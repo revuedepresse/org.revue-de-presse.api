@@ -1,0 +1,674 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Gestion g&eacute;n&eacute;rale de la session - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.session.advanced_usage.html">Utilisation avanc&eacute;e</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.session.html">Zend_Session</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.session.savehandler.dbtable.html">Zend_Session_SaveHandler_DbTable</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.session.global_session_management" class="section"><div class="info"><h1 class="title">Gestion générale de la session</h1></div>
+    
+
+    <p class="para">
+        Le comportement des sessions peut être modifié en utilisant les méthodes statiques de
+        la classe Zend_Session. Il s&#039;agit du comportement global des sessions dans toute
+        l&#039;application, incluant la configuration des <a href="http://www.php.net/session#session.configuration" class="link external">&raquo; options usuelles offertes par
+        ext/session</a>, ceci en utilisant  <span class="methodname">Zend_Session::setOptions()</span>.
+        Ainsi, des problèmes de sécurité peuvent apparaître si vous utilisez mal le support de
+        stockage des sessions <code class="code">save_path</code> ou encore si vous négligez le cookie utilisé
+        par ext/session.
+    </p>
+
+    <div class="section" id="zend.session.global_session_management.configuration_options" name="zend.session.global_session_management.configuration_options"><div class="info"><h1 class="title">Options de configuration</h1></div>
+        
+
+        <p class="para">
+            Lors de la création du premier namespace de session, Zend_Session va
+            automatiquement démarrer la session <acronym class="acronym">PHP</acronym>, sauf si celle-ci a été démarrée avec <a href="zend.session.advanced_usage.html#zend.session.advanced_usage.starting_a_session" class="link"> <span class="methodname">Zend_Session::start()</span></a>
+            auparavant. La session <acronym class="acronym">PHP</acronym> résultante utilisera les options de configuration par défaut
+            de Zend_Session, sauf si ceux-ci ont été modifiés à l&#039;aide de
+             <span class="methodname">Zend_Session::setOptions()</span>.
+        </p>
+
+        <p class="para">
+            Pour assigner une option de configuration, passez son nom (la partie qui suit
+            &quot;<code class="code">session.</code>&quot; dans les options de configuration de ext/session) comme clé au
+            tableau passé à  <span class="methodname">Zend_Session::setOptions()</span>. La valeur
+            correspondante dans le tableau sera alors utilisée comme valeur de l&#039;option. Si vous
+            omettez une option, alors celles par défaut recommandées par Zend_Session seront
+            utilisées, sinon si elles n&#039;existent pas, les valeurs par défaut de php.ini. Les retours
+            et les idées quant aux &quot;options recommandées&quot; sont appréciées et peuvent être envoyées à
+            <a href="mailto:fw-auth@lists.zend.com" class="link external">&raquo; fw-auth@lists.zend.com</a>.
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #1 Utiliser Zend_Config pour configurer Zend_Session</b></p></div>
+            
+
+            <div class="example-contents"><p>
+                Pour configurer le composant en utilisant un objet <a href="zend.config.adapters.ini.html" class="link"><span class="classname">Zend_Config_Ini</span></a>,
+                ajoutez ces paramètres au fichier <acronym class="acronym">INI</acronym> en question:
+            </p></div>
+
+            <div class="programlisting ini"><div class="inicode"><div class="ini" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #666666; font-style: italic;">; Paramètres de production</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000066; font-weight:bold;"><span style="">&#91;</span>production<span style="">&#93;</span></span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #666666; font-style: italic;">; bug_compat_42</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #666666; font-style: italic;">; bug_compat_warn</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #666666; font-style: italic;">; cache_expire</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #666666; font-style: italic;">; cache_limiter</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #666666; font-style: italic;">; cookie_domain</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #666666; font-style: italic;">; cookie_lifetime</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #666666; font-style: italic;">; cookie_path</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #666666; font-style: italic;">; cookie_secure</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #666666; font-style: italic;">; entropy_file</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #666666; font-style: italic;">; entropy_length</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #666666; font-style: italic;">; gc_divisor</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #666666; font-style: italic;">; gc_maxlifetime</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #666666; font-style: italic;">; gc_probability</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #666666; font-style: italic;">; hash_bits_per_character</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #666666; font-style: italic;">; hash_function</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #666666; font-style: italic;">; name doit être unique pour chaque application partageant le même nom de domaine</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000099;">name </span>=<span style="color: #660066;"> UNIQUE_NAME</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #666666; font-style: italic;">; referer_check</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #666666; font-style: italic;">; save_handler</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #666666; font-style: italic;">; save_path</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #666666; font-style: italic;">; serialize_handler</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #666666; font-style: italic;">; use_cookies</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #666666; font-style: italic;">; use_only_cookies</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #666666; font-style: italic;">; use_trans_sid</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #666666; font-style: italic;">; remember_me_seconds = &lt;integer seconds&gt;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #666666; font-style: italic;">; strict = on|off</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #666666; font-style: italic;">; Development hérite de production, mais redéfinit certaines valeurs</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000066; font-weight:bold;"><span style="">&#91;</span>development : production<span style="">&#93;</span></span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #666666; font-style: italic;">; N'oubliez pas de créer ce dossier et d'attribuer à PHP les droits 'rwx'.</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000099;">save_path </span>=<span style="color: #660066;"> /home/myaccount/zend_sessions/myapp</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000099;">use_only_cookies </span>=<span style="color: #660066;"> on</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #666666; font-style: italic;">; Le cookie de session durera 10 jours</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000099;">remember_me_seconds </span>=<span style="color: #660066;"> <span style="">864000</span></span></div></li></ol></div></div></div>
+
+
+            <div class="example-contents"><p>
+                Ensuite, chargez ce fichier de configuration, et passez sa représentation
+                tableau à  <span class="methodname">Zend_Session::setOptions()</span>:
+            </p></div>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$config</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Config_Ini<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'myapp.ini'</span>, <span style="color: #ff0000;">'development'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #b1b100;">require_once</span> <span style="color: #ff0000;">'Zend/Session.php'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">Zend_Session::<span style="color: #006600;">setOptions</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$config</span>-&gt;<span style="color: #006600;">toArray</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+        </div>
+
+        <p class="para">
+            La plupart des options ne nécessitent pas d&#039;explications étant donné qu&#039;elles font
+            parti des options de ext/session, documentées dans le manuel officiel de <acronym class="acronym">PHP</acronym>, cependant
+            les options particulières méritent une description: <ul class="itemizedlist">
+                    <li class="listitem">
+                    <p class="para">
+                        bool <code class="code">strict</code> : désactive le démarrage automatique de
+                        <span class="classname">Zend_Session</span> lorsque <code class="code">new
+                        Zend_Session_Namespace()</code> est utilisé.
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        int <code class="code">remember_me_seconds</code> : temps de vie du cookie de
+                        session, une fois le navigateur client fermé.
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        string <code class="code">save_path</code> : Cette valeur est dépendante du système
+                        sur lequel <acronym class="acronym">PHP</acronym> est lancé. Un <em class="emphasis">chemin absolu</em> vers un
+                        dossier lisible et écrivable à <acronym class="acronym">PHP</acronym> devrait être utilisé (dans le cas
+                        d&#039;utilisation d&#039;un dossier pour le support des sessions). Si le chemin n&#039;est
+                        pas pleinement accessible à <acronym class="acronym">PHP</acronym>, <span class="classname">Zend_Session</span> lancera
+                        une exception à son démarrage (lorsque  <span class="methodname">start()</span> est
+                        appelée.
+                    </p>
+
+                    <blockquote><p><b class="note">Note</b>: <span class="info"><b>Attention aux failles de sécurité</b><br /></span>
+                        
+
+                        
+                            Si le chemin des sessions est accessible en lecture à d&#039;autres
+                            applications, alors le vol de session peut être possible. Si le dossier
+                            est accessible en écriture à d&#039;autres applications, alors <a href="http://en.wikipedia.org/wiki/Session_poisoning" class="link external">&raquo; l&#039;empoisonnement de
+                            sessions</a> peut être possible. SI le chemin est partagé avec
+                            d&#039;autres utilisateurs ou d&#039;autres applications <acronym class="acronym">PHP</acronym>, plusieurs problèmes
+                            de sécurité peuvent apparaître, incluant le vol de session, et les
+                            collisions de ramasse-miette (garbage collection) (Un process d&#039;une
+                            autre application <acronym class="acronym">PHP</acronym> déclenche une collecte sur vos fichiers de
+                            session).
+                        <br />
+
+                        
+                            Par exemple, un pirate peut visiter le site d&#039;une victime pour
+                            obtenir un cookie de session. Il modifie ensuite le chemin du cookie
+                            afin que celui-ci soit envoyé à sa propre application (en partage sur le
+                            même serveur que le votre), et il exécute
+                             <span class="methodname">var_dump($_SESSION)</span>. Il obtient alors des informations sur
+                            les variables de session que vous stockez, et il peut les modifier pour
+                            retourner sur votre site. L&#039;empoisonnement a eu lieu. Même si deux
+                            applications sur le même serveur ne partagent pas le même dossier
+                            <code class="code">save_path</code>, si celui-ci est devinable, l&#039;attaquant peut
+                            alors l&#039;utiliser sur sa propre application et dans certaines
+                            configurations de <acronym class="acronym">PHP</acronym>, accéder à la session de l&#039;application victime. La
+                            valeur du <code class="code">save_path</code> ne doit pas être rendue publique ou
+                            devinable, le dossier doit se trouver dans un endroit isolé et
+                            sécurisé.
+                        <br />
+                    </p></blockquote>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        string <code class="code">name</code> - La valeur doit être choisie de manière
+                        <em class="emphasis">unique</em> pour chaque application.
+                    </p>
+
+                    <blockquote><p><b class="note">Note</b>: <span class="info"><b>Risque de sécurité</b><br /></span>
+                        
+
+                        
+                            Si la valeur <code class="code">php.ini</code> de <code class="code">session.name</code>
+                            n&#039;est pas unique (celle par défaut &quot;PHPSESSID&quot;), et qu&#039;il existe
+                            plusieurs applications accessible via le même domaine, alors elle
+                            partagerons leurs données pour les visiteurs. Aussi, des problème de
+                            corruption peuvent apparaître.
+                        <br />
+                    </p></blockquote>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        bool <code class="code">use_only_cookies</code> - Afin d&#039;éviter d&#039;autres failles de
+                        sécurité (concernant le trans-sid), ne changez pas cette option. <blockquote><p><b class="note">Note</b>: <span class="info"><b>Risque de sécurité</b><br /></span>
+                                
+
+                            
+                                Si cette option n&#039;est pas activée, un attaquant peut
+                                facilement fixer un id de session d&#039;une victime en lui envoyant des
+                                liens tels que
+                                <code class="code">http://www.example.com/index.php?PHPSESSID=fixed_session_id</code>.
+                                La fixation fonctionne si la victime n&#039;a pas déjà un identifiant de
+                                session sur le site example.com. Lorsque la victime utilise un
+                                identifiant de session qu&#039;un attaquant connaît, il peut alors se
+                                faire passer pour elle.
+                            <br />
+                            </p></blockquote>
+                        </p>
+                </li>
+                </ul>
+            </p>
+    </div>
+
+    <div class="section" id="zend.session.global_session_management.headers_sent" name="zend.session.global_session_management.headers_sent"><div class="info"><h1 class="title">L&#039;erreur: &quot;Headers Already Sent&quot;</h1></div>
+        
+
+        <p class="para">
+            Si vous voyez l&#039;erreur, &quot;Cannot modify header information - headers already sent&quot;,
+            ou, &quot;You must call ... before any output has been sent to the browser; output started in
+            ...&quot;, analysez tout de suite d&#039;où vient la fuite grâce au message d&#039;erreur. Toute action
+            entraînant un envoi d&#039;en-têtes <acronym class="acronym">HTTP</acronym>, comme envoyer un cookie, doit être effectuée avant
+            d&#039;envoyer du contenu standard (non bufferisé), sauf si le buffer de sortie de <acronym class="acronym">PHP</acronym> est
+            activé.
+        </p>
+
+        <ul class="itemizedlist">
+            <li class="listitem">
+                <p class="para">
+                    Utiliser <a href="http://php.net/outcontrol" class="link external">&raquo; le buffer de
+                    sortie</a> résout souvent le problème, et peut améliorer les performances.
+                    Par exemple, une valeur <code class="code">php.ini</code>, &quot;<code class="code">output_buffering =
+                    65535</code>&quot; active un buffer de 64K. Même si le buffer de sortie peut
+                    améliorer les performances lorsqu&#039;il est bien configuré, se reposer sur lui
+                    concernant les erreurs &quot;headers already sent&quot; n&#039;est pas suffisant. En effet, sa
+                    taille peut être dépassé entraînant son vidage, et le problème revient.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    Aussi, il convient d&#039;organiser l&#039;application de manière à ce que les
+                    envois d&#039;en-tête se passent avant l&#039;envoi de contenu.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    Si Zend_Session produit ce message, cherchez la cause grâce au message
+                    d&#039;erreur indiquant d&#039;où provient &quot;la fuite&quot;. Aussi, des opérations comme
+                     <span class="methodname">destroy()</span> envoient des en-têtes concernant la destruction du cookie
+                    de session. Si vous ne voulez pas ces informations envoyées, utilisez alors
+                     <span class="methodname">destroy(false)</span>.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    Supprimez tous les balises de fermeture &quot;<code class="code">?&gt;</code>&quot;, si elles
+                    terminent du code <acronym class="acronym">PHP</acronym>. Elles sont facultatives et les nouvelles lignes blanches
+                    éventuelles en fin de fichier ne seront pas envoyées, car parsées par
+                    <acronym class="acronym">PHP</acronym>.
+                </p>
+            </li>
+        </ul>
+    </div>
+
+    <div class="section" id="zend.session.global_session_management.session_identifiers" name="zend.session.global_session_management.session_identifiers"><div class="info"><h1 class="title">Identifiants de session</h1></div>
+        
+
+        <p class="para">
+            Les bonnes pratiques d&#039;utilisation des sessions avec Zend Framework passent par un
+            cookie, plutôt que se reporter à l&#039;URL concernant l&#039;identifiant de session. Par défaut,
+            le composant Zend_Session est bloqué sur l&#039;utilisation unique du cookie comme moyen de
+            propagation de l&#039;identifiant de session. La session <acronym class="acronym">PHP</acronym> va alors utiliser cet
+            identifiant de manière à identifier de manière unique chaque client (navigateur) qui s&#039;y
+            connecte, et maintenir un état entre leurs transactions, donnant l&#039;impression de
+            conservation de données. Zend_Session_* utilise alors le tableau
+            (<var class="varname">$_SESSION</var>) et vous y donne accès d&#039;une manière objet élégante. Attention,
+            si un attaquant arrive à accéder au cookie de session d&#039;une victime, il pourra alors
+            tromper le serveur, et se faire passer pour la victime. Ce comportement n&#039;est pas unique
+            à <acronym class="acronym">PHP</acronym>, ni à Zend Framework, mais au Web en général, et au protocole <acronym class="acronym">HTTP</acronym>. La méthode
+             <span class="methodname">regenerateId()</span> permet de changer l&#039;identifiant de session stocké dans le
+            cookie du client, par un autre, en théorie imprévisible. Notez que par la suite, nous
+            confondons les termes &#039;client&#039; et &#039;navigateur&#039;, même si ceci n&#039;est pas tout à fait
+            juste.
+        </p>
+
+        <p class="para">
+            Changer l&#039;identifiant de session permet d&#039;aider contre le vol de données. Si un
+            attaquant possède l&#039;identifiant d&#039;une victime, le changer ne changera rien pour la
+            victime, mais provoquera une invalidation de la session de l&#039;attaquant, qui ne connaît
+            alors pas la nouvelle valeur de l&#039;identifiant de session. Non seulement
+             <span class="methodname">regenerateId()</span> change l&#039;identifiant de session, mais en plus il migre les
+            données de l&#039;ancien identifiant vers le nouveau, invalidant totalement l&#039;ancien.
+        </p>
+
+        <p class="para">
+            Quand régénérer cet identifiant ? En théorie, mettre
+             <span class="methodname">Zend_Session::regenerateId()</span> en bootstrap est la manière la plus
+            adaptée pour sécuriser une session. Cependant, ceci a un coût non négligeable, car il
+            faut alors à chaque fois régénérer un identifiant, et renvoyer un nouveau cookie au
+            client. Il est alors nécessaire de déterminer les situations &#039;à risque&#039;, et régénérer
+            alors l&#039;identifiant de session dans de telles situations. Ces situations peuvent être
+            par exemple l&#039;authentification d&#039;un client, ou encore son élévation de privilèges. Si
+            vous appelez  <span class="methodname">rememberMe()</span>, n&#039;appelez alors pas  <span class="methodname">regenerateId()</span>,
+            car elle sera appelée de manière automatique.
+        </p>
+
+        <div class="section" id="zend.session.global_session_management.session_identifiers.hijacking_and_fixation" name="zend.session.global_session_management.session_identifiers.hijacking_and_fixation"><div class="info"><h1 class="title">Vol de session et fixation</h1></div>
+            
+
+            <p class="para">
+                Éviter <a href="http://en.wikipedia.org/wiki/Cross_site_scripting" class="link external">&raquo; les
+                failles cross-site script (XSS) </a> aide à éviter le vol de session. Selon
+                <a href="http://secunia.com/" class="link external">&raquo; Secunia</a>, les problèmes XSS sont fréquents,
+                quelque soit le langage utilisé pour créer l&#039;application Web. Plutôt que de se
+                considérer invulnérable, considérez votre application de manière à minimiser
+                l&#039;impact d&#039;une éventuelle faille XSS. Avec XSS, l&#039;attaquant n&#039;a pas besoin d&#039;accéder
+                au trafic de la victime, sur le réseau. Si la victime possède déjà un cookie de
+                session, javascript peut permettre à l&#039;attaquant de voler celui-ci, et donc la
+                session. Dans le cas de victimes sans cookie, l&#039;attaquant peut utiliser XSS pour
+                créer un cookie avec un session id connu, et l&#039;envoyer à la victime, fixant ainsi la
+                session. L&#039;attaquant peut dès lors visualiser toute la session de la victime au fur
+                et à mesure que celle-ci surfe, sans se rendre compte de rien. Cependant,
+                l&#039;attaquant ne peut modifier l&#039;état de la session du coté <acronym class="acronym">PHP</acronym> ( la fermer par
+                exemple ), sauf si l&#039;application possède d&#039;autres vulnérabilités (CSRF), ou si le
+                <code class="code">save_path</code> est modifiable.
+            </p>
+
+            <p class="para">
+                En elle-même, la fonction  <span class="methodname">Zend_Session::regenerateId()</span>
+                utilisée à la première utilisation de la session, ne protège pas contre la fixation.
+                Ceci peut paraître contradictoire, mais un attaquant peut très bien initialiser une
+                session de lui-même, qui sera alors rafraîchie (régénérée), et dont il connaîtra
+                alors l&#039;identifiant. Il n&#039;aura plus qu&#039;à fixer cet identifiant dans un javascript
+                pour qu&#039;une victime l&#039;utilise, et la faille est à nouveau présente. Aussi, fixer la
+                session par l&#039;URL est extrêmement simple, mais n&#039;est possible que lorsque
+                <code class="code">use_only_cookies = off</code>.
+            </p>
+
+            <p class="para">
+                Le vol de session ne peut se remarqué que si vous arrivez à faire la
+                différence entre l&#039;attaquant et la victime. Ce n&#039;est pas chose simple, et les
+                techniques utilisées ne sont jamais fiables à 100%. L&#039;IP peut être utilisée, même si
+                celle-ci n&#039;est pas totalement fiable. Les en-têtes du navigateur Web, eux, le sont
+                déjà plus (lorsque 2 requêtes successives avec le même identifiant de session
+                arrivent au serveur, si l&#039;une prétend être issue de FireFox et l&#039;autre d&#039;Opéra,
+                alors très probablement qu&#039;il s&#039;agit de 2 personnes différentes, mais ayant le même
+                identifiant de session. Typiquement : l&#039;attaquant et sa victime.) Il est très
+                difficile de différencier l&#039;attaquant et la victime, c&#039;est d&#039;ailleurs impossible
+                dans la suite de cas suivants : <ul class="itemizedlist">
+                        <li class="listitem">
+                        <p class="para">
+                            l&#039;attaquant initialise une session pour obtenir un identifiant
+                            valide.
+                        </p>
+                    </li>
+
+                    <li class="listitem">
+                        <p class="para">
+                            l&#039;attaquant utilise une faille XSS pour envoyer un cookie de
+                            session à une victime, possédant son propre identifiant de session
+                            (fixation).
+                        </p>
+                    </li>
+
+                    <li class="listitem">
+                        <p class="para">
+                            l&#039;attaquant et la victime utilisent le même navigateur, sont
+                            derrière le même proxy.
+                        </p>
+                    </li>
+                </ul> Le code suivant permet d&#039;empêcher l&#039;attaquant de connaître
+                l&#039;identifiant de session de la victime (sauf s&#039;il arrive à le fixer):
+            </p>
+
+            <div class="example"><div class="info"><p><b>Example #2 Vol et fixation, protections</b></p></div>
+                
+
+                <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$defaultNamespace</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Session_Namespace<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #b1b100;">if</span> <span style="color: #66cc66;">&#40;</span>!<a href="http://www.php.net/isset"><span style="color: #000066;">isset</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$defaultNamespace</span>-&gt;<span style="color: #006600;">initialized</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; Zend_Session::<span style="color: #006600;">regenerateId</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #0000ff;">$defaultNamespace</span>-&gt;<span style="color: #006600;">initialized</span> = <span style="color: #000000; font-weight: bold;">true</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+
+            </div>
+        </div>
+    </div>
+
+    <div class="section" id="zend.session.global_session_management.rememberme" name="zend.session.global_session_management.rememberme"><div class="info"><h1 class="title"> <span class="methodname">rememberMe(integer $seconds)</span></h1></div>
+        
+
+        <p class="para">
+            Par défaut, la session se termine lorsque le client ferme son navigateur. Il peut
+            cependant être nécessaire de faire en sorte que même après la fermeture, le cookie de
+            session persiste un certain temps dans le navigateur. Utilisez
+             <span class="methodname">Zend_Session::rememberMe()</span> avant tout démarrage de la session,
+            afin de spécifier à celle-ci qu&#039;elle devra utiliser un cookie persistant du coté du
+            client. Ce cookie persistera alors $seconds secondes. Si vous ne précisez pas de temps,
+            <code class="code">remember_me_seconds</code>, sera utilisé. Cette valeur se paramètre d&#039;ailleurs au
+            moyen de  <span class="methodname">Zend_Session::setOptions()</span>.
+        </p>
+    </div>
+
+    <div class="section" id="zend.session.global_session_management.forgetme" name="zend.session.global_session_management.forgetme"><div class="info"><h1 class="title"> <span class="methodname">forgetMe()</span></h1></div>
+        
+
+        <p class="para">
+            Cette fonction est analogue à  <span class="methodname">rememberMe()</span> sauf qu&#039;elle demande au
+            cookie de session du navigateur client d&#039;être détruit à la fermeture de celui-ci (et non
+            éventuellement après X temps).
+        </p>
+    </div>
+
+    <div class="section" id="zend.session.global_session_management.sessionexists" name="zend.session.global_session_management.sessionexists"><div class="info"><h1 class="title"> <span class="methodname">sessionExists()</span></h1></div>
+        
+
+        <p class="para">
+            Utilisez cette méthode afin de savoir si une session existe pour le client (la
+            requête) actuel. Ceci doit être utilisé avant le démarrage de la session.
+        </p>
+    </div>
+
+    <div class="section" id="zend.session.global_session_management.destroy" name="zend.session.global_session_management.destroy"><div class="info"><h1 class="title"> <span class="methodname">destroy(bool $remove_cookie = true, bool $readonly = true)</span></h1></div>
+        
+
+        <p class="para">
+             <span class="methodname">Zend_Session::destroy()</span> détruit la session et toutes les
+            données la concernant. Cependant, aucune variable dans <acronym class="acronym">PHP</acronym> n&#039;est affectée, donc vos
+            namespaces de session (instances de <span class="classname">Zend_Session_Namespace</span>)
+            restent lisibles. Pour compléter la &quot;déconnexion&quot;, laissez le premier paramètre à
+            <b><tt>TRUE</tt></b> (par défaut), demandant l&#039;expiration du cookie de session du client.
+            <var class="varname">$readonly</var> permet d&#039;empêcher la future création de namespaces (new
+            <span class="classname">Zend_Session_Namespace</span>) ou des opérations d&#039;écriture via
+            <span class="classname">Zend_Session</span>.
+        </p>
+
+        <p class="para">
+            Si vous voyez le message d&#039;erreur &quot;Cannot modify header information - headers
+            already sent&quot;, alors tentez de ne pas utiliser <b><tt>TRUE</tt></b> comme valeur du premier
+            argument (ceci demande l&#039;expiration du cookie de session, ou voyez <a href="zend.session.global_session_management.html#zend.session.global_session_management.headers_sent" class="xref">L'erreur: &quot;Headers Already Sent&quot;</a>. Ainsi,
+             <span class="methodname">Zend_Session::destroy(true)</span> doit être appelé avant tout envoi
+            d&#039;en-tête <acronym class="acronym">HTTP</acronym> par <acronym class="acronym">PHP</acronym>, ou alors la bufferisation de sortie doit être activée (sans que
+            celui-ci ne déborde).
+        </p>
+
+        <blockquote><p><b class="note">Note</b>: <span class="info"><b>Exception</b><br /></span>
+            
+
+            
+                Par défaut, <var class="varname">$readonly</var> est activé et toute opération future
+                d&#039;écriture dans la session lèvera une exception.
+            <br />
+        </p></blockquote>
+    </div>
+
+    <div class="section" id="zend.session.global_session_management.stop" name="zend.session.global_session_management.stop"><div class="info"><h1 class="title"> <span class="methodname">stop()</span></h1></div>
+        
+
+        <p class="para">
+            Cette méthode ne fait rien d&#039;autre que de verrouiller la session en écriture. Tout
+            appel futur d&#039;écriture via des instances de
+            <span class="classname">Zend_Session_Namespace</span> ou <span class="classname">Zend_Session</span>
+            lèvera une exception.
+        </p>
+    </div>
+
+    <div class="section" id="zend.session.global_session_management.writeclose" name="zend.session.global_session_management.writeclose"><div class="info"><h1 class="title"> <span class="methodname">writeClose($readonly = true)</span></h1></div>
+        
+
+        <p class="para">
+            Ferme la session coté serveur, soit enregistre les variables de session dans le
+            support, et détache <var class="varname">$_SESSION</var> de son support de stockage. Le paramètre
+            optionnel <var class="varname">$readonly</var> empêche alors toute future écriture via
+            <span class="classname">Zend_Session</span> ou <span class="classname">Zend_Session_Namespace</span>.
+            Ces écritures lèveront une exception.
+        </p>
+
+        <blockquote><p><b class="note">Note</b>: <span class="info"><b>Exception</b><br /></span>
+            
+
+            
+                Par défaut, <var class="varname">$readonly</var> est activé, et donc tout appel d&#039;écriture
+                futur dans la session générera une exception. Certaines applications peuvent
+                nécessiter de conserver un accès en écriture dans <var class="varname">$_SESSION</var>, même si ce
+                tableau a été déconnecté de son support de stockage avec
+                 <span class="methodname">session_write_close()</span>. Ainsi, Zend Framework propose cette option en
+                passant à <b><tt>FALSE</tt></b> la valeur de <var class="varname">$readonly</var>, mais ce n&#039;est pas
+                une pratique conseillée.
+            <br />
+        </p></blockquote>
+    </div>
+
+    <div class="section" id="zend.session.global_session_management.expiresessioncookie" name="zend.session.global_session_management.expiresessioncookie"><div class="info"><h1 class="title"> <span class="methodname">expireSessionCookie()</span></h1></div>
+        
+
+        <p class="para">
+            Cette méthode envoie un cookie d&#039;identifiant de session périmé au client. Quelque
+            fois cette technique est utilisée pour déconnecter le client de sa session.
+        </p>
+    </div>
+
+    <div class="section" id="zend.session.global_session_management.savehandler" name="zend.session.global_session_management.savehandler"><div class="info"><h1 class="title"><code class="code">setSaveHandler(Zend_Session_SaveHandler_Interface
+        $interface)</code></h1></div>
+        
+
+        <p class="para">
+            Cette méthode propose une correspondance orientée objet de <a href="http://php.net/session_set_save_handler" class="link external">&raquo;  <span class="methodname">session_set_save_handler()</span></a>.
+        </p>
+    </div>
+
+    <div class="section" id="zend.session.global_session_management.namespaceisset" name="zend.session.global_session_management.namespaceisset"><div class="info"><h1 class="title"> <span class="methodname">namespaceIsset($namespace)</span></h1></div>
+        
+
+        <p class="para">Cette méthode permet de déterminer si un namespace existe dans la session.</p>
+
+        <blockquote><p><b class="note">Note</b>: <span class="info"><b>Exception</b><br /></span>
+            
+
+            
+                Une exception sera levée si la session n&#039;est pas lisible (n&#039;a pas été
+                démarrée).
+            <br />
+        </p></blockquote>
+    </div>
+
+    <div class="section" id="zend.session.global_session_management.namespaceunset" name="zend.session.global_session_management.namespaceunset"><div class="info"><h1 class="title"> <span class="methodname">namespaceUnset($namespace)</span></h1></div>
+        
+
+        <p class="para">
+            Utilisez  <span class="methodname">Zend_Session::namespaceUnset($namespace)</span> pour
+            détruire un namespace entier de la session. Comme pour les tableaux <acronym class="acronym">PHP</acronym>, si le tableau
+            est détruit, les objets à l&#039;intérieur ne le sont pas s&#039;il reste des références vers eux
+            dans d&#039;autres tableaux ou objets toujours accessibles. Ainsi
+             <span class="methodname">namespaceUnset()</span> ne détruit pas &quot;en profondeur&quot; la variable de session
+            associée au namespace. Voyez <a href="http://php.net/references" class="link external">&raquo; les références en
+            <acronym class="acronym">PHP</acronym></a> pour plus d&#039;infos.
+        </p>
+
+        <blockquote><p><b class="note">Note</b>: <span class="info"><b>Exception</b><br /></span>
+            
+
+            
+                Une exception sera envoyée si le namespace n&#039;est pas écrivable (après un appel
+                à  <span class="methodname">destroy()</span>).
+            <br />
+        </p></blockquote>
+    </div>
+
+    <div class="section" id="zend.session.global_session_management.namespaceget" name="zend.session.global_session_management.namespaceget"><div class="info"><h1 class="title"> <span class="methodname">namespaceGet($namespace)</span></h1></div>
+        
+
+        <p class="para">
+            Déprécié: Utilisez  <span class="methodname">getIterator()</span> dans
+            <span class="classname">Zend_Session_Namespace</span>. Cette méthode retourne un tableau du
+            contenu du namespace $namespace. Si vous avez une raison de conserver cette méthode,
+            faites nous part de vos remarques à <a href="mailto:fw-auth@lists.zend.com" class="link external">&raquo; fw-auth@lists.zend.com</a>.
+        </p>
+
+        <blockquote><p><b class="note">Note</b>: <span class="info"><b>Exception</b><br /></span>
+            
+
+            
+                Une exception sera levée si la session n&#039;est pas lisible (n&#039;a pas été
+                démarrée).
+            <br />
+        </p></blockquote>
+    </div>
+
+    <div class="section" id="zend.session.global_session_management.getiterator" name="zend.session.global_session_management.getiterator"><div class="info"><h1 class="title"> <span class="methodname">getIterator()</span></h1></div>
+        
+
+        <p class="para">
+             <span class="methodname">getIterator()</span> retourne un <code class="code">ArrayObject</code> contenant tous les
+            noms des namespaces de session.
+        </p>
+
+        <blockquote><p><b class="note">Note</b>: <span class="info"><b>Exception</b><br /></span>
+            
+
+            
+                Une exception sera levée si la session n&#039;est pas lisible (n&#039;a pas été
+                démarrée).
+            <br />
+        </p></blockquote>
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.session.advanced_usage.html">Utilisation avanc&eacute;e</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.session.html">Zend_Session</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.session.savehandler.dbtable.html">Zend_Session_SaveHandler_DbTable</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.session.html">Zend_Session</a></li>
+  <li><a href="zend.session.introduction.html">Introduction</a></li>
+  <li><a href="zend.session.basic_usage.html">Usage basique</a></li>
+  <li><a href="zend.session.advanced_usage.html">Utilisation avanc&eacute;e</a></li>
+  <li class="active"><a href="zend.session.global_session_management.html">Gestion g&eacute;n&eacute;rale de la session</a></li>
+  <li><a href="zend.session.savehandler.dbtable.html">Zend_Session_SaveHandler_DbTable</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

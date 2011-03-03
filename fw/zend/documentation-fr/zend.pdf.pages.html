@@ -1,0 +1,227 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Les pages d'un document - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.pdf.save.html">Sauvegarder les changement dans un document PDF</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.pdf.html">Zend_Pdf</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.pdf.drawing.html">Dessiner</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.pdf.pages" class="section"><div class="info"><h1 class="title">Les pages d&#039;un document</h1></div>
+    
+
+    <div class="section" id="zend.pdf.pages.creation" name="zend.pdf.pages.creation"><div class="info"><h1 class="title">Création de page</h1></div>
+        
+
+        <p class="para">
+            Les pages d&#039;un document <acronym class="acronym">PDF</acronym> sont représentés par la classe
+            <span class="classname">Zend_Pdf_Page</span>
+        </p>
+
+        <p class="para">
+            Les pages d&#039;un <acronym class="acronym">PDF</acronym> proviennent d&#039;un <acronym class="acronym">PDF</acronym> existant, ou sont créées à partir de
+            rien.
+        </p>
+
+        <p class="para">
+            Une nouvelle page peut-être obtenu en créant un nouvel objet
+            <span class="classname">Zend_Pdf_Page</span> ou en appelant la méthode
+             <span class="methodname">Zend_Pdf::newPage()</span>qui retourne un objet
+            <span class="classname">Zend_Pdf_Page</span>. La différence est que la méthode
+             <span class="methodname">Zend_Pdf::newPage()</span> crée une page directement attachée au
+            document. A la différence des pages non attachées à un document, elle ne peut-être
+            utilisée dans plusieurs documents <acronym class="acronym">PDF</acronym>, mais est un peu plus performante. <a href="#fnid1" name="fn1"><sup>[1]</sup></a>
+                <span class="classname">Zend_Pdf</span>
+                . C&#039;est à vous de choisir quel approche doit-être utilisée.
+            </p>
+
+        <p class="para">
+            Les méthodes  <span class="methodname">Zend_Pdf::newPage()</span> et
+            <span class="classname">Zend_Pdf_Page</span> prennent le même paramètre. C&#039;est la taille de la
+            page ($x, $y) en point (1/72 inch soit 0,352778 mm), ou une constante prédéfinie, qui
+            correspond au format du papier : <ul class="itemizedlist">
+                    <li class="listitem">
+                        <p class="para">Zend_Pdf_Page::SIZE_A4</p>
+                    </li>
+
+                    <li class="listitem">
+                        <p class="para">Zend_Pdf_Page::SIZE_A4_LANDSCAPE</p>
+                    </li>
+
+                    <li class="listitem">
+                        <p class="para">Zend_Pdf_Page::SIZE_LETTER</p>
+                    </li>
+
+                    <li class="listitem">
+                        <p class="para">Zend_Pdf_Page::SIZE_LETTER_LANDSCAPE</p>
+                    </li>
+                </ul>
+            </p>
+
+        <p class="para">
+            Les pages du document sont stockées dans l&#039;attribut public <var class="varname">$pages</var> de
+            la classe <span class="classname">Zend_Pdf</span>. C&#039;est un tableau d&#039;objet
+            <span class="classname">Zend_Pdf_Page</span>. Il définit l&#039;ensemble des pages, ainsi que l&#039;ordre
+            de celle-ci et peut-être manipulé comme un tableau classique :
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #1 Gestion des pages d&#039;un document PDF</b></p></div>
+            
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">...</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Inverse l'ordre des pages</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$pdf</span>-&gt;<span style="color: #006600;">pages</span> = <a href="http://www.php.net/array_reverse"><span style="color: #000066;">array_reverse</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$pdf</span>-&gt;<span style="color: #006600;">pages</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">...</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Ajoute une nouvelle page</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$pdf</span>-&gt;<span style="color: #006600;">pages</span><span style="color: #66cc66;">&#91;</span><span style="color: #66cc66;">&#93;</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Pdf_Page<span style="color: #66cc66;">&#40;</span>Zend_Pdf_Page::<span style="color: #006600;">SIZE_A4</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Ajoute une nouvelle page</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$pdf</span>-&gt;<span style="color: #006600;">pages</span><span style="color: #66cc66;">&#91;</span><span style="color: #66cc66;">&#93;</span> = <span style="color: #0000ff;">$pdf</span>-&gt;<span style="color: #006600;">newPage</span><span style="color: #66cc66;">&#40;</span>Zend_Pdf_Page::<span style="color: #006600;">SIZE_A4</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Retire la page spécifiée</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/unset"><span style="color: #000066;">unset</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$pdf</span>-&gt;<span style="color: #006600;">pages</span><span style="color: #66cc66;">&#91;</span><span style="color: #0000ff;">$id</span><span style="color: #66cc66;">&#93;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">...</div></li></ol></div></div></div>
+
+        </div>
+    </div>
+
+    <div class="section" id="zend.pdf.pages.cloning" name="zend.pdf.pages.cloning"><div class="info"><h1 class="title">Clonage de page</h1></div>
+        
+
+        <p class="para">
+            Les pages existantes d&#039;un <acronym class="acronym">PDF</acronym> peuvent être clonées en créant un nouvel objet
+            <span class="classname">Zend_Pdf_Page</span> avec la page existante comme paramètre :
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #2 Cloner une page existante</b></p></div>
+            
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">...</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Stocke le modèle dans une variable séparée</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$template</span> = <span style="color: #0000ff;">$pdf</span>-&gt;<span style="color: #006600;">pages</span><span style="color: #66cc66;">&#91;</span><span style="color: #0000ff;">$templatePageIndex</span><span style="color: #66cc66;">&#93;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">...</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Ajoute une nouvelle page</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$page1</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Pdf_Page<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$template</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$pdf</span>-&gt;<span style="color: #006600;">pages</span><span style="color: #66cc66;">&#91;</span><span style="color: #66cc66;">&#93;</span> = <span style="color: #0000ff;">$page1</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">...</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Ajoute une autre page</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$page2</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Pdf_Page<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$template</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$pdf</span>-&gt;<span style="color: #006600;">pages</span><span style="color: #66cc66;">&#91;</span><span style="color: #66cc66;">&#93;</span> = <span style="color: #0000ff;">$page2</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">...</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Enlève la page modèle du document</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/unset"><span style="color: #000066;">unset</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$pdf</span>-&gt;<span style="color: #006600;">pages</span><span style="color: #66cc66;">&#91;</span><span style="color: #0000ff;">$templatePageIndex</span><span style="color: #66cc66;">&#93;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">...</div></li></ol></div></div></div>
+
+        </div>
+
+        <p class="para">C&#039;est pratique si plusieurs pages doivent être créées sur le même modèle.</p>
+
+        <div class="caution"><b class="caution">Caution</b>
+            <p class="para">
+                Important ! La page clonée partage quelques ressources <acronym class="acronym">PDF</acronym> avec la page
+                modèle, donc ceci doit être utilisé seulement dans le même document qu&#039;une page
+                modèle. Le document modifié peut être sauvegardé comme nouveau document.
+            </p>
+        </div>
+    </div>
+<div class="footnote"><a name="fnid1" href="#fn1"><sup>[1]</sup></a><span class="para footnote">
+                    C'est une limitation de la version courante du module
+                    . Ce sera corrigé dans une future version. Mais
+                    les pages non attachées à un document donneront toujours de meilleurs résultats
+                    pour partager une page entre plusieurs documents.
+                </span></div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.pdf.save.html">Sauvegarder les changement dans un document PDF</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.pdf.html">Zend_Pdf</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.pdf.drawing.html">Dessiner</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.pdf.html">Zend_Pdf</a></li>
+  <li><a href="zend.pdf.introduction.html">Introduction</a></li>
+  <li><a href="zend.pdf.create.html">Cr&eacute;er et charger des documents PDF</a></li>
+  <li><a href="zend.pdf.save.html">Sauvegarder les changement dans un document PDF</a></li>
+  <li class="active"><a href="zend.pdf.pages.html">Les pages d'un document</a></li>
+  <li><a href="zend.pdf.drawing.html">Dessiner</a></li>
+  <li><a href="zend.pdf.interactive-features.html">Interactive Features</a></li>
+  <li><a href="zend.pdf.info.html">Informations du document et m&eacute;tadonn&eacute;es</a></li>
+  <li><a href="zend.pdf.usage.html">Exemple d'utilisation du module Zend_Pdf</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

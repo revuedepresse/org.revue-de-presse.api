@@ -1,0 +1,364 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Introduction - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.http.html">Zend_Http</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.http.html">Zend_Http</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.http.client.advanced.html">Zend_Http_Client - Utilisation avanc&eacute;e</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.http.client" class="section"><div class="info"><h1 class="title">Introduction</h1></div>
+    
+
+    <p class="para">
+        <span class="classname">Zend_Http_Client</span> fournit une interface qui permet d&#039;utiliser le
+        protocole <acronym class="acronym">HTTP</acronym> (Hyper-Text Transfer Protocol). <span class="classname">Zend_Http_Client</span>
+        supporte les fonctionnalités de base d&#039;un client <acronym class="acronym">HTTP</acronym>, ainsi que des fonctionnalités plus
+        avancées, comme l&#039;authentification ou l&#039;upload de fichiers. Toutes les requêtes retournent
+        un objet Zend_Http_Response, avec lequel on pourra accéder au corps ou aux en-têtes de la
+        réponse <acronym class="acronym">HTTP</acronym> (voyez <a href="zend.http.response.html" class="xref">Zend_Http_Response</a>).
+    </p>
+
+    <div class="section" id="zend.http.client.introduction" name="zend.http.client.introduction"><div class="info"><h1 class="title">Utilisation de Zend_Http_Client</h1></div>
+        
+
+        <p class="para">
+            Le constructeur de classe accepte deux paramètres : l&#039;URI (ou un objet
+            <code class="code"><span class="classname">Zend_Uri_Http</span></code>), et un tableau ou un objet Zend_Config
+            d&#039;options de configuration. Ils peuvent aussi être définis avec des méthodes plus tard :
+             <span class="methodname">setUri()</span> et  <span class="methodname">setConfig()</span>.
+            <div class="example"><div class="info"><p><b>Example #1 Instanciation d&#039;un objet Zend_Http_Client</b></p></div>
+                    
+
+                    <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$client</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Http_Client<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'http://example.org'</span>, <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'maxredirects'</span> =&gt; <span style="color: #cc66cc;">0</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'timeout'</span>&nbsp; &nbsp; &nbsp; =&gt; <span style="color: #cc66cc;">30</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// OU</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$client</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Http_Client<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$client</span>-&gt;<span style="color: #006600;">setUri</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'http://example.org'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$client</span>-&gt;<span style="color: #006600;">setConfig</span><span style="color: #66cc66;">&#40;</span><a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'maxredirects'</span> =&gt; <span style="color: #cc66cc;">0</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'timeout'</span>&nbsp; &nbsp; &nbsp; =&gt; <span style="color: #cc66cc;">30</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// You can also use a Zend_Config object to set the client's configuration</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$config</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Config_Ini<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'httpclient.ini, '</span>secure<span style="color: #ff0000;">');</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #ff0000;">$client-&gt;setConfig($config);</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #ff0000;"</span></div></li></ol></div></div></div>
+
+                </div>
+            </p>
+
+        <blockquote><p><b class="note">Note</b>: 
+            
+                <span class="classname">Zend_Http_Client</span> utilise
+                <span class="classname">Zend_Uri_Http</span> pour valider les <acronym class="acronym">URL</acronym>s. Ce qui veut dire que
+                certains caractères comme les pipes (&quot;|&quot;) ou le symbole &quot;^&quot; ne seront pas acceptés
+                par défaut dans les <acronym class="acronym">URL</acronym>s. Ceci peut être modifié par le réglage de l&#039;option
+                &quot;allow_unwise&quot; de <span class="classname">Zend_Uri</span> à <b><tt>TRUE</tt></b>. Voir <a href="zend.uri.chapter.html#zend.uri.validation.allowunwise" class="xref">Autoriser les caract&egrave;res &quot;imprudents&quot; dans les URIs</a> pour de plus amples
+                informations.
+            <br />
+        </p></blockquote>
+    </div>
+
+    <div class="section" id="zend.http.client.configuration" name="zend.http.client.configuration"><div class="info"><h1 class="title">Les paramètres de configuration</h1></div>
+        
+
+        <p class="para">
+            Le constructeur et  <span class="methodname">setConfig()</span> acceptent un tableau associatif de
+            paramètre de configuration, ou un objet Zend_Config. Fixer ces paramètres est optionnel,
+            ils ont tous une valeur par défaut.
+                <table class="doctable table"><div class="info"><caption><b>Zend_Http_Client : paramètres de configuration</b></caption></div>
+                    
+
+                    
+                        <thead valign="middle">
+                            <tr valign="middle">
+                                <th>Paramètre</th>
+                                <th>Description</th>
+                                <th>Valeur attendue</th>
+                                <th>Valeur par défaut</th>
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody valign="middle" class="tbody">
+                            <tr valign="middle">
+                                <td align="left">maxredirects</td>
+                                <td align="left">Nombre maximum de redirections à suivre (0 = aucune)</td>
+                                <td align="left">entier</td>
+                                <td align="left">5</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">strict</td>
+                                <td align="left">Validation faite ou non sur les noms d&#039;en-têtes. Si à
+                                <b><tt>FALSE</tt></b>, des fonctions de validation n&#039;interviendront
+                                pas. Habituellement ceci ne devrait pas être changé</td>
+                                <td align="left">booléen</td>
+                                <td align="left"><b><tt>TRUE</tt></b></td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">strictredirects</td>
+                                <td align="left">Est ce que le client doit suivre strictement les redirections
+                                selon la <b><tt>RFC2616</tt></b> ? (voyez <a href="zend.http.client.advanced.html#zend.http.client.redirections" class="xref">Redirections HTTP</a>)</td>
+                                <td align="left">booléen</td>
+                                <td align="left"><b><tt>FALSE</tt></b></td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">useragent</td>
+                                <td align="left">La chaîne User Agent du client (envoyée en en-tête de
+                                requête)</td>
+                                <td align="left">chaîne</td>
+                                <td align="left">&#039;Zend_Http_Client&#039;</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">timeout</td>
+                                <td align="left">Connexion timeout (secondes)</td>
+                                <td align="left">entier</td>
+                                <td align="left">10</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">httpversion</td>
+                                <td align="left">Version du protocole <acronym class="acronym">HTTP</acronym> à utiliser (&#039;1.1&#039;, &#039;1.0&#039; ou
+                                &#039;0.9&#039;)</td>
+                                <td align="left">chaîne</td>
+                                <td align="left">&#039;1.1&#039;</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">adapter</td>
+                                <td align="left">Classe adaptateur à utiliser (voyez <a href="zend.http.client.adapters.html" class="xref">Zend_Http_Client - Adaptateurs de connexion</a>)</td>
+                                <td align="left">mixed</td>
+                                <td align="left">&#039;Zend_Http_Client_Adapter_Socket&#039;</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">keepalive</td>
+                                <td align="left">Utilisation du pipelining <acronym class="acronym">HTTP</acronym> (connexion ouverte après
+                                déconnexion du client)</td>
+                                <td align="left">booléen</td>
+                                <td align="left"><b><tt>FALSE</tt></b></td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">storeresponse</td>
+                                <td align="left">Stockage ou non de la dernière réponse pour une récupération
+                                ultérieure avec  <span class="methodname">getLastResponse()</span>. Si réglez à
+                                <b><tt>FALSE</tt></b>,  <span class="methodname">getLastResponse()</span> retournera
+                                <b><tt>NULL</tt></b>.</td>
+                                <td align="left">booléen</td>
+                                <td align="left"><b><tt>TRUE</tt></b></td>
+                            </tr>
+
+                        </tbody>
+                    
+                </table>
+
+            </p>
+    </div>
+
+    <div class="section" id="zend.http.client.basic-requests" name="zend.http.client.basic-requests"><div class="info"><h1 class="title">Utilisation basique</h1></div>
+        
+
+        <p class="para">
+            Exécuter des requêtes HTTP basiques est très simple grâce à la méthode
+             <span class="methodname">request()</span>, et ceci nécessite rarement plus d&#039;une ligne de code : <div class="example"><div class="info"><p><b>Example #2 Requête GET simple</b></p></div>
+                    
+
+                    <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$client</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Http_Client<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'http://example.org'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$response</span> = <span style="color: #0000ff;">$client</span>-&gt;<span style="color: #006600;">request</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+                </div> La méthode  <span class="methodname">request()</span> accepte un paramètre optionnel
+            définissant la méthode HTTP, - GET, POST, PUT, HEAD, DELETE, TRACE, OPTIONS ou CONNECT -
+            comme définies dans la RFC 2616 concernant le protocole HTTP <a href="#fnid1" name="fn1"><sup>[1]</sup></a>
+                <tt class="uri">http://www.w3.org/Protocols/rfc2616/rfc2616.html</tt>
+            . Ces méthodes HTTP sont aussi définies en tant que constantes de classe,
+            Zend_Http_Request::GET, Zend_Http_Request::POST, etc...
+        </p>
+
+        <p class="para">
+            Si aucune méthode de requêtage HTTP n&#039;est définie, alors la dernière utilisée via
+             <span class="methodname">setMethod()</span> sera utilisée. Si  <span class="methodname">setMethod()</span> n&#039;a jamais été
+            appelée, GET est alors utilisée par défaut. <div class="example"><div class="info"><p><b>Example #3 Requêtes d&#039;autres types que GET</b></p></div>
+                    
+
+                    <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// requête POST</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$response</span> = <span style="color: #0000ff;">$client</span>-&gt;<span style="color: #006600;">request</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'POST'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// autre manière de faire :</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$client</span>-&gt;<span style="color: #006600;">setMethod</span><span style="color: #66cc66;">&#40;</span>Zend_Http_Client::<span style="color: #006600;">POST</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$response</span> = <span style="color: #0000ff;">$client</span>-&gt;<span style="color: #006600;">request</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+                </div>
+            </p>
+    </div>
+
+    <div class="section" id="zend.http.client.parameters" name="zend.http.client.parameters"><div class="info"><h1 class="title">Ajouts de paramètres GET et POST</h1></div>
+        
+
+        <p class="para">
+            Ajouter des paramètres GET à la requête HTTP est très simple. Vous pouvez les
+            ajouter en tant que partie de l&#039;URL désirée, ou en utilisant la méthode
+             <span class="methodname">setParameterGet()</span>. Celle-ci prend en premier paramètre le nom du paramètre
+            GET, et en second sa valeur. Un tableau associatif peut aussi être utilisé. <div class="example"><div class="info"><p><b>Example #4 Ajouts de paramètres GET</b></p></div>
+                    
+
+                    <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Avec la méthode setParameterGet</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$client</span>-&gt;<span style="color: #006600;">setParameterGet</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'knight'</span>, <span style="color: #ff0000;">'lancelot'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Ce qui est équivalent à :</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$client</span>-&gt;<span style="color: #006600;">setUri</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'http://example.com/index.php?knight=lancelot'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Ajout de plusieurs paramètres en un appel</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$client</span>-&gt;<span style="color: #006600;">setParameterGet</span><span style="color: #66cc66;">&#40;</span><a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'first_name'</span>&nbsp; =&gt; <span style="color: #ff0000;">'Bender'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'middle_name'</span> =&gt; <span style="color: #ff0000;">'Bending'</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'made_in'</span>&nbsp; &nbsp; &nbsp;=&gt; <span style="color: #ff0000;">'Mexico'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+                </div>
+            </p>
+
+        <p class="para">
+            Coté POST, c&#039;est très similaire à GET, sauf que les paramètres POST doivent faire
+            partie du corps de la requête. Il n&#039;est donc pas possible de les ajouter dans l&#039;URL.
+            Utilisez simplement  <span class="methodname">setParameterPost()</span> de la même manière que sa soeur
+             <span class="methodname">setParameterGet()</span>. <div class="example"><div class="info"><p><b>Example #5 Ajout de paramètres POST</b></p></div>
+                    
+
+                    <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// passage de paramètre POST simple</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$client</span>-&gt;<span style="color: #006600;">setParameterPost</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'language'</span>, <span style="color: #ff0000;">'fr'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Plusieurs paramètres, dont un avec plusieurs valeurs</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$client</span>-&gt;<span style="color: #006600;">setParameterPost</span><span style="color: #66cc66;">&#40;</span><a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'language'</span>&nbsp; =&gt; <span style="color: #ff0000;">'es'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'country'</span>&nbsp; &nbsp;=&gt; <span style="color: #ff0000;">'ar'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'selection'</span> =&gt; <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #cc66cc;">45</span>, <span style="color: #cc66cc;">32</span>, <span style="color: #cc66cc;">80</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+                </div> Notez qu&#039;en plus de paramètres POST, vous pouvez ajouter des paramètres
+            GET à une requête POST. Le contraire n&#039;est pas possible, ainsi les paramètres POST
+            ajoutés à une requête GET seront acceptés certes, mais ignorés.
+        </p>
+    </div>
+
+    <div class="section" id="zend.http.client.accessing_last" name="zend.http.client.accessing_last"><div class="info"><h1 class="title">Accéder à la dernière requête, ou réponse</h1></div>
+        
+
+        <p class="para">
+            <span class="classname">Zend_Http_Client</span> fournit un moyen d&#039;accéder à la dernière
+            requête qu&#039;il a effectuée, ainsi qu&#039;à la dernière réponse qu&#039;il a reçue.
+            <span class="classname">Zend_Http_Client-&gt;getLastRequest()</span> ne prends pas de paramètres
+            et retourne la dernière requête sous forme de chaîne de caractères.
+            <span class="classname">Zend_Http_Client-&gt;getLastResponse()</span> retourne elle la dernière
+            réponse, mais sous forme d&#039;objet <a href="zend.http.response.html" class="link">Zend_Http_Response</a>.
+        </p>
+    </div>
+<div class="footnote"><a name="fnid1" href="#fn1"><sup>[1]</sup></a><span class="para footnote">
+                    Voyez la RFC 2616 - .
+                </span></div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.http.html">Zend_Http</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.http.html">Zend_Http</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.http.client.advanced.html">Zend_Http_Client - Utilisation avanc&eacute;e</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.http.html">Zend_Http</a></li>
+  <li class="active"><a href="zend.http.client.html">Introduction</a></li>
+  <li><a href="zend.http.client.advanced.html">Zend_Http_Client - Utilisation avanc&eacute;e</a></li>
+  <li><a href="zend.http.client.adapters.html">Zend_Http_Client - Adaptateurs de connexion</a></li>
+  <li><a href="zend.http.cookies.html">Zend_Http_Cookie and Zend_Http_CookieJar</a></li>
+  <li><a href="zend.http.response.html">Zend_Http_Response</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

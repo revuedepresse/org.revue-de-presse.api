@@ -1,0 +1,217 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Introduction - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.console.getopt.html">Zend_Console_Getopt</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.console.getopt.html">Zend_Console_Getopt</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.console.getopt.rules.html">D&eacute;clarer les r&egrave;gles Getopt</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.console.getopt.introduction" class="section"><div class="info"><h1 class="title">Introduction</h1></div>
+    
+
+    <p class="para">
+        La classe <span class="classname">Zend_Console_Getopt</span> aide les applications lancées en ligne
+        de commande à analyser les options et arguments.
+    </p>
+
+    <p class="para">
+        Les utilisateurs peuvent spécifier des arguments en ligne de commande quand ils
+        exécutent votre application. Ces arguments ont du sens dans l&#039;application : changer son
+        comportement, choisir des ressources, ou spécifier des paramètres. Beaucoup d&#039;options ont
+        une signification usuelle, par exemple &quot;<strong class="command">--verbose</strong>&quot; permet la production
+        d&#039;informations supplémentaires dans beaucoup d&#039;applications. D&#039;autres options peuvent avoir
+        un sens qui est différent pour chaque application. Par exemple, &quot;<strong class="command">-c</strong>&quot;
+        prend des sens différents lorsqu&#039;il est utilisé dans <strong class="command">grep</strong>,
+        <strong class="command">ls</strong>, et <strong class="command">tar</strong>.
+    </p>
+
+    <p class="para">
+        Nous avons ci-dessous quelques définitions de termes. L&#039;usage commun des termes
+        varie, mais cette documentation utilisera les définitions ci-dessous.
+    </p>
+
+    <ul class="itemizedlist">
+        <li class="listitem">
+            <p class="para">
+                &quot;argument&quot; : une chaîne de caractères qui
+                apparaît dans la ligne de commande après le nom de la commande. Les arguments
+                peuvent être des options ou bien peut apparaître sans option, appeler des
+                ressources sur lesquelles la commande agit.
+            </p>
+        </li>
+
+        <li class="listitem">
+            <p class="para">
+                &quot;option&quot; : un argument qui signifie que la commande va changer
+                son comportement par défaut d&#039;une manière quelconque.
+            </p>
+        </li>
+
+        <li class="listitem">
+            <p class="para">
+                &quot;flag&quot; (drapeau) : la première partie d&#039;une option, identifie le but de l&#039;option.
+                Un drapeau est précédé conventionnellement par un ou deux tirets
+                (&quot;<strong class="command">-</strong>&quot; or &quot;<strong class="command">--</strong>&quot;). Un drapeau court comporte un
+                caractère unique. Un drapeau long est une chaîne de plusieurs caractères. Un tiret
+                simple précède un drapeau court ou un groupe de drapeaux courts. Un tiret double
+                précède un drapeau long. Les drapeaux longs ne peuvent pas être groupés.
+            </p>
+        </li>
+
+        <li class="listitem">
+            <p class="para">
+                &quot;parameter&quot; (paramètre) : la seconde partie d&#039;une option ; une
+                donnée qui peut accompagner un drapeau, si c&#039;est applicable à l&#039;option donnée. Par
+                exemple, beaucoup de commandes acceptent &quot;<strong class="command">--verbose</strong>&quot;,
+                mais typiquement cette option n&#039;a aucun paramètre. Cependant, une option
+                comme &quot;<strong class="command">--user</strong> a presque toujours besoin d&#039;un paramètre
+                à sa suite.
+            </p>
+            <p class="para">
+                Un paramètre peut être donné comme un argument séparé après un argument de
+                drapeau, ou comme faisant partie de la même chaîne de caractères, séparé du drapeau
+                par le symbole égal (&quot;<strong class="command">=</strong>&quot;). La dernière forme est autorisée
+                seulement avec des drapeaux longs. Par exemple, <strong class="command">-u username</strong>,
+                <strong class="command">--user username</strong>, et <strong class="command">--user=username</strong> sont
+                des formats supportés par <span class="classname">Zend_Console_Getopt</span>.
+            </p>
+        </li>
+
+        <li class="listitem">
+            <p class="para">
+                &quot;cluster&quot; (groupe) : les drapeaux courts peuvent être combinés dans une
+                chaîne de caractère unique précédée par un tiret simple. Par exemple, &quot;
+                <strong class="command">ls -1str</strong>&quot; emploie un groupe de quatre drapeaux courts. Cette
+                commande est équivalente à &quot;
+                <strong class="command">ls -1 -s -t -r</strong>&quot;. Seuls les drapeaux courts peuvent être groupés.
+                Vous ne pouvez pas faire un groupe de drapeaux longs.
+            </p>
+        </li>
+    </ul>
+
+    <p class="para">
+        Par exemple, dans &quot;<strong class="command">mysql --user=root mabase</strong>&quot;, &quot;<strong class="command">mysql</strong>&quot;
+        est la <em class="emphasis">commande</em>, &quot;<strong class="command">--user=root</strong>&quot; est une
+        <em class="emphasis">option</em>, &quot;<strong class="command">--user</strong>&quot; est un
+        <em class="emphasis">drapeau</em>, &quot;<strong class="command">root</strong>&quot; est un
+        <em class="emphasis">paramètre</em> de l&#039;option, et
+        &quot;<strong class="command">mabase</strong>&quot; est un argument mais pas une option dans notre définition.
+    </p>
+
+    <p class="para">
+        <span class="classname">Zend_Console_Getopt</span> fournit une interface pour déclarer quels
+        drapeaux sont valides pour votre application, produit une erreur et un message s&#039;ils
+        emploient un drapeau invalide, et transmet à votre application les drapeaux spécifiés
+        par l&#039;utilisateur.
+    </p>
+
+    <blockquote><p><b class="note">Note</b>: <span class="info"><b>Getopt n&#039;est pas une application framework</b><br /></span>
+        
+
+        
+            <span class="classname">Zend_Console_Getopt</span> <em class="emphasis">n&#039;interprète
+            pas</em> le sens des drapeaux ou des paramètres, cette classe n&#039;exécute
+            pas non plus de processus d&#039;application ou n&#039;invoque pas le code d&#039;application. Vous
+            devez implémenter ces actions dans votre propre code d&#039;application. Vous pouvez
+            utiliser la classe <span class="classname">Zend_Console_Getopt</span> pour analyser la ligne
+            d&#039;instruction et fournir des méthodes orientées objet pour savoir quelles options ont
+            été données par un utilisateur, mais le code pour utiliser ces données pour appeler les
+            parties de votre application devra être dans une autre classe <acronym class="acronym">PHP</acronym>.
+        <br />
+    </p></blockquote>
+
+    <p class="para">
+        Les sections suivantes décrivent l&#039;utilisation de
+        <span class="classname">Zend_Console_Getopt</span>.
+    </p>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.console.getopt.html">Zend_Console_Getopt</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.console.getopt.html">Zend_Console_Getopt</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.console.getopt.rules.html">D&eacute;clarer les r&egrave;gles Getopt</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.console.getopt.html">Zend_Console_Getopt</a></li>
+  <li class="active"><a href="zend.console.getopt.introduction.html">Introduction</a></li>
+  <li><a href="zend.console.getopt.rules.html">D&eacute;clarer les r&egrave;gles Getopt</a></li>
+  <li><a href="zend.console.getopt.fetching.html">Extraire les options et les arguments</a></li>
+  <li><a href="zend.console.getopt.configuration.html">Configurer Zend_Console_Getopt</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,369 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Manipuler des mesures - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.measure.output.html">R&eacute;cup&eacute;rer des mesures</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.measure.html">Zend_Measure</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.measure.types.html">Types de mesures</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.measure.edit" class="section"><div class="info"><h1 class="title">Manipuler des mesures</h1></div>
+    
+
+    <p class="para">
+        L&#039;analyse et la normalisation de l&#039;entrée, combinées avec la récupération suivant les
+        notations régionalisées rend des données accessibles aux utilisateurs dans différentes
+        régions. Beaucoup de méthodes additionnelles existent dans les composants
+        <span class="classname">Zend_Measure_*</span> pour manipuler et travailler ces données, après
+        qu&#039;elles aient été normalisées.
+    </p>
+
+    <ul class="itemizedlist">
+        <li class="listitem">
+            <p class="para"><a href="zend.measure.edit.html#zend.measure.edit.convert" class="link"><code class="code">Convertir</code></a></p>
+        </li>
+
+        <li class="listitem">
+            <p class="para">
+                <a href="zend.measure.edit.html#zend.measure.edit.add" class="link"><code class="code">Ajouter et
+                soustraire</code></a>
+            </p>
+        </li>
+
+        <li class="listitem">
+            <p class="para">
+                <a href="zend.measure.edit.html#zend.measure.edit.equal" class="link"><code class="code">Comparer avec un
+                booléen</code></a>
+            </p>
+        </li>
+
+        <li class="listitem">
+            <p class="para">
+                <a href="zend.measure.edit.html#zend.measure.edit.compare" class="link"><code class="code">Comparer &quot;plus/moins grand
+                que&quot;</code></a>
+            </p>
+        </li>
+
+        <li class="listitem">
+            <p class="para">
+                <a href="zend.measure.edit.html#zend.measure.edit.changevalue" class="link"><code class="code">Changer manuellement des
+                valeurs</code></a>
+            </p>
+        </li>
+
+        <li class="listitem">
+            <p class="para">
+                <a href="zend.measure.edit.html#zend.measure.edit.changetype" class="link"><code class="code">Changer manuellement de
+                type</code></a>
+            </p>
+        </li>
+    </ul>
+
+    <div class="section" id="zend.measure.edit.convert" name="zend.measure.edit.convert"><div class="info"><h1 class="title">Convertir</h1></div>
+        
+
+        <p class="para">
+            Le dispositif le plus important est probablement la conversion dans différentes
+            unités de la mesure. La conversion d&#039;une unité peut être faite à tout moment en
+            utilisant la méthode  <span class="methodname">convertTo()</span>. Des unités de mesure peuvent seulement
+            être converties en d&#039;autres unités du même type (classe). Par conséquent, il n&#039;est pas
+            possible de convertir (par exemple : une longueur en poids), qui encouragerait des
+            pratiques de programmation pauvres et entraînerait la propagation d&#039;erreurs sans lever
+            d&#039;exception.
+        </p>
+
+        <p class="para">
+            La méthode <code class="code">convertTo</code> accepte un paramètre facultatif. Avec ce
+            paramètre vous pouvez définir une précision pour l&#039;élément retourné. La précision par
+            défaut est &quot;<code class="code">2</code>&quot;.
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #1 Convertir</b></p></div>
+            
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$locale</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Locale<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'de'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$machaine</span> = <span style="color: #ff0000;">&quot;1.234.567,89&quot;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$unite</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Measure_Weight<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$machaine</span>,<span style="color: #ff0000;">'POND'</span>, <span style="color: #0000ff;">$locale</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/print"><span style="color: #000066;">print</span></a> <span style="color: #ff0000;">&quot;Kilo : &quot;</span>.<span style="color: #0000ff;">$unite</span>-&gt;<span style="color: #006600;">convertTo</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'KILOGRAM'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// affiche &quot;Kilo : 617283.945 kg&quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// l'utilisation de constantes est considérée comme</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// une meilleure pratique que les chaînes</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/print"><span style="color: #000066;">print</span></a> <span style="color: #ff0000;">&quot;Tonne : &quot;</span>.<span style="color: #0000ff;">$unite</span>-&gt;<span style="color: #006600;">convertTo</span><span style="color: #66cc66;">&#40;</span>Zend_Measure_Weight::<span style="color: #006600;">TON</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// affiche &quot;Tonne : 617.283945 t&quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// définition de la précision pour l'affichage</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/print"><span style="color: #000066;">print</span></a> <span style="color: #ff0000;">&quot;Tonne :&quot;</span>.<span style="color: #0000ff;">$unit</span>-&gt;<span style="color: #006600;">convertTo</span><span style="color: #66cc66;">&#40;</span>Zend_Measure_Weight::<span style="color: #006600;">TON</span>, <span style="color: #cc66cc;">3</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+        </div>
+    </div>
+
+    <div class="section" id="zend.measure.edit.add" name="zend.measure.edit.add"><div class="info"><h1 class="title">Ajouter et soustraire</h1></div>
+        
+
+        <p class="para">
+            Les mesures peuvent être ajoutées en utilisant  <span class="methodname">add()</span> et soustraites
+            en utilisant  <span class="methodname">sub()</span>. Chaque addition créera un nouvel objet pour le
+            résultat. L&#039;objet courant ne sera jamais changé par la classe. Le nouvel objet sera du
+            même type que l&#039;objet de début. Les objets dynamiques supportent un modèle fluide de
+            programmation, où des ordres complexes d&#039;opération peuvent être imbriqués sans risque
+            d&#039;effets secondaires changeant les objets d&#039;entrée.
+        </p>
+
+        <p class="para">
+            <div class="example"><div class="info"><p><b>Example #2 Ajouter des mesures</b></p></div>
+                    
+
+                    <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Définition des objets</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$unite1</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Measure_Length<span style="color: #66cc66;">&#40;</span><span style="color: #cc66cc;">200</span>, Zend_Measure_Length::<span style="color: #006600;">CENTIMETER</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$unite2</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Measure_Length<span style="color: #66cc66;">&#40;</span><span style="color: #cc66cc;">1</span>, Zend_Measure_Length::<span style="color: #006600;">METER</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// ajouter l'$unite2 à l'$unite1</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$somme</span> = <span style="color: #0000ff;">$unite1</span>-&gt;<span style="color: #006600;">add</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$unite2</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$somme</span>; <span style="color: #808080; font-style: italic;">// affiche &quot;300 cm&quot;</span></div></li></ol></div></div></div>
+
+                </div>
+            </p>
+
+        <blockquote><p><b class="note">Note</b>: <span class="info"><b>Conversion automatique</b><br /></span>
+            
+
+            
+                Ajouter un objet à l&#039;autre le convertira automatiquement dans l&#039;unité
+                correcte. Il n&#039;est pas nécessaire d&#039;appeler <a href="zend.measure.edit.html#zend.measure.edit.convert" class="link"> <span class="methodname">convertTo()</span></a> avant d&#039;ajouter
+                des unités différentes.
+            <br />
+        </p></blockquote>
+
+        <p class="para">
+            <div class="example"><div class="info"><p><b>Example #3 Soustraire des mesures</b></p></div>
+                    
+
+                    <div class="example-contents"><p>La soustraction des mesures fonctionne comme l&#039;addition.</p></div>
+
+                    <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Définition des objets</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$unite1</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Measure_Length<span style="color: #66cc66;">&#40;</span><span style="color: #cc66cc;">200</span>, Zend_Measure_Length::<span style="color: #006600;">CENTIMETER</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$unite2</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Measure_Length<span style="color: #66cc66;">&#40;</span><span style="color: #cc66cc;">1</span>, Zend_Measure_Length::<span style="color: #006600;">METER</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// soustriare l'$unite2 de l'$unite1</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$somme</span> = <span style="color: #0000ff;">$unite1</span>-&gt;<span style="color: #006600;">sub</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$unite2</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$somme</span>; <span style="color: #808080; font-style: italic;">// affiche &quot;100 cm&quot;</span></div></li></ol></div></div></div>
+
+            </div>
+            </p>
+    </div>
+
+    <div class="section" id="zend.measure.edit.equal" name="zend.measure.edit.equal"><div class="info"><h1 class="title">Vérifier l&#039;égalité des mesures</h1></div>
+        
+
+        <p class="para">
+            Les mesures peuvent également être comparées, mais sans conversion automatique de
+            l&#039;unité. De plus,  <span class="methodname">equals()</span> retourne <b><tt>TRUE</tt></b>, seulement si la
+            valeur et l&#039;unité de mesure sont identiques.
+        </p>
+
+        <p class="para">
+            <div class="example"><div class="info"><p><b>Example #4 Mesures différentes</b></p></div>
+                    
+
+                    <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Définition des mesures</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$unite1</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Measure_Length<span style="color: #66cc66;">&#40;</span><span style="color: #cc66cc;">100</span>, Zend_Measure_Length::<span style="color: #006600;">CENTIMETER</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$unite2</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Measure_Length<span style="color: #66cc66;">&#40;</span><span style="color: #cc66cc;">1</span>, Zend_Measure_Length::<span style="color: #006600;">METER</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #b1b100;">if</span> <span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$unite1</span>-&gt;<span style="color: #006600;">equals</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$unite2</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <a href="http://www.php.net/print"><span style="color: #000066;">print</span></a> <span style="color: #ff0000;">&quot;Les mesures sont identiques&quot;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span> <span style="color: #b1b100;">else</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <a href="http://www.php.net/print"><span style="color: #000066;">print</span></a> <span style="color: #ff0000;">&quot;Les mesures sont différentes&quot;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// affiche &quot;Les mesures sont différentes&quot;</span></div></li></ol></div></div></div>
+
+                </div> <div class="example"><div class="info"><p><b>Example #5 Mesures identiques</b></p></div>
+                    
+
+                    <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Définition des mesures</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$unite1</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Measure_Length<span style="color: #66cc66;">&#40;</span><span style="color: #cc66cc;">100</span>, Zend_Measure_Length::<span style="color: #006600;">CENTIMETER</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$unite2</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Measure_Length<span style="color: #66cc66;">&#40;</span><span style="color: #cc66cc;">1</span>, Zend_Measure_Length::<span style="color: #006600;">METER</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$unite2</span>-&gt;<span style="color: #006600;">setType</span><span style="color: #66cc66;">&#40;</span>Zend_Measure_Length::<span style="color: #006600;">CENTIMETER</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #b1b100;">if</span> <span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$unite1</span>-&gt;<span style="color: #006600;">equals</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$unite2</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <a href="http://www.php.net/print"><span style="color: #000066;">print</span></a> <span style="color: #ff0000;">&quot;Les mesures sont identiques&quot;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span> <span style="color: #b1b100;">else</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <a href="http://www.php.net/print"><span style="color: #000066;">print</span></a> <span style="color: #ff0000;">&quot;Les mesures sont différentes&quot;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span> <span style="color: #808080; font-style: italic;">// affiche &quot;Les mesures sont identiques&quot;</span></div></li></ol></div></div></div>
+
+                </div>
+            </p>
+    </div>
+
+    <div class="section" id="zend.measure.edit.compare" name="zend.measure.edit.compare"><div class="info"><h1 class="title">Comparer les mesures</h1></div>
+        
+
+        <p class="para">
+            Pour déterminer si une mesure est plus ou moins grande qu&#039;une autre, il faut
+            utiliser  <span class="methodname">compare()</span>, qui renvoie 0, -1 ou 1 selon la différence entre les
+            deux objets. Les mesures identiques retourneront 0. Plus petit retournera -1 et plus
+            grand retournera +1.
+        </p>
+
+        <p class="para">
+            <div class="example"><div class="info"><p><b>Example #6 Différence</b></p></div>
+                    
+
+                    <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$unite1</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Measure_Length<span style="color: #66cc66;">&#40;</span><span style="color: #cc66cc;">100</span>, Zend_Measure_Length::<span style="color: #006600;">CENTIMETER</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$unite2</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Measure_Length<span style="color: #66cc66;">&#40;</span><span style="color: #cc66cc;">1</span>, Zend_Measure_Length::<span style="color: #006600;">METER</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$unite3</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Measure_Length<span style="color: #66cc66;">&#40;</span><span style="color: #cc66cc;">1.2</span>, Zend_Measure_Length::<span style="color: #006600;">METER</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/print"><span style="color: #000066;">print</span></a> <span style="color: #ff0000;">&quot;Egalité : &quot;</span>.<span style="color: #0000ff;">$unite2</span>-&gt;<span style="color: #006600;">compare</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$unite1</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// affiche &quot;Egalité : 0&quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/print"><span style="color: #000066;">print</span></a> <span style="color: #ff0000;">&quot;Plus petit que : &quot;</span>.<span style="color: #0000ff;">$unite2</span>-&gt;<span style="color: #006600;">compare</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$unite3</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// affiche &quot;Plus petit que : -1&quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/print"><span style="color: #000066;">print</span></a> <span style="color: #ff0000;">&quot;Plus grand que : &quot;</span>.<span style="color: #0000ff;">$unite3</span>-&gt;<span style="color: #006600;">compare</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$unite2</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// affiche &quot;Plus grand que : 1&quot;</span></div></li></ol></div></div></div>
+
+                </div>
+            </p>
+    </div>
+
+    <div class="section" id="zend.measure.edit.changevalue" name="zend.measure.edit.changevalue"><div class="info"><h1 class="title">Changer manuellement des valeurs</h1></div>
+        
+
+        <p class="para">
+            Pour changer explicitement la valeur d&#039;une mesure, il faut utiliser
+             <span class="methodname">setValue()</span> pour surcharger la valeur courante. Les paramètres sont
+            identiques à ceux du constructeur.
+        </p>
+
+        <p class="para">
+            <div class="example"><div class="info"><p><b>Example #7 Changer une valeur</b></p></div>
+                    
+
+                    <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$locale</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Locale<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'de_AT'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$unite</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Measure_Length<span style="color: #66cc66;">&#40;</span><span style="color: #cc66cc;">1</span>,Zend_Measure_Length::<span style="color: #006600;">METER</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$unite</span>-&gt;<span style="color: #006600;">setValue</span><span style="color: #66cc66;">&#40;</span><span style="color: #cc66cc;">1.2</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$unite</span>; <span style="color: #808080; font-style: italic;">// affiche &quot;1.2 m&quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$unite</span>-&gt;<span style="color: #006600;">setValue</span><span style="color: #66cc66;">&#40;</span><span style="color: #cc66cc;">1.2</span>, Zend_Measure_Length::<span style="color: #006600;">KILOMETER</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$unite</span>; <span style="color: #808080; font-style: italic;">// affiche &quot;1200 km&quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$unite</span>-&gt;<span style="color: #006600;">setValue</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">&quot;1.234,56&quot;</span>, Zend_Measure_Length::<span style="color: #006600;">MILLIMETER</span>,<span style="color: #0000ff;">$locale</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$unite</span>; <span style="color: #808080; font-style: italic;">// affiche &quot;1234.56 mm&quot;</span></div></li></ol></div></div></div>
+
+                </div>
+            </p>
+    </div>
+
+    <div class="section" id="zend.measure.edit.changetype" name="zend.measure.edit.changetype"><div class="info"><h1 class="title">Changer manuellement de type</h1></div>
+        
+
+        <p class="para">
+            Pour changer le type d&#039;une mesure sans altérer sa valeur, il faut utiliser
+             <span class="methodname">setType()</span>.
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #8 Changer de type</b></p></div>
+            
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$unite</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Measure_Length<span style="color: #66cc66;">&#40;</span><span style="color: #cc66cc;">1</span>,Zend_Measure_Length::<span style="color: #006600;">METER</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$unite</span>; <span style="color: #808080; font-style: italic;">// affiche &quot;1 m&quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$unite</span>-&gt;<span style="color: #006600;">setType</span><span style="color: #66cc66;">&#40;</span>Zend_Measure_Length::<span style="color: #006600;">KILOMETER</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$unite</span>; <span style="color: #808080; font-style: italic;">// affiche &quot;1000 km&quot;</span></div></li></ol></div></div></div>
+
+        </div>
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.measure.output.html">R&eacute;cup&eacute;rer des mesures</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.measure.html">Zend_Measure</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.measure.types.html">Types de mesures</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.measure.html">Zend_Measure</a></li>
+  <li><a href="zend.measure.introduction.html">Introduction</a></li>
+  <li><a href="zend.measure.creation.html">Cr&eacute;ation d'une mesure</a></li>
+  <li><a href="zend.measure.output.html">R&eacute;cup&eacute;rer des mesures</a></li>
+  <li class="active"><a href="zend.measure.edit.html">Manipuler des mesures</a></li>
+  <li><a href="zend.measure.types.html">Types de mesures</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

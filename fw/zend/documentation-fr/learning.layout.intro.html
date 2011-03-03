@@ -1,0 +1,148 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Introduction - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="learning.layout.html">Getting Started with Zend_Layout</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="learning.layout.html">Getting Started with Zend_Layout</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="learning.layout.usage.html">Utiliser Zend_Layout</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="learning.layout.intro" class="section"><div class="info"><h1 class="title">Introduction</h1></div>
+    
+
+    <p class="para">
+        Dans une application utilisant les couches Zend Framework <acronym class="acronym">MVC</acronym>,
+        vos scripts de vue ne seront que des blocs de <acronym class="acronym">HTML</acronym> concernant
+        l&#039;action demandée. Par exemple, une action &quot;<var class="filename">/user/list</var>&quot;
+        mènerait vers un script de vue itérant sur les utilisateurs en présentant une liste:
+    </p>
+
+    <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&lt;h2&gt;Utilisateurs&lt;/h2&gt;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&lt;ul&gt;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">&lt;?php</span> <span style="color: #b1b100;">if</span> <span style="color: #66cc66;">&#40;</span>!<a href="http://www.php.net/count"><span style="color: #000066;">count</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">users</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>: <span style="color: #000000; font-weight: bold;">?&gt;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &lt;li&gt;Pas d<span style="color: #ff0000;">'utilisateurs&lt;/li&gt;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #ff0000;">&nbsp; &nbsp; &lt;?php else: ?&gt;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #ff0000;">&nbsp; &nbsp; &lt;?php foreach ($this-&gt;users as $user): ?&gt;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #ff0000;">&nbsp; &nbsp; &lt;li&gt;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #ff0000;">&nbsp; &nbsp; &nbsp; &nbsp; &lt;?php echo $this-&gt;escape($user-&gt;fullname) ?&gt;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #ff0000;">&nbsp; &nbsp; &nbsp; &nbsp; (&lt;?php echo $this-&gt;escape($user-&gt;email) ?&gt;)</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #ff0000;">&nbsp; &nbsp; &lt;/li&gt;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #ff0000;">&nbsp; &nbsp; &lt;?php endforeach ?&gt;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #ff0000;">&nbsp; &nbsp; &lt;?php endif ?&gt;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #ff0000;">&lt;/ul&gt;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #ff0000;"</span></div></li></ol></div></div></div>
+
+
+    <p class="para">
+        Comme c&#039;est juste un bloc de code <acronym class="acronym">HTML</acronym>, ce n&#039;est pas une page valide,
+        il manque le <acronym class="acronym">DOCTYPE</acronym> et la balise ouvrante <acronym class="acronym">HTML</acronym> puis
+        <acronym class="acronym">BODY</acronym>. Quand seront-ils crées?
+    </p>
+
+    <p class="para">
+        Dans les anciennes versions de Zend Framework, les développeurs créaient souvent des scripts
+        de vue &quot;header&quot; et &quot;footer&quot; qui servaient à cela. Ca fonctionnait certes, mais c&#039;était
+        difficile à refactoriser, ou pour appeler du contenu provenant de plusieurs actions.
+    </p>
+
+    <p class="para">
+        Le pattern
+        <a href="http://martinfowler.com/eaaCatalog/twoStepView.html" class="link external">&raquo; Two-Step View</a>
+        solutionne beaucoup des problèmes indiqués. Avec, la vue &quot;application&quot; est crée en premier,
+        puis injectée dans une vue &quot;page&quot; ainsi présentée à l&#039;utilisateur client. la vue de page
+        peut être imaginée comme un template global ou layout qui décrirait des éléments communs
+        utilisés au travers de multiples pages.
+    </p>
+
+    <p class="para">
+        Dans Zend Framework, <span class="classname">Zend_Layout</span> implémente le pattern Two-Step View.
+    </p>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="learning.layout.html">Getting Started with Zend_Layout</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="learning.layout.html">Getting Started with Zend_Layout</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="learning.layout.usage.html">Utiliser Zend_Layout</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="learning.html">Learning Zend Framework</a></li>
+  <li class="header up"><a href="learning.layout.html">Getting Started with Zend_Layout</a></li>
+  <li class="active"><a href="learning.layout.intro.html">Introduction</a></li>
+  <li><a href="learning.layout.usage.html">Utiliser Zend_Layout</a></li>
+  <li><a href="learning.layout.conclusions.html">Zend_Layout: Conclusions</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

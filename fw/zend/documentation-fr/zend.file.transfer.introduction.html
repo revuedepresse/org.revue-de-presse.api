@@ -1,0 +1,664 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Zend_File_Transfer - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.file.html">Zend_File</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.file.html">Zend_File</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.file.transfer.validators.html">Validateurs pour Zend_File_Transfer</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.file.transfer.introduction" class="section"><div class="info"><h1 class="title">Zend_File_Transfer</h1></div>
+    
+
+    <p class="para">
+        <span class="classname">Zend_File_Transfer</span> permet aux développeurs de contrôler
+        l&#039;upload de fichiers mais aussi le téléchargement. Il vous permet d&#039;utiliser les validateurs
+        incorporés pour le traitement de fichier et même la possibilité de changer les fichiers avec
+        des filtres. <span class="classname">Zend_File_Transfer</span> fonctionne avec des adaptateurs ce
+        qui vous permet d&#039;utiliser la même <acronym class="acronym">API</acronym> pour différents protocoles de transfert <acronym class="acronym">HTTP</acronym>, FTP,
+        WEBDAV et plus encore.
+    </p>
+
+    <blockquote><p><b class="note">Note</b>: <span class="info"><b>Limitation</b><br /></span>
+        
+
+        
+            L&#039;implémentation actuelle de <span class="classname">Zend_File_Transfer</span> est limitée
+            aux uploads de type <acronym class="acronym">HTTP</acronym> Post. Le téléchargement de fichiers et les autres adaptateurs
+            seront ajoutés dans les prochaines versions. Les méthodes non implémentées pour le
+            moment lèveront une exception. Donc réellement vous devriez directement utiliser une
+            instance de <span class="classname">Zend_File_Transfer_Adapter_Http</span>. Ceci changera dans
+            le futur, dès qu&#039;il existera des adaptateurs disponibles.
+        <br />
+    </p></blockquote>
+
+    <blockquote><p><b class="note">Note</b>: <span class="info"><b>Formulaires</b><br /></span>
+        
+
+        
+            Quand vous utilisez <span class="classname">Zend_Form</span> vous devriez lire et suivre
+            les exemples décrits dans le chapitre <span class="classname">Zend_Form</span> et ne pas
+            utiliser manuellement <span class="classname">Zend_File_Transfer</span>. Mais les informations
+            que vous pourrez lire dans le présent chapitre vous seront malgré tout utile, même si
+            vous ne l&#039;utilisez pas directement. Toutes les considérations, descriptions et solutions
+            sont les mêmes quand vous utilisez <span class="classname">Zend_File_Transfer</span> au travers
+            de <span class="classname">Zend_Form</span>.
+        <br />
+    </p></blockquote>
+
+    <p class="para">
+        L&#039;utilisation de <span class="classname">Zend_File_Transfer</span> est assez simple. Il
+        consiste en deux parties. Le formulaire <acronym class="acronym">HTTP</acronym> qui réalise l&#039;upload, et la gestion des
+        fichiers uploadés avec <span class="classname">Zend_File_Transfer</span>. Regardez l&#039;exemple suivant
+        :
+    </p>
+
+    <div class="example"><div class="info"><p><b>Example #1 Formulaire simple d&#039;upload de fichier</b></p></div>
+        
+
+        <div class="example-contents"><p>
+            Cet exemple illustre un upload de fichier basique avec
+            <span class="classname">Zend_File_Transfer</span>. La première partie est le formulaire. Dans
+            notre exemple, il n&#039;y a qu&#039;un seul fichier que nous souhaitons uploadé.
+        </p></div>
+
+        <div class="programlisting"><div class="cdata"><pre>
+&lt;form enctype=&quot;multipart/form-data&quot; action=&quot;/file/upload&quot; method=&quot;POST&quot;&gt;
+    &lt;input type=&quot;hidden&quot; name=&quot;MAX_FILE_SIZE&quot; value=&quot;100000&quot; /&gt;
+        Choose a file to upload:
+        &lt;input name=&quot;uploadedfile&quot; type=&quot;file&quot; /&gt;
+        &lt;br /&gt;
+    &lt;input type=&quot;submit&quot; value=&quot;Upload File&quot; /&gt;
+&lt;/form&gt;
+</pre></div></div>
+
+
+        <div class="example-contents"><p>
+            Notez que vous devriez utiliser <a href="zend.form.standardElements.html#zend.form.standardElements.file" class="link">Zend_Form_Element_File</a> par simplicité
+            plutôt que de créer le HTML manuellement.
+        </p></div>
+
+        <div class="example-contents"><p>
+            L&#039;étape suivante est de créer le récepteur de l&#039;upload. Dans notre exemple le
+            récepteur est &quot;<code class="code">/file/upload</code>&quot;. Donc nous créons le contrôleur
+            <code class="code">file</code> avec l&#039;action <code class="code">upload</code>.
+        </p></div>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$adapter</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_File_Transfer_Adapter_Http<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$adapter</span>-&gt;<span style="color: #006600;">setDestination</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'C:<span style="color: #000099; font-weight: bold;">\t</span>emp'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #b1b100;">if</span> <span style="color: #66cc66;">&#40;</span>!<span style="color: #0000ff;">$adapter</span>-&gt;<span style="color: #006600;">receive</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #0000ff;">$messages</span> = <span style="color: #0000ff;">$adapter</span>-&gt;<span style="color: #006600;">getMessages</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <a href="http://www.php.net/implode"><span style="color: #000066;">implode</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">&quot;<span style="color: #000099; font-weight: bold;">\n</span>&quot;</span>, <span style="color: #0000ff;">$messages</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+
+
+        <div class="example-contents"><p>
+            Comme vous le voyez, l&#039;utilisation la plus simple est de définir une destination
+            avec la méthode <code class="code">setDestination</code> et d&#039;appeler la méthode
+             <span class="methodname">receive()</span>. S&#039;il apparaît des erreurs au cours de l&#039;upload, alors vous les
+            récupérerez grâce à une exception qui sera retournée.
+        </p></div>
+    </div>
+
+    <blockquote><p><b class="note">Note</b>: <span class="info"><b>Attention</b><br /></span>
+        
+
+        
+            Maintenez à l&#039;esprit qu&#039;il s&#039;agit de l&#039;utilisation la plus simple. Vous
+            <em class="emphasis">ne devez jamais</em> utiliser cet exemple en environnement de production
+            car il causerait de graves problèmes de sécurité. Vous devez toujours utiliser des
+            validateurs pour accroître la sécurité.
+        <br />
+    </p></blockquote>
+
+    <div class="section" id="zend.file.transfer.introduction.adapters" name="zend.file.transfer.introduction.adapters"><div class="info"><h1 class="title">Adaptateurs supportés par Zend_File_Transfer</h1></div>
+        
+
+        <p class="para">
+            <span class="classname">Zend_File_Transfer</span> est construit pour supporter différents
+            adaptateurs et différentes directions. Il est conçu pour permettre l&#039;upload, le
+            téléchargement et même l&#039;envoi bidirectionnel (upload avec un adaptateur et télécharge
+            avec un autre adaptateur en même temps) de fichiers.
+        </p>
+    </div>
+
+    <div class="section" id="zend.file.transfer.introduction.options" name="zend.file.transfer.introduction.options"><div class="info"><h1 class="title">Options de Zend_File_Transfer</h1></div>
+        
+
+        <p class="para">
+            <span class="classname">Zend_File_Transfer</span> et ses adaptateurs supportent plusieurs
+            options. Vous pouvez paramétrer toutes les options soit en les fournissant au
+            constructeur, ou en utilisant  <span class="methodname">setOptions($options)</span>.
+             <span class="methodname">getOptions()</span> retournera les options actuellement paramétrées. Ci-dessous,
+            vous trouverez la liste des options supportées :
+        </p>
+
+        <ul class="itemizedlist">
+            <li class="listitem">
+                <p class="para">
+                    <code class="code">ignoreNoFile</code> : si cette option vaut <b><tt>TRUE</tt></b>, tous
+                    les validateurs ignoreront le fait que le fichier à été uploadé ou non par le
+                    formulaire. Cette option vaut par défaut <b><tt>FALSE</tt></b>, ce qui lance une
+                    erreur indiquant que le fichier n&#039;a pas été fourni.
+                </p>
+            </li>
+        </ul>
+    </div>
+
+    <div class="section" id="zend.file.transfer.introduction.checking" name="zend.file.transfer.introduction.checking"><div class="info"><h1 class="title">Vérification des fichiers</h1></div>
+        
+
+        <p class="para">
+            <span class="classname">Zend_File_Transfer</span> possède plusieurs méthodes qui
+            permettent de vérifier suivant différentes considérations. Ceci est particulièrement
+            utile quand vous devez travailler avec des fichiers qui ont été uploadés.
+        </p>
+
+        <ul class="itemizedlist">
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">isValid($files = null)</span> : cette méthode vérifie si le(s)
+                    fichier(s) est(sont) valide(s), en se basant sur les validateurs affectés à
+                    chacun de ces fichiers. Si aucun fichier n&#039;est fourni, tous les fichiers seront
+                    vérifiés. Notez que cette méthode sera appelée en dernier quand les fichiers
+                    seront reçus.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">isUploaded($files = null)</span> : cette méthode vérifie si le(s)
+                    fichier(s) fourni(s) a (ont) été uploadé(s) par l&#039;utilisateur. Ceci est utile si
+                    vous avez défini que certains fichiers sont optionnels. Si aucun fichier n&#039;est
+                    fourni, tous les fichiers seront vérifiés.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">isReceived($files = null)</span> : cette méthode vérifie si le(s)
+                    fichier(s) fourni(s) a (ont) bien été reçu(s). Si aucun fichier n&#039;est fourni,
+                    tous les fichiers seront vérifiés.
+                </p>
+            </li>
+        </ul>
+
+        <div class="example"><div class="info"><p><b>Example #2 Vérification de fichiers</b></p></div>
+            
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$upload</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_File_Transfer<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Retourne toutes les informations connues sur le fichier</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$files</span> = <span style="color: #0000ff;">$upload</span>-&gt;<span style="color: #006600;">getFileInfo</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #b1b100;">foreach</span> <span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$files</span> <span style="color: #b1b100;">as</span> <span style="color: #0000ff;">$file</span> =&gt; <span style="color: #0000ff;">$info</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// Fichier uploadé ?</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #b1b100;">if</span> <span style="color: #66cc66;">&#40;</span>!<span style="color: #0000ff;">$upload</span>-&gt;<span style="color: #006600;">isUploaded</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$file</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <a href="http://www.php.net/print"><span style="color: #000066;">print</span></a> <span style="color: #ff0000;">&quot;Pourquoi n'avez-vous pas uploadé ce fichier ?&quot;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">continue</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// Les validateurs sont-ils OK ?</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #b1b100;">if</span> <span style="color: #66cc66;">&#40;</span>!<span style="color: #0000ff;">$upload</span>-&gt;<span style="color: #006600;">isValid</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$file</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <a href="http://www.php.net/print"><span style="color: #000066;">print</span></a> <span style="color: #ff0000;">&quot;Désolé mais $file ne correspond à ce que nous attendons&quot;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">continue</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$upload</span>-&gt;<span style="color: #006600;">receive</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+        </div>
+    </div>
+
+    <div class="section" id="zend.file.transfer.introduction.informations" name="zend.file.transfer.introduction.informations"><div class="info"><h1 class="title">Informations complémentaires sur les fichiers</h1></div>
+        
+
+        <p class="para">
+            <span class="classname">Zend_File_Transfer</span> peut fournir de multiples informations
+            complémentaires sur les fichiers. Les méthodes suivantes sont disponibles :
+        </p>
+
+        <ul class="itemizedlist">
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">getFileName($file = null, $path = true)</span> : cette méthode
+                    retourne le vrai nom de fichier d&#039;un fichier transféré.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">getFileInfo($file = null)</span> : cette méthode retourne tous les
+                    informations internes concernant un fichier transféré donné.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    <code class="code">getFileSize($file = null) </code>: cette méthode retourne la taille
+                    réelle d&#039;un fichier transféré donné.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    <code class="code">getHash($hash = &#039;crc32&#039;, $files = null) </code>: cette méthode
+                    retourne la valeur de hachage du contenu d&#039;un fichier transféré donné.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">getMimeType($files = null)</span> : cette méthode retourne le type
+                    <acronym class="acronym">MIME</acronym> d&#039;un fichier transféré donné.
+                </p>
+            </li>
+        </ul>
+
+        <p class="para">
+             <span class="methodname">getFileName()</span> accepte le nom d&#039;un élément entant que premier
+            paramètre. Si aucun n&#039;est fourni, tous les fichiers connus seront retournées sous la
+            forme d&#039;un tableau. Si le fichier est un &quot;multifile&quot;, vous le récupérerez aussi sous la
+            forme d&#039;un tableau. S&#039;il n&#039;y a qu&#039;un seul fichier alors une chaîne sera
+            retournée.
+        </p>
+
+        <p class="para">
+            Par défaut les noms de fichier sont retournés avec leur chemin d&#039;accès complet. Si
+            vous souhaitez seulement le nom de fichier sans le chemin, vous pouvez paramétrer le
+            second paramètre <var class="varname">$path</var> à <b><tt>FALSE</tt></b> ce qui tronquera le
+            chemin.
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #3 Récupération du nom de fichier</b></p></div>
+            
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$upload</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_File_Transfer<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$upload</span>-&gt;<span style="color: #006600;">receive</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Retourne le nom de fichier pour tous les fichiers</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$names</span> = <span style="color: #0000ff;">$upload</span>-&gt;<span style="color: #006600;">getFileName</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Retourne le nom de fichier de l'élément de formulaire &quot;foo&quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$names</span> = <span style="color: #0000ff;">$upload</span>-&gt;<span style="color: #006600;">getFileName</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'foo'</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+        </div>
+
+        <blockquote><p><b class="note">Note</b>: 
+            
+                Notez que le nom de fichier peut changer quand vous recevez le fichier. Ceci
+                est du au fait qu&#039;après la réception, tous les filtres sot appliqués. Donc vous ne
+                devriez appeler  <span class="methodname">getFileName()</span> qu&#039;après avoir reçu les fichiers.
+            <br />
+        </p></blockquote>
+
+        <p class="para">
+             <span class="methodname">getFileSize()</span> retourne par défaut la taille réelle d&#039;un fichier en
+            notation SI ce qui signifie que vous récupérerez <code class="code">2kB</code> au lieu de
+            <b><tt>2048</tt></b>. Si vous voulez la taille brute, utilisez l&#039;option
+            <code class="code">useByteString</code> à <b><tt>FALSE</tt></b>.
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #4 Récupération de la taille de fichier</b></p></div>
+            
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$upload</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_File_Transfer<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$upload</span>-&gt;<span style="color: #006600;">receive</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Retourne les tailles de tous les fichiers sous la forme</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// d'un tableau si plus d'un fichier a été uploadé</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$size</span> = <span style="color: #0000ff;">$upload</span>-&gt;<span style="color: #006600;">getFileSize</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Bascule de la notation SI vers une taille brute</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$upload</span>-&gt;<span style="color: #006600;">setOption</span><span style="color: #66cc66;">&#40;</span><a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'useByteString'</span> =&gt; <span style="color: #000000; font-weight: bold;">false</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$size</span> = <span style="color: #0000ff;">$upload</span>-&gt;<span style="color: #006600;">getFileSize</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+        </div>
+
+        <blockquote><p><b class="note">Note</b>: <span class="info"><b>Client given filesize</b><br /></span>
+            
+
+            
+                Note that the filesize which is given by the client is not seen as save input.
+                Therefor the real size of the file will be detected and returned instead of the
+                filesize sent by the client.
+            <br />
+        </p></blockquote>
+
+        <p class="para">
+             <span class="methodname">getHash()</span> accepte le nom de l&#039;algorithme de hachage en tant que
+            premier paramètre. Pour avoir une liste des algorithmes connus, regardez <a href="http://php.net/manual/fr/function.hash-algos.php" class="link external">&raquo; la méthode hash_algos de
+            <acronym class="acronym">PHP</acronym></a>. Si vous ne fournissez aucun algorithme, celui par défaut sera
+            <code class="code">crc32</code>.
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #5 Récupération d&#039;un hash de fichier</b></p></div>
+            
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$upload</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_File_Transfer<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$upload</span>-&gt;<span style="color: #006600;">receive</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Retourne le hachage de fichier pour tous les fichiers sous la forme</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// d'un tableau si plusieurs fichiers sont fournis</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$hash</span> = <span style="color: #0000ff;">$upload</span>-&gt;<span style="color: #006600;">getHash</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'md5'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Retourne le hachage de l'élément de formulaire &quot;foo&quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$names</span> = <span style="color: #0000ff;">$upload</span>-&gt;<span style="color: #006600;">getHash</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'crc32'</span>, <span style="color: #ff0000;">'foo'</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+        </div>
+
+        <blockquote><p><b class="note">Note</b>: <span class="info"><b>Valeur retournée</b><br /></span>
+            
+
+            
+                Notez que si un fichier ou un élément de formulaire donné contient plus d&#039;un
+                fichier, la valeur retournée sera un tableau.
+            <br />
+        </p></blockquote>
+
+        <p class="para">
+             <span class="methodname">getMimeType()</span> retourne le type <acronym class="acronym">MIME</acronym> d&#039;un fichier. Si plus d&#039;un
+            fichier a été uploadé, elle retourne un tableau, sinon c&#039;est une chaîne.
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #6 Récupération du type MIME de fichier</b></p></div>
+            
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$upload</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_File_Transfer<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$upload</span>-&gt;<span style="color: #006600;">receive</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$mime</span> = <span style="color: #0000ff;">$upload</span>-&gt;<span style="color: #006600;">getMimeType</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Retourne le type MIME pour l'élément de formulaire &quot;foo&quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$names</span> = <span style="color: #0000ff;">$upload</span>-&gt;<span style="color: #006600;">getMimeType</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'foo'</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+        </div>
+
+         <blockquote><p><b class="note">Note</b>: <span class="info"><b>Client given mimetype</b><br /></span>
+            
+
+             
+                Note that the mimetype which is given by the client is not seen as save input.
+                Therefor the real mimetype of the file will be detected and returned instead of the
+                mimetype sent by the client.
+            <br />
+        </p></blockquote>
+
+        <div class="warning"><b class="warning">Warning</b><div class="info"><h1 class="title">Exception possible</h1></div>
+            
+
+            <p class="para">
+                Notez que cette méthode utilise l&#039;extension fileinfo si elle est disponible.
+                Si elle n&#039;est pas trouvé, elle utilise l&#039;extension mimemagic. Quand aucune extension
+                n&#039;est fournie, une exception est levée.
+            </p>
+        </div>
+
+        <div class="warning"><b class="warning">Warning</b><div class="info"><h1 class="title">Original data within $_FILES</h1></div>
+            
+
+            <p class="para">
+                Due to security reasons also the original data within $_FILES will be overridden
+                as soon as <span class="classname">Zend_File_Transfer</span> is initiated. When you want
+                to omit this behaviour and have the original data simply set the
+                <span class="property">detectInfos</span> option to <b><tt>FALSE</tt></b> at initiation.
+            </p>
+
+            <p class="para">
+                This option will have no effect after you initiated
+                <span class="classname">Zend_File_Transfer</span>.
+            </p>
+        </div>
+    </div>
+
+    <div class="section" id="zend.file.transfer.introduction.uploadprogress" name="zend.file.transfer.introduction.uploadprogress"><div class="info"><h1 class="title">Progress for file uploads</h1></div>
+        
+
+        <p class="para">
+            <span class="classname">Zend_File_Transfer</span> can give you the actual state of a fileupload in progress. To use
+            this feature you need either the <b><tt>APC</tt></b> extension which is provided with most default
+            <acronym class="acronym">PHP</acronym> installations, or the <code class="code">uploadprogress</code> extension. Both extensions are detected
+            and used automatically. To be able to get the progress you need to meet some prerequisites.
+        </p>
+
+        <p class="para">
+            First, you need to have either <b><tt>APC</tt></b> or <code class="code">uploadprogress</code> to be enabled.
+            Note that you can disable this feature of <b><tt>APC</tt></b> within your php.ini.
+        </p>
+
+        <p class="para">
+            Second, you need to have the proper hidden fields added in the form which sends the files. When you
+            use <span class="classname">Zend_Form_Element_File</span> this hidden fields are automatically added by
+            <span class="classname">Zend_Form</span>.
+        </p>
+
+        <p class="para">
+            When the above two points are provided then you are able to get the actual progress of the
+            file upload by using the <code class="code">getProgress</code> method. Actually there are 2 official ways to
+            handle this.
+        </p>
+
+        <div class="section" id="zend.file.transfer.introduction.uploadprogress.progressadapter" name="zend.file.transfer.introduction.uploadprogress.progressadapter"><div class="info"><h1 class="title">Using a progressbar adapter</h1></div>
+            
+
+            <p class="para">
+                You can use the convinient <em class="emphasis">Zend_ProgressBar</em> to get the actual progress
+                and can display it in a simple manner to your user.
+            </p>
+
+            <p class="para">
+                To archive this, you have to add the wished <em class="emphasis">Zend_ProgressBar_Adapter</em> to
+                 <span class="methodname">getProgress()</span> when you are calling it the first time. For details about the right
+                adapter to use, look into the chapter
+                <a href="zend.progressbar.introduction.html#zend.progressbar.adapters" class="link">Zend_ProgressBar Standard Adapters</a>.
+            </p>
+
+            <div class="example"><div class="info"><p><b>Example #7 Using the progressbar adapter to retrieve the actual state</b></p></div>
+                
+
+                <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$adapter</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_ProgressBar_Adapter_Console<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$upload</span>&nbsp; = Zend_File_Transfer_Adapter_Http::<span style="color: #006600;">getProgress</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$adapter</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$upload</span> = <span style="color: #000000; font-weight: bold;">null</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #b1b100;">while</span> <span style="color: #66cc66;">&#40;</span>!<span style="color: #0000ff;">$upload</span><span style="color: #66cc66;">&#91;</span><span style="color: #ff0000;">'done'</span><span style="color: #66cc66;">&#93;</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #0000ff;">$upload</span> = Zend_File_Transfer_Adapter_Http:getProgress<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$upload</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+
+            </div>
+
+            <p class="para">
+                The complete handling is done by  <span class="methodname">getProgress()</span> for you in the background.
+            </p>
+        </div>
+
+        <div class="section" id="zend.file.transfer.introduction.uploadprogress.manually" name="zend.file.transfer.introduction.uploadprogress.manually"><div class="info"><h1 class="title">Using getProgress() manually</h1></div>
+            
+
+            <p class="para">
+                You can also work manually with  <span class="methodname">getProgress()</span> without the usage of
+                <span class="classname">Zend_ProgressBar</span>.
+            </p>
+
+            <p class="para">
+                Call  <span class="methodname">getProgress()</span> without settings. It will return you an array with several keys.
+                They differ according to the used <acronym class="acronym">PHP</acronym> extension. But the following keys are given independently
+                of the extension:
+            </p>
+
+            <ul class="itemizedlist">
+                <li class="listitem">
+                    <p class="para">
+                        <em class="emphasis">id</em>: The ID of this upload. This ID identifies the
+                        upload within the extension. It is filled automatically. You should never change or
+                        give this value yourself.
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        <em class="emphasis">total</em>: The total filesize of the uploaded files in bytes
+                        as integer.
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        <em class="emphasis">current</em>: The current uploaded filesize in bytes
+                        as integer.
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        <em class="emphasis">rate</em>: The average upload speed in bytes per second
+                        as integer.
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        <em class="emphasis">done</em>: Returns true when the upload is finished and false
+                        otherwise.
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        <em class="emphasis">message</em>: The actual message. Eighter the progress as
+                        text in the form <em class="emphasis">10kB / 200kB</em>, or a helpful message
+                        in the case of a problem. Problems could be, that there is no upload in progress, that
+                        there was a failure while retrieving the data for the progress, or that the upload has
+                        been canceled.
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        <em class="emphasis">progress</em>: This optional key takes a instance of
+                        Zend_ProgressBar_Adapter or Zend_ProgressBar and allows to get the actual upload state
+                        within a progressbar.
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        <em class="emphasis">session</em>: This optional key takes the name of a session
+                        namespace which will be used within Zend_ProgressBar. When this key is not given it
+                        defaults to <span class="classname">Zend_File_Transfer_Adapter_Http_ProgressBar</span>.
+                    </p>
+                </li>
+            </ul>
+
+            <p class="para">
+                All other returned keys are provided directly from the extensions and will not be checked.
+            </p>
+
+            <p class="para">
+                The following example shows a possible manual usage:
+            </p>
+
+            <div class="example"><div class="info"><p><b>Example #8 Manual usage of the file progress</b></p></div>
+                
+
+                <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$upload</span>&nbsp; = Zend_File_Transfer_Adapter_Http::<span style="color: #006600;">getProgress</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #b1b100;">while</span> <span style="color: #66cc66;">&#40;</span>!<span style="color: #0000ff;">$upload</span><span style="color: #66cc66;">&#91;</span><span style="color: #ff0000;">'done'</span><span style="color: #66cc66;">&#93;</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #0000ff;">$upload</span> = Zend_File_Transfer_Adapter_Http:getProgress<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$upload</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <a href="http://www.php.net/print"><span style="color: #000066;">print</span></a> <span style="color: #ff0000;">&quot;<span style="color: #000099; font-weight: bold;">\n</span>Actual progress:&quot;</span>.<span style="color: #0000ff;">$upload</span><span style="color: #66cc66;">&#91;</span><span style="color: #ff0000;">'message'</span><span style="color: #66cc66;">&#93;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// do whatever you need</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+
+            </div>
+        </div>
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.file.html">Zend_File</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.file.html">Zend_File</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.file.transfer.validators.html">Validateurs pour Zend_File_Transfer</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.file.html">Zend_File</a></li>
+  <li class="active"><a href="zend.file.transfer.introduction.html">Zend_File_Transfer</a></li>
+  <li><a href="zend.file.transfer.validators.html">Validateurs pour Zend_File_Transfer</a></li>
+  <li><a href="zend.file.transfer.filters.html">Filtres pour Zend_File_Transfer</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

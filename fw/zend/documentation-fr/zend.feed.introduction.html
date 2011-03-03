@@ -1,0 +1,181 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Introduction - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.feed.html">Zend_Feed</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.feed.html">Zend_Feed</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.feed.importing.html">Importer des flux</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.feed.introduction" class="section"><div class="info"><h1 class="title">Introduction</h1></div>
+    
+
+    <p class="para">
+        Le composant <span class="classname">Zend_Feed</span> offre des services permettant de
+        traiter des flux <acronym class="acronym">RSS</acronym> et Atom. Il permet d&#039;accéder aux éléments d&#039;un flux, aux attributs
+        d&#039;un flux et aux attributs des entrées d&#039;un flux, tout cela au moyen d&#039;une syntaxe
+        intuitive. <span class="classname">Zend_Feed</span> prend aussi complètement en charge la
+        modification de la structure des flux et des entrées, avec la même syntaxe intuitive que
+        précédemment, et il sait transformer le résultat en <acronym class="acronym">XML</acronym>. À l&#039;avenir, la prise en charge des
+        modifications pourrait aussi inclure la prise en charge du protocole de publication
+        Atom.
+    </p>
+
+    <p class="para">
+        Sur le plan de la programmation, <span class="classname">Zend_Feed</span> est constitué d&#039;une
+        classe de base <span class="classname">Zend_Feed</span> et de classes de base abstraites
+        <span class="classname">Zend_Feed_Abstract</span> et
+        <span class="classname">Zend_Feed_Entry_Abstract</span>, permettant de représenter respectivement
+        des flux et des entrées ; <span class="classname">Zend_Feed</span> contient aussi des
+        implémentations particulières de ces classes abstraites pour les flux et entrées <acronym class="acronym">RSS</acronym> et
+        Atom ainsi qu&#039;un assistant en coulisses qui assure le bon fonctionnement de la syntaxe
+        intuitive.
+    </p>
+
+    <p class="para">
+        Dans l&#039;exemple ci-dessous, nous illustrons une utilisation simple de
+        <span class="classname">Zend_Feed</span> : on obtient un flux <acronym class="acronym">RSS</acronym> et on enregistre les
+        portions du flux qui nous intéressent dans un tableau <acronym class="acronym">PHP</acronym> simple, qui pourra ensuite être
+        utilisé pour afficher les données, les stocker dans une base de données etc.
+    </p>
+
+    <blockquote><p><b class="note">Note</b>: <span class="info"><b>Attention</b><br /></span>
+        
+        
+            Beaucoup de flux <acronym class="acronym">RSS</acronym> ont à leur disposition différentes propriétés, pour les
+            canaux comme pour les éléments. La spécification <acronym class="acronym">RSS</acronym> spécifie beaucoup de propriétés
+            optionnelles et gardez donc cela à l&#039;esprit lorsque vous écrivez du code qui manipule
+            des données <acronym class="acronym">RSS</acronym>.
+        <br />
+    </p></blockquote>
+
+    <div class="example"><div class="info"><p><b>Example #1 Manipuler des données RSS avec Zend_Feed</b></p></div>
+        
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// on va chercher les dernières news de Slashdot</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">try <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #0000ff;">$rssSlashdot</span> =</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">Zend_Feed::<span style="color: #006600;">import</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'http://rss.slashdot.org/Slashdot/slashdot'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span> catch <span style="color: #66cc66;">&#40;</span>Zend_Feed_Exception <span style="color: #0000ff;">$e</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// l'importation du flux a échoué</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #ff0000;">&quot;Une exception a été interceptée lors de l'importation &quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp;. <span style="color: #ff0000;">&quot;du flux : {$e-&gt;getMessage()}<span style="color: #000099; font-weight: bold;">\n</span>&quot;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <a href="http://www.php.net/exit"><span style="color: #000066;">exit</span></a>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// on initialise un tableau contenant les données du canal RSS</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$canal</span> = <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'titre'</span>&nbsp; &nbsp; &nbsp; &nbsp;=&gt; <span style="color: #0000ff;">$rssSlashdot</span>-&gt;<span style="color: #006600;">title</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'lien'</span>&nbsp; &nbsp; &nbsp; &nbsp; =&gt; <span style="color: #0000ff;">$rssSlashdot</span>-&gt;<span style="color: #006600;">link</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'description'</span> =&gt; <span style="color: #0000ff;">$rssSlashdot</span>-&gt;<span style="color: #006600;">description</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'elements'</span>&nbsp; &nbsp; =&gt; <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// on itère sur chaque élément du canal et</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// on stocke les données qui nous intéressent</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #b1b100;">foreach</span> <span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$rssSlashdot</span> <span style="color: #b1b100;">as</span> <span style="color: #0000ff;">$elem</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #0000ff;">$canal</span><span style="color: #66cc66;">&#91;</span><span style="color: #ff0000;">'elements'</span><span style="color: #66cc66;">&#93;</span><span style="color: #66cc66;">&#91;</span><span style="color: #66cc66;">&#93;</span> = <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'titre'</span>&nbsp; &nbsp; &nbsp; &nbsp;=&gt; <span style="color: #0000ff;">$elem</span>-&gt;<span style="color: #006600;">title</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'lien'</span>&nbsp; &nbsp; &nbsp; &nbsp; =&gt; <span style="color: #0000ff;">$elem</span>-&gt;<span style="color: #006600;">link</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'description'</span> =&gt; <span style="color: #0000ff;">$elem</span>-&gt;<span style="color: #006600;">description</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.feed.html">Zend_Feed</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.feed.html">Zend_Feed</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.feed.importing.html">Importer des flux</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.feed.html">Zend_Feed</a></li>
+  <li class="active"><a href="zend.feed.introduction.html">Introduction</a></li>
+  <li><a href="zend.feed.importing.html">Importer des flux</a></li>
+  <li><a href="zend.feed.findFeeds.html">Obtenir des flux &agrave; partir de pages Web</a></li>
+  <li><a href="zend.feed.consuming-rss.html">Consommer un flux RSS</a></li>
+  <li><a href="zend.feed.consuming-atom.html">Consommer un flux Atom</a></li>
+  <li><a href="zend.feed.consuming-atom-single-entry.html">Consommer une entr&eacute;e Atom particuli&egrave;re</a></li>
+  <li><a href="zend.feed.modifying-feed.html">Modifier la structure du flux ou des entr&eacute;es</a></li>
+  <li><a href="zend.feed.custom-feed.html">Classes personnalis&eacute;es pour les flux et entr&eacute;es</a></li>
+  <li><a href="zend.feed.reader.html">Zend_Feed_Reader</a></li>
+  <li><a href="zend.feed.writer.html">Zend_Feed_Writer</a></li>
+  <li><a href="zend.feed.pubsubhubbub.introduction.html">Zend_Feed_Pubsubhubbub</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

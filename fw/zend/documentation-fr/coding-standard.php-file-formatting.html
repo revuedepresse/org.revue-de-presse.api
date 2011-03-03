@@ -1,0 +1,151 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Formatage des fichiers PHP - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="coding-standard.overview.html">Vue d'ensemble</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="coding-standard.html">Convention de codage PHP de Zend Framework</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="coding-standard.naming-conventions.html">Conventions de nommage</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="coding-standard.php-file-formatting" class="section"><div class="info"><h1 class="title">Formatage des fichiers PHP</h1></div>
+        
+
+        <div class="section" id="coding-standard.php-file-formatting.general" name="coding-standard.php-file-formatting.general"><div class="info"><h1 class="title">Général</h1></div>
+            
+
+            <p class="para">
+                Pour les fichiers contenant uniquement du code PHP, la balise de fermeture
+                (&quot;?&gt;&quot;) n&#039;est jamais permise. Il n&#039;est pas requis par PHP. Ne pas l&#039;inclure permet
+                de se prémunir les problèmes liés à l&#039;injection accidentelle d&#039;espaces blancs dans
+                la sortie.
+            </p>
+
+            <p class="para">
+                <em class="emphasis">IMPORTANT :</em> L&#039;inclusion de données binaires arbitraires
+                comme il est permis par <code class="code">__HALT_COMPILER()</code> est prohibé dans tout fichier
+                PHP de Zend Framework, ainsi que dans tout fichier dérivé. L&#039;utilisation de cette
+                possibilité est uniquement permise pour des scripts spéciaux d&#039;installation.
+            </p>
+        </div>
+
+        <div class="section" id="coding-standard.php-file-formatting.indentation" name="coding-standard.php-file-formatting.indentation"><div class="info"><h1 class="title">Indentation</h1></div>
+            
+
+            <p class="para">Utilisez une indentation de 4 espaces, sans tabulations.</p>
+        </div>
+
+        <div class="section" id="coding-standard.php-file-formatting.max-line-length" name="coding-standard.php-file-formatting.max-line-length"><div class="info"><h1 class="title">Longueur maximum d&#039;une ligne</h1></div>
+            
+
+            <p class="para">
+                La longueur souhaitée d&#039;une ligne est de 80 caractères, c&#039;est-à-dire que les
+                développeurs devraient avoir pour but de ne pas dépasser les 80 caractères pour des
+                raisons pratiques. Cependant, des lignes plus longues sont acceptables. La longueur
+                maximum de toute ligne de code PHP est de 120 caractères.
+            </p>
+        </div>
+
+        <div class="section" id="coding-standard.php-file-formatting.line-termination" name="coding-standard.php-file-formatting.line-termination"><div class="info"><h1 class="title">Terminaison de lignes</h1></div>
+            
+
+            <p class="para">
+                La terminaison de ligne est la terminaison standard pour les fichier textes
+                UNIX. Les lignes doit finir seulement avec un &quot;linefeed&quot; (LF). Les linefeeds sont
+                représentés comme 10 en ordinal, ou 0x0A en hexadécimal.
+            </p>
+
+            <p class="para">
+                Note : N&#039;utilisez pas de retour chariots (CR) comme le font les Macintosh
+                (0x0D) ou de combinaison retour chariot/linefeed (CRLF) comme le font les
+                ordinateurs sous Windows (0x0D, 0x0A).
+            </p>
+        </div>
+    </div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="coding-standard.overview.html">Vue d'ensemble</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="coding-standard.html">Convention de codage PHP de Zend Framework</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="coding-standard.naming-conventions.html">Conventions de nommage</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="coding-standard.html">Convention de codage PHP de Zend Framework</a></li>
+  <li><a href="coding-standard.overview.html">Vue d'ensemble</a></li>
+  <li class="active"><a href="coding-standard.php-file-formatting.html">Formatage des fichiers PHP</a></li>
+  <li><a href="coding-standard.naming-conventions.html">Conventions de nommage</a></li>
+  <li><a href="coding-standard.coding-style.html">Style de codage</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

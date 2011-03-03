@@ -1,0 +1,484 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Introduction - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.acl.html">Zend_Acl</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.acl.html">Zend_Acl</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.acl.refining.html">Affiner les Contr&ocirc;les d'Acc&egrave;s</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.acl.introduction" class="section"><div class="info"><h1 class="title">Introduction</h1></div>
+    
+
+    <p class="para">
+        <span class="classname">Zend_Acl</span> fournit une implémentation légère et flexible de
+        listes de contrôle d&#039;accès (<acronym class="acronym">ACL</acronym>) pour la gestion de privilèges. En
+        général, une application peut utiliser ces <acronym class="acronym">ACL</acronym> pour contrôler l&#039;accès à
+        certains objets par d&#039;autres objets demandeurs.
+    </p>
+
+    <p class="para">
+        Dans le cadre de cette documentation :
+    </p>
+
+    <ul class="itemizedlist">
+        <li class="listitem">
+            <p class="para">
+                une <em class="emphasis">ressource</em> est un objet dont l&#039;accès est contrôlé,
+            </p>
+        </li>
+        <li class="listitem">
+            <p class="para">
+                un <em class="emphasis">rôle</em> est un objet qui peut demander l&#039;accès à une ressource.
+            </p>
+        </li>
+    </ul>
+
+    <p class="para">
+        Dit simplement, <em class="emphasis"> les rôles demandent l&#039;accès à des
+        ressources</em>. Par exemple, si une personne demande l&#039;accès à une voiture, alors la
+        personne est le rôle demandeur et la voiture est la ressource, puisque l&#039;accès à la voiture
+        est soumis à un contrôle.
+    </p>
+
+    <p class="para">
+        Grâce à la définition et à la mise en oeuvre d&#039;une <acronym class="acronym">ACL</acronym>,
+        une application peut contrôler comment les objets demandeurs (rôles) reçoivent l&#039;accès (ou
+        non) à des objets protégés (ressources).
+    </p>
+
+    <div class="section" id="zend.acl.introduction.resources" name="zend.acl.introduction.resources"><div class="info"><h1 class="title">A propos des ressources</h1></div>
+        
+
+        <p class="para">
+            Avec <span class="classname">Zend_Acl</span>, créer une ressource est très simple.
+            <span class="classname">Zend_Acl</span> fournit
+            <span class="classname">Zend_Acl_Resource_Interface</span> pour faciliter la tâche aux
+            développeurs. Une classe a simplement besoin d&#039;implémenter cette interface, qui
+            consiste en une seule méthode,  <span class="methodname">getResourceId()</span>, pour que
+            <span class="classname">Zend_Acl</span> reconnaît l&#039;objet comme étant une ressource. Par
+            ailleurs, <span class="classname">Zend_Acl_Resource</span> est fourni par
+            <span class="classname">Zend_Acl</span> comme une implémentation basique de ressource que les
+            développeurs peuvent étendre si besoin.
+        </p>
+
+        <p class="para">
+            <span class="classname">Zend_Acl</span> fournit une structure en arbre à laquelle
+            plusieurs ressources (ou &quot;zone sous contrôle d&#039;accès&quot;) peuvent être ajoutées. Puisque
+            les ressources sont sauvées dans cet arbre, elles peuvent être organisées du général
+            (via la racine de l&#039;arbre) jusqu&#039;au particulier (via les feuilles de l&#039;arbre). Les
+            requêtes envers une ressource spécifique vont automatiquement entraîner la recherche de
+            règles sur ses parents au sein de la structure hiérarchique des ressources, ce qui
+            permet un héritage simple des règles. Par exemple, si une règle par défaut doit être
+            appliquée à tous les bâtiments d&#039;une ville, on pourra simplement assigner la règle à la
+            ville elle-même, au lieu de la répéter à tous les bâtiments. Mais certains bâtiments
+            peuvent nécessiter des règles spécifiques, et ceci peut se faire aisément avec
+            <span class="classname">Zend_Acl</span> en assignant les règles nécessaires à chaque bâtiment
+            de la ville qui nécessite une exception. Une ressource peut hériter d&#039;un seul parent
+            ressource, qui hérite lui même de son propre parent, et ainsi de suite.
+        </p>
+
+        <p class="para">
+            <span class="classname">Zend_Acl</span> supporte aussi des privilèges pour chaque
+            ressource (par exemple : &quot;créer&quot;, &quot;lire&quot;, &quot;modifier&quot;, &quot;supprimer&quot;), et le développeur
+            peut assigner des règles qui affectent tous les privilèges ou seuls certains privilèges
+            d&#039;une ressource.
+        </p>
+    </div>
+
+    <div class="section" id="zend.acl.introduction.roles" name="zend.acl.introduction.roles"><div class="info"><h1 class="title">A propos des rôles</h1></div>
+        
+
+        <p class="para">
+            Comme pour les ressources, créer un rôle est très simple. Tout rôle doit implémenter
+            <span class="classname">Zend_Acl_Role_Interface</span> qui consiste en une seule méthode
+             <span class="methodname">getRoleId()</span>. De plus, <span class="classname">Zend_Acl_Role</span> est
+            inclus dans <span class="classname">Zend_Acl</span> comme une implémentation basique de rôle que
+            les développeurs peuvent étendre si besoin.
+        </p>
+
+        <p class="para">
+            Dans <span class="classname">Zend_Acl</span>, un rôle peut hériter de un ou plusieurs
+            rôles. Ceci permet de supporter l&#039;héritage de règles à travers plusieurs rôles. Par
+            exemple, un rôle utilisateur, comme &quot;Éric&quot;, peut appartenir à un ou plusieurs rôles
+            d&#039;action, tels que &quot;éditeur&quot; ou &quot;administrateur&quot;. Le développeur peut créer des règles
+            pour &quot;éditeur&quot; et &quot;administrateur&quot; séparément, et &quot;Éric&quot; va hériter des règles des deux
+            sans avoir à définir des règles directement pour &quot;Éric&quot;.
+        </p>
+
+        <p class="para">
+            Bien que la possibilité d&#039;hériter de plusieurs rôles soit très utile, l&#039;héritage
+            multiple introduit aussi un certain degré de complexité. L&#039;exemple ci-dessous illustre
+            l&#039;ambiguïté et la manière dont <span class="classname">Zend_Acl</span> la résout.
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #1 Héritages multiples entre rôles</b></p></div>
+            
+
+            <div class="example-contents"><p>
+                Le code ci-dessous définit trois rôles de base - &quot;guest&quot;, &quot;member&quot;, et &quot;admin&quot; -
+                desquels d&#039;autres rôles peuvent hériter. Ensuite, un rôle identifié par &quot;someUser&quot;
+                est créé et hérite des trois autres rôles. L&#039;ordre selon lequel ces rôles
+                apparaissent dans le tableau <var class="varname">$parents</var> est important. Lorsque cela
+                est nécessaire <span class="classname">Zend_Acl</span> recherche les règles d&#039;accès définies
+                non seulement pour le rôle demandé (ici &quot;someUser&quot;), mais aussi pour les autres
+                rôles desquels le rôle recherché hérite (ici &quot;guest&quot;, &quot;member&quot;, et &quot;admin&quot;) :
+            </p></div>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$acl</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Acl<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">addRole</span><span style="color: #66cc66;">&#40;</span><span style="color: #000000; font-weight: bold;">new</span> Zend_Acl_Role<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'guest'</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; -&gt;<span style="color: #006600;">addRole</span><span style="color: #66cc66;">&#40;</span><span style="color: #000000; font-weight: bold;">new</span> Zend_Acl_Role<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'member'</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; -&gt;<span style="color: #006600;">addRole</span><span style="color: #66cc66;">&#40;</span><span style="color: #000000; font-weight: bold;">new</span> Zend_Acl_Role<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'admin'</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$parents</span> = <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'guest'</span>, <span style="color: #ff0000;">'member'</span>, <span style="color: #ff0000;">'admin'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">addRole</span><span style="color: #66cc66;">&#40;</span><span style="color: #000000; font-weight: bold;">new</span> Zend_Acl_Role<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'someUser'</span><span style="color: #66cc66;">&#41;</span>, <span style="color: #0000ff;">$parents</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">add</span><span style="color: #66cc66;">&#40;</span><span style="color: #000000; font-weight: bold;">new</span> Zend_Acl_Resource<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'someResource'</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">deny</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'invite'</span>, <span style="color: #ff0000;">'someResource'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">allow</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'membre'</span>, <span style="color: #ff0000;">'someResource'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">isAllowed</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'someUser'</span>, <span style="color: #ff0000;">'someResource'</span><span style="color: #66cc66;">&#41;</span> ? <span style="color: #ff0000;">'autorisé'</span> : <span style="color: #ff0000;">'refusé'</span>;</div></li></ol></div></div></div>
+
+
+            <div class="example-contents"><p>
+                Puisqu&#039;il n&#039;y a pas de règle spécifiquement définie pour le rôle
+                &quot;someUser&quot; et &quot;someResource&quot;, <span class="classname">Zend_Acl</span> doit rechercher
+                des règles qui pourraient être définies pour des rôles dont &quot;someUser&quot; hérite.
+                Premièrement, le rôle &quot;admin&quot; est contrôlé, et il n&#039;y a pas de règle d&#039;accès
+                définie pour lui. Ensuite, le rôle &quot;member&quot; est visité, et
+                <span class="classname">Zend_Acl</span> trouve qu&#039;il y a une règle qui spécifie que
+                &quot;member&quot; a un accès autorisé à &quot;someResource&quot;.
+            </p></div>
+
+            <div class="example-contents"><p>
+                Si <span class="classname">Zend_Acl</span> continuait à examiner toutes les règles de
+                tous les rôles parents, il trouverait que &quot;someResource&quot; est interdit d&#039;accès à
+                &quot;someResource&quot;. Ceci introduit une ambiguïté puisque maintenant &quot;someUser&quot; est
+                à la fois autorisé et interdit d&#039;accès à &quot;someResource&quot;, puisqu&#039;il hérite de règles
+                opposées de ses différents parents.
+            </p></div>
+
+            <div class="example-contents"><p>
+                <span class="classname">Zend_Acl</span> résout cette ambiguïté en arrêtant la
+                recherche de règles d&#039;accès dès qu&#039;une première règle est découverte. Dans notre
+                exemple, puisque le rôle &quot;member&quot; est examiné avant le rôle &quot;guest&quot;, le résultat
+                devrait afficher &quot;autorisé&quot;.
+            </p></div>
+        </div>
+
+        <blockquote><p><b class="note">Note</b>: 
+            
+                Lorsque vous spécifiez plusieurs parents pour un rôle, conservez à l&#039;esprit
+                que le dernier parent listé est le premier dans lequel une règle utilisable sera
+                recherchée.
+            <br />
+        </p></blockquote>
+    </div>
+
+    <div class="section" id="zend.acl.introduction.creating" name="zend.acl.introduction.creating"><div class="info"><h1 class="title">Créer la Liste de Contrôle d&#039;Accès</h1></div>
+        
+
+        <p class="para">
+            Une <acronym class="acronym">ACL</acronym> peut représenter n&#039;importe quel ensemble d&#039;objets physiques
+            ou virtuels que vous souhaitez. Pour les besoins de la démonstration, nous allons créer
+            un système basique d&#039;<acronym class="acronym">ACL</acronym> pour une Gestion de Contenus
+            (<acronym class="acronym">CMS</acronym>) qui comporte plusieurs niveaux de groupes au sein d&#039;une grande
+            variété de zones. Pour créer un nouvel objet <acronym class="acronym">ACL</acronym>, nous créons une
+            nouvelle instance d&#039;<acronym class="acronym">ACL</acronym> sans paramètres :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$acl</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Acl<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <blockquote><p><b class="note">Note</b>: 
+            
+                Jusqu&#039;à ce que le développeur spécifie une règle &quot;allow&quot;,
+                <span class="classname">Zend_Acl</span> refuse l&#039;accès pour tous les privilèges sur chaque
+                ressource pour chaque rôle.
+            <br />
+        </p></blockquote>
+    </div>
+
+    <div class="section" id="zend.acl.introduction.role_registry" name="zend.acl.introduction.role_registry"><div class="info"><h1 class="title">Registre des rôles</h1></div>
+        
+
+        <p class="para">
+            Les systèmes de gestion de contenu (ou <acronym class="acronym">CMS</acronym>) vont pratiquement
+            toujours nécessiter une hiérarchie de permissions afin de déterminer les droits de
+            rédaction de ses utilisateurs. Il pourrait y avoir un groupe &quot;Invités&quot; qui donne accès
+            aux démonstrations, un groupe &quot;Staff&quot; pour la majorité des utilisateurs du
+            <acronym class="acronym">CMS</acronym> qui réalisent la plupart du travail quotidien, un groupe
+            &quot;Éditeur&quot; pour ceux qui sont responsables de la publication, l&#039;archivage, la relecture
+            et la suppression, et enfin un groupe &quot;Administrateur&quot; dont les tâches incluent toutes
+            les tâches des autres groupes plus des tâches de maintenance, de gestion des
+            utilisateurs, configuration et backup ou export. Cet ensemble de permissions peut être
+            représenté dans un registre de rôles, permettant à chaque groupe d&#039;hériter des
+            privilèges des groupes &quot;parents&quot;. Les permissions peuvent être rendues de la manière
+            suivante :
+        </p>
+
+        <table class="doctable table"><div class="info"><caption><b>Contrôles d&#039;Accès pour un exemple de CMS</b></caption></div>
+            
+
+            
+                <thead valign="middle">
+                    <tr valign="middle">
+                        <th>Nom</th>
+                        <th>Permissions</th>
+                        <th>Permissions héritées de</th>
+                    </tr>
+
+                </thead>
+
+                <tbody valign="middle" class="tbody">
+                    <tr valign="middle">
+                        <td align="left">Invité</td>
+                        <td align="left">Voir</td>
+                        <td align="left">N/A</td>
+                    </tr>
+
+                    <tr valign="middle">
+                        <td align="left">Staff</td>
+                        <td align="left">Modifier, Soumettre, Relire</td>
+                        <td align="left">Invité</td>
+                    </tr>
+
+                    <tr valign="middle">
+                        <td align="left">Éditeur</td>
+                        <td align="left">Publier, Archiver, Supprimer</td>
+                        <td align="left">Staff</td>
+                    </tr>
+
+                    <tr valign="middle">
+                        <td align="left">Administrateur</td>
+                        <td align="left">(Reçoit tous les accès)</td>
+                        <td align="left">N/A</td>
+                    </tr>
+
+                </tbody>
+            
+        </table>
+
+
+        <p class="para">
+            Pour cet exemple, <span class="classname">Zend_Acl_Role</span> est utilisé, mais
+            n&#039;importe quel objet qui implémente <span class="classname">Zend_Acl_Role_Interface</span> est
+            acceptable. Ces groupes peuvent être ajoutés au registre des rôles comme suit :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$acl</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Acl<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Ajoute des groupes au registre des rôles en utilisant Zend_Acl_Role</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Invité n'hérite d'aucun accès</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$roleinvite</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Acl_Role<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'invite'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">addRole</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$roleinvite</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Staff hérite de Invité</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">addRole</span><span style="color: #66cc66;">&#40;</span><span style="color: #000000; font-weight: bold;">new</span> Zend_Acl_Role<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'staff'</span><span style="color: #66cc66;">&#41;</span>, <span style="color: #0000ff;">$roleinvite</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Ce que précède pourrait aussi être écrit:</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// $acl-&gt;addRole(new Zend_Acl_Role('staff'), 'invite');</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Editeur hérite de staff</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">addRole</span><span style="color: #66cc66;">&#40;</span><span style="color: #000000; font-weight: bold;">new</span> Zend_Acl_Role<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'editeur'</span><span style="color: #66cc66;">&#41;</span>, <span style="color: #ff0000;">'staff'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Administrateur n'hérite pas d'accès</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">addRole</span><span style="color: #66cc66;">&#40;</span><span style="color: #000000; font-weight: bold;">new</span> Zend_Acl_Role<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'administrateur'</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+    </div>
+
+    <div class="section" id="zend.acl.introduction.defining" name="zend.acl.introduction.defining"><div class="info"><h1 class="title">Définir les Contrôles d&#039;Accès</h1></div>
+        
+
+        <p class="para">
+            Maintenant que l&#039;<acronym class="acronym">ACL</acronym> contient les rôles nécessaires, on peut établir
+            des règles qui définissent comment les ressources accèdent aux rôles. Vous avez sans
+            doute noté que nous n&#039;avons défini aucune ressource particulière pour cet exemple, ce
+            qui est plus simple pour illustrer comment les règles s&#039;appliquent à toutes les
+            ressources. <span class="classname">Zend_Acl</span> fournit une implémentation dans laquelle les
+            règles doivent simplement être assignées du général au particulier, ce qui réduit le
+            nombre de règles spécifiques à ajouter. Ceci grâce à l&#039;héritage.
+        </p>
+
+        <blockquote><p><b class="note">Note</b>: 
+            
+                Généralement <span class="classname">Zend_Acl</span> se conforme à une règle donnée
+                si et seulement si une règle plus spécifique ne s&#039;applique pas.
+            <br />
+        </p></blockquote>
+
+        <p class="para">
+            En conséquence, on peut définir un nombre assez complexe de règles avec un nombre
+            minimal de code. Pour définir les permissions comme définies ci-dessus :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$acl</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Acl<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$roleinvite</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Acl_Role<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'invité'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">addRole</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$roleinvite</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">addRole</span><span style="color: #66cc66;">&#40;</span><span style="color: #000000; font-weight: bold;">new</span> Zend_Acl_Role<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'staff'</span><span style="color: #66cc66;">&#41;</span>, <span style="color: #0000ff;">$roleinvite</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">addRole</span><span style="color: #66cc66;">&#40;</span><span style="color: #000000; font-weight: bold;">new</span> Zend_Acl_Role<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'editeur'</span><span style="color: #66cc66;">&#41;</span>, <span style="color: #ff0000;">'staff'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">addRole</span><span style="color: #66cc66;">&#40;</span><span style="color: #000000; font-weight: bold;">new</span> Zend_Acl_Role<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'administrateur'</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Invité peut uniquement voir le contenu</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">allow</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$roleinvite</span>, <span style="color: #000000; font-weight: bold;">null</span>, <span style="color: #ff0000;">'voir'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">/*</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">ce qui précède peut aussi être écrit :</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">$acl-&gt;allow('invité', null, 'voir');</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">*/</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Staff hérite des privilèges de Invité, mais a aussi ses propres</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// privilèges</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">allow</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'staff'</span>, <span style="color: #000000; font-weight: bold;">null</span>, <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'edit'</span>, <span style="color: #ff0000;">'submit'</span>, <span style="color: #ff0000;">'relire'</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Editeur hérite les privilèges voir, modifier, soumettre,</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// et relire de Staff, mais a aussi besoin de certains privilèges</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">allow</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'editeur'</span>, <span style="color: #000000; font-weight: bold;">null</span>, <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'publier'</span>, <span style="color: #ff0000;">'archiver'</span>, <span style="color: #ff0000;">'supprimer'</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Administrateur hérite de rien, mais reçoit tous les privilèges</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">allow</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'administrateur'</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <p class="para">
+            Les valeurs <b><tt>NULL</tt></b> dans les appels  <span class="methodname">allow()</span>
+            ci-dessus sont utilisées pour indiquer que les règles s&#039;appliquent à toutes les
+            ressources.
+        </p>
+    </div>
+
+    <div class="section" id="zend.acl.introduction.querying" name="zend.acl.introduction.querying"><div class="info"><h1 class="title">Interroger les ACL</h1></div>
+        
+
+        <p class="para">
+            Nous avons maintenant une <acronym class="acronym">ACL</acronym> flexible, qui peut être utilisée pour
+            déterminer si l&#039;objet appelant a les permissions pour réaliser les fonctions au sein de
+            l&#039;application web. Interroger cette liste est assez simple en utilisant la méthode
+             <span class="methodname">isAllowed()</span> :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">isAllowed</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'invité'</span>, <span style="color: #000000; font-weight: bold;">null</span>, <span style="color: #ff0000;">'voir'</span><span style="color: #66cc66;">&#41;</span> ?</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">&quot;autorisé&quot;</span> : <span style="color: #ff0000;">&quot;refusé&quot;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// autorisé</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">isAllowed</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'staff'</span>, <span style="color: #000000; font-weight: bold;">null</span>, <span style="color: #ff0000;">'publier'</span><span style="color: #66cc66;">&#41;</span> ?</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">&quot;autorisé&quot;</span> : <span style="color: #ff0000;">&quot;refusé&quot;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// refusé</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">isAllowed</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'staff'</span>, <span style="color: #000000; font-weight: bold;">null</span>, <span style="color: #ff0000;">'relire'</span><span style="color: #66cc66;">&#41;</span> ?</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">&quot;autorisé&quot;</span> : <span style="color: #ff0000;">&quot;refusé&quot;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// autorisé</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">isAllowed</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'editeur'</span>, <span style="color: #000000; font-weight: bold;">null</span>, <span style="color: #ff0000;">'voir'</span><span style="color: #66cc66;">&#41;</span> ?</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">&quot;autorisé&quot;</span> : <span style="color: #ff0000;">&quot;refusé&quot;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// autorisé parce que hérité de Invité</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">isAllowed</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'editeur'</span>, <span style="color: #000000; font-weight: bold;">null</span>, <span style="color: #ff0000;">'modifier'</span><span style="color: #66cc66;">&#41;</span> ?</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">&quot;autorisé&quot;</span> : <span style="color: #ff0000;">&quot;refusé&quot;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// refusé parce qu'il n'y a pas de règle pour 'modifier'</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">isAllowed</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'administrateur'</span>, <span style="color: #000000; font-weight: bold;">null</span>, <span style="color: #ff0000;">'voir'</span><span style="color: #66cc66;">&#41;</span> ?</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">&quot;autorisé&quot;</span> : <span style="color: #ff0000;">&quot;refusé&quot;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// autorisé car administrateur est autorisé pour tout</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">isAllowed</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'administrateur'</span><span style="color: #66cc66;">&#41;</span> ?</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">&quot;autorisé&quot;</span> : <span style="color: #ff0000;">&quot;refusé&quot;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// autorisé car administrateur est autorisé pour tout</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">isAllowed</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'administrateur'</span>, <span style="color: #000000; font-weight: bold;">null</span>, <span style="color: #ff0000;">'modifier'</span><span style="color: #66cc66;">&#41;</span> ?</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">&quot;autorisé&quot;</span> : <span style="color: #ff0000;">&quot;refusé&quot;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// autorisé car administrateur est autorisé pour tout</span></div></li></ol></div></div></div>
+
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.acl.html">Zend_Acl</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.acl.html">Zend_Acl</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.acl.refining.html">Affiner les Contr&ocirc;les d'Acc&egrave;s</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.acl.html">Zend_Acl</a></li>
+  <li class="active"><a href="zend.acl.introduction.html">Introduction</a></li>
+  <li><a href="zend.acl.refining.html">Affiner les Contr&ocirc;les d'Acc&egrave;s</a></li>
+  <li><a href="zend.acl.advanced.html">Utilisation avanc&eacute;e</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

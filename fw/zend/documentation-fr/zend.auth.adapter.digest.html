@@ -1,0 +1,219 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Authentification &quot;Digest&quot; - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.auth.adapter.dbtable.html">Authentification avec une table de base de donn&eacute;es</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.auth.html">Zend_Auth</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.auth.adapter.http.html">Adaptateur d'authentification HTTP</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.auth.adapter.digest" class="section"><div class="info"><h1 class="title">Authentification &quot;Digest&quot;</h1></div>
+    
+
+    <div class="section" id="zend.auth.adapter.digest.introduction" name="zend.auth.adapter.digest.introduction"><div class="info"><h1 class="title">Introduction</h1></div>
+        
+
+        <p class="para">
+            <a href="http://fr.wikipedia.org/wiki/HTTP_Authentification#M.C3.A9thode_Digest" class="link external">&raquo; 
+            L&#039;authentification &quot;Digest&quot;</a> est une méthode d&#039;authentification
+            <acronym class="acronym">HTTP</acronym> qui améliore
+            <a href="http://fr.wikipedia.org/wiki/HTTP_Authentification#M.C3.A9thode_Basic" class="link external">&raquo; 
+            l&#039;authentification basique</a> en fournissant un moyen d&#039;authentifier sans avoir à
+            transmettre le mot de passe en clair sur le réseau.
+        </p>
+
+        <p class="para">
+            Cet adaptateur permet l&#039;authentification en utilisant un fichier texte contenant
+            des lignes comportant les éléments de base d&#039;une authentification Digest :
+        </p>
+
+        <ul class="itemizedlist">
+            <li class="listitem">
+                <p class="para">
+                    identifiant, tel que
+                    &quot;<em class="emphasis"><var class="filename">utilisateur.jean</var></em>&quot;
+                </p>
+            </li>
+            <li class="listitem">
+                <p class="para">domaine, tel que &quot;<em class="emphasis">Zone administrative</em>&quot;</p>
+            </li>
+            <li class="listitem">
+                <p class="para">
+                    hachage <acronym class="acronym">MD5</acronym>5 d&#039;un identifiant, domaine et mot de passe,
+                    séparés par des caractères deux-points.
+                </p>
+            </li>
+        </ul>
+
+        <p class="para">
+            Les éléments ci-dessus sont séparés par des caractères deux-points, comme dans
+            l&#039;exemple suivant (dans lequel le mot de passe est
+            &quot;<em class="emphasis">unMotdepasse</em>&quot;) :
+        </p>
+
+        <div class="programlisting txt"><div class="txtcode"><div style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">unUtilisateur:Un domaine:3b17d7f3a9374666e892cbce58aa724f</div></li></ol></div></div></div>
+
+    </div>
+
+    <div class="section" id="zend.auth.adapter.digest.specifics" name="zend.auth.adapter.digest.specifics"><div class="info"><h1 class="title">Spécifications</h1></div>
+        
+
+        <p class="para">
+            L&#039;adaptateur d&#039;authentification Digest, <span class="classname">Zend_Auth_Adapter_Digest</span>
+            requiert plusieurs paramètres d&#039;entrée :
+        </p>
+
+        <ul class="itemizedlist">
+            <li class="listitem">
+                <p class="para">
+                    filename : fichier utilisé pour réaliser
+                    l&#039;authentification
+                </p>
+            </li>
+            <li class="listitem">
+                <p class="para">
+                    realm : domaine d&#039;authentification Digest (&quot;realm&quot; en anglais)
+                </p>
+            </li>
+            <li class="listitem">
+                <p class="para">
+                    username : identifiant d&#039;authentification Digest
+                </p>
+            </li>
+            <li class="listitem">
+                <p class="para">
+                    password : mot de passe pour l&#039;identifiant dans le domaine
+                </p>
+            </li>
+        </ul>
+
+        <p class="para">
+            Ces paramètres doivent être définis avant l&#039;appel de
+             <span class="methodname">authenticate()</span>.
+        </p>
+    </div>
+
+    <div class="section" id="zend.auth.adapter.digest.identity" name="zend.auth.adapter.digest.identity"><div class="info"><h1 class="title">Identité</h1></div>
+        
+
+        <p class="para">
+            L&#039;adaptateur d&#039;authentification Digest retourne un objet
+            <span class="classname">Zend_Auth_Result</span>, lequel a été alimenté avec l&#039;identité sous la
+            forme d&#039;un tableau ayant pour clés <em class="emphasis">realm</em> (domaine) et
+            <em class="emphasis">username</em> (identifiant). Les valeurs respectives associées à ces
+            clés correspondent aux valeurs définies avant l&#039;appel à
+             <span class="methodname">authenticate()</span>.
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$adaptateur</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Auth_Adapter_Digest<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$nomFichier</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #0000ff;">$domaine</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #0000ff;">$identifiant</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #0000ff;">$motdepasse</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$resultat</span> = <span style="color: #0000ff;">$adaptateur</span>-&gt;<span style="color: #006600;">authenticate</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$identite</span> = <span style="color: #0000ff;">$resultat</span>-&gt;<span style="color: #006600;">getIdentity</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/print_r"><span style="color: #000066;">print_r</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$identite</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">/*</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">Array</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">(</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">&nbsp; &nbsp; [realm] =&gt; Un domaine</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">&nbsp; &nbsp; [username] =&gt; unUtilisateur</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">)</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">*/</span></div></li></ol></div></div></div>
+
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.auth.adapter.dbtable.html">Authentification avec une table de base de donn&eacute;es</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.auth.html">Zend_Auth</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.auth.adapter.http.html">Adaptateur d'authentification HTTP</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.auth.html">Zend_Auth</a></li>
+  <li><a href="zend.auth.introduction.html">Introduction</a></li>
+  <li><a href="zend.auth.adapter.dbtable.html">Authentification avec une table de base de donn&eacute;es</a></li>
+  <li class="active"><a href="zend.auth.adapter.digest.html">Authentification &quot;Digest&quot;</a></li>
+  <li><a href="zend.auth.adapter.http.html">Adaptateur d'authentification HTTP</a></li>
+  <li><a href="zend.auth.adapter.ldap.html">LDAP Authentication</a></li>
+  <li><a href="zend.auth.adapter.openid.html">Authentification OpenID</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

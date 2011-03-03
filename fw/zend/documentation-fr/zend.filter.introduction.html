@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Introduction - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.filter.html">Zend_Filter</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.filter.html">Zend_Filter</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.filter.set.html">Classes de filtre standards</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.filter.introduction" class="section"><div class="info"><h1 class="title">Introduction</h1></div>
+    
+
+    <p class="para">
+        Le composant <span class="classname">Zend_Filter</span> fournit un ensemble de filtres de
+        données usuel. Il fournit également un mécanisme simple de chaînage par lequel plusieurs
+        filtres peuvent être appliqués à une donnée dans un ordre défini.
+    </p>
+
+    <div class="section" id="zend.filter.introduction.definition" name="zend.filter.introduction.definition"><div class="info"><h1 class="title">Qu&#039;est-ce qu&#039;un filtre ?</h1></div>
+        
+
+        <p class="para">
+            Généralement parlant, un filtre est utilisé pour supprimer les parties non
+            désirées de ce qui lui est soumis tout en laissant passer la partie désirée. Dans ce cas
+            de figure, un filtre est une opération qui restitue une partie de la donnée soumise. Ce
+            type de filtrage est utile pour les applications Web : suppression des données
+            soumises non conformes, élimination des espaces inutiles, etc.
+        </p>
+
+        <p class="para">
+            Cette définition simple d&#039;un filtre peut être étendue pour inclure des
+            transformations généralisées aux données soumises. Une transformation communément
+            requise dans les applications Web consiste à échapper les entités HTML. Ainsi, si un
+            champ de formulaire est automatiquement transmis et contient des données non vérifiées
+            (provenant par exemple d&#039;un navigateur Web), ces données doivent être purgées de leurs
+            entités HTML ou bien contenir uniquement des entités HTML échappées, de manière à se
+            garantir contre des comportements non désirés et les vulnérabilités de sécurité. Afin
+            d&#039;assurer cette opération, les entités HTML qui sont présentes dans les données saisies
+            doivent être soit supprimées soit échappées. Naturellement, l&#039;approche adéquate dépend
+            du contexte. Un filtre de suppression des entités HTML opère dans le contexte défini
+            plus haut : une opération produisant un sous-ensemble à partir d&#039;une donnée
+            soumise. Cependant, un filtre échappant les entités HTML transforme la valeur entrée
+            (par exemple, &quot;<code class="code">&amp;</code>&quot; sera transformé en &quot;<code class="code">&amp;amp;</code>&quot;.
+            Permettre de telles choses est important pour les développeurs Web et &quot;filtrer&quot; dans le
+            contexte d&#039;utilisation de <span class="classname">Zend_Filter</span> consiste à réaliser des
+            transformations sur les données soumises.
+        </p>
+    </div>
+
+    <div class="section" id="zend.filter.introduction.using" name="zend.filter.introduction.using"><div class="info"><h1 class="title">Utilisation basique des filtres</h1></div>
+        
+
+        <p class="para">
+            Avoir cette définition d&#039;un filtre établie fournit la base pour
+            <span class="classname">Zend_Filter_Interface</span>, qui nécessitent une méthode unique nommée
+             <span class="methodname">filter()</span> pour être implémentée par une classe de filtre.
+        </p>
+
+        <p class="para">
+            L&#039;exemple simple ci-dessous démontre l&#039;utilisation d&#039;un filtre sur les caractères
+            esperluette (<code class="code">&amp;</code>, &quot;ampersand&quot; en anglais) et guillemet double
+            (<code class="code">&quot;</code>) : <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$htmlEntities</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Filter_HtmlEntities<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$htmlEntities</span>-&gt;<span style="color: #006600;">filter</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'&amp;'</span><span style="color: #66cc66;">&#41;</span>; <span style="color: #808080; font-style: italic;">// &amp;amp;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$htmlEntities</span>-&gt;<span style="color: #006600;">filter</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'&quot;'</span><span style="color: #66cc66;">&#41;</span>; <span style="color: #808080; font-style: italic;">// &amp;quot;</span></div></li></ol></div></div></div>
+</p>
+        </div>
+
+        <div class="section" id="zend.filter.introduction.static" name="zend.filter.introduction.static"><div class="info"><h1 class="title">Utilisation de la méthode statique staticFilter()</h1></div>
+            
+
+        <p class="para">
+            S&#039;il est peu pratique de charger une classe de filtre donnée et créer une instance
+            du filtre, vous pouvez utiliser la méthode statique
+             <span class="methodname">Zend_Filter::get()</span> comme appel alternatif. Le premier argument de
+            cette méthode est une valeur de saisie de données, que vous passeriez à la méthode
+             <span class="methodname">filter()</span>. Le deuxième argument est une chaîne, qui correspond au nom de
+            base de la classe de filtre, relativement dans l&#039;espace de nommage
+            <span class="classname">Zend_Filter</span>. La méthode  <span class="methodname">staticFilter()</span> charge automatiquement
+            la classe, crée une instance et applique la méthode  <span class="methodname">filter()</span> à la donnée
+            saisie. <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> Zend_Filter::<span style="color: #006600;">get</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'&amp;'</span>, <span style="color: #ff0000;">'HtmlEntities'</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+</p>
+
+        <p class="para">
+            Vous pouvez aussi fournir un tableau de paramètres destinés au constructeur de la
+            classe, s&#039;ils sont nécessaires pour votre classe de filtre. <div class="programlisting"><div class="cdata"><pre>
+echo Zend_Filter::filterStatic(&#039;&quot;&#039;,
+                               &#039;HtmlEntities&#039;,
+                               array(&#039;quotestyle&#039; =&gt; ENT_QUOTES));
+</pre></div></div>
+</p>
+
+        <p class="para">
+            L&#039;utilisation statique peut être pratique pour invoquer un filtre ad hoc, mais si
+            vous avez besoin d&#039;exécuter un filtre pour des saisies multiples, il est plus efficace
+            de suivre le premier exemple ci-dessus, créant une instance de l&#039;objet de filtre et
+            appelant sa méthode  <span class="methodname">filter()</span>.
+        </p>
+
+        <p class="para">
+            De plus, la classe <span class="classname">Zend_Filter_Input</span> vous permet
+            d&#039;instancier et d&#039;exécuter des filtres multiples et des classes de validateurs sur
+            demande pour traiter l&#039;ensemble de données saisies. Voir <a href="zend.filter.input.html" class="xref">Zend_Filter_Input</a>.
+        </p>
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.filter.html">Zend_Filter</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.filter.html">Zend_Filter</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.filter.set.html">Classes de filtre standards</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.filter.html">Zend_Filter</a></li>
+  <li class="active"><a href="zend.filter.introduction.html">Introduction</a></li>
+  <li><a href="zend.filter.set.html">Classes de filtre standards</a></li>
+  <li><a href="zend.filter.filter_chains.html">Cha&icirc;nes de filtrage</a></li>
+  <li><a href="zend.filter.writing_filters.html">&Eacute;criture de filtres</a></li>
+  <li><a href="zend.filter.input.html">Zend_Filter_Input</a></li>
+  <li><a href="zend.filter.inflector.html">Zend_Filter_Inflector</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

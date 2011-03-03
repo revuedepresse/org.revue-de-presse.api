@@ -1,0 +1,226 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>D&eacute;clarer les r&egrave;gles Getopt - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.console.getopt.introduction.html">Introduction</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.console.getopt.html">Zend_Console_Getopt</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.console.getopt.fetching.html">Extraire les options et les arguments</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.console.getopt.rules" class="section"><div class="info"><h1 class="title">Déclarer les règles Getopt</h1></div>
+    
+
+    <p class="para">
+        Le constructeur de la classe <span class="classname">Zend_Console_Getopt</span> prend un à trois
+        arguments. Le premier argument déclare quelles options sont supportées par votre
+        application. Cette classe supporte des formes de syntaxe alternatives pour déclarer les
+        options. Voir les sections ci-dessous pour le format et l&#039;utilisation de ces formes de
+        syntaxe.
+    </p>
+
+    <p class="para">
+        Le constructeur prend deux arguments supplémentaires, qui sont facultatifs. Le
+        deuxième argument peut contenir les arguments de la ligne de commande. La valeur par défaut
+        est <var class="varname">$_SERVER[&#039;argv&#039;]</var>.
+    </p>
+
+    <p class="para">
+        Le troisième argument du constructeur peut contenir des options de configuration pour
+        adapter le comportement de <span class="classname">Zend_Console_Getopt</span>. Voir la section
+        <a href="zend.console.getopt.configuration.html#zend.console.getopt.configuration.config" class="link">Ajouter une
+        configuration</a> pour la référence des options disponibles.
+    </p>
+
+    <div class="section" id="zend.console.getopt.rules.short" name="zend.console.getopt.rules.short"><div class="info"><h1 class="title">Déclarer des options avec la syntaxe courte</h1></div>
+        
+
+        <p class="para">
+            <span class="classname">Zend_Console_Getopt</span> supporte une syntaxe compacte semblable à
+            cela employée par <acronym class="acronym">GNU</acronym> Getopt (voir
+            <a href="http://www.gnu.org/software/libc/manual/html_node/Getopt.html" class="link external">&raquo; http://www.gnu.org/software/libc/manual/html_node/Getopt.html</a>).
+            Cette syntaxe supporte seulement des drapeaux courts (1 seul caractère). Dans une
+            chaîne de caractère unique, vous entrez chacune des lettres qui correspondent aux
+            drapeaux supportés par votre application. Une lettre suivie d&#039;un caractère deux points
+            (&quot;<em class="emphasis">:</em>&quot;) indique un drapeau qui exige un paramètre.
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #1 Utiliser la syntaxe courte</b></p></div>
+            
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$opts</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Console_Getopt<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'abp:'</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+        </div>
+
+        <p class="para">
+            L&#039;exemple ci-dessus montre l&#039;utilisation de <span class="classname">Zend_Console_Getopt</span>
+            pour déclarer que des options peuvent être données en tant que &quot;<strong class="command">-a</strong>&quot;,
+            &quot;<strong class="command">-b</strong>&quot; ou &quot;<strong class="command">-p</strong>&quot;. Le dernier drapeau exige un
+            paramètre.
+        </p>
+
+        <p class="para">
+            La syntaxe courte est limitée aux drapeaux courts (1 seul caractère). Les alias, les
+            types des paramètres, et les messages d&#039;aide ne sont pas supportés dans la syntaxe
+            courte.
+        </p>
+    </div>
+
+    <div class="section" id="zend.console.getopt.rules.long" name="zend.console.getopt.rules.long"><div class="info"><h1 class="title">Déclarer des options avec la syntaxe longue</h1></div>
+        
+
+        <p class="para">
+            Une syntaxe différente avec plus de possibilités est également disponible. Cette
+            syntaxe permet d&#039;indiquer des alias pour les drapeaux, les types de paramètres
+            d&#039;option, et aussi des messages d&#039;aide pour décrire l&#039;utilisation à l&#039;utilisateur. Au
+            lieu d&#039;utiliser une chaîne de caractère unique comme pour la syntaxe courte, la syntaxe
+            longue emploie un tableau associatif comme premier argument du constructeur pour
+            déclarer les options.
+        </p>
+
+        <p class="para">
+            La clé de chaque élément du tableau associatif est une chaîne avec un format qui
+            nomme le drapeau, avec tous ses alias, séparés par le symbole &quot;<em class="emphasis">|</em>&quot;.
+            Après la série des alias, si l&#039;option exige un paramètre, il y a un symbole égal
+            (&quot;<em class="emphasis">=</em>&quot;) avec une lettre qui représente le <em class="emphasis">type</em>
+            du paramètre :
+        </p>
+
+        <ul class="itemizedlist">
+            <li class="listitem">
+                <p class="para">
+                    &quot;<em class="emphasis">=s</em>&quot; pour un paramètre de type chaîne de caractère.
+                </p>
+            </li>
+            <li class="listitem">
+                <p class="para">
+                    &quot;<em class="emphasis">=w</em>&quot; pour un paramètre de type mot (une chaîne de caractère
+                    qui ne contient pas d&#039;espace).
+                </p>
+            </li>
+            <li class="listitem">
+                <p class="para">&quot;<em class="emphasis">=i</em>&quot; pour un paramètre de type entier (integer).</p>
+            </li>
+        </ul>
+
+        <p class="para">
+            Si le paramètre est optionnel, on utilise le tiret (&quot;<em class="emphasis">-</em>&quot;) au lieu du
+            symbole égal.
+        </p>
+
+        <p class="para">
+            La valeur de chaque élément dans le tableau associatif est un message d&#039;aide pour
+            décrire à l&#039;utilisateur comment employer votre programme.
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #2 Utiliser la syntaxe longue</b></p></div>
+            
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$opts</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Console_Getopt<span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'abricot|a'</span>&nbsp; =&gt; <span style="color: #ff0000;">'option abricot, sans parametres'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'banane|b=i'</span> =&gt; <span style="color: #ff0000;">'option banane, avec un parametre entier obligatoire'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'pear|p-s'</span>&nbsp; &nbsp;=&gt; <span style="color: #ff0000;">'option pear, avec un parametre chaîne optionel'</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; <span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+        </div>
+
+        <p class="para">
+            Dans l&#039;exemple ci-dessus, il y a trois options. &quot;<strong class="command">--abricot</strong>&quot; et
+            &quot;<strong class="command">-a</strong>&quot; sont des alias l&#039;un pour l&#039;autre et l&#039;option ne prend pas de
+            paramètres. &quot;<strong class="command">--banane</strong>&quot; et &quot;<strong class="command">-b</strong>&quot; sont des alias
+            l&#039;un pour l&#039;autre et l&#039;option prend un paramètre obligatoire de type entier. Enfin,
+            &quot;<strong class="command">--pear</strong>&quot; et &quot;<strong class="command">-p</strong>&quot; sont des alias l&#039;un pour l&#039;autre
+            et l&#039;option prend un paramètre optionnel de type chaîne de caractère.
+        </p>
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.console.getopt.introduction.html">Introduction</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.console.getopt.html">Zend_Console_Getopt</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.console.getopt.fetching.html">Extraire les options et les arguments</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.console.getopt.html">Zend_Console_Getopt</a></li>
+  <li><a href="zend.console.getopt.introduction.html">Introduction</a></li>
+  <li class="active"><a href="zend.console.getopt.rules.html">D&eacute;clarer les r&egrave;gles Getopt</a></li>
+  <li><a href="zend.console.getopt.fetching.html">Extraire les options et les arguments</a></li>
+  <li><a href="zend.console.getopt.configuration.html">Configurer Zend_Console_Getopt</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

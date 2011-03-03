@@ -1,0 +1,178 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Introduction - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.navigation.html">Zend_Navigation</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.navigation.html">Zend_Navigation</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.navigation.pages.html">Pages</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.navigation.introduction" class="section"><div class="info"><h1 class="title">Introduction</h1></div>
+    
+
+    <p class="para">
+        <span class="classname">Zend_Navigation</span> est un composant gérant arbres et menus
+        pour les pages webs. Il permet de créer des menus, des fils, des liens et
+        des cartographies de sites (sitemaps), ou encore toute autre représentation
+        concernant la navigation.
+    </p>
+
+    <div class="section" id="zend.navigation.introduction.concepts" name="zend.navigation.introduction.concepts"><div class="info"><h1 class="title">Pages et Conteneurs</h1></div>
+        
+
+        <p class="para">
+            Deux concepts existent dans <span class="classname">Zend_Navigation</span>:
+        </p>
+
+        <div class="section" id="zend.navigation.introduction.pages" name="zend.navigation.introduction.pages"><div class="info"><h1 class="title">Pages</h1></div>
+            
+            <p class="para">
+                Une page (<span class="classname">Zend_Navigation_Page</span>) dans
+                <span class="classname">Zend_Navigation</span> – dans sa forme la plus
+                simple – est un objet pointant vers une page web. En plus d&#039;un
+                pointeur vers une page web, l&#039;objet page contient d&#039;autres
+                informations utiles à la navigation comme un <code class="code">label</code>,
+                un titre <code class="code">title</code>, etc.
+            </p>
+
+            <p class="para">
+                Pour plus d&#039;informations sur les pages, lisez
+                <a href="zend.navigation.pages.html" class="link">leur section</a>.
+            </p>
+        </div>
+
+        <div class="section" id="zend.navigation.introduction.containers" name="zend.navigation.introduction.containers"><div class="info"><h1 class="title">Conteneurs</h1></div>
+            
+            <p class="para">
+                Un conteneur de navigation
+                (<span class="classname">Zend_Navigation_Container</span>) est une classe
+                contenant des pages. Elle possède des méthodes pour ajouter, supprimer,
+                récupérer et itrérer au travers de pages. Elle implémente les interfaces
+                de la <a href="http://php.net/spl" class="link external">&raquo; SPL</a>
+                <span class="classname">RecursiveIterator</span> et
+                <span class="classname">Countable</span>, et peuvent ainsi être parcourues avec
+                les itérateurs de la SPL tels que
+                <span class="classname">RecursiveIteratorIterator</span>.
+            </p>
+
+            <p class="para">
+                Pour plus d&#039;informations sur les conteneurs, lisez
+                <a href="zend.navigation.containers.html" class="link">leur section</a>.
+            </p>
+
+            <blockquote><p><b class="note">Note</b>: 
+                
+                    <span class="classname">Zend_Navigation_Page</span> étend
+                    <span class="classname">Zend_Navigation_Container</span>, ce qui signifie
+                    qu&#039;une page peut posséder des sous-pages.
+                <br />
+            </p></blockquote>
+        </div>
+    </div>
+
+    <div class="section" id="zend.navigation.introduction.separation" name="zend.navigation.introduction.separation"><div class="info"><h1 class="title">Séparation des données (modèle) et du rendu (vue)</h1></div>
+        
+
+        <p class="para">
+            Les classes dans <span class="classname">Zend_Navigation</span> ne s&#039;occupent
+            pas du rendu visuel, celui-ci est effectué par des aides de vue. Par contre,
+            les pages peuvent contenir des informations utilisées par les aides de vue
+            comme un label (libellé), une classe <acronym class="acronym">CSS</acronym>, un titre,
+            des attributs <code class="code">lastmod</code> et <code class="code">priority</code> pour les
+            sitemaps, etc.
+        </p>
+
+        <p class="para">
+            Pour plus d&#039;informations sur le rendu des éléments, lisez
+            <a href="zend.view.helpers.html#zend.view.helpers.initial.navigation" class="link">leur section</a>.
+        </p>
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.navigation.html">Zend_Navigation</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.navigation.html">Zend_Navigation</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.navigation.pages.html">Pages</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.navigation.html">Zend_Navigation</a></li>
+  <li class="active"><a href="zend.navigation.introduction.html">Introduction</a></li>
+  <li><a href="zend.navigation.pages.html">Pages</a></li>
+  <li><a href="zend.navigation.containers.html">Containers</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

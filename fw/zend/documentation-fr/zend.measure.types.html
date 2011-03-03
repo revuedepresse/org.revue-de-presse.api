@@ -1,0 +1,448 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Types de mesures - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.measure.edit.html">Manipuler des mesures</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.measure.html">Zend_Measure</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.memory.html">Zend_Memory</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.measure.types" class="section"><div class="info"><h1 class="title">Types de mesures</h1></div>
+    
+
+    <p class="para">
+        Tous les types de mesures supportées sont listées ci-dessous, chacun avec une exemple
+        d&#039;utilisation standard pour ce type de mesure.
+    </p>
+
+    <table class="doctable table"><div class="info"><caption><b>Liste des types de mesure</b></caption></div>
+        
+
+        
+            <thead valign="middle">
+                <tr valign="middle">
+                    <th>Type</th>
+                    <th>Classe</th>
+                    <th>Unité standard</th>
+                    <th>Description</th>
+                </tr>
+
+            </thead>
+
+
+            <tbody valign="middle" class="tbody">
+                <tr valign="middle">
+                    <td align="left">Accélération</td>
+                    <td align="left">Zend_Measure_Acceleration</td>
+                    <td align="left">Mètres par seconde carré | <code class="code">m/s²</code></td>
+                    <td align="left"><span class="classname">Zend_Measure_Acceleration</span> couvre le facteur
+                    physique d&#039;accélération.</td>
+                </tr>
+
+
+                <tr valign="middle">
+                    <td align="left">Angle</td>
+                    <td align="left">Zend_Measure_Angle</td>
+                    <td align="left">Radiant | <code class="code">rad</code></td>
+                    <td align="left"><span class="classname">Zend_Measure_Angle</span> couvre les dimensions
+                    angulaires.</td>
+                </tr>
+
+
+                <tr valign="middle">
+                    <td align="left">Superficie</td>
+                    <td align="left">Zend_Measure_Area</td>
+                    <td align="left">Mètres carré | <code class="code">m²</code></td>
+                    <td align="left"><span class="classname">Zend_Measure_Area</span> couvre les
+                    superficies.</td>
+                </tr>
+
+
+                <tr valign="middle">
+                    <td align="left">Binaire</td>
+                    <td align="left">Zend_Measure_Binary</td>
+                    <td align="left">Bit | <code class="code">b</code></td>
+                    <td align="left"><span class="classname">Zend_Measure_Binary</span> couvre les conversions
+                    binaires.</td>
+                </tr>
+
+
+                <tr valign="middle">
+                    <td align="left">Capacité électrique</td>
+                    <td align="left">Zend_Measure_Capacitance</td>
+                    <td align="left">Farad | <code class="code">F</code></td>
+                    <td align="left"><span class="classname">Zend_Measure_Capacitance</span> couvre le facteur
+                    physique de capacité électrique.</td>
+                </tr>
+
+
+                <tr valign="middle">
+                    <td align="left">Volume (de cuisine)</td>
+                    <td align="left">Zend_Measure_Cooking_Volume</td>
+                    <td align="left">Mètre au cube | <code class="code">m³</code></td>
+                    <td align="left"><span class="classname">Zend_Measure_Cooking_Volume</span> couvre les volumes
+                    (principalement pour la cuisine ou les livres de cuisine).</td>
+                </tr>
+
+
+                <tr valign="middle">
+                    <td align="left">Poids (de cuisine)</td>
+                    <td align="left">Zend_Measure_Cooking_Weight</td>
+                    <td align="left">Gramme | <code class="code">g</code></td>
+                    <td align="left"><span class="classname">Zend_Measure_Cooking_Weight</span> couvre les poids
+                    (principalement pour la cuisine ou les livres de cuisine).</td>
+                </tr>
+
+
+                <tr valign="middle">
+                    <td align="left">Courant électrique</td>
+                    <td align="left">Zend_Measure_Current</td>
+                    <td align="left">Ampère | <code class="code">A</code></td>
+                    <td align="left"><span class="classname">Zend_Measure_Current</span> couvre le facteur
+                    physique de courant électrique.</td>
+                </tr>
+
+
+                <tr valign="middle">
+                    <td align="left">Masse volumique (densité)</td>
+                    <td align="left">Zend_Measure_Density</td>
+                    <td align="left">Kilogramme par mètre au cube | <code class="code">kg/m³</code></td>
+                    <td align="left"><span class="classname">Zend_Measure_Density</span> couvre le facteur
+                    physique de la masse volumique (densité).</td>
+                </tr>
+
+
+                <tr valign="middle">
+                    <td align="left">Énergie</td>
+                    <td align="left">Zend_Measure_Energy</td>
+                    <td align="left">Joule | <code class="code">J</code></td>
+                    <td align="left"><span class="classname">Zend_Measure_Energy</span> couvre le facteur physique
+                    de l&#039;énergie.</td>
+                </tr>
+
+
+                <tr valign="middle">
+                    <td align="left">Force</td>
+                    <td align="left">Zend_Measure_Force</td>
+                    <td align="left">Newton | <code class="code">N</code></td>
+                    <td align="left"><span class="classname">Zend_Measure_Force</span> couvre le facteur physique
+                    de la force.</td>
+                </tr>
+
+
+                <tr valign="middle">
+                    <td align="left">Débit (massique)</td>
+                    <td align="left">Zend_Measure_Flow_Mass</td>
+                    <td align="left">Kilogramme par seconde | <code class="code">kg/s</code></td>
+                    <td align="left"><span class="classname">Zend_Measure_Flow_Mass</span> couvre le facteur
+                    physique de débit massique. Le poids de la masse en écoulement est utilisé
+                    comme point de référence de la classe.</td>
+                </tr>
+
+
+                <tr valign="middle">
+                    <td align="left">Débit (molaire)</td>
+                    <td align="left">Zend_Measure_Flow_Mole</td>
+                    <td align="left">Mole par seconde | <code class="code">mol/s</code></td>
+                    <td align="left"><span class="classname">Zend_Measure_Flow_Mole</span> couvre le facteur
+                    physique de débit massique. La densité de la masse en écoulement est
+                    utilisée comme point de référence de la classe.</td>
+                </tr>
+
+
+                <tr valign="middle">
+                    <td align="left">Débit (volumique)</td>
+                    <td align="left">Zend_Measure_Flow_Volume</td>
+                    <td align="left">Mètres au cube par seconde | <code class="code">m³/s</code></td>
+                    <td align="left"><span class="classname">Zend_Measure_Flow_Volume</span> couvre le facteur
+                    physique de débit massique. Le volume de la masse en écoulement est utilisé
+                    comme point de référence de la classe.</td>
+                </tr>
+
+
+                <tr valign="middle">
+                    <td align="left">Fréquence</td>
+                    <td align="left">Zend_Measure_Frequency</td>
+                    <td align="left">Hertz | <code class="code">Hz</code></td>
+                    <td align="left"><span class="classname">Zend_Measure_Frequency</span> couvre le facteur
+                    physique de fréquence.</td>
+                </tr>
+
+
+                <tr valign="middle">
+                    <td align="left">Éclairement lumineux</td>
+                    <td align="left">Zend_Measure_Illumination</td>
+                    <td align="left">Lux | <code class="code">lx</code></td>
+                    <td align="left"><span class="classname">Zend_Measure_Illumination</span> couvre le facteur
+                    physique de l&#039;éclairement lumineux.</td>
+                </tr>
+
+
+                <tr valign="middle">
+                    <td align="left">Longueur</td>
+                    <td align="left">Zend_Measure_Length</td>
+                    <td align="left">Mètres | <code class="code">m</code></td>
+                    <td align="left"><span class="classname">Zend_Measure_Length</span> couvre le facteur physique
+                    de longueur.</td>
+                </tr>
+
+
+                <tr valign="middle">
+                    <td align="left">Luminosité</td>
+                    <td align="left">Zend_Measure_Lightness</td>
+                    <td align="left">Candela par mètre carré | <code class="code">cd/m²</code></td>
+                    <td align="left"><span class="classname">Zend_Measure_Ligntness</span> couvre le facteur
+                    physique de luminosité.</td>
+                </tr>
+
+
+                <tr valign="middle">
+                    <td align="left">Nombre</td>
+                    <td align="left">Zend_Measure_Number</td>
+                    <td align="left">Décimal | <code class="code">(10)</code></td>
+                    <td align="left"><span class="classname">Zend_Measure_Number</span> permet la conversion entre
+                    les formats numériques.</td>
+                </tr>
+
+
+                <tr valign="middle">
+                    <td align="left">Puissance</td>
+                    <td align="left">Zend_Measure_Power</td>
+                    <td align="left">Watt | <code class="code">W</code></td>
+                    <td align="left"><span class="classname">Zend_Measure_Power</span> couvre le facteur physique
+                    de puissance.</td>
+                </tr>
+
+
+                <tr valign="middle">
+                    <td align="left">Pression</td>
+                    <td align="left">Zend_Measure_Pressure</td>
+                    <td align="left">Newton par mètre carré | <code class="code">N/m²</code></td>
+                    <td align="left"><span class="classname">Zend_Measure_Pressure</span> couvre le facteur
+                    physique de pression.</td>
+                </tr>
+
+
+                <tr valign="middle">
+                    <td align="left">Vitesse</td>
+                    <td align="left">Zend_Measure_Speed</td>
+                    <td align="left">Mètre par seconde | <code class="code">m/s</code></td>
+                    <td align="left"><span class="classname">Zend_Measure_Speed</span> couvre le facteur physique
+                    de vitesse</td>
+                </tr>
+
+
+                <tr valign="middle">
+                    <td align="left">Température</td>
+                    <td align="left">Zend_Measure_Temperature</td>
+                    <td align="left">Kelvin | <code class="code">K</code></td>
+                    <td align="left"><span class="classname">Zend_Measure_Temperature</span> couvre le facteur
+                    physique de température</td>
+                </tr>
+
+
+                <tr valign="middle">
+                    <td align="left">Durée</td>
+                    <td align="left">Zend_Measure_Time</td>
+                    <td align="left">Seconde | <code class="code">s</code></td>
+                    <td align="left"><span class="classname">Zend_Measure_Time</span> couvre le facteur physique
+                    de la durée.</td>
+                </tr>
+
+
+                <tr valign="middle">
+                    <td align="left">Couple</td>
+                    <td align="left">Zend_Measure_Torque</td>
+                    <td align="left">Newton mètre | <code class="code">Nm</code></td>
+                    <td align="left"><span class="classname">Zend_Measure_Torque</span> couvre le facteur physique
+                    du couple</td>
+                </tr>
+
+
+                <tr valign="middle">
+                    <td align="left">Viscosité (dynamique)</td>
+                    <td align="left">Zend_Measure_Viscosity_Dynamic</td>
+                    <td align="left">Kilogramme par mètre seconde | <code class="code">kg/ms</code></td>
+                    <td align="left"><span class="classname">Zend_Measure_Viscosity_Dynamic</span> couvre le
+                    facteur physique de viscosité. La masse du fluide est utilisée comme le
+                    point de référence de la classe.</td>
+                </tr>
+
+
+                <tr valign="middle">
+                    <td align="left">Viscosité (cinématique)</td>
+                    <td align="left">Zend_Measure_Viscosity_Kinematic</td>
+                    <td align="left">Mètres carré par seconde | <code class="code">m²/s</code></td>
+                    <td align="left"><span class="classname">Zend_Measure_Viscosity_Kinematic</span> couvre le
+                    facteur physique de viscosité. La distance parcouru par la masse en
+                    écoulement est utilisée comme le point de référence de la classe.</td>
+                </tr>
+
+
+                <tr valign="middle">
+                    <td align="left">Volume</td>
+                    <td align="left">Zend_Measure_Volume</td>
+                    <td align="left">Mètre au cube | <code class="code">m³</code></td>
+                    <td align="left"><span class="classname">Zend_Measure_Volume</span> couvre le facteur physique
+                    de volume (contenu).</td>
+                </tr>
+
+
+                <tr valign="middle">
+                    <td align="left">Masse</td>
+                    <td align="left">Zend_Measure_Weight</td>
+                    <td align="left">Kilogramme | <code class="code">kg</code></td>
+                    <td align="left"><span class="classname">Zend_Measure_Weight</span> couvre le facteur physique
+                    de masse.</td>
+                </tr>
+
+            </tbody>
+        
+    </table>
+
+
+    <div class="section" id="zend.measure.types.binary" name="zend.measure.types.binary"><div class="info"><h1 class="title">Conseils pour Zend_Measure_Binary</h1></div>
+        
+
+        <p class="para">
+            Quelques conventions binaires populaires, incluent des termes comme le kilo-, le
+            mega-, le giga, etc. dans les langues utilisant implicitement la base 10, tels que 1000
+            ou 10³. Cependant, dans le format binaire des ordinateurs, ces limites doivent être vues
+            comme un facteur de conversion de 1024 au lieu de 1000. Pour exclure des confusions il y
+            a quelques années, la notation BI a été introduite. Au lieu du &quot;kilobyte&quot;, le kibibyte
+            pour le &quot;kilo-binary-byte&quot; devrait être employé.
+        </p>
+
+        <p class="para">
+            Dans la classe BINARY les deux notations peuvent être trouvées, comme
+            <code class="code">KILOBYTE = 1024 - binary computer conversion KIBIBYTE = 1024 - new notation
+            KILO_BINARY_BYTE = 1024 - new</code>, ou la notation, en format long <code class="code">KILOBYTE_SI =
+            1000 - SI notation for kilo (1000)</code>. Les DVDs par exemple sont identifiés par la
+            SI-notation, mais presque tous les disques durs sont marqués dans la numérotation
+            binaire des ordinateurs.
+        </p>
+    </div>
+
+    <div class="section" id="zend.measure.types.decimal" name="zend.measure.types.decimal"><div class="info"><h1 class="title">Conseils pour Zend_Measure_Number</h1></div>
+        
+
+        <p class="para">
+            Le format de nombre le plus connu est le système décimal. De manière
+            additionnelle, cette classe supporte le système octal, le système hexadécimal, le
+            système binaire, le système des chiffres romains et quelques autres systèmes moins
+            populaires. Noter que seulement la partie décimale des nombres est manipulée. Toute
+            partie fractionnelle sera effacée.
+        </p>
+    </div>
+
+    <div class="section" id="zend.measure.types.roman" name="zend.measure.types.roman"><div class="info"><h1 class="title">Chiffres romains</h1></div>
+        
+
+        <p class="para">
+            Les chiffres romains plus grands que 4000 sont supportés. <a href="http://fr.wikipedia.org/wiki/Num%C3%A9ration_romaine#Extensions_classiques" class="link external">&raquo; Ces
+            nombres sont écrits avec une barre au dessus</a>. Comme cette barre ne peut pas être
+            représentée sur l&#039;ordinateur, il faut utiliser un tiret bas en début de chaîne.
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$valeur_grande</span> = <span style="color: #ff0000;">'_X'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$locale</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Locale<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'en'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$unite</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Measure_Number<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$valeur_grande</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Zend_Measure_Number::<span style="color: #006600;">ROMAN</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #0000ff;">$locale</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// convertir en système décimal</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$unite</span>-&gt;<span style="color: #006600;">convertTo</span><span style="color: #66cc66;">&#40;</span>Zend_Measure_Number::<span style="color: #006600;">DECIMAL</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// affiche 10000</span></div></li></ol></div></div></div>
+
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.measure.edit.html">Manipuler des mesures</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.measure.html">Zend_Measure</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.memory.html">Zend_Memory</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.measure.html">Zend_Measure</a></li>
+  <li><a href="zend.measure.introduction.html">Introduction</a></li>
+  <li><a href="zend.measure.creation.html">Cr&eacute;ation d'une mesure</a></li>
+  <li><a href="zend.measure.output.html">R&eacute;cup&eacute;rer des mesures</a></li>
+  <li><a href="zend.measure.edit.html">Manipuler des mesures</a></li>
+  <li class="active"><a href="zend.measure.types.html">Types de mesures</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

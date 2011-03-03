@@ -1,0 +1,424 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Notation des pluriels pour Translation - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.translate.additional.html">Additional features for translation</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.translate.html">Zend_Translate</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.uri.html">Zend_Uri</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.translate.plurals" class="section"><div class="info"><h1 class="title">Notation des pluriels pour Translation</h1></div>
+    
+
+    <p class="para">
+        Depuis Zend Framework 1.9, <span class="classname">Zend_Translate</span> gère les pluriels.
+        Comme presque tous les langages utilisent des pluriels, la traduction doit gérer celà.
+    </p>
+
+    <p class="para">
+        Qu&#039;est ce qu&#039;un pluriel? En général, les pluriels sont des mots qui prennent en compte une contenance
+        numérique. Cependant chaque langue a sa propre définition du pluriel. En anglais, par exemple, un seul pluriel
+        par mot existe donc par exemple &quot;car&quot; donnera &quot;cars&quot; au pluriel. D&#039;autres langages comme le russe
+        proposent plusieurs pluriels et plusieurs règles de pluriels.
+    </p>
+
+    <p class="para">
+        Lorsque vous voulez utiliser les pluriels avec <span class="classname">Zend_Translate</span> vous n&#039;avez pas besoin
+        de savoir comment ceux-ci sont définis, seul le traducteur sait. Vous devez juste savoir la langue dans laquelle
+        traduire.
+    </p>
+
+    <p class="para">
+        Il existe 2 manières d&#039;utiliser les pluriels. La traditionnelle qui vous fait utiliser une méthode,
+        la moderne, qui permet d&#039;utiliser la même méthode pour plusieurs pluriels.
+    </p>
+
+    <div class="section" id="zend.translate.plurals.traditional" name="zend.translate.plurals.traditional"><div class="info"><h1 class="title">Méthode traditionnelle</h1></div>
+        
+
+        <p class="para">
+            Les personnes connaissant gettext vont reconnaitre cette méthodologie. Il existe une seule méthode
+             <span class="methodname">plural()</span> qui rend le pluriel.
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #1 Exemple avec la méthode traditionnelle</b></p></div>
+            
+
+            <div class="example-contents"><p>
+                La méthode  <span class="methodname">plural()</span> accepte 4 paramètres. Le premier est le messageId au singulier, le second
+                est le messageId du pluriel, le troisième est le nombre ou la quantité.
+            </p></div>
+
+            <div class="example-contents"><p>
+                La quantité va être utilisée pour détecter le pluriel à retourner. Le 4ème paramètre optionnel peut être utilisé pour
+                spécifier une locale concernant la traduction.
+            </p></div>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$translate</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Translate<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'gettext'</span>, <span style="color: #ff0000;">'/path/to/german.mo'</span>, <span style="color: #ff0000;">'de'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$translate</span>-&gt;<span style="color: #006600;">plural</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'Car'</span>, <span style="color: #ff0000;">'Cars'</span>, <span style="color: #0000ff;">$number</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+        </div>
+    </div>
+
+    <div class="section" id="zend.translate.plurals.modern" name="zend.translate.plurals.modern"><div class="info"><h1 class="title">Méthode moderne de traduction du pluriel</h1></div>
+        
+
+        <p class="para">
+            Utilisez la méthode  <span class="methodname">translate()</span> pour la traduction des pluriels.
+        </p>
+
+        <p class="para">
+            Pour utiliser la traduction de pluriels avec  <span class="methodname">translate()</span>, passez un tableau
+            comme messageId plutôt qu&#039;une chaine. Ce tableau doit contenir le messageId original, celui du pluriel,
+            une quantité et optionnellement une locale.
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #2 Exemple de la méthode moderne de traduction du pluriel</b></p></div>
+            
+
+            <div class="example-contents"><p>
+                Pour traduire un pluriel avec la méthode moderne, agissez comme suit:
+            </p></div>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$translate</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Translate<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'gettext'</span>, <span style="color: #ff0000;">'/path/to/german.mo'</span>, <span style="color: #ff0000;">'de'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$translate</span>-&gt;<span style="color: #006600;">translate</span><span style="color: #66cc66;">&#40;</span><a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'Car'</span>, <span style="color: #ff0000;">'Cars'</span>, <span style="color: #0000ff;">$number</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+        </div>
+
+        <p class="para">
+            Avec cette méthode, vous pouvez utiliser n&#039;importe quelle langue comme messageId original.
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #3 Exemple de la méthode moderne de traduction du pluriel utilisant un langage source différent</b></p></div>
+            
+
+            <div class="example-contents"><p>
+                Imaginons que nous voulions utiliser du russe et que le messageId est russe et non anglais.
+            </p></div>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$translate</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Translate<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'gettext'</span>, <span style="color: #ff0000;">'/path/to/german.mo'</span>, <span style="color: #ff0000;">'de'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$translate</span>-&gt;<span style="color: #006600;">translate</span><span style="color: #66cc66;">&#40;</span><a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'Car'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'Cars first plural'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'Cars second plural'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$number</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'ru'</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+        </div>
+
+        <p class="para">
+            Comme vous le voyez, vous pouvez donner plus d&#039;un pluriel, mais il faut alors spécifier la langue pour que
+            <span class="classname">Zend_Translate</span> puisse trouver les règles de pluriel appropriées.
+        </p>
+
+        <p class="para">
+            Si vous omettez la langue, l&#039;anglais sera utilisé et tout pluriel superflu sera ignoré.
+        </p>
+    </div>
+
+    <div class="section" id="zend.translate.plurals.source" name="zend.translate.plurals.source"><div class="info"><h1 class="title">Fichiers sources de pluriels</h1></div>
+        
+
+        <p class="para">
+            Toutes les sources ne supportent pas les pluriels. Voyez la liste ci-après pour les détails:
+        </p>
+
+        <table class="doctable table"><div class="info"><caption><b>Support du pluriel</b></caption></div>
+            
+            
+                <thead valign="middle">
+                    <tr valign="middle">
+                        <th>Adaptateur</th>
+                        <th>Pluriels supportés</th>
+                    </tr>
+
+                </thead>
+
+                <tbody valign="middle" class="tbody">
+                    <tr valign="middle">
+                        <td align="left">Array</td>
+                        <td align="left"><em class="emphasis">oui</em></td>
+                    </tr>
+
+                    <tr valign="middle">
+                        <td align="left">Csv</td>
+                        <td align="left"><em class="emphasis">oui</em></td>
+                    </tr>
+
+                    <tr valign="middle">
+                        <td align="left">Gettext</td>
+                        <td align="left"><em class="emphasis">oui</em></td>
+                    </tr>
+
+                    <tr valign="middle">
+                        <td align="left">Ini</td>
+                        <td align="left"><em class="emphasis">non</em></td>
+                    </tr>
+
+                    <tr valign="middle">
+                        <td align="left">Qt</td>
+                        <td align="left"><em class="emphasis">non</em></td>
+                    </tr>
+
+                    <tr valign="middle">
+                        <td align="left">Tbx</td>
+                        <td align="left"><em class="emphasis">non</em></td>
+                    </tr>
+
+                    <tr valign="middle">
+                        <td align="left">Tmx</td>
+                        <td align="left"><em class="emphasis">non</em></td>
+                    </tr>
+
+                    <tr valign="middle">
+                        <td align="left">Xliff</td>
+                        <td align="left"><em class="emphasis">non</em></td>
+                    </tr>
+
+                    <tr valign="middle">
+                        <td align="left">XmlTm</td>
+                        <td align="left"><em class="emphasis">non</em></td>
+                    </tr>
+
+                </tbody>
+            
+        </table>
+
+
+        <p class="para">
+            Lisez la suite pour des exemples.
+        </p>
+
+        <div class="section" id="zend.translate.plurals.source.array" name="zend.translate.plurals.source.array"><div class="info"><h1 class="title">Source tableau contenant des pluriels</h1></div>
+            
+
+            <p class="para">
+                Un tableau de traduction contenant des pluriels devrait ressembler à ceci:
+            </p>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'plural_0'</span> =&gt; <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'plural_0 (ru)'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'plural_1 (ru)'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'plural_2 (ru)'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'plural_3 (ru)'</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#41;</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'plural_1'</span> =&gt; <span style="color: #ff0000;">''</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+            <p class="para">
+                Dans cet exemple, <code class="code">plural_0</code> et <code class="code">plural_1</code> sont les définitions du pluriel
+                depuis le code source. Le tableau à l&#039;index <code class="code">plural_0</code> possède les pluriels traduits.
+                Regardez l&#039;exemple suivant avec du vrai contenu et une traduction anglais - allemand.
+            </p>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'Car'</span> =&gt; <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'Auto'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'Autos'</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#41;</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'Cars'</span> =&gt; <span style="color: #ff0000;">''</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+            <p class="para">
+                Si votre langue supporte plusieurs pluriels, ajoutez les simplement dans le tableau à la
+                suite du premier pluriel.
+            </p>
+        </div>
+
+        <div class="section" id="zend.translate.plurals.source.csv" name="zend.translate.plurals.source.csv"><div class="info"><h1 class="title">Csv et pluriels</h1></div>
+            
+
+            <p class="para">
+                Un fichier csv gérant des pluriels ressemble à ceci:
+            </p>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #ff0000;">&quot;plural_0&quot;</span>;<span style="color: #ff0000;">&quot;plural_0 (ru)&quot;</span>;<span style="color: #ff0000;">&quot;plural_1 (ru)&quot;</span>;<span style="color: #ff0000;">&quot;plural_2 (ru)&quot;</span>;<span style="color: #ff0000;">&quot;plural_3 (ru)&quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #ff0000;">&quot;plural_1&quot;</span>;</div></li></ol></div></div></div>
+
+
+            <p class="para">
+                Toutes les traductions des pluriels doivent être ajoutées après le premier pluriel et
+                tout les pluriels suivants doivent être ajoutés après, mais sans traduction.
+                Notez que le délimiteur est nécessaire pour les pluriels vides.
+            </p>
+        </div>
+
+        <div class="section" id="zend.translate.plurals.source.gettext" name="zend.translate.plurals.source.gettext"><div class="info"><h1 class="title">Gettext et pluriels</h1></div>
+            
+
+            <p class="para">
+                Gettext supporte nativement les pluriels, les fichiers
+                <var class="filename">*.mo</var> contiennent tout ce qui est nécessaire.
+            </p>
+
+            <blockquote><p><b class="note">Note</b>: 
+                
+                    Notez que gettext ne gère pas les langues à plusieurs pluriels, utilisez
+                    un autre adaptateur dans ce cas là.
+                <br />
+            </p></blockquote>
+        </div>
+    </div>
+
+    <div class="section" id="zend.translate.plurals.customrules" name="zend.translate.plurals.customrules"><div class="info"><h1 class="title">Custom plural rules</h1></div>
+        
+
+        <p class="para">
+            In rare cases it could be useful to be able to define own plural rules. See chinese for
+            example. This language defines two plural rules. Per default it does not use plurals.
+            But in rare cases it uses a rule like <em class="emphasis">(number == 1) ? 0 : 1</em>.
+        </p>
+
+        <p class="para">
+            Also when you want to use a language which has no known plural rules, and would want to
+            define your own rules.
+        </p>
+
+        <p class="para">
+            This can be done by using  <span class="methodname">Zend_Translate_Plural::setRule()</span>.
+            The method expects two parameters which must be given. A rule, which is simply a
+            callback to a self defined method. And a locale for which the rule will be used.
+        </p>
+
+        <p class="para">
+            Your rule could look like this:
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> MyRule<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$number</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #b1b100;">return</span> <span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$number</span> == <span style="color: #cc66cc;">10</span><span style="color: #66cc66;">&#41;</span> ? <span style="color: #cc66cc;">0</span> : <span style="color: #cc66cc;">1</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+
+
+        <p class="para">
+            As you see, your rule must accept one parameter. It is the number which you will use to
+            return which plural the translation has to use. In our example we defined that when we
+            get a &#039;10&#039; the plural definition 0 has to be used, in all other cases we&#039;re using 1.
+        </p>
+
+        <p class="para">
+            Your rules can be as simple or as complicated as you want. You must only return an
+            integer value. The plural definition 0 stands for singular translation, and 1 stands for
+            the first plural rule.
+        </p>
+
+        <p class="para">
+            To activate your rule, and to link it to the wished locale, you have to call it like
+            this:
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">Zend_Translate_Plural::<span style="color: #006600;">setPlural</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'MyPlural'</span>, <span style="color: #ff0000;">'zh'</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <p class="para">
+            Now we linked our plural definition to the chinese language.
+        </p>
+
+        <p class="para">
+            You can define one plural rule for every language. But you should be aware that you set
+            the plural rules before you are doing translations.
+        </p>
+
+        <blockquote><p><b class="note">Note</b>: <span class="info"><b>Define custom plurals only when needed</b><br /></span>
+            
+
+            
+                <span class="classname">Zend_Translate</span> defines plurals for most known languages.
+                You should not define own plurals when you are not in need. The default rules work
+                most of time.
+            <br />
+        </p></blockquote>
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.translate.additional.html">Additional features for translation</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.translate.html">Zend_Translate</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.uri.html">Zend_Uri</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.translate.html">Zend_Translate</a></li>
+  <li><a href="zend.translate.introduction.html">Introduction</a></li>
+  <li><a href="zend.translate.adapter.html">Adaptateurs pour Zend_Translate</a></li>
+  <li><a href="zend.translate.using.html">Utiliser les adaptateurs de traduction</a></li>
+  <li><a href="zend.translate.sourcecreation.html">Creating source files</a></li>
+  <li><a href="zend.translate.additional.html">Additional features for translation</a></li>
+  <li class="active"><a href="zend.translate.plurals.html">Notation des pluriels pour Translation</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,324 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Conventions de nommage - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="coding-standard.php-file-formatting.html">Formatage des fichiers PHP</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="coding-standard.html">Convention de codage PHP de Zend Framework</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="coding-standard.coding-style.html">Style de codage</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="coding-standard.naming-conventions" class="section"><div class="info"><h1 class="title">Conventions de nommage</h1></div>
+        
+
+        <div class="section" id="coding-standard.naming-conventions.classes" name="coding-standard.naming-conventions.classes"><div class="info"><h1 class="title">Classes</h1></div>
+            
+
+            <p class="para">
+                Zend Framework emploie une convention de nommage des classes où les noms des
+                classes mènent directement dans les répertoires dans lesquels elles sont stockées.
+                Le répertoire racine de Zend Framework est le répertoire &quot;Zend/&quot;, tandis que le
+                répertoire racine de la librairie extras de Zend Framework est &quot;ZendX/&quot;. Toutes les
+                classes sont stockées de façon hiérarchique sous ces dossiers racines.
+            </p>
+
+            <p class="para">
+                Les noms de classes ne peuvent contenir que des caractères alphanumériques.
+                Les nombres sont autorisés, mais déconseillés. Les tirets bas (&quot;_&quot;) ne sont
+                autorisés que pour être utilisés comme séparateur de chemin ; le nom de fichier
+                &quot;Zend/Db/Table.php&quot; doit mener à la classe appelée &quot;Zend_Db_Table&quot;.
+            </p>
+
+            <p class="para">
+                Si un nom de classe comprend plus d&#039;un mot, la première lettre de chaque
+                nouveau mot doit être mis en majuscule. La mise en majuscule de lettres successives
+                n&#039;est pas autorisée, c&#039;est-à-dire qu&#039;une classe &quot;Zend_PDF&quot; est interdit alors que
+                &quot;Zend_Pdf&quot; est autorisé.
+            </p>
+
+            <p class="para">
+                Ces conventions définissent un pseudo mécanisme d&#039;espace de noms pour Zend
+                Framework. Zend Framework adoptera la fonctionnalité des espaces de noms de PHP
+                quand celle-ci sera disponible et qu&#039;il sera possible pour les développeurs de
+                l&#039;utiliser dans leurs applications.
+            </p>
+
+            <p class="para">
+                Regardez les noms de classes dans les librairies standard et extras pour avoir
+                des exemples de cette convention de nommage. <em class="emphasis">IMPORTANT :</em> le
+                code qui opère avec le Framework mais qui n&#039;en fait par partie, c&#039;est-à-dire le code
+                écrit par un utilisateur et pas Zend ou une des entreprises partenaires, ne doivent
+                jamais commencer par &quot;Zend_&quot;.
+            </p>
+        </div>
+
+        <div class="section" id="coding-standard.naming-conventions.abstracts" name="coding-standard.naming-conventions.abstracts"><div class="info"><h1 class="title">Abstract Classes</h1></div>
+            
+
+            <p class="para">
+                In general, abstract classes follow the same conventions as <a href="coding-standard.naming-conventions.html#coding-standard.naming-conventions.classes" class="link">classes</a>,
+                with one additional rule: abstract class names must end in the term, &quot;Abstract&quot;,
+                and that term must not be preceded by an underscore. As an example,
+                <span class="classname">Zend_Controller_Plugin_Abstract</span> is considered an
+                invalid name, but <span class="classname">Zend_Controller_PluginAbstract</span> or
+                <span class="classname">Zend_Controller_Plugin_PluginAbstract</span> would be valid
+                names.
+            </p>
+
+            <blockquote><p><b class="note">Note</b>: 
+                
+                    This naming convention is new with version 1.9.0 of Zend Framework. Classes
+                    that pre-date that version may not follow this rule, but will be renamed in
+                    the future in order to comply.
+                <br />
+            </p></blockquote>
+        </div>
+
+        <div class="section" id="coding-standard.naming-conventions.interfaces" name="coding-standard.naming-conventions.interfaces"><div class="info"><h1 class="title">Interfaces</h1></div>
+            
+
+            <p class="para">
+                In general, interfaces follow the same conventions as <a href="coding-standard.naming-conventions.html#coding-standard.naming-conventions.classes" class="link">classes</a>,
+                with one additional rule: interface names may optionally end in the term,
+                &quot;Interface&quot;, but that term must not be preceded by an underscore. As an example,
+                <span class="classname">Zend_Controller_Plugin_Interface</span> is considered an
+                invalid name, but <span class="classname">Zend_Controller_PluginInterface</span> or
+                <span class="classname">Zend_Controller_Plugin_PluginInterface</span> would be valid
+                names.
+            </p>
+
+            <p class="para">
+                While this rule is not required, it is strongly recommended, as it provides a
+                good visual cue to developers as to which files contain interfaces rather than
+                classes.
+            </p>
+
+            <blockquote><p><b class="note">Note</b>: 
+                
+                    This naming convention is new with version 1.9.0 of Zend Framework. Classes
+                    that pre-date that version may not follow this rule, but will be renamed in
+                    the future in order to comply.
+                <br />
+            </p></blockquote>
+        </div>
+
+        <div class="section" id="coding-standard.naming-conventions.filenames" name="coding-standard.naming-conventions.filenames"><div class="info"><h1 class="title">Noms de fichiers</h1></div>
+            
+
+            <p class="para">
+                Pour tous les autres fichiers, seuls des caractères alphanumériques, tirets
+                bas et tirets demi-cadratin (&quot;-&quot;) sont autorisés. Les espaces et les caractères
+                spéciaux sont interdits.
+            </p>
+
+            <p class="para">
+                Tout fichier contenant du code PHP doit se terminer par l&#039;extension &quot;.php&quot;.
+                Ces exemples montrent des noms de fichiers acceptables pour contenir les noms de
+                classes issus des exemples ci-dessus : <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">Zend/Db.php</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">Zend/Controller/Front.php</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">Zend/View/Helper/FormRadio.php</div></li></ol></div></div></div>
+
+                Les noms de fichiers doivent correspondre aux noms des classes décris ci-dessus.
+            </p>
+        </div>
+
+        <div class="section" id="coding-standard.naming-conventions.functions-and-methods" name="coding-standard.naming-conventions.functions-and-methods"><div class="info"><h1 class="title">Fonctions et méthodes</h1></div>
+            
+
+            <p class="para">
+                Les noms de fonctions ne peuvent contenir que des caractères alphanumériques.
+                Les tirets bas (&quot;_&quot;) ne sont pas permis. Les nombres sont autorisés mais
+                déconseillés.
+            </p>
+
+            <p class="para">
+                Les noms de fonctions doivent toujours commencer avec une lettre en minuscule.
+                Quand un nom de fonction est composé de plus d&#039;un seul mot, la première lettre de
+                chaque mot doit être mise en majuscule. C&#039;est ce que l&#039;on appelle communément la
+                &quot;notationCamel&quot;.
+            </p>
+
+            <p class="para">
+                La clarté est conseillée. Le nom des fonctions devrait être aussi explicite
+                que possible, c&#039;est un gage de compréhension du code.
+            </p>
+
+            <p class="para">
+                Voici des exemples de noms acceptables pour des fonctions : <div class="programlisting"><div class="cdata"><pre>
+filterInput()
+
+getElementById()
+
+widgetFactory()
+</pre></div></div>
+
+            </p>
+
+            <p class="para">
+                Pour la programmation orientée objet, les accesseurs aux objets doivent
+                toujours être préfixés par soit &quot;get&quot; soit &quot;set&quot;. Lorsque vous utilisez des motifs
+                de conception, comme le Singleton ou la Fabrique, le nom de la méthode doit contenir
+                le nom du motif pour permettre une reconnaissance plus simple et plus rapide du
+                motif.
+            </p>
+
+            <p class="para">
+                Pour des méthodes d&#039;objet qui sont déclarées avec la construction &quot;private&quot; ou
+                &quot;protected&quot;, le premier caractère du nom variable doit être un tiret bas simple
+                (&quot;_&quot;). C&#039;est la seule utilisation autorisé d&#039;un tiret bas dans un nom de méthode.
+                Les méthodes déclarées &quot;public&quot; ne devraient jamais commencer par un tiret
+                bas.
+            </p>
+
+            <p class="para">
+                Les fonctions à portée globale (&quot;les fonctions flottantes&quot;) sont autorisées
+                mais déconseillées. Il est recommandé de mettre ces fonctions dans des classes
+                statiques.
+            </p>
+        </div>
+
+        <div class="section" id="coding-standard.naming-conventions.variables" name="coding-standard.naming-conventions.variables"><div class="info"><h1 class="title">Variables</h1></div>
+            
+
+            <p class="para">
+                Les noms de variables ne peuvent contenir que des caractères alphanumériques.
+                Les tirets bas ne sont pas permis. Les nombres sont autorisés mais
+                déconseillés.
+            </p>
+
+            <p class="para">
+                Pour les variables membres de classe qui sont déclarées comme &quot;private&quot; ou
+                &quot;protected&quot;, le premier caractère du nom de la variable doit être un tiret bas
+                simple (&quot;_&quot;). C&#039;est la seule utilisation autorisé d&#039;un tiret bas dans un nom de
+                variable. Les variables membres &quot;public&quot; ne devraient jamais commencer par un tiret
+                bas.
+            </p>
+
+            <p class="para">
+                Tout comme les noms de fonction (cf la section 3.3 ci-dessus), les noms de
+                variables doivent toujours commencer par un caractère en minuscule et suivre la
+                convention de capitalisation de la &quot;notationCamel&quot;.
+            </p>
+
+            <p class="para">
+                La clarté est conseillée. Les variables devraient toujours être aussi claires
+                que pratiques. Des noms de variables comme &quot;$i&quot; et &quot;$n&quot; sont déconseillé pour tout
+                autre usage que les petites boucles. Si une boucle contient plus de 20 lignes de
+                code, les variables pour les indices doivent avoir des noms descriptifs.
+            </p>
+        </div>
+
+        <div class="section" id="coding-standard.naming-conventions.constants" name="coding-standard.naming-conventions.constants"><div class="info"><h1 class="title">Constantes</h1></div>
+            
+
+            <p class="para">
+                Les constantes peuvent contenir des caractères alphanumériques et des tirets
+                bas. Les nombres sont autorisés.
+            </p>
+
+            <p class="para">
+                Les constantes doivent toujours être en majuscule, cependant les mots pouvant
+                les composer doivent être séparés par des tiret-bats (&quot;_&quot;).
+            </p>
+
+            <p class="para">
+                Par exemple, <code class="code">EMBED_SUPPRESS_EMBED_EXCEPTION</code> est permis mais
+                <code class="code">EMBED_SUPPRESSEMBEDEXCEPTION</code> ne l&#039;est pas.
+            </p>
+
+            <p class="para">
+                Les constantes doivent toujours être définies comme des membres d&#039;une classe,
+                en utilisant la construction &quot;const&quot;. Définir des constantes globales avec &quot;define&quot;
+                est permis mais déconseillé.
+            </p>
+        </div>
+    </div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="coding-standard.php-file-formatting.html">Formatage des fichiers PHP</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="coding-standard.html">Convention de codage PHP de Zend Framework</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="coding-standard.coding-style.html">Style de codage</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="coding-standard.html">Convention de codage PHP de Zend Framework</a></li>
+  <li><a href="coding-standard.overview.html">Vue d'ensemble</a></li>
+  <li><a href="coding-standard.php-file-formatting.html">Formatage des fichiers PHP</a></li>
+  <li class="active"><a href="coding-standard.naming-conventions.html">Conventions de nommage</a></li>
+  <li><a href="coding-standard.coding-style.html">Style de codage</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

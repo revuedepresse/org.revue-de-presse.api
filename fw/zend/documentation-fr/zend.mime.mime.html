@@ -1,0 +1,266 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Zend_Mime - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.mime.html">Zend_Mime</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.mime.html">Zend_Mime</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.mime.message.html">Zend_Mime_Message</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.mime.mime" class="section"><div class="info"><h1 class="title">Zend_Mime</h1></div>
+    
+
+    <div class="section" id="zend.mime.mime.introduction" name="zend.mime.mime.introduction"><div class="info"><h1 class="title">Introduction</h1></div>
+        
+
+        <p class="para">
+            <span class="classname">Zend_Mime</span> est une classe de support pour gérer les messages
+            <acronym class="acronym">MIME</acronym> en plusieurs parties. Elle est utilisé par <a href="zend.mail.html" class="link"><span class="classname">Zend_Mail</span></a> et <a href="zend.mime.message.html" class="link"><span class="classname">Zend_Mime_Message</span></a>, est
+            peut-être utilisée dans l&#039;application qui nécessite un support <acronym class="acronym">MIME</acronym>.
+        </p>
+    </div>
+
+    <div class="section" id="zend.mime.mime.static" name="zend.mime.mime.static"><div class="info"><h1 class="title">Méthodes statiques et constantes</h1></div>
+        
+
+        <p class="para">
+            <span class="classname">Zend_Mime</span> fournit un jeu simple de méthodes statiques pour
+            fonctionner avec <acronym class="acronym">MIME</acronym> : <ul class="itemizedlist">
+                    <li class="listitem">
+                    <p class="para">
+                         <span class="methodname">Zend_Mime::isPrintable()</span>: retourne
+                        <b><tt>TRUE</tt></b> si la chaine données contient des caractères non
+                        imprimables. <b><tt>FALSE</tt></b> dans les autres cas.
+                    </p>
+                </li>
+
+                <li class="listitem">
+                     <p class="para">
+                         <span class="methodname">Zend_Mime::encode()</span>: encode
+                        une chaîne en utilisant l&#039;encodage spécifié.
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                         <span class="methodname">Zend_Mime::encodeBase64()encodeBase64()</span>: encode
+                        une chaîne en utilisant base64.
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                         <span class="methodname">Zend_Mime::encodeQuotedPrintable()</span>: encode une
+                        chaîne avec le mécanisme quoted-printable.
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                         <span class="methodname">Zend_Mime::encodeBase64Header()</span>: encode
+                        une chaîne en utilisant base64 pour les entêtes émail.
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                         <span class="methodname">Zend_Mime::encodeQuotedPrintableHeader()</span>: ncode une
+                        chaîne avec le mécanisme quoted-printable pour les entêtes émail.
+                    </p>
+                </li>
+            </ul>
+            </p>
+
+        <p class="para">
+            <span class="classname">Zend_Mime</span> définit un jeu de constantes communément utilisé
+            avec des messages <acronym class="acronym">MIME</acronym> : <ul class="itemizedlist">
+                    <li class="listitem">
+                    <p class="para">
+                        <span class="classname">Zend_Mime::TYPE_OCTETSTREAM</span>:
+                        &quot;application/octet-stream&quot;
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para"><span class="classname">Zend_Mime::TYPE_TEXT</span>: &quot;text/plain&quot;</p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para"><span class="classname">Zend_Mime::TYPE_HTML</span>: &quot;text/html&quot;</p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para"><span class="classname">Zend_Mime::ENCODING_7BIT</span>: &quot;7bit&quot;</p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para"><span class="classname">Zend_Mime::ENCODING_8BIT</span>: &quot;8bit&quot;</p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        <span class="classname">Zend_Mime::ENCODING_QUOTEDPRINTABLE</span>:
+                        &quot;quoted-printable&quot;
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para"><span class="classname">Zend_Mime::ENCODING_BASE64</span>: &quot;base64&quot;</p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        <span class="classname">Zend_Mime::DISPOSITION_ATTACHMENT</span>:
+                        &quot;attachment&quot;
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para"><span class="classname">Zend_Mime::DISPOSITION_INLINE</span>: &quot;inline&quot;</p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        <b><tt>Zend_Mime::MULTIPART_ALTERNATIVE</tt></b>:
+                        &#039;multipart/alternative&#039;
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        <b><tt>Zend_Mime::MULTIPART_MIXED</tt></b>: &#039;multipart/mixed&#039;
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        <b><tt>Zend_Mime::MULTIPART_RELATED</tt></b>: &#039;multipart/related&#039;
+                    </p>
+                </li>
+            </ul>
+            </p>
+    </div>
+
+    <div class="section" id="zend.mime.mime.instatiation" name="zend.mime.mime.instatiation"><div class="info"><h1 class="title">Instancier Zend_Mime</h1></div>
+        
+
+        <p class="para">
+            Lors de l&#039;instanciation d&#039;un objet <span class="classname">Zend_Mime</span>, une frontière
+            <acronym class="acronym">MIME</acronym> est stockée pour qu&#039;elle soit utilisée pour tous les appels aux méthodes statiques
+            suivant, sur cet objet. Si le constructeur est appelé avec une chaîne en paramètre,
+            cette valeur sera utilisée comme frontière <acronym class="acronym">MIME</acronym>. Sinon, une frontière <acronym class="acronym">MIME</acronym> aléatoire
+            sera générée lors de la construction.
+        </p>
+
+        <p class="para">
+            Un objet <span class="classname">Zend_Mime</span> contient les méthodes suivantes :
+            <ul class="itemizedlist">
+                    <li class="listitem">
+                        <p class="para"> <span class="methodname">boundary()</span>: retourne la frontière <acronym class="acronym">MIME</acronym>.</p>
+                    </li>
+
+                    <li class="listitem">
+                    <p class="para">
+                         <span class="methodname">boundaryLine()</span>: retourne la ligne complète de la
+                        frontière <acronym class="acronym">MIME</acronym>.
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                         <span class="methodname">mimeEnd()</span>: retourne la fin de la frontière <acronym class="acronym">MIME</acronym>
+                        complète.
+                    </p>
+                </li>
+                </ul>
+            </p>
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.mime.html">Zend_Mime</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.mime.html">Zend_Mime</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.mime.message.html">Zend_Mime_Message</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.mime.html">Zend_Mime</a></li>
+  <li class="active"><a href="zend.mime.mime.html">Zend_Mime</a></li>
+  <li><a href="zend.mime.message.html">Zend_Mime_Message</a></li>
+  <li><a href="zend.mime.part.html">Zend_Mime_Part</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

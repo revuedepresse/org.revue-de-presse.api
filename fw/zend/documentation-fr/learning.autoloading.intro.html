@@ -1,0 +1,130 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Introduction - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="learning.autoloading.html">Autoloading in Zend Framework</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="learning.autoloading.html">Autoloading in Zend Framework</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="learning.autoloading.design.html">Architecture et buts</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="learning.autoloading.intro" class="section"><div class="info"><h1 class="title">Introduction</h1></div>
+    
+
+    <p class="para">
+        L&#039;auto-chargement est un mécanisme qui élimine les inclusions de dépendances manuelles
+        au sein du code <acronym class="acronym">PHP</acronym>. Le <a href="http://php.net/autoload" class="link external">&raquo; manuel sur
+        l&#039;autoload en PHP</a>précise qu&#039;une fois qu&#039;un autoloader a été défini, &quot;il est
+        appelé automatiquement dans le cas où l&#039;on tente d&#039;utiliser une classe ou une interface
+        qui n&#039;a pas encore été définie&quot;
+    </p>
+
+    <p class="para">
+        En utilisant l&#039;auto-chargement, vous n&#039;avez pas besoin de vous inquiéter
+        <em class="emphasis">du lieu</em> où la classe existe au sein du projet. Avec des autoloaders
+        bien définis, la résolution du fichier contenant la classe utilisée sera effectuée de
+        manière transparente.
+    </p>
+
+    <p class="para">
+        Aussi, l&#039;autoloader chargeant la classe uniquement lorsque celle-ci est strictement nécessaire,
+        ceci peut avoir des effets très positifs sur les performances globales -- particulièrement
+        si vous prenez soin de supprimer tous les appels à  <span class="methodname">require_once()</span>
+        avant votre déploiement.
+    </p>
+
+    <p class="para">
+        Zend Framework encourage l&#039;utilisation de l&#039;auto-chargement et propose différents outils pour
+        charger le code des librairies comme celui de l&#039;application. Ce tutoriel couvre ces outils
+        et la manière de les utiliser efficacement.
+    </p>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="learning.autoloading.html">Autoloading in Zend Framework</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="learning.autoloading.html">Autoloading in Zend Framework</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="learning.autoloading.design.html">Architecture et buts</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="learning.html">Learning Zend Framework</a></li>
+  <li class="header up"><a href="learning.autoloading.html">Autoloading in Zend Framework</a></li>
+  <li class="active"><a href="learning.autoloading.intro.html">Introduction</a></li>
+  <li><a href="learning.autoloading.design.html">Architecture et buts</a></li>
+  <li><a href="learning.autoloading.usage.html">Utilisation de base de l'autoloader</a></li>
+  <li><a href="learning.autoloading.resources.html">Auto-chargement de resources</a></li>
+  <li><a href="learning.autoloading.conclusion.html">Conclusion</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

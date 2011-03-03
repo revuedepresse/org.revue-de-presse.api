@@ -1,0 +1,791 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Zend_Http_Client - Adaptateurs de connexion - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.http.client.advanced.html">Zend_Http_Client - Utilisation avanc&eacute;e</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.http.html">Zend_Http</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.http.cookies.html">Zend_Http_Cookie and Zend_Http_CookieJar</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.http.client.adapters" class="section"><div class="info"><h1 class="title">Zend_Http_Client - Adaptateurs de connexion</h1></div>
+    
+
+    <div class="section" id="zend.http.client.adapters.overview" name="zend.http.client.adapters.overview"><div class="info"><h1 class="title">Présentation globale</h1></div>
+        
+
+        <p class="para">
+            <span class="classname">Zend_Http_Client</span> accepte des objets adaptateurs. Ces objets
+            ont la responsabilité de soutenir la connexion vers un serveur, à savoir écrire des
+            requêtes et lire des réponses L&#039;adaptateur peut donc être changé, et même écrit ou
+            réécrit pour correspondre à vos besoins, sans avoir l&#039;obligation de toucher à toute la
+            classe dite &quot;client&quot;. Vous vous connectez et manipulez votre connexion toujours de la
+            même manière quelque soit l&#039;adaptateur situé dessous.
+        </p>
+
+        <p class="para">
+            Actuellement, la classe cliente <span class="classname">Zend_Http_Client</span> est
+            fournie avec quatre adaptateurs : <ul class="itemizedlist">
+                    <li class="listitem">
+                        <p class="para"><span class="classname">Zend_Http_Client_Adapter_Socket</span> (défaut)</p>
+                    </li>
+
+                    <li class="listitem">
+                        <p class="para"><span class="classname">Zend_Http_Client_Adapter_Proxy</span></p>
+                    </li>
+
+                    <li class="listitem">
+                        <p class="para"><span class="classname">Zend_Http_Client_Adapter_Curl</span></p>
+                    </li>
+
+                    <li class="listitem">
+                        <p class="para"><span class="classname">Zend_Http_Client_Adapter_Test</span></p>
+                    </li>
+                </ul>
+            </p>
+
+        <p class="para">
+            L&#039;objet Zend_Http_Client se voit spécifié un adaptateur via son constructeur avec
+            le tableau d&#039;options, à l&#039;index &#039;adapter&#039;. Fournissez alors une chaîne représentant la
+            classe d&#039;adaptateur à utiliser (par exemple &#039;Zend_Http_Client_Adapter_Socket&#039;), ou un
+            objet directement (par exemple <code class="code"> new Zend_Http_Client_Adapter_Test</code>). Vous
+            pouvez de même passer un adaptateur plus tard, avec la méthode
+            <span class="classname">Zend_Http_Client-&gt;setConfig()</span>.
+        </p>
+    </div>
+
+    <div class="section" id="zend.http.client.adapters.socket" name="zend.http.client.adapters.socket"><div class="info"><h1 class="title">Adaptateur Socket</h1></div>
+        
+
+        <p class="para">
+            L&#039;adaptateur par défaut est Zend_Http_Client_Adapter_Socket. Il est basé sur les
+            fonctions <acronym class="acronym">PHP</acronym>  <span class="methodname">fsockopen()</span> et soeurs. Il ne nécessite donc aucune extension
+            particulière ni option de compilation de <acronym class="acronym">PHP</acronym>.
+        </p>
+
+        <p class="para">
+            L&#039;adaptateur Socket peut être configuré avec des options, passées par
+            <span class="classname">Zend_Http_Client-&gt;setConfig()</span> ou au constructeur du client.
+            <table class="doctable table"><div class="info"><caption><b>Zend_Http_Client_Adapter_Socket configuration</b></caption></div>
+                    
+
+                    
+                        <thead valign="middle">
+                            <tr valign="middle">
+                                <th>Paramètre</th>
+                                <th>Description</th>
+                                <th>Types attendus</th>
+                                <th>Valeur par défaut</th>
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody valign="middle" class="tbody">
+                            <tr valign="middle">
+                                <td align="left">persistent</td>
+                                <td align="left">Utilise ou non les connexions <acronym class="acronym">TCP</acronym> persistantes</td>
+                                <td align="left">booléen</td>
+                                <td align="left">false</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">ssltransport</td>
+                                <td align="left">Couche de transport <acronym class="acronym">SSL</acronym> (&#039;sslv2&#039;, &#039;tls&#039;)</td>
+                                <td align="left">chaîne</td>
+                                <td align="left">ssl</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">sslcert</td>
+                                <td align="left">Chemin vers le certificat <acronym class="acronym">SSL</acronym> encodé <acronym class="acronym">PEM</acronym></td>
+                                <td align="left">chaîne</td>
+                                <td align="left">null</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">sslpassphrase</td>
+                                <td align="left">Phrase de passe pour le fichier de certificat <acronym class="acronym">SSL</acronym></td>
+                                <td align="left">chaîne</td>
+                                <td align="left">null</td>
+                            </tr>
+
+                        </tbody>
+                    
+                </table>
+ <blockquote><p><b class="note">Note</b>: <span class="info"><b>Connexions <acronym class="acronym">TCP</acronym> persistantes</b><br /></span>
+                    
+
+                
+                    L&#039;utilisation de connexions <acronym class="acronym">TCP</acronym> persistantes peut potentiellement
+                    accélérer vos requêtes <acronym class="acronym">HTTP</acronym> mais n&#039;a, dans la plupart des cas, qu&#039;un petit effet
+                    positif et peut surcharger le serveur <acronym class="acronym">HTTP</acronym> auquel vous êtes connecté.
+                <br />
+
+                
+                    Il est recommandé d&#039;utiliser les connexions <acronym class="acronym">TCP</acronym> persistantes seulement si
+                    vous vous connectez au même serveur très fréquemment, et que vous êtes sûr que
+                    le serveur est capable de gérer un nombre élevé de connections concurrentes.
+                    Dans tous les cas vous êtes encouragés à tester l&#039;effet des connections
+                    persistantes à la fois sur l&#039;accélération du client et sur la charge du serveur
+                    avant d&#039;activer cette option.
+                <br />
+
+                
+                    De plus, quand vous utilisez des connexions persistantes, il est
+                    recommandé d&#039;activer l&#039;option &quot;Keep-Alive&quot; décrite dans <a href="zend.http.client.html#zend.http.client.configuration" class="xref">Les param&egrave;tres de configuration</a>, sinon les connexions persistantes
+                    n&#039;auront que peu ou pas d&#039;effet.
+                <br />
+            </p></blockquote> <blockquote><p><b class="note">Note</b>: <span class="info"><b>HTTPS SSL Paramètres de flux</b><br /></span>
+                
+
+                
+                    <code class="code">ssltransport, sslcert</code> and <code class="code">sslpassphrase</code> sont
+                    seulement appropriées lors de l&#039;utilisation d&#039;HTTPS.
+                <br />
+
+                
+                    Bien que les réglages par défaut du mode <acronym class="acronym">SSL</acronym> fonctionneront pour la
+                    plupart des applications, vous pourrez avoir besoin de les changer si le
+                    serveur, auquel vous vous connectez, requière un paramétrage particulier du
+                    client. Dans ce cas, vous devriez lire les sections sur la couche de transport
+                    <acronym class="acronym">SSL</acronym> et ses options à cette <a href="http://www.php.net/manual/en/transports.php#transports.inet" class="link external">&raquo; adresse</a>.
+                <br />
+                </p></blockquote>
+            </p>
+
+        <div class="example"><div class="info"><p><b>Example #1 Changer la couche de transport HTTPS</b></p></div>
+            
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Définit des paramètres de configuration</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$config</span> = <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'adapter'</span>&nbsp; &nbsp; &nbsp; =&gt; <span style="color: #ff0000;">'Zend_Http_Client_Adapter_Socket'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'ssltransport'</span> =&gt; <span style="color: #ff0000;">'tls'</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Instantie un objet client</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$client</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Http_Client<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'https://www.example.com'</span>, <span style="color: #0000ff;">$config</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Cette requête sera envoyée vers une connexion sécurisée TLS</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$response</span> = <span style="color: #0000ff;">$client</span>-&gt;<span style="color: #006600;">request</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+        </div>
+
+        <p class="para">
+            Le résultat ci-dessus sera similaire à l&#039;ouverture d&#039;une connexion <acronym class="acronym">TCP</acronym> avec la
+            commande <acronym class="acronym">PHP</acronym> suivante :
+        </p>
+
+        <p class="para"> <span class="methodname">fsockopen(&#039;tls://www.example.com&#039;, 443)</span></p>
+
+        <div class="section" id="zend.http.client.adapters.socket.streamcontext" name="zend.http.client.adapters.socket.streamcontext"><div class="info"><h1 class="title">Customizing and accessing the Socket adapter stream context</h1></div>
+            
+            <p class="para">
+                Starting from Zend Framework 1.9, <span class="classname">Zend_Http_Client_Adapter_Socket</span>
+                provides direct access to the underlying <a href="http://php.net/manual/en/stream.contexts.php" class="link external">&raquo; stream context</a>
+                used to connect to the remote server. This allows the user to pass
+                specific options and parameters to the <acronym class="acronym">TCP</acronym> stream, and to the <acronym class="acronym">SSL</acronym> wrapper in
+                case of <acronym class="acronym">HTTPS</acronym> connections.
+            </p>
+
+            <p class="para">
+                You can access the stream context using the following methods of <span class="classname">Zend_Http_Client_Adapter_Socket</span>:
+                <ul class="itemizedlist">
+                    <li class="listitem">
+                        <p class="para">
+                            <b class="firstterm"> <span class="methodname">setStreamContext($context)</span></b>
+                            Sets the stream context to be used by the adapter. Can accept either
+                            a stream context resource created using the
+                            <a href="http://php.net/manual/en/function.stream-context-create.php" class="link external">&raquo;  <span class="methodname">stream_context_create()</span></a>
+                            <acronym class="acronym">PHP</acronym> function, or an array of stream context options, in the same format provided to this function.
+                            Providing an array will create a new stream context using these options, and set it.
+                        </p>
+                    </li>
+                    <li class="listitem">
+                        <p class="para">
+                            <b class="firstterm"> <span class="methodname">getStreamContext()</span></b>
+                            Get the stream context of the adapter. If no stream context was set,
+                            will create a default stream context and return it. You can then set
+                            or get the value of different context options using regular <acronym class="acronym">PHP</acronym> stream
+                            context functions.
+                        </p>
+                    </li>
+                </ul>
+            </p>
+            <div class="example"><div class="info"><p><b>Example #2 Setting stream context options for the Socket adapter</b></p></div>
+            
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Array of options</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$options</span> = <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'socket'</span> =&gt; <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// Bind local socket side to a specific interface</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'bindto'</span> =&gt; <span style="color: #ff0000;">'10.1.2.3:50505'</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#41;</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'ssl'</span> =&gt; <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// Verify server side certificate,</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// do not accept invalid or self-signed SSL certificates</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'verify_peer'</span> =&gt; <span style="color: #000000; font-weight: bold;">true</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'allow_self_signed'</span> =&gt; <span style="color: #000000; font-weight: bold;">false</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// Capture the peer's certificate</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'capture_peer_cert'</span> =&gt; <span style="color: #000000; font-weight: bold;">true</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Create an adapter object and attach it to the HTTP client</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$adapter</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Http_Client_Adapter_Socket<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$client</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Http_Client<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$client</span>-&gt;<span style="color: #006600;">setAdapter</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$adapter</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Method 1: pass the options array to setStreamContext()</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$adapter</span>-&gt;<span style="color: #006600;">setStreamContext</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$options</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Method 2: create a stream context and pass it to setStreamContext()</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$context</span> = <a href="http://www.php.net/stream_context_create"><span style="color: #000066;">stream_context_create</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$options</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$adapter</span>-&gt;<span style="color: #006600;">setStreamContext</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$context</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Method 3: get the default stream context and set the options on it</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$context</span> = <span style="color: #0000ff;">$adapter</span>-&gt;<span style="color: #006600;">getStreamContext</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/stream_context_set_option"><span style="color: #000066;">stream_context_set_option</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$context</span>, <span style="color: #0000ff;">$options</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Now, preform the request</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$response</span> = <span style="color: #0000ff;">$client</span>-&gt;<span style="color: #006600;">request</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// If everything went well, you can now access the context again</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$opts</span> = <a href="http://www.php.net/stream_context_get_options"><span style="color: #000066;">stream_context_get_options</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$adapter</span>-&gt;<span style="color: #006600;">getStreamContext</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$opts</span><span style="color: #66cc66;">&#91;</span><span style="color: #ff0000;">'ssl'</span><span style="color: #66cc66;">&#93;</span><span style="color: #66cc66;">&#91;</span><span style="color: #ff0000;">'peer_certificate'</span><span style="color: #66cc66;">&#93;</span>;</div></li></ol></div></div></div>
+
+        </div>
+
+        <blockquote><p><b class="note">Note</b>: 
+            
+                Note that you must set any stream context options before using the adapter
+                to preform actual requests. If no context is set before preforming <acronym class="acronym">HTTP</acronym> requests
+                with the Socket adapter, a default stream context will be created. This context
+                resource could be accessed after preforming any requests using the
+                 <span class="methodname">getStreamContext()</span> method.
+            <br />
+        </p></blockquote>
+        </div>
+    </div>
+
+    <div class="section" id="zend.http.client.adapters.proxy" name="zend.http.client.adapters.proxy"><div class="info"><h1 class="title">Adaptateur Proxy</h1></div>
+        
+
+        <p class="para">
+            L&#039;adaptateur Zend_Http_Client_Adapter_Proxy est identique à celui par défaut,
+            Socket, sauf que Proxy se connectera au serveur via un serveur Proxy (mandataire). Cette
+            utilisation peut être rencontrée pour des raisons de performances ou de sécurité.
+        </p>
+
+        <p class="para">
+            En utilisant l&#039;adaptateur Proxy, quelques paramètres de configuration seront
+            nécessaires en plus du paramètre &#039;adapter&#039; : <table class="doctable table"><div class="info"><caption><b>Zend_Http_Client paramètres de configuration</b></caption></div>
+                    
+
+                    
+                        <thead valign="middle">
+                            <tr valign="middle">
+                                <th>Paramètre</th>
+                                <th>Description</th>
+                                <th>Valeurs attendues</th>
+                                <th>Valeur par défaut</th>
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody valign="middle" class="tbody">
+                            <tr valign="middle">
+                                <td align="left">proxy_host</td>
+                                <td align="left">Adresse du serveur Proxy</td>
+                                <td align="left">chaîne</td>
+                                <td align="left">&#039;proxy.myhost.com&#039; ou &#039;10.1.2.3&#039;</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">proxy_port</td>
+                                <td align="left">Port du serveur Proxy</td>
+                                <td align="left">entier</td>
+                                <td align="left">8080 (défaut) ou 81</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">proxy_user</td>
+                                <td align="left">nom d&#039;utilisateur pour le Proxy, si requis</td>
+                                <td align="left">chaîne</td>
+                                <td align="left">&#039;shahar&#039; ou &#039;&#039; pour aucun (défaut)</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">proxy_pass</td>
+                                <td align="left">Mot de passe du Proxy, si requis</td>
+                                <td align="left">chaîne</td>
+                                <td align="left">&#039;secret&#039; ou &#039;&#039; pour aucun (défaut)</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">proxy_auth</td>
+                                <td align="left">Type d&#039;authentification <acronym class="acronym">HTTP</acronym> du Proxy</td>
+                                <td align="left">chaîne</td>
+                                <td align="left">Zend_Http_Client::AUTH_BASIC (défaut)</td>
+                            </tr>
+
+                        </tbody>
+                    
+                </table>
+
+            </p>
+
+        <p class="para">
+            <code class="code">proxy_host</code> devrait toujours être fourni. Si ça n&#039;est pas le cas,
+            alors le client retournera sur une connexion Socket par défaut. <code class="code">proxy_port</code>
+            est par défaut à &quot;8080&quot;.
+        </p>
+
+        <p class="para">
+            <code class="code">proxy_user</code> et <code class="code">proxy_pass</code> ne sont requis que si le
+            serveur Proxy demande une authentification. Si vous remplissez ces options, alors un
+            champ d&#039;en-tête <acronym class="acronym">HTTP</acronym> &quot;Proxy-Authentication&quot; sera ajouté à vos requêtes, via votre
+            client.
+        </p>
+
+        <p class="para">
+            <code class="code">proxy_auth</code> définit le type d&#039;authentification à utiliser, si le
+            serveur Proxy demande une authentification. Actuellement, seule la méthode &quot;basic&quot;
+            (<span class="classname">Zend_Http_Client::AUTH_BASIC</span>) est supportée.
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #3 Utiliser Zend_Http_Client derrière un serveur Proxy</b></p></div>
+            
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Paramètres de configuration</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$config</span> = <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'adapter'</span>&nbsp; &nbsp; =&gt; <span style="color: #ff0000;">'Zend_Http_Client_Adapter_Proxy'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'proxy_host'</span> =&gt; <span style="color: #ff0000;">'proxy.int.zend.com'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'proxy_port'</span> =&gt; <span style="color: #cc66cc;">8000</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'proxy_user'</span> =&gt; <span style="color: #ff0000;">'shahar.e'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'proxy_pass'</span> =&gt; <span style="color: #ff0000;">'bananashaped'</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Crée l'objet client</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$client</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Http_Client<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'http://www.example.com'</span>, <span style="color: #0000ff;">$config</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// utilisez l'objet client ici ...</span></div></li></ol></div></div></div>
+
+        </div>
+
+        <p class="para">
+            Comme déjà dit, si proxy_host n&#039;est pas rempli ou défini en tant que chaîne vide,
+            alors le client utilisera l&#039;adaptateur Socket par défaut. Ceci est utile si le proxy est
+            utilisé optionnellement, ou par intermittence.
+        </p>
+
+        <blockquote><p><b class="note">Note</b>: 
+            
+                Since the proxy adapter inherits from <span class="classname">Zend_Http_Client_Adapter_Socket</span>,
+                you can use the stream context access method (see <a href="zend.http.client.adapters.html#zend.http.client.adapters.socket.streamcontext" class="xref">Customizing and accessing the Socket adapter stream context</a>)
+                to set stream context options on Proxy connections as demonstrated above.
+            <br />
+        </p></blockquote>
+    </div>
+
+    <div class="section" id="zend.http.client.adapters.curl" name="zend.http.client.adapters.curl"><div class="info"><h1 class="title">The cURL Adapter</h1></div>
+        
+        <p class="para">
+            cURL is a standard <acronym class="acronym">HTTP</acronym> client library that is distributed with many
+            operating systems and can be used in <acronym class="acronym">PHP</acronym> via the cURL extension. It
+            offers functionality for many special cases which can occur for a <acronym class="acronym">HTTP</acronym>
+            client and make it a perfect choice for a <acronym class="acronym">HTTP</acronym> adapter. It supports
+            secure connections, proxy, all sorts of authentication mechanisms
+            and shines in applications that move large files around between servers.
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #4 Setting cURL options</b></p></div>
+            
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$config</span> = <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'adapter'</span>&nbsp; &nbsp;=&gt; <span style="color: #ff0000;">'Zend_Http_Client_Adapter_Curl'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'curloptions'</span> =&gt; <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span>CURLOPT_FOLLOWLOCATION =&gt; <span style="color: #000000; font-weight: bold;">true</span><span style="color: #66cc66;">&#41;</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$client</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Http_Client<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$uri</span>, <span style="color: #0000ff;">$config</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+        </div>
+
+        <p class="para">
+            By default the cURL adapter is configured to behave exactly like
+            the Socket Adapter and it also accepts the same configuration parameters
+            as the Socket and Proxy adapters. You can also change the cURL options by either specifying
+            the &#039;curloptions&#039; key in the constructor of the adapter or by calling
+             <span class="methodname">setCurlOption($name, $value)</span>. The <var class="varname">$name</var> key
+            corresponds to the CURL_* constants of the cURL extension. You can
+            get access to the Curl handle by calling <code class="code">$adapter-&gt;getHandle();</code>
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #5 Transfering Files by Handle</b></p></div>
+            
+
+            <div class="example-contents"><p>
+                You can use cURL to transfer very large files over <acronym class="acronym">HTTP</acronym> by filehandle.
+            </p></div>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$putFileSize</span>&nbsp; &nbsp;= <a href="http://www.php.net/filesize"><span style="color: #000066;">filesize</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">&quot;filepath&quot;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$putFileHandle</span> = <a href="http://www.php.net/fopen"><span style="color: #000066;">fopen</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">&quot;filepath&quot;</span>, <span style="color: #ff0000;">&quot;r&quot;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$adapter</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Http_Client_Adapter_Curl<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$client</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Http_Client<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$client</span>-&gt;<span style="color: #006600;">setAdapter</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$adapter</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$adapter</span>-&gt;<span style="color: #006600;">setConfig</span><span style="color: #66cc66;">&#40;</span><a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'curloptions'</span> =&gt; <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; CURLOPT_INFILE =&gt; <span style="color: #0000ff;">$putFileHandle</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; CURLOPT_INFILESIZE =&gt; <span style="color: #0000ff;">$putFileSize</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$client</span>-&gt;<span style="color: #006600;">request</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">&quot;PUT&quot;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+        </div>
+    </div>
+
+    <div class="section" id="zend.http.client.adapters.test" name="zend.http.client.adapters.test"><div class="info"><h1 class="title">Adaptateur Test</h1></div>
+        
+
+        <p class="para">
+            Il est quelque fois difficile de tester une application qui a besoin d&#039;une
+            connexion <acronym class="acronym">HTTP</acronym>. Par exemple, une application qui est en charge de lire un flux <acronym class="acronym">RSS</acronym> aura
+            besoin d&#039;une connexion, qui n&#039;est pas tout le temps disponible.
+        </p>
+
+        <p class="para">
+            C&#039;est pour cette raison que l&#039;adaptateur
+            <span class="classname">Zend_Http_Client_Adapter_Test</span> est présent. Vous pouvez de cette
+            manière écrire vos applications, et lors de la phase de tests, passer votre connexion
+            sur l&#039;adaptateur Test (objet mock).
+        </p>
+
+        <p class="para">
+            La classe <span class="classname">Zend_Http_Client_Adapter_Test</span> possède une méthode
+            supplémentaire,  <span class="methodname">setResponse()</span>. Elle prend en paramètre un objet
+            <span class="classname">Zend_Http_Response</span> ou une chaîne. Une fois cet objet de réponse
+            déterminé, l&#039;adaptateur de Test retournera toujours cette réponse, sans effectuer de
+            réelle requête <acronym class="acronym">HTTP</acronym>.
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #6 Tester avec un objet de réponse HTTP unique</b></p></div>
+            
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Création de l'adatateur et de l'objet client :</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$adapter</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Http_Client_Adapter_Test<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$client</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Http_Client<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'http://www.example.com'</span>, <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'adapter'</span> =&gt; <span style="color: #0000ff;">$adapter</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Passage de l'objet de réponse</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$adapter</span>-&gt;<span style="color: #006600;">setResponse</span><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">&quot;HTTP/1.1 200 OK&quot;</span>&nbsp; &nbsp; &nbsp; &nbsp; . <span style="color: #ff0000;">&quot;<span style="color: #000099; font-weight: bold;">\r</span><span style="color: #000099; font-weight: bold;">\n</span>&quot;</span> .</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">&quot;Content-type: text/xml&quot;</span> . <span style="color: #ff0000;">&quot;<span style="color: #000099; font-weight: bold;">\r</span><span style="color: #000099; font-weight: bold;">\n</span>&quot;</span> .</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">&quot;<span style="color: #000099; font-weight: bold;">\r</span><span style="color: #000099; font-weight: bold;">\n</span>&quot;</span> .</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;'</span> .</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'&lt;rss version=&quot;2.0&quot; xmlns:content=&quot;http://purl.org/rss/1.0/modules/content/&quot;'</span> .</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'&nbsp; &nbsp; &nbsp;xmlns:wfw=&quot;http://wellformedweb.org/CommentAPI/&quot;'</span> .</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'&nbsp; &nbsp; &nbsp;xmlns:dc=&quot;http://purl.org/dc/elements/1.1/&quot;&gt;'</span> .</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'&nbsp; &lt;channel&gt;'</span> .</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'&nbsp; &nbsp; &lt;title&gt;Premature Optimization&lt;/title&gt;'</span> .</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// etc....</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'&lt;/rss&gt;'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$response</span> = <span style="color: #0000ff;">$client</span>-&gt;<span style="color: #006600;">request</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'GET'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// ... continuez à parser $response...</span></div></li></ol></div></div></div>
+
+        </div>
+
+        <p class="para">
+            L&#039;exemple ci dessus montre comment préconfigurer la réponse qui sera retournée
+            lors d&#039;une requête de votre objet client. Ainsi lors des tests, votre application
+            continuera de se comporter normalement, elle aura tout simplement été trompée (mock).
+            Aucune connexion <acronym class="acronym">HTTP</acronym> n&#039;est dans ce cas là nécessaire.
+        </p>
+
+        <p class="para">
+            Quelques fois, plusieurs transactions <acronym class="acronym">HTTP</acronym> peuvent être nécessaires. Une réponse
+            peut demander une redirection, vers une autre. Dans ce cas, utiliser
+             <span class="methodname">setResponse()</span> toute seule n&#039;est pas possible car il ne sera pas possible de
+            spécifier les réponses suivantes, nécessaires alors à l&#039;application.
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #7 Tester avec plusieurs réponses HTTP</b></p></div>
+            
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Création des objets adaptateur, et client</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$adapter</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Http_Client_Adapter_Test<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$client</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Http_Client<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'http://www.example.com'</span>, <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'adapter'</span> =&gt; <span style="color: #0000ff;">$adapter</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Configuration de la première réponse attendue</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$adapter</span>-&gt;<span style="color: #006600;">setResponse</span><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">&quot;HTTP/1.1 302 Found&quot;</span>&nbsp; &nbsp; &nbsp; . <span style="color: #ff0000;">&quot;<span style="color: #000099; font-weight: bold;">\r</span><span style="color: #000099; font-weight: bold;">\n</span>&quot;</span> .</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">&quot;Location: /&quot;</span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;. <span style="color: #ff0000;">&quot;<span style="color: #000099; font-weight: bold;">\r</span><span style="color: #000099; font-weight: bold;">\n</span>&quot;</span> .</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">&quot;Content-Type: text/html&quot;</span> . <span style="color: #ff0000;">&quot;<span style="color: #000099; font-weight: bold;">\r</span><span style="color: #000099; font-weight: bold;">\n</span>&quot;</span> .</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">&quot;<span style="color: #000099; font-weight: bold;">\r</span><span style="color: #000099; font-weight: bold;">\n</span>&quot;</span> .</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'&lt;html&gt;'</span> .</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'&nbsp; &lt;head&gt;&lt;title&gt;Moved&lt;/title&gt;&lt;/head&gt;'</span> .</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'&nbsp; &lt;body&gt;&lt;p&gt;This page has moved.&lt;/p&gt;&lt;/body&gt;'</span> .</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'&lt;/html&gt;'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Configuration des réponses successives</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$adapter</span>-&gt;<span style="color: #006600;">addResponse</span><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">&quot;HTTP/1.1 200 OK&quot;</span>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;. <span style="color: #ff0000;">&quot;<span style="color: #000099; font-weight: bold;">\r</span><span style="color: #000099; font-weight: bold;">\n</span>&quot;</span> .</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">&quot;Content-Type: text/html&quot;</span> . <span style="color: #ff0000;">&quot;<span style="color: #000099; font-weight: bold;">\r</span><span style="color: #000099; font-weight: bold;">\n</span>&quot;</span> .</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">&quot;<span style="color: #000099; font-weight: bold;">\r</span><span style="color: #000099; font-weight: bold;">\n</span>&quot;</span> .</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'&lt;html&gt;'</span> .</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'&nbsp; &lt;head&gt;&lt;title&gt;My Pet Store Home Page&lt;/title&gt;&lt;/head&gt;'</span> .</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'&nbsp; &lt;body&gt;&lt;p&gt;...&lt;/p&gt;&lt;/body&gt;'</span> .</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'&lt;/html&gt;'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// l'objet $client est prêt à être testé</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// son comportement est déja configuré</span></div></li></ol></div></div></div>
+
+        </div>
+
+        <p class="para">
+            La méthode  <span class="methodname">setResponse()</span> détruit toutes les réponses dans le buffer
+            de <span class="classname">Zend_Http_Client_Adapter_Test</span> et définit la première réponse
+            qui sera retournée. La méthode  <span class="methodname">addResponse()</span> définit les réponses
+            suivantes.
+        </p>
+
+        <p class="para">Les réponses seront rejouées dans leur ordre d&#039;ajout.</p>
+
+        <p class="para">
+            Dans l&#039;exemple ci-dessus, l&#039;adaptateur est configuré pour un scénario de test de
+            redirections 302. En fonction de votre application, le suivi d&#039;une redirection peut être
+            ou non désiré. Dans notre exemple, nous nous attendons à ce que la redirection soit
+            suivie et nous configurons notre adaptateur de tests pour ceci. La réponse de
+            redirection originelle (302) est définie avec la méthode  <span class="methodname">setResponse()</span>,
+            quant à la réponse non redirigeante (200) suivante, elles est définie avec la méthode
+             <span class="methodname">addResponse()</span>. Lorsque votre objet client est configuré, vous pouvez
+            l&#039;injecter dans votre application à tester, et voir le résultat et les
+            comportements.
+        </p>
+
+        <p class="para">
+            If you need the adapter to fail on demand you can use
+             <span class="methodname">setNextRequestWillFail($flag)</span>. The method will cause the next
+            call to  <span class="methodname">connect()</span> to throw an
+            <span class="classname">Zend_Http_Client_Adapter_Exception</span> exception. This can be useful
+            when your application caches content from an external site (in case the site goes down)
+            and you want to test this feature.
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #8 Forcing the adapter to fail</b></p></div>
+            
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Instantiate a new adapter and client</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$adapter</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Http_Client_Adapter_Test<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$client</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Http_Client<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'http://www.example.com'</span>, <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'adapter'</span> =&gt; <span style="color: #0000ff;">$adapter</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Force the next request to fail with an exception</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$adapter</span>-&gt;<span style="color: #006600;">nextRequestWillFail</span><span style="color: #66cc66;">&#40;</span><span style="color: #000000; font-weight: bold;">true</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">try <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// This call will result in a Zend_Http_Client_Adapter_Exception</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #0000ff;">$client</span>-&gt;<span style="color: #006600;">request</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span> catch <span style="color: #66cc66;">&#40;</span>Zend_Http_Client_Adapter_Exception <span style="color: #0000ff;">$e</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// ...</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Further requests will work as expected until</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// you call setNextRequestWillFail(true) again</span></div></li></ol></div></div></div>
+
+        </div>
+    </div>
+
+    <div class="section" id="zend.http.client.adapters.extending" name="zend.http.client.adapters.extending"><div class="info"><h1 class="title">Créer vos propres adaptateurs de connexion</h1></div>
+        
+
+        <p class="para">
+            Vous pouvez créer vos propres adaptateurs, si vous avez un besoin spécial à
+            utiliser. Par exemple, des possibilités de cache, ou des sockets persistantes.
+        </p>
+
+        <p class="para">
+            Pour ceci, votre classe d&#039;adaptateur doit implémenter l&#039;interface
+            <span class="classname">Zend_Http_Client_Adapter_Interface</span>. L&#039;exemple suivant montre un
+            squelette de classe. Toutes les méthodes publiques, ici, sont indispensables à la
+            classe, elles sont issues de l&#039;interface :
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #9 Création de votre propre adaptateur de connexion</b></p></div>
+            
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000000; font-weight: bold;">class</span> MyApp_Http_Client_Adapter_BananaProtocol</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; implements Zend_Http_Client_Adapter_Interface</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">/**</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">&nbsp; &nbsp; &nbsp;* Définit le tableau de configuration pour cet adaptateur</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">&nbsp; &nbsp; &nbsp;*</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">&nbsp; &nbsp; &nbsp;* @param array $config</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">&nbsp; &nbsp; &nbsp;*/</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> setConfig<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$config</span> = <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// Ceci change rarement, vous devriez copier l'implémentation</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// présente dans Zend_Http_Client_Adapter_Socket.</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">/**</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">&nbsp; &nbsp; &nbsp;* Connecte à une serveur distant</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">&nbsp; &nbsp; &nbsp;*</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">&nbsp; &nbsp; &nbsp;* @param string&nbsp; $host</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">&nbsp; &nbsp; &nbsp;* @param int&nbsp; &nbsp; &nbsp;$port</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">&nbsp; &nbsp; &nbsp;* @param boolean $secure</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">&nbsp; &nbsp; &nbsp;*/</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> connect<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$host</span>, <span style="color: #0000ff;">$port</span> = <span style="color: #cc66cc;">80</span>, <span style="color: #0000ff;">$secure</span> = <span style="color: #000000; font-weight: bold;">false</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// Etablit la connexion au serveur</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">/**</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">&nbsp; &nbsp; &nbsp;* Envoie une requête au serveur</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">&nbsp; &nbsp; &nbsp;*</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">&nbsp; &nbsp; &nbsp;* @param string&nbsp; &nbsp; &nbsp; &nbsp; $method</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">&nbsp; &nbsp; &nbsp;* @param Zend_Uri_Http $url</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">&nbsp; &nbsp; &nbsp;* @param string&nbsp; &nbsp; &nbsp; &nbsp; $http_ver</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">&nbsp; &nbsp; &nbsp;* @param array&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;$headers</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">&nbsp; &nbsp; &nbsp;* @param string&nbsp; &nbsp; &nbsp; &nbsp; $body</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">&nbsp; &nbsp; &nbsp;* @return string Request as text</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">&nbsp; &nbsp; &nbsp;*/</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> write<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$method</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$url</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$http_ver</span> = <span style="color: #ff0000;">'1.1'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$headers</span> = <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$body</span> = <span style="color: #ff0000;">''</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// Envoie la requête au serveur distant. Cette fonction devrait</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// retourner la requête complète (en-tête et corps) as a string</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">/**</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">&nbsp; &nbsp; &nbsp;* Lit la réponse du serveur</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">&nbsp; &nbsp; &nbsp;*</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">&nbsp; &nbsp; &nbsp;* @return string</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">&nbsp; &nbsp; &nbsp;*/</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> read<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// Lit la réponse du serveur distant, et la retourne sous forme</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// de chaine de caractères</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">/**</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">&nbsp; &nbsp; &nbsp;* Ferme la connexion avec le serveur</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">&nbsp; &nbsp; &nbsp;*</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">&nbsp; &nbsp; &nbsp;*/</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> close<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// Ferme la connexion, appelée en dernière.</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Maintenant, vous pouvez utiliser cet adaptateur :</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$client</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Http_Client<span style="color: #66cc66;">&#40;</span><a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'adapter'</span> =&gt; <span style="color: #ff0000;">'MyApp_Http_Client_Adapter_BananaProtocol'</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+        </div>
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.http.client.advanced.html">Zend_Http_Client - Utilisation avanc&eacute;e</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.http.html">Zend_Http</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.http.cookies.html">Zend_Http_Cookie and Zend_Http_CookieJar</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.http.html">Zend_Http</a></li>
+  <li><a href="zend.http.client.html">Introduction</a></li>
+  <li><a href="zend.http.client.advanced.html">Zend_Http_Client - Utilisation avanc&eacute;e</a></li>
+  <li class="active"><a href="zend.http.client.adapters.html">Zend_Http_Client - Adaptateurs de connexion</a></li>
+  <li><a href="zend.http.cookies.html">Zend_Http_Cookie and Zend_Http_CookieJar</a></li>
+  <li><a href="zend.http.response.html">Zend_Http_Response</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

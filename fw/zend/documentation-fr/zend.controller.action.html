@@ -1,0 +1,709 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Contr&ocirc;leurs d'action - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.controller.dispatcher.html">Le distributeur</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.controller.html">Zend_Controller</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.controller.actionhelpers.html">Aides d'action (Helper)</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.controller.action" class="section"><div class="info"><h1 class="title">Contrôleurs d&#039;action</h1></div>
+    
+
+    <div class="section" id="zend.controller.action.introduction" name="zend.controller.action.introduction"><div class="info"><h1 class="title">Introduction</h1></div>
+        
+
+        <p class="para">
+            <span class="classname">Zend_Controller_Action</span> est une classe abstraite que vous
+            pouvez utiliser avec le contrôleur frontal quand vous construisez un site Web basé sur
+            le modèle de conception Modèle-Vues-Contrôleurs (<acronym class="acronym">MVC</acronym>).
+        </p>
+
+        <p class="para">
+            Pour utiliser <span class="classname">Zend_Controller_Action</span>, vous devez la
+            sous-classer dans vos propres classes de contrôleurs d&#039;action (ou la sous-classer pour
+            créer votre propre classe de base pour vos contrôleurs d&#039;action). L&#039;opération la plus
+            basique est de la sous-classer, et de créer vos méthodes d&#039;action qui correspondent aux
+            différentes actions que vous souhaitez gérer. La gestion du routage et de la
+            distribution des <span class="classname">Zend_Controller</span> va rechercher automatiquement
+            les méthodes dont le nom termine par &#039;Action&#039; dans votre classe et les considérer comme
+            des actions potentiellement valides de votre contrôleur.
+        </p>
+
+        <p class="para">Par exemple, considérons une classe définie comme ceci :</p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000000; font-weight: bold;">class</span> FooController <span style="color: #000000; font-weight: bold;">extends</span> Zend_Controller_Action</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> barAction<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// réalise quelquechose</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> bazAction<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// réalise quelquechose</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+
+
+        <p class="para">
+            La classe <em class="emphasis">FooController</em> (contrôleur <em class="emphasis">foo</em>)
+            définit deux actions, <em class="emphasis">bar</em> et <em class="emphasis">baz</em>.
+        </p>
+
+        <p class="para">
+            Il y a d&#039;autres fonctionnalités qui peuvent être utilisées, comme personnaliser
+            l&#039;initialisation des actions, gérer les actions par défaut quand aucune action ou une
+            action invalide est fournie, avoir la possibilité de hook (&quot;détournement&quot;) en pre et
+            post-dispatch, et une variété de méthodes d&#039;aides (helper). Ce chapitre fournit une vue
+            d&#039;ensemble des fonctionnalités du contrôleur d&#039;action.
+        </p>
+
+        <blockquote><p><b class="note">Note</b>: <span class="info"><b>Comportement par défaut</b><br /></span>
+            
+            
+                Par défaut, le <a href="zend.controller.front.html" class="link">contrôleur frontal</a>
+                active l&#039;aide d&#039;action
+                <a href="zend.controller.actionhelpers.html#zend.controller.actionhelpers.viewrenderer" class="link">ViewRenderer</a>.
+                Cette aide s&#039;occupe de l&#039;injection automatique de l&#039;objet de vue dans vos
+                contrôleurs, ainsi que du rendu de cette vue. Vous pouvez la désactiver au sein de
+                vos contrôleurs par l&#039;une ou l&#039;autre des actions suivantes :
+            <br />
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000000; font-weight: bold;">class</span> FooController <span style="color: #000000; font-weight: bold;">extends</span> Zend_Controller_Action</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> init<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// Locale à ce seul contrôleur ; affecte toutes les actions,</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// si chargée dans l'init :</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$this</span>-&gt;_helper-&gt;<span style="color: #006600;">viewRenderer</span>-&gt;<span style="color: #006600;">setNoRender</span><span style="color: #66cc66;">&#40;</span><span style="color: #000000; font-weight: bold;">true</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// Global :</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$this</span>-&gt;_helper-&gt;<span style="color: #006600;">removeHelper</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'viewRenderer'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// Global aussi, mais doit être réalisé en conjonction avec</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// la version locale pour être propagé dans ce contrôleur:</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; Zend_Controller_Front::<span style="color: #006600;">getInstance</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>-&gt;<span style="color: #006600;">setParam</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'noViewRenderer'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #000000; font-weight: bold;">true</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+
+            
+                Les méthodes  <span class="methodname">initView()</span>,
+                 <span class="methodname">getViewScript()</span>,  <span class="methodname">render()</span>, et
+                 <span class="methodname">renderScript()</span> sont affectées chacune au
+                <em class="emphasis">ViewRenderer</em> à moins que l&#039;aide ne soit pas chargée dans le
+                gestionnaire d&#039;aide (helper broker) ou que l&#039;option
+                <em class="emphasis">noViewRenderer</em> n&#039;ait été réglée.
+            <br />
+            
+                Vous pouvez simplement désactiver le rendu pour une vue individuelle grâce au
+                drapeau <em class="emphasis">noRender</em> du <em class="emphasis">ViewRenderer</em> :
+            <br />
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000000; font-weight: bold;">class</span> FooController <span style="color: #000000; font-weight: bold;">extends</span> Zend_Controller_Action</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> barAction<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// désactive le rendu automatique pour cette action seulement :</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$this</span>-&gt;_helper-&gt;<span style="color: #006600;">viewRenderer</span>-&gt;<span style="color: #006600;">setNoRender</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+
+            
+                Les raisons principales de désactiver le <em class="emphasis">ViewRenderer</em> sont
+                l&#039;absence de besoin d&#039;objets de vues ou si vous n&#039;effectuez pas de rendu via des
+                scripts de vues (par exemple, quand vous utilisez un contrôleur d&#039;action pour
+                servir des protocoles de service Web comme <acronym class="acronym">SOAP</acronym>,
+                <acronym class="acronym">XML-RPC</acronym>, ou <acronym class="acronym">REST</acronym>). Dans la plupart
+                des cas, il n&#039;est pas nécessaire de désactiver globalement le
+                <em class="emphasis">ViewRenderer</em>, seulement de manière sélective pour des
+                contrôleurs ou actions individuels.
+            <br />
+        </p></blockquote>
+    </div>
+
+    <div class="section" id="zend.controller.action.initialization" name="zend.controller.action.initialization"><div class="info"><h1 class="title">Initialisation d&#039;objet</h1></div>
+        
+
+        <p class="para">
+            Même si vous pouvez toujours surcharger le constructeur du contrôleur d&#039;action,
+            nous ne vous le recommandons pas.
+             <span class="methodname">Zend_Controller_Action::__construct()</span> réalise certaines tâches
+            importantes, comme l&#039;enregistrement des objets de requêtes et de réponses, ainsi que
+            l&#039;invocation d&#039;arguments personnalisés fourni par le contrôleur frontal. Si vous devez
+            surcharger le constructeur, n&#039;oubliez pas d&#039;appeler
+             <span class="methodname">parent::__construct($request, $response, $invokeArgs)</span>.
+        </p>
+
+        <p class="para">
+            La manière la plus appropriée de personnaliser l&#039;instanciation est d&#039;utiliser la
+            méthode  <span class="methodname">init()</span>, qui est appelée en dernière tâche de
+             <span class="methodname">__construct()</span>. Par exemple, si vous voulez vous connecter à
+            une base de données à l&#039;instanciation :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000000; font-weight: bold;">class</span> FooController <span style="color: #000000; font-weight: bold;">extends</span> Zend_Controller_Action</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> init<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">db</span> = Zend_Db::<span style="color: #006600;">factory</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'Pdo_Mysql'</span>, <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'host'</span>&nbsp; &nbsp; &nbsp;=&gt; <span style="color: #ff0000;">'myhost'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'username'</span> =&gt; <span style="color: #ff0000;">'user'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'password'</span> =&gt; <span style="color: #ff0000;">'XXXXXXX'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'dbname'</span>&nbsp; &nbsp;=&gt; <span style="color: #ff0000;">'website'</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+
+    </div>
+
+    <div class="section" id="zend.controller.action.prepostdispatch" name="zend.controller.action.prepostdispatch"><div class="info"><h1 class="title">Détournement Pre et Post-Dispatch (Hook)</h1></div>
+        
+
+        <p class="para">
+            <span class="classname">Zend_Controller_Action</span> spécifie deux méthodes qui peuvent être
+            appelées juste avant et juste après une action,  <span class="methodname">preDispatch()</span>
+            et  <span class="methodname">postDispatch()</span>. Celles-ci peuvent être pratiques dans
+            plusieurs cas : vérifier l&#039;authentification et les <acronym class="acronym">ACL</acronym> avant
+            d&#039;exécuter une action (en appelant  <span class="methodname">_forward()</span> dans
+             <span class="methodname">preDispatch()</span>, l&#039;action sera évitée), par
+            exemple, ou en plaçant du contenu généré dans une partie du modèle du site
+            ( <span class="methodname">postDispatch()</span>).
+        </p>
+
+        <blockquote><p><b class="note">Note</b>: <span class="info"><b>Utilisation de init() ou de preDispatch()</b><br /></span>
+            
+
+            
+                Dans la <a href="zend.controller.action.html#zend.controller.action.initialization" class="link">section
+                    précédente</a>, nous avons introduit la méthode
+                 <span class="methodname">init()</span>, et dans celle-ci, la méthode
+                 <span class="methodname">preDispatch()</span>. Quelles sont leurs différences, et quelles
+                actions vont-elles réaliser chacune ?
+            <br />
+
+            
+                La méthode  <span class="methodname">init()</span> a pour but principal d&#039;étendre le
+                constructeur. Typiquement, votre constructeur devrait simplement paramétrer les
+                états des objets, mais pas réaliser d&#039;opérations logiques. Ceci peut inclure
+                l&#039;initialisation des ressources utilisées dans le contrôleur (comme des modèles,
+                des objets de configuration, etc.), ou assigner des valeurs issues du contrôleur
+                frontal, du fichier d&#039;amorçage, ou d&#039;un registre.
+            <br />
+
+            
+                La méthode  <span class="methodname">preDispatch()</span> peut aussi être utilisée pour
+                paramétrer un objet ou un environnement (par exemple, une vue, une aide d&#039;action,
+                etc.), mais son but principal est d&#039;établir des décisions autorisant ou non une
+                action requêtée à être distribuée. Si elle ne l&#039;est pas, vous pouvez alors utiliser
+                 <span class="methodname">_forward()</span> vers une autre action, ou lancer une exception.
+            <br />
+
+            
+                Note: la méthode  <span class="methodname">_forward()</span> s&#039;exécutera pas correctement
+                si elle est appelée depuis  <span class="methodname">init()</span>, ce qui est une
+                formalisation des intentions de deux méthodes.
+            <br />
+        </p></blockquote>
+    </div>
+
+    <div class="section" id="zend.controller.action.accessors" name="zend.controller.action.accessors"><div class="info"><h1 class="title">Accesseurs</h1></div>
+        
+
+        <p class="para">
+            Un certain nombre d&#039;objets et de variables sont enregistrés avec l&#039;objet et chacun
+            possède des méthodes accesseurs.
+        </p>
+
+        <ul class="itemizedlist">
+            <li class="listitem">
+                <p class="para">
+                    <em class="emphasis">Objet Requête</em> :  <span class="methodname">getRequest()</span>
+                    peut être utilisé pour récupérer l&#039;objet de requête utilisé pour appeler
+                    l&#039;action.
+                </p>
+            </li>
+            <li class="listitem">
+                <p class="para">
+                    <em class="emphasis">Objet Réponse</em> :  <span class="methodname">getResponse()</span>
+                    peut être utilisé pour récupérer l&#039;objet de réponse assemblant la réponse
+                    finale. Quelques appels typiques peuvent ressembler à ceci :
+                </p>
+                <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">getResponse</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>-&gt;<span style="color: #006600;">setHeader</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'Content-Type'</span>, <span style="color: #ff0000;">'text/xml'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">getResponse</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>-&gt;<span style="color: #006600;">appendBody</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$content</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+            </li>
+            <li class="listitem">
+                <p class="para">
+                    <em class="emphasis">Arguments d&#039;invocation</em> : le contrôleur frontal peut
+                    transmettre des paramètres au routeur, au distributeur, et au contrôleur
+                    d&#039;action. Pour récupérer individuellement ceux-ci utilisez
+                     <span class="methodname">getInvokeArg($key)</span> ; alternativement, récupérer la
+                    liste entière en utilisant  <span class="methodname">getInvokeArgs()</span>.
+                </p>
+            </li>
+            <li class="listitem">
+                <p class="para">
+                    <em class="emphasis">Paramètres de requêtes</em> : l&#039;objet de requête
+                    rassemble les paramètres de requête, comme les paramètres
+                    <b><tt>_GET</tt></b> ou _<b><tt>_POST</tt></b>, ou les
+                    paramètres utilisateurs spécifiés dans le chemin d&#039;<acronym class="acronym">URL</acronym>.
+                    Pour récupérer ceux-ci utilisez  <span class="methodname">_getParam($key)</span> ou
+                     <span class="methodname">_getAllParams()</span>. Vous pouvez aussi régler ces
+                    paramètres en utilisant  <span class="methodname">_setParam()</span> ;
+                    ceci est pratique quand vous redirigez vers des actions additionnelles.
+                </p>
+                <p class="para">
+                    Pour tester si un paramètre existe ou non (pratique pour les branchements
+                    logiques), utilisez  <span class="methodname">_hasParam($key)</span>.
+                </p>
+                <blockquote><p><b class="note">Note</b>: 
+                    
+                         <span class="methodname">_getParam()</span> peut prendre un second paramètre
+                        optionnel contenant une valeur par défaut à utiliser si le paramètre n&#039;est
+                        pas réglé ou qu&#039;il est vide. Utiliser ceci élimine la nécessité d&#039;appeler
+                         <span class="methodname">_hasParam()</span> avant de récupérer une valeur :
+                    <br />
+                    <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Utilise une valeur par défaut de 1 si id n'est pas réglé</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$id</span> = <span style="color: #0000ff;">$this</span>-&gt;_getParam<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'id'</span>, <span style="color: #cc66cc;">1</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Au lieu de :</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #b1b100;">if</span> <span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$this</span>-&gt;_hasParam<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'id'</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #0000ff;">$id</span> = <span style="color: #0000ff;">$this</span>-&gt;_getParam<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'id'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span> <span style="color: #b1b100;">else</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #0000ff;">$id</span> = <span style="color: #cc66cc;">1</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+
+                </p></blockquote>
+            </li>
+        </ul>
+    </div>
+
+    <div class="section" id="zend.controller.action.viewintegration" name="zend.controller.action.viewintegration"><div class="info"><h1 class="title">Intégration des Vues</h1></div>
+        
+
+        <blockquote><p><b class="note">Note</b>: <span class="info"><b>
+                Par défaut, l&#039;intégration des vues est réalisé via le ViewRenderer
+            </b><br /></span>
+            
+            
+                Le contenu de cette section n&#039;est valable que si vous avez explicitement
+                désactivé le
+                <a href="zend.controller.actionhelpers.html#zend.controller.actionhelpers.viewrenderer" class="link">ViewRenderer</a>.
+                Sinon, vous pouvez passer à la section suivante.
+            <br />
+        </p></blockquote>
+
+        <p class="para">
+            <span class="classname">Zend_Controller_Action</span> fournit un mécanisme rudimentaire
+            et flexible pour l&#039;intégration des vues. Deux méthodes accomplissent ceci,
+             <span class="methodname">initView()</span> et  <span class="methodname">render()</span> ; la
+            première méthode charge la propriété publique <var class="varname">$view</var>, et la dernière
+            effectue le rendu d&#039;une vue basé sur l&#039;action courante demandée dans la requête, en
+            utilisant la hiérarchie des répertoires pour déterminer le chemin du script.
+        </p>
+
+        <div class="section" id="zend.controller.action.viewintegration.initview" name="zend.controller.action.viewintegration.initview"><div class="info"><h1 class="title">Initialisation des Vues</h1></div>
+            
+
+            <p class="para">
+                 <span class="methodname">initView()</span> initialise l&#039;objet Vue.
+                 <span class="methodname">render()</span> appelle  <span class="methodname">initView()</span> dans
+                le but de récupérer l&#039;objet de vue, mais il peut être
+                initialisé à tout moment ; par défaut il remplit la propriété
+                <var class="varname">$view</var> avec un objet <span class="classname">Zend_View</span>, mais toute
+                classe implémentant <span class="classname">Zend_View_Interface</span> peut être utilisée.
+                Si <var class="varname">$view</var> est déjà initialisé, il retourne simplement cette
+                propriété.
+            </p>
+
+            <p class="para">
+                La mise en oeuvre par défaut suppose la structure de répertoire suivante :
+            </p>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">applicationOrModule/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; controllers/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; IndexController.php</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; views/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; scripts/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; index/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; index.phtml</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; helpers/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; filters/</div></li></ol></div></div></div>
+
+
+            <p class="para">
+                En d&#039;autres termes, les scripts de vues sont supposés être dans le
+                sous-répertoire <var class="filename">/views/scripts/</var>, et le sous-répertoire
+                <var class="filename">/views/</var> est censé contenir les fonctionnalités soeurs
+                (aides [helpers], filtres [filters]). En déterminant le script de vue et son
+                chemin, le répertoire <var class="filename">/views/scripts/</var> est utilisé comme
+                chemin de base, avec des dossiers nommés par le nom de contrôleur fournissant
+                ainsi la hiérarchie des scripts de vues.
+            </p>
+
+        </div>
+
+        <div class="section" id="zend.controller.action.viewintegration.render" name="zend.controller.action.viewintegration.render"><div class="info"><h1 class="title">Effectuer le rendu des Vues</h1></div>
+            
+
+            <p class="para"> <span class="methodname">render()</span> a la signature suivante :</p>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">string render<span style="color: #66cc66;">&#40;</span>string <span style="color: #0000ff;">$action</span> = <span style="color: #000000; font-weight: bold;">null</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; string <span style="color: #0000ff;">$name</span> = <span style="color: #000000; font-weight: bold;">null</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; bool <span style="color: #0000ff;">$noController</span> = <span style="color: #000000; font-weight: bold;">false</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+            <p class="para">
+                 <span class="methodname">render()</span> effectue le rendu d&#039;un script de vue. Si aucun
+                argument n&#039;est fourni, la méthode suppose que le script requêté est
+                <var class="filename">[controller]/[action].phtml</var> (où <var class="filename">.phtml</var>
+                est la valeur de la propriété <var class="varname">$viewSuffix</var>). Fournir une valeur
+                pour <var class="varname">$action</var> va effectuer le rendu du script dans le sous-dossier
+                <var class="filename">/[controller]/</var>. Pour surcharger l&#039;utilisation du sous-dossier
+                <var class="filename">/[controller]/</var>, fournissez la valeur <b><tt>TRUE</tt></b>
+                à <var class="varname">$noController</var>. Enfin, les scripts sont rendus dans l&#039;objet
+                réponse ; si vous souhaitez effectuer le rendu dans un
+                <a href="zend.controller.response.html#zend.controller.response.namedsegments" class="link">segment
+                nommé</a>spécifique de l&#039;objet réponse, fournissez une valeur à
+                <var class="varname">$name</var>.
+            </p>
+
+            <blockquote><p><b class="note">Note</b>: 
+                
+                    Puisque le contrôleur et des noms d&#039;action peuvent contenir des caractères
+                    délimiteurs de mot comme &#039;_&#039;, &#039;.&#039; et &#039;-&#039;,  <span class="methodname">render()</span>
+                    normalise ceux-ci à &#039;-&#039; en déterminant le nom du script. En interne, il utilise
+                    le délimiteur de mot et de chemin du istributeur pour faire cette normalisation.
+                    Ainsi, une requête pour <var class="filename">/foo.bar/baz-bat</var> rendra le
+                    script <var class="filename">foo-bar/baz-bat.phtml</var>. Si votre méthode d&#039;action
+                    contient des notationsCamel, veuillez vous souvenir que ceci va résulter avec
+                    des mots séparés par &#039;-&#039; en déterminant le nom de fichier du script de vue.
+                <br />
+            </p></blockquote>
+
+            <p class="para">Quelques exemples :</p>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000000; font-weight: bold;">class</span> MonController <span style="color: #000000; font-weight: bold;">extends</span> Zend_Controller_Action</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> fooAction<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// Effectue le rendu de mon/foo.phtml</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">render</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// Effectue le rendu de mon/bar.phtml</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">render</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'bar'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// Effectue le rendu de baz.phtml</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">render</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'baz'</span>, <span style="color: #000000; font-weight: bold;">null</span>, <span style="color: #000000; font-weight: bold;">true</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// Effectue le rendu de mon/login.phtml vers le segment</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// 'form' de l'objet réponse</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">render</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'login'</span>, <span style="color: #ff0000;">'form'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// Effectue le rendu de site.phtml vers le segment</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// 'page' de l'objet réponse ; sans utiliser</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// le sous-dossier 'mon/'</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">render</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'site'</span>, <span style="color: #ff0000;">'page'</span>, <span style="color: #000000; font-weight: bold;">true</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> bazBatAction<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// Effectue le rendu de mon/baz-bat.phtml</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">render</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+
+        </div>
+    </div>
+
+    <div class="section" id="zend.controller.action.utilmethods" name="zend.controller.action.utilmethods"><div class="info"><h1 class="title">Méthodes utiles</h1></div>
+        
+
+        <p class="para">
+            En plus de l&#039;accesseur et des méthodes d&#039;intégration de vue,
+            <span class="classname">Zend_Controller_Action</span> possède plusieurs méthodes utiles pour
+            exécuter des tâches communes de l&#039;intérieur de vos méthodes d&#039;action (ou de
+            pre- / post-dispatch).
+        </p>
+
+        <ul class="itemizedlist">
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">_forward($action, $controller = null, $module = null, array $params
+                    = null)</span> : exécute une autre action. Si appelé dans
+                     <span class="methodname">preDispatch()</span>, la requête courante est évitée en
+                    faveur de la nouvelle. Sinon, après que l&#039;action courante ait été exécutée,
+                    l&#039;action demandée dans  <span class="methodname">_forward()</span> sera exécutée à
+                    son tour.
+                </p>
+            </li>
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">_redirect($url, array $options = array())</span> :
+                    redirige vers une autre page. Cette méthode prend un <acronym class="acronym">URL</acronym>
+                    et un jeu d&#039;options optionnel. Par défaut, il exécute une redirection de
+                    type <acronym class="acronym">HTTP</acronym> 302.
+                </p>
+                <p class="para">Les options peuvent inclure une ou plusieurs des clés suivantes :</p>
+                <ul class="itemizedlist">
+                    <li class="listitem">
+                        <p class="para">
+                            <em class="emphasis"/> : avec ou sans sortie immédiate. Si
+                            appelée, la méthode fermera proprement toute session ouverte et
+                            réalisera la redirection.
+                        </p>
+                        <p class="para">
+                            Vous pouvez régler cette option de manière globale dans le
+                            contrôleur en utilisant l&#039;accesseur
+                             <span class="methodname">setRedirectExit()</span>.
+                        </p>
+                    </li>
+                    <li class="listitem">
+                        <p class="para">
+                            <em class="emphasis">prependBase</em> : ajoute ou non
+                            l&#039;<acronym class="acronym">URL</acronym> de base enregistré dans l&#039;objet
+                            requête à l&#039;<acronym class="acronym">URL</acronym> produit.
+                        </p>
+                        <p class="para">
+                            Vous pouvez régler cette option de manière globale dans le
+                            contrôleur en utilisant l&#039;accesseur
+                             <span class="methodname">setRedirectPrependBase()</span>.
+                        </p>
+                    </li>
+                    <li class="listitem">
+                        <p class="para">
+                            <em class="emphasis">code</em> : fournit le code <acronym class="acronym">HTTP</acronym>
+                            à utiliser pour la redirection. Par défaut, un <acronym class="acronym">HTTP</acronym>
+                            302 est utilisé ; tout code compris entre 301 et 306 peut être utilisé.
+                        </p>
+                        <p class="para">
+                            Vous pouvez régler cette option de manière globale dans le
+                            contrôleur en utilisant l&#039;accesseur
+                             <span class="methodname">setRedirectCode()</span>.
+                        </p>
+                    </li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+    <div class="section" id="zend.controller.action.subclassing" name="zend.controller.action.subclassing"><div class="info"><h1 class="title">Sous-classer le contrôleur d&#039;action</h1></div>
+        
+
+        <p class="para">
+            Par conception, <span class="classname">Zend_Controller_Action</span> doit être
+            sous-classé pour créer un contrôleur d&#039;action. Au minimum, vous devez définir les
+            méthodes d&#039;action que le contrôleur d&#039;action peut appeler.
+        </p>
+
+        <p class="para">
+            En plus de la création de fonctionnalité utile pour vos applications Web, vous
+            pouvez aussi constater que vous répétez souvent la même installation ou les mêmes
+            méthodes utilitaires dans vos contrôleurs divers ; s&#039;il en est ainsi, créer une classe
+            de contrôleur de base commune qui étend <span class="classname">Zend_Controller_Action</span>
+            peut résoudre une telle redondance.
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #1 Comment gérer des actions non-existantes</b></p></div>
+            
+
+            <div class="example-contents"><p>
+                Si une requête vers un contrôleur est faite en incluant une méthode d&#039;action
+                indéfinie,  <span class="methodname">Zend_Controller_Action::__call()</span> sera invoqué.
+                 <span class="methodname">__call()</span> est, bien sûr, la méthode magique de
+                <acronym class="acronym">PHP</acronym> pour la surcharge de méthode.
+            </p></div>
+
+            <div class="example-contents"><p>
+                Par défaut, cette méthode lève une
+                <span class="classname">Zend_Controller_Action_Exception</span> indiquant que la méthode
+                requêtée n&#039;a pas été trouvée dans le contrôleur. Si la méthode requêtée se termine
+                par &quot;Action&quot;, on considère qu&#039;une action était requêté et qu&#039;elle n&#039;existe pas ; un
+                telle erreur entraîne une exception ayant un code 404. Tout autre appel de méthode
+                entraîne une exception ayant un code 500. Ceci vous permet de facilement
+                différencier une page inconnue et une erreur de l&#039;application dans votre
+                gestionnaire d&#039;erreur.
+            </p></div>
+
+            <div class="example-contents"><p>
+                Vous pouvez surcharger cette fonctionnalité si vous souhaitez exécuter
+                d&#039;autres opérations. Par exemple, si vous souhaitez afficher un message d&#039;erreur,
+                vous pouvez écrire quelque chose comme ceci :
+            </p></div>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000000; font-weight: bold;">class</span> MonController <span style="color: #000000; font-weight: bold;">extends</span> Zend_Controller_Action</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> __call<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$method</span>, <span style="color: #0000ff;">$args</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">if</span> <span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'Action'</span> == <a href="http://www.php.net/substr"><span style="color: #000066;">substr</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$method</span>, <span style="color: #cc66cc;">-6</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// Si une méthode d'action n'est pas trouvée,</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// rendre le script d'erreur</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">return</span> <span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">render</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'error'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// pour toute autre méthode, levée d'une exception</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; throw <span style="color: #000000; font-weight: bold;">new</span> Exception<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'Méthode invalide &quot;'</span> . <span style="color: #0000ff;">$method</span> . <span style="color: #ff0000;">'&quot; appelée'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #cc66cc;">500</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+
+
+            <div class="example-contents"><p>
+                Une autre possibilité est de rediriger vers une page de contrôleur par
+                défaut :
+            </p></div>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000000; font-weight: bold;">class</span> MyController <span style="color: #000000; font-weight: bold;">extends</span> Zend_Controller_Action</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> indexAction<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">render</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> __call<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$method</span>, <span style="color: #0000ff;">$args</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">if</span> <span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'Action'</span> == <a href="http://www.php.net/substr"><span style="color: #000066;">substr</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$method</span>, <span style="color: #cc66cc;">-6</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// Si une méthode d'action n'est pas trouvée,</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// rediriger vers l'action index</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">return</span> <span style="color: #0000ff;">$this</span>-&gt;_forward<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'index'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// pour tout autre méthode, levée d'une exception</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; throw <span style="color: #000000; font-weight: bold;">new</span> Exception<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'Méthode invalide &quot;'</span> . <span style="color: #0000ff;">$method</span> . <span style="color: #ff0000;">'&quot; appelée'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #cc66cc;">500</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+
+        </div>
+
+        <p class="para">
+            En plus de la surcharge de  <span class="methodname">__call()</span>, chacune des méthodes
+            d&#039;initialisation , utilitaires, d&#039;accesseurs, de vues et de détournement de la
+            distribution mentionnées ci-dessus peuvent être surchargées dans le but de
+            personnaliser vos contrôleurs. Par exemple, si vous stockez votre objet de vue dans le
+            registre, vous pouvez vouloir modifier votre méthode  <span class="methodname">initView()</span>
+            avec une code comme celui-ci :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">abstract <span style="color: #000000; font-weight: bold;">class</span> Ma_Base_Controller <span style="color: #000000; font-weight: bold;">extends</span> Zend_Controller_Action</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> initView<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">if</span> <span style="color: #66cc66;">&#40;</span><span style="color: #000000; font-weight: bold;">null</span> === <span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">view</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">if</span> <span style="color: #66cc66;">&#40;</span>Zend_Registry::<span style="color: #006600;">isRegistered</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'view'</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">view</span> = Zend_Registry::<span style="color: #006600;">get</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'view'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span> <span style="color: #b1b100;">else</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">view</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_View<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">view</span>-&gt;<span style="color: #006600;">setBasePath</span><span style="color: #66cc66;">&#40;</span><a href="http://www.php.net/dirname"><span style="color: #000066;">dirname</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #000000; font-weight: bold;">__FILE__</span><span style="color: #66cc66;">&#41;</span> . <span style="color: #ff0000;">'/../views'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">return</span> <span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">view</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+
+
+        <p class="para">
+            En espérant que les informations de ce chapitre vous permettent de voir la
+            flexibilité de ce composant particulier et comment vous pouvez le modifier suivant les
+            besoins de votre application.
+        </p>
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.controller.dispatcher.html">Le distributeur</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.controller.html">Zend_Controller</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.controller.actionhelpers.html">Aides d'action (Helper)</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.controller.html">Zend_Controller</a></li>
+  <li><a href="zend.controller.quickstart.html">Zend_Controller - D&eacute;marrage rapide</a></li>
+  <li><a href="zend.controller.basics.html">Fondations de Zend_Controller</a></li>
+  <li><a href="zend.controller.front.html">Le contr&ocirc;leur frontal (Front Controller)</a></li>
+  <li><a href="zend.controller.request.html">L'objet Requ&ecirc;te</a></li>
+  <li><a href="zend.controller.router.html">Routeur Standard</a></li>
+  <li><a href="zend.controller.dispatcher.html">Le distributeur</a></li>
+  <li class="active"><a href="zend.controller.action.html">Contr&ocirc;leurs d'action</a></li>
+  <li><a href="zend.controller.actionhelpers.html">Aides d'action (Helper)</a></li>
+  <li><a href="zend.controller.response.html">Objet de r&eacute;ponse</a></li>
+  <li><a href="zend.controller.plugins.html">Plugins</a></li>
+  <li><a href="zend.controller.modular.html">Utilisation de conventions de dossiers modulaires</a></li>
+  <li><a href="zend.controller.exceptions.html">Exceptions avec MVC</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

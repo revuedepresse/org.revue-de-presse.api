@@ -1,0 +1,224 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Zend_Text_Figlet - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.text.html">Zend_Text</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.text.html">Zend_Text</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.text.table.introduction.html">Zend_Text_Table</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.text.figlet" class="section"><div class="info"><h1 class="title">Zend_Text_Figlet</h1></div>
+    
+
+    <p class="para">
+        <span class="classname">Zend_Text_Figlet</span> est un composant qui permet aux développeurs
+        de créer des textes dénommés FIGlet. Un texte FIGlet test une chaîne de caractères, qui est
+        représenté en &quot;ASCII-art&quot;. FIGlet utilise une format de police spécial , nommée FLT (FigLet
+        Font). Par défaut, une police standard est fourni avec
+        <span class="classname">Zend_Text_Figlet</span>, mais vous pouvez ajouter des polices additionnels à
+        <a href="http://www.figlet.org/fontdb.cgi" class="link external">&raquo; http://www.figlet.org</a>.
+    </p>
+
+    <blockquote><p><b class="note">Note</b>: <span class="info"><b>Polices compressée</b><br /></span>
+        
+
+        
+            <span class="classname">Zend_Text_Figlet</span> supporte les polices compressées en gzip.
+            Ceci veut dire que vous pouvez prendre un fichier <code class="code">.flf</code> et le gzipper. Pour
+            permettre à <span class="classname">Zend_Text_Figlet</span> de les reconnaître, les polices
+            gzippées doivent avoir l&#039;extension <code class="code">.gz</code>. De plus, pour pouvoir utiliser les
+            polices compressées, vous devez activer l&#039;extension GZIP de <acronym class="acronym">PHP</acronym>.
+        <br />
+    </p></blockquote>
+
+    <blockquote><p><b class="note">Note</b>: <span class="info"><b>Encodage</b><br /></span>
+        
+
+        
+            <span class="classname">Zend_Text_Figlet</span> considère que vos chaînes sont encodées en
+            UTF-8 par défaut. Si ce n&#039;est pas le cas, vous pouvez fournir le type d&#039;encodage des
+            caractères en tant que second paramètre à la méthode  <span class="methodname">render()</span>.
+        <br />
+    </p></blockquote>
+
+    <p class="para">
+        Il existe plusieurs options pour un FIGlet. Quand vous instanciez
+        <span class="classname">Zend_Text_Figlet</span>, vous pouvez les fournir sous la forme d&#039;un tableau
+        ou d&#039;un objet <span class="classname">Zend_Config</span>. <ul class="itemizedlist">
+                <li class="listitem">
+                <p class="para">
+                    <code class="code">font</code> : défini la police utilisée pour le rendu. Par défaut la
+                    police incorporé sera utilisée.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    <code class="code">outputWidth</code> : défini la largeur maximum de la chaîne
+                    résultat. Ceci est utilisé pour le retour à la ligne automatique ainsi que pour
+                    la justification. Attention cependant à de trop petites valeurs, qui pourraient
+                    induire un comportement indéfini. La valeur par défaut est 80.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    <code class="code">handleParagraphs</code> : un booléen qui indique, comment les
+                    nouvelles lignes sont gérées. Réglé à <b><tt>TRUE</tt></b>, les nouvelles lignes
+                    uniques sont ignorées et traitées comme un espace unique. Seules des nouvelles
+                    lignes multiples seront gérées comme telles. La valeur par défaut est
+                    <b><tt>FALSE</tt></b>.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    <code class="code">justification</code> : peut être une des valeurs de type
+                    <span class="classname">Zend_Text_Figlet::JUSTIFICATION_*</span>. Il existe
+                    <b><tt>JUSTIFICATION_LEFT</tt></b>, <b><tt>JUSTIFICATION_CENTER</tt></b> et
+                    <b><tt>JUSTIFICATION_RIGHT</tt></b>. La justification par défaut est défini par la
+                    valeur de <code class="code">rightToLeft</code>.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    <code class="code">rightToLeft</code> : défini la direction d&#039;écriture du texte. Peut
+                    être <span class="classname">Zend_Text_Figlet::DIRECTION_LEFT_TO_RIGHT</span> ou
+                    <span class="classname">Zend_Text_Figlet::DIRECTION_RIGHT_TO_LEFT</span>. Par défaut le
+                    réglage du fichier de police est utilisé. Quand aucune justification n&#039;est
+                    définie, un texte écrit de droite à gauche est automatiquement aligné à
+                    droite.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    <code class="code">smushMode</code> : un entier qui définit comme chaque caractère est
+                    fusionné avec les autres. Peut être la somme de multiple valeurs de type
+                    <span class="classname">Zend_Text_Figlet::SM_*</span>. Il existe les modes de fusion
+                    suivant : SM_EQUAL, SM_LOWLINE, SM_HIERARCHY, SM_PAIR, SM_BIGX, SM_HARDBLANK,
+                    SM_KERN et SM_SMUSH. Une valeur de 0 ne désactive pas entièrement la fusion,
+                    mais force la valeur SM_KERN, tandis que la valeur de -1 la désactive. Une
+                    explication des différents modes de fusion peut être trouvé <a href="http://www.jave.de/figlet/figfont.txt" class="link external">&raquo; ici</a>. Par défaut le réglage
+                    de la police est utilisé. L&#039;option du mode de fusion est normalement seulement
+                    utilisé par les concepteurs de police testant les différents mode de disposition
+                    d&#039;une nouvelle police.
+                </p>
+            </li>
+            </ul>
+        </p>
+
+    <div class="example"><div class="info"><p><b>Example #1 Utilisation Zend_Text_Figlet</b></p></div>
+        
+
+        <div class="example-contents"><p>
+            Cet exemple illustre une utilisation basique de
+            <span class="classname">Zend_Text_Figlet</span> pour créer une texte FIGlet simple :
+        </p></div>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$figlet</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Text_Figlet<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$figlet</span>-&gt;<span style="color: #006600;">render</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'Zend'</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <div class="example-contents"><p>
+            En considérant que vous utilisez une police à espacement fixe, vous obtiendrez
+            quelque chose comme ceci :
+        </p></div>
+
+        <div class="programlisting text"><div class="textcode"><div class="text" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">______&nbsp; &nbsp; ______&nbsp; &nbsp; _&nbsp; __&nbsp; &nbsp;______</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;|__&nbsp; //&nbsp; &nbsp;|&nbsp; ___||&nbsp; | \| || |&nbsp; __ \\</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp;/ //&nbsp; &nbsp; | ||__&nbsp; &nbsp; |&nbsp; ' || | |&nbsp; \ ||</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; / //__&nbsp; &nbsp;| ||___&nbsp; &nbsp;| .&nbsp; || | |__/ ||</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;/_____||&nbsp; |_____||&nbsp; |_|\_|| |_____//</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;`-----`'&nbsp; `-----`&nbsp; &nbsp;`-` -`'&nbsp; -----`</div></li></ol></div></div></div>
+
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.text.html">Zend_Text</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.text.html">Zend_Text</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.text.table.introduction.html">Zend_Text_Table</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.text.html">Zend_Text</a></li>
+  <li class="active"><a href="zend.text.figlet.html">Zend_Text_Figlet</a></li>
+  <li><a href="zend.text.table.introduction.html">Zend_Text_Table</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

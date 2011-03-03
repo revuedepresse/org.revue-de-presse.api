@@ -1,0 +1,200 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Attraper les exceptions Gdata - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.gdata.youtube.html">Using the YouTube Data API</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.gdata.html">Zend_Gdata</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.http.html">Zend_Http</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.gdata.exception" class="section"><div class="info"><h1 class="title">Attraper les exceptions Gdata</h1></div>
+    
+
+    <p class="para">
+        La classe <span class="classname">Zend_Gdata_App_Exception</span> est la classe de base de
+        toutes les exceptions envoyées par les composants Gdata.
+    </p>
+
+    <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">try <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #0000ff;">$client</span> =</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; Zend_Gdata_ClientLogin::<span style="color: #006600;">getHttpClient</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$username</span>, <span style="color: #0000ff;">$password</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span> catch<span style="color: #66cc66;">&#40;</span>Zend_Gdata_App_Exception <span style="color: #0000ff;">$ex</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// Affiche l'exception à l'utilisateur</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <a href="http://www.php.net/die"><span style="color: #000066;">die</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$ex</span>-&gt;<span style="color: #006600;">getMessage</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+
+
+    <p class="para">
+        Voici les sous classes exception utilisées dans <span class="classname">Zend_Gdata</span>
+        :<ul class="itemizedlist">
+                <li class="listitem">
+                <p class="para">
+                    <span class="classname">Zend_Gdata_App_AuthException</span> indique que les
+                    identifiants du compte utilisateur sont erronés.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    <span class="classname">Zend_Gdata_App_BadMethodCallException</span> est levée
+                    lorsque vous tentez d&#039;utiliser une méthode sur un service qui ne l&#039;implémente
+                    pas. Par exemple, le service CodeSearch ne supporte pas la méthode
+                     <span class="methodname">post()</span>.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    <span class="classname">Zend_Gdata_App_HttpException</span> indique un échec de
+                    requête <acronym class="acronym">HTTP</acronym>. Cette exception vous donne le moyen de récupérer la réponse
+                    <span class="classname">Zend_Http_Response</span> entière pour déterminer la cause
+                    exacte de l&#039;erreur, alors que <code class="code">$e-&gt;getMessage()</code> ne montre pas
+                    autant de détails.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    <span class="classname">Zend_Gdata_App_InvalidArgumentException</span> est envoyée
+                    lorsque l&#039;application envoie une valeur non attendue. Par exemple spécifier la
+                    visibilité d&#039;un calendrier à &quot;banane&quot;, ou récupérer le flux d&#039;un blog Blogger
+                    sans spécifier le nom du blog en question.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    <span class="classname">Zend_Gdata_App_CaptchaRequiredException</span> est envoyée
+                    lorsqu&#039;une tentative de ClientLogin reçoit un challenge
+                    <span_trademark class="trademark">CAPTCHA</span_trademark> depuis le service d&#039;authentification. Cette
+                    exception contient un jeton ID et une <acronym class="acronym">URL</acronym> vers une image
+                    <span_trademark class="trademark">CAPTCHA</span_trademark> . Cette image est un puzzle visuel qui devrait
+                    être retournée à l&#039;utilisateur du service. Après récupération de la réponse de
+                    l&#039;utilisateur, celle-ci peut être incluse lors du ClientLogin suivant.
+                    L&#039;utilisateur peut aussi alternativement être redirigé vers ce site : <tt class="uri">https://www.google.com/accounts/DisplayUnlockCaptcha</tt>. De plus
+                    amples informations peuvent être trouvées dans <a href="zend.gdata.clientlogin.html" class="link">la documentation du ClientLogin</a>.
+                </p>
+            </li>
+            </ul>
+        </p>
+
+    <p class="para">
+        Vous pouvez ainsi utiliser ces sous-classes d&#039;exceptions pour les gérer chacune
+        différemment. Référez vous à l&#039;API pour savoir quel composant
+        <span class="classname">Zend_Gdata</span> envoie quel type d&#039;exception.
+    </p>
+
+    <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">try <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #0000ff;">$client</span> =</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; Zend_Gdata_ClientLogin::<span style="color: #006600;">getHttpClient</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$username</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$password</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$service</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span> catch<span style="color: #66cc66;">&#40;</span>Zend_Gdata_App_AuthException <span style="color: #0000ff;">$authEx</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// identifiants fournis incorrects</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// Vous pourriez par exemple offrir une</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// seconde chance à l'utilisateur ici</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; ...</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span> catch<span style="color: #66cc66;">&#40;</span>Zend_Gdata_App_HttpException <span style="color: #0000ff;">$httpEx</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// les serveurs Google Data sont injoignables</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <a href="http://www.php.net/die"><span style="color: #000066;">die</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$httpEx</span>-&gt;<span style="color: #006600;">getMessage</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.gdata.youtube.html">Using the YouTube Data API</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.gdata.html">Zend_Gdata</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.http.html">Zend_Http</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.gdata.html">Zend_Gdata</a></li>
+  <li><a href="zend.gdata.introduction.html">Introduction</a></li>
+  <li><a href="zend.gdata.authsub.html">Authentification par proc&eacute;d&eacute; AuthSub</a></li>
+  <li><a href="zend.gdata.books.html">Using the Book Search Data API</a></li>
+  <li><a href="zend.gdata.clientlogin.html">Authentification avec ClientLogin</a></li>
+  <li><a href="zend.gdata.calendar.html">Using Google Calendar</a></li>
+  <li><a href="zend.gdata.docs.html">Using Google Documents List Data API</a></li>
+  <li><a href="zend.gdata.health.html">Using Google Health</a></li>
+  <li><a href="zend.gdata.spreadsheets.html">Using Google Spreadsheets</a></li>
+  <li><a href="zend.gdata.gapps.html">Using Google Apps Provisioning</a></li>
+  <li><a href="zend.gdata.gbase.html">Using Google Base</a></li>
+  <li><a href="zend.gdata.photos.html">Utilisation des albums Web Picasa</a></li>
+  <li><a href="zend.gdata.youtube.html">Using the YouTube Data API</a></li>
+  <li class="active"><a href="zend.gdata.exception.html">Attraper les exceptions Gdata</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,289 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Consommer un flux RSS - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.feed.findFeeds.html">Obtenir des flux &agrave; partir de pages Web</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.feed.html">Zend_Feed</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.feed.consuming-atom.html">Consommer un flux Atom</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.feed.consuming-rss" class="section"><div class="info"><h1 class="title">Consommer un flux RSS</h1></div>
+    
+
+    <p class="para">
+        Lire un flux <acronym class="acronym">RSS</acronym> se résume à instancier un objet <span class="classname">Zend_Feed_Rss</span>
+        en passant l&#039;URL du flux :
+    </p>
+
+    <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$canal</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Feed_Rss<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'http://rss.exemple.com/nomDuCanal'</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+    <p class="para">
+        Si une erreur a lieu lors de l&#039;obtention du flux, une
+        <span class="classname">Zend_Feed_Exception</span> sera déclenchée.
+    </p>
+
+    <p class="para">
+        Une fois que vous disposez d&#039;un objet &quot;flux <acronym class="acronym">RSS</acronym>&quot;, vous pouvez accéder aux propriétés
+        <acronym class="acronym">RSS</acronym> standard du canal, et ce directement à partir de l&#039;objet :
+    </p>
+
+    <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$canal</span>-&gt;<span style="color: #006600;">title</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+    <p class="para">
+        Notez la syntaxe utilisée : un appel de fonction.
+        <span class="classname">Zend_Feed</span> utilise une convention selon laquelle les propriétés sont
+        traitées comme des objets <acronym class="acronym">XML</acronym> si elles sont demandées au moyen de la syntaxe
+        <code class="code">$obj-&gt;propriété</code> et comme des chaînes si elles sont demandées au moyen de la
+        syntaxe <code class="code">$obj-&gt;propriété()</code>. Ceci permet d&#039;accéder à la totalité du contenu
+        textuel d&#039;un nœud particulier tout comme à l&#039;ensemble des enfants de ce nœud.
+    </p>
+
+    <p class="para">
+        Si les propriétés du canal possèdent des attributs, ils sont accessibles à l&#039;aide de
+        l&#039;indexage <acronym class="acronym">PHP</acronym> :
+    </p>
+
+    <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$canal</span>-&gt;<span style="color: #006600;">category</span><span style="color: #66cc66;">&#91;</span><span style="color: #ff0000;">'domain'</span><span style="color: #66cc66;">&#93;</span>;</div></li></ol></div></div></div>
+
+
+    <p class="para">
+        Comme les attributs <acronym class="acronym">XML</acronym> ne peuvent avoir des enfants, la syntaxe
+        <code class="code">$obj-&gt;propriété[&#039;attribut&#039;]()</code> n&#039;est pas nécessaire pour accéder aux valeurs
+        des attributs.
+    </p>
+
+    <p class="para">
+        La plupart du temps vous voudrez itérer sur le flux et réaliser quelque chose avec
+        ses entrées. <span class="classname">Zend_Feed_Abstract</span> implémente l&#039;interface
+        <code class="code">iterator</code> de <acronym class="acronym">PHP</acronym>, ce qui résume au code suivant l&#039;affichage des titres de tous
+        les articles du canal :
+    </p>
+
+    <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #b1b100;">foreach</span> <span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$canal</span> <span style="color: #b1b100;">as</span> <span style="color: #0000ff;">$element</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$element</span>-&gt;<span style="color: #006600;">title</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span> . <span style="color: #ff0000;">&quot;<span style="color: #000099; font-weight: bold;">\n</span>&quot;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+
+
+    <p class="para">
+        Si vous n&#039;êtes pas un familier de <acronym class="acronym">RSS</acronym>, voici les éléments standard associés au
+        canal <acronym class="acronym">RSS</acronym> et à ses éléments pris séparément (les entrées).
+    </p>
+
+    <p class="para">Les éléments requis pour les canaux sont :</p>
+
+    <p class="para">
+        <ul class="itemizedlist">
+            <li class="listitem">
+                <p class="para"><code class="code">title</code> (titre) : le nom du canal</p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    <code class="code">link</code> (lien) : l&#039;URL du site Web correspondant au canal
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    <code class="code">description</code> : une ou plusieurs phrases décrivant le canal
+                </p>
+            </li>
+        </ul>
+    </p>
+
+    <p class="para">Les éléments optionnels pour les canaux sont :</p>
+
+    <p class="para">
+        <ul class="itemizedlist">
+            <li class="listitem">
+                <p class="para">
+                    <code class="code">pubDate</code> (date de publication) : la date de publication de
+                    l&#039;ensemble, au format <acronym class="acronym">RFC</acronym> 822
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    <code class="code">language</code> (langue) : la langue dans laquelle est écrit le
+                    canal
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    <code class="code">category</code> (catégorie) : un ou plusieurs noms de catégorie
+                    (spécifiés au moyen de plusieurs balises) auquel appartient le canal
+                </p>
+            </li>
+        </ul>
+    </p>
+
+    <p class="para">
+        Les éléments <acronym class="acronym">RSS</acronym> <code class="code">&lt;item&gt;</code> n&#039;ont pas d&#039;éléments requis particulier.
+        Cependant soit <code class="code">title</code> soit <code class="code">description</code> doivent être
+        présents.
+    </p>
+
+    <p class="para">Les éléments communs sont :</p>
+
+    <p class="para">
+        <ul class="itemizedlist">
+            <li class="listitem">
+                <p class="para"><code class="code">title</code> (titre) : le titre de l&#039;élément</p>
+            </li>
+
+            <li class="listitem">
+                <p class="para"><code class="code">link</code> (lien) : l&#039;URL de l&#039;élément</p>
+            </li>
+
+            <li class="listitem">
+                <p class="para"><code class="code">description</code> : un résumé de l&#039;élément</p>
+            </li>
+
+            <li class="listitem">
+                <p class="para"><code class="code">author</code> (auteur) : l&#039;adresse e-mail de l&#039;auteur</p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    <code class="code">category</code> (catégorie) : une ou plusieurs catégories auquel
+                    appartient l&#039;élément
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    <code class="code">comments</code> (commentaires) : l&#039;URL des commentaires relatifs à
+                    cet élément
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    <code class="code">pubDate</code> (date de publication) : la date à laquelle l&#039;élément
+                    a été publié, au format <acronym class="acronym">RFC</acronym> 822
+                </p>
+            </li>
+        </ul>
+    </p>
+
+    <p class="para">
+        Dans votre code vous pouvez toujours tester si un élément est non-vide au moyen du
+        test suivant :
+    </p>
+
+    <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #b1b100;">if</span> <span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$element</span>-&gt;<span style="color: #006600;">nomPropriete</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// ... traitement</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+
+
+    <p class="para">
+        Si vous utilisez à la place de la condition <code class="code">$element-&gt;nomPropriete</code>,
+        vous obtiendrez toujours un objet qui, même vide, sera évalué comme <b><tt>TRUE</tt></b>, donc
+        le test échouera.
+    </p>
+
+    <p class="para">
+        Pour plus d&#039;informations, la spécification <acronym class="acronym">RSS</acronym> 2.0 officielle est disponible à
+        l&#039;adresse : <a href="http://blogs.law.harvard.edu/tech/rss" class="link external">&raquo; 
+        http://blogs.law.harvard.edu/tech/rss</a>
+    </p>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.feed.findFeeds.html">Obtenir des flux &agrave; partir de pages Web</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.feed.html">Zend_Feed</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.feed.consuming-atom.html">Consommer un flux Atom</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.feed.html">Zend_Feed</a></li>
+  <li><a href="zend.feed.introduction.html">Introduction</a></li>
+  <li><a href="zend.feed.importing.html">Importer des flux</a></li>
+  <li><a href="zend.feed.findFeeds.html">Obtenir des flux &agrave; partir de pages Web</a></li>
+  <li class="active"><a href="zend.feed.consuming-rss.html">Consommer un flux RSS</a></li>
+  <li><a href="zend.feed.consuming-atom.html">Consommer un flux Atom</a></li>
+  <li><a href="zend.feed.consuming-atom-single-entry.html">Consommer une entr&eacute;e Atom particuli&egrave;re</a></li>
+  <li><a href="zend.feed.modifying-feed.html">Modifier la structure du flux ou des entr&eacute;es</a></li>
+  <li><a href="zend.feed.custom-feed.html">Classes personnalis&eacute;es pour les flux et entr&eacute;es</a></li>
+  <li><a href="zend.feed.reader.html">Zend_Feed_Reader</a></li>
+  <li><a href="zend.feed.writer.html">Zend_Feed_Writer</a></li>
+  <li><a href="zend.feed.pubsubhubbub.introduction.html">Zend_Feed_Pubsubhubbub</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

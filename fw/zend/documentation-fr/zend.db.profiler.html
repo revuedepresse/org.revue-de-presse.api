@@ -1,0 +1,604 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Zend_Db_Profiler - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.db.statement.html">Zend_Db_Statement</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.db.html">Zend_Db</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.db.select.html">Zend_Db_Select</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.db.profiler" class="section"><div class="info"><h1 class="title">Zend_Db_Profiler</h1></div>
+    
+
+    <div class="section" id="zend.db.profiler.introduction" name="zend.db.profiler.introduction"><div class="info"><h1 class="title">Introduction</h1></div>
+        
+
+        <p class="para">
+            <span class="classname">Zend_Db_Profiler</span> peut être activé pour permettre le
+            profilage de requête. Les profils incluent les requêtes exécutées par l&#039;adaptateur,
+            ainsi que leur temps d&#039;exécution, permettant l&#039;inspection des requêtes qui ont été
+            exécutées sans avoir besoin de rajouter le code spécifique de débogage aux classes.
+            L&#039;utilisation avancée permet aussi au développeur de filtrer quelles requêtes il
+            souhaite profiler.
+        </p>
+
+        <p class="para">
+            Le profileur s&#039;active soit en passant une directive au constructeur de
+            l&#039;adaptateur, soit en spécifiant à l&#039;adaptateur de l&#039;activer plus tard.
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$params</span> = <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'host'</span>&nbsp; &nbsp; &nbsp;=&gt; <span style="color: #ff0000;">'127.0.0.1'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'username'</span> =&gt; <span style="color: #ff0000;">'webuser'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'password'</span> =&gt; <span style="color: #ff0000;">'xxxxxxxx'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'dbname'</span>&nbsp; &nbsp;=&gt; <span style="color: #ff0000;">'test'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'profiler'</span> =&gt; <span style="color: #000000; font-weight: bold;">true</span>&nbsp; <span style="color: #808080; font-style: italic;">// active le profileur ;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// mettre à false pour désactiver</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// (désactivé par défaut)</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$db</span> = Zend_Db::<span style="color: #006600;">factory</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'PDO_MYSQL'</span>, <span style="color: #0000ff;">$params</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// stoppe le profileur :</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$db</span>-&gt;<span style="color: #006600;">getProfiler</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>-&gt;<span style="color: #006600;">setEnabled</span><span style="color: #66cc66;">&#40;</span><span style="color: #000000; font-weight: bold;">false</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// active le profileur :</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$db</span>-&gt;<span style="color: #006600;">getProfiler</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>-&gt;<span style="color: #006600;">setEnabled</span><span style="color: #66cc66;">&#40;</span><span style="color: #000000; font-weight: bold;">true</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <p class="para">
+            La valeur de l&#039;option <span class="property">profiler</span> est souple. Elle est interprétée
+            différemment suivant son type. La plupart du temps, vous devriez simplement utiliser une
+            variable booléenne, mais d&#039;autres valeurs vous permettent de personnaliser le
+            comportement du profileur.
+        </p>
+
+        <p class="para">
+            Un argument booléen active le profileur si c&#039;est une valeur <b><tt>TRUE</tt></b>,
+            ou le désactive si <b><tt>FALSE</tt></b>. La classe de profileur est celle par
+            défaut, par exemple <span class="classname">Zend_Db_Profiler</span>.
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$params</span><span style="color: #66cc66;">&#91;</span><span style="color: #ff0000;">'profiler'</span><span style="color: #66cc66;">&#93;</span> = <span style="color: #000000; font-weight: bold;">true</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$db</span> = Zend_Db::<span style="color: #006600;">factory</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'PDO_MYSQL'</span>, <span style="color: #0000ff;">$params</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <p class="para">
+            Une instance d&#039;un objet profileur fait que l&#039;adaptateur utilise cet objet. L&#039;objet
+            doit être de type <span class="classname">Zend_Db_Profiler</span> ou une sous-classe.
+            L&#039;activation du profileur est faite séparément.
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$profiler</span> = Mon_Db_Profiler<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$profiler</span>-&gt;<span style="color: #006600;">setEnabled</span><span style="color: #66cc66;">&#40;</span><span style="color: #000000; font-weight: bold;">true</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$params</span><span style="color: #66cc66;">&#91;</span><span style="color: #ff0000;">'profiler'</span><span style="color: #66cc66;">&#93;</span> = <span style="color: #0000ff;">$profiler</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$db</span> = Zend_Db::<span style="color: #006600;">factory</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'PDO_MYSQL'</span>, <span style="color: #0000ff;">$params</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <p class="para">
+            L&#039;argument peut être un tableau associatif contenant une ou toutes les clés
+            suivantes : &quot;<span class="property">enabled</span>&quot;, &quot;<span class="property">instance</span>&quot;, et
+            &quot;<span class="property">class</span>&quot;. Les clés &quot;<span class="property">enabled</span>&quot; et
+            &quot;<span class="property">instance</span>&quot; correspondent aux types booléen et instance décrites
+            ci-dessus. La clé &quot;<span class="property">class</span>&quot; est utilisée pour
+            nommer une classe à prendre en tant que profileur personnalisé. La classe doit être de
+            type <span class="classname">Zend_Db_Profiler</span> ou une sous-classe. La classe est
+            instanciée sans aucun argument de constructeur. L&#039;option &quot;<span class="property">class</span>&quot;
+            est ignorée quand l&#039;option &quot;<span class="property">instance</span>&quot; est fournie.
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$params</span><span style="color: #66cc66;">&#91;</span><span style="color: #ff0000;">'profiler'</span><span style="color: #66cc66;">&#93;</span> = <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'enabled'</span> =&gt; <span style="color: #000000; font-weight: bold;">true</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'class'</span>&nbsp; &nbsp;=&gt; <span style="color: #ff0000;">'Mon_Db_Profiler'</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$db</span> = Zend_Db::<span style="color: #006600;">factory</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'PDO_MYSQL'</span>, <span style="color: #0000ff;">$params</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <p class="para">
+            Enfin, l&#039;argument peut être un objet de type <span class="classname">Zend_Config</span>
+            contenant des propriétés, qui sont traitées comme les clés de tableaux décrites
+            ci-dessus. Par exemple, un fichier &quot;<var class="filename">config.ini</var>&quot; peut
+            contenir les données suivantes :
+        </p>
+
+        <div class="programlisting ini"><div class="inicode"><div class="ini" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000066; font-weight:bold;"><span style="">&#91;</span>main<span style="">&#93;</span></span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">db.profiler.<span style="color: #000099;">class&nbsp; &nbsp;</span>= <span style="color: #933;">&quot;Mon_Db_Profiler&quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">db.profiler.<span style="color: #000099;">enabled </span>=<span style="color: #660066;"> true</span></div></li></ol></div></div></div>
+
+
+        <p class="para">
+            Cette configuration peut être appliquée par le code <acronym class="acronym">PHP</acronym>
+            suivant :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$config</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Config_Ini<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'config.ini'</span>, <span style="color: #ff0000;">'main'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$params</span><span style="color: #66cc66;">&#91;</span><span style="color: #ff0000;">'profiler'</span><span style="color: #66cc66;">&#93;</span> = <span style="color: #0000ff;">$config</span>-&gt;<span style="color: #006600;">db</span>-&gt;<span style="color: #006600;">profiler</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$db</span> = Zend_Db::<span style="color: #006600;">factory</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'PDO_MYSQL'</span>, <span style="color: #0000ff;">$params</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <p class="para">
+            La propriété &quot;<span class="property">instance</span>&quot; peut être utilisée comme ceci :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$profiler</span> = <span style="color: #000000; font-weight: bold;">new</span> Mon_Db_Profiler<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$profiler</span>-&gt;<span style="color: #006600;">setEnabled</span><span style="color: #66cc66;">&#40;</span><span style="color: #000000; font-weight: bold;">true</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$configData</span> = <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'instance'</span> =&gt; <span style="color: #0000ff;">$profiler</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$config</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Config<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$configData</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$params</span><span style="color: #66cc66;">&#91;</span><span style="color: #ff0000;">'profiler'</span><span style="color: #66cc66;">&#93;</span> = <span style="color: #0000ff;">$config</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$db</span> = Zend_Db::<span style="color: #006600;">factory</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'PDO_MYSQL'</span>, <span style="color: #0000ff;">$params</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+    </div>
+
+    <div class="section" id="zend.db.profiler.using" name="zend.db.profiler.using"><div class="info"><h1 class="title">Utiliser le profileur</h1></div>
+        
+
+        <p class="para">
+            A n&#039;importe quel moment, vous pouvez récupérer le profileur en utilisant la
+            méthode  <span class="methodname">getProfiler()</span> de l&#039;adaptateur :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$profileur</span> = <span style="color: #0000ff;">$db</span>-&gt;<span style="color: #006600;">getProfiler</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <p class="para">
+            Ceci retourne une instance de <span class="classname">Zend_Db_Profiler</span>. Avec cette
+            instance, le développeur peut examiner les requêtes en utilisant un éventail de
+            méthodes :
+        </p>
+
+        <ul class="itemizedlist">
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">getTotalNumQueries()</span> retourne le nombre total de
+                    requêtes profilées.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">getTotalElapsedSecs()</span> retourne le nombre total de
+                    secondes écoulées pour chaque requête profilée.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">getQueryProfiles()</span> retourne un tableau de tous les
+                    profils de requêtes.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">getLastQueryProfile()</span> retourne le profil de requête le
+                    plus récent, peut importe si la requête à fini de s&#039;exécuter ou pas (si
+                    l&#039;exécution n&#039;est pas finie, le temps de fin sera <b><tt>NULL</tt></b>).
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">clear()</span> nettoie tous les anciens profils de la pile.
+                </p>
+            </li>
+        </ul>
+
+        <p class="para">
+            La valeur de retour de  <span class="methodname">getLastQueryProfile()</span> et les éléments
+            individuels de  <span class="methodname">getQueryProfiles()</span> sont des objets de type
+            <span class="classname">Zend_Db_Profiler_Query</span> qui permettent d&#039;inspecter les
+            requêtes :
+        </p>
+
+        <ul class="itemizedlist">
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">getQuery()</span> retourne le <acronym class="acronym">SQL</acronym> de la
+                    requête sous forme de texte. Le texte de <acronym class="acronym">SQL</acronym> d&#039;une requête
+                    préparée avec des paramètres est le texte au moment où la requête a été
+                    préparée, donc il contient les emplacements de paramètre, mais pas les
+                    valeurs utilisées quand la déclaration est exécutée.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">getQueryParams()</span> retourne un tableau des valeurs de
+                    paramètres utilisées lors de l&#039;exécution d&#039;une requête préparée. Ceci inclue à
+                    la fois les paramètres attachés et les arguments de la méthode
+                     <span class="methodname">execute()</span>. Les clés du tableau sont les positions
+                    (base 1) ou les noms des paramètres.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">getElapsedSecs()</span> retourne le nombre de secondes
+                    d&#039;exécution de la requête.
+                </p>
+            </li>
+        </ul>
+
+        <p class="para">
+            L&#039;information que <span class="classname">Zend_Db_Profiler</span> fourni est utile pour
+            profiler des goulots d&#039;étranglement dans les applications, ainsi que pour déboguer les
+            requêtes qui viennent d&#039;être exécutées. Par exemple, pour voir la dernière requête qui
+            vient de s&#039;exécuter :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$query</span> = <span style="color: #0000ff;">$profileur</span>-&gt;<span style="color: #006600;">getLastQueryProfile</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$query</span>-&gt;<span style="color: #006600;">getQuery</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <p class="para">
+            Si une page se génère lentement, utilisez le profileur pour déterminer le nombre
+            total de requêtes, et ensuite passer d&#039;une requête à l&#039;autre pour voir laquelle
+            a été la plus longue :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$tempsTotal</span>&nbsp; &nbsp; &nbsp; &nbsp;= <span style="color: #0000ff;">$profileur</span>-&gt;<span style="color: #006600;">getTotalElapsedSecs</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$nombreRequetes</span>&nbsp; &nbsp;= <span style="color: #0000ff;">$profileur</span>-&gt;<span style="color: #006600;">getTotalNumQueries</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$tempsLePlusLong</span>&nbsp; = <span style="color: #cc66cc;">0</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$requeteLaPlusLongue</span> = <span style="color: #000000; font-weight: bold;">null</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #b1b100;">foreach</span> <span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$profileur</span>-&gt;<span style="color: #006600;">getQueryProfiles</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span> <span style="color: #b1b100;">as</span> <span style="color: #0000ff;">$query</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #b1b100;">if</span> <span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$query</span>-&gt;<span style="color: #006600;">getElapsedSecs</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span> &gt; <span style="color: #0000ff;">$tempsLePlusLong</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$tempsLePlusLong</span>&nbsp; = <span style="color: #0000ff;">$query</span>-&gt;<span style="color: #006600;">getElapsedSecs</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$requeteLaPlusLongue</span> = <span style="color: #0000ff;">$query</span>-&gt;<span style="color: #006600;">getQuery</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #ff0000;">'Exécution de '</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp;. <span style="color: #0000ff;">$nombreRequetes</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp;. <span style="color: #ff0000;">' requêtes en '</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp;. <span style="color: #0000ff;">$tempsTotal</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp;. <span style="color: #ff0000;">' secondes'</span> . <span style="color: #ff0000;">&quot;<span style="color: #000099; font-weight: bold;">\n</span>&quot;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #ff0000;">'Temps moyen : '</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp;. <span style="color: #0000ff;">$tempsTotal</span> / <span style="color: #0000ff;">$nombreRequetes</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp;. <span style="color: #ff0000;">' secondes'</span> . <span style="color: #ff0000;">&quot;<span style="color: #000099; font-weight: bold;">\n</span>&quot;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #ff0000;">'Requêtes par seconde: '</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp;. <span style="color: #0000ff;">$nombreRequetes</span> / <span style="color: #0000ff;">$tempsTotal</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp;. <span style="color: #ff0000;">' seconds'</span> . <span style="color: #ff0000;">&quot;<span style="color: #000099; font-weight: bold;">\n</span>&quot;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #ff0000;">'Requête la plus lente (secondes) : '</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp;. <span style="color: #0000ff;">$tempsLePlusLong</span> . <span style="color: #ff0000;">&quot;<span style="color: #000099; font-weight: bold;">\n</span>&quot;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #ff0000;">&quot;Requête la plus lente (SQL) : <span style="color: #000099; font-weight: bold;">\n</span>&quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp;. <span style="color: #0000ff;">$requeteLaPlusLongue</span> . <span style="color: #ff0000;">&quot;<span style="color: #000099; font-weight: bold;">\n</span>&quot;</span>;</div></li></ol></div></div></div>
+
+    </div>
+
+    <div class="section" id="zend.db.profiler.advanced" name="zend.db.profiler.advanced"><div class="info"><h1 class="title">Utilisation avancée du profileur</h1></div>
+        
+
+        <p class="para">
+            En plus de l&#039;inspection de requête, le profileur permet aussi au développeur de
+            filtrer quelles requêtes il veut profiler. Les méthodes suivantes fonctionnent avec une
+            instance de <span class="classname">Zend_Db_Profiler</span> :
+        </p>
+
+        <div class="section" id="zend.db.profiler.advanced.filtertime" name="zend.db.profiler.advanced.filtertime"><div class="info"><h1 class="title">Filtrer par temps d&#039;exécution</h1></div>
+            
+
+            <p class="para">
+                 <span class="methodname">setFilterElapsedSecs()</span> permet au développeur de définir un
+                temps minimum d&#039;exécution de la requête avant que celle-ci soit profilée. Pour
+                retirer le filtre, passez une valeur <b><tt>NULL</tt></b> à la méthode.
+            </p>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Seules les requêtes qui durent au moins 5 secondes sont profilées :</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$profileur</span>-&gt;<span style="color: #006600;">setFilterElapsedSecs</span><span style="color: #66cc66;">&#40;</span><span style="color: #cc66cc;">5</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Profil de toutes les requêtes, peu importe leur durée :</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$profileur</span>-&gt;<span style="color: #006600;">setFilterElapsedSecs</span><span style="color: #66cc66;">&#40;</span><span style="color: #000000; font-weight: bold;">null</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+        </div>
+
+        <div class="section" id="zend.db.profiler.advanced.filtertype" name="zend.db.profiler.advanced.filtertype"><div class="info"><h1 class="title">Filtrer par type de requête</h1></div>
+            
+
+            <p class="para">
+                 <span class="methodname">setFilterQueryType()</span> permet au développeur de définir quels
+                types de requêtes doivent être profilées ; pour profiler des types multiples vous
+                pouvez utiliser le OU logique. Les types de requêtes sont définis sous forme de
+                constantes de <span class="classname">Zend_Db_Profiler</span> :
+            </p>
+
+            <ul class="itemizedlist">
+                <li class="listitem">
+                    <p class="para">
+                        <b><tt>Zend_Db_Profiler::CONNECT</tt></b> : opérations de
+                        connexion ou de sélection de base de données.
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        <b><tt>Zend_Db_Profiler::QUERY</tt></b> : requête générale qui
+                        ne correspond pas aux autres types.
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        <b><tt>Zend_Db_Profiler::INSERT</tt></b> : toute requête qui
+                        ajoute des données dans la base de données, généralement
+                        du <acronym class="acronym">SQL</acronym> <acronym class="acronym">INSERT</acronym>.
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        <b><tt>Zend_Db_Profiler::UPDATE</tt></b> : toute requête qui
+                        met à jour des données, généralement du <acronym class="acronym">SQL</acronym>
+                        <acronym class="acronym">UPDATE</acronym>.
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        <b><tt>Zend_Db_Profiler::DELETE</tt></b> : toute requête qui
+                        efface des données, généralement du <acronym class="acronym">SQL</acronym>
+                        <b><tt>DELETE</tt></b>.
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        <b><tt>Zend_Db_Profiler::SELECT</tt></b> : toute requête qui
+                        récupère des données, généralement du <acronym class="acronym">SQL</acronym>
+                        <acronym class="acronym">SELECT</acronym>.
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        <b><tt>Zend_Db_Profiler::TRANSACTION</tt></b> : toute requête
+                        qui concerne des opérations de transaction, comme start transaction,
+                        commit, ou rollback.
+                    </p>
+                </li>
+            </ul>
+
+            <p class="para">
+                Comme avec  <span class="methodname">setFilterElapsedSecs()</span>, vous pouvez retirer
+                tous les filtres en passant <b><tt>NULL</tt></b> comme unique argument.
+            </p>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// profile uniquement les requêtes SELECT</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$profileur</span>-&gt;<span style="color: #006600;">setFilterQueryType</span><span style="color: #66cc66;">&#40;</span>Zend_Db_Profiler::<span style="color: #006600;">SELECT</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// profile les requêtes SELECT, INSERT, et UPDATE</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$profileur</span>-&gt;<span style="color: #006600;">setFilterQueryType</span><span style="color: #66cc66;">&#40;</span>Zend_Db_Profiler::<span style="color: #006600;">SELECT</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;| Zend_Db_Profiler::<span style="color: #006600;">INSERT</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;| Zend_Db_Profiler::<span style="color: #006600;">UPDATE</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// profile les requêtes DELETE</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$profileur</span>-&gt;<span style="color: #006600;">setFilterQueryType</span><span style="color: #66cc66;">&#40;</span>Zend_Db_Profiler::<span style="color: #006600;">DELETE</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Efface tous les filtres</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$profileur</span>-&gt;<span style="color: #006600;">setFilterQueryType</span><span style="color: #66cc66;">&#40;</span><span style="color: #000000; font-weight: bold;">null</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+        </div>
+
+        <div class="section" id="zend.db.profiler.advanced.getbytype" name="zend.db.profiler.advanced.getbytype"><div class="info"><h1 class="title">Récupérer les profils par type de requête</h1></div>
+            
+
+            <p class="para">
+                Utiliser  <span class="methodname">setFilterQueryType()</span> peut réduire les profils
+                générés. Cependant il est parfois utile de garder tous les profils et voir
+                uniquement ceux dont on a besoin, à un moment donné. Une autre possibilité de
+                 <span class="methodname">getQueryProfiles()</span> est qu&#039;il est possible de filtrer
+                à la volée, en passant un type de requête (ou une combinaison logique de types
+                de requête) comme premier argument ; voir
+                <a href="zend.db.profiler.html#zend.db.profiler.advanced.filtertype" class="link">cette section</a>
+                pour la liste des constantes de types de requête.
+            </p>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Récupère uniquement les profils des requêtes SELECT</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$profiles</span> = <span style="color: #0000ff;">$profiler</span>-&gt;<span style="color: #006600;">getQueryProfiles</span><span style="color: #66cc66;">&#40;</span>Zend_Db_Profiler::<span style="color: #006600;">SELECT</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Récupère uniquement les profils des requêtes :</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// SELECT, INSERT, et UPDATE</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$profiles</span> = <span style="color: #0000ff;">$profiler</span>-&gt;<span style="color: #006600;">getQueryProfiles</span><span style="color: #66cc66;">&#40;</span>Zend_Db_Profiler::<span style="color: #006600;">SELECT</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; | Zend_Db_Profiler::<span style="color: #006600;">INSERT</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; | Zend_Db_Profiler::<span style="color: #006600;">UPDATE</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Récupère uniquement les profils des requêtes DELETE</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// (on peut donc comprendre pourquoi les données disparaissent)</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$profiles</span> = <span style="color: #0000ff;">$profiler</span>-&gt;<span style="color: #006600;">getQueryProfiles</span><span style="color: #66cc66;">&#40;</span>Zend_Db_Profiler::<span style="color: #006600;">DELETE</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+        </div>
+    </div>
+
+    <div class="section" id="zend.db.profiler.profilers" name="zend.db.profiler.profilers"><div class="info"><h1 class="title">Profileurs spécialisés</h1></div>
+        
+
+        <p class="para">
+            Un profileur spécialisé est un objet qui hérite de
+            <span class="classname">Zend_Db_Profiler</span>. Les profileurs spécialisés traitent les
+            informations de profilage de manière spécifique.
+        </p>
+
+        <div class="section" id="zend.db.profiler.profilers.firebug" name="zend.db.profiler.profilers.firebug"><div class="info"><h1 class="title">Profiler avec Firebug</h1></div>
+    
+
+    <p class="para">
+        <span class="classname">Zend_Db_Profiler_Firebug</span> envoie des informations de profilage
+        vers la <a href="http://getfirebug.com/logging.html" class="link external">&raquo; console</a>
+        <a href="http://www.getfirebug.com/" class="link external">&raquo; Firebug</a>.
+    </p>
+
+    <p class="para">
+        Toutes les données sont envoyées via le composant
+        <span class="classname">Zend_Wildfire_Channel_HttpHeaders</span> qui utilise les en-têtes
+        <acronym class="acronym">HTTP</acronym> pour s&#039;assurer que le contenu de la page n&#039;est pas perturbé.
+        Déboguer les requêtes <acronym class="acronym">AJAX</acronym> qui requière du <acronym class="acronym">JSON</acronym>
+        &quot;propre&quot; ou un réponse <acronym class="acronym">XML</acronym> est possible avec cette approche.
+    </p>
+
+    <p class="para">Éléments requis :</p>
+
+    <ul class="itemizedlist">
+        <li class="listitem">
+            <p class="para">
+                Navigateur Firefox idéalement en version 3 mais la version 2 est aussi
+                supportée.
+            </p>
+        </li>
+
+        <li class="listitem">
+            <p class="para">
+                L&#039;extension Firefox nommée Firebug qui peut être téléchargée à cette adresse
+                <a href="https://addons.mozilla.org/en-US/firefox/addon/1843" class="link external">&raquo; https://addons.mozilla.org/en-US/firefox/addon/1843</a>.
+            </p>
+        </li>
+
+        <li class="listitem">
+            <p class="para">
+                L&#039;extension Firefox nommée FirePHP qui peut être téléchargée à cette adresse
+                <a href="https://addons.mozilla.org/en-US/firefox/addon/6149" class="link external">&raquo; https://addons.mozilla.org/en-US/firefox/addon/6149</a>.
+            </p>
+        </li>
+    </ul>
+
+    <div class="example"><div class="info"><p><b>Example #1 Profilage de base de données avec Zend_Controller_Front</b></p></div>
+        
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Dans votre fichier d'amorçage</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$profiler</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Db_Profiler_Firebug<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'All DB Queries'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$profiler</span>-&gt;<span style="color: #006600;">setEnabled</span><span style="color: #66cc66;">&#40;</span><span style="color: #000000; font-weight: bold;">true</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Attacher le profileur à votre adaptateur de base de données</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$db</span>-&gt;<span style="color: #006600;">setProfiler</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$profiler</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Distribuer votre contrôleur frontal</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Toutes les requêtes dans vos fichiers de modèles, vues et</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// contrôleurs seront maintenant profilées et envoyées à Firebug</span></div></li></ol></div></div></div>
+
+    </div>
+
+    <div class="example"><div class="info"><p><b>Example #2 Profilage de base de données sans Zend_Controller_Front</b></p></div>
+        
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$profiler</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Db_Profiler_Firebug<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'All DB Queries'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$profiler</span>-&gt;<span style="color: #006600;">setEnabled</span><span style="color: #66cc66;">&#40;</span><span style="color: #000000; font-weight: bold;">true</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Attacher le profileur à votre adaptateur de base de données</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$db</span>-&gt;<span style="color: #006600;">setProfiler</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$profiler</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$request</span>&nbsp; = <span style="color: #000000; font-weight: bold;">new</span> Zend_Controller_Request_Http<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$response</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Controller_Response_Http<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$channel</span>&nbsp; = Zend_Wildfire_Channel_HttpHeaders::<span style="color: #006600;">getInstance</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$channel</span>-&gt;<span style="color: #006600;">setRequest</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$request</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$channel</span>-&gt;<span style="color: #006600;">setResponse</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$response</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Démarrer l'output buffering</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/ob_start"><span style="color: #000066;">ob_start</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Maintenant vous pouvez lancer les requêtes</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// qui doivent être profilées</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Envoi des données de profiling vers le navigateur</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$channel</span>-&gt;<span style="color: #006600;">flush</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$response</span>-&gt;<span style="color: #006600;">sendHeaders</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+    </div>
+</div>
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.db.statement.html">Zend_Db_Statement</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.db.html">Zend_Db</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.db.select.html">Zend_Db_Select</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.db.html">Zend_Db</a></li>
+  <li><a href="zend.db.adapter.html">Zend_Db_Adapter</a></li>
+  <li><a href="zend.db.statement.html">Zend_Db_Statement</a></li>
+  <li class="active"><a href="zend.db.profiler.html">Zend_Db_Profiler</a></li>
+  <li><a href="zend.db.select.html">Zend_Db_Select</a></li>
+  <li><a href="zend.db.table.html">Zend_Db_Table</a></li>
+  <li><a href="zend.db.table.row.html">Zend_Db_Table_Row</a></li>
+  <li><a href="zend.db.table.rowset.html">Zend_Db_Table_Rowset</a></li>
+  <li><a href="zend.db.table.relationships.html">Relations Zend_Db_Table</a></li>
+  <li><a href="zend.db.table.definition.html">Zend_Db_Table_Definition</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

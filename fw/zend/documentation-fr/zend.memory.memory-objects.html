@@ -1,0 +1,321 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Objet m&eacute;moire - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.memory.memory-manager.html">Manager de m&eacute;moire</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.memory.html">Zend_Memory</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.mime.html">Zend_Mime</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.memory.memory-objects" class="section"><div class="info"><h1 class="title">Objet mémoire</h1></div>
+    
+
+    <div class="section" id="zend.memory.memory-objects.movable" name="zend.memory.memory-objects.movable"><div class="info"><h1 class="title">Mobile</h1></div>
+        
+
+        <p class="para">
+            Créer des objets mémoires mobiles en utilisant la méthode
+             <span class="methodname">create([$data])</span> du manager de mémoire : <div class="programlisting"><div class="cdata"><pre>
+$memObject = $memoryManager-&gt;create($data);
+</pre></div></div>
+</p>
+
+        <p class="para">
+            &quot;Mobile&quot; signifie que de tels objets peuvent être mis en cache et déchargés de la
+            mémoire et chargés ensuite quand le code de l&#039;application accède à l&#039;objet.
+        </p>
+    </div>
+
+    <div class="section" id="zend.memory.memory-objects.locked" name="zend.memory.memory-objects.locked"><div class="info"><h1 class="title">Verrouillé</h1></div>
+        
+
+        <p class="para">
+            Créer des objets mémoires verrouillés en utilisant la méthode
+             <span class="methodname">createLocked([$data])</span> du manager de mémoire : <div class="programlisting"><div class="cdata"><pre>
+$memObject = $memoryManager-&gt;createLocked($data);
+</pre></div></div>
+</p>
+
+        <p class="para">
+            &quot;Verrouillé&quot; signifie que de tels objets ne sont jamais mis en cache et déchargés
+            de la mémoire.
+        </p>
+
+        <p class="para">
+            Les objets verrouillés fournissent la même interface que des objets mobiles
+            (<span class="classname">Zend_Memory_Container_Interface</span>). Donc l&#039;objet verrouillé peut
+            être utilisé en n&#039;importe quel endroit à la place des objets mobiles.
+        </p>
+
+        <p class="para">
+            Il est utile si une application ou un développeur peut décider, que quelques
+            objets ne devraient jamais être mis en cache, en se basant sur des considérations de
+            performance.
+        </p>
+
+        <p class="para">
+            L&#039;accès aux objets verrouillés est plus rapide, parce que le manager de mémoire ne
+            doit pas suivre à la trace des changements pour ces objets.
+        </p>
+
+        <p class="para">
+            La classe d&#039;objets verrouillés
+            (<span class="classname">Zend_Memory_Container_Locked</span>) garantit pratiquement la même
+            performance qu&#039;en travaillant avec une variable de type chaîne de caractères. La couche
+            supérieure est un simple référence pour récupérer la propriété de classe.
+        </p>
+    </div>
+
+    <div class="section" id="zend.memory.memory-objects.value" name="zend.memory.memory-objects.value"><div class="info"><h1 class="title">Propriété &quot;value&quot; du manager de mémoire</h1></div>
+        
+
+        <p class="para">
+            Utilisez la propriété &quot;<code class="code">value</code>&quot; du conteneur de mémoire (mobile ou
+            verrouillé) pour travailler avec les données des objets mémoire : <div class="programlisting"><div class="cdata"><pre>
+$memObject = $memoryManager-&gt;create($data);
+
+echo $memObject-&gt;value;
+
+$memObject-&gt;value = $newValue;
+
+$memObject-&gt;value[$index] = &#039;_&#039;;
+
+echo ord($memObject-&gt;value[$index1]);
+
+$memObject-&gt;value = substr($memObject-&gt;value, $start, $length);
+</pre></div></div>
+</p>
+
+        <p class="para">
+            Une autre manière d&#039;accéder aux données d&#039;objet mémoire est d&#039;utiliser la méthode
+            <a href="zend.memory.memory-objects.html#zend.memory.memory-objects.api.getRef" class="link"> <span class="methodname">getRef()</span></a>.
+            Cette méthode <em class="emphasis">doit</em> être utilisée pour les versions de <acronym class="acronym">PHP</acronym>
+            inférieure à 5.2. Il devrait aussi être utilisé dans quelques autres cas pour des
+            raisons de performance.
+        </p>
+    </div>
+
+    <div class="section" id="zend.memory.memory-objects.api" name="zend.memory.memory-objects.api"><div class="info"><h1 class="title">Interface du conteneur de mémoire</h1></div>
+        
+
+        <p class="para">Le conteneur de mémoire fournit les méthodes suivantes :</p>
+
+        <div class="section" id="zend.memory.memory-objects.api.getRef" name="zend.memory.memory-objects.api.getRef"><div class="info"><h1 class="title">La méthode getRef()</h1></div>
+            
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> &amp;getRef<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+            <p class="para">
+                La méthode  <span class="methodname">getRef()</span> retourne la référence vers une valeur
+                d&#039;objet.
+            </p>
+
+            <p class="para">
+                Des objets mobiles sont chargés du cache à ce moment si l&#039;objet n&#039;est pas déjà
+                dans la mémoire. Si l&#039;objet est chargé du cache, cela pourrait entraîner la mise en
+                cache d&#039;autres objets si la limite de mémoire était dépassée en ayant tous les
+                objets en mémoire.
+            </p>
+
+            <p class="para">
+                La méthode  <span class="methodname">getRef()</span> <em class="emphasis">doit</em> être utilisée pour
+                accéder aux données d&#039;objet mémoire si la version de <acronym class="acronym">PHP</acronym> est inférieure à 5.2
+            </p>
+
+            <p class="para">
+                Suivre à la trace les changements de ces données nécessitent des ressources
+                supplémentaires. La méthode  <span class="methodname">getRef()</span> retourne une référence à une
+                chaîne, qui est changé directement par l&#039;utilisateur de l&#039;application. Ainsi, c&#039;est
+                une bonne idée d&#039;utiliser la méthode  <span class="methodname">getRef()</span> pour le traitement des
+                données : <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$memObject</span> = <span style="color: #0000ff;">$memoryManager</span>-&gt;<span style="color: #006600;">create</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$data</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$value</span> = &amp;<span style="color: #0000ff;">$memObject</span>-&gt;<span style="color: #006600;">getRef</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #b1b100;">for</span> <span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$count</span> = <span style="color: #cc66cc;">0</span>; <span style="color: #0000ff;">$count</span> &lt; <a href="http://www.php.net/strlen"><span style="color: #000066;">strlen</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$value</span><span style="color: #66cc66;">&#41;</span>; <span style="color: #0000ff;">$count</span>++<span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #0000ff;">$char</span> = <span style="color: #0000ff;">$value</span><span style="color: #66cc66;">&#91;</span><span style="color: #0000ff;">$count</span><span style="color: #66cc66;">&#93;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; ...</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+</p>
+            </div>
+
+            <div class="section" id="zend.memory.memory-objects.api.touch" name="zend.memory.memory-objects.api.touch"><div class="info"><h1 class="title">La méthode touch()</h1></div>
+                
+
+                <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> <a href="http://www.php.net/touch"><span style="color: #000066;">touch</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+            <p class="para">
+                La méthode  <span class="methodname">touch()</span> devrait être employée en commun avec
+                 <span class="methodname">getRef()</span>. Elle signale que la valeur d&#039;objet a été changé :
+                <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$memObject</span> = <span style="color: #0000ff;">$memoryManager</span>-&gt;<span style="color: #006600;">create</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$data</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">...</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$value</span> = &amp;<span style="color: #0000ff;">$memObject</span>-&gt;<span style="color: #006600;">getRef</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #b1b100;">for</span> <span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$count</span> = <span style="color: #cc66cc;">0</span>; <span style="color: #0000ff;">$count</span> &lt; <a href="http://www.php.net/strlen"><span style="color: #000066;">strlen</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$value</span><span style="color: #66cc66;">&#41;</span>; <span style="color: #0000ff;">$count</span>++<span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; ...</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #b1b100;">if</span> <span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$condition</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$value</span><span style="color: #66cc66;">&#91;</span><span style="color: #0000ff;">$count</span><span style="color: #66cc66;">&#93;</span> = <span style="color: #0000ff;">$char</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; ...</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$memObject</span>-&gt;<span style="color: #006600;">touch</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+</p>
+            </div>
+
+            <div class="section" id="zend.memory.memory-objects.api.lock" name="zend.memory.memory-objects.api.lock"><div class="info"><h1 class="title">La méthode lock()</h1></div>
+                
+
+                <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> lock<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+            <p class="para">
+                La méthode  <span class="methodname">lock()</span> verrouille l&#039;objet en mémoire. Elle devrait
+                être utilisé pour empêcher la mise en cache des objets que vous choisissez.
+                Normalement, ce n&#039;est pas nécessaire, parce que le manager de mémoire utilise un
+                algorithme intelligent pour choisir des candidats à la mise en cache. Mais si vous
+                savez exactement, qu&#039;à cette endroit du code certains objets ne devraient pas être
+                mis en cache, vous pouvez les verrouiller.
+            </p>
+
+            <p class="para">
+                Le verrouillage d&#039;objets dans la mémoire garantit aussi que la référence
+                retournée par la méthode  <span class="methodname">getRef()</span> est valable jusqu&#039;à ce que vous
+                déverrouiller l&#039;objet : <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$memObject1</span> = <span style="color: #0000ff;">$memoryManager</span>-&gt;<span style="color: #006600;">create</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$data1</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$memObject2</span> = <span style="color: #0000ff;">$memoryManager</span>-&gt;<span style="color: #006600;">create</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$data2</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">...</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$memObject1</span>-&gt;<span style="color: #006600;">lock</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$memObject2</span>-&gt;<span style="color: #006600;">lock</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$value1</span> = &amp;<span style="color: #0000ff;">$memObject1</span>-&gt;<span style="color: #006600;">getRef</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$value2</span> = &amp;<span style="color: #0000ff;">$memObject2</span>-&gt;<span style="color: #006600;">getRef</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #b1b100;">for</span> <span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$count</span> = <span style="color: #cc66cc;">0</span>; <span style="color: #0000ff;">$count</span> &lt; <a href="http://www.php.net/strlen"><span style="color: #000066;">strlen</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$value2</span><span style="color: #66cc66;">&#41;</span>; <span style="color: #0000ff;">$count</span>++<span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #0000ff;">$value1</span> .= <span style="color: #0000ff;">$value2</span><span style="color: #66cc66;">&#91;</span><span style="color: #0000ff;">$count</span><span style="color: #66cc66;">&#93;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$memObject1</span>-&gt;<span style="color: #006600;">touch</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$memObject1</span>-&gt;<span style="color: #006600;">unlock</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$memObject2</span>-&gt;<span style="color: #006600;">unlock</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+</p>
+            </div>
+
+            <div class="section" id="zend.memory.memory-objects.api.unlock" name="zend.memory.memory-objects.api.unlock"><div class="info"><h1 class="title">La méthode unlock()</h1></div>
+                
+
+                <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> unlock<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+            <p class="para">
+                La méthode  <span class="methodname">unlock()</span> déverrouille l&#039;objet quand il n&#039;est plus
+                nécessaire de maintenir verrouillé. Voir l&#039;exemple ci-dessus.
+            </p>
+        </div>
+
+        <div class="section" id="zend.memory.memory-objects.api.isLocked" name="zend.memory.memory-objects.api.isLocked"><div class="info"><h1 class="title">La méthode isLocked()</h1></div>
+            
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> isLocked<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+            <p class="para">
+                La méthode  <span class="methodname">isLocked()</span> peut être utilisée pour vérifier si l&#039;objet
+                est verrouillé. Il retourne <b><tt>TRUE</tt></b> si l&#039;objet est verrouillé, ou
+                <b><tt>FALSE</tt></b> s&#039;il n&#039;est pas verrouillé. C&#039;est toujours <b><tt>TRUE</tt></b> pour
+                les objets &quot;verrouillés&quot; et peut être <b><tt>TRUE</tt></b> ou <b><tt>FALSE</tt></b> pour
+                des objets &quot;mobiles&quot;.
+            </p>
+        </div>
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.memory.memory-manager.html">Manager de m&eacute;moire</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.memory.html">Zend_Memory</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.mime.html">Zend_Mime</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.memory.html">Zend_Memory</a></li>
+  <li><a href="zend.memory.overview.html">Pr&eacute;sentation</a></li>
+  <li><a href="zend.memory.memory-manager.html">Manager de m&eacute;moire</a></li>
+  <li class="active"><a href="zend.memory.memory-objects.html">Objet m&eacute;moire</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

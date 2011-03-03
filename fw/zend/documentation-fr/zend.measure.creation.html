@@ -1,0 +1,215 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Cr&eacute;ation d'une mesure - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.measure.introduction.html">Introduction</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.measure.html">Zend_Measure</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.measure.output.html">R&eacute;cup&eacute;rer des mesures</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.measure.creation" class="section"><div class="info"><h1 class="title">Création d&#039;une mesure</h1></div>
+    
+
+    <p class="para">
+        En créant un objet de mesure, les méthodes <span class="classname">Zend_Measure_*</span>
+        prévoient que l&#039;entrée ou la mesure originale soit le premier paramètre. Ceci peut être un
+        <a href="zend.measure.creation.html#zend.measure.creation.number" class="link"><code class="code">argument numérique</code></a>, une
+        <a href="zend.measure.creation.html#zend.measure.creation.string" class="link"><code class="code">chaîne</code></a> sans unités, ou une
+        <a href="zend.measure.creation.html#zend.measure.creation.localized" class="link"><code class="code">chaîne régionale</code></a> avec
+        une (des) unité(s) spécifiée(s). Le deuxième paramètre définit le type de la mesure. Les
+        deux paramètres sont obligatoires. La langue peut être indiquée comme troisième paramètre
+        optionnel.
+    </p>
+
+    <div class="section" id="zend.measure.creation.number" name="zend.measure.creation.number"><div class="info"><h1 class="title">Créer des mesures à partir de nombres entiers et décimaux</h1></div>
+        
+
+        <p class="para">
+            En plus des valeurs de données en nombre entier, des nombre décimaux peuvent être
+            employés, mais <a href="http://www.php.net/float" class="link external">&raquo; &quot;il est fréquent que de simples
+            fractions décimales telles que 0.1 ou 0.7 ne puissent être converties au format interne
+            binaire sans une légère perte de précision&quot;</a> parfois en donnant des résultats
+            étonnants. En outre, il ne faut pas comparer l&#039;égalité de deux nombres décimaux.
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #1 Création de mesure en utilisant des nombres entiers et décimaux</b></p></div>
+            
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$mesure</span> = <span style="color: #cc66cc;">1234.7</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$unite</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Measure_Length<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#40;</span>integer<span style="color: #66cc66;">&#41;</span><span style="color: #0000ff;">$mesure</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; Zend_Measure_Length::<span style="color: #006600;">STANDARD</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$unite</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// affiche '1234 m' (mètres)</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$unite</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Measure_Length<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$mesure</span>, Zend_Measure_Length::<span style="color: #006600;">STANDARD</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$unite</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// affiche '1234.7 m' (mètres)</span></div></li></ol></div></div></div>
+
+        </div>
+    </div>
+
+    <div class="section" id="zend.measure.creation.string" name="zend.measure.creation.string"><div class="info"><h1 class="title">Créer des mesures à partir de chaînes de caractères</h1></div>
+        
+
+        <p class="para">
+            Beaucoup de mesures reçues comme entrée des applications Zend Framework peuvent
+            seulement être passées aux classes <span class="classname">Zend_Measure_*</span> comme des
+            chaînes, telles que des nombres écrits en utilisant les <a href="http://fr.wikipedia.org/wiki/Num%C3%A9ration_romaine" class="link external">&raquo; chiffres romains</a> ou
+            les valeurs binaires extrêmement grandes qui excèdent la précision native de <acronym class="acronym">PHP</acronym> des
+            nombres entiers ou décimaux. Puisque les nombres entiers peuvent être indiqués en
+            utilisant des chaînes, s&#039;il y a un quelconque risque de perdre la précision à cause des
+            limitations des types natifs (nombre entier et décimaux), il faut utiliser des chaînes à
+            la place. <span class="classname">Zend_Measure_Number</span> emploie l&#039;extension BCMath pour
+            supporter la précision arbitraire, afin d&#039;éviter les limitations dans beaucoup de
+            fonctions de <acronym class="acronym">PHP</acronym>, telle que <a href="http://php.net/bin2dec" class="link external">&raquo;  <span class="methodname">bin2dec()</span></a>.
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #2 Création de mesure en utilisant des chaînes</b></p></div>
+            
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$machaine</span> = <span style="color: #ff0000;">&quot;10010100111010111010100001011011101010001&quot;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$unit</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Measure_Number<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$machaine</span>, Zend_Measure_Number::<span style="color: #006600;">BINARY</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$unit</span>;</div></li></ol></div></div></div>
+
+        </div>
+    </div>
+
+    <div class="section" id="zend.measure.creation.localized" name="zend.measure.creation.localized"><div class="info"><h1 class="title">Mesures à partir de chaînes localisées</h1></div>
+        
+
+        <p class="para">
+            Quand une corde est présentée dans une notation régionalisée, l&#039;interprétation
+            correcte ne peut pas être déterminée sans connaître la région attendue. La division des
+            chiffres décimaux avec &quot;.&quot; et grouper des milliers avec &quot;,&quot; est commun en l&#039;anglais,
+            mais pas dans d&#039;autres langues. Par exemple, le nombre anglais &quot;1,234.50&quot; serait
+            interprété comme &quot;1.2345&quot; en allemand. Pour traiter de tels problèmes, la famille des
+            classes <span class="classname">Zend_Measure_*</span> offrent la possibilité d&#039;indiquer une
+            langue ou une région pour lever l&#039;ambiguïté les données d&#039;entrée et pour interpréter
+            correctement la valeur sémantique prévue.
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #3 Chaînes localisées</b></p></div>
+            
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$locale</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Locale<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'de'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$machaine</span> = <span style="color: #ff0000;">&quot;1,234.50&quot;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$unite</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Measure_Length<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$machaine</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Zend_Measure_Length::<span style="color: #006600;">STANDARD</span>, <span style="color: #0000ff;">$locale</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$unite</span>; <span style="color: #808080; font-style: italic;">// affiche &quot;1.234 m&quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$machaine</span> = <span style="color: #ff0000;">&quot;1,234.50&quot;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$unite</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Measure_Length<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$machaine</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;Zend_Measure_Length::<span style="color: #006600;">STANDARD</span>, <span style="color: #ff0000;">'en_US'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$unite</span>; <span style="color: #808080; font-style: italic;">// affiche &quot;1234.50 m&quot;</span></div></li></ol></div></div></div>
+
+        </div>
+
+        <p class="para">
+            Depuis la version 1.7.0 de Zend Framework, <span class="classname">Zend_Measure</span>
+            supporte aussi l&#039;utilisation d&#039;une application pleinement localisée. Vous pouvez
+            simplement paramétrer une instance <span class="classname">Zend_Locale</span> dans le registre
+            comme présenté ci-dessous. Avec cette notation vous pouvez ne pas paramétrer cette
+            valeur manuellement à chaque fois quand vous utilisez la même localisation plusieurs
+            fois.
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// in your bootstrap file</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$locale</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Locale<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'de_AT'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">Zend_Registry::<span style="color: #006600;">set</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'Zend_Locale'</span>, <span style="color: #0000ff;">$locale</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// somewhere in your application</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$length</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Measure_Length<span style="color: #66cc66;">&#40;</span>Zend_Measure_Length::<span style="color: #006600;">METER</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.measure.introduction.html">Introduction</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.measure.html">Zend_Measure</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.measure.output.html">R&eacute;cup&eacute;rer des mesures</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.measure.html">Zend_Measure</a></li>
+  <li><a href="zend.measure.introduction.html">Introduction</a></li>
+  <li class="active"><a href="zend.measure.creation.html">Cr&eacute;ation d'une mesure</a></li>
+  <li><a href="zend.measure.output.html">R&eacute;cup&eacute;rer des mesures</a></li>
+  <li><a href="zend.measure.edit.html">Manipuler des mesures</a></li>
+  <li><a href="zend.measure.types.html">Types de mesures</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>
