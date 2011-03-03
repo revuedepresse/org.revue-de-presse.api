@@ -1746,42 +1746,49 @@ class Data_Fetcher extends Database
 
 		$class_dumper = $class_application::getDumperClass();
 
-		if ( FALSE != strpos( $identifier, '_' ) )
-		
-			$identifier = str_replace( '_', '.', $identifier );
+		$callback_parameters = FALSE;
 
-		else if ( preg_match( '/\s+/', $identifier ) )
-		
-			$identifier = preg_replace('/[\s+]/', '.', $identifier);
+		if (
+			is_string( $identifier ) &&
+			strlen( $identifier )
+		)
+		{
+			if ( ( FALSE != strpos( $identifier, '_' ) ) )
+			
+				$identifier = str_replace( '_', '.', $identifier );
+	
+			else if ( preg_match( '/\s+/', $identifier ) )
+			
+				$identifier = preg_replace('/[\s+]/', '.', $identifier);
 
-		$select_form = '
-			SELECT
-				frm_id id,
-				frm_identifier form_identifier,
-				frm_title title,
-				frm_config configuration,
-				prv_id	privilege_level,
-				rte_id route,
-				rte_uri form_uri
-			FROM
-				'.TABLE_FORM.'
-			LEFT JOIN
-				'.TABLE_ROUTE.'
-			USING
-				(rte_id)
-			WHERE
-				frm_status = '.FORM_STATUS_ACTIVE.' AND
-				frm_identifier LIKE "'.$identifier.'"
-		';
-		
-		$results_form = $class_db::query( $select_form );
+			$select_form = '
+				SELECT
+					frm_id id,
+					frm_identifier form_identifier,
+					frm_title title,
+					frm_config configuration,
+					prv_id	privilege_level,
+					rte_id route,
+					rte_uri form_uri
+				FROM
+					'.TABLE_FORM.'
+				LEFT JOIN
+					'.TABLE_ROUTE.'
+				USING
+					(rte_id)
+				WHERE
+					frm_status = '.FORM_STATUS_ACTIVE.' AND
+					frm_identifier LIKE "'.$identifier.'"
+			';
+			
+			$results_form = $class_db::query( $select_form );
+	
+			if ( is_object( $results_form ) && $results_form->num_rows )
+	
+				$callback_parameters = $results_form->fetch_object();
+		}
 
-		if ( is_object( $results_form ) && $results_form->num_rows )
-
-			return $results_form->fetch_object();
-		else
-
-			return FALSE;
+		return $callback_parameters;
 	}
 
 	/**
