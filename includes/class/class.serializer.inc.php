@@ -1953,7 +1953,7 @@ class Serializer extends Executor
 						$store_name = $matches[2];
 
 					// set the default update field value flag
-					$update_field_value = true;
+					$update_field_value = TRUE;
 
 					// check if a user is logged in
 					if ( $authorization_granted || $class_user_handler::loggedIn() )
@@ -2374,6 +2374,7 @@ class Serializer extends Executor
 								)
 						);
 				}
+
 			else if (
 				$events_exists &&
 				defined(

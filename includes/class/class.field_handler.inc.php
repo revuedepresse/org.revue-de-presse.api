@@ -99,16 +99,22 @@ class Field_Handler extends Form
 		$handler_id = FORM_ORDINARY
 	)
 	{
-		global $class_application;
+		global $class_application, $verbose_mode;
 
 		// set the data fetcher class name
-		$class_data_fetcher = $class_application::getDataFetcherClass();
+		$class_data_fetcher = self::getDataFetcherClass();
 
 		// set the dumper class name
-		$class_dumper = $class_application::getDumperClass();
+		$class_dumper = self::getDumperClass();
 
 		// set the form manager class name
-		$class_form_manager = $class_application::getFormManagerClass();
+		$class_form_manager = self::getFormManagerClass();
+
+		// set the test case class name
+		$class_test_case = self::getTestCaseClass();
+
+		// initialize the context of a test case 
+		$context = array();
 
 		// get handlers
 		$handlers = $class_form_manager::getHandlers();
@@ -127,6 +133,21 @@ class Field_Handler extends Form
 					unset( $_control_dashboard[$_field_name] );
 			}
 		}
+
+		// get coordinates
+		$coordinates = &$this->getCoordinates( $handler_id );
+
+		if ( isset( $coordinates[COORDINATES_POSITION_INSTANCES] ) )
+		{
+			$position_instances = $coordinates[COORDINATES_POSITION_INSTANCES];
+
+			end( $position_instances );
+			list( $position_instance ) = each( $position_instances );
+			reset( $position_instances );
+		}
+		else
+
+			$position_instance = NULL;
 
 		// get the link suffix length
 		$suffix_start = strpos( $field_name, SUFFIX_LINK );
@@ -346,8 +367,7 @@ class Field_Handler extends Form
 			}
 		}
 
-		// clear errors for non empty fields which are not linked to any other field
-		if (
+		$condition_field_missing = 
 			$field_name == $trimmed_field_name &&
 			isset( $errors[$field_name][ERROR_FIELD_MISSING] ) &&
 			isset( $field_value ) &&
@@ -358,7 +378,41 @@ class Field_Handler extends Form
 				isset( $filters ) &&
 				in_array( FILTER_NUMERIC, $filters )
 			)
-		)
+		;
+
+		/**
+		*
+		* context for test case of revision 561
+		*
+		* Revise field links controller
+		*
+		*/
+
+		$context = array_merge(
+			$context,
+			array(
+				PROPERTY_NAME => $field_name,				
+				PROPERTY_CONDITION_FIELD_VALUE_MISSING =>
+					$condition_field_missing,
+				PROPERTY_CONDITION_FIELD_VALUE_UNCONFIRMED => 
+					$field_name != $trimmed_field_name &&
+					(
+						!empty( $link_field_value ) ||
+						!empty( $data_submitted[$trimmed_field_name] )
+					) &&
+					isset( $errors[$field_name][ERROR_FIELD_MISSING] ) &&
+					! isset( $errors[$trimmed_field_name][ERROR_FIELD_MISSING] ),
+				PROPERTY_ERROR =>
+						isset( $errors[$field_name] )
+					?
+						$errors[$field_name]
+					:
+						PROPERTY_NULL
+			)
+		);
+
+		// clear errors for non empty fields which are not linked to any other field
+		if ( $condition_field_missing )
 		{
 			// check if confirmation is correct for two fields which have been linked
 			if (
@@ -379,39 +433,123 @@ class Field_Handler extends Form
 		}
 
 		// check errors for fields with linked values
-		else if (
-			$field_name != $trimmed_field_name &&
-			(
-				!empty( $link_field_value ) ||
-				!empty( $data_submitted[$trimmed_field_name] )
-			) &&
-			isset( $errors[$field_name][ERROR_FIELD_MISSING] ) &&
-			! isset( $errors[$trimmed_field_name][ERROR_FIELD_MISSING] )
-		)
+		else if ( $field_name != $trimmed_field_name  )
 		{
 			if (
-				$data_submitted[$trimmed_field_name] ==
-					$data_submitted[$field_name]
+				! empty( $link_field_value ) ||
+				! empty( $data_submitted[$trimmed_field_name] )
 			)
+			{
+				if (
+					isset( $errors[$field_name][ERROR_FIELD_MISSING] ) &&
+					! isset( $errors[$trimmed_field_name][ERROR_FIELD_MISSING] )					
+				)
+				{		
+					// append the field confirmation status to the context
+					// of a test case
+				
+					$context = array_merge(
+						$context,
+						array(
+							PROPERTY_DATA_CONFIRMED => 
+								$data_submitted[$trimmed_field_name] ==
+									$data_submitted[$field_name]						
+						)						
+					);
+		
+					if (
+						$data_submitted[$trimmed_field_name] ==
+							$data_submitted[$field_name]
+					)
+					{
+						unset( $errors[$field_name][ERROR_FIELD_MISSING] );
 
-				unset( $errors[$field_name][ERROR_FIELD_MISSING] );
+						if ( ! isset( $errors[$field_name][ERROR_WRONG_CONFIRMATION] ) )
+			
+							// restore the link target field value
+							$field_values[$field_name] = $field_value = $link_field_value;						
+					}		
+					else
+					{
+						// append field values the context of a test case
+						$context = array_merge(
+							$context,
+							array(
+								PROPERTY_FIELD_VALUES,
+								$field_values
+							)
+						);
 
-			if ( ! isset( $errors[$field_name][ERROR_WRONG_CONFIRMATION] ) )
+						if (
+							! isset(
+								$errors[$field_name][ERROR_WRONG_CONFIRMATION]
+							)
+						)
+						
+							$errors[$field_name][ERROR_WRONG_CONFIRMATION] =
+								FORM_LINK_BAD
+							;
+					}
+				}
+				else if (
+					! isset( $errors[$field_name][ERROR_FIELD_MISSING] ) &&
+					(
+						$data_submitted[$trimmed_field_name] !=
+							$data_submitted[$field_name]					
+					)
+				)
+				{					
+					$control_dashboard[$field_name] = array(
+						ERROR_FIELD_MISSING => FORM_REQUIRED_FIELD,
+						ERROR_WRONG_CONFIRMATION  => FORM_LINK_BAD
+					);
 
-				// restore the link target field value
-				$field_values[$field_name] = $field_value = $link_field_value;
+					$control_dashboard[$trimmed_field_name] = array(
+						ERROR_FIELD_MISSING => FORM_REQUIRED_FIELD
+					);
+					
+					$errors[$field_name] = array(
+						ERROR_FIELD_MISSING => FORM_REQUIRED_FIELD,
+						ERROR_WRONG_CONFIRMATION  => FORM_LINK_BAD
+					);
+					
+					$errors[$trimmed_field_name] = array(
+						ERROR_FIELD_MISSING => FORM_REQUIRED_FIELD
+					);
+
+					if ( isset( $control_dashboard[''] )  )
+					
+						unset( $control_dashboard[''] );
+						
+					if ( isset( $errors[''] )  )
+					
+						unset( $errors[''] );
+
+					// append the control dashboard and errors to the context
+					// of a test case
+				
+					$context = array_merge(
+						$context,
+						array(
+							PROPERTY_DASHBOARD => $control_dashboard,
+							PROPERTY_ERRORS => $errors
+						)						
+					);
+				}
+			}
 		}
-
+	
 		// check if a default value was set to acceptable
 		if (
 			$field_type == FIELD_TYPE_HIDDEN
 			||
 			isset( $errors[$field_name][ERROR_DEFAULT_VALUE] ) &&
 			isset( $default_value ) &&			
-			!empty( $field_value ) &&
+			! empty( $field_value ) &&
 			$field_value != $default_value
 		)
-			unset($errors[$field_name][ERROR_DEFAULT_VALUE]);
+
+			unset( $errors[$field_name][ERROR_DEFAULT_VALUE] );
 
 		// check if the errors store is to be unset
 		if (
@@ -432,6 +570,12 @@ class Field_Handler extends Form
 			// unset the errors for the current field
 			unset( $errors[$field_name] );
 		}
+
+		$class_test_case::perform(
+			DEBUGGING_FIELD_HANDLING_LINK_FIELDS_AT_ERROR_CLEARANCE,
+			$verbose_mode,
+			$context
+		);
 	}
 
 	/**
@@ -448,16 +592,26 @@ class Field_Handler extends Form
 		$handler_id = FORM_ORDINARY
 	)
 	{
+		global $verbose_mode;
+
 		// set the dumper class
 		$class_dumper = self::getDumperClass();
 
 		// set the field handler class
 		$class_field_handler = __CLASS__;
 
+		// set the test case class
+		$class_test_case = self::getTestCaseClass();
+
 		$data = &$this->getSubmittedData();
 
 		// get the store
 		$store = &self::getStore( $position, $handler_id );
+
+		// initialize test case context 
+		$context =
+
+		$links = array();
 
 		// check if multiple instances of the same position
 		/// are about to be submitted
@@ -499,14 +653,117 @@ class Field_Handler extends Form
 			
 				$field_values = &$data;
 			else
+			{
+				$suffix_length = strlen( SUFFIX_LINK );
+				
+				while (
+					(
+						list( $field_name, ) = 
+							each(
+								$store[SESSION_STORE_FIELD][SESSION_STORE_VALUE]
+							)
+					) &&  ! in_array( $field_name, $links )
+				)
+				{
+					// get the link suffix length
+					$suffix_start = strpos( $field_name, SUFFIX_LINK );
+			
+					// check if the current field is linked to another field
+					if ( $suffix_start === FALSE )
+			
+						$trimmed_field_name = $field_name;
+					else
+			
+						$trimmed_field_name = substr(
+							$field_name,
+							0,
+							strlen( $field_name ) - $suffix_length
+						);
+
+					/**
+					*
+					* context for test case of revision 561
+					*
+					* Revise field links controller
+					*
+					*/
+
+					$context = array_merge(
+						$context,
+						array(
+							PROPERTY_IDENTITY =>
+									$trimmed_field_name != $field_name
+								?
+									'TRUE'
+								:
+									'FALSE',
+							PROPERTY_NAME => $field_name,
+							PROPERTY_NAME_TRIMMED => $trimmed_field_name,
+							PROPERTY_DATA_SUBMITTED =>  $data,
+							PROPERTY_STORE => $store,
+							PROPERTY_DATA_POSTED =>  $_POST
+						)
+					);
+
+					if (
+						( $trimmed_field_name != $field_name ) &&
+						$store[SESSION_STORE_FIELD]
+							[SESSION_STORE_VALUE][$field_name] !=
+							$store[SESSION_STORE_FIELD]
+								[SESSION_STORE_VALUE][$trimmed_field_name]
+					)
+					{
+						$store[SESSION_STORE_FIELD]
+								[SESSION_STORE_VALUE][$field_name] = ''
+						;
+						
+						if (
+							isset(
+								$store[SESSION_STORE_FIELD]
+									[SESSION_STORE_ATTRIBUTE]
+										[$trimmed_field_name]
+											[AFFORDANCE_HASH]
+							)
+						)
+
+							/**
+							* 
+							* Set hashed fields values to blank
+							*
+							*/
+
+							$store[SESSION_STORE_FIELD]
+									[SESSION_STORE_VALUE]
+										[$trimmed_field_name] = ''
+							;
+					}
+
+					$links[] = $field_name;
+				}
+				
+				reset( $store[SESSION_STORE_FIELD][SESSION_STORE_VALUE] );
 
 				$field_values = &$store[SESSION_STORE_FIELD][SESSION_STORE_VALUE];
+
+				$context = array_merge(
+					$context,
+					array(
+						PROPERTY_FIELD_VALUES => $field_values
+					)
+				);
+			}
 
 			$store
 				[SESSION_STORE_FIELD]
 					[SESSION_STORE_HALF_LIVING] =
 				&$field_values
 			;
+
+			$class_test_case::perform(
+				DEBUGGING_FIELD_HANDLING_LINK_FIELDS,
+				$verbose_mode,
+				$context
+			);
 
 			unset( $store[SESSION_STORE_FIELD][SESSION_STORE_VALUE] );
  		}
@@ -1805,8 +2062,10 @@ class Field_Handler extends Form
 				$handler_id
 			);
 
-			// get the field type
-			$field_type = $field_attributes[HTML_ATTRIBUTE_TYPE];
+			if ( isset( $field_attributes[HTML_ATTRIBUTE_TYPE] ) )
+
+				// get the field type
+				$field_type = $field_attributes[HTML_ATTRIBUTE_TYPE];
 
 			// get the default value
 			if ( isset( $field_attributes[HTML_ATTRIBUTE_VALUE] ) )
@@ -2028,11 +2287,19 @@ class Field_Handler extends Form
 		&$field_values		
 	)
 	{
+		global $verbose_mode;
+
 		// set the dumper class name
 		$class_dumper = self::getDumperClass();
 
 		// set the form manager class name
 		$class_form_manager = self::getFormManagerClass();
+
+		// set the test case class
+		$class_test_case = self::getTestCaseClass();
+
+		// initialize the context of a test case 
+		$context = array();
 
 		// get the control dashboard
 		$control_dashboard = &self::get_control_dashboard(
@@ -2088,13 +2355,30 @@ class Field_Handler extends Form
 			$field_values[$field_name] = $values[$field_name];
 
 		else if ( $default_value )
-
+		{
 			if ( $trimmed_field_name == $field_name )
 			
 				$field_values[$field_name] = $default_value;
 			else
 
-				$field_values[$field_name] = $default_value;
+				$field_values[$field_name] = $field_values[$trimmed_field_name];
+
+			/**
+			*
+			* context for test case of revision 561
+			*
+			* Revise field links controller
+			*
+			*/
+	
+			$context = array_merge(
+				$context,
+				array(
+					PROPERTY_NAME => $field_name,
+					PROPERTY_VALUE => $field_values[$field_name]
+				)
+			);
+		}
 
 		// check if an error was detected for the current field
 		if ( isset( $control_dashboard[$field_name] ) )
@@ -2104,16 +2388,14 @@ class Field_Handler extends Form
 			{
 				while ( list( $filter, $filter_applied ) = each( $filters ) )
 				{
-					// check the filters
-					if ( $field_name == 'field name' )
-						
-						$class_dumper::log(
-							__METHOD__,
-							array(
-								'filters:',
-								$filters
-							)
-						);
+					// append the current filter to the test case context
+					$context = array_merge(
+						$context,
+						array(
+							PROPERTY_NAME => $field_name,
+							PROPERTY_FILTER => $filter
+						)
+					);
 
 					if ( $filter_applied === FALSE )
 
@@ -2134,6 +2416,15 @@ class Field_Handler extends Form
 
 			// prepare detected error values to be returned
 			$errors[$field_name] = &$control_dashboard[$field_name];
+
+			// append the current error to the test case context
+			$context = array_merge(
+				$context,
+				array(
+					PROPERTY_NAME => $field_name,
+					PROPERTY_ERROR => $errors[$field_name]
+				)
+			);
 
 			// check if the current field type is not button, image or submit
 			// before saving it in session
@@ -2161,22 +2452,25 @@ class Field_Handler extends Form
 				$handler_id
 			);
 
-			// get a debugging report about the control dashboard,
-			// errors and field values
-			Dumper::log(
-				__METHOD__,
-				array(
-					'trimmed field name: '.$trimmed_field_name,
-					'control dashboard: ',
-					$control_dashboard,
-					'errors to be passed to the current form: ',
-					$errors,
-					'field values: ',
-					$values
-				),
-				DEBUGGING_FIELD_HANDLING && strpos( $field_name, 'email' )
-			);
+			if ( strpos( $field_name, 'submit' ) !== FALSE )
+		
+				// append the control dashboard, errors and field values
+				// to the test case context
+				$context = array_merge(
+					$context,
+					array(
+						PROPERTY_DASHBOARD => $control_dashboard,
+						PROPERTY_ERRORS => $errors,
+						PROPERTY_VALUES => $values
+					)
+				);
 		}
+
+		$class_test_case::perform(
+			DEBUGGING_FIELD_HANDLING_LINK_FIELDS_AT_DATA_SUBMISSION,
+			$verbose_mode,
+			$context
+		);
 	}
 
 	/**
@@ -2643,6 +2937,15 @@ class Field_Handler extends Form
 		$handler_id = FORM_ORDINARY
 	)
 	{
+		global $verbose_mode;
+
+		$class_dumper = self::getDumperClass();
+
+		$class_test_case = self::getTestCaseClass();
+
+		// initialize the context of a test case 
+		$context = array();
+		
 		// get the control dashboard
 		$control_dashboard = &self::get_control_dashboard( $position, $handler_id );
 
@@ -2652,7 +2955,7 @@ class Field_Handler extends Form
 
 		$data_submission = $this->getAProperty( PROPERTY_DATA_SUBMISSION );
 
-		$data_validation = $this->getAProperty( PROPERTY_DATA_VALIDATION_FAILURE );
+		$data_validation = &$this->getAProperty( PROPERTY_DATA_VALIDATION_FAILURE );
 
 		// declare the default field handler
 		$field_handler = NULL;
@@ -2679,6 +2982,33 @@ class Field_Handler extends Form
 			$control_dashboard[$target][ERROR_WRONG_CONFIRMATION] = FORM_LINK_BAD;
 		}
 
+		/**
+		*
+		* context for test case of revision 561
+		*
+		* Revise field links controller
+		*
+		*/
+
+		$context = array_merge(
+			$context,
+			array(
+				PROPERTY_TARGET => isset( $children[$target] ),
+				PROPERTY_NAME => $name,
+				PROPERTY_DATA_VALIDATION => $data_validation,
+				PROPERTY_DATA_VALIDATION_FAILURE => ( $data_validation === TRUE ),
+				PROPERTY_CONDITION_VALIDATION_FAILURE =>
+						isset( $children[$target] ) &&
+						$children[$target]->getProperty(
+							PROPERTY_DATA_VALIDATION_FAILURE
+						)
+					?
+						'TRUE'
+					:
+						'FALSE'
+			)
+		);
+
 		// case when some data validation fail
 		if (
 			$data_validation === TRUE &&
@@ -2687,6 +3017,7 @@ class Field_Handler extends Form
 		)
 		{
 			$field_handler->setProperty( PROPERTY_DATA_VALIDATION_FAILURE, FALSE );
+
 			$control_dashboard[$target][ERROR_WRONG_CONFIRMATION] = FORM_LINK_BAD;
 			
 			$children[$target]->setProperty( PROPERTY_DATA_VALIDATION_FAILURE, FALSE );
@@ -2697,6 +3028,12 @@ class Field_Handler extends Form
 		)
 
 			unset( $control_dashboard[$target][ERROR_WRONG_CONFIRMATION] );
+
+		$class_test_case::perform(
+			DEBUGGING_FIELD_HANDLING_LINK_FIELDS,
+			$verbose_mode,
+			$context
+		);
 
 		return $field_handler;
 	}
@@ -3460,8 +3797,9 @@ class Field_Handler extends Form
 			}
 
 			if (
-				$parent != ROUTE_OVERVIEW &&
-				FALSE == $authorization_granted
+				( $parent != ROUTE_OVERVIEW ) &&
+				( FALSE == $authorization_granted ) &&
+				is_object( $qualities )
 			)
 
 				// login the current member again
@@ -4839,19 +5177,23 @@ class Field_Handler extends Form
 	* @param	mixed		$informant	informant
     * @return 	array		dashboard
     */
-	public function &getDashboard($informant = NULL)
+	public function &getDashboard( $informant = NULL )
 	{
 		// get the handler identifier
 		$handler_id = $this->getHandlerId();
 
 		// get the coordinates of the field handler
-		$coordinates = $this->getCoordinates($handler_id);
+		$coordinates = $this->getCoordinates( $handler_id );
 
 		// get the current position
 		$current_position = $coordinates[COORDINATES_CURRENT_POSITION];
 
 		// return a control dashboard
-		return self::getControlDashboard($handler_id, $current_position, $informant);		
+		return self::getControlDashboard(
+			$handler_id,
+			$current_position,
+			$informant
+		);
 	}
 
 	/**
@@ -5918,7 +6260,7 @@ class Field_Handler extends Form
 
 					// check the hash affordance
 					if ( isset( $field_attributes[AFFORDANCE_HASH] ) )
-					
+
 						// set the value hash
 						$store[SESSION_STORE_FIELD][SESSION_STORE_VALUE][$name] =
 							call_user_func(
@@ -5926,6 +6268,7 @@ class Field_Handler extends Form
 								$value
 							)
 						;
+
 					else
 
 						// set the value
@@ -5960,6 +6303,7 @@ class Field_Handler extends Form
 
 				// check the field type
 				if (
+					isset( $field_attributes[HTML_ATTRIBUTE_TYPE] ) &&
 					in_array(
 						strtolower( $field_attributes[HTML_ATTRIBUTE_TYPE] ),
 						array(
@@ -6494,7 +6838,7 @@ class Field_Text extends Html_Input
     * @param	string 	$data	containing data to be checked
     * @return 	string	containing data
     */
-	public function check($data)
+	public function check( $data )
 	{
 		$class_field_handler = CLASS_FIELD_HANDLER;
 
@@ -6504,6 +6848,7 @@ class Field_Text extends Html_Input
 
 		// get field filters
 		$filters = &$class_field_handler::get_field_filters($this->id);		
+
 		$valid_input = TRUE;
 
 		if (isset($filters) && is_array($filters) && count($filters) > 0)

@@ -1146,4 +1146,3 @@ class Interceptor extends Store
 		self::updatePosition($url, POSITION_PREVIOUS, $store_type);
 	}
 }
-?>

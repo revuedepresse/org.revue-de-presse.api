@@ -352,8 +352,8 @@ class Dumper extends Toolbox
 				)
 				{
 					//if ( $force_display == TRUE )
-
-						//var_dump( $messages );
+					//
+					//	var_dump( $messages );
 
 					$dumper = new self(
 						'',
@@ -392,4 +392,3 @@ class Dumper extends Toolbox
 		return $class_file_manager::dump( $message );
 	}
 }
-?>
