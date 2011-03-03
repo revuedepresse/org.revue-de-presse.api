@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lang name="user">
+    <s id="affordance_logout">Logout</s>
+    <s id="dialog_welcome">Welcome</s>
+    <s id="administrator">Administrator</s>
+</lang>

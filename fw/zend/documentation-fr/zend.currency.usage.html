@@ -1,0 +1,191 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Utiliser Zend_Currency - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.currency.introduction.html">Introduction &agrave; Zend_Currency</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.currency.html">Zend_Currency</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.currency.options.html">Options des monnaies</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.currency.usage" class="section"><div class="info"><h1 class="title">Utiliser Zend_Currency</h1></div>
+    
+
+    <div class="section" id="zend.currency.usage.generic" name="zend.currency.usage.generic"><div class="info"><h1 class="title">Utilisation de base</h1></div>
+        
+
+        <p class="para">
+            La manière la plus simple consiste à se reposer sur la locale de l&#039;utilisateur. Lorsque vous créez
+            une instance de <span class="classname">Zend_Currency</span> sans préciser d&#039;options, la locale du client sera alors
+            utilisée.
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #1 Créer une monnaie avec les paramètres du client</b></p></div>
+            
+
+            <div class="example-contents"><p>
+                Imaginons un client dont la locale est &quot;en_US&quot; dans son navigateur. Dans ce cas,
+                <span class="classname">Zend_Currency</span> détectera automatiquement la monnaie à utiliser.
+            </p></div>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$currency</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Currency<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Voyons les paramètres par défaut régis par la locale utilisateur</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// var_dump($currency);</span></div></li></ol></div></div></div>
+
+
+            <div class="example-contents"><p>
+                L&#039;objet crée va alors contenir une monnaie &quot;US Dollar&quot; car il s&#039;agit de la monnaie affectée
+                aux USA. D&#039;autres options ont aussi été affectées comme le signe &quot;$&quot; ou l&#039;abbréviation
+                 &quot;USD&quot;.
+            </p></div>
+        </div>
+
+        <blockquote><p><b class="note">Note</b>: <span class="info"><b>La détection automatique par locale ne fonctionne pas toujours</b><br /></span>
+            
+
+            
+                La détection automatique par locale ne fonctionne pas toujours car
+                <span class="classname">Zend_Currency</span> nécessite une locale incluant la région. Si le client
+                utilise une locale courte (&quot;en&quot;), <span class="classname">Zend_Currency</span> ne sait pas quelle
+                région parmi les 30 possibles choisir. Une exception sera alors levée.
+            <br />
+
+            
+                Un client peut aussi déregler la locale dans son navigateur, ou la supprimer. Ainsi le paramètre
+                de l&#039;environnement sera alors utilisé pour la locale, ce qui peut mener à des comportements non
+                attendus ou des exceptions.
+            <br />
+        </p></blockquote>
+    </div>
+
+    <div class="section" id="zend.currency.usage.locale" name="zend.currency.usage.locale"><div class="info"><h1 class="title">Créer une monnaie basée sur une locale</h1></div>
+        
+
+        <p class="para">
+            Pour éviter ce genre de problème, précisez manuellement la locale à utiliser.
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$currency</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Currency<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'en_US'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Utilisation de l'option 'locale'</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// $currency = new Zend_Currency(array('locale' =&gt; 'en_US'));</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Voir la monnaie avec les paramètres actuels fixés à 'en_US'</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// var_dump($currency);</span></div></li></ol></div></div></div>
+
+
+        <p class="para">
+            Dans l&#039;exemple ci-dessus, nous ne sommes plus dépendant du client.
+        </p>
+
+        <p class="para">
+            <span class="classname">Zend_Currency</span> supporte aussi l&#039;utilisation d&#039;une locale globale.
+            Mettez une instance de <span class="classname">Zend_Locale</span> dans le registre comme montré
+            ci-après. Dans un tel cas, l&#039;option locale n&#039;est plus obligatoire pour chaque instance
+            et la même locale sera utilisée partout, tout le temps.
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// dans le bootstrap</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$locale</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Locale<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'de_AT'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">Zend_Registry::<span style="color: #006600;">set</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'Zend_Locale'</span>, <span style="color: #0000ff;">$locale</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// quelque part dans l'application</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$currency</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Currency<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.currency.introduction.html">Introduction &agrave; Zend_Currency</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.currency.html">Zend_Currency</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.currency.options.html">Options des monnaies</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.currency.html">Zend_Currency</a></li>
+  <li><a href="zend.currency.introduction.html">Introduction &agrave; Zend_Currency</a></li>
+  <li class="active"><a href="zend.currency.usage.html">Utiliser Zend_Currency</a></li>
+  <li><a href="zend.currency.options.html">Options des monnaies</a></li>
+  <li><a href="zend.currency.description.html">Qu'est ce qui d&eacute;finit une monnaie?</a></li>
+  <li><a href="zend.currency.position.html">O&ugrave; est le symbole monn&eacute;taire?</a></li>
+  <li><a href="zend.currency.number.html">A quoi ressemble une monnaie?</a></li>
+  <li><a href="zend.currency.value.html">Travailler avec les valeurs des monnaies (les montants)</a></li>
+  <li><a href="zend.currency.calculation.html">Calculs avec les monnaies</a></li>
+  <li><a href="zend.currency.exchange.html">Echanger (convertir) des monnaies</a></li>
+  <li><a href="zend.currency.additional.html">Informations compl&eacute;mentaires pour Zend_Currency</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

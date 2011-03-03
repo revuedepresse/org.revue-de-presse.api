@@ -1,0 +1,623 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Zend_Service_Flickr - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.service.developergarden.html">Zend_Service_DeveloperGarden</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.service.html">Zend_Service</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.service.livedocx.html">Zend_Service_LiveDocx</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.service.flickr" class="section"><div class="info"><h1 class="title">Zend_Service_Flickr</h1></div>
+    
+
+    <div class="section" id="zend.service.flickr.introduction" name="zend.service.flickr.introduction"><div class="info"><h1 class="title">Introduction</h1></div>
+        
+
+        <p class="para">
+            <span class="classname">Zend_Service_Flickr</span> est une <acronym class="acronym">API</acronym> simple pour utiliser le
+            service Web REST de Flick. Pour pouvoir utiliser les services Web Flickr, vous devez
+            avoir une clé d&#039;utilisation de l&#039;API. Pour obtenir une telle clé, et pour plus
+            d&#039;information sur le service Web REST de Flickr, veuillez vous référez à la <a href="http://www.flickr.com/services/api/" class="link external">&raquo; documentation de l&#039;API Flickr</a>.
+        </p>
+
+        <p class="para">
+            Dans l&#039;exemple suivant, nous allons utiliser la méthode  <span class="methodname">tagSearch()</span>
+            pour rechercher des photos ayant &quot;php&quot; dans les tags.
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #1 Simple recherche de photos sur Flickr</b></p></div>
+            
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$flickr</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Service_Flickr<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'MA_CLE_API'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$results</span> = <span style="color: #0000ff;">$flickr</span>-&gt;<span style="color: #006600;">tagSearch</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">&quot;php&quot;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #b1b100;">foreach</span> <span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$results</span> <span style="color: #b1b100;">as</span> <span style="color: #0000ff;">$result</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$result</span>-&gt;<span style="color: #006600;">title</span> . <span style="color: #ff0000;">'&lt;br /&gt;'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+
+        </div>
+
+        <blockquote><p><b class="note">Note</b>: <span class="info"><b>Paramètres optionnels</b><br /></span>
+            
+
+            
+                 <span class="methodname">tagSearch()</span> accepte un tableau d&#039;options comme second paramètre
+                optionnel.
+            <br />
+        </p></blockquote>
+    </div>
+
+    <div class="section" id="zend.service.flickr.finding-users" name="zend.service.flickr.finding-users"><div class="info"><h1 class="title">Trouver les photos et les informations des utilisateurs Flickr</h1></div>
+        
+
+        <p class="para">
+            <span class="classname">Zend_Service_Flickr</span>fournit plusieurs façons différentes de
+            récupérer des informations sur les utilisateurs.
+        </p>
+
+        <ul class="itemizedlist">
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">userSearch()</span>: Accepte une chaîne de caractère de balise
+                    délimitée par des espaces, et un tableau d&#039;options en second paramètre
+                    optionnel. Elle retourne un jeu de photos sous la forme d&#039;un objet
+                    <span class="classname">Zend_Service_Flickr_ResultSet</span>.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">getIdByUsername()</span>: Retourne l&#039;identifiant utilisateur,
+                    correspondant à son nom d&#039;utilisateur.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">getIdByEmail()</span>: Retourne l&#039;identifiant utilisateur
+                    correspondant à l&#039;adresse émail donnée.
+                </p>
+            </li>
+        </ul>
+
+        <div class="example"><div class="info"><p><b>Example #2 Trouver les photos publiques d&#039;un utilisateur Flickr par son adresse
+            émail</b></p></div>
+            
+
+            <div class="example-contents"><p>
+                Dans cet exemple, nous havons une adresse émail d&#039;un utilisateur Flickr, et
+                nous recherchons les photos publiques des utilisateurs en utilisant la méthode
+                 <span class="methodname">userSearch()</span> :
+            </p></div>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$flickr</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Service_Flickr<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'MA_CLE_API'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$results</span> = <span style="color: #0000ff;">$flickr</span>-&gt;<span style="color: #006600;">userSearch</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$userEmail</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #b1b100;">foreach</span> <span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$results</span> <span style="color: #b1b100;">as</span> <span style="color: #0000ff;">$result</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$result</span>-&gt;<span style="color: #006600;">title</span> . <span style="color: #ff0000;">'&lt;br /&gt;'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+
+        </div>
+    </div>
+
+    <div class="section" id="zend.service.flickr.grouppoolgetphotos" name="zend.service.flickr.grouppoolgetphotos"><div class="info"><h1 class="title">Trouver des photos dans le pool d&#039;un groupe</h1></div>
+        
+
+        <p class="para">
+            <span class="classname">Zend_Service_Flickr</span> vous permet de récupérer les photos
+            issues du pool d&#039;un groupe à partir de son ID. Utilisez pour cela la méthode
+             <span class="methodname">groupPoolGetPhotos()</span> :
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #3 Récupération les photos du pool d&#039;un groupe grâce à son ID</b></p></div>
+            
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$flickr</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Service_Flickr<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'MA_CLE_API'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$results</span> = <span style="color: #0000ff;">$flickr</span>-&gt;<span style="color: #006600;">groupPoolGetPhotos</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$groupId</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #b1b100;">foreach</span> <span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$results</span> <span style="color: #b1b100;">as</span> <span style="color: #0000ff;">$result</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$result</span>-&gt;<span style="color: #006600;">title</span> . <span style="color: #ff0000;">'&lt;br /&gt;'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+
+        </div>
+
+        <blockquote><p><b class="note">Note</b>: <span class="info"><b>Paramètre optionnel</b><br /></span>
+            
+
+            
+                 <span class="methodname">groupPoolGetPhotos()</span> accepte un second paramètre optionnel sous
+                la forme d&#039;un tableau d&#039;options.
+            <br />
+        </p></blockquote>
+    </div>
+
+    <div class="section" id="zend.service.flickr.getimagedetails" name="zend.service.flickr.getimagedetails"><div class="info"><h1 class="title">Récupérer les détails d&#039;une image</h1></div>
+        
+
+        <p class="para">
+            <span class="classname">Zend_Service_Flickr</span> permet de récupérer facilement et
+            rapidement, les détails d&#039;une image grâce à son ID. Utilisez simplement la méthode
+             <span class="methodname">getImageDetails()</span>, comme dans l&#039;exemple suivant :
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #4 Récupérer les détails d&#039;une image</b></p></div>
+            
+
+            <div class="example-contents"><p>
+                Une fois que vous avez l&#039;identifiant de l&#039;image Flickr, il est simple de
+                retrouver les informations qui lui sont associées :
+            </p></div>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$flickr</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Service_Flickr<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'MA_CLE_API'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$image</span> = <span style="color: #0000ff;">$flickr</span>-&gt;<span style="color: #006600;">getImageDetails</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$imageId</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #ff0000;">&quot;ID de l'image : $imageId, taille : &quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp;. <span style="color: #ff0000;">&quot;$image-&gt;width x $image-&gt;height pixels.&lt;br /&gt;<span style="color: #000099; font-weight: bold;">\n</span>&quot;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #ff0000;">&quot;&lt;a href=<span style="color: #000099; font-weight: bold;">\&quot;</span>$image-&gt;clickUri<span style="color: #000099; font-weight: bold;">\&quot;</span>&gt;Clicker pour l'image&lt;/a&gt;<span style="color: #000099; font-weight: bold;">\n</span>&quot;</span>;</div></li></ol></div></div></div>
+
+        </div>
+    </div>
+
+    <div class="section" id="zend.service.flickr.classes" name="zend.service.flickr.classes"><div class="info"><h1 class="title">Classes de résultats Zend_Service_Flickr</h1></div>
+        
+
+        <p class="para">
+            Les classes suivantes sont toutes retournées par  <span class="methodname">tagSearch()</span> et
+             <span class="methodname">userSearch()</span> : <ul class="itemizedlist">
+                    <li class="listitem">
+                    <p class="para">
+                        <a href="zend.service.flickr.html#zend.service.flickr.classes.resultset" class="link"><span class="classname">Zend_Service_Flickr_ResultSet</span></a>
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        <a href="zend.service.flickr.html#zend.service.flickr.classes.result" class="link"><span class="classname">Zend_Service_Flickr_Result</span></a>
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        <a href="zend.service.flickr.html#zend.service.flickr.classes.image" class="link"><span class="classname">Zend_Service_Flickr_Image</span></a>
+                    </p>
+                </li>
+                </ul>
+            </p>
+
+        <div class="section" id="zend.service.flickr.classes.resultset" name="zend.service.flickr.classes.resultset"><div class="info"><h1 class="title">Zend_Service_Flickr_ResultSet</h1></div>
+            
+
+            <p class="para">Représente le jeu de résultats d&#039;une recherche sur Flickr.</p>
+
+            <blockquote><p><b class="note">Note</b>: 
+                
+                    Implémente l&#039;itérateur <code class="code">SeekableIterator</code> (ie en utilisant
+                    <code class="code">foreach</code>), ainsi qu&#039;un accès direct à un résultat particulier en
+                    utilisant  <span class="methodname">seek()</span>.
+                <br />
+            </p></blockquote>
+
+            <div class="section" id="zend.service.flickr.classes.resultset.properties" name="zend.service.flickr.classes.resultset.properties"><div class="info"><h1 class="title">Propriétés</h1></div>
+                
+
+                <table class="doctable table"><div class="info"><caption><b>Propriétés Zend_Service_Flickr_ResultSet</b></caption></div>
+                    
+
+                    
+                        <thead valign="middle">
+                            <tr valign="middle">
+                                <th>Nom</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody valign="middle" class="tbody">
+                            <tr valign="middle">
+                                <td align="left">totalResultsAvailable</td>
+                                <td align="left">int</td>
+                                <td align="left">Nombre total de résultats disponibles</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">totalResultsReturned</td>
+                                <td align="left">int</td>
+                                <td align="left">Nombre total de résultats retournés</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">firstResultPosition</td>
+                                <td align="left">int</td>
+                                <td align="left">??? The offset in the total result set of this result set
+                                ???</td>
+                            </tr>
+
+                        </tbody>
+                    
+                </table>
+
+            </div>
+
+            <div class="section" id="zend.service.flickr.classes.resultset.totalResults" name="zend.service.flickr.classes.resultset.totalResults"><div class="info"><h1 class="title">Zend_Service_Flickr_ResultSet::totalResults()</h1></div>
+                
+
+                <p class="para">
+                    <div class="methodsynopsis dc-description">
+                             <span class="type">int</span> 
+
+                             <span class="methodname">totalResults</span>
+
+                             ( <span class="methodparam">void</span>
+                         )</div>
+
+                    </p>
+
+                <p class="para">Retourne le nombre de totale de résultats dans ce jeu de résultats.</p>
+
+                <p class="para">
+                    <a href="zend.service.flickr.html#zend.service.flickr.classes" class="link">Retour à la liste des
+                    classes</a>
+                </p>
+            </div>
+        </div>
+
+        <div class="section" id="zend.service.flickr.classes.result" name="zend.service.flickr.classes.result"><div class="info"><h1 class="title">Zend_Service_Flickr_Result</h1></div>
+            
+
+            <p class="para">Un seule image résultant d&#039;une requête sur Flickr.</p>
+
+            <div class="section" id="zend.service.flickr.classes.result.properties" name="zend.service.flickr.classes.result.properties"><div class="info"><h1 class="title">Propriétés</h1></div>
+                
+
+                <table class="doctable table"><div class="info"><caption><b>Propriétés Zend_Service_Flickr_Result</b></caption></div>
+                    
+
+                    
+                        <thead valign="middle">
+                            <tr valign="middle">
+                                <th>Nom</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody valign="middle" class="tbody">
+                            <tr valign="middle">
+                                <td align="left">id</td>
+                                <td align="left">string</td>
+                                <td align="left">Identifiant de l&#039;image</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">owner</td>
+                                <td align="left">string</td>
+                                <td align="left">Le <acronym class="acronym">NSID</acronym> du propriétaire de la photo.</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">secret</td>
+                                <td align="left">string</td>
+                                <td align="left">La clé utilisée dans la construction de l&#039;URL.</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">server</td>
+                                <td align="left">string</td>
+                                <td align="left">Le nom du serveur à utiliser pour construire
+                                l&#039;URL.</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">title</td>
+                                <td align="left">string</td>
+                                <td align="left">Le titre de la photo.</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">ispublic</td>
+                                <td align="left">string</td>
+                                <td align="left">La photo est publique.</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">isfriend</td>
+                                <td align="left">string</td>
+                                <td align="left">Vous pouvez voir la photo parce que vous êtes un ami du
+                                propriétaire de cette photo.</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">isfamily</td>
+                                <td align="left">string</td>
+                                <td align="left">Vous pouvez voir la photo parce que vous êtes de la
+                                famille du propriétaire de cette photo.</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">license</td>
+                                <td align="left">string</td>
+                                <td align="left">La licence sous laquelle cette photo est
+                                disponible.</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">dateupload</td>
+                                <td align="left">string</td>
+                                <td align="left">La date à laquelle la photo a été uploadée.</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">datetaken</td>
+                                <td align="left">string</td>
+                                <td align="left">La date à laquelle la photo a été prise.</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">ownername</td>
+                                <td align="left">string</td>
+                                <td align="left">Le screenname du propriétaire de la photo.</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">iconserver</td>
+                                <td align="left">string</td>
+                                <td align="left">Le serveur utilisé pour l&#039;assemblage des ??? icon <b><tt>URLs</tt></b>
+                                ???.</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">Square</td>
+                                <td align="left"><a href="zend.service.flickr.html#zend.service.flickr.classes.image" class="link">Zend_Service_Flickr_Image</a></td>
+                                <td align="left">Une miniature de l&#039;image au format 75x75 pixels.</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">Thumbnail</td>
+                                <td align="left"><a href="zend.service.flickr.html#zend.service.flickr.classes.image" class="link">Zend_Service_Flickr_Image</a></td>
+                                <td align="left">Une miniature de l&#039;image de 100 pixels.</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">Small</td>
+                                <td align="left"><a href="zend.service.flickr.html#zend.service.flickr.classes.image" class="link">Zend_Service_Flickr_Image</a></td>
+                                <td align="left">Une version en 240 pixels de l&#039;image.</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">Medium</td>
+                                <td align="left"><a href="zend.service.flickr.html#zend.service.flickr.classes.image" class="link">Zend_Service_Flickr_Image</a></td>
+                                <td align="left">Une version en 500 pixel version de l&#039;image.</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">Large</td>
+                                <td align="left"><a href="zend.service.flickr.html#zend.service.flickr.classes.image" class="link">Zend_Service_Flickr_Image</a></td>
+                                <td align="left">Une version en 640 pixel version de l&#039;image.</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">Original</td>
+                                <td align="left"><a href="zend.service.flickr.html#zend.service.flickr.classes.image" class="link">Zend_Service_Flickr_Image</a></td>
+                                <td align="left">L&#039;image originale.</td>
+                            </tr>
+
+                        </tbody>
+                    
+                </table>
+
+
+                <p class="para">
+                    <a href="zend.service.flickr.html#zend.service.flickr.classes" class="link">Retour à la liste des
+                    classes</a>
+                </p>
+            </div>
+        </div>
+
+        <div class="section" id="zend.service.flickr.classes.image" name="zend.service.flickr.classes.image"><div class="info"><h1 class="title">Zend_Service_Flickr_Image</h1></div>
+            
+
+            <p class="para">Représente une image retournée pour une recherche Flickr.</p>
+
+            <div class="section" id="zend.service.flickr.classes.image.properties" name="zend.service.flickr.classes.image.properties"><div class="info"><h1 class="title">Propriétés</h1></div>
+                
+
+                <table class="doctable table"><div class="info"><caption><b>Propriétés Zend_Service_Flickr_Image</b></caption></div>
+                    
+
+                    
+                        <thead valign="middle">
+                            <tr valign="middle">
+                                <th>Nom</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                            </tr>
+
+                        </thead>
+
+
+                        <tbody valign="middle" class="tbody">
+                            <tr valign="middle">
+                                <td align="left">uri</td>
+                                <td align="left">string</td>
+                                <td align="left">URI de l&#039;image originale.</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">clickUri</td>
+                                <td align="left">string</td>
+                                <td align="left">URI cliquable (ie la page Flickr) de l&#039;image.</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">width</td>
+                                <td align="left">int</td>
+                                <td align="left">Largeur de l&#039;image.</td>
+                            </tr>
+
+
+                            <tr valign="middle">
+                                <td align="left">height</td>
+                                <td align="left">int</td>
+                                <td align="left">Hauteur de l&#039;image.</td>
+                            </tr>
+
+                        </tbody>
+                    
+                </table>
+
+
+                <p class="para">
+                    <a href="zend.service.flickr.html#zend.service.flickr.classes" class="link">Retour à la liste des
+                    classes</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.service.developergarden.html">Zend_Service_DeveloperGarden</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.service.html">Zend_Service</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.service.livedocx.html">Zend_Service_LiveDocx</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.service.html">Zend_Service</a></li>
+  <li><a href="zend.service.introduction.html">Introduction</a></li>
+  <li><a href="zend.service.akismet.html">Zend_Service_Akismet</a></li>
+  <li><a href="zend.service.amazon.html">Zend_Service_Amazon</a></li>
+  <li><a href="zend.service.amazon.ec2.html">Zend_Service_Amazon_Ec2</a></li>
+  <li><a href="zend.service.amazon.ec2.instance.html">Zend_Service_Amazon_Ec2: Instances</a></li>
+  <li><a href="zend.service.amazon.ec2.windows.instance.html">Zend_Service_Amazon_Ec2: Windows Instances</a></li>
+  <li><a href="zend.service.amazon.ec2.reserved.instance.html">Zend_Service_Amazon_Ec2: Reserved Instances</a></li>
+  <li><a href="zend.service.amazon.ec2.cloudwatch.html">Zend_Service_Amazon_Ec2: CloudWatch Monitoring</a></li>
+  <li><a href="zend.service.amazon.ec2.images.html">Zend_Service_Amazon_Ec2: Amazon Machine Images (AMI)</a></li>
+  <li><a href="zend.service.amazon.ec2.ebs.html">Zend_Service_Amazon_Ec2: Elastic Block Storage (EBS)</a></li>
+  <li><a href="zend.service.amazon.ec2.elasticip.html">Zend_Service_Amazon_Ec2: Elastic IP Addresses</a></li>
+  <li><a href="zend.service.amazon.ec2.keypairs.html">Zend_Service_Amazon_Ec2: Keypairs</a></li>
+  <li><a href="zend.service.amazon.ec2.zones.html">Zend_Service_Amazon_Ec2: Regions and Availability Zones</a></li>
+  <li><a href="zend.service.amazon.ec2.securitygroups.html">Zend_Service_Amazon_Ec2: Security Groups</a></li>
+  <li><a href="zend.service.amazon.s3.html">Zend_Service_Amazon_S3</a></li>
+  <li><a href="zend.service.amazon.sqs.html">Zend_Service_Amazon_Sqs</a></li>
+  <li><a href="zend.service.audioscrobbler.html">Zend_Service_Audioscrobbler</a></li>
+  <li><a href="zend.service.delicious.html">Zend_Service_Delicious</a></li>
+  <li><a href="zend.service.developergarden.html">Zend_Service_DeveloperGarden</a></li>
+  <li class="active"><a href="zend.service.flickr.html">Zend_Service_Flickr</a></li>
+  <li><a href="zend.service.livedocx.html">Zend_Service_LiveDocx</a></li>
+  <li><a href="zend.service.nirvanix.html">Zend_Service_Nirvanix</a></li>
+  <li><a href="zend.service.recaptcha.html">Zend_Service_ReCaptcha</a></li>
+  <li><a href="zend.service.simpy.html">Zend_Service_Simpy</a></li>
+  <li><a href="zend.service.slideshare.html">Zend_Service_SlideShare</a></li>
+  <li><a href="zend.service.strikeiron.html">Zend_Service_StrikeIron</a></li>
+  <li><a href="zend.service.strikeiron.bundled-services.html">Zend_Service_StrikeIron: Bundled Services</a></li>
+  <li><a href="zend.service.strikeiron.advanced-uses.html">Zend_Service_StrikeIron: Advanced Uses</a></li>
+  <li><a href="zend.service.technorati.html">Zend_Service_Technorati</a></li>
+  <li><a href="zend.service.twitter.html">Zend_Service_Twitter</a></li>
+  <li><a href="zend.service.windowsazure.html">Zend_Service_WindowsAzure</a></li>
+  <li><a href="zend.service.yahoo.html">Zend_Service_Yahoo</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

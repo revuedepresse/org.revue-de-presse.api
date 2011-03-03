@@ -1,0 +1,366 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Adaptateurs CAPTCHA - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.captcha.operation.html">Op&eacute;ration Captcha</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.captcha.html">Zend_Captcha</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.codegenerator.html">Zend_CodeGenerator</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.captcha.adapters" class="section"><div class="info"><h1 class="title">Adaptateurs CAPTCHA</h1></div>
+    
+
+    <p class="para">Les adaptateurs suivants sont fournis dans Zend Framework par défaut.</p>
+
+    <div class="section" id="zend.captcha.adapters.word" name="zend.captcha.adapters.word"><div class="info"><h1 class="title">Zend_Captcha_Word</h1></div>
+        
+
+        <p class="para">
+            <span class="classname">Zend_Captcha_Word</span> est un adaptateur abstrait qui sert de classe
+            de base pour la plupart des autres adaptateurs <acronym class="acronym">CAPTCHA</acronym>. Il fournit
+            des mutateurs permettant de spécifier la taille du mot le <acronym class="acronym">TTL</acronym> de
+            session, l&#039;objet d&#039;espace de noms de session à utiliser, et la classe d&#039;espace de noms
+            de session à utiliser pour la persistance si vous ne souhaitez pas utiliser
+            <span class="classname">Zend_Session_Namespace</span> pour la persistance.
+            <span class="classname">Zend_Captcha_Word</span> encapsule toute la logique de validation.
+        </p>
+
+        <p class="para">
+            Par défaut la taille du mot est de 8 caractères, le timeout de session est de 5
+            minutes et l&#039;objet d&#039;espace de nom de session utilisé est
+            <span class="classname">Zend_Session_Namespace</span> (avec l&#039;espace de nom
+            (&quot;<span class="classname">Zend_Form_Captcha_&lt;captcha ID&gt;</span>&quot;).
+        </p>
+
+        <p class="para">
+            En plus des méthodes standards fournies par
+            <span class="classname">Zend_Captcha_Adapter</span>, <span class="classname">Zend_Captcha_Word</span>
+            propose les méthodes suivantes :
+        </p>
+
+        <ul class="itemizedlist">
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">setWordLen($length)</span> et
+                     <span class="methodname">getWordLen()</span> vous permettent de piloter la taille du
+                    &quot;mot&quot; généré, en caractères.
+                </p>
+            </li>
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">setTimeout($ttl)</span> et
+                     <span class="methodname">getTimeout()</span> vous donnent la main sur le temps-de-vie
+                    du jeton de session. <var class="varname">$ttl</var> est exprimé en secondes.
+                </p>
+            </li>
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">setSessionClass($class)</span> et
+                     <span class="methodname">getSessionClass()</span>
+                    vous permettent de piloter la classe de session, si vous désirez utiliser une
+                    alternative à <span class="classname">Zend_Session_Namespace</span>, ceci dans le but
+                    de faire persister le jeton <acronym class="acronym">CAPTCHA</acronym> en session.
+                </p>
+            </li>
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">getId()</span> retourne l&#039;identifiant du jeton actuel.
+                </p>
+            </li>
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">getWord()</span> retourne le mot généré utilisé avec le
+                    <acronym class="acronym">CAPTCHA</acronym>. Il sera généré pour vous si aucun n&#039;existe déjà.
+                </p>
+            </li>
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">setSession(Zend_Session_Namespace $session)</span> permet
+                    d&#039;injecter un objet de session qui sera utilisé pour faire persister le jeton
+                    de <acronym class="acronym">CAPTCHA</acronym>.  <span class="methodname">getSession()</span> retourne
+                    l&#039;objet de session actuellement utilisé.
+                </p>
+            </li>
+        </ul>
+
+        <p class="para">
+            Tous les <acronym class="acronym">CAPTCHA</acronym> Word vous autorisent à passer un tableau d&#039;options
+            au constructeur, ou à  <span class="methodname">setOptions()</span> (un objet
+            <span class="classname">Zend_Config</span> peut être utilisé avec
+             <span class="methodname">setConfig()</span>).
+            Par défaut, les clés <em class="emphasis">timeout</em> <em class="emphasis">wordLen</em> et
+            <em class="emphasis">sessionClass</em> seront utilisées.
+        </p>
+
+        <blockquote><p><b class="note">Note</b>: 
+            
+                <span class="classname">Zend_Captcha_Word</span> est une classe abstraite et ne peut être
+                utilisée directement.
+            <br />
+        </p></blockquote>
+    </div>
+
+    <div class="section" id="zend.captcha.adapters.dumb" name="zend.captcha.adapters.dumb"><div class="info"><h1 class="title">Zend_Captcha_Dumb</h1></div>
+        
+
+        <p class="para">
+            L&#039;adaptateur <span class="classname">Zend_Captch_Dumb</span> propose une chaine aléatoire qui
+            doit être ressaisie, mais inversée. Ce n&#039;est pas une solution
+            <acronym class="acronym">CAPTCHA</acronym> idéale (un robot peut la détourner), il devrait être utilisé
+            comme solution de remplacement extrême, ou pour les tests. Il étend
+            <span class="classname">Zend_Captcha_Word</span>.
+        </p>
+    </div>
+
+    <div class="section" id="zend.captcha.adapters.figlet" name="zend.captcha.adapters.figlet"><div class="info"><h1 class="title">Zend_Captcha_Figlet</h1></div>
+        
+
+        <p class="para">
+            L&#039;adaptateur <span class="classname">Zend_Captcha_Figlet</span> utilise
+            <a href="zend.text.figlet.html" class="link"><span class="classname">Zend_Text_Figlet</span></a> pour
+            présenter un captcha. Seuls les caractères alphabétiques sont utilisables.
+        </p>
+
+        <p class="para">
+            Les options passées au constructeur le seront pour l&#039;objet
+            <a href="zend.text.figlet.html" class="link"><span class="classname">Zend_Text_Figlet</span></a> que
+            l&#039;adaptateur va utiliser. Voyez la documentation de <a href="zend.text.figlet.html" class="link"><span class="classname">Zend_Text_Figlet</span></a>pour plus
+            d&#039;informations.
+        </p>
+    </div>
+
+    <div class="section" id="zend.captcha.adapters.image" name="zend.captcha.adapters.image"><div class="info"><h1 class="title">Zend_Captcha_Image</h1></div>
+        
+
+        <p class="para">
+            L&#039;adaptateur <span class="classname">Zend_Captcha_Image</span> prend le mot généré et le
+            transforme en image difficile à analyser pour un programme informatique (robot). Pour
+            cela, il nécessite l&#039;<a href="http://php.net/gd" class="link external">&raquo; extension GD</a>,
+            compilée avec le support TrueType et Freetype. Actuellement, l&#039;adaptateur
+            <span class="classname">Zend_Captcha_Image</span> ne génère que des images
+            <acronym class="acronym">PNG</acronym>.
+        </p>
+
+        <p class="para">
+            <span class="classname">Zend_Captcha_Image</span> étend
+            <span class="classname">Zend_Captcha_Word</span>, et propose les méthodes additionnelles
+            suivantes :
+        </p>
+
+        <ul class="itemizedlist">
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">setExpiration($expiration)</span> et
+                     <span class="methodname">getExpiration()</span> vous autorisent à manipuler le temps
+                    maximum que l&#039;image <acronym class="acronym">CAPTCHA</acronym> doit rester
+                    sur le disque. En général, il s&#039;agit d&#039;un temps supérieur à celui de la
+                    session. Un ramasse-miettes passe régulièrement à chaque instanciation de
+                    l&#039;objet <acronym class="acronym">CAPTCHA</acronym> Image : il détruit les images arrivées à
+                    expiration. La période d&#039;expiration doit être exprimée en secondes.
+                </p>
+            </li>
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">setGcFreq($gcFreq)</span> et
+                     <span class="methodname">getGcFreg()</span> vous
+                    permettent de manipuler la fréquence de collecte du ramasse-miettes des images.
+                    Le ramasse-miettes passera à une fréquence de <strong class="command">1/$gcFreq</strong>.
+                    Par défaut 1 / 100, soit toutes les 100 requêtes.
+                </p>
+            </li>
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">setFont($font)</span> et  <span class="methodname">getFont()</span>
+                    vous donnent le moyen de manipuler la police que vous souhaitez utiliser.
+                    <var class="varname">$font</var> doit indiquer le chemin complet vers la police à
+                    utiliser pour générer le <acronym class="acronym">CAPTCHA</acronym>.
+                    Une exception sera levée si vous ne spécifiez pas ce paramètre.
+                </p>
+            </li>
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">setFontSize($fsize)</span> et
+                     <span class="methodname">getFontSize()</span> servent pour spécifier et récupérer la
+                    taille de la police à utiliser (en pixels) pour générer l
+                    <acronym class="acronym">CAPTCHA</acronym>. Par défaut : 24px.
+                </p>
+            </li>
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">setHeight($height)</span> et
+                     <span class="methodname">getHeight()</span> servent pour spécifier et récupérer la
+                    hauteur de la police à utiliser (en pixels) pour générer le
+                    <acronym class="acronym">CAPTCHA</acronym>. Par défaut : 50px.
+                </p>
+            </li>
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">setWidth($width)</span> et
+                     <span class="methodname">getWidth()</span> servent pour spécifier et récupérer la
+                    largeur de la police à utiliser (en pixels) pour générer le
+                    <acronym class="acronym">CAPTCHA</acronym>. Par défaut : 200px.
+                </p>
+            </li>
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">setImgDir($imgDir)</span> et
+                     <span class="methodname">getImgDir()</span> vous permettent de manipuler le dossier
+                    dans lequel les images <acronym class="acronym">CAPTCHA</acronym> générées
+                    seront stockées. Par défaut, il s&#039;agit de
+                    &quot;<var class="filename">./images/captcha/</var>&quot;, qui devrait être
+                    pris relativement au fichier de bootstrap du site.
+                </p>
+            </li>
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">setImgUrl($imgUrl)</span> et
+                     <span class="methodname">getImgUrl()</span> vous donnent le moyen de manipuler le
+                    chemin relatif à utiliser pour la balise <acronym class="acronym">HTML</acronym> servant
+                    à afficher l&#039;image du <acronym class="acronym">CAPTCHA</acronym>. Par défaut, il s&#039;agit de
+                    &quot;<var class="filename">/images/captcha/</var>&quot;.
+                </p>
+            </li>
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">setSuffix($suffix)</span> et
+                     <span class="methodname">getSuffix()</span> vous donnent
+                    la main sur le suffixe à utiliser pour le nom du fichier de l&#039;image générée par
+                    le <acronym class="acronym">CAPTCHA</acronym>. Il s&#039;agit par défaut de
+                    &quot;<var class="filename">.png</var>&quot;. Note : changer ceci ne changera pas
+                    le type de l&#039;image générée.
+                </p>
+            </li>
+        </ul>
+
+        <p class="para">
+            Toutes les options ci-dessus peuvent aussi être passées en constructeur.
+            Supprimer la partie &quot;set&quot; de leur méthodes, et passez leur première lettre en minuscule
+            pour avoir les clés du tableau d&#039;options que le constructeur utilise. (&quot;suffix&quot;,
+            &quot;height&quot;, &quot;imgUrl&quot;, etc...).
+        </p>
+    </div>
+
+    <div class="section" id="zend.captcha.adapters.recaptcha" name="zend.captcha.adapters.recaptcha"><div class="info"><h1 class="title">Zend_Captcha_ReCaptcha</h1></div>
+        
+
+        <p class="para">
+            L&#039;adaptateur <span class="classname">Zend_Captcha_ReCaptcha</span> utilise
+            <a href="zend.service.recaptcha.html" class="link">Zend_Service_ReCaptcha</a> pour générer des
+            <acronym class="acronym">CAPTCHA</acronym>. Les méthodes suivantes lui sont propres :
+        </p>
+
+        <ul class="itemizedlist">
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">setPrivKey($key)</span> et
+                     <span class="methodname">getPrivKey()</span> vous
+                    permettent de gérer la clé privée utilisée avec le service ReCaptcha. Cette clé
+                    doit être spécifiée en constructeur, mais peut être ensuite modifiée.
+                </p>
+            </li>
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">setPubKey($key)</span> et
+                     <span class="methodname">getPubKey()</span> vous permettent
+                    de gérer la clé publique utilisée avec le service ReCaptcha. Cette clé doit
+                    être spécifiée en constructeur, mais peut être ensuite modifiée.
+                </p>
+            </li>
+            <li class="listitem">
+                <p class="para">
+                     <span class="methodname">setService(Zend_Service_ReCaptcha $service)</span> et
+                     <span class="methodname">getService()</span> vous permettent d&#039;interagir directement
+                    avec l&#039;objet service ReCaptcha utilisé par l&#039;adaptateur.
+                </p>
+            </li>
+        </ul>
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.captcha.operation.html">Op&eacute;ration Captcha</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.captcha.html">Zend_Captcha</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.codegenerator.html">Zend_CodeGenerator</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.captcha.html">Zend_Captcha</a></li>
+  <li><a href="zend.captcha.introduction.html">Introduction</a></li>
+  <li><a href="zend.captcha.operation.html">Op&eacute;ration Captcha</a></li>
+  <li class="active"><a href="zend.captcha.adapters.html">Adaptateurs CAPTCHA</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

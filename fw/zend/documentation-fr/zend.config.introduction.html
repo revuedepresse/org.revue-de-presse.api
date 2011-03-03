@@ -1,0 +1,207 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Introduction - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.config.html">Zend_Config</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.config.html">Zend_Config</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.config.theory_of_operation.html">Aspect th&eacute;orique</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.config.introduction" class="section"><div class="info"><h1 class="title">Introduction</h1></div>
+    
+
+    <p class="para">
+        <span class="classname">Zend_Config</span> est conçu pour simplifier l&#039;accès et l&#039;utilisation des
+        données de configuration dans les applications. Il fournit une interface utilisateur basée
+        sur des propriétés d&#039;objets imbriquées. Les données de configuration peuvent venir de
+        sources variées supportant une organisation hiérarchique des données. Actuellement
+        <span class="classname">Zend_Config</span> fournit des adaptateurs pour les données de
+        configuration qui sont stockées dans des fichier textes avec
+        <a href="zend.config.adapters.ini.html" class="link"><span class="classname">Zend_Config_Ini</span></a> et
+        <a href="zend.config.adapters.xml.html" class="link"><span class="classname">Zend_Config_Xml</span></a>.
+    </p>
+
+    <div class="example"><div class="info"><p><b>Example #1 Utilisation native de Zend_Config</b></p></div>
+        
+
+        <div class="example-contents"><p>
+            Normalement on s&#039;attend à ce que les utilisateurs emploient une des classes
+            d&#039;adaptateur telles que
+            <a href="zend.config.adapters.ini.html" class="link"><span class="classname">Zend_Config_Ini</span></a>
+            ou
+            <a href="zend.config.adapters.xml.html" class="link"><span class="classname">Zend_Config_Xml</span></a>,
+            mais si les données de configuration sont disponibles dans un tableau
+            <acronym class="acronym">PHP</acronym>, on peut
+            simplement passer les données au constructeur de <span class="classname">Zend_Config</span>
+            afin d&#039;utiliser une interface orientée objet simple :
+        </p></div>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Fourni un tableau de configuration</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$configArray</span> = <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'webhost'</span> =&gt; <span style="color: #ff0000;">'www.example.com'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'database'</span> =&gt; <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'adapter'</span> =&gt; <span style="color: #ff0000;">'pdo_mysql'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'params'</span>&nbsp; =&gt; <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'host'</span>&nbsp; &nbsp; &nbsp;=&gt; <span style="color: #ff0000;">'db.example.com'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'username'</span> =&gt; <span style="color: #ff0000;">'dbuser'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'password'</span> =&gt; <span style="color: #ff0000;">'secret'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'dbname'</span>&nbsp; &nbsp;=&gt; <span style="color: #ff0000;">'mydatabase'</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Crée un objet à partir des données de configuration</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$config</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Config<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$configArray</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Affiche une donnée de configuration en particulier</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// (résultat : 'www.example.com')</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$config</span>-&gt;<span style="color: #006600;">webhost</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Utilise les données de configuration pour se connecter</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// à une base de données</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$db</span> = Zend_Db::<span style="color: #006600;">factory</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$config</span>-&gt;<span style="color: #006600;">database</span>-&gt;<span style="color: #006600;">adapter</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #0000ff;">$config</span>-&gt;<span style="color: #006600;">database</span>-&gt;<span style="color: #006600;">params</span>-&gt;<span style="color: #006600;">toArray</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Autre possibilité : fournir simplement l'objet Zend_Config.</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Zend_Db factory sait comment l'interpréter.</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$db</span> = Zend_Db::<span style="color: #006600;">factory</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$config</span>-&gt;<span style="color: #006600;">database</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+    </div>
+
+    <p class="para">
+        Comme illustré dans l&#039;exemple ci-dessus, <span class="classname">Zend_Config</span> fournit une
+        syntaxe de propriétés d&#039;objets imbriquées pour accéder aux données de configuration passées
+        à son constructeur.
+    </p>
+
+    <p class="para">
+        Avec l&#039;accès de type orienté-objet aux données, <span class="classname">Zend_Config</span> a aussi
+        la méthode  <span class="methodname">get()</span> qui retournera la valeur par défaut si l&#039;élément
+        n&#039;existe pas. Par exemple :
+    </p>
+
+    <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$host</span> = <span style="color: #0000ff;">$config</span>-&gt;<span style="color: #006600;">database</span>-&gt;<span style="color: #006600;">get</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'host'</span>, <span style="color: #ff0000;">'localhost'</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+    <div class="example"><div class="info"><p><b>Example #2 Utilisez Zend_Config avec un fichier de configuration en PHP</b></p></div>
+        
+
+        <div class="example-contents"><p>
+            Il est souvent souhaitable d&#039;utiliser une fichier de configuration en pur
+            <acronym class="acronym">PHP</acronym>. Le code
+            suivant illustre comment ceci peut être facilement réalisé :
+        </p></div>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// config.php</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #b1b100;">return</span> <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'webhost'</span>&nbsp; =&gt; <span style="color: #ff0000;">'www.example.com'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'database'</span> =&gt; <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'adapter'</span> =&gt; <span style="color: #ff0000;">'pdo_mysql'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'params'</span>&nbsp; =&gt; <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'host'</span>&nbsp; &nbsp; &nbsp;=&gt; <span style="color: #ff0000;">'db.example.com'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'username'</span> =&gt; <span style="color: #ff0000;">'dbuser'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'password'</span> =&gt; <span style="color: #ff0000;">'secret'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'dbname'</span>&nbsp; &nbsp;=&gt; <span style="color: #ff0000;">'mydatabase'</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Lecture de la configuration</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$config</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Config<span style="color: #66cc66;">&#40;</span><span style="color: #b1b100;">require</span> <span style="color: #ff0000;">'config.php'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Affiche une donnée de configuration ('www.example.com')</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$config</span>-&gt;<span style="color: #006600;">webhost</span>;</div></li></ol></div></div></div>
+
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.config.html">Zend_Config</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.config.html">Zend_Config</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.config.theory_of_operation.html">Aspect th&eacute;orique</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.config.html">Zend_Config</a></li>
+  <li class="active"><a href="zend.config.introduction.html">Introduction</a></li>
+  <li><a href="zend.config.theory_of_operation.html">Aspect th&eacute;orique</a></li>
+  <li><a href="zend.config.adapters.ini.html">Zend_Config_Ini</a></li>
+  <li><a href="zend.config.adapters.xml.html">Zend_Config_Xml</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

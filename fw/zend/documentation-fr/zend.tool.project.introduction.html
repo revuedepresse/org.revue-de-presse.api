@@ -1,0 +1,137 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Introduction - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.tool.project.html">Zend_Tool_Project</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.tool.project.html">Zend_Tool_Project</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.tool.project.create-a-project.html">Cr&eacute;er un projet</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.tool.project.introduction" class="section"><div class="info"><h1 class="title">Introduction</h1></div>
+    
+
+    <p class="para">
+        <span class="classname">Zend_Tool_Project</span> est construit à partir de
+        <span class="classname">Zend_Tool_Framework</span> permettant ainsi d&#039;étendre ses capacités et
+        de gérer un projet. En général, un projet est un effort prévu ou une initiative. Dans
+        le monde de l&#039;informatique, les projets sont généralement une collection de ressources.
+        Ces ressources peuvent être des fichiers, des répertoires, des bases de données, des
+        schémas, des images, des styles, et parfois plus.
+    </p>
+
+    <p class="para">
+        Ce même concept s&#039;applique aux projets Zend Framework. Dans les projets Zend Framework,
+        vous avez des contrôleurs, des actions, des vues, des modèles, des bases de données et
+        ainsi de suite. En terme de <span class="classname">Zend_Tool</span>, nous avons besoin d&#039;un
+        moyen de pister ce type de ressources - c&#039;est-à-dire
+        <span class="classname">Zend_Tool_Project</span>.
+    </p>
+
+    <p class="para">
+        <span class="classname">Zend_Tool_Project</span> est capable de pister les ressources de projet
+        au cours du développement d&#039;un projet. Ainsi, par exemple, si lors de la première commande
+        vous créez un contrôleur et que lors de la commande suivante vous souhaitez créer une
+        action à l&#039;intérieur de ce contrôleur, <span class="classname">Zend_Tool_Project</span> doit
+        <em class="emphasis">connaitre</em> ce fichier de contrôleur qui a été créé ainsi vous pouvez
+        (dans l&#039;action suivante), être capable de lui ajouter une action. C&#039;est ce qui maintient
+        nos projets à jour et <em class="emphasis">complets</em>.
+    </p>
+
+    <p class="para">
+        Un autre point important à comprendre concernant les projets est que typiquement, les
+        ressources sont organisées de manière hiérarchique. Avec cela à l&#039;esprit,
+        <span class="classname">Zend_Tool_Project</span> est capable de construire le projet en cours
+        dans une représentation interne qui lui permet de maintenir non seulement
+        <em class="emphasis">quelles</em> ressources de font partie d&#039;un projet à un moment donné,
+        mais également <em class="emphasis">où</em> elles sont les unes par rapport aux autres.
+    </p>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.tool.project.html">Zend_Tool_Project</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.tool.project.html">Zend_Tool_Project</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.tool.project.create-a-project.html">Cr&eacute;er un projet</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.tool.project.html">Zend_Tool_Project</a></li>
+  <li class="active"><a href="zend.tool.project.introduction.html">Introduction</a></li>
+  <li><a href="zend.tool.project.create-a-project.html">Cr&eacute;er un projet</a></li>
+  <li><a href="zend.tool.project.providers.html">Fournisseurs de Zend_Tool_Project</a></li>
+  <li><a href="zend.tool.project.internals.html">Rouages internes de Zend_Tool_Project</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

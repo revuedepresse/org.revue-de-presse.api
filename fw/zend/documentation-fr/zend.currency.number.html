@@ -1,0 +1,210 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>A quoi ressemble une monnaie? - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.currency.position.html">O&ugrave; est le symbole monn&eacute;taire?</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.currency.html">Zend_Currency</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.currency.value.html">Travailler avec les valeurs des monnaies (les montants)</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.currency.number" class="section"><div class="info"><h1 class="title">A quoi ressemble une monnaie?</h1></div>
+    
+
+    <p class="para">
+        Le rendu visuel d&#039;une monnaie va dépendre de la locale. La locale stocke plusieurs informations
+        qui peuvent chacune être redéfinies par vos propres options si besoin.
+    </p>
+
+    <p class="para">
+        Par exemple, la plupart des locales utilisent le script latin pour rendre les nombres.
+        Mais certaines langues, comme l&#039;arabe, utilisent d&#039;autres chiffres. Et un site Web Arabe
+        va utiliser le rendu arabe pour toutes les monnaies, voyez l&#039;exemple:
+    </p>
+
+    <div class="example"><div class="info"><p><b>Example #1 Utiliser un script personnalisé</b></p></div>
+        
+
+        <div class="example-contents"><p>
+            Imagnons que nous utisons la monnaie &quot;Dollar&quot;. Mais nous voulons rendre notre page
+            avec des scripts arabes.
+        </p></div>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$currency</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Currency<span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'value'</span>&nbsp; =&gt; <span style="color: #cc66cc;">1000</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'script'</span> =&gt; <span style="color: #ff0000;">'Arab'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/print"><span style="color: #000066;">print</span></a> <span style="color: #0000ff;">$currency</span>; <span style="color: #808080; font-style: italic;">// Retournerait '$ ١٬٠٠٠٫٠٠'</span></div></li></ol></div></div></div>
+
+    </div>
+
+    <p class="para">
+        Pour plus d&#039;informations sur les scripts disponibles, voyez le manuel de
+        <span class="classname">Zend_Locale</span>sur <a href="zend.locale.parsing.html#zend.locale.numbersystems" class="link">les systèmes
+        des nombres</a>.
+    </p>
+
+    <p class="para">
+        Le formattage d&#039;une monnaie peut être changé. Par défaut, la locale est utilisée. Elle indique le séparateur
+        des milliers, le point de la décimale et la précision.
+    </p>
+
+    <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$currency</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Currency<span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'value'</span>&nbsp; &nbsp; =&gt; <span style="color: #cc66cc;">1000</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'currency'</span> =&gt; <span style="color: #ff0000;">'USD'</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'format'</span>&nbsp; &nbsp;=&gt; <span style="color: #ff0000;">'de'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/print"><span style="color: #000066;">print</span></a> <span style="color: #0000ff;">$currency</span>; <span style="color: #808080; font-style: italic;">// Retournerait '$ 1.000'</span></div></li></ol></div></div></div>
+
+
+    <p class="para">
+        Il existe deux manières de préciser le format à utiliser, manuellement ou via une locale.
+    </p>
+
+    <p class="para">
+        Utiliser la locale vous permet de bénéficier de certains automatismes. Par exemple la locale
+        &#039;de&#039; definit le point &#039;.&#039; comme séparateur des milliers, et la virgule &#039;,&#039; comme séparateur décimal.
+        En anglais, c&#039;est l&#039;inverse.
+    </p>
+
+    <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$currency_1</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Currency<span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'value'</span>&nbsp; &nbsp; =&gt; <span style="color: #cc66cc;">1000</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'currency'</span> =&gt; <span style="color: #ff0000;">'USD'</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'format'</span>&nbsp; &nbsp;=&gt; <span style="color: #ff0000;">'de'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$currency_2</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Currency<span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'value'</span>&nbsp; &nbsp; =&gt; <span style="color: #cc66cc;">1000</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'currency'</span> =&gt; <span style="color: #ff0000;">'USD'</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'format'</span>&nbsp; &nbsp;=&gt; <span style="color: #ff0000;">'en'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/print"><span style="color: #000066;">print</span></a> <span style="color: #0000ff;">$currency_1</span>; <span style="color: #808080; font-style: italic;">// Retournerait '$ 1.000'</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/print"><span style="color: #000066;">print</span></a> <span style="color: #0000ff;">$currency_2</span>; <span style="color: #808080; font-style: italic;">// Retournerait '$ 1,000'</span></div></li></ol></div></div></div>
+
+
+    <p class="para">
+        Si vous les définissez manuellement, vous devez alors respecter le format décrit dans
+        <a href="zend.locale.parsing.html#zend.locale.number.localize.table-1" class="link">ce chapitre de la localisation
+            </a>. Voyez plutôt:
+    </p>
+
+    <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$currency</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Currency<span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'value'</span>&nbsp; &nbsp; =&gt; <span style="color: #cc66cc;">1000</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'currency'</span> =&gt; <span style="color: #ff0000;">'USD'</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'format'</span>&nbsp; &nbsp;=&gt; <span style="color: #ff0000;">'#0'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/print"><span style="color: #000066;">print</span></a> <span style="color: #0000ff;">$currency</span>; <span style="color: #808080; font-style: italic;">// Retournerait '$ 1000'</span></div></li></ol></div></div></div>
+
+
+    <p class="para">
+        Dans l&#039;exemple ci-dessus nous avons supprimé le séparateur et l&#039;indicateur de précision.
+    </p>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.currency.position.html">O&ugrave; est le symbole monn&eacute;taire?</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.currency.html">Zend_Currency</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.currency.value.html">Travailler avec les valeurs des monnaies (les montants)</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.currency.html">Zend_Currency</a></li>
+  <li><a href="zend.currency.introduction.html">Introduction &agrave; Zend_Currency</a></li>
+  <li><a href="zend.currency.usage.html">Utiliser Zend_Currency</a></li>
+  <li><a href="zend.currency.options.html">Options des monnaies</a></li>
+  <li><a href="zend.currency.description.html">Qu'est ce qui d&eacute;finit une monnaie?</a></li>
+  <li><a href="zend.currency.position.html">O&ugrave; est le symbole monn&eacute;taire?</a></li>
+  <li class="active"><a href="zend.currency.number.html">A quoi ressemble une monnaie?</a></li>
+  <li><a href="zend.currency.value.html">Travailler avec les valeurs des monnaies (les montants)</a></li>
+  <li><a href="zend.currency.calculation.html">Calculs avec les monnaies</a></li>
+  <li><a href="zend.currency.exchange.html">Echanger (convertir) des monnaies</a></li>
+  <li><a href="zend.currency.additional.html">Informations compl&eacute;mentaires pour Zend_Currency</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

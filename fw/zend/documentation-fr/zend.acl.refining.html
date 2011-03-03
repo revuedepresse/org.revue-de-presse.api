@@ -1,0 +1,262 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Affiner les Contr&ocirc;les d'Acc&egrave;s - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.acl.introduction.html">Introduction</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.acl.html">Zend_Acl</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.acl.advanced.html">Utilisation avanc&eacute;e</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.acl.refining" class="section"><div class="info"><h1 class="title">Affiner les Contrôles d&#039;Accès</h1></div>
+    
+
+    <div class="section" id="zend.acl.refining.precise" name="zend.acl.refining.precise"><div class="info"><h1 class="title">Mieux définir les Contrôles d&#039;Accès</h1></div>
+        
+
+        <p class="para">
+            L&#039;<acronym class="acronym">ACL</acronym> basique définie dans le
+            <a href="zend.acl.introduction.html" class="link">chapitre précédent</a>montre comment plusieurs
+            privilèges peuvent être alloués pour l&#039;ensemble de l&#039;<acronym class="acronym">ACL</acronym> (toutes les
+            ressources). En pratique, toutefois, les contrôles d&#039;accès ont souvent des exceptions et
+            des degrés de complexité variables. <span class="classname">Zend_Acl</span> permet d&#039;atteindre
+            ce degré de finesse d&#039;une manière directe et flexible.
+        </p>
+
+        <p class="para">
+            Pour l&#039;exemple du <acronym class="acronym">CMS</acronym>, nous avons déterminé que bien que le groupe
+            &quot;Staff&quot; couvre les besoins de la plupart des utilisateurs, un groupe &quot;Marketing&quot; est
+            nécessaire. Ce groupe doit avoir accès à la newsletter et aux dernières news dans le
+            <acronym class="acronym">CMS</acronym>. Le groupe va recevoir la possibilité de publier et d&#039;archiver à
+            la fois des newsletters et des news.
+        </p>
+
+        <p class="para">
+            De plus, il a été demandé que le groupe &quot;Staff&quot; puisse voir les nouveaux textes,
+            mais pas les nouvelles news. Enfin, il devrait être impossible pour tout le monde (y
+            compris les administrateurs) d&#039;archiver un contenu qui n&#039;aurait une durée de vie que de
+            1 ou 2 jours.
+        </p>
+
+        <p class="para">
+            En premier lieu, nous modifions le registre des rôles pour refléter ces
+            changements. Nous avons dit que le groupe &quot;Marketing&quot; a les même permissions de base
+            que &quot;Staff&quot;. Donc nous créons &quot;marketing&quot; pour qu&#039;il hérite des permissions de
+            &quot;staff&quot;.
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Le nouveau groupe Marketing hérite des permissions de Staff</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">addRole</span><span style="color: #66cc66;">&#40;</span><span style="color: #000000; font-weight: bold;">new</span> Zend_Acl_Role<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'marketing'</span><span style="color: #66cc66;">&#41;</span>, <span style="color: #ff0000;">'staff'</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <p class="para">
+            Ensuite, notez que les contrôles d&#039;accès plus haut font référence à des
+            ressources (ex. &quot;newsletters&quot;, &quot;dernières news&quot;, &quot;annonces&quot;). Maintenant, nous ajoutons
+            ces Ressources :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Créer les Ressources pour les règles</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// newsletter</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">addResource</span><span style="color: #66cc66;">&#40;</span><span style="color: #000000; font-weight: bold;">new</span> Zend_Acl_Resource<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'newsletter'</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// news</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">addResource</span><span style="color: #66cc66;">&#40;</span><span style="color: #000000; font-weight: bold;">new</span> Zend_Acl_Resource<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'news'</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// dernières news</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">addResource</span><span style="color: #66cc66;">&#40;</span><span style="color: #000000; font-weight: bold;">new</span> Zend_Acl_Resource<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'latest'</span><span style="color: #66cc66;">&#41;</span>, <span style="color: #ff0000;">'news'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// annonces</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">addResource</span><span style="color: #66cc66;">&#40;</span><span style="color: #000000; font-weight: bold;">new</span> Zend_Acl_Resource<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'announcement'</span><span style="color: #66cc66;">&#41;</span>, <span style="color: #ff0000;">'news'</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <p class="para">
+            Ensuite c&#039;est simplement une manière de définir ces règles spécifiques sur les
+            parties cibles de l&#039;<acronym class="acronym">ACL</acronym> :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Le Marketing doit être capable de publier</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// et d'archiver les newsletters et les dernières news</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">allow</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'marketing'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'newsletter'</span>, <span style="color: #ff0000;">'latest'</span><span style="color: #66cc66;">&#41;</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'publish'</span>, <span style="color: #ff0000;">'archive'</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Staff (et marketing, par héritage),</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// n'ont pas la permission de relire les dernières news</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">deny</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'staff'</span>, <span style="color: #ff0000;">'latest'</span>, <span style="color: #ff0000;">'relire'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Personne (y compris les administrateurs)</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// n'a la permission d'archiver des annonces</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">deny</span><span style="color: #66cc66;">&#40;</span><span style="color: #000000; font-weight: bold;">null</span>, <span style="color: #ff0000;">'annonce'</span>, <span style="color: #ff0000;">'archive'</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <p class="para">
+            On peut maintenant interroger les <acronym class="acronym">ACL</acronym> sur base des dernières
+            modifications :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">isAllowed</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'staff'</span>, <span style="color: #ff0000;">'newsletter'</span>, <span style="color: #ff0000;">'publish'</span><span style="color: #66cc66;">&#41;</span> ?</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">&quot;autorisé&quot;</span> : <span style="color: #ff0000;">&quot;refusé&quot;</span>; <span style="color: #808080; font-style: italic;">// refusé</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">isAllowed</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'marketing'</span>, <span style="color: #ff0000;">'newsletter'</span>, <span style="color: #ff0000;">'publish'</span><span style="color: #66cc66;">&#41;</span> ?</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">&quot;autorisé&quot;</span> : <span style="color: #ff0000;">&quot;refusé&quot;</span>; <span style="color: #808080; font-style: italic;">// autorisé</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">isAllowed</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'staff'</span>, <span style="color: #ff0000;">'latest'</span>, <span style="color: #ff0000;">'publish'</span><span style="color: #66cc66;">&#41;</span> ?</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">&quot;autorisé&quot;</span> : <span style="color: #ff0000;">&quot;refusé&quot;</span>; <span style="color: #808080; font-style: italic;">// refusé</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">isAllowed</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'marketing'</span>, <span style="color: #ff0000;">'latest'</span>, <span style="color: #ff0000;">'publish'</span><span style="color: #66cc66;">&#41;</span> ?</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">&quot;autorisé&quot;</span> : <span style="color: #ff0000;">&quot;refusé&quot;</span>; <span style="color: #808080; font-style: italic;">// autorisé</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">isAllowed</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'marketing'</span>, <span style="color: #ff0000;">'latest'</span>, <span style="color: #ff0000;">'archive'</span><span style="color: #66cc66;">&#41;</span> ?</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">&quot;autorisé&quot;</span> : <span style="color: #ff0000;">&quot;refusé&quot;</span>; <span style="color: #808080; font-style: italic;">// autorisé</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">isAllowed</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'marketing'</span>, <span style="color: #ff0000;">'latest'</span>, <span style="color: #ff0000;">'revise'</span><span style="color: #66cc66;">&#41;</span> ?</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">&quot;autorisé&quot;</span> : <span style="color: #ff0000;">&quot;refusé&quot;</span>; <span style="color: #808080; font-style: italic;">// refusé</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">isAllowed</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'editor'</span>, <span style="color: #ff0000;">'announcement'</span>, <span style="color: #ff0000;">'archive'</span><span style="color: #66cc66;">&#41;</span> ?</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">&quot;autorisé&quot;</span> : <span style="color: #ff0000;">&quot;refusé&quot;</span>; <span style="color: #808080; font-style: italic;">// refusé</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">isAllowed</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'administrator'</span>, <span style="color: #ff0000;">'announcement'</span>, <span style="color: #ff0000;">'archive'</span><span style="color: #66cc66;">&#41;</span> ?</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">&quot;autorisé&quot;</span> : <span style="color: #ff0000;">&quot;refusé&quot;</span>; <span style="color: #808080; font-style: italic;">// refusé</span></div></li></ol></div></div></div>
+
+    </div>
+
+    <div class="section" id="zend.acl.refining.removing" name="zend.acl.refining.removing"><div class="info"><h1 class="title">Retirer les Contrôles d&#039;Accès</h1></div>
+        
+
+        <p class="para">
+            Pour retirer une ou plusieurs règles des <acronym class="acronym">ACL</acronym>, utilisez simplement la
+            méthode  <span class="methodname">removeAllow()</span> ou  <span class="methodname">removeDeny()</span>.
+            Comme pour  <span class="methodname">allow()</span> et  <span class="methodname">deny()</span>, vous
+            pouvez utiliser une valeur <b><tt>NULL</tt></b> pour indiquer que la méthode
+            s&#039;applique à tous les rôles, ressources et / ou privilèges.
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Retire l'interdiction de relire les dernières news au Staff</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// (et au marketing, par héritage)</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">removeDeny</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'staff'</span>, <span style="color: #ff0000;">'latest'</span>, <span style="color: #ff0000;">'relire'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">isAllowed</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'marketing'</span>, <span style="color: #ff0000;">'latest'</span>, <span style="color: #ff0000;">'relire'</span><span style="color: #66cc66;">&#41;</span> ?</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">&quot;autorisé&quot;</span> : <span style="color: #ff0000;">&quot;refusé&quot;</span>; <span style="color: #808080; font-style: italic;">// autorisé</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Retire l'autorisation de publier</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// et archiver les newsletters au Marketing</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">removeAllow</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'marketing'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'newsletter'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'publish'</span>, <span style="color: #ff0000;">'archive'</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">isAllowed</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'marketing'</span>, <span style="color: #ff0000;">'newsletter'</span>, <span style="color: #ff0000;">'publish'</span><span style="color: #66cc66;">&#41;</span> ?</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">&quot;autorisé&quot;</span> : <span style="color: #ff0000;">&quot;refusé&quot;</span>; <span style="color: #808080; font-style: italic;">// refusé</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">isAllowed</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'marketing'</span>, <span style="color: #ff0000;">'newsletter'</span>, <span style="color: #ff0000;">'archive'</span><span style="color: #66cc66;">&#41;</span> ?</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">&quot;autorisé&quot;</span> : <span style="color: #ff0000;">&quot;refusé&quot;</span>; <span style="color: #808080; font-style: italic;">// refusé</span></div></li></ol></div></div></div>
+
+
+        <p class="para">
+            Les privilèges peuvent être modifiés de manière incrémentielle comme indiqué au
+            dessus, mais une valeur <b><tt>NULL</tt></b> pour les privilèges écrase ces
+            modifications incrémentielles.
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// donne au groupe Marketing toutes les permissions</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// sur les dernières nouvelles</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">allow</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'marketing'</span>, <span style="color: #ff0000;">'latest'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">isAllowed</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'marketing'</span>, <span style="color: #ff0000;">'latest'</span>, <span style="color: #ff0000;">'publish'</span><span style="color: #66cc66;">&#41;</span> ?</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">&quot;autorisé&quot;</span> : <span style="color: #ff0000;">&quot;refusé&quot;</span>; <span style="color: #808080; font-style: italic;">// autorisé</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">isAllowed</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'marketing'</span>, <span style="color: #ff0000;">'latest'</span>, <span style="color: #ff0000;">'archive'</span><span style="color: #66cc66;">&#41;</span> ?</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">&quot;autorisé&quot;</span> : <span style="color: #ff0000;">&quot;refusé&quot;</span>; <span style="color: #808080; font-style: italic;">// autorisé</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$acl</span>-&gt;<span style="color: #006600;">isAllowed</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'marketing'</span>, <span style="color: #ff0000;">'latest'</span>, <span style="color: #ff0000;">'anything'</span><span style="color: #66cc66;">&#41;</span> ?</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">&quot;autorisé&quot;</span> : <span style="color: #ff0000;">&quot;refusé&quot;</span>; <span style="color: #808080; font-style: italic;">// autorisé</span></div></li></ol></div></div></div>
+
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.acl.introduction.html">Introduction</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.acl.html">Zend_Acl</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.acl.advanced.html">Utilisation avanc&eacute;e</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.acl.html">Zend_Acl</a></li>
+  <li><a href="zend.acl.introduction.html">Introduction</a></li>
+  <li class="active"><a href="zend.acl.refining.html">Affiner les Contr&ocirc;les d'Acc&egrave;s</a></li>
+  <li><a href="zend.acl.advanced.html">Utilisation avanc&eacute;e</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

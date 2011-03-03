@@ -1,0 +1,673 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Bonnes pratiques - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.search.lucene.advanced.html">Avanc&eacute;</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.search.lucene.html">Zend_Search_Lucene</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.serializer.html">Zend_Serializer</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.search.lucene.best-practice" class="section"><div class="info"><h1 class="title">Bonnes pratiques</h1></div>
+    
+
+    <div class="section" id="zend.search.lucene.best-practice.field-names" name="zend.search.lucene.best-practice.field-names"><div class="info"><h1 class="title">Nommage des champs</h1></div>
+        
+
+        <p class="para">
+            Il n&#039;y a pas de limitation pour les noms de champs dans
+            <span class="classname">Zend_Search_Lucene</span>.
+        </p>
+
+        <p class="para">
+            Cependant, il est préférable de ne pas utiliser les noms &#039;<em class="emphasis">id</em>&#039;
+            et &#039;<em class="emphasis">score</em>&#039; afin d&#039;éviter toute ambiguïté dans les propriétés de
+            <code class="code">QueryHit</code>.
+        </p>
+
+        <p class="para">
+            Les propriétés <code class="code">id</code> et <code class="code">score</code> de
+            <span class="classname">Zend_Search_Lucene_Search_QueryHit</span> font toujours référence à
+            l&#039;identifiant interne du document Lucene et au <a href="zend.search.lucene.searching.html#zend.search.lucene.searching.results-scoring" class="link">score</a> de hit. Si le
+            document indexé possède les mêmes champs stockés, vous devrez utiliser la méthode
+             <span class="methodname">getDocument()</span> pour y accéder :<div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$hits</span> = <span style="color: #0000ff;">$index</span>-&gt;<span style="color: #006600;">find</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$query</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #b1b100;">foreach</span> <span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$hits</span> <span style="color: #b1b100;">as</span> <span style="color: #0000ff;">$hit</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// Récupérer le champ de document 'title'</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #0000ff;">$title</span> = <span style="color: #0000ff;">$hit</span>-&gt;<span style="color: #006600;">title</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// Récupérer le champ de document 'contents'</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #0000ff;">$contents</span> = <span style="color: #0000ff;">$hit</span>-&gt;<span style="color: #006600;">contents</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// Récupérer l'id interne du document Lucene</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #0000ff;">$id</span> = <span style="color: #0000ff;">$hit</span>-&gt;<span style="color: #006600;">id</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// Récupérer le score de hit</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #0000ff;">$score</span> = <span style="color: #0000ff;">$hit</span>-&gt;<span style="color: #006600;">score</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// Récupérer le champ de document 'id'</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #0000ff;">$docId</span> = <span style="color: #0000ff;">$hit</span>-&gt;<span style="color: #006600;">getDocument</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>-&gt;<span style="color: #006600;">id</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// Récupérer le champ de document 'score'</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #0000ff;">$docId</span> = <span style="color: #0000ff;">$hit</span>-&gt;<span style="color: #006600;">getDocument</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>-&gt;<span style="color: #006600;">score</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// Un autre moyen de récupérer le champ 'title'</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #0000ff;">$title</span> = <span style="color: #0000ff;">$hit</span>-&gt;<span style="color: #006600;">getDocument</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>-&gt;<span style="color: #006600;">title</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+</p>
+        </div>
+
+        <div class="section" id="zend.search.lucene.best-practice.indexing-performance" name="zend.search.lucene.best-practice.indexing-performance"><div class="info"><h1 class="title">Performance de l&#039;indexation</h1></div>
+            
+
+        <p class="para">
+            La performance de l&#039;indexation est un compromis entre les ressources utilisées, le
+            temps d&#039;indexation et la qualité de l&#039;index.
+        </p>
+
+        <p class="para">
+            La qualité de l&#039;index est complètement déterminée par le nombre de segments de
+            l&#039;index.
+        </p>
+
+        <p class="para">
+            Chaque segment d&#039;index et une portion de données entièrement indépendante. Ainsi
+            plus un index contient de segments, plus il sera gourmand en mémoire et en temps de
+            calcul lors de la recherche.
+        </p>
+
+        <p class="para">
+            L&#039;optimisation d&#039;index est un processus consistant à fusionner plusieurs segments
+            en un seul nouveau segment. Un index totalement optimisé ne contient qu&#039;un seul
+            segment.
+        </p>
+
+        <p class="para">
+            L&#039;optimisation complète de l&#039;index peut être effectuée avec la méthode
+             <span class="methodname">optimize()</span> :<div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$index</span> = Zend_Search_Lucene::<span style="color: #006600;">open</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$indexPath</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$index</span>-&gt;<span style="color: #006600;">optimize</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+</p>
+
+        <p class="para">
+            L&#039;optimisation d&#039;index fonctionne avec des &quot;data streams&quot; et ne consomme pas pas
+            une grande quantité de mémoire, mais nécessite des ressources de processeur et du
+            temps.
+        </p>
+
+        <p class="para">
+            Par nature, les segments d&#039;index de Lucene ne peuvent pas être mis à jour
+            (l&#039;opération de mise à jour nécessite une réécriture complète du segment). Ainsi,
+            l&#039;ajout de nouveau(x) document(s) à un index implique toujours la génération d&#039;un
+            nouveau segment. De fait, cela dégrade la qualité de l&#039;index.
+        </p>
+
+        <p class="para">
+            Une optimisation automatique d&#039;un index est effectuée après chaque génération de
+            segment et consiste en la fusion des segments partiels.
+        </p>
+
+        <p class="para">
+            Il y a trois options pour contrôler le comportement de l&#039;auto-optimisation (voir
+            la section <a href="zend.search.lucene.index-creation.html#zend.search.lucene.index-creation.optimization" class="link">Optimisation
+            d&#039;index</a>) :<ul class="itemizedlist">
+                    <li class="listitem">
+                    <p class="para">
+                        <em class="emphasis">MaxBufferedDocs</em> représente le nombre maximum de
+                        documents qui peuvent être mis en mémoire tampon avant qu&#039;un nouveau segment
+                        soit généré et écrit sur le disque dur.
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        <em class="emphasis">MaxMergeDocs</em> représente le nombre maximum de
+                        documents qui seront fusionnés dans un nouveau segment lors du processus
+                        d&#039;auto-optimisation.
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        <em class="emphasis">MergeFactor</em> détermine à quelle fréquence
+                        l&#039;auto-optimisation est effectuée.
+                    </p>
+                </li>
+            </ul> <blockquote><p><b class="note">Note</b>: 
+                
+                    Toutes ces options sont des propriétés de la classe
+                    <span class="classname">Zend_Search_Lucene</span>, pas des propriétés d&#039;index. Elles
+                    n&#039;affectent que les instances de <span class="classname">Zend_Search_Lucene</span> et
+                    peuvent varier selon les scripts.
+                <br />
+                </p></blockquote>
+            </p>
+
+        <p class="para">
+            <em class="emphasis">MaxBufferedDocs</em> n&#039;a aucun effet si vous n&#039;indexez qu&#039;un seul
+            document par exécution de script. En revanche, il est très important pour les
+            indexations massives (&quot;batch indexing&quot;). Plus sa valeur est élevée, meilleures seront
+            les performances d&#039;indexation, mais plus la consommation de mémoire sera
+            importante.
+        </p>
+
+        <p class="para">
+            Il n&#039;existe pas de manière simple de calculer la meilleure valeur pour le
+            paramètre <em class="emphasis">MaxBufferedDocs</em> car cela dépend de la taille moyenne des
+            documents, de l&#039;analyseur utilisé et de la mémoire disponible.
+        </p>
+
+        <p class="para">
+            Une bonne méthode pour trouver une valeur correcte consiste à effectuer plusieurs
+            tests avec les documents les plus volumineux que vous vous attendez à voir figurer dans
+            l&#039;index.<a href="#fnid1" name="fn1"><sup>[1]</sup></a>
+                
+                     <span class="methodname">memory_get_usage()</span> <span class="methodname">memory_get_peak_usage()</span>
+            . Une bonne pratique consiste à ne pas utiliser plus de la moitié de la
+            mémoire allouée.
+        </p>
+
+        <p class="para">
+            <em class="emphasis">MaxMergeDocs</em> limite la taille d&#039;un segment (en termes de
+            nombre de documents). De ce fait, il limite également la durée de l&#039;auto-optimisation en
+            garantissant que la méthode  <span class="methodname">addDocument()</span> ne sera pas exécutée plus d&#039;un
+            certain nombre de fois. C&#039;est très important dans le cadre d&#039;applications
+            interactives.
+        </p>
+
+        <p class="para">
+            Diminuer la valeur du paramètre <em class="emphasis">MaxMergeDocs</em> peut aussi
+            améliorer les performances lors de l&#039;indexation en masse (&quot;batch indexing&quot;).
+            L&#039;auto-optimisation est un processus itératif et utilise une technique ascendante. Les
+            petits segments sont fusionnés vers de plus gros segments qui sont eux-mêmes fusionnés
+            vers des segments encore plus gros, etc. L&#039;optimisation complète est achevée lorsqu&#039;il
+            ne reste qu&#039;un seul gros segment.
+        </p>
+
+        <p class="para">
+            De petits segments détériore généralement la qualité de l&#039;index. Un grand nombre
+            de petits segments peut aussi déclencher l&#039;erreur &quot;Too many open files&quot; déterminée par
+            les limitations du système d&#039;exploitation<a href="#fnid2" name="fn2"><sup>[2]</sup></a>
+                
+                    <span class="classname">Zend_Search_Lucene</span>
+                .
+            </p>
+
+        <p class="para">
+            En général, l&#039;optimisation d&#039;index en arrière-plan devrait être effectuée pour les
+            modes d&#039;indexation interactifs et la valeur de <em class="emphasis">MaxMergeDocs</em> ne
+            devrait pas être trop faible pour les indexations de masse (&quot;batch indexing&quot;).
+        </p>
+
+        <p class="para">
+            <em class="emphasis">MergeFactor</em> affecte la fréquence d&#039;auto-optimisation. De
+            faibles valeurs augmenteront la qualité des index non-optimisés. Des valeurs plus
+            importantes amélioreront les performances de l&#039;indexation, mais également le nombre de
+            segments fusionnés. Ce qui peut également déclencher l&#039;erreur &quot;Too many open
+            files&quot;.
+        </p>
+
+        <p class="para">
+            <em class="emphasis">MergeFactor</em> groupe les segments d&#039;index par leur taille :
+            <ol type="1">
+                    <li class="listitem">
+                        <p class="para">Pas plus grand que <em class="emphasis">MaxBufferedDocs</em>.</p>
+                    </li>
+
+                    <li class="listitem">
+                    <p class="para">
+                        Plus grand que <em class="emphasis">MaxBufferedDocs</em>, mais pas plus
+                        grand que
+                        <em class="emphasis">MaxBufferedDocs</em>*<em class="emphasis">MergeFactor</em>.
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        Plus grand que
+                        <em class="emphasis">MaxBufferedDocs</em>*<em class="emphasis">MergeFactor</em>, mais
+                        pas plus grand que
+                        <em class="emphasis">MaxBufferedDocs</em>*<em class="emphasis">MergeFactor</em>*<em class="emphasis">MergeFactor</em>.
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">...</p>
+                </li>
+                </ol>
+            </p>
+
+        <p class="para">
+            <span class="classname">Zend_Search_Lucene</span> vérifie à chaque appel de
+             <span class="methodname">addDocument()</span> si la fusion de n&#039;importe quel segment pour déplacer le
+            segment nouvellement créé dans le groupe suivant. Si c&#039;est le cas, la fusion est
+            effectuée.
+        </p>
+
+        <p class="para">
+            Ainsi, un index avec N groupes peut contenir <em class="emphasis">MaxBufferedDocs</em>
+            + (N-1)*<em class="emphasis">MergeFactor</em> segments et contient au moins
+            <em class="emphasis">MaxBufferedDocs</em>*<em class="emphasis">MergeFactor</em><sup class="superscript">(N-1)</sup>
+            documents.
+        </p>
+
+        <p class="para">
+            La formule ci-dessous donne une bonne approximation du nombre de segments dans un
+            index :
+        </p>
+
+        <p class="para">
+            <em class="emphasis">Nombre de segments</em> &lt;= <em class="emphasis">MaxBufferedDocs</em>
+            + <em class="emphasis">MergeFactor</em>*log
+            <sub class="subscript"><em class="emphasis">MergeFactor</em></sub> (<em class="emphasis">Nombre de
+            documents</em>/<em class="emphasis">MaxBufferedDocs</em>)
+        </p>
+
+        <p class="para">
+            <em class="emphasis">MaxBufferedDocs</em> est déterminé par la mémoire allouée. Cela
+            permet pour le facteur de fusion (MergeFactor) approprié d&#039;avoir un nombre raisonnable
+            de segments.
+        </p>
+
+        <p class="para">
+            L&#039;optimisation du paramètre <em class="emphasis">MergeFactor</em> est plus efficace
+            pour les performances de l&#039;indexation de masse (batch indexing) que
+            <em class="emphasis">MaxMergeDocs</em>. Mais cette méthode manque un peu de finesse. Le mieux
+            est d&#039;utiliser l&#039;estimation ci-dessus pour optimiser <em class="emphasis">MergeFactor</em>,
+            puis de jouer avec <em class="emphasis">MaxMergeDocs</em> pour obtenir les meilleures
+            performances d&#039;indexation de masse (batch indexing).
+        </p>
+    </div>
+
+    <div class="section" id="zend.search.lucene.best-practice.shutting-down" name="zend.search.lucene.best-practice.shutting-down"><div class="info"><h1 class="title">Indexation à l&#039;arrêt du programme</h1></div>
+        
+
+        <p class="para">
+            L&#039;instance de <span class="classname">Zend_Search_Lucene</span> effectue quelques tâches à
+            la sortie du programme si des documents ont été ajoutés à l&#039;index mais pas écrits dans
+            un nouveau segment.
+        </p>
+
+        <p class="para">Elle peut également déclencher le processus d&#039;auto-optimisation.</p>
+
+        <p class="para">
+            L&#039;objet qui représente l&#039;index est automatiquement fermé lorsque lui, ainsi que
+            tous les objets de résultats de requête qui lui sont associés, sont hors de portée du
+            script principal.
+        </p>
+
+        <p class="para">
+            Si l&#039;objet d&#039;index est stocké dans une variable globale, il ne sera fermé qu&#039;à la
+            fin de l&#039;exécution du script<a href="#fnid3" name="fn3"><sup>[3]</sup></a>
+                <acronym class="acronym">PHP</acronym>
+                .
+            </p>
+
+        <p class="para">Le processus d&#039;exception de <acronym class="acronym">PHP</acronym> est également fermé à ce moment.</p>
+
+        <p class="para">
+            Cela n&#039;empêche pas la fermeture normale du processus de l&#039;index, mais cela peut
+            empêcher un diagnostic d&#039;erreur précis si une erreur survient durant la
+            fermeture.
+        </p>
+
+        <p class="para">Il y a deux moyens qui peuvent permettre d&#039;éviter ce problème.</p>
+
+        <p class="para">
+            Le premier est de forcer l&#039;index à sortir de la portée (du scope) :<div class="programlisting"><div class="cdata"><pre>
+$index = Zend_Search_Lucene::open($indexPath);
+
+...
+
+unset($index);
+</pre></div></div>
+</p>
+
+        <p class="para">
+            Le second est d&#039;effectuer une opération de commit avant la fin du script exécution
+            :<div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$index</span> = Zend_Search_Lucene::<span style="color: #006600;">open</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$indexPath</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$index</span>-&gt;<span style="color: #006600;">commit</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+ Cette possibilité est également décrite dans la section &quot;<a href="zend.search.lucene.advanced.html#zend.search.lucene.advanced.static" class="link">Avancé - Utiliser les propriétés statiques
+            de l&#039;index</a>&quot;.
+        </p>
+    </div>
+
+    <div class="section" id="zend.search.lucene.best-practice.unique-id" name="zend.search.lucene.best-practice.unique-id"><div class="info"><h1 class="title">Récupération de documents par leur id unique</h1></div>
+        
+
+        <p class="para">
+            C&#039;est une pratique commune de stocker un identifiant unique de document dans
+            l&#039;index. Par exemple, une url, un chemin ou un identifiant tiré d&#039;une base de
+            données.
+        </p>
+
+        <p class="para">
+            <span class="classname">Zend_Search_Lucene</span> fournit une méthode
+             <span class="methodname">termDocs()</span> pour récupérer des documents contenant les termes
+            spécifiés.
+        </p>
+
+        <p class="para">
+            C&#039;est plus efficace que d&#039;utiliser la méthode  <span class="methodname">find()</span> :<div class="programlisting"><div class="cdata"><pre>
+// Récupération de documents avec la méthode find()
+// en utilisant une querystring
+$query = $idFieldName . &#039;:&#039; . $docId;
+$hits  = $index-&gt;find($query);
+foreach ($hits as $hit) {
+    $title    = $hit-&gt;title;
+    $contents = $hit-&gt;contents;
+    ...
+}
+...
+
+// Récupération de documents avec la méthode find()
+// en utilisant l&#039;API de requête.
+$term = new Zend_Search_Lucene_Index_Term($docId, $idFieldName);
+$query = new Zend_Search_Lucene_Search_Query_Term($term);
+$hits  = $index-&gt;find($query);
+foreach ($hits as $hit) {
+    $title    = $hit-&gt;title;
+    $contents = $hit-&gt;contents;
+    ...
+}
+
+...
+
+// Récupération de documents avec la méthode termDocs()
+$term = new Zend_Search_Lucene_Index_Term($docId, $idFieldName);
+$docIds  = $index-&gt;termDocs($term);
+foreach ($docIds as $id) {
+    $doc = $index-&gt;getDocument($id);
+    $title    = $doc-&gt;title;
+    $contents = $doc-&gt;contents;
+    ...
+}
+</pre></div></div>
+</p>
+        </div>
+
+        <div class="section" id="zend.search.lucene.best-practice.memory-usage" name="zend.search.lucene.best-practice.memory-usage"><div class="info"><h1 class="title">Utilisation de la mémoire</h1></div>
+            
+
+        <p class="para">
+            <span class="classname">Zend_Search_Lucene</span> est un module relativement gourmand en
+            mémoire.
+        </p>
+
+        <p class="para">
+            Il utilise la mémoire pour mettre en cache certaines informations et optimiser la
+            recherche, ainsi que les performances de l&#039;indexation.
+        </p>
+
+        <p class="para">La mémoire requise diffère selon les modes.</p>
+
+        <p class="para">
+            L&#039;index du dictionnaire des termes est chargé durant la recherche. Il s&#039;agit de
+            chaque 128<sup class="superscript">ème</sup><a href="#fnid4" name="fn4"><sup>[4]</sup></a>
+                <span class="classname">Zend_Search_Lucene</span>
+                 terme du dictionnaire complet.
+            </p>
+
+        <p class="para">
+            De fait, la consommation de mémoire augmente si vous avez un grand nombre de
+            termes uniques. Cela peut arriver si vous utilisez des phrases non &quot;tokenizées&quot; comme
+            champ de recherche ou que vous indexez un large volume d&#039;informations
+            non-textuelles.
+        </p>
+
+        <p class="para">
+            Un index non-optimisé consiste en plusieurs segments. Cela augmente également
+            l&#039;utilisation de mémoire. Les segments étant indépendants, chacun possède son propre
+            dictionnaire de termes et index de dictionnaire de termes. Si un index consiste en
+            <em class="emphasis">N</em> segments, il risque, dans le pire des cas, de multiplier par
+            <em class="emphasis">N</em> la consommation de mémoire. Lancez l&#039;optimisation de l&#039;index en
+            fusionnant tous les segments afin d&#039;éviter de telles consommations de mémoire.
+        </p>
+
+        <p class="para">
+            L&#039;indexation utilise la même quantité de mémoire que la recherche, plus de la
+            mémoire pour mettre les documents en tampon. La quantité de mémoire peut être gérée par
+            le paramètre <em class="emphasis">MaxBufferedDocs</em>.
+        </p>
+
+        <p class="para">
+            L&#039;optimisation d&#039;index (complète ou partielle) utilise un processus de type flux
+            (&quot;streaming&quot;) et ne requiert pas une grosse quantité de mémoire.
+        </p>
+    </div>
+
+    <div class="section" id="zend.search.lucene.best-practice.encoding" name="zend.search.lucene.best-practice.encoding"><div class="info"><h1 class="title">Encodage</h1></div>
+        
+
+        <p class="para">
+            <span class="classname">Zend_Search_Lucene</span> travaille avec des chaînes en UTF-8 en
+            interne. Ainsi toutes les chaînes de caractères retournée par
+            <span class="classname">Zend_Search_Lucene</span> sont encodées en UTF-8.
+        </p>
+
+        <p class="para">
+            Vous ne devriez pas être concernés par l&#039;encodage si vous travaillez avec des
+            chaîne purement <acronym class="acronym">ASCII</acronym>, mais vous devez être prudent si ce n&#039;est pas le cas.
+        </p>
+
+        <p class="para">
+            Un mauvais encodage peut causer des notices (erreur) durant la conversation
+            d&#039;encodage, voire la perte de données.
+        </p>
+
+        <p class="para">
+            <span class="classname">Zend_Search_Lucene</span> offre un large éventail de possibilités
+            d&#039;encodage pour les documents indexés et les requêtes analysées.
+        </p>
+
+        <p class="para">
+            L&#039;encodage peut être explicitement spécifié en passant un paramètre optionnel à la
+            méthode de création d&#039;un champ :<div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$doc</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Search_Lucene_Document<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$doc</span>-&gt;<span style="color: #006600;">addField</span><span style="color: #66cc66;">&#40;</span>Zend_Search_Lucene_Field::<span style="color: #006600;">Text</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'title'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$title</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'iso-8859-1'</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$doc</span>-&gt;<span style="color: #006600;">addField</span><span style="color: #66cc66;">&#40;</span>Zend_Search_Lucene_Field::<span style="color: #006600;">UnStored</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'contents'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$contents</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'utf-8'</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+ C&#039;est le meilleur moyen d&#039;éviter toute ambiguïté dans les encodages
+            utilisés.
+        </p>
+
+        <p class="para">
+            Si le paramètre optionnel de l&#039;encodage est omis, la locale courante est utilisée.
+            La locale courante peut contenir des données d&#039;encodage en plus des spécification de
+            langue :<div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/setlocale"><span style="color: #000066;">setlocale</span></a><span style="color: #66cc66;">&#40;</span>LC_ALL, <span style="color: #ff0000;">'fr_FR'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">...</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/setlocale"><span style="color: #000066;">setlocale</span></a><span style="color: #66cc66;">&#40;</span>LC_ALL, <span style="color: #ff0000;">'de_DE.iso-8859-1'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">...</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/setlocale"><span style="color: #000066;">setlocale</span></a><span style="color: #66cc66;">&#40;</span>LC_ALL, <span style="color: #ff0000;">'ru_RU.UTF-8'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">...</div></li></ol></div></div></div>
+</p>
+
+        <p class="para">
+            La même approche est utilisée pour définir l&#039;encodage des chaînes de
+            requête.
+        </p>
+
+        <p class="para">
+            Si l&#039;encodage n&#039;est pas spécifié, la locale courante est utilisée pour le
+            déterminer.
+        </p>
+
+        <p class="para">
+            L&#039;encodage peut être passée comme paramètre optionnel si la requête est analysée
+            explicitement avant la recherche :<div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$query</span> =</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; Zend_Search_Lucene_Search_QueryParser::<span style="color: #006600;">parse</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$queryStr</span>, <span style="color: #ff0000;">'iso-8859-5'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$hits</span> = <span style="color: #0000ff;">$index</span>-&gt;<span style="color: #006600;">find</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$query</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">...</div></li></ol></div></div></div>
+</p>
+
+        <p class="para">
+            L&#039;encodage par défaut peut également être spécifié avec la méthode
+             <span class="methodname">setDefaultEncoding()</span> :<div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">Zend_Search_Lucene_Search_QueryParser::<span style="color: #006600;">setDefaultEncoding</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'iso-8859-1'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$hits</span> = <span style="color: #0000ff;">$index</span>-&gt;<span style="color: #006600;">find</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$queryStr</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">...</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;chaîne vide sous-entend <span style="color: #ff0000;">&quot;locale courante&quot;</span>.</div></li></ol></div></div></div>
+</p>
+
+        <p class="para">
+            Si l&#039;encodage correct est spécifié, il pourra être correctement interprété par
+            l&#039;analyseur. Le comportement dépend de quel analyseur est utilisé. Consultez la section
+            sur les <a href="zend.search.lucene.charset.html" class="link">Jeu de caractères</a> pour plus de
+            détails.
+        </p>
+    </div>
+
+    <div class="section" id="zend.search.lucene.best-practice.maintenance" name="zend.search.lucene.best-practice.maintenance"><div class="info"><h1 class="title">Maintenance de l&#039;index</h1></div>
+        
+
+        <p class="para">
+            Il devrait être clair que <span class="classname">Zend_Search_Lucene</span> comme toute
+            autre implémentation de Lucene ne comporte pas de &quot;base de données&quot;.
+        </p>
+
+        <p class="para">
+            Les index ne devrait pas être utilisés pour du stockage de données. Ils ne
+            fournissent pas de fonctionnalités de backup/restauration partiel, journalisation, logs,
+            transactions et beaucoup d&#039;autres fonctionnalités assimilées aux systèmes de gestion de
+            bases de données.
+        </p>
+
+        <p class="para">
+            Cependant, <span class="classname">Zend_Search_Lucene</span> tente de garder ses index
+            dans un état constant en tout temps.
+        </p>
+
+        <p class="para">
+            Le backup et la restauration d&#039;un index devrait être effectué en copiant le
+            contenu du répertoire de l&#039;index.
+        </p>
+
+        <p class="para">
+            Si pour une raison quelconque, un index devait être corrompu, il devrait être
+            restauré ou complètement reconstruit.
+        </p>
+
+        <p class="para">
+            C&#039;est donc une bonne idée de faire des backups des gros index et de stocker les
+            logs de modifications pour pouvoir effectuer des restaurations manuelles et des
+            opérations de &quot;roll-forward&quot; si nécessaire. Cette pratique réduit considérablement le
+            temps de restauration.
+        </p>
+    </div>
+<div class="footnote"><a name="fnid1" href="#fn1"><sup>[1]</sup></a><span class="para footnote"> et 
+                    peuvent être utilisées pour contrôler l'utilisation de la mémoire.
+                </span></div>
+<div class="footnote"><a name="fnid2" href="#fn2"><sup>[2]</sup></a><span class="para footnote"> maintient chaque segment ouvert
+                    pour améliorer les performances de recherche.
+                </span></div>
+<div class="footnote"><a name="fnid3" href="#fn3"><sup>[3]</sup></a><span class="para footnote">
+                    Cela peut aussi se produire s'il y a une référence à l'index ou à l'un de
+                    ses résultats de recherche dans une structure de données cyclique, car le
+                    ramasse-miettes de  ne récupère les objets avec des références cycliques
+                    qu'en fin d'exécution de script
+                </span></div>
+<div class="footnote"><a name="fnid4" href="#fn4"><sup>[4]</sup></a><span class="para footnote">
+                    Le format de fichier Lucene permet de configurer ce nombre, mais
+                     n'expose pas cette possibilité dans
+                    l'API. Cependant vous pouvez toujours configurer ce nombre si l'index est géré
+                    par une autre implémentation de Lucene.
+                </span></div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.search.lucene.advanced.html">Avanc&eacute;</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.search.lucene.html">Zend_Search_Lucene</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.serializer.html">Zend_Serializer</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.search.lucene.html">Zend_Search_Lucene</a></li>
+  <li><a href="zend.search.lucene.overview.html">Vue d'ensemble</a></li>
+  <li><a href="zend.search.lucene.index-creation.html">Cr&eacute;er des index</a></li>
+  <li><a href="zend.search.lucene.searching.html">Chercher dans un index</a></li>
+  <li><a href="zend.search.lucene.query-language.html">Langage de requ&ecirc;tes</a></li>
+  <li><a href="zend.search.lucene.query-api.html">API de construction de requ&ecirc;tes</a></li>
+  <li><a href="zend.search.lucene.charset.html">Jeu de caract&egrave;res</a></li>
+  <li><a href="zend.search.lucene.extending.html">Extensibilit&eacute;</a></li>
+  <li><a href="zend.search.lucene.java-lucene.html">Agir avec Lucene Java</a></li>
+  <li><a href="zend.search.lucene.advanced.html">Avanc&eacute;</a></li>
+  <li class="active"><a href="zend.search.lucene.best-practice.html">Bonnes pratiques</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

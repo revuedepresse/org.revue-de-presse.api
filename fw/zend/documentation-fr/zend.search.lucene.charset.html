@@ -1,0 +1,268 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Jeu de caract&egrave;res - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.search.lucene.query-api.html">API de construction de requ&ecirc;tes</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.search.lucene.html">Zend_Search_Lucene</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.search.lucene.extending.html">Extensibilit&eacute;</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.search.lucene.charset" class="section"><div class="info"><h1 class="title">Jeu de caractères</h1></div>
+    
+
+    <div class="section" id="zend.search.lucene.charset.description" name="zend.search.lucene.charset.description"><div class="info"><h1 class="title">Support UTF-8 et caractères sur un octet</h1></div>
+        
+
+        <p class="para">
+            <span class="classname">Zend_Search_Lucene</span> utilise l&#039;UTF-8 en interne. Les fichiers
+            d&#039;index stockent des données Unicode dans le &quot;format UTF-8 modifié&quot; de Java.
+            <span class="classname">Zend_Search_Lucene</span> supporte totalement ce format, à une exception
+            près. <a href="#fnid1" name="fn1"><sup>[1]</sup></a>
+                
+
+                
+                
+            </p>
+
+        <p class="para">
+            L&#039;encodage des caractères d&#039;entrée peut être spécifié grâce à l&#039;API de
+            <span class="classname">Zend_Search_Lucene</span>. Les données seront converties automatiquement
+            en UTF-8.
+        </p>
+    </div>
+
+    <div class="section" id="zend.search.lucene.charset.default_analyzer" name="zend.search.lucene.charset.default_analyzer"><div class="info"><h1 class="title">Analyseur de texte par défaut</h1></div>
+        
+
+        <p class="para">
+            Cependant, l&#039;analyseur de texte par défaut (aussi utilisé par l&#039;analyseur de
+            requête) utilise  <span class="methodname">ctype_alpha()</span>.
+        </p>
+
+        <p class="para">
+             <span class="methodname">ctype_alpha()</span> n&#039;est pas compatible UTF-8, donc l&#039;analyseur convertit
+            le texte vers &quot;ASCII//TRANSLIT&quot; avant l&#039;indexation. Le même processus est utilisé de
+            manière transparente lors du requêtage. <a href="#fnid2" name="fn2"><sup>[2]</sup></a>
+                
+                
+            </p>
+
+        <blockquote><p><b class="note">Note</b>: <span class="info"><b></span>
+            
+
+            
+                L&#039;analyseur par défaut isole les chiffres. Utilisez le parseur &quot;Num&quot; si vous
+                voulez que les chiffres soient considérés comme des mots.
+            <br />
+        </p></blockquote>
+    </div>
+
+    <div class="section" id="zend.search.lucene.charset.utf_analyzer" name="zend.search.lucene.charset.utf_analyzer"><div class="info"><h1 class="title">Analyseurs de texte compatibles UTF-8</h1></div>
+        
+
+        <p class="para">
+            <span class="classname">Zend_Search_Lucene</span> contient aussi des analyseurs
+            compatibles UTF-8 :
+            <span class="classname">Zend_Search_Lucene_Analysis_Analyzer_Common_Utf8</span>,
+            <span class="classname">Zend_Search_Lucene_Analysis_Analyzer_Common_Utf8Num</span>,
+            <span class="classname">Zend_Search_Lucene_Analysis_Analyzer_Common_Utf8_CaseInsensitive</span>,
+            <span class="classname">Zend_Search_Lucene_Analysis_Analyzer_Common_Utf8Num_CaseInsensitive</span>.
+        </p>
+
+        <p class="para">
+            N&#039;importe quel analyseur peut être activé avec un code comme celui-ci:
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">Zend_Search_Lucene_Analysis_Analyzer::<span style="color: #006600;">setDefault</span><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">new</span> Zend_Search_Lucene_Analysis_Analyzer_Common_Utf8<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+            </p>
+
+        <div class="warning"><b class="warning">Warning</b><div class="info"><h1 class="title"/></div>
+            
+
+            <p class="para">
+                Les analyseurs UTF-8 ont été améliorés dans Zend Framework 1.5. Les anciennes
+                versions considéraient les caractères non-ASCII comme des lettres. Les nouveaux
+                analyseurs sont quant à eux plus précis sur ce point.
+            </p>
+
+            <p class="para">
+                Ceci pourrait vous obliger à reconstruire votre index afin que vos données et
+                vos requêtes de recherche soient au même format. Des résultats faux peuvent
+                apparaître sinon.
+            </p>
+        </div>
+
+        <p class="para">
+            Tous ces analyseurs nécessitent que la libraire PCRE (Perl-compatible regular
+            expressions) soit compilée avec le support d&#039;UTF-8. Ce support d&#039;UTF-8 pour PCRE est
+            activé par défaut dans les sources des libraires PCRE livrées avec <acronym class="acronym">PHP</acronym>, mais si vous
+            avez utilisé des librairies partagées pour la compilation de <acronym class="acronym">PHP</acronym>, alors le support
+            d&#039;UTF-8 peut dépendre de l&#039;OS.
+        </p>
+
+        <p class="para">
+            Utilisez ce code pour vérifier si le support d&#039;UTF-8 est assuré pour PCRE :
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #b1b100;">if</span> <span style="color: #66cc66;">&#40;</span>@<a href="http://www.php.net/preg_match"><span style="color: #000066;">preg_match</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'/<span style="color: #000099; font-weight: bold;">\p</span>L/u'</span>, <span style="color: #ff0000;">'a'</span><span style="color: #66cc66;">&#41;</span> == <span style="color: #cc66cc;">1</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #ff0000;">&quot;support UTF-8 pour PCRE activé.<span style="color: #000099; font-weight: bold;">\n</span>&quot;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span> <span style="color: #b1b100;">else</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #ff0000;">&quot;support UTF-8 pour PCRE désactivé.<span style="color: #000099; font-weight: bold;">\n</span>&quot;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+</p>
+
+        <p class="para">
+            Les analyseurs UTF-8 insensibles à la casse ont aussi besoin de l&#039;extension <a href="http://www.php.net/manual/en/ref.mbstring.php" class="link external">&raquo; mbstring</a> pour être
+            activés.
+        </p>
+
+        <p class="para">
+            Si vous voulez les analyseurs UTF-8 insensibles à la casse, mais que vous n&#039;avez
+            pas mbstring, normalisez alors vos données avant de les indexer ainsi que vos requêtes
+            avant vos recherches, ceci en les tranformant en casse minuscule : <div class="programlisting"><div class="cdata"><pre>
+// Indexation
+setlocale(LC_CTYPE, &#039;de_DE.iso-8859-1&#039;);
+
+...
+
+Zend_Search_Lucene_Analysis_Analyzer::setDefault(
+    new Zend_Search_Lucene_Analysis_Analyzer_Common_Utf8());
+
+...
+
+$doc = new Zend_Search_Lucene_Document();
+
+$doc-&gt;addField(Zend_Search_Lucene_Field::UnStored(
+                    &#039;contents&#039;, strtolower($contents))
+              );
+
+// champ titre (indexed, unstored)
+$doc-&gt;addField(Zend_Search_Lucene_Field::UnStored(
+                    &#039;title&#039;, strtolower($title))
+              );
+
+// champ titre (unindexed, stored)
+$doc-&gt;addField(Zend_Search_Lucene_Field::UnIndexed(&#039;_title&#039;, $title));
+</pre></div></div>
+ <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Recherche</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/setlocale"><span style="color: #000066;">setlocale</span></a><span style="color: #66cc66;">&#40;</span>LC_CTYPE, <span style="color: #ff0000;">'de_DE.iso-8859-1'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">...</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">Zend_Search_Lucene_Analysis_Analyzer::<span style="color: #006600;">setDefault</span><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">new</span> Zend_Search_Lucene_Analysis_Analyzer_Common_Utf8<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">...</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$hits</span> = <span style="color: #0000ff;">$index</span>-&gt;<span style="color: #006600;">find</span><span style="color: #66cc66;">&#40;</span><a href="http://www.php.net/strtolower"><span style="color: #000066;">strtolower</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$query</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+</p>
+        </div>
+    <div class="footnote"><a name="fnid1" href="#fn1"><sup>[1]</sup></a><span class="para footnote">
+                    Zend_Search_Lucene supporte seulement les caractères Basic Multilingual
+                    Plane (BMP) (de 0x0000 à 0xFFFF) et ne supporte pas les "caractères
+                    supplémentaires" (caractères dont les codes sont supérieurs à 0xFFFF).
+                </span><span class="para footnote">
+                    Java 2 représente ces caractères comme une paire de char (16-bit), le
+                    premier depuis l'échelle haute (0xD800-0xDBFF), le second pour l'échelle basse
+                    (0xDC00-0xDFFF). Ils sont alors encodés comme des caractères UTF-8 standards sur
+                    six octets. La représentation UTF-8 standard utilise elle 4 octets pour les
+                    caractères supplémentaires.
+                </span></div>
+<div class="footnote"><a name="fnid2" href="#fn2"><sup>[2]</sup></a><span class="para footnote">
+                    La conversion vers 'ASCII//TRANSLIT' peut dépendre de la locale courante
+                    ou de l'OS.
+                </span></div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.search.lucene.query-api.html">API de construction de requ&ecirc;tes</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.search.lucene.html">Zend_Search_Lucene</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.search.lucene.extending.html">Extensibilit&eacute;</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.search.lucene.html">Zend_Search_Lucene</a></li>
+  <li><a href="zend.search.lucene.overview.html">Vue d'ensemble</a></li>
+  <li><a href="zend.search.lucene.index-creation.html">Cr&eacute;er des index</a></li>
+  <li><a href="zend.search.lucene.searching.html">Chercher dans un index</a></li>
+  <li><a href="zend.search.lucene.query-language.html">Langage de requ&ecirc;tes</a></li>
+  <li><a href="zend.search.lucene.query-api.html">API de construction de requ&ecirc;tes</a></li>
+  <li class="active"><a href="zend.search.lucene.charset.html">Jeu de caract&egrave;res</a></li>
+  <li><a href="zend.search.lucene.extending.html">Extensibilit&eacute;</a></li>
+  <li><a href="zend.search.lucene.java-lucene.html">Agir avec Lucene Java</a></li>
+  <li><a href="zend.search.lucene.advanced.html">Avanc&eacute;</a></li>
+  <li><a href="zend.search.lucene.best-practice.html">Bonnes pratiques</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

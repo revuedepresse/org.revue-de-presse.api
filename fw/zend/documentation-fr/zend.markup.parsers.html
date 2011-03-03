@@ -1,0 +1,340 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Analyseurs Zend_Markup (parsers) - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.markup.getting-started.html">Guide de d&eacute;marrage avec Zend_Markup</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.markup.html">Zend_Markup</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.markup.renderers.html">Moteurs de rendu Zend_Markup</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.markup.parsers" class="section"><div class="info"><h1 class="title">Analyseurs Zend_Markup (parsers)</h1></div>
+    
+
+    <p class="para">
+        <span class="classname">Zend_Markup</span> est fourni avec deux analyseurs, BBCode et
+        Textile.
+    </p>
+
+    <div class="section" id="zend.markup.parsers.theory" name="zend.markup.parsers.theory"><div class="info"><h1 class="title">Theorie de l&#039;analyse</h1></div>
+        
+
+        <p class="para">
+            Les analyseurs syntaxiques de <span class="classname">Zend_Markup</span> sont des classes
+            qui convertissent du texte balisé en un arbre d&#039;identifiants d&#039;analyses, appelées &#039;tokens&#039;.
+            Même si nous utilisons par la suite l&#039;analyseur BBCode, le principe de l&#039;arbre à
+            tokens est le même pour tous les analyseurs syntaxiques. Essayons avec un morceau
+            de BBCode par exemple:
+        </p>
+
+        <div class="programlisting"><div class="cdata"><pre>
+[b]foo[i]bar[/i][/b]baz
+</pre></div></div>
+
+
+        <p class="para">
+            L&#039;analyseur BBCode va analyser syntaxiquement ce code et en déduire l&#039;arbre suivant:
+        </p>
+
+        <ul class="itemizedlist">
+            <li class="listitem">
+                <p class="para">[b]</p>
+
+                <ul class="itemizedlist">
+                    <li class="listitem">
+                        <p class="para">foo</p>
+                    </li>
+
+                    <li class="listitem">
+                        <p class="para">[i]</p>
+
+                        <ul class="itemizedlist">
+                            <li class="listitem">
+                                <p class="para">bar</p>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </li>
+
+            <li class="listitem">
+                <p class="para">baz</p>
+            </li>
+        </ul>
+
+        <p class="para">
+            Notez que les tags de fermeture n&#039;existent plus dans l&#039;arbre généré. Ceci car ils
+            n&#039;ont pas de valeur particulière pour la sémantique, ils ne sont pas perdus mais stockés
+            grâce au seul tag d&#039;ouverture. Notez aussi que ceci n&#039;est qu&#039;une vue simplifiée de l&#039;arbre
+            réel qui contient en réalité bien plus d&#039;informations comme les attributs éventuels du tag
+            et son nom.
+        </p>
+    </div>
+
+    <div class="section" id="zend.markup.parsers.bbcode" name="zend.markup.parsers.bbcode"><div class="info"><h1 class="title">L&#039;analyseur BBCode</h1></div>
+        
+
+        <p class="para">
+            L&#039;analyseur BBCode est un analyseur de <span class="classname">Zend_Markup</span> qui
+            transforme un code BBCode en arbres à tokens. La syntaxe des tags BBCode est:
+        </p>
+
+        <div class="programlisting text"><div class="textcode"><div class="text" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">[name(=(value|&quot;value&quot;))( attribute=(value|&quot;value&quot;))*]</div></li></ol></div></div></div>
+
+
+        <p class="para">
+            Des exemples de tags BBCode valides:
+        </p>
+
+        <div class="programlisting"><div class="cdata"><pre>
+[b]
+[list=1]
+[code file=Zend/Markup.php]
+[url=&quot;http://framework.zend.com/&quot; title=&quot;Zend Framework!&quot;]
+</pre></div></div>
+
+
+        <p class="para">
+            Par défaut, tous les tags sont fermés avec la syntaxe &#039;[/tagname]&#039;.
+        </p>
+    </div>
+
+    <div class="section" id="zend.markup.parsers.textile" name="zend.markup.parsers.textile"><div class="info"><h1 class="title">L&#039;analyseur Textile</h1></div>
+        
+
+        <p class="para">
+            L&#039;analyseur Textile de <span class="classname">Zend_Markup</span> convertit du texte au format Textile
+            en un arbre à tokens. Textile n&#039;ayant pas de structure à base de tags, la liste suivante est un
+            exemple de tags:
+        </p>
+
+        <table class="doctable table"><div class="info"><caption><b>Liste de tags Textile basiques</b></caption></div>
+            
+
+            
+                <thead valign="middle">
+                    <tr valign="middle">
+                        <th>Entrée</th>
+
+                        <th>Sortie</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody valign="middle" class="tbody">
+                    <tr valign="middle">
+                        <td align="left">*foo*</td>
+
+                        <td align="left">&lt;strong&gt;foo&lt;/strong&gt;</td>
+                    </tr>
+
+
+                    <tr valign="middle">
+                        <td align="left">_foo_</td>
+
+                        <td align="left">&lt;em&gt;foo&lt;/em&gt;</td>
+                    </tr>
+
+
+                    <tr valign="middle">
+                        <td align="left">??foo??</td>
+
+                        <td align="left">&lt;cite&gt;foo&lt;/cite&gt;</td>
+                    </tr>
+
+
+                    <tr valign="middle">
+                        <td align="left">-foo-</td>
+
+                        <td align="left">&lt;del&gt;foo&lt;/del&gt;</td>
+                    </tr>
+
+
+                    <tr valign="middle">
+                        <td align="left">+foo+</td>
+
+                        <td align="left">&lt;ins&gt;foo&lt;/ins&gt;</td>
+                    </tr>
+
+
+                    <tr valign="middle">
+                        <td align="left">^foo^</td>
+
+                        <td align="left">&lt;sup&gt;foo&lt;/sup&gt;</td>
+                    </tr>
+
+
+                    <tr valign="middle">
+                        <td align="left">~foo~</td>
+
+                        <td align="left">&lt;sub&gt;foo&lt;/sub&gt;</td>
+                    </tr>
+
+
+                    <tr valign="middle">
+                        <td align="left">%foo%</td>
+
+                        <td align="left">&lt;span&gt;foo&lt;/span&gt;</td>
+                    </tr>
+
+
+                    <tr valign="middle">
+                        <td align="left">PHP(PHP Hypertext Preprocessor)</td>
+
+                        <td align="left">&lt;acronym title=&quot;PHP Hypertext Preprocessor&quot;&gt;PHP&lt;/acronym&gt;</td>
+                    </tr>
+
+
+                    <tr valign="middle">
+                        <td align="left">&quot;Zend Framework&quot;:http://framework.zend.com/</td>
+
+                        <td align="left">&lt;a href=&quot;http://framework.zend.com/&quot;&gt;Zend Framework&lt;/a&gt;</td>
+                    </tr>
+
+
+                    <tr valign="middle">
+                        <td align="left">h1. foobar</td>
+
+                        <td align="left">&lt;h1&gt;foobar&lt;/h1&gt;</td>
+                    </tr>
+
+
+                    <tr valign="middle">
+                        <td align="left">h6. foobar</td>
+
+                        <td align="left">&lt;h6&gt;foobar&lt;/h6&gt;</td>
+                    </tr>
+
+
+                    <tr valign="middle">
+                        <td align="left">!http://framework.zend.com/images/logo.gif!</td>
+
+                        <td align="left">&lt;img src=&quot;http://framework.zend.com/images/logo.gif&quot; /&gt;</td>
+                    </tr>
+
+                </tbody>
+            
+        </table>
+
+
+        <p class="para">
+            L&#039;analyseur Textile encapsule tous les tags dans des paragraphes; un paragraphe se termine par
+            deux nouvelles lignes, et s&#039;il y a des tags supplémentaires, un nouveau paragraphe sera ajouté.
+        </p>
+
+        <div class="section" id="zend.markup.parsers.textile.lists" name="zend.markup.parsers.textile.lists"><div class="info"><h1 class="title">Listes</h1></div>
+            
+
+            <p class="para">
+                L&#039;analyseur Textile supporte aussi deux types de listes. Le type numérique, utilisant
+                le caractère &quot;#&quot; et le type anonyme qui utilise lui l&#039;étoile &quot;*&quot;.
+                Exemple des deux listes:
+            </p>
+
+            <div class="programlisting"><div class="cdata"><pre>
+# Item 1
+# Item 2
+
+* Item 1
+* Item 2
+</pre></div></div>
+
+
+            <p class="para">
+                Le code ci-dessus génèrera deux listes, la première, numérique; et la seconde, anonyme.
+                Dans les éléments des listes, vous pouvez utiliser des tags classiques comme le gras
+                (*), et l&#039;emphase(italique) (_). Les tags ayant besoin de créer une nouvelle ligne
+                (comme &#039;h1&#039; etc.) ne peuvent être utilisés au sein des listes.
+            </p>
+        </div>
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.markup.getting-started.html">Guide de d&eacute;marrage avec Zend_Markup</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.markup.html">Zend_Markup</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.markup.renderers.html">Moteurs de rendu Zend_Markup</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.markup.html">Zend_Markup</a></li>
+  <li><a href="zend.markup.introduction.html">Introduction</a></li>
+  <li><a href="zend.markup.getting-started.html">Guide de d&eacute;marrage avec Zend_Markup</a></li>
+  <li class="active"><a href="zend.markup.parsers.html">Analyseurs Zend_Markup (parsers)</a></li>
+  <li><a href="zend.markup.renderers.html">Moteurs de rendu Zend_Markup</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

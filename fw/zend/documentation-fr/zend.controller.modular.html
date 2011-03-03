@@ -1,0 +1,312 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Utilisation de conventions de dossiers modulaires - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.controller.plugins.html">Plugins</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.controller.html">Zend_Controller</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.controller.exceptions.html">Exceptions avec MVC</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.controller.modular" class="section"><div class="info"><h1 class="title">Utilisation de conventions de dossiers modulaires</h1></div>
+    
+
+    <div class="section" id="zend.controller.modular.introduction" name="zend.controller.modular.introduction"><div class="info"><h1 class="title">Introduction</h1></div>
+        
+
+        <p class="para">
+            Les conventions de dossiers vous permettent de séparer les différentes
+            applications <acronym class="acronym">MVC</acronym> dans des unités isolées et les réutiliser dans le contrôleur frontal.
+            Voici une illustration :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">docroot/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; index.php</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">application/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">default</span>/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; controllers/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; IndexController.php</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; FooController.php</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; models/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; views/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; scripts/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; index/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; foo/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; helpers/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; filters/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; blog/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; controllers/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; IndexController.php</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; models/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; views/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; scripts/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; index/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; helpers/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; filters/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; news/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; controllers/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; IndexController.php</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; ListController.php</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; models/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; views/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; scripts/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; index/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <a href="http://www.php.net/list"><span style="color: #000066;">list</span></a>/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; helpers/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; filters/</div></li></ol></div></div></div>
+
+
+        <p class="para">
+            Ci dessus, le nom du module est utilisé comme préfixe pour les contrôleurs qu&#039;il
+            possède. Il y a donc trois contrôleurs : &quot;Blog_IndexController&quot;,
+            &quot;News_IndexController&quot;, et &quot;News_ListController&quot;. Deux contrôleurs dans le module par
+            défaut sont aussi définis, &quot;IndexController&quot; et &quot;FooController&quot;. Ceux-ci ne possèdent
+            pas le nom du module dans leur nom. Cet exemple d&#039;arborescence conseillée sera utilisé
+            dans ce chapitre.
+        </p>
+
+        <blockquote><p><b class="note">Note</b>: <span class="info"><b>Pas de namespace pour le module par défaut</b><br /></span>
+            
+            
+                Notez que dans le module par défaut, les contrôleurs n&#039;ont pas besoin d&#039;être
+                préfixés par le nom du module (&quot;Default_&quot;). Ils sont simplement distribués tels
+                quels. Ce n&#039;est pas le cas pour les autres contrôleurs.
+            <br />
+        </p></blockquote>
+
+        <p class="para">Alors, comment utiliser une structure telle que celle-ci ?</p>
+    </div>
+
+    <div class="section" id="zend.controller.modular.directories" name="zend.controller.modular.directories"><div class="info"><h1 class="title">Spécification des dossiers de modules</h1></div>
+        
+
+        <p class="para">
+            La première chose à faire est d&#039;indiquer au contrôleur frontal où se trouvent les
+            dossiers contenant les contrôleurs d&#039;action. Passez un <code class="code">array</code> ou une
+            <code class="code">string</code> à  <span class="methodname">setControllerDirectory()</span>, ou alors une
+            <code class="code">string</code> à  <span class="methodname">addControllerDirectory()</span>. Si vous utilisez les
+            modules, ces appels de méthodes changent quelque peu.
+        </p>
+
+        <p class="para">
+            Pour  <span class="methodname">setControllerDirectory()</span>, un tableau est requis. Les paires
+            clé/valeur représentent le nom du module, et le chemin des contrôleurs. La clé
+            <code class="code">default</code> est utilisée pour indiquer les contrôleurs globaux (dont le nom ne
+            comporte pas le module). Chaque option doit comporter une indication vers un chemin, et
+            la clé <code class="code">default</code> doit être présente :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$front</span>-&gt;<span style="color: #006600;">setControllerDirectory</span><span style="color: #66cc66;">&#40;</span><a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'default'</span> =&gt; <span style="color: #ff0000;">'/path/to/application/controllers'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'blog'</span>&nbsp; &nbsp; =&gt; <span style="color: #ff0000;">'/path/to/application/blog/controllers'</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <p class="para">
+             <span class="methodname">addControllerDirectory()</span> prend en paramètre une <code class="code">string</code>
+            décrivant un chemin vers des contrôleurs. Si vous voulez indiquer un module, passez le
+            en second paramètre. Sinon, le chemin sera ajouté au module
+            <code class="code">default.</code>
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$front</span>-&gt;<span style="color: #006600;">addControllerDirectory</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'/path/to/application/news/controllers'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">'news'</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <p class="para">
+            Enfin, si vous avez un dossier spécial regroupant tous vos modules, indiquez le
+            grâce à  <span class="methodname">addModuleDirectory()</span> :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">/**</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;"> * Sur cet exemple :</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;"> * application/</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;"> *&nbsp; &nbsp; &nbsp;modules/</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;"> *&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;default/</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;"> *&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;controllers/</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;"> *&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;foo/</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;"> *&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;controllers/</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;"> *&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;bar/</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;"> *&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;controllers/</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;"> */</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$front</span>-&gt;<span style="color: #006600;">addModuleDirectory</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'/path/to/application/modules'</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <p class="para">
+            Dans le code ci dessus, vous déclarez 3 modules en une méthodes. Celle-ci
+            s&#039;attend à la structure comprenant les modules <code class="code">default</code>, <code class="code">foo</code>,
+            et <code class="code">bar</code>, chacun devant posséder un dossier <code class="code">controllers</code>
+        </p>
+
+        <p class="para">
+            Si le dossier &quot;controllers&quot; ne vous convient pas, changez son nom à l&#039;aide de
+             <span class="methodname">setModuleControllerDirectoryName()</span> :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">/**</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;"> * Le dossier des contrôleurs s'appelle désormais 'con'</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;"> * application/</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;"> *&nbsp; &nbsp; &nbsp;modules/</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;"> *&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;default/</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;"> *&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;con/</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;"> *&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;foo/</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;"> *&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;con/</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;"> *&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;bar/</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;"> *&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;con/</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;"> */</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$front</span>-&gt;<span style="color: #006600;">setModuleControllerDirectoryName</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'con'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$front</span>-&gt;<span style="color: #006600;">addModuleDirectory</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'/path/to/application/modules'</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <blockquote><p><b class="note">Note</b>: 
+            
+                Si vos dossiers de modules ne doivent pas utiliser de sous dossier pour les
+                contrôleurs, alors passez une valeur vide à
+                 <span class="methodname">setModuleControllerDirectoryName()</span>.
+            <br />
+        </p></blockquote>
+    </div>
+
+    <div class="section" id="zend.controller.modular.router" name="zend.controller.modular.router"><div class="info"><h1 class="title">Routage des modules</h1></div>
+        
+
+        <p class="para">
+            La route par défaut, <span class="classname">Zend_Controller_Router_Rewrite</span> est un
+            objet de type <span class="classname">Zend_Controller_Router_Route_Module</span>. Cette route
+            traite les schémas de routage suivants :
+        </p>
+
+        <ul class="itemizedlist">
+            <li class="listitem">
+                <p class="para"><code class="code">:module/:controller/:action/*</code></p>
+            </li>
+            <li class="listitem">
+                <p class="para"><code class="code">:controller/:action/*</code></p>
+            </li>
+        </ul>
+
+        <p class="para">
+            Ainsi, elle va trouver les contrôleurs et actions, avec ou sans module les
+            précédant. Un module ne sera trouvé que si sa clé existe dans le tableau d&#039;options
+            passé au contrôleur frontal ou au distributeur.
+        </p>
+    </div>
+
+    <div class="section" id="zend.controller.modular.defaultcontroller" name="zend.controller.modular.defaultcontroller"><div class="info"><h1 class="title">Module ou contrôleur Default global</h1></div>
+        
+
+        <p class="para">
+            Dans le routeur par défaut, si aucun contrôleur n&#039;est indiqué dans l&#039;URL, un
+            contrôleur par défaut sera utilisé (<code class="code">IndexController</code>, sauf si l&#039;on décide
+            de changer ce paramètre). Avec des modules indiqués dans l&#039;URL, si aucun contrôleur
+            n&#039;est indiqué, alors le distributeur cherchera dans le module demandé le contrôleur par
+            défaut. Si celui-ci est absent, c&#039;est celui du module &quot;default&quot; qui sera
+            utilisé.
+        </p>
+
+        <p class="para">
+            Si vous voulez renvoyer directement vers le contrôleur par défaut du module
+            &quot;default&quot;, passez le paramètre <code class="code">useDefaultControllerAlways</code> à
+            <b><tt>TRUE</tt></b> dans le contrôleur frontal :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$front</span>-&gt;<span style="color: #006600;">setParam</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'useDefaultControllerAlways'</span>, <span style="color: #000000; font-weight: bold;">true</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.controller.plugins.html">Plugins</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.controller.html">Zend_Controller</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.controller.exceptions.html">Exceptions avec MVC</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.controller.html">Zend_Controller</a></li>
+  <li><a href="zend.controller.quickstart.html">Zend_Controller - D&eacute;marrage rapide</a></li>
+  <li><a href="zend.controller.basics.html">Fondations de Zend_Controller</a></li>
+  <li><a href="zend.controller.front.html">Le contr&ocirc;leur frontal (Front Controller)</a></li>
+  <li><a href="zend.controller.request.html">L'objet Requ&ecirc;te</a></li>
+  <li><a href="zend.controller.router.html">Routeur Standard</a></li>
+  <li><a href="zend.controller.dispatcher.html">Le distributeur</a></li>
+  <li><a href="zend.controller.action.html">Contr&ocirc;leurs d'action</a></li>
+  <li><a href="zend.controller.actionhelpers.html">Aides d'action (Helper)</a></li>
+  <li><a href="zend.controller.response.html">Objet de r&eacute;ponse</a></li>
+  <li><a href="zend.controller.plugins.html">Plugins</a></li>
+  <li class="active"><a href="zend.controller.modular.html">Utilisation de conventions de dossiers modulaires</a></li>
+  <li><a href="zend.controller.exceptions.html">Exceptions avec MVC</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

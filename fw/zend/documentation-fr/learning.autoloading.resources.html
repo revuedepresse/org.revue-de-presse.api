@@ -1,0 +1,199 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Auto-chargement de resources - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="learning.autoloading.usage.html">Utilisation de base de l'autoloader</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="learning.autoloading.html">Autoloading in Zend Framework</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="learning.autoloading.conclusion.html">Conclusion</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="learning.autoloading.resources" class="section"><div class="info"><h1 class="title">Auto-chargement de resources</h1></div>
+    
+
+    <p class="para">
+        En développant des applications, il est souvent difficile de regrouper certaines classes
+        dans une relation 1:1 avec le système de fichiers que recommande le Zend framework, ou alors
+        ça ne semble pas intuitif de le faire. Cela signifie que les classes ne seront pas trouvées
+        par l&#039;autoloader.
+    </p>
+
+    <p class="para">
+        Si vous lisez <a href="learning.autoloading.design.html" class="link">les caractéristiques de l&#039;architecture
+        </a> de l&#039;autoloader, le dernier point de cette section indique qu&#039;une solution existe pour
+        un tel problème. Zend Framework utilise alors <span class="classname">Zend_Loader_Autoloader_Resource
+        </span>.
+    </p>
+
+    <p class="para">
+        Une ressource est juste un nom qui correspond à un espace de noms pour un composant
+        (qui est ajouté à l&#039;espace de noms de l&#039;autoloader) et un chemin (qui est relatif au
+        chemin de base de l&#039;autoloader). Sous forme de code, vous feriez quelque chose comme:
+    </p>
+
+    <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$loader</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Application_Module_Autoloader<span style="color: #66cc66;">&#40;</span><a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'namespace'</span> =&gt; <span style="color: #ff0000;">'Blog'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'basePath'</span>&nbsp; =&gt; APPLICATION_PATH . <span style="color: #ff0000;">'/modules/blog'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+    <p class="para">
+        Une fois le chargeur en place, il faut l&#039;informer des différents types de ressources
+        qu&#039;il va avoir à gérer. Ces types sont simplement des paires d&#039;arbres et de préfixes.
+    </p>
+
+    <p class="para">
+        Considérons ce qui suit comme exemple:
+    </p>
+
+    <div class="programlisting text"><div class="textcode"><div class="text" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">path/to/some/resources/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">|-- forms/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">|&nbsp; &nbsp;`-- Guestbook.php&nbsp; &nbsp; &nbsp; &nbsp; // Foo_Form_Guestbook</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">|-- models/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">|&nbsp; &nbsp;|-- DbTable/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">|&nbsp; &nbsp;|&nbsp; &nbsp;`-- Guestbook.php&nbsp; &nbsp; // Foo_Model_DbTable_Guestbook</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">|&nbsp; &nbsp;|-- Guestbook.php&nbsp; &nbsp; &nbsp; &nbsp; // Foo_Model_Guestbook</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">|&nbsp; &nbsp;`-- GuestbookMapper.php&nbsp; // Foo_Model_GuestbookMapper</div></li></ol></div></div></div>
+
+
+    <p class="para">
+        Le premier reflexe est de créer un chargeur de ressources:
+    </p>
+
+    <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$loader</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Loader_Autoloader_Resource<span style="color: #66cc66;">&#40;</span><a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'basePath'</span>&nbsp; =&gt; <span style="color: #ff0000;">'path/to/some/resources/'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'namespace'</span> =&gt; <span style="color: #ff0000;">'Foo'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+    <p class="para">
+        Puis, nous définissons des types de ressources.
+         <span class="methodname">Zend_Loader_Autoloader_Resourse::addResourceType()</span> prend trois
+        arguments: le &quot;type&quot; de resource (une chaine arbitraire), le chemin sous le chemin de base
+        dans lequel le type de ressource doit se trouver, et le préfixe particulier à utiliser pour
+        ce type de ressource. Dans l&#039;arbre représenté ci-dessus, il y a trois types : form
+        (dans le sous-dossier &quot;forms&quot;, avec un préfixe &quot;Form&quot;), model (dans le sous-dossier &quot;models&quot;,
+        avec un préfixe &quot;Model&quot;), et dbtable (dans le sous-dossier
+        &quot;<var class="filename">models/DbTable</var>&quot;, avec un préfixe &quot;<span class="classname">Model_DbTable</span>&quot;).
+        Nous les définirons comme ceci:
+    </p>
+
+    <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$loader</span>-&gt;<span style="color: #006600;">addResourceType</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'form'</span>, <span style="color: #ff0000;">'forms'</span>, <span style="color: #ff0000;">'Form'</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp;-&gt;<span style="color: #006600;">addResourceType</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'model'</span>, <span style="color: #ff0000;">'models'</span>, <span style="color: #ff0000;">'Model'</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp;-&gt;<span style="color: #006600;">addResourceType</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'dbtable'</span>, <span style="color: #ff0000;">'models/DbTable'</span>, <span style="color: #ff0000;">'Model_DbTable'</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+    <p class="para">
+        Il ne reste plus qu&#039;à utiliser les classes:
+    </p>
+
+    <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$form</span>&nbsp; &nbsp; &nbsp; = <span style="color: #000000; font-weight: bold;">new</span> Foo_Form_Guestbook<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$guestbook</span> = <span style="color: #000000; font-weight: bold;">new</span> Foo_Model_Guestbook<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+    <blockquote><p><b class="note">Note</b>: <span class="info"><b>Autoload de ressource Module</b><br /></span>
+        
+
+        
+            La couche <acronym class="acronym">MVC</acronym> de Zend Framework encourage l&#039;utilisation de &quot;modules&quot;,
+            qui sont des mini-applications de votre site. Les modules possèdent typiquement des
+            types de ressource par défaut, et Zend Framework
+            <a href="project-structure.filesystem.html" class="link">recommande une hiérarchie de répertoires
+            standard pour les modules</a>. Les autoloaders de ressources sont particulièrement
+            adaptés à cette situation -- tellement qu&#039;ils sont activés par défaut lorsque vous créez
+            des classes de bootstrap qui étendent
+            <span class="classname">Zend_Application_Module_Bootstrap</span>. Pour plus d&#039;informations, lisez
+            la <a href="zend.loader.autoloader-resource.html#zend.loader.autoloader-resource.module" class="link">documentation de
+                Zend_Loader_Autoloader_Module</a>.
+        <br />
+    </p></blockquote>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="learning.autoloading.usage.html">Utilisation de base de l'autoloader</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="learning.autoloading.html">Autoloading in Zend Framework</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="learning.autoloading.conclusion.html">Conclusion</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="learning.html">Learning Zend Framework</a></li>
+  <li class="header up"><a href="learning.autoloading.html">Autoloading in Zend Framework</a></li>
+  <li><a href="learning.autoloading.intro.html">Introduction</a></li>
+  <li><a href="learning.autoloading.design.html">Architecture et buts</a></li>
+  <li><a href="learning.autoloading.usage.html">Utilisation de base de l'autoloader</a></li>
+  <li class="active"><a href="learning.autoloading.resources.html">Auto-chargement de resources</a></li>
+  <li><a href="learning.autoloading.conclusion.html">Conclusion</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

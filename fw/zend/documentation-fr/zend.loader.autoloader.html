@@ -1,0 +1,869 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>L'autoloader - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.loader.load.html">Charger les fichiers et les classes dynamiquement</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.loader.html">Zend_Loader</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.loader.autoloader-resource.html">Autoloaders de ressources</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.loader.autoloader" class="section"><div class="info"><h1 class="title">L&#039;autoloader</h1></div>
+    
+
+    <p class="para">
+        <span class="classname">Zend_Loader_Autoloader</span> propose une solution intelligente et
+        souple d&#039;auto-chargement (autoload) pour Zend Framework. Il a été conçu pour remplir
+        plusieurs objectifs :
+    </p>
+
+    <ul class="itemizedlist">
+        <li class="listitem">
+            <p class="para">
+                Proposer un autoloader à base d&#039;espaces de noms (auparavant, les espaces de
+                noms étaient interceptés).
+            </p>
+        </li>
+
+        <li class="listitem">
+            <p class="para">
+                Proposer d&#039;enregistrer des autoloads personnalisés, et les gérer comme une
+                pile. (A l&#039;heure actuelle, ceci permet de s&#039;affranchir de certaines contraintes avec
+                <code class="code">spl_autoload</code>, qui ne permet pas le ré-enregistrement d&#039;une fonction à 
+                base d&#039;objet).
+            </p>
+        </li>
+
+        <li class="listitem">
+            <p class="para">
+                Proposer un autoload optimisé pour les espaces de noms, qui permet une
+                meilleure résolution des noms de classes.
+            </p>
+        </li>
+    </ul>
+
+    <p class="para">
+        <span class="classname">Zend_Loader_Autoloader</span> est un singleton, il est donc
+        universellement accessible. Ceci permet d&#039;enregistrer des autoload depuis n&#039;importe où dans
+        votre code.
+    </p>
+
+    <div class="section" id="zend.loader.autoloader.usage" name="zend.loader.autoloader.usage"><div class="info"><h1 class="title">Utiliser le chargeur automatique (autoloader)</h1></div>
+        
+
+        <p class="para">
+            La première fois qu&#039;une instance de l&#039;autoloader est créée, il s&#039;enregistre
+            lui-même sur la fonction <code class="code">spl_autoload</code>. Vous récupérez son instance via la
+            méthode  <span class="methodname">getInstance()</span> :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$autoloader</span> = Zend_Loader_Autoloader::<span style="color: #006600;">getInstance</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <p class="para">
+            Par défaut, l&#039;autoloader est configuré pour capturer les espaces de noms &quot;Zend_&quot;
+            et &quot;ZendX_&quot;. Si votre propre librairie de code utilise un espace de noms différent, vous
+            devez alors enregistrer celui-ci avec la méthode  <span class="methodname">registerNamespace()</span>. Par
+            exemple, si votre librairie possède l&#039;espace de noms &quot;My_&quot;, vous devriez agir comme
+            cela :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$autoloader</span>-&gt;<span style="color: #006600;">registerNamespace</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'My_'</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <blockquote><p><b class="note">Note</b>: <span class="info"><b>Préfixes des espaces de noms</b><br /></span>
+            
+
+            
+                Notez que l&#039;exemple précédent enregistre &quot;My_&quot; et non &quot;My&quot;. Ceci car
+                <span class="classname">Zend_Loader_Autoloader</span> est un autoloader global, et n&#039;a
+                aucune idée qu&#039;un préfixe de classe possède un underscore. Si c&#039;est <em class="emphasis">votre
+                </em> cas, alors faites le apparaître lors de son enregistrement dans
+                l&#039;autoloader.
+            <br />
+        </p></blockquote>
+
+        <p class="para">
+            Il est aussi possible que vous enregistriez vos propres fonctions d&#039;autoload,
+            optionnellement avec un espace de noms spécifique,
+            <span class="classname">Zend_Loader_Autoloader</span> va alors tenter de l&#039;utiliser lorsque
+            nécessaire (lors de l&#039;auto-chargement).
+        </p>
+
+        <p class="para">
+            Par exemple, vous pourriez avoir besoin d&#039;un ou plusieurs composants eZcomponents
+            avec votre application Zend Framework. Pour utiliser ses capacités d&#039;autoload, ajoutez
+            son autoloader à votre pile grâce à  <span class="methodname">pushAutoloader()</span> :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$autoloader</span>-&gt;<span style="color: #006600;">pushAutoloader</span><span style="color: #66cc66;">&#40;</span><a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'ezcBase'</span>, <span style="color: #ff0000;">'autoload'</span><span style="color: #66cc66;">&#41;</span>, <span style="color: #ff0000;">'ezc'</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <p class="para">
+            Ceci indique que les classes dont le nom commence par &quot;ezc&quot; devra utiliser cette
+            fonction d&#039;autoload.
+        </p>
+
+        <p class="para">
+             <span class="methodname">unshiftAutoloader()</span>, elle, rajoute la méthode d&#039;autoload au début de
+            la pile.
+        </p>
+
+        <p class="para">
+            Par défaut, <span class="classname">Zend_Loader_Autoloader</span> ne supprime aucune
+            erreur lorsqu&#039;il utilise son autoloader interne, s&#039;appuyant sur
+             <span class="methodname">Zend_Loader::loadClass()</span>. La plupart du temps, c&#039;est le
+            comportement recherché. Cependant, si vous voulez faire apparaître les éventuelles
+            erreurs de chargement, appelez alors  <span class="methodname">suppressNotFoundWarnings()</span> :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$autoloader</span>-&gt;<span style="color: #006600;">suppressNotFoundWarnings</span><span style="color: #66cc66;">&#40;</span><span style="color: #000000; font-weight: bold;">true</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <p class="para">
+            Enfin, il se peut que vous vouliez que l&#039;autoloader par défaut charge toutes les
+            classes de tous les espaces de noms. Par exemple, les librairies PEAR ne partagent pas
+            un espace de noms commun, ce qui rend la tâche difficile si on veut associer chacun des
+            espaces de noms internes. Utilisez alors  <span class="methodname">setFallbackAutoloader()</span> pour
+            rendre l&#039;autoloader &quot;global&quot; et charger tous les espaces de noms :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$autoloader</span>-&gt;<span style="color: #006600;">setFallbackAutoloader</span><span style="color: #66cc66;">&#40;</span><span style="color: #000000; font-weight: bold;">true</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+        <blockquote><p><b class="note">Note</b>: <span class="info"><b>Loading Classes from PHP Namespaces</b><br /></span>
+            
+
+            
+                Starting in version 1.10.0, Zend Framework now allows loading classes from PHP
+                namespaces. This support follows the same guidelines and implementation as that
+                found in the <a href="http://groups.google.com/group/php-standards/web/psr-0-final-proposal" class="link external">&raquo; PHP
+                Framework Interop Group PSR-0</a> reference implementation.
+            <br />
+
+            
+                Under this guideline, the following rules apply:
+            <br />
+
+            <ul class="itemizedlist">
+                <li class="listitem">
+                    <p class="para">
+                        Each namespace separator is converted to a
+                        <b><tt>DIRECTORY_SEPARATOR</tt></b> when loading from the file system.
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        Each &quot;_&quot; character in the <em class="emphasis">CLASS NAME</em> is converted to a
+                        <b><tt>DIRECTORY_SEPARATOR</tt></b>.  The &quot;_&quot; character has no special
+                        meaning in the namespace.
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        The fully-qualified namespace and class is suffixed with &quot;.php&quot; when loading
+                        from the file system.
+                    </p>
+                </li>
+            </ul>
+
+            
+                As examples:
+            <br />
+
+            <ul class="itemizedlist">
+                <li class="listitem">
+                    <p class="para">
+                        <span class="classname">\Doctrine\Common\IsolatedClassLoader</span> =&gt;
+                        <var class="filename">/path/to/project/lib/vendor/Doctrine/Common/IsolatedClassLoader.php</var>
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        <span class="classname">\namespace\package\Class_Name</span> =&gt;
+                        <var class="filename">/path/to/project/lib/vendor/namespace/package/Class/Name.php</var>
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        <span class="classname">\namespace\package_name\Class_Name</span> =&gt;
+                        <var class="filename">/path/to/project/lib/vendor/namespace/package_name/Class/Name.php</var>
+                    </p>
+                </li>
+            </ul>
+        </p></blockquote>
+    </div>
+
+    <div class="section" id="zend.loader.autoloader.zf-version" name="zend.loader.autoloader.zf-version"><div class="info"><h1 class="title">Selecting a Zend Framework version</h1></div>
+        
+
+        <p class="para">
+            Typically, you will use the version of Zend Framework that the autoloader you
+            instantiate came with. However, when developing a project, it&#039;s often useful to track
+            specific versions, major or minor branches, or just the latest version.
+            <span class="classname">Zend_Loader_Autoloader</span>, as of version 1.10, offers some features
+            to help manage this task.
+        </p>
+
+        <p class="para">
+            Imagine the following scenario:
+        </p>
+
+        <ul class="itemizedlist">
+            <li class="listitem">
+                <p class="para">
+                    During <em class="emphasis">development</em>, you want to track the latest version of
+                    Zend Framework you have installed, so that you can ensure the application works
+                    when you upgrade between versions.
+                </p>
+
+                <p class="para">
+                    When pushing to <em class="emphasis">Quality Assurance</em>, however, you need to
+                    have slightly more stability, so you want to use the latest installed revision
+                    of a specific minor version.
+                </p>
+
+                <p class="para">
+                    Finally, when you push to <em class="emphasis">production</em>, you want to pin to a
+                    specific installed version, to ensure no breakage occurs if or when you add new
+                    versions of Zend Framework to you server.
+                </p>
+            </li>
+        </ul>
+
+        <p class="para">
+            The autoloader allows you to do this with the method
+             <span class="methodname">setZfPath()</span>. This method takes two arguments, a
+            <em class="emphasis">path</em> to a set of Zend Framework installations, and a
+            <em class="emphasis">version</em> to use. Once invoked, it prepends a path to the
+            <b><tt>include_path</tt></b> pointing to the appropriate Zend Framework
+            installation library.
+        </p>
+
+        <p class="para">
+            The directory you specify as your <em class="emphasis">path</em> should have a tree such as
+            the following:
+        </p>
+
+        <div class="programlisting text"><div class="textcode"><div class="text" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">ZendFramework/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">|-- 1.9.2/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">|&nbsp; &nbsp;|-- library/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">|-- ZendFramework-1.9.1-minimal/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">|&nbsp; &nbsp;|-- library/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">|-- 1.8.4PL1/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">|&nbsp; &nbsp;|-- library/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">|-- 1.8.4/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">|&nbsp; &nbsp;|-- library/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">|-- ZendFramework-1.8.3/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">|&nbsp; &nbsp;|-- library/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">|-- 1.7.8/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">|&nbsp; &nbsp;|-- library/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">|-- 1.7.7/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">|&nbsp; &nbsp;|-- library/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">|-- 1.7.6/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">|&nbsp; &nbsp;|-- library/</div></li></ol></div></div></div>
+
+
+        <p class="para">
+            (where <em class="emphasis">path</em> points to the directory &quot;ZendFramework&quot; in the above
+            example)
+        </p>
+
+        <p class="para">
+            Note that each subdirectory should contain the directory <var class="filename">library</var>,
+            which contains the actual Zend Framework library code. The individual subdirectory names
+            may be version numbers, or simply be the untarred contents of a standard Zend Framework
+            distribution tarball/zipfile.
+        </p>
+
+        <p class="para">
+            Now, let&#039;s address the use cases. In the first use case, in
+            <em class="emphasis">development</em>, we want to track the latest source install. We can do
+            that by passing &quot;latest&quot; as the version:
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$autoloader</span>-&gt;<span style="color: #006600;">setZfPath</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$path</span>, <span style="color: #ff0000;">'latest'</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <p class="para">
+            In the example from above, this will map to the directory
+            <var class="filename">ZendFramework/1.9.2/library/</var>; you can verify this by checking the
+            return value of  <span class="methodname">getZfPath()</span>.
+        </p>
+
+        <p class="para">
+            In the second situation, for <em class="emphasis">quality assurance</em>, let&#039;s say we want
+            to pin to the 1.8 minor release, using the latest install you have for that release. You
+            can do so as follows:
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$autoloader</span>-&gt;<span style="color: #006600;">setZfPath</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$path</span>, <span style="color: #ff0000;">'1.8'</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <p class="para">
+            In this case, it will find the directory
+            <var class="filename">ZendFramework/1.8.4PL1/library/</var>.
+        </p>
+
+        <p class="para">
+            In the final case, for <em class="emphasis">production</em>, we&#039;ll pin to a specific version
+            -- 1.7.7, since that was what was available when Quality Assurance tested prior to our
+            release.
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$autoloader</span>-&gt;<span style="color: #006600;">setZfPath</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$path</span>, <span style="color: #ff0000;">'1.7.7'</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <p class="para">
+            Predictably, it finds the directory <var class="filename">ZendFramework/1.7.7/library/</var>.
+        </p>
+
+        <p class="para">
+            You can also specify these values in the configuration file you use with
+            <var class="filename">Zend_Application</var>. To do so, you&#039;d specify the following
+            information:
+        </p>
+
+        <div class="programlisting ini"><div class="inicode"><div class="ini" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000066; font-weight:bold;"><span style="">&#91;</span>production<span style="">&#93;</span></span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000099;">autoloaderZfPath </span>= <span style="color: #933;">&quot;path/to/ZendFramework&quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000099;">autoloaderZfVersion </span>= <span style="color: #933;">&quot;1.7.7&quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000066; font-weight:bold;"><span style="">&#91;</span>qa<span style="">&#93;</span></span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000099;">autoloaderZfVersion </span>= <span style="color: #933;">&quot;1.8&quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000066; font-weight:bold;"><span style="">&#91;</span>development<span style="">&#93;</span></span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000099;">autoloaderZfVersion </span>= <span style="color: #933;">&quot;latest&quot;</span></div></li></ol></div></div></div>
+
+
+        <p class="para">
+            Note the different environment sections, and the different version specified in each
+            environment; these factors will allow <span class="classname">Zend_Application</span> to
+            configure the autoloader appropriately.
+        </p>
+
+        <div class="warning"><b class="warning">Warning</b><div class="info"><h1 class="title">Performance implications</h1></div>
+            
+
+            <p class="para">
+                For best performance, either do not use this feature, or specify a specific Zend
+                Framework version (i.e., not &quot;latest&quot;, a major revision such as &quot;1&quot;, or a minor
+                revision such as &quot;1.8&quot;). Otherwise, the autoloader will need to scan the provided
+                path for directories matching the criteria -- a somewhat expensive operation to
+                perform on each request.
+            </p>
+        </div>
+    </div>
+
+    <div class="section" id="zend.loader.autoloader.interface" name="zend.loader.autoloader.interface"><div class="info"><h1 class="title">L&#039;interface de l&#039;autoloader</h1></div>
+        
+
+        <p class="para">
+            Vous pouvez donc ajouter des fonctions de chargement par espace de noms, mais Zend
+            Framework définit aussi une interface pour l&#039;autoload,
+            <span class="classname">Zend_Loader_Autoloader_Interface</span> :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000000; font-weight: bold;">interface</span> Zend_Loader_Autoloader_Interface</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> autoload<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$class</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+
+
+        <p class="para">
+            L&#039;utilisation de l&#039;interface vous permet de passer un objet aux méthodes
+             <span class="methodname">pushAutoloader()</span> et  <span class="methodname">unshiftAutoloader()</span> de
+            <span class="classname">Zend_Loader_Autoloader</span> :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Foo_Autoloader implémente Zend_Loader_Autoloader_Interface:</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$foo</span> = <span style="color: #000000; font-weight: bold;">new</span> Foo_Autoloader<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$autoloader</span>-&gt;<span style="color: #006600;">pushAutoloader</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$foo</span>, <span style="color: #ff0000;">'Foo_'</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+    </div>
+
+    <div class="section" id="zend.loader.autoloader.reference" name="zend.loader.autoloader.reference"><div class="info"><h1 class="title">Référence de l&#039;autoloader</h1></div>
+        
+
+        <p class="para">
+            Voici un guide des méthodes de
+            <span class="classname">Zend_Loader_Autoloader</span>.
+        </p>
+
+        <table class="doctable table"><div class="info"><caption><b>Méthodes de Zend_Loader_Autoloader</b></caption></div>
+            
+
+            
+                <thead valign="middle">
+                    <tr valign="middle">
+                        <th>Méthode</th>
+                        <th>Valeur de retour</th>
+                        <th>Paramètres</th>
+                        <th>Description</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody valign="middle" class="tbody">
+                    <tr valign="middle">
+                        <td align="left"> <span class="methodname">getInstance()</span></td>
+                        <td align="left"><span class="classname">Zend_Loader_Autoloader</span></td>
+                        <td align="left">N/A</td>
+                        <td align="left">
+                            <p class="para">
+                                Retourne l&#039;instance singleton de
+                                <span class="classname">Zend_Loader_Autoloader</span> Au premier appel,
+                                enregistre l&#039;autoloader avec <code class="code">spl_autoload</code>. Cette
+                                méthode est statique.
+                            </p>
+                        </td>
+                    </tr>
+
+
+                    <tr valign="middle">
+                        <td align="left"> <span class="methodname">resetInstance()</span></td>
+                        <td align="left"><code class="code">void</code></td>
+                        <td align="left">N/A</td>
+                        <td align="left">
+                            <p class="para">
+                                Remet à zéro l&#039;état interne de
+                                <span class="classname">Zend_Loader_Autoloader</span> en désenregistrant les
+                                fonctions d&#039;autoload éventuellement présentes, ainsi que tous les
+                                espaces de noms.
+                            </p>
+                        </td>
+                    </tr>
+
+
+                    <tr valign="middle">
+                        <td align="left"> <span class="methodname">autoload($class)</span></td>
+                        <td align="left"><code class="code">string|false</code></td>
+                        <td align="left">
+                            <ul class="itemizedlist">
+                                <li class="listitem">
+                                    <p class="para">
+                                        <var class="varname">$class</var>, <em class="emphasis">requis</em>. Une
+                                        classe à charger.
+                                    </p>
+                                </li>
+                            </ul>
+                        </td>
+                        <td align="left">
+                            <p class="para">
+                                Essaye de résoudre un nom de classe en fichier, et tente de la
+                                charger.
+                            </p>
+                        </td>
+                    </tr>
+
+
+                    <tr valign="middle">
+                        <td align="left"> <span class="methodname">setDefaultAutoloader($callback)</span></td>
+                        <td align="left"><span class="classname">Zend_Loader_Autoloader</span></td>
+                        <td align="left">
+                            <ul class="itemizedlist">
+                                <li class="listitem">
+                                    <p class="para">
+                                        <var class="varname">$callback</var>,
+                                        <em class="emphasis">requis</em>.
+                                    </p>
+                                </li>
+                            </ul>
+                        </td>
+                        <td align="left">
+                            <p class="para">
+                                Spécifie une fonction <acronym class="acronym">PHP</acronym> à utiliser comme autoloader par défaut.
+                            </p>
+                        </td>
+                    </tr>
+
+
+                    <tr valign="middle">
+                        <td align="left"> <span class="methodname">getDefaultAutoloader()</span></td>
+                        <td align="left"><code class="code">callback</code></td>
+                        <td align="left">N/A</td>
+                        <td align="left">
+                            <p class="para">
+                                Retourne la fonction d&#039;autoload par défaut, il s&#039;agit par
+                                défaut de  <span class="methodname">Zend_Loader::loadClass()</span>.
+                            </p>
+                        </td>
+                    </tr>
+
+
+                    <tr valign="middle">
+                        <td align="left"> <span class="methodname">setAutoloaders(array $autoloaders)</span></td>
+                        <td align="left"><span class="classname">Zend_Loader_Autoloader</span></td>
+                        <td align="left">
+                            <ul class="itemizedlist">
+                                <li class="listitem">
+                                    <p class="para">
+                                        <var class="varname">$autoloaders</var>,
+                                        <em class="emphasis">requis</em>.
+                                    </p>
+                                </li>
+                            </ul>
+                        </td>
+                        <td align="left">
+                            <p class="para">
+                                Passe une liste d&#039;autoloaders (sous forme de noms de
+                                fonctions <acronym class="acronym">PHP</acronym>) Ã  ajouter Ã  la pile de ceux déjà présents.
+                            </p>
+                        </td>
+                    </tr>
+
+
+                    <tr valign="middle">
+                        <td align="left"> <span class="methodname">getAutoloaders()</span></td>
+                        <td align="left"> <span class="type">Array</span> </td>
+                        <td align="left">N/A</td>
+                        <td align="left"><p class="para">Récupère la pile d&#039;autoloaders interne.</p></td>
+                    </tr>
+
+
+                    <tr valign="middle">
+                        <td align="left"> <span class="methodname">getNamespaceAutoloaders($namespace)</span></td>
+                        <td align="left"> <span class="type">Array</span> </td>
+                        <td align="left">
+                            <ul class="itemizedlist">
+                                <li class="listitem">
+                                    <p class="para">
+                                        <var class="varname">$namespace</var>,
+                                        <em class="emphasis">requis</em>
+                                    </p>
+                                </li>
+                            </ul>
+                        </td>
+                        <td align="left">
+                            <p class="para">
+                                Récupère tous les autoloaders qui sont associés à un
+                                certain espace de noms.
+                            </p>
+                        </td>
+                    </tr>
+
+
+                    <tr valign="middle">
+                        <td align="left"> <span class="methodname">registerNamespace($namespace)</span></td>
+                        <td align="left"><span class="classname">Zend_Loader_Autoloader</span></td>
+                        <td align="left">
+                            <ul class="itemizedlist">
+                                <li class="listitem">
+                                    <p class="para">
+                                        <var class="varname">$namespace</var>,
+                                        <em class="emphasis">requis</em>.
+                                    </p>
+                                </li>
+                            </ul>
+                        </td>
+                        <td align="left">
+                            <p class="para">
+                                Enregistre un ou plusieurs espaces de noms, avec
+                                l&#039;autoloader par défaut. Si <var class="varname">$namespace</var> est une chaîne,
+                                c&#039;est cet espace de noms qui sera enregistré, si c&#039;est un tableau de
+                                chaînes, ils le seront tous.
+                            </p>
+                        </td>
+                    </tr>
+
+
+                    <tr valign="middle">
+                        <td align="left"> <span class="methodname">unregisterNamespace($namespace)</span></td>
+                        <td align="left"><span class="classname">Zend_Loader_Autoloader</span></td>
+                        <td align="left">
+                            <ul class="itemizedlist">
+                                <li class="listitem">
+                                    <p class="para">
+                                        <var class="varname">$namespace</var>,
+                                        <em class="emphasis">requis</em>.
+                                    </p>
+                                </li>
+                            </ul>
+                        </td>
+                        <td align="left">
+                            <p class="para">
+                                Désenregistre (supprime) un espace de noms depuis
+                                l&#039;autoloader par défaut. Si <var class="varname">$namespace</var> est une chaîne,
+                                c&#039;est cet espace de noms qui sera désenregistré, si c&#039;est un tableau
+                                de chaînes, ils le seront tous.
+                            </p>
+                        </td>
+                    </tr>
+
+
+                    <tr valign="middle">
+                        <td align="left"> <span class="methodname">getRegisteredNamespaces()</span></td>
+                        <td align="left"> <span class="type">Array</span> </td>
+                        <td align="left">N/A</td>
+                        <td align="left">
+                            <p class="para">
+                                Retourne un tableau comportant tous les espaces de noms
+                                enregistrés avec l&#039;autoloader par défaut.
+                            </p>
+                        </td>
+                    </tr>
+
+
+                    <tr valign="middle">
+                        <td align="left"> <span class="methodname">suppressNotFoundWarnings($flag = null)</span></td>
+                        <td align="left"><code class="code">boolean|Zend_Loader_Autoloader</code></td>
+                        <td align="left">
+                            <ul class="itemizedlist">
+                                <li class="listitem">
+                                    <p class="para"><var class="varname">$flag</var>, <em class="emphasis">optionnel</em>.</p>
+                                </li>
+                            </ul>
+                        </td>
+                        <td align="left">
+                            <p class="para">
+                                Affecte ou récupère la valeur du paramètre indiquant si l&#039;autoloader
+                                par défaut doit supprimer les warnings &quot;file not found&quot;. Si aucun
+                                argument (ou null) lui est passé, il retourne sa valeur actuelle,
+                                dans le cas contraire, il retournera l&#039;instance de l&#039;autoloader
+                                permettant le chainage des méthodes.
+                            </p>
+                        </td>
+                    </tr>
+
+
+                    <tr valign="middle">
+                        <td align="left"> <span class="methodname">setFallbackAutoloader($flag)</span></td>
+                        <td align="left"><span class="classname">Zend_Loader_Autoloader</span></td>
+                        <td align="left">
+                            <ul class="itemizedlist">
+                                <li class="listitem">
+                                    <p class="para"><var class="varname">$flag</var>, <em class="emphasis">requis</em>.</p>
+                                </li>
+                            </ul>
+                        </td>
+                        <td align="left">
+                            <p class="para">
+                                Affecte la valeur du drapeau utilisé pour déterminer si
+                                l&#039;autoloader par défaut doit être utilisé comme &quot;catch-all&quot; pour
+                                charger tous les espaces de noms.
+                            </p>
+                        </td>
+                    </tr>
+
+
+                    <tr valign="middle">
+                        <td align="left"> <span class="methodname">isFallbackAutoloader()</span></td>
+                        <td align="left"> <span class="type">Boolean</span> </td>
+                        <td align="left">N/A</td>
+                        <td align="left">
+                            <p class="para">
+                                Retourne la valeur du drapeau utilisé pour déterminer si
+                                l&#039;autoloader par défaut doit être utilisé comme &quot;catch-all&quot; pour
+                                charger tous les espaces de noms.
+                            </p>
+                        </td>
+                    </tr>
+
+
+                    <tr valign="middle">
+                        <td align="left"> <span class="methodname">getClassAutoloaders($class)</span></td>
+                        <td align="left"> <span class="type">Array</span> </td>
+                        <td align="left">
+                            <ul class="itemizedlist">
+                                <li class="listitem">
+                                    <p class="para"><var class="varname">$class</var>, <em class="emphasis">requis</em>.</p>
+                                </li>
+                            </ul>
+                        </td>
+                        <td align="left">
+                            <p class="para">
+                                Retourne une liste d&#039;autoloaders d&#039;espaces de noms qui pourraient
+                                correspondre à la classe indiquée. Si aucun ne correspond, la
+                                liste de tous les autoloaders globaux (non associés à des espaces de
+                                noms) sera retournée.
+                            </p>
+                        </td>
+                    </tr>
+
+
+                    <tr valign="middle">
+                        <td align="left"> <span class="methodname">unshiftAutoloader($callback, $namespace = &#039;&#039;)</span></td>
+                        <td align="left"><span class="classname">Zend_Loader_Autoloader</span></td>
+                        <td align="left">
+                            <ul class="itemizedlist">
+                                <li class="listitem">
+                                    <p class="para">
+                                        <var class="varname">$callback</var>, <em class="emphasis">requis</em>. Une
+                                        fonction <acronym class="acronym">PHP</acronym> valide.
+                                    </p>
+                                </li>
+
+                                <li class="listitem">
+                                    <p class="para">
+                                        <var class="varname">$namespace</var>, <em class="emphasis">optionnel</em>.
+                                        Une chaîne représentant un préfixe de classe.
+                                    </p>
+                                </li>
+                            </ul>
+                        </td>
+                        <td align="left">
+                            <p class="para">
+                                Ajoute un autoloader au début de la pile des autoloaders
+                                internes. Si un espace de noms est fourni, il sera utilisé pour cet
+                                autoloader, sinon l&#039;autoloader sera global.
+                            </p>
+                        </td>
+                    </tr>
+
+
+                    <tr valign="middle">
+                        <td align="left"> <span class="methodname">pushAutoloader($callback, $namespace = &#039;&#039;)</span></td>
+                        <td align="left"><span class="classname">Zend_Loader_Autoloader</span></td>
+                        <td align="left">
+                            <ul class="itemizedlist">
+                                <li class="listitem">
+                                    <p class="para">
+                                        <var class="varname">$callback</var>, <em class="emphasis">requis</em>. Une
+                                        fonction <acronym class="acronym">PHP</acronym> valide.
+                                    </p>
+                                </li>
+                                <li class="listitem">
+                                    <p class="para">
+                                        <var class="varname">$namespace</var>, <em class="emphasis">optionnel</em>.
+                                        Une chaîne représentant un préfixe de classe.
+                                    </p>
+                                </li>
+                            </ul>
+                        </td>
+                        <td align="left">
+                            <p class="para">
+                                Ajoute un autoloader à la fin de la pile des autoloaders
+                                internes. Si un espace de noms est fourni, il sera utilisé pour cet
+                                autoloader, sinon l&#039;autoloader sera global.
+                            </p>
+                        </td>
+                    </tr>
+
+
+                    <tr valign="middle">
+                        <td align="left"> <span class="methodname">removeAutoloader($callback, $namespace = &#039;&#039;)</span></td>
+                        <td align="left"><span class="classname">Zend_Loader_Autoloader</span></td>
+                        <td align="left">
+                            <ul class="itemizedlist">
+                                <li class="listitem">
+                                    <p class="para">
+                                        <var class="varname">$callback</var>, <em class="emphasis">requis</em>. Une
+                                        fonction <acronym class="acronym">PHP</acronym> valide.
+                                    </p>
+                                </li>
+                                <li class="listitem">
+                                    <p class="para">
+                                        <var class="varname">$namespace</var>, <em class="emphasis">optionnel</em>.
+                                        Une chaîne représentant un préfixe de classe, ou un tableau
+                                        de chaînes.
+                                    </p>
+                                </li>
+                            </ul>
+                        </td>
+                        <td align="left">
+                            <p class="para">
+                                Supprime un autoloader de la pile interne. Si un espace de
+                                noms est indiqué, supprime l&#039;autoloader pour cet espace de noms
+                                uniquement.
+                            </p>
+                        </td>
+                    </tr>
+
+                </tbody>
+            
+        </table>
+
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.loader.load.html">Charger les fichiers et les classes dynamiquement</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.loader.html">Zend_Loader</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.loader.autoloader-resource.html">Autoloaders de ressources</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.loader.html">Zend_Loader</a></li>
+  <li><a href="zend.loader.load.html">Charger les fichiers et les classes dynamiquement</a></li>
+  <li class="active"><a href="zend.loader.autoloader.html">L'autoloader</a></li>
+  <li><a href="zend.loader.autoloader-resource.html">Autoloaders de ressources</a></li>
+  <li><a href="zend.loader.pluginloader.html">Chargeur de Plugins</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

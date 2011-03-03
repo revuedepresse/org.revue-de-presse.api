@@ -1,0 +1,366 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>&Eacute;crire des validateurs - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.validate.validator_chains.html">Cha&icirc;nes de validation</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.validate.html">Zend_Validate</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.validate.messages.html">Messages de validation</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.validate.writing_validators" class="section"><div class="info"><h1 class="title">Écrire des validateurs</h1></div>
+    
+
+    <p class="para">
+        <span class="classname">Zend_Validate</span> fournit un ensemble de validateurs habituellement
+        nécessaires, mais inévitablement, les développeurs souhaiteront écrire des validateurs sur
+        mesure pour leurs besoins particuliers. La méthode d&#039;écriture d&#039;un validateur personnalisé
+        est décrit dans cette section.
+    </p>
+
+    <p class="para">
+        <span class="classname">Zend_Validate_Interface</span> définit trois méthodes,
+         <span class="methodname">isValid()</span>,  <span class="methodname">getMessages()</span>, et  <span class="methodname">getErrors()</span>, qui peuvent
+        être implémentées par des classes d&#039;utilisateur afin de créer les objets de validation sur
+        mesure. Un objet qui implémente l&#039;interface <span class="classname">Zend_Validate_Interface</span>
+        peut être ajouté à une chaîne de validateur avec
+         <span class="methodname">Zend_Validate::addValidator()</span>. De tels objets peuvent également être
+        employés avec <a href="zend.filter.input.html" class="link"><span class="classname">Zend_Filter_Input</span></a>.
+    </p>
+
+    <p class="para">
+        Comme vous avez déjà pu déduire de la description ci-dessus de
+        <span class="classname">Zend_Validate_Interface</span>, les classes de validation fournie avec Zend
+        Framework retourne une valeur booléenne pour savoir si une valeur est validée ou non. Elles
+        fournissent également des informations sur la raison pour laquelle la validation a échoué
+        sur une valeur. La mise à disposition de ces raisons d&#039;échec de validation peut être
+        utilisée par une application dans différents buts, tels que fournir des statistiques pour
+        l&#039;analyse de la facilité d&#039;utilisation.
+    </p>
+
+    <p class="para">
+        La fonctionnalité de base de message d&#039;échec de validation est implémentée dans
+        <span class="classname">Zend_Validate_Abstract</span>. Pour inclure cette fonctionnalité en créant
+        une classe de validation, étendez simplement <span class="classname">Zend_Validate_Abstract</span>.
+        Dans la classe étendue vous implémenteriez la logique de la méthode  <span class="methodname">isValid()</span>
+        et définiriez les variables de message et les modèles de message qui correspondent aux types
+        d&#039;échecs de validation qui peuvent se produire. Si une valeur ne passe pas vos essais de
+        validation, alors  <span class="methodname">isValid()</span> devrait renvoyer <b><tt>FALSE</tt></b>. Si la valeur
+        passe vos essais de validation, alors  <span class="methodname">isValid()</span> devrait renvoyer
+        <b><tt>TRUE</tt></b>.
+    </p>
+
+    <p class="para">
+        En général, la méthode  <span class="methodname">isValid()</span> ne devrait lever aucune exception,
+        excepté où il est impossible de déterminer si la valeur d&#039;entrée est valide. Quelques
+        exemples de cas raisonnables pour lever une exception pourraient être si un fichier ne peut
+        pas être ouvert, un serveur de <acronym class="acronym">LDAP</acronym> ne pourraient pas être contacté, ou une connexion de
+        base de données est indisponible, où quand une telle chose peut être exigée pour que le
+        succès ou l&#039;échec de validation soit déterminé.
+    </p>
+
+    <div class="example"><div class="info"><p><b>Example #1 Création d&#039;une simple classe de validation</b></p></div>
+        
+
+        <div class="example-contents"><p>
+            L&#039;exemple suivant démontre comment un validateur personnalisé très simple pourrait
+            être écrit. Dans ce cas-ci les règles de validation sont simplement que la valeur
+            d&#039;entrée doit être une valeur en virgule flottante. <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000000; font-weight: bold;">class</span> MonValidateur_Float <span style="color: #000000; font-weight: bold;">extends</span> Zend_Validate_Abstract</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; const FLOAT = <span style="color: #ff0000;">'float'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; protected <span style="color: #0000ff;">$_messageTemplates</span> = <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; self::<span style="color: #006600;">FLOAT</span> =&gt; <span style="color: #ff0000;">&quot;'%value%' n'est pas une valeur en virgule flottante&quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> isValid<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$value</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$this</span>-&gt;_setValue<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$value</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">if</span> <span style="color: #66cc66;">&#40;</span>!<a href="http://www.php.net/is_float"><span style="color: #000066;">is_float</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$value</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$this</span>-&gt;_error<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">return</span> <span style="color: #000000; font-weight: bold;">false</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">return</span> <span style="color: #000000; font-weight: bold;">true</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+ La classe définit un modèle pour son message unique d&#039;échec de validation,
+            qui inclut le paramètre magique intégré, <code class="code">%value%</code>. L&#039;appel à
+             <span class="methodname">_setValue()</span> prépare l&#039;objet pour insérer automatiquement la valeur examinée
+            dans le message d&#039;échec, si la validation de la valeur échoue. L&#039;appel à
+             <span class="methodname">_error()</span> trace la raison d&#039;échec de validation. Puisque cette classe
+            définit seulement un message d&#039;échec, il n&#039;est pas nécessaire de fournir à
+             <span class="methodname">_error()</span> le nom du modèle de message d&#039;échec.
+        </p></div>
+    </div>
+
+    <div class="example"><div class="info"><p><b>Example #2 Écriture d&#039;une classe de validation ayant des conditions de dépendances</b></p></div>
+        
+
+        <div class="example-contents"><p>
+            L&#039;exemple suivant démontre un ensemble plus complexe de règles de validation, où
+            on l&#039;exige que la valeur d&#039;entrée doit être numérique et dans la plage des valeurs
+            limites minimum et maximum. Une valeur d&#039;entrée ferait échouer la validation pour
+            exactement une des raisons suivantes : <ul class="itemizedlist">
+                    <li class="listitem">
+                        <p class="para">La valeur d&#039;entrée n&#039;est pas numérique.</p>
+                    </li>
+
+                    <li class="listitem">
+                    <p class="para">
+                        La valeur d&#039;entrée est inférieure que la valeur permise
+                        minimum.
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        La valeur d&#039;entrée est supérieure que la valeur permise
+                        maximum.
+                    </p>
+                </li>
+                </ul>
+            </p></div>
+
+        <div class="example-contents"><p>
+            Ces raisons d&#039;échec de validation sont alors traduites dans les définitions de la
+            classe : <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000000; font-weight: bold;">class</span> MonValidateur_NumericBetween <span style="color: #000000; font-weight: bold;">extends</span> Zend_Validate_Abstract</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; const MSG_NUMERIC = <span style="color: #ff0000;">'msgNumeric'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; const MSG_MINIMUM = <span style="color: #ff0000;">'msgMinimum'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; const MSG_MAXIMUM = <span style="color: #ff0000;">'msgMaximum'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #0000ff;">$minimum</span> = <span style="color: #cc66cc;">0</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #0000ff;">$maximum</span> = <span style="color: #cc66cc;">100</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; protected <span style="color: #0000ff;">$_messageVariables</span> = <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'min'</span> =&gt; <span style="color: #ff0000;">'minimum'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'max'</span> =&gt; <span style="color: #ff0000;">'maximum'</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; protected <span style="color: #0000ff;">$_messageTemplates</span> = <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; self::<span style="color: #006600;">MSG_NUMERIC</span> =&gt; <span style="color: #ff0000;">&quot;'%value%' n'est pas numérique&quot;</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; self::<span style="color: #006600;">MSG_MINIMUM</span> =&gt; <span style="color: #ff0000;">&quot;'%value%' doit être supérieure à '%min%'&quot;</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; self::<span style="color: #006600;">MSG_MAXIMUM</span> =&gt; <span style="color: #ff0000;">&quot;'%value%' doit être inférieure à '%max%'&quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> isValid<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$value</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$this</span>-&gt;_setValue<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$value</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">if</span> <span style="color: #66cc66;">&#40;</span>!<a href="http://www.php.net/is_numeric"><span style="color: #000066;">is_numeric</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$value</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$this</span>-&gt;_error<span style="color: #66cc66;">&#40;</span>self::<span style="color: #006600;">MSG_NUMERIC</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">return</span> <span style="color: #000000; font-weight: bold;">false</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">if</span> <span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$value</span> &lt; <span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">minimum</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$this</span>-&gt;_error<span style="color: #66cc66;">&#40;</span>self::<span style="color: #006600;">MSG_MINIMUM</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">return</span> <span style="color: #000000; font-weight: bold;">false</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">if</span> <span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$value</span> &gt; <span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">maximum</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$this</span>-&gt;_error<span style="color: #66cc66;">&#40;</span>self::<span style="color: #006600;">MSG_MAXIMUM</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">return</span> <span style="color: #000000; font-weight: bold;">false</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">return</span> <span style="color: #000000; font-weight: bold;">true</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+ Les propriétés publiques <var class="varname">$minimum</var> et <var class="varname">$maximum</var> ont
+            été établies pour fournir les frontières minimum et maximum d&#039;une valeur pour qu&#039;elle
+            soit validée avec succès. La classe définit également deux variables de message qui
+            correspondent aux propriétés publiques et permettent que <code class="code">min</code> et
+            <code class="code">max</code> soient employés dans des modèles de message en tant que paramètres
+            magiques, comme avec <code class="code">value</code>.
+        </p></div>
+
+        <div class="example-contents"><p>
+            Noter que si n&#039;importe quel élément de la validation vérifié dans
+             <span class="methodname">isValid()</span> échoue, un message approprié d&#039;échec est préparé, et la méthode
+            renvoie immédiatement <b><tt>FALSE</tt></b>. Ces règles de validation sont donc
+            séquentiellement dépendantes. C&#039;est-à-dire, que si un essai échoue, il n&#039;y a aucun
+            besoin d&#039;examiner les règles suivantes de validation. Ce besoin peut exister, cependant.
+            L&#039;exemple suivant illustre comment écrire une classe ayant des règles indépendantes de
+            validation, où l&#039;objet de validation peut renvoyer des raisons multiples pour lesquelles
+            une tentative particulière de validation a échoué.
+        </p></div>
+    </div>
+
+    <div class="example"><div class="info"><p><b>Example #3 Validation avec des conditions indépendantes, avec raisons multiples
+        d&#039;échec</b></p></div>
+        
+
+        <div class="example-contents"><p>
+            Considérons l&#039;écriture d&#039;une classe de validation pour le contrôle de résistance
+            d&#039;un mot de passe - quand un utilisateur est requis afin de choisir un mot de passe qui
+            respecte certains critères pour aider à la sécurisation des comptes d&#039;utilisateur.
+            Supposons que les critères de sécurité de mot de passe imposent que le mot de passe :
+            <ul class="itemizedlist">
+                    <li class="listitem">
+                        <p class="para">est au moins une longueur de 8 caractères,</p>
+                    </li>
+
+                    <li class="listitem">
+                        <p class="para">contient au moins une lettre majuscule,</p>
+                    </li>
+
+                    <li class="listitem">
+                        <p class="para">contient au moins une lettre minuscule,</p>
+                    </li>
+
+                    <li class="listitem">
+                        <p class="para">et contient au moins un caractère de chiffre.</p>
+                    </li>
+                </ul>
+            </p></div>
+
+        <div class="example-contents"><p>
+            La classe suivante implémente ces critères de validation : <div class="programlisting"><div class="cdata"><pre>
+class MonValidateur_PasswordStrength extends Zend_Validate_Abstract
+{
+    const LENGTH = &#039;length&#039;;
+    const UPPER  = &#039;upper&#039;;
+    const LOWER  = &#039;lower&#039;;
+    const DIGIT  = &#039;digit&#039;;
+
+    protected $_messageTemplates = array(
+        self::LENGTH =&gt;
+            &quot;&#039;%value%&#039; doit avoir une longueur d&#039;au moins 8 caractères&quot;,
+        self::UPPER  =&gt;
+            &quot;&#039;%value%&#039; doit contenir au moins une lettre majuscule&quot;,
+        self::LOWER  =&gt;
+            &quot;&#039;%value%&#039; doit contenir au moins une lettre minuscule&quot;,
+        self::DIGIT  =&gt;
+            &quot;&#039;%value%&#039; doit contenir au moins un chiffre&quot;
+    );
+
+    public function isValid($value)
+    {
+        $this-&gt;_setValue($value);
+
+        $isValid = true;
+
+        if (strlen($value) &lt; 8) {
+            $this-&gt;_error(self::LENGTH);
+            $isValid = false;
+        }
+
+        if (!preg_match(&#039;/[A-Z]/&#039;, $value)) {
+            $this-&gt;_error(self::UPPER);
+            $isValid = false;
+        }
+
+        if (!preg_match(&#039;/[a-z]/&#039;, $value)) {
+            $this-&gt;_error(self::LOWER);
+            $isValid = false;
+        }
+
+        if (!preg_match(&#039;/\d/&#039;, $value)) {
+            $this-&gt;_error(self::DIGIT);
+            $isValid = false;
+        }
+
+        return $isValid;
+    }
+}
+</pre></div></div>
+Noter que les quatre critères d&#039;essais dans  <span class="methodname">isValid()</span> ne
+            renvoient pas immédiatement <b><tt>FALSE</tt></b>. Ceci permet à la classe de validation de
+            fournir toutes les raisons pour lesquelles le mot de passe d&#039;entrée n&#039;a pas réussi à
+            remplir les conditions de validation. Si, par exemple, un utilisateur entre la chaîne
+            &quot;<code class="code">#$%</code>&quot; comme mot de passe,  <span class="methodname">isValid()</span> entraînera que les quatre
+            messages d&#039;échec de validation seront retournés lors de l&#039;appel suivant à
+             <span class="methodname">getMessages()</span>.
+        </p></div>
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.validate.validator_chains.html">Cha&icirc;nes de validation</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.validate.html">Zend_Validate</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.validate.messages.html">Messages de validation</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.validate.html">Zend_Validate</a></li>
+  <li><a href="zend.validate.introduction.html">Introduction</a></li>
+  <li><a href="zend.validate.set.html">Classes de validation standard</a></li>
+  <li><a href="zend.validate.validator_chains.html">Cha&icirc;nes de validation</a></li>
+  <li class="active"><a href="zend.validate.writing_validators.html">&Eacute;crire des validateurs</a></li>
+  <li><a href="zend.validate.messages.html">Messages de validation</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,316 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Informations du document et m&eacute;tadonn&eacute;es - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.pdf.interactive-features.html">Interactive Features</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.pdf.html">Zend_Pdf</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.pdf.usage.html">Exemple d'utilisation du module Zend_Pdf</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.pdf.info" class="section"><div class="info"><h1 class="title">Informations du document et métadonnées</h1></div>
+    
+
+    
+
+    <p class="para">
+        Un document <acronym class="acronym">PDF</acronym> peut inclure des informations générales comme le titre du document,
+        l&#039;auteur et les dates de création ou de modification.
+    </p>
+
+    <p class="para">
+        Historiquement ces informations sont stockées dans une structure spéciale Info. Cette
+        structure est disponible en lecture/écriture sous la forme d&#039;un tableau associatif en
+        utilisant la propriété publique <code class="code">properties</code> des objets
+        <span class="classname">Zend_Pdf</span> : <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$pdf</span> = Zend_Pdf::<span style="color: #006600;">load</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$pdfPath</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$pdf</span>-&gt;<span style="color: #006600;">properties</span><span style="color: #66cc66;">&#91;</span><span style="color: #ff0000;">'Title'</span><span style="color: #66cc66;">&#93;</span> . <span style="color: #ff0000;">&quot;<span style="color: #000099; font-weight: bold;">\n</span>&quot;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$pdf</span>-&gt;<span style="color: #006600;">properties</span><span style="color: #66cc66;">&#91;</span><span style="color: #ff0000;">'Author'</span><span style="color: #66cc66;">&#93;</span> . <span style="color: #ff0000;">&quot;<span style="color: #000099; font-weight: bold;">\n</span>&quot;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$pdf</span>-&gt;<span style="color: #006600;">properties</span><span style="color: #66cc66;">&#91;</span><span style="color: #ff0000;">'Title'</span><span style="color: #66cc66;">&#93;</span> = <span style="color: #ff0000;">'Nouveau Titre.'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$pdf</span>-&gt;<span style="color: #006600;">save</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$pdfPath</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+</p>
+
+    <p class="para">
+        Les clés suivantes sont définies par la norme <acronym class="acronym">PDF</acronym> v1.4 (Acrobat 5) : <ul class="itemizedlist">
+                <li class="listitem">
+                <p class="para">
+                    <em class="emphasis">Title</em> - string, optionnel, le titre du
+                    document.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    <em class="emphasis">Author</em> - string, optionnel, le nom de la personne qui
+                    a créé le document.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    <em class="emphasis">Subject</em> - string, optionnel, le sujet du
+                    document.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    <em class="emphasis">Keywords</em> - string, optionnel, les mots clés associés
+                    au document.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    <em class="emphasis">Creator</em> - string, optionnel, si le document a été
+                    converti en <acronym class="acronym">PDF</acronym> à partir d&#039;un autre format, le nom de l&#039;application (par
+                    exemple, Adobe FrameMaker®) qui a créé le document original à partir duquel il a
+                    été converti.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    <em class="emphasis">Producer</em> - string, optionnel, si le document a été
+                    converti en <acronym class="acronym">PDF</acronym> à partir d&#039;un autre format, le nom de l&#039;application (par
+                    exemple, Acrobat Distiller) qui l&#039;a converti en <acronym class="acronym">PDF</acronym>.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    <em class="emphasis">CreationDate</em> - string, optionnel, la date et l&#039;heure
+                    auxquelles le document a été créé sous la forme suivante :
+                    &quot;D:YYYYMMDDHHmmSSOHH&#039;mm&#039;&quot;, où : <ul class="itemizedlist">
+                            <li class="listitem">
+                                <p class="para"><em class="emphasis">YYYY</em> est la date.</p>
+                            </li>
+
+                            <li class="listitem">
+                                <p class="para"><em class="emphasis">MM</em> est le mois.</p>
+                            </li>
+
+                            <li class="listitem">
+                                <p class="para"><em class="emphasis">DD</em> est le jour (01–31).</p>
+                            </li>
+
+                            <li class="listitem">
+                                <p class="para"><em class="emphasis">HH</em> est l&#039;heure (00–23).</p>
+                            </li>
+
+                            <li class="listitem">
+                                <p class="para"><em class="emphasis">mm</em> est la minute (00–59).</p>
+                            </li>
+
+                            <li class="listitem">
+                                <p class="para"><em class="emphasis">SS</em> est la seconde (00–59).</p>
+                            </li>
+
+                            <li class="listitem">
+                            <p class="para">
+                                <em class="emphasis">O</em> est la différence de l&#039;heure locale par
+                                rapport au temps universel (UT), dénoté par un des caractères +, de
+                                −, ou de Z (voir ci-dessous).
+                            </p>
+                        </li>
+
+                        <li class="listitem">
+                            <p class="para">
+                                <em class="emphasis">HH</em> suivi par &#039; est la valeur absolue du
+                                décalage par rapport à l&#039;UT en heures (00–23).
+                            </p>
+                        </li>
+
+                        <li class="listitem">
+                            <p class="para">
+                                <em class="emphasis">mm</em> suivi par &#039; est la valeur absolue du
+                                décalage par rapport à l&#039;UT en minutes (00–59).
+                            </p>
+                        </li>
+                    </ul> Le caractère apostrophe (&#039;) après &quot;HH&quot; et &quot;mm&quot; est un
+                élément de la syntaxe. Chaque champs après l&#039;année est optionnel. (Le préfixe
+                &quot;D:&quot;, bien que lui aussi optionnel, est fortement recommandé.) Les valeurs par
+                défaut pour &quot;MM&quot; et &quot;DD&quot; sont à &quot;01&quot; ; tous les autres champs numériques ont par
+                défaut des valeurs à zéro. Un signe plus (+) en tant que valeur pour le champs
+                &quot;0&quot; signifie que l&#039;heure locale est après l&#039;UT, un signe moins (-) que l&#039;heure
+                locale est avant l&#039;UT, et la lettre &quot;Z&quot; que l&#039;heure locale est égale à l&#039;UT. Si
+                aucune information concernant l&#039;UT n&#039;est spécifiée, la différence par rapport à
+                l&#039;UT est considérée inconnue. Que le décalage horaire soit connu ou non, le
+                    reste de la date devrait être exprimée en heure locale.
+                </p>
+
+                <p class="para">
+                    Par exemple la date &quot;23 décembre 1998 à 19:52 (heure locale U.S.
+                    Pacifique)&quot; est représentée par la chaîne &quot;D:199812231952−08&#039;00&#039;&quot;.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    <em class="emphasis">ModDate</em> - string, optionnel, la date et l&#039;heure
+                    auxquelles le document a été le plus récemment modifié, sous la même forme que
+                    <em class="emphasis">CreationDate</em>.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    <em class="emphasis">Trapped</em> - boolean, optionnel, indique si le document
+                    à été modifié pour inclure une information de &quot;trapping&quot;. <ul class="itemizedlist">
+                            <li class="listitem">
+                            <p class="para">
+                                <em class="emphasis">true</em> - Le document a été entièrement
+                                &quot;trappé&quot; ; aucun autre &quot;trapping&quot; n&#039;est nécessaire.
+                            </p>
+                        </li>
+
+                        <li class="listitem">
+                            <p class="para">
+                                <em class="emphasis">false</em> - Le document n&#039;a pas encore été
+                                &quot;trappé&quot; ; tout &quot;trapping&quot; reste encore à réaliser.
+                            </p>
+                        </li>
+
+                        <li class="listitem">
+                            <p class="para">
+                                <em class="emphasis">null</em> - Soit il est impossible de savoir
+                                si le document a été &quot;trappé&quot;, soit il a été partiellement &quot;trappé&quot;
+                                ; certains &quot;trapping&quot; additionnels sont nécessaires.
+                            </p>
+                        </li>
+                        </ul>
+                    </p>
+            </li>
+            </ul>
+        </p>
+
+    <p class="para">
+        Depuis la version v1.6 de la norme <acronym class="acronym">PDF</acronym>, les métadonnées peuvent être stockées dans un
+        document <acronym class="acronym">XML</acronym> spécial attaché au document <acronym class="acronym">PDF</acronym> (XMP - <a href="http://www.adobe.com/products/xmp/" class="link external">&raquo; eXtensible Metadata Platform</a>).
+    </p>
+
+    <p class="para">
+        Ce document XML peut être récupéré et attaché au document PDF avec les méthodes
+         <span class="methodname">Zend_Pdf::getMetadata()</span> et
+         <span class="methodname">Zend_Pdf::setMetadata($metadata)</span> : <div class="programlisting"><div class="cdata"><pre>
+$pdf = Zend_Pdf::load($pdfPath);
+$metadata = $pdf-&gt;getMetadata();
+$metadataDOM = new DOMDocument();
+$metadataDOM-&gt;loadXML($metadata);
+
+$xpath = new DOMXPath($metadataDOM);
+$pdfPreffixNamespaceURI = $xpath-&gt;query(&#039;/rdf:RDF/rdf:Description&#039;)
+                                -&gt;item(0)
+                                -&gt;lookupNamespaceURI(&#039;pdf&#039;);
+$xpath-&gt;registerNamespace(&#039;pdf&#039;, $pdfPreffixNamespaceURI);
+
+$titleNode = $xpath-&gt;query(&#039;/rdf:RDF/rdf:Description/pdf:Title&#039;)
+                   -&gt;item(0);
+$title = $titleNode-&gt;nodeValue;
+...
+
+$titleNode-&gt;nodeValue = &#039;Nouveau titre&#039;;
+$pdf-&gt;setMetadata($metadataDOM-&gt;saveXML());
+$pdf-&gt;save($pdfPath);
+</pre></div></div>
+</p>
+
+    <p class="para">
+        Les propriétés communes du document sont dupliquées dans la structure Info et dans le
+        document de métadonnées (s&#039;il est présent). Il est de la responsabilité de l&#039;utilisateur de
+        l&#039;application de les maintenir synchronisées.
+    </p>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.pdf.interactive-features.html">Interactive Features</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.pdf.html">Zend_Pdf</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.pdf.usage.html">Exemple d'utilisation du module Zend_Pdf</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.pdf.html">Zend_Pdf</a></li>
+  <li><a href="zend.pdf.introduction.html">Introduction</a></li>
+  <li><a href="zend.pdf.create.html">Cr&eacute;er et charger des documents PDF</a></li>
+  <li><a href="zend.pdf.save.html">Sauvegarder les changement dans un document PDF</a></li>
+  <li><a href="zend.pdf.pages.html">Les pages d'un document</a></li>
+  <li><a href="zend.pdf.drawing.html">Dessiner</a></li>
+  <li><a href="zend.pdf.interactive-features.html">Interactive Features</a></li>
+  <li class="active"><a href="zend.pdf.info.html">Informations du document et m&eacute;tadonn&eacute;es</a></li>
+  <li><a href="zend.pdf.usage.html">Exemple d'utilisation du module Zend_Pdf</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

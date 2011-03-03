@@ -1,0 +1,476 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Cr&eacute;er et rendre des &eacute;l&eacute;ments composites - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="learning.form.decorators.individual.html">Rendu individuel des d&eacute;corateurs</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="learning.form.decorators.html">Understanding and Using Zend Form Decorators</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="learning.form.decorators.conclusion.html">Conclusion</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="learning.form.decorators.composite" class="section"><div class="info"><h1 class="title">Créer et rendre des éléments composites</h1></div>
+    
+
+    <p class="para">
+        Dans <a href="learning.form.decorators.individual.html" class="link">la dernière section</a>, nous
+        avions un exemple traitant un élément &quot;date de naissance&quot;:
+    </p>
+
+    <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&lt;div <span style="color: #000000; font-weight: bold;">class</span>=<span style="color: #ff0000;">&quot;element&quot;</span>&gt;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">&lt;?php</span> <a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$form</span>-&gt;<span style="color: #006600;">dateOfBirth</span>-&gt;<span style="color: #006600;">renderLabel</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span> <span style="color: #000000; font-weight: bold;">?&gt;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">&lt;?php</span> <a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">formText</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'dateOfBirth[day]'</span>, <span style="color: #ff0000;">''</span>, <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'size'</span> =&gt; <span style="color: #cc66cc;">2</span>, <span style="color: #ff0000;">'maxlength'</span> =&gt; <span style="color: #cc66cc;">2</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span> <span style="color: #000000; font-weight: bold;">?&gt;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; /</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">&lt;?php</span> <a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">formText</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'dateOfBirth[month]'</span>, <span style="color: #ff0000;">''</span>, <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'size'</span> =&gt; <span style="color: #cc66cc;">2</span>, <span style="color: #ff0000;">'maxlength'</span> =&gt; <span style="color: #cc66cc;">2</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span> <span style="color: #000000; font-weight: bold;">?&gt;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; /</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">&lt;?php</span> <a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">formText</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'dateOfBirth[year]'</span>, <span style="color: #ff0000;">''</span>, <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'size'</span> =&gt; <span style="color: #cc66cc;">4</span>, <span style="color: #ff0000;">'maxlength'</span> =&gt; <span style="color: #cc66cc;">4</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span> <span style="color: #000000; font-weight: bold;">?&gt;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&lt;/div&gt;</div></li></ol></div></div></div>
+
+
+    <p class="para">
+        Comment représenteriez-vous cet élément en tant que
+        <span class="classname">Zend_Form_Element</span>?
+        Comment écrire un décorateur qui s&#039;assure de son rendu ?
+    </p>
+
+    <div class="section" id="learning.form.decorators.composite.element" name="learning.form.decorators.composite.element"><div class="info"><h1 class="title">L&#039;élément</h1></div>
+        
+
+        <p class="para">
+            Les questions à se poser sur le fonctionnement de l&#039;élément sont:
+        </p>
+
+        <ul class="itemizedlist">
+            <li class="listitem">
+                <p class="para">
+                    Comment affecter et récupérer une valeur?
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    Comment valider la valeur?
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    Comment proposer l&#039;affectation personnalisée d&#039;une valeur composées de trois
+                    segments (jour, mois, année)?
+                </p>
+            </li>
+        </ul>
+
+        <p class="para">
+            Les deux première questions se positionnent sur l&#039;élément de formulaire lui-même, comment
+            vont fonctionner les méthodes  <span class="methodname">setValue()</span> et
+             <span class="methodname">getValue()</span>?
+            L&#039;autre question nous suggère de nous questionner sur comment récupérer les segments
+            représentant la date, ou comment les affecter dans l&#039;élément?
+        </p>
+
+        <p class="para">
+            La solution est de surcharger la méthode  <span class="methodname">setValue()</span> dans l&#039;élément
+             pour proposer sa propre logique. Dans le cas de notre exemple, notre élément devrait avoir
+             trois comportements distincts:
+        </p>
+
+        <ul class="itemizedlist">
+            <li class="listitem">
+                <p class="para">
+                    Si un timestamp entier est utilisé, il doit aider à la détermination des entités
+                    jour, mois, année.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    Si une chaine est utilisée, elle devrait être transformée en timestamp, et cette valeur
+                    sera utiliser pour déterminer les entités jour, mois, année.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    Si un tableau contenant les clés jour, mois, année est utilisé, alors les valeurs
+                    doivent être stockées.
+                </p>
+            </li>
+        </ul>
+
+        <p class="para">
+            En interne, les jour, mois et année seront stockés distinctement. Lorsque la valeur de l&#039;élément
+            sera demandée, nous récupèrerons une chaine formatée et normalisée. Nous surchargerons
+             <span class="methodname">getValue()</span> pour assembler les segments élémentaires composant la date.
+        </p>
+
+        <p class="para">
+            Voici à quoi ressemblerait la classe:
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000000; font-weight: bold;">class</span> My_Form_Element_Date <span style="color: #000000; font-weight: bold;">extends</span> Zend_Form_Element_Xhtml</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; protected <span style="color: #0000ff;">$_dateFormat</span> = <span style="color: #ff0000;">'%year%-%month%-%day%'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; protected <span style="color: #0000ff;">$_day</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; protected <span style="color: #0000ff;">$_month</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; protected <span style="color: #0000ff;">$_year</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> setDay<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$value</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$this</span>-&gt;_day = <span style="color: #66cc66;">&#40;</span>int<span style="color: #66cc66;">&#41;</span> <span style="color: #0000ff;">$value</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">return</span> <span style="color: #0000ff;">$this</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> getDay<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">return</span> <span style="color: #0000ff;">$this</span>-&gt;_day;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> setMonth<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$value</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$this</span>-&gt;_month = <span style="color: #66cc66;">&#40;</span>int<span style="color: #66cc66;">&#41;</span> <span style="color: #0000ff;">$value</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">return</span> <span style="color: #0000ff;">$this</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> getMonth<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">return</span> <span style="color: #0000ff;">$this</span>-&gt;_month;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> setYear<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$value</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$this</span>-&gt;_year = <span style="color: #66cc66;">&#40;</span>int<span style="color: #66cc66;">&#41;</span> <span style="color: #0000ff;">$value</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">return</span> <span style="color: #0000ff;">$this</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> getYear<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">return</span> <span style="color: #0000ff;">$this</span>-&gt;_year;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> setValue<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$value</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">if</span> <span style="color: #66cc66;">&#40;</span><a href="http://www.php.net/is_int"><span style="color: #000066;">is_int</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$value</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">setDay</span><span style="color: #66cc66;">&#40;</span><a href="http://www.php.net/date"><span style="color: #000066;">date</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'d'</span>, <span style="color: #0000ff;">$value</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;-&gt;<span style="color: #006600;">setMonth</span><span style="color: #66cc66;">&#40;</span><a href="http://www.php.net/date"><span style="color: #000066;">date</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'m'</span>, <span style="color: #0000ff;">$value</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;-&gt;<span style="color: #006600;">setYear</span><span style="color: #66cc66;">&#40;</span><a href="http://www.php.net/date"><span style="color: #000066;">date</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'Y'</span>, <span style="color: #0000ff;">$value</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span> <span style="color: #b1b100;">elseif</span> <span style="color: #66cc66;">&#40;</span><a href="http://www.php.net/is_string"><span style="color: #000066;">is_string</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$value</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$date</span> = <a href="http://www.php.net/strtotime"><span style="color: #000066;">strtotime</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$value</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">setDay</span><span style="color: #66cc66;">&#40;</span><a href="http://www.php.net/date"><span style="color: #000066;">date</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'d'</span>, <span style="color: #0000ff;">$date</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;-&gt;<span style="color: #006600;">setMonth</span><span style="color: #66cc66;">&#40;</span><a href="http://www.php.net/date"><span style="color: #000066;">date</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'m'</span>, <span style="color: #0000ff;">$date</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;-&gt;<span style="color: #006600;">setYear</span><span style="color: #66cc66;">&#40;</span><a href="http://www.php.net/date"><span style="color: #000066;">date</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'Y'</span>, <span style="color: #0000ff;">$date</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span> <span style="color: #b1b100;">elseif</span> <span style="color: #66cc66;">&#40;</span><a href="http://www.php.net/is_array"><span style="color: #000066;">is_array</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$value</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &amp;&amp; <span style="color: #66cc66;">&#40;</span><a href="http://www.php.net/isset"><span style="color: #000066;">isset</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$value</span><span style="color: #66cc66;">&#91;</span><span style="color: #ff0000;">'day'</span><span style="color: #66cc66;">&#93;</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &amp;&amp; <a href="http://www.php.net/isset"><span style="color: #000066;">isset</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$value</span><span style="color: #66cc66;">&#91;</span><span style="color: #ff0000;">'month'</span><span style="color: #66cc66;">&#93;</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &amp;&amp; <a href="http://www.php.net/isset"><span style="color: #000066;">isset</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$value</span><span style="color: #66cc66;">&#91;</span><span style="color: #ff0000;">'year'</span><span style="color: #66cc66;">&#93;</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">setDay</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$value</span><span style="color: #66cc66;">&#91;</span><span style="color: #ff0000;">'day'</span><span style="color: #66cc66;">&#93;</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;-&gt;<span style="color: #006600;">setMonth</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$value</span><span style="color: #66cc66;">&#91;</span><span style="color: #ff0000;">'month'</span><span style="color: #66cc66;">&#93;</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;-&gt;<span style="color: #006600;">setYear</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$value</span><span style="color: #66cc66;">&#91;</span><span style="color: #ff0000;">'year'</span><span style="color: #66cc66;">&#93;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span> <span style="color: #b1b100;">else</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; throw <span style="color: #000000; font-weight: bold;">new</span> Exception<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'Valeur de date invalide'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">return</span> <span style="color: #0000ff;">$this</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> getValue<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">return</span> <a href="http://www.php.net/str_replace"><span style="color: #000066;">str_replace</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'%year%'</span>, <span style="color: #ff0000;">'%month%'</span>, <span style="color: #ff0000;">'%day%'</span><span style="color: #66cc66;">&#41;</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">getYear</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>, <span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">getMonth</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>, <span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">getDay</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$this</span>-&gt;_dateFormat</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+
+
+        <p class="para">
+            Cette classe est fléxible : nous pouvons affecter les valeurs par défaut depuis une base de
+            données et être certains qu&#039;elles seront stockées correctement. Aussi, la valeur peut être
+            affectée depuis un tableau provenant des entrées du formulaire. Enfin, nous avons tous les
+            accesseurs distincts pour chaque segment de la date, un décorateur pourra donc créer
+            l&#039;élément comme il le voudra.
+        </p>
+    </div>
+
+    <div class="section" id="learning.form.decorators.composite.decorator" name="learning.form.decorators.composite.decorator"><div class="info"><h1 class="title">Le décorateur</h1></div>
+        
+
+        <p class="para">
+            Toujours en suivant notre exemple, imaginons que nous voulions que notre utilisateur
+            saisissent chaque segment jour, mois, année séparément. Heureusement, PHP permet
+            d&#039;utiliser la notation tableau pour créer des éléments, ainsi nous pourrons capturer
+            ces trois valeurs en une seule et nous crérons un élément
+            <span class="classname">Zend_Form</span> traitant avec des valeurs en tableau.
+        </p>
+
+        <p class="para">
+            Le décorateur est relativement simple: Il va récupérer le jour, le mois et l&#039;année de
+            l&#039;élément et passer chaque valeur à une aide de vue qui rendra chaque champ
+            individuellement. Nous les rassemblerons ensuite dans le rendu final.
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000000; font-weight: bold;">class</span> My_Form_Decorator_Date <span style="color: #000000; font-weight: bold;">extends</span> Zend_Form_Decorator_Abstract</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> render<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$content</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$element</span> = <span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">getElement</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">if</span> <span style="color: #66cc66;">&#40;</span>!<span style="color: #0000ff;">$element</span> instanceof My_Form_Element_Date<span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// Nous ne rendons que des éléments Date</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">return</span> <span style="color: #0000ff;">$content</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$view</span> = <span style="color: #0000ff;">$element</span>-&gt;<span style="color: #006600;">getView</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">if</span> <span style="color: #66cc66;">&#40;</span>!<span style="color: #0000ff;">$view</span> instanceof Zend_View_Interface<span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// Nous utilisons des aides de vue, si aucune vue n'existe</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// nous ne rendons rien</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">return</span> <span style="color: #0000ff;">$content</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$day</span>&nbsp; &nbsp;= <span style="color: #0000ff;">$element</span>-&gt;<span style="color: #006600;">getDay</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$month</span> = <span style="color: #0000ff;">$element</span>-&gt;<span style="color: #006600;">getMonth</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$year</span>&nbsp; = <span style="color: #0000ff;">$element</span>-&gt;<span style="color: #006600;">getYear</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$name</span>&nbsp; = <span style="color: #0000ff;">$element</span>-&gt;<span style="color: #006600;">getFullyQualifiedName</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$params</span> = <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'size'</span>&nbsp; &nbsp; &nbsp; =&gt; <span style="color: #cc66cc;">2</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'maxlength'</span> =&gt; <span style="color: #cc66cc;">2</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$yearParams</span> = <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'size'</span>&nbsp; &nbsp; &nbsp; =&gt; <span style="color: #cc66cc;">4</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'maxlength'</span> =&gt; <span style="color: #cc66cc;">4</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$markup</span> = <span style="color: #0000ff;">$view</span>-&gt;<span style="color: #006600;">formText</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$name</span> . <span style="color: #ff0000;">'[day]'</span>, <span style="color: #0000ff;">$day</span>, <span style="color: #0000ff;">$params</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; . <span style="color: #ff0000;">' / '</span> . <span style="color: #0000ff;">$view</span>-&gt;<span style="color: #006600;">formText</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$name</span> . <span style="color: #ff0000;">'[month]'</span>, <span style="color: #0000ff;">$month</span>, <span style="color: #0000ff;">$params</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; . <span style="color: #ff0000;">' / '</span> . <span style="color: #0000ff;">$view</span>-&gt;<span style="color: #006600;">formText</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$name</span> . <span style="color: #ff0000;">'[year]'</span>, <span style="color: #0000ff;">$year</span>, <span style="color: #0000ff;">$yearParams</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">switch</span> <span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">getPlacement</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">case</span> self::<span style="color: #006600;">PREPEND</span>:</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">return</span> <span style="color: #0000ff;">$markup</span> . <span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">getSeparator</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span> . <span style="color: #0000ff;">$content</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">case</span> self::<span style="color: #006600;">APPEND</span>:</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">default</span>:</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">return</span> <span style="color: #0000ff;">$content</span> . <span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">getSeparator</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span> . <span style="color: #0000ff;">$markup</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+
+
+    <p class="para">
+        Il faut maintenant préciser à notre élément d&#039;utiliser notre décorateur par défaut.
+        Pour ceci, il faut informer l&#039;élément du chemin vers notre décorateur. Nous pouvons
+        effectuer ceci par le constructeur:
+    </p>
+
+    <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000000; font-weight: bold;">class</span> My_Form_Element_Date <span style="color: #000000; font-weight: bold;">extends</span> Zend_Form_Element_Xhtml</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// ...</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> __construct<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$spec</span>, <span style="color: #0000ff;">$options</span> = <span style="color: #000000; font-weight: bold;">null</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">addPrefixPath</span><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'My_Form_Decorator'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'My/Form/Decorator'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'decorator'</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; parent::__construct<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$spec</span>, <span style="color: #0000ff;">$options</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// ...</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+
+
+    <p class="para">
+        Notez que l&#039;on fait cela en constructeur et non dans la méthode  <span class="methodname">init()</span>.
+        Ceci pour deux raisons. D&#039;abord, ceci permet d&#039;étendre dans le futur notre élément afin d&#039;y
+        ajouter de la logique dans  <span class="methodname">init</span> sans se soucier de l&#039;appel à
+         <span class="methodname">parent::init()</span>. Ensuite, celà permet aussi de redéfinir le décorateur
+        par défaut <span class="classname">Date</span> dans le futur si celà devient nécessaire, via le
+        constructeur ou la méthode  <span class="methodname">init</span>.
+    </p>
+
+    <p class="para">
+        Ensuite, nous devons réécrire la méthode  <span class="methodname">loadDefaultDecorators()</span> pour
+        lui indiquer d&#039;utiliser notre décorateur <span class="classname">Date</span>:
+    </p>
+
+    <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000000; font-weight: bold;">class</span> My_Form_Element_Date <span style="color: #000000; font-weight: bold;">extends</span> Zend_Form_Element_Xhtml</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// ...</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> loadDefaultDecorators<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">if</span> <span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">loadDefaultDecoratorsIsDisabled</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">return</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$decorators</span> = <span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">getDecorators</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #b1b100;">if</span> <span style="color: #66cc66;">&#40;</span><a href="http://www.php.net/empty"><span style="color: #000066;">empty</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$decorators</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">addDecorator</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'Date'</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;-&gt;<span style="color: #006600;">addDecorator</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'Errors'</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;-&gt;<span style="color: #006600;">addDecorator</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'Description'</span>, <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">'tag'</span>&nbsp; &nbsp;=&gt; <span style="color: #ff0000;">'p'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">'class'</span> =&gt; <span style="color: #ff0000;">'description'</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;-&gt;<span style="color: #006600;">addDecorator</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'HtmlTag'</span>, <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">'tag'</span> =&gt; <span style="color: #ff0000;">'dd'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">'id'</span>&nbsp; =&gt; <span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">getName</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span> . <span style="color: #ff0000;">'-element'</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;-&gt;<span style="color: #006600;">addDecorator</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'Label'</span>, <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'tag'</span> =&gt; <span style="color: #ff0000;">'dt'</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// ...</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+
+
+    <p class="para">
+        A qyuoi ressemble le rendu final ? Considérons l&#039;élément suivant:
+    </p>
+
+    <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$d</span> = <span style="color: #000000; font-weight: bold;">new</span> My_Form_Element_Date<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'dateOfBirth'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$d</span>-&gt;<span style="color: #006600;">setLabel</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'Date de naissance: '</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; -&gt;<span style="color: #006600;">setView</span><span style="color: #66cc66;">&#40;</span><span style="color: #000000; font-weight: bold;">new</span> Zend_View<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Ces deux procédés sont équivalents:</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$d</span>-&gt;<span style="color: #006600;">setValue</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'20 April 2009'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$d</span>-&gt;<span style="color: #006600;">setValue</span><span style="color: #66cc66;">&#40;</span><a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'year'</span> =&gt; <span style="color: #ff0000;">'2009'</span>, <span style="color: #ff0000;">'month'</span> =&gt; <span style="color: #ff0000;">'04'</span>, <span style="color: #ff0000;">'day'</span> =&gt; <span style="color: #ff0000;">'20'</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+    <p class="para">
+        Si vous affichez cet élément, vous obtiendrez ce rendu (avec quelques modifications
+        concernant la mise en page du manuel et sa lisibilité):
+    </p>
+
+    <div class="programlisting html"><div class="htmlcode"><div style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&lt;dt id=&quot;dateOfBirth-label&quot;&gt;&lt;label for=&quot;dateOfBirth&quot; class=&quot;optional&quot;&gt;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; Date de naissance:</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&lt;/label&gt;&lt;/dt&gt;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&lt;dd id=&quot;dateOfBirth-element&quot;&gt;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &lt;input type=&quot;text&quot; name=&quot;dateOfBirth[day]&quot; id=&quot;dateOfBirth-day&quot;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; value=&quot;20&quot; size=&quot;2&quot; maxlength=&quot;2&quot;&gt; /</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &lt;input type=&quot;text&quot; name=&quot;dateOfBirth[month]&quot; id=&quot;dateOfBirth-month&quot;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; value=&quot;4&quot; size=&quot;2&quot; maxlength=&quot;2&quot;&gt; /</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &lt;input type=&quot;text&quot; name=&quot;dateOfBirth[year]&quot; id=&quot;dateOfBirth-year&quot;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; value=&quot;2009&quot; size=&quot;4&quot; maxlength=&quot;4&quot;&gt;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&lt;/dd&gt;</div></li></ol></div></div></div>
+
+    </div>
+
+    <div class="section" id="learning.form.decorators.composite.conclusion" name="learning.form.decorators.composite.conclusion"><div class="info"><h1 class="title">Conclusion</h1></div>
+        
+
+        <p class="para">
+            Nous avons maintenant un élément qui peut rendre de multiples champs de formulaire,
+            et les traiter comme une seule entité -- la valeur <var class="varname">dateOfBirth</var>
+            sera passée comme un tableau à l&#039;élément et celui-ci créra les segments de date
+            appropriés et retournera une valeur normalisée.
+        </p>
+
+        <p class="para">
+            Aussi, nous pouvons toujours utiliser des décorateurs différents avec l&#039;élément. Si
+            nous avions voulu utiliser un décorateur
+            <a href="http://dojotoolkit.org/" class="link external">&raquo; Dojo</a> <span class="classname">DateTextBox</span>
+            -- qui accepte et retourne des chaines -- we aurions pu, sans modification sur
+            l&#039;élément lui-même.
+        </p>
+
+        <p class="para">
+            Enfin, vous avez une API uniforme pour décrire un élement se composant se plusieurs
+            segments distincts.
+        </p>
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="learning.form.decorators.individual.html">Rendu individuel des d&eacute;corateurs</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="learning.form.decorators.html">Understanding and Using Zend Form Decorators</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="learning.form.decorators.conclusion.html">Conclusion</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="learning.html">Learning Zend Framework</a></li>
+  <li class="header up"><a href="learning.form.decorators.html">Understanding and Using Zend Form Decorators</a></li>
+  <li><a href="learning.form.decorators.intro.html">Introduction</a></li>
+  <li><a href="learning.form.decorators.simplest.html">Les bases des d&eacute;corateurs</a></li>
+  <li><a href="learning.form.decorators.layering.html">Chainer les d&eacute;corateurs</a></li>
+  <li><a href="learning.form.decorators.individual.html">Rendu individuel des d&eacute;corateurs</a></li>
+  <li class="active"><a href="learning.form.decorators.composite.html">Cr&eacute;er et rendre des &eacute;l&eacute;ments composites</a></li>
+  <li><a href="learning.form.decorators.conclusion.html">Conclusion</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

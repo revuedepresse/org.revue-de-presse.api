@@ -1,0 +1,438 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Zend_Controller - D&eacute;marrage rapide - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.controller.html">Zend_Controller</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.controller.html">Zend_Controller</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.controller.basics.html">Fondations de Zend_Controller</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.controller.quickstart" class="section"><div class="info"><h1 class="title">Zend_Controller - Démarrage rapide</h1></div>
+    
+
+    <div class="section" id="zend.controller.quickstart.introduction" name="zend.controller.quickstart.introduction"><div class="info"><h1 class="title">Introduction</h1></div>
+        
+
+        <p class="para">
+            <span class="classname">Zend_Controller</span> est le coeur du système <acronym class="acronym">MVC</acronym> de Zend
+            Framework. <acronym class="acronym">MVC</acronym> équivaut à
+            <a href="http://fr.wikipedia.org/wiki/Mod%C3%A8le-Vue-Contr%C3%B4leur" class="link external">&raquo; 
+            Modèle-Vue-Contrôleur</a>et est un motif de conception (&quot;design pattern&quot;) visant à
+            séparer la logique d&#039;application de la logique d&#039;affichage.
+            <span class="classname">Zend_Controller_Front</span> implémente un modèle de
+            <a href="http://www.martinfowler.com/eaaCatalog/frontController.html" class="link external">&raquo; contrôleur
+            frontal (&quot;Front Controller&quot;)</a>, dans lequel toutes les demandes sont arrêtées par
+            le contrôleur frontal et distribuées vers différents contrôleurs d&#039;action (&quot;Action
+            Controller&quot;) basés sur l&#039;URL demandé.
+        </p>
+
+        <p class="para">
+            Le système <span class="classname">Zend_Controller</span> a été construit dans un souci
+            d&#039;extensibilité, soit par sous-classement des classes existantes, en écrivant les
+            nouvelles classes qui implémentent les diverses interfaces et les classes abstraites
+            qui forment la base de la famille de contrôleur des classes, soit par écriture de
+            plugins ou d&#039;aides d&#039;action afin d&#039;utiliser ou d&#039;augmenter les fonctionnalités du
+            système.
+        </p>
+    </div>
+
+    <div class="section" id="zend.controller.quickstart.go" name="zend.controller.quickstart.go"><div class="info"><h1 class="title">Démarrage rapide</h1></div>
+        
+
+        <p class="para">
+            Si vous avez besoin d&#039;informations plus détaillées, lisez les sections suivantes.
+            Si vous voulez juste démarrer rapidement, lisez ce qui suit.
+        </p>
+
+        <div class="section" id="zend.controller.quickstart.go.directory" name="zend.controller.quickstart.go.directory"><div class="info"><h1 class="title">Créer votre disposition de système de fichiers</h1></div>
+            
+
+            <p class="para">
+                La première étape est de créer votre disposition de système de fichiers. La
+                disposition typique est la suivante :
+            </p>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">application/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; controllers/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; IndexController.php</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; models/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; views/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; scripts/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; index/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; index.phtml</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #ff0000">&nbsp; &nbsp; &nbsp; &nbsp; helpers/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; filters/</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">html/</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; .htaccess</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; index.php</div></li></ol></div></div></div>
+
+        </div>
+
+        <div class="section" id="zend.controller.quickstart.go.docroot" name="zend.controller.quickstart.go.docroot"><div class="info"><h1 class="title">Régler votre document root</h1></div>
+            
+
+            <p class="para">
+                Dans votre serveur Web, faîtes pointer votre &quot;document root&quot; vers le dossier
+                <code class="code">html</code> du système de fichiers ci-dessus.
+            </p>
+        </div>
+
+        <div class="section" id="zend.controller.quickstart.go.rewrite" name="zend.controller.quickstart.go.rewrite"><div class="info"><h1 class="title">Créer vos règles de réécriture</h1></div>
+            
+
+            <p class="para">Éditez le fichier <code class="code">html/.htaccess</code> afin de lire ceci :</p>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">RewriteEngine On</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">RewriteCond %<span style="color: #66cc66;">&#123;</span>REQUEST_FILENAME<span style="color: #66cc66;">&#125;</span> -s <span style="color: #66cc66;">&#91;</span>OR<span style="color: #66cc66;">&#93;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">RewriteCond %<span style="color: #66cc66;">&#123;</span>REQUEST_FILENAME<span style="color: #66cc66;">&#125;</span> -l <span style="color: #66cc66;">&#91;</span>OR<span style="color: #66cc66;">&#93;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">RewriteCond %<span style="color: #66cc66;">&#123;</span>REQUEST_FILENAME<span style="color: #66cc66;">&#125;</span> -d</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">RewriteRule ^.*$ - <span style="color: #66cc66;">&#91;</span>NC,L<span style="color: #66cc66;">&#93;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">RewriteRule ^.*$ index.php <span style="color: #66cc66;">&#91;</span>NC,L<span style="color: #66cc66;">&#93;</span></div></li></ol></div></div></div>
+
+
+            <blockquote><p><b class="note">Note</b>: <span class="info"><b>Connaître mod_rewrite</b><br /></span>
+                
+
+                
+                    Les règles de réécriture ci-dessus autorisent l&#039;accès à tous fichiers sous la
+                    racine de votre hôte virtuel. Si vous avez des fichiers que vous ne souhaitez
+                    pas exposer, vous pouvez souhaiter restreindre ces règles. Allez sur le site
+                    d&#039;Apache <a href="http://httpd.apache.org/docs/2.0/mod/mod_rewrite.html" class="link external">&raquo; pour en
+                        apprendre davantage concernant mod_rewrite</a>.
+                <br />
+            </p></blockquote>
+
+            <p class="para">
+                Si vous avez <acronym class="acronym">IIS</acronym> 7.0, utilisez ceci pour votre configuration de réécriture :
+            </p>
+
+            <div class="programlisting xml"><div class="xmlcode"><div class="xml" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;?xml</span> <span style="color: #000066;">version</span>=<span style="color: #ff0000;">&quot;1.0&quot;</span> <span style="color: #000066;">encoding</span>=<span style="color: #ff0000;">&quot;UTF-8&quot;</span><span style="font-weight: bold; color: black;">?&gt;</span></span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;configuration<span style="font-weight: bold; color: black;">&gt;</span></span></span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp;<span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;system</span>.webServer<span style="font-weight: bold; color: black;">&gt;</span></span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;rewrite<span style="font-weight: bold; color: black;">&gt;</span></span></span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;rules<span style="font-weight: bold; color: black;">&gt;</span></span></span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;rule</span> <span style="color: #000066;">name</span>=<span style="color: #ff0000;">&quot;Imported Rule 1&quot;</span> <span style="color: #000066;">stopProcessing</span>=<span style="color: #ff0000;">&quot;true&quot;</span><span style="font-weight: bold; color: black;">&gt;</span></span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;match</span> <span style="color: #000066;">url</span>=<span style="color: #ff0000;">&quot;^.*$&quot;</span> <span style="font-weight: bold; color: black;">/&gt;</span></span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;conditions</span> <span style="color: #000066;">logicalGrouping</span>=<span style="color: #ff0000;">&quot;MatchAny&quot;</span><span style="font-weight: bold; color: black;">&gt;</span></span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;add</span> <span style="color: #000066;">input</span>=<span style="color: #ff0000;">&quot;{REQUEST_FILENAME}&quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #000066;">matchType</span>=<span style="color: #ff0000;">&quot;IsFile&quot;</span> <span style="color: #000066;">pattern</span>=<span style="color: #ff0000;">&quot;&quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #000066;">ignoreCase</span>=<span style="color: #ff0000;">&quot;false&quot;</span> <span style="font-weight: bold; color: black;">/&gt;</span></span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;add</span> <span style="color: #000066;">input</span>=<span style="color: #ff0000;">&quot;{REQUEST_FILENAME}&quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #000066;">matchType</span>=<span style="color: #ff0000;">&quot;IsDirectory&quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #000066;">pattern</span>=<span style="color: #ff0000;">&quot;&quot;</span> <span style="color: #000066;">ignoreCase</span>=<span style="color: #ff0000;">&quot;false&quot;</span> <span style="font-weight: bold; color: black;">/&gt;</span></span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;/conditions<span style="font-weight: bold; color: black;">&gt;</span></span></span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;action</span> <span style="color: #000066;">type</span>=<span style="color: #ff0000;">&quot;None&quot;</span> <span style="font-weight: bold; color: black;">/&gt;</span></span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;/rule<span style="font-weight: bold; color: black;">&gt;</span></span></span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;rule</span> <span style="color: #000066;">name</span>=<span style="color: #ff0000;">&quot;Imported Rule 2&quot;</span> <span style="color: #000066;">stopProcessing</span>=<span style="color: #ff0000;">&quot;true&quot;</span><span style="font-weight: bold; color: black;">&gt;</span></span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;match</span> <span style="color: #000066;">url</span>=<span style="color: #ff0000;">&quot;^.*$&quot;</span> <span style="font-weight: bold; color: black;">/&gt;</span></span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;action</span> <span style="color: #000066;">type</span>=<span style="color: #ff0000;">&quot;Rewrite&quot;</span> <span style="color: #000066;">url</span>=<span style="color: #ff0000;">&quot;index.php&quot;</span> <span style="font-weight: bold; color: black;">/&gt;</span></span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;/rule<span style="font-weight: bold; color: black;">&gt;</span></span></span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;/rules<span style="font-weight: bold; color: black;">&gt;</span></span></span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;/rewrite<span style="font-weight: bold; color: black;">&gt;</span></span></span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp;<span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;/system</span>.webServer<span style="font-weight: bold; color: black;">&gt;</span></span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;/configuration<span style="font-weight: bold; color: black;">&gt;</span></span></span></div></li></ol></div></div></div>
+
+
+            <p class="para">
+                Les règles ci-dessus vont redirigées toute requête vers des ressources
+                existantes (liens symboliques, fichiers non vides, ou répertoires non-vides), tout
+                autre requête sera renvoyée vers le contrôleur frontal.
+            </p>
+
+            <blockquote><p><b class="note">Note</b>: 
+                
+                    Les règles de réécriture ci-dessus sont pour Apache ; pour des exemples
+                    de règles de réécriture pour d&#039;autres serveurs Web, reportez-vous à la
+                    <a href="zend.controller.router.html#zend.controller.router.introduction" class="link">documentation du
+                    routeur</a>.
+                <br />
+            </p></blockquote>
+        </div>
+
+        <div class="section" id="zend.controller.quickstart.go.bootstrap" name="zend.controller.quickstart.go.bootstrap"><div class="info"><h1 class="title">Créer votre fichier d&#039;amorçage (bootstrap)</h1></div>
+            
+
+            <p class="para">
+                Le fichier d&#039;amorçage est la page vers laquelle toutes les demandes sont
+                dirigées -- <code class="code">html/index.php</code> dans ce cas-ci. Ouvrez
+                <code class="code">html/index.php</code> dans l&#039;éditeur de votre choix et ajouter ce qui
+                suit :
+            </p>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">Zend_Controller_Front::<span style="color: #006600;">run</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'/chemin/vers/application/controllers'</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+            <p class="para">
+                Ceci va instancier et distribuer le contrôleur frontal, qui conduira les
+                demandes vers les contrôleurs d&#039;action.
+            </p>
+
+        </div>
+
+        <div class="section" id="zend.controller.quickstart.go.controller" name="zend.controller.quickstart.go.controller"><div class="info"><h1 class="title">Créer votre contrôleur d&#039;action par défaut</h1></div>
+            
+
+            <p class="para">
+                Avant de discuter des contrôleurs d&#039;action, vous devez d&#039;abord comprendre
+                comment les requêtes sont dirigées dans Zend Framework. Par défaut, le premier
+                segment d&#039;un chemin d&#039;URL correspond à un contrôleur, et le second à une action.
+                Par exemple, l&#039;URL est <code class="code">http://framework.zend.com/roadmap/components</code>,
+                le chemin est <code class="code">/roadmap/components</code>, qui correspondra au contrôleur
+                <code class="code">roadmap</code> et à l&#039;action <code class="code">components</code>. Si aucune action n&#039;est
+                fournie, l&#039;action <code class="code">index</code> est présumé, et si aucun contrôleur n&#039;est
+                fourni, le contrôleur <code class="code">index</code> est présumé (suivant la convention Apache
+                qui fait correspondre un <code class="code">DirectoryIndex</code> automatiquement).
+            </p>
+
+            <p class="para">
+                Le distributeur du <span class="classname">Zend_Controller</span> prend alors la
+                valeur du contrôleur et le fait correspondre à une classe. Par défaut, il s&#039;agit du
+                nom du contrôleur suivi du mot <code class="code">Controller</code>. Ainsi, dans notre exemple
+                ci-dessus, le contrôleur <code class="code">roadmap</code> correspond à la classe
+                <code class="code">RoadmapController</code>.
+            </p>
+
+            <p class="para">
+                De la même manière, la valeur de l&#039;action correspond à une méthode de la
+                classe contrôleur. Par défaut, la valeur est écrit en minuscule, et le mot
+                <code class="code">Action</code> est ajouté. Ainsi, dans notre exemple ci-dessus, l&#039;action
+                <code class="code">components</code> devient <code class="code">componentsAction</code>, et la méthode finale
+                appelée est  <span class="methodname">RoadmapController::componentsAction()</span>.
+            </p>
+
+            <p class="para">
+                Créons maintenant un contrôleur d&#039;action par défaut et une méthode d&#039;action.
+                Comme noté auparavant, le contrôleur et l&#039;action par défaut sont tous les deux
+                nommées <code class="code">index</code>. Ouvrez le fichier
+                <code class="code">application/controllers/IndexController.php</code>, et entrez ce qui suit
+                :
+            </p>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">/** Zend_Controller_Action */</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000000; font-weight: bold;">class</span> IndexController <span style="color: #000000; font-weight: bold;">extends</span> Zend_Controller_Action</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> indexAction<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">render</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+
+
+            <p class="para">
+                Par défaut, l&#039;aide d&#039;action
+                <a href="zend.controller.actionhelpers.html#zend.controller.actionhelpers.viewrenderer" class="link">ViewRenderer</a>est
+                activé. Ceci signifie qu&#039;en définissant simplement une méthode d&#039;action et un
+                script de vue correspondant, vous obtiendrez automatiquement le rendu du contenu.
+                Par défaut, <span class="classname">Zend_View</span> est utilisé en tant que couche Vue
+                dans le <acronym class="acronym">MVC</acronym>. Le <code class="code">ViewRenderer</code> utilise le nom du contrôleur (par
+                exemple, <code class="code">index</code>) et le nom de l&#039;action courante (par exemple,
+                <code class="code">index</code>) pour déterminer le modèle à afficher. Par défaut, le fichier
+                modèle se termine par l&#039;extension <code class="code">.phtml</code>, cela signifie que dans
+                l&#039;exemple ci-dessus, le modèle <code class="code">index/index.phtml</code> sera rendu. De plus,
+                le <code class="code">ViewRenderer</code> suppose automatiquement que le dossier
+                <code class="code">views</code> situé au même niveau que le dossier des contrôleurs est le
+                dossier de base des vues, et que les scripts de vues sont dans le sous-dossier
+                <code class="code">views/scripts/</code>. Ainsi le modèle rendu sera trouvé dans
+                <code class="code">application/views/scripts/index/index.phtml</code>.
+            </p>
+        </div>
+
+        <div class="section" id="zend.controller.quickstart.go.view" name="zend.controller.quickstart.go.view"><div class="info"><h1 class="title">Créer votre script de vue</h1></div>
+            
+
+            <p class="para">
+                Comme mentionné
+                <a href="zend.controller.quickstart.html#zend.controller.quickstart.go.controller" class="link">dans la section
+                précédente</a>, les scripts de vue sont dans
+                <code class="code">application/views/scripts/</code> ; le script de vue pour le contrôleur et
+                l&#039;action par défaut est donc
+                <code class="code">application/views/scripts/index/index.phtml</code>. Créer ce fichier, et
+                saisissez ce HTML :
+            </p>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&lt;!DOCTYPE html</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000000; font-weight: bold;">PUBLIC</span> <span style="color: #ff0000;">&quot;-//W3C//DTD XHTML 1.0 Strict//EN&quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #ff0000;">&quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd&quot;</span>&gt;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&lt;html&gt;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&lt;head&gt;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &lt;meta http-equiv=<span style="color: #ff0000;">&quot;Content-Type&quot;</span> content=<span style="color: #ff0000;">&quot;text/html; charset=utf-8&quot;</span> /&gt;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &lt;title&gt;My first Zend Framework App&lt;/title&gt;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&lt;/head&gt;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&lt;body&gt;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &lt;h1&gt;Hello, World!&lt;/h1&gt;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&lt;/body&gt;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&lt;/html&gt;</div></li></ol></div></div></div>
+
+        </div>
+
+        <div class="section" id="zend.controller.quickstart.go.errorhandler" name="zend.controller.quickstart.go.errorhandler"><div class="info"><h1 class="title">Créer votre contrôleur d&#039;erreur</h1></div>
+            
+
+            <p class="para">
+                Par défaut,
+                <a href="zend.controller.plugins.html#zend.controller.plugins.standard.errorhandler" class="link">le plugin de gestion
+                des erreurs</a>est enregistré. Ce plugin nécessite qu&#039;un contrôleur existe pour
+                gérer les erreurs. Par défaut, il s&#039;agit d&#039;un <code class="code">ErrorController</code> dans le
+                module par défaut avec une méthode <code class="code">errorAction</code> :
+            </p>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">/** Zend_Controller_Action */</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000000; font-weight: bold;">class</span> ErrorController <span style="color: #000000; font-weight: bold;">extends</span> Zend_Controller_Action</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">public</span> <span style="color: #000000; font-weight: bold;">function</span> errorAction<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+
+
+            <p class="para">
+                En considérant l&#039;architecture des dossiers vu ci-dessus, le fichier sera dans
+                <code class="code">application/controllers/ErrorController.php</code>. Vous devez aussi créer
+                une script de vue dans <code class="code">application/views/scripts/error/error.phtml</code> ;
+                exemple de contenu possible :
+            </p>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&lt;!DOCTYPE html</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #000000; font-weight: bold;">PUBLIC</span> <span style="color: #ff0000;">&quot;-//W3C//DTD XHTML 1.0 Strict//EN&quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #ff0000;">&quot;http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd&quot;</span>&gt;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&lt;html&gt;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&lt;head&gt;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &lt;meta http-equiv=<span style="color: #ff0000;">&quot;Content-Type&quot;</span> content=<span style="color: #ff0000;">&quot;text/html; charset=utf-8&quot;</span> /&gt;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &lt;title&gt;Erreur&lt;/title&gt;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&lt;/head&gt;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&lt;body&gt;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &lt;h1&gt;Erreur apparue&lt;/h1&gt;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &lt;p&gt;Une erreur est apparue ; veuillez rééssayer plus tard.&lt;/p&gt;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&lt;/body&gt;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&lt;/html&gt;</div></li></ol></div></div></div>
+
+        </div>
+
+        <div class="section" id="zend.controller.quickstart.go.finish" name="zend.controller.quickstart.go.finish"><div class="info"><h1 class="title">Voir le site !</h1></div>
+            
+
+            <p class="para">
+                Avec votre premier contrôleur et votre première vue, vous pouvez maintenant
+                démarrer votre navigateur et aller sur votre site. En supposant que
+                <code class="code">exemple.fr</code> est votre domaine, chacun des <acronym class="acronym">URL</acronym>s suivants vous dirigera
+                vers la page que nous avons tout juste créée :
+            </p>
+
+            <ul class="itemizedlist">
+                <li class="listitem">
+                    <p class="para"><code class="code">http://exemple.fr/</code></p>
+                </li>
+                <li class="listitem">
+                    <p class="para"><code class="code">http://exemple.fr/index</code></p>
+                </li>
+                <li class="listitem">
+                    <p class="para"><code class="code">http://exemple.fr/index/index</code></p>
+                </li>
+            </ul>
+
+            <p class="para">
+                Vous êtes maintenant prêt à créer de nouveaux contrôleurs et de nouvelles
+                méthodes d&#039;action. Félicitations !
+            </p>
+        </div>
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.controller.html">Zend_Controller</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.controller.html">Zend_Controller</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.controller.basics.html">Fondations de Zend_Controller</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.controller.html">Zend_Controller</a></li>
+  <li class="active"><a href="zend.controller.quickstart.html">Zend_Controller - D&eacute;marrage rapide</a></li>
+  <li><a href="zend.controller.basics.html">Fondations de Zend_Controller</a></li>
+  <li><a href="zend.controller.front.html">Le contr&ocirc;leur frontal (Front Controller)</a></li>
+  <li><a href="zend.controller.request.html">L'objet Requ&ecirc;te</a></li>
+  <li><a href="zend.controller.router.html">Routeur Standard</a></li>
+  <li><a href="zend.controller.dispatcher.html">Le distributeur</a></li>
+  <li><a href="zend.controller.action.html">Contr&ocirc;leurs d'action</a></li>
+  <li><a href="zend.controller.actionhelpers.html">Aides d'action (Helper)</a></li>
+  <li><a href="zend.controller.response.html">Objet de r&eacute;ponse</a></li>
+  <li><a href="zend.controller.plugins.html">Plugins</a></li>
+  <li><a href="zend.controller.modular.html">Utilisation de conventions de dossiers modulaires</a></li>
+  <li><a href="zend.controller.exceptions.html">Exceptions avec MVC</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

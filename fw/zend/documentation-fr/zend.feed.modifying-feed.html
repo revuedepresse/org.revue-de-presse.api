@@ -1,0 +1,179 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Modifier la structure du flux ou des entr&eacute;es - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.feed.consuming-atom-single-entry.html">Consommer une entr&eacute;e Atom particuli&egrave;re</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.feed.html">Zend_Feed</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.feed.custom-feed.html">Classes personnalis&eacute;es pour les flux et entr&eacute;es</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.feed.modifying-feed" class="section"><div class="info"><h1 class="title">Modifier la structure du flux ou des entrées</h1></div>
+    
+
+    <p class="para">
+        La syntaxe intuitive de <span class="classname">Zend_Feed</span> peut aussi bien servir à
+        lire des flux ou des entrées qu&#039;à les construire et les modifier. Vous pouvez facilement
+        transformer vos nouveaux objets (ou objets modifiés) en code <acronym class="acronym">XML</acronym> bien formé et enregistrer
+        ensuite ce code dans un fichier ou le renvoyer au serveur.
+    </p>
+
+    <div class="example"><div class="info"><p><b>Example #1 Modifier l&#039;entrée existante d&#039;un flux</b></p></div>
+        
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$flux</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Feed_Atom<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'http://atom.exemple.com/flux/1'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$entree</span> = <span style="color: #0000ff;">$flux</span>-&gt;<span style="color: #006600;">current</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$entree</span>-&gt;<span style="color: #006600;">title</span> = <span style="color: #ff0000;">'Ceci est un nouveau titre'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$entree</span>-&gt;<span style="color: #006600;">author</span>-&gt;<span style="color: #006600;">email</span> = <span style="color: #ff0000;">'mon_email@exemple.com'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$entree</span>-&gt;<span style="color: #006600;">saveXML</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <div class="example-contents"><p>
+            Ce code affichera une représentation <acronym class="acronym">XML</acronym> complète (y compris le prologue
+            <code class="code">&lt;?xml ...&gt;</code>) de la nouvelle entrée, avec les espaces de noms <acronym class="acronym">XML</acronym>
+            nécessaires.
+        </p></div>
+
+        <div class="example-contents"><p>
+            Notez que le code ci-dessus fonctionnera même si l&#039;entrée existante ne possédait
+            pas de balise <code class="code">author</code>. Vous pouvez utiliser autant de fois que vous le
+            souhaitez l&#039;opérateur d&#039;accès <code class="code">-&gt;</code> dans une instruction
+            d&#039;affectation ; si nécessaire, les niveaux intermédiaires seront créés pour vous
+            automatiquement.
+        </p></div>
+
+    </div>
+
+    <p class="para">
+        Si vous souhaitez utiliser dans votre entrée un espace de noms autre que
+        <code class="code">atom:</code>, <code class="code">rss:</code> ou <code class="code">osrss:</code>, vous devez enregistrer cet
+        espace de noms auprès de <span class="classname">Zend_Feed</span> à l&#039;aide de la méthode
+         <span class="methodname">Zend_Feed::registerNamespace()</span>. Lorsque vous modifiez un élément
+        existant, il gardera toujours son espace de noms d&#039;origine. Lorsque vous ajoutez un
+        élément, il utilisera l&#039;espace de noms par défaut si vous ne spécifiez pas explicitement un
+        autre espace de noms.
+    </p>
+
+    <div class="example"><div class="info"><p><b>Example #2 
+            Créer une entrée Atom dont les éléments appartiennent à un espace de noms
+            personnalisé
+        </b></p></div>
+        
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$entree</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Feed_Entry_Atom<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// en Atom, id est toujours affecté par le serveur</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$entree</span>-&gt;<span style="color: #006600;">title</span> = <span style="color: #ff0000;">'mon entrée perso'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$entree</span>-&gt;<span style="color: #006600;">author</span>-&gt;<span style="color: #006600;">name</span> = <span style="color: #ff0000;">'Auteur'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$entree</span>-&gt;<span style="color: #006600;">author</span>-&gt;<span style="color: #006600;">email</span> = <span style="color: #ff0000;">'moi@exemple.com'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// maintenant on s'occupe de la partie personnalisée</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">Zend_Feed::<span style="color: #006600;">registerNamespace</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'monen'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">'http://www.exemple.com/monen/1.0'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$entree</span>-&gt;<span style="color: #66cc66;">&#123;</span><span style="color: #ff0000;">'monen:monelement_un'</span><span style="color: #66cc66;">&#125;</span> = <span style="color: #ff0000;">'ma première valeur personnalisée'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$entree</span>-&gt;<span style="color: #66cc66;">&#123;</span><span style="color: #ff0000;">'monen:conteneur_elt'</span><span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp;-&gt;<span style="color: #006600;">partie1</span> = <span style="color: #ff0000;">'première partie imbriquée personnalisée'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$entree</span>-&gt;<span style="color: #66cc66;">&#123;</span><span style="color: #ff0000;">'monen:conteneur_elt'</span><span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp;-&gt;<span style="color: #006600;">partie2</span> = <span style="color: #ff0000;">'deuxième partie imbriquée personnalisée'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$entree</span>-&gt;<span style="color: #006600;">saveXML</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.feed.consuming-atom-single-entry.html">Consommer une entr&eacute;e Atom particuli&egrave;re</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.feed.html">Zend_Feed</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.feed.custom-feed.html">Classes personnalis&eacute;es pour les flux et entr&eacute;es</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.feed.html">Zend_Feed</a></li>
+  <li><a href="zend.feed.introduction.html">Introduction</a></li>
+  <li><a href="zend.feed.importing.html">Importer des flux</a></li>
+  <li><a href="zend.feed.findFeeds.html">Obtenir des flux &agrave; partir de pages Web</a></li>
+  <li><a href="zend.feed.consuming-rss.html">Consommer un flux RSS</a></li>
+  <li><a href="zend.feed.consuming-atom.html">Consommer un flux Atom</a></li>
+  <li><a href="zend.feed.consuming-atom-single-entry.html">Consommer une entr&eacute;e Atom particuli&egrave;re</a></li>
+  <li class="active"><a href="zend.feed.modifying-feed.html">Modifier la structure du flux ou des entr&eacute;es</a></li>
+  <li><a href="zend.feed.custom-feed.html">Classes personnalis&eacute;es pour les flux et entr&eacute;es</a></li>
+  <li><a href="zend.feed.reader.html">Zend_Feed_Reader</a></li>
+  <li><a href="zend.feed.writer.html">Zend_Feed_Writer</a></li>
+  <li><a href="zend.feed.pubsubhubbub.introduction.html">Zend_Feed_Pubsubhubbub</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

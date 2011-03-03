@@ -1,0 +1,61 @@
+disclaimers:
+  -
+    invitation
+fields:
+  - 
+    accesskey: e
+    link.to: email_again
+    name: email
+    save.to: db.user.email
+    type: email*
+  -
+    name: email_again
+    type: email*
+  -
+    id: user_name
+    name: user_name
+    save.to: db.user.user_name
+    type: text*
+  -
+    id: first_name
+    name: first_name
+    save.to: db.user.first_name
+    type: text
+  -
+    name: last_name
+    save.to: db.user.last_name
+    type: text
+  -
+    link.to: password_sign_up_again
+    hash: sha1
+    name: password_sign_up
+    save.to: db.user.password
+    type: password*
+  -
+    name: password_sign_up_again
+    type: password*
+  -
+    name: phone
+    save.to: db.user.phone
+    type: text
+  -
+    class: submit_sign_up
+    name: submit_sign_up_private_beta
+    type: submit
+    value: submit_sign_up_private_beta
+feedback:
+  success:
+    message: success
+    links:
+      -
+        name: sign_in
+        position: after
+        target: form.sign_in
+  failure:
+    message: failure
+    placeholder: email|user_name
+    links:
+      -
+        name: sign_up
+        position: after
+        target: form.sign_up

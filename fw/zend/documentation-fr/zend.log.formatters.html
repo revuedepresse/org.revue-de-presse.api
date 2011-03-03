@@ -1,0 +1,201 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Formateurs (mise en forme) - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.log.writers.html">R&eacute;dacteurs (Writers)</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.log.html">Zend_Log</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.log.filters.html">Filtres</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.log.formatters" class="section"><div class="info"><h1 class="title">Formateurs (mise en forme)</h1></div>
+    
+
+    <p class="para">
+        Un formateur est un objet qui est responsable de prendre un tableau <code class="code">event</code>
+        décrivant un événement de log et produisant une ligne de log formatée sous la forme d&#039;un une
+        chaîne.
+    </p>
+
+    <p class="para">
+        Quelques rédacteurs (&quot;Writers&quot;) ne fonctionnent pas en terme de ligne et ne peuvent
+        pas utiliser un formateur. Un exemple est le rédacteur de base de données, qui insère les
+        items d&#039;événement directement en colonnes de base de données. Pour les rédacteurs qui ne
+        peuvent pas supporter un formateur, une exception est levée si vous essayez d&#039;affecter un
+        formateur.
+    </p>
+
+    <div class="section" id="zend.log.formatters.simple" name="zend.log.formatters.simple"><div class="info"><h1 class="title">Formatage simple</h1></div>
+        
+
+        <p class="para">
+            <span class="classname">Zend_Log_Formatter_Simple</span> est le formateur par défaut. Il
+            est configuré automatiquement quand vous n&#039;indiquez aucun formateur. La configuration
+            par défaut est équivalente à ce qui suit : <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$format</span> = <span style="color: #ff0000;">'%timestamp% %priorityName% (%priority%): %message%'</span> . PHP_EOL;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$formatter</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Log_Formatter_Simple<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$format</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+</p>
+
+        <p class="para">
+            Un formateur est affecté à un objet individuel de rédacteur en utilisant la
+            méthode  <span class="methodname">setFormatter()</span> du rédacteur : <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$redacteur</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Log_Writer_Stream<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'php://output'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$formateur</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Log_Formatter_Simple<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'Bonjour %message%'</span> . PHP_EOL<span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$redacteur</span>-&gt;<span style="color: #006600;">setFormatter</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$formateur</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$logger</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Log<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$logger</span>-&gt;<span style="color: #006600;">addWriter</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$redacteur</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$logger</span>-&gt;<span style="color: #006600;">info</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'Monde'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// affiche &quot;Bonjour Monde&quot;</span></div></li></ol></div></div></div>
+</p>
+
+        <p class="para">
+            Le constructeur de <span class="classname">Zend_Log_Formatter_Simple</span> accepte un
+            paramètre unique : la chaîne de formatage. Cette chaîne contient des clés entourées par
+            le signe pourcentage (par exemple %message%). La chaîne de formatage peut contenir
+            n&#039;importe quelle clé du tableau de données d&#039;événement. Vous pouvez récupérer les clés
+            par défaut en utilisant la constante DEFAULT_FORMAT de
+            <span class="classname">Zend_Log_Formatter_Simple</span>.
+        </p>
+    </div>
+
+    <div class="section" id="zend.log.formatters.xml" name="zend.log.formatters.xml"><div class="info"><h1 class="title">Formater vers le XML</h1></div>
+        
+
+        <p class="para">
+            <span class="classname">Zend_Log_Formatter_Xml</span> formate des données de log dans des
+            chaînes de type XML. Par défaut, il note automatiquement tout le tableau de données
+            d&#039;événements : <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$redacteur</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Log_Writer_Stream<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'php://output'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$formateur</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Log_Formatter_Xml<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$redacteur</span>-&gt;<span style="color: #006600;">setFormatter</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$formateur</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$logger</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Log<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$logger</span>-&gt;<span style="color: #006600;">addWriter</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$redacteur</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$logger</span>-&gt;<span style="color: #006600;">info</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">&quot;Message d'information&quot;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+</p>
+
+        <p class="para">
+            Le code ci-dessus affiche le XML suivant (des espaces supplémentaires sont ajoutés
+            pour la clarté) : <div class="programlisting xml"><div class="xmlcode"><div class="xml" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;logEntry<span style="font-weight: bold; color: black;">&gt;</span></span></span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; <span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;timestamp<span style="font-weight: bold; color: black;">&gt;</span></span></span>2007-04-06T07:24:37-07:00<span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;/timestamp<span style="font-weight: bold; color: black;">&gt;</span></span></span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; <span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;message<span style="font-weight: bold; color: black;">&gt;</span></span></span>Message d'information<span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;/message<span style="font-weight: bold; color: black;">&gt;</span></span></span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; <span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;priority<span style="font-weight: bold; color: black;">&gt;</span></span></span>6<span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;/priority<span style="font-weight: bold; color: black;">&gt;</span></span></span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; <span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;priorityName<span style="font-weight: bold; color: black;">&gt;</span></span></span>INFO<span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;/priorityName<span style="font-weight: bold; color: black;">&gt;</span></span></span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;/logEntry<span style="font-weight: bold; color: black;">&gt;</span></span></span></div></li></ol></div></div></div>
+</p>
+
+        <p class="para">
+            Il est possible d&#039;adapter l&#039;élément racine comme indiquent faire correspondre les
+            éléments XML au tableau de données d&#039;évènements. Le constructeur de
+            <span class="classname">Zend_Log_Formatter_Xml</span> accepte une chaîne avec le nom de
+            l&#039;élément racine comme premier paramètre et un tableau associatif avec les éléments de
+            correspondance comme deuxième paramètre : <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$redacteur</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Log_Writer_Stream<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'php://output'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$formateur</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Log_Formatter_Xml<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'log'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'msg'</span> =&gt; <span style="color: #ff0000;">'message'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'niveau'</span> =&gt; <span style="color: #ff0000;">'priorityName'</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$redacteur</span>-&gt;<span style="color: #006600;">setFormatter</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$formateur</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$logger</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Log<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$logger</span>-&gt;<span style="color: #006600;">addWriter</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$redacteur</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$logger</span>-&gt;<span style="color: #006600;">info</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">&quot;Message d'information&quot;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+ Le code ci-dessus change l&#039;élément racine par défaut de
+            <code class="code">logEntry</code> en <code class="code">log</code>. Il fait correspondre également les éléments
+            <code class="code">msg</code> au <code class="code">message</code> de l&#039;item de donnée d&#039;événement. Ceci a comme
+            conséquence l&#039;affichage suivant : <div class="programlisting xml"><div class="xmlcode"><div class="xml" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;log<span style="font-weight: bold; color: black;">&gt;</span></span></span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; <span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;msg<span style="font-weight: bold; color: black;">&gt;</span></span></span>Message d'information<span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;/msg<span style="font-weight: bold; color: black;">&gt;</span></span></span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; <span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;niveau<span style="font-weight: bold; color: black;">&gt;</span></span></span>INFO<span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;/niveau<span style="font-weight: bold; color: black;">&gt;</span></span></span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #009900;"><span style="font-weight: bold; color: black;">&lt;/log<span style="font-weight: bold; color: black;">&gt;</span></span></span></div></li></ol></div></div></div>
+</p>
+        </div>
+    </div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.log.writers.html">R&eacute;dacteurs (Writers)</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.log.html">Zend_Log</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.log.filters.html">Filtres</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.log.html">Zend_Log</a></li>
+  <li><a href="zend.log.overview.html">Pr&eacute;sentation</a></li>
+  <li><a href="zend.log.writers.html">R&eacute;dacteurs (Writers)</a></li>
+  <li class="active"><a href="zend.log.formatters.html">Formateurs (mise en forme)</a></li>
+  <li><a href="zend.log.filters.html">Filtres</a></li>
+  <li><a href="zend.log.factory.html">Utiliser la fabrique pour cr&eacute;er des logs</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

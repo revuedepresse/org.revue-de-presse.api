@@ -1,0 +1,194 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>O&ugrave; est le symbole monn&eacute;taire? - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.currency.description.html">Qu'est ce qui d&eacute;finit une monnaie?</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.currency.html">Zend_Currency</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.currency.number.html">A quoi ressemble une monnaie?</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.currency.position" class="section"><div class="info"><h1 class="title">Où est le symbole monnétaire?</h1></div>
+    
+
+    <p class="para">
+        Le signe symbolique de la monnaie est positionné par rapport à sa valeur en fonction de
+        la locale utilisée. Cependant, vous pouvez forcer ce positionnement grâce à l&#039;option
+        <span class="property">display</span> qui se configure au moyen de constantes:
+    </p>
+
+    <table class="doctable table"><div class="info"><caption><b>Positions disponibles pour la monnaie</b></caption></div>
+        
+
+        
+            <thead valign="middle">
+                <tr valign="middle">
+                    <th>Constante</th>
+                    <th>Description</th>
+                </tr>
+
+            </thead>
+
+
+            <tbody valign="middle" class="tbody">
+                <tr valign="middle">
+                    <td align="left"><b><tt>STANDARD</tt></b></td>
+                    <td align="left">Affiche le symbole de la monnaie dans une position standard,
+                    conforme à la locale</td>
+                </tr>
+
+
+                <tr valign="middle">
+                    <td align="left"><b><tt>RIGHT</tt></b></td>
+
+                    <td align="left">
+                        Affiche le symbole de la monnaie à droite de sa valeur
+                    </td>
+                </tr>
+
+
+                <tr valign="middle">
+                    <td align="left"><b><tt>LEFT</tt></b></td>
+
+                    <td align="left">
+                        Affiche le symbole de la monnaie à gauche de sa valeur
+                    </td>
+                </tr>
+
+            </tbody>
+        
+    </table>
+
+
+    <div class="example"><div class="info"><p><b>Example #1 Paramétrer la position du symbole monnétaire</b></p></div>
+        
+
+        <div class="example-contents"><p>
+            Imaginons que le client utilise la locale &quot;en_US&quot;. Sans option, la valeur retournée
+            serait par exemple:
+        </p></div>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$currency</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Currency<span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'value'</span> =&gt; <span style="color: #cc66cc;">100</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/print"><span style="color: #000066;">print</span></a> <span style="color: #0000ff;">$currency</span>; <span style="color: #808080; font-style: italic;">// Retournerait '$ 100'</span></div></li></ol></div></div></div>
+
+
+        <div class="example-contents"><p>
+            En utilisant la valeur par défaut, le symbole pourrait être retourné à gauche ou à droite
+            de la valeur de monnaie. Voyons comment fixer cette position:
+        </p></div>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$currency</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Currency<span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'value'</span>&nbsp; &nbsp; =&gt; <span style="color: #cc66cc;">100</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">'position'</span> =&gt; Zend_Currency::<span style="color: #006600;">RIGHT</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/print"><span style="color: #000066;">print</span></a> <span style="color: #0000ff;">$currency</span>; <span style="color: #808080; font-style: italic;">// Retournerait '100 $';</span></div></li></ol></div></div></div>
+
+
+        <div class="example-contents"><p>
+            Notez que dans le deuxième exemple, la position de <acronym class="acronym">USD</acronym> est fixée
+            quelle que soit la locale ou la monnaie considérée.
+        </p></div>
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.currency.description.html">Qu'est ce qui d&eacute;finit une monnaie?</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.currency.html">Zend_Currency</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.currency.number.html">A quoi ressemble une monnaie?</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.currency.html">Zend_Currency</a></li>
+  <li><a href="zend.currency.introduction.html">Introduction &agrave; Zend_Currency</a></li>
+  <li><a href="zend.currency.usage.html">Utiliser Zend_Currency</a></li>
+  <li><a href="zend.currency.options.html">Options des monnaies</a></li>
+  <li><a href="zend.currency.description.html">Qu'est ce qui d&eacute;finit une monnaie?</a></li>
+  <li class="active"><a href="zend.currency.position.html">O&ugrave; est le symbole monn&eacute;taire?</a></li>
+  <li><a href="zend.currency.number.html">A quoi ressemble une monnaie?</a></li>
+  <li><a href="zend.currency.value.html">Travailler avec les valeurs des monnaies (les montants)</a></li>
+  <li><a href="zend.currency.calculation.html">Calculs avec les monnaies</a></li>
+  <li><a href="zend.currency.exchange.html">Echanger (convertir) des monnaies</a></li>
+  <li><a href="zend.currency.additional.html">Informations compl&eacute;mentaires pour Zend_Currency</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

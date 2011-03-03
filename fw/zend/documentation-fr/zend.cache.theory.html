@@ -1,0 +1,266 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Aspect th&eacute;orique - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.cache.introduction.html">Introduction</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.cache.html">Zend_Cache</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.cache.frontends.html">Les frontends Zend_Cache</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.cache.theory" class="section"><div class="info"><h1 class="title">Aspect théorique</h1></div>
+    
+
+    <p class="para">
+        Il y a trois concepts clés dans <span class="classname">Zend_Cache</span>. Le premier est
+        l&#039;identifiant unique (une chaîne) qui est utilisé pour identifier les enregistrements de
+        cache. Le second est la directive <em class="emphasis">&quot;lifeTime&quot;</em> vue dans les
+        exemples ; elle définit combien de temps la ressource de cache est considérée comme à
+        jour. Le troisième est l&#039;exécution conditionnelle, ainsi chaque partie de votre code peut
+        être évitée entièrement, pour améliorer methodname performances. La fonction principale du
+        frontend ( <span class="methodname">Zend_Cache_Core::get()</span>) est toujours faite pour retourner
+        <b><tt>FALSE</tt></b> en cas de cache manquant, si cela donne du sens à la nature d&#039;un
+        frontend. Cela permet aux utilisateurs d&#039;entourer des parties de code qu&#039;ils veulent mettre
+        en cache (et éviter) dans une instruction
+        <em class="emphasis"> <span class="methodname">if()</span>{ ... }</em> où la condition est une
+        méthode <span class="classname">Zend_Cache</span>. A la fin de ces blocs, vous devez sauvegarder ce
+        que vous avez généré (par exemple  <span class="methodname">Zend_Cache_Core::save()</span>).
+    </p>
+
+    <blockquote><p><b class="note">Note</b>: 
+        
+            Le design de l&#039;exécution conditionnelle de votre code généré n&#039;est pas forcément
+            dans des frontends (<em class="emphasis">Function</em>, par exemple) quand toute la logique
+            est implémentée à l&#039;intérieur du frontend.
+        <br />
+    </p></blockquote>
+
+    <blockquote><p><b class="note">Note</b>: 
+        
+            Le &quot;Cache hit&quot; est un terme pour une condition quand l&#039;enregistrement de cache
+            est trouvé, valide, et à jour (en d&#039;autres mots, qu&#039;il n&#039;a pas encore expiré). Le
+            &quot;Cache miss&quot; est tout le reste. Lorsque un &quot;Cache miss&quot; survient, vous devez générer
+            vos données (comme vous le feriez normalement) et les mettre en cache. Lorsque vous
+            avez un &quot;Cache hit&quot;, le backend récupère pour vous et de façon transparente, les
+            enregistrements.
+        <br />
+    </p></blockquote>
+
+    <div class="section" id="zend.cache.factory" name="zend.cache.factory"><div class="info"><h1 class="title">La méthode de fabrique de Zend_Cache</h1></div>
+        
+
+        <p class="para">
+            Une bonne manière de construire une instance utilisable d&#039;un frontend
+            <span class="classname">Zend_Cache</span> est donnée dans l&#039;exemple suivant :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Nous choisissons un backend (par exemple 'File' ou 'Sqlite')</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$backendName</span> = <span style="color: #ff0000;">'[...]'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Nous choisissons un frontend (par exemple: 'Core', 'Output',</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// 'Page'...)</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$frontendName</span> = <span style="color: #ff0000;">'[...]'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Nous définissons un tableau d'options pour le frontend choisit</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$frontendOptions</span> = <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#91;</span>...<span style="color: #66cc66;">&#93;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Nous définissons un tableau d'options pour le banckend choisit</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$backendOptions</span> = <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#91;</span>...<span style="color: #66cc66;">&#93;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Nous créons la bonne instance</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Bien sur, les deux derniers arguments sont optionnels</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$cache</span> = Zend_Cache::<span style="color: #006600;">factory</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$frontendName</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #0000ff;">$backendName</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #0000ff;">$frontendOptions</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #0000ff;">$backendOptions</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <p class="para">
+            Dans les exemples suivants, nous nous assurerons que la variable
+            <var class="varname">$cache</var> utilise une instance de frontend valide, et que vous
+            comprenez comment passer des paramètres à vos backends.
+        </p>
+
+        <blockquote><p><b class="note">Note</b>: 
+            
+                Utilisez toujours  <span class="methodname">Zend_Cache::factory()</span> pour obtenir des
+                instances de frontend. Instancier des frontends et des backends par vous-même ne
+                fonctionnera pas comme prévu.
+            <br />
+        </p></blockquote>
+    </div>
+
+    <div class="section" id="zend.cache.tags" name="zend.cache.tags"><div class="info"><h1 class="title">Baliser les enregistrements</h1></div>
+        
+
+        <p class="para">
+            Les balises sont un moyen de catégoriser les enregistrements de cache. Quand vous
+            sauvegardez un cache avec la méthode  <span class="methodname">save()</span> vous pouvez
+            définir un tableau de balises qui s&#039;appliqueront à cet enregistrement. Ensuite vous
+            serez en mesure de nettoyer tous les enregistrements de cache identifiés par
+            une balise (ou plusieurs) donnée :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$cache</span>-&gt;<span style="color: #006600;">save</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$grande_donnees</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">'monIDUnique'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'tagA'</span>, <span style="color: #ff0000;">'tagB'</span>, <span style="color: #ff0000;">'tagC'</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <blockquote><p><b class="note">Note</b>: 
+            
+                Notez que la méthode  <span class="methodname">save()</span> accepte un quatrième paramètre
+                optionnel : <var class="varname">$specificLifetime</var> (si différent de
+                <b><tt>FALSE</tt></b>, il affecte un &quot;lifeTime&quot; spécifique pour
+                cet enregistrement de cache particulier).
+            <br />
+        </p></blockquote>
+    </div>
+
+    <div class="section" id="zend.cache.clean" name="zend.cache.clean"><div class="info"><h1 class="title">Nettoyer le cache</h1></div>
+        
+
+        <p class="para">
+            Pour supprimer / invalider un identifiant de cache particulier, vous pouvez
+            utiliser la méthode  <span class="methodname">remove()</span> :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$cache</span>-&gt;<span style="color: #006600;">remove</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'idAEffacer'</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <p class="para">
+            Pour effacer / invalider plusieurs identifiants de caches en une seule
+            opération, vous pouvez utiliser la méthode  <span class="methodname">clean()</span>. Par
+            exemple, pour supprimer tous les caches :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// nettoie tous les enregistrements</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$cache</span>-&gt;<span style="color: #006600;">clean</span><span style="color: #66cc66;">&#40;</span>Zend_Cache::<span style="color: #006600;">CLEANING_MODE_ALL</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// nettoie uniquement les caches obsolètes</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$cache</span>-&gt;<span style="color: #006600;">clean</span><span style="color: #66cc66;">&#40;</span>Zend_Cache::<span style="color: #006600;">CLEANING_MODE_OLD</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <p class="para">
+            Si vous voulez effacer les caches correspondant aux balises &quot;tagA&quot; et &quot;tagC&quot; :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$cache</span>-&gt;<span style="color: #006600;">clean</span><span style="color: #66cc66;">&#40;</span>Zend_Cache::<span style="color: #006600;">CLEANING_MODE_MATCHING_TAG</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'tagA'</span>, <span style="color: #ff0000;">'tagC'</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <p class="para">
+            Si vous voulez effacer les caches ne correspondant pas aux balises &quot;tagA&quot; et
+            &quot;tagC&quot; :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$cache</span>-&gt;<span style="color: #006600;">clean</span><span style="color: #66cc66;">&#40;</span>Zend_Cache::<span style="color: #006600;">CLEANING_MODE_NOT_MATCHING_TAG</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'tagA'</span>, <span style="color: #ff0000;">'tagC'</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <p class="para">
+            Si vous voulez effacer les caches correspondant aux balises &quot;tagA&quot; ou &quot;tagC&quot; :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$cache</span>-&gt;<span style="color: #006600;">clean</span><span style="color: #66cc66;">&#40;</span>Zend_Cache::<span style="color: #006600;">CLEANING_MODE_MATCHING_ANY_TAG</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'tagA'</span>, <span style="color: #ff0000;">'tagC'</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <p class="para">
+            Les modes disponibles de nettoyage sont <b><tt>CLEANING_MODE_ALL</tt></b>,
+            <b><tt>CLEANING_MODE_OLD</tt></b>, <b><tt>CLEANING_MODE_MATCHING_TAG</tt></b>,
+            <b><tt>CLEANING_MODE_NOT_MATCHING_TAG</tt></b> et
+            <b><tt>CLEANING_MODE_MATCHING_ANY_TAG</tt></b>. Les derniers, comme leur nom
+            l&#039;indique, sont à combiner avec un tableau de balises pour réaliser les opérations de
+            nettoyage.
+        </p>
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.cache.introduction.html">Introduction</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.cache.html">Zend_Cache</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.cache.frontends.html">Les frontends Zend_Cache</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.cache.html">Zend_Cache</a></li>
+  <li><a href="zend.cache.introduction.html">Introduction</a></li>
+  <li class="active"><a href="zend.cache.theory.html">Aspect th&eacute;orique</a></li>
+  <li><a href="zend.cache.frontends.html">Les frontends Zend_Cache</a></li>
+  <li><a href="zend.cache.backends.html">Les backends Zend_Cache</a></li>
+  <li><a href="zend.cache.cache.manager.html">Le gestionnaire de Cache</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

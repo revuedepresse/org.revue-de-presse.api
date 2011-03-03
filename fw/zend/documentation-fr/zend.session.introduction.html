@@ -1,0 +1,159 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Introduction - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.session.html">Zend_Session</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.session.html">Zend_Session</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.session.basic_usage.html">Usage basique</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.session.introduction" class="section"><div class="info"><h1 class="title">Introduction</h1></div>
+    
+
+    <p class="para">
+        L&#039;équipe Auth de Zend Framework apprécie considérablement votre feedback et vos
+        contributions sur notre liste émail : <a href="mailto:fw-auth@lists.zend.com" class="link external">&raquo; fw-auth@lists.zend.com</a>.
+    </p>
+
+    <p class="para">
+        Dans les applications Web écrites en <acronym class="acronym">PHP</acronym>, une <em class="emphasis">session</em> représente
+        un raccordement logique entre le côté serveur, des données persistantes et un client
+        particulier (par exemple, un navigateur Web). <span class="classname">Zend_Session</span> aide à
+        contrôler et à préserver les données de session, un complément logique des données de type
+        cookie, en cas de demande de page multiples par le même client. À la différence des données
+        de cookie, les données de session ne sont pas stockées du côté client, et elles sont
+        seulement partagées avec le client quand le code source du côté serveur rend volontairement
+        disponible les données par l&#039;intermédiaire d&#039;une réponse à une demande du client. Dans le
+        cadre de ce composant et de cette documentation, le terme &quot;données de session&quot; se rapportent
+        aux données du côté serveur stockées dans <a href="http://www.php.net/manual/fr/reserved.variables.php#reserved.variables.session" class="link external">&raquo; <var class="varname">$_SESSION</var></a>,
+        contrôlées par <span class="classname">Zend_Session</span>, et individuellement manipulées par des
+        objets <span class="classname">Zend_Session_Namespace</span>. <em class="emphasis">Les espaces de noms de
+        session</em> permettent d&#039;accéder aux données de session en utilisant les <a href="http://fr.wikipedia.org/wiki/Espace_de_noms" class="link external">&raquo; espaces de noms</a> classiques
+        implémentés logiquement en tant que groupes nommés de tableaux associatifs, indexés par des
+        chaînes (semblables aux tableaux habituels de <acronym class="acronym">PHP</acronym>).
+    </p>
+
+    <p class="para">
+        Les instances <span class="classname">Zend_Session_Namespace</span> sont des objets accesseurs
+        pour les sous-parties nommées de <var class="varname">$_SESSION</var>. Le composant
+        <span class="classname">Zend_Session</span> encapsule l&#039;extension session de <acronym class="acronym">PHP</acronym> existante avec une
+        interface d&#039;administration et de gestion, afin de fournir une <acronym class="acronym">API</acronym> à
+        <span class="classname">Zend_Session_Namespace</span> pour les espaces de noms de session
+        persistants. <span class="classname">Zend_Session_Namespace</span> fournit une interface normalisée
+        et orientée objet pour travailler en espaces de noms persistants à l&#039;intérieur du mécanisme
+        standard des sessions de <acronym class="acronym">PHP</acronym>. Le support existe pour les espaces de noms anonymes et les
+        espaces de nom de session authentifiés (par exemple, &quot;login&quot;).
+        <span class="classname">Zend_Auth</span>, le composant d&#039;authentification de Zend Framework emploie
+        <span class="classname">Zend_Session_Namespace</span> pour stocker les informations liées aux
+        utilisateurs authentifiés. Puisque <span class="classname">Zend_Session</span> emploie les fonctions
+        normales de l&#039;extension session de <acronym class="acronym">PHP</acronym>, tous les options et réglages familiers de
+        configuration s&#039;appliquent (voir <a href="http://www.php.net/manual/fr/ref.session.php" class="link external">&raquo; http://www.php.net/session</a>), avec
+        en bonus la facilité d&#039;accès par une interface orientée objet et un comportement par défaut
+        fournissant les meilleures pratiques et une intégration sans problèmes dans Zend Framework.
+        Ainsi, un id standard de session <acronym class="acronym">PHP</acronym>, stocké soit dans un cookie côté client ou incorporé
+        dans l&#039;URL, maintient l&#039;association entre un client et des données de session.
+    </p>
+
+    <p class="para">
+        La fonction de gestion de session par défaut <a href="http://www.php.net/manual/fr/function.session-set-save-handler.php" class="link external">&raquo; session_set_save_handler</a>
+        ne maintient pas cette association dans un faisceau (NDT. : &quot;cluster&quot;) de serveurs sous
+        certaines conditions car les données de session sont sauvegardées seulement sur le serveur
+        qui répond à la requête. Si une requête peut être réalisée par un serveur différent de celui
+        où les données de session sont sauvegardées, alors le serveur appelé n&#039;aura pas accès aux
+        données de session (si elles ne sont pas disponibles dans un système de fichiers en réseau).
+        Une liste additionnelle de gestionnaire de session sera fournie, dès que possible. Les
+        membres de la communauté sont encouragés à suggérer et soumettre des gestionnaires de
+        sauvegardes à la liste <a href="mailto:fw-auth@lists.zend.com" class="link external">&raquo; fw-auth@lists.zend.com</a>. Un gestionnaire de
+        sauvegarde compatible <span class="classname">Zend_Db</span> a été signalé à la liste.
+    </p>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.session.html">Zend_Session</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.session.html">Zend_Session</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.session.basic_usage.html">Usage basique</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.session.html">Zend_Session</a></li>
+  <li class="active"><a href="zend.session.introduction.html">Introduction</a></li>
+  <li><a href="zend.session.basic_usage.html">Usage basique</a></li>
+  <li><a href="zend.session.advanced_usage.html">Utilisation avanc&eacute;e</a></li>
+  <li><a href="zend.session.global_session_management.html">Gestion g&eacute;n&eacute;rale de la session</a></li>
+  <li><a href="zend.session.savehandler.dbtable.html">Zend_Session_SaveHandler_DbTable</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

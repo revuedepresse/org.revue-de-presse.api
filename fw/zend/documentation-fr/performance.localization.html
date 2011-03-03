@@ -1,0 +1,221 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Internationalisation (i18n) and Localisation (l10n) - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="performance.database.html">Performance de Zend_Db</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="performance.html">Zend Framework Performance Guide</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="performance.view.html">View Rendering</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="performance.localization" class="section"><div class="info"><h1 class="title">Internationalisation (i18n) and Localisation (l10n)</h1></div>
+    
+
+    <p class="para">
+        Internationaliser et localiser un site sont des manières fantastiques d&#039;étendre votre
+        audience et de s&#039;assurer que tous les visiteurs peuvent trouver l&#039;information dont ils ont
+        besoin. Cependant, ceci entraîne souvent une dégradation de performance. Ci-dessous vous
+        trouverez des stratégies à utiliser pour réduire la surcharge due à l&#039;I18N et à la
+        L10N.
+    </p>
+
+    <div class="section" id="performance.localization.translationadapter" name="performance.localization.translationadapter"><div class="info"><h1 class="title">Quel adaptateur de traduction dois-je utiliser ?</h1></div>
+        
+
+        <p class="para">
+            Tous les adaptateurs de traduction ne sont pas conçus de la même façon. Certains
+            ont plus de fonctionnalités que d&#039;autres, et certains sont plus performants que
+            d&#039;autres. De plus, vous pouvez avoir des contraintes qui vous forcent à utiliser un
+            adaptateur en particulier. Cependant si vous avez le choix, quels adaptateurs sont les
+            plus rapides ?
+        </p>
+
+        <div class="section" id="performance.localization.translationadapter.fastest" name="performance.localization.translationadapter.fastest"><div class="info"><h1 class="title">Utiliser les adaptateurs de traduction non-XML pour plus de rapidité</h1></div>
+            
+
+            <p class="para">
+                Zend Framework embarque toute une variété d&#039;adaptateurs de traduction. Une
+                moitié de ceux-ci utilisent un format XML, entraînant une surcharge mémoire et des
+                pertes de performance. Heureusement, il existe plusieurs adaptateurs basés sur
+                d&#039;autres formats qui peuvent être analysés beaucoup plus rapidement. Par ordre de
+                vitesse, du plus rapide au plus lent, ils sont :
+            </p>
+
+            <ul class="itemizedlist">
+                <li class="listitem">
+                    <p class="para">
+                        <em class="emphasis">Array</em> : celui-ci est le plus rapide, puisqu&#039;il
+                        est, par définition, analysé dans un format natif de PHP immédiatement lors
+                        de son inclusion.
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        <em class="emphasis">CSV</em> : utilises <code class="code">fgetcsv()</code> pour
+                        analyser un fichier CSV file et le transforme en un format PHP natif.
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        <em class="emphasis">INI</em> : utilises <code class="code">parse_ini_file()</code> pour
+                        analyser un fichier INI file et le transforme en un format PHP natif.
+                        Celui-ci et l&#039;adaptateur CSV sont équivalent en terme de performance.
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        <em class="emphasis">Gettext</em> : l&#039;adaptateur Gettext de Zend Framework
+                        <em class="emphasis">n&#039;utilise pas</em> l&#039;extension gettext puisqu&#039;elle n&#039;est pas
+                        thread safe et ne permet pas de spécifier plus d&#039;une locale par serveur. En
+                        conséquence, il est plus lent que d&#039;utiliser l&#039;extension Gettext
+                        directement, mais comme le format Gettext est binaire, il reste plus rapide
+                        à analyser qu&#039;un format XML.
+                    </p>
+                </li>
+            </ul>
+
+            <p class="para">
+                Si l&#039;un de vos besoins principaux est la performance, nous vous conseillons
+                d&#039;utiliser l&#039;un des adaptateurs ci-dessus.
+            </p>
+        </div>
+    </div>
+
+    <div class="section" id="performance.localization.cache" name="performance.localization.cache"><div class="info"><h1 class="title">
+            Comment peut-on améliorer les performances de la traduction et de la localisation ?
+        </h1></div>
+        
+
+        <p class="para">
+            Peut-être, pour certaines raisons, vous êtes limité à un adaptateur de traduction
+            de type XML. Ou peut-être vous voudriez accélérer des choses encore plus. Ou peut-être
+            vous voulez rendre des opérations de localisation plus rapides. Comment pouvez-vous
+            faire ceci ?
+        </p>
+
+        <div class="section" id="performance.localization.cache.usage" name="performance.localization.cache.usage"><div class="info"><h1 class="title">Utiliser les caches de traductions et de localisation</h1></div>
+            
+
+            <p class="para">
+                A la fois <span class="classname">Zend_Translate</span> et
+                <span class="classname">Zend_Locale</span> implémente une fonctionnalité de mise en cache
+                qui peuvent considérablement améliorer les performances. Dans chacun des cas, le
+                goulot principal est typiquement la lecture des fichiers, pas la réelle
+                consultation ; la mise en cache élimine la nécessité de relire de nouveau les
+                fichiers de traduction ou de localisation.
+            </p>
+
+            <p class="para">
+                Vous pouvez lire plus d&#039;informations concernant la mise en cache
+                d&#039;informations de traduction ou de localisation dans les paragraphes suivants :
+            </p>
+
+            <ul class="itemizedlist">
+                <li class="listitem">
+                    <p class="para">
+                        <a href="zend.translate.adapter.html#zend.translate.adapter.caching" class="link">Mise en cache pour
+                        <span class="classname">Zend_Translate</span></a>
+                    </p>
+                </li>
+
+                <li class="listitem">
+                    <p class="para">
+                        <a href="zend.locale.introduction.html#zend.locale.cache" class="link">Mise en cache pour
+                        <span class="classname">Zend_Locale</span></a>
+                    </p>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="performance.database.html">Performance de Zend_Db</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="performance.html">Zend Framework Performance Guide</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="performance.view.html">View Rendering</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="performance.html">Zend Framework Performance Guide</a></li>
+  <li><a href="performance.introduction.html">Introduction</a></li>
+  <li><a href="performance.classloading.html">Chargement des classes</a></li>
+  <li><a href="performance.database.html">Performance de Zend_Db</a></li>
+  <li class="active"><a href="performance.localization.html">Internationalisation (i18n) and Localisation (l10n)</a></li>
+  <li><a href="performance.view.html">View Rendering</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,278 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Fondations de Zend_Controller - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.controller.quickstart.html">Zend_Controller - D&eacute;marrage rapide</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.controller.html">Zend_Controller</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.controller.front.html">Le contr&ocirc;leur frontal (Front Controller)</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.controller.basics" class="section"><div class="info"><h1 class="title">Fondations de Zend_Controller</h1></div>
+    
+
+    <p class="para">
+        Le système <span class="classname">Zend_Controller</span> est conçu pour être léger,
+        modulaire, et extensible. Il est de conception minimaliste pour permettre la flexibilité et
+        la liberté aux utilisateurs tout en fournissant assez de structure de sorte que les
+        systèmes établis autour de <span class="classname">Zend_Controller</span> partagent certaines
+        conventions communes et dispositions semblables de code.
+    </p>
+
+    <p class="para">
+        Le diagramme suivant décrit le déroulement des opérations, et ce qui suit décrit en
+        détail les interactions :
+    </p>
+
+    <p class="para">
+        <div class="inlinemediaobject"><div class="imageobject"><a href="images/d481d625821a97b9a5eb2cec99dca50e-zend.controller.basics.png"><img src="images/d481d625821a97b9a5eb2cec99dca50e-zend.controller.basics.png" alt="zend.controller.basics.png" width="450" height="525" /></a></div></div>
+    </p>
+
+    <p class="para">
+        Le déroulement des opérations de <span class="classname">Zend_Controller</span> est
+        implémenté par plusieurs composants. Même s&#039;il n&#039;est pas nécessaire de comprendre
+        complètement les détails de tous ces composants pour employer le système, avoir une bonne
+        connaissance du fonctionnement du processus est utile.
+    </p>
+
+    <ul class="itemizedlist">
+        <li class="listitem">
+            <p class="para">
+                <span class="classname">Zend_Controller_Front</span> orchestre le déroulement entier
+                des opérations du système <span class="classname">Zend_Controller</span>. C&#039;est une
+                interprétation du modèle contrôleur frontal (&quot;FrontController&quot;).
+                <span class="classname">Zend_Controller_Front</span> traite toutes les demandes reçues par
+                le serveur et est finalement responsable de déléguer les demandes aux contrôleurs
+                d&#039;action (&quot;ActionControllers&quot; [<span class="classname">Zend_Controller_Action</span>]).
+            </p>
+        </li>
+        <li class="listitem">
+            <p class="para">
+                <span class="classname">Zend_Controller_Request_Abstract</span> (souvent référencé
+                comme <code class="code">Request Object</code>) représente l&#039;environnement de la requête et
+                fournit les méthodes pour régler et rechercher le contrôleur, l&#039;action et les
+                paramètres fournis. De plus il contient l&#039;information si l&#039;action qu&#039;elle contient
+                a été distribuée ou non par <span class="classname">Zend_Controller_Dispatcher</span>. Des
+                extensions de l&#039;objet abstrait de requête peuvent être employées pour encapsuler
+                l&#039;environnement entier de requête, permettant à des routeurs de récupérer les
+                informations issues de l&#039;environnement de requête afin de régler les noms de
+                contrôleur et d&#039;action.
+            </p>
+            <p class="para">
+                Par défaut, <span class="classname">Zend_Controller_Request_Http</span> est employé,
+                ce qui permet d&#039;accéder à l&#039;environnement complet de requête <acronym class="acronym">HTTP</acronym>.
+            </p>
+        </li>
+        <li class="listitem">
+            <p class="para">
+                <span class="classname">Zend_Controller_Router_Interface</span> est employé pour
+                définir les routeurs. Le routage est le processus d&#039;examen de l&#039;environnement de
+                requête pour déterminer quel contrôleur, et action de ce contrôleur, devraient
+                recevoir la requête. Ces contrôleur, action, et paramètres facultatifs sont alors
+                placés dans l&#039;objet de requête à traiter par
+                <span class="classname">Zend_Controller_Dispatcher_Standard</span>. Le routage se produit
+                seulement une fois : quand la demande est initialement reçue et avant que le
+                premier contrôleur ne soit distribué.
+            </p>
+            <p class="para">
+                Le routeur par défaut, <span class="classname">Zend_Controller_Router_Rewrite</span>,
+                récupère un <acronym class="acronym">URI</acronym> comme indiqué dans
+                <span class="classname">Zend_Controller_Request_Http</span> et le décompose en contrôleur,
+                action, et paramètres basés sur l&#039;information de chemin de l&#039;URL. Par exemple,
+                l&#039;URL <code class="code">http://localhost/foo/bar/key/value</code> serait décodée pour employer
+                le contrôleur <code class="code">foo</code>, l&#039;action <code class="code">bar</code>, et pour indiquer un
+                paramètre <code class="code">key</code> avec une valeur <code class="code">value</code>.
+            </p>
+            <p class="para">
+                <span class="classname">Zend_Controller_Router_Rewrite</span> peut également être
+                utilisé pour faire correspondre des chemins arbitraires ; voir
+                <a href="zend.controller.router.html" class="link">la documentation du routeur</a>pour plus
+                d&#039;information.
+            </p>
+        </li>
+        <li class="listitem">
+            <p class="para">
+                <span class="classname">Zend_Controller_Dispatcher_Interface</span> est utilisé pour
+                définir les distributeurs. La distribution est le processus chargé de récupérer le
+                contrôleur et l&#039;action issus de l&#039;objet de requête et de les faire correspondre à
+                un fichier/classe de contrôleur et à une méthode d&#039;action dans la classe du
+                contrôleur. Si le contrôleur ou l&#039;action n&#039;existent pas, il se charge de déterminer
+                des contrôleurs et des actions par défaut à distribuer.
+            </p>
+            <p class="para">
+                Le processus de distribution réel se compose de l&#039;instanciation de la classe
+                de contrôleur et de l&#039;appel de la méthode d&#039;action dans cette classe. A la
+                différence du routage, qui se produit seulement une fois, la distribution se
+                produit dans une boucle. Si le statut distribué de l&#039;objet de requête est remis à
+                zéro à un moment quelconque, la boucle sera répétée, en appelant l&#039;action
+                actuellement placée dans l&#039;objet de requête. La première fois que la boucle se
+                termine avec une propriété de statut d&#039;objet de requête distribué à vrai (booléen
+                <b><tt>TRUE</tt></b>), le processus s&#039;arrête.
+            </p>
+            <p class="para">
+                Le distributeur par défaut est
+                <span class="classname">Zend_Controller_Dispatcher_Standard</span>. Il définit les
+                contrôleurs comme des classes pouvant se nommer avec une série de caractère
+                majuscules et/ou minuscules et se terminant par le mot <code class="code">Controller</code>, et
+                des méthodes d&#039;action suivant la notationCamel se terminant avec le mot Action :
+                 <span class="methodname">FooController::barAction()</span>. Dans ce cas-ci, le contrôleur est désigné
+                comme <code class="code">foo</code> et l&#039;action comme <code class="code">bar</code>.
+            </p>
+            <blockquote><p><b class="note">Note</b>: <span class="info"><b>Conventions de nommage (casse)</b><br /></span>
+                
+                
+                    Puisque les humains sont notoirement incompatibles avec le respect des
+                    majuscules et des minuscules quand ils tapent des liens, Zend Framework
+                    normalise les chemins en lettres minuscules. Ceci, naturellement, affectera
+                    votre manière d&#039;appeler vos contrôleurs et actions... ou vous vous référez à
+                    eux dans les liens.
+                <br />
+                
+                    Si vous souhaitez que votre classe ou action de contrôleur ait de
+                    multiples motsEnCassesMélangées ou motsEnNotationCamel, vous devrez séparer ces
+                    mots dans l&#039;URL avec soit un tiret (&quot;-&quot;), soit un point (&quot;.&quot;) (bien que vous
+                    puissiez configurer le caractère utilisé).
+                <br />
+                
+                    Par exemple, si vous souhaitez l&#039;action
+                     <span class="methodname">FooBarController::bazBatAction()</span>, vous vous referez à elle avec
+                    l&#039;URL <code class="code">/foo-bar/baz-bat</code> ou <code class="code">/foo.bar/baz.bat</code>.
+                <br />
+            </p></blockquote>
+        </li>
+        <li class="listitem">
+            <p class="para">
+                <span class="classname">Zend_Controller_Action</span> est le composant contrôleur
+                d&#039;action de base. Chaque contrôleur est une classe simple qui étend la classe de
+                <span class="classname">Zend_Controller_Action</span> et devrait contenir une ou plusieurs
+                méthodes d&#039;action.
+            </p>
+        </li>
+        <li class="listitem">
+            <p class="para">
+                <span class="classname">Zend_Controller_Response_Abstract</span> définit une classe
+                de réponse de base employée pour rassembler et retourner les réponses des
+                contrôleurs d&#039;action. Il rassemble les en-têtes et le contenu du corps.
+            </p>
+            <p class="para">
+                La classe de réponse par défaut est
+                <span class="classname">Zend_Controller_Response_Http</span>, qui convient pour l&#039;usage
+                dans un environnement <acronym class="acronym">HTTP</acronym>.
+            </p>
+        </li>
+    </ul>
+
+    <p class="para">
+        Le déroulement des opérations de <span class="classname">Zend_Controller</span> est
+        relativement simple. Une demande est reçue par
+        <span class="classname">Zend_Controller_Front</span>, qui appelle alternativement
+        <span class="classname">Zend_Controller_Router_Rewrite</span> pour déterminer le contrôleur (et
+        l&#039;action dans ce contrôleur) à distribuer.
+        <span class="classname">Zend_Controller_Router_Rewrite</span> décompose l&#039;URI afin de régler les
+        noms de contrôleur et d&#039;action dans la requête.
+        <span class="classname">Zend_Controller_Front</span> entre alors dans une boucle de distribution.
+        Il appelle <span class="classname">Zend_Controller_Dispatcher_Standard</span>, en lui passant la
+        requête, pour distribuer le contrôleur et l&#039;action indiqués dans la requête (ou utiliser
+        les valeurs par défaut). Après que le contrôleur ait fini, la commande revient à
+        <span class="classname">Zend_Controller_Front</span>. Si le contrôleur a indiqué qu&#039;un autre
+        contrôleur devait être distribué en remettant à zéro le statut distribué de la requête, la
+        boucle continue et une autre distribution est effectuée. Sinon, le processus se
+        termine.
+    </p>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.controller.quickstart.html">Zend_Controller - D&eacute;marrage rapide</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.controller.html">Zend_Controller</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.controller.front.html">Le contr&ocirc;leur frontal (Front Controller)</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.controller.html">Zend_Controller</a></li>
+  <li><a href="zend.controller.quickstart.html">Zend_Controller - D&eacute;marrage rapide</a></li>
+  <li class="active"><a href="zend.controller.basics.html">Fondations de Zend_Controller</a></li>
+  <li><a href="zend.controller.front.html">Le contr&ocirc;leur frontal (Front Controller)</a></li>
+  <li><a href="zend.controller.request.html">L'objet Requ&ecirc;te</a></li>
+  <li><a href="zend.controller.router.html">Routeur Standard</a></li>
+  <li><a href="zend.controller.dispatcher.html">Le distributeur</a></li>
+  <li><a href="zend.controller.action.html">Contr&ocirc;leurs d'action</a></li>
+  <li><a href="zend.controller.actionhelpers.html">Aides d'action (Helper)</a></li>
+  <li><a href="zend.controller.response.html">Objet de r&eacute;ponse</a></li>
+  <li><a href="zend.controller.plugins.html">Plugins</a></li>
+  <li><a href="zend.controller.modular.html">Utilisation de conventions de dossiers modulaires</a></li>
+  <li><a href="zend.controller.exceptions.html">Exceptions avec MVC</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

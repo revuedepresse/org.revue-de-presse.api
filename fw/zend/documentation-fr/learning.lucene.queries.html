@@ -1,0 +1,316 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Requ&ecirc;tes support&eacute;es - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="learning.lucene.searching.html">Recherche</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="learning.lucene.html">Getting Started with Zend_Search_Lucene</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="learning.lucene.pagination.html">Pagination de r&eacute;sultat de recherche</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="learning.lucene.queries" class="section"><div class="info"><h1 class="title">Requêtes supportées</h1></div>
+    
+
+    <p class="para">
+        <span class="classname">Zend_Search_Lucene</span> et Lucene Java supportent un langage de requête
+        puissant.
+        Il permet de rechercher des termes individuels, des phrases, des ensembles de termes ;
+        en utilisant des jokers ou des recherches floues ; en combinant des requêtes à l&#039;aide
+        d&#039;opérateurs booléens et ainsi de suite.
+    </p>
+
+    <p class="para">
+        Une description détaillée du langage de requête peut être trouvé dans la documentation du
+        composant <a href="zend.search.lucene.query-language.html" class="link">
+            Zend_Search_Lucene</a>.
+    </p>
+
+    <p class="para">
+        Ci-dessous, des exemples de quelques requêtes types communes et de stratégies.
+    </p>
+
+    <div class="example"><div class="info"><p><b>Example #1 Effectuer une requête pour un mot seul</b></p></div>
+        
+
+        <div class="programlisting text"><div class="textcode"><div class="text" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">hello</div></li></ol></div></div></div>
+
+
+        <div class="example-contents"><p>
+            Recherche le mot &quot;hello&quot; à travers les champs de tous les documents.
+        </p></div>
+    </div>
+
+    <blockquote><p><b class="note">Note</b>: <span class="info"><b>Champ de recherche par défaut</b><br /></span>
+        
+
+        
+            Note importante ! Lucene Java recherche uniquement dans les champs de &quot;contenu&quot; par
+            défaut, mais <span class="classname">Zend_Search_Lucene</span> recherche à travers
+            <em class="emphasis">tous</em> les champs. Ce comportement peut être modifié en utilisant
+            la méthode  <span class="methodname">Zend_Search_Lucene::setDefaultSearchField($fieldName)</span>.
+        <br />
+    </p></blockquote>
+
+    <div class="example"><div class="info"><p><b>Example #2 Effectuer une recherche de mots multiples</b></p></div>
+        
+
+        <div class="programlisting text"><div class="textcode"><div class="text" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">hello dolly</div></li></ol></div></div></div>
+
+
+        <div class="example-contents"><p>
+            Recherche deux mots. Les deux mots sont facultatifs, au moins l&#039;un des deux doit être
+            présent dans le résultat
+        </p></div>
+    </div>
+
+    <div class="example"><div class="info"><p><b>Example #3 Mots requis dans une requête</b></p></div>
+        
+
+        <div class="programlisting text"><div class="textcode"><div class="text" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">+hello dolly</div></li></ol></div></div></div>
+
+
+        <div class="example-contents"><p>
+            Recherche deux mots ; &quot;hello&quot; est requis, &quot;dolly&quot; est facultatif.
+        </p></div>
+    </div>
+
+    <div class="example"><div class="info"><p><b>Example #4 Interdire des mots dans les documents recherchés</b></p></div>
+        
+
+        <div class="programlisting text"><div class="textcode"><div class="text" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">+hello -dolly</div></li></ol></div></div></div>
+
+
+        <div class="example-contents"><p>
+            Recherche avec deux mots ; &quot;hello&quot; est requis, &#039;dolly&#039; est interdit. En d&#039;autres termes,
+            si le document contient &quot;hello&quot;, mais contient aussi le mot &quot;dolly&quot;, il ne sera pas
+            retourné dans l&#039;ensemble de résultats.
+        </p></div>
+    </div>
+
+    <div class="example"><div class="info"><p><b>Example #5 Rechercher des phrases</b></p></div>
+        
+
+        <div class="programlisting text"><div class="textcode"><div class="text" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&quot;hello dolly&quot;</div></li></ol></div></div></div>
+
+
+        <div class="example-contents"><p>
+            Recherche de la phrases &quot;hello dolly&quot; ; un document correspond uniquement si la chaine
+            exacte est présente.
+        </p></div>
+    </div>
+
+    <div class="example"><div class="info"><p><b>Example #6 Effectuer des recherches dans des champs en particulier</b></p></div>
+        
+
+        <div class="programlisting text"><div class="textcode"><div class="text" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">title:&quot;The Right Way&quot; AND text:go</div></li></ol></div></div></div>
+
+
+        <div class="example-contents"><p>
+            Recherche la phrase &quot;The Right Way&quot; au sein du champ <span class="property">title</span> et le mot
+            &quot;go&quot; dans la propriété <span class="property">text</span>.
+        </p></div>
+    </div>
+
+    <div class="example"><div class="info"><p><b>Example #7 Effectuer des recherches dans des champs en particulier aussi bien que dans le
+        document complet</b></p></div>
+        
+
+        <div class="programlisting text"><div class="textcode"><div class="text" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">title:&quot;The Right Way&quot; AND&nbsp; go</div></li></ol></div></div></div>
+
+
+        <div class="example-contents"><p>
+            Recherche la phrase &quot;The Right Way&quot; dans la propriété <span class="property">title</span> et le
+            mot &quot;go&quot; dans tous les champs du document.
+        </p></div>
+    </div>
+
+    <div class="example"><div class="info"><p><b>Example #8 Effectuer des recherches dans des champs en particulier aussi bien que dans le
+        document complet (Alternatif)</b></p></div>
+        
+
+        <div class="programlisting text"><div class="textcode"><div class="text" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">title:Do it right</div></li></ol></div></div></div>
+
+
+        <div class="example-contents"><p>
+            Recherche le mot &quot;Do&quot; dans la propriété <span class="property">title</span> et les mots &quot;it&quot; and
+            &quot;right&quot; dans tous les champs ; si l&#039;un d&#039;entre eux correspond, le document correspondra
+            à un résultat de recherche.
+        </p></div>
+    </div>
+
+    <div class="example"><div class="info"><p><b>Example #9 Faire des requêtes avec le joker &quot;?&quot;</b></p></div>
+        
+
+        <div class="programlisting text"><div class="textcode"><div class="text" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">te?t</div></li></ol></div></div></div>
+
+
+        <div class="example-contents"><p>
+            Recherche les mots correspondants au motif &quot;te?t&quot;, où &quot;?&quot; est n&#039;importe quel caractère
+            unique.
+        </p></div>
+    </div>
+
+    <div class="example"><div class="info"><p><b>Example #10 Faire des requêtes avec le joker  &quot;*&quot;</b></p></div>
+        
+
+        <div class="programlisting text"><div class="textcode"><div class="text" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">test*</div></li></ol></div></div></div>
+
+
+        <div class="example-contents"><p>
+            Recherche les mots correspondants au motif &quot;test*&quot;, où &quot;*&quot; est n&#039;importe quelle séquence
+            de 0 caractère ou plus.
+        </p></div>
+    </div>
+
+    <div class="example"><div class="info"><p><b>Example #11 Rechercher une gamme inclusive de termes</b></p></div>
+        
+
+        <div class="programlisting text"><div class="textcode"><div class="text" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">mod_date:[20020101 TO 20030101]</div></li></ol></div></div></div>
+
+
+        <div class="example-contents"><p>
+            Recherche la gamme de termes (inclusif).
+        </p></div>
+    </div>
+
+    <div class="example"><div class="info"><p><b>Example #12 Rechercher une gamme exclusive de termes</b></p></div>
+        
+
+        <div class="programlisting text"><div class="textcode"><div class="text" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">title:{Aida to Carmen}</div></li></ol></div></div></div>
+
+
+        <div class="example-contents"><p>
+            Recherche la gamme de termes (exculsif).
+        </p></div>
+    </div>
+
+    <div class="example"><div class="info"><p><b>Example #13 Recherches floues</b></p></div>
+        
+
+        <div class="programlisting text"><div class="textcode"><div class="text" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">roam~</div></li></ol></div></div></div>
+
+
+        <div class="example-contents"><p>
+            Recherche foue pour le mot &quot;roam&quot;.
+        </p></div>
+    </div>
+
+    <div class="example"><div class="info"><p><b>Example #14 Recherches booléennes</b></p></div>
+        
+
+        <div class="programlisting text"><div class="textcode"><div class="text" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">(framework OR library) AND php</div></li></ol></div></div></div>
+
+
+        <div class="example-contents"><p>
+            Requête booléenne.
+        </p></div>
+    </div>
+
+    <p class="para">
+        Toutes les requêtes supportées peuvent être construites via
+        l&#039;<a href="zend.search.lucene.query-api.html" class="link">API de construction de requêtes</a> de
+        <span class="classname">Zend_Search_Lucene</span>. De plus l&#039;analyse et la construction de requêtes
+        peuvent être combinées :
+    </p>
+
+    <div class="example"><div class="info"><p><b>Example #15 Combinaison d&#039;analyse et de construction de requêtes</b></p></div>
+        
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$userQuery</span> = Zend_Search_Lucene_Search_QueryParser::<span style="color: #006600;">parse</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$queryStr</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$query</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Search_Lucene_Search_Query_Boolean<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$query</span>-&gt;<span style="color: #006600;">addSubquery</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$userQuery</span>, <span style="color: #000000; font-weight: bold;">true</span>&nbsp; <span style="color: #808080; font-style: italic;">/* required */</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$query</span>-&gt;<span style="color: #006600;">addSubquery</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$constructedQuery</span>, <span style="color: #000000; font-weight: bold;">true</span>&nbsp; <span style="color: #808080; font-style: italic;">/* required */</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="learning.lucene.searching.html">Recherche</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="learning.lucene.html">Getting Started with Zend_Search_Lucene</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="learning.lucene.pagination.html">Pagination de r&eacute;sultat de recherche</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="learning.html">Learning Zend Framework</a></li>
+  <li class="header up"><a href="learning.lucene.html">Getting Started with Zend_Search_Lucene</a></li>
+  <li><a href="learning.lucene.intro.html">Introduction &agrave; Zend_Search_Lucene</a></li>
+  <li><a href="learning.lucene.index-structure.html">Structure d'index Lucene</a></li>
+  <li><a href="learning.lucene.index-opening.html">Ouverture et cr&eacute;ation d'index</a></li>
+  <li><a href="learning.lucene.indexing.html">Indexation</a></li>
+  <li><a href="learning.lucene.searching.html">Recherche</a></li>
+  <li class="active"><a href="learning.lucene.queries.html">Requ&ecirc;tes support&eacute;es</a></li>
+  <li><a href="learning.lucene.pagination.html">Pagination de r&eacute;sultat de recherche</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

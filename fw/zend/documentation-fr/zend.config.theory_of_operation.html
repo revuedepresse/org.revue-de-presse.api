@@ -1,0 +1,202 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Aspect th&eacute;orique - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.config.introduction.html">Introduction</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.config.html">Zend_Config</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.config.adapters.ini.html">Zend_Config_Ini</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.config.theory_of_operation" class="section"><div class="info"><h1 class="title">Aspect théorique</h1></div>
+    
+
+    <p class="para">
+        Les données de configuration sont transmis au constructeur de
+        <span class="classname">Zend_Config</span> sous la forme d&#039;un tableau associatif, qui peut être
+        multidimensionnel, afin de supporter une organisation des données du général vers le
+        spécifique. Les classes d&#039;adaptateur concrètes permettent de construire le tableau
+        associatif pour le constructeur de <span class="classname">Zend_Config</span> à partir du système
+        de stockage des données de configuration. Dans certaines utilisations spécifiques, les
+        scripts de l&#039;utilisateur peuvent fournir de tels tableaux directement
+        au constructeur de <span class="classname">Zend_Config</span>, sans employer une classe
+        d&#039;adaptateur.
+    </p>
+
+    <p class="para">
+        Chaque valeur du tableau de données de configuration devient une propriété de l&#039;objet
+        <span class="classname">Zend_Config</span>. La clé est utilisée comme nom de propriété. Si une
+        valeur est un tableau, alors la propriété d&#039;objet résultante est créée comme un nouveau
+        objet <span class="classname">Zend_Config</span>, chargé avec les données du tableau. Cela se
+        déroule récursivement, tel qu&#039;une hiérarchie de données de configuration peut être créée
+        avec n&#039;importe quel nombre de niveaux.
+    </p>
+
+    <p class="para">
+        <span class="classname">Zend_Config</span> implémente les interfaces <em class="emphasis">Countable</em>
+        et <em class="emphasis">Iterator</em> afin de faciliter l&#039;accès simple aux données de
+        configuration. Ainsi, on peut employer la fonction
+        <a href="http://fr.php.net/count" class="link external">&raquo;  <span class="methodname">count()</span></a>
+        et des constructions de <acronym class="acronym">PHP</acronym> telles que
+        <a href="http://fr.php.net/foreach" class="link external">&raquo; <em class="emphasis">foreach</em></a> sur des objets
+        <span class="classname">Zend_Config</span>.
+    </p>
+
+    <p class="para">
+        Par défaut, les données de configuration fournies par <span class="classname">Zend_Config</span> ne
+        sont pas modifiables (lecture seule), et une affectation (par exemple,
+        <strong class="command">$config-&gt;database-&gt;host = &#039;example.com&#039;;</strong>) lèvera une exception. Ce
+        comportement par défaut peut cependant être surchargé par le constructeur pour permettre la
+        modification des valeurs de données. De plus, quand les modifications sont autorisées,
+        <span class="classname">Zend_Config</span> supporte l&#039;effacement de valeurs (c&#039;est-à-dire
+         <span class="methodname">unset($config-&gt;database-&gt;host)</span>). La méthode
+         <span class="methodname">readOnly()</span> peut être utilisée pour déterminer si les modifications
+        sont autorisés pour un objet <span class="classname">Zend_Config</span> donné et la méthode
+         <span class="methodname">setReadOnly()</span> peut être
+        utilisée pour empêcher toute nouvelle modification d&#039;un objet
+        <span class="classname">Zend_Config</span> qui aurait été créé en autorisant le modifications.
+    </p>
+
+    <blockquote><p><b class="note">Note</b>: 
+        
+            Il est important de ne pas confondre des modifications en cours de script avec
+            l&#039;enregistrement des données de configuration dans le support de stockage
+            spécifique. Les outils pour créer et modifier des données de configuration pour
+            différents supports de stockage ne concernent pas
+            <span class="classname">Zend_Config</span>. Des solutions tiers open-source sont facilement
+            disponibles afin de créer et / ou de modifier les données de configuration
+            pour différents supports de stockage.
+        <br />
+    </p></blockquote>
+
+    <p class="para">
+        Les classes d&#039;adaptateur héritent de la classe de <span class="classname">Zend_Config</span> ce qui
+        permet d&#039;utiliser ses fonctionnalités.
+    </p>
+
+    <p class="para">
+        La famille des classes <span class="classname">Zend_Config</span> permet d&#039;organiser les données de
+        configuration en sections. Les classes d&#039;adaptateur <span class="classname">Zend_Config</span>
+        peuvent être chargées en spécifiant une section unique, des sections multiples, ou toutes
+        les sections (si aucune n&#039;est indiquée).
+    </p>
+
+    <p class="para">
+        Les classes d&#039;adaptateurs <span class="classname">Zend_Config</span> supporte un modèle d&#039;héritage
+        simple qui permet à des données de configuration d&#039;être héritées d&#039;une section de données
+        de configuration dans d&#039;autres. Ceci afin de réduire ou d&#039;éliminer le besoin de reproduire
+        des données de configuration pour différents cas. Une section héritante peut également
+        surchargée les valeurs dont elle hérite de sa section parente. Comme l&#039;héritage des classes
+        <acronym class="acronym">PHP</acronym>, une section peut hériter d&#039;une section parent, qui peut hériter
+        d&#039;une section grand-parent, et ainsi de suite, mais l&#039;héritage multiple (c.-à-d., la
+        section C héritant directement des sections parents A et B) n&#039;est pas supporté.
+    </p>
+
+    <p class="para">
+        Si vous avez deux objets <span class="classname">Zend_Config</span>, vous pouvez les fusionner en
+        un objet unique en utilisant la fonction  <span class="methodname">merge()</span>. Par exemple,
+        prenons <var class="varname">$config</var> et <var class="varname">$localConfig</var>, vous pouvez fusionner
+        <var class="varname">$localConfig</var> dans <var class="varname">$config</var> en utilisant
+        <strong class="command">$config-&gt;merge($localConfig);</strong>. Les éléments de
+        <var class="varname">$localConfig</var> surchargeront les éléments nommés de la même manière dans
+        <var class="varname">$config</var>.
+    </p>
+
+    <blockquote><p><b class="note">Note</b>: 
+        
+            L&#039;objet <span class="classname">Zend_Config</span> qui réalise la fusion doit avoir été
+            construit en autorisant les modifications, en fournissant <b><tt>TRUE</tt></b>
+            en tant que second paramètre du constructeur. La méthode
+             <span class="methodname">setReadOnly()</span> peut être utilisée pour empêcher toute nouvelle
+            modification après la fin de la fusion.
+        <br />
+    </p></blockquote>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.config.introduction.html">Introduction</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.config.html">Zend_Config</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.config.adapters.ini.html">Zend_Config_Ini</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.config.html">Zend_Config</a></li>
+  <li><a href="zend.config.introduction.html">Introduction</a></li>
+  <li class="active"><a href="zend.config.theory_of_operation.html">Aspect th&eacute;orique</a></li>
+  <li><a href="zend.config.adapters.ini.html">Zend_Config_Ini</a></li>
+  <li><a href="zend.config.adapters.xml.html">Zend_Config_Xml</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

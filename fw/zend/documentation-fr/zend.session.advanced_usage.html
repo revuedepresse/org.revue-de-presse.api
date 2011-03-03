@@ -1,0 +1,607 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Utilisation avanc&eacute;e - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.session.basic_usage.html">Usage basique</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.session.html">Zend_Session</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.session.global_session_management.html">Gestion g&eacute;n&eacute;rale de la session</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.session.advanced_usage" class="section"><div class="info"><h1 class="title">Utilisation avancée</h1></div>
+    
+
+    <p class="para">
+        Même si les exemples de l&#039;utilisation basique sont une manière parfaitement acceptable
+        d&#039;utiliser les sessions dans Zend Framework, il existe de bonnes pratiques à considérer.
+        Cette section détaille plus finement le traitement des sessions et présente des utilisations
+        plus avancées du composant <span class="classname">Zend_Session</span>.
+    </p>
+
+    <div class="section" id="zend.session.advanced_usage.starting_a_session" name="zend.session.advanced_usage.starting_a_session"><div class="info"><h1 class="title">Démarrer une session</h1></div>
+        
+
+        <p class="para">
+            Si vous voulez que toutes les requêtes aient une session facilitée avec
+            <span class="classname">Zend_Session</span>, alors démarrez la session dans votre fichier
+            d&#039;amorçage :
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #1 Démarrer la session globale</b></p></div>
+            
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">Zend_Session::<span style="color: #006600;">start</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+        </div>
+
+        <p class="para">
+            En démarrant la session dans votre fichier d&#039;amorçage, vous empêcher la
+            possibilité de démarrer votre session après l&#039;envoi d&#039;en-têtes à votre navigateur, ce
+            qui entraîne la levée d&#039;une exception, et peut être une page cassée pour les visiteurs
+            de votre site. Divers usages avancés nécessitent premièrement
+             <span class="methodname">Zend_Session::start()</span>. (D&#039;autant plus sur les utilisations
+            avancées suivantes.)
+        </p>
+
+        <p class="para">
+            Il existe quatre manières différentes pour démarrer une session, quand on utilise
+            <span class="classname">Zend_Session</span>. Deux sont mauvaises.
+        </p>
+
+        <ol type="1">
+            <li class="listitem">
+                <p class="para">
+                    Mauvaise : n&#039;activez pas <a href="http://www.php.net/manual/fr/ref.session.php#ini.session.auto-start" class="link external">&raquo; <code class="code">session.auto_start</code></a>
+                    de PHP. Si vous n&#039;avez pas la possibilité de désactiver ce réglage dans le
+                    php.ini, ou que vous utilisez mod_php (ou équivalent), et que le réglage est
+                    déjà activé dans le <code class="code">php.ini</code>, alors ajoutez le code suivant à votre
+                    fichier <code class="code">.htaccess</code> (habituellement votre dossier de démarrage HTML)
+                    : <div class="programlisting httpd.conf"><div class="httpd.confcode"><div style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">php_value session.auto_start 0</div></li></ol></div></div></div>
+</p>
+                </li>
+
+                <li class="listitem">
+                <p class="para">
+                    Mauvaise : n&#039;utilisez pas la fonction <a href="http://www.php.net/session_start" class="link external">&raquo;  <span class="methodname">session_start()</span></a>
+                    directement. Si vous utilisez directement  <span class="methodname">session_start()</span>, et que
+                    vous démarrez en utilisant <span class="classname">Zend_Session_Namespace</span>, une
+                    exception sera levée par  <span class="methodname">Zend_Session::start()</span> (&quot;session
+                    has already been started&quot;). Si vous appelez  <span class="methodname">session_start()</span>, après
+                    avoir utilisé <span class="classname">Zend_Session_Namespace</span> ou démarré
+                    explicitement  <span class="methodname">Zend_Session::start()</span>, une erreur de niveau
+                    <b><tt>E_NOTICE</tt></b> sera générée, et l&#039;appel sera ignoré.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    Correcte : utilisez  <span class="methodname">Zend_Session::start()</span>. Si vous
+                    voulez que toutes vos requêtes aient et utilisent les sessions, alors placez
+                    cette fonction le plus tôt possible et sans condition dans votre fichier
+                    d&#039;amorçage. Les sessions ont un coût. Si certaines requêtes nécessitent les
+                    sessions, mais que les autres n&#039;en ont pas besoin, alors :
+                </p>
+
+                <ul class="itemizedlist">
+                    <li class="listitem">
+                        <p class="para">
+                            Sans conditions, réglez l&#039;option <code class="code">strict</code> à
+                            <b><tt>TRUE</tt></b> en utilisant
+                             <span class="methodname">Zend_Session::setOptions()</span> dans votre fichier
+                            d&#039;amorçage.
+                        </p>
+                    </li>
+
+                    <li class="listitem">
+                        <p class="para">
+                            Appelez  <span class="methodname">Zend_Session::start()</span>, uniquement
+                            pour les requêtes qui nécessitent l&#039;usage des sessions, avant la
+                            première instanciation d&#039;un objet
+                             <span class="methodname">Zend_Session_Namespace()</span>.
+                        </p>
+                    </li>
+
+                    <li class="listitem">
+                        <p class="para">
+                            Utilisez &quot;<code class="code">new Zend_Session_Namespace()</code>&quot; normalement,
+                            quand nécessaire, mais faites attention que
+                             <span class="methodname">Zend_Session::start()</span> soit appelée
+                            auparavant.
+                        </p>
+                    </li>
+                </ul>
+
+                <p class="para">
+                    L&#039;option <code class="code">strict</code> empêche <code class="code">new
+                    Zend_Session_Namespace()</code> d&#039;automatiquement démarrer une session en
+                    utilisant  <span class="methodname">Zend_Session::start()</span>. Ainsi, cette option aide
+                    les développeurs d&#039;application Zend Framework universelles à imposer une
+                    décision de conception afin d&#039;empêcher l&#039;utilisation de sessions pour certaines
+                    requêtes, puisqu&#039;une erreur sera levée en utilisant cette option et en
+                    instanciant <span class="classname">Zend_Session_Namespace</span>, avant un appel
+                    explicite de  <span class="methodname">Zend_Session::start()</span>. N&#039;employez pas cette
+                    option dans le code de la librairie coeur du ZF, car seuls les développeurs
+                    universels peuvent faire ce choix de design. Les développeurs doivent considérer
+                    avec précaution l&#039;impact de l&#039;utilisation de
+                     <span class="methodname">Zend_Session::setOptions()</span>, puisque ces options ont un
+                    effet global, suite à leur correspondance avec les options sous-jacentes pour
+                    ext/session.
+                </p>
+            </li>
+
+            <li class="listitem">
+                <p class="para">
+                    Correcte : instanciez simplement
+                     <span class="methodname">Zend_Session_Namespace()</span> quand nécessaire, la session <acronym class="acronym">PHP</acronym>
+                    sous-jacente sera automatiquement démarrée. Ceci permet un usage extrêmement
+                    simple qui fonctionne dans la plupart des cas. Cependant, vous êtes responsable
+                    de vous assurer que le premier <code class="code">new Zend_Session_Namespace()</code>
+                    intervient <em class="emphasis">avant</em> que toute sortie (par exemple <a href="http://www.php.net/headers_sent" class="link external">&raquo; en-têtes <acronym class="acronym">HTTP</acronym></a>) ait été envoyée par
+                    <acronym class="acronym">PHP</acronym> au client, si vous utilisez le réglage par défaut, sessions basées sur les
+                    cookies (fortement recommandé). Voir <a href="zend.session.global_session_management.html#zend.session.global_session_management.headers_sent" class="xref">L'erreur: &quot;Headers Already Sent&quot;</a> pour plus
+                    d&#039;informations.
+                </p>
+            </li>
+        </ol>
+    </div>
+
+    <div class="section" id="zend.session.advanced_usage.locking" name="zend.session.advanced_usage.locking"><div class="info"><h1 class="title">Verrouiller les espaces de noms de session</h1></div>
+        
+
+        <p class="para">
+            Les espaces de noms de session peuvent être verrouillés, pour éviter tout risque
+            d&#039;altération des données dans cet espace. Utilisez  <span class="methodname">lock()</span> pour attribuer à
+            un espace de nommage spécifique le mode lecture seule, <span class="methodname">unLock()</span> pour
+            attribuer le mode lecture / écriture, et  <span class="methodname">isLocked()</span> pour tester si un
+            espace de nommage a été auparavant verrouillé. Les verrouillages sont transitoires et ne
+            persistent pas d&#039;une requête à l&#039;autre. Verrouiller un espace de nommage n&#039;a pas d&#039;effet
+            sur les méthodes de réglages des objets stockés dans cet espace, mais empêche
+            l&#039;utilisation des méthodes de réglage de l&#039;espace de noms destiné à détruire ou à
+            remplacer les objets stockés dans l&#039;espace. De la même manière, verrouiller les
+            instances <span class="classname">Zend_Session_Namespace</span> n&#039;empêche pas l&#039;accès direct à
+            l&#039;alias dans tableau de stockage <var class="varname">$_SESSION</var> (voir <a href="http://www.php.net/references" class="link external">&raquo; PHP references</a>).
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #2 Verrouillage des espaces de noms de session</b></p></div>
+            
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$userProfileNamespace</span> =</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #000000; font-weight: bold;">new</span> Zend_Session_Namespace<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'userProfileNamespace'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// vérrouillons une session en lecture seule</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$userProfileNamespace</span>-&gt;<span style="color: #006600;">lock</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// dévérrouillage si déjà vérrouillé</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #b1b100;">if</span> <span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$userProfileNamespace</span>-&gt;<span style="color: #006600;">isLocked</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #0000ff;">$userProfileNamespace</span>-&gt;<span style="color: #006600;">unLock</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+
+        </div>
+    </div>
+
+    <div class="section" id="zend.session.advanced_usage.expiration" name="zend.session.advanced_usage.expiration"><div class="info"><h1 class="title">Expiration d&#039;un espace de noms</h1></div>
+        
+
+        <p class="para">
+            Des limites peuvent être affectées à la durée de vie soit des espaces de noms soit
+            de clés individuelles dans cet espace. Les cas d&#039;utilisation habituels incluent le
+            passage d&#039;une information temporaire entre requêtes, et la diminution de l&#039;exposition à
+            un potentiel risque de sécurité par la suppression de l&#039;accès à des informations
+            sensibles potentielles à une certaine heure après que l&#039;authentification ait eu lieu.
+            L&#039;expiration peut être basée sur les secondes écoulées, ou basées sur le concept de
+            &quot;hops&quot;, où un &quot;hop&quot; apparaît à chaque requête successive.
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #3 Exemple d&#039;expiration</b></p></div>
+            
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$s</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Session_Namespace<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'expireAll'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$s</span>-&gt;<span style="color: #006600;">a</span> = <span style="color: #ff0000;">'apple'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$s</span>-&gt;<span style="color: #006600;">p</span> = <span style="color: #ff0000;">'pear'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$s</span>-&gt;<span style="color: #006600;">o</span> = <span style="color: #ff0000;">'orange'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$s</span>-&gt;<span style="color: #006600;">setExpirationSeconds</span><span style="color: #66cc66;">&#40;</span><span style="color: #cc66cc;">5</span>, <span style="color: #ff0000;">'a'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// expire seulement pour la clé &quot;a&quot; dans 5 secondes</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// expiration de tout l'espace de nommage dans 5 &quot;hops&quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$s</span>-&gt;<span style="color: #006600;">setExpirationHops</span><span style="color: #66cc66;">&#40;</span><span style="color: #cc66cc;">5</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$s</span>-&gt;<span style="color: #006600;">setExpirationSeconds</span><span style="color: #66cc66;">&#40;</span><span style="color: #cc66cc;">60</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// L'espace de noms &quot;expireAll&quot; sera marqué &quot;expired&quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// soit à la première requête reçue après 60 secondes,</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// soit dans 5 hops, en fonction de ce qui arrivera en premier.</span></div></li></ol></div></div></div>
+
+        </div>
+
+        <p class="para">
+            Quand vous travaillez avec des données de session expirées dans la requête
+            courante, des précautions doivent être prises concernant leur utilisation. Bien que les
+            données soient retournées par référence, modifier les données expirées ne les rendra pas
+            persistantes dans la requête courante. Dans le but de remettre à zéro leur temps
+            d&#039;expiration, transférez les données dans des variables temporaires, utilisez l&#039;espace
+            de nommage pour les effacer, et ensuite réaffectez les clés appropriées de
+            nouveau.
+        </p>
+    </div>
+
+    <div class="section" id="zend.session.advanced_usage.controllers" name="zend.session.advanced_usage.controllers"><div class="info"><h1 class="title">Encapsulation de session et Contrôleurs</h1></div>
+        
+
+        <p class="para">
+            Les espaces de noms peuvent aussi être utilisés pour séparer l&#039;accès aux sessions
+            par contrôleur afin de protéger les variables d&#039;une quelconque contamination. Par
+            exemple, un contrôleur d&#039;authentification pourrait garder ces données de session
+            séparées de tous les autres contrôleurs pour des raisons de sécurité.
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #4 Sessions nommées par contrôleur avec expiration automatique</b></p></div>
+            
+
+            <div class="example-contents"><p>
+                Le code suivant, partie d&#039;un contrôleur destiné à afficher une question dans
+                un test, initie une variable booléenne pour représenter l&#039;acceptation ou non d&#039;une
+                réponse à la question soumise. Dans ce cas, l&#039;utilisateur de l&#039;application a 300
+                secondes pour répondre à la question affichée.
+            </p></div>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$testSpace</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Session_Namespace<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'testSpace'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$testSpace</span>-&gt;<span style="color: #006600;">setExpirationSeconds</span><span style="color: #66cc66;">&#40;</span><span style="color: #cc66cc;">300</span>, <span style="color: #ff0000;">'accept_answer'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// expire seulement cette variable</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$testSpace</span>-&gt;<span style="color: #006600;">accept_answer</span> = <span style="color: #000000; font-weight: bold;">true</span>;</div></li></ol></div></div></div>
+
+
+            <div class="example-contents"><p>
+                Ci-dessous, le contrôleur qui analyse les réponses aux questions du test
+                détermine l&#039;acceptation ou non d&#039;une réponse en se basant sur le fait que
+                l&#039;utilisateur a répondu dans le temps alloué :
+            </p></div>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// contrôleur analysant la réponse</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$testSpace</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Session_Namespace<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'testSpace'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #b1b100;">if</span> <span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$testSpace</span>-&gt;<span style="color: #006600;">accept_answer</span> === <span style="color: #000000; font-weight: bold;">true</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// dans le temps autorisé</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #b1b100;">else</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// pas dans le temps autorisé</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+
+        </div>
+    </div>
+
+    <div class="section" id="zend.session.advanced_usage.single_instance" name="zend.session.advanced_usage.single_instance"><div class="info"><h1 class="title">Limiter les instances multiples par espace de noms</h1></div>
+        
+
+        <p class="para">
+            Bien que <a href="zend.session.advanced_usage.html#zend.session.advanced_usage.locking" class="link">le verrouillage de
+            session</a> fournisse un bon degré de protection contre l&#039;utilisation inattendue des
+            données dans un espace de noms, <span class="classname">Zend_Session_Namespace</span> offre
+            aussi la possibilité d&#039;empêcher la création d&#039;instances multiples correspondant à un
+            unique espace de noms.
+        </p>
+
+        <p class="para">
+            Pour activer ce comportement, réglez à <b><tt>TRUE</tt></b> le second argument du
+            constructeur quand vous créez la dernière instance autorisée de
+            <span class="classname">Zend_Session_Namespace</span>. Tout tentative suivante d&#039;instanciation
+            du même espace de noms entraînera la levée d&#039;une exception.
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #5 Limiter l&#039;accès à un espace de noms à une instance unique</b></p></div>
+            
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// créer une instance d'espace</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$authSpaceAccessor1</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Session_Namespace<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'Zend_Auth'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// créer une autre instance du même espace,</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// mais désactiver toute nouvelle instance</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$authSpaceAccessor2</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Session_Namespace<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'Zend_Auth'</span>, <span style="color: #000000; font-weight: bold;">true</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// créer une référence est toujours possible</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$authSpaceAccessor3</span> = <span style="color: #0000ff;">$authSpaceAccessor2</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$authSpaceAccessor1</span>-&gt;<span style="color: #006600;">foo</span> = <span style="color: #ff0000;">'bar'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/assert"><span style="color: #000066;">assert</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$authSpaceAccessor2</span>-&gt;<span style="color: #006600;">foo</span>, <span style="color: #ff0000;">'bar'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">try <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #0000ff;">$aNamespaceObject</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Session_Namespace<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'Zend_Auth'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span> catch <span style="color: #66cc66;">&#40;</span>Zend_Session_Exception <span style="color: #0000ff;">$e</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #ff0000;">&quot;Cannot instantiate this namespace &quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp;. <span style="color: #ff0000;">&quot;since $authSpaceAccessor2 was created<span style="color: #000099; font-weight: bold;">\n</span>&quot;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+
+        </div>
+
+        <p class="para">
+            Le second paramètre dans le constructeur ci-dessus informe
+            <span class="classname">Zend_Session_Namespace</span> que toute future instance avec l&#039;espace de
+            noms &quot;Zend_Auth&quot; sera refusée. Tenter de créer une instance entraînera la levée d&#039;une
+            exception par le constructeur. Le développeur devient responsable de stocker quelque
+            part une référence à l&#039;instance de l&#039;objet (<var class="varname">$authSpaceAccessor1</var>,
+            <var class="varname">$authSpaceAccessor2</var>, ou <var class="varname">$authSpaceAccessor3</var> dans l&#039;exemple
+            ci-dessus), si l&#039;accès à l&#039;espace de noms de session est nécessaire plus tard dans la
+            même requête. Par exemple, le développeur peut stocker la référence dans une variable
+            statique , ajouter la référence au <a href="http://www.martinfowler.com/eaaCatalog/registry.html" class="link external">&raquo; registre</a> (voir <a href="zend.registry.html" class="xref">Zend_Registry</a>), ou sinon la rendre disponible pour les autres méthodes qui
+            peuvent avoir accès à cet espace de noms.
+        </p>
+    </div>
+
+    <div class="section" id="zend.session.advanced_usage.arrays" name="zend.session.advanced_usage.arrays"><div class="info"><h1 class="title">Travailler avec les tableaux</h1></div>
+        
+
+        <p class="para">
+            A cause de l&#039;histoire de l&#039;implémentation des méthodes magiques dans <acronym class="acronym">PHP</acronym>, la
+            modification d&#039;un tableau à l&#039;intérieur d&#039;un espace de noms peut ne pas fonctionner avec
+            les versions de <acronym class="acronym">PHP</acronym> inférieures à 5.2.1. Si vous travaillez exclusivement avec des
+            versions de <acronym class="acronym">PHP</acronym> 5.2.1 ou supérieur., alors vous pouvez passer la <a href="zend.session.advanced_usage.html#zend.session.advanced_usage.objects" class="link">section suivante</a>.
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #6 Modifier un tableau de données avec un espace de noms de session</b></p></div>
+            
+
+            <div class="example-contents"><p>Le code suivant illustre le problème qui peut être reproduit :</p></div>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$sessionNamespace</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Session_Namespace<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$sessionNamespace</span>-&gt;<span style="color: #006600;">array</span> = <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$sessionNamespace</span>-&gt;<span style="color: #006600;">array</span><span style="color: #66cc66;">&#91;</span><span style="color: #ff0000;">'testKey'</span><span style="color: #66cc66;">&#93;</span> = <span style="color: #cc66cc;">1</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// ne fonctionne pas comme attendu avant PHP 5.2.1</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$sessionNamespace</span>-&gt;<span style="color: #006600;">array</span><span style="color: #66cc66;">&#91;</span><span style="color: #ff0000;">'testKey'</span><span style="color: #66cc66;">&#93;</span>;</div></li></ol></div></div></div>
+
+        </div>
+
+        <div class="example"><div class="info"><p><b>Example #7 Construire les tableaux avant le stockage en session</b></p></div>
+            
+
+            <div class="example-contents"><p>
+                Si possible, évitez le problème en stockant les tableaux dans un espace de
+                noms de session seulement après que toutes les clés et les valeurs aient été
+                définies :
+            </p></div>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$sessionNamespace</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Session_Namespace<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'Foo'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$sessionNamespace</span>-&gt;<span style="color: #006600;">array</span> = <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'a'</span>, <span style="color: #ff0000;">'b'</span>, <span style="color: #ff0000;">'c'</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+        </div>
+
+        <p class="para">
+            Si vous utilisez une version de <acronym class="acronym">PHP</acronym> affectée et avez besoin de modifier un tableau
+            après l&#039;avoir assigné à une clé dans l&#039;espace de noms, vous pouvez utiliser l&#039;une des
+            solutions suivantes :
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #8 Solution : réassigner un tableau modifié</b></p></div>
+            
+
+            <div class="example-contents"><p>
+                Dans le code suivant, une copie du tableau stocké est créée, modifiée, et
+                réassignée à la place d&#039;où provenait la copie, en effaçant le tableau
+                original.
+            </p></div>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$sessionNamespace</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Session_Namespace<span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// assigne le tableau initial</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$sessionNamespace</span>-&gt;<span style="color: #006600;">array</span> = <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'fruit'</span> =&gt; <span style="color: #ff0000;">'pomme'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// copie du tableau</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$tmp</span> = <span style="color: #0000ff;">$sessionNamespace</span>-&gt;<span style="color: #006600;">array</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// modification de la copie</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$tmp</span><span style="color: #66cc66;">&#91;</span><span style="color: #ff0000;">'fruit'</span><span style="color: #66cc66;">&#93;</span> = <span style="color: #ff0000;">'poire'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// ré-assignation de la copie dans l'espace de noms</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$sessionNamespace</span>-&gt;<span style="color: #006600;">array</span> = <span style="color: #0000ff;">$tmp</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$sessionNamespace</span>-&gt;<span style="color: #006600;">array</span><span style="color: #66cc66;">&#91;</span><span style="color: #ff0000;">'fruit'</span><span style="color: #66cc66;">&#93;</span>; <span style="color: #808080; font-style: italic;">// affiche &quot;poire&quot;</span></div></li></ol></div></div></div>
+
+        </div>
+
+        <div class="example"><div class="info"><p><b>Example #9 Solution : stocker un tableau contenant une référence</b></p></div>
+            
+
+            <div class="example-contents"><p>
+                Autrement, stockez un tableau contenant une référence au tableau désiré, et y
+                accéder indirectement.
+            </p></div>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$myNamespace</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Session_Namespace<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'myNamespace'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$a</span> = <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #cc66cc;">1</span>, <span style="color: #cc66cc;">2</span>, <span style="color: #cc66cc;">3</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$myNamespace</span>-&gt;<span style="color: #006600;">someArray</span> = <a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span> &amp;<span style="color: #0000ff;">$a</span> <span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$a</span><span style="color: #66cc66;">&#91;</span><span style="color: #ff0000;">'foo'</span><span style="color: #66cc66;">&#93;</span> = <span style="color: #ff0000;">'bar'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$myNamespace</span>-&gt;<span style="color: #006600;">someArray</span><span style="color: #66cc66;">&#91;</span><span style="color: #ff0000;">'foo'</span><span style="color: #66cc66;">&#93;</span>; <span style="color: #808080; font-style: italic;">// affiche &quot;bar&quot;</span></div></li></ol></div></div></div>
+
+        </div>
+    </div>
+
+    <div class="section" id="zend.session.advanced_usage.objects" name="zend.session.advanced_usage.objects"><div class="info"><h1 class="title">Utiliser les sessions avec des objets</h1></div>
+        
+
+        <p class="para">
+            Si vous prévoyez de rendre persistant des objets dans les sessions <acronym class="acronym">PHP</acronym>, pensez
+            qu&#039;ils peuvent être <a href="http://www.php.net/manual/fr/language.oop.serialization.php" class="link external">&raquo; sérialisé</a> pour
+            le stockage. Ainsi, tout objet persistant dans les sessions <acronym class="acronym">PHP</acronym> doit être désérialisé
+            après sa récupération à partir du stockage. L&#039;implication est que le développeur doit
+            s&#039;assurer que les classes des objets persistants doivent avoir été définies avant que
+            l&#039;objet ne soit désérialisé du stockage. Si aucune classe n&#039;est définie pour l&#039;objet
+            désérialisé, alors il devient une instance de <code class="code">stdClass</code>.
+        </p>
+    </div>
+
+    <div class="section" id="zend.session.advanced_usage.testing" name="zend.session.advanced_usage.testing"><div class="info"><h1 class="title">Utiliser les sessions avec les tests unitaires</h1></div>
+        
+
+        <p class="para">
+            Zend Framework s&#039;appuie sur PHPUnit pour faciliter ses propres tests. Beaucoup de
+            développeurs étendent la suite des tests unitaires pour couvrir le code de leurs
+            applications. L&#039;exception &quot;<em class="emphasis">Zend_Session is currently marked as
+            read-only</em>&quot; (NDT. : &quot;Zend_Session est actuellement marquée en lecture seule&quot;)
+            est levée lors de l&#039;exécution des tests unitaires, si une méthode d&#039;écriture est
+            utilisée après la clôture de la session. Cependant les tests unitaires employant
+            <span class="classname">Zend_Session</span> requièrent une attention particulière, car la
+            fermeture ( <span class="methodname">Zend_Session::writeClose()</span>), ou la destruction d&#039;une
+            session ( <span class="methodname">Zend_Session::destroy()</span>) empêche tout futur changement
+            ou suppression de clés dans un <span class="classname">Zend_Session_Namespace</span>. Ce
+            comportement est un résultat direct du mécanisme fondamental de l&#039;extension session et
+            des fonctions <acronym class="acronym">PHP</acronym>  <span class="methodname">session_destroy()</span> et  <span class="methodname">session_write_close()</span>,
+            qui n&#039;a pas de mécanisme de marche arrière (&quot;undo&quot;) pour faciliter le réglage/démontage
+            avec les tests unitaires.
+        </p>
+
+        <p class="para">
+            Pour contourner ceci, regardez le test unitaire
+             <span class="methodname">testSetExpirationSeconds()</span> dans
+            <code class="code">tests/Zend/Session/SessionTest.php</code> et <code class="code">SessionTestHelper.php</code>,
+            qui utilise le code <acronym class="acronym">PHP</acronym>  <span class="methodname">exec()</span> pour charger un processus séparé. Le nouveau
+            processus simule plus précisément une seconde requête successive du navigateur. Le
+            processus séparé démarre avec une session &quot;propre&quot;, comme n&#039;importe quelle exécution de
+            <acronym class="acronym">PHP</acronym> pour une requête Web. Ainsi, tout changement fait à <var class="varname">$_SESSION</var> dans le
+            processus appelant devient disponible dans le processus enfant, pourvu que le parent ait
+            fermé la session avant d&#039;utiliser  <span class="methodname">exec()</span>.
+        </p>
+
+        <div class="example"><div class="info"><p><b>Example #10 Utilisation de PHPUnit pour tester le code écrit avec Zend_Session*</b></p></div>
+            
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// tester setExpirationSeconds()</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #b1b100;">require</span> <span style="color: #ff0000;">'tests/Zend/Session/SessionTestHelper.php'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// voir aussi SessionTest.php dans trunk/</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$script</span> = <span style="color: #ff0000;">'SessionTestHelper.php'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$s</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Session_Namespace<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'espace'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$s</span>-&gt;<span style="color: #006600;">a</span> = <span style="color: #ff0000;">'abricot'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$s</span>-&gt;<span style="color: #006600;">o</span> = <span style="color: #ff0000;">'orange'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$s</span>-&gt;<span style="color: #006600;">setExpirationSeconds</span><span style="color: #66cc66;">&#40;</span><span style="color: #cc66cc;">5</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">Zend_Session::<span style="color: #006600;">regenerateId</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$id</span> = Zend_Session::<span style="color: #006600;">getId</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/session_write_close"><span style="color: #000066;">session_write_close</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// relâche la session donc le processus suivant peut l'utiliser</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/sleep"><span style="color: #000066;">sleep</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #cc66cc;">4</span><span style="color: #66cc66;">&#41;</span>; <span style="color: #808080; font-style: italic;">// pas assez long pour les éléments expirent</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/exec"><span style="color: #000066;">exec</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$script</span> . <span style="color: #ff0000;">&quot;expireAll $id expireAll&quot;</span>, <span style="color: #0000ff;">$result</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$result</span> = <span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">sortResult</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$result</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$expect</span> = <span style="color: #ff0000;">';a === abricot;o === orange;p === pear'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">assertTrue</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$result</span> === <span style="color: #0000ff;">$expect</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">&quot;iteration over default Zend_Session namespace failed; &quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; . <span style="color: #ff0000;">&quot;expecting result === '$expect', but got '$result'&quot;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/sleep"><span style="color: #000066;">sleep</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #cc66cc;">2</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// assez long pour que les éléments expirent</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// (total de 6 secondes écoulées, avec une expiration de 5)</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/exec"><span style="color: #000066;">exec</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$script</span> . <span style="color: #ff0000;">&quot;expireAll $id expireAll&quot;</span>, <span style="color: #0000ff;">$result</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$result</span> = <a href="http://www.php.net/array_pop"><span style="color: #000066;">array_pop</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$result</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">assertTrue</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$result</span> === <span style="color: #ff0000;">''</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">&quot;iteration over default Zend_Session namespace failed; &quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; . <span style="color: #ff0000;">&quot;expecting result === '', but got '$result')&quot;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/session_start"><span style="color: #000066;">session_start</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>; <span style="color: #808080; font-style: italic;">// redémarre artificiellement une session suspendue</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Ceci peut être découpé dans un test séparé, mais en réalité,</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// si quoi que ce soit reste de la partie précédente et contamine</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// les tests suivants, alors c'est un bug dont nous voulons avoir</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// des informations</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$s</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Session_Namespace<span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'expireGuava'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$s</span>-&gt;<span style="color: #006600;">setExpirationSeconds</span><span style="color: #66cc66;">&#40;</span><span style="color: #cc66cc;">5</span>, <span style="color: #ff0000;">'g'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// maintenant essayons d'expirer seulement une clé dans l'espace</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$s</span>-&gt;<span style="color: #006600;">g</span> = <span style="color: #ff0000;">'guava'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$s</span>-&gt;<span style="color: #006600;">p</span> = <span style="color: #ff0000;">'peach'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$s</span>-&gt;<span style="color: #006600;">p</span> = <span style="color: #ff0000;">'plum'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/session_write_close"><span style="color: #000066;">session_write_close</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// relâche la session donc le processus suivant peut l'utiliser</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/sleep"><span style="color: #000066;">sleep</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #cc66cc;">6</span><span style="color: #66cc66;">&#41;</span>; <span style="color: #808080; font-style: italic;">// pas assez long pour les éléments expirent</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/exec"><span style="color: #000066;">exec</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$script</span> . <span style="color: #ff0000;">&quot;expireAll $id expireGuava&quot;</span>, <span style="color: #0000ff;">$result</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$result</span> = <span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">sortResult</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$result</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/session_start"><span style="color: #000066;">session_start</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>; <span style="color: #808080; font-style: italic;">// redémarre artificiellement la session suspendue</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$this</span>-&gt;<span style="color: #006600;">assertTrue</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$result</span> === <span style="color: #ff0000;">';p === plum'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">&quot;iteration over named Zend_Session namespace failed (result=$result)&quot;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+        </div>
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.session.basic_usage.html">Usage basique</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.session.html">Zend_Session</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.session.global_session_management.html">Gestion g&eacute;n&eacute;rale de la session</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.session.html">Zend_Session</a></li>
+  <li><a href="zend.session.introduction.html">Introduction</a></li>
+  <li><a href="zend.session.basic_usage.html">Usage basique</a></li>
+  <li class="active"><a href="zend.session.advanced_usage.html">Utilisation avanc&eacute;e</a></li>
+  <li><a href="zend.session.global_session_management.html">Gestion g&eacute;n&eacute;rale de la session</a></li>
+  <li><a href="zend.session.savehandler.dbtable.html">Zend_Session_SaveHandler_DbTable</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>

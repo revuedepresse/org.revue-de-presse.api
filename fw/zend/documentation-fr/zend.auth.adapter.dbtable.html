@@ -1,0 +1,441 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
+    <title>Authentification avec une table de base de donn&eacute;es - Zend Framework Manual</title>
+
+</head>
+<body>
+<table width="100%">
+    <tr valign="top">
+        <td width="85%">
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.auth.introduction.html">Introduction</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.auth.html">Zend_Auth</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.auth.adapter.digest.html">Authentification &quot;Digest&quot;</a></div>
+                    </td>
+                </tr>
+            </table>
+<hr />
+<div id="zend.auth.adapter.dbtable" class="section"><div class="info"><h1 class="title">Authentification avec une table de base de données</h1></div>
+    
+
+    <div class="section" id="zend.auth.adapter.dbtable.introduction" name="zend.auth.adapter.dbtable.introduction"><div class="info"><h1 class="title">Introduction</h1></div>
+        
+
+        <p class="para">
+            <span class="classname">Zend_Auth_Adapter_DbTable</span> fournit la possibilité d&#039;authentifier
+            sur la base de crédits stockés dans une table de base de données. Comme
+            <span class="classname">Zend_Auth_Adapter_DbTable</span> requiert qu&#039;une instance de
+            <span class="classname">Zend_Db_Adapter_Abstract</span> soit fournie à son constructeur, chaque
+            instance est liée à une connexion de base de données particulière. Les autres options
+            de configuration peuvent être réglées grâce au constructeur ou au travers de
+            différentes méthodes, une pour chaque option.
+        </p>
+
+        <p class="para">
+            Les options de configuration disponibles incluent :
+        </p>
+
+        <ul class="itemizedlist">
+            <li class="listitem">
+                <p class="para">
+                    <em class="emphasis"><span class="property">tableName</span></em> : il s&#039;agit du nom de
+                    la table dans la base de données qui contient les crédits d&#039;authentification,
+                    et envers laquelle la requête d&#039;authentification sera réalisée.
+                </p>
+            </li>
+            <li class="listitem">
+                <p class="para">
+                    <em class="emphasis"><span class="property">identityColumn</span></em> : il s&#039;agit du
+                    nom de la colonne dans la table utilisée pour représenter l&#039;identité. La
+                    colonne d&#039;identité doit contenir une valeur unique, comme un &quot;username&quot; ou
+                    une adresse émail.
+                </p>
+            </li>
+            <li class="listitem">
+                <p class="para">
+                    <em class="emphasis"><span class="property">credentialColumn</span></em> : il s&#039;agit
+                    du nom de la colonne dans la table utilisée pour représenter le crédit. Dans
+                    le cas d&#039;une simple authentification par identité / mot de passe, la valeur
+                    de crédit correspond au mot de passe. Voir aussi l&#039;option
+                    <span class="property">credentialTreatment</span>.
+                </p>
+            </li>
+            <li class="listitem">
+                <p class="para">
+                    <em class="emphasis"><span class="property">credentialTreatment</span></em> : dans la
+                    plupart des cas, les mots de passe et autres données sensibles sont cryptés,
+                    hachés, encodés, masqués, ou sinon traités à travers une fonction ou un
+                    algorithme. En spécifiant un traitement paramétrable de chaîne avec cette
+                    méthode, comme  <span class="methodname">MD5(?)</span> ou
+                     <span class="methodname">PASSWORD(?)</span>, un
+                    développeur peut appliquer un code <acronym class="acronym">SQL</acronym> arbitraire sur les
+                    données de crédit fournies. Comme ces fonctions sont spécifiques à chaque
+                    gestionnaire de base de données (<acronym class="acronym">SGBD</acronym>), vérifiez le manuel
+                    de la base de données pour vérifier la disponibilité de ces fonctions dans
+                    votre système.
+                </p>
+            </li>
+        </ul>
+
+        <div class="example"><div class="info"><p><b>Example #1 Utilisation basique</b></p></div>
+            
+
+            <div class="example-contents"><p>
+                Comme expliqué dans l&#039;introduction, le constructeur de
+                <span class="classname">Zend_Auth_Adapter_DbTable</span> requiert une instance de
+                <span class="classname">Zend_Db_Adapter_Abstract</span> qui est utilisée comme connexion à
+                la base de données à laquelle l&#039;instance d&#039;adaptateur d&#039;authentification est liée.
+                Avant tout, la connexion à la base de donnée devrait être crée.
+            </p></div>
+
+            <div class="example-contents"><p>
+                Le code suivant crée un adaptateur pour une base de données en mémoire, crée
+                un schéma avec une table unique, et insère une ligne sur laquelle nous pouvons
+                réaliser une requête d&#039;authentification plus tard. Cet exemple requiert que
+                l&#039;extension <acronym class="acronym">PDO</acronym> SQLite soit disponible :
+            </p></div>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Crée une connexion de base de données SQLite en mémoire</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$dbAdapter</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Db_Adapter_Pdo_Sqlite<span style="color: #66cc66;">&#40;</span><a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'dbname'</span> =&gt;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; <span style="color: #ff0000;">':memory:'</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Construit une requête de création de table</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$sqlCreate</span> = <span style="color: #ff0000;">'CREATE TABLE [users] ( '</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;. <span style="color: #ff0000;">'[id] INTEGER&nbsp; NOT NULL PRIMARY KEY, '</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;. <span style="color: #ff0000;">'[username] VARCHAR(50) UNIQUE NOT NULL, '</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;. <span style="color: #ff0000;">'[password] VARCHAR(32) NULL, '</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;. <span style="color: #ff0000;">'[real_name] VARCHAR(150) NULL)'</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Crée la table de crédits d'authentification</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$dbAdapter</span>-&gt;<span style="color: #006600;">query</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$sqlCreate</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Construit la requête pour insérer une ligne pour laquelle</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// l'authentification pourra réussir</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$sqlInsert</span> = <span style="color: #ff0000;">&quot;INSERT INTO users (username, password, real_name) &quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;. <span style="color: #ff0000;">&quot;VALUES ('my_username', 'my_password', 'My Real Name')&quot;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Insertion des données</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$dbAdapter</span>-&gt;<span style="color: #006600;">query</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$sqlInsert</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+            <div class="example-contents"><p>
+                Avec une connexion de base de données et des données disponibles dans la
+                table, une instance de <span class="classname">Zend_Auth_Adapter_DbTable</span> peut être
+                créée. Les valeurs d&#039;options de configuration peuvent être fournies au
+                constructeur ou en tant que paramètres aux méthodes de réglage après
+                l&#039;instanciation :
+            </p></div>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Configure une instance avec des paramètres de constructeur ...</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$authAdapter</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Auth_Adapter_DbTable<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$dbAdapter</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">'users'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">'username'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">'password'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// ... ou configure l'instance avec des méthodes de réglage</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$authAdapter</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Auth_Adapter_DbTable<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$dbAdapter</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$authAdapter</span>-&gt;<span style="color: #006600;">setTableName</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'users'</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; -&gt;<span style="color: #006600;">setIdentityColumn</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'username'</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; -&gt;<span style="color: #006600;">setCredentialColumn</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'password'</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+            <div class="example-contents"><p>
+                A cet instant, l&#039;instance de l&#039;adaptateur d&#039;authentification est prête à
+                recevoir des requêtes d&#039;authentification. Dans le but de réaliser une requête
+                d&#039;authentification, les valeurs des crédits requêtés sont fournies à l&#039;adaptateur
+                avant d&#039;appeler la méthode  <span class="methodname">authenticate()</span> :
+            </p></div>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Règle les valeurs d'entrées des crédits</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// (en général, à partir d'un formulaire d'enregistrement)</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$authAdapter</span>-&gt;<span style="color: #006600;">setIdentity</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'my_username'</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; -&gt;<span style="color: #006600;">setCredential</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'my_password'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Réalise la requête d'authentification, et sauvegarde le résultat</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$result</span> = <span style="color: #0000ff;">$authAdapter</span>-&gt;<span style="color: #006600;">authenticate</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+            <div class="example-contents"><p>
+                En plus de la disponibilité de la méthode  <span class="methodname">getIdentity()</span>
+                pour récupérer l&#039;objet du résultat d&#039;authentification,
+                <span class="classname">Zend_Auth_Adapter_DbTable</span> supporte aussi la récupération de
+                la ligne de la table qui a réussi l&#039;authentification :
+            </p></div>
+
+            <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Affiche l'identité</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/echo"><span style="color: #000066;">echo</span></a> <span style="color: #0000ff;">$result</span>-&gt;<span style="color: #006600;">getIdentity</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span> . <span style="color: #ff0000;">&quot;<span style="color: #000099; font-weight: bold;">\n</span><span style="color: #000099; font-weight: bold;">\n</span>&quot;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Affiche la ligne de résultat</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><a href="http://www.php.net/print_r"><span style="color: #000066;">print_r</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$authAdapter</span>-&gt;<span style="color: #006600;">getResultRowObject</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">/* Affiche:</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">my_username</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">Array</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">(</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">&nbsp; &nbsp; [id] =&gt; 1</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">&nbsp; &nbsp; [username] =&gt; my_username</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">&nbsp; &nbsp; [password] =&gt; my_password</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">&nbsp; &nbsp; [real_name] =&gt; My Real Name</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">)</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">*/</span></div></li></ol></div></div></div>
+
+
+            <div class="example-contents"><p>
+                Puisque la ligne de la table contient la valeur de crédit, il est important de
+                garantir ces valeurs contre l&#039;accès fortuit.
+            </p></div>
+        </div>
+    </div>
+
+    <div class="section" id="zend.auth.adapter.dbtable.advanced.storing_result_row" name="zend.auth.adapter.dbtable.advanced.storing_result_row"><div class="info"><h1 class="title">Utilisation avancée : maintenir persistant l&#039;objet de résultat DbTable</h1></div>
+        
+
+        <p class="para">
+            Par défaut, <span class="classname">Zend_Auth_Adapter_DbTable</span> retourne l&#039;identité
+            fournie à l&#039;objet Auth en cas d&#039;authentification couronnée de succès. Un autre scénario
+            d&#039;utilisation, où les développeurs veulent stocker dans le mécanisme de stockage
+            persistant du <span class="classname">Zend_Auth</span> un objet d&#039;identité contenant d&#039;autres
+            informations utiles, est résolu en utilisant la méthode
+             <span class="methodname">getResultRowObject()</span> retournant un objet
+            <em class="emphasis">stdClass</em>. Le petit bout de code suivant illustre cette
+            utilisation :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// authentifie avec Zend_Auth_Adapter_DbTable</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$result</span> = <span style="color: #0000ff;">$this</span>-&gt;_auth-&gt;<span style="color: #006600;">authenticate</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$adapter</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #b1b100;">if</span> <span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$result</span>-&gt;<span style="color: #006600;">isValid</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// stocke l'identité comme objet dans lequel seulement username et</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// real_name sont retournés</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #0000ff;">$storage</span> = <span style="color: #0000ff;">$this</span>-&gt;_auth-&gt;<span style="color: #006600;">getStorage</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #0000ff;">$storage</span>-&gt;<span style="color: #006600;">write</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$adapter</span>-&gt;<span style="color: #006600;">getResultRowObject</span><span style="color: #66cc66;">&#40;</span><a href="http://www.php.net/array"><span style="color: #000066;">array</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'username'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">'real_name'</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// stocke l'identité comme objet dans lequel la colonne password</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">// a été omis</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #0000ff;">$storage</span>-&gt;<span style="color: #006600;">write</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$adapter</span>-&gt;<span style="color: #006600;">getResultRowObject</span><span style="color: #66cc66;">&#40;</span><span style="color: #000000; font-weight: bold;">null</span>, <span style="color: #ff0000;">'password'</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">/* ... */</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span> <span style="color: #b1b100;">else</span> <span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #808080; font-style: italic;">/* ... */</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+
+    </div>
+
+    <div class="section" id="zend.auth.adapter.dbtable.advanced.advanced_usage" name="zend.auth.adapter.dbtable.advanced.advanced_usage"><div class="info"><h1 class="title">Utilisation avancée par l&#039;exemple</h1></div>
+        
+
+        <p class="para">
+            Bien que le but initial de <span class="classname">Zend_Auth</span> (et par extension celui de
+            <span class="classname">Zend_Auth_Adapter_DbTable</span>) est principalement
+            l&#039;<em class="emphasis">authentification</em> et non
+            l&#039;<em class="emphasis">autorisation</em> (ou contrôle d&#039;accès), il existe quelques
+            exemples et problèmes qui franchissent la limite des domaines auxquels ils
+            appartiennent. Selon la façon dont vous avez décidé d&#039;expliquer votre problème, il
+            semble parfois raisonnable de résoudre ce qui pourrait ressembler à un problème
+            d&#039;autorisation dans l&#039;adaptateur d&#039;authentification.
+        </p>
+
+        <p class="para">
+            Ceci étant dit, <span class="classname">Zend_Auth_Adapter_DbTable</span> possède des mécanismes
+            qui sont construits de telle sorte qu&#039;ils peuvent être démultipliés pour ajouter des
+            contrôles supplémentaires au moment de l&#039;authentification pour résoudre quelques
+            problèmes communs d&#039;utilisateur.
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// La valeur du champs &quot;etat&quot; d'un compte</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// ne doit pas être égal à &quot;compromis&quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$adapter</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Auth_Adapter_DbTable<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$db</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">'utilisateurs'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">'login'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">'password'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">'MD5(?) AND etat != &quot;compromis&quot;'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// La valeur du champs &quot;actif&quot; d'un compte</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// doit être égal à &quot;TRUE&quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$adapter</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Auth_Adapter_DbTable<span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$db</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">'utilisateurs'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">'login'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">'password'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;<span style="color: #ff0000;">'MD5(?) AND actif = &quot;TRUE&quot;'</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <p class="para">
+            Un autre scénario possible est l&#039;implantation d&#039;un mécanisme de &quot;salting&quot;.
+            &quot;Salting&quot; est un terme se référant une technique qui peut fortement améliorer la
+            sécurité de votre application. C&#039;est basé sur l&#039;idée que concaténer une chaîne
+            aléatoire à tout mot de passe rend impossible la réussite d&#039;une attaque de type &quot;brute
+            force&quot; sur la base de données en utilisant des valeurs préalablement hashées issues
+            d&#039;un dictionnaire.
+        </p>
+
+        <p class="para">
+            Par conséquent nous devons modifier notre table pour stocker notre chaîne de
+            &quot;salt&quot; aléatoire :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$sqlAlter</span> = <span style="color: #ff0000;">&quot;ALTER TABLE [users] &quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; . <span style="color: #ff0000;">&quot;ADD COLUMN [password_salt] &quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; . <span style="color: #ff0000;">&quot;AFTER [password]&quot;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$dbAdapter</span>-&gt;<span style="color: #006600;">query</span><span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$sqlAlter</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <p class="para">
+            Voici une méthode simple pour générer une chaîne aléatoire pour chaque
+            utilisateur à leur enregistrement :
+        </p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #b1b100;">for</span> <span style="color: #66cc66;">&#40;</span><span style="color: #0000ff;">$i</span> = <span style="color: #cc66cc;">0</span>; <span style="color: #0000ff;">$i</span> &lt; <span style="color: #cc66cc;">50</span>; <span style="color: #0000ff;">$i</span>++<span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#123;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #0000ff;">$dynamicSalt</span> .= <a href="http://www.php.net/chr"><span style="color: #000066;">chr</span></a><span style="color: #66cc66;">&#40;</span><a href="http://www.php.net/rand"><span style="color: #000066;">rand</span></a><span style="color: #66cc66;">&#40;</span><span style="color: #cc66cc;">33</span>, <span style="color: #cc66cc;">126</span><span style="color: #66cc66;">&#41;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#125;</span></div></li></ol></div></div></div>
+
+
+        <p class="para">Et maintenant, construisons l&#039;adaptateur :</p>
+
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$adapter</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Auth_Adapter_DbTable<span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #0000ff;">$db</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'users'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'username'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'password'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">&quot;MD5(CONCAT('&quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; . Zend_Registry::<span style="color: #006600;">get</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'staticSalt'</span><span style="color: #66cc66;">&#41;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; . <span style="color: #ff0000;">&quot;', ?, password_salt))&quot;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+
+        <blockquote><p><b class="note">Note</b>: 
+            
+                Vous pouvez encore améliorer la sécurité en utilisant une chaîne de &quot;salt&quot;
+                statique codée en dur dans votre application. Dans le cas ou la base de données est
+                compromise (par exemple par une attaque de type injection <acronym class="acronym">SQL</acronym>)
+                mais que votre serveur Web est intact, les données sont inutilisables par
+                l&#039;attaquant.
+            <br />
+        </p></blockquote>
+
+        <p class="para">
+            Une autre alternative est d&#039;utiliser la méthode  <span class="methodname">getDbSelect()</span>
+            de la classe <span class="classname">Zend_Auth_Adapter_DbTable</span> après la construction de
+            l&#039;adaptateur. Cette méthode retournera une instance d&#039;objet
+            <span class="classname">Zend_Db_Select</span> utilisée pour réaliser la routine
+             <span class="methodname">authenticate()</span>. Il est important de noter que cette méthode
+            retournera toujours le même objet, que la méthode
+             <span class="methodname">authenticate()</span> a été appelée ou non. Cet objet
+            <em class="emphasis">ne comportera aucune</em> information d&#039;identité ou de crédit puisque
+            celles-ci sont placées dans l&#039;objet select au moment de
+             <span class="methodname">authenticate()</span>.
+        </p>
+
+        <p class="para">
+            Un exemple de situation nécessitant l&#039;utilisation de la méthode
+             <span class="methodname">getDbSelect()</span> serait de vérifier le statut d&#039;un utilisateur,
+            en d&#039;autres termes pour voir si le compte d&#039;un utilisateur est activé.
+        </p>
+        <div class="programlisting php"><div class="phpcode"><div class="php" style="font-family: monospace;"><ol><li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// En continuant avec l'exemple ci-dessus</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$adapter</span> = <span style="color: #000000; font-weight: bold;">new</span> Zend_Auth_Adapter_DbTable<span style="color: #66cc66;">&#40;</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #0000ff;">$db</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'users'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'username'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'password'</span>,</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp; &nbsp; <span style="color: #ff0000;">'MD5(?)'</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Récupérer l'objet select (par référence)</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$select</span> = <span style="color: #0000ff;">$adapter</span>-&gt;<span style="color: #006600;">getDbSelect</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$select</span>-&gt;<span style="color: #006600;">where</span><span style="color: #66cc66;">&#40;</span><span style="color: #ff0000;">'active = &quot;TRUE&quot;'</span><span style="color: #66cc66;">&#41;</span>;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;">&nbsp;</div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #808080; font-style: italic;">// Authentification, ceci s'assure que users.active = TRUE</span></div></li>
+<li style="font-family: 'Courier New', Courier, monospace; color: black; font-weight: normal; font-style: normal;"><div style="font-family: 'Courier New', Courier, monospace; font-weight: normal;"><span style="color: #0000ff;">$adapter</span>-&gt;<span style="color: #006600;">authenticate</span><span style="color: #66cc66;">&#40;</span><span style="color: #66cc66;">&#41;</span>;</div></li></ol></div></div></div>
+
+    </div>
+</div>
+        <hr />
+
+            <table width="100%">
+                <tr>
+                    <td width="25%" style="text-align: left;">
+                    <a href="zend.auth.introduction.html">Introduction</a>
+                    </td>
+
+                    <td width="50%" style="text-align: center;">
+                        <div class="up"><span class="up"><a href="zend.auth.html">Zend_Auth</a></span><br />
+                        <span class="home"><a href="manual.html">Programmer's Reference Guide</a></span></div>
+                    </td>
+
+                    <td width="25%" style="text-align: right;">
+                        <div class="next" style="text-align: right; float: right;"><a href="zend.auth.adapter.digest.html">Authentification &quot;Digest&quot;</a></div>
+                    </td>
+                </tr>
+            </table>
+</td>
+        <td style="font-size: smaller;" width="15%"> <style type="text/css">
+#leftbar {
+	float: left;
+	width: 186px;
+	padding: 5px;
+	font-size: smaller;
+}
+ul.toc {
+	margin: 0px 5px 5px 5px;
+	padding: 0px;
+}
+ul.toc li {
+	font-size: 85%;
+	margin: 1px 0 1px 1px;
+	padding: 1px 0 1px 11px;
+	list-style-type: none;
+	background-repeat: no-repeat;
+	background-position: center left;
+}
+ul.toc li.header {
+	font-size: 115%;
+	padding: 5px 0px 5px 11px;
+	border-bottom: 1px solid #cccccc;
+	margin-bottom: 5px;
+}
+ul.toc li.active {
+	font-weight: bold;
+}
+ul.toc li a {
+	text-decoration: none;
+}
+ul.toc li a:hover {
+	text-decoration: underline;
+}
+</style>
+ <ul class="toc">
+  <li class="header home"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="manual.html">Programmer's Reference Guide</a></li>
+  <li class="header up"><a href="reference.html">Zend Framework Reference</a></li>
+  <li class="header up"><a href="zend.auth.html">Zend_Auth</a></li>
+  <li><a href="zend.auth.introduction.html">Introduction</a></li>
+  <li class="active"><a href="zend.auth.adapter.dbtable.html">Authentification avec une table de base de donn&eacute;es</a></li>
+  <li><a href="zend.auth.adapter.digest.html">Authentification &quot;Digest&quot;</a></li>
+  <li><a href="zend.auth.adapter.http.html">Adaptateur d'authentification HTTP</a></li>
+  <li><a href="zend.auth.adapter.ldap.html">LDAP Authentication</a></li>
+  <li><a href="zend.auth.adapter.openid.html">Authentification OpenID</a></li>
+ </ul>
+ </td>
+    </tr>
+</table>
+</body>
+</html>
