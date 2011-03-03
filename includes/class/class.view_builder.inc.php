@@ -30,7 +30,10 @@ class View_Builder extends User_Interface
         $_stylesheet = &$this->getStylesheet();
 
         // declare a empty stylesheet array
-        $_stylesheet = array();
+        $_stylesheet =
+		
+		// initialize the context of a test case
+		$context = array();
 
         // set the dumper class name
 		$class_dumper = $class_application::getDumperClass();
@@ -73,17 +76,6 @@ class View_Builder extends User_Interface
 			$handler_id
 		);
 
-		$class_test_case::perform(
-			DEBUGGING_FIELD_ERROR_HANDLING,
-			$verbose_mode,
-			array(
-				$blackboard,
-				$persistent_field_handler,
-				__METHOD__,
-				__LINE__
-			)
-		);
-
 		// set the blackboard dashboard property
 		$blackboard->{PROPERTY_DASHBOARD} =
 			&$persistent_field_handler->getDashboard()
@@ -99,6 +91,35 @@ class View_Builder extends User_Interface
         $store =
 			$persistent_field_handler->getControlDashboard(
 				$handler_id
+		);
+
+		$class_test_case::perform(
+			DEBUGGING_FIELD_ERROR_HANDLING,
+			$verbose_mode && DEBUGGING_FIELD_ERROR_HANDLING,
+			array(
+				$blackboard,
+				$persistent_field_handler,
+				__METHOD__,
+				__LINE__
+			)
+		);
+
+		/**
+		*
+		* context for test case of revision 561
+		*
+		* Revise field links controller
+		*
+		*/
+
+		$context = array_merge(
+			$context,
+			array(
+				PROPERTY_DASHBOARD => $blackboard->{PROPERTY_DASHBOARD},
+				PROPERTY_REPOSITORY => $blackboard->{PROPERTY_CHECK},
+				PROPERTY_STORE => $store,
+				PROPERTY_HANDLER => $handler_id
+			)
 		);
 
         // get field values of the current field handler
@@ -181,6 +202,12 @@ class View_Builder extends User_Interface
 									[$field[HTML_ATTRIBUTE_NAME]]
 					;
             }
+
+		$class_test_case::perform(
+			DEBUGGING_FIELD_HANDLING_LINK_FIELDS,
+			$verbose_mode,
+			$context
+		);
     }
 
 	/**
@@ -438,6 +465,9 @@ class View_Builder extends User_Interface
 
 		$static_mode = FALSE;
 
+		// initialize the context of a test case 
+		$context = array();
+
 		if ( ! is_null( $static_parameters ) )
 		{		
 			$static_mode = TRUE;
@@ -492,13 +522,8 @@ class View_Builder extends User_Interface
             // check the error context parameter
             if ( isset( $resources[CONTEXT_INDEX_ERRORS] ) )
             {
-                $class_dumper::log(
-					__METHOD__,
-					array(
-                        'context',
-                        $resources
-                    )	
-				);
+				// set the context resources property
+				$context[PROPERTY_RESOURCES] = $resources;
 
                 // get the error context parameter
                 $errors = $resources[CONTEXT_INDEX_ERRORS];
@@ -639,6 +664,25 @@ class View_Builder extends User_Interface
 
                 // list the properties of an input element
                 list( $field_type, $field_name ) = $properties;
+
+				// get the link suffix length
+				$suffix_start = strpos( $field_name, SUFFIX_LINK );
+
+				$suffix_length = strlen( SUFFIX_LINK );
+		
+				// check if the current field is linked to another field
+				if ( $suffix_start === FALSE )
+		
+					$trimmed_field_name = $field_name;
+				else
+		
+					$trimmed_field_name = substr(
+						$field_name,
+						0,
+						strlen( $field_name ) - $suffix_length
+					);
+
+ 				$link_broken = FALSE;
 
 				// check the field option property				
 				if ( isset( $properties[2] ) )
@@ -1504,12 +1548,66 @@ class View_Builder extends User_Interface
 
 								$class_test_case::perform(
 									DEBUGGING_FIELD_ERROR_HANDLING,
-									$verbose_mode,
+									$verbose_mode && DEBUGGING_FIELD_ERROR_HANDLING,
 									array(
 										ENTITY_CHECK => $_check,	
 										ENTITY_STORE => $_store,	
 										ENTITY_DASHBOARD => $_dashboard,
 										PROPERTY_NAME => $field_name
+									)
+								);
+
+							if ( isset( $_POST ) ) 
+
+								/**
+								*
+								* context for test case of revision 561
+								*
+								* Revise field links controller
+								*
+								*/
+						
+								$context = array_merge(
+									$context,
+									array(
+										PROPERTY_NAME => $field_name,
+										PROPERTY_CONDITION_FIELD_VALUE_ERROR =>
+											isset( $_store ) && is_array( $_store ) &&
+											! empty( $_store[SESSION_STATUS] ) &&
+								
+											(
+												(
+													$_store[SESSION_STATUS] ==
+														SESSION_STATUS_DATA_SUBMITTED
+												) ||
+												count(
+													$_check
+														[SESSION_STORE_FIELD]
+															[SESSION_STORE_HALF_LIVING]
+												)
+											) &&
+											
+											isset( $_dashboard ) && is_array( $_dashboard ) &&
+											! empty( $_dashboard[$field_name] ) &&
+											is_array( $_dashboard[$field_name] ) &&
+											count( $_dashboard[$field_name] ) != 0 &&
+											(
+												! empty(
+													$_dashboard
+														[$field_name]
+															[ERROR_FIELD_MISSING]
+												) ||
+												! empty(
+													$_dashboard
+														[$field_name]
+															[ERROR_ALREADY_TAKEN]
+												) ||
+												! empty(
+													$_dashboard
+														[$field_name]
+															[ERROR_WRONG_VALUE]
+												)
+											)
 									)
 								);
 
@@ -1560,6 +1658,58 @@ class View_Builder extends User_Interface
 	
 								// construct a new DOMText object
 								$p_node = new DOMText();
+
+								/**
+								*
+								* context for test case of revision 561
+								*
+								* Revise field links controller
+								*
+								*/
+
+								if ( isset( $_POST ) )
+								
+									$context = array_merge(
+										$context,
+										array(
+											PROPERTY_NAME => $field_name,
+											PROPERTY_CONDITION_FIELD_VALUE_STORED,
+											! empty(
+												$_dashboard
+													[$field_name]
+														[ERROR_FIELD_MISSING]
+											) &&
+											empty(
+												$_check
+													[SESSION_STORE_FIELD]
+														[SESSION_STORE_VALUE]
+															[$field_name]
+											) &&
+											empty(
+												$_check
+													[SESSION_STORE_FIELD]
+														[SESSION_STORE_HALF_LIVING]
+															[$field_name]
+											),
+											PROPERTY_CONDITION_FIELD_VALUE_CONFIRMED =>
+												$trimmed_field_name,
+												$field_name,
+												$_check
+													[SESSION_STORE_FIELD]
+														[SESSION_STORE_HALF_LIVING]
+															[$field_name],
+												$_check
+													[SESSION_STORE_FIELD]
+														[SESSION_STORE_HALF_LIVING]
+															[$trimmed_field_name],
+											PROPERTY_CONDITION_FIELD_VALUE_MISSING => 
+												! empty(
+													$_dashboard
+														[$field_name]
+															[ERROR_FIELD_MISSING]
+												)											
+										)
+									);
 	
 								// check the already taken error flag							
 								if (
@@ -1613,6 +1763,19 @@ class View_Builder extends User_Interface
 											[SESSION_STORE_FIELD]
 												[SESSION_STORE_HALF_LIVING]
 													[$field_name]
+									) ||
+									(
+										( $link_broken = ( $field_name != $trimmed_field_name ) ) &&
+										(
+											$_check
+													[SESSION_STORE_FIELD]
+														[SESSION_STORE_HALF_LIVING]
+															[$field_name] !==
+											$_check
+													[SESSION_STORE_FIELD]
+														[SESSION_STORE_HALF_LIVING]
+															[$trimmed_field_name]
+										)
 									)
 								)
 								{
@@ -1645,14 +1808,22 @@ class View_Builder extends User_Interface
 								// append the DOMText object
 								// to the p DOMelement
 								$p_element->appendChild( $p_node );
-	
+
+
+								// Append the broken link property
+								// to a test case context
+
+								$context[PROPERTY_LINK] = 
+									$link_broken ? 'TRUE' : 'FALSE'
+								;	
+
 								if (
 									! empty(
 										$_check
 											[SESSION_STORE_FIELD]
 												[SESSION_STORE_HALF_LIVING]
 													[$field_name]
-									)
+									) && ! $link_broken
 								)
 								{
 									// delete the half living value
@@ -1977,6 +2148,12 @@ class View_Builder extends User_Interface
 								break;                            
 					}
         }
+
+		$class_test_case::perform(
+			DEBUGGING_FIELD_HANDLING_LINK_FIELDS,
+			$verbose_mode,
+			$context
+		);
 
         return $element;
     }
@@ -8990,17 +9167,25 @@ class View_Builder extends User_Interface
 					// construct a new DOMText object
 					$disclaimer_node = new DOMText();
 	
-					if ( is_string( $index ) && $index == AFFORDANCE_DISPLAY )
+					if ( is_string( $index ) && ( $index == AFFORDANCE_DISPLAY ) )
 					{
 						$paragraph_node->setAttribute(
 							HTML_ATTRIBUTE_CLASS,
 							$index
-						);							
-	
-						// append data to the DOMText object
-						$disclaimer_node->appendData(
-							$disclaimer_index
 						);
+						
+						if (
+							(
+								$disclaimer_value =
+									$disclaimer_index[ENTITY_DISCLAIMER]
+							) !== NULL
+						)
+
+							// append data to the DOMText object
+							$disclaimer_node->appendData(
+								$disclaimer_value
+							);
+
 	
 						$_SESSION[ENTITY_FEEDBACK]
 							[$form_identifier]
