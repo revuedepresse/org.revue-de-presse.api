@@ -25,4 +25,3 @@ class Application extends \sefi\Application
         parent::__construct();
     }
 }
-?>
