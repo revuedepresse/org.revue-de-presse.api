@@ -566,6 +566,11 @@ class Form extends Toolbox
 
 		$class_dumper = $class_application::getDumperClass();
 
+		$class_test_case = $class_application::getTestCaseClass();
+
+		// initialize the context of a test case 
+		$context = array();
+
 		$children = &$this->getAProperty( PROPERTY_CHILDREN );
 
 		$data = $this->getAProperty( PROPERTY_DATA );
@@ -604,6 +609,24 @@ class Form extends Toolbox
 				')'
 			;
 		}
+
+		/**
+		*
+		* context for test case of revision 561
+		*
+		* Revise field links controller
+		*
+		*/
+
+		$context[PROPERTY_DATA_SUBMISSION] = $data_submission;
+
+		$class_dumper::log(
+			__METHOD__,
+			array(
+				'[data submission]',
+				$data_submission
+			)
+		);
 
 		if ( $data_submission )
 		{
@@ -647,6 +670,13 @@ class Form extends Toolbox
 					)
 				);
 
+			// Set the data validation failure of the context
+			$context[PROPERTY_DATA_VALIDATION_FAILURE] =
+				! isset( $data[$name] ) ||
+				! isset( $data[$target] ) ||
+				$data[$name] != $data[$target]
+			;
+
 			if (
 				! isset( $data[$name] ) ||
 				! isset( $data[$target] ) ||
@@ -670,9 +700,19 @@ class Form extends Toolbox
 					FALSE
 				);
 
-			unset( $children[$target] );
+			unset( $children );
 		}
 
+		// Set the component property of the context 
+
+		$context[PROPERTY_COMPONENT] = $this;
+
+		$class_test_case::perform(
+			DEBUGGING_FIELD_HANDLING_LINK_FIELDS_AT_DATA_SUBMISSION,
+			$verbose_mode,
+			$context
+		);
+		
 		return $this;
 	}
 
@@ -720,4 +760,3 @@ class Form extends Toolbox
 		return $this->setAProperty($name, $value);
 	}
 }
-?>

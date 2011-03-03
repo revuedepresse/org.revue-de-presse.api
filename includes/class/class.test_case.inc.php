@@ -140,6 +140,223 @@ class Test_Case extends Application
 	}
 
 	/**
+	* Test the checkSubmittedData method of the Field Handler class 
+	*
+	* @param	mixed	$test_case	test case
+	* @param	boolean	$active		active
+	* @param	mixed	$context	context
+	* @return	mixed
+	*/	
+	public static function method__field_handler__checkSubmittedData(
+		$test_case = NULL,
+		$active = FALSE,
+		$context = NULL		
+	)
+	{
+		global $verbose_mode;
+
+		// set the dumper class name
+		$class_dumper = self::getDumperClass();
+
+		if (
+			! $active ||
+			! DEBUGGING_FIELD_HANDLING_LINK_FIELDS_AT_DATA_SUBMISSION ||
+			! count( $context )
+		)
+		
+			return;
+
+		switch ( $test_case )
+		{
+			case DEBUGGING_FIELD_HANDLING_LINK_FIELDS_AT_DATA_SUBMISSION:
+
+				$class_dumper::log(
+					__METHOD__,
+					array( $context ),
+					$verbose_mode,
+					isset( $_POST ) &&
+						isset( $context[PROPERTY_NAME] ) &&
+							(
+								strpos( $context[PROPERTY_NAME], 'submit' ) !==
+									FALSE
+							)
+				);
+
+					break;
+		}
+	}
+
+	/**
+	* Test the clear_field_errors method of the Field Handler class 
+	*
+	* @param	mixed	$test_case	test case
+	* @param	boolean	$active		active
+	* @param	mixed	$context	context
+	* @return	mixed
+	*/	
+	public static function method__field_handler__clear_field_errors(
+		$test_case = NULL,
+		$active = FALSE,
+		$context = NULL		
+	)
+	{
+		global $verbose_mode;
+
+		// set the dumper class name
+		$class_dumper = self::getDumperClass();
+
+		if (
+			! $active ||
+			! DEBUGGING_FIELD_HANDLING_LINK_FIELDS ||
+			! count( $context )
+		)
+		
+			return;
+
+		switch ( $test_case )
+		{
+			case DEBUGGING_FIELD_HANDLING_LINK_FIELDS:
+
+				$class_dumper::log(
+					__METHOD__,
+					array( $context ),
+					$verbose_mode,
+					isset( $_POST ) &&
+						isset( $context[PROPERTY_NAME] ) &&
+							(
+								strpos( $context[PROPERTY_NAME], 'submit' ) !==
+									FALSE
+							)					
+				);
+
+					break;
+		}
+	}
+
+	/**
+	* Test the clear_field_value method of the Field Handler class 
+	*
+	* @param	mixed	$test_case	test case
+	* @param	boolean	$active		active
+	* @param	mixed	$context	context
+	* @return	mixed
+	*/	
+	public static function method__field_handler__clear_field_values(
+		$test_case = NULL,
+		$active = FALSE,
+		$context = NULL		
+	)
+	{
+		global $verbose_mode;
+
+		// set the dumper class name
+		$class_dumper = self::getDumperClass();
+
+		if (
+			! $active ||
+			! DEBUGGING_FIELD_HANDLING_LINK_FIELDS ||
+			! count( $context )
+		)
+		
+			return;
+
+		switch ( $test_case )
+		{
+			case DEBUGGING_FIELD_HANDLING_LINK_FIELDS:
+
+				$class_dumper::log(
+					__METHOD__,
+					array( $context ),
+					$verbose_mode
+				);
+
+					break;
+		}
+	}
+
+	/**
+	* Test the link method of the Field Handler class 
+	*
+	* @param	mixed	$test_case	test case
+	* @param	boolean	$active		active
+	* @param	mixed	$context	context
+	* @return	mixed
+	*/	
+	public static function method__field_handler__link(
+		$test_case = NULL,
+		$active = FALSE,
+		$context = NULL		
+	)
+	{
+		global $verbose_mode;
+
+		// set the dumper class name
+		$class_dumper = self::getDumperClass();
+
+		if (
+			! $active ||
+			! DEBUGGING_FIELD_HANDLING_LINK_FIELDS ||
+			! count( $context )
+		)
+		
+			return;
+
+		switch ( $test_case )
+		{
+			case DEBUGGING_FIELD_HANDLING_LINK_FIELDS:
+
+				$class_dumper::log(
+					__METHOD__,
+					array( $context ),
+					$verbose_mode
+				);
+
+					break;
+		}
+	}
+
+	/**
+	* Test the link method of the Form class 
+	*
+	* @param	mixed	$test_case	test case
+	* @param	boolean	$active		active
+	* @param	mixed	$context	context
+	* @return	mixed
+	*/	
+	public static function method__form__link(
+		$test_case = NULL,
+		$active = FALSE,
+		$context = NULL		
+	)
+	{
+		global $verbose_mode;
+
+		// set the dumper class name
+		$class_dumper = self::getDumperClass();
+
+		if (
+			! $active ||
+			! DEBUGGING_FIELD_HANDLING_LINK_FIELDS_AT_DATA_SUBMISSION ||
+			! count( $context )
+		)
+		
+			return;
+
+		switch ( $test_case )
+		{
+			case DEBUGGING_FIELD_HANDLING_LINK_FIELDS_AT_DATA_SUBMISSION:
+
+				$class_dumper::log(
+					__METHOD__,
+					array( $context ),
+					$verbose_mode
+				);
+
+					break;
+		}
+	}
+	
+	/**
 	* Test the Form-Manager class constructor 
 	*
 	* @param	mixed	$test_case	test case
@@ -355,7 +572,13 @@ class Test_Case extends Application
 		// set the lock class name
 		$class_lock = self::getLockClass();
 	
-		if ( ! $active || ! DEBUGGING_FIELD_ERROR_HANDLING )
+		if (
+			! $active ||
+			(
+				! DEBUGGING_FIELD_ERROR_HANDLING &&
+				! DEBUGGING_FIELD_HANDLING_LINK_FIELDS
+			)
+		)
 		
 			return;
 
@@ -382,6 +605,16 @@ class Test_Case extends Application
 				}
 
 					break;
+
+			case DEBUGGING_FIELD_HANDLING_LINK_FIELDS:
+
+				$class_dumper::log(
+					__METHOD__,
+					array( $context ),
+					$verbose_mode
+				);
+				
+					break;
 		}
 	}
 
@@ -404,7 +637,13 @@ class Test_Case extends Application
 		// set the dumper class name
 		$class_dumper = self::getDumperClass();
 
-		if ( ! $active || ! DEBUGGING_FIELD_ERROR_HANDLING )
+		if (
+			! $active ||
+			(
+				! DEBUGGING_FIELD_ERROR_HANDLING &&		
+				! DEBUGGING_FIELD_HANDLING_LINK_FIELDS
+			)
+		)
 		
 			return;
 
@@ -526,6 +765,16 @@ class Test_Case extends Application
 					);
 					
 					break;
+
+			case DEBUGGING_FIELD_HANDLING_LINK_FIELDS:
+
+				$class_dumper::log(
+					__METHOD__,
+					array( $context ),
+					$verbose_mode
+				);
+				
+					break;
 		}
 	}
 
@@ -566,4 +815,3 @@ class Test_Case extends Application
 		}
 	}
 }
-?>

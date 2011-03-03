@@ -781,7 +781,7 @@ class Photo extends Toolbox
             {
                 if ( '' !== base64_decode( $result->bytes ) )
                 {
-					$image = '';
+                    $image = '';
 
                     $db_img = imagecreatefromstring(
                         base64_decode( $result->bytes )
@@ -791,7 +791,7 @@ class Photo extends Toolbox
                         $width,
                         $height
                     );
-
+                    
                     if ( file_exists( $path ) )
                     {
                         $source = imagecreatefromjpeg( $path );
@@ -810,9 +810,13 @@ class Photo extends Toolbox
                         );
                         
                         // save the image to the file system
-                        imagejpeg( $target, $path_resized_photograph, IMAGE_JPEG_QUALITY );
+                        imagejpeg(
+                            $target,
+                            $path_resized_photograph,
+                            IMAGE_JPEG_QUALITY
+                        );
     
-                        if ( file_exists($path_resized_photograph ) )
+                        if ( file_exists( $path_resized_photograph ) )
     
                             $image = file_get_contents($path_resized_photograph);
                         else 
@@ -826,9 +830,9 @@ class Photo extends Toolbox
                     else
                     
                         throw new Exception(
-							EXCEPTION_MISSING_RESOURCE .
+                            EXCEPTION_MISSING_RESOURCE .
                             ' ( ' . $path . ')'
-						);
+                        );
 
                     return $image;
                 }
@@ -1086,4 +1090,3 @@ class Photo extends Toolbox
         }
     }
 }
-?>

@@ -75,5 +75,3 @@ assignConstant('EXCEPTION_UNDEFINED_FORM_IDENTIFIER', 'The current form identifi
 assignConstant('EXCEPTION_UNDEFINED_KEY_IDENTIFER', 'A key identifier is missing.');
 assignConstant('EXCEPTION_UNDEFINED_OPTIONS', 'Some options are missing');
 assignConstant('EXCEPTION_UNIT_TESTING_ASSERTION_INVALID', 'An assertion is not valid (%s)');
-
-?>

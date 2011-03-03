@@ -1040,8 +1040,10 @@ class Form_Manager extends Toolbox
 		{
 			list($index, $handlers) = each($form_manager::get_control_panel());			
 
-			$store_field_handlers[$form_manager->get_handler_id()] =
-				$handlers[$form_manager->get_handler_id()];
+			if ( isset( $handlers[$form_manager->get_handler_id()] ) )
+
+				$store_field_handlers[$form_manager->get_handler_id()] =
+					$handlers[$form_manager->get_handler_id()];
 		}
 
 		// return the identifier of a form manager instance
