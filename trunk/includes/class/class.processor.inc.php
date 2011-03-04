@@ -1,5 +1,21 @@
 <?php
-
+/**
+*************
+* Changes log
+*
+*************
+* 2011 03 04
+*************
+* 
+* Revise the extraction of the context feedback property before taking action
+*
+* method affected ::
+* 
+* PROCESSOR :: takeAction
+* 
+* (revision 31)
+*
+*/
 /**
 * Processor class
 *
@@ -88,13 +104,24 @@ class Processor extends Controller
 		$class_serializer = $class_application::getSerializerClass();
 
 		// check the context
-		if ( is_object( $context[PROPERTY_HANDLER] ) && get_class( $context[PROPERTY_HANDLER] ) )
+		if (
+			is_object( $context[PROPERTY_HANDLER] ) &&
+			get_class( $context[PROPERTY_HANDLER] )
+		)
 		{
-
 			$field_handler = $context;
 
-			// get the feedback events
-			$events_feedback = $field_handler->getProperty( PROPERTY_FEEDBACK );
+			if (
+				in_array(
+					'getProperty',
+					get_class_methods( get_class( $field_handler ) )
+				)
+			)
+
+				// get the feedback events
+				$events_feedback = $field_handler->getProperty(
+					PROPERTY_FEEDBACK
+				);
 		}
 
 		if ( ! isset( $context[PROPERTY_KEY] ) )
@@ -350,4 +377,3 @@ class Processor extends Controller
 		return $callback_parameters;
 	}
 }
-?>
