@@ -713,7 +713,7 @@ class Photo extends Toolbox
 
         if ( ! file_exists( $directory_proportions ) )
         
-            mkdir( $directory_proportions );
+            mkdir( $directory_proportions, 0755, TRUE );
 
         // set a path to a resized photograph
         $path_resized_photograph =
