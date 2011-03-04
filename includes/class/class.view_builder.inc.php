@@ -7,10 +7,12 @@
 * 2011 03 04
 *************
 *
+* Create a dummy object with qualities of an anonymous user
 * Revise disclaimer rendering at form validation
 *
 * method affected ::
 *
+* VIEW BUILDER :: renderThread
 * VIEW BUILDER :: settleDisclaimer
 * 
 * (revision 24)
@@ -8634,6 +8636,17 @@ class View_Builder extends User_Interface
 											=> $child->{PROPERTY_OWNER}
 									)
 								);
+								
+								if ( ! is_object( $qualities ) )
+								{
+									$qualities = new stdClass();
+				
+									$qualities->{ROW_MEMBER_USER_NAME} =
+										USER_NAME_ANONYMOUS
+									;
+
+									$qualities->{PROPERTY_AVATAR} = NULL;
+								}
 			
 								try {
 									$unique_insight_node_id =
@@ -8676,18 +8689,18 @@ class View_Builder extends User_Interface
 											URI_AFFORDANCE_EDIT.'-'.
 												ENTITY_INSIGHT.'-'.
 													ENTITY_NODE.'-'.
-														$child->id
+														$child->{PROPERTY_ID}
 										,
 										PLACEHOLDER_LABEL => DIALOG_LINK_EDIT_INSIGHT
 									);
-									
+
 									$node[PLACEHOLDER_INSIGHT_ACTIONS][] = array(
 										PLACEHOLDER_CLASS => STYLE_CLASS_INSIGHT_REMOVE,
 										PLACEHOLDER_LINK =>
 											URI_AFFORDANCE_REMOVE.'-'.
 												ENTITY_INSIGHT.'-'.
 													ENTITY_NODE.'-'.
-														$child->id
+														$child->{PROPERTY_ID}
 										,
 										PLACEHOLDER_LABEL => DIALOG_LINK_REMOVE_INSIGHT
 									);
