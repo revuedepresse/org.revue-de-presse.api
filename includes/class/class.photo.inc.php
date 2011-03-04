@@ -1,4 +1,18 @@
 <?php
+/**
+*************
+* Changes log
+*
+*************
+* 2011 03 04
+*************
+* 
+* Revise the loadPhotography method by preventing the case
+* when no Photograph object can be retrieved
+* 
+* (revision 15)
+*
+*/
 
 /**
 * Photo class
