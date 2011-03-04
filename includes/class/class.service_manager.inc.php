@@ -12,7 +12,7 @@
 *
 * method affected ::
 *
-* getServiceProperty
+* SERVICE MANAGER :: getServiceProperty
 * 
 * (revision 23)
 *
@@ -91,4 +91,3 @@ class Service_Manager extends Deployer
 		return $_class;
 	}
 }
-?>
