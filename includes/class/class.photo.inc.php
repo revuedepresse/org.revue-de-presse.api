@@ -915,7 +915,7 @@ class Photo extends Toolbox
     * @param    integer $avatar avatar size
     * @return   mixed
     */
-    public static function loadPhotography($id, $avatar = FALSE)
+    public static function loadPhotography( $id, $avatar = FALSE )
     {
         global $class_application;
 
@@ -938,7 +938,7 @@ class Photo extends Toolbox
             $dimensions->{PROPERTY_WIDTH} = 0;
         }
             
-        return $class_application::fetchPhotograph($id, $dimensions, $avatar);
+        return $class_application::fetchPhotograph( $id, $dimensions, $avatar );
     }
  
     /**
