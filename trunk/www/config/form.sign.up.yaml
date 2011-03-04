@@ -26,15 +26,6 @@ fields:
     save.to: db.user.last_name
     type: text
   -
-    link.to: password_sign_up_again
-    hash: sha1
-    name: password_sign_up
-    save.to: db.user.password
-    type: password*
-  -
-    name: password_sign_up_again
-    type: password*
-  -
     name: phone
     save.to: db.user.phone
     type: text
