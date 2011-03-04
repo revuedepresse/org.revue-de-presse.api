@@ -20,8 +20,11 @@ class Service_Manager extends Deployer
 		$service = SERVICE_MYSQL
 	)
 	{
-		$file_path = dirname(__FILE__).'/../../.'.FILE_NAME_SERVICE_CONFIGURATION.EXTENSION_INI;
-
+		$file_path =
+			dirname(__FILE__) . '/../../../../' . DIR_SETTINGS .
+			'/.'.FILE_NAME_SERVICE_CONFIGURATION.EXTENSION_INI
+		;
+		
 		$file_contents = self::loadFileContents($file_path, EXTENSION_INI);
 
 		if (
@@ -45,7 +48,12 @@ class Service_Manager extends Deployer
 		}
 		else
 		
-			throw new Exception(sprintf(fEXCEPTION_INVALID_CONFIGURATION_FILE, $file_path));
+			throw new Exception(
+				sprintf(
+					EXCEPTION_INVALID_CONFIGURATION_FILE,
+					$file_path
+				)
+			);
 	}
 
 	/**
