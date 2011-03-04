@@ -160,8 +160,14 @@ class Controller extends Source
 					else if (is_numeric($callback_parameters))
 					{
 						$_node = $class_insight::fetchInsightNode($callback_parameters);
-
-						if ( FALSE === strpos( $current_URI, $previous_position ) )
+	
+						if (
+							FALSE === strpos(
+								$current_URI,
+								$previous_position
+							) ||
+							( FALSE === strpos( '-', $previous_position ) )
+						)
 
 							$class_application::jumpTo(
 								$previous_position.
@@ -174,7 +180,7 @@ class Controller extends Source
 							);
 						else
 						
-							$class_application::jumpTo(PREFIX_ROOT);
+							$class_application::jumpTo( PREFIX_ROOT );
 					}
 
 					break;
