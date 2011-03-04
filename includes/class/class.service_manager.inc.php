@@ -1,4 +1,22 @@
 <?php
+/**
+*************
+* Changes log
+*
+*************
+* 2011 03 24
+*************
+* 
+* Move the configuration file to a directory
+* out of reach of the Apache server
+*
+* method affected ::
+*
+* getServiceProperty
+* 
+* (revision 23)
+*
+*/
 
 /**
 * Service Manager class
