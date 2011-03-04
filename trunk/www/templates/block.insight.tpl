@@ -6,7 +6,7 @@
         {foreach from=$thread.nodes key=index item=node}
         <li>
             <div class='owner'>
-                <div id='_{$node.id}' class='avatar' title='{$node.user_name}'>{$node.avatar}</div>
+                <div id='_{$node.id}' class='avatar' title='{$node.user_name}'>{if $node.avatar != 0}{$node.avatar}{else}{$node.user_name}{/if}</div>
             </div>
             <div class='modification_date'><p>{$node.date_modification}</p></div>
             <p><pre>{$node.body}</pre></p>
