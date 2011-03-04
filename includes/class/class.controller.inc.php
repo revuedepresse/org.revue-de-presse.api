@@ -1,4 +1,21 @@
 <?php
+/**
+*************
+* Changes log
+*
+*************
+* 2011 03 04
+*************
+*
+* Revise the client redirection at comment post
+*
+* method affected ::
+* 
+* CONTROLLER :: checkPostedData
+* 
+* (revision 30)
+*
+*/
 
 /**
 * Controller class
