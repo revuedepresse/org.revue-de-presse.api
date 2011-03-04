@@ -1,4 +1,21 @@
 <?php
+/**
+*************
+* Changes log
+*
+*************
+* 2011 03 04
+*************
+*
+* Revise disclaimer rendering at form validation
+*
+* method affected ::
+*
+* VIEW BUILDER :: settleDisclaimer
+* 
+* (revision 24)
+*
+*/
 
 /**
 * View builder class
