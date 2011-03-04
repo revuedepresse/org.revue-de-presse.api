@@ -9174,18 +9174,17 @@ class View_Builder extends User_Interface
 							$index
 						);
 						
-						if (
-							(
-								$disclaimer_value =
-									$disclaimer_index[ENTITY_DISCLAIMER]
-							) !== NULL
-						)
+						if ( ! is_string( $disclaimer_index[ENTITY_DISCLAIMER] ) )
 
-							// append data to the DOMText object
-							$disclaimer_node->appendData(
-								$disclaimer_value
-							);
+							$disclaimer_value =
+								$disclaimer_index[ENTITY_DISCLAIMER]
+							;
+						else 
+							
+							$disclaimer_value = $disclaimer_index;
 
+                        // append data to the DOMText object
+						$disclaimer_node->appendData( $disclaimer_value );
 	
 						$_SESSION[ENTITY_FEEDBACK]
 							[$form_identifier]
