@@ -25,7 +25,7 @@
     <s id='disclaimer_confirm_do_you'>Do you confirm this operation?</s>
     <s id='disclaimer_edit_basic_information_requirements'>Starred* items are mandatory</s>
     <s id='disclaimer_required_input'>Required information</s>
-    <s id='disclaimer_retrieve_password_enter_email'>Please enter and submit your email to retrieve your password.</s>
+    <s id='disclaimer_retrieve_password_enter_email'>Please enter and submit your email to renew your password.</s>
     <s id='disclaimer_send_feedback_any_suggestion'>I love feedback!
 Share your insights and I will do my best to provide you with an appropriate answer within 48 hours ;)</s>
     <s id='disclaimer_sign_up_invitation'>'Weaving The Web' is a project under private beta testing.{LF}We will revert to you as soon as we are fully convinced our infrastucture can offer some acceptable quality of service.</s>
