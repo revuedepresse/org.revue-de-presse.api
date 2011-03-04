@@ -51,13 +51,16 @@ class Processor extends Controller
 	* @param	array	$fixes	fixes
 	* @return	string	link
 	*/	
-	public static function generateLink($fixes)
+	public static function generateLink( $fixes )
 	{
-		$generated_key = self::randomString($fixes);
+		$generated_key = self::randomString( $fixes );
 
-		if (isset($generated_key['sha1']))
+		if ( isset( $generated_key['sha1'] ) )
 
-			return URI_AFFORDANCE_CONFIRM.'?'.GET_PROFILE_CHANGES.'='.$generated_key['sha1'];
+			return
+				URI_AFFORDANCE_CONFIRM.'?'.GET_PROFILE_CHANGES.
+					'='.$generated_key['sha1']
+			;
 		else
 		
 			throw new Exception(EXCEPTION_INVALID_ARGUMENT);

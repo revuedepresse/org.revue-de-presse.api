@@ -592,22 +592,26 @@ class Interceptor extends Store
 				$action_sign_up
 			)
 			{
-				if ( isset( $form_identifier ) )
-
-					$class_application::displayFeedbackView(
-						(
-							is_string( $package ) &&
-							isset( $_SESSION[ENTITY_FEEDBACK] )
+				$class_application::displayFeedbackView(
+					(
+						is_string( $package ) &&
+						isset( $_SESSION[ENTITY_FEEDBACK] )
+					?
+						$package
+					:
+						$_SESSION
+							[ENTITY_FEEDBACK]
+								[$form_identifier]
+									[AFFORDANCE_DISPLAY]
+					),
+					(
+							isset( $form_identifier )
 						?
-							$package
+							$form_identifier
 						:
-							$_SESSION
-								[ENTITY_FEEDBACK]
-									[$form_identifier]
-										[AFFORDANCE_DISPLAY]
-						),
-						$form_identifier
-					);
+							NULL
+					)
+				);
 
 				unset( $_SESSION[ENTITY_FEEDBACK] );
 
