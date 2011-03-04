@@ -9,7 +9,11 @@
 * 
 * Revise the loadPhotography method by preventing the case
 * when no Photograph object can be retrieved
-* 
+*
+* method affected ::
+*
+* PHOTO :: loadPhotography
+*
 * (revision 15)
 *
 */
