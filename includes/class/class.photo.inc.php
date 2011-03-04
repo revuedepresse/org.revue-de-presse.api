@@ -919,7 +919,7 @@ class Photo extends Toolbox
         }
         else
         {
-            $dimensions->{PROPERTY_HEIGTH} = 
+            $dimensions->{PROPERTY_HEIGHT} = 
 
             $dimensions->{PROPERTY_WIDTH} = 0;
         }
