@@ -911,10 +911,19 @@ class Photo extends Toolbox
 
         $attributes = $class_data_fetcher::fetchPhotograph($id);
 
-        $dimensions->{PROPERTY_HEIGHT} = $attributes->getHeight();
+        if ( is_object( $attributes ) )
+        {
+            $dimensions->{PROPERTY_HEIGHT} = $attributes->getHeight();
         
-        $dimensions->{PROPERTY_WIDTH} = $attributes->getWidth();
+            $dimensions->{PROPERTY_WIDTH} = $attributes->getWidth();
+        }
+        else
+        {
+            $dimensions->{PROPERTY_HEIGTH} = 
 
+            $dimensions->{PROPERTY_WIDTH} = 0;
+        }
+            
         return $class_application::fetchPhotograph($id, $dimensions, $avatar);
     }
  
