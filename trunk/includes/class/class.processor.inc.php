@@ -109,7 +109,7 @@ class Processor extends Controller
 			get_class( $context[PROPERTY_HANDLER] )
 		)
 		{
-			$field_handler = $context;
+			$field_handler = $context[PROPERTY_HANDLER];
 
 			if (
 				in_array(
