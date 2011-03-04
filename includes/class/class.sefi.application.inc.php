@@ -2052,6 +2052,9 @@ namespace sefi
 			// set the Dumper class name
 			$class_dumper = self::getDumperClass();
 
+			// set the exception handler class name
+			$class_exception_handler = self::getExceptionHandlerClass();
+
 			// set the template engine class name
 			$class_template_engine = self::getTemplateEngineClass();
 
@@ -2116,9 +2119,35 @@ namespace sefi
 				$width = $_GET[GET_WIDTH];
 
 			if ( ! isset( $height ) || ! isset( $width ) )
+			{
+				$exception = new \Exception( EXCEPTION_INVALID_ARGUMENT );
+				
+				$context_http = array(
+					PROTOCOL_HTTP_METHOD_GET => $_GET,
+					PROTOCOL_HTTP_METHOD_POST => $_POST
+				);
+	
+				$context = array(
+					PROPERTY_CONTEXT => print_r( $context_http, TRUE ),
+					PROPERTY_DESCRIPTION => sprintf(
+						EVENT_DESCRIPTION_EXCEPTION_CAUGHT,
+						$exception->getCode(),
+						$exception->getFile(),
+						$exception->getLine(),
+						$exception->getMessage(),
+						$exception->getTraceAsString()
+					),
+					PROPERTY_EXCEPTION => $exception,
+					PROPERTY_TYPE => EVENT_TYPE_EXCEPTION_CAUGHT
+				);
+	
+				$class_exception_handler::logContext( $context );
+				
+				$heigt =
+				
+				$width = DIMENSION_MAXIMUM_AVATAR_LONG_EDGE;
+			}
 			
-				throw new \Exception( EXCEPTION_INVALID_ARGUMENT );
-
 			// save the original height
 			$_height = $height;
 
