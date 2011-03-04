@@ -2143,7 +2143,7 @@ namespace sefi
 	
 				$class_exception_handler::logContext( $context );
 				
-				$heigt =
+				$heigth =
 				
 				$width = DIMENSION_MAXIMUM_AVATAR_LONG_EDGE;
 			}
