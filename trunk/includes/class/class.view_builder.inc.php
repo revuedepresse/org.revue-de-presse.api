@@ -9207,7 +9207,7 @@ class View_Builder extends User_Interface
 						if (
 							! is_string( $disclaimer_index ) &&
 							is_array( $disclaimer_index ) &&
-							isse( $disclaimer_index[ENTITY_DISCLAIMER] )
+							isset( $disclaimer_index[ENTITY_DISCLAIMER] )
 						)
 
 							$disclaimer_value =
