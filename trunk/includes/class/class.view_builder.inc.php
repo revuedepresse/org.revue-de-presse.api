@@ -9204,7 +9204,11 @@ class View_Builder extends User_Interface
 							$index
 						);
 						
-						if ( ! is_string( $disclaimer_index[ENTITY_DISCLAIMER] ) )
+						if (
+							! is_string( $disclaimer_index ) &&
+							is_array( $disclaimer_index ) &&
+							isse( $disclaimer_index[ENTITY_DISCLAIMER] )
+						)
 
 							$disclaimer_value =
 								$disclaimer_index[ENTITY_DISCLAIMER]
