@@ -134,7 +134,14 @@ class Message extends Header
 		*
 		*/
 
-		fprint( $search_results );
+		fprint(
+			array(
+				'[search results]',
+				$search_results,
+				'[maxima]',
+				$max_uids
+			)
+		);
 
 		reset( $search_results );
 
@@ -142,11 +149,17 @@ class Message extends Header
 
 		reset( $search_results );
 
+		ob_start();
+
 		while ( list( $label, $uids ) = each( $search_results ) )
 		{
 			$_keywords = $label . ' ' .SEPARATOR_LABEL_SUBJECT .' ' . $subject;
 
 			$max_uid = $max_uids[$_keywords];
+			
+			if ( $max_uid === FALSE )
+			
+				$max_uid = -1;
 
 			/**
 			*
@@ -154,8 +167,8 @@ class Message extends Header
 			* for provided search criteria
 			* 
 			*/
-
-			$max_uid_index = array_search( $max_uid, $uids, TRUE );
+	
+			$max_uid_index = array_search( $max_uid, $uids );
 
 			while ( ( list( $index, $uid ) = each( $uids ) ) )
 			{
@@ -179,14 +192,16 @@ class Message extends Header
 						$body = imap_body( $resource, $uid, FT_UID ),
 						$header->{PROPERTY_ID}
 					);
+					
+					echo
+						'[uid :: ', $uid, ']<br /><br/>',
+						'[header]', '<br /><br/>',
+						'<pre>', $header_value, '</pre>', '<br/><br/>',
+						'[body]', '<br /><br/>',
+						'<pre>', $body, '</pre>', '<br/><br/><br/><br/>'
+					;
 
-					//echo
-					//	'[uid :: ', $uid, ']<br /><br/>',
-					//	'[header]', '<br /><br/>',
-					//	'<pre>', $header_value, '</pre>', '<br/><br/>',
-					//	'[body]', '<br /><br/>',
-					//	'<pre>', $body, '</pre>', '<br/><br/><br/><br/>'
-					//;
+					ob_end_flush();
 				}
 			}
 

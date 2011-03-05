@@ -18,7 +18,7 @@
 $class_message = $class_application::getMessageClass();
 
 //$class_message::import();
-//
+
 $class_message::import( '*', array( 'interests' ) );
 
 $class_message::import( '*', array( 'photography' ) );
