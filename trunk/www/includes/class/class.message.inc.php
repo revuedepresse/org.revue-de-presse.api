@@ -154,15 +154,13 @@ class Message extends Header
 			* for provided search criteria
 			* 
 			*/
-	
-			$max_uid_index = array_search( $max_uid, $uids );
+
+			$max_uid_index = array_search( $max_uid, $uids, TRUE );
 
 			while ( ( list( $index, $uid ) = each( $uids ) ) )
 			{
 				if ( $index > $max_uid_index )
 				{
-					ob_start();
-
 					/**
 					*
 					* Save headers and their corresponding messages
@@ -189,8 +187,6 @@ class Message extends Header
 					//	'[body]', '<br /><br/>',
 					//	'<pre>', $body, '</pre>', '<br/><br/><br/><br/>'
 					//;
-
-					ob_end_flush();
 				}
 			}
 
