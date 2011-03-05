@@ -545,14 +545,16 @@ class Api extends Transfer
 
 		reset( $labels );
 
-		$class_dumper::log(
-			__METHOD__,
-			array(
-				'search results: ',
-				$search_results
-			),
-			$verbose_mode
-		);
+		//if ( $verbose_mode )
+		//
+		//	$class_dumper::log(
+		//		__METHOD__,
+		//		array(
+		//			'search results: ',
+		//			$search_results
+		//		),
+		//		$verbose_mode
+		//	);
 
 		return $search_results;
 	}
