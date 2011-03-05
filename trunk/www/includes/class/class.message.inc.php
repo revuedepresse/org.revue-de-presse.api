@@ -53,6 +53,8 @@ class Message extends Header
 	{
 		global $class_application, $verbose_mode;
 
+		$class_dumper = $class_application::getDumperClass();
+
 		$class_header = $class_application::getHeaderClass();
 
 		if ( is_null( $subject ) )
@@ -116,16 +118,16 @@ class Message extends Header
 
 			list( , $criteria ) = explode( SEPARATOR_LABEL_SUBJECT,  $keywords );
 
-			$criteria =
-				'SUBJECT "'.
-				(
-						$subject === REGEXP_ANY
-					?
-						''
-					:
-						$subject
-				).'"'
-			;
+			$criteria = 'SUBJECT "'.$subject.'"';
+
+			$class_dumper::log(
+				__METHOD__,
+				array(
+					'[criteria]',
+					$criteria	  
+				),
+				$verbose_mode
+			);
 
 			$search_results[$label] =
 				imap_search( $resource, $criteria, SE_UID )
