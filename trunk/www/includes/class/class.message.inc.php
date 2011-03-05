@@ -181,14 +181,14 @@ class Message extends Header
 						$body = imap_body( $resource, $uid, FT_UID ),
 						$header->{PROPERTY_ID}
 					);
-					
-					echo
-						'[uid :: ', $uid, ']<br /><br/>',
-						'[header]', '<br /><br/>',
-						'<pre>', $header_value, '</pre>', '<br/><br/>',
-						'[body]', '<br /><br/>',
-						'<pre>', $body, '</pre>', '<br/><br/><br/><br/>'
-					;
+
+					//echo
+					//	'[uid :: ', $uid, ']<br /><br/>',
+					//	'[header]', '<br /><br/>',
+					//	'<pre>', $header_value, '</pre>', '<br/><br/>',
+					//	'[body]', '<br /><br/>',
+					//	'<pre>', $body, '</pre>', '<br/><br/><br/><br/>'
+					//;
 
 					ob_end_flush();
 				}
