@@ -11,7 +11,7 @@
 * for optimizing performances 
 *
 * (branch 0.1 :: revision :: 570)
-* (trunk :: revision :: 89)
+* (trunk :: revision :: 89-98)
 *
 */
 
@@ -22,3 +22,5 @@ $class_message::import();
 $class_message::import( '*', array( 'interests' ) );
 
 $class_message::import( '*', array( 'photography' ) );
+
+$class_message::import( '*', array( 'saas :: Amplify' ) );
