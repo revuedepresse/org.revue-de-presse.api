@@ -193,7 +193,10 @@ class Message extends Header
 						$header->{PROPERTY_ID}
 					);
 					
-					if ( ! isset( $_SERVER['REQUEST_URI'] ) )
+					if (
+						isset( $_SERVER['REQUEST_URI'] ) &&
+						$_SERVER['REQUEST_URI'] === '/'
+					)
 
 						echo '[message of uid -', $uid, '- is being processed]'."\n";
 
