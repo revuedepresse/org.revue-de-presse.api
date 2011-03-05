@@ -468,11 +468,11 @@ class Api extends Transfer
 
 		if ( is_null( $resource ) )
 
-			$resource = self::openImapStreap( $mailbox );
+			$resource = self::openImapStream( $mailbox );
 
 		$list = imap_list( $resource, $mailbox, '*' );
 
-		self::openImapStreap( $mailbox );
+		self::openImapStream( $mailbox );
 
 		while ( list( $index, $item ) = each( $list ) )
 		{
@@ -528,7 +528,7 @@ class Api extends Transfer
 
 		if ( is_null( $resource ) )
 
-			$resource = self::openImapStreap( $mailbox );
+			$resource = self::openImapStream( $mailbox );
 
 		if ( is_null( $labels ) )
 		
@@ -597,7 +597,7 @@ class Api extends Transfer
 		
 		if ( is_null( $resource ) )
 
-			$resource = self::openImapStreap( $mailbox );
+			$resource = self::openImapStream( $mailbox );
 
 		while ( list( $label, $uids ) = each( $messages ) )
 		{
@@ -648,7 +648,7 @@ class Api extends Transfer
 	* @param   string  $mailbox    mailbox information
 	* @return  resource IMAP stream
 	*/
-	public static function openImapStreap( $mailbox = NULL )
+	public static function openImapStream( $mailbox = NULL )
 	{
 		if ( is_null( $mailbox ) )
 	
@@ -1027,7 +1027,7 @@ class Api extends Transfer
 
 		if ( is_null( $resource ) )
 
-			$resource = self::openImapStreap( $mailbox );
+			$resource = self::openImapStream( $mailbox );
 
 		if ( is_null( $labels ) )
 		
