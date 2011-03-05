@@ -125,6 +125,7 @@ assignConstant('PROPERTY_ID', 'id');
 assignConstant('PROPERTY_IDENTIFIER', 'identifier');
 assignConstant('PROPERTY_IDENTITY', 'identity');
 assignConstant('PROPERTY_IMAGE', 'image');
+assignConstant('PROPERTY_IMAP_MESSAGE_NUMBER', 'imap_message_number');
 assignConstant('PROPERTY_IMAP_UID', 'imap_uid');
 assignConstant('PROPERTY_INDEX', 'index');
 assignConstant('PROPERTY_INSTANCE', 'instance');
