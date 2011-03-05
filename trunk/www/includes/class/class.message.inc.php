@@ -156,10 +156,6 @@ class Message extends Header
 			$_keywords = $label . ' ' .SEPARATOR_LABEL_SUBJECT .' ' . $subject;
 
 			$max_uid = $max_uids[$_keywords];
-			
-			if ( $max_uid === FALSE )
-			
-				$max_uid = -1;
 
 			/**
 			*
@@ -168,7 +164,11 @@ class Message extends Header
 			* 
 			*/
 	
-			$max_uid_index = array_search( $max_uid, $uids );
+			$max_uid_index = array_search( $max_uid, $uids, TRUE );
+
+			if ( $max_uid_index === FALSE )
+			
+				$max_uid_index = -1;
 
 			while ( ( list( $index, $uid ) = each( $uids ) ) )
 			{
@@ -193,13 +193,9 @@ class Message extends Header
 						$header->{PROPERTY_ID}
 					);
 					
-					echo
-						'[uid :: ', $uid, ']<br /><br/>',
-						'[header]', '<br /><br/>',
-						'<pre>', $header_value, '</pre>', '<br/><br/>',
-						'[body]', '<br /><br/>',
-						'<pre>', $body, '</pre>', '<br/><br/><br/><br/>'
-					;
+					if ( ! isset( $_SERVER['REQUEST_URI'] ) )
+
+						echo '[message of uid -', $uid, '- is being processed]'."\n";
 
 					ob_end_flush();
 				}
