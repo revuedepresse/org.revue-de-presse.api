@@ -23,6 +23,8 @@ $class_dumper = $class_application::getDumperClass();
 
 $criteria = 'SUBJECT "slashdot"';
 
+$last_uid_recorded = 110213;
+
 $mailbox =
 
 $resource = NULL;
@@ -54,75 +56,60 @@ while ( list( , $label ) = each( $labels ) )
 
 reset( $search_results );
 
-list( , $uids ) = each( $search_results );
-
-end( $uids );
-
-list( , $uid ) = each( $uids );
-
-if ( $verbose_mode )
-
-	echo 'last uid: ', $uid;
-
-$class_dumper::log(
-	__METHOD__,
-	array(
-		'[last uid]',
-		$uid
-	),
-	$verbose_mode
-);
-
-//while ( list( $label, $uids ) = each( $search_results ) )
-//{
-//	while (
-//		( list( , $uid ) = each( $uids ))
-//	)
-//	{
-//		if ( $uid > 110213 )
-//		{
-//			imap_reopen( $resource, $label );
-//	
-//			$_messages[ $uid ] = array(
-//				PROPERTY_BODY =>
-//					imap_fetchbody( $resource, $uid, '1', FT_UID ),
-//				PROPERTY_HEADER =>
-//					imap_fetchheader( $resource, $uid, FT_UID ),
-//				PROPERTY_STRUCTURE =>
-//					imap_fetchstructure( $resource, $uid, FT_UID )
-//			);
-//		}
-//	}
+//list( , $uids ) = each( $search_results );
+//reset( $search_results );
 //
-//	reset( $uids );
-//}
+//end( $uids );
+//list( , $uid ) = each( $uids );
+//reset( $uids );
 //
-//if ( is_array( $messages )  && count( $messages ) )
-//{
-//	end( $messages );
-//	list( $uid ) = each( $messages );
 //
-//	echo $uid;
+//if ( $verbose_mode )
 //
-//	$class_dumper::log(
-//		__METHOD__,
-//		array(
-//			'[latest uid]',
-//			$uid
-//		),
-//		TRUE
-//	);	
+//	echo 'last uid: ', $uid;
 //
-//	foreach ( $messages as $uid => $properties )
-//	{
-//		$header = $class_header::make(
-//			$properties[PROPERTY_HEADER],
-//			$uid
-//		);
-//	
-//		$message = $class_message::make(
-//			$properties[PROPERTY_BODY],
-//			$header->{PROPERTY_ID}
-//		);
-//	}
-//}
+//$class_dumper::log(
+//	__METHOD__,
+//	array(
+//		'[last uid]',
+//		$uid
+//	),
+//	$verbose_mode
+//);
+
+$last_uid_recorded_index = array_search( $last_uid_recorded, $uids );
+
+while ( list( $label, $uids ) = each( $search_results ) )
+{
+	while (
+		( list( $index, $uid ) = each( $uids ) )
+	)
+	{
+		if ( $index > $last_uid_recorded_index )
+		{
+			imap_reopen( $resource, $label );
+	
+			$header = $class_header::make(
+				imap_fetchheader( $resource, $uid, FT_UID ),
+				$uid
+			);
+
+			$message = $class_message::make(
+				$body = imap_fetchbody( $resource, $uid, '1', FT_UID ),
+				$header->{PROPERTY_ID}
+			);
+
+			if ( $verbose_mode )
+
+				echo
+					'[current uid] <br /><br />', $uid, '<br />', '<br />',
+					'[message body] <br /><br />', $body,
+					'<br /><br /><br /><br />'
+				;
+		}
+	}
+
+	reset( $uids );
+}
+
+reset( $search_results );
