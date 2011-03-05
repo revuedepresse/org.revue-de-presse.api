@@ -172,6 +172,8 @@ class Message extends Header
 			{
 				if ( $index > $max_uid_index )
 				{
+					ob_start();
+
 					/**
 					*
 					* Save headers and their corresponding messages
@@ -194,6 +196,9 @@ class Message extends Header
 					if ( ! isset( $_SERVER['REQUEST_URI'] ) )
 
 						echo '[message of uid -', $uid, '- is being processed]'."\n";
+
+					ob_flush();
+					flush();
 				}
 			}
 
