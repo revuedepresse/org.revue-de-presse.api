@@ -172,8 +172,6 @@ class Message extends Header
 			{
 				if ( $index > $max_uid_index )
 				{
-					ob_start();
-
 					/**
 					*
 					* Save headers and their corresponding messages
@@ -192,16 +190,6 @@ class Message extends Header
 						$body = imap_body( $resource, $uid, FT_UID ),
 						$header->{PROPERTY_ID}
 					);
-					
-					if (
-						isset( $_SERVER['REQUEST_URI'] ) &&
-						$_SERVER['REQUEST_URI'] === '/'
-					)
-
-						echo '[message of uid -', $uid, '- is being processed]'."\n";
-
-					ob_flush();
-					flush();
 				}
 			}
 
