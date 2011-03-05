@@ -616,6 +616,10 @@ class Api extends Transfer
 
 			$resource = self::openImapStream( $mailbox );
 
+		fprintf( imap_getmailboxes( $resource , $mailbox , '*' ) );
+		
+		exit();
+
 		while ( list( $label, $uids ) = each( $messages ) )
 		{
 			while (
