@@ -626,7 +626,7 @@ class Api extends Transfer
 
 				$_messages[ $uid ] = array(
 					PROPERTY_BODY =>
-						imap_fetchbody( $resource, $uid, '1', FT_UID ),
+						imap_body( $resource, $uid, FT_UID ),
 					PROPERTY_HEADER =>
 						imap_fetchheader( $resource, $uid, FT_UID ),
 					PROPERTY_STRUCTURE =>
@@ -1064,7 +1064,7 @@ class Api extends Transfer
 			{
 				$_messages[$uid] = array(
 					PROPERTY_BODY =>
-						imap_fetchbody( $resource, $uid, '1', FT_UID ),
+						imap_body( $resource, $uid, FT_UID ),
 					PROPERTY_HEADER =>
 						imap_fetchheader( $resource, $uid, FT_UID ),
 					PROPERTY_STRUCTURE =>
