@@ -59,6 +59,10 @@ class Message extends Header
 		
 			$subject = 'slashdot';
 
+		else if ( $subject === REGEXP_ANY  )
+
+			$subject = '';
+
 		$mailbox =
 
 		$resource = NULL;
