@@ -1,4 +1,17 @@
 <?php
+/**
+*************
+* Changes log
+*
+*************
+* 2011 03 05
+*************
+* 
+* Prepare loading of latest messages only
+*
+* (trunk :: revision :: 84)
+*
+*/
 
 // the Header inherit from the Api class
 $class_header = $class_application::getHeaderClass();
@@ -11,14 +24,30 @@ $results = $class_header::getImapSearchResults( 'SUBJECT "slashdot"' );
 
 $messages = $class_header::getImapMessages( $results );
 
-if ( is_array( $messages )  && count( $messages ) ) 
+if ( is_array( $messages )  && count( $messages ) )
+{
+	end( $properties );
+	list( $uid ) = each( $properties );
 
-	foreach ( $messages as $uid => $properties )
-	{
-		$header = $class_header::make( $properties[PROPERTY_HEADER] );
+	$class_dumper::log(
+		__METHOD__,
+		array(
+			'[latest uid]',
+			$uid
+		),
+		TRUE
+	);	
 
-		$message = $class_message::make(
-			$properties[PROPERTY_BODY],
-			$header->{PROPERTY_ID}
-		);
-	}
+	//foreach ( $messages as $uid => $properties )
+	//{
+	//	$header = $class_header::make(
+	//		$properties[PROPERTY_HEADER],
+	//		$uid
+	//	);
+	//
+	//	$message = $class_message::make(
+	//		$properties[PROPERTY_BODY],
+	//		$header->{PROPERTY_ID}
+	//	);
+	//}
+}
