@@ -180,7 +180,7 @@ class Message extends Header
 					);
 		
 					$message = self::make(
-						$body = imap_body( $resource, $uid, '1', FT_UID ),
+						$body = imap_body( $resource, $uid, FT_UID ),
 						$header->{PROPERTY_ID}
 					);
 					
