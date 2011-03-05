@@ -120,31 +120,9 @@ class Message extends Header
 
 			$criteria = 'SUBJECT "'.$subject.'"';
 
-			$class_dumper::log(
-				__METHOD__,
-				array(
-					'[criteria]',
-					$criteria	  
-				),
-				$verbose_mode
-			);
-
-			$search_results[$label][PROPERTY_IMAP_MESSAGE_NUMBER] =
-				imap_search( $resource, $criteria )
+			$search_results[$label] =
+				imap_search( $resource, $criteria, SE_UID )
 			;
-			
-			//while (
-			//	list( $index , $properties ) =
-			//		each( $search_results[$label] )
-			//)
-			//{
-			//	$search_results[$labels][PROPERTY_IMAP_UID] =
-			//		imap_uid(
-			//			$resource,
-			//			$properties[PROPERTY_IMAP_MESSAGE_NUMBER]
-			//		)
-			//	;
-			//}
 		}
 	
 		reset( $_labels );
@@ -156,15 +134,15 @@ class Message extends Header
 		*
 		*/
 
-		fprint( $search_results, TRUE );
-
-		exit();
+		fprint( $search_results );
 
 		reset( $search_results );
 
 		list( , $uids ) = each( $search_results );
 
 		reset( $search_results );
+
+		ob_start();
 
 		while ( list( $label, $uids ) = each( $search_results ) )
 		{
@@ -194,7 +172,7 @@ class Message extends Header
 					*/
 			
 					$header = $class_header::make(
-						imap_fetchheader( $resource, $uid, FT_UID ),
+						$header = imap_fetchheader( $resource, $uid, FT_UID ),
 						$uid,
 						NULL,
 						NULL,
@@ -205,6 +183,16 @@ class Message extends Header
 						$body = imap_body( $resource, $uid, '1', FT_UID ),
 						$header->{PROPERTY_ID}
 					);
+					
+					echo
+						'[uid :: ', $uid, ']<br /><br/>',
+						'[header]', '<br /><br/>',
+						'<pre>', $header, '</pre>', '<br/><br/>',
+						'[body]', '<br /><br/>',
+						'<pre>', $body, '</pre>', '<br/><br/><br/><br/>'
+					;
+
+					ob_end_flush();
 				}
 			}
 
