@@ -149,8 +149,6 @@ class Message extends Header
 
 		reset( $search_results );
 
-		ob_start();
-
 		while ( list( $label, $uids ) = each( $search_results ) )
 		{
 			$_keywords = $label . ' ' .SEPARATOR_LABEL_SUBJECT .' ' . $subject;
@@ -196,8 +194,6 @@ class Message extends Header
 					if ( ! isset( $_SERVER['REQUEST_URI'] ) )
 
 						echo '[message of uid -', $uid, '- is being processed]'."\n";
-
-					ob_end_flush();
 				}
 			}
 
