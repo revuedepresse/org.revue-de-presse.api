@@ -56,9 +56,10 @@ while ( list( , $label ) = each( $labels ) )
 
 reset( $search_results );
 
-//list( , $uids ) = each( $search_results );
-//reset( $search_results );
-//
+list( , $uids ) = each( $search_results );
+
+reset( $search_results );
+
 //end( $uids );
 //list( , $uid ) = each( $uids );
 //reset( $uids );
