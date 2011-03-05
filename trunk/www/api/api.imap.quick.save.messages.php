@@ -33,11 +33,11 @@ $search_results = array();
 
 if ( is_null( $mailbox ) && is_null( $resource ) )
 
-	$mailbox = self::getImapMailbox();
+	$mailbox = $class_header::getImapMailbox();
 
 if ( is_null( $resource ) )
 
-	$resource = self::openImapStream( $mailbox );
+	$resource = $class_header::openImapStream( $mailbox );
 
 if ( is_null( $labels ) )
 
@@ -51,6 +51,8 @@ while ( list( , $label ) = each( $labels ) )
 		imap_search( $resource, $criteria, SE_UID )
 	;
 }
+
+reset( $search_results );
 
 list( , $uids ) = each( $search_results );
 
