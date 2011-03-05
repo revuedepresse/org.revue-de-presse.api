@@ -19,8 +19,14 @@ class Deployer extends I18n
 
 		$condition_deployment_first_level  =
 			isset( $_SERVER['SERVER_NAME'] ) &&
-			in_array( $_SERVER['SERVER_NAME'], array( '## FILL HOSTNAME ##', '## FILL HOSTNAME ##', 'www.## FILL HOSTNAME ##' ) ) ||
-			(
+			in_array(
+				$_SERVER['SERVER_NAME'],
+				array(
+					'## FILL HOSTNAME ##',
+					'## FILL HOSTNAME ##',
+					'www.## FILL HOSTNAME ##'
+				)
+			) || (
 				! isset( $_SERVER['SERVER_NAME'] ) &&
 				isset( $_SERVER['SCRIPT_NAME'] ) &&
 				preg_match('/## FILL HOSTNAME ##/', $_SERVER['SCRIPT_NAME'])
