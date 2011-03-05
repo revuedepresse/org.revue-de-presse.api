@@ -129,9 +129,22 @@ class Message extends Header
 				$verbose_mode
 			);
 
-			$search_results[$label] =
-				imap_search( $resource, $criteria, SE_UID )
+			$search_results[$label][PROPERTY_IMAP_MESSAGE_NUMBER] =
+				imap_search( $resource, $criteria )
 			;
+			
+			//while (
+			//	list( $index , $properties ) =
+			//		each( $search_results[$label] )
+			//)
+			//{
+			//	$search_results[$labels][PROPERTY_IMAP_UID] =
+			//		imap_uid(
+			//			$resource,
+			//			$properties[PROPERTY_IMAP_MESSAGE_NUMBER]
+			//		)
+			//	;
+			//}
 		}
 	
 		reset( $_labels );
