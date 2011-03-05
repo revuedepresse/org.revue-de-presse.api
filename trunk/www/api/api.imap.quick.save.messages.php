@@ -23,7 +23,20 @@ $class_dumper = $class_application::getDumperClass();
 
 $criteria = 'SUBJECT "slashdot"';
 
-$last_uid_recorded = 110213;
+$select_last_uid_recorded = '
+	SELECT
+		max( hdr_imap_uid ) AS last_uid_recorded
+	FROM
+		weaving_preprod
+';
+
+$class_sql = $class_application::getSqlClass();
+
+$resource = $class_sql::query( $last_uid_recorded );
+
+$results = $resource->fetch_object();
+
+$last_uid_recorded = $results->last_uid_recorded;
 
 $mailbox =
 
@@ -100,13 +113,13 @@ while ( list( $label, $uids ) = each( $search_results ) )
 				$header->{PROPERTY_ID}
 			);
 
-			if ( $verbose_mode )
-
-				echo
-					'[current uid] <br /><br />', $uid, '<br />', '<br />',
-					'[message body] <br /><br />', $body,
-					'<br /><br /><br /><br />'
-				;
+			//if ( $verbose_mode )
+			//
+			//	echo
+			//		'[current uid] <br /><br />', $uid, '<br />', '<br />',
+			//		'[message body] <br /><br />', $body,
+			//		'<br /><br /><br /><br />'
+			//	;
 		}
 	}
 
