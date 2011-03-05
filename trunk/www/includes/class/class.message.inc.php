@@ -59,10 +59,6 @@ class Message extends Header
 		
 			$subject = 'slashdot';
 
-		else if ( $subject === REGEXP_ANY  )
-
-			$subject = '';
-
 		$mailbox =
 
 		$resource = NULL;
@@ -125,7 +121,16 @@ class Message extends Header
 
 			list( , $criteria ) = explode( SEPARATOR_LABEL_SUBJECT,  $keywords );
 
-			$criteria = 'SUBJECT "'.$subject.'"';
+			$criteria =
+				'SUBJECT "'.
+				(
+						$subject === REGEXP_ANY
+					?
+						''
+					:
+						$subject
+				).'"'
+			;
 
 			$search_results[$label] =
 				imap_search( $resource, $criteria, SE_UID )
