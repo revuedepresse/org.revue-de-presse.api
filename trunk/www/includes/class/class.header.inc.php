@@ -1,4 +1,21 @@
 <?php
+/**
+*************
+* Changes log
+*
+*************
+* 2011 03 05
+*************
+* 
+* Add the keywords property to instances of the header class
+*
+* method affected ::
+*
+* HEADER :: make
+*
+* (branch 0.1 :: revision :: 571)
+*
+*/
 
 /**
 * Header class
@@ -65,7 +82,14 @@ class Header extends Api
 		else
 
 			$subject = $arguments[3];
-	
+
+		if ( ! isset($arguments[4] ) )
+
+			$keywords = NULL;
+		else
+
+			$keywords = $arguments[4];
+
 		$properties = array(
 			PROPERTY_VALUE => $value,
 			PROPERTY_HASH => sha1( $value )
@@ -83,7 +107,10 @@ class Header extends Api
 
 			$properties[PROPERTY_SUBJECT] = $subject;
 
+		if ( ! is_null( $keywords ) )
+
+			$properties[PROPERTY_KEYWORDS] = $keywords;
+
 		return self::add( $properties );
 	}
 }
-?>
