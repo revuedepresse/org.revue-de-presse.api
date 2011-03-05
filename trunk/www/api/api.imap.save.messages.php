@@ -22,12 +22,50 @@ $class_dumper = $class_application::getDumperClass();
 
 $results = $class_header::getImapSearchResults( 'SUBJECT "slashdot"' );
 
-$messages = $class_header::getImapMessages( $results );
+$mailbox =
+
+$resource = NULL;
+
+$_messages = array();
+
+if ( is_null( $mailbox ) )
+
+	$mailbox = self::getImapMailbox();
+
+if ( is_null( $resource ) )
+
+	$resource = self::openImapStreap( $mailbox );
+
+while ( list( $label, $uids ) = each( $results ) )
+{
+	while (
+		( list( , $uid ) = each( $uids ))
+	)
+	{
+		if ( $uid > 110213 )
+		{
+			imap_reopen( $resource, $label );
+	
+			$_messages[ $uid ] = array(
+				PROPERTY_BODY =>
+					imap_fetchbody( $resource, $uid, '1', FT_UID ),
+				PROPERTY_HEADER =>
+					imap_fetchheader( $resource, $uid, FT_UID ),
+				PROPERTY_STRUCTURE =>
+					imap_fetchstructure( $resource, $uid, FT_UID )
+			);
+		}
+	}
+
+	reset( $uids );
+}
 
 if ( is_array( $messages )  && count( $messages ) )
 {
-	end( $properties );
-	list( $uid ) = each( $properties );
+	end( $messages );
+	list( $uid ) = each( $messages );
+
+	echo $uid;
 
 	$class_dumper::log(
 		__METHOD__,
