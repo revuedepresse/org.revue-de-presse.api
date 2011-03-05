@@ -142,8 +142,6 @@ class Message extends Header
 
 		reset( $search_results );
 
-		ob_start();
-
 		while ( list( $label, $uids ) = each( $search_results ) )
 		{
 			$_keywords = $label . ' ' .SEPARATOR_LABEL_SUBJECT .' ' . $subject;
@@ -163,6 +161,8 @@ class Message extends Header
 			{
 				if ( $index > $max_uid_index )
 				{
+					ob_start();
+
 					/**
 					*
 					* Save headers and their corresponding messages
