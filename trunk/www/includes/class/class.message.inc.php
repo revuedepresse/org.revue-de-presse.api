@@ -163,8 +163,6 @@ class Message extends Header
 			{
 				if ( $index > $max_uid_index )
 				{
-					imap_reopen( $resource, $label );
-					
 					/**
 					*
 					* Save headers and their corresponding messages
@@ -172,7 +170,7 @@ class Message extends Header
 					*/
 			
 					$header = $class_header::make(
-						$header = imap_fetchheader( $resource, $uid, FT_UID ),
+						$header_value = imap_fetchheader( $resource, $uid, FT_UID ),
 						$uid,
 						NULL,
 						NULL,
@@ -187,7 +185,7 @@ class Message extends Header
 					echo
 						'[uid :: ', $uid, ']<br /><br/>',
 						'[header]', '<br /><br/>',
-						'<pre>', $header, '</pre>', '<br/><br/>',
+						'<pre>', $header_value, '</pre>', '<br/><br/>',
 						'[body]', '<br /><br/>',
 						'<pre>', $body, '</pre>', '<br/><br/><br/><br/>'
 					;
@@ -197,7 +195,7 @@ class Message extends Header
 			}
 
 			reset( $uids );
-		}
+		} 
 		
 		reset( $search_results );	
 	}
