@@ -60,7 +60,7 @@ end( $uids );
 
 list( , $uid ) = each( $uids );
 
-if ( $verbose )
+if ( $verbose_mode )
 
 	echo 'last uid: ', $uid;
 
@@ -70,7 +70,7 @@ $class_dumper::log(
 		'[last uid]',
 		$uid
 	),
-	$verbose
+	$verbose_mode
 );
 
 //while ( list( $label, $uids ) = each( $search_results ) )
