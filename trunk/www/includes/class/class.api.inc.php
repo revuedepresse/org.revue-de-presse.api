@@ -1,4 +1,21 @@
 <?php
+/**
+*************
+* Changes log
+*
+*************
+* 2011 03 05
+*************
+* 
+* Revise the method name used to open imap stream
+*
+* method affected
+*
+* API :: openImapStream
+* 
+* (revision 569)
+*
+*/
 
 /**
 * Api class

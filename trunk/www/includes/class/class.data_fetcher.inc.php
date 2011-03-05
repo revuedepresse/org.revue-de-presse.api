@@ -1,4 +1,21 @@
 <?php
+/**
+*************
+* Changes log
+*
+*************
+* 2011 03 05
+*************
+* 
+* Implement maximum uid retrieval
+*
+* method affected ::
+*
+* DATA FETCHER :: fetchMaxUid
+*
+* (branch 0.1 :: revision :: 570)
+*
+*/
 
 /**
 * Data Fetcher class
@@ -2075,6 +2092,51 @@ class Data_Fetcher extends Database
 	}
 
 	/**
+	* Get the maximum uid for provided search criteria
+	* 
+	* @param	string	$criteria	criteria
+	* @param	mixed	$type		uid type
+	* @return	mixed	uid 
+	*/
+	public static function fetchMaxUid( $criteria, $type = NULL )
+	{
+		global $class_application, $verbose_mode;
+
+		$class_db = $class_application::getDbClass();
+
+		$max_uid = NULL;
+
+		/**
+		*
+		* Case when IMAP uid are to be fetched
+		*
+		*/
+
+		if ( is_null( $type ) )
+		{
+			$select_last_uid_recorded = '
+				SELECT
+					max(
+						' .PREFIX_TABLE_COLUMN_HEADER . PROPERTY_IMAP_UID . '
+					) AS ' . PROPERTY_LAST_UID_RECORDED . '
+				FROM
+					' . DB_SEFI . '.' . TABLE_HEADER . '
+				WHERE
+					' . PREFIX_TABLE_COLUMN_HEADER . PROPERTY_KEYWORDS . 
+						' LIKE "%' . $criteria . '%"
+			';
+
+			$resource = $class_db::query( $select_last_uid_recorded );
+
+			$results = $resource->fetch_object();
+			
+			$max_uid = $results->{PROPERTY_LAST_UID_RECORDED};
+		}
+		
+		return $max_uid;
+	}
+
+	/**
 	* Get a list of entities
 	* 
 	* @param	string	$entity		document type
@@ -3889,4 +3951,3 @@ class Data_Fetcher extends Database
 		return $select_query;
 	}
 }
-?>
