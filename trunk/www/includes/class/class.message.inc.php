@@ -111,12 +111,7 @@ class Message extends Header
 				$_labels[$keywords] = $label;
 				
 			$max_uids[$keywords] = self::fetchMaxUid( $keywords );
-		}
-	
-		reset( $_labels );
 
-		while ( list( $keywords, $label ) = each( $_labels ) )
-		{
 			imap_reopen( $resource, $mailbox.$label );			
 
 			list( , $criteria ) = explode( SEPARATOR_LABEL_SUBJECT,  $keywords );
@@ -136,6 +131,8 @@ class Message extends Header
 				imap_search( $resource, $criteria, SE_UID )
 			;
 		}
+	
+		reset( $_labels );
 
 		/**
 		*
@@ -144,7 +141,9 @@ class Message extends Header
 		*
 		*/
 
-		fprint( $search_results );
+		fprint( $search_results, TRUE );
+
+		exit();
 
 		reset( $search_results );
 
@@ -188,7 +187,7 @@ class Message extends Header
 					);
 		
 					$message = self::make(
-						$body = imap_fetchbody( $resource, $uid, '1', FT_UID ),
+						$body = imap_body( $resource, $uid, '1', FT_UID ),
 						$header->{PROPERTY_ID}
 					);
 				}
