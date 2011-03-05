@@ -19,8 +19,8 @@ $class_message = $class_application::getMessageClass();
 
 //$class_message::import();
 //
-$class_message::import( '*', array( 'interests' ) );
+//$class_message::import( '*', array( 'interests' ) );
 //
-//$class_message::import( '*', array( 'photography' ) );
+$class_message::import( '*', array( 'photography' ) );
 
-//$class_message::import( '*', array( 'saas :: Amplify' ) );
+$class_message::import( '*', array( 'saas :: Amplify' ) );
