@@ -168,8 +168,7 @@ class Message extends Header
 			
 				$max_uid_index = -1;
 
-			fprint(array('[max uid index]', $max_uid_index, ), TRUE);
-			exit();
+			fprint( array( '[max uid index]', $max_uid_index ) ) ;
 
 			while ( ( list( $index, $uid ) = each( $uids ) ) )
 			{
