@@ -2127,7 +2127,7 @@ class Data_Fetcher extends Database
 			';
 
 			$resource = $class_db::query( $select_last_uid_recorded );
-
+exit();
 			$results = $resource->fetch_object();
 			
 			$max_uid = $results->{PROPERTY_LAST_UID_RECORDED};
