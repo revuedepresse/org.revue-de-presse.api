@@ -4,6 +4,15 @@
 * Changes log
 *
 *************
+* 2011 03 06
+*************
+* 
+* Get mailboxes to be imported from pattern
+*
+* (branch 0.1 :: revision :: 575)
+* (trunk :: revision :: 125)
+* 
+*************
 * 2011 03 05
 *************
 * 
@@ -17,10 +26,10 @@
 
 $class_message = $class_application::getMessageClass();
 
-$class_message::import();
+$mailboxes = $class_message::getMailboxes( '/^saas ::/');
+
+$class_message::import( '*', $mailboxes );
 
 $class_message::import( '*', array( 'interests' ) );
 
 $class_message::import( '*', array( 'photography' ) );
-
-$class_message::import( '*', array( 'saas :: Amplify' ) );

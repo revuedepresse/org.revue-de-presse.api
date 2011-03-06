@@ -45,11 +45,18 @@ class Message extends Header
 	/**
 	* Import messages into the database
 	*
-	* @param	string	$subject	message subject	
-	* @param	array	$labels		restriction labels
+	* @param	string		$subject	message subject	
+	* @param	array		$labels		restriction labels
+	* @param	string		$mailbox	mailbox settings
+	* @param	resource	$resource	IMAP resource
 	* @return	object	Message 	instance
 	*/
-	public static function import( $subject = NULL, $labels = NULL)
+	public static function import(
+		$subject = NULL,
+		$labels = NULL,
+		$mailbox = NULL,
+		$resource = NULL
+	)
 	{
 		global $class_application, $verbose_mode;
 
@@ -60,10 +67,6 @@ class Message extends Header
 		if ( is_null( $subject ) )
 		
 			$subject = 'slashdot';
-
-		$mailbox =
-
-		$resource = NULL;
 
 		$_messages =
 
@@ -169,6 +172,8 @@ class Message extends Header
 				$max_uid_index = -1;
 
 			fprint( array( '[max uid index]', $max_uid_index ) ) ;
+
+			imap_reopen( $resource, $mailbox.$label );			
 
 			while ( ( list( $index, $uid ) = each( $uids ) ) )
 			{

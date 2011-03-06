@@ -4,6 +4,21 @@
 * Changes log
 *
 *************
+* 2011 03 06
+*************
+*
+* Implement a method to get mailboxes
+*
+* method affected ::
+*
+* API :: getMailboxes
+* API :: getImapMailbox
+* API :: getImapStream
+*
+* (branch 0.1 :: revision :: 576)
+* (trunk :: revision :: 125)
+*
+*************
 * 2011 03 05
 *************
 * 
@@ -13,7 +28,7 @@
 *
 * API :: openImapStream
 * 
-* (revision 569)
+* (branch 0.1 :: revision :: 569)
 *
 */
 
@@ -72,6 +87,7 @@ class Api extends Transfer
 
 		return $store;
 	}
+
 	/**
 	* Initialize a store
 	*
@@ -562,43 +578,30 @@ class Api extends Transfer
 
 		reset( $labels );
 
-		//if ( $verbose_mode )
-		//
-		//	$class_dumper::log(
-		//		__METHOD__,
-		//		array(
-		//			'search results: ',
-		//			$search_results
-		//		),
-		//		$verbose_mode
-		//	);
-
 		return $search_results;
 	}
 
 	/**
-	* Get an IMAP mailbox
+	* Alias to getImapStream
 	*
 	* @return  string	IMAP mailbox settings
 	*/
 	public static function getImapMailbox()
 	{
-		// $mailbox = "{mail.## FILL HOSTNAME ##:143/novalidate-cert}";
-
-		return '{'.IMAP_HOST.':'.IMAP_PORT.IMAP_FLAGS.'}';
+		return self::getImapStream();
 	}
 
 	/**
 	* Get IMAP messages
 	*
 	* @param	mixed		$messages	messages
-	* @param	string		$mailbox	mailbox settings
+	* @param	string		$stream		IMAP stream
 	* @param	resource	$resource	IMAP resource
 	* @return  	integer		message sequence
 	*/
 	public static function getImapMessages(
 		$messages,
-		$mailbox = NULL,
+		$stream = NULL,
 		$resource = NULL
 	)
 	{
@@ -608,13 +611,13 @@ class Api extends Transfer
 
 		$_messages = array();
 
-		if ( is_null( $mailbox ) )
+		if ( is_null( $stream ) )
 		
-			$mailbox = self::getImapMailbox();
+			$stream  = self::getImapStream();
 		
 		if ( is_null( $resource ) )
 
-			$resource = self::openImapStream( $mailbox );
+			$resource = self::openImapStream( $stream );
 
 		while ( list( $label, $uids ) = each( $messages ) )
 		{
@@ -643,6 +646,70 @@ class Api extends Transfer
 	}
 
 	/**
+	* Get an IMAP stream
+	*
+	* @return  string	IMAP mailbox settings
+	*/
+	public static function getImapStream()
+	{
+		return '{'.IMAP_HOST.':'.IMAP_PORT.IMAP_FLAGS.'}';		
+	}
+
+	/**
+	* Get mailboxes
+	*
+	* @param	string		$pattern	pattern
+	* @param	string		$stream		IMAP stream
+	* @param	resource	$resource	IMAP resource
+	* @return  	integer		message sequence
+	*/
+	public static function getMailboxes(
+		$pattern,
+		$stream = NULL,
+		$resource = NULL
+	)
+	{
+		global $class_application, $verbose_mode;
+
+		$class_dumper = $class_application::getDumperClass();
+
+		$mailboxes = array();
+
+		if ( is_null( $stream ) )
+		
+			$stream = self::getImapStream();
+			
+		if ( is_null( $resource ) )
+		
+			$resource = self::openImapStream( $stream );
+
+		$imap_mailboxes = imap_getmailboxes( $resource, $stream, REGEXP_ANY );
+
+		fprint( $imap_mailboxes );
+
+		while ( list( , $_mailbox ) = each( $imap_mailboxes ) )
+		{
+			$mailbox_name =
+				str_replace(
+					$stream,
+					'',
+					$_mailbox->{PROPERTY_NAME}
+				)
+			;
+
+			if (
+				$match = preg_match( $pattern, $mailbox_name, $matches ) 
+			)
+
+				$mailboxes[] = $mailbox_name;
+		}
+
+		reset( $mailboxes );
+		
+		return $mailboxes;
+	}
+
+	/**
 	* Get a signature
 	*
 	* @param	boolean	$namespace	namespace flag
@@ -662,21 +729,20 @@ class Api extends Transfer
 	/**
 	* Open an IMAP stream
 	*
-	* @param   string  $mailbox    mailbox information
+	* @param   string  	$stream		IMAP stream
 	* @return  resource IMAP stream
 	*/
-	public static function openImapStream( $mailbox = NULL )
+	public static function openImapStream( $stream = NULL )
 	{
-		if ( is_null( $mailbox ) )
+		if ( is_null( $stream ) )
 	
-			$mailbox = self::getImapMailbox();
+			$stream = self::getImapStream();
 	
-		// $resource = imap_open($mailbox, "## FILL USERNAME ##@## FILL HOSTNAME ##", "## FILL ME ##");
-		$resource = imap_open( $mailbox, IMAP_USERNAME, IMAP_PASSWORD );
-	
-		if ( $resource )
+		if ( $_stream = imap_open( $stream, IMAP_USERNAME, IMAP_PASSWORD ) )
 		
-			return $resource;
+			$stream = $_stream;
+
+		return $stream;
 	}
 
 	/**
