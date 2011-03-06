@@ -26,10 +26,20 @@
 
 $class_message = $class_application::getMessageClass();
 
-$mailboxes = $class_message::getMailboxes( '/^saas ::/');
+$mailboxes_api = $class_message::getMailboxes( '/^API/');
 
-$class_message::import( '*', $mailboxes );
+$class_message::import( '*', $mailboxes_api );
 
-$class_message::import( '*', array( 'interests' ) );
+//$mailboxes_saas = $class_message::getMailboxes( '/^saas ::/');
 
-$class_message::import( '*', array( 'photography' ) );
+//$class_message::import( '*', $mailboxes_saas );
+
+$mailboxes_socs = $class_message::getMailboxes( '/^social networ/');
+
+$class_message::import( '*', $mailboxes_socs );
+
+//$class_message::import();
+
+//$class_message::import( '*', array( 'interests' ) );
+//
+//$class_message::import( '*', array( 'photography' ) );
