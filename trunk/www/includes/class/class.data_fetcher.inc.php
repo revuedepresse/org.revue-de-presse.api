@@ -2130,7 +2130,7 @@ class Data_Fetcher extends Database
 
 			$results = $resource->fetch_object();
 			
-			$max_uid = $results->{PROPERTY_LAST_UID_RECORDED};
+			$max_uid = (int) $results->{PROPERTY_LAST_UID_RECORDED};
 		}
 		
 		return $max_uid;
