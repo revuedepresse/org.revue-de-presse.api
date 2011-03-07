@@ -1,21 +1,4 @@
 <?php
-/**
-*************
-* Changes log
-*
-*************
-* 2011 03 04
-*************
-*
-* Revise the client redirection at comment post
-*
-* method affected ::
-* 
-* CONTROLLER :: checkPostedData
-* 
-* (revision 30)
-*
-*/
 
 /**
 * Controller class
@@ -177,7 +160,7 @@ class Controller extends Source
 					else if (is_numeric($callback_parameters))
 					{
 						$_node = $class_insight::fetchInsightNode($callback_parameters);
-	
+
 						if (
 							FALSE === strpos(
 								$current_URI,
@@ -773,4 +756,3 @@ class Controller extends Source
 		return $_class;
 	}
 }
-?>

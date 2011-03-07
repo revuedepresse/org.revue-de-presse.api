@@ -31,4 +31,3 @@ class Validator extends File_Manager
 		return $this->_dom;
 	}
 }
-?>

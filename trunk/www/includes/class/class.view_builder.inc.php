@@ -4434,8 +4434,8 @@ class View_Builder extends User_Interface
 								// load photographs
 								$item_collection =
 									$class_media_manager::loadPhotosByAuthorId(
-										//$member_identifier,
-										AUTHOR_IDENTIFIER_SHAL,
+										$member_identifier,
+										//AUTHOR_IDENTIFIER_SHAL,
 										FALSE
 									)
 								;
@@ -4500,9 +4500,12 @@ class View_Builder extends User_Interface
 		
 									// check the provided border
 									if (
+										(
 										$border *
 											PAGINATION_COUNT_PER_PAGE_PHOTOGRAPH  >
 												count( $item_collection )
+										) &&
+										count( $item_collection )
 									)
 		
 										$border = $border % count( $item_collection );
@@ -4767,7 +4770,8 @@ class View_Builder extends User_Interface
 						$parameters
 							[PLACEHOLDER_LINKS]
 								[DIALOG_MEMBER_ACCOUNT] =
-							URI_AFFORDANCE_EDIT_MEMBER_ACCOUNT
+							URI_AFFORDANCE_EDIT_MEMBER_ACCOUNT.'#'.
+								ACTION_EDIT_BASIC_INFORMATION
 						;
 					else
 	

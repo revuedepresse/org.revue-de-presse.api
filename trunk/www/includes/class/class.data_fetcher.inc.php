@@ -1799,7 +1799,7 @@ class Data_Fetcher extends Database
 			';
 			
 			$results_form = $class_db::query( $select_form );
-	
+
 			if ( is_object( $results_form ) && $results_form->num_rows )
 	
 				$callback_parameters = $results_form->fetch_object();
