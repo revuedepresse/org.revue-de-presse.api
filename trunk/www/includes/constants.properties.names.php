@@ -192,6 +192,7 @@ assignConstant('PROPERTY_PROPERTIES', 'properties');
 assignConstant('PROPERTY_PROPERTY', 'property');
 assignConstant('PROPERTY_PROPERTY_NAME', 'property_name');
 assignConstant('PROPERTY_PROTOCOL', 'protocol');
+assignConstant('PROPERTY_PUBLIC', 'public');
 assignConstant('PROPERTY_REPOSITORY', 'repository');
 assignConstant('PROPERTY_REFERRAL', 'referral');
 assignConstant('PROPERTY_RESOURCES', 'resources');
