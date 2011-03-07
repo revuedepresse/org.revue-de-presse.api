@@ -25,7 +25,8 @@
     <s id='disclaimer_confirm_do_you'>Do you confirm this operation?</s>
     <s id='disclaimer_edit_basic_information_requirements'>Starred* items are mandatory</s>
     <s id='disclaimer_required_input'>Required information</s>
-    <s id='disclaimer_retrieve_password_enter_email'>Please enter and submit your email to renew your password.</s>
+    <s id='disclaimer_retrieve_password_enter_email'>Please enter and submit your email to retrieve your password.</s>
+    <s id='disclaimer_send_document_requirements'>The greatest length of the photograph should be 500 pixels at least.</s>
     <s id='disclaimer_send_feedback_any_suggestion'>I love feedback!
 Share your insights and I will do my best to provide you with an appropriate answer within 48 hours ;)</s>
     <s id='disclaimer_sign_up_invitation'>'Weaving The Web' is a project under private beta testing.{LF}We will revert to you as soon as we are fully convinced our infrastucture can offer some acceptable quality of service.</s>
@@ -72,6 +73,9 @@ Share your insights and I will do my best to provide you with an appropriate ans
     <s id='label_sign_in_password'>Password</s>
     <s id='label_sign_in_login'>Email</s> 
     <s id='label_sign_in_password'>Password</s>
+    <s id='label_send_document_file'>Photograph</s>
+    <s id='label_send_document_title'>Title</s>
+    <s id='label_send_document_keywords'>Keywords</s>
     <s id='label_upload_photograph_file'>Photograph</s>
     <s id='label_upload_photograph_title'>Title</s>
     <s id='label_upload_photograph_keywords'>Keywords</s>
@@ -152,10 +156,11 @@ Share your insights and I will do my best to provide you with an appropriate ans
     <s id='status_saved'>Your application is saved</s>
     <s id='layout_title_level_1_change_password_alter_password'>Change password</s>
     <s id='layout_title_level_1_edit_basic_information_contact_information'>Contact information</s>
+    <s id='layout_title_level_1_send_document_upload_photograph'>Upload photograph</s>
+    <s id='layout_title_level_1_write_article'>Draw up an article</s>
     <s id='layout_title_level_2_change_password_alter_password'>Change password</s>
     <s id='layout_title_level_2_edit_basic_information_contact_information'>Contact information</s>
-    <s id='layout_title_level_1_upload_photograph'>Upload photograph</s>
-    <s id='layout_title_level_1_write_article'>Draw up an article</s>
+    <s id='layout_title_level_2_send_document_upload_photograph'>Upload photograph</s>
 	<s id='time_bad'>Bad time</s>
     <s id='title_edit_insight_node'>Edit insight node</s>
     <s id='title_home'>Home</s>
