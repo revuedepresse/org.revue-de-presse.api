@@ -755,7 +755,7 @@ body div#upload_photograph
         }
 
         body div#tabs div#change_password form fieldset div input#submit_password,
-        body div#tabs div#edit_basic_information form fieldset div input#submit_information
+        body div#tabs div#edit_basic_information form fieldset div input#submit_information,
         body div#tabs div#send_document form fieldset div input#submit_document
         {
             float: right;
