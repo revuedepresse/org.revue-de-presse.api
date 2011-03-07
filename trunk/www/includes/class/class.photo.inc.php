@@ -847,10 +847,20 @@ class Photo extends Toolbox
                     }
                     else
                     
-                        throw new Exception(
-                            EXCEPTION_MISSING_RESOURCE .
-                            ' ( ' . $path . ')'
-                        );
+                        try {
+                            throw new Exception(
+                                EXCEPTION_MISSING_RESOURCE .
+                                ' ( ' . $path . ')'
+                            );
+                        }
+                        catch ( Exception $exception )
+                        {
+                            /**
+                            *
+                            * FIXME
+                            *
+                            */
+                        }
 
                     return $image;
                 }
@@ -931,9 +941,9 @@ class Photo extends Toolbox
 
         if ( is_object( $attributes ) )
         {
-            $dimensions->{PROPERTY_HEIGHT} = $attributes->getHeight();
+        $dimensions->{PROPERTY_HEIGHT} = $attributes->getHeight();
         
-            $dimensions->{PROPERTY_WIDTH} = $attributes->getWidth();
+        $dimensions->{PROPERTY_WIDTH} = $attributes->getWidth();
         }
         else
         {
@@ -1117,3 +1127,4 @@ class Photo extends Toolbox
         }
     }
 }
+?>
