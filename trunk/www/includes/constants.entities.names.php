@@ -247,9 +247,8 @@ assignConstant('ENTITY_VALIDATOR', 'validator');
 assignConstant('ENTITY_VALUE', 'value');
 assignConstant('ENTITY_VIEW', 'view');
 assignConstant('ENTITY_VIEW_BUILDER', 'view_builder');
+assignConstant('ENTITY_VISIBILITY', 'visibility');
 assignConstant('ENTITY_VISITOR', 'visitor');
 assignConstant('ENTITY_WEAVER', 'weaver');
 assignConstant('ENTITY_YAML', 'yaml');
 assignConstant('ENTITY_ZIP_ARCHIVE', 'zip_archive');
-
-?>

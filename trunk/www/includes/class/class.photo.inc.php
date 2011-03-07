@@ -4,17 +4,17 @@
 * Changes log
 *
 *************
-* 2011 03 04
+* 2011 03 07
 *************
-* 
-* Revise the loadPhotography method by preventing the case
-* when no Photograph object can be retrieved
 *
+* Set author property as object or id depending on
+* type of argument provided
+* 
 * method affected ::
 *
-* PHOTO :: loadPhotography
-*
-* (revision 15)
+* PHOTO :: setAuthor
+* 
+* (revision 588)
 *
 */
 
@@ -198,11 +198,22 @@ class Photo extends Toolbox
     * @param    object $author  representing an Author instance
     * @return   nothing
     */	        
-    public function setAuthor($author) {
-        if (is_object($author) && get_class($author) == CLASS_AUTHOR) {
+    public function setAuthor($author)
+    {
+        if (
+            is_object( $author ) &&
+            get_class( $author ) == CLASS_AUTHOR)
+
             $this->_author = $author;
-        } else
+
+        else if ( is_integer( $author ) )
+        {
+            $this->_author = $author;
+        }
+        else
+        {
             throw new Exception('an Author instance has to be passed as an object');
+        }
     }
     
     /**
@@ -731,7 +742,7 @@ class Photo extends Toolbox
 
         if ( ! file_exists( $directory_proportions ) )
         
-            mkdir( $directory_proportions, 0755, TRUE );
+            mkdir( $directory_proportions );
 
         // set a path to a resized photograph
         $path_resized_photograph =
@@ -929,7 +940,7 @@ class Photo extends Toolbox
     * @param    integer $avatar avatar size
     * @return   mixed
     */
-    public static function loadPhotography( $id, $avatar = FALSE )
+    public static function loadPhotography($id, $avatar = FALSE)
     {
         global $class_application;
 
@@ -939,20 +950,11 @@ class Photo extends Toolbox
 
         $attributes = $class_data_fetcher::fetchPhotograph($id);
 
-        if ( is_object( $attributes ) )
-        {
         $dimensions->{PROPERTY_HEIGHT} = $attributes->getHeight();
         
         $dimensions->{PROPERTY_WIDTH} = $attributes->getWidth();
-        }
-        else
-        {
-            $dimensions->{PROPERTY_HEIGHT} = 
 
-            $dimensions->{PROPERTY_WIDTH} = 0;
-        }
-            
-        return $class_application::fetchPhotograph( $id, $dimensions, $avatar );
+        return $class_application::fetchPhotograph($id, $dimensions, $avatar);
     }
  
     /**
@@ -1127,4 +1129,3 @@ class Photo extends Toolbox
         }
     }
 }
-?>

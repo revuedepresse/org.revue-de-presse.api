@@ -19,4 +19,3 @@ class Media_Manager extends Diaporama
 		parent::__construct($id);
 	}
 }
-?>

@@ -12,6 +12,7 @@
     <s id="link_search_results">Search results</s>
     <s id="link_start">First page</s>
     <s id="link_top">Top</s>
+    <s id="property_author">Author</s>
     <s id="property_date_creation">Creation date</s>
     <s id="property_date_last_modification">Last modification date</s>
     <s id="property_keywords">Keywords</s>
@@ -24,12 +25,14 @@
     <s id="affordance_rate">Rate</s>
     <s id="affordance_remove">Remove</s>
     <s id="affordance_report">Report</s>
+    <s id="affordance_share">Share</s>
     <s id="affordance_suggest">Suggest</s>
     <s id="fact_like">Liked</s>
     <s id="fact_prefix_did_not">Didn't</s>
     <s id="fact_rated">Rated</s>
     <s id="fact_remove">Removed</s>
     <s id="fact_report">Reported</s>
+    <s id="fact_share">Shared</s>
     <s id="fact_suggest">Suggested</s>
     <s id="signature_email">SEFI's team</s>
 </lang>

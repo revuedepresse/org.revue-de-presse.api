@@ -395,7 +395,7 @@ class Diaporama extends Photo
                                             (int)$photos[$photo_id]->getHeight()
                                         );
             
-                                        imagejpeg( $thumbnail, $temporary_path, IMAGE_JPEG_QUALITY );
+                                        imagejpeg( $thumbnail, $temporary_path, 100 );
                                     }
                                 }
         
@@ -440,52 +440,37 @@ class Diaporama extends Photo
     * @param    boolean     $accept_avatars     accept avatars
     * @return	array	    containing Photo instances
     */	 
-    public static function loadPhotosByAuthorId($author_id, $accept_avatars = TRUE)
+    public static function loadPhotosByAuthorId(
+        $author_id,
+        $accept_avatars = TRUE
+    )
     {
-	    $database_connection = new Database_Connection();
-		$exceptions = null;
-		$photos = array();
-	
-        $retrieve_photo = '
-            SELECT
-                photo_id,
-				hash,
-                height,
-                keywords,
-                mime_type,
-                original_file_name,
-                size,
-                title,
-                width,
-                pht_date_creation,
-                pht_date_last_modification,
-                pht_status
-            FROM
-                `'.TABLE_PHOTOGRAPH.'`
-            WHERE
-                author_id = '.$author_id.' AND
-                pht_status != '.PHOTOGRAPH_STATUS_DISABLED.
-                (
-                    $accept_avatars === FALSE
-                ?
-                    ' AND pht_status != '.PHOTOGRAPH_STATUS_AVATAR
-                :
-                    ''
-                ).'
-            ORDER BY
-                photo_id
-            DESC
-        ';
+		global $class_application, $verbose_mode;
 
-        $retrieving_result = $database_connection->executeQuery($retrieve_photo, true);
+        $class_data_fetcher = $class_application::getDataFetcherClass();
+
+		$exceptions = NULL;
+
+		$photos = array();
+
+        $photographs_results = $class_data_fetcher::fetchPhotographs(
+            $author_id,
+            $accept_avatars
+        );
 
         try {
-            if ( ! $retrieving_result )
+            if ( ! $photographs_results )
     
-                throw new Exception('warning: an error occured while retrieving data from the table'.TABLE_PHOTOGRAPH);
+                throw new Exception(
+                    'warning: an error occured '.
+                        'while retrieving data from the table' .
+                            TABLE_PHOTOGRAPH
+                );
     
-            else {
-                foreach ($retrieving_result as $result) {
+            else
+            {
+                foreach ( $photographs_results as $result )
+                {
                     $photo = new Photo((int)$result->photo_id);                
                     $dimensions = array((int)$result->width,(int)$result->height);
     
@@ -520,13 +505,13 @@ class Diaporama extends Photo
                     }
                     
                     try {
-                        $photo->setAuthor((int)$author_id);
+                        $photo->setAuthor( ( int ) $result->author_id );
                     } catch (Exception $setting_exception) {
                         $exceptions .= $setting_exception;
                     }
     
                     try {
-                        $photo->setStatus((int)$result->pht_status);
+                        $photo->setStatus( ( int ) $result->pht_status );
                     } catch (Exception $setting_exception) {
                         $exceptions .= $setting_exception;
                     }
