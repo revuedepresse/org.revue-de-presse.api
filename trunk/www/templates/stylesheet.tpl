@@ -755,7 +755,7 @@ body div#upload_photograph
         }
 
         body div#tabs div#change_password form fieldset div input#submit_password,
-        body div#tabs div#edit_basic_information form fieldset div input#submit_information,
+        body div#tabs div#edit_basic_information form fieldset div input#submit_information
         body div#tabs div#send_document form fieldset div input#submit_document
         {
             float: right;
@@ -2212,6 +2212,7 @@ div.image div.panels ul.information_panel
         width: auto;
     }
 
+    div.image div.panels ul.information_panel li.element_panel span.property_author,
     div.image div.panels ul.information_panel li.element_panel span.property_title,
     div.image div.panels ul.information_panel li.element_panel span.property_keywords
     {
@@ -2227,6 +2228,7 @@ div.image div.panels ul.information_panel
     {
         font-size: 0.8em;
         font-weight: normal;
+        line-height: 1.75em;
     }
 
 input,

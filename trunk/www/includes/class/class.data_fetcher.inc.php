@@ -25,6 +25,357 @@
 */
 class Data_Fetcher extends Database
 {
+
+    /**
+    * Load a photograph
+    * 
+    * @param    integer	$id identifier
+    * @return   mixed
+    */
+	public static function fetchPhotograph( $id )
+	{
+		$class_db = CLASS_DB;
+
+		$class_photograph = CLASS_PHOTO;
+
+		$attributes = array();
+
+		$exceptions = '';
+
+        $select_photograph = '
+            SELECT
+				author_id,
+				hash,
+                height,
+                keywords,
+                mime_type,
+                original_file_name,
+                size,
+                title,
+                width,
+                pht_date_creation,
+                pht_date_last_modification,
+                pht_status
+            FROM
+                '.TABLE_PHOTOGRAPH.'
+            WHERE
+                photo_id = '.$id.' AND
+                pht_status != '.PHOTOGRAPH_STATUS_DISABLED
+        ;
+
+        $result_photograph = $class_db::query($select_photograph);
+
+		if ($result_photograph->num_rows)
+		{
+			$photograph = $result_photograph->fetch_object();
+
+			$attributes = new $class_photograph((int)$id);
+
+			$dimensions = array((int)$photograph->width, (int)$photograph->height);
+
+			try
+			{
+				$attributes->setDimensions($dimensions);
+			}
+			catch (Exception $setting_exception)
+			{
+				$exceptions .= $setting_exception;
+			}
+		
+			try
+			{
+				$attributes->setHash($photograph->hash);
+			}
+			catch (Exception $setting_exception)
+			{
+				$exceptions .= $setting_exception;
+			}
+
+			try
+			{
+				$attributes->setKeywords($photograph->keywords);
+			}
+			catch (Exception $setting_exception)
+			{
+				$exceptions .= $setting_exception;
+			}
+			
+			try
+			{
+				$attributes->setSize((int)$photograph->size);                    
+			}
+			catch (Exception $setting_exception)
+			{
+				$exceptions .= $setting_exception;
+			}
+			
+			try
+			{
+				$attributes->setMimeType($photograph->mime_type);
+			}
+			catch (Exception $setting_exception)
+			{
+				$exceptions .= $setting_exception;
+			}
+			
+			try
+			{
+				$attributes->setAuthor((int)$photograph->author_id);
+			}
+			catch (Exception $setting_exception)
+			{
+				$exceptions .= $setting_exception;
+			}
+
+			try
+			{
+				$attributes->setStatus((int)$photograph->pht_status);
+			}
+			catch (Exception $setting_exception)
+			{
+				$exceptions .= $setting_exception;
+			}
+
+			try
+			{
+				$attributes->setTitle($photograph->title);
+			}
+			catch (Exception $setting_exception)
+			{
+				$exceptions .= $setting_exception;
+			}
+			
+			try {
+				$attributes->setOriginalFileName($photograph->original_file_name);
+			}
+			catch (Exception $setting_exception)
+			{
+				$exceptions .= $setting_exception;
+			}
+
+			try
+			{
+				$attributes->setCreationDate($photograph->pht_date_creation);
+			}
+			catch (Exception $setting_exception)
+			{
+				$exceptions .= $setting_exception;
+			}
+			
+			try
+			{
+				$attributes->setLastModificationDate($photograph->pht_date_last_modification);
+			}
+			catch (Exception $setting_exception)
+			{
+				$exceptions .= $setting_exception;
+			}
+		}
+
+		return $attributes;
+	}
+
+	/***
+	* Fetch photographs
+	* 
+	* @param	integer		$member_id			member id
+	* @param	boolean		$accept_avatars 	avatars flag
+	*
+	* @return	resource	photographs results
+	*/
+	public static function fetchPhotographs(
+		$member_id,
+		$accept_avatars = FALSE
+	)
+	{
+		global $class_application, $verbose_mode;
+
+		$class_db = $class_application::getDbClass();
+
+		$class_dumper = $class_application::getDumperClass();
+		
+		$callback_parameters = array();
+
+		$arc_type_visibility = self::getEntityTypeValue(
+			array(
+				PROPERTY_NAME => ENTITY_VISIBILITY,
+				PROPERTY_ENTITY => ENTITY_ARC
+			)
+		);
+
+        /**
+        *
+        * Retrieve concepts ids
+        * (previously called ids of entities, renamed here to clarify
+        * "id of entity types" instead of "entity id of entity types")
+        *
+        */
+
+        $concept_photograph_id = self::getEntityIdByName(
+            ENTITY_PHOTOGRAPH
+        );
+
+        $concept_entity_type_id = self::getEntityIdByName(
+            ENTITY_ENTITY_TYPE
+        );
+
+
+		$visibility_type_public = self::getEntityTypeId(
+			array(
+				PROPERTY_NAME => PROPERTY_PUBLIC,
+				PROPERTY_ENTITY => ENTITY_VISIBILITY
+			)
+		);
+
+		$class_dumper::log(
+			__METHOD__,
+            array(
+                '[value of arc type with visibility as name]',
+                $arc_type_visibility,
+                '[id of public visibility as an entity type concept]',
+                $visibility_type_public,
+                '[photograph concept id]',
+                $concept_photograph_id,
+                '[entity type concept id]',
+                $concept_entity_type_id                  
+            )
+		);
+
+        $query_select_photo = '
+            SELECT
+				author_id,
+                photo_id,
+				hash,
+                height,
+                keywords,
+                mime_type,
+                original_file_name,
+                size,
+                title,
+                width,
+                pht_date_creation,
+                pht_date_last_modification,
+                pht_status
+            FROM
+                `'.TABLE_PHOTOGRAPH.'`
+            WHERE
+                ( ' .
+                    ( $member_id ? ' author_id = '.$member_id : '' ) . ' OR
+                    photo_id IN (
+                        SELECT
+
+                            ' . PREFIX_TABLE_COLUMN_EDGE .
+								TABLE_ALIAS_PHOTOGRAPH . '.' .
+                                    PREFIX_TABLE_COLUMN_EDGE . PROPERTY_KEY . '
+
+                        FROM
+
+                            '. TABLE_ARC .' ' . TABLE_ALIAS_ARC . ', 
+
+                            '. TABLE_EDGE .' ' .
+								PREFIX_TABLE_COLUMN_EDGE .
+									TABLE_ALIAS_PHOTOGRAPH . ',
+
+                            '. TABLE_EDGE .' ' .
+								PREFIX_TABLE_COLUMN_EDGE .
+									TABLE_ALIAS_ENTITY_TYPE . '
+
+                        WHERE
+
+                            # active arcs
+
+                            ' . TABLE_ALIAS_ARC . '.' .
+								PREFIX_TABLE_COLUMN_ARC . PROPERTY_STATUS .
+								
+									' = ' . ARC_STATUS_ACTIVE . ' AND
+
+                            # arcs of type visiblity
+                            
+                            ' . TABLE_ALIAS_ARC . '.' . PREFIX_TABLE_COLUMN_ARC .
+								PROPERTY_TYPE .
+								
+									' = ' . $arc_type_visibility . ' AND
+
+                            # source edges are active
+
+                            ' . PREFIX_TABLE_COLUMN_EDGE . TABLE_ALIAS_PHOTOGRAPH .
+								'.' . PREFIX_TABLE_COLUMN_EDGE  . PROPERTY_STATUS .
+								
+									' = ' . EDGE_STATUS_ACTIVE . ' AND
+                                
+                            # source edges are of type photograph
+
+                            ' . PREFIX_TABLE_COLUMN_EDGE . TABLE_ALIAS_PHOTOGRAPH . '.' .
+								PREFIX_TABLE_COLUMN_EDGE  . PROPERTY_ID .
+                                
+									' = ' . TABLE_ALIAS_ARC . '.' .
+										PREFIX_TABLE_COLUMN_ARC. PROPERTY_SOURCE . '  AND
+
+                            ' . PREFIX_TABLE_COLUMN_EDGE . TABLE_ALIAS_PHOTOGRAPH . '.' .
+								PREFIX_TABLE_COLUMN_ENTITY . PROPERTY_ID .
+                                
+									' = ' . $concept_photograph_id . '  AND
+
+                            # destination edges are active
+
+                            ' . PREFIX_TABLE_COLUMN_EDGE . TABLE_ALIAS_ENTITY_TYPE . '.' .
+								PREFIX_TABLE_COLUMN_EDGE  . PROPERTY_STATUS .
+                                
+									' = ' . EDGE_STATUS_ACTIVE . ' AND
+
+                            # destination edges are of type entity type
+
+                            ' . PREFIX_TABLE_COLUMN_EDGE . TABLE_ALIAS_ENTITY_TYPE . '.' .
+								PREFIX_TABLE_COLUMN_EDGE  . PROPERTY_ID .
+
+								    ' =  ' . TABLE_ALIAS_ARC . '.' .
+										PREFIX_TABLE_COLUMN_ARC . PROPERTY_DESTINATION . ' AND
+
+                            ' . PREFIX_TABLE_COLUMN_EDGE . TABLE_ALIAS_ENTITY_TYPE . '.' .
+								PREFIX_TABLE_COLUMN_ENTITY . PROPERTY_ID .
+                                
+								    ' = ' . $concept_entity_type_id . '  AND                                
+
+                            # visibility level is public
+
+                            ' . PREFIX_TABLE_COLUMN_EDGE . TABLE_ALIAS_ENTITY_TYPE . '.' .
+								PREFIX_TABLE_COLUMN_EDGE  . PROPERTY_KEY .
+                            
+								    ' = ' . $visibility_type_public . '
+                    )
+                )
+                AND pht_status != '.PHOTOGRAPH_STATUS_DISABLED.
+                (
+                    $accept_avatars === FALSE
+                ?
+                    ' AND pht_status != '.PHOTOGRAPH_STATUS_AVATAR
+                :
+                    ''
+                ).'
+            ORDER BY
+                photo_id
+            DESC
+        ';
+		
+		$photographs_results = $class_db::query( $query_select_photo );
+		
+		if (
+			is_object( $photographs_results ) &&
+			get_class( $photographs_results ) === CLASS_MYSQLI_RESULT
+		)
+		{
+			if ( $photographs_count = $photographs_results->num_rows )
+
+				for ( $k = $photographs_count ; $k > 0 ; $k-- )
+
+					$callback_parameters[] = $photographs_results->fetch_object();
+
+			$photographs_results->free_result();
+		}
+
+		return $callback_parameters;
+	}
+
     /**
     * Fetch the properties of insight node
     * 
@@ -2428,155 +2779,6 @@ class Data_Fetcher extends Database
 				$member_qualities[$qualities->id] = $qualities;
 		
 		return $member_qualities;
-	}
-
-    /**
-    * Load a photograph
-    * 
-    * @param    integer	$id identifier
-    * @return   mixed
-    */
-	public static function fetchPhotograph($id)
-	{
-		$class_db = CLASS_DB;
-
-		$class_photograph = CLASS_PHOTO;
-
-		$attributes = array();
-
-		$exceptions = '';
-
-        $select_photograph = '
-            SELECT
-				author_id,
-				hash,
-                height,
-                keywords,
-                mime_type,
-                original_file_name,
-                size,
-                title,
-                width,
-                pht_date_creation,
-                pht_date_last_modification,
-                pht_status
-            FROM
-                '.TABLE_PHOTOGRAPH.'
-            WHERE
-                photo_id = '.$id.' AND
-                pht_status != '.PHOTOGRAPH_STATUS_DISABLED
-        ;
-
-        $result_photograph = $class_db::query($select_photograph);
-
-		if ($result_photograph->num_rows)
-		{
-			$photograph = $result_photograph->fetch_object();
-
-			$attributes = new $class_photograph((int)$id);
-
-			$dimensions = array((int)$photograph->width, (int)$photograph->height);
-
-			try
-			{
-				$attributes->setDimensions($dimensions);
-			}
-			catch (Exception $setting_exception)
-			{
-				$exceptions .= $setting_exception;
-			}
-		
-			try
-			{
-				$attributes->setHash($photograph->hash);
-			}
-			catch (Exception $setting_exception)
-			{
-				$exceptions .= $setting_exception;
-			}
-
-			try
-			{
-				$attributes->setKeywords($photograph->keywords);
-			}
-			catch (Exception $setting_exception)
-			{
-				$exceptions .= $setting_exception;
-			}
-			
-			try
-			{
-				$attributes->setSize((int)$photograph->size);                    
-			}
-			catch (Exception $setting_exception)
-			{
-				$exceptions .= $setting_exception;
-			}
-			
-			try
-			{
-				$attributes->setMimeType($photograph->mime_type);
-			}
-			catch (Exception $setting_exception)
-			{
-				$exceptions .= $setting_exception;
-			}
-			
-			try
-			{
-				$attributes->setAuthor((int)$photograph->author_id);
-			}
-			catch (Exception $setting_exception)
-			{
-				$exceptions .= $setting_exception;
-			}
-
-			try
-			{
-				$attributes->setStatus((int)$photograph->pht_status);
-			}
-			catch (Exception $setting_exception)
-			{
-				$exceptions .= $setting_exception;
-			}
-
-			try
-			{
-				$attributes->setTitle($photograph->title);
-			}
-			catch (Exception $setting_exception)
-			{
-				$exceptions .= $setting_exception;
-			}
-			
-			try {
-				$attributes->setOriginalFileName($photograph->original_file_name);
-			}
-			catch (Exception $setting_exception)
-			{
-				$exceptions .= $setting_exception;
-			}
-
-			try
-			{
-				$attributes->setCreationDate($photograph->pht_date_creation);
-			}
-			catch (Exception $setting_exception)
-			{
-				$exceptions .= $setting_exception;
-			}
-			
-			try
-			{
-				$attributes->setLastModificationDate($photograph->pht_date_last_modification);
-			}
-			catch (Exception $setting_exception)
-			{
-				$exceptions .= $setting_exception;
-			}
-		}
-
-		return $attributes;
 	}
 
     /**

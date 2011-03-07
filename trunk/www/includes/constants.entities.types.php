@@ -26,12 +26,14 @@ assignConstant('API_TYPE_TWITTER*', 'twitter');
 
 // Arc type
 
-assignConstant('ARC_TYPE_ENCAPSULATION', 5);
-assignConstant('ARC_TYPE_MODEL', 0);
-assignConstant('ARC_TYPE_OWNERSHIP*', 1);
-assignConstant('ARC_TYPE_EXECUTE_QUERY', 2);
-assignConstant('ARC_TYPE_INSTANTIATE_ENTITY', 3);
-assignConstant('ARC_TYPE_TAKE_SNAPSHOT', 4);
+assignConstant( 'ARC_TYPE_ENCAPSULATION', 5 );
+assignConstant( 'ARC_TYPE_MODEL', 0 );
+assignConstant( 'ARC_TYPE_OWNERSHIP*', 1 );
+assignConstant( 'ARC_TYPE_EXECUTE_QUERY', 2 );
+assignConstant( 'ARC_TYPE_INSTANTIATE_ENTITY', 3 );
+assignConstant( 'ARC_TYPE_TAKE_SNAPSHOT', 4 );
+assignConstant( 'ARC_TYPE_VISIBILITY', 5 );
+
 
 // Callback types
 
@@ -136,6 +138,7 @@ assignConstant( 'FEEDBACK_TYPE_REPORT_PERFORMANCE_ISSUES', 2 );
 assignConstant('FLAG_TYPE_ADMINISTRATION', 4);
 assignConstant('FLAG_TYPE_LIKE', 0);
 assignConstant('FLAG_TYPE_DO_NOT_LIKE', 1);
+assignConstant('FLAG_TYPE_SHARE', 5);
 assignConstant('FLAG_TYPE_SUGGEST_REMOVAL', 2);
 assignConstant('FLAG_TYPE_REPORT', 3);
 
@@ -387,6 +390,12 @@ assignConstant('TRAVERSING_TYPE_RECURSIVELY', 1);
 assignConstant('USER_TYPE_ADMINISTRATOR', 'admin');
 assignConstant('USER_TYPE_VISITOR', 1);
 assignConstant('USER_TYPE_SUPER_ADMINISTRATOR', 2);
+
+// Visibility
+
+assignConstant('VISIBILITY_TYPE_PARANOID*', 0);
+assignConstant('VISIBILITY_TYPE_SHARED', 1);
+assignConstant('VISIBILITY_TYPE_PUBLIC', 2);
 
 // View types
 
