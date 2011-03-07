@@ -35,11 +35,15 @@ $class_message = $class_application::getMessageClass();
 //$mailboxes_social_networks = $class_message::getMailboxes( '/^social networ/');
 //$class_message::import( '*', $mailboxes_social_networks );
 
-$mailboxes_news = $class_message::getMailboxes( '/^news/');
-$class_message::import( '*', $mailboxes_news );
 
-$mailboxes_social_bookmarking = $class_message::getMailboxes( '/^social bookmarking/');
-$class_message::import( '*', $mailboxes_social_bookmarking );
+$mailboxes_server_administration = $class_message::getMailboxes( '/^server administration/');
+$class_message::import( '*', $mailboxes_server_administration );
+//
+//$mailboxes_news = $class_message::getMailboxes( '/^news/');
+//$class_message::import( '*', $mailboxes_news );
+//
+//$mailboxes_social_bookmarking = $class_message::getMailboxes( '/^social bookmarking/');
+//$class_message::import( '*', $mailboxes_social_bookmarking );
 
 //$class_message::import();
 
