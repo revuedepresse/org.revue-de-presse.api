@@ -26,17 +26,20 @@
 
 $class_message = $class_application::getMessageClass();
 
-$mailboxes_api = $class_message::getMailboxes( '/^API/');
-
-$class_message::import( '*', $mailboxes_api );
+//$mailboxes_api = $class_message::getMailboxes( '/^API/');
+//$class_message::import( '*', $mailboxes_api );
 
 //$mailboxes_saas = $class_message::getMailboxes( '/^saas ::/');
-
 //$class_message::import( '*', $mailboxes_saas );
 
-$mailboxes_socs = $class_message::getMailboxes( '/^social networ/');
+//$mailboxes_social_networks = $class_message::getMailboxes( '/^social networ/');
+//$class_message::import( '*', $mailboxes_social_networks );
 
-$class_message::import( '*', $mailboxes_socs );
+$mailboxes_news = $class_message::getMailboxes( '/^news/');
+$class_message::import( '*', $mailboxes_news );
+
+$mailboxes_social_bookmarking = $class_message::getMailboxes( '/^social bookmarking/');
+$class_message::import( '*', $mailboxes_social_bookmarking );
 
 //$class_message::import();
 
