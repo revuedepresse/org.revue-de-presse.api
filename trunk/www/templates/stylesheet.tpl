@@ -756,6 +756,7 @@ body div#upload_photograph
 
         body div#tabs div#change_password form fieldset div input#submit_password,
         body div#tabs div#edit_basic_information form fieldset div input#submit_information
+        body div#tabs div#send_document form fieldset div input#submit_document
         {
             float: right;
             text-transform: capitalize;
@@ -1308,6 +1309,12 @@ div#confirm form
                     div.fieldset_wrpr_1 span#span_submit_information,
             body#body
                 div#edit_basic_information.form_container
+                    div.fieldset_wrpr_1 div.span_wrpr_1,
+            body#body
+                div#send_document.form_container
+                    div.fieldset_wrpr_1 span#span_submit_document,
+            body#body
+                div#send_document.form_container
                     div.fieldset_wrpr_1 div.span_wrpr_1
             {
                 width: 100%
@@ -1382,6 +1389,10 @@ div#confirm form
             body#body
                 div#edit_basic_information.form_container
                     div#div_submit_information
+                        div.wrapper_span,
+            body#body
+                div#send_document.form_container
+                    div#div_submit_document
                         div.wrapper_span
             {
                 float: right;
@@ -2010,7 +2021,8 @@ div.image div.panels ul.action_panel
         body#body div#sign_in form div#div_submit span#span_submit input,
         body#body div#sign_up.form_container form fieldset input.submit_sign_up,
         body#body div#tabs div#change_password form fieldset div input#submit_password,
-        body#body div#tabs div#edit_basic_information form fieldset div input#submit_information
+        body#body div#tabs div#edit_basic_information form fieldset div input#submit_information,
+        body#body div#tabs div#send_document form fieldset div input#submit_document
         {
             background-color: #eaedf6;
             font-weight: 600;
@@ -2040,11 +2052,28 @@ div.image div.panels ul.action_panel
                     div#edit_basic_information
                         form fieldset
                             div
-                                input#submit_information
+                                input#submit_information,
+            body#body
+                div#tabs
+                    div#send_document
+                        form fieldset
+                            div
+                                input#submit_document
             {
                 margin-right: 0px;
             }
 
+            body#body
+                div#tabs
+                    div#send_document
+                        form fieldset
+                            div
+                                input#submit_document
+            {
+                margin-right: 8px;
+                margin-top: 10px;
+            }
+    
             body#body div#search form input#look_up
             {
                 height: 31px;
