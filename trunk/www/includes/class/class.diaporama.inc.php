@@ -479,84 +479,95 @@ class Diaporama extends Photo
 
         $retrieving_result = $database_connection->executeQuery($retrieve_photo, true);
 
-		if (!$retrieving_result)
-            throw new Exception('warning: an error occured while retrieving data from the table'.TABLE_PHOTOGRAPH);
-        else {
-			foreach ($retrieving_result as $result) {
-				$photo = new Photo((int)$result->photo_id);                
-				$dimensions = array((int)$result->width,(int)$result->height);
-
-                try {
-                    $photo->setDimensions($dimensions);
-                } catch (Exception $setting_exception) {
-                    $exceptions .= $setting_exception;
-                }
-            
-                try {
-                    $photo->setHash($result->hash);
-                } catch (Exception $setting_exception) {
-                    $exceptions .= $setting_exception;
-                }
+        try {
+            if ( ! $retrieving_result )
     
-                try {
-                    $photo->setKeywords($result->keywords);
-                } catch (Exception $setting_exception) {
-                    $exceptions .= $setting_exception;
-                }
+                throw new Exception('warning: an error occured while retrieving data from the table'.TABLE_PHOTOGRAPH);
+    
+            else {
+                foreach ($retrieving_result as $result) {
+                    $photo = new Photo((int)$result->photo_id);                
+                    $dimensions = array((int)$result->width,(int)$result->height);
+    
+                    try {
+                        $photo->setDimensions($dimensions);
+                    } catch (Exception $setting_exception) {
+                        $exceptions .= $setting_exception;
+                    }
                 
-                try {
-                    $photo->setSize((int)$result->size);                    
-                } catch (Exception $setting_exception) {
-                    $exceptions .= $setting_exception;
-                }
-                
-                try {
-                    $photo->setMimeType($result->mime_type);
-                } catch (Exception $setting_exception) {
-                    $exceptions .= $setting_exception;
-                }
-                
-                try {
-                    $photo->setAuthor((int)$author_id);
-                } catch (Exception $setting_exception) {
-                    $exceptions .= $setting_exception;
-                }
-
-                try {
-                    $photo->setStatus((int)$result->pht_status);
-                } catch (Exception $setting_exception) {
-                    $exceptions .= $setting_exception;
-                }
-
-                try {
-                    $photo->setTitle($result->title);
-                } catch (Exception $setting_exception) {
-                    $exceptions .= $setting_exception;
-                }
-                
-                try {
-                    $photo->setOriginalFileName($result->original_file_name);
-                } catch (Exception $setting_exception) {
-                    $exceptions .= $setting_exception;
-                }
-
-                try {
-                    $photo->setCreationDate($result->pht_date_creation);
-                } catch (Exception $setting_exception) {
-                    $exceptions .= $setting_exception;
-                }
-                
-                try {
-                    $photo->setLastModificationDate($result->pht_date_last_modification);
-                } catch (Exception $setting_exception) {
-                    $exceptions .= $setting_exception;
-                }
-                
-				$photos[(int)$result->photo_id] = $photo;
-			} 
-		}
+                    try {
+                        $photo->setHash($result->hash);
+                    } catch (Exception $setting_exception) {
+                        $exceptions .= $setting_exception;
+                    }
+        
+                    try {
+                        $photo->setKeywords($result->keywords);
+                    } catch (Exception $setting_exception) {
+                        $exceptions .= $setting_exception;
+                    }
+                    
+                    try {
+                        $photo->setSize((int)$result->size);                    
+                    } catch (Exception $setting_exception) {
+                        $exceptions .= $setting_exception;
+                    }
+                    
+                    try {
+                        $photo->setMimeType($result->mime_type);
+                    } catch (Exception $setting_exception) {
+                        $exceptions .= $setting_exception;
+                    }
+                    
+                    try {
+                        $photo->setAuthor((int)$author_id);
+                    } catch (Exception $setting_exception) {
+                        $exceptions .= $setting_exception;
+                    }
+    
+                    try {
+                        $photo->setStatus((int)$result->pht_status);
+                    } catch (Exception $setting_exception) {
+                        $exceptions .= $setting_exception;
+                    }
+    
+                    try {
+                        $photo->setTitle($result->title);
+                    } catch (Exception $setting_exception) {
+                        $exceptions .= $setting_exception;
+                    }
+                    
+                    try {
+                        $photo->setOriginalFileName($result->original_file_name);
+                    } catch (Exception $setting_exception) {
+                        $exceptions .= $setting_exception;
+                    }
+    
+                    try {
+                        $photo->setCreationDate($result->pht_date_creation);
+                    } catch (Exception $setting_exception) {
+                        $exceptions .= $setting_exception;
+                    }
+                    
+                    try {
+                        $photo->setLastModificationDate($result->pht_date_last_modification);
+                    } catch (Exception $setting_exception) {
+                        $exceptions .= $setting_exception;
+                    }
+                    
+                    $photos[(int)$result->photo_id] = $photo;
+                } 
+            }
+        }
+        catch ( Exception $exception )
+        {
+            /**
+            *
+            * FIXME
+            *
+            */
+        }
 		
 		return $photos;
     }	
 }
-?>

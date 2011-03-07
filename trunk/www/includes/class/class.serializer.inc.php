@@ -1397,6 +1397,13 @@ class Serializer extends Executor
 		// declare an empty feedback store
 		$feedback = array();
 
+		$filing_forms = 
+			array(
+				AFFORDANCE_UPLOAD_PHOTOGRAPH,
+				AFFORDANCE_SEND_DOCUMENT
+			)
+		;
+
 		// check the context
 		if ( is_object( $context ) && get_class( $context ) )
 
@@ -1654,12 +1661,21 @@ class Serializer extends Executor
 								;
 
 								if (
-									$form_identifier ==
-										AFFORDANCE_UPLOAD_PHOTOGRAPH
+									in_array(
+										$form_identifier,
+										$filing_forms
+									)
 								)
 								{
 									// get the qualities of the logged in member 
-									$qualities = $class_member::getQualities( TRUE );
+									$qualities = $class_member::getQualities(
+											$form_identifier ===
+												AFFORDANCE_UPLOAD_PHOTOGRAPH
+										?
+											TRUE
+										:
+											FALSE 
+									);
 
 									// set a hash
 									$hash = $class_photo::createHash();
@@ -1739,6 +1755,34 @@ class Serializer extends Executor
 												0
 											).',
 									';
+
+									$class_dumper::log(
+										__METHOD__,
+										array(
+											'[post update event]',
+											$field_attributes
+										)
+									);
+
+									/**
+									*
+									* FIXME
+									*
+									*/
+
+									if (
+										! empty(
+											$field_attributes[EVENT_AFTER_UPDATE]
+										)  &&
+										$form_identifier ===
+											AFFORDANCE_SEND_DOCUMENT
+									)
+	
+										// let a processor taking action
+										$class_processor::takeAction(
+											$field_attributes[EVENT_AFTER_UPDATE],
+											$feedback
+										);
 								}
 							}
 							else
@@ -1835,9 +1879,15 @@ class Serializer extends Executor
 					)
 				)
 				{
-					$authorization_granted = $class_user_handler::authorizedUser(
-						$field_handler->getProperty( PROPERTY_FORM_IDENTIFIER )
-					);
+					$authorization_granted =
+						$class_user_handler::authorizedUser(
+							$field_handler->getProperty( PROPERTY_FORM_IDENTIFIER ) 
+						) ||
+						in_array(
+							$form_identifier,
+							$filing_forms
+						)	
+					;
 
 					if ( $authorization_granted == TRUE)
 						
@@ -2290,7 +2340,10 @@ class Serializer extends Executor
 				move_uploaded_file( $path_temporary, $path_destination );
 
 			if (
-				$form_identifier == AFFORDANCE_UPLOAD_PHOTOGRAPH &&
+				in_array(
+					$form_identifier,
+					$filing_forms
+				) &&
 				! empty( $path_destination )
 			)
 

@@ -1538,7 +1538,8 @@ namespace sefi
 
 								$photos =
 									$class_media_manager::loadPhotosByAuthorId(
-										AUTHOR_IDENTIFIER_SHAL
+										$qualities->{ROW_MEMBER_IDENTIFIER}
+										//AUTHOR_IDENTIFIER_SHAL
 									)
 								;
 
@@ -2126,7 +2127,7 @@ namespace sefi
 					PROTOCOL_HTTP_METHOD_GET => $_GET,
 					PROTOCOL_HTTP_METHOD_POST => $_POST
 				);
-	
+			
 				$context = array(
 					PROPERTY_CONTEXT => print_r( $context_http, TRUE ),
 					PROPERTY_DESCRIPTION => sprintf(
@@ -2147,7 +2148,7 @@ namespace sefi
 				
 				$width = DIMENSION_MAXIMUM_AVATAR_LONG_EDGE;
 			}
-			
+
 			// save the original height
 			$_height = $height;
 
@@ -3927,12 +3928,12 @@ namespace sefi
 						$flags = $class_flag_manager::getFlags(
 							array( 'usr_id' => $member_identifier )
 						);
-
+						
 						// load photos by author identifier
 						$photos = array_slice(
 							$class_media_manager::loadPhotosByAuthorId(
-								//$qualities->{ROW_MEMBER_IDENTIFIER}
-								AUTHOR_IDENTIFIER_SHAL,
+								$member_identifier,
+								//AUTHOR_IDENTIFIER_SHAL,
 								FALSE
 							),
 							( 
