@@ -168,12 +168,11 @@ class Message extends Header
 		{
 			if ( is_array( $uids ) && count( $uids ) )
 			{
-	
 				$_keywords = $label . ' ' .SEPARATOR_LABEL_SUBJECT .' ' . $subject;
 	
 				$max_uid = $max_uids[$_keywords];
 	
-				if ( is_array( $max_uid ) && count( $max_uid ) )
+				if ( is_array( $uids ) && count( $uids ) )
 				{
 					/**
 					*
