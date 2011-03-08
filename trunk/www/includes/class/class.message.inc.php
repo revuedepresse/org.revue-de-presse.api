@@ -4,6 +4,18 @@
 * Changes log
 *
 *************
+* 2011 03 08
+*************
+* 
+* Add the hash property
+*
+* method affected ::
+*
+* MESSAGE :: import
+*
+* (trunk :: revision :: 141)
+* 
+*************
 * 2011 03 05
 *************
 * 
