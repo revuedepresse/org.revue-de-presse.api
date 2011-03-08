@@ -355,13 +355,12 @@ class Data_Fetcher extends Database
                 photo_id
             DESC
         ';
-		$class_dumper::log(
-			__METHOD__,
-			array($query_select_photo),
-			TRUE
-		);		
+
 		$photographs_results = $class_db::query( $query_select_photo );
 		
+		
+		if ( $author_id == 3 )
+echo $query_select_photo ;		
 		if (
 			is_object( $photographs_results ) &&
 			get_class( $photographs_results ) === CLASS_MYSQLI_RESULT
@@ -375,7 +374,11 @@ class Data_Fetcher extends Database
 
 			$photographs_results->free_result();
 		}
-
+		$class_dumper::log(
+			__METHOD__,
+			array($callback_parameters),
+			TRUE
+		);
 		return $callback_parameters;
 	}
 
