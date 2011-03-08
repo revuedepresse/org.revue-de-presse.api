@@ -219,7 +219,6 @@ class Data_Fetcher extends Database
             ENTITY_ENTITY_TYPE
         );
 
-
 		$visibility_type_public = self::getEntityTypeId(
 			array(
 				PROPERTY_NAME => PROPERTY_PUBLIC,
@@ -356,7 +355,11 @@ class Data_Fetcher extends Database
                 photo_id
             DESC
         ';
-		
+		$class_dumper::log(
+			__METHOD__,
+			array($query_select_photo),
+			TRUE
+		);		
 		$photographs_results = $class_db::query( $query_select_photo );
 		
 		if (
