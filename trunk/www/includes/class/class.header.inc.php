@@ -92,7 +92,10 @@ class Header extends Api
 
 		$properties = array(
 			PROPERTY_VALUE => $value,
-			PROPERTY_HASH => sha1( $value )
+			PROPERTY_HASH => md5(
+				$value . SEPARATOR_LABEL_SUBJECT .
+					( is_null( $keywords ) ? '' : $keywords ) 
+			)
 		);
 
 		if ( ! is_null( $uid ) )
