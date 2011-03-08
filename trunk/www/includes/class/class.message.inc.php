@@ -260,12 +260,22 @@ class Message extends Header
 
 		if ( is_null( $type ) )
 
+		if ( ! isset( $arguments[4] ) )
+
+			$body_text = NULL;
+		else
+
+			$body_text = $arguments[4];
+
 		if ( ! isset( $arguments[3] ) )
 
 			$hash = md5(
 				$header_id .
 					SEPARATOR_LABEL_SUBJECT .
-						$body_html
+						( is_null( $body_text ) ? '' : $body_text ) .
+							SEPARATOR_LABEL_SUBJECT .
+								$body_html .
+									SEPARATOR_LABEL_SUBJECT 
 			);
 		else
 
@@ -293,6 +303,13 @@ class Message extends Header
 				PROPERTY_FOREIGN_KEY => $header_id
 			)
 		);
+
+		if ( ! is_null( $body_text ) )
+	
+			$properties = array_merge(
+				array( PROPERTY_BODY_TEXT => $body_text ),
+				$properties
+			);
 
 		return self::add( $properties );
 	}
