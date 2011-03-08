@@ -233,7 +233,7 @@ class Message extends Header
 
 			throw new Exception(EXCEPTION_INVALID_ARGUMENT);
 
-		if ( ! isset($arguments[2] ) )
+		if ( ! isset( $arguments[2] ) )
 
 			$type = NULL;
 		else
@@ -241,7 +241,20 @@ class Message extends Header
 			$type = $arguments[2];
 
 		if ( is_null( $type ) )
-	
+
+		if ( ! isset( $arguments[3] ) )
+
+			$hash = md5(
+				$header_id .
+					SEPARATOR_LABEL_SUBJECT .
+						$body_html
+			);
+		else
+
+			$hash = $arguments[3];
+
+		if ( is_null( $type ) )
+
 			$message_type = self::getDefaultType();
 		else
 		{
@@ -256,6 +269,7 @@ class Message extends Header
 
 		$properties = array(
 			PROPERTY_BODY_HTML => $body_html,
+			PROPERTY_HASH => $hash,
 			PROPERTY_TYPE => $message_type,
 			PREFIX_TABLE_COLUMN_HEADER.PROPERTY_ID => array(
 				PROPERTY_FOREIGN_KEY => $header_id
