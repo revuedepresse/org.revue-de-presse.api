@@ -578,8 +578,8 @@ class Executor extends Processor
 							)
 							VALUES (
 								NULL ,
-								' . $arc_type_visibility . ',
 								' . ARC_STATUS_ACTIVE . ' , 
+								' . $arc_type_visibility . ',
 								{edge_source_id},
 								{edge_destination_id}
 							)
