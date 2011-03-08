@@ -359,7 +359,7 @@ class Data_Fetcher extends Database
 		$photographs_results = $class_db::query( $query_select_photo );
 		
 		
-		if ( $author_id == 3 )
+		if ( $member_id  == 3 )
 echo $query_select_photo ;		
 		if (
 			is_object( $photographs_results ) &&
