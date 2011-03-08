@@ -32,7 +32,7 @@ assignConstant( 'ARC_TYPE_OWNERSHIP*', 1 );
 assignConstant( 'ARC_TYPE_EXECUTE_QUERY', 2 );
 assignConstant( 'ARC_TYPE_INSTANTIATE_ENTITY', 3 );
 assignConstant( 'ARC_TYPE_TAKE_SNAPSHOT', 4 );
-assignConstant( 'ARC_TYPE_VISIBILITY', 5 );
+assignConstant( 'ARC_TYPE_VISIBILITY', 6 );
 
 
 // Callback types
