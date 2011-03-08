@@ -35,14 +35,14 @@ $class_message = $class_application::getMessageClass();
 //$mailboxes_social_networks = $class_message::getMailboxes( '/^social networ/');
 //$class_message::import( '*', $mailboxes_social_networks );
 
-$mailboxes_development = $class_message::getMailboxes( '/^development/');
-$class_message::import( '*', $mailboxes_development );
-
-$mailboxes_organization = $class_message::getMailboxes( '/^organization/');
-$class_message::import( '*', $mailboxes_organization );
-
-$mailboxes_language = $class_message::getMailboxes( '/^language/');
-$class_message::import( '*', $mailboxes_language );
+//$mailboxes_development = $class_message::getMailboxes( '/^development/');
+//$class_message::import( '*', $mailboxes_development );
+//
+//$mailboxes_organization = $class_message::getMailboxes( '/^organization/');
+//$class_message::import( '*', $mailboxes_organization );
+//
+//$mailboxes_language = $class_message::getMailboxes( '/^language/');
+//$class_message::import( '*', $mailboxes_language );
 
 $mailboxes_microblogging = $class_message::getMailboxes( '/^microblogging/');
 $class_message::import( '*', $mailboxes_microblogging );
