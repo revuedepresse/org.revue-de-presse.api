@@ -358,9 +358,6 @@ class Data_Fetcher extends Database
 
 		$photographs_results = $class_db::query( $query_select_photo );
 		
-		
-		if ( $member_id  == 3 )
-echo $query_select_photo ;		
 		if (
 			is_object( $photographs_results ) &&
 			get_class( $photographs_results ) === CLASS_MYSQLI_RESULT
@@ -374,11 +371,7 @@ echo $query_select_photo ;
 
 			$photographs_results->free_result();
 		}
-		$class_dumper::log(
-			__METHOD__,
-			array($callback_parameters),
-			TRUE
-		);
+
 		return $callback_parameters;
 	}
 
