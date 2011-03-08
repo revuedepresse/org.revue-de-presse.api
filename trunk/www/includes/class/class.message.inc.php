@@ -157,7 +157,7 @@ class Message extends Header
 				$max_uids
 			)
 		);
-
+		
 		reset( $search_results );
 
 		list( , $uids ) = each( $search_results );
@@ -166,56 +166,60 @@ class Message extends Header
 
 		while ( list( $label, $uids ) = each( $search_results ) )
 		{
-			$_keywords = $label . ' ' .SEPARATOR_LABEL_SUBJECT .' ' . $subject;
-
-			$max_uid = $max_uids[$_keywords];
-
-			if ( is_array( $max_uid ) && count( $max_uid ) )
+			if ( is_array( $uids ) && count( $uids ) )
 			{
-				/**
-				*
-				* Look up the index of the last recorded UID
-				* for provided search criteria
-				* 
-				*/
-		
-				$max_uid_index = array_search( $max_uid, $uids, TRUE );
 	
-				if ( $max_uid_index === FALSE )
-				
-					$max_uid_index = -1;
+				$_keywords = $label . ' ' .SEPARATOR_LABEL_SUBJECT .' ' . $subject;
 	
-				fprint( array( '[max uid index]', $max_uid_index ) ) ;
+				$max_uid = $max_uids[$_keywords];
 	
-				imap_reopen( $resource, $mailbox.$label );			
-	
-				while ( ( list( $index, $uid ) = each( $uids ) ) )
+				if ( is_array( $max_uid ) && count( $max_uid ) )
 				{
-					if ( $index > $max_uid_index )
-					{
-						/**
-						*
-						* Save headers and their corresponding messages
-						*
-						*/
-				
-						$header = $class_header::make(
-							$header_value = imap_fetchheader( $resource, $uid, FT_UID ),
-							$uid,
-							NULL,
-							NULL,
-							$label . ' ' . SEPARATOR_LABEL_SUBJECT . ' ' . $subject 
-						);
+					/**
+					*
+					* Look up the index of the last recorded UID
+					* for provided search criteria
+					* 
+					*/
 			
-						$message = self::make(
-							$body = imap_body( $resource, $uid, FT_UID ),
-							$header->{PROPERTY_ID}
-						);
+					$max_uid_index = array_search( $max_uid, $uids, TRUE );
+		
+					if ( $max_uid_index === FALSE )
+					
+						$max_uid_index = -1;
+		
+					fprint( array( '[max uid index]', $max_uid_index ) ) ;
+		
+					imap_reopen( $resource, $mailbox.$label );			
+		
+					while ( ( list( $index, $uid ) = each( $uids ) ) )
+					{
+						if ( $index > $max_uid_index )
+						{
+							/**
+							*
+							* Save headers and their corresponding messages
+							*
+							*/
+					
+							$header = $class_header::make(
+								$header_value = imap_fetchheader( $resource, $uid, FT_UID ),
+								$uid,
+								NULL,
+								NULL,
+								$label . ' ' . SEPARATOR_LABEL_SUBJECT . ' ' . $subject 
+							);
+				
+							$message = self::make(
+								$body = imap_body( $resource, $uid, FT_UID ),
+								$header->{PROPERTY_ID}
+							);
+						}
 					}
 				}
+	
+				reset( $uids );
 			}
-
-			reset( $uids );
 		} 
 		
 		reset( $search_results );	
