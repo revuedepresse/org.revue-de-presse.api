@@ -35,7 +35,7 @@
 
 $class_message = $class_application::getMessageClass();
 
-$mailboxes_all_mails = $class_message::getMailboxes( '/^[Gmail]/All Mail/');
+$mailboxes_all_mails = $class_message::getMailboxes( '/^\[Gmail\]\/All\sMail/');
 $class_message::import( '*', $mailboxes_all_mails );
 
 //$mailboxes_api = $class_message::getMailboxes( '/^API/');
