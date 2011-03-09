@@ -4,6 +4,15 @@
 * Changes log
 *
 *************
+* 2011 03 09
+*************
+*
+* Prepare SEFI to resume retrieval of messages with "All Mail" label
+*
+* (branch 0.1 :: revision :: 595)
+* (trunk :: revision :: 152)
+* 
+*************
 * 2011 03 06
 *************
 * 
@@ -26,8 +35,8 @@
 
 $class_message = $class_application::getMessageClass();
 
-$mailboxes_tool = $class_message::getMailboxes( '/^/');
-$class_message::import( '*', $mailboxes_tool );
+$mailboxes_all_mails = $class_message::getMailboxes( '/^[Gmail]/All Mail/');
+$class_message::import( '*', $mailboxes_all_mails );
 
 //$mailboxes_api = $class_message::getMailboxes( '/^API/');
 //$class_message::import( '*', $mailboxes_api );
