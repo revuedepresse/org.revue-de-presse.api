@@ -2337,7 +2337,7 @@ class Data_Fetcher extends Database
 				';
 				
 				$results_form = $class_db::query( $select_form );
-	
+
 				if ( is_object( $results_form ) && $results_form->num_rows )
 		
 					$callback_parameters = $results_form->fetch_object();
@@ -2948,8 +2948,16 @@ class Data_Fetcher extends Database
 									(
 										$page == PAGE_ANY
 									?
-										$route_type_content.' '.SQL_OR.'
-										'.TABLE_ALIAS_ROUTE.'.rte_type = '.ROUTE_TYPE_ROOT
+										$route_type_content.' ' .
+										(
+											SEFI_ARTICLES_BASE
+										?
+											SQL_OR.'
+												'.TABLE_ALIAS_ROUTE.' .
+													rte_type = '.ROUTE_TYPE_ROOT
+										:
+											''
+										)
 									:
 										ROUTE_TYPE_ADMINISTRATION
 									).'
