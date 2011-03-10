@@ -7799,7 +7799,10 @@ class View_Builder extends User_Interface
 			$template_engine->fetch( $template_name )
 		);
 
-		if ( FALSE !== strpos( $_SERVER['REQUEST_URI'],  AFFORDANCE_SEND_FEEDBACK ) )
+		if (
+			SEFI_FORM_FEEDBACK &&
+			FALSE !== strpos( $_SERVER['REQUEST_URI'],  AFFORDANCE_SEND_FEEDBACK )
+		)
 
 			$footer = $class_application::getFormView( AFFORDANCE_SEND_FEEDBACK );
 
