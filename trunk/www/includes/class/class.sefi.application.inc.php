@@ -2980,15 +2980,15 @@ namespace sefi
 							$page != PAGE_OVERVIEW
 						)
 						{
+							if (
+								! isset( $_SESSION[STORE_DIALOG] ) ||
+								! is_array( $_SESSION[STORE_DIALOG] )
+							)
+
+								$_SESSION[STORE_DIALOG] = array();
+
 							if ( SEFI_ARTICLES_BASE )
 							{
-								if (
-									! isset( $_SESSION[STORE_DIALOG] ) ||
-									! is_array( $_SESSION[STORE_DIALOG] )
-								)
-	
-									$_SESSION[STORE_DIALOG] = array();
-				
 								$_SESSION[STORE_DIALOG][] = ACTION_SEARCH;
 	
 								$form_parameters[PLACEHOLDER_MAIN] = self::getFormView(
@@ -2996,15 +2996,18 @@ namespace sefi
 									BLOCK_FORM,
 									PAGE_DIALOG
 								);
-	
+
 								unset( $_SESSION[STORE_DIALOG] );
 							}
 							else if (
 								$_SERVER['REQUEST_URI'] !==
 									URI_PAGE_WONDERING
 							)
-							
+							{
+								unset( $_SESSION[STORE_DIALOG] );
+
 								self::jumpTo( URI_PAGE_WONDERING );
+							}
 						}
 						else 
 

@@ -337,9 +337,10 @@ class Memento extends Serializer
 
 			$expire = time() + MEMCACHED_EXPIRATION_TIME;
 
-		if (
-			is_null( $key ) ||
-			(
+		if ( is_null( $key )  )
+		{
+			if (
+				is_null( $data ) ||
 				! is_null( $data ) &&
 				(
 					( is_string( $data ) && ! strlen( $data ) ) ||
@@ -347,9 +348,13 @@ class Memento extends Serializer
 					( is_object( $data ) && ! count( get_object_vars( $data ) ) )
 				)
 			)
-		)
 
-			$key = sha1( get_type( $data ) );
+				$key = sha1( gettype( $data ) );
+			else
+
+				$key = sha1( serialize( $data ) );
+		}
+
 
 		$memory_cache = self::openConnection();
 
