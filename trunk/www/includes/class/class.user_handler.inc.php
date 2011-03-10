@@ -142,16 +142,17 @@ class User_Handler extends Administrator
     *
     * @param	boolean		$administrator		administrator flag
     * @return 	boolean		logged in status
-    */
-	public static function loggedIn( $administrator = FALSE )
+    */	
+	public static function loggedIn($administrator = FALSE)
 	{
 		// check the member store 
 		if (
 			! $administrator &&
 			isset( $_SESSION[STORE_MEMBER] ) &&
-			is_object( $_SESSION[STORE_MEMBER] ) &&
+			is_object($_SESSION[STORE_MEMBER] ) &&
 			isset( $_SESSION[STORE_MEMBER]->{ROW_MEMBER_IDENTIFIER} ) &&
-			is_numeric( $_SESSION[STORE_MEMBER]->{ROW_MEMBER_IDENTIFIER} ) ||
+			is_numeric( $_SESSION[STORE_MEMBER]->{ROW_MEMBER_IDENTIFIER} )
+			||
 			$administrator &&
 			isset( $_SESSION[STORE_ADMINISTRATOR] ) &&
 			is_object( $_SESSION[STORE_ADMINISTRATOR] ) &&
