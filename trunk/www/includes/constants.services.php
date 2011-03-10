@@ -54,6 +54,7 @@ declareConstantsBatch(
 		'SETTING_DATABASE' => 'database',
 		'SETTING_EXPIRATION_TIME' => 'expiration_time',
 		'SETTING_FLAGS' => 'flags',
+		'SETTING_FLUSH_CACHE_FORM' => 'flush_cache_form',
 		'SETTING_FLUSH_CACHE_MENU' => 'flush_cache_menu',
 		'SETTING_HOST' => 'host',
 		'SETTING_MAXIMUM_LONG_LENGTH_AVATAR' => 'maximum_long_length_photograph',
@@ -195,6 +196,16 @@ declareConstantsBatch(
 				$class_application::getServiceProperty(
 					SETTING_EXPIRATION_TIME, SERVICE_MEMCACHED
 				)
+			),
+
+		'MEMCACHED_FLUSH_CACHE_FORM' => (
+					$class_application::getServiceProperty(
+						SETTING_FLUSH_CACHE_FORM, SERVICE_MEMCACHED
+					)
+				?
+					TRUE
+				:
+					FALSE
 			),
 
 		'MEMCACHED_FLUSH_CACHE_MENU' => (
