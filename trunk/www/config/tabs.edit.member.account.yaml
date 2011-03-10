@@ -7,7 +7,3 @@ tabs:
     affordance: change.password
     menu: alter_password
     type: form
-  - 
-    affordance: send.document
-    menu: upload_photograph
-    type: form
