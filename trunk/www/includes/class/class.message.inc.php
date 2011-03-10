@@ -201,7 +201,7 @@ class Message extends Header
 							
 							if (
 								! strlen( trim( $body ) ) ||
-								! strlen( trim( $header ) )
+								! strlen( trim( $header_value ) )
 							)
 							
 								throw new Exception(
