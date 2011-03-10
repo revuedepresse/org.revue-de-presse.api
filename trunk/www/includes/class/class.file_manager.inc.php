@@ -66,7 +66,7 @@ class File_Manager extends Toolbox
 
 		$handle = fopen(
 			dirname( __FILE__ ) .
-			'/../../../logs/logs_'.NAMESPACE_TIFA.'_'.
+			'/../../../../../logs/logs_'.NAMESPACE_TIFA.'_'.
 			date('Ymd_H').'.log',
 			'a+'
 		);

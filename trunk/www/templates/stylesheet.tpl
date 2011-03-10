@@ -587,7 +587,8 @@ li span
 }
 
     body#body div#change_password.form_container form div label span,
-    body#body div#edit_basic_information.form_container form div label span
+    body#body div#edit_basic_information.form_container form div label span,
+    body#body div#send_document.form_container form div label span
     {
         margin-left: 0px;
     }
@@ -614,7 +615,13 @@ li span
             form
                 fieldset
                     div
-                        div.wrapper_span
+                        div.wrapper_span,
+    body#body
+        div#send_document.form_container
+            form
+                fieldset
+                    div
+                        div.wrapper_span                        
     {
         margin-left: 0px;
         width: 260px;
@@ -641,6 +648,7 @@ li span
     body#body div.form_container form fieldset div div.wrapper_button_post_insight
     {
         float: right;
+        margin-right: 6px;
         width: 100%;
     }
 
@@ -744,7 +752,8 @@ body div#upload_photograph
 }
 
     body div#tabs div#change_password,
-    body div#tabs div#edit_basic_information
+    body div#tabs div#edit_basic_information,
+    body div#tabs div#send_document
     {
         display: block;
     }
@@ -815,7 +824,8 @@ body div#upload_photograph
     }
 
         body div#tabs div#change_password.form_container form fieldset,
-        body div#tabs div#edit_basic_information.form_container form fieldset
+        body div#tabs div#edit_basic_information.form_container form fieldset,
+        body div#tabs div#send_document.form_container form fieldset
         {
             text-align: center;
             width: 265px;
@@ -988,7 +998,8 @@ div#write_article
             }
             
         body#body div#change_password.form_container form fieldset div input,
-        body#body div#edit_basic_information.form_container form fieldset div input
+        body#body div#edit_basic_information.form_container form fieldset div input,
+        body#body div#send_document.form_container form fieldset div input
         {
             width: 100%;
         }
@@ -1085,7 +1096,8 @@ div#write_article
             }
 
                 body#body div#change_password.form_container form,
-                body#body div#edit_basic_information.form_container form
+                body#body div#edit_basic_information.form_container form,
+                body#body div#send_document.form_container form
                 {
                     width: 300px;
                 }
@@ -1282,7 +1294,9 @@ div#confirm form
         body#body div#change_password.form_container div.fieldset_wrpr_2,
         body#body div#change_password.form_container div.fieldset_wrpr_0,
         body#body div#edit_basic_information.form_container div.fieldset_wrpr_2,
-        body#body div#edit_basic_information.form_container div.fieldset_wrpr_0
+        body#body div#edit_basic_information.form_container div.fieldset_wrpr_0,
+        body#body div#send_document.form_container div.fieldset_wrpr_2,
+        body#body div#send_document.form_container div.fieldset_wrpr_0
         {
             background-image: none;
             background-repeat: no-repeat;
@@ -1293,7 +1307,8 @@ div#confirm form
         }
 
         body#body div#change_password.form_container div.fieldset_wrpr_1,        
-        body#body div#edit_basic_information.form_container div.fieldset_wrpr_1
+        body#body div#edit_basic_information.form_container div.fieldset_wrpr_1,
+        body#body div#send_document.form_container div.fieldset_wrpr_1
         {
             float: left;
         }
@@ -1321,7 +1336,8 @@ div#confirm form
             }
 
         body#body div#change_password.form_container div.fieldset_wrpr_2,
-        body#body div#edit_basic_information.form_container div.fieldset_wrpr_2
+        body#body div#edit_basic_information.form_container div.fieldset_wrpr_2,
+        body#body div#send_document.form_container div.fieldset_wrpr_2
         {
             float: right;
         }
@@ -1339,7 +1355,14 @@ div#confirm form
         body#body div#edit_basic_information.form_container div.fieldset_wrprc,
         body#body div#edit_basic_information.form_container div.span_wrp,
         body#body div#edit_basic_information.form_container div.span_wrpr,
-        body#body div#edit_basic_information.form_container div.span_wrprc
+        body#body div#edit_basic_information.form_container div.span_wrprc,
+        body#body div#send_document.form_container div.wrapper_span,
+        body#body div#send_document.form_container div.fieldset_wrp,
+        body#body div#send_document.form_container div.fieldset_wrpr,
+        body#body div#send_document.form_container div.fieldset_wrprc,
+        body#body div#send_document.form_container div.span_wrp,
+        body#body div#send_document.form_container div.span_wrpr,
+        body#body div#send_document.form_container div.span_wrpr        
         {
             float: left;
         }
@@ -1351,7 +1374,11 @@ div#confirm form
             body#body
                 div#tabs
                     div#edit_basic_information.form_container
-                        form div.wrp
+                        form div.wrp,
+            body#body
+                div#tabs
+                    div#send_document.form_container
+                        form div.wrp                        
             {
                 float: none;
                 margin: auto;
@@ -1365,7 +1392,11 @@ div#confirm form
             body#body
                 div#tabs
                     div#edit_basic_information.form_container
-                        form div.wrapper_span div.span_wrp
+                        form div.wrapper_span div.span_wrp,
+            body#body
+                div#tabs
+                    div#send_document.form_container
+                        form div.wrapper_span div.span_wrp                        
             {
                 width: 260px;
             }            
@@ -1377,7 +1408,11 @@ div#confirm form
             body#body
                 div#tabs
                     div#edit_basic_information.form_container
-                        form div.fieldset_wrpr_1
+                        form div.fieldset_wrpr_1,
+            body#body
+                div#tabs
+                    div#send_document.form_container
+                        form div.fieldset_wrpr_1                        
             {
                 width: 294px;
             }
@@ -1847,7 +1882,7 @@ div.image div.panel_container
 div.image div.panel_container div.panels
 {
     margin: auto;
-    width: 600px;
+    width: 640px;
 }
 
 div.image div.panels div.post_insight,
@@ -1974,7 +2009,7 @@ div.image div.panels ul.action_panel
     div.image div.panels div.post_insight form textarea    
     {
         margin: auto;
-        width: 95%;
+        width: 95.5%;
     }
 
     div.image div.panels div.post_insight form div.button_cancel_insight,
@@ -2060,20 +2095,10 @@ div.image div.panels ul.action_panel
                             div
                                 input#submit_document
             {
+                float: right;
                 margin-right: 0px;
             }
 
-            body#body
-                div#tabs
-                    div#send_document
-                        form fieldset
-                            div
-                                input#submit_document
-            {
-                margin-right: 8px;
-                margin-top: 10px;
-            }
-    
             body#body div#search form input#look_up
             {
                 height: 31px;
@@ -2108,7 +2133,7 @@ div.image div.panels ul.action_panel
                 left: 0;
                 height: 2em;
                 position: absolute;
-                width: 5px;
+                width: 0px;
             }
 
             body#body
@@ -2120,7 +2145,7 @@ div.image div.panels ul.action_panel
                 right: 0;
                 height: 2em;
                 position: absolute;
-                width: 5px;            
+                width: 0px;            
             }
 
                 body#body div.reply div.form_container input.button_post_insight,

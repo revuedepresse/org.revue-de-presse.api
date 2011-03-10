@@ -281,7 +281,11 @@ namespace sefi
 		)
 		{
 			// send headers
-			header('Content-Type: '.MIME_TYPE_TEXT_HTML.'; charset='.I18N_CHARSET_UTF8);
+			header(
+				'Content-Type: '.
+					MIME_TYPE_TEXT_HTML.
+						'; charset='.I18N_CHARSET_UTF8
+			);
 
 			// return a member view
 			echo $this->fetchMemberView(
@@ -311,8 +315,6 @@ namespace sefi
 			$informant = null
 		)
 		{
-			$class_dumper = self::getDumperClass();
-
 			// get member variables
 			$_variables = &$this->get_variables();
 	
@@ -410,16 +412,6 @@ namespace sefi
 
 			// add space between closing bracket of single tags 
 			$view = preg_replace( '/\s*\/>/', ' />', $view );
-
-			$class_dumper::log(
-				__METHOD__,
-				array( debug_backtrace() )
-			);
-
-			$class_dumper::log(
-				__METHOD__,
-				array( $view )
-			);
 
 			// return the view
 			return $view;
@@ -1236,7 +1228,7 @@ namespace sefi
 					// logout the current logged in member
 					self::destroySession($administration);
 
-					if (!$administration)
+					if ( ! $administration )
 
 						$authentication_form = PREFIX_ROOT;
 					else
@@ -1533,20 +1525,27 @@ namespace sefi
 
 							if (
 								! $properties->{PROPERTY_KEY} ||
-								isset($properties->{PROPERTY_IDENTIFIER})	
+								isset( $properties->{PROPERTY_IDENTIFIER} )	
 							)
 
 								$photos =
 									$class_media_manager::loadPhotosByAuthorId(
-										$qualities->{ROW_MEMBER_IDENTIFIER}
-										//AUTHOR_IDENTIFIER_SHAL
+										$qualities->{ROW_MEMBER_IDENTIFIER},
+										FALSE,
+										(
+											! $properties->{PROPERTY_KEY}
+										?
+											$media
+										:
+											$properties->{PROPERTY_IDENTIFIER}
+										)
 									)
 								;
 
 							// check the media identifier
 							if (
-								isset($media->{PROPERTY_IDENTIFIER}) &&
-								isset($photos[$media->{PROPERTY_IDENTIFIER}])
+								isset( $media->{PROPERTY_IDENTIFIER} ) &&
+								isset( $photos[$media->{PROPERTY_IDENTIFIER}] )
 							)
 
 								// get the file content
@@ -1566,7 +1565,9 @@ namespace sefi
 					{
 						// load photos by author identifier
 						$photos = $class_media_manager::loadPhotosByAuthorId(
-							$qualities->{ROW_MEMBER_IDENTIFIER}
+							$qualities->{ROW_MEMBER_IDENTIFIER},
+							FALSE,
+							$media->{PROPERTY_IDENTIFIER}
 						);
 
 						$key =
@@ -1809,7 +1810,10 @@ namespace sefi
 		public static function displaySearchResults(&$context, $page)
 		{
 			// send headers
-			header('Content-Type: '.MIME_TYPE_TEXT_HTML.'; charset='.I18N_CHARSET_UTF8);
+			header(
+				'Content-Type: '.MIME_TYPE_TEXT_HTML.
+					'; charset='.I18N_CHARSET_UTF8
+			);
 
 			// return a fetched view
 			echo self::getSearchResults($context, $page);
@@ -2016,8 +2020,6 @@ namespace sefi
 			$informant = null
 		)
 		{
-			$class_dumper = self::getDumperClass();
-
 			// set member variables
 			if ( isset( $variables ) )
 
@@ -2052,9 +2054,6 @@ namespace sefi
 
 			// set the Dumper class name
 			$class_dumper = self::getDumperClass();
-
-			// set the exception handler class name
-			$class_exception_handler = self::getExceptionHandlerClass();
 
 			// set the template engine class name
 			$class_template_engine = self::getTemplateEngineClass();
@@ -2120,34 +2119,8 @@ namespace sefi
 				$width = $_GET[GET_WIDTH];
 
 			if ( ! isset( $height ) || ! isset( $width ) )
-			{
-				$exception = new \Exception( EXCEPTION_INVALID_ARGUMENT );
-				
-				$context_http = array(
-					PROTOCOL_HTTP_METHOD_GET => $_GET,
-					PROTOCOL_HTTP_METHOD_POST => $_POST
-				);
 			
-				$context = array(
-					PROPERTY_CONTEXT => print_r( $context_http, TRUE ),
-					PROPERTY_DESCRIPTION => sprintf(
-						EVENT_DESCRIPTION_EXCEPTION_CAUGHT,
-						$exception->getCode(),
-						$exception->getFile(),
-						$exception->getLine(),
-						$exception->getMessage(),
-						$exception->getTraceAsString()
-					),
-					PROPERTY_EXCEPTION => $exception,
-					PROPERTY_TYPE => EVENT_TYPE_EXCEPTION_CAUGHT
-				);
-	
-				$class_exception_handler::logContext( $context );
-				
-				$height =
-				
-				$width = DIMENSION_MAXIMUM_AVATAR_LONG_EDGE;
-			}
+				throw new \Exception( EXCEPTION_INVALID_ARGUMENT );
 
 			// save the original height
 			$_height = $height;
@@ -2211,6 +2184,8 @@ namespace sefi
 				md5(
 					serialize(
 						array(
+							DIMENSION_MAXIMUM_LONG_EDGE,
+							DIMENSION_MAXIMUM_AVATAR_LONG_EDGE,
 							$key.
 							( (int) $avatar ).'_'.
 							substr(
@@ -2465,7 +2440,7 @@ namespace sefi
 										$maximum_long_edge."_".
 											$proportions."/".
 												$identifier,
-									IMAGE_JPEG_QUALITY
+									100
 								);
 						}
 						else
@@ -2864,7 +2839,7 @@ namespace sefi
 									self::jumpTo( URI_ACTION_DISPLAY_DOCUMENT );
 	
 								case ROUTE_WONDERING:
-	
+
 									// build a content view
 									$parameters[ENTITY_CONTENT] =
 										$class_view_builder::buildContent(
@@ -2979,22 +2954,28 @@ namespace sefi
 							$page != PAGE_OVERVIEW
 						)
 						{
-							if (
-								! isset( $_SESSION[STORE_DIALOG] ) ||
-								! is_array( $_SESSION[STORE_DIALOG] )
-							)
-
-								$_SESSION[STORE_DIALOG] = array();
-			
-							$_SESSION[STORE_DIALOG][] = ACTION_SEARCH;
-
-							$form_parameters[PLACEHOLDER_MAIN] = self::getFormView(
-								ACTION_SEARCH,
-								BLOCK_FORM,
-								PAGE_DIALOG
-							);
-
-							unset( $_SESSION[STORE_DIALOG] );
+							if ( SEFI_ARTICLES_BASE )
+							{
+								if (
+									! isset( $_SESSION[STORE_DIALOG] ) ||
+									! is_array( $_SESSION[STORE_DIALOG] )
+								)
+	
+									$_SESSION[STORE_DIALOG] = array();
+				
+								$_SESSION[STORE_DIALOG][] = ACTION_SEARCH;
+	
+								$form_parameters[PLACEHOLDER_MAIN] = self::getFormView(
+									ACTION_SEARCH,
+									BLOCK_FORM,
+									PAGE_DIALOG
+								);
+	
+								unset( $_SESSION[STORE_DIALOG] );
+							}
+							else
+							
+								self::jumpTo( URI_PAGE_WONDERING );
 						}
 						else 
 
@@ -3930,23 +3911,23 @@ namespace sefi
 						);
 						
 						// load photos by author identifier
-						$photos = array_slice(
+						$photos = 
 							$class_media_manager::loadPhotosByAuthorId(
 								$member_identifier,
-								//AUTHOR_IDENTIFIER_SHAL,
-								FALSE
-							),
-							( 
-								(
-									$default_border =
-										$class_interceptor::getDefaultBorder()
-								) *
-								PAGINATION_COUNT_PER_PAGE_PHOTOGRAPH -
-								PAGINATION_COUNT_PER_PAGE_PHOTOGRAPH
-							),
-							PAGINATION_COUNT_PER_PAGE_PHOTOGRAPH,
-							TRUE
-						);
+								FALSE,
+								array(
+									PROPERTY_START =>
+										(
+											$default_border =
+												$class_interceptor::getDefaultBorder()
+										) *
+										PAGINATION_COUNT_PER_PAGE_PHOTOGRAPH -
+											PAGINATION_COUNT_PER_PAGE_PHOTOGRAPH,
+									PROPERTY_LENGTH =>
+										PAGINATION_COUNT_PER_PAGE_PHOTOGRAPH
+								)
+							)
+						;
 
 						while ( list( $id, ) = each( $photos ) )
 						

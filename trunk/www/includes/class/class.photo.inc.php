@@ -1074,11 +1074,11 @@ class Photo extends Toolbox
         
         $template->assign("label_browse",$lang['button_labels']['selection']['label_value']);
     
-        $template->display(TPL_FORM_UPLOAD_PHOTOS_TOP);
+        $template->display( TPL_FORM_UPLOAD_PHOTOS_TOP );
 
-        $template->display(TPL_FIELDS_UPLOAD_PHOTOS_FORM);        
+        $template->display( TPL_FIELDS_UPLOAD_PHOTOS_FORM );        
 
-        $template->display(TPL_FORM_UPLOAD_PHOTOS_BOTTOM);
+        $template->display( TPL_FORM_UPLOAD_PHOTOS_BOTTOM );
     }
 
     /**

@@ -1,23 +1,4 @@
 <?php
-/**
-*************
-* Changes log
-*
-*************
-* 2011 03 04
-*************
-*
-* Check the declaration of a form identifier before destroying
-* a session left possibly opened when
-* a client follows a confirmation link
-*
-* method affected ::
-* 
-* INTERCEPTOR :: route
-* 
-* (revision 78)
-*
-*/
 
 /**
 * Interceptor class
@@ -604,13 +585,7 @@ class Interceptor extends Store
 								[$form_identifier]
 									[AFFORDANCE_DISPLAY]
 					),
-					(
-							isset( $form_identifier )
-						?
-							$form_identifier
-						:
-							NULL
-					)
+					$form_identifier
 				);
 
 				unset( $_SESSION[ENTITY_FEEDBACK] );
@@ -877,7 +852,6 @@ class Interceptor extends Store
 
 							// set a border
 							self::updateDefaultBorder( BORDER_DEFAULT_OFFSET );
-
 
 						// check the route id property 
 						if ( ! empty( $route->{PROPERTY_ID} ) )
@@ -1171,3 +1145,4 @@ class Interceptor extends Store
 		self::updatePosition($url, POSITION_PREVIOUS, $store_type);
 	}
 }
+?>

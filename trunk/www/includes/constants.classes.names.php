@@ -96,6 +96,7 @@ assignConstant('CLASS_LOCKSMITH','Locksmith');
 assignConstant('CLASS_LSQL','Lsql');
 assignConstant('CLASS_MEDIA_MANAGER', 'Media_Manager');
 assignConstant('CLASS_MEMENTO', 'Memento');
+assignConstant('CLASS_MEMORY_CACHE', 'Memcache');
 assignConstant('CLASS_MESSAGE', 'Message');
 assignConstant('CLASS_MESSENGER', 'Messenger');
 assignConstant('CLASS_MEMBER', 'Member');

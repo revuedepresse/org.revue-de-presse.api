@@ -1,4 +1,24 @@
 <?php
+/**
+*************
+* Changes log
+*
+*************
+* 2011 03 09
+*************
+* 
+* Start implementing data storage by using memcached service
+*
+* methods affected ::
+*
+* MEMENTO :: delete
+* MEMENTO :: getStatistics
+* MEMENTO :: openConnection
+* MEMENTO :: storeData
+* 
+* (branches 0.1 :: revision :: 595)
+*
+*/
 
 /**
 * Memento class
@@ -190,5 +210,158 @@ class Memento extends Serializer
 			list( $_namespace, $_class ) = explode( '\\', __CLASS__ );
 
 		return $_class;
+	}
+
+	/**
+	* Get statistics from a memached server
+	*
+	* @param	string	$type	type
+	* @param	string	$slabid	slabib
+	* @return	integer	$limit	limit
+	*/
+	public static function getStatistics(
+		$type = NULL,
+		$slabid = NULL,
+		$limit = NULL
+	)
+	{
+		$memcached = self::openConnection();
+
+		return $memcached->getExtendedStats( $type, $slabid, $limit );
+	}
+
+	/**
+	* Open a connection with a memcache server
+	*
+	* @param	mixed	$host
+	* @param	mixed	$port
+	* @return 	mixed
+	*/
+	public static function openConnection(
+		$host = NULL,
+		$port = NULL
+	)
+	{
+		global $class_application, $verbose_mode;
+
+		$class_memory_cache = $class_application::getMemoryCacheClass();
+
+		$memory_cache = new $class_memory_cache;
+		
+		if ( is_null( $host ) )
+		
+			$host = MEMCACHED_HOST;
+
+		if ( is_null( $port ) )
+		
+			$host = MEMCACHED_PORT;
+
+		if ( ! $memory_cache->addServer( MEMCACHED_HOST, MEMCACHED_PORT ) )
+		
+			throw new Exception( EXCEPTION_INVALID_MEMCACHED_SERVER );
+		else
+
+			return $memory_cache;
+	}
+
+	/**
+	* Remove data from a memcached server
+	*
+	* @param	mixed	$key	key
+	* @param	mixed	$flush	flushing flag
+	* @return 	mixed
+	*/
+	public static function removeData( $key = NULL, $flush = FALSE )
+	{
+		$memory_cache = self::openConnection();
+		
+		if ( $flush === TRUE )
+
+			$callback_parameters = $memory_cache->flush();
+		else
+
+			$callback_parameters = $memory_cache->delete( $key );
+
+		return $callback_parameters;
+	}
+
+	/**
+	* Retrieve data
+	*
+	* @param	mixed	$key		key
+	* @param	mixed	$flags		flags
+	* @return 	mixed	data
+	*/
+	public static function retrieveData(
+		$key,
+		&$flags = NULL
+	)
+	{
+		$memory_cache = self::openConnection();
+		
+		if ( MEMCACHED_ACTIVE )
+		
+			$data = $memory_cache->get( $key, $flags );
+		else
+
+			$data = FALSE;
+
+		return $data;
+	}
+
+	/**
+	* Store data
+	*
+	* @param	mixed	$data		data
+	* @param	mixed	$key		key
+	* @param	mixed	$replace	replace
+	* @param	mixed	$flag		flag
+	* @param	mixed	$expire		expiration time
+	* @return 	mixed
+	*/
+	public static function storeData(
+		$data = NULL,
+		$key = NULL,
+		$replace = FALSE,
+		$flag = MEMCACHE_COMPRESSED,
+		$expire = NULL
+	)
+	{
+		global $class_application, $verbose_mode;
+
+		$class_dumper = $class_application::getDumperClass();
+		
+		$class_memory_cache = $class_application::getMemoryCacheClass();
+		
+		if ( is_null( $expire ) )
+
+			$expire = time() + MEMCACHED_EXPIRATION_TIME;
+
+		if (
+			is_null( $key ) ||
+			(
+				! is_null( $data ) &&
+				(
+					( is_string( $data ) && ! strlen( $data ) ) ||
+					( is_array( $data ) && ! count( $data ) ) ||
+					( is_object( $data ) && ! count( get_object_vars( $data ) ) )
+				)
+			)
+		)
+
+			$key = sha1( get_type( $data ) );
+
+		$memory_cache = self::openConnection();
+
+		$method = $replace  ? 'replace' : 'add' ;
+
+		$callback_parameters = $memory_cache->$method(
+			$key,
+			$data,
+			$flag,
+			$expire
+		);
+		
+		return $callback_parameters;
 	}
 }

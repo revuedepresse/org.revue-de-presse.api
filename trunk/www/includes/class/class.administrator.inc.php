@@ -25,4 +25,3 @@ class Administrator extends Member
 		return $_class;
 	}
 }
-?>

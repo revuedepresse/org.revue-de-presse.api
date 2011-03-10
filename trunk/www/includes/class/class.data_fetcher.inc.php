@@ -2,6 +2,18 @@
 /**
 *************
 * Changes log
+* 
+*************
+* 2011 03 09
+*************
+*
+* Set avatar photographs public by default
+*
+* method affected ::
+*
+* DATA_FETCHER :: fetchPhotographs
+*
+* (branch 0.1 :: revision :: 592)
 *
 *************
 * 2011 03 05
@@ -25,7 +37,6 @@
 */
 class Data_Fetcher extends Database
 {
-
     /**
     * Load a photograph
     * 
@@ -63,7 +74,7 @@ class Data_Fetcher extends Database
                 pht_status != '.PHOTOGRAPH_STATUS_DISABLED
         ;
 
-        $result_photograph = $class_db::query($select_photograph);
+        $result_photograph = $class_db::query( $select_photograph );
 
 		if ($result_photograph->num_rows)
 		{
@@ -180,12 +191,16 @@ class Data_Fetcher extends Database
 	* 
 	* @param	integer		$member_id			member id
 	* @param	boolean		$accept_avatars 	avatars flag
+	* @param	mixed		$conditions			conditions
+	* @param	mixed		$total_photographs	photographs total
 	*
 	* @return	resource	photographs results
 	*/
 	public static function fetchPhotographs(
 		$member_id,
-		$accept_avatars = FALSE
+		$accept_avatars = FALSE,
+		$conditions = NULL,
+		&$total_photographs = NULL
 	)
 	{
 		global $class_application, $verbose_mode;
@@ -193,6 +208,8 @@ class Data_Fetcher extends Database
 		$class_db = $class_application::getDbClass();
 
 		$class_dumper = $class_application::getDumperClass();
+
+		$class_memento = $class_application::getMementoClass();
 		
 		$callback_parameters = array();
 
@@ -203,174 +220,310 @@ class Data_Fetcher extends Database
 			)
 		);
 
-        /**
-        *
-        * Retrieve concepts ids
-        * (previously called ids of entities, renamed here to clarify
-        * "id of entity types" instead of "entity id of entity types")
-        *
-        */
-
-        $concept_photograph_id = self::getEntityIdByName(
-            ENTITY_PHOTOGRAPH
-        );
-
-        $concept_entity_type_id = self::getEntityIdByName(
-            ENTITY_ENTITY_TYPE
-        );
-
-		$visibility_type_public = self::getEntityTypeId(
-			array(
-				PROPERTY_NAME => PROPERTY_PUBLIC,
-				PROPERTY_ENTITY => ENTITY_VISIBILITY
-			)
-		);
-
-		$class_dumper::log(
-			__METHOD__,
-            array(
-                '[value of arc type with visibility as name]',
-                $arc_type_visibility,
-                '[id of public visibility as an entity type concept]',
-                $visibility_type_public,
-                '[photograph concept id]',
-                $concept_photograph_id,
-                '[entity type concept id]',
-                $concept_entity_type_id                  
-            )
-		);
-
-        $query_select_photo = '
-            SELECT
-				author_id,
-                photo_id,
-				hash,
-                height,
-                keywords,
-                mime_type,
-                original_file_name,
-                size,
-                title,
-                width,
-                pht_date_creation,
-                pht_date_last_modification,
-                pht_status
-            FROM
-                `'.TABLE_PHOTOGRAPH.'`
-            WHERE
-                ( ' .
-                    ( $member_id ? ' author_id = '.$member_id : '' ) . ' OR
-                    photo_id IN (
-                        SELECT
-
-                            ' . PREFIX_TABLE_COLUMN_EDGE .
-								TABLE_ALIAS_PHOTOGRAPH . '.' .
-                                    PREFIX_TABLE_COLUMN_EDGE . PROPERTY_KEY . '
-
-                        FROM
-
-                            '. TABLE_ARC .' ' . TABLE_ALIAS_ARC . ', 
-
-                            '. TABLE_EDGE .' ' .
-								PREFIX_TABLE_COLUMN_EDGE .
-									TABLE_ALIAS_PHOTOGRAPH . ',
-
-                            '. TABLE_EDGE .' ' .
-								PREFIX_TABLE_COLUMN_EDGE .
-									TABLE_ALIAS_ENTITY_TYPE . '
-
-                        WHERE
-
-                            # active arcs
-
-                            ' . TABLE_ALIAS_ARC . '.' .
-								PREFIX_TABLE_COLUMN_ARC . PROPERTY_STATUS .
-								
-									' = ' . ARC_STATUS_ACTIVE . ' AND
-
-                            # arcs of type visiblity
-                            
-                            ' . TABLE_ALIAS_ARC . '.' . PREFIX_TABLE_COLUMN_ARC .
-								PROPERTY_TYPE .
-								
-									' = ' . $arc_type_visibility . ' AND
-
-                            # source edges are active
-
-                            ' . PREFIX_TABLE_COLUMN_EDGE . TABLE_ALIAS_PHOTOGRAPH .
-								'.' . PREFIX_TABLE_COLUMN_EDGE  . PROPERTY_STATUS .
-								
-									' = ' . EDGE_STATUS_ACTIVE . ' AND
-                                
-                            # source edges are of type photograph
-
-                            ' . PREFIX_TABLE_COLUMN_EDGE . TABLE_ALIAS_PHOTOGRAPH . '.' .
-								PREFIX_TABLE_COLUMN_EDGE  . PROPERTY_ID .
-                                
-									' = ' . TABLE_ALIAS_ARC . '.' .
-										PREFIX_TABLE_COLUMN_ARC. PROPERTY_SOURCE . '  AND
-
-                            ' . PREFIX_TABLE_COLUMN_EDGE . TABLE_ALIAS_PHOTOGRAPH . '.' .
-								PREFIX_TABLE_COLUMN_ENTITY . PROPERTY_ID .
-                                
-									' = ' . $concept_photograph_id . '  AND
-
-                            # destination edges are active
-
-                            ' . PREFIX_TABLE_COLUMN_EDGE . TABLE_ALIAS_ENTITY_TYPE . '.' .
-								PREFIX_TABLE_COLUMN_EDGE  . PROPERTY_STATUS .
-                                
-									' = ' . EDGE_STATUS_ACTIVE . ' AND
-
-                            # destination edges are of type entity type
-
-                            ' . PREFIX_TABLE_COLUMN_EDGE . TABLE_ALIAS_ENTITY_TYPE . '.' .
-								PREFIX_TABLE_COLUMN_EDGE  . PROPERTY_ID .
-
-								    ' =  ' . TABLE_ALIAS_ARC . '.' .
-										PREFIX_TABLE_COLUMN_ARC . PROPERTY_DESTINATION . ' AND
-
-                            ' . PREFIX_TABLE_COLUMN_EDGE . TABLE_ALIAS_ENTITY_TYPE . '.' .
-								PREFIX_TABLE_COLUMN_ENTITY . PROPERTY_ID .
-                                
-								    ' = ' . $concept_entity_type_id . '  AND                                
-
-                            # visibility level is public
-
-                            ' . PREFIX_TABLE_COLUMN_EDGE . TABLE_ALIAS_ENTITY_TYPE . '.' .
-								PREFIX_TABLE_COLUMN_EDGE  . PROPERTY_KEY .
-                            
-								    ' = ' . $visibility_type_public . '
-                    )
-                )
-                AND pht_status != '.PHOTOGRAPH_STATUS_DISABLED.
-                (
-                    $accept_avatars === FALSE
-                ?
-                    ' AND pht_status != '.PHOTOGRAPH_STATUS_AVATAR
-                :
-                    ''
-                ).'
-            ORDER BY
-                photo_id
-            DESC
-        ';
-
-		$photographs_results = $class_db::query( $query_select_photo );
+		$id =
 		
+		$start =
+		
+		$length = NULL;
+
+		$memento_key = md5( serialize( func_get_args() ) );
+
 		if (
-			is_object( $photographs_results ) &&
-			get_class( $photographs_results ) === CLASS_MYSQLI_RESULT
+			FALSE ===
+				(
+					$callback_parameters_cached =
+						$class_memento::retrieveData( $memento_key )
+				)
 		)
 		{
-			if ( $photographs_count = $photographs_results->num_rows )
+			if (
+				is_object( $conditions ) ||
+				is_array( $conditions )
+			)
+			{
+				if (
+					is_object( $conditions ) &&
+					isset( $conditions->{PROPERTY_IDENTIFIER} )
+				)
+	
+					$id = $conditions->{PROPERTY_IDENTIFIER};
+				
+				else if (
+					isset( $conditions[PROPERTY_START] ) &&
+					isset( $conditions[PROPERTY_LENGTH] )
+				)
+				{
+					$start = $conditions[PROPERTY_START];
+	
+					$length = $conditions[PROPERTY_LENGTH];
+				}
+			}
+	
+			/**
+			*
+			* Retrieve concepts ids
+			* (previously called ids of entities, renamed here to clarify
+			* "id of entity types" instead of "entity id of entity types")
+			*
+			*/
+	
+			$concept_photograph_id = self::getEntityIdByName(
+				ENTITY_PHOTOGRAPH
+			);
+	
+			$concept_entity_type_id = self::getEntityIdByName(
+				ENTITY_ENTITY_TYPE
+			);
+	
+			$visibility_type_public = self::getEntityTypeId(
+				array(
+					PROPERTY_NAME => PROPERTY_PUBLIC,
+					PROPERTY_ENTITY => ENTITY_VISIBILITY
+				)
+			);
+	
+			$class_dumper::log(
+				__METHOD__,
+				array(
+					'[value of arc type with visibility as name]',
+					$arc_type_visibility,
+					'[id of public visibility as an entity type concept]',
+					$visibility_type_public,
+					'[photograph concept id]',
+					$concept_photograph_id,
+					'[entity type concept id]',
+					$concept_entity_type_id                  
+				)
+			);
+	
+			$query_select_photo = '
+				SELECT SQL_CALC_FOUND_ROWS
+					author_id,
+					photo_id,
+					hash,
+					height,
+					keywords,
+					mime_type,
+					original_file_name,
+					size,
+					title,
+					width,
+					pht_date_creation,
+					pht_date_last_modification,
+					pht_status
+				FROM
+					`'.TABLE_PHOTOGRAPH.'`
+				WHERE
+					( ' .
+						(
+							is_null( $id )
+						?
+							' 1 '
+						:
+							' photo_id = ' . $id 
+						)
+					.' ) AND 
+					( ' .
+						(
+								$member_id
+							?
+								'( '.
+									' author_id = '.$member_id . ' ' .
+									(
+											! $accept_avatars
+										?
+											''
+										:
+											' OR
+											pht_status = ' .
+												PHOTOGRAPH_STATUS_AVATAR 
+									) .
+								') '
+							:
+								''
+						) . ' OR
+						photo_id IN (
+							SELECT
+	
+								' . PREFIX_TABLE_COLUMN_EDGE .
+									TABLE_ALIAS_PHOTOGRAPH . '.' .
+										PREFIX_TABLE_COLUMN_EDGE . PROPERTY_KEY . '
+	
+							FROM
+	
+								'. TABLE_ARC .' ' . TABLE_ALIAS_ARC . ', 
+	
+								'. TABLE_EDGE .' ' .
+									PREFIX_TABLE_COLUMN_EDGE .
+										TABLE_ALIAS_PHOTOGRAPH . ',
+	
+								'. TABLE_EDGE .' ' .
+									PREFIX_TABLE_COLUMN_EDGE .
+										TABLE_ALIAS_ENTITY_TYPE . '
+	
+							WHERE ' .
+	
+								// active arcs
+	
+								TABLE_ALIAS_ARC . '.' .
+									PREFIX_TABLE_COLUMN_ARC . PROPERTY_STATUS .
+									
+										' = ' . ARC_STATUS_ACTIVE . ' AND ' .
+	
+								// arcs of type visiblity
+								
+								TABLE_ALIAS_ARC . '.' . PREFIX_TABLE_COLUMN_ARC .
+									PROPERTY_TYPE .
+									
+										' = ' . $arc_type_visibility . ' AND ' .
+	
+								// source edges are active
+	
+								PREFIX_TABLE_COLUMN_EDGE . TABLE_ALIAS_PHOTOGRAPH .
+									'.' . PREFIX_TABLE_COLUMN_EDGE  . PROPERTY_STATUS .
+									
+										' = ' . EDGE_STATUS_ACTIVE . ' AND ' .
+									
+								// source edges are of type photograph
+	
+								PREFIX_TABLE_COLUMN_EDGE . TABLE_ALIAS_PHOTOGRAPH . '.' .
+									PREFIX_TABLE_COLUMN_EDGE  . PROPERTY_ID .
+									
+										' = ' . TABLE_ALIAS_ARC . '.' .
+											PREFIX_TABLE_COLUMN_ARC. PROPERTY_SOURCE . '  AND ' .
+											
+								PREFIX_TABLE_COLUMN_EDGE . TABLE_ALIAS_PHOTOGRAPH . '.' .
+									PREFIX_TABLE_COLUMN_ENTITY . PROPERTY_ID .
+									
+										' = ' . $concept_photograph_id . '  AND ' .
+	
+								// destination edges are active
+	
+								PREFIX_TABLE_COLUMN_EDGE . TABLE_ALIAS_ENTITY_TYPE . '.' .
+									PREFIX_TABLE_COLUMN_EDGE  . PROPERTY_STATUS .
+									
+										' = ' . EDGE_STATUS_ACTIVE . ' AND ' .
+	
+								// destination edges are of type entity type
+	
+								PREFIX_TABLE_COLUMN_EDGE . TABLE_ALIAS_ENTITY_TYPE . '.' .
+									PREFIX_TABLE_COLUMN_EDGE  . PROPERTY_ID .
+	
+										' =  ' . TABLE_ALIAS_ARC . '.' .
+											PREFIX_TABLE_COLUMN_ARC . PROPERTY_DESTINATION . ' AND ' .
+	
+								PREFIX_TABLE_COLUMN_EDGE . TABLE_ALIAS_ENTITY_TYPE . '.' .
+									PREFIX_TABLE_COLUMN_ENTITY . PROPERTY_ID .
+									
+										' = ' . $concept_entity_type_id . '  AND ' .
+	
+								// visibility level is public
+	
+								PREFIX_TABLE_COLUMN_EDGE . TABLE_ALIAS_ENTITY_TYPE . '.' .
+									PREFIX_TABLE_COLUMN_EDGE  . PROPERTY_KEY .
+								
+										' = ' . $visibility_type_public . '
+						)
+					) AND pht_status != '.PHOTOGRAPH_STATUS_DISABLED.
+					(
+						$accept_avatars === FALSE
+					?
+						' AND (
+							pht_status != ' . PHOTOGRAPH_STATUS_AVATAR .
+							' OR ' .
+							(
+								is_null( $id )
+							?
+								' 0 '
+							:
+								' EXISTS (
+									SELECT
+										photo_id
+									FROM
+										`' . TABLE_PHOTOGRAPH . '`
+									WHERE
+										photo_id = ' . $id . ' AND 
+										pht_status = ' .
+											PHOTOGRAPH_STATUS_AVATAR .
+								' ) '
+							) . 
+						' ) '
+					:
+						''
+					).'
+				ORDER BY
+					photo_id
+	
+				DESC
+	
+				' . (
+						! is_null( $start )
+					?
+						// pagination
+						' LIMIT ' . $start . ',' . $length
+					:
+						''
+				)
+			;
+	
+			$link = $class_db::getLink();
+	
+			$select_found_rows = ' ; SELECT FOUND_ROWS() AS ' . PROPERTY_ROWS_CALCULATED;
+	
+			$link->multi_query( $query_select_photo . $select_found_rows );
+			
+			if ( $photographs_results = $link->store_result() )
+			
+				if (
+					is_object( $photographs_results ) &&
+					get_class( $photographs_results ) === CLASS_MYSQLI_RESULT
+				)
+				{
+					if ( $photographs_count = $photographs_results->num_rows )
+		
+						for ( $k = $photographs_count ; $k > 0 ; $k-- )
+		
+							$callback_parameters[] = $photographs_results->fetch_object();
+		
+					//$photographs_results->free_result();
+				}
+	
+			$link->next_result();
+	
+			$results = $link->store_result();
+	
+			if (
+				is_object( $results ) &&
+				( get_class( $results ) === CLASS_MYSQLI_RESULT ) &&
+				$results->num_rows
+			)
+			{
+				$properties = $results->fetch_object();
+	
+				$class_dumper::log(
+					__METHOD__,
+					array(
+						'[properties]',
+						$properties
+					)
+				);
+	
+				$total_photographs =
+					$properties->{PROPERTY_ROWS_CALCULATED}
+				;
+			}
 
-				for ( $k = $photographs_count ; $k > 0 ; $k-- )
 
-					$callback_parameters[] = $photographs_results->fetch_object();
-
-			$photographs_results->free_result();
+			$class_memento::storeData(
+				serialize( array( $callback_parameters, $total_photographs ) ),
+				$memento_key
+			);
 		}
+		else
+		
+			list( $callback_parameters, $total_photographs ) =
+				unserialize( $callback_parameters_cached )
+			;
 
 		return $callback_parameters;
 	}
@@ -399,479 +552,502 @@ class Data_Fetcher extends Database
 
 		$class_db = $class_application::getDbClass();
 
+		$class_memento = $class_application::getMementoClass();
+
 		$meta_properties = 
+
 		$original_aliases =
+
 		$properties = array();
 
-		switch ($entity_type)
+		$memento_key = md5( serialize( func_get_args() ) );
+
+		if (
+			FALSE ===
+				(
+					$properties_cached =
+						$class_memento::retrieveData( $memento_key )
+				)
+		)
 		{
-			case CLASS_ENTITY:
-
-				if ( is_numeric($context) && !empty($context) )
-				{
-					$select_id = '
-						SELECT
-							'.PREFIX_TABLE_COLUMN_ENTITY.PROPERTY_NAME.' '.PROPERTY_ENTITY_NAME.'
-						FROM
-							'.TABLE_ENTITY.'
-						WHERE
-							'.PREFIX_TABLE_COLUMN_ENTITY.PROPERTY_ID.' = '.$context
-					;
-
-					$results = $class_db::query($select_id, TRUE);
-
-					if ($results->rowCount() == 1)
-
-						$properties = $results->fetchObject();
-				}
-				else if ( is_array( $context ) && count( $context ) )
-				{
-					$clause_where = SQL_ANYWHERE;
-
-					while ( list( $name, $value ) = each($context) )
-
-						// prevent meta properties like namespace to be used
-						if ( ! is_array( $value ) )
-
-							$clause_where .=
-								' '.SQL_AND.' '.
-								PREFIX_TABLE_COLUMN_ENTITY.$name.
-								' = '.
-								( is_numeric($value) ? $value : '"'.$value.'"' )
-							;
-						else
-
-							$meta_properties[$name] = $value;
-
-					$column_entity_id =
-						PREFIX_TABLE_COLUMN_ENTITY.
-							PROPERTY_ID
-					;
-
-					$column_entity_name =
-						PREFIX_TABLE_COLUMN_ENTITY.
-							PROPERTY_NAME
-					;
-
-					$alias_entity_id = PROPERTY_ID;
-
-					$alias_entity_name = PROPERTY_ENTITY_NAME;
-
-					$select_matching_items = '
-						SELECT
-							'.$column_entity_id.' '.$alias_entity_id.',
-							'.$column_entity_name.' '.$alias_entity_name.'
-						FROM
-							'.TABLE_ENTITY.'
-						WHERE
-							'.$clause_where
-					;
-
-					$class_dumper::log(
-						__METHOD__,
-						array(
-							'select matching items ',
-							$select_matching_items
-						)
-					);
-
-					$results = $class_db::query($select_matching_items, TRUE);
-
-					if ( $results->rowCount() )
-					{
-						if ($results->rowCount() == 1)
-						
-							$properties = $results->fetchObject();
-						else 
-
-							while ($result = $results->fetchObject())
+			switch ( $entity_type )
+			{
+				case CLASS_ENTITY:
 	
-								$properties[] = $result;
-					}
-					
-					if ( count($meta_properties) )
-					
-						$properties =
-							(object)
-							array_merge(
-									is_object($properties)
-								?
-									(array) $properties
-								:
-									$properties
-								,
-								$meta_properties
-							)
+					if ( is_numeric( $context ) && ! empty( $context ) )
+					{
+						$select_id = '
+							SELECT
+								'.PREFIX_TABLE_COLUMN_ENTITY.PROPERTY_NAME.' '.PROPERTY_ENTITY_NAME.'
+							FROM
+								'.TABLE_ENTITY.'
+							WHERE
+								'.PREFIX_TABLE_COLUMN_ENTITY.PROPERTY_ID.' = '.$context
 						;
-				}
-
-					break;
-			
-			default:
-
-				if (
-					! is_null( $entity_type ) &&
-					class_exists( $entity_type )
-				)
-
-					$configuration = $entity_type::getConfiguration();
-				else
-				
-					throw new Exception(
-						EXCEPTION_DEVELOPMENT_BEHAVIORAL_DEFINITION_MISSING
-					);
-
-				if (
-					isset($configuration[ENTITY_COLUMN_PREFIX]) && 
-					isset($configuration[ENTITY_TABLE])
-				)
-				{
-					$clause_where = SQL_ANYWHERE;
-
-					$clause_group_by =
-					$clause_select = '';
-
-					$column_prefix = $configuration[ENTITY_COLUMN_PREFIX];
-
-					$table_alias = substr($configuration[ENTITY_COLUMN_PREFIX], 0, -1);
-
-					$table = $configuration[ENTITY_TABLE];
-
-					if (
-						isset($context[SQL_SELECT]) &&
-						is_array($context[SQL_SELECT]) &&
-						( $columns = $context[SQL_SELECT] ) != FALSE
-					)
-					{
-						end($columns);
-						list($last_alias) = each($columns);
-						reset($columns);
-
-						while ( list( $alias, $column ) = each( $columns ) )
-						{
-							$_column =
-
-							$_parameter = NULL;
-
-							if ( is_numeric( $alias ) )
-							{
-								$index = $alias;
-								$alias = $column;
-							}
-							else if (isset($index))
-
-								$index = $alias;
-
-							// prevent MySQL keywords from being used as aliases
-							if (
-								in_array(
-									strtolower( $alias ),
-									$class_db::getSQLKeywords()
-								)
-							)
-							{
-								$original_aliases[$alias.'_'] = $alias;
-
-								$alias = $alias.'_';
-							}
-
-							if (
-								is_array( $column ) &&
-								(
-									isset( $column[PROPERTY_FOREIGN_KEY] ) &&
-									( $_column = $column[PROPERTY_FOREIGN_KEY] )
-									||
-									isset( $column[PROPERTY_RETURN] ) &&
-									( $_return = $column[PROPERTY_RETURN] )
-								)
-							)
-							{
-								// check is a parameter is to be passed
-								// to a function
-								if (
-									isset( $column[PROPERTY_RETURN] ) &&
-									( $_return = ' '.$column[PROPERTY_RETURN] ) &&
-									isset( $column[PROPERTY_PARAMETER] ) &&
-									( $_parameter = $column[PROPERTY_PARAMETER] )
-								)
-
-									$selected_column =
-										$_return.'('.
-											$table_alias.'.'.
-												$column_prefix.
-													$_parameter.
-										')';
-
-								// set a foreign key column selection
-								if (
-									isset( $column[PROPERTY_FOREIGN_KEY] ) &&
-									( $_column = $column[PROPERTY_FOREIGN_KEY] )
-								)
-								{
-									// select a foreign key
-									$selected_column = $table_alias.'.'.$_column;
-									
-									if (
-										isset( $column[PROPERTY_RETURN] ) &&
-										( $_return = $column[PROPERTY_RETURN] ) &&
-										! isset( $column[PROPERTY_PARAMETER] )
-									)
-
-										// pass a foreign key as a parameter
-										$selected_column =
-											$_return.'('.$table_alias.'.'.$_column.')';
-								}
-								else if ( ! isset( $column[PROPERTY_PARAMETER] ) )
-
-									// pass a native table column as parameter
-									// to a function
-									$selected_column =
-										$_return.'('.
-											$table_alias.'.'.
-											$column_prefix.$alias.
-										')'
-									;
-							}
-							else
-							
-								$selected_column = $table_alias.'.'.$column_prefix.$column;
-
-							$clause_select .=
-								$selected_column.' '.$alias.
-								(
-									(
-										isset($index)
-									?
-										$index
-									:
-										$alias
-									) !== $last_alias
-								?
-									', '."\n"
-								:
-									''
-								)
-							;
-						}
-
-						$selection = $context[SQL_SELECT];
-
-						unset($context[SQL_SELECT]);
-					}
-					else if (
-						is_array( $context ) &&
-						isset( $context[SQL_ANY] )
-					)
-					{
-						$clause_select = SQL_ANY;
-
-						$selection = $context[SQL_ANY];
-
-						unset($context[SQL_ANY]);
-					}
-
-					if (
-						is_array( $context ) &&
-						isset( $context[SQL_GROUP_BY]) 
-					)
-					{
-						if (
-							! is_array( $context[SQL_GROUP_BY] ) ||
-							! count( $context[SQL_GROUP_BY] )
-						)
-						
-							unset( $context[SQL_GROUP_BY] );
-						else
-						{
-							while (
-								list( $index )
-								   = each( $context[SQL_GROUP_BY] )
-							)
-							{
-								if (
-									! is_array( $context[SQL_GROUP_BY][$index] )
-								)
 	
-									$context[SQL_GROUP_BY][$index] =
-										$table_alias.'.'.
-											$column_prefix.
-												$context[SQL_GROUP_BY][$index];
-								else if (
-									is_array( $context[SQL_GROUP_BY][$index] ) &&
-									(
-										list( $_value, $_name) =
-										each( $context[SQL_GROUP_BY][$index] )
-									) &&
-									$_name == PROPERTY_FOREIGN_KEY &&
-									trim( strlen( $_value ) ) > 0
-								)
-								{
-									$context[SQL_GROUP_BY][$index] =
-										$table_alias.'.'.$_value;
-								}
-								
-
-							}
-
-							$clause_group_by .= ' '.SQL_GROUP_BY.' '.implode(
-								','."\n",
-								$context[SQL_GROUP_BY]
-							);
-			
-							unset( $context[SQL_GROUP_BY] );
-						}
-					}	
-
-					if (
-						is_array( $context ) &&
-						( $conditions = $context ) !== FALSE
-					)
+						$results = $class_db::query($select_id, TRUE);
+	
+						if ($results->rowCount() == 1)
+	
+							$properties = $results->fetchObject();
+					}
+					else if ( is_array( $context ) && count( $context ) )
 					{
-						while ( list( $name, $value ) = each( $conditions ) )
-						{
-							if (
-								$name != PROPERTY_FOREIGN_KEY &&
-								! is_array( $value ) 
-							)
-
+						$clause_where = SQL_ANYWHERE;
+	
+						while ( list( $name, $value ) = each($context) )
+	
+							// prevent meta properties like namespace to be used
+							if ( ! is_array( $value ) )
+	
 								$clause_where .=
-									SQL_AND.
-									$table_alias.'.'.$column_prefix.$name.' = '.
+									' '.SQL_AND.' '.
+									PREFIX_TABLE_COLUMN_ENTITY.$name.
+									' = '.
 									( is_numeric($value) ? $value : '"'.$value.'"' )
 								;
-
-							else if (
-								is_array( $value ) &&
-								( FALSE !== ( list($_name, $_value) = each( $value ) ) )
+							else
+	
+								$meta_properties[$name] = $value;
+	
+						$column_entity_id =
+							PREFIX_TABLE_COLUMN_ENTITY.
+								PROPERTY_ID
+						;
+	
+						$column_entity_name =
+							PREFIX_TABLE_COLUMN_ENTITY.
+								PROPERTY_NAME
+						;
+	
+						$alias_entity_id = PROPERTY_ID;
+	
+						$alias_entity_name = PROPERTY_ENTITY_NAME;
+	
+						$select_matching_items = '
+							SELECT
+								'.$column_entity_id.' '.$alias_entity_id.',
+								'.$column_entity_name.' '.$alias_entity_name.'
+							FROM
+								'.TABLE_ENTITY.'
+							WHERE
+								'.$clause_where
+						;
+	
+						$class_dumper::log(
+							__METHOD__,
+							array(
+								'select matching items ',
+								$select_matching_items
 							)
+						);
 	
-								$clause_where .=
-									SQL_AND.
-									$table_alias.'.'.
-									
-									// check if a condition of type IN is defined
-									(
-											$_name !== SQL_IN 
-										?
-										
-											// integrate a foreign key condition
-											$_name.' = '.
-											(
-													is_numeric($_value)
-												?
-													$_value
-												:
-													'"'.$_value.'"'
-											)
-										:
-										(
-											// integrate a condition of type IN
-											
-												is_array( $_value) &&
-												count( $_value )
-											?
-												$column_prefix.$name.' '.
-												SQL_IN.
-												' ( '.
-													implode( ',', $_value ).
-												' ) '
-											:
-												''
-										)
-									);
-
-								;
-						}
-					}
-
-					$select_entity = 
-						SQL_SELECT.' '.
-							(
-								$clause_select != SQL_ANY
-							?
-								'"'.
-								// prevent backslashes from being escaped
-								preg_replace(
-									'/[\\\\](?![\\\\])/',
-									'\\\\\\\\',
-									$entity_type
-								).'" '.
-								PROPERTY_ENTITY_NAME.
-								(
-									!empty($clause_select)
-								?
-									','
-								:
-									''
-								)
-							:
-								''
-							).
-							$clause_select.' '.
-						SQL_FROM.' '.
-							$table.' '.$table_alias.' '.
-						SQL_WHERE.' '.
-							$clause_where.
-							
-							$clause_group_by
-					;
-
-					$class_dumper::log(
-						__METHOD__,
-						array($select_entity)
-					);
-
-					$results = $class_db::query($select_entity);
-
-					$restore_aliases = function (&$container, $aliases)
-					{
-						if (count($aliases) > 0)
-						
-							while (list($temporary, $original) = each($aliases))
-							{
-								$container->$original = $container->$temporary;
-					
-								unset($container->$temporary);
-							}
+						$results = $class_db::query($select_matching_items, TRUE);
 	
-						reset($aliases);
-					};
-
-					if ( $results->num_rows )
-					{
-						if ( $results->num_rows > 1 )
+						if ( $results->rowCount() )
 						{
-							// check if a primary key could be used for indexation
-							if (
-								isset( $selection ) &&
-								is_array( $selection) &&
-								isset( $selection[PROPERTY_ID] )
-							)
-
-								while ($result = $results->fetch_object())
-								{
-									$restore_aliases($result, $original_aliases);
+							if ($results->rowCount() == 1)
 							
-									$properties[$result->{PROPERTY_ID}] = $result;
-								}
+								$properties = $results->fetchObject();
 							else 
 	
-								while ($result = $results->fetch_object())
-								{
-									$restore_aliases($result, $original_aliases);
-							
+								while ($result = $results->fetchObject())
+		
 									$properties[] = $result;
-								}
 						}
-						else
+						
+						if ( count($meta_properties) )
+						
+							$properties =
+								(object)
+								array_merge(
+										is_object($properties)
+									?
+										(array) $properties
+									:
+										$properties
+									,
+									$meta_properties
+								)
+							;
+					}
+	
+						break;
+				
+				default:
+	
+					if (
+						! is_null( $entity_type ) &&
+						class_exists( $entity_type )
+					)
+	
+						$configuration = $entity_type::getConfiguration();
+					else
+					
+						throw new Exception(
+							EXCEPTION_DEVELOPMENT_BEHAVIORAL_DEFINITION_MISSING
+						);
+	
+					if (
+						isset($configuration[ENTITY_COLUMN_PREFIX]) && 
+						isset($configuration[ENTITY_TABLE])
+					)
+					{
+						$clause_where = SQL_ANYWHERE;
+	
+						$clause_group_by =
+						$clause_select = '';
+	
+						$column_prefix = $configuration[ENTITY_COLUMN_PREFIX];
+	
+						$table_alias = substr($configuration[ENTITY_COLUMN_PREFIX], 0, -1);
+	
+						$table = $configuration[ENTITY_TABLE];
+	
+						if (
+							isset($context[SQL_SELECT]) &&
+							is_array($context[SQL_SELECT]) &&
+							( $columns = $context[SQL_SELECT] ) != FALSE
+						)
 						{
-							$properties = $results->fetch_object();
-
-							$restore_aliases( $properties, $original_aliases );
+							end($columns);
+							list($last_alias) = each($columns);
+							reset($columns);
+	
+							while ( list( $alias, $column ) = each( $columns ) )
+							{
+								$_column =
+	
+								$_parameter = NULL;
+	
+								if ( is_numeric( $alias ) )
+								{
+									$index = $alias;
+									$alias = $column;
+								}
+								else if (isset($index))
+	
+									$index = $alias;
+	
+								// prevent MySQL keywords from being used as aliases
+								if (
+									in_array(
+										strtolower( $alias ),
+										$class_db::getSQLKeywords()
+									)
+								)
+								{
+									$original_aliases[$alias.'_'] = $alias;
+	
+									$alias = $alias.'_';
+								}
+	
+								if (
+									is_array( $column ) &&
+									(
+										isset( $column[PROPERTY_FOREIGN_KEY] ) &&
+										( $_column = $column[PROPERTY_FOREIGN_KEY] )
+										||
+										isset( $column[PROPERTY_RETURN] ) &&
+										( $_return = $column[PROPERTY_RETURN] )
+									)
+								)
+								{
+									// check is a parameter is to be passed
+									// to a function
+									if (
+										isset( $column[PROPERTY_RETURN] ) &&
+										( $_return = ' '.$column[PROPERTY_RETURN] ) &&
+										isset( $column[PROPERTY_PARAMETER] ) &&
+										( $_parameter = $column[PROPERTY_PARAMETER] )
+									)
+	
+										$selected_column =
+											$_return.'('.
+												$table_alias.'.'.
+													$column_prefix.
+														$_parameter.
+											')';
+	
+									// set a foreign key column selection
+									if (
+										isset( $column[PROPERTY_FOREIGN_KEY] ) &&
+										( $_column = $column[PROPERTY_FOREIGN_KEY] )
+									)
+									{
+										// select a foreign key
+										$selected_column = $table_alias.'.'.$_column;
+										
+										if (
+											isset( $column[PROPERTY_RETURN] ) &&
+											( $_return = $column[PROPERTY_RETURN] ) &&
+											! isset( $column[PROPERTY_PARAMETER] )
+										)
+	
+											// pass a foreign key as a parameter
+											$selected_column =
+												$_return.'('.$table_alias.'.'.$_column.')';
+									}
+									else if ( ! isset( $column[PROPERTY_PARAMETER] ) )
+	
+										// pass a native table column as parameter
+										// to a function
+										$selected_column =
+											$_return.'('.
+												$table_alias.'.'.
+												$column_prefix.$alias.
+											')'
+										;
+								}
+								else
+								
+									$selected_column = $table_alias.'.'.$column_prefix.$column;
+	
+								$clause_select .=
+									$selected_column.' '.$alias.
+									(
+										(
+											isset($index)
+										?
+											$index
+										:
+											$alias
+										) !== $last_alias
+									?
+										', '."\n"
+									:
+										''
+									)
+								;
+							}
+	
+							$selection = $context[SQL_SELECT];
+	
+							unset($context[SQL_SELECT]);
+						}
+						else if (
+							is_array( $context ) &&
+							isset( $context[SQL_ANY] )
+						)
+						{
+							$clause_select = SQL_ANY;
+	
+							$selection = $context[SQL_ANY];
+	
+							unset($context[SQL_ANY]);
+						}
+	
+						if (
+							is_array( $context ) &&
+							isset( $context[SQL_GROUP_BY]) 
+						)
+						{
+							if (
+								! is_array( $context[SQL_GROUP_BY] ) ||
+								! count( $context[SQL_GROUP_BY] )
+							)
+							
+								unset( $context[SQL_GROUP_BY] );
+							else
+							{
+								while (
+									list( $index )
+									   = each( $context[SQL_GROUP_BY] )
+								)
+								{
+									if (
+										! is_array( $context[SQL_GROUP_BY][$index] )
+									)
+		
+										$context[SQL_GROUP_BY][$index] =
+											$table_alias.'.'.
+												$column_prefix.
+													$context[SQL_GROUP_BY][$index];
+									else if (
+										is_array( $context[SQL_GROUP_BY][$index] ) &&
+										(
+											list( $_value, $_name) =
+											each( $context[SQL_GROUP_BY][$index] )
+										) &&
+										$_name == PROPERTY_FOREIGN_KEY &&
+										trim( strlen( $_value ) ) > 0
+									)
+									{
+										$context[SQL_GROUP_BY][$index] =
+											$table_alias.'.'.$_value;
+									}
+									
+	
+								}
+	
+								$clause_group_by .= ' '.SQL_GROUP_BY.' '.implode(
+									','."\n",
+									$context[SQL_GROUP_BY]
+								);
+				
+								unset( $context[SQL_GROUP_BY] );
+							}
+						}	
+	
+						if (
+							is_array( $context ) &&
+							( $conditions = $context ) !== FALSE
+						)
+						{
+							while ( list( $name, $value ) = each( $conditions ) )
+							{
+								if (
+									$name != PROPERTY_FOREIGN_KEY &&
+									! is_array( $value ) 
+								)
+	
+									$clause_where .=
+										SQL_AND.
+										$table_alias.'.'.$column_prefix.$name.' = '.
+										( is_numeric($value) ? $value : '"'.$value.'"' )
+									;
+	
+								else if (
+									is_array( $value ) &&
+									( FALSE !== ( list($_name, $_value) = each( $value ) ) )
+								)
+		
+									$clause_where .=
+										SQL_AND.
+										$table_alias.'.'.
+										
+										// check if a condition of type IN is defined
+										(
+												$_name !== SQL_IN 
+											?
+											
+												// integrate a foreign key condition
+												$_name.' = '.
+												(
+														is_numeric($_value)
+													?
+														$_value
+													:
+														'"'.$_value.'"'
+												)
+											:
+											(
+												// integrate a condition of type IN
+												
+													is_array( $_value) &&
+													count( $_value )
+												?
+													$column_prefix.$name.' '.
+													SQL_IN.
+													' ( '.
+														implode( ',', $_value ).
+													' ) '
+												:
+													''
+											)
+										);
+	
+									;
+							}
+						}
+	
+						$select_entity = 
+							SQL_SELECT.' '.
+								(
+									$clause_select != SQL_ANY
+								?
+									'"'.
+									// prevent backslashes from being escaped
+									preg_replace(
+										'/[\\\\](?![\\\\])/',
+										'\\\\\\\\',
+										$entity_type
+									).'" '.
+									PROPERTY_ENTITY_NAME.
+									(
+										!empty($clause_select)
+									?
+										','
+									:
+										''
+									)
+								:
+									''
+								).
+								$clause_select.' '.
+							SQL_FROM.' '.
+								$table.' '.$table_alias.' '.
+							SQL_WHERE.' '.
+								$clause_where.
+								
+								$clause_group_by
+						;
+	
+						$class_dumper::log(
+							__METHOD__,
+							array( $select_entity )
+						);
+	
+						$results = $class_db::query( $select_entity );
+	
+						$restore_aliases = function (&$container, $aliases)
+						{
+							if (count($aliases) > 0)
+							
+								while (list($temporary, $original) = each($aliases))
+								{
+									$container->$original = $container->$temporary;
+						
+									unset($container->$temporary);
+								}
+		
+							reset($aliases);
+						};
+	
+						if ( $results->num_rows )
+						{
+							if ( $results->num_rows > 1 )
+							{
+								// check if a primary key could be used for indexation
+								if (
+									isset( $selection ) &&
+									is_array( $selection) &&
+									isset( $selection[PROPERTY_ID] )
+								)
+	
+									while ($result = $results->fetch_object())
+									{
+										$restore_aliases($result, $original_aliases);
+								
+										$properties[$result->{PROPERTY_ID}] = $result;
+									}
+								else 
+		
+									while ($result = $results->fetch_object())
+									{
+										$restore_aliases($result, $original_aliases);
+								
+										$properties[] = $result;
+									}
+							}
+							else
+							{
+								$properties = $results->fetch_object();
+	
+								$restore_aliases( $properties, $original_aliases );
+							}
 						}
 					}
-				}
+			}
+
+			$class_memento::storeData(
+				serialize( $properties ),
+				$memento_key
+			);
 		}
+		else
+		
+			$properties = unserialize( $properties_cached );
 
 		return $properties;
 	}
@@ -2113,48 +2289,69 @@ class Data_Fetcher extends Database
 
 		$class_dumper = $class_application::getDumperClass();
 
+		$class_memento = $class_application::getMementoClass();
+
 		$callback_parameters = FALSE;
 
+		$memento_key = md5( serialize( func_get_args() ) );
+
 		if (
-			is_string( $identifier ) &&
-			strlen( $identifier )
+			FALSE ===
+				(
+					$callback_parameters_cached =
+						$class_memento::retrieveData( $memento_key )
+				)
 		)
 		{
-			if ( ( FALSE != strpos( $identifier, '_' ) ) )
-			
-				$identifier = str_replace( '_', '.', $identifier );
+			if (
+				is_string( $identifier ) &&
+				strlen( $identifier )
+			)
+			{
+				if ( ( FALSE != strpos( $identifier, '_' ) ) )
+				
+					$identifier = str_replace( '_', '.', $identifier );
+		
+				else if ( preg_match( '/\s+/', $identifier ) )
+				
+					$identifier = preg_replace('/[\s+]/', '.', $identifier);
 	
-			else if ( preg_match( '/\s+/', $identifier ) )
-			
-				$identifier = preg_replace('/[\s+]/', '.', $identifier);
-
-			$select_form = '
-				SELECT
-					frm_id id,
-					frm_identifier form_identifier,
-					frm_title title,
-					frm_config configuration,
-					prv_id	privilege_level,
-					rte_id route,
-					rte_uri form_uri
-				FROM
-					'.TABLE_FORM.'
-				LEFT JOIN
-					'.TABLE_ROUTE.'
-				USING
-					(rte_id)
-				WHERE
-					frm_status = '.FORM_STATUS_ACTIVE.' AND
-					frm_identifier LIKE "'.$identifier.'"
-			';
-			
-			$results_form = $class_db::query( $select_form );
-
-			if ( is_object( $results_form ) && $results_form->num_rows )
+				$select_form = '
+					SELECT
+						frm_id id,
+						frm_identifier form_identifier,
+						frm_title title,
+						frm_config configuration,
+						prv_id	privilege_level,
+						rte_id route,
+						rte_uri form_uri
+					FROM
+						'.TABLE_FORM.'
+					LEFT JOIN
+						'.TABLE_ROUTE.'
+					USING
+						(rte_id)
+					WHERE
+						frm_status = '.FORM_STATUS_ACTIVE.' AND
+						frm_identifier LIKE "'.$identifier.'"
+				';
+				
+				$results_form = $class_db::query( $select_form );
 	
-				$callback_parameters = $results_form->fetch_object();
+				if ( is_object( $results_form ) && $results_form->num_rows )
+		
+					$callback_parameters = $results_form->fetch_object();
+			}
+
+			$class_memento::storeData(
+				serialize( $callback_parameters ),
+				$memento_key
+			);
 		}
-
+		else
+		
+			$callback_parameters = unserialize( $callback_parameters_cached );
+			
 		return $callback_parameters;
 	}
 
@@ -2239,14 +2436,16 @@ class Data_Fetcher extends Database
 				{
 					$select_id = '
 						SELECT
-							'.PREFIX_TABLE_COLUMN_ENTITY.PROPERTY_ID.' '.PROPERTY_ID.'
+							'.PREFIX_TABLE_COLUMN_ENTITY.PROPERTY_ID .
+								' ' . PROPERTY_ID.'
 						FROM
 							'.TABLE_ENTITY.'
 						WHERE
-							'.PREFIX_TABLE_COLUMN_ENTITY.PROPERTY_NAME.' = LOWER("'.$context.'")
+							'.PREFIX_TABLE_COLUMN_ENTITY.PROPERTY_NAME .
+								' = LOWER("'.$context.'")
 					';
 
-					$results = $class_db::query($select_id, TRUE);
+					$results = $class_db::query( $select_id, TRUE );
 					
 					if ($results->rowCount() == 1)
 					
@@ -2273,7 +2472,7 @@ class Data_Fetcher extends Database
 
 		$insights = array();
 
-		if (is_array($conditions))
+		if ( is_array( $conditions ) )
 		{
 
 			while (list($name, $value) = each($conditions))
@@ -2503,6 +2702,7 @@ class Data_Fetcher extends Database
 	)	
 	{
 		$limit_clause =
+
 		$where_clause = '';
 
 		$list = new stdClass();
@@ -2520,7 +2720,7 @@ class Data_Fetcher extends Database
 		{
 			case DOCUMENT_TYPE_XHTML:
 
-				if (!empty($limit))
+				if ( ! empty( $limit ) )
 
 					$select_clause = '
 						SELECT
@@ -2529,7 +2729,8 @@ class Data_Fetcher extends Database
 							fd_date_publication publication_date,
 							fd_hash hash
 					';
-				else if (!$max)
+
+				else if ( ! $max )
 
 					$select_clause = '
 						SELECT
@@ -2617,20 +2818,188 @@ class Data_Fetcher extends Database
 				$list->items[$_entity->id] = $_entity;
 
 		// check if the limit argument is empty
-		else if (empty($limit) && is_object($result) && $result->num_rows && !$max)
+		else if (
+			empty( $limit ) &&
+			is_object( $result ) &&
+			$result->num_rows &&
+			! $max
+		)
 
 			$list->count = $result->fetch_object()->count;
 
-		else if (is_object($result) && $max)
+		else if ( is_object( $result ) && $max )
 
 			$list->max = $result->fetch_object()->max;
-		else if (is_object($result) && $result->num_rows)
+
+		else if ( is_object( $result ) && $result->num_rows )
 
 			while ($_entity = $result->fetch_object())
 
 				$list->items[$_entity->id] = uf8_decode($_entity);
 
 		return $list;
+	}
+
+    /**
+    * Get a menu
+    *
+    * @param	string	$block	block
+    * @param	integer	$page	page
+    * @return 	array
+    */	
+	public static function fetchMenu( $block, $page )
+	{
+		global $class_application, $verbose_mode;
+
+		// set the db class name
+		$class_db = $class_application::getDbClass();
+
+		// set the entity class name
+		$class_entity = $class_application::getEntityClass();
+
+		// declare an empty array of menu items
+		$menu = array();
+
+		$class_memento = $class_application::getMementoClass();
+
+		$memento_key = md5( serialize( func_get_args() ) );
+
+		if (
+			MEMCACHED_FLUSH_CACHE_MENU ||
+			(
+				FALSE ===
+					(
+						$menu_cached =
+							$class_memento::retrieveData( $memento_key )
+					)
+			)
+		)
+		{
+			// switch from the page
+			switch ($page)
+			{
+				case PAGE_ANY:
+				case PAGE_OVERVIEW:
+	
+					// switch from the block
+					switch ($block)
+					{
+						case BLOCK_MENU_HEADER:
+	
+							$content_level_type_root = $class_entity::getTypeValue(
+								array(
+									PROPERTY_NAME => PROPERTY_ROOT,
+									PROPERTY_ENTITY => ENTITY_CONTENT_LEVEL
+								)
+							);
+	
+							$content_level_type_overview = $class_entity::getTypeValue(
+								array(
+									PROPERTY_NAME => PROPERTY_OVERVIEW,
+									PROPERTY_ENTITY => ENTITY_CONTENT_LEVEL
+								)
+							);
+	
+							$route_type_content = self::getTypeValue(
+								array(
+									PROPERTY_NAME => ENTITY_CONTENT,
+									PROPERTY_ENTITY => ENTITY_ROUTE
+								)
+							);
+	
+							// select contents
+							$select_contents = '
+								SELECT
+									ctt_title,
+									'.TABLE_ALIAS_ROUTE.'.rte_index,
+									CONCAT(
+										IF (
+											'.TABLE_ALIAS_ROUTE.'_.rte_uri != "/",
+											'.TABLE_ALIAS_ROUTE.'_.rte_uri,
+											""
+										),
+										'.TABLE_ALIAS_ROUTE.'.rte_uri
+									) rte_uri
+								FROM
+									'.TABLE_CONTENT.'
+								LEFT JOIN
+									'.TABLE_ROUTE.' '.TABLE_ALIAS_ROUTE.'
+								USING
+									(rte_id)
+								LEFT JOIN
+									'.TABLE_ROUTE.' '.TABLE_ALIAS_ROUTE.'_
+								ON
+								(
+									'.TABLE_ALIAS_ROUTE.'_.rte_id =
+										'.TABLE_ALIAS_ROUTE.'.rte_parent_hub 
+								)
+								WHERE
+									ctt_status = '.CONTENT_STATUS_ACTIVE.' AND
+									'.TABLE_ALIAS_ROUTE.'.rte_level = '.
+										(
+											$page == PAGE_ANY
+										?
+											$content_level_type_root
+										:
+											$content_level_type_overview
+										).' AND
+									'.TABLE_ALIAS_ROUTE.'.rte_status = '.ROUTE_OPENED.' AND
+									'.TABLE_ALIAS_ROUTE.'.rte_type = '.
+									(
+										$page == PAGE_ANY
+									?
+										$route_type_content.' '.SQL_OR.'
+										'.TABLE_ALIAS_ROUTE.'.rte_type = '.ROUTE_TYPE_ROOT
+									:
+										ROUTE_TYPE_ADMINISTRATION
+									).'
+								ORDER BY
+									'.TABLE_ALIAS_ROUTE.'.rte_index
+							';
+
+							// get a link
+							$link = $class_db::getLink();
+	
+							// prepare the queyr
+							$statement = $link->prepare($select_contents);
+	
+							// bind the result
+							$statement->bind_result($text, $index, $href);
+	
+							// execute a statement
+							$execution_result = $statement->execute();
+					
+							// fetch result of a statement
+							while ( $fetch_result = $statement->fetch() )
+		
+								// check the result
+								if ($fetch_result)
+								{
+									$menu[$index] = new stdClass();
+	
+									$menu[$index]->{ENTITY_TEXT} = $text;
+	
+									$menu[$index]->{HTML_ATTRIBUTE_HREF} = $href;								
+								}
+	
+							break;
+					}				
+	
+						break;
+			}
+
+			$class_memento::storeData(
+				serialize( $menu ),
+				$memento_key,
+				MEMCACHED_FLUSH_CACHE_MENU
+			);
+		}
+		else
+		
+			$menu = unserialize( $menu_cached );
+
+		// return a menu
+		return $menu;		
 	}
 
     /**
@@ -2648,69 +3017,92 @@ class Data_Fetcher extends Database
 
 		$class_dumper = $class_application::getDumperClass();
 
-		$qualities = array($id, NULL, NULL);
+		$class_memento = $class_application::getMementoClass();
 
-		$results = NULL;
+		$memento_key = md5( serialize( func_get_args() ) );
 
-		$select_clause = '
-			SELECT
-				'.TABLE_ALIAS_USER.'.'.PREFIX_TABLE_COLUMN_USER.'user_name,
-				'.TABLE_ALIAS_USER.'.grp_id
-		';
+		if (
+			FALSE ===
+				(
+					$callback_parameters_cached =
+						$class_memento::retrieveData( $memento_key )
+				) 
+		)
+		{
+			$qualities = array( $id, NULL, NULL );
 	
-		$from_clause = '
-			FROM
-				'.TABLE_USER.' '.TABLE_ALIAS_USER
-		;
-		
-		if ( $administrator )
-		
-			$from_clause .= '
-				LEFT JOIN
-					'.TABLE_PRIVILEGE.' p
-				ON
-					sha1( usr_id ) = p.prv_hash
+			$results = NULL;
+	
+			$select_clause = '
+				SELECT
+					'.TABLE_ALIAS_USER.'.'.PREFIX_TABLE_COLUMN_USER.'user_name,
+					'.TABLE_ALIAS_USER.'.grp_id
 			';
-
-		$where_clause = '
-			WHERE
-				'.TABLE_ALIAS_USER.'.'.PREFIX_TABLE_COLUMN_USER.'id = ? AND
-				'.TABLE_ALIAS_USER.'.'.PREFIX_TABLE_COLUMN_USER.'status = '.
-					USER_STATUS_ACTIVE
-		;
-
-		$select_qualities = $select_clause.$from_clause.$where_clause;
-
-		$link = $class_db::getLink();
-			
-		$statement = $link->prepare( $select_qualities );
-
-		$statement->store_result();
-
-		// bind variables to the statement parameters
-		$statement->bind_param(
-			MYSQLI_STATEMENT_TYPE_INTEGER,
-			$qualities[0]
-		);
 		
-		// bind variables to the statement results
-		$statement->bind_result(
-			$qualities[2],
-			$qualities[1]
-		);
+			$from_clause = '
+				FROM
+					'.TABLE_USER.' '.TABLE_ALIAS_USER
+			;
+			
+			if ( $administrator )
+			
+				$from_clause .= '
+					LEFT JOIN
+						'.TABLE_PRIVILEGE.' p
+					ON
+						sha1( usr_id ) = p.prv_hash
+				';
+	
+			$where_clause = '
+				WHERE
+					'.TABLE_ALIAS_USER.'.'.PREFIX_TABLE_COLUMN_USER.'id = ? AND
+					'.TABLE_ALIAS_USER.'.'.PREFIX_TABLE_COLUMN_USER.'status = '.
+						USER_STATUS_ACTIVE
+			;
+	
+			$select_qualities = $select_clause.$from_clause.$where_clause;
+	
+			$link = $class_db::getLink();
+				
+			$statement = $link->prepare( $select_qualities );
+	
+			$statement->store_result();
+	
+			// bind variables to the statement parameters
+			$statement->bind_param(
+				MYSQLI_STATEMENT_TYPE_INTEGER,
+				$qualities[0]
+			);
+			
+			// bind variables to the statement results
+			$statement->bind_result(
+				$qualities[2],
+				$qualities[1]
+			);
+	
+			// execute a statement
+			$execution_result = $statement->execute();
+	
+			// fetch result of a statement
+			$success = $statement->fetch();
+	
+			if ( $success )
+	
+				$callback_parameters = $qualities;
+			else
+	
+				$callback_parameters = $results;
 
-		// execute a statement
-		$execution_result = $statement->execute();
-
-		// fetch result of a statement
-		$success = $statement->fetch();
-
-		if ( $success )
-
-			return $qualities;
+			$class_memento::storeData(
+				serialize( $callback_parameters ),
+				$memento_key
+			);
+		}
 		else
+		
+			$callback_parameters = unserialize( $callback_parameters_cached );
 
-			return $results;
+		return $callback_parameters;
 	}
 
     /**
@@ -3159,9 +3551,11 @@ class Data_Fetcher extends Database
 	{
 		global $class_application;
 
-		$class_dumper = $class_application::getDumperClass();
+		$class_memento = $class_application::getMementoClass();
 
 		$class_lsql = $class_application::getLsqlClass();
+
+		$class_dumper = $class_application::getDumperClass();
 
 		// declare an empty package
 		$package = array();
@@ -3182,486 +3576,505 @@ class Data_Fetcher extends Database
 
 			case PACKAGE_ROUTE:
 
-				$class_serializer = $class_application::getSerializerClass();
+				$memento_key = md5( serialize( func_get_args() ) );
 
-				$select_parent_route_clause =
-				$join_route_clause = '';
-
-				$multilevel_route = FALSE;
-
-				$route_type_content = self::getTypeValue(
-					array(
-						PROPERTY_NAME => ENTITY_CONTENT,
-						PROPERTY_ENTITY => ENTITY_ROUTE
-					)
-				);
-
-				list(
-					$match,
-					$submatch,
-					$matches,
-					$submatches
-				) = $class_serializer::checkRequest( $properties );
-
-				// check the match
-				if ( $match )
-
-					$properties =
-							$submatch && is_null( $second_guess )
-						?
-							$submatches[1]
-						:
-							$matches[1]
-					;
-				else
+				if (
+					FALSE ===
+						(
+							$package_cached =
+								$class_memento::retrieveData( $memento_key )
+						)
+				)
 				{
-					// profile changes confirmation pattern for
-					// email and user name updates
-					$confirmation_pattern = 
-						REGEXP_OPEN.
-							REGEXP_ESCAPE.PREFIX_ROOT.
-							AFFORDANCE_CONFIRM.'\?([^=]*)=(.*)'.
-						REGEXP_CLOSE
-					;
-
-					$confirmation_match = preg_match(
-						$confirmation_pattern,
-						$properties,
+					$class_serializer = $class_application::getSerializerClass();
+	
+					$select_parent_route_clause =
+					$join_route_clause = '';
+	
+					$multilevel_route = FALSE;
+	
+					$route_type_content = self::getTypeValue(
+						array(
+							PROPERTY_NAME => ENTITY_CONTENT,
+							PROPERTY_ENTITY => ENTITY_ROUTE
+						)
+					);
+	
+					list(
+						$match,
+						$submatch,
+						$matches,
 						$submatches
-					);
-
-					if ( $confirmation_match )
-					{
-						if ( $submatches[1] == GET_PROFILE_CHANGES )
-						{
-							$link_results = self::checkLink( $properties );
-					
-							if (
-								isset( $link_results ) &&
-								is_object( $link_results )
-							)
-							
-								while (
-									$link_properties =
-										$link_results->fetch_object()
-								)
-		
-									if (
-										isset($link_properties->link_status) &&
-										$link_properties->link_status ==
-											LINK_STATUS_INACTIVE
-									)
-									{
-										$results =
-											$class_serializer::executeQuery(
-												$link_properties->query
-											);
-			
-										// toggle the link status right after
-										// executing the associated query
-										if ( $results )
-										{
-											$class_serializer::toggleStatus(
-												$link_properties->link_id,
-												ENTITY_LINK
-											);
-			
-											$class_serializer::toggleStatus(
-												$link_properties->query_id,
-												ENTITY_QUERY
-											);
-										}
-		
-										$_SESSION[ENTITY_FEEDBACK] =
-											DIALOG_LINK_VALID;
-									}
-									else if (
-										! isset( $link_properties->link_status )
-									)
-			
-										$_SESSION[ENTITY_FEEDBACK] =
-											DIALOG_LINK_INVALID
-										;
+					) = $class_serializer::checkRequest( $properties );
 	
-									else if (
-										$link_properties->link_status ==
-											LINK_STATUS_ACTIVE
-									)
-			
-										$_SESSION[ENTITY_FEEDBACK] =
-											DIALOG_LINK_ALREADY_USED
-										;
-						}
-						else
-
-							throw new Exception(
-								EXCEPTION_FURTHER_IMPLEMENTATION_REQUIRED
-							);
-
-						if ( isset( $_SESSION[ENTITY_FEEDBACK] ) )
-
-							return $_SESSION[ENTITY_FEEDBACK];
-						else
-
-							return $package;
-					}
-				}
-
-				if ( FALSE !== strpos( $properties, SEPARATOR_LEVEL ) )
-				{
-					$levels = explode( SEPARATOR_LEVEL, $properties );
-					
-					if ( ! empty( $levels[1] ) )
-					{
-						$multilevel_route = true;
-
-						$properties = $levels[0].SEPARATOR_LEVEL;
-					}
-				}
-
-				if ( $properties == SEPARATOR_LEVEL )
-				
-					$properties = '';
-
-				if (
-					$multilevel_route &&
-					count( $levels ) &&
-					! empty( $properties )
-				)
-				
-					$properties = $levels[count( $levels ) - 1];
-
-				if (
-					FALSE === strpos(
-						substr(
-							$properties,
-							strlen( $properties ) - 2,
-							2
-						),
-						'-'
-					)
-				)
-				{
-					$alias_column_form_id = ENTITY_FORM;
-
-					$alias_table_form = TABLE_ALIAS_FORM;
-
-					$alias_table_route = TABLE_ALIAS_ROUTE;
-
-					$column_form_id =
-						TABLE_ALIAS_FORM.'.'.
-							PREFIX_TABLE_COLUMN_FORM.
-								PROPERTY_ID
-					;
-
-					// declare the select clause 
-					$select_clause = '
-						SELECT 
-							'.$alias_table_route.'.rte_id AS id,
-							'.$alias_table_route.'.rte_type AS type,
-							'.$alias_table_route.'.rte_parent_hub AS folder,
-							'.$alias_table_route.'.'.
-								PREFIX_TABLE_COLUMN_ENTITY.PROPERTY_ID.' entity,
-							'.TABLE_ALIAS_CONTENT.'.cty_id AS content_type,
-							COALESCE( '.$column_form_id.', 0 ) '.
-								$alias_column_form_id
-					;
-	
-					// declare the from clause 
-					$from_clause = '
-						FROM
-							'.TABLE_ROUTE.' '.$alias_table_route.'
-					';
-	
-					// declare the join content clause 
-					$join_clause = '
-						LEFT JOIN
-							'.TABLE_CONTENT_TYPE.' '.TABLE_ALIAS_CONTENT.'
-						ON
-							'.TABLE_ALIAS_CONTENT.'.cty_id =
-								'.$alias_table_route.'.cty_id 
-						LEFT JOIN
-							'.TABLE_FORM.' '.$alias_table_form.'
-						ON (
-							'.$alias_table_route.'.'.
-								PREFIX_TABLE_COLUMN_ROUTE.PROPERTY_ID.' =
-									'.$alias_table_form.'.'.
-										PREFIX_TABLE_COLUMN_ROUTE.PROPERTY_ID.
-							' AND '.
-								$alias_table_form.'.'.
-									PREFIX_TABLE_COLUMN_FORM.PROPERTY_STATUS.' = '.
-										ENTITY_STATUS_ACTIVE.'
-						)
-					';
-	
-					// declare the where clause
-					$where_clause = '
-						WHERE
-							'.$alias_table_route.'.rte_status = '.ROUTE_OPENED.
-							' AND '.$alias_table_route.'.rte_uri LIKE "'.
-							(strlen($properties) != 0 ? '%' : '').
-							((!isset($levels) || count($levels) <= 1) ? '/' : '').
-							$properties.(strlen($properties) != 0 ? '%' : '').'"
-					';
-	
-					if (
-						isset( $levels ) &&
-						count( $levels ) &&
-						! empty( $levels[count( $levels ) - 1] ) )
-					{
-						// declare the select parent route clause 
-						$select_clause .= ',
-							p.rte_id AS parent_id
-						';
-	
-						// declare the join route clause 
-						$join_clause .= '
-							LEFT JOIN
-								'.TABLE_ROUTE.' p
-							ON
-								'.$alias_table_route.'.rte_parent_hub = p.rte_id
-						';
-	
-						// append a condition to the where clause
-						$where_clause .= '
-							AND p.rte_uri LIKE "/'.
-								$levels[count($levels) - 2].'%"
-						';
-					}
-				}
-				else
-				{
-					if ( ! empty( $matches[2] ) && is_numeric( $matches[2] ) )
-
-						$identifier = $matches[2];
-					else 
-
-						throw new Exception( EXCEPTION_INVALID_IDENTIFIER );
-
-					$identifier_type = substr(
-						$properties,
-						strlen( $properties ) - 1,
-						1
-					);
-
-					if (
-						! empty( $identifier_type ) &&
-						is_string( $identifier_type )
-					)
-
-						switch ($identifier_type)
-						{
-							case GET_DOCUMENT_IDENTIFIER_REWRITTEN:
-
-								$join_clause = '';
-	
-								$select_clause = '
-									SELECT
-										fd_title title,
-										fd_hash hash,
-										fd_date_publication publication_date
-								';
-								
-								$from_clause = '
-									FROM
-										'.TABLE_FEED.'
-								';
-
-								$where_clause = '
-									WHERE
-										fd_id = '.$identifier
-								;
-
-									break;
-						}
-				}
-
-				// set the select route query
-				$select_route =
-					$select_clause.
-					$from_clause.
-					$join_clause.
-					$where_clause
-				;
-
-				// execute the select route query
-				$results = $class_lsql::query(
-					$select_route,
-					FALSE,
-					DEBUGGING_DISPLAY_QUERY_CHECK_ROUTE,
-					FALSE,
-					__CLASS__,
-					__FUNCTION__
-				);
-
-				// check the results
-				if ( $results->num_rows )
-				{
-					// set the package
-					$package[] = $results->fetch_object();
-
+					// check the match
 					if ( $match )
+	
+						$properties =
+								$submatch && is_null( $second_guess )
+							?
+								$submatches[1]
+							:
+								$matches[1]
+						;
+					else
 					{
-
-						// check that the current route does not lead to a folder
-						// or that the route lead explicitly to a folder
-						// (ending with a separator "/")
-
-						if (
-							! empty( $package[count($package) - 1]
-								->{PROPERTY_TYPE}
-							) &&
-							(
-								$package[count($package) - 1]
-									->{PROPERTY_TYPE} != ROUTE_TYPE_FOLDER ||
-								substr(
-									$properties,
-									strlen( $properties ) - 1,
-									1
-								) == SEPARATOR_LEVEL
-							)
-						)
-						{
-							
-							// assign the affordance property
-							if (
-								empty( $submatches[1] ) &&
-								(
-									! empty( $matches[1] ) ||
-									! empty( $matches[4] )
-								)
-							)
+						// profile changes confirmation pattern for
+						// email and user name updates
+						$confirmation_pattern = 
+							REGEXP_OPEN.
+								REGEXP_ESCAPE.PREFIX_ROOT.
+								AFFORDANCE_CONFIRM.'\?([^=]*)=(.*)'.
+							REGEXP_CLOSE
+						;
 	
-								// set the affordance property
-								$package[count($package) - 1]
-									->{PROPERTY_AFFORDANCE} =
-										!empty($matches[1])
-								?
-										$matches[1]
-								:
-										$matches[4]
-									;
+						$confirmation_match = preg_match(
+							$confirmation_pattern,
+							$properties,
+							$submatches
+						);
+	
+						if ( $confirmation_match )
+						{
+							if ( $submatches[1] == GET_PROFILE_CHANGES )
+							{
+								$link_results = self::checkLink( $properties );
+						
+								if (
+									isset( $link_results ) &&
+									is_object( $link_results )
+								)
+								
+									while (
+										$link_properties =
+											$link_results->fetch_object()
+									)
+			
+										if (
+											isset($link_properties->link_status) &&
+											$link_properties->link_status ==
+												LINK_STATUS_INACTIVE
+										)
+										{
+											$results =
+												$class_serializer::executeQuery(
+													$link_properties->query
+												);
+				
+											// toggle the link status right after
+											// executing the associated query
+											if ( $results )
+											{
+												$class_serializer::toggleStatus(
+													$link_properties->link_id,
+													ENTITY_LINK
+												);
+				
+												$class_serializer::toggleStatus(
+													$link_properties->query_id,
+													ENTITY_QUERY
+												);
+											}
+			
+											$_SESSION[ENTITY_FEEDBACK] =
+												DIALOG_LINK_VALID;
+										}
+										else if (
+											! isset( $link_properties->link_status )
+										)
+				
+											$_SESSION[ENTITY_FEEDBACK] =
+												DIALOG_LINK_INVALID
+											;
+		
+										else if (
+											$link_properties->link_status ==
+												LINK_STATUS_ACTIVE
+										)
+				
+											$_SESSION[ENTITY_FEEDBACK] =
+												DIALOG_LINK_ALREADY_USED
+											;
+							}
 							else
-
-								// set the affordance property
-								$package[count($package) - 1]
-									->{PROPERTY_AFFORDANCE} = $submatches[1]
-								;
-
-							if (
-								$package[count($package) - 1]
-									->{PROPERTY_ID} == ROUTE_SEARCH_RESULTS &&
-
-								isset(
-									$package[count($package) - 1]
-										->{PROPERTY_AFFORDANCE}
-								)
-							)
-
-								$package[count($package) - 1]
-									->{PROPERTY_ACTION} =
-										$package[count($package) - 1]
-											->{PROPERTY_AFFORDANCE}
-								;
-
-							// check identifiers of an entity to be updated
-							if (
-								!empty( $matches[2] ) ||
-								!empty( $matches[5] ) ||
-								!empty( $submatches[2] )
-							)
-							{
-								if ( empty( $submatches[2] ) )
-
-									// set the identifier property
-									$package[count( $package ) - 1]
-										->{PROPERTY_IDENTIFIER} =
-										! empty($matches[2])
-									?
-										$matches[2]
-									:
-										$matches[5]
-									;
-								else
-
-									$package[count( $package ) - 1]
-										->{PROPERTY_IDENTIFIER} =
-										$submatches[2]
-									;
-							}
 	
-							// check the third match
-							if (
-								! empty( $matches[3] ) ||
-								! empty( $matches[6] )
-							)
+								throw new Exception(
+									EXCEPTION_FURTHER_IMPLEMENTATION_REQUIRED
+								);
 	
-								// set the key property
-								$package[count( $package ) - 1]->{PROPERTY_KEY} =
-									!empty( $matches[3] )
-								?
-									$matches[3]
-								:
-									$matches[6]
-								;
+							if ( isset( $_SESSION[ENTITY_FEEDBACK] ) )
 	
-							if ( $multilevel_route )
-							{
-								if ( empty( $levels[count($levels) - 1] ) )
-								
-									unset( $levels[count($levels) - 1] );
+								return $_SESSION[ENTITY_FEEDBACK];
+							else
 	
-								// check if the number of levels is greater than one
-								else if (
-									count( $levels ) > 1 &&
-									! empty( $levels[count( $levels ) - 1] )
-								)
-								
-									$package[count($package) - 1]
-										->{PROPERTY_AFFORDANCE} =
-											$levels[count($levels) - 1]
-									;
-	
-								// set the key property
-								$package[count($package) - 1]
-									->{PROPERTY_LEVELS} =
-										$levels
-								;
-							}
+								return $package;
 						}
-						else if ( ! empty($package[count($package) - 1]->title ) )
+					}
+	
+					if ( FALSE !== strpos( $properties, SEPARATOR_LEVEL ) )
+					{
+						$levels = explode( SEPARATOR_LEVEL, $properties );
+						
+						if ( ! empty( $levels[1] ) )
 						{
-							$package[count($package) - 1]
-								->{PROPERTY_ACTION} =
-									ACTION_DISPLAY_DOCUMENT
-							;
-
-							$package[count($package) - 1]
-								->{PROPERTY_IDENTIFIER} =
-									$identifier
-							;	
-
-							$package[count($package) - 1]
-								->{PROPERTY_TYPE} =
-									$route_type_content
-							;
+							$multilevel_route = true;
+	
+							$properties = $levels[0].SEPARATOR_LEVEL;
+						}
+					}
+	
+					if ( $properties == SEPARATOR_LEVEL )
+					
+						$properties = '';
+	
+					if (
+						$multilevel_route &&
+						count( $levels ) &&
+						! empty( $properties )
+					)
+					
+						$properties = $levels[count( $levels ) - 1];
+	
+					if (
+						FALSE === strpos(
+							substr(
+								$properties,
+								strlen( $properties ) - 2,
+								2
+							),
+							'-'
+						)
+					)
+					{
+						$alias_column_form_id = ENTITY_FORM;
+	
+						$alias_table_form = TABLE_ALIAS_FORM;
+	
+						$alias_table_route = TABLE_ALIAS_ROUTE;
+	
+						$column_form_id =
+							TABLE_ALIAS_FORM.'.'.
+								PREFIX_TABLE_COLUMN_FORM.
+									PROPERTY_ID
+						;
+	
+						// declare the select clause 
+						$select_clause = '
+							SELECT 
+								'.$alias_table_route.'.rte_id AS id,
+								'.$alias_table_route.'.rte_type AS type,
+								'.$alias_table_route.'.rte_parent_hub AS folder,
+								'.$alias_table_route.'.'.
+									PREFIX_TABLE_COLUMN_ENTITY.PROPERTY_ID.' entity,
+								'.TABLE_ALIAS_CONTENT.'.cty_id AS content_type,
+								COALESCE( '.$column_form_id.', 0 ) '.
+									$alias_column_form_id
+						;
+		
+						// declare the from clause 
+						$from_clause = '
+							FROM
+								'.TABLE_ROUTE.' '.$alias_table_route.'
+						';
+		
+						// declare the join content clause 
+						$join_clause = '
+							LEFT JOIN
+								'.TABLE_CONTENT_TYPE.' '.TABLE_ALIAS_CONTENT.'
+							ON
+								'.TABLE_ALIAS_CONTENT.'.cty_id =
+									'.$alias_table_route.'.cty_id 
+							LEFT JOIN
+								'.TABLE_FORM.' '.$alias_table_form.'
+							ON (
+								'.$alias_table_route.'.'.
+									PREFIX_TABLE_COLUMN_ROUTE.PROPERTY_ID.' =
+										'.$alias_table_form.'.'.
+											PREFIX_TABLE_COLUMN_ROUTE.PROPERTY_ID.
+								' AND '.
+									$alias_table_form.'.'.
+										PREFIX_TABLE_COLUMN_FORM.PROPERTY_STATUS.' = '.
+											ENTITY_STATUS_ACTIVE.'
+							)
+						';
+		
+						// declare the where clause
+						$where_clause = '
+							WHERE
+								'.$alias_table_route.'.rte_status = '.ROUTE_OPENED.
+								' AND '.$alias_table_route.'.rte_uri LIKE "'.
+								(strlen($properties) != 0 ? '%' : '').
+								((!isset($levels) || count($levels) <= 1) ? '/' : '').
+								$properties.(strlen($properties) != 0 ? '%' : '').'"
+						';
+		
+						if (
+							isset( $levels ) &&
+							count( $levels ) &&
+							! empty( $levels[count( $levels ) - 1] ) )
+						{
+							// declare the select parent route clause 
+							$select_clause .= ',
+								p.rte_id AS parent_id
+							';
+		
+							// declare the join route clause 
+							$join_clause .= '
+								LEFT JOIN
+									'.TABLE_ROUTE.' p
+								ON
+									'.$alias_table_route.'.rte_parent_hub = p.rte_id
+							';
+		
+							// append a condition to the where clause
+							$where_clause .= '
+								AND p.rte_uri LIKE "/'.
+									$levels[count($levels) - 2].'%"
+							';
 						}
 					}
 					else
+					{
+						if ( ! empty( $matches[2] ) && is_numeric( $matches[2] ) )
+	
+							$identifier = $matches[2];
+						else 
+	
+							throw new Exception( EXCEPTION_INVALID_IDENTIFIER );
+	
+						$identifier_type = substr(
+							$properties,
+							strlen( $properties ) - 1,
+							1
+						);
+	
+						if (
+							! empty( $identifier_type ) &&
+							is_string( $identifier_type )
+						)
+	
+							switch ($identifier_type)
+							{
+								case GET_DOCUMENT_IDENTIFIER_REWRITTEN:
+	
+									$join_clause = '';
+		
+									$select_clause = '
+										SELECT
+											fd_title title,
+											fd_hash hash,
+											fd_date_publication publication_date
+									';
+									
+									$from_clause = '
+										FROM
+											'.TABLE_FEED.'
+									';
+	
+									$where_clause = '
+										WHERE
+											fd_id = '.$identifier
+									;
+	
+										break;
+							}
+					}
+	
+					// set the select route query
+					$select_route =
+						$select_clause.
+						$from_clause.
+						$join_clause.
+						$where_clause
+					;
+	
+					// execute the select route query
+					$results = $class_lsql::query(
+						$select_route,
+						FALSE,
+						DEBUGGING_DISPLAY_QUERY_CHECK_ROUTE,
+						FALSE,
+						__CLASS__,
+						__FUNCTION__
+					);
+	
+					// check the results
+					if ( $results->num_rows )
+					{
+						// set the package
+						$package[] = $results->fetch_object();
+	
+						if ( $match )
+						{
+	
+							// check that the current route does not lead to a folder
+							// or that the route lead explicitly to a folder
+							// (ending with a separator "/")
+	
+							if (
+								! empty( $package[count($package) - 1]
+									->{PROPERTY_TYPE}
+								) &&
+								(
+									$package[count($package) - 1]
+										->{PROPERTY_TYPE} != ROUTE_TYPE_FOLDER ||
+									substr(
+										$properties,
+										strlen( $properties ) - 1,
+										1
+									) == SEPARATOR_LEVEL
+								)
+							)
+							{
+								
+								// assign the affordance property
+								if (
+									empty( $submatches[1] ) &&
+									(
+										! empty( $matches[1] ) ||
+										! empty( $matches[4] )
+									)
+								)
+		
+									// set the affordance property
+									$package[count($package) - 1]
+										->{PROPERTY_AFFORDANCE} =
+											!empty($matches[1])
+									?
+											$matches[1]
+									:
+											$matches[4]
+										;
+								else
+	
+									// set the affordance property
+									$package[count($package) - 1]
+										->{PROPERTY_AFFORDANCE} = $submatches[1]
+									;
+	
+								if (
+									$package[count($package) - 1]
+										->{PROPERTY_ID} == ROUTE_SEARCH_RESULTS &&
+	
+									isset(
+										$package[count($package) - 1]
+											->{PROPERTY_AFFORDANCE}
+									)
+								)
+	
+									$package[count($package) - 1]
+										->{PROPERTY_ACTION} =
+											$package[count($package) - 1]
+												->{PROPERTY_AFFORDANCE}
+									;
+	
+								// check identifiers of an entity to be updated
+								if (
+									!empty( $matches[2] ) ||
+									!empty( $matches[5] ) ||
+									!empty( $submatches[2] )
+								)
+								{
+									if ( empty( $submatches[2] ) )
+	
+										// set the identifier property
+										$package[count( $package ) - 1]
+											->{PROPERTY_IDENTIFIER} =
+											! empty($matches[2])
+										?
+											$matches[2]
+										:
+											$matches[5]
+										;
+									else
+	
+										$package[count( $package ) - 1]
+											->{PROPERTY_IDENTIFIER} =
+											$submatches[2]
+										;
+								}
+		
+								// check the third match
+								if (
+									! empty( $matches[3] ) ||
+									! empty( $matches[6] )
+								)
+		
+									// set the key property
+									$package[count( $package ) - 1]->{PROPERTY_KEY} =
+										!empty( $matches[3] )
+									?
+										$matches[3]
+									:
+										$matches[6]
+									;
+		
+								if ( $multilevel_route )
+								{
+									if ( empty( $levels[count($levels) - 1] ) )
+									
+										unset( $levels[count($levels) - 1] );
+		
+									// check if the number of levels is greater than one
+									else if (
+										count( $levels ) > 1 &&
+										! empty( $levels[count( $levels ) - 1] )
+									)
+									
+										$package[count($package) - 1]
+											->{PROPERTY_AFFORDANCE} =
+												$levels[count($levels) - 1]
+										;
+		
+									// set the key property
+									$package[count($package) - 1]
+										->{PROPERTY_LEVELS} =
+											$levels
+									;
+								}
+							}
+							else if ( ! empty($package[count($package) - 1]->title ) )
+							{
+								$package[count($package) - 1]
+									->{PROPERTY_ACTION} =
+										ACTION_DISPLAY_DOCUMENT
+								;
+	
+								$package[count($package) - 1]
+									->{PROPERTY_IDENTIFIER} =
+										$identifier
+								;	
+	
+								$package[count($package) - 1]
+									->{PROPERTY_TYPE} =
+										$route_type_content
+								;
+							}
+						}
+						else
+	
+							$package = array();
+					}
+					else if ( $match && is_null( $second_guess ) )
+					{
+						$arguments = func_get_args();
+	
+						$arguments[2] = TRUE;
+	
+						$package = call_user_func_array(
+							array( __CLASS__, __METHOD__ ),
+							$arguments
+						);
+					}
 
-						$package = array();
-				}
-				else if ( $match && is_null( $second_guess ) )
-				{
-					$arguments = func_get_args();
-
-					$arguments[2] = TRUE;
-
-					$package = call_user_func_array(
-						array( __CLASS__, __METHOD__ ),
-						$arguments
+					$class_memento::storeData(
+						serialize( $package ),
+						$memento_key
 					);
 				}
+				else
+				
+					$package = unserialize( $package_cached );
 
 					break;
 		}
@@ -3679,54 +4092,77 @@ class Data_Fetcher extends Database
 	*/	
 	public static function getAttributes($conditions, $entity_type = ENTITY_ROUTE)
 	{
-		$class_db = CLASS_DB;
+		global $class_application, $verbose_mode;
 
-		switch ($entity_type)
+		$class_db = $class_application::getDbClass();
+
+		$class_memento = $class_application::getMementoClass();
+
+		$memento_key = md5( serialize( func_get_args() ) );
+
+		if (
+			FALSE ===
+				(
+					$attributes_cached =
+						$class_memento::retrieveData( $memento_key )
+				)
+		)
 		{
-			case ENTITY_ROUTE:
-
-				$where_clause = '
-					WHERE
-						rte_status = '.ROUTE_OPENED
-				;
-				
-				if (is_string($conditions))
-				
-					$where_clause .= ' AND rte_uri LIKE "%'.$conditions.'%"';
-
-				// check if the conditions are passed as an array
-				else if (is_array($conditions) && count($conditions) > 0)
-				{
-					while (list($property, $value) = each($conditions))
-					
-						$where_clause .= ' AND '.
-							$property.
-							(
-								is_numeric($value)
-							?
-								' = '.$value
-							:
-								' LIKE "%'.$value.'%"'
-							)
-						; 
-				}
+			switch ($entity_type)
+			{
+				case ENTITY_ROUTE:
 	
-				$select_entity = '
-					SELECT
-						'.ROW_PARENT_HUB.',
-						'.PREFIX_TABLE_COLUMN_ENTITY.PROPERTY_ID.' '.PROPERTY_ENTITY.'
-					FROM
-						'.TABLE_ROUTE.'
-					'.$where_clause
-				;
+					$where_clause = '
+						WHERE
+							rte_status = '.ROUTE_OPENED
+					;
+					
+					if (is_string($conditions))
+					
+						$where_clause .= ' AND rte_uri LIKE "%'.$conditions.'%"';
+	
+					// check if the conditions are passed as an array
+					else if (is_array($conditions) && count($conditions) > 0)
+					{
+						while (list($property, $value) = each($conditions))
+						
+							$where_clause .= ' AND '.
+								$property.
+								(
+									is_numeric($value)
+								?
+									' = '.$value
+								:
+									' LIKE "%'.$value.'%"'
+								)
+							; 
+					}
+		
+					$select_entity = '
+						SELECT
+							'.ROW_PARENT_HUB.',
+							'.PREFIX_TABLE_COLUMN_ENTITY.PROPERTY_ID.' '.PROPERTY_ENTITY.'
+						FROM
+							'.TABLE_ROUTE.'
+						'.$where_clause
+					;
+	
+					$results = $class_db::query($select_entity);
+	
+					$attributes = $results->num_rows ? $results->fetch_object() : new stdClass();
+	
+						break;
+			}
 
-				$results = $class_db::query($select_entity);
-
-				$attributes = $results->num_rows ? $results->fetch_object() : new stdClass();
-
-					break;
+			$class_memento::storeData(
+				serialize( $attributes ),
+				$memento_key
+			);
 		}
-
+		else
+		
+			$attributes = unserialize( $attributes_cached );
+		
 		return $attributes;
 	}
 

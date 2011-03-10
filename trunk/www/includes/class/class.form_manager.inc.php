@@ -61,9 +61,11 @@ class Form_Manager extends Toolbox
 
 			reset( $persistent_control_panel[STORE_FIELD_HANDLERS] );
 
-			$store_backup[PROPERTY_CONFIGURATION] =
-				$field_handler->getConfig()
-			;
+			if ( is_object( $field_handler ) )
+
+				$store_backup[PROPERTY_CONFIGURATION] =
+					$field_handler->getConfig()
+				;
 
 			$class_dumper::log(
 				__METHOD__,
@@ -801,7 +803,10 @@ class Form_Manager extends Toolbox
 				each( $store_field_handlers )
 		)
 
-			if ( $_field_handler->getDataStatus() )
+			if (
+				is_object( $_field_handler ) &&
+				$_field_handler->getDataStatus()
+			)
 			{
 				$form_identifier =
 					$_field_handler->getProperty( PROPERTY_FORM_IDENTIFIER );
@@ -882,14 +887,17 @@ class Form_Manager extends Toolbox
 					each( $store_field_handlers )
 			)
 			{
-				$form_identifier =
-					$field_handler->getProperty(
-						PROPERTY_FORM_IDENTIFIER
-					);
-
-				if ( in_array( $form_identifier, $intruders ) )
-				
-					$store_affordances[$form_identifier] = $handler_id;
+				if ( is_object( $field_handler ) )
+				{
+					$form_identifier =
+						$field_handler->getProperty(
+							PROPERTY_FORM_IDENTIFIER
+						);
+	
+					if ( in_array( $form_identifier, $intruders ) )
+					
+						$store_affordances[$form_identifier] = $handler_id;
+				}
 			}
 
 			reset( $store_field_handlers );
@@ -1826,13 +1834,20 @@ class Form_Manager extends Toolbox
 				$storage_model
 			);
 
-			$class_memento::write(
-				array(
-					PROPERTY_KEY => $collection_persistent[$preselected_index]
-						[PROPERTY_SIGNATURE],
-					ENTITY_PANEL => $control_panel_decorated
+			if (
+				isset(
+					$collection_persistent[$preselected_index]
+						[PROPERTY_SIGNATURE]
 				)
-			);
+			)
+
+				$class_memento::write(
+					array(
+						PROPERTY_KEY => $collection_persistent[$preselected_index]
+							[PROPERTY_SIGNATURE],
+						ENTITY_PANEL => $control_panel_decorated
+					)
+				);
 
 			$persistent_control_panel = &$control_panel_decorated;
 		}

@@ -1496,8 +1496,7 @@ class Field_Handler extends Form
 						$this,
 						'fields: ',
 						$fields
-					),
-					TRUE
+					)
 				);
 
 				if (
@@ -4285,13 +4284,15 @@ class Field_Handler extends Form
 					if ( in_array( $handler_index, $store_affordances ) )
 
 						$handler_index++;
+						
+					if ( is_object( $field_handler ) )
 
-					// append an identifier to the affordances
-					$store_affordances
-						[$field_handler->getProperty(
-							PROPERTY_FORM_IDENTIFIER
-						)] = $handler_index
-					;
+						// append an identifier to the affordances
+						$store_affordances
+							[$field_handler->getProperty(
+								PROPERTY_FORM_IDENTIFIER
+							)] = $handler_index
+						;
 				}
 	
 				// check the affordances store
@@ -5578,6 +5579,7 @@ class Field_Handler extends Form
 				// check the field handlers store 
 				if (
 					! in_array( $_identifier, $store_affordances ) &&
+					is_object( $field_handler ) &&
 					isset(
 						$affordances[$field_handler->getProperty(
 							PROPERTY_SIGNATURE

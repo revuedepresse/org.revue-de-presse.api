@@ -1,4 +1,23 @@
 <?php
+/**
+*************
+* Changes log
+*
+*************
+* 2011 03 08
+*************
+* 
+* Implement items sharing with flags
+*
+* methods affected ::
+*
+* EXECUTOR :: perform
+* FLAG MANAGER :: flagAsShared
+* SERIALIZER :: flagAsShared
+* 
+* (revision 590)
+*
+*/
 
 /**
 * Serializer class
@@ -113,6 +132,334 @@ class Serializer extends Executor
 			throw new Exception( $exception.': '.EXCEPTION_EXPECTATION_ARRAY );			
 
 		return $last_insert_id;
+	}
+
+	/**
+	* Set a sharing flag
+	*
+	* @param	mixed	$properties 	properties
+	* @return	mixed
+	*/
+	public static function flagAsShared( $properties = NULL )
+	{
+		global $class_application, $verbose_mode;
+
+		$class_db = $class_application::getDbClass();
+
+		$class_dumper = $class_application::getDumperClass();
+
+		if ( ! is_array( $properties ) || ! count( $properties ) )
+
+			throw new Exception( EXCEPTION_INVALID_ARGUMENT );
+
+		/**
+		* Inject the following variables into the symbol table
+		* 
+		* @tparam	integer		$id 		id
+		* @tparam	boolean		$status		flag status
+		*/
+		
+		extract( $properties );
+
+		$arc_id =
+
+		$edge_destination_id =
+
+		$edge_source_id = NULL;
+		
+		$arc_type_visibility = self::getEntityTypeValue(
+			array(
+				PROPERTY_NAME => ENTITY_VISIBILITY,
+				PROPERTY_ENTITY => ENTITY_ARC
+			)
+		);
+
+		/**
+		*
+		* Retrieve concepts ids
+		* (previously called ids of entities, renamed here to clarify
+		* "id of entity types" instead of "entity id of entity types")
+		*
+		*/
+
+		$concept_photograph_id = self::getEntityIdByName(
+			ENTITY_PHOTOGRAPH
+		);
+
+		$concept_entity_type_id = self::getEntityIdByName(
+			ENTITY_ENTITY_TYPE
+		);
+
+		$visibility_type_public = self::getEntityTypeId(
+			array(
+				PROPERTY_NAME => PROPERTY_PUBLIC,
+				PROPERTY_ENTITY => ENTITY_VISIBILITY
+			)
+		);
+
+		$database = DB_SEFI . '.';
+
+		# insert new edge representing a entity type concept 
+
+		$query_insert_edge_destination = '
+			INSERT INTO ' . $database.  TABLE_EDGE . ' (
+				`edg_id` ,
+				`ety_id` ,
+				`edg_status` ,
+				`edg_key`
+			)
+			VALUES (
+				NULL ,
+				' . $concept_entity_type_id . ',
+				' . EDGE_STATUS_ACTIVE. ',
+				' . $visibility_type_public . '
+			)
+		';
+
+		# insert new edge representing a photograph
+		
+		$query_insert_edge_source = '
+			INSERT INTO ' . $database.  TABLE_EDGE . ' (
+				`edg_id` ,
+				`ety_id` ,
+				`edg_status` ,
+				`edg_key`
+			)
+			VALUES (
+				NULL ,
+				' . $concept_photograph_id . ',
+				' . EDGE_STATUS_ACTIVE. ',
+				' . $id . '
+			)
+		';
+		
+		# insert visibility arc
+		
+		$query_insert_arc_model = '
+			INSERT INTO ' . $database . TABLE_ARC . '  (
+				`arc_id` ,
+				`arc_status` ,
+				`arc_type` ,
+				`arc_source` ,
+				`arc_destination`
+			)
+			VALUES (
+				NULL ,
+				' . ARC_STATUS_ACTIVE . ' , 
+				' . $arc_type_visibility . ',
+				{edge_source_id},
+				{edge_destination_id}
+			)
+		';
+
+		$query_select_arc_model = '
+			SELECT
+				' . PREFIX_TABLE_COLUMN_ARC . PROPERTY_ID .
+					' ' . PROPERTY_ID . '
+			FROM ' . $database . TABLE_ARC . '  
+			WHERE
+				'. PREFIX_TABLE_COLUMN_ARC . PROPERTY_TYPE . 
+					' = ' . $arc_type_visibility . ' AND 
+				'. PREFIX_TABLE_COLUMN_ARC . PROPERTY_SOURCE .
+					' = {edge_source}  AND   
+				'. PREFIX_TABLE_COLUMN_ARC . PROPERTY_DESTINATION .
+					' = {edge_destination}
+		';
+
+		$query_select_edge_destination_model = '
+			SELECT
+				' . PREFIX_TABLE_COLUMN_EDGE . PROPERTY_ID . 
+					' ' . PROPERTY_ID . '
+			FROM
+				' . $database . TABLE_EDGE . '
+			WHERE
+				' . PREFIX_TABLE_COLUMN_EDGE . PROPERTY_STATUS .
+					' = ' . EDGE_STATUS_ACTIVE. ' AND
+				' . PREFIX_TABLE_COLUMN_ENTITY. PROPERTY_ID .
+					' = ' . $concept_entity_type_id . ' AND
+				' . PREFIX_TABLE_COLUMN_EDGE . PROPERTY_KEY . 
+					' = ' . $visibility_type_public
+		;
+
+		$query_select_edge_source_model = '
+			SELECT
+				' . PREFIX_TABLE_COLUMN_EDGE . PROPERTY_ID . 
+					' ' . PROPERTY_ID . '
+			FROM
+				' . $database . TABLE_EDGE . '
+			WHERE
+				' . PREFIX_TABLE_COLUMN_EDGE . PROPERTY_STATUS .
+					' = ' . EDGE_STATUS_ACTIVE. ' AND
+				' . PREFIX_TABLE_COLUMN_ENTITY. PROPERTY_ID .
+					' = ' . $concept_photograph_id . ' AND
+				' . PREFIX_TABLE_COLUMN_EDGE . PROPERTY_KEY . 
+					' = ' . $id
+		;
+
+		# update visibility arc
+
+		$query_update_arc_model = '
+			UPDATE ' . $database . TABLE_ARC . '
+			SET
+				arc_status = {' . PROPERTY_STATUS . '}
+			WHERE 
+				arc_id = {'. PROPERTY_ID .'}
+		';
+		
+		$results_edge_destination = $class_db::query(
+			$query_select_edge_destination_model
+		);
+
+		$results_edge_source = $class_db::query(
+			$query_select_edge_source_model
+		);
+
+		if ( $results_edge_source->num_rows )
+		{
+			$edge_source = $results_edge_source
+				->fetch_object()
+			;
+			
+			$edge_source_id = $edge_source->{PROPERTY_ID};
+		}
+
+		if ( ! $results_edge_destination->num_rows )
+		{
+			$insertion_results = $class_db::query(
+				$query_insert_edge_destination
+			);
+
+			/**
+			*
+			* FIXME
+			*
+			* Update existing disabled concept edge of type entity type 
+			* if required but only if flag toggled is perfectly well identified
+			*
+			*/
+
+			if ( ! $insertion_results )
+
+				throw new Exception(
+					sprintf(
+						EXCEPTION_EXISTING_ENTITY,
+						' '.ENTITY_RECORD
+					)
+				);
+
+			$edge_destination_id = $link->insert_id;
+		}
+		else
+
+			$edge_destination_id =
+				$results_edge_destination->fetch_object()->{PROPERTY_ID}
+			;
+
+		$class_dumper::log(
+			__METHOD__,
+			array(
+				'[destination edge id]',
+				$edge_destination_id,
+				'[source edge id]',
+				$edge_source_id
+			)
+		);
+			
+		if (
+			! is_null( $edge_source_id ) &&
+			! is_null( $edge_destination_id )
+		)
+		{
+			$query_select_arc = str_replace(
+				array(
+					'{edge_destination}',
+					'{edge_source}'
+				),
+				array(
+					$edge_destination_id,
+					$edge_source_id
+				),
+				$query_select_arc_model
+			);
+
+			$results_arc = $class_db::query( $query_select_arc );
+
+			$class_dumper::log(
+				__METHOD__,
+				array( $query_select_arc )
+			);
+
+			if ( $results_arc->num_rows )
+			{
+				$arc = $results_arc->fetch_object();
+
+				$arc_id = $arc->{PROPERTY_ID};
+			}
+
+			$results_arc->free_result();
+		}
+
+		$results_edge_destination->free_result();								
+		
+		$results_edge_source->free_result();
+
+		$class_dumper::log(
+			__METHOD__,
+			array(
+				'[arc id]',
+				$arc_id
+			)
+		);
+
+		if ( ! is_null( $arc_id ) )
+		{
+			$query_update_arc = str_replace(
+				array(
+					'{' . PROPERTY_ID . '}',
+					'{' . PROPERTY_STATUS . '}'
+				),
+				array(
+					$arc_id,
+						$status == FLAG_STATUS_ENABLED
+					?
+						ARC_STATUS_ACTIVE
+					:
+						ARC_STATUS_INACTIVE
+				)
+				,
+				$query_update_arc_model
+			);
+
+			$class_db::query( $query_update_arc );
+		}
+		else 
+		{
+			if ( is_null( $edge_source_id ) )
+			{
+				$class_db::query( $query_insert_edge_source );
+
+				$edge_source_id = $link->insert_id;								
+			}
+			
+			if ( $status == FLAG_STATUS_ENABLED )
+			{
+				$query_insert_arc = str_replace(
+					array(
+						'{edge_destination_id}',
+						'{edge_source_id}'
+					),
+					array(
+						$edge_destination_id,
+						$edge_source_id
+					),
+					$query_insert_arc_model
+				);
+
+				$class_db::query( $query_insert_arc );
+				
+				$arc_id = $link->insert_id;	
+			}
+		}
 	}
 
 	/**
@@ -1767,6 +2114,8 @@ class Serializer extends Executor
 									/**
 									*
 									* FIXME
+									*
+									* generalization
 									*
 									*/
 

@@ -83,6 +83,7 @@ class Toolbox
 			ENTITY_MEDIA_MANAGER => CLASS_MEDIA_MANAGER,
 			ENTITY_MEMBER => CLASS_MEMBER,
 			ENTITY_MEMENTO => CLASS_MEMENTO,
+			ENTITY_MEMORY_CACHE => CLASS_MEMORY_CACHE,
 			ENTITY_MESSAGE => CLASS_MESSAGE,
 			ENTITY_MESSENGER => CLASS_MESSENGER,
 			ENTITY_MYSQLI => CLASS_MYSQLI,
@@ -197,235 +198,6 @@ class Toolbox
 			throw new Exception( EXCEPTION_FURTHER_IMPLEMENTATION_REQUIRED );
 
 		return $class;
-	}
-
-	/**
-	* Check if an entity has an access key 
-	*
-	* @param	mixed		&$entity		entity
-	* @param	string		$key			key
-	* @param	string		$symbol_name	name of a symbol
-	* @return  	boolean		indicator
-	*/	
-	public static function key_exists(
-		&$entity,
-		$key,
-		$symbol_name = NULL
-	)
-	{
-		global $symbols, $verbose_mode;
-
-		$class_dumper = self::getDumperClass();
-
-		$update_symbols = ! is_null( $symbol_name );
-
-		$key_exists = FALSE;
-
-		if ( ! is_null( $entity ) )
-		{
-			if ( is_array( $entity ) )
-			{
-				if ( $update_symbols && ! isset( $symbols[$symbol_name] ) )
-
-					$symbols[$symbol_name] = array(
-						PROPERTY_ISA => 'array'
-					);
-  
-				if ( isset( $entity[$key] ) )
-
-					$key_exists = array( $entity[$key] );
-
-				else if ( $update_symbols )
-				{
-					if ( ! isset( $symbols[$symbol_name][PROPERTY_KEYS] ) )
-
-						$symbols[$symbol_name][PROPERTY_KEYS] = array();
-
-					$symbols[$symbol_name][PROPERTY_KEYS][$key] = 
-						PROPERTY_UNDECLARED
-					;
-				}
-			}
-			else if (
-				is_object( $entity ) &&
-				(
-					// check if the key contains a property
-					is_array( $key ) ||
-
-					// check if the key is a member variable
-					is_string( $key ) &&
-					isset( $entity->$key )
-				)
-			)
-			{
-				if ( $update_symbols && ! isset( $symbols[$symbol_name] ) )
-
-					$symbols[$symbol_name] = array(
-						PROPERTY_ISA => get_class( $entity )
-					);
- 
-				if ( is_array( $key ) )
-				{
-					list( $property, $callback ) = each( $key );
-					
-					switch ( $property )
-					{
-						case PROPERTY_METHOD:
-
-							if ( is_array( $callback ) )
-							{
-								list( $method, $arguments ) = $callback;
-
-								if (
-									in_array(
-										$method,
-										get_class_methods(
-											get_class( $entity )
-										)
-									)
-								)
-								{
-									$key_exists = array(
-										call_user_func_array(
-											array(
-												$entity,
-												$method
-											),
-											$arguments
-										)
-									);
-								}
-								else
-
-									throw new Exception(
-										sprintf(
-											EXCEPTION_MISSING_ENTITY,
-											ENTITY_METHOD
-										)
-									);
-							}
-							else
-
-								throw new Exception(
-									EXCEPTION_INVALID_CALLBACK
-								);
-	
-									break;
-					}
-				}
-				else
-				{
-					if ( isset( $entity->$key ) )
-	
-						$key_exists = array( $entity->$key );
-	
-					else if ( $update_symbols )
-					{
-						if ( ! isset( $symbols[$symbol_name][PROPERTY_KEYS] ) )
-	
-							$symbols[$symbol_name][PROPERTY_KEYS] = array();
-	
-						$symbols[$symbol_name][PROPERTY_KEYS][$key] = 
-							PROPERTY_UNDECLARED
-						;
-					}
-				}
-			}
-		}
-		else if ( $update_symbols )
-
-			$symbols[$symbol_name] = array(
-				PROPERTY_IS_NULL => TRUE
-			);
-
-		return $key_exists;
-	}
-
-	/**
-	* Check if an entity has an access key 
-	*
-	* @param	mixed		$entity				entity
-	* @param	string		$keys				keys
-	* @param	string		$extract_value		extract value
-	* @param	string		$symbol_name		symbol name
-	* @param	string		$traversing_type	traversing type
-	* @return  	boolean		indicator
-	*/	
-	public static function keys_exists(
-		&$entity,
-		$keys,
-		$extract_value = FALSE,
-		$symbol_name = NULL,
-		$traversing_type = NULL
-	)
-	{
-		global $class_application, $verbose_mode;
-
-		$class_dumper = self::getDumperClass();
-
-		$default_traversing_type = TRAVERSING_TYPE_RECURSIVELY;
-
-		$entities = array( &$entity );
-
-		$keys_exists = FALSE;
-
-		if ( is_null( $traversing_type ) )
-
-			$traversing_type = $default_traversing_type;
-
-		if ( is_array( $keys ) && count( $keys ) )
-		{
-			switch ( $traversing_type )
-			{
-				// recursive traversing type 
-				case $default_traversing_type:
-
-					while (
-						( list( $index, $key ) = each( $keys ) ) &&
-						(
-							$key_exists =
-								self::key_exists(
-									$entity,
-									$key,
-									$symbol_name
-								)
-						) &&
-						is_array( $key_exists )
-					)
-					{
-						list( $_index, $_key ) = each( $key_exists );
-
-						$entities[$index + 1] = &$key_exists[$_index];
-
-						$entity = &$_key;
-					}
-
-					reset( $keys );
-
-					if ( ! $extract_value )
-
-						$keys_exists = $key_exists;
-	
-					else if (
-						is_array( $key_exists ) &&
-						reset( $key_exists )
-					)
-
-						list( , $keys_exists ) = each( $key_exists );
-
-						break;
-			}
-
-			if (
-				$keys_exists !== FALSE &&
-				is_array( $keys_exists ) &&
-				! $extract_value
-			)
-
-				$keys_exists[] = $entities;
-		}
-
-		return $keys_exists;
 	}
 
 	/**
@@ -1158,6 +930,235 @@ class Toolbox
 	public static function hash($string)
 	{
 		return "_".substr(md5($string), 0, 5);
+	}
+
+	/**
+	* Check if an entity has an access key 
+	*
+	* @param	mixed		&$entity		entity
+	* @param	string		$key			key
+	* @param	string		$symbol_name	name of a symbol
+	* @return  	boolean		indicator
+	*/	
+	public static function key_exists(
+		&$entity,
+		$key,
+		$symbol_name = NULL
+	)
+	{
+		global $symbols, $verbose_mode;
+
+		$class_dumper = self::getDumperClass();
+
+		$update_symbols = ! is_null( $symbol_name );
+
+		$key_exists = FALSE;
+
+		if ( ! is_null( $entity ) )
+		{
+			if ( is_array( $entity ) )
+			{
+				if ( $update_symbols && ! isset( $symbols[$symbol_name] ) )
+
+					$symbols[$symbol_name] = array(
+						PROPERTY_ISA => 'array'
+					);
+  
+				if ( isset( $entity[$key] ) )
+
+					$key_exists = array( $entity[$key] );
+
+				else if ( $update_symbols )
+				{
+					if ( ! isset( $symbols[$symbol_name][PROPERTY_KEYS] ) )
+
+						$symbols[$symbol_name][PROPERTY_KEYS] = array();
+
+					$symbols[$symbol_name][PROPERTY_KEYS][$key] = 
+						PROPERTY_UNDECLARED
+					;
+				}
+			}
+			else if (
+				is_object( $entity ) &&
+				(
+					// check if the key contains a property
+					is_array( $key ) ||
+
+					// check if the key is a member variable
+					is_string( $key ) &&
+					isset( $entity->$key )
+				)
+			)
+			{
+				if ( $update_symbols && ! isset( $symbols[$symbol_name] ) )
+
+					$symbols[$symbol_name] = array(
+						PROPERTY_ISA => get_class( $entity )
+					);
+ 
+				if ( is_array( $key ) )
+				{
+					list( $property, $callback ) = each( $key );
+					
+					switch ( $property )
+					{
+						case PROPERTY_METHOD:
+
+							if ( is_array( $callback ) )
+							{
+								list( $method, $arguments ) = $callback;
+
+								if (
+									in_array(
+										$method,
+										get_class_methods(
+											get_class( $entity )
+										)
+									)
+								)
+								{
+									$key_exists = array(
+										call_user_func_array(
+											array(
+												$entity,
+												$method
+											),
+											$arguments
+										)
+									);
+								}
+								else
+
+									throw new Exception(
+										sprintf(
+											EXCEPTION_MISSING_ENTITY,
+											ENTITY_METHOD
+										)
+									);
+							}
+							else
+
+								throw new Exception(
+									EXCEPTION_INVALID_CALLBACK
+								);
+	
+									break;
+					}
+				}
+				else
+				{
+					if ( isset( $entity->$key ) )
+	
+						$key_exists = array( $entity->$key );
+	
+					else if ( $update_symbols )
+					{
+						if ( ! isset( $symbols[$symbol_name][PROPERTY_KEYS] ) )
+	
+							$symbols[$symbol_name][PROPERTY_KEYS] = array();
+	
+						$symbols[$symbol_name][PROPERTY_KEYS][$key] = 
+							PROPERTY_UNDECLARED
+						;
+					}
+				}
+			}
+		}
+		else if ( $update_symbols )
+
+			$symbols[$symbol_name] = array(
+				PROPERTY_IS_NULL => TRUE
+			);
+
+		return $key_exists;
+	}
+
+	/**
+	* Check if an entity has an access key 
+	*
+	* @param	mixed		$entity				entity
+	* @param	string		$keys				keys
+	* @param	string		$extract_value		extract value
+	* @param	string		$symbol_name		symbol name
+	* @param	string		$traversing_type	traversing type
+	* @return  	boolean		indicator
+	*/	
+	public static function keys_exists(
+		&$entity,
+		$keys,
+		$extract_value = FALSE,
+		$symbol_name = NULL,
+		$traversing_type = NULL
+	)
+	{
+		global $class_application, $verbose_mode;
+
+		$class_dumper = self::getDumperClass();
+
+		$default_traversing_type = TRAVERSING_TYPE_RECURSIVELY;
+
+		$entities = array( &$entity );
+
+		$keys_exists = FALSE;
+
+		if ( is_null( $traversing_type ) )
+
+			$traversing_type = $default_traversing_type;
+
+		if ( is_array( $keys ) && count( $keys ) )
+		{
+			switch ( $traversing_type )
+			{
+				// recursive traversing type 
+				case $default_traversing_type:
+
+					while (
+						( list( $index, $key ) = each( $keys ) ) &&
+						(
+							$key_exists =
+								self::key_exists(
+									$entity,
+									$key,
+									$symbol_name
+								)
+						) &&
+						is_array( $key_exists )
+					)
+					{
+						list( $_index, $_key ) = each( $key_exists );
+
+						$entities[$index + 1] = &$key_exists[$_index];
+
+						$entity = &$_key;
+					}
+
+					reset( $keys );
+
+					if ( ! $extract_value )
+
+						$keys_exists = $key_exists;
+	
+					else if (
+						is_array( $key_exists ) &&
+						reset( $key_exists )
+					)
+
+						list( , $keys_exists ) = each( $key_exists );
+
+						break;
+			}
+
+			if (
+				$keys_exists !== FALSE &&
+				is_array( $keys_exists ) &&
+				! $extract_value
+			)
+
+				$keys_exists[] = $entities;
+		}
+
+		return $keys_exists;
 	}
 
 	/*

@@ -23,6 +23,7 @@ assignConstant('EXCEPTION_DEVELOPMENT_CLASS_METHOD_REQUIRED', 'The "%s" method o
 assignConstant('EXCEPTION_DEVELOPMENT_MISSING_CLASS', 'There might be some needs here for implementing a new class (%s).');
 assignConstant('EXCEPTION_DEVELOPMENT_MISSING_ENTITY', 'There might be some needs here for implementing a new kind of entity.');
 assignConstant('EXCEPTION_DEVELOPMENT_PDO_DISCONTINUED', 'PDO implementation is discontinued for this class.');
+assignConstant('EXCEPTION_EXISTING_ENTITY', 'Such a%s exists already.');
 assignConstant('EXCEPTION_EXPECTATION_ARRAY', 'an argument of type array is expected.');
 assignConstant('EXCEPTION_EXPECTATION_OBJECT', 'a argument of type object is expected.');
 assignConstant('EXCEPTION_FURTHER_IMPLEMENTATION_REQUIRED', 'There might be a need for few more lines of code here...');
@@ -50,6 +51,7 @@ assignConstant('EXCEPTION_INVALID_FILE_TYPE', 'The file type is not valid.');
 assignConstant('EXCEPTION_INVALID_HTML_TAG', 'There is no class definition for such HTML tag');
 assignConstant('EXCEPTION_INVALID_I18N_SCOPE', 'The i18n scope is not valid.');
 assignConstant('EXCEPTION_INVALID_IDENTIFIER', 'The provided identifier is not valid.');
+assignConstant('EXCEPTION_INVALID_MEMCACHED_SERVER', 'The memcached server settings are not valid.');
 assignConstant('EXCEPTION_INVALID_PROPERTY_NAME', 'the name of the property is not valid.');
 assignConstant('EXCEPTION_INVALID_QUERY', 'The provided query is not valid.');
 assignConstant('EXCEPTION_INVALID_PROPORTIONS', 'The proportions of a given photograph are not valid');
@@ -75,3 +77,5 @@ assignConstant('EXCEPTION_UNDEFINED_FORM_IDENTIFIER', 'The current form identifi
 assignConstant('EXCEPTION_UNDEFINED_KEY_IDENTIFER', 'A key identifier is missing.');
 assignConstant('EXCEPTION_UNDEFINED_OPTIONS', 'Some options are missing');
 assignConstant('EXCEPTION_UNIT_TESTING_ASSERTION_INVALID', 'An assertion is not valid (%s)');
+
+?>
