@@ -168,9 +168,9 @@ class Exception_Handler extends Event_Manager
 
 			exit();
 		}
-		//else 
-		//
-		//	exit( EXCEPTION_INVALID_ERROR_HANDLER );
+		else 
+		
+			exit( EXCEPTION_INVALID_ERROR_HANDLER );
 	}
 
 	/**
@@ -255,25 +255,25 @@ class Exception_Handler extends Event_Manager
 
 		$error_handling_witness = 'testErrorHandler';
 
-// 		set_error_handler(
-//			array( $class_exception_handler, $error_handling_witness )
-//		);
-//
-//		$previous_exception_handler = set_exception_handler(
-//			array( $class_exception_handler, 'notify' )
-//		);
-//
-//		$previous_error_handler = set_error_handler(
-//			array( $class_exception_handler, 'logException' )
-//		);
-//
-//		if (
-//			! is_array( $previous_error_handler ) ||
-//			! isset( $previous_error_handler[1] ) ||
-//			$previous_error_handler[1] != $error_handling_witness
-//		)
-//		
-//			exit( EXCEPTION_INVALID_ERROR_HANDLER );
+ 		set_error_handler(
+			array( $class_exception_handler, $error_handling_witness )
+		);
+
+		$previous_exception_handler = set_exception_handler(
+			array( $class_exception_handler, 'notify' )
+		);
+
+		$previous_error_handler = set_error_handler(
+			array( $class_exception_handler, 'logException' )
+		);
+
+		if (
+			! is_array( $previous_error_handler ) ||
+			! isset( $previous_error_handler[1] ) ||
+			$previous_error_handler[1] != $error_handling_witness
+		)
+		
+			exit( EXCEPTION_INVALID_ERROR_HANDLER );
 	}
 
 	/**
