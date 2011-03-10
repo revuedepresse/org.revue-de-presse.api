@@ -2296,11 +2296,14 @@ class Data_Fetcher extends Database
 		$memento_key = md5( serialize( func_get_args() ) );
 
 		if (
-			FALSE ===
-				(
-					$callback_parameters_cached =
-						$class_memento::retrieveData( $memento_key )
-				)
+			MEMCACHED_FLUSH_CACHE_FORM ||
+			(
+				FALSE ===
+					(
+						$callback_parameters_cached =
+							$class_memento::retrieveData( $memento_key )
+					)
+			)
 		)
 		{
 			if (
@@ -2335,7 +2338,13 @@ class Data_Fetcher extends Database
 						frm_status = '.FORM_STATUS_ACTIVE.' AND
 						frm_identifier LIKE "'.$identifier.'"
 				';
-				
+
+				$class_dumper::log(
+					__METHOD__,
+					array( $select_form ),
+					TRUE
+				);				
+
 				$results_form = $class_db::query( $select_form );
 
 				if ( is_object( $results_form ) && $results_form->num_rows )
@@ -2345,7 +2354,8 @@ class Data_Fetcher extends Database
 
 			$class_memento::storeData(
 				serialize( $callback_parameters ),
-				$memento_key
+				$memento_key,
+				MEMCACHED_FLUSH_CACHE_FORM
 			);
 		}
 		else
