@@ -4424,6 +4424,8 @@ class View_Builder extends User_Interface
 								// get the default border
 								$border = $class_interceptor::getDefaultBorder();
 
+								$calculated_rows = NULL;
+
 								// declare the default photograph contents
 								$photograph_contents = '';
 	
@@ -4435,23 +4437,31 @@ class View_Builder extends User_Interface
 								$item_collection =
 									$class_media_manager::loadPhotosByAuthorId(
 										$member_identifier,
-										//AUTHOR_IDENTIFIER_SHAL,
-										FALSE
+										FALSE,
+										array(
+											PROPERTY_START => $border  *
+												PAGINATION_COUNT_PER_PAGE_PHOTOGRAPH -
+													PAGINATION_COUNT_PER_PAGE_PHOTOGRAPH,
+										PROPERTY_LENGTH =>
+												PAGINATION_COUNT_PER_PAGE_PHOTOGRAPH
+										),
+										$calculated_rows
 									)
 								;
+	
+								$class_dumper::log(
+									__METHOD__,
+									array(
+										'[calculated rows]',
+										$calculated_rows
+									)
+								);
 	
 								// load photos by author identifier
 								$photos = 
 	
 								// set the placeholder value
-								$placeholder_value = array_slice(
-									$item_collection,
-									$border *
-										PAGINATION_COUNT_PER_PAGE_PHOTOGRAPH -
-											PAGINATION_COUNT_PER_PAGE_PHOTOGRAPH,
-									PAGINATION_COUNT_PER_PAGE_PHOTOGRAPH,
-									TRUE
-								);
+								$placeholder_value = $item_collection;
 
 								$flags = $class_flag_manager::getFlags(
 									array( 'usr_id' => $member_identifier )
@@ -4466,16 +4476,30 @@ class View_Builder extends User_Interface
 		
 								while ( list( $id, ) = each( $photos ) )
 								
-									$context[] = $class_insight::loadThread(
-										$id,
-										$class_entity::getByName(
-											CLASS_PHOTOGRAPH
-										)->{PROPERTY_ID}
-									);
+									$context[] =
+										array(
+											$class_insight::loadThread(
+												$id,
+												$class_entity::getByName(
+													CLASS_PHOTOGRAPH
+												)->{PROPERTY_ID}
+											)
+										)
+									;
 
+								$_context = array(
+									$context,
+									DIMENSION_MAXIMUM_AVATAR_LONG_EDGE,
+									DIMENSION_MAXIMUM_LONG_EDGE,
+									SEFI_ALBUM_COMMENTS,
+									SEFI_ALBUM_FLAGS,
+									SEFI_ALBUM_METADATA,
+									SEFI_ALBUM_NAVIGATION
+								);
+	
 								reset( $photos );
 
-								$cache_id = md5( serialize( $context ) );
+								$cache_id = md5( serialize( $_context ) );
 
 								$template_name = TPL_BLOCK_CONTENT;
 
@@ -4491,9 +4515,7 @@ class View_Builder extends User_Interface
 								{
 									$class_interceptor::updateOuterBorder(
 										ceil(
-											count(
-												$item_collection
-											) /
+											$calculated_rows /
 												PAGINATION_COUNT_PER_PAGE_PHOTOGRAPH
 										)
 									);
@@ -4503,12 +4525,12 @@ class View_Builder extends User_Interface
 										(
 										$border *
 											PAGINATION_COUNT_PER_PAGE_PHOTOGRAPH  >
-												count( $item_collection )
+												$calculated_rows
 										) &&
-										count( $item_collection )
+										$calculated_rows
 									)
 		
-										$border = $border % count( $item_collection );
+										$border = $border % $calculated_rows;
 
 									// set a property
 									self::setProperty( ENTITY_SLICE, $photos );
@@ -4549,7 +4571,7 @@ class View_Builder extends User_Interface
 											$properties->{PROPERTY_HEIGHT} =
 												$photo->getHeight()
 											;
-			
+	
 											// get the photograph width
 											$properties->{PROPERTY_WIDTH} =
 												$photo->getWidth()
@@ -4590,14 +4612,7 @@ class View_Builder extends User_Interface
 									$photos = 
 		
 									// set the placeholder value
-									$placeholder_value = array_slice(
-										$item_collection,
-										$border *
-											PAGINATION_COUNT_PER_PAGE_PHOTOGRAPH -
-												PAGINATION_COUNT_PER_PAGE_PHOTOGRAPH,
-										PAGINATION_COUNT_PER_PAGE_PHOTOGRAPH,
-										TRUE
-									);
+									$placeholder_value = $item_collection;
 
 									// set a slice of photos persistent
 									self::setProperty( ENTITY_SLICE, $photos );		
@@ -6594,8 +6609,10 @@ class View_Builder extends User_Interface
 
 		$class_user_handler = self::getUserHandlerClass();
 
-		// set the default panel
-		$panel = '';
+		// set default panel and thread
+		$panel =
+
+		$thread = '';
 
 		// construct a new template engine
 		$template_engine = new $class_template_engine();
@@ -6624,7 +6641,11 @@ class View_Builder extends User_Interface
 								// get the identifier
 								$identifier = $instance->getId();
 
-								$thread = $class_insight::getThread($identifier);
+								if ( SEFI_ALBUM_COMMENTS )
+
+									$thread = $class_insight::getThread(
+										$identifier
+									);
 
 								$template_name = TPL_BLOCK_IMAGE_PANEL;
 
@@ -6642,11 +6663,27 @@ class View_Builder extends User_Interface
 								$cache_id = md5(
 									serialize(
 										array(
+											// maximum long edge of photographs
+											DIMENSION_MAXIMUM_LONG_EDGE,
+											
+											// maximum long edge of avatars 
+											DIMENSION_MAXIMUM_AVATAR_LONG_EDGE,
+
 											$flags,
+
 											$identifier,
+
 											$administrator_identifier,
+
 											$member_identifier,
-											$thread
+
+											$thread,
+
+											SEFI_ALBUM_FLAGS,
+
+											SEFI_ALBUM_METADATA,
+
+											SEFI_ALBUM_NAVIGATION
 										)
 									)
 								);
@@ -6660,31 +6697,42 @@ class View_Builder extends User_Interface
 									)
 								)
 								{
-									// declare empty arrays of information and affordances
+									// declare empty arrays of
+									// 	affordances
+									// 	metadata
+									// 	links
+									// 	keywords
+
 									$affordances =
-									$information = array();
+
+									$information =
+									
+									$links =
 	
-									// declare an empty set of keywords
 									$keywords_set = array();
 	
 									// set the first item flag
-									$first_item = false;
+									$first_item = FALSE;
 	
 									// set the last item flag
-									$last_item = false;
+									$last_item = FALSE;
 	
 									// set the default next item index
-									$next_item_index = null;
+									$next_item_index = NULL;
 	
 									// set the default previous item index
-									$previous_item_index = null;
+									$previous_item_index = NULL;
 	
 									// get the resource content
 									$content = $resource->{PROPERTY_CONTENT};
 	
 									// replace comma with semi columns in the keywords list
-									$_keywords_set = str_replace(",", ";", $instance->getKeywords());
-								
+									$_keywords_set = str_replace(
+										',',
+										';',
+										$instance->getKeywords()
+									);
+
 									list( , , $owner_name ) =
 										$class_member::fetchUserName(
 											$instance->getAuthor()
@@ -6692,7 +6740,10 @@ class View_Builder extends User_Interface
 									;
 
 									// get the list of keywords
-									$keywords_set = explode(";", $_keywords_set);
+									$keywords_set = explode(
+										';',
+										$_keywords_set
+									);
 	
 									// apply a callack to the keywords set 
 									$keywords_set = array_map(
@@ -6707,23 +6758,6 @@ class View_Builder extends User_Interface
 									// set a new list of keywords
 									$_keywords_set = implode(", ", $keywords_set);
 	
-									//// apply a callack to the keywords set 
-									//$set = array_map(
-									//	function ($keyword) {
-									//
-									//		// check if the current keyword contains a blank
-									//		$match = preg_match("/\s/", trim($keyword));
-									//
-									//		$_keyword = !$match ? "#".$keyword : "#[".$keyword."]";
-									//
-									//		return $_keyword;
-									//	},
-									//	$keywords_set
-									//);
-									//
-									//// implode the list of keywords
-									//$_keywords_set = implode(", ", $set);
-
 									// get the placeholder value
 									$placeholder_value = self::getPlaceholder();
 	
@@ -6734,7 +6768,10 @@ class View_Builder extends User_Interface
 									$latest_key = count($keys) - 1;
 		
 									// get the index
-									$index = array_search($instance->getId(), $keys);
+									$index = array_search(
+										$instance->getId(),
+										$keys
+									);
 	
 									// get the index
 									$accesskeys = array(
@@ -6808,34 +6845,37 @@ class View_Builder extends User_Interface
 											)
 										);
 									}
-	
-									$links = array(
-										'bottom' => CONTENT_LINK_BOTTOM,
-										'top' => CONTENT_LINK_TOP
-									);
-	
-									// check if the current item is the last one
-									if ( ! $last_item )
-	
-										$links = array_merge(
-											$links,
-											array(
-												'next' =>
-													CONTENT_LINK_NEXT
-											)
+									
+									if ( SEFI_ALBUM_NAVIGATION )
+									{
+										$links = array(
+											'bottom' => CONTENT_LINK_BOTTOM,
+											'top' => CONTENT_LINK_TOP
 										);
-	
-									// check if the current item is the first one
-									if ( ! $first_item )
-	
-										$links = array_merge(
-											$links,
-											array(
-												'previous' =>
-													CONTENT_LINK_PREVIOUS
-											)
-										);
-	
+		
+										// check if the current item is the last one
+										if ( ! $last_item )
+		
+											$links = array_merge(
+												$links,
+												array(
+													'next' =>
+														CONTENT_LINK_NEXT
+												)
+											);
+		
+										// check if the current item is the first one
+										if ( ! $first_item )
+		
+											$links = array_merge(
+												$links,
+												array(
+													'previous' =>
+														CONTENT_LINK_PREVIOUS
+												)
+											);
+									}
+
 									// assign the internal anchors
 									$template_engine->assign(
 										PLACEHOLDER_INTERNAL_ANCHORS,
@@ -6847,225 +6887,230 @@ class View_Builder extends User_Interface
 										PLACEHOLDER_LINKS,
 										$links
 									);
-
-									// set the public affordances
-									$affordances = 	array(
-										array(
-											ENTITY_LABEL => CONTENT_AFFORDANCE_COMMENT,
-											ENTITY_LINK => PREFIX_LINK_INTERNAL.ACTION_POST.'_'.$identifier,
-											HTML_ATTRIBUTE_CLASS => JAVASCRIPT_IDENTIFIER_AFFORDANCE_COMMENT,
-											HTML_ATTRIBUTE_ID => JAVASCRIPT_IDENTIFIER_AFFORDANCE_COMMENT."-".$identifier,
-											PROPERTY_ACCESS_KEY => ACCESS_KEY_AFFORDANCE_COMMENT,
-											PROPERTY_ACCESS_TYPE => array(
-												ACCESS_CONTROL_LIST_GROUP => GROUP_VISITOR
-											)
-										),									
-										array(										
-											ENTITY_LABEL => 
-												(
-													isset($flags[FLAG_TYPE_LIKE][$identifier])
-												?
-													CONTENT_FACT_LIKE
-												:
-													CONTENT_AFFORDANCE_LIKE
-												),
-											ENTITY_LINK => URI_AFFORDANCE_LIKE."-".$identifier,
-											HTML_ATTRIBUTE_CLASS =>
-												JAVASCRIPT_IDENTIFIER_AFFORDANCE_LIKE.' '.
-												(
-													isset( $flags[FLAG_TYPE_LIKE][$identifier] )
-												?
-													STYLE_CLASS_ENABLED
-												:
-													STYLE_CLASS_DISABLED
-												),
-											HTML_ATTRIBUTE_ID => JAVASCRIPT_IDENTIFIER_AFFORDANCE_LIKE."-".$identifier,
-											PROPERTY_ACCESS_KEY => ACCESS_KEY_AFFORDANCE_LIKE,
-											PROPERTY_ACCESS_TYPE => array(
-												ACCESS_CONTROL_LIST_GROUP => GROUP_VISITOR
-											)
-										),
-										array(
-											ENTITY_LABEL =>
-													isset($flags[FLAG_TYPE_DO_NOT_LIKE][$identifier])
-												?
-													CONTENT_FACT_PREFIX_DID_NOT." ".strtolower( CONTENT_AFFORDANCE_LIKE )
-												:
-													CONTENT_AFFORDANCE_PREFIX_DO_NOT." ".strtolower( CONTENT_AFFORDANCE_LIKE )
-											,
-											ENTITY_LINK => URI_AFFORDANCE_DO_NOT_LIKE."-".$identifier,
-											HTML_ATTRIBUTE_CLASS =>
-												JAVASCRIPT_IDENTIFIER_AFFORDANCE_DO_NOT_LIKE.' '.
-												(
-													isset($flags[FLAG_TYPE_DO_NOT_LIKE][$identifier])
-												?
-													STYLE_CLASS_ENABLED
-												:
-													STYLE_CLASS_DISABLED
-												),
-											HTML_ATTRIBUTE_ID => JAVASCRIPT_IDENTIFIER_AFFORDANCE_DO_NOT_LIKE."-".$identifier,
-											PROPERTY_ACCESS_KEY => ACCESS_KEY_AFFORDANCE_DO_NOT_LIKE,
-											PROPERTY_ACCESS_TYPE => array(
-												ACCESS_CONTROL_LIST_GROUP => GROUP_VISITOR
-											)
-										)
-									);
 									
-									if (
-										$member_identifier ===
-											$instance->getAuthor()
-									)
-									
-										$affordances = array_merge(
-											$affordances,
+									if ( SEFI_ALBUM_FLAGS )
+									{
+										// set the public affordances
+										$affordances = array(
 											array(
-												array(
-													ENTITY_LABEL =>
-															isset( $flags[FLAG_TYPE_SHARE][$identifier] )
-														?
-															CONTENT_FACT_SHARE 
-														:
-															CONTENT_AFFORDANCE_SHARE 
-													,
-													ENTITY_LINK => URI_AFFORDANCE_SHARE."-".$identifier,
-													HTML_ATTRIBUTE_CLASS =>
-														JAVASCRIPT_IDENTIFIER_AFFORDANCE_SHARE.' '.
-														(
-															isset( $flags[FLAG_TYPE_SHARE][$identifier] )
-														?
-															STYLE_CLASS_ENABLED
-														:
-															STYLE_CLASS_DISABLED
-														),
-													HTML_ATTRIBUTE_ID => JAVASCRIPT_IDENTIFIER_AFFORDANCE_SHARE."-".$identifier,
-													PROPERTY_ACCESS_KEY => ACCESS_KEY_AFFORDANCE_SHARE,
-													PROPERTY_ACCESS_TYPE => array(
-														ACCESS_CONTROL_LIST_GROUP => GROUP_VISITOR
-													)
+												ENTITY_LABEL => CONTENT_AFFORDANCE_COMMENT,
+												ENTITY_LINK => PREFIX_LINK_INTERNAL.ACTION_POST.'_'.$identifier,
+												HTML_ATTRIBUTE_CLASS => JAVASCRIPT_IDENTIFIER_AFFORDANCE_COMMENT,
+												HTML_ATTRIBUTE_ID => JAVASCRIPT_IDENTIFIER_AFFORDANCE_COMMENT."-".$identifier,
+												PROPERTY_ACCESS_KEY => ACCESS_KEY_AFFORDANCE_COMMENT,
+												PROPERTY_ACCESS_TYPE => array(
+													ACCESS_CONTROL_LIST_GROUP => GROUP_VISITOR
 												)
-											)
-										);
-
-									$affordances = array_merge(
-										$affordances,
-										array(
-											array(
-												ENTITY_LABEL =>
-														isset($flags[FLAG_TYPE_SUGGEST_REMOVAL][$identifier])
-													?									
-														CONTENT_FACT_SUGGEST." ".strtolower(CONTENT_ACTION_REMOVAL)
-													:
-														CONTENT_AFFORDANCE_SUGGEST." ".strtolower(CONTENT_ACTION_REMOVAL)
-												,
-												ENTITY_LINK => URI_AFFORDANCE_SUGGEST_REMOVAL."-".$identifier,
-												HTML_ATTRIBUTE_CLASS =>
-													JAVASCRIPT_IDENTIFIER_AFFORDANCE_SUGGEST_REMOVAL.' '.
+											),									
+											array(										
+												ENTITY_LABEL => 
 													(
-														isset($flags[FLAG_TYPE_SUGGEST_REMOVAL][$identifier])
+														isset($flags[FLAG_TYPE_LIKE][$identifier])
+													?
+														CONTENT_FACT_LIKE
+													:
+														CONTENT_AFFORDANCE_LIKE
+													),
+												ENTITY_LINK => URI_AFFORDANCE_LIKE."-".$identifier,
+												HTML_ATTRIBUTE_CLASS =>
+													JAVASCRIPT_IDENTIFIER_AFFORDANCE_LIKE.' '.
+													(
+														isset( $flags[FLAG_TYPE_LIKE][$identifier] )
 													?
 														STYLE_CLASS_ENABLED
 													:
 														STYLE_CLASS_DISABLED
 													),
-												HTML_ATTRIBUTE_ID => JAVASCRIPT_IDENTIFIER_AFFORDANCE_SUGGEST_REMOVAL."-".$identifier,
-												PROPERTY_ACCESS_KEY => ACCESS_KEY_AFFORDANCE_SUGGEST_REMOVAL,
+												HTML_ATTRIBUTE_ID => JAVASCRIPT_IDENTIFIER_AFFORDANCE_LIKE."-".$identifier,
+												PROPERTY_ACCESS_KEY => ACCESS_KEY_AFFORDANCE_LIKE,
 												PROPERTY_ACCESS_TYPE => array(
 													ACCESS_CONTROL_LIST_GROUP => GROUP_VISITOR
 												)
 											),
 											array(
 												ENTITY_LABEL =>
-														isset($flags[FLAG_TYPE_REPORT][$identifier])
-													?									
-														CONTENT_FACT_REPORT
+														isset($flags[FLAG_TYPE_DO_NOT_LIKE][$identifier])
+													?
+														CONTENT_FACT_PREFIX_DID_NOT." ".strtolower( CONTENT_AFFORDANCE_LIKE )
 													:
-														CONTENT_AFFORDANCE_REPORT
+														CONTENT_AFFORDANCE_PREFIX_DO_NOT." ".strtolower( CONTENT_AFFORDANCE_LIKE )
 												,
-												ENTITY_LINK => URI_AFFORDANCE_REPORT."-".$identifier,
+												ENTITY_LINK => URI_AFFORDANCE_DO_NOT_LIKE."-".$identifier,
 												HTML_ATTRIBUTE_CLASS =>
-													JAVASCRIPT_IDENTIFIER_AFFORDANCE_REPORT.' '.
+													JAVASCRIPT_IDENTIFIER_AFFORDANCE_DO_NOT_LIKE.' '.
 													(
-														isset($flags[FLAG_TYPE_REPORT][$identifier])
+														isset($flags[FLAG_TYPE_DO_NOT_LIKE][$identifier])
 													?
 														STYLE_CLASS_ENABLED
 													:
 														STYLE_CLASS_DISABLED
 													),
-												HTML_ATTRIBUTE_ID => JAVASCRIPT_IDENTIFIER_AFFORDANCE_REPORT."-".$identifier,
-												PROPERTY_ACCESS_KEY => ACCESS_KEY_AFFORDANCE_REPORT,
+												HTML_ATTRIBUTE_ID => JAVASCRIPT_IDENTIFIER_AFFORDANCE_DO_NOT_LIKE."-".$identifier,
+												PROPERTY_ACCESS_KEY => ACCESS_KEY_AFFORDANCE_DO_NOT_LIKE,
 												PROPERTY_ACCESS_TYPE => array(
 													ACCESS_CONTROL_LIST_GROUP => GROUP_VISITOR
 												)
-											)									
+											)
+										);
+									
+										if (
+											$member_identifier ===
+												$instance->getAuthor()
 										)
-									);
+										
+											$affordances = array_merge(
+												$affordances,
+												array(
+													array(
+														ENTITY_LABEL =>
+																isset( $flags[FLAG_TYPE_SHARE][$identifier] )
+															?
+																CONTENT_FACT_SHARE 
+															:
+																CONTENT_AFFORDANCE_SHARE 
+														,
+														ENTITY_LINK => URI_AFFORDANCE_SHARE."-".$identifier,
+														HTML_ATTRIBUTE_CLASS =>
+															JAVASCRIPT_IDENTIFIER_AFFORDANCE_SHARE.' '.
+															(
+																isset( $flags[FLAG_TYPE_SHARE][$identifier] )
+															?
+																STYLE_CLASS_ENABLED
+															:
+																STYLE_CLASS_DISABLED
+															),
+														HTML_ATTRIBUTE_ID => JAVASCRIPT_IDENTIFIER_AFFORDANCE_SHARE."-".$identifier,
+														PROPERTY_ACCESS_KEY => ACCESS_KEY_AFFORDANCE_SHARE,
+														PROPERTY_ACCESS_TYPE => array(
+															ACCESS_CONTROL_LIST_GROUP => GROUP_VISITOR
+														)
+													)
+												)
+											);
 	
-									// declare an array of information
-									$information = array(
-										array(
-											ENTITY_CLASS =>
-												ENTITY_ELEMENT."_".STYLE_CLASS_AUTHOR." ".
-													ENTITY_ELEMENT."_".ENTITY_PANEL,
+										$affordances = array_merge(
+											$affordances,
+											array(
+												array(
+													ENTITY_LABEL =>
+															isset($flags[FLAG_TYPE_SUGGEST_REMOVAL][$identifier])
+														?									
+															CONTENT_FACT_SUGGEST." ".strtolower(CONTENT_ACTION_REMOVAL)
+														:
+															CONTENT_AFFORDANCE_SUGGEST." ".strtolower(CONTENT_ACTION_REMOVAL)
+													,
+													ENTITY_LINK => URI_AFFORDANCE_SUGGEST_REMOVAL."-".$identifier,
+													HTML_ATTRIBUTE_CLASS =>
+														JAVASCRIPT_IDENTIFIER_AFFORDANCE_SUGGEST_REMOVAL.' '.
+														(
+															isset($flags[FLAG_TYPE_SUGGEST_REMOVAL][$identifier])
+														?
+															STYLE_CLASS_ENABLED
+														:
+															STYLE_CLASS_DISABLED
+														),
+													HTML_ATTRIBUTE_ID => JAVASCRIPT_IDENTIFIER_AFFORDANCE_SUGGEST_REMOVAL."-".$identifier,
+													PROPERTY_ACCESS_KEY => ACCESS_KEY_AFFORDANCE_SUGGEST_REMOVAL,
+													PROPERTY_ACCESS_TYPE => array(
+														ACCESS_CONTROL_LIST_GROUP => GROUP_VISITOR
+													)
+												),
+												array(
+													ENTITY_LABEL =>
+															isset($flags[FLAG_TYPE_REPORT][$identifier])
+														?									
+															CONTENT_FACT_REPORT
+														:
+															CONTENT_AFFORDANCE_REPORT
+													,
+													ENTITY_LINK => URI_AFFORDANCE_REPORT."-".$identifier,
+													HTML_ATTRIBUTE_CLASS =>
+														JAVASCRIPT_IDENTIFIER_AFFORDANCE_REPORT.' '.
+														(
+															isset($flags[FLAG_TYPE_REPORT][$identifier])
+														?
+															STYLE_CLASS_ENABLED
+														:
+															STYLE_CLASS_DISABLED
+														),
+													HTML_ATTRIBUTE_ID => JAVASCRIPT_IDENTIFIER_AFFORDANCE_REPORT."-".$identifier,
+													PROPERTY_ACCESS_KEY => ACCESS_KEY_AFFORDANCE_REPORT,
+													PROPERTY_ACCESS_TYPE => array(
+														ACCESS_CONTROL_LIST_GROUP => GROUP_VISITOR
+													)
+												)									
+											)
+										);
+									}
 
-											ENTITY_CLASS."_".ENTITY_PROPERTY =>
-												ENTITY_PROPERTY."_".STYLE_CLASS_AUTHOR,
-											
-											ENTITY_CLASS."_".ENTITY_SEPARATOR =>
-												ENTITY_SEPARATOR."_".STYLE_CLASS_AUTHOR." ".
-													ENTITY_SEPARATOR."_".ENTITY_PANEL,
-											
-											ENTITY_CLASS."_".ENTITY_VALUE =>
-												ENTITY_VALUE."_".STYLE_CLASS_AUTHOR,
-											
-											ENTITY_PROPERTY =>
-												CONTENT_PROPERTY_AUTHOR,
-											
-											ENTITY_VALUE => $owner_name
-										),
-
-										array(
-											ENTITY_CLASS =>
-												ENTITY_ELEMENT."_".STYLE_CLASS_TITLE." ".
-													ENTITY_ELEMENT."_".ENTITY_PANEL,
-
-											ENTITY_CLASS."_".ENTITY_PROPERTY =>
-												ENTITY_PROPERTY."_".STYLE_CLASS_TITLE,
-											
-											ENTITY_CLASS."_".ENTITY_SEPARATOR =>
-												ENTITY_SEPARATOR."_".STYLE_CLASS_TITLE." ".
-													ENTITY_SEPARATOR."_".ENTITY_PANEL,
-											
-											ENTITY_CLASS."_".ENTITY_VALUE =>
-												ENTITY_VALUE."_".STYLE_CLASS_TITLE,
-											
-											ENTITY_PROPERTY =>
-												CONTENT_PROPERTY_TITLE,
-											
-											ENTITY_VALUE =>
-												$instance->getTitle()
-										),
-										array(
-											ENTITY_CLASS =>
-												ENTITY_ELEMENT."_".STYLE_CLASS_KEYWORDS." ".
-													ENTITY_ELEMENT."_".ENTITY_PANEL,
-
-											ENTITY_CLASS."_".ENTITY_PROPERTY =>
-												ENTITY_PROPERTY."_".STYLE_CLASS_KEYWORDS,
+									if ( SEFI_ALBUM_METADATA )
 	
-											ENTITY_CLASS."_".ENTITY_SEPARATOR =>
-												ENTITY_SEPARATOR."_".STYLE_CLASS_KEYWORDS." ".
-													ENTITY_SEPARATOR."_".ENTITY_PANEL,
+										// declare an array of information
+										$information = array(
+											array(
+												ENTITY_CLASS =>
+													ENTITY_ELEMENT."_".STYLE_CLASS_AUTHOR." ".
+														ENTITY_ELEMENT."_".ENTITY_PANEL,
 	
-											ENTITY_CLASS."_".ENTITY_VALUE =>
-												ENTITY_VALUE."_".STYLE_CLASS_KEYWORDS,
+												ENTITY_CLASS."_".ENTITY_PROPERTY =>
+													ENTITY_PROPERTY."_".STYLE_CLASS_AUTHOR,
+												
+												ENTITY_CLASS."_".ENTITY_SEPARATOR =>
+													ENTITY_SEPARATOR."_".STYLE_CLASS_AUTHOR." ".
+														ENTITY_SEPARATOR."_".ENTITY_PANEL,
+												
+												ENTITY_CLASS."_".ENTITY_VALUE =>
+													ENTITY_VALUE."_".STYLE_CLASS_AUTHOR,
+												
+												ENTITY_PROPERTY =>
+													CONTENT_PROPERTY_AUTHOR,
+												
+												ENTITY_VALUE => $owner_name
+											),
 	
-											ENTITY_PROPERTY =>
-												CONTENT_PROPERTY_KEYWORDS,
+											array(
+												ENTITY_CLASS =>
+													ENTITY_ELEMENT."_".STYLE_CLASS_TITLE." ".
+														ENTITY_ELEMENT."_".ENTITY_PANEL,
 	
-											ENTITY_VALUE =>
-												$_keywords_set
-										)										
-									);
+												ENTITY_CLASS."_".ENTITY_PROPERTY =>
+													ENTITY_PROPERTY."_".STYLE_CLASS_TITLE,
+												
+												ENTITY_CLASS."_".ENTITY_SEPARATOR =>
+													ENTITY_SEPARATOR."_".STYLE_CLASS_TITLE." ".
+														ENTITY_SEPARATOR."_".ENTITY_PANEL,
+												
+												ENTITY_CLASS."_".ENTITY_VALUE =>
+													ENTITY_VALUE."_".STYLE_CLASS_TITLE,
+												
+												ENTITY_PROPERTY =>
+													CONTENT_PROPERTY_TITLE,
+												
+												ENTITY_VALUE =>
+													$instance->getTitle()
+											),
+											array(
+												ENTITY_CLASS =>
+													ENTITY_ELEMENT."_".STYLE_CLASS_KEYWORDS." ".
+														ENTITY_ELEMENT."_".ENTITY_PANEL,
+	
+												ENTITY_CLASS."_".ENTITY_PROPERTY =>
+													ENTITY_PROPERTY."_".STYLE_CLASS_KEYWORDS,
+		
+												ENTITY_CLASS."_".ENTITY_SEPARATOR =>
+													ENTITY_SEPARATOR."_".STYLE_CLASS_KEYWORDS." ".
+														ENTITY_SEPARATOR."_".ENTITY_PANEL,
+		
+												ENTITY_CLASS."_".ENTITY_VALUE =>
+													ENTITY_VALUE."_".STYLE_CLASS_KEYWORDS,
+		
+												ENTITY_PROPERTY =>
+													CONTENT_PROPERTY_KEYWORDS,
+		
+												ENTITY_VALUE =>
+													$_keywords_set
+											)										
+										);
 
 									if (
 										isset(
@@ -7079,25 +7124,28 @@ class View_Builder extends User_Interface
 										)
 									)
 									{
-										// declare an array of affordances
-										$affordances = array_merge(
-											$affordances,
-											array(
+										if ( SEFI_ALBUM_FLAGS )
+
+											// declare an array of affordances
+											$affordances = array_merge(
+												$affordances,
 												array(
-													ENTITY_LABEL => CONTENT_AFFORDANCE_REMOVE." ".CONTENT_PROPERTY_SELF_REFERENCE,
-													ENTITY_LINK => URI_AFFORDANCE_REMOVE."-".$identifier,
-													HTML_ATTRIBUTE_CLASS =>
-														JAVASCRIPT_IDENTIFIER_AFFORDANCE_REMOVE.' '.STYLE_CLASS_LINK,
-													HTML_ATTRIBUTE_ID => JAVASCRIPT_IDENTIFIER_AFFORDANCE_REMOVE."-".$identifier,
-													PROPERTY_ACCESS_KEY => ACCESS_KEY_AFFORDANCE_REMOVE,
-													PROPERTY_ACCESS_TYPE => array(
-														ACCESS_CONTROL_LIST_GROUP => GROUP_ADMINISTRATOR
+													array(
+														ENTITY_LABEL => CONTENT_AFFORDANCE_REMOVE." ".CONTENT_PROPERTY_SELF_REFERENCE,
+														ENTITY_LINK => URI_AFFORDANCE_REMOVE."-".$identifier,
+														HTML_ATTRIBUTE_CLASS =>
+															JAVASCRIPT_IDENTIFIER_AFFORDANCE_REMOVE.' '.STYLE_CLASS_LINK,
+														HTML_ATTRIBUTE_ID => JAVASCRIPT_IDENTIFIER_AFFORDANCE_REMOVE."-".$identifier,
+														PROPERTY_ACCESS_KEY => ACCESS_KEY_AFFORDANCE_REMOVE,
+														PROPERTY_ACCESS_TYPE => array(
+															ACCESS_CONTROL_LIST_GROUP => GROUP_ADMINISTRATOR
+														)
 													)
 												)
-											)
-										);
+											);
 	
 										if (
+											SEFI_ALBUM_METADATA && 
 											'0000-00-00'
 												!= substr(
 													$instance->getLastModificationDate(), 0, 10
@@ -7118,6 +7166,7 @@ class View_Builder extends User_Interface
 											);
 	
 										if (
+											SEFI_ALBUM_METADATA && 
 											'0000-00-00'
 												!= substr(
 													$instance->getCreationDate(),
@@ -7172,11 +7221,17 @@ class View_Builder extends User_Interface
 									// assign a thread
 									$template_engine->assign(
 										PLACEHOLDER_FORM_INSIGHT,
-										$class_insight::getForm(
-											$class_entity::getByName( CLASS_PHOTOGRAPH )
-												->{PROPERTY_ID},
-											$identifier,
-											INSIGHT_TYPE_PARENT_ROOT
+										(
+												SEFI_ALBUM_COMMENTS
+											?
+												$class_insight::getForm(
+													$class_entity::getByName( CLASS_PHOTOGRAPH )
+														->{PROPERTY_ID},
+													$identifier,
+													INSIGHT_TYPE_PARENT_ROOT
+												)
+											:
+												''
 										)
 									);
 	
@@ -8596,7 +8651,7 @@ class View_Builder extends User_Interface
     * @param	mixed	$thread	thread
     * @return   string	thread
     */
-	public static function renderThread($thread)
+	public static function renderThread( $thread )
 	{
 		global $class_application;
 
@@ -8644,8 +8699,8 @@ class View_Builder extends User_Interface
 					serialize(
 						array(
 							$thread,
-							$class_member::getIdentifier(TRUE, FALSE),
-							$class_member::getIdentifier(FALSE, FALSE)
+							$class_member::getIdentifier( TRUE, FALSE ),
+							$class_member::getIdentifier( FALSE, FALSE )
 						)
 					)
 				);
@@ -8829,9 +8884,12 @@ class View_Builder extends User_Interface
 							$threads[] = $_thread;
 						}
 					}
-			
+					
 					// assign the threads to their placeholder
-					$template_engine->assign( PLACEHOLDER_THREADS, $threads );
+					$template_engine->assign(
+						PLACEHOLDER_THREADS,
+						$threads
+					);
 				}
 
 				// fetch a view

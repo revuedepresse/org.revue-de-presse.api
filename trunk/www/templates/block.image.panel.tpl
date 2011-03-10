@@ -1,4 +1,4 @@
-<div class='image' id='{$internal_anchors.prefix}{$internal_anchors.current}'>
+<div class='image'{if $internal_anchors and $internal_anchors.current} id='{$internal_anchors.prefix}{$internal_anchors.current}'{/if}>
     {$resource}
     <div class='panel_container'>
         <div class='panels'>
@@ -33,6 +33,7 @@
                 {/foreach}
             </ul>
             {/if}
+            {if $links}
             <ul class='action_panel navigation'>
                 <li>
                     <a
@@ -62,6 +63,7 @@
                        href='{$internal_anchors.top}'>{$links.top}</a>
                 </li>
             </ul>
+            {/if}
             {if $information|@count neq null}
             <ul class='information_panel'>
                 {foreach from=$information key=index item=data}

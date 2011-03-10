@@ -438,11 +438,15 @@ class Diaporama extends Photo
     *
     * @param    integer     $author_id          author identifier
     * @param    boolean     $accept_avatars     accept avatars
+    * @param    mixed       $conditions         conditions
+    * @param    mixed       &$calculated_rows   rows calculated
     * @return	array	    containing Photo instances
     */	 
     public static function loadPhotosByAuthorId(
         $author_id,
-        $accept_avatars = TRUE
+        $accept_avatars = TRUE,
+        $conditions = NULL,
+        &$calculated_rows = NULL
     )
     {
 		global $class_application, $verbose_mode;
@@ -455,7 +459,9 @@ class Diaporama extends Photo
 
         $photographs_results = $class_data_fetcher::fetchPhotographs(
             $author_id,
-            $accept_avatars
+            $accept_avatars,
+            $conditions,
+            $calculated_rows
         );
 
         try {

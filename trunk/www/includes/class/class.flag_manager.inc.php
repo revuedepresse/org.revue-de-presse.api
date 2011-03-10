@@ -1,4 +1,23 @@
 <?php
+/**
+*************
+* Changes log
+*
+*************
+* 2011 03 08
+*************
+* 
+* Implement items sharing with flags
+* 
+* methods affected ::
+*
+* EXECUTOR :: perform
+* FLAG MANAGER :: flagAsShared
+* SERIALIZER :: flagAsShared
+* 
+* (revision 590)
+*
+*/
 
 /**
 * Flag manager class
@@ -9,12 +28,31 @@
 class Flag_Manager extends Flag
 {
 	/**
-	 * Get flags
-	 *
-	 * @param	array	$properties	properties
-	 * @param	integer	$limit		limit
-	 * @return	object	flag
-	 */
+	* Set a sharing flag
+	*
+	* @param	mixed	$properties 	properties
+	* @return	mixed
+	*/
+	public static function flagAsShared( $properties )
+	{
+		global $class_application, $verbose_mode;
+
+		$class_serializer = $class_application::getSerializerClass();
+
+		if ( ! is_array( $properties ) || ! count( $properties ) )
+
+			throw new Exception( EXCEPTION_INVALID_ARGUMENT );
+
+		return $class_serializer::flagAsShared( $properties );
+	}
+
+	/**
+	* Get flags
+	*
+	* @param	array	$properties	properties
+	* @param	integer	$limit		limit
+	* @return	object	flag
+	*/
 	public static function getFlags( $properties, $limit = 0 )
 	{		
 		$class_db = self::getDbClass();
@@ -283,7 +321,6 @@ class Flag_Manager extends Flag
 	public static function getFlagsByOwner($owner_identifier)
 	{
 		// returned flags
-		return self::getFlags(array('usr_id' => $owner_identifier));
+		return self::getFlags( array( 'usr_id' => $owner_identifier ) );
 	}
 }
-?>

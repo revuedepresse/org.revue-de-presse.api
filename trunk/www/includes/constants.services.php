@@ -38,16 +38,26 @@ declareConstantsBatch(
 		'SERVICE_TWITTER' =>'twitter',
 
 		// Services configuration
-		
+
+		'SETTING_ACTIVE' => 'active',		
+		'SETTING_ALBUM_FLAGS' => 'album_flags',
+		'SETTING_ALBUM_COMMENTS' => 'album_comments',
+		'SETTING_ALBUM_METADATA' => 'album_metadata',
+		'SETTING_ALBUM_NAVIGATION' => 'album_navigation',
 		'SETTING_API_KEY' => 'api_key',
+		'SETTING_ARTICLES_BASE' => 'articles_base',
 		'SETTING_ASSERTION' => 'assertion',
 		'SETTING_BASE_URL' => 'base_url',
 		'SETTING_CACHING' => 'caching',
 		'SETTING_CALLBACK' => 'callback',
+		'SETTING_COMMENTS' => 'comments',
 		'SETTING_DATABASE' => 'database',
 		'SETTING_EXPIRATION_TIME' => 'expiration_time',
 		'SETTING_FLAGS' => 'flags',
+		'SETTING_FLUSH_CACHE_MENU' => 'flush_cache_menu',
 		'SETTING_HOST' => 'host',
+		'SETTING_MAXIMUM_LONG_LENGTH_AVATAR' => 'maximum_long_length_photograph',
+		'SETTING_MAXIMUM_LONG_LENGTH_PHOTOGRAPH' => 'maximum_long_length_avatar',
 		'SETTING_MODE' => 'mode',
 		'SETTING_PASSWORD' => 'password',
 		'SETTING_PORT' => 'port',
@@ -175,10 +185,26 @@ declareConstantsBatch(
 
 		// Memcached
 
+		'MEMCACHED_ACTIVE' => (
+				$class_application::getServiceProperty(
+					SETTING_ACTIVE, SERVICE_MEMCACHED
+				)
+			),
+
 		'MEMCACHED_EXPIRATION_TIME' => (
 				$class_application::getServiceProperty(
 					SETTING_EXPIRATION_TIME, SERVICE_MEMCACHED
 				)
+			),
+
+		'MEMCACHED_FLUSH_CACHE_MENU' => (
+					$class_application::getServiceProperty(
+						SETTING_FLUSH_CACHE_MENU, SERVICE_MEMCACHED
+					)
+				?
+					TRUE
+				:
+					FALSE
 			),
 
 		'MEMCACHED_HOST' => (
@@ -209,11 +235,67 @@ declareConstantsBatch(
 
 		// Generic
 
+		'SEFI_ALBUM_COMMENTS' => 
+				$class_application::getServiceProperty(
+					SETTING_ALBUM_COMMENTS, SERVICE_SEFI
+				)
+			?
+				TRUE
+			:
+				FALSE
+		,
+		'SEFI_ALBUM_FLAGS' => 
+				$class_application::getServiceProperty(
+					SETTING_ALBUM_FLAGS, SERVICE_SEFI
+				)
+			?
+				TRUE
+			:
+				FALSE
+		,
+		'SEFI_ALBUM_MAXIMUM_LONG_LENGTH_PHOTOGRAPH' => 
+			$class_application::getServiceProperty(
+				SETTING_MAXIMUM_LONG_LENGTH_PHOTOGRAPH, SERVICE_SEFI
+			)
+		,		
+		'SEFI_ALBUM_METADATA' => 
+				$class_application::getServiceProperty(
+					SETTING_ALBUM_METADATA, SERVICE_SEFI
+				)
+			?
+				TRUE
+			:
+				FALSE
+		,
+		'SEFI_ALBUM_NAVIGATION' => 
+				$class_application::getServiceProperty(
+					SETTING_ALBUM_NAVIGATION, SERVICE_SEFI
+				)
+			?
+				TRUE
+			:
+				FALSE
+		,
+		'SEFI_ARTICLES_BASE' => 
+				$class_application::getServiceProperty(
+					SETTING_ARTICLES_BASE, SERVICE_SEFI
+				)
+			?
+				TRUE
+			:
+				FALSE
+		,		
 		'SEFI_BASE_URL' => 
 			$class_application::getServiceProperty(
 				SETTING_BASE_URL, SERVICE_SEFI
-			),
-		
+			)
+		,
+		'SEFI_USER_PROFILE_MAXIMUM_LONG_LENGTH_AVATAR' => 
+			$class_application::getServiceProperty(
+				SETTING_MAXIMUM_LONG_LENGTH_AVATAR, SERVICE_SEFI
+			)
+		,
+
 		// Unit testing
 
 		'UNIT_TESTING_MODE_STATUS' => 

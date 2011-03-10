@@ -42,7 +42,13 @@ class DB extends Database_Connection
     * @param	mixed		$checksum	checksum
     * @return 	object
     */
-	public static function checkResults($query, $results, $link, $pdo = FALSE, $checksum = NULL)
+	public static function checkResults(
+		$query,
+		$results,
+		$link,
+		$pdo = FALSE,
+		$checksum = NULL
+	)
 	{
 		$class_dumper = CLASS_DUMPER;
 
@@ -53,11 +59,13 @@ class DB extends Database_Connection
 			strpos(strtolower($query), 'replace') !== FALSE
 		)
 		{
-			if (!$pdo_active && ( $results === TRUE ))
+			if ( ! $pdo_active && ( $results === TRUE ) )
 
 				$results = $link->insert_id;
 
-			else if ($pdo_active && is_object($results) && get_class($results) == CLASS_PDO)
+			else if ( $pdo_active && is_object( $results ) &&
+				get_class( $results ) == CLASS_PDO
+			)
 
 				$results = $link->lastInsertId();
 		}
@@ -80,8 +88,8 @@ class DB extends Database_Connection
 			}
 			else if (
 				$pdo_active &&
-				!is_object($results) &&
-				get_class($link) == CLASS_PDO
+				! is_object( $results ) &&
+				get_class( $link ) == CLASS_PDO
 			)
 			{
 				$error_description = $link->errorInfo();
@@ -264,7 +272,11 @@ class DB extends Database_Connection
     * @param	mixed		$checksum	checksum
     * @return 	array 		result
     */	
-    public static function query($query, $pdo = FALSE, $checksum = NULL)
+    public static function query(
+		$query,
+		$pdo = FALSE,
+		$checksum = NULL
+	)
 	{
 		$class_dumper = CLASS_DUMPER;
 
@@ -298,10 +310,16 @@ class DB extends Database_Connection
 		}
 
 		// execute a query
-		$results = $link->query($query);
+		$results = $link->query( $query );
 
 		try {
-			$callback_parameters = self::checkResults($query, $results, $link, $pdo, $checksum);
+			$callback_parameters = self::checkResults(
+				$query,
+				$results,
+				$link,
+				$pdo,
+				$checksum
+			);
 		}
 		catch (Exception $exception)
 		{
