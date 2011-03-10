@@ -302,7 +302,7 @@ declareConstantsBatch(
 				SETTING_BASE_URL, SERVICE_SEFI
 			)
 		,
-		'SEFI_FORM_FEEDBACK' => 
+		'SEFI_FORM_SEND_FEEDBACK' => 
 				$class_application::getServiceProperty(
 					SETTING_FORM_FEEDBACK, SERVICE_SEFI
 				)
