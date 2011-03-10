@@ -2119,8 +2119,34 @@ namespace sefi
 				$width = $_GET[GET_WIDTH];
 
 			if ( ! isset( $height ) || ! isset( $width ) )
+			{
+				$exception = new \Exception( EXCEPTION_INVALID_ARGUMENT );
+				
+				$context_http = array(
+					PROTOCOL_HTTP_METHOD_GET => $_GET,
+					PROTOCOL_HTTP_METHOD_POST => $_POST
+				);
 			
-				throw new \Exception( EXCEPTION_INVALID_ARGUMENT );
+				$context = array(
+					PROPERTY_CONTEXT => print_r( $context_http, TRUE ),
+					PROPERTY_DESCRIPTION => sprintf(
+						EVENT_DESCRIPTION_EXCEPTION_CAUGHT,
+						$exception->getCode(),
+						$exception->getFile(),
+						$exception->getLine(),
+						$exception->getMessage(),
+						$exception->getTraceAsString()
+					),
+					PROPERTY_EXCEPTION => $exception,
+					PROPERTY_TYPE => EVENT_TYPE_EXCEPTION_CAUGHT
+				);
+	
+				$class_exception_handler::logContext( $context );
+				
+				$height =
+				
+				$width = DIMENSION_MAXIMUM_AVATAR_LONG_EDGE;
+			}
 
 			// save the original height
 			$_height = $height;
@@ -2440,7 +2466,7 @@ namespace sefi
 										$maximum_long_edge."_".
 											$proportions."/".
 												$identifier,
-									100
+									IMAGE_JPEG_QUALITY
 								);
 						}
 						else

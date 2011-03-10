@@ -155,5 +155,3 @@ assignConstant('CLASS_WEAVER', 'Weaver');
 assignConstant('CLASS_YAML', 'Yaml');
 assignConstant('CLASS_ZEND_MAIL', 'Zend_Mail');
 assignConstant('CLASS_ZIP_ARCHIVE', 'ZipArchive');
-
-?>
