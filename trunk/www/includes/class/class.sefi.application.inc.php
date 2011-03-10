@@ -2999,9 +2999,9 @@ namespace sefi
 	
 								unset( $_SESSION[STORE_DIALOG] );
 							}
-							else
-							
-								self::jumpTo( URI_PAGE_WONDERING );
+							//else
+							//
+							//	self::jumpTo( URI_PAGE_WONDERING );
 						}
 						else 
 
