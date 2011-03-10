@@ -7795,19 +7795,18 @@ class View_Builder extends User_Interface
 
 		$template_name = TPL_BLOCK_FOOTER;
 
-		$footer = $class_application::beautifySource(
-			$template_engine->fetch( $template_name )
-		);
+		if ( SEFI_FORM_SEND_FEEDBACK )
+
+			$footer = $class_application::beautifySource(
+				$template_engine->fetch( $template_name )
+			);
+		else
+		
+			$footer = '';
 
 		if (
-			SEFI_FORM_FEEDBACK &&
-			(
-				FALSE
-					!== strpos(
-						$_SERVER['REQUEST_URI'],
-						AFFORDANCE_SEND_FEEDBACK
-					)
-			)
+			SEFI_FORM_SEND_FEEDBACK &&
+			FALSE !== strpos( $_SERVER['REQUEST_URI'],  AFFORDANCE_SEND_FEEDBACK )
 		)
 
 			$footer = $class_application::getFormView( AFFORDANCE_SEND_FEEDBACK );
