@@ -302,11 +302,30 @@ class Memento extends Serializer
 		if (
 			MEMCACHED_ACTIVE ||
 			(
-				FALSE !==
-					strpos(
-						$_SERVER['REQUEST_URI'],
-						PREFIX_ROOT.DIR_UNIT_TESTING
-					)
+				isset( $_SERVER['REQUEST_URI'] ) &&
+				(
+					FALSE !==
+						strpos(
+							$_SERVER['REQUEST_URI'],
+							PREFIX_ROOT.DIR_UNIT_TESTING
+						)
+				) ||
+				isset( $_SERVER['REDIRECT_URL'] ) &&
+				(
+					FALSE !==
+						strpos(
+							$_SERVER['REQUEST_URI'],
+							PREFIX_ROOT.DIR_UNIT_TESTING
+						)
+				) ||
+				isset( $_SERVER['PHP_SELF'] ) &&
+				(
+					FALSE !==
+						strpos(
+							$_SERVER['PHP_SELF'],
+							PREFIX_ROOT.DIR_UNIT_TESTING
+						)					
+				)
 			)
 		)
 		
