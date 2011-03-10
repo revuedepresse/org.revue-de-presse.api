@@ -4,6 +4,19 @@
 * Changes log
 *
 *************
+* 2011 03 10
+*************
+*
+* Revise the message hash calculation
+*
+* method affected ::
+*
+* MESSAGE :: import
+*
+* (branch 0.1 :: revision :: 597)
+* (trunk :: revision :: 156)
+* 
+*************
 * 2011 03 08
 *************
 * 
@@ -212,6 +225,12 @@ class Message extends Header
 								);
 							else
 							{
+								$keywords =
+									$label . ' ' .
+									SEPARATOR_LABEL_SUBJECT . ' ' .
+									$subject
+								;
+
 								/**
 								*
 								* Save headers and their corresponding messages
@@ -223,12 +242,26 @@ class Message extends Header
 									$uid,
 									NULL,
 									NULL,
-									$label . ' ' . SEPARATOR_LABEL_SUBJECT . ' ' . $subject 
+									$keywords
 								);
 					
 								$message = self::make(
 									$body,
-									$header->{PROPERTY_ID}
+									$header->{PROPERTY_ID},
+									NULL,
+									NULL,
+									
+									// message hash
+
+									md5(
+										$uid .
+											SEPARATOR_HASH_WORDS .
+												$keywords .
+													SEPARATOR_HASH_WORDS .
+														''  .
+															SEPARATOR_HASH_WORDS .
+																$body
+									)
 								);
 							}
 						}
@@ -288,12 +321,9 @@ class Message extends Header
 		if ( ! isset( $arguments[3] ) )
 
 			$hash = md5(
-				$header_id .
-					SEPARATOR_LABEL_SUBJECT .
-						( is_null( $body_text ) ? '' : $body_text ) .
-							SEPARATOR_LABEL_SUBJECT .
-								$body_html .
-									SEPARATOR_LABEL_SUBJECT 
+				( is_null( $body_text ) ? '' : $body_text ) .
+				SEPARATOR_HASH_WORDS .
+				$body_html 
 			);
 		else
 
