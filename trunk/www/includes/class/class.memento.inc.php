@@ -299,7 +299,16 @@ class Memento extends Serializer
 	{
 		$memory_cache = self::openConnection();
 		
-		if ( MEMCACHED_ACTIVE )
+		if (
+			MEMCACHED_ACTIVE ||
+			(
+				FALSE !==
+					strpos(
+						$_SERVER['REQUEST_URI'],
+						PREFIX_ROOT.DIR_UNIT_TESTING
+					)
+			)
+		)
 		
 			$data = $memory_cache->get( $key, $flags );
 		else
