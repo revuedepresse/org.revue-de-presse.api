@@ -4,6 +4,19 @@
 * Changes log
 *
 *************
+* 2011 03 10
+*************
+* 
+* Revise header hash calculation
+*
+* method affected ::
+*
+* HEADER :: make
+*
+* (branch 0.1 :: revision :: 597)
+* (trunk :: revision :: 156)
+* 
+*************
 * 2011 03 05
 *************
 * 
@@ -90,12 +103,23 @@ class Header extends Api
 
 			$keywords = $arguments[4];
 
+		if ( ! isset( $arguments[5] ) )
+
+			$hash = md5(
+				$value . SEPARATOR_HASH_WORDS .
+					( is_null( $keywords ) ? '' : $keywords ) 
+			);
+
+		else if ( strlen( $arguments[5] ) )
+
+			$hash = $arguments[5];
+		else
+		
+			throw new Exception( EXCEPTION_INVALID_ARGUMENT );
+			
 		$properties = array(
 			PROPERTY_VALUE => $value,
-			PROPERTY_HASH => md5(
-				$value . SEPARATOR_LABEL_SUBJECT .
-					( is_null( $keywords ) ? '' : $keywords ) 
-			)
+			PROPERTY_HASH => $hash
 		);
 
 		if ( ! is_null( $uid ) )
