@@ -56,7 +56,7 @@ declareConstantsBatch(
 		'SETTING_FLAGS' => 'flags',
 		'SETTING_FLUSH_CACHE_FORM' => 'flush_cache_form',
 		'SETTING_FLUSH_CACHE_MENU' => 'flush_cache_menu',
-		'SETTING_FORM_FEEDBACK' => 'form_feedback',
+		'SETTING_FORM_FEEDBACK' => 'form_send_feedback',
 		'SETTING_HOST' => 'host',
 		'SETTING_MAXIMUM_LONG_LENGTH_AVATAR' => 'maximum_long_length_photograph',
 		'SETTING_MAXIMUM_LONG_LENGTH_PHOTOGRAPH' => 'maximum_long_length_avatar',
