@@ -6,7 +6,7 @@ if ( ! function_exists( 'assignConstant' ) && defined( 'ENTITY_FUNCTION' ) )
 
 		$exception = sprintf( EXCEPTION_MISSING_ENTITY, ENTITY_FUNCTION );
 
-if ( ! defined('CLASS_APPLICATION' ) &&  defined( 'ENTITY_CLASS' ) )
+if ( ! defined( 'CLASS_APPLICATION' ) &&  defined( 'ENTITY_CLASS' ) )
 
 		$exception = sprintf( EXCEPTION_MISSING_ENTITY, ENTITY_CLASS );
 
@@ -30,8 +30,10 @@ declareConstantsBatch(
 		'SERVICE_DEPLOYMENT' => 'deployment',
 		'SERVICE_GMAIL' => 'gmail',
 		'SERVICE_IMAP' => 'imap',
+		'SERVICE_MEMCACHED' => 'memcached',
 		'SERVICE_READITLATER' => 'readitlater',
 		'SERVICE_MYSQL' => 'mysql',
+		'SERVICE_SEFI' => 'sefi',
 		'SERVICE_SMTP' => 'smtp',
 		'SERVICE_TWITTER' =>'twitter',
 
@@ -39,9 +41,11 @@ declareConstantsBatch(
 		
 		'SETTING_API_KEY' => 'api_key',
 		'SETTING_ASSERTION' => 'assertion',
+		'SETTING_BASE_URL' => 'base_url',
 		'SETTING_CACHING' => 'caching',
 		'SETTING_CALLBACK' => 'callback',
 		'SETTING_DATABASE' => 'database',
+		'SETTING_EXPIRATION_TIME' => 'expiration_time',
 		'SETTING_FLAGS' => 'flags',
 		'SETTING_HOST' => 'host',
 		'SETTING_MODE' => 'mode',
@@ -169,6 +173,25 @@ declareConstantsBatch(
 				SETTING_FLAGS, SERVICE_IMAP
 			),
 
+		// Memcached
+
+		'MEMCACHED_EXPIRATION_TIME' => (
+				$class_application::getServiceProperty(
+					SETTING_EXPIRATION_TIME, SERVICE_MEMCACHED
+				)
+			),
+
+		'MEMCACHED_HOST' => (
+				$class_application::getServiceProperty(
+					SETTING_HOST, SERVICE_MEMCACHED
+				)
+			),
+		'MEMCACHED_PORT' => (
+				$class_application::getServiceProperty(
+					SETTING_PORT, SERVICE_MEMCACHED
+				)
+			),
+		
 		// ReadItLater
 
 		'READITLATER_API_KEY' => 
@@ -184,6 +207,13 @@ declareConstantsBatch(
 				SETTING_PASSWORD, SERVICE_READITLATER
 			),
 
+		// Generic
+
+		'SEFI_BASE_URL' => 
+			$class_application::getServiceProperty(
+				SETTING_BASE_URL, SERVICE_SEFI
+			),
+		
 		// Unit testing
 
 		'UNIT_TESTING_MODE_STATUS' => 

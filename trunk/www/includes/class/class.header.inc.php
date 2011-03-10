@@ -106,6 +106,7 @@ class Header extends Api
 		if ( ! isset( $arguments[5] ) )
 
 			$hash = md5(
+				$uid . SEPARATOR_HASH_WORDS .
 				$value . SEPARATOR_HASH_WORDS .
 					( is_null( $keywords ) ? '' : $keywords ) 
 			);

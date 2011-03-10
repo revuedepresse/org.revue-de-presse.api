@@ -246,9 +246,17 @@ class Message extends Header
 								);
 					
 								$message = self::make(
+									
+									// HTML body
+
 									$body,
+
+									// Header id
+
 									$header->{PROPERTY_ID},
-									NULL,
+
+									// message type
+
 									NULL,
 									
 									// message hash
