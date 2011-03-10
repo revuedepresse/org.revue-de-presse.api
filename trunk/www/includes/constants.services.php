@@ -303,9 +303,13 @@ declareConstantsBatch(
 			)
 		,
 		'SEFI_FORM_FEEDBACK' => 
-			$class_application::getServiceProperty(
-				SETTING_FORM_FEEDBACK, SERVICE_SEFI
-			)
+				$class_application::getServiceProperty(
+					SETTING_FORM_FEEDBACK, SERVICE_SEFI
+				)
+			?
+				TRUE
+			:
+				FALSE
 		,
 		'SEFI_USER_PROFILE_MAXIMUM_LONG_LENGTH_AVATAR' => 
 			$class_application::getServiceProperty(
