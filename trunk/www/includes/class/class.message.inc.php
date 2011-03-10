@@ -195,24 +195,42 @@ class Message extends Header
 					{
 						if ( $index > $max_uid_index )
 						{
-							/**
-							*
-							* Save headers and their corresponding messages
-							*
-							*/
+							$header_value = imap_fetchheader( $resource, $uid, FT_UID );
+	
+							$body = imap_body( $resource, $uid, FT_UID );
+							
+							if (
+								! strlen( trim( $body ) ) ||
+								! strlen( trim( $header ) )
+							)
+							
+								throw new Exception(
+									sprintf(
+										EXCEPTION_INVALID_ENTITY,
+										ENTITY_MESSAGE
+									)
+								);
+							else
+							{
+								/**
+								*
+								* Save headers and their corresponding messages
+								*
+								*/
+						
+								$header = $class_header::make(
+									$header_value,
+									$uid,
+									NULL,
+									NULL,
+									$label . ' ' . SEPARATOR_LABEL_SUBJECT . ' ' . $subject 
+								);
 					
-							$header = $class_header::make(
-								$header_value = imap_fetchheader( $resource, $uid, FT_UID ),
-								$uid,
-								NULL,
-								NULL,
-								$label . ' ' . SEPARATOR_LABEL_SUBJECT . ' ' . $subject 
-							);
-				
-							$message = self::make(
-								$body = imap_body( $resource, $uid, FT_UID ),
-								$header->{PROPERTY_ID}
-							);
+								$message = self::make(
+									$body,
+									$header->{PROPERTY_ID}
+								);
+							}
 						}
 					}
 				}
