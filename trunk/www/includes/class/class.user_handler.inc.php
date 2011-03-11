@@ -101,8 +101,10 @@ class User_Handler extends Administrator
 
 				if (
 					is_object( $form_configuration ) &&
-					isset( $form_configuration->privilege_level ) &&
-					is_null( $form_configuration->privilege_level )
+					(
+						! isset( $form_configuration->privilege_level ) ||
+						is_null( $form_configuration->privilege_level )
+					)
 				)
 				
 					$authorization_granted = TRUE;
