@@ -2339,12 +2339,6 @@ class Data_Fetcher extends Database
 						frm_identifier LIKE "'.$identifier.'"
 				';
 
-				$class_dumper::log(
-					__METHOD__,
-					array( $select_form ),
-					TRUE
-				);				
-
 				$results_form = $class_db::query( $select_form );
 
 				if ( is_object( $results_form ) && $results_form->num_rows )
