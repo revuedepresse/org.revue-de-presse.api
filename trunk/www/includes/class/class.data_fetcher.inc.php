@@ -2866,10 +2866,18 @@ class Data_Fetcher extends Database
 
 		$class_memento = $class_application::getMementoClass();
 
-		$memento_key = md5( serialize( func_get_args() ) );
+		$memento_key = md5(
+			serialize(
+				array_merge(
+					func_get_args(),
+					array( SEFI_ARTICLES_BASE )
+				)
+			)
+		);
 
 		if (
 			MEMCACHED_FLUSH_CACHE_MENU ||
+			SEFI_ARTICLES_BASE ||
 			(
 				FALSE ===
 					(
@@ -3003,7 +3011,7 @@ class Data_Fetcher extends Database
 			$class_memento::storeData(
 				serialize( $menu ),
 				$memento_key,
-				MEMCACHED_FLUSH_CACHE_MENU
+				MEMCACHED_FLUSH_CACHE_MENU || SEFI_ARTICLES_BASE
 			);
 		}
 		else
