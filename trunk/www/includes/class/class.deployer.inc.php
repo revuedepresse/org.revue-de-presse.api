@@ -127,44 +127,48 @@ class Deployer extends I18n
 			if (
 				isset( $_SERVER['REQUEST_URI'] ) &&
 				(
-					strpos(
-						$_SERVER['REQUEST_URI'],
-						PREFIX_ROOT.DIR_API
-					) !== FALSE
-					||					
-					strpos(
-						$_SERVER['REQUEST_URI'],
-						PREFIX_ROOT.DIR_ROUTINES
-					) !== FALSE
-					||
-					strpos(
-						$_SERVER['REQUEST_URI'],
-						PREFIX_ROOT.DIR_UNIT_TESTING
-					) !== FALSE &&
 					(
-						$_SERVER['REQUEST_URI'] !==
-						URI_UNIT_TESTING_DESTROY_SESSION
+						strpos(
+							$_SERVER['REQUEST_URI'],
+							PREFIX_ROOT.DIR_API
+						) !== FALSE
+					) || (
+						strpos(
+							$_SERVER['REQUEST_URI'],
+							PREFIX_ROOT.DIR_ROUTINES
+						) !== FALSE
+					) ||
+					(
+						(
+							strpos(
+								$_SERVER['REQUEST_URI'],
+								PREFIX_ROOT.DIR_UNIT_TESTING
+							) !== FALSE 
+						) && (
+							$_SERVER['REQUEST_URI'] !==
+							URI_UNIT_TESTING_DESTROY_SESSION
+						)
+					) || (
+						strpos(
+							$_SERVER['REQUEST_URI'],
+							PREFIX_ROOT.DIR_OBSERVATORY
+						) !== FALSE
+					) || (
+						strpos(
+							$_SERVER['REQUEST_URI'],
+							PREFIX_ROOT.DIR_TEMPLATES
+						) !== FALSE
+					) || (
+						strpos(
+							$_SERVER['REQUEST_URI'],
+							PREFIX_ROOT.DIR_TEMPLATES_C
+						) !== FALSE
 					)
-					||
-					strpos(
-						$_SERVER['REQUEST_URI'],
-						PREFIX_ROOT.DIR_OBSERVATORY
-					) !== FALSE
-					||							
-					strpos(
-						$_SERVER['REQUEST_URI'],
-						PREFIX_ROOT.DIR_TEMPLATES
-					) !== FALSE
-					||
-					strpos(
-						$_SERVER['REQUEST_URI'],
-						PREFIX_ROOT.DIR_TEMPLATES_C
-					) !== FALSE
 				)
 			)
 			{
 				$class_user_handler = CLASS_USER_HANDLER;
-				
+
 				if ( ! $class_user_handler::loggedIn( TRUE ) )
 
 					$class_application::jumpTo( PREFIX_ROOT, 301 );

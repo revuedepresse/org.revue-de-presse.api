@@ -7,6 +7,19 @@
 * 2011 03 10
 *************
 *
+* Bypass empty messages
+*
+* method affect ::
+*
+* MESSAGE :: import
+*
+* (branch 0.1 :: revision :: 620)
+* (trunk :: revision :: 184)
+* 
+*************
+* 2011 03 10
+*************
+*
 * Revise the message hash calculation
 *
 * method affected ::
@@ -86,6 +99,8 @@ class Message extends Header
 		global $class_application, $verbose_mode;
 
 		$class_dumper = $class_application::getDumperClass();
+
+		$class_exception_handler = $class_application::getExceptionHandlerClass();
 
 		$class_header = $class_application::getHeaderClass();
 
@@ -216,13 +231,35 @@ class Message extends Header
 								! strlen( trim( $body ) ) ||
 								! strlen( trim( $header_value ) )
 							)
-							
-								throw new Exception(
-									sprintf(
+							{
+								$exception = new \Exception(
+									sprintf( 
 										EXCEPTION_INVALID_ENTITY,
 										ENTITY_MESSAGE
 									)
 								);
+								
+								$context_http = array(
+									PROTOCOL_HTTP_METHOD_GET => $_GET,
+									PROTOCOL_HTTP_METHOD_POST => $_POST
+								);
+							
+								$context = array(
+									PROPERTY_CONTEXT => print_r( $context_http, TRUE ),
+									PROPERTY_DESCRIPTION => sprintf(
+										EVENT_DESCRIPTION_EXCEPTION_CAUGHT,
+										$exception->getCode(),
+										$exception->getFile(),
+										$exception->getLine(),
+										$exception->getMessage(),
+										$exception->getTraceAsString()
+									),
+									PROPERTY_EXCEPTION => $exception,
+									PROPERTY_TYPE => EVENT_TYPE_EXCEPTION_CAUGHT
+								);
+					
+								$class_exception_handler::logContext( $context );								
+							}
 							else
 							{
 								$keywords =
