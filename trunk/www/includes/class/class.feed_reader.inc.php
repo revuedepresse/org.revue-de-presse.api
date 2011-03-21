@@ -313,7 +313,7 @@ class Feed_Reader extends File_Manager
 	*/
 	public static function displayTwitterFavorites($user_name)
 	{
-		$results = self::getTwitterFavorites($user_name);
+		$results = self::getTwitterFavorites( $user_name );
 
 		echo $results;
 	}
@@ -332,7 +332,7 @@ class Feed_Reader extends File_Manager
 
 		$class_dumper = $class_application::getDumperClass();
 
-		return $class_api::fetchFavoriteStatuses();
+		return $class_api::fetchFavoriteStatuses( $user_name );
 	}
 
     /**
