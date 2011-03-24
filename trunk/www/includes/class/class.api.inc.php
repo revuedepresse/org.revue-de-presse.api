@@ -314,6 +314,8 @@ class Api extends Transfer
 			DIR_LIBRARY_TWITTEROAUTH.'/'
 		;
 
+		$response = NULL;
+
 		list( $service, $service_type_default ) = self::checkService( $service );
 
 		if ( is_null(  $endpoint ) )
@@ -375,18 +377,22 @@ class Api extends Transfer
 					
 					break;
 		}
+
+		return $response;
 	}
 
 	/**
 	* Fetch favorite statuses
 	*
-	* @param	string	$user_name	user name
-	* @param	mixed	$service	service 
+	* @param	string	$user_name		user name
+	* @param	mixed	$service		service 
+	* @param	mixed	$options 		options
 	* @return	mixed
 	*/	
 	public static function fetchFavoriteStatuses(
 		$user_name = NULL,
-		$service = NULL
+		$service = NULL,
+		$options = NULL
 	)
 	{
 		global $class_application, $verbose_mode;
@@ -395,18 +401,29 @@ class Api extends Transfer
 
 		$class_user = $class_application::getUserClass();
 
+		$page_index = 1;
+
 		$user_name_default = $class_user::getUserName();
 
 		if ( is_null( $user_name ) )
 		
 			$user_name = $user_name_default;
 
+		if (
+			! is_null( $options ) &&
+			is_object( $options ) &&
+			isset( $options->{PROPERTY_PAGE} )
+		)
+
+			$page_index = $options->{PROPERTY_PAGE};
+
 		list( $service, $service_type_default ) = self::checkService( $service );
 
 		$endpoint = str_replace(
 			'{user}',
 			$user_name,
-			API_TWITTER_FAVORITES_API
+			API_TWITTER_FAVORITES_API.
+			( $page_index > 1 ? '&'.PROPERTY_PAGE.'='.$page_index : '' )
 		);
 
 		$response = self::contactEndpoint(
@@ -1222,6 +1239,15 @@ class Api extends Transfer
 		$store = &self::initializeStore( $service );
 		
 		$tuple = self::fetchTokensTuples();
+
+		$class_dumper::log(
+			__METHOD__,
+			array(
+				'[tokens tuple]',
+				$tuple
+			),
+			$verbose_mode
+		);
 
 		if ( is_array( $tuple ) && count( $tuple ) === 2 )
 		{

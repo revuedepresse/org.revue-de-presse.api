@@ -279,6 +279,12 @@ class Toolbox
 		// add space between closing bracket of single tags 
 		$source = preg_replace( '/\s*\/>/', ' />', $source );
 
+		// remove empty title tags
+		$source = preg_replace( '/<title><\/title>/', '', $source );
+
+		// restore insecable space
+		$source = str_replace( '&amp;nbsp;', '&', $source );
+		
 		return $source;        	
 	}
 	/*
@@ -1248,6 +1254,78 @@ class Toolbox
         }
 
         return array( $rewritten_file_name, $file_extension );
+	}
+
+	/*
+    * Shorten a sentence
+    *
+    * @param	string	$sentence		sentence
+    * @param	boolean	$crop 			cropping flag
+    * @param	string 	$max_characters	maximmum characters count 
+    * @param	string	$ellipsis		ellipsis symbol
+    * @param	boolean	$pad			padding flag
+    * @return	string	sentence shortened
+	*/
+	public static function shorten_sentence(
+		$sentence,
+		$crop = TRUE, 
+		$max_characters = 140,
+		$ellipsis = ' [...]',
+		$pad = TRUE
+	)
+	{
+		$_max_characters = $max_characters;
+
+		if ( ! is_null( $ellipsis ) )
+
+			$_max_characters = $max_characters - strlen( $ellipsis );
+
+		$sentence_shortened = '';
+
+		$_words = array();
+
+		$words = explode( ' ', $sentence );
+
+		array_map(
+			function( $value )
+			{
+				str_replace( "\n", '', trim( $value ) );
+			},
+			$words
+		);
+		
+		$characters_count = 0;
+
+		$remaining_characters = TRUE;
+
+		while (
+			( list( , $word ) = each( $words ) ) &&
+			( $remaining_characters )
+		)
+		{
+			$characters_count += strlen( $word ) + 1;
+
+			$remaining_characters =
+				( $characters_count < $_max_characters ) ||
+				! $crop
+			;
+
+			if ( $remaining_characters )
+
+				$_words[] = $word;
+		}
+
+		$_words[] = $word;
+
+		$sentence_shortened = implode( ' ', $_words ) . $ellipsis;
+		
+		if ( $pad && ( strlen( $sentence_shortened ) < $max_characters ) )
+
+			$sentence_shortened =
+				str_pad( $sentence_shortened, $max_characters, ' ' )
+			;
+
+		return $sentence_shortened;
 	}
 
 	/*

@@ -1,3 +1,5 @@
 <?php
 
-$class_application::route();
+if ( isset( $class_application ) )
+
+	$class_application::route();

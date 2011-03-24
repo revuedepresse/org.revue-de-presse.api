@@ -16,11 +16,14 @@ if ( typeof( prepareFocus ) == 'function' )
 $( document ).ready(
     function()
     {
-        var location_menu = null;
-        var location_jbutton = null;
+        var location_menu, location_jbutton = null;
 
-        var body = "#body";  
+        var body = "#body";
+
+        var cells_sortable = '.sortable_cells';
+
         var name = "#menu_block_right";  
+
         var regexp;
 
         var id_button_view_feedback = 'div_view_feedback';
@@ -182,6 +185,14 @@ $( document ).ready(
                     }
                 );
             }
+        }
+        
+        jcells_sortables = $( cells_sortable );
+
+        if ( jcells_sortables )
+        {
+            //jcells_sortables.sortable();
+            //jcells_sortables.disableSelection();            
         }
     }
 )

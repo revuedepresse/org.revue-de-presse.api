@@ -75,7 +75,9 @@ class Layout_Manager extends View_Builder
         $layouts = array();
 
         // get the layout type and its configuration
-        list($layout_type, $layout_configuration) = each($configuration);
+        list(
+			$layout_type, $layout_configuration
+		) = each($configuration);
         
         // switch from the configuration layout
         switch ($layout_type)
@@ -83,7 +85,10 @@ class Layout_Manager extends View_Builder
             case LAYOUT_TYPE_TABS:
 
                 // loop on the layout configuration elements
-                while (list($index, $configuration) = each($layout_configuration))
+                while (
+					list( $index, $configuration ) =
+						each( $layout_configuration )
+				)
                 {
                     // switch from the configuration type
                     switch ($configuration[PROPERTY_TYPE])
@@ -164,13 +169,68 @@ class Layout_Manager extends View_Builder
         $tabs = $template_engine->fetch( $template_name, $cache_id );
 
         // return beautified tabs
-        echo self::beautify_source($tabs);
+        echo self::beautify_source( $tabs );
 
         // clear all cache
         $template_engine->clear();
     }
 
-   /*
+	/**
+	* Get a layout
+	*
+	* @param	string	$template_name	template name
+	* @param	array	$parameters		parameters
+	* @param	integer	$cache_id 		cache id
+	* @return 	mixed	layout
+	*/
+	public static function getLayout(
+		$template_name = NULL,
+		$parameters = NULL,
+		$cache_id = NULL
+	)
+	{
+		global $class_application, $verbose_mode;
+
+		$class_dumper = $class_application::getDumperClass();
+
+		$class_template_engine = self::getTemplateEngineClass();
+
+		$layout = '';
+
+		$template_engine = new $class_template_engine;
+
+		if (
+			is_null( $template_name ) ||
+			! is_string( $template_name ) ||
+			! strlen( $template_name )
+		)
+
+			throw new Exception( EXCEPTION_INVALID_ARGUMENT );
+
+		if (
+			! is_null( $parameters ) &&
+			! is_array( $parameters )
+		)
+
+			throw new Exception( EXCEPTION_INVALID_ARGUMENT );
+
+		else if ( count( $parameters ) )
+		
+			while ( list( $name, $value ) = each( $parameters ) )
+	
+				$template_engine->assign( $name, $value );
+
+		$layout = self::beautifySource(
+			$_layout = $template_engine->fetch( $template_name, md5( time() ) )
+		);
+
+		// clear all cache
+		$template_engine->clear();
+
+		return $layout;
+	}
+
+	/*
     * Fetch tabs
     * 
     * @param	string	    $affordance		affordance
@@ -220,14 +280,14 @@ class Layout_Manager extends View_Builder
         {
             // build a layout
             $layout_tabs = self::buildLayout( $configuration );
-    
+
             // build the left block
             $layout_left = $class_view_builder::buildBlock(
                 PAGE_ANY,
                 BLOCK_LEFT,
                 $configuration
             );
-    
+
             // build the common header
             $layout_header = $class_view_builder::buildBlock(PAGE_HOMEPAGE, BLOCK_HEADER);
     
