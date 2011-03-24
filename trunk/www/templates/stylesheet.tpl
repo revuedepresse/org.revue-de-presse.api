@@ -23,7 +23,7 @@ a,
 body,
 input
 {
-    color: {/literal}#e1e1e1{literal};
+    color: #e1e1e1;
 }
 
 input,
@@ -48,6 +48,96 @@ body#body h2
     font-weight: normal;
 }
 
+body#body div._table
+{
+    margin-top: 35px;
+}
+
+    body#body div._table ul.sortable_cells li div.td
+    {
+        background-color: #fff;
+    }
+
+    body#body div._table ul.sortable_cells
+    {
+        list-style-type: none; margin: 0; padding: 0;
+    }
+
+    body#body div._table ul.sortable_cells li {
+        margin: 3px 3px 3px 0;
+        padding: 1px;
+        float: left;
+        text-align: center;
+    }
+    
+    body#body div._table ul.sortable_cells li div.td,
+    body#body div._table ul.sortable_cells li div.td a,
+    body#body div._table ul.sortable_cells li div.td a:active,
+    body#body div._table ul.sortable_cells li div.td a:hover,
+    body#body div._table ul.sortable_cells li div.td a:link,
+    body#body div._table ul.sortable_cells li div.td a:visited
+    {
+        color: #000;
+        text-align: center;        
+    }
+
+        body#body div._table div div.table ul.sortable_cells div.td
+        {
+            border: 1px #000 dotted;
+            float: left;
+            height: 90px;
+            margin: 0px;
+            padding: 0px;
+            text-align: center;        
+            {/literal}{*}white-space:pre-wrap;{/*}{literal}
+            width: 230px;            
+        }
+
+            body#body div._table div div.table ul.sortable_cells div.td p
+            {
+                float: left;
+                margin: auto;
+                margin-top: 2px;
+                width: 230px;
+            }
+
+            body#body div._table div div.table ul.sortable_cells div.td span.pre
+            {
+                float: none;
+            }
+
+            body#body div._table div div.table ul.sortable_cells div.td p,
+            body#body div._table div div.table ul.sortable_cells div.td span.pre,
+            body#body div._table div div.table ul.sortable_cells div.td span.pre a
+            {
+                font-size: 1em;
+            }
+
+{/literal}{*}
+    body#body div._table div div div div
+    {
+        background-color: #fff;
+    }
+
+    body#body div._table div div.table div.tr
+    {
+        float: left;
+        margin-top: 2px;
+        padding : 0px;
+    }
+    
+        body#body div._table div div.table div.tr div.td
+        {
+            border: 1px #000 dotted;
+            float: left;
+            height: 75px;
+            margin: 2px;
+            padding: 5px;
+            text-align: left;
+            width: auto;
+        }
+{/*}{literal}
+        
 body#body div.flowing_data,
 body#body div#retrieve_password
 {

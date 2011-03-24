@@ -251,7 +251,7 @@ class Exception_Handler extends Event_Manager
 	*/
 	public static function deploy()
 	{
-		$class_exception_handler = CLASS_EXCEPTION_HANDLER;
+		$class_exception_handler = __CLASS__;
 
 		$error_handling_witness = 'testErrorHandler';
 
@@ -267,6 +267,10 @@ class Exception_Handler extends Event_Manager
 			array( $class_exception_handler, 'logException' )
 		);
 
+		register_shutdown_function(
+			array( $class_exception_handler, 'shutdown' )
+		);
+		
 		if (
 			! is_array( $previous_error_handler ) ||
 			! isset( $previous_error_handler[1] ) ||
@@ -342,4 +346,45 @@ class Exception_Handler extends Event_Manager
 
 		self::logContext( $context );
 	}
+
+	/**
+	* Function called at shutdown
+	*
+	* @return  	mixed
+	*/
+	public static function shutdown()
+	{
+		global $class_application, $verbose_mode;
+
+		$class_dumper = $class_application::getDumperClass();
+		
+		$error_occurrence = FALSE;
+		
+		if  ( $error_properties = error_get_last() )
+		{
+			switch( $error_properties['type'] )
+			{
+				case E_ERROR:
+				case E_CORE_ERROR:
+				case E_COMPILE_ERROR:
+				case E_USER_ERROR:
+
+					$error_occurrence = TRUE;
+
+						break;
+			}
+		}
+
+		if ( $error_occurrence )
+
+			$class_dumper::log(
+				__METHOD__,
+				array(
+					'[the current script execution was interrupted '.
+					'when an error with following details occurred]',
+					$error_properties
+				),
+				$verbose_mode
+			);
+	}	
 }

@@ -309,22 +309,285 @@ class Feed_Reader extends File_Manager
 	* Display the favorites of a twitter user
 	*
 	* @param	string	$user_name	user name
+	* @param	mixed	$options 	options 		
 	* @return 	nothing
 	*/
-	public static function displayTwitterFavorites($user_name)
+	public static function displayTwitterFavorites( $user_name, $options = NULL )
 	{
-		$results = self::getTwitterFavorites( $user_name );
+		$results = self::getTwitterFavorites( $user_name, $options );
 
-		echo $results;
+		echo '<pre>', print_r( $results, TRUE ), '</pre>';
+	}
+
+	/**
+	* Display a wall from the favorites of a twitter user
+	*
+	* @param	string	$user_name	user name
+	* @return 	nothing
+	*/
+	public static function displayTwitterWall( $user_name )
+	{
+		global $class_application, $verbose_mode;
+
+		$class_dumper = $class_application::getDumperClass();
+
+		$class_layout_manager = $class_application::getLayoutManagerClass();
+
+		$class_user_handler = $class_application::getUserHandlerClass();
+
+		if ( ! $class_user_handler::loggedIn() )
+		{
+			$class_application::jumpTo( PREFIX_ROOT );
+
+			exit();
+		}
+
+		$class_view_builder = $class_application::getViewBuilderClass();
+		
+		$_favorites = array();
+
+		$dumped_store = serialize( $_favorites );
+
+		$directory_favorites =
+			dirname( __FILE__ ) . '/../../' .
+			DIR_API. '/' .
+			DIR_TWITTER . '/' .
+			DIR_FAVORITES . '/'
+		;
+
+		$file_prefix = $user_name . '_favorites_';
+	
+		$file_name =
+			$directory_favorites .
+			$file_prefix .
+			date( 'Y-m-d_H' )
+		;
+
+		$file_matching = FALSE; 
+
+		if ( file_exists( $file_name ) )
+		{
+			$dumped_store = file_get_contents( $file_name );
+		
+			$file_matching = TRUE;
+		}
+		else
+		{
+ 			$pattern_file =
+				$directory_favorites .
+				$file_prefix .
+				'*'
+			;
+			
+			$matching_files = glob( $pattern_file );
+
+			if (
+				is_array( $matching_files ) &&
+				count( $matching_files )
+			)
+			{
+				$_file_name = array_pop( $matching_files );
+
+				$dumped_store = file_get_contents( $_file_name );
+		
+				$file_matching = TRUE;
+			}
+		}
+
+		$store = &self::initializeStore();
+
+		if ( ! isset( $store[STORE_FAVORITES] ) )
+		
+			$store[STORE_FAVORITES] = array();
+		
+		$store_favorites = &$store[STORE_FAVORITES];
+
+		$context = new stdClass();
+
+		$max_columns = 2;
+
+		$page_index = 1;
+
+		$regression = FALSE;
+
+		$sort_by_length =
+			function ( $a, $b ) use ( $class_dumper )
+			{
+				if ( ! is_object( $a ) || ! is_object( $b ) )
+	
+					throw new Exception( EXCEPTION_INVALID_ARGUMENT );
+				
+				if (
+					! isset( $a->{PROPERTY_TEXT} ) ||
+					! isset( $b->{PROPERTY_TEXT} )
+				)
+				
+					throw new Exception( EXCEPTION_INVALID_ARGUMENT );
+					
+				if (
+					strlen( $b->{PROPERTY_TEXT } ) ==
+						strlen( $a->{PROPERTY_TEXT } )
+				)
+					
+					$result = 0;
+
+				$result = 
+						(
+							strlen( $b->{PROPERTY_TEXT } ) -
+								strlen( $a->{PROPERTY_TEXT } )
+						) > 0
+					?
+						-1
+					:
+						1
+				;
+
+				return $result;
+			}
+		;
+
+		if (
+			! isset( $store_favorites[$user_name] ) ||
+			! count( $store_favorites[$user_name] )
+		)
+		{
+			if (
+				! $file_matching ||
+				( strlen( $dumped_store ) === strlen( serialize( array() ) ) )
+			)
+			{
+				while (
+					$favorites_slice = self::getTwitterFavorites(
+						$user_name,
+						(object) array( PROPERTY_PAGE => $page_index )
+					)
+				)
+				{
+					while ( list( $index, $favorite ) = each( $favorites_slice ) )
+		
+						$_favorites[md5( serialize( $favorite ) )] = $favorite;
+		
+					$page_index++;
+				}
+			}
+			else
+
+				$_favorites = unserialize( $dumped_store );
+
+			$store_favorites[$user_name] = $_favorites;
+		}
+		else
+		
+			$_favorites = $store_favorites[$user_name];
+
+		// usort( $_favorites, $sort_by_length );
+
+		if ( file_exists( $file_name ) )
+		{			
+			if (
+				strlen( $dumped_store ) >
+					strlen( serialize( $_favorites ) )
+			)
+
+				$regression = TRUE;
+		}
+		
+		if ( ! $regression )
+		{
+			$file_handler = fopen(
+				$file_name,
+				FILE_ACCESS_MODE_OVERWRITE
+			);
+
+			fwrite( $file_handler, serialize( $_favorites ) );
+	
+			fclose( $file_handler );
+		}
+
+		$row_index =
+
+		$count_rows = ceil( count( $_favorites ) / $max_columns );
+
+		$parameters = array();
+
+		$pattern_replacement = '<span class="pre"><a href="${1}">${1}</a></span>';
+
+		$pattern_url = '#(http://[^\s]+)\s?#';
+
+		while ( $row_index )
+		{
+			$column_index = 0;
+			
+			while ( $column_index < $max_columns )
+			{
+				list( $hash, $favorite ) = each( $_favorites );
+
+				$tweet =
+						is_object( $favorite ) && 
+						isset( $favorite->{PROPERTY_TEXT} )
+					?
+						$favorite->{PROPERTY_TEXT}
+					:
+						''
+				;
+				
+				if ( strlen( $tweet ) )
+
+					$parameters[$row_index][$column_index] = 
+						$class_application::shorten_sentence(
+							preg_replace(
+								$pattern_url,
+								$pattern_replacement,
+								$tweet
+							),
+							FALSE,
+							140,
+							NULL
+						)
+					;
+				else
+
+					$column_index--;
+
+				$column_index++;
+			}
+
+			$row_index--;
+		}
+
+		$body = $class_layout_manager::getLayout(
+			TPL_BLOCK_TABLE,
+			array( PROPERTY_TABLE => $parameters )
+		);
+
+		$context->{PLACEHOLDER_BODY} = $body;
+		
+		$context->{PROPERTY_CACHE_ID} = md5( time() );
+		
+		$context->{PROPERTY_CONTAINER} = array(
+			HTML_ELEMENT_DIV => array(
+				HTML_ATTRIBUTE_CLASS =>
+					STYLE_CLASS_TABLE
+			)
+		);
+		
+		$view = $class_view_builder::displayView(
+			$context,
+			VIEW_TYPE_INJECTION
+		);
 	}
 
 	/**
 	* Get the favorites of a twitter user
 	*
 	* @param	string	$user_name	user name
+	* @param	mixed	$options 	options 		
 	* @return	string	favorites
 	*/
-	public static function getTwitterFavorites( $user_name )
+	public static function getTwitterFavorites(
+		$user_name,
+		$options = NULL		
+	)
 	{
 		global $class_application, $verbose_mode;
 
@@ -332,7 +595,29 @@ class Feed_Reader extends File_Manager
 
 		$class_dumper = $class_application::getDumperClass();
 
-		return $class_api::fetchFavoriteStatuses( $user_name );
+		return $class_api::fetchFavoriteStatuses(
+			$user_name,
+			NULL,
+			$options			
+		);
+	}
+	
+	/**
+	* Initialize a store
+	*
+	* @param	integer	$service		service
+	* @param	string	$store_parent	store parent
+	* @return	&array	reference to a store
+	*/	
+	public static function &initializeStore( $service = NULL, $store_parent = NULL )
+	{
+		global $class_application, $verbose_mode;
+		
+		$class_api = $class_application::getApiClass();
+		
+		$store = &$class_api::initializeStore( $service, $store_parent );
+
+		return $store;
 	}
 
     /**
@@ -344,7 +629,12 @@ class Feed_Reader extends File_Manager
     * @param	html		$html			HTML flag
     * @return   string  contents
     */
-    public static function parse($url = null, $extract_dom = true, $curl = false, $html = false)
+    public static function parse(
+		$url = NULL,
+		$extract_dom = TRUE,
+		$curl = FALSE,
+		$html = FALSE
+	)
     {
         $feed_reader = new self($url, $extract_dom, $curl, $html);
 

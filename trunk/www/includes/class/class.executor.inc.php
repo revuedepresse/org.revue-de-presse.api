@@ -215,9 +215,6 @@ class Executor extends Processor
 
 				// display the parameters through a template
 				$template_engine->display( TPL_STYLESHEET );
-
-				// clear all cache
-				$template_engine->clear();
 	
 					break;
 
