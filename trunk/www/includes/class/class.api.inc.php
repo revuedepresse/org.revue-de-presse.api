@@ -371,7 +371,7 @@ class Api extends Transfer
 							'The response to your last request is: ',
 							$response,
 						),
-						$verbose_mode
+						DEBUGGING_DISPLAY_API_CONTACT_ENPOINT_RESPONSE
 					);
 				}				
 					
@@ -1246,7 +1246,7 @@ class Api extends Transfer
 				'[tokens tuple]',
 				$tuple
 			),
-			$verbose_mode
+			DEBUGGING_DISPLAY_API_CONTACT_ENPOINT_RESPONSE
 		);
 
 		if ( is_array( $tuple ) && count( $tuple ) === 2 )
