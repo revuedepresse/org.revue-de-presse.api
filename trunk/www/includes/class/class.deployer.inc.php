@@ -17,32 +17,16 @@ class Deployer extends I18n
 	{
 		$callback_parameters = NULL;
 
-		$condition_deployment_first_level  =
+		if (
 			isset( $_SERVER['SERVER_NAME'] ) &&
-			in_array(
-				$_SERVER['SERVER_NAME'],
-				array(
-					'## FILL HOSTNAME ##',
-					'## FILL HOSTNAME ##',
-					'www.## FILL HOSTNAME ##'
-				)
-			) || (
+			$_SERVER['SERVER_NAME'] == '## FILL HOSTNAME ##' ||
+			(
 				! isset( $_SERVER['SERVER_NAME'] ) &&
 				isset( $_SERVER['SCRIPT_NAME'] ) &&
 				preg_match('/## FILL HOSTNAME ##/', $_SERVER['SCRIPT_NAME'])
 			) ||
-                        (
-                                ! isset( $_SERVER['SERVER_NAME'] ) &&
-                                isset( $_SERVER['SCRIPT_NAME'] ) &&
-                                preg_match('/weaving-the-web\.org/', $_SERVER['SCRIPT_NAME'])
-                        ) ||
-                        (
-                                // on remote adama server
-                                isset( $_SERVER['DOCUMENT_ROOT'] ) &&
-                                $_SERVER['DOCUMENT_ROOT'] == '/var/www/## FILL DOCUMENT ROOT ##'
-                        ) ||
 			(
-				// on local adama server
+				// on adama server
 				isset( $_SERVER['DOCUMENT_ROOT'] ) &&
 				$_SERVER['DOCUMENT_ROOT'] == '## FILL ABSOLUTE PATH ##'
 			) ||
@@ -51,9 +35,7 @@ class Deployer extends I18n
 				isset( $_SERVER['DOCUMENT_ROOT'] ) &&
 				$_SERVER['DOCUMENT_ROOT'] == '## FILL ABSOLUTE PATH ##'
 			)
-		;
-
-		if ( $condition_deployment_first_level )
+		)
 
 			define( 'CURRENT_DEPLOYMENT_STAGE', 0 );
 
@@ -128,47 +110,52 @@ class Deployer extends I18n
 				isset( $_SERVER['REQUEST_URI'] ) &&
 				(
 					(
-						strpos(
-							$_SERVER['REQUEST_URI'],
-							PREFIX_ROOT.DIR_API
-						) !== FALSE
-					) || (
-						strpos(
-							$_SERVER['REQUEST_URI'],
-							PREFIX_ROOT.DIR_ROUTINES
-						) !== FALSE
-					) ||
-					(
 						(
 							strpos(
 								$_SERVER['REQUEST_URI'],
-								PREFIX_ROOT.DIR_UNIT_TESTING
-							) !== FALSE 
-						) && (
-							$_SERVER['REQUEST_URI'] !==
-							URI_UNIT_TESTING_DESTROY_SESSION
+								PREFIX_ROOT.DIR_API
+							) !== FALSE
+						) || (
+							strpos(
+								$_SERVER['REQUEST_URI'],
+								PREFIX_ROOT.DIR_ROUTINES
+							) !== FALSE
+						) || (
+							strpos(
+								$_SERVER['REQUEST_URI'],
+								PREFIX_ROOT.DIR_OBSERVATORY
+							) !== FALSE
+						) || (
+							strpos(
+								$_SERVER['REQUEST_URI'],
+								PREFIX_ROOT.DIR_TEMPLATES
+							) !== FALSE
+						) || (
+							strpos(
+								$_SERVER['REQUEST_URI'],
+								PREFIX_ROOT.DIR_TEMPLATES_C
+							) !== FALSE
+						) || (
+							(
+								strpos(
+									$_SERVER['REQUEST_URI'],
+									PREFIX_ROOT.DIR_UNIT_TESTING
+								) !== FALSE
+							) && (
+								$_SERVER['REQUEST_URI'] !==
+									URI_UNIT_TESTING_DESTROY_SESSION
+							)
 						)
-					) || (
-						strpos(
-							$_SERVER['REQUEST_URI'],
-							PREFIX_ROOT.DIR_OBSERVATORY
-						) !== FALSE
-					) || (
-						strpos(
-							$_SERVER['REQUEST_URI'],
-							PREFIX_ROOT.DIR_TEMPLATES
-						) !== FALSE
-					) || (
-						strpos(
-							$_SERVER['REQUEST_URI'],
-							PREFIX_ROOT.DIR_TEMPLATES_C
-						) !== FALSE
-					)
+					) &&
+					! in_array(
+						$_SERVER['SCRIPT_NAME'],
+						array( SCRIPT_API_TWITTER_DISPLAY_WALL )
+					) 					
 				)
 			)
 			{
 				$class_user_handler = CLASS_USER_HANDLER;
-
+				
 				if ( ! $class_user_handler::loggedIn( TRUE ) )
 
 					$class_application::jumpTo( PREFIX_ROOT, 301 );

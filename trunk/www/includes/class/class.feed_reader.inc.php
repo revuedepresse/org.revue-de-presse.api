@@ -312,7 +312,10 @@ class Feed_Reader extends File_Manager
 	* @param	mixed	$options 	options 		
 	* @return 	nothing
 	*/
-	public static function displayTwitterFavorites( $user_name, $options = NULL )
+	public static function displayTwitterFavorites(
+		$user_name,
+		$options = NULL
+	)
 	{
 		$results = self::getTwitterFavorites( $user_name, $options );
 
@@ -323,11 +326,17 @@ class Feed_Reader extends File_Manager
 	* Display a wall from the favorites of a twitter user
 	*
 	* @param	string	$user_name	user name
+	* @param	boolean	$sorted		sorting flag
 	* @return 	nothing
 	*/
-	public static function displayTwitterWall( $user_name )
+	public static function displayTwitterWall(
+		$user_name,
+		$sorted = FALSE
+	)
 	{
 		global $class_application, $verbose_mode;
+
+		$class_api = $class_application::getApiClass();
 
 		$class_dumper = $class_application::getDumperClass();
 
@@ -335,15 +344,11 @@ class Feed_Reader extends File_Manager
 
 		$class_user_handler = $class_application::getUserHandlerClass();
 
-		if ( ! $class_user_handler::loggedIn() )
-		{
-			$class_application::jumpTo( PREFIX_ROOT );
-
-			exit();
-		}
-
 		$class_view_builder = $class_application::getViewBuilderClass();
-		
+
+		// Restore accessing privileges by retrieving existing access tokens
+		$class_api::unserializeAccessTokens();
+
 		$_favorites = array();
 
 		$dumped_store = serialize( $_favorites );
@@ -355,51 +360,80 @@ class Feed_Reader extends File_Manager
 			DIR_FAVORITES . '/'
 		;
 
-		$file_prefix = $user_name . '_favorites_';
-	
-		$file_name =
-			$directory_favorites .
-			$file_prefix .
-			date( 'Y-m-d_H' )
-		;
+		// force user name replacement
 
-		$file_matching = FALSE; 
+        if (
+			isset( $_GET[GET_USERNAME_TWITTER] ) &&
+			is_string( $_GET[GET_USERNAME_TWITTER] )
+		)
 
-		if ( file_exists( $file_name ) )
-		{
-			$dumped_store = file_get_contents( $file_name );
-		
-			$file_matching = TRUE;
-		}
-		else
-		{
- 			$pattern_file =
-				$directory_favorites .
-				$file_prefix .
-				'*'
-			;
-			
-			$matching_files = glob( $pattern_file );
+            $user_name = preg_replace(
+				'#[^-_a-zA-Z0-9]#',
+				'',
+				$_GET[GET_USERNAME_TWITTER]
+			);
 
-			if (
-				is_array( $matching_files ) &&
-				count( $matching_files )
-			)
-			{
-				$_file_name = array_pop( $matching_files );
+        if ( is_null( $user_name ) )
 
-				$dumped_store = file_get_contents( $_file_name );
-		
-				$file_matching = TRUE;
-			}
-		}
+            $class_application::jumpTo( PREFIX_ROOT );
 
-		$store = &self::initializeStore();
+        $file_prefix = $user_name . '_favorites_';
 
-		if ( ! isset( $store[STORE_FAVORITES] ) )
-		
-			$store[STORE_FAVORITES] = array();
-		
+        $file_name =
+            $directory_favorites .
+            $file_prefix .
+            date( 'Y-m-d_H' )
+        ;
+
+        $file_matching = FALSE;
+
+        if ( file_exists( $file_name ) )
+        {
+            $dumped_store = file_get_contents( $file_name );
+
+            $file_matching = TRUE;
+        }
+        else
+        {
+            $pattern_file =
+                $directory_favorites .
+                $file_prefix .
+                '*'
+            ;
+
+            $matching_files = glob( $pattern_file );
+
+            if (
+                is_array( $matching_files ) &&
+                count( $matching_files )
+            )
+            {
+                $_file_name = array_pop( $matching_files );
+
+                $dumped_store = file_get_contents( $_file_name );
+
+                $file_matching = TRUE;
+            }
+        }
+
+        $store = &self::initializeStore();
+
+		// force data refresh 
+
+        if (
+			isset( $_GET[GET_API_TWITTER_REFRESH] ) &&
+			$_GET[GET_API_TWITTER_REFRESH]
+		)
+        {
+            unset( $store[STORE_FAVORITES] );
+
+            $file_matching = FALSE;
+        }
+
+        if ( ! isset( $store[STORE_FAVORITES] ) )
+
+            $store[STORE_FAVORITES] = array();
+
 		$store_favorites = &$store[STORE_FAVORITES];
 
 		$context = new stdClass();
@@ -480,7 +514,9 @@ class Feed_Reader extends File_Manager
 		
 			$_favorites = $store_favorites[$user_name];
 
-		// usort( $_favorites, $sort_by_length );
+		if ( $sorted )
+
+			usort( $_favorites, $sort_by_length );
 
 		if ( file_exists( $file_name ) )
 		{			
@@ -530,7 +566,7 @@ class Feed_Reader extends File_Manager
 					:
 						''
 				;
-				
+
 				if ( strlen( $tweet ) )
 
 					$parameters[$row_index][$column_index] = 
@@ -545,9 +581,6 @@ class Feed_Reader extends File_Manager
 							NULL
 						)
 					;
-				else
-
-					$column_index--;
 
 				$column_index++;
 			}
@@ -570,7 +603,9 @@ class Feed_Reader extends File_Manager
 					STYLE_CLASS_TABLE
 			)
 		);
-		
+
+		$context->{PROPERTY_ANONYMOUS} = TRUE;
+
 		$view = $class_view_builder::displayView(
 			$context,
 			VIEW_TYPE_INJECTION

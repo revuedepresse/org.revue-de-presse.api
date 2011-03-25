@@ -50,7 +50,10 @@ body#body h2
 
 body#body div._table
 {
-    margin-top: 35px;
+    margin: auto;
+    margin-top: 10px;
+    text-align: center;
+    width: 100%;
 }
 
     body#body div._table ul.sortable_cells li div.td
@@ -60,7 +63,11 @@ body#body div._table
 
     body#body div._table ul.sortable_cells
     {
-        list-style-type: none; margin: 0; padding: 0;
+        list-style-type: none;
+        margin: auto;
+        padding: 0;
+        min-width: 230px;
+        width: 1000px;
     }
 
     body#body div._table ul.sortable_cells li {
@@ -87,7 +94,7 @@ body#body div._table
             float: left;
             height: 90px;
             margin: 0px;
-            padding: 0px;
+            padding: 5px;
             text-align: center;        
             {/literal}{*}white-space:pre-wrap;{/*}{literal}
             width: 230px;            

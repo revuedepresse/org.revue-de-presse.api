@@ -8051,6 +8051,8 @@ class View_Builder extends User_Interface
 
 		$default_type = VIEW_TYPE_FORM;
 
+		$block_header = '';
+
 		$callback_parameters = array();
 
 		if ( is_null( $entity_type ) )
@@ -8061,10 +8063,15 @@ class View_Builder extends User_Interface
 		{
 			case VIEW_TYPE_INJECTION:
 
-				$block_header = self::buildBlock(
-					PAGE_DIALOG,
-					BLOCK_HEADER
-				);
+				if (
+					! isset( $context->{PROPERTY_ANONYMOUS} ) ||
+					$context->{PROPERTY_ANONYMOUS} === FALSE
+				)
+
+					$block_header = self::buildBlock(
+						PAGE_DIALOG,
+						BLOCK_HEADER
+					);
 
 				$template_engine = new $class_template_engine;
 

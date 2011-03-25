@@ -18,6 +18,7 @@ assignConstant('PROPERTY_ACCESS_TYPE', 'access_type');
 assignConstant('PROPERTY_ACTION', 'action');
 assignConstant('PROPERTY_AFFORDANCE', 'affordance');
 assignConstant('PROPERTY_ALIAS', 'alias');
+assignConstant('PROPERTY_ANONYMOUS', 'anonymous');
 assignConstant('PROPERTY_ANY', 'any');
 assignConstant('PROPERTY_API_CONSUMER_CALLBACK', 'api_consumer_callback');
 assignConstant('PROPERTY_API_CONSUMER_KEY', 'api_consumer_key');
