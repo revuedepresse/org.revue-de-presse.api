@@ -286,21 +286,11 @@ class Api extends Transfer
 	/**
 	* Check the rate limit
 	*
-	* @param	string	$status		status
 	* @param	mixed	$service	service
 	* @return	nothing
 	*/
-	public static function checkRateLimit( $status = NULL, $service = NULL )
+	public static function checkRateLimit( $service = NULL )
 	{
-		if ( is_null( $status ) )
-		
-			throw new Exception(
-				sprintf(
-					EXCEPTION_INVALID_ENTITY,
-					PROPERTY_STATUS
-				)
-			);
-
 		return self::contactEndpoint(
 			API_TWITTER_RATE_LIMIT,
 			array(
