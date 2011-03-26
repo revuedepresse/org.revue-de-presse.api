@@ -1,4 +1,25 @@
 <?php
+/**
+*************
+* Changes log
+*
+*************
+* 2011 03 26
+*************
+*
+* Implement methods to display wall of tweets
+* from twitter timelines and favorites
+*
+* methods affected ::
+*
+* FEED_READER :: displayTwitterTimeline
+* FEED_READER :: displayTwitterWall
+* FEED_READER :: getTwitterTimeline
+* 
+* (branch 0.1 :: revision 630)
+* (trunk :: revision :: 195)
+*
+*/
 
 /**
 * Feed reader class
@@ -19,7 +40,12 @@ class Feed_Reader extends File_Manager
     * @param	html		$html			HTML flag
     * @return   string  contents
     */
-    private function __construct($url = null, $extract_dom = true, $curl = false, $html = false)
+    private function __construct(
+		$url = NULL,
+		$extract_dom = TRUE,
+		$curl = FALSE,
+		$html = FALSE
+	)
     {
         $_dom = &$this->getDOM();
         $_raw_contents = &$this->getRawContents();
@@ -31,7 +57,9 @@ class Feed_Reader extends File_Manager
 				'http' => array(
 					'method'  => 'GET',
 					'header' =>
-						"User-Agent: Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10.6; fr; rv:1.9.1.5) Gecko/20091102 Firefox/3.5.5 GTB6 FirePHP/0.3".
+						"User-Agent: Mozilla/5.0 (Macintosh; U; ".
+						"Intel Mac OS X 10.6; fr; rv:1.9.1.5) ".
+						"Gecko/20091102 Firefox/3.5.5 GTB6 FirePHP/0.3".
 						"Accept-Language: en-us,en;q=0.8,fr;q=0.5,fr-fr;q=0.3"
 				)
 			);
@@ -47,7 +75,10 @@ class Feed_Reader extends File_Manager
 			{
 	
 				// set the default URL
-				$url = PROTOCOL_HTTP.$_SERVER['HTTP_HOST'].PREFIX_USER_INTERFACE.ENTITY_FACTORY.EXTENSION_PHP;
+				$url = PROTOCOL_HTTP.$_SERVER['HTTP_HOST'] .
+					PREFIX_USER_INTERFACE.ENTITY_FACTORY.
+						EXTENSION_PHP
+				;
 		
 				// set the contents
 				$_raw_contents = file_get_contents($url, FILE_BINARY, $context);
@@ -323,14 +354,33 @@ class Feed_Reader extends File_Manager
 	}
 
 	/**
+	* Display a kind of timeline 
+	*
+	* @param	string	$kind		kind of timeline
+	* @param	mixed	$options 	options 		
+	* @return 	nothing
+	*/
+	public static function displayTwitterTimeline(
+		$kind,
+		$options = NULL
+	)
+	{
+		$results = self::getTwitterTimeline( $kind, $options );
+
+		echo '<pre>', print_r( $results, TRUE ), '</pre>';
+	}
+
+	/**
 	* Display a wall from the favorites of a twitter user
 	*
 	* @param	string	$user_name	user name
+	* @param	string	$resource	resource
 	* @param	boolean	$sorted		sorting flag
 	* @return 	nothing
 	*/
 	public static function displayTwitterWall(
 		$user_name,
+		$resource = NULL,
 		$sorted = FALSE
 	)
 	{
@@ -359,6 +409,21 @@ class Feed_Reader extends File_Manager
 			DIR_TWITTER . '/' .
 			DIR_FAVORITES . '/'
 		;
+
+		$method = 'getTwitterFavorites';
+		
+		if (
+			is_null( $resource ) &&
+			isset( $_GET[GET_API_TWITTER_RESOURCE] ) &&
+			is_string( $_GET[GET_API_TWITTER_RESOURCE] ) &&
+			in_array(
+				$_GET[GET_API_TWITTER_RESOURCE],
+				array(
+					ENTITY_FAVORITE,
+					ENTITY_TIMELINE
+				)
+			)
+		)
 
 		// force user name replacement
 
@@ -490,8 +555,12 @@ class Feed_Reader extends File_Manager
 				( strlen( $dumped_store ) === strlen( serialize( array() ) ) )
 			)
 			{
+				if ( ! is_null( $resource ) )
+
+					$method = 'getTwitter' . ucfirst( $resource ) . 's';
+
 				while (
-					$favorites_slice = self::getTwitterFavorites(
+					$favorites_slice = self::$method(
 						$user_name,
 						(object) array( PROPERTY_PAGE => $page_index )
 					)
@@ -632,6 +701,31 @@ class Feed_Reader extends File_Manager
 
 		return $class_api::fetchFavoriteStatuses(
 			$user_name,
+			NULL,
+			$options			
+		);
+	}
+
+	/**
+	* Get the timeline of a twitter user
+	*
+	* @param	string	$kind		kind
+	* @param	mixed	$options 	options 		
+	* @return	string	favorites
+	*/
+	public static function getTwitterTimeline(
+		$kind,
+		$options = NULL		
+	)
+	{
+		global $class_application, $verbose_mode;
+
+		$class_api = $class_application::getApiClass();
+
+		$class_dumper = $class_application::getDumperClass();
+
+		return $class_api::fetchTimelineStatuses(
+			$kind,
 			NULL,
 			$options			
 		);
@@ -777,4 +871,3 @@ class Feed_Reader extends File_Manager
         trigger_error('ouch');
     }
 }
-?>

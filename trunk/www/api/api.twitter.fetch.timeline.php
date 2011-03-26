@@ -10,9 +10,12 @@
 
 $class_feed_reader = $class_application::getFeedReaderClass();
 
-$user_name = '## FILL YOUR USERNAME ##';
+$kind = API_TWITTER_TIMELINE_HOME;
 
-$class_feed_reader::displayTwitterFavorites(
-	$user_name,
-	(object) array( PROPERTY_PAGE => 17 )
+$class_feed_reader::displayTwitterTimeline(
+	$kind,
+	(object) array(
+		//PROPERTY_COUNT => 200,
+		PROPERTY_PAGE => 1,
+	)
 );

@@ -4,6 +4,19 @@
 * Changes log
 *
 *************
+* 2011 03 26
+*************
+*
+* Implement a method totwitter timelines
+*
+* method affected ::
+*
+* API :: fetchTimelineStatuses
+* 
+* (branch 0.1 :: revision 630)
+* (trunk :: revision :: 195)
+*
+*************
 * 2011 03 06
 *************
 *
@@ -368,7 +381,15 @@ class Api extends Transfer
 					$class_dumper::log(
 						__METHOD__,
 						array(
-							'The response to your last request is: ',
+							'[connection]',
+							$connection,
+							'[endpoint]',
+							$endpoint,
+							'[method]',
+							$method,
+							'[parameters]',
+							$parameters,
+							'[response]',
 							$response,
 						),
 						DEBUGGING_DISPLAY_API_CONTACT_ENPOINT_RESPONSE
@@ -424,6 +445,80 @@ class Api extends Transfer
 			$user_name,
 			API_TWITTER_FAVORITES_API.
 			( $page_index > 1 ? '&'.PROPERTY_PAGE.'='.$page_index : '' )
+		);
+
+		$response = self::contactEndpoint(
+			$endpoint,
+			NULL,
+			$service
+		);
+
+		return $response;
+	}
+
+	/**
+	* Fetch timeline statuses
+	*
+	* @param	string	$kind		kind
+	* @param	mixed	$service	service 
+	* @param	mixed	$options 	options
+	* @return	mixed
+	*/	
+	public static function fetchTimelineStatuses(
+		$kind = NULL,
+		$service = NULL,
+		$options = NULL
+	)
+	{
+		global $class_application, $verbose_mode;
+
+		$class_dumper = $class_application::getDumperClass();
+
+		$class_user = $class_application::getUserClass();
+
+		// Restore accessing privileges by retrieving existing access tokens
+		self::unserializeAccessTokens();
+
+		$default_results_count = 5;
+
+		$default_page_index = 1;
+
+		$page_index = $default_page_index;
+
+		$results_count = $default_results_count;
+
+		if ( is_null( $kind ) )
+
+			$kind = API_TWITTER_TIMELINE_PUBLIC;
+
+		if (
+			! is_null( $options ) &&
+			is_object( $options ) 
+		)
+		{
+			if ( isset( $options->{PROPERTY_COUNT} ) )
+
+				$results_count = $options->{PROPERTY_COUNT};
+
+			if ( isset( $options->{PROPERTY_PAGE} ) )
+
+				$page_index = $options->{PROPERTY_PAGE};
+		}
+
+		list( $service, $service_type_default ) = self::checkService( $service );
+
+		$endpoint = str_replace(
+			'{' . PROPERTY_KIND . '}',
+			$kind,
+			API_TWITTER_TIMELINE_API.
+			(
+				$page_index >= $default_page_index ?
+					'&'. PROPERTY_PAGE . '=' . $page_index : ''
+			) .
+			(
+				$results_count > $default_results_count ?
+					'&'. PROPERTY_COUNT . '=' . $results_count: ''
+			)			
 		);
 
 		$response = self::contactEndpoint(
@@ -500,7 +595,7 @@ class Api extends Transfer
 	*
 	* @param   	string		$mailbox 	mailbox settings
 	* @param	resource	$resource	IMAP resource
-	* @return  resource IMAP stream
+	* @return  	resource 	IMAP stream
 	*/
 	public static function dumpImapLabels( $mailbox = NULL, $resource = NULL )
 	{
