@@ -407,8 +407,6 @@ class Feed_Reader extends File_Manager
 
 		$max_columns = 2;
 
-		$method = 'getTwitter' . ucfirst( $resource );
-
 		$options = array( PROPERTY_PAGE => $page_index );
 
 		$page_index = 1;
@@ -442,6 +440,8 @@ class Feed_Reader extends File_Manager
 		)
 
 			$resource = $_GET[GET_API_TWITTER_RESOURCE];
+
+		$method = 'getTwitter' . ucfirst( $resource );
 
 		// Get data previously fetched and stored locally
 		$file_prefix = $definition . '_' . $resource . '_';
@@ -574,14 +574,23 @@ class Feed_Reader extends File_Manager
 		)
 		{
 			if (
-				! $file_matching ||
-				( strlen( $dumped_store ) === strlen( serialize( array() ) ) )
+				(
+					! $file_matching ||
+					(
+						strlen( $dumped_store ) ===
+							strlen( serialize( array() ) )
+					)
+				) &&
+				in_array(
+					$method,
+					get_class_methods( __CLASS__ )
+				)
 			)
 
 				while (
 					$favorites_slice = self::$method(
 						$definition,
-						(object) $options
+						( object ) $options
 					)
 				)
 				{
