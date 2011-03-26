@@ -294,7 +294,6 @@ class Api extends Transfer
 		return self::contactEndpoint(
 			API_TWITTER_RATE_LIMIT,
 			array(
-				PROPERTY_STATUS => $status,
 				PROPERTY_PROTOCOL => PROTOCOL_HTTP_METHOD_GET
 			),
 			$service
