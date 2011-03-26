@@ -183,6 +183,7 @@ class Deployer extends I18n
 						$_SERVER['SCRIPT_NAME'],
 						array(
 							SCRIPT_API_TWITTER_DISPLAY_WALL,
+							SCRIPT_API_TWITTER_FORGET_ACCESS_TOKEN,
 							SCRIPT_API_TWITTER_REQUEST_ACCESS_TOKEN
 						)
 					)
