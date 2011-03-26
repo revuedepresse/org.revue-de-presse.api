@@ -284,6 +284,34 @@ class Api extends Transfer
 	}
 
 	/**
+	* Check the rate limit
+	*
+	* @param	string	$status		status
+	* @param	mixed	$service	service
+	* @return	nothing
+	*/
+	public static function checkRateLimit( $status = NULL, $service = NULL )
+	{
+		if ( is_null( $status ) )
+		
+			throw new Exception(
+				sprintf(
+					EXCEPTION_INVALID_ENTITY,
+					PROPERTY_STATUS
+				)
+			);
+
+		return self::contactEndpoint(
+			API_TWITTER_RATE_LIMIT,
+			array(
+				PROPERTY_STATUS => $status,
+				PROPERTY_PROTOCOL => PROTOCOL_HTTP_METHOD_GET
+			),
+			$service
+		);
+	}
+
+	/**
 	* Check a service
 	*
 	* @param	mixed	$service
@@ -443,7 +471,7 @@ class Api extends Transfer
 		$endpoint = str_replace(
 			'{user}',
 			$user_name,
-			API_TWITTER_FAVORITES_API.
+			API_TWITTER_FAVORITES.
 			( $page_index > 1 ? '&'.PROPERTY_PAGE.'='.$page_index : '' )
 		);
 
@@ -507,7 +535,7 @@ class Api extends Transfer
 		$endpoint = str_replace(
 			'{' . PROPERTY_KIND . '}',
 			$kind,
-			API_TWITTER_TIMELINE_API.
+			API_TWITTER_TIMELINE.
 			(
 				$page_index >= $default_page_index ?
 					'&'. PROPERTY_PAGE . '=' . $page_index : ''
