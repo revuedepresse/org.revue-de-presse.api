@@ -212,6 +212,7 @@ assignConstant('PROPERTY_ROOT', 'root');
 assignConstant('PROPERTY_ROUTE', 'route');
 assignConstant('PROPERTY_ROW', 'row');
 assignConstant('PROPERTY_ROWS_CALCULATED', 'calculated_rows');
+assignConstant('PROPERTY_SCREEN_NAME', 'screen_name');
 assignConstant('PROPERTY_SECRET', 'secret');
 assignConstant('PROPERTY_SECRET_OAUTH', 'oauth_secret');
 assignConstant('PROPERTY_SETTINGS', 'settings');
