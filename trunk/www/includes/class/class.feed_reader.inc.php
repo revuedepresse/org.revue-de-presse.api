@@ -399,6 +399,8 @@ class Feed_Reader extends File_Manager
 		// Restore accessing privileges by retrieving existing access tokens
 		$class_api::unserializeAccessTokens();
 
+		$credentials = $class_api::verifyCredentials();
+
 		$_favorites = array();
 
 		$context = new stdClass();
@@ -459,6 +461,10 @@ class Feed_Reader extends File_Manager
 			case ENTITY_TIMELINE:
 
 				$options[PROPERTY_COUNT] = 200;
+				
+				if ( isset( $credentials->{PROPERTY_SCREEN_NAME} ) )
+
+					$file_prefix .= $credentials->{PROPERTY_SCREEN_NAME} . '_';
 
 					break;
 
@@ -479,7 +485,7 @@ class Feed_Reader extends File_Manager
 
         $file_name =
             $directory .
-            $file_prefix .
+            $file_prefix . 
             date( 'Y-m-d_H' )
         ;
 
