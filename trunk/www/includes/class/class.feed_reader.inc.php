@@ -419,13 +419,6 @@ class Feed_Reader extends File_Manager
 		
 			$resource = ENTITY_FAVORITE;
 
-		$directory =
-			dirname( __FILE__ ) . '/../../' .
-			DIR_API. '/' .
-			DIR_TWITTER . '/' .
-			$resource . '/'
-		;
-
 		// Set resource type from HTTP GET parameter
 		if (
 			isset( $_GET[GET_API_TWITTER_RESOURCE] ) &&
@@ -440,6 +433,13 @@ class Feed_Reader extends File_Manager
 		)
 
 			$resource = $_GET[GET_API_TWITTER_RESOURCE];
+
+		$directory =
+			dirname( __FILE__ ) . '/../../' .
+			DIR_API. '/' .
+			DIR_TWITTER . '/' .
+			$resource . '/'
+		;
 
 		$method = 'getTwitter' . ucfirst( $resource );
 
