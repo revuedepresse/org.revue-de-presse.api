@@ -494,7 +494,7 @@ class Feed_Reader extends File_Manager
         else
         {
             $pattern_file =
-                $directory_favorites .
+                $directory.
                 $file_prefix .
                 '*'
             ;
