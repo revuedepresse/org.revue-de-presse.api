@@ -476,9 +476,6 @@ class Api extends Transfer
 
 		$class_user = $class_application::getUserClass();
 
-		// Restore accessing privileges by retrieving existing access tokens
-		self::unserializeAccessTokens();
-
 		$default_results_count = 5;
 
 		$default_page_index = 1;
