@@ -1,4 +1,22 @@
 <?php
+/**
+*************
+* Changes log
+*
+*************
+* 2011 03 26
+*************
+* 
+* Revise bootstrap
+*
+* method affected ::
+*
+* DEPLOYER :: initialize
+* 
+* (branch 0.1 :: revision 636)
+* (trunk :: revision :: 204)
+*
+*/
 
 /**
 * Deployer class
@@ -17,25 +35,39 @@ class Deployer extends I18n
 	{
 		$callback_parameters = NULL;
 
-		if (
+		$condition_deployment_first_level  =
 			isset( $_SERVER['SERVER_NAME'] ) &&
-			$_SERVER['SERVER_NAME'] == '## FILL HOSTNAME ##' ||
-			(
+			in_array(
+				$_SERVER['SERVER_NAME'],
+				array(
+					'## FILL HOSTNAME ##',
+					'## FILL HOSTNAME ##',
+					'www.## FILL HOSTNAME ##'
+				)
+			) || (
 				! isset( $_SERVER['SERVER_NAME'] ) &&
 				isset( $_SERVER['SCRIPT_NAME'] ) &&
 				preg_match('/## FILL HOSTNAME ##/', $_SERVER['SCRIPT_NAME'])
-			) ||
-			(
-				// on adama server
+			) || (
+					! isset( $_SERVER['SERVER_NAME'] ) &&
+					isset( $_SERVER['SCRIPT_NAME'] ) &&
+					preg_match('/weaving-the-web\.org/', $_SERVER['SCRIPT_NAME'])
+			) || (
+					// on remote adama server
+					isset( $_SERVER['DOCUMENT_ROOT'] ) &&
+					$_SERVER['DOCUMENT_ROOT'] == '/var/www/## FILL DOCUMENT ROOT ##'
+			) || (
+				// on local adama server
 				isset( $_SERVER['DOCUMENT_ROOT'] ) &&
 				$_SERVER['DOCUMENT_ROOT'] == '## FILL ABSOLUTE PATH ##'
-			) ||
-			(
+			) || (
 				// on babylone_crusader server
 				isset( $_SERVER['DOCUMENT_ROOT'] ) &&
 				$_SERVER['DOCUMENT_ROOT'] == '## FILL ABSOLUTE PATH ##'
 			)
-		)
+		;
+
+		if ( $condition_deployment_first_level )
 
 			define( 'CURRENT_DEPLOYMENT_STAGE', 0 );
 
