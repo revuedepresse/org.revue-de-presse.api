@@ -419,17 +419,24 @@ class Feed_Reader extends File_Manager
 		// Set resource type from HTTP GET parameter
 		if (
 			isset( $_GET[GET_API_TWITTER_RESOURCE] ) &&
-			is_string( $_GET[GET_API_TWITTER_RESOURCE] ) &&
-			in_array(
-				$_GET[GET_API_TWITTER_RESOURCE],
-				array(
-					ENTITY_FAVORITE,
-					ENTITY_TIMELINE
+			is_string( $_GET[GET_API_TWITTER_RESOURCE] )
+		)
+		{
+			if (
+				in_array(
+					$_GET[GET_API_TWITTER_RESOURCE],
+					array(
+						ENTITY_FAVORITE,
+						ENTITY_TIMELINE
+					)
 				)
 			)
-		)
 
-			$resource = $_GET[GET_API_TWITTER_RESOURCE];
+				$resource = $_GET[GET_API_TWITTER_RESOURCE];
+			else
+			
+				throw new Exception( EXCEPTION_INVALID_ARGUMENT );
+		}
 
 		$directory =
 			dirname( __FILE__ ) . '/../../' .
