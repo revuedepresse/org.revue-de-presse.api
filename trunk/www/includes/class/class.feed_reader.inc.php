@@ -337,18 +337,18 @@ class Feed_Reader extends File_Manager
 	}
 
 	/**
-	* Display the favorites of a twitter user
+	* Display the favorite statuses of a twitter user
 	*
 	* @param	string	$user_name	user name
 	* @param	mixed	$options 	options 		
 	* @return 	nothing
 	*/
-	public static function displayTwitterFavorites(
+	public static function displayTwitterFavoriteStatuses(
 		$user_name,
 		$options = NULL
 	)
 	{
-		$results = self::getTwitterFavorites( $user_name, $options );
+		$results = self::getTwitterFavoriteStatuses( $user_name, $options );
 
 		echo '<pre>', print_r( $results, TRUE ), '</pre>';
 	}
@@ -373,14 +373,14 @@ class Feed_Reader extends File_Manager
 	/**
 	* Display a wall from the favorites of a twitter user
 	*
-	* @param	string	$user_name	user name
-	* @param	string	$resource	resource
-	* @param	boolean	$sorted		sorting flag
+	* @param	string	$user_name		user name
+	* @param	string	$resource_type	resource type
+	* @param	boolean	$sorted			sorting flag
 	* @return 	nothing
 	*/
 	public static function displayTwitterWall(
 		$user_name,
-		$resource = NULL,
+		$resource_type = NULL,
 		$sorted = FALSE
 	)
 	{
@@ -410,10 +410,12 @@ class Feed_Reader extends File_Manager
 			DIR_FAVORITES . '/'
 		;
 
-		$method = 'getTwitterFavorites';
+		if ( is_null( $resource_type ) )
 		
+			$resource_type = ENTITY_FAVORITE;
+
+		// Set resource type from HTTP GET parameter
 		if (
-			is_null( $resource ) &&
 			isset( $_GET[GET_API_TWITTER_RESOURCE] ) &&
 			is_string( $_GET[GET_API_TWITTER_RESOURCE] ) &&
 			in_array(
@@ -425,8 +427,25 @@ class Feed_Reader extends File_Manager
 			)
 		)
 
-		// force user name replacement
+			$resource_type = $_GET[GET_API_TWITTER_RESOURCE];
 
+		$options = array( PROPERTY_PAGE => $page_index );
+
+		switch ( $resource_type )
+		{
+			case ENTITY_TIMELINE:
+
+				$options[PROPERTY_COUNT] = 200;
+
+					break;
+
+			case ENTITY_FAVORITE:
+			default:
+		}
+
+		$method = 'getTwitter' . ucfirst( $resource );
+
+		// Set user name from HTTP GET parameter
         if (
 			isset( $_GET[GET_USERNAME_TWITTER] ) &&
 			is_string( $_GET[GET_USERNAME_TWITTER] )
@@ -442,6 +461,7 @@ class Feed_Reader extends File_Manager
 
             $class_application::jumpTo( PREFIX_ROOT );
 
+		// Get data previously fetched and stored locally
         $file_prefix = $user_name . '_favorites_';
 
         $file_name =
@@ -554,15 +574,11 @@ class Feed_Reader extends File_Manager
 				! $file_matching ||
 				( strlen( $dumped_store ) === strlen( serialize( array() ) ) )
 			)
-			{
-				if ( ! is_null( $resource ) )
-
-					$method = 'getTwitter' . ucfirst( $resource ) . 's';
 
 				while (
 					$favorites_slice = self::$method(
 						$user_name,
-						(object) array( PROPERTY_PAGE => $page_index )
+						(object) $options
 					)
 				)
 				{
@@ -572,7 +588,7 @@ class Feed_Reader extends File_Manager
 		
 					$page_index++;
 				}
-			}
+
 			else
 
 				$_favorites = unserialize( $dumped_store );
@@ -688,7 +704,7 @@ class Feed_Reader extends File_Manager
 	* @param	mixed	$options 	options 		
 	* @return	string	favorites
 	*/
-	public static function getTwitterFavorites(
+	public static function getTwitterFavoriteStatuses(
 		$user_name,
 		$options = NULL		
 	)
