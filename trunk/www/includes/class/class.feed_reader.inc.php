@@ -373,14 +373,14 @@ class Feed_Reader extends File_Manager
 	/**
 	* Display a wall from the favorites of a twitter user
 	*
-	* @param	string	$user_name		user name
-	* @param	string	$resource_type	resource type
-	* @param	boolean	$sorted			sorting flag
+	* @param	string	$user_name	user name
+	* @param	string	$resource	resource 
+	* @param	boolean	$sorted		sorting flag
 	* @return 	nothing
 	*/
 	public static function displayTwitterWall(
 		$user_name,
-		$resource_type = NULL,
+		$resource = NULL,
 		$sorted = FALSE
 	)
 	{
@@ -410,9 +410,9 @@ class Feed_Reader extends File_Manager
 			DIR_FAVORITES . '/'
 		;
 
-		if ( is_null( $resource_type ) )
+		if ( is_null( $resource ) )
 		
-			$resource_type = ENTITY_FAVORITE;
+			$resource = ENTITY_FAVORITE;
 
 		// Set resource type from HTTP GET parameter
 		if (
@@ -427,11 +427,11 @@ class Feed_Reader extends File_Manager
 			)
 		)
 
-			$resource_type = $_GET[GET_API_TWITTER_RESOURCE];
+			$resource = $_GET[GET_API_TWITTER_RESOURCE];
 
 		$options = array( PROPERTY_PAGE => $page_index );
 
-		switch ( $resource_type )
+		switch ( $resource )
 		{
 			case ENTITY_TIMELINE:
 
