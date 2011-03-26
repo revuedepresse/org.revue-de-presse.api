@@ -371,15 +371,15 @@ class Feed_Reader extends File_Manager
 	}
 
 	/**
-	* Display a wall from the favorites of a twitter user
+	* Display a wall from tweets
 	*
-	* @param	string	$user_name	user name
+	* @param	string	$definition	tweets definition
 	* @param	string	$resource	resource 
 	* @param	boolean	$sorted		sorting flag
 	* @return 	nothing
 	*/
 	public static function displayTwitterWall(
-		$user_name,
+		$definition,
 		$resource = NULL,
 		$sorted = FALSE
 	)
@@ -401,18 +401,32 @@ class Feed_Reader extends File_Manager
 
 		$_favorites = array();
 
+		$context = new stdClass();
+
 		$dumped_store = serialize( $_favorites );
 
-		$directory_favorites =
-			dirname( __FILE__ ) . '/../../' .
-			DIR_API. '/' .
-			DIR_TWITTER . '/' .
-			DIR_FAVORITES . '/'
-		;
+		$max_columns = 2;
+
+		$method = 'getTwitter' . ucfirst( $resource );
+
+		$options = array( PROPERTY_PAGE => $page_index );
+
+		$page_index = 1;
+
+		$regression = FALSE;
+
+        $store = &self::initializeStore();
 
 		if ( is_null( $resource ) )
 		
 			$resource = ENTITY_FAVORITE;
+
+		$directory =
+			dirname( __FILE__ ) . '/../../' .
+			DIR_API. '/' .
+			DIR_TWITTER . '/' .
+			$resource . '/'
+		;
 
 		// Set resource type from HTTP GET parameter
 		if (
@@ -429,8 +443,17 @@ class Feed_Reader extends File_Manager
 
 			$resource = $_GET[GET_API_TWITTER_RESOURCE];
 
-		$options = array( PROPERTY_PAGE => $page_index );
+		// Get data previously fetched and stored locally
+		$file_prefix = $definition . '_' . $resource . '_';
 
+		// Set user name from HTTP GET parameter
+        if (
+			isset( $_GET[GET_USERNAME_TWITTER] ) &&
+			is_string( $_GET[GET_USERNAME_TWITTER] )
+		)
+
+            $definition = $_GET[GET_USERNAME_TWITTER];
+	
 		switch ( $resource )
 		{
 			case ENTITY_TIMELINE:
@@ -441,31 +464,21 @@ class Feed_Reader extends File_Manager
 
 			case ENTITY_FAVORITE:
 			default:
+
+				// sanitize user names
+				$definition = preg_replace(
+					'#[^-_a-zA-Z0-9]#',
+					'',
+					$definition
+				);
 		}
 
-		$method = 'getTwitter' . ucfirst( $resource );
-
-		// Set user name from HTTP GET parameter
-        if (
-			isset( $_GET[GET_USERNAME_TWITTER] ) &&
-			is_string( $_GET[GET_USERNAME_TWITTER] )
-		)
-
-            $user_name = preg_replace(
-				'#[^-_a-zA-Z0-9]#',
-				'',
-				$_GET[GET_USERNAME_TWITTER]
-			);
-
-        if ( is_null( $user_name ) )
+        if ( is_null( $definition ) || ! strlen( $definition ) )
 
             $class_application::jumpTo( PREFIX_ROOT );
 
-		// Get data previously fetched and stored locally
-        $file_prefix = $user_name . '_favorites_';
-
         $file_name =
-            $directory_favorites .
+            $directory .
             $file_prefix .
             date( 'Y-m-d_H' )
         ;
@@ -501,8 +514,6 @@ class Feed_Reader extends File_Manager
             }
         }
 
-        $store = &self::initializeStore();
-
 		// force data refresh 
 
         if (
@@ -510,24 +521,16 @@ class Feed_Reader extends File_Manager
 			$_GET[GET_API_TWITTER_REFRESH]
 		)
         {
-            unset( $store[STORE_FAVORITES] );
+            unset( $store[$resource] );
 
             $file_matching = FALSE;
         }
 
-        if ( ! isset( $store[STORE_FAVORITES] ) )
+        if ( ! isset( $store[$resource] ) )
 
-            $store[STORE_FAVORITES] = array();
+            $store[$resource] = array();
 
-		$store_favorites = &$store[STORE_FAVORITES];
-
-		$context = new stdClass();
-
-		$max_columns = 2;
-
-		$page_index = 1;
-
-		$regression = FALSE;
+		$store_resource = &$store[$resource];
 
 		$sort_by_length =
 			function ( $a, $b ) use ( $class_dumper )
@@ -566,8 +569,8 @@ class Feed_Reader extends File_Manager
 		;
 
 		if (
-			! isset( $store_favorites[$user_name] ) ||
-			! count( $store_favorites[$user_name] )
+			! isset( $store_resource[$definition] ) ||
+			! count( $store_resource[$definition] )
 		)
 		{
 			if (
@@ -577,7 +580,7 @@ class Feed_Reader extends File_Manager
 
 				while (
 					$favorites_slice = self::$method(
-						$user_name,
+						$definition,
 						(object) $options
 					)
 				)
@@ -593,11 +596,11 @@ class Feed_Reader extends File_Manager
 
 				$_favorites = unserialize( $dumped_store );
 
-			$store_favorites[$user_name] = $_favorites;
+			$store_resource[$definition] = $_favorites;
 		}
 		else
 		
-			$_favorites = $store_favorites[$user_name];
+			$_favorites = $store_resource[$definition];
 
 		if ( $sorted )
 
