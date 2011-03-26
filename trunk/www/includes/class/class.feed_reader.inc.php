@@ -407,9 +407,9 @@ class Feed_Reader extends File_Manager
 
 		$max_columns = 2;
 
-		$options = array( PROPERTY_PAGE => $page_index );
-
 		$page_index = 1;
+
+		$options = array( PROPERTY_PAGE => $page_index );
 
 		$regression = FALSE;
 
@@ -599,6 +599,8 @@ class Feed_Reader extends File_Manager
 						$_favorites[md5( serialize( $favorite ) )] = $favorite;
 		
 					$page_index++;
+
+					$options[PROPERTY_PAGE] = $page_index;
 				}
 
 			else
