@@ -396,6 +396,9 @@ class Feed_Reader extends File_Manager
 
 		$class_view_builder = $class_application::getViewBuilderClass();
 
+		// verify credentials validity
+		$credentials = $class_api::verifyCredentials();
+
 		$_favorites = array();
 
 		$context = new stdClass();
