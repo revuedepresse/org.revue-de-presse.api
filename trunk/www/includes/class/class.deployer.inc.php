@@ -181,8 +181,11 @@ class Deployer extends I18n
 					) &&
 					! in_array(
 						$_SERVER['SCRIPT_NAME'],
-						array( SCRIPT_API_TWITTER_DISPLAY_WALL )
-					) 					
+						array(
+							SCRIPT_API_TWITTER_DISPLAY_WALL,
+							SCRIPT_API_TWITTER_REQUEST_ACCESS_TOKEN
+						)
+					)
 				)
 			)
 			{
