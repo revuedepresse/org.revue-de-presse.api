@@ -396,17 +396,6 @@ class Feed_Reader extends File_Manager
 
 		$class_view_builder = $class_application::getViewBuilderClass();
 
-		// forget possible existing token already signed by Twitter
-		$class_api::forgetAccessToken();
-
-		// request a new token to Twitter to be signed after user authentication
-		$class_api::requestToken( NULL, $verbose_mode );
-
-		// Restore accessing privileges by retrieving existing access tokens
-		//$class_api::unserializeAccessTokens();
-
-		$credentials = $class_api::verifyCredentials();
-
 		$_favorites = array();
 
 		$context = new stdClass();
