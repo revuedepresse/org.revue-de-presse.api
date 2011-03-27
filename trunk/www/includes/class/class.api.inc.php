@@ -427,7 +427,7 @@ class Api extends Transfer
 	* @param	mixed	$options 		options
 	* @return	mixed
 	*/	
-	public static function fetchFavoriteStatuses(
+	public static function fetchFavorite(
 		$user_name = NULL,
 		$service = NULL,
 		$options = NULL
@@ -493,9 +493,9 @@ class Api extends Transfer
 
 		$class_user = $class_application::getUserClass();
 
-		$default_results_count = 5;
-
 		$default_page_index = 1;
+
+		$default_results_count = 5;
 
 		$page_index = $default_page_index;
 
