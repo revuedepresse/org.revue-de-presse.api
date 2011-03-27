@@ -343,12 +343,12 @@ class Feed_Reader extends File_Manager
 	* @param	mixed	$options 	options 		
 	* @return 	nothing
 	*/
-	public static function displayTwitterFavoriteStatuses(
+	public static function displayTwitterFavorite(
 		$user_name,
 		$options = NULL
 	)
 	{
-		$results = self::getTwitterFavoriteStatuses( $user_name, $options );
+		$results = self::getTwitterFavorite( $user_name, $options );
 
 		echo '<pre>', print_r( $results, TRUE ), '</pre>';
 	}
@@ -395,9 +395,6 @@ class Feed_Reader extends File_Manager
 		$class_user_handler = $class_application::getUserHandlerClass();
 
 		$class_view_builder = $class_application::getViewBuilderClass();
-
-		// verify credentials validity
-		$credentials = $class_api::verifyCredentials();
 
 		$_favorites = array();
 
@@ -450,9 +447,6 @@ class Feed_Reader extends File_Manager
 
 		$method = 'getTwitter' . ucfirst( $resource );
 
-		// Get data previously fetched and stored locally
-		$file_prefix = $definition . '_' . $resource . '_';
-
 		// Set user name from HTTP GET parameter
         if (
 			isset( $_GET[GET_USERNAME_TWITTER] ) &&
@@ -460,10 +454,16 @@ class Feed_Reader extends File_Manager
 		)
 
             $definition = $_GET[GET_USERNAME_TWITTER];
+
+		// Get data previously fetched and stored locally
+		$file_prefix = $definition . '_' . $resource . '_';
 	
 		switch ( $resource )
 		{
 			case ENTITY_TIMELINE:
+
+				// verify credentials validity
+				$credentials = $class_api::verifyCredentials();
 
 				$options[PROPERTY_COUNT] = 200;
 				
@@ -731,7 +731,7 @@ class Feed_Reader extends File_Manager
 	* @param	mixed	$options 	options 		
 	* @return	string	favorites
 	*/
-	public static function getTwitterFavoriteStatuses(
+	public static function getTwitterFavorite(
 		$user_name,
 		$options = NULL		
 	)
@@ -742,7 +742,7 @@ class Feed_Reader extends File_Manager
 
 		$class_dumper = $class_application::getDumperClass();
 
-		return $class_api::fetchFavoriteStatuses(
+		return $class_api::fetchFavorite(
 			$user_name,
 			NULL,
 			$options			
