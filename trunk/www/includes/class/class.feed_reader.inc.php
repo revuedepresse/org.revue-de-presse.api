@@ -476,6 +476,8 @@ class Feed_Reader extends File_Manager
 			case ENTITY_FAVORITE:
 			default:
 
+				$class_api::unserializeAccessTokens();
+
 				// sanitize user names
 				$definition = preg_replace(
 					'#[^-_a-zA-Z0-9]#',
