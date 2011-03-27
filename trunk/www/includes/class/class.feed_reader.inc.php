@@ -504,28 +504,28 @@ class Feed_Reader extends File_Manager
 
             $file_matching = TRUE;
         }
-        else
-        {
-            $pattern_file =
-                $directory.
-                $file_prefix .
-                '*'
-            ;
-
-            $matching_files = glob( $pattern_file );
-
-            if (
-                is_array( $matching_files ) &&
-                count( $matching_files )
-            )
-            {
-                $_file_name = array_pop( $matching_files );
-
-                $dumped_store = file_get_contents( $_file_name );
-
-                $file_matching = TRUE;
-            }
-        }
+        //else
+        //{
+        //    $pattern_file =
+        //        $directory.
+        //        $file_prefix .
+        //        '*'
+        //    ;
+        //
+        //    $matching_files = glob( $pattern_file );
+        //
+        //    if (
+        //        is_array( $matching_files ) &&
+        //        count( $matching_files )
+        //    )
+        //    {
+        //        $_file_name = array_pop( $matching_files );
+        //
+        //        $dumped_store = file_get_contents( $_file_name );
+        //
+        //        $file_matching = TRUE;
+        //    }
+        //}
 
 		// force data refresh 
 
