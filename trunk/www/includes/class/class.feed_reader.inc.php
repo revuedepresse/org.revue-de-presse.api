@@ -483,7 +483,7 @@ class Feed_Reader extends File_Manager
 					isset( $_GET[GET_USERNAME_TWITTER] ) &&
 					is_string( $_GET[GET_USERNAME_TWITTER] )
 				)
-		
+
 					$definition = $_GET[GET_USERNAME_TWITTER];
 
 				// sanitize user names
@@ -615,12 +615,12 @@ class Feed_Reader extends File_Manager
 				)
 			)
 
-				while (
-					$favorites_slice = self::$method(
-						$definition,
-						( object ) $options
-					)
-				)
+				//while (
+				//	$favorites_slice = self::$method(
+				//		$definition,
+				//		( object ) $options
+				//	)
+				//)
 				{
 					while ( list( $index, $favorite ) = each( $favorites_slice ) )
 		
