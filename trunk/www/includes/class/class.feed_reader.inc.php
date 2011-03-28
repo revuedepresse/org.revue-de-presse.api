@@ -423,6 +423,8 @@ class Feed_Reader extends File_Manager
 
 		$regression = FALSE;
 
+		$class_api::unserializeAccessTokens();
+
         $store = &self::initializeStore();
 
 		if ( is_null( $resource ) )
@@ -491,8 +493,6 @@ class Feed_Reader extends File_Manager
 
 			case ENTITY_FAVORITE:
 			default:
-
-				$class_api::unserializeAccessTokens();
 
 				// Set user name from HTTP GET parameter
 				if (
