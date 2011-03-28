@@ -632,9 +632,11 @@ class Feed_Reader extends File_Manager
 			)
 
 				while (
-					$favorites_slice = self::$method(
-						$definition,
-						( object ) $options
+					(
+						$favorites_slice = self::$method(
+							$definition,
+							( object ) $options
+						)
 					) &&
 					! $error_404
 				)
