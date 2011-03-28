@@ -458,7 +458,7 @@ class Feed_Reader extends File_Manager
 				
 				if ( isset( $credentials->{PROPERTY_SCREEN_NAME} ) )
 
-					$file_prefix .= $credentials->{PROPERTY_SCREEN_NAME} . '_';
+					$definition = $credentials->{PROPERTY_SCREEN_NAME} . '_';
 
 				// Set user name from HTTP GET parameter
 				else if (
@@ -468,7 +468,7 @@ class Feed_Reader extends File_Manager
 				{
 					$options[PROPERTY_SCREEN_NAME] = $_GET[GET_USERNAME_TWITTER];
 
-					$file_prefix .= $_GET[GET_USERNAME_TWITTER] . '_';
+					$user_name = $_GET[GET_USERNAME_TWITTER] . '_';
 				}
 
 					break;
@@ -495,7 +495,11 @@ class Feed_Reader extends File_Manager
 		}
 
 		// Get data previously fetched and stored locally
-		$file_prefix = $definition . '_' . $resource . '_';
+		$file_prefix =
+			$definition . '_' .
+			$resource . '_' .
+			(  isset( $user_name ) ? $user_name : '' )
+		; 
 
         if ( is_null( $definition ) || ! strlen( $definition ) )
 
