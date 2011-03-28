@@ -510,13 +510,17 @@ class Api extends Transfer
 			is_object( $options ) 
 		)
 		{
+			if ( isset( $options->{PROPERTY_PAGE} ) )
+
+				$page_index = $options->{PROPERTY_PAGE};
+
 			if ( isset( $options->{PROPERTY_COUNT} ) )
 
 				$results_count = $options->{PROPERTY_COUNT};
 
-			if ( isset( $options->{PROPERTY_PAGE} ) )
+			if ( isset( $options->{PROPERTY_SCREEN_NAME} ) )
 
-				$page_index = $options->{PROPERTY_PAGE};
+				$screen_name = $options->{PROPERTY_SCREEN_NAME};
 		}
 
 		list( $service, $service_type_default ) = self::checkService( $service );
@@ -531,7 +535,11 @@ class Api extends Transfer
 			) .
 			(
 				$results_count > $default_results_count ?
-					'&'. PROPERTY_COUNT . '=' . $results_count: ''
+					'&'. PROPERTY_COUNT . '=' . $results_count : ''
+			) .
+			(
+				isset( $screen_name ) ?
+					'&'. PROPERTY_SCREEN_NAME . '=' . $screen_name : ''
 			)			
 		);
 
