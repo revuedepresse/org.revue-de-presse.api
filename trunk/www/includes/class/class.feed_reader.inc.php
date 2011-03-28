@@ -459,7 +459,7 @@ class Feed_Reader extends File_Manager
 				$options[PROPERTY_COUNT] = 200;
 				
 				if (
-					! isset( $_GET[GET_USERNAME_TWITTER] ) &&
+					//! isset( $_GET[GET_USERNAME_TWITTER] ) &&
 					isset( $credentials->{PROPERTY_SCREEN_NAME} )
 				)
 
