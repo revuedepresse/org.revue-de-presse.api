@@ -6,6 +6,8 @@ $class_feed_reader = $class_application::getFeedReaderClass();
 //
 //$class_feed_reader::displayTwitterWall( $user_name );
 
-$kind = 'home';
+//$kind = 'home';
+
+$kind = 'user';
 
 $class_feed_reader::displayTwitterWall( $kind );
