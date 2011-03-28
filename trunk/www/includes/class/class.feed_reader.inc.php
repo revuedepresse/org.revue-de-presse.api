@@ -622,6 +622,11 @@ class Feed_Reader extends File_Manager
 				//	)
 				//)
 				{
+					$favorites_slice = self::$method(
+						$definition,
+						( object ) $options
+					);
+
 					while ( list( $index, $favorite ) = each( $favorites_slice ) )
 		
 						$_favorites[md5( serialize( $favorite ) )] = $favorite;
