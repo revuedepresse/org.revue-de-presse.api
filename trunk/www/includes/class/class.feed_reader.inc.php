@@ -4,6 +4,17 @@
 * Changes log
 *
 *************
+* 2011 03 28
+*************
+*
+* Prevent looping on "Not Found" error
+*
+* FEED_READER :: displayTwitterWall
+*
+* (branch 0.1 :: revision 636)
+* (trunk :: revision :: 230)
+*
+*************
 * 2011 03 26
 *************
 *
@@ -459,7 +470,7 @@ class Feed_Reader extends File_Manager
 				$options[PROPERTY_COUNT] = 200;
 				
 				if (
-					//! isset( $_GET[GET_USERNAME_TWITTER] ) &&
+					! isset( $_GET[GET_USERNAME_TWITTER] ) &&
 					isset( $credentials->{PROPERTY_SCREEN_NAME} )
 				)
 
@@ -620,26 +631,19 @@ class Feed_Reader extends File_Manager
 				)
 			)
 
-				//while (
-				//	$favorites_slice = self::$method(
-				//		$definition,
-				//		( object ) $options
-				//	) &&
-				//	! $error_404
-				//)
-				{
+				while (
 					$favorites_slice = self::$method(
 						$definition,
 						( object ) $options
-					) ;
-
+					) &&
+					! $error_404
+				)
+				{
 					if ( isset( $favorites_slice->{PROPERTY_ERROR} ) &&
 						$favorites_slice->{PROPERTY_ERROR} === 'Not found'
 					)
 
 						$error_404 = TRUE;
-
-					echo '404?' , $error_404;
 
 					while ( list( $index, $favorite ) = each( $favorites_slice ) )
 		
