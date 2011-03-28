@@ -613,8 +613,8 @@ class Feed_Reader extends File_Manager
 		;
 
 		if (
-			! isset( $store_resource[$definition] ) ||
-			! count( $store_resource[$definition] )
+			! isset( $store_resource[$file_prefix] ) ||
+			! count( $store_resource[$file_prefix] )
 		)
 		{
 			if (
@@ -661,11 +661,11 @@ class Feed_Reader extends File_Manager
 
 				$_favorites = unserialize( $dumped_store );
 
-			$store_resource[$definition] = $_favorites;
+			$store_resource[$file_prefix] = $_favorites;
 		}
 		else
 		
-			$_favorites = $store_resource[$definition];
+			$_favorites = $store_resource[$file_prefix];
 
 		if ( $sorted )
 
