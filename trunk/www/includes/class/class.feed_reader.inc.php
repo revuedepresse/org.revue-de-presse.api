@@ -446,17 +446,6 @@ class Feed_Reader extends File_Manager
 		;
 
 		$method = 'getTwitter' . ucfirst( $resource );
-
-		// Set user name from HTTP GET parameter
-        if (
-			isset( $_GET[GET_USERNAME_TWITTER] ) &&
-			is_string( $_GET[GET_USERNAME_TWITTER] )
-		)
-
-            $definition = $_GET[GET_USERNAME_TWITTER];
-
-		// Get data previously fetched and stored locally
-		$file_prefix = $definition . '_' . $resource . '_';
 	
 		switch ( $resource )
 		{
@@ -471,12 +460,31 @@ class Feed_Reader extends File_Manager
 
 					$file_prefix .= $credentials->{PROPERTY_SCREEN_NAME} . '_';
 
+				// Set user name from HTTP GET parameter
+				else if (
+					isset( $_GET[GET_USERNAME_TWITTER] ) &&
+					is_string( $_GET[GET_USERNAME_TWITTER] )
+				)
+				{
+					$options[PROPERTY_SCREEN_NAME] = $_GET[GET_USERNAME_TWITTER];
+
+					$file_prefix .= $_GET[GET_USERNAME_TWITTER] . '_';
+				}
+
 					break;
 
 			case ENTITY_FAVORITE:
 			default:
 
 				$class_api::unserializeAccessTokens();
+
+				// Set user name from HTTP GET parameter
+				if (
+					isset( $_GET[GET_USERNAME_TWITTER] ) &&
+					is_string( $_GET[GET_USERNAME_TWITTER] )
+				)
+		
+					$definition = $_GET[GET_USERNAME_TWITTER];
 
 				// sanitize user names
 				$definition = preg_replace(
@@ -485,6 +493,9 @@ class Feed_Reader extends File_Manager
 					$definition
 				);
 		}
+
+		// Get data previously fetched and stored locally
+		$file_prefix = $definition . '_' . $resource . '_';
 
         if ( is_null( $definition ) || ! strlen( $definition ) )
 
