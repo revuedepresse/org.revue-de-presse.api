@@ -641,12 +641,12 @@ class Feed_Reader extends File_Manager
 					! $error_404
 				)
 				{
-					if (
-						isset( $favorites_slice->{PROPERTY_ERROR} ) &&
-						( $favorites_slice->{PROPERTY_ERROR} === 'Not found' )
-					)
-
-						$error_404 = TRUE;
+					//if (
+					//	isset( $favorites_slice->{PROPERTY_ERROR} ) &&
+					//	( $favorites_slice->{PROPERTY_ERROR} === 'Not found' )
+					//)
+					//
+					//	$error_404 = TRUE;
 
 					while ( list( $index, $favorite ) = each( $favorites_slice ) )
 		
