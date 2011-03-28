@@ -456,7 +456,10 @@ class Feed_Reader extends File_Manager
 
 				$options[PROPERTY_COUNT] = 200;
 				
-				if ( isset( $credentials->{PROPERTY_SCREEN_NAME} ) )
+				if (
+					! isset( $_GET[GET_USERNAME_TWITTER] ) &&
+					isset( $credentials->{PROPERTY_SCREEN_NAME} )
+				)
 
 					$definition = $credentials->{PROPERTY_SCREEN_NAME} . '_';
 
