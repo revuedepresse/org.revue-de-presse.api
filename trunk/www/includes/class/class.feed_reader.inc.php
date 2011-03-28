@@ -402,6 +402,8 @@ class Feed_Reader extends File_Manager
 
 		$dumped_store = serialize( $_favorites );
 
+		$error_404 = FALSE;
+
 		$max_columns = 2;
 
 		$page_index = 1;
@@ -622,13 +624,22 @@ class Feed_Reader extends File_Manager
 				//	$favorites_slice = self::$method(
 				//		$definition,
 				//		( object ) $options
-				//	)
+				//	) &&
+				//	! $error_404
 				//)
 				{
 					$favorites_slice = self::$method(
 						$definition,
 						( object ) $options
-					);
+					) ;
+
+					if ( isset( $favorites_slice->{PROPERTY_ERROR} ) &&
+						$favorites_slice->{PROPERTY_ERROR} === 'Not found'
+					)
+
+						$error_404 = TRUE;
+
+					echo '404?' , $error_404;
 
 					while ( list( $index, $favorite ) = each( $favorites_slice ) )
 		
