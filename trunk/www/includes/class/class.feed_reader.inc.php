@@ -407,11 +407,13 @@ class Feed_Reader extends File_Manager
 
 		$class_view_builder = $class_application::getViewBuilderClass();
 
-		$_favorites = array();
+		$_items = array();
+
+		$aggregate = FALSE;
 
 		$context = new stdClass();
 
-		$dumped_store = serialize( $_favorites );
+		$dumped_store = serialize( $_items );
 
 		$error_404 = FALSE;
 
@@ -535,28 +537,28 @@ class Feed_Reader extends File_Manager
 
             $file_matching = TRUE;
         }
-        //else
-        //{
-        //    $pattern_file =
-        //        $directory.
-        //        $file_prefix .
-        //        '*'
-        //    ;
-        //
-        //    $matching_files = glob( $pattern_file );
-        //
-        //    if (
-        //        is_array( $matching_files ) &&
-        //        count( $matching_files )
-        //    )
-        //    {
-        //        $_file_name = array_pop( $matching_files );
-        //
-        //        $dumped_store = file_get_contents( $_file_name );
-        //
-        //        $file_matching = TRUE;
-        //    }
-        //}
+        else
+        {
+            $pattern_file =
+                $directory.
+                $file_prefix .
+                '*'
+            ;
+        
+            $matching_files = glob( $pattern_file );
+        
+            if (
+                is_array( $matching_files ) &&
+                count( $matching_files )
+            )
+            {
+                $_file_name = array_pop( $matching_files );
+        
+                $dumped_store = file_get_contents( $_file_name );
+        
+                $file_matching = TRUE;
+            }
+        }
 
 		// force data refresh 
 
@@ -614,7 +616,11 @@ class Feed_Reader extends File_Manager
 
 		if (
 			! isset( $store_resource[$file_name] ) ||
-			! count( $store_resource[$file_name] )
+			! count( $store_resource[$file_name] ) ||
+			(
+				isset( $_GET[GET_API_TWITTER_AGGREGATE] ) &&
+				( $aggregate = $_GET[GET_API_TWITTER_AGGREGATE] )
+			)
 		)
 		{
 			if (
@@ -623,17 +629,30 @@ class Feed_Reader extends File_Manager
 					(
 						strlen( $dumped_store ) ===
 							strlen( serialize( array() ) )
-					)
+					) ||
+					$aggregate
 				) &&
 				in_array(
 					$method,
 					get_class_methods( __CLASS__ )
 				)
 			)
+			{
+				if ( $aggregate )
+				{
+					$count_items = count( unserialize( $dumped_store ) );
+					
+					$options[PROPERTY_PAGE] =
+
+					$page_index = floor(
+						$count_items /
+							$options[PROPERTY_COUNT]
+					) + 1;
+				}
 
 				while (
 					(
-						$favorites_slice = self::$method(
+						$items = self::$method(
 							$definition,
 							( object ) $options
 						)
@@ -648,34 +667,34 @@ class Feed_Reader extends File_Manager
 					//
 					//	$error_404 = TRUE;
 
-					while ( list( $index, $favorite ) = each( $favorites_slice ) )
+					while ( list( $index, $item ) = each( $items ) )
 		
-						$_favorites[md5( serialize( $favorite ) )] = $favorite;
+						$_items[md5( serialize( $item ) )] = $item;
 		
 					$page_index++;
 
 					$options[PROPERTY_PAGE] = $page_index;
 				}
-
+			}
 			else
 
-				$_favorites = unserialize( $dumped_store );
+				$_items = unserialize( $dumped_store );
 
-			$store_resource[$file_name] = $_favorites;
+			$store_resource[$file_name] = $_items;
 		}
 		else
 		
-			$_favorites = $store_resource[$file_name];
+			$_items = $store_resource[$file_name];
 
 		if ( $sorted )
 
-			usort( $_favorites, $sort_by_length );
+			usort( $_items, $sort_by_length );
 
 		if ( file_exists( $file_name ) )
 		{			
 			if (
 				strlen( $dumped_store ) >
-					strlen( serialize( $_favorites ) )
+					strlen( serialize( $_items ) )
 			)
 
 				$regression = TRUE;
@@ -688,14 +707,14 @@ class Feed_Reader extends File_Manager
 				FILE_ACCESS_MODE_OVERWRITE
 			);
 
-			fwrite( $file_handler, serialize( $_favorites ) );
+			fwrite( $file_handler, serialize( $_items ) );
 	
 			fclose( $file_handler );
 		}
 
 		$row_index =
 
-		$count_rows = ceil( count( $_favorites ) / $max_columns );
+		$count_rows = ceil( count( $_items ) / $max_columns );
 
 		$parameters = array();
 
@@ -709,7 +728,7 @@ class Feed_Reader extends File_Manager
 			
 			while ( $column_index < $max_columns )
 			{
-				list( $hash, $favorite ) = each( $_favorites );
+				list( $hash, $favorite ) = each( $_items );
 
 				$tweet =
 						is_object( $favorite ) && 
