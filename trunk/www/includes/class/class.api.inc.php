@@ -285,22 +285,22 @@ class Api extends Transfer
 		{
 			case $service_type_default;
 
-				if ( ! isset( $service_store->{PROPERTY_API_CONSUMER_KEY} ) )
-				
-					$service_store->{PROPERTY_API_CONSUMER_KEY} =
-						API_TWITTER_CONSUMER_KEY;
+		if ( ! isset( $service_store->{PROPERTY_API_CONSUMER_KEY} ) )
 		
-				if ( ! isset( $service_store->{PROPERTY_API_CONSUMER_SECRET} ) )
-		
-					$service_store->{PROPERTY_API_CONSUMER_SECRET} =
-						API_TWITTER_CONSUMER_SECRET
-					;
-		
-				if ( ! isset( $service_store->{PROPERTY_API_CONSUMER_CALLBACK} ) )
-		
-					$service_store->{PROPERTY_API_CONSUMER_CALLBACK} =
-						API_TWITTER_CALLBACK
-					;
+			$service_store->{PROPERTY_API_CONSUMER_KEY} =
+				API_TWITTER_CONSUMER_KEY;
+
+		if ( ! isset( $service_store->{PROPERTY_API_CONSUMER_SECRET} ) )
+
+			$service_store->{PROPERTY_API_CONSUMER_SECRET} =
+				API_TWITTER_CONSUMER_SECRET
+			;
+
+		if ( ! isset( $service_store->{PROPERTY_API_CONSUMER_CALLBACK} ) )
+
+			$service_store->{PROPERTY_API_CONSUMER_CALLBACK} =
+				API_TWITTER_CALLBACK
+			;
 
 				$api_type = $api_type_default;
 				
@@ -311,19 +311,19 @@ class Api extends Transfer
 				$entity_service = ENTITY_SERVICE;
 
 				$service_type_amazon_id = $class_data_fetcher::getEntityTypeId(
-					array(
+			array(
 						PROPERTY_VALUE => $service,
 						PROPERTY_ENTITY => $entity_service
-					)
-				);
+			)
+		);
 
 				$entity_type_amazon = $class_entity::getType(
-				   array(
+			array(
 					   PROPERTY_ID => $service_type_amazon_id,
 					   PROPERTY_ENTITY => $entity_service
-				   )
-				);
- 
+			)
+		);
+
 				$service_name = $entity_type_amazon->{PROPERTY_NAME};
 
 				$constant_name_consumer_key = strtoupper(
@@ -367,7 +367,7 @@ class Api extends Transfer
 					$service_store->{PROPERTY_USER_NAME} =
 						constant( $constant_name_user_name )
 					;
-
+		
 				$api_type = $class_data_fetcher::getEntityTypeValue(
 					array(
 						PROPERTY_NAME => $service_name,
@@ -457,33 +457,33 @@ class Api extends Transfer
 
 		$store = &self::initializeStore( $service );
 		$service_store = &self::getEntityStore( $service );
-
+		
 		switch ( $service )
 		{
 			case $service_type_default:
 
 				$class_twitteroauth = $class_application::getTwitteroauthClass();
-	
+
 				$library_directory_oauth =
 					dirname(__FILE__).'/..'.
 					DIR_LIBRARY.'/'.
 					DIR_LIBRARY_TWITTEROAUTH.'/'
 				;
-	
+		
 				if ( is_null(  $endpoint ) )
-				
+
 					$endpoint = API_TWITTER_VERIFY_CREDENTIALS;
-	
-				if (
-					! isset( $service_store->{PROPERTY_API_CONSUMER_CALLBACK} ) ||
-					! isset( $service_store->{PROPERTY_API_CONSUMER_SECRET} )
-				)
-		
-					throw new Exception( EXCEPTION_INVALID_CONFIGURATION );
-		
-				$api_consumer_key = $service_store->{PROPERTY_API_CONSUMER_KEY};
-				$api_consumer_secret = $service_store->{PROPERTY_API_CONSUMER_SECRET};
-				
+
+		if (
+			! isset( $service_store->{PROPERTY_API_CONSUMER_CALLBACK} ) ||
+			! isset( $service_store->{PROPERTY_API_CONSUMER_SECRET} )
+		)
+
+			throw new Exception( EXCEPTION_INVALID_CONFIGURATION );
+
+		$api_consumer_key = $service_store->{PROPERTY_API_CONSUMER_KEY};
+		$api_consumer_secret = $service_store->{PROPERTY_API_CONSUMER_SECRET};
+
 				if (
 					isset( $store[PROPERTY_TOKEN_ACCESS] ) &&
 					count( $store[PROPERTY_TOKEN_ACCESS] )
@@ -515,8 +515,8 @@ class Api extends Transfer
 						),
 						DEBUGGING_DISPLAY_API_CONTACT_ENPOINT_RESPONSE
 					);
-				}
-
+				}				
+					
 					break;
 
 			default:
@@ -666,7 +666,7 @@ class Api extends Transfer
 			(
 				isset( $since_id ) ?
 					'&'. PROPERTY_SINCE_ID . '=' . $since_id : ''
-			)
+			)			
 		);
 
 		$response = self::contactEndpoint(
@@ -733,7 +733,7 @@ class Api extends Transfer
 
 		$class_dumper::log(
 			__METHOD__,
-			array('A new token request can be made'),
+			array('A new token request can be issued'),
 			$verbose_mode
 		);		
 	}
@@ -1089,7 +1089,10 @@ class Api extends Transfer
 			if (
 				isset( $store[PROPERTY_TOKEN_ACCESS] ) &&
 				isset( $store[PROPERTY_STATUS] ) &&
-				$store[PROPERTY_STATUS] == ENTITY_STATUS_INACTIVE
+				(
+					! isset( $store[PROPERTY_STATUS] ) ||
+					( $store[PROPERTY_STATUS] == ENTITY_STATUS_INACTIVE )
+ 				)
 			)
 			{
 				if ( isset( $store_parent[$service][PROPERTY_TOKEN_ACCESS] ) ) 
