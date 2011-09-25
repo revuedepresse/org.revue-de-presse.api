@@ -1,23 +1,4 @@
 <?php
-/**
-*************
-* Changes log
-*
-*************
-* 2011 03 08
-*************
-* 
-* Implement items sharing with flags
-* 
-* methods affected ::
-*
-* EXECUTOR :: perform
-* FLAG MANAGER :: flagAsShared
-* SERIALIZER :: flagAsShared
-* 
-* (revision 590)
-*
-*/
 
 /**
 * Flag manager class
@@ -324,3 +305,23 @@ class Flag_Manager extends Flag
 		return self::getFlags( array( 'usr_id' => $owner_identifier ) );
 	}
 }
+
+/**
+*************
+* Changes log
+*
+*************
+* 2011 03 08
+*************
+* 
+* Implement items sharing with flags
+* 
+* methods affected ::
+*
+* EXECUTOR :: perform
+* FLAG MANAGER :: flagAsShared
+* SERIALIZER :: flagAsShared
+* 
+* (revision 590)
+*
+*/

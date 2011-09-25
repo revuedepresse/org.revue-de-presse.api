@@ -1,22 +1,4 @@
 <?php
-/**
-*************
-* Changes log
-*
-*************
-* 2011 03 26
-*************
-* 
-* Revise bootstrap
-*
-* method affected ::
-*
-* DEPLOYER :: initialize
-* 
-* (branch 0.1 :: revision 636)
-* (trunk :: revision :: 204)
-*
-*/
 
 /**
 * Deployer class
@@ -49,13 +31,13 @@ class Deployer extends I18n
 				isset( $_SERVER['SCRIPT_NAME'] ) &&
 				preg_match('/## FILL HOSTNAME ##/', $_SERVER['SCRIPT_NAME'])
 			) || (
-					! isset( $_SERVER['SERVER_NAME'] ) &&
-					isset( $_SERVER['SCRIPT_NAME'] ) &&
-					preg_match('/weaving-the-web\.org/', $_SERVER['SCRIPT_NAME'])
+				! isset( $_SERVER['SERVER_NAME'] ) &&
+				isset( $_SERVER['SCRIPT_NAME'] ) &&
+				preg_match('/weaving-the-web\.org/', $_SERVER['SCRIPT_NAME'])
 			) || (
-					// on remote adama server
-					isset( $_SERVER['DOCUMENT_ROOT'] ) &&
-					$_SERVER['DOCUMENT_ROOT'] == '/var/www/## FILL DOCUMENT ROOT ##'
+				// on remote adama server
+				isset( $_SERVER['DOCUMENT_ROOT'] ) &&
+				$_SERVER['DOCUMENT_ROOT'] == '/var/www/## FILL DOCUMENT ROOT ##'
 			) || (
 				// on local adama server
 				isset( $_SERVER['DOCUMENT_ROOT'] ) &&
@@ -182,6 +164,7 @@ class Deployer extends I18n
 					! in_array(
 						$_SERVER['SCRIPT_NAME'],
 						array(
+							SCRIPT_API_FLICKR_AUTHENTICATE,
 							SCRIPT_API_TWITTER_CHECK_RATE_LIMIT,
 							SCRIPT_API_TWITTER_DISPLAY_WALL,
 							SCRIPT_API_TWITTER_FORGET_ACCESS_TOKEN,
@@ -450,3 +433,22 @@ class Deployer extends I18n
 		return UNIT_TESTING_MODE_STATUS;
 	}
 }
+
+/**
+*************
+* Changes log
+*
+*************
+* 2011 03 26
+*************
+* 
+* Revise bootstrap
+*
+* method affected ::
+*
+* DEPLOYER :: initialize
+* 
+* (branch 0.1 :: revision 636)
+* (trunk :: revision :: 204)
+*
+*/

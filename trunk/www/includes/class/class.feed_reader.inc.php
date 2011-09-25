@@ -1,36 +1,4 @@
 <?php
-/**
-*************
-* Changes log
-*
-*************
-* 2011 03 28
-*************
-*
-* Prevent looping on "Not Found" error
-*
-* FEED_READER :: displayTwitterWall
-*
-* (branch 0.1 :: revision 636)
-* (trunk :: revision :: 230)
-*
-*************
-* 2011 03 26
-*************
-*
-* Implement methods to display wall of tweets
-* from twitter timelines and favorites
-*
-* methods affected ::
-*
-* FEED_READER :: displayTwitterTimeline
-* FEED_READER :: displayTwitterWall
-* FEED_READER :: getTwitterTimeline
-* 
-* (branch 0.1 :: revision 630)
-* (trunk :: revision :: 195)
-*
-*/
 
 /**
 * Feed reader class
@@ -427,6 +395,8 @@ class Feed_Reader extends File_Manager
 
 		$class_api::unserializeAccessTokens();
 
+		$max_id = 0;
+
         $store = &self::initializeStore();
 
 		if ( is_null( $resource ) )
@@ -555,8 +525,22 @@ class Feed_Reader extends File_Manager
                 $_file_name = array_pop( $matching_files );
         
                 $dumped_store = file_get_contents( $_file_name );
+
+				$_items = unserialize( $dumped_store );
         
                 $file_matching = TRUE;
+
+				$max_id = self::getLastTweetId( $_file_name );
+
+				$class_dumper::log(
+					__METHOD__,
+					array(
+						'[since id]',
+						$max_id,
+						'since_id === 0',
+						$max_id === 0 ? 'TRUE' : 'FALSE'
+					)
+				);
             }
         }
 
@@ -615,12 +599,12 @@ class Feed_Reader extends File_Manager
 		;
 
 		if (
-			! isset( $store_resource[$file_name] ) ||
-			! count( $store_resource[$file_name] ) ||
 			(
 				isset( $_GET[GET_API_TWITTER_AGGREGATE] ) &&
 				( $aggregate = $_GET[GET_API_TWITTER_AGGREGATE] )
-			)
+			) ||
+			! isset( $store_resource[$file_name] ) ||
+			! count( $store_resource[$file_name] )
 		)
 		{
 			if (
@@ -640,15 +624,31 @@ class Feed_Reader extends File_Manager
 			{
 				if ( $aggregate )
 				{
-					$count_items = count( unserialize( $dumped_store ) );
-					
-					$options[PROPERTY_PAGE] =
+					if ( $max_id === 0 )
+					{
+						$count_items = count( unserialize( $dumped_store ) );
+						
+						$options[PROPERTY_PAGE] =
+	
+						$page_index = floor(
+							$count_items /
+								$options[PROPERTY_COUNT]
+						) + 1;
+					}
+					else
 
-					$page_index = floor(
-						$count_items /
-							$options[PROPERTY_COUNT]
-					) + 1;
+						$options[PROPERTY_MAX_ID] = $max_id;
 				}
+
+				$class_dumper::log(
+					__METHOD__,
+					array(
+						'[aggregate data]',
+						$aggregate ? 'TRUE' : 'FALSE', 						
+						'[options]',
+						$options
+					)
+				);
 
 				while (
 					(
@@ -660,12 +660,12 @@ class Feed_Reader extends File_Manager
 					! $error_404
 				)
 				{
-					//if (
-					//	isset( $favorites_slice->{PROPERTY_ERROR} ) &&
-					//	( $favorites_slice->{PROPERTY_ERROR} === 'Not found' )
-					//)
-					//
-					//	$error_404 = TRUE;
+					if (
+						isset( $favorites_slice->{PROPERTY_ERROR} ) &&
+						( $favorites_slice->{PROPERTY_ERROR} === 'Not found' )
+					)
+					
+						$error_404 = TRUE;
 
 					while ( list( $index, $item ) = each( $items ) )
 		
@@ -782,6 +782,70 @@ class Feed_Reader extends File_Manager
 			$context,
 			VIEW_TYPE_INJECTION
 		);
+	}
+
+	/**
+	* Get the id of last tweet from a source
+	*
+	* @param	string	$file	file
+	* @param	mixed	$source	source
+	* @return 	mixed	
+	*/
+	public static function getLastTweetId( $file, $source = NULL )
+	{
+		if ( is_null( $source ) )
+		
+			$source = ENTITY_FILE;
+	
+		$last_item_id = 0;
+	
+		switch ( $source )
+		{
+			case ENTITY_FILE:
+			default:
+
+				$store = self::unserializeStore( $file );
+
+				$last_item = array_pop( $store );
+				
+				if (
+					is_object( $last_item) &&
+					isset( $last_item->{PROPERTY_ID} )
+				)
+
+					$last_item_id = $last_item->{PROPERTY_ID};
+		}
+
+		return $last_item_id;	
+	}
+	
+	/**
+	* Unserialize a store
+	*
+	* @param	string	$file	file
+	* @return	array	store
+	*/	
+	public static function unserializeStore( $file )
+	{
+		$store = array();
+	
+		if ( file_exists( $file ) )
+		{
+			$dump_store = file_get_contents( $file );
+		
+			$store = unserialize( $dump_store );
+		}
+		else
+		
+			throw new Exception(
+				sprintf(
+					EXCEPTION_INVALID_ENTITY,
+					ENTITY_PATH
+				).' ('.$file.')'
+			);
+		
+		return $store;
+		
 	}
 
 	/**
@@ -956,7 +1020,7 @@ class Feed_Reader extends File_Manager
 			echo $exception_missing_metadata_rdf;
 		else
 
-			throw new Exception( $$exception_missing_metadata_rdf );
+			throw new Exception( $exception_missing_metadata_rdf );
 
 		return array(
 			METADATA_TYPE_KEYWORDS => implode(';', $keywords),
@@ -974,3 +1038,47 @@ class Feed_Reader extends File_Manager
         trigger_error('ouch');
     }
 }
+
+/**
+*************
+* Changes log
+*
+*************
+* 2011 03 26
+*************
+*
+* Implement methods to display wall of tweets
+* from twitter timelines and favorites
+*
+* methods affected ::
+*
+* FEED_READER :: displayTwitterTimeline
+* FEED_READER :: displayTwitterWall
+* FEED_READER :: getTwitterTimeline
+* 
+* (branch 0.1 :: revision 630)
+* (trunk :: revision :: 195)
+*
+**************
+* 2011 03 28
+*************
+*
+* Prevent looping on "Not Found" error
+*
+* FEED_READER :: displayTwitterWall
+*
+* (branch 0.1 :: revision 636)
+* (trunk :: revision :: 230)
+*
+*************
+* 2011 03 29
+*************
+*
+* Implement last tweet id retrieval from source
+*
+* FEED_READER :: getLastTweetId
+*
+* (branch 0.1 :: revision 639)
+* (trunk :: revision :: 238)
+* 
+*/

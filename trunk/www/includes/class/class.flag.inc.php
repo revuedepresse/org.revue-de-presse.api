@@ -111,4 +111,3 @@ class Flag extends Toolbox
 		$property = $value;
 	}
 }
-?>

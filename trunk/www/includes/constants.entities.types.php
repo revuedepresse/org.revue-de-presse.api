@@ -22,6 +22,7 @@ assignConstant('AFFORDANCE_TYPE_INPUT_TEXT*', 'input_text');
 
 // API types
 
+assignConstant('API_TYPE_AMAZON', 'amazon');
 assignConstant('API_TYPE_TWITTER*', 'twitter');
 
 // Arc type
@@ -162,6 +163,11 @@ assignConstant('FIELD_TYPE_SUBMIT', 'submit');
 assignConstant('FIELD_TYPE_TEXT', 'text');
 assignConstant('FIELD_TYPE_TEXTAREA', 'textarea');
 
+// File types
+
+assignConstant( 'FILE_TYPE_ORDINARY*', 0 );
+assignConstant( 'FILE_TYPE_DIRECTORY', 1 );
+
 // Folder types
 
 assignConstant('FOLDER_TYPE_CACHE', DIR_CACHE);
@@ -238,14 +244,47 @@ assignConstant('LEVEL_TYPE_ROOT', 0);
 
 assignConstant('LINK_TYPE_CONFIRMATION', 1);
 
+
+// Media types
+
+assignConstant('MASHUP_TYPE_OPEN_DATA*', 'open_data');
+
 // Media types
 
 assignConstant('MEDIA_TYPE_IMAGE', 0);
+
+// Merchant platform types
+
+assignConstant('MERCHANT_PLATFORM_TYPE_E_COMMERCE*', 'e_commerce');
 
 // Message types
 
 assignConstant('MESSAGE_TYPE_EMAIL*', 0);
 assignConstant('MESSAGE_TYPE_TWEET', 1);
+
+// Metadata types
+
+assignConstant('METADATA_TYPE_KEYWORDS', 'keywords');
+assignConstant('METADATA_TYPE_RDF', 'rdf');
+assignConstant('METADATA_TYPE_TITLE', 'title');
+assignConstant('METADATA_TYPE_XPACKET', 'xpacket');
+
+// Method Name Sections types
+
+assignConstant('METHOD_NAME_SECTION_TYPE_BY*', 'by');
+
+// Mime types
+
+assignConstant('MIME_TYPE_APPLICATION_JSON', 'application/json');
+assignConstant('MIME_TYPE_APPLICATION_RDF_XML', 'application/rdf+xml');
+assignConstant('MIME_TYPE_PLAIN_TEXT', 'text/plain');
+assignConstant('MIME_TYPE_TEXT_CSS', 'text/css');
+assignConstant('MIME_TYPE_TEXT_HTML', 'text/html');
+
+// Mysqli types
+
+assignConstant('MYSQLI_STATEMENT_TYPE_INTEGER', 'i');
+assignConstant('MYSQLI_STATEMENT_TYPE_STRING', 's');
 
 // Operation types
 
@@ -278,30 +317,6 @@ assignConstant('QUERY_TYPE_INSERT', 0);
 assignConstant('QUERY_TYPE_SELECT*', 1);
 assignConstant('QUERY_TYPE_UPDATE', 2);
 
-// Metadata types
-
-assignConstant('METADATA_TYPE_KEYWORDS', 'keywords');
-assignConstant('METADATA_TYPE_RDF', 'rdf');
-assignConstant('METADATA_TYPE_TITLE', 'title');
-assignConstant('METADATA_TYPE_XPACKET', 'xpacket');
-
-// Method Name Sections types
-
-assignConstant('METHOD_NAME_SECTION_TYPE_BY*', 'by');
-
-// Mime types
-
-assignConstant('MIME_TYPE_APPLICATION_JSON', 'application/json');
-assignConstant('MIME_TYPE_APPLICATION_RDF_XML', 'application/rdf+xml');
-assignConstant('MIME_TYPE_PLAIN_TEXT', 'text/plain');
-assignConstant('MIME_TYPE_TEXT_CSS', 'text/css');
-assignConstant('MIME_TYPE_TEXT_HTML', 'text/html');
-
-// Mysqli types
-
-assignConstant('MYSQLI_STATEMENT_TYPE_INTEGER', 'i');
-assignConstant('MYSQLI_STATEMENT_TYPE_STRING', 's');
-
 // Panel types
 
 assignConstant('PANEL_TYPE_AFFORDANCE', 'affordance');
@@ -327,6 +342,7 @@ assignConstant('SCHEMA_TYPE_PARENTS', 4);
 // Service types
 
 assignConstant('SERVICE_TYPE_TWITTER*', 0);
+assignConstant('SERVICE_TYPE_AMAZON', 1);
 
 // Social network types
 

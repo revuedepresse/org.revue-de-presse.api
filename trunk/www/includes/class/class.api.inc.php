@@ -1,49 +1,4 @@
 <?php
-/**
-*************
-* Changes log
-*
-*************
-* 2011 03 26
-*************
-*
-* Implement a method totwitter timelines
-*
-* method affected ::
-*
-* API :: fetchTimelineStatuses
-* 
-* (branch 0.1 :: revision 630)
-* (trunk :: revision :: 195)
-*
-*************
-* 2011 03 06
-*************
-*
-* Implement a method to get mailboxes
-*
-* method affected ::
-*
-* API :: getMailboxes
-* API :: getImapMailbox
-* API :: getImapStream
-*
-* (branch 0.1 :: revision :: 576)
-* (trunk :: revision :: 125)
-*
-*************
-* 2011 03 05
-*************
-* 
-* Revise the method name used to open imap stream
-*
-* method affected
-*
-* API :: openImapStream
-* 
-* (branch 0.1 :: revision :: 569)
-*
-*/
 
 /**
 * Api class
@@ -53,6 +8,82 @@
 */
 class Api extends Transfer
 {
+	/**
+	* Build an endpoint
+	* 
+	* @param	integer	$service	service
+	* @return	string	endpoint
+	*/
+	public static function buildEndpoint( $service = NULL, $parameters = NULL )
+	{
+		global $class_application;
+
+		$class_dumper = $class_application::getDumperClass();
+
+		list( $service, $service_type_default ) = self::checkService( $service );
+
+		$service_store = &self::getEntityStore( $service );
+		$store = &self::initializeStore( $service );
+
+		if ( ! isset( $parameters[PROPERTY_ID] ) ) 
+			
+			throw new Exception( sprintf( EXCEPTION_INVALID_ENTITY, PROPERTY_ID ) ) ;
+		else
+		
+			$isbn = $parameters[PROPERTY_ID];
+		
+		$endpoint_generic = 'webservices.amazon.com';
+		$endoint_fr = 'ecs.amazonaws.fr';
+		
+		$condition = 'All';
+		$id_access_key = $service_store->{PROPERTY_API_CONSUMER_KEY};
+		$id_associate = $service_store->{PROPERTY_USER_NAME};
+		$id_item = $isbn;
+		$id_type = 'ISBN';
+		$include_review_summary = TRUE;
+		$search_index = 'Books';
+		$secret_access_key = $service_store->{PROPERTY_API_CONSUMER_SECRET};
+		$truncate_reviews_at = 0;
+		$version = '2011-08-01';
+		
+		$timestamp = gmdate( 'Y-m-d\TH:i:s\Z'); 
+		$timestamp = str_replace( ':', '%3A', $timestamp);
+		
+		$query_string =
+			'AWSAccessKeyId=' . $id_access_key.
+			'&AssociateTag=' . $id_associate.
+			'&Condition='. $condition .
+			'&IdType=' . $id_type . 
+			'&IncludeReviewsSummary=' . $include_review_summary . 
+			'&ItemId=' . $id_item . 
+			'&Operation=ItemLookup' .
+			'&ResponseGroup=OfferFull' . 
+			'&SearchIndex='. $search_index . 
+			'&Service=AWSECommerceService' . 
+			'&Timestamp=' . $timestamp .
+			'&TruncateReviewsAt=' . $truncate_reviews_at .
+			'&Version=' . $version 
+		;
+		
+		$base_domain = $endoint_fr;
+		
+		$format = '/onca/xml';
+		
+		$request_get = 'GET'. "\n" . $base_domain . "\n" . $format . "\n";
+		
+		$prepend_string = $request_get . $query_string;
+		
+		$signature = base64_encode( hash_hmac( 'sha256', $prepend_string, $secret_access_key, TRUE ) );  
+		$signature = str_replace( '+', '%2B', $signature );
+		$signature = str_replace( '=', '%3D', $signature );
+
+		$query_string .= '&Signature=' . $signature;
+
+		$endpoint =  'http://'. $base_domain. $format . '?' . $query_string;
+
+		return $endpoint;
+	}
+
 	/**
 	* Get an entity store
 	*
@@ -148,7 +179,7 @@ class Api extends Transfer
 
 			$level = $level_default_type ;
 
-			if ( ! is_array( $properties ) && count( $properties ) )
+			if ( is_array( $properties ) && count( $properties ) )
 			{	
 				if ( isset( $properties[PROPERTY_PARENT] ) )
 
@@ -222,26 +253,11 @@ class Api extends Transfer
 
 		$class_dumper = $class_application::getDumperClass();
 
+		$class_entity = $class_application::getEntityClass();
+
 		list( $service, $service_type_default ) = self::checkService( $service );
 
 		$service_store = &self::getEntityStore( $service );
-
-		if ( ! isset( $service_store->{PROPERTY_API_CONSUMER_KEY} ) )
-		
-			$service_store->{PROPERTY_API_CONSUMER_KEY} =
-				API_TWITTER_CONSUMER_KEY;
-
-		if ( ! isset( $service_store->{PROPERTY_API_CONSUMER_SECRET} ) )
-
-			$service_store->{PROPERTY_API_CONSUMER_SECRET} =
-				API_TWITTER_CONSUMER_SECRET
-			;
-
-		if ( ! isset( $service_store->{PROPERTY_API_CONSUMER_CALLBACK} ) )
-
-			$service_store->{PROPERTY_API_CONSUMER_CALLBACK} =
-				API_TWITTER_CALLBACK
-			;
 
 		$api_type_default = $class_data_fetcher::getEntityTypeValue(
 			array(
@@ -268,9 +284,103 @@ class Api extends Transfer
 		switch ( $service )
 		{
 			case $service_type_default;
-			default:
+
+				if ( ! isset( $service_store->{PROPERTY_API_CONSUMER_KEY} ) )
+				
+					$service_store->{PROPERTY_API_CONSUMER_KEY} =
+						API_TWITTER_CONSUMER_KEY;
+		
+				if ( ! isset( $service_store->{PROPERTY_API_CONSUMER_SECRET} ) )
+		
+					$service_store->{PROPERTY_API_CONSUMER_SECRET} =
+						API_TWITTER_CONSUMER_SECRET
+					;
+		
+				if ( ! isset( $service_store->{PROPERTY_API_CONSUMER_CALLBACK} ) )
+		
+					$service_store->{PROPERTY_API_CONSUMER_CALLBACK} =
+						API_TWITTER_CALLBACK
+					;
 
 				$api_type = $api_type_default;
+				
+					break;
+
+			default:
+			
+				$entity_service = ENTITY_SERVICE;
+
+				$service_type_amazon_id = $class_data_fetcher::getEntityTypeId(
+					array(
+						PROPERTY_VALUE => $service,
+						PROPERTY_ENTITY => $entity_service
+					)
+				);
+
+				$entity_type_amazon = $class_entity::getType(
+				   array(
+					   PROPERTY_ID => $service_type_amazon_id,
+					   PROPERTY_ENTITY => $entity_service
+				   )
+				);
+ 
+				$service_name = $entity_type_amazon->{PROPERTY_NAME};
+
+				$constant_name_consumer_key = strtoupper(
+					ENTITY_API . '_' . $service_name . '_' .
+					ENTITY_CONSUMER . '_' . ENTITY_KEY
+				);
+
+				$constant_name_consumer_secret = strtoupper(
+					ENTITY_API . '_' . $service_name . '_' .
+					ENTITY_CONSUMER . '_' . ENTITY_SECRET
+				);
+
+				$constant_name_user_name = strtoupper(
+					ENTITY_API . '_' . $service_name . '_' .
+					ENTITY_USER_NAME
+				);
+
+				if (
+					! isset( $service_store->{PROPERTY_API_CONSUMER_KEY} ) &&
+					defined( $constant_name_consumer_key )
+				)
+				
+					$service_store->{PROPERTY_API_CONSUMER_KEY} =
+						constant( $constant_name_consumer_key );
+					;
+
+				if (
+					! isset( $service_store->{PROPERTY_API_CONSUMER_SECRET} ) &&
+					defined( $constant_name_consumer_secret )
+				)
+				
+					$service_store->{PROPERTY_API_CONSUMER_SECRET} =
+						constant( $constant_name_consumer_secret )
+					;
+
+				if (
+					! isset( $service_store->{PROPERTY_USER_NAME} ) &&
+					defined( $constant_name_user_name )
+				)
+				
+					$service_store->{PROPERTY_USER_NAME} =
+						constant( $constant_name_user_name )
+					;
+
+				$api_type = $class_data_fetcher::getEntityTypeValue(
+					array(
+						PROPERTY_NAME => $service_name,
+						PROPERTY_ENTITY => ENTITY_API
+					)
+				);
+
+				$entity_type_mashup = $class_entity::getDefaultType(
+					NULL,
+					ENTITY_MASHUP
+				);
+
+				$store_parent = $entity_type_mashup->{PROPERTY_VALUE};
 		}
 
 		$store = &self::getStore(
@@ -335,46 +445,45 @@ class Api extends Transfer
 		global $class_application, $verbose_mode;
 
 		$class_dumper = $class_application::getDumperClass();
+		$class_feed_reader = $class_application::getFeedReaderClass();
 
-		$class_twitteroauth = $class_application::getTwitteroauthClass();
+		if ( is_null(  $parameters ) )
 
-		$library_directory_oauth =
-			dirname(__FILE__).'/..'.
-			DIR_LIBRARY.'/'.
-			DIR_LIBRARY_TWITTEROAUTH.'/'
-		;
+			$parameters = array();
 
 		$response = NULL;
 
 		list( $service, $service_type_default ) = self::checkService( $service );
 
-		if ( is_null(  $endpoint ) )
-		
-			$endpoint = API_TWITTER_VERIFY_CREDENTIALS;
-
-		if ( is_null(  $parameters ) )
-
-			$parameters = array();
-		
 		$store = &self::initializeStore( $service );
-
 		$service_store = &self::getEntityStore( $service );
-
-		if (
-			! isset( $service_store->{PROPERTY_API_CONSUMER_CALLBACK} ) ||
-			! isset( $service_store->{PROPERTY_API_CONSUMER_SECRET} )
-		)
-
-			throw new Exception( EXCEPTION_INVALID_CONFIGURATION );
-
-		$api_consumer_key = $service_store->{PROPERTY_API_CONSUMER_KEY};
-
-		$api_consumer_secret = $service_store->{PROPERTY_API_CONSUMER_SECRET};
 
 		switch ( $service )
 		{
 			case $service_type_default:
 
+				$class_twitteroauth = $class_application::getTwitteroauthClass();
+	
+				$library_directory_oauth =
+					dirname(__FILE__).'/..'.
+					DIR_LIBRARY.'/'.
+					DIR_LIBRARY_TWITTEROAUTH.'/'
+				;
+	
+				if ( is_null(  $endpoint ) )
+				
+					$endpoint = API_TWITTER_VERIFY_CREDENTIALS;
+	
+				if (
+					! isset( $service_store->{PROPERTY_API_CONSUMER_CALLBACK} ) ||
+					! isset( $service_store->{PROPERTY_API_CONSUMER_SECRET} )
+				)
+		
+					throw new Exception( EXCEPTION_INVALID_CONFIGURATION );
+		
+				$api_consumer_key = $service_store->{PROPERTY_API_CONSUMER_KEY};
+				$api_consumer_secret = $service_store->{PROPERTY_API_CONSUMER_SECRET};
+				
 				if (
 					isset( $store[PROPERTY_TOKEN_ACCESS] ) &&
 					count( $store[PROPERTY_TOKEN_ACCESS] )
@@ -398,22 +507,23 @@ class Api extends Transfer
 					$class_dumper::log(
 						__METHOD__,
 						array(
-							'[connection]',
-							$connection,
-							'[endpoint]',
-							$endpoint,
-							'[method]',
-							$method,
-							'[parameters]',
-							$parameters,
-							'[response]',
-							$response,
+							'[connection]', $connection,
+							'[endpoint]', $endpoint,
+							'[method]', $method,
+							'[parameters]', $parameters,
+							'[response]', $response,
 						),
 						DEBUGGING_DISPLAY_API_CONTACT_ENPOINT_RESPONSE
 					);
-				}				
-					
+				}
+
 					break;
+
+			default:
+			
+				$endpoint = self::buildEndpoint( $service, $parameters );
+				
+				$response = $class_feed_reader::parse( $endpoint );
 		}
 
 		return $response;
@@ -518,9 +628,17 @@ class Api extends Transfer
 
 				$results_count = $options->{PROPERTY_COUNT};
 
+			if ( isset( $options->{PROPERTY_MAX_ID} ) )
+
+				$max_id = $options->{PROPERTY_MAX_ID};
+
 			if ( isset( $options->{PROPERTY_SCREEN_NAME} ) )
 
 				$screen_name = $options->{PROPERTY_SCREEN_NAME};
+
+			if ( isset( $options->{PROPERTY_SINCE_ID} ) )
+
+				$since_id = $options->{PROPERTY_SINCE_ID};
 		}
 
 		list( $service, $service_type_default ) = self::checkService( $service );
@@ -538,9 +656,17 @@ class Api extends Transfer
 					'&'. PROPERTY_COUNT . '=' . $results_count : ''
 			) .
 			(
+				isset( $max_id ) ?
+					'&'. PROPERTY_MAX_ID . '=' . $max_id : ''
+			) .
+			(
 				isset( $screen_name ) ?
 					'&'. PROPERTY_SCREEN_NAME . '=' . $screen_name : ''
-			)			
+			) .
+			(
+				isset( $since_id ) ?
+					'&'. PROPERTY_SINCE_ID . '=' . $since_id : ''
+			)
 		);
 
 		$response = self::contactEndpoint(
@@ -858,6 +984,23 @@ class Api extends Transfer
 			list( $_namespace, $_class ) = explode( '\\', __CLASS__ );
 
 		return $_class;
+	}
+
+	/**
+	* Fetch a book by providing its ISBN
+	* 
+	* @string	integer	$isbn	isbn
+	* @return 	mixed	response
+	*/
+	public static function lookUpBookByISBN( $isbn ) 
+	{
+		$response = self::contactEndpoint(
+			NULL,
+			array( PROPERTY_ID => $isbn ),
+			SERVICE_TYPE_AMAZON
+		);
+		
+		return $response;
 	}
 
 	/**
@@ -1429,3 +1572,68 @@ class Api extends Transfer
 		return self::contactEndpoint( NULL, NULL, $service );
 	}
 }
+
+/**
+*************
+* Changes log
+*
+*************
+* 2011 03 05
+*************
+* 
+* Revise the method name used to open imap stream
+*
+* method affected
+*
+* API :: openImapStream
+* 
+* (branch 0.1 :: revision :: 569)
+*
+*************
+* 2011 03 06
+*************
+*
+* Implement a method to get mailboxes
+*
+* method affected ::
+*
+* API :: getMailboxes
+* API :: getImapMailbox
+* API :: getImapStream
+*
+* (branch 0.1 :: revision :: 576)
+* (trunk :: revision :: 125)
+*
+*************
+* 2011 03 26
+*************
+*
+* Implement a method to get twitter timelines
+*
+* method affected ::
+*
+* API :: fetchTimelineStatuses
+* 
+* (branch 0.1 :: revision 630)
+* (trunk :: revision :: 195)
+*
+*************
+* 2011 09 25
+*************
+*
+* Implement a method to get products from Amazon
+* Implement construction of endpoint for Amazon (by signing each request)
+* Revise store accessor
+* Extend store initialization
+* 
+* methods affected ::
+*
+* API :: buildEndpoint
+* API :: contactEndpoint
+* API :: getStore
+* API :: initializeStore
+* API :: fetchBookByISBN
+* 
+* (branch 0.1 :: revision 656)
+*
+*/

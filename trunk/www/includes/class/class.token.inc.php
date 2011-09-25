@@ -219,4 +219,3 @@ class Token extends Controller
 		return $_class;
 	}
 }
-?>
