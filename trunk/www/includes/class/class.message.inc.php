@@ -185,12 +185,19 @@ class Message extends Header
 				$max_uids
 			)
 		);
-		
+
 		reset( $search_results );
 
 		list( , $uids ) = each( $search_results );
 
 		reset( $search_results );
+
+		// Get the last uid
+		end( $uids );
+
+		list( , $last_uid ) = each( $uids );
+
+		reset( $uids );
 
 		while ( list( $label, $uids ) = each( $search_results ) )
 		{
@@ -208,14 +215,25 @@ class Message extends Header
 					* for provided search criteria
 					* 
 					*/
-			
-					$max_uid_index = array_search( $max_uid, $uids, TRUE );
+
+					while (
+						! (
+							$max_uid_index = array_search(
+								$max_uid,
+								$uids,
+								TRUE
+							)
+						) &&
+						( $max_uid < $last_uid )
+					)
+
+						$max_uid++;			
 		
 					if ( $max_uid_index === FALSE )
 					
 						$max_uid_index = -1;
 		
-					fprint( array( '[max uid index]', $max_uid_index ) ) ;
+					fprint( array( '[max uid index]', $max_uid_index ) );
 		
 					imap_reopen( $resource, $mailbox.$label );			
 		
