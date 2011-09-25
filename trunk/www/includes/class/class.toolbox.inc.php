@@ -28,6 +28,7 @@ class Toolbox
 			ENTITY_API => CLASS_API,
 			ENTITY_APPLICATION => CLASS_APPLICATION,
 			ENTITY_AUTHOR => CLASS_AUTHOR,
+			ENTITY_BOOK => CLASS_BOOK,
 			ENTITY_DATABASE => CLASS_DATABASE,
 			ENTITY_DATA_FETCHER => CLASS_DATA_FETCHER,
 			ENTITY_DB => CLASS_DB,
@@ -60,6 +61,7 @@ class Toolbox
 			ENTITY_FEED_READER => CLASS_FEED_READER,
 			ENTITY_FEEDBACK => CLASS_FEEDBACK,
 			ENTITY_FIELD_HANDLER => CLASS_FIELD_HANDLER,
+			ENTITY_FILE => CLASS_FILE,
 			ENTITY_FILE_MANAGER => CLASS_FILE_MANAGER,
 			ENTITY_FLAG => CLASS_FLAG,
 			ENTITY_FLAG_MANAGER => CLASS_FLAG_MANAGER,
@@ -1167,6 +1169,88 @@ class Toolbox
 		return $keys_exists;
 	}
 
+	/**
+	* Return a output
+	*
+	* @tparam	mixed	$arguments 	arguments
+	* @return 	mixed	output
+	*/
+	public static function out()
+	{
+		$class_dumper = self::getDumperClass();
+		
+		$arguments = func_get_args();
+
+		$out = NULL;
+
+		if ( ! isset( $arguments[0] ) )
+
+			throw new Exception( EXCEPTION_INVALID_ARGUMENT );
+		else
+		{
+			if ( FALSE !== strpos( $arguments[0], '|' ) )
+
+				throw new Exception( EXCEPTION_INVALID_ARGUMENT );
+
+			if ( is_string( $arguments[0] ) )
+			{
+				if ( 0 === strpos( $arguments[0], '$' ) )
+				{
+					$command_line = substr( $arguments[0], 1 );
+
+					$command = explode( ' ', $command_line );
+
+					switch( $command[0] )
+					{
+						case 'du':
+
+							$program = $command[0];
+
+							$argument = ' ' . $command[1];
+
+							$switch = ' ';
+
+							if ( 0 === strpos( $command[1], '-' ) )
+							{
+								$switch = ' ' . $command[1];
+	
+								if ( ! empty( $command[2] ) )
+	
+									$argument = ' ' . $command[2];
+								else
+								
+									throw new Exception( EXCEPTION_INVALID_ARGUMENT );
+							}
+	
+							if ( ! file_exists( trim( $argument )  ) )
+							
+								throw new Exception(
+									sprintf( EXCEPTION_INVALID_ENTITY, ENTITY_PATH )
+								);
+
+							$command_line_clean = $program . $switch . $argument;
+
+							$return = exec( $command_line_clean );
+	
+							$lines = explode( '\n', $return );
+	
+							$out = forEachItem(
+								$lines,
+								function ( $value )
+								{
+									return explode( "\t", $value );
+								}
+							);
+
+								break;
+					}
+				}
+			}
+		}
+
+		return $out;		
+	}
+
 	/*
     * Replace special characters in a string
     *
@@ -1536,3 +1620,19 @@ class Toolbox
 		return $result;
 	}
 }
+
+/**
+*************
+* Changes log
+*
+*************
+* 2011 04 20
+*************
+* 
+* Implement the following methods:
+*
+* Toolbox::out
+* 
+* (revision 647)
+*
+*/

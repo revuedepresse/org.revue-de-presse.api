@@ -1,33 +1,4 @@
 <?php
-/**
-*************
-* Changes log
-* 
-*************
-* 2011 03 09
-*************
-*
-* Set avatar photographs public by default
-*
-* method affected ::
-*
-* DATA_FETCHER :: fetchPhotographs
-*
-* (branch 0.1 :: revision :: 592)
-*
-*************
-* 2011 03 05
-*************
-* 
-* Implement maximum uid retrieval
-*
-* method affected ::
-*
-* DATA FETCHER :: fetchMaxUid
-*
-* (branch 0.1 :: revision :: 570)
-*
-*/
 
 /**
 * Data Fetcher class
@@ -534,14 +505,16 @@ class Data_Fetcher extends Database
     * @param	mixed	$context		context
     * @param	mixed	$entity_type	kind of entity
     * @param	boolean	$wrap			wrap flag
+    * @param	boolean	$memcached		memcache flag					
     * @param	boolean	$verbose		verbose mode
-    * @param	mixed	$checksum 		checksum
+    * @param	mixed	$checksum		checksum
     * @return	mixed
 	*/
 	public static function &fetchProperties(
 		$context,
 		$entity_type = NULL,
-		$wrap = FALSE,		
+		$wrap = FALSE,
+		$memcached = FALSE,
 		$verbose = FALSE,
 		$checksum = NULL
 	)
@@ -563,11 +536,17 @@ class Data_Fetcher extends Database
 		$memento_key = md5( serialize( func_get_args() ) );
 
 		if (
-			FALSE ===
+			(
+				! $memcached ||
+				MEMCACHED_FLUSH_CACHE_PROPERTIES ||
 				(
-					$properties_cached =
-						$class_memento::retrieveData( $memento_key )
+					FALSE ===
+						(
+							$properties_cached =
+								$class_memento::retrieveData( $memento_key )
+						)
 				)
+			)
 		)
 		{
 			switch ( $entity_type )
@@ -641,7 +620,7 @@ class Data_Fetcher extends Database
 								$select_matching_items
 							)
 						);
-	
+
 						$results = $class_db::query($select_matching_items, TRUE);
 	
 						if ( $results->rowCount() )
@@ -696,6 +675,7 @@ class Data_Fetcher extends Database
 						$clause_where = SQL_ANYWHERE;
 	
 						$clause_group_by =
+						$clause_limit =
 						$clause_select = '';
 	
 						$column_prefix = $configuration[ENTITY_COLUMN_PREFIX];
@@ -703,6 +683,36 @@ class Data_Fetcher extends Database
 						$table_alias = substr($configuration[ENTITY_COLUMN_PREFIX], 0, -1);
 	
 						$table = $configuration[ENTITY_TABLE];
+
+
+						if (
+							is_array( $context ) &&
+							isset( $context[SQL_LIMIT] ) 
+						)
+						{
+							if (
+								isset( $context[SQL_LIMIT][PROPERTY_START] ) ||
+								isset( $context[SQL_LIMIT][PROPERTY_COUNT] )
+							)
+							
+								$clause_limit .= ' ' . SQL_LIMIT . ' ';
+							
+							if ( isset( $context[SQL_LIMIT][PROPERTY_START] ) )
+							
+								$clause_limit .= $context[SQL_LIMIT][PROPERTY_START]; 
+							else 
+
+								$clause_limit .= '0';
+								
+							if ( $context[SQL_LIMIT][PROPERTY_COUNT] )
+
+								$clause_limit .= ',' . $context[SQL_LIMIT][PROPERTY_COUNT];
+							else 
+
+								$clause_limit .= ',18446744073709551615';
+
+							unset( $context[SQL_LIMIT] );
+						}
 	
 						if (
 							isset($context[SQL_SELECT]) &&
@@ -950,7 +960,7 @@ class Data_Fetcher extends Database
 									;
 							}
 						}
-	
+
 						$select_entity = 
 							SQL_SELECT.' '.
 								(
@@ -978,9 +988,9 @@ class Data_Fetcher extends Database
 							SQL_FROM.' '.
 								$table.' '.$table_alias.' '.
 							SQL_WHERE.' '.
-								$clause_where.
-								
-								$clause_group_by
+								$clause_where .
+								$clause_group_by .
+								$clause_limit
 						;
 	
 						$class_dumper::log(
@@ -1042,7 +1052,8 @@ class Data_Fetcher extends Database
 
 			$class_memento::storeData(
 				serialize( $properties ),
-				$memento_key
+				$memento_key,
+				MEMCACHED_FLUSH_CACHE_PROPERTIES
 			);
 		}
 		else
@@ -4608,3 +4619,47 @@ class Data_Fetcher extends Database
 		return $select_query;
 	}
 }
+
+/**
+*************
+* Changes log
+*
+*************
+* 2011 03 05
+*************
+* 
+* Implement maximum uid retrieval
+*
+* method affected ::
+*
+* DATA FETCHER :: fetchMaxUid
+*
+* (branch 0.1 :: revision :: 570)
+*
+*************
+* 2011 03 09
+*************
+*
+* Set avatar photographs public by default
+*
+* method affected ::
+*
+* DATA_FETCHER :: fetchPhotographs
+*
+* (branch 0.1 :: revision :: 592)
+*
+*************
+* 2011 09 25
+*************
+*
+* development :: api :: amazon
+*
+* Implement limit clause
+*
+* method affected ::
+*
+* DATA_FETCHER :: fetchProperties
+*
+* (branch 0.1 :: revision :: 658)
+*
+*/

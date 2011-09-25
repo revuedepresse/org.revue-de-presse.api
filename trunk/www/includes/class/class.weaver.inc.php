@@ -114,4 +114,3 @@ class Weaver extends Arc
 		return $_class;
 	}
 }
-?>

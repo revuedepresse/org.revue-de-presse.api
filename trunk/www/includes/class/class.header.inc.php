@@ -1,34 +1,4 @@
 <?php
-/**
-*************
-* Changes log
-*
-*************
-* 2011 03 10
-*************
-* 
-* Revise header hash calculation
-*
-* method affected ::
-*
-* HEADER :: make
-*
-* (branch 0.1 :: revision :: 597)
-* (trunk :: revision :: 156)
-* 
-*************
-* 2011 03 05
-*************
-* 
-* Add the keywords property to instances of the header class
-*
-* method affected ::
-*
-* HEADER :: make
-*
-* (branch 0.1 :: revision :: 571)
-*
-*/
 
 /**
 * Header class
@@ -142,3 +112,34 @@ class Header extends Api
 		return self::add( $properties );
 	}
 }
+
+/**
+*************
+* Changes log
+*
+*************
+* 2011 03 05
+*************
+* 
+* Add the keywords property to instances of the header class
+*
+* method affected ::
+*
+* HEADER :: make
+*
+* (branch 0.1 :: revision :: 571)
+*
+*************
+* 2011 03 10
+*************
+* 
+* Revise header hash calculation
+*
+* method affected ::
+*
+* HEADER :: make
+*
+* (branch 0.1 :: revision :: 597)
+* (trunk :: revision :: 156)
+*
+*/

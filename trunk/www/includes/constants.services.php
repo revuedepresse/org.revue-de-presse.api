@@ -25,6 +25,7 @@ declareConstantsBatch(
 
 		// services
 
+		'SERVICE_AMAZON' => 'amazon',
 		'SERVICE_DEBUGGING' => 'debug',
 		'SERVICE_CACHING' => 'caching',
 		'SERVICE_DEPLOYMENT' => 'deployment',
@@ -56,6 +57,7 @@ declareConstantsBatch(
 		'SETTING_FLAGS' => 'flags',
 		'SETTING_FLUSH_CACHE_FORM' => 'flush_cache_form',
 		'SETTING_FLUSH_CACHE_MENU' => 'flush_cache_menu',
+		'SETTING_FLUSH_CACHE_PROPERTIES' => 'flush_cache_properties',
 		'SETTING_FORM_FEEDBACK' => 'form_send_feedback',
 		'SETTING_HOST' => 'host',
 		'SETTING_MAXIMUM_LONG_LENGTH_AVATAR' => 'maximum_long_length_photograph',
@@ -78,7 +80,22 @@ declareConstantsBatch(
 
 declareConstantsBatch(
 	array(
+		
+		// API for Amazon
 
+		'API_AMAZON_CONSUMER_KEY' => 
+			$class_application::getServiceProperty(
+				SETTING_API_KEY, SERVICE_AMAZON
+			),
+		'API_AMAZON_CONSUMER_SECRET' => 
+			$class_application::getServiceProperty(
+				SETTING_PASSWORD, SERVICE_AMAZON
+			),
+		'API_AMAZON_USER_NAME' => 
+			$class_application::getServiceProperty(
+				SETTING_USER_NAME, SERVICE_AMAZON
+			),
+			
 		// Api for Twitter 
 
 		'API_TWITTER_USER_NAME' => 
@@ -212,6 +229,16 @@ declareConstantsBatch(
 		'MEMCACHED_FLUSH_CACHE_MENU' => (
 					$class_application::getServiceProperty(
 						SETTING_FLUSH_CACHE_MENU, SERVICE_MEMCACHED
+					)
+				?
+					TRUE
+				:
+					FALSE
+			),
+
+		'MEMCACHED_FLUSH_CACHE_PROPERTIES' => (
+					$class_application::getServiceProperty(
+						SETTING_FLUSH_CACHE_PROPERTIES, SERVICE_MEMCACHED
 					)
 				?
 					TRUE
