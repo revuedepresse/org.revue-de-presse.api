@@ -41,11 +41,15 @@ class Entity implements Model_Entity
 	* @param	string	$name	name
 	* @return	mixed	property value
 	*/
-	public function &getProperty($name)
+	public function &getProperty( $name )
 	{
-		if (!isset($this->properties->$name))
+		if ( ! isset( $this->properties ) )
 		
-			$this->properties->$name = null;
+			throw new Exception( EXCEPTION_CONSISTENCY_ISSUE );
+		
+		if ( ! isset( $this->properties->$name ) )
+		
+			$this->properties->$name = NULL;
 			
 		return $this->properties->$name;
 	}
@@ -231,7 +235,7 @@ class Entity implements Model_Entity
 				);
 		}
 	
-		if (!isset($callback_parameters))
+		if ( ! isset($callback_parameters ) )
 
 			switch ($name)
 			{
@@ -967,11 +971,9 @@ class Entity implements Model_Entity
 
 		$default_type = self::fetchDefaultType($entity_type);
 
-		$exception = NULL;
-
-		if (is_object($default_type) && isset($default_type->{PROPERTY_VALUE}))
+		if ( is_object( $default_type ) && isset( $default_type->{PROPERTY_VALUE} ) )
 		{
-			if (!empty($property))
+			if ( ! empty( $property ) )
 			{
 				if (isset($default_type->$property))
 
@@ -1075,11 +1077,24 @@ class Entity implements Model_Entity
 		$class_dumper = $class_application::getDumperClass();
 
 		if (
-			!is_array($properties) ||
-			!isset($properties[PROPERTY_NAME]) ||
-			!isset($properties[PROPERTY_ENTITY]) ||
-			!is_string($properties[PROPERTY_NAME]) ||
-			!is_string($properties[PROPERTY_ENTITY])
+			! is_array($properties) ||
+			(
+				(
+					! isset( $properties[PROPERTY_NAME] ) ||
+					! is_string( $properties[PROPERTY_NAME] )
+				) && (
+					! isset( $properties[PROPERTY_VALUE] ) ||
+					(
+						! is_string( $properties[PROPERTY_VALUE] ) &&
+						! is_integer( $properties[PROPERTY_VALUE] ) 
+					)
+				) && (
+					! isset( $properties[PROPERTY_ID] ) ||
+					! is_numeric( $properties[PROPERTY_ID] )
+				)
+			) || 
+			! isset( $properties[PROPERTY_ENTITY] ) ||
+			! is_string($properties[PROPERTY_ENTITY])
 		)
 
 			$type = NULL;
@@ -1110,13 +1125,35 @@ class Entity implements Model_Entity
 				)
 			);
 
-			$type = self::getByName(
-				$properties[PROPERTY_NAME],
-				$_properties,
-				CLASS_ENTITY_TYPE,
-				$verbose,
-				$informant
-			);
+			if ( isset( $properties[PROPERTY_NAME] ) )
+
+				$type = self::getByName(
+					$properties[PROPERTY_NAME],
+					$_properties,
+					CLASS_ENTITY_TYPE,
+					$verbose,
+					$informant
+				);
+
+			else if ( isset( $properties[PROPERTY_VALUE] ) )
+
+				$type = self::getByValue(
+					$properties[PROPERTY_VALUE],
+					$_properties,
+					CLASS_ENTITY_TYPE,
+					$verbose,
+					$informant
+				);
+
+			else if ( isset( $properties[PROPERTY_ID] ) )
+
+				$type = self::getById(
+					$properties[PROPERTY_ID],
+					$_properties,
+					CLASS_ENTITY_TYPE,
+					$verbose,
+					$informant
+				);
 		}
 
 		return $type;
@@ -1333,3 +1370,21 @@ class Entity implements Model_Entity
 		return $entity->serialize();
 	}
 }
+
+/**
+*************
+* Changes log
+*
+*************
+* 2011 09 25
+*************
+* 
+* Implement entity type accessor by value
+*
+* method affected ::
+*
+* DATA FETCHER :: getType
+*
+* (branch 0.1 :: revision :: 656)
+*
+*/
