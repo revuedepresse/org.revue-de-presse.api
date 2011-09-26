@@ -76,7 +76,6 @@ class Service_Manager extends Deployer
 	}
 }
 
-
 /**
 *************
 * Changes log
