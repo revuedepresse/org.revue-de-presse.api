@@ -511,7 +511,7 @@ if ( ! function_exists( FUNCTION_START_SESSION ) )
 				)
 			);
 
-		else if ( ( $session_id = session_id() ) === '' )
+		else if ( ( $session_id = session_id() ) === '' && ! defined( STDIN ) )
 		{
 			session_cache_limiter( 'using private_no_expire' );
 		
