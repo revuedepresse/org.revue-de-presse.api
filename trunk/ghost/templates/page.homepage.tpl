@@ -1,1 +1,0 @@
-{$body_header}{if isset($column_left)}{$column_left}{/if}{$column_right}{if $body}{literal}{body}{/literal}{else}{if isset($main)}{$main}{/if}{/if}{$footer}
