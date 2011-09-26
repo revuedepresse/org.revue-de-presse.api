@@ -39,6 +39,10 @@ class Deployer extends I18n
 				isset( $_SERVER['DOCUMENT_ROOT'] ) &&
 				$_SERVER['DOCUMENT_ROOT'] == '/var/www/## FILL DOCUMENT ROOT ##'
 			) || (
+				// on remote adama server
+				isset( $_SERVER['DOCUMENT_ROOT'] ) &&
+				$_SERVER['DOCUMENT_ROOT'] == '/var/www/## FILL DOCUMENT ROOT ##'
+			) || (
 				// on local adama server
 				isset( $_SERVER['DOCUMENT_ROOT'] ) &&
 				$_SERVER['DOCUMENT_ROOT'] == '## FILL ABSOLUTE PATH ##'
