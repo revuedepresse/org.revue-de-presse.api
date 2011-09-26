@@ -5,7 +5,7 @@
 */	
 if ( ! class_exists( CLASS_SYMFONY_YAML ) )
 
-    require_once( dirname(__FILE__). '/../../lib/sfYaml/sfYaml.php' );
+    require_once( 'sfYaml/sfYaml.php' );
 
 /**
 * Yaml class
