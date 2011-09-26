@@ -1627,7 +1627,7 @@ class Serializer extends Executor
 
 			$update_event_occurence_model = '
 				UPDATE '.TABLE_EVENT.' SET
-					'.$column_prefix.PROPERTY_OCCURENCE.' = '.$column_prefix.PROPERTY_OCCURENCE.' + 1,
+					'.$column_prefix.PROPERTY_OCCURRENCE.' = '.$column_prefix.PROPERTY_OCCURRENCE.' + 1,
 					'.$column_prefix.PROPERTY_DATE_LAST_OCCURRENCE.' = NOW()
 				WHERE
 					'.$column_prefix.PROPERTY_ID.' = {id}
