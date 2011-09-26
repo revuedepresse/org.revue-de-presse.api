@@ -53,6 +53,7 @@ declareConstantsBatch(
 		'SETTING_CALLBACK' => 'callback',
 		'SETTING_COMMENTS' => 'comments',
 		'SETTING_DATABASE' => 'database',
+		'SETTING_DIR_LIB' => 'dir_lib',
 		'SETTING_EXPIRATION_TIME' => 'expiration_time',
 		'SETTING_FLAGS' => 'flags',
 		'SETTING_FLUSH_CACHE_FORM' => 'flush_cache_form',
@@ -323,6 +324,11 @@ declareConstantsBatch(
 				TRUE
 			:
 				FALSE
+		,
+		'DIR_LIB_ABSOLUTE' => 
+			$class_application::getServiceProperty(
+				SETTING_DIR_LIB, SERVICE_SEFI
+			)
 		,		
 		'SEFI_BASE_URL' => 
 			$class_application::getServiceProperty(
