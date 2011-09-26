@@ -55,7 +55,7 @@ class Service_Manager extends Deployer
 		}
 		else
 		
-			throw new Exception(sprintf(fEXCEPTION_INVALID_CONFIGURATION_FILE, $file_path));
+			throw new Exception(sprintf(EXCEPTION_INVALID_CONFIGURATION_FILE, $file_path));
 	}
 
 	/**
