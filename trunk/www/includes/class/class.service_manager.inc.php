@@ -20,10 +20,17 @@ class Service_Manager extends Deployer
 		$service = SERVICE_MYSQL
 	)
 	{
-		$file_path =
-			dirname( __FILE__ ) . '/../../.' .
-			FILE_NAME_SERVICE_CONFIGURATION.EXTENSION_INI
-		;
+		if ( in_array( $_SERVER['SERVER_NAME'], array( '## FILL HOSTNAME ##' ) ) ) 
+
+			$file_path =
+				dirname( __FILE__ ) . '/../../.' .
+				FILE_NAME_SERVICE_CONFIGURATION.EXTENSION_INI
+			;
+		else 
+
+			$file_path = dirname(__FILE__).'/../../../../settings/.'.
+				FILE_NAME_SERVICE_CONFIGURATION.EXTENSION_INI;
+			;
 
 		$file_contents = self::loadFileContents( $file_path, EXTENSION_INI );
 
@@ -68,3 +75,22 @@ class Service_Manager extends Deployer
 		return $_class;
 	}
 }
+
+
+/**
+*************
+* Changes log
+*
+*************
+* 2011 09 26
+*************
+* 
+* Revise path to configuration file
+*
+* method affected ::
+*
+* SERVICE_MANAGER :: getServiceProperty
+* 
+* (trunk :: revision :: 243)
+*
+*/
