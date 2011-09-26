@@ -20,7 +20,7 @@ class Service_Manager extends Deployer
 		$service = SERVICE_MYSQL
 	)
 	{
-		if ( in_array( $_SERVER['SERVER_NAME'], array( '## FILL HOSTNAME ##' ) ) ) 
+		if ( in_array( $_SERVER['SERVER_NAME'], array( '## FILL HOSTNAME ##' ) ) )
 
 			$file_path =
 				dirname( __FILE__ ) . '/../../.' .
