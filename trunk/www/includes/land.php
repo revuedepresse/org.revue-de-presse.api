@@ -9,7 +9,7 @@ if ( defined( 'DEPLOYMENT_CACHING' ) && ! DEPLOYMENT_CACHING )
 	// construct a new Smarty object
 	$template_engine = new $class_template_engine();
 
-	echo print_r( array( '[cache cleared]', $template_engine->clear_all_cache() ) );
+	echo print_r( array( '[cache cleared]', $template_engine->clear_all_cache() ), TRUE );
 }
 
 /**
