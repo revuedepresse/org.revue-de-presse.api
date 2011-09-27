@@ -1,15 +1,16 @@
 <?php
 
-if ( defined( 'DEPLOYMENT_CACHING' ) && ! DEPLOYMENT_CACHING )
+if ( defined( 'DEPLOYMENT_MODE' ) && ! DEPLOYMENT_MODE )
 {
 	global $class_application;
 
-	$class_template_engine = $class_application::getTemplateEngineClass();
-			
-	// construct a new Smarty object
-	$template_engine = new $class_template_engine();
+	$class_template_engine = $class_application::getDumperClass();
 
-	echo print_r( array( '[cache cleared]', $template_engine->clear_all_cache() ), TRUE );
+	$class_dumper::log(
+		__METHOD__,
+		array( '[deployment level :: ' . DEPLOYMENT_MODE . ']'),
+		TRUE
+	);
 }
 
 /**
@@ -19,10 +20,12 @@ if ( defined( 'DEPLOYMENT_CACHING' ) && ! DEPLOYMENT_CACHING )
 *************
 * 2011 09 27
 *************
-* 
-* development :: deployment ::
 *
-* Implement cache cleaning in CLI mode
+* project :: ghost ::
+* 
+* deployment :: template engine ::
+*
+* Append deployment mode to landing script
 * 
 * (revision 321)
 *
