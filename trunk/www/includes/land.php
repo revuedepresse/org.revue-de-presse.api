@@ -1,6 +1,6 @@
 <?php
 
-if ( defined( 'CLASS_TEMPLATE_ENGINE' ) && defined( 'STDIN' ) )
+if ( 0 === strpos( $_SERVER['SCRIPT_NAME'], '/var/www/## FILL DOCUMENT ROOT ##/' ) )
 {
 	global $class_application;
 
@@ -9,7 +9,7 @@ if ( defined( 'CLASS_TEMPLATE_ENGINE' ) && defined( 'STDIN' ) )
 	// construct a new Smarty object
 	$template_engine = new $class_template_engine();
 
-	echo print( array( '[cache cleared]', $template_engine->clear_all_cache() ) );
+	echo print_r( array( '[cache cleared]', $template_engine->clear_all_cache() ) );
 }
 
 /**
