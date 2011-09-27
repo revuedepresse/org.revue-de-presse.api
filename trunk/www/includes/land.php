@@ -1,6 +1,6 @@
 <?php
 
-if ( 0 === strpos( $_SERVER['SCRIPT_NAME'], '/var/www/## FILL DOCUMENT ROOT ##/' ) )
+if ( defined( 'DEPLOYMENT_CACHING' ) && ! DEPLOYMENT_CACHING )
 {
 	global $class_application;
 
