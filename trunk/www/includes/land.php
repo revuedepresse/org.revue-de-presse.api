@@ -4,12 +4,12 @@ if ( defined( 'DEPLOYMENT_MODE' ) && ! DEPLOYMENT_MODE )
 {
 	global $class_application;
 
-	$class_template_engine = $class_application::getDumperClass();
+	$class_dumper = $class_application::getDumperClass();
 
 	$class_dumper::log(
 		__METHOD__,
-		array( '[deployment level :: ' . DEPLOYMENT_MODE . ']'),
-		TRUE
+		array( '[deployment level :: ' . DEPLOYMENT_MODE . ']' ),
+		$verbose_mode
 	);
 }
 
