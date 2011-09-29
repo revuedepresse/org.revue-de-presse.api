@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<lang name="user">
+    <s id="link_edit_insight">Edit</s>
+    <s id="link_remove_insight">Remove</s>
+    <s id="link_reply_to_insight">Reply</s>
+    <s id="link_return_to_login_form">Return to login form</s>
+    <s id="link_already_used">Sorry this link has been activated already.</s> 
+    <s id="link_invalid">Sorry this link is not valid, if you think it should be, please contact the administrator.</s>   
+    <s id="link_valid">Thank you for confirming your latest changes</s>
+    <s id="sender_email">no-reply@weaving-the-web.org</s>   
+    <s id="sender_name_confirmation">Weaving the Web</s>   
+    <s id="remove_item">Remove this item</s>   
+    <s id="subject_confirmation_message">Weaving the Web :: Latest updates to be confirmed</s>   
+    <s id="upload_successful">Thank you, the operation ran smoothly.</s>
+    <s id="no_items">Sorry, no item was found for the keywords you have provided</s>   
+</lang>
