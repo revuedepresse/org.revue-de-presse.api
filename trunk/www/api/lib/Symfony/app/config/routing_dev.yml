@@ -1,19 +1,6 @@
-_facebook:
-    pattern:  /facebook
-    defaults: { _controller: WeavingTheWebBundle:Login:index }
-
-_welcome:
-    pattern:  /
-    defaults: { _controller: AcmeDemoBundle:Welcome:index }
-
-_demo_secured:
-    resource: "@AcmeDemoBundle/Controller/SecuredController.php"
-    type:     annotation
-
-_demo:
-    resource: "@AcmeDemoBundle/Controller/DemoController.php"
-    type:     annotation
-    prefix:   /demo
+_newsfeed:
+    pattern:  /newsfeed/name
+    defaults: { _controller: TifaApiFacebookBundle:Newsfeed:index }
 
 _assetic:
     resource: .
