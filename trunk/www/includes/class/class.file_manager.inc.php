@@ -152,28 +152,25 @@ class File_Manager extends Toolbox
     * @return 	mixed		file contents
     */
 	public static function loadFileContents(
-		$file_path,
-		$file_extension = NULL
+		$file_path, $file_extension = NULL
 	)
 	{
 		$file_contents = NULL;
 
-		switch ($file_extension)
-		{
-			case EXTENSION_INI:
+		if (file_exists($file_path))
 
-				if (file_exists($file_path))
-
+			switch ($file_extension)
+			{
+				case EXTENSION_INI:
+	
 					$file_contents  = parse_ini_file($file_path, TRUE);
+					
+						break;
+	
+				default:
 				
-					break;
-
-			default:
-			
-				if (file_exists($file_path))
-
 					$file_contents = file_get_contents($file_path);
-		}
+			}
 
 		return $file_contents;
 	}
@@ -204,19 +201,34 @@ class File_Manager extends Toolbox
 
 		$path_file = $path_directory.$file_name;
 
-		if ( file_exists( $path_file ) )
-
-			// deserialize a YAML file
+		if ( file_exists( $path_file ) ) // deserialize a YAML file
 			$output = $class_yaml::deserialize( $path_file );
 		else
-
-			throw new Exception(
-				sprintf(
-					EXCEPTION_INVALID_CONFIGURATION_FILE,
-					$path_file
-				)
-			);
+			throw new Exception( sprintf(
+				EXCEPTION_INVALID_CONFIGURATION_FILE, $path_file
+			) );
 
 		return $output;
 	}
 }
+
+/**
+*************
+* Changes log
+*
+*************
+* 2012 04 29
+*************
+* 
+* deployment :: service management ::
+*
+* Revise declaration of file settings
+*
+* method affected ::
+*
+* FILE_MANAGER :: loadFileContent
+*
+* (trunk :: revision 451)
+* (v0.2 :: revision 452)
+*
+*/
