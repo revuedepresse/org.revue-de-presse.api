@@ -1,5 +1,5 @@
-_newsfeed:
-    pattern:  /newsfeed/name
+TifaApiFacebookBundle_newsfeed:
+    pattern:  /newsfeed/{until}
     defaults: { _controller: TifaApiFacebookBundle:Newsfeed:index }
 
 _assetic:
