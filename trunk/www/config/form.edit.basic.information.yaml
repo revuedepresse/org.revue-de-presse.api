@@ -1,0 +1,53 @@
+disclaimers:
+  -
+    requirements
+fields:
+  -
+    accesskey: u
+    before.update:
+      display: disclaimer.safe_changes
+      save.to: db.contact
+      send: email.changes_confirmation
+    confirmation: email
+    display.default.value: db.user.user_name*
+    name: user_name
+    type: text*
+    tabindex: 1
+  -
+    accesskey: m
+    before.update:
+      display: disclaimer.safe_changes
+      save.to: db.contact
+      send: email.changes_confirmation
+    display.default.value: db.user.email*
+    name: email
+    type: email*
+    tabindex: 2
+  -
+    accesskey: f
+    display.default.value: db.user.first_name*
+    name: first_name
+    type: text*
+    tabindex: 3
+  -
+    accesskey: d
+    display.default.value: db.user.middle_name*
+    name: middle_name
+    tabindex: 4
+    type: text
+  -
+    accesskey: l  
+    display.default.value: db.user.last_name*
+    name: last_name
+    tabindex: 5
+    type: text*
+  -
+    accesskey: s
+    id: submit_information
+    name: submit
+    tabindex: 6
+    type: submit
+    value: update
+    disclaimers:
+layout:
+  title_level_2: contact_information

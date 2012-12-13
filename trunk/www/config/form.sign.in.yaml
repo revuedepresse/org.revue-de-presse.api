@@ -1,0 +1,27 @@
+fields:
+  -
+    accesskey: e
+    class: email
+    display.default.value: Email
+    id: login
+    name: login
+    tabindex: 1
+    type: email*
+  -
+    accesskey: p  
+    name: password
+    tabindex: 2
+    type: password*
+  -  
+    accesskey: l
+    check.predicates: login
+    id: submit
+    name: submit
+    tabindex: 3
+    type: submit
+    value: login
+links:
+  -
+    name: retrieve_password
+    position: after
+    target: form.retrieve_password
