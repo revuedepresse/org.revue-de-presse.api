@@ -1,0 +1,1 @@
+ct.add({$component_name});

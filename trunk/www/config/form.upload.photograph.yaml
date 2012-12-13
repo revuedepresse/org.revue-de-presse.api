@@ -1,0 +1,28 @@
+fields:
+  - 
+    name: file
+    accesskey: f
+    move.to: fs.snapshots
+    type: file*
+  -
+    name: title
+    accesskey: t    
+    save.to: db.photo.title*
+    type: text*
+  -
+    name: keywords
+    accesskey: k
+    save.to: db.photo.keywords*
+    type: text*
+  -
+    name: submit
+    class: upload
+    accesskey: s    
+    type: submit
+    value: upload
+feedback:
+  success:
+    message: upload_successful
+  failure:
+    message: upload_failed
+    link.to: upload_photograph

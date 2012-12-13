@@ -1,0 +1,3 @@
+<?php
+
+require_once( DIR_LIB_ABSOLUTE . SCRIPT_LIBRARY_SMARTY );

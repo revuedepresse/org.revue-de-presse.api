@@ -1,0 +1,10 @@
+parameters:
+    endpoint.twitter.feed:  %endpoint_twitter_feed%
+    endpoint.twitter.user:  %endpoint_twitter_user%
+    api.twitter.version:    %api_twitter_version%
+
+services:
+    data_mining.miner.twitter:
+        class:  %data_mining.miner.class%
+        arguments:
+          - %endpoint.twitter.feed%

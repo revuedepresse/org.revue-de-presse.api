@@ -1,0 +1,30 @@
+disclaimers:
+  -
+    requirements
+fields:
+  - 
+    name: file
+    accesskey: f
+    move.to: fs.snapshots
+    type: file
+  -
+    name: title
+    accesskey: t
+    save.to: db.photo.title*
+    type: text
+  -
+    name: keywords
+    accesskey: k
+    after.update:
+      display: disclaimer.upload_successful    
+    save.to: db.photo.keywords*
+    type: text
+  -
+    name: submit
+    class: upload
+    accesskey: s
+    id: submit_document
+    type: submit
+    value: upload
+layout:
+  title_level_2: upload_photograph
