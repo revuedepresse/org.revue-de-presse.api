@@ -1,0 +1,50 @@
+imports:
+    - { resource: parameters.yml }
+    - { resource: parameters.php }
+    - { resource: security.yml }
+
+framework:
+    default_locale:       %locale%
+    translator:           { fallback: en }
+    secret:               %secret%
+    router:
+        resource: "%kernel.root_dir%/config/routing.yml"
+        strict_requirements: %kernel.debug%
+    form:                 true
+    csrf_protection:      true
+    validation:           { enable_annotations: true }
+    templating:           { engines: ['twig'] }
+    trust_proxy_headers:  false
+    session:
+        auto_start:
+
+# Twig Configuration
+twig:
+    debug:            %kernel.debug%
+    strict_variables: %kernel.debug%
+
+# Assetic Configuration
+assetic:
+    bundles: []
+    debug:          %kernel.debug%
+    use_controller: false
+    filters:
+        cssrewrite: ~
+
+# Doctrine Configuration
+doctrine:
+    orm:
+        auto_generate_proxy_classes: %kernel.debug%
+        auto_mapping: true
+
+propel:
+    path:       "%kernel.root_dir%/../vendor/propel"
+    phing_path: "%kernel.root_dir%/../vendor/phing"
+    
+# Swiftmailer Configuration
+swiftmailer:
+    spool:     { type: memory }
+    transport: %mailer_transport%
+    host:      %mailer_host%
+    username:  %mailer_user%
+    password:  %mailer_password%

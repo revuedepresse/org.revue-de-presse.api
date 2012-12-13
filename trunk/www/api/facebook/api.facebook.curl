@@ -1,0 +1,11 @@
+curl \
+		-F 'access_token=## FILL ACCESS_TOKEN ##' \
+		-F 'message=Snapshot' \
+		-F 'link=http://example.com/snapshots/img.jpg' \
+		-F 'picture=http://example.com/snapshots/img.jpg' \
+		-F 'name=Triceratops' \
+		-F 'caption=It turns out, she never really existed' \
+		-F 'description=nothing more to say about this sad story' \
+		-F 'actions={"name": "View on Weaving the Web", "link": "http://example.com/snapshots/img.jpg?param=%20"}' \
+		-F 'privacy={"value": "SELF"}' \
+		https://graph.facebook.com/me/feed

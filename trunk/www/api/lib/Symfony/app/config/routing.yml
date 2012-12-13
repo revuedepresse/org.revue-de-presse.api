@@ -1,0 +1,8 @@
+wtw_api_facebook_bundle:
+    resource: "@WTWAPIFacebookBundle/Resources/config/routing.yml"
+    prefix:   /sf2
+
+wtw_documentation_markdown:
+    resource: "@WTWDocumentationMarkdownBundle/Controller/"
+    type:     annotation
+    prefix:   /sf2

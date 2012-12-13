@@ -1,0 +1,25 @@
+parameters:
+    database_charset:  UTF8
+    database_driver:   pdo_mysql
+    database_host:     localhost
+    database_port:     3306
+    database_name:     _
+    database_user:     _
+    database_password: _
+
+    mailer_transport:  smtp
+    mailer_host:       localhost
+    mailer_user:       ~
+    mailer_password:   ~
+
+    locale:            en
+    secret:            ## FILL ME ##
+
+    api_twitter_version:      1.1
+    api_twitter_user_token:   _
+    api_twitter_user_secret:  _
+
+    endpoint_facebook_feed:   http://## FILL ME ##/fb/api.facebook.get.feed.php
+    endpoint_github_redirect: https://## FILL HOSTNAME ##/github/request
+    endpoint_twitter_feed:    http://127.0.0.1/api/twitter/timeline
+    endpoint_twitter_user:    https://userstream.twitter.com/%s/user.json
