@@ -253,7 +253,7 @@ class Client
 
         $endpoint = $siteMap['url']['base'] . $siteMap['uri']['get_repos'] .
             '?' . $parameterToken .
-            '&' . $this->redirectUri();
+            '&' . 'redirect_uri=' . $this->getRedirect();
         $response = $this->crawlUrl($endpoint);
 
         $this->log(
