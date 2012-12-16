@@ -61,25 +61,33 @@ class Service_Manager extends Deployer
 			FILE_NAME_SERVICE_CONFIGURATION.EXTENSION_INI
 		;
 
-        if (
-            ! $build_jenkins && 
-            ! $symfony_detected &&
-			! is_null( $server_name ) &&
-			in_array(
-				$server_name,
-				array(
-					$host_local_ip,
-					$host_lan_ip,
-					$host_local_livecoding,
-					$host_local_snaps,
-					$host_dev_tifa
-				)
-			) || (
-                $mode_cli &&
-                ( false === strpos( $script_name, 'phpunit' ) ) ||
-                ( isset($argv[1]) && false !== strpos($argv[1], 'wtw:api') )
+        $environment_development = ! $build_jenkins && ( 
+                ! $symfony_detected &&
+                ! is_null( $server_name ) &&
+                in_array(
+                    $server_name,
+                    array(
+                        $host_local_ip,
+                        $host_lan_ip,
+                        $host_local_livecoding,
+                        $host_local_snaps,
+                        $host_dev_tifa
+                    )
+                ) || (
+                    $mode_cli && (
+                        ( false === strpos( $script_name, 'phpunit' ) ) &&
+                        ( false === strpos( $script_name, 'app/console' ) ) &&
+                        ( false === strpos( $script_name, 'installer.php' ) ) &&
+                        ( isset($argv[1]) && false !== strpos($argv[1], 'wtw:api') )
+                    )
+                )
             )
-		)
+        ;
+
+        if ($debug_enabled)
+            error_log('[development environment] ' . $environment_development);
+
+        if ($environment_development)
 			$file_path =
 				$directory_current . '/../../' .
 				$file_name_settings
