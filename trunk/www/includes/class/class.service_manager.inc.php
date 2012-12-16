@@ -28,8 +28,6 @@ class Service_Manager extends Deployer
 
 		$directory_current = dirname( __FILE__ );
 
-		$host =
-		$resquest_uri =
 		$script_name =
 		$server_name =
 		$server_port = null;
@@ -39,7 +37,6 @@ class Service_Manager extends Deployer
 		$host_local_livecoding = 'livecoding.dev';
 		$host_local_snaps = 'snaps.dev';
 		$host_dev_tifa = '## FILL HOSTNAME ##';
-		$host_fr_snaps = '## FILL HOSTNAME ##';
 
 		$mode_cli = defined('STDIN');
 
