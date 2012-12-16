@@ -1988,7 +1988,7 @@ class Tokens_Stream extends \Alpha
 
 		if ( ! file_exists( $root_directory ) )
 
-			mkdir( $root_directory );
+			mkdir( $root_directory, 0660, true );
 
 		else if (
 			file_exists( $root_directory ) &&
