@@ -60,7 +60,6 @@ $exceptions = array(
 	'EXCEPTION_INVALID_SERVER_CONFIGURATION_INVALID_TIDY_EXTENSION' => 'The tidy extension for PHP is most likely invalid.',
 	'EXCEPTION_INVALID_SERVER_CONFIGURATION_TEMPORARY_DIRECTORY' => 'The temporary directory is not set properly.',
 	'EXCEPTION_INVALID_SERVICE_CONFIGURATION' => 'The provided service configuration is invalid.',
-    'EXCEPTION_SQL_INVALID_CLAUSE_ORDER_BY' => 'The Order By clause is not valid.',
 	'EXCEPTION_LOST_IN_TRANSLATION' => 'A piece of information was lost in translation',
 	'EXCEPTION_MISSING_ENTITY' => 'A %s is missing.',
 	'EXCEPTION_MISSING_LIBRARY' => 'The %s library is missing.',
@@ -70,6 +69,8 @@ $exceptions = array(
 	'EXCEPTION_OPERATION_FAILURE_PROCESSING' => 'The following operation failed: entity processing',
 	'EXCEPTION_OPERATION_FAILURE_REMOVAL' => 'The following operation failed: entity removal',
 	'EXCEPTION_RIGHTS_MANAGEMENT_CREDENTIALS_INSUFFICIENT' => 'Sorry, your credentials are insufficient for running this operation',
+	'EXCEPTION_SOURCE_BUILDER_SYNTAX_ERROR' => 'Sorry, source builder has generated some code with incorrect syntax.',
+	'EXCEPTION_SQL_INVALID_CLAUSE_ORDER_BY' => 'The Order By clause is not valid.',
 	'EXCEPTION_UNDEFINED_CONFIGURATION_PROPERTY' => 'Some configuration properties are missing.',
 	'EXCEPTION_UNDEFINED_DATA_TYPES' => 'Please fix the data type definition.',
 	'EXCEPTION_UNDEFINED_ENTITY' => 'Undefined %s',
@@ -85,45 +86,45 @@ $exceptions = array(
 declareConstantsBatch( $exceptions, FALSE );
 
 /**
- *************
- * Changes log
- *
- *************
- * 2011 10 03
- *************
- *
- * project :: wtw ::
- *
- * development :: introspection ::
- * 
- * Declare invalid property exception
- * 
- * (branch 0.1 :: revision :: 674)
- * (branch 0.2 :: revision :: 379)
- *
- *************
- * 2011 10 20
- *************
- *
- * project :: wtw ::
- *
- * development :: introspection ::
- * 
- * Declare exceptions array
- * 
- * (branch 0.1 :: revision :: 724)
- * (branch 0.2 :: revision :: 393)
- *
- *************
- * 2012 05 01
- *************
- *
- * project :: wtw ::
- *
- * development :: object-relational mapping ::
- *
- * Declare exception for invalid Order By clause in SQL queries
- * 
- * (branch 0.1 :: revision :: 874)
- *
- */
+*************
+* Changes log
+*
+*************
+* 2011 10 03
+*************
+*
+* project :: wtw ::
+*
+* development :: introspection ::
+* 
+* Declare invalid property exception
+* 
+* (branch 0.1 :: revision :: 674)
+* (branch 0.2 :: revision :: 379)
+*
+*************
+* 2011 10 20
+*************
+*
+* project :: wtw ::
+*
+* development :: introspection ::
+* 
+* Declare exceptions array
+* 
+* (branch 0.1 :: revision :: 724)
+* (branch 0.2 :: revision :: 393)
+*
+*************
+* 2012 05 01
+*************
+*
+* project :: wtw ::
+*
+* development :: object-relational mapping ::
+*
+* Declare exception for invalid Order By clause in SQL queries
+* 
+* (branch 0.1 :: revision :: 874)
+*
+*/
