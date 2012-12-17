@@ -21,6 +21,7 @@ $properties = array(
 	'PROPERTY_API_CONSUMER_CALLBACK' => 'api_consumer_callback',
 	'PROPERTY_API_CONSUMER_KEY' => 'api_consumer_key',
 	'PROPERTY_API_CONSUMER_SECRET' => 'api_consumer_secret',
+	'PROPERTY_ARGUMENT' => 'argument',
 	'PROPERTY_ARGUMENTS' => 'arguments',
 	'PROPERTY_ATTRIBUTES' => 'attributes',
 	'PROPERTY_AUTHOR' => 'author',
@@ -67,6 +68,7 @@ $properties = array(
 	'PROPERTY_COORDINATES' => 'coordinates',
 	'PROPERTY_COUNT_BYTES' => 'bytes_count',
 	'PROPERTY_COUNT_OPTIONS' => 'options_count',
+	'PROPERTY_COUNT_TOKENS' => 'tokens_count',
 	'PROPERTY_COUNT' => 'count',
 	'PROPERTY_DASHBOARD' => 'dashboard',
 	'PROPERTY_DATA' => 'data',
@@ -125,6 +127,7 @@ $properties = array(
 	'PROPERTY_FIELDS' => 'fields',
 	'PROPERTY_FIELD_VALUES' => 'field_values',
 	'PROPERTY_FILE' => 'file',
+	'PROPERTY_FILES_NAMES' => 'files_names',
 	'PROPERTY_FILTER' => 'filter',
 	'PROPERTY_FOLDER' => 'folder',
 	'PROPERTY_FORMAT' => 'format',
@@ -140,6 +143,7 @@ $properties = array(
 	'PROPERTY_HANDLERS' => 'handlers',
 	'PROPERTY_HASH_MAP' => 'hash_map',
 	'PROPERTY_HASH' => 'hash',
+	'PROPERTY_HASHES' => 'hashes',
 	'PROPERTY_HEIGHT' => 'height',
 	'PROPERTY_HOST' => 'host',
 	'PROPERTY_HTML_ELEMENTS' => 'html_elements',
@@ -162,6 +166,7 @@ $properties = array(
 	'PROPERTY_KEYWORDS' => 'keywords',
 	'PROPERTY_KIND' => 'kind',
 	'PROPERTY_HEADER' => 'header',
+	'PROPERTY_HISTORY' => 'history',
 	'PROPERTY_HOST' => 'host',
 	'PROPERTY_LABEL' => 'label',
 	'PROPERTY_LANGUAGE' => 'language',
@@ -191,6 +196,7 @@ $properties = array(
 	'PROPERTY_MEMBERSHIP' => 'membership',
 	'PROPERTY_MESSAGE' => 'message',
 	'PROPERTY_METHOD' => 'method',
+	'PROPERTY_METHODS' => 'methods',
 	'PROPERTY_MODE_ACCESS' => 'access_mode',
 	'PROPERTY_NAME' => 'name',
 	'PROPERTY_NAME_TRIMMED' => 'trimmed_name',
@@ -201,6 +207,7 @@ $properties = array(
 	'PROPERTY_OBJECT' => 'object',
 	'PROPERTY_OCCURRENCES' => 'occurrences',
 	'PROPERTY_OCCURRENCE' => 'occurrence',
+	'PROPERTY_OCCURRENCE_LAST' => 'last_occurrence',
 	'PROPERTY_OFFSET' => 'offset',
 	'PROPERTY_OPERAND' => 'operand',
 	'PROPERTY_OPERANDS' => 'operands',
@@ -222,6 +229,8 @@ $properties = array(
 	'PROPERTY_PDO' => 'pdo',
 	'PROPERTY_PARENTHESIS_CLOSING' => 'closing_parenthesis',
 	'PROPERTY_PARENTHESIS_OPENING' => 'opening_parenthesis',
+	'PROPERTY_PERSISTENCY' => 'persistency',
+	'PROPERTY_PLACEHOLDERS' => 'placeholders',
 	'PROPERTY_POSITION_NEW' => 'new_position',
 	'PROPERTY_POSITION_OLD' => 'old_position',
 	'PROPERTY_POSITION' => 'position',
@@ -242,6 +251,7 @@ $properties = array(
 	'PROPERTY_QUALITY' => 'quality',
 	'PROPERTY_RELEASED' => 'released',
 	'PROPERTY_RENDER' => 'render',
+	'PROPERTY_REPEATABLE' => 'repeatable',
 	'PROPERTY_REQUEST' => 'request',
 	'PROPERTY_RESULT' => 'result',
 	'PROPERTY_RETURN' => 'return',
@@ -268,6 +278,7 @@ $properties = array(
 	'PROPERTY_SORT' => 'sort',
 	'PROPERTY_SENDER' => 'sender',
 	'PROPERTY_SOURCE' => 'source',
+	'PROPERTY_SOURCE_TYPE' => 'source_type',
 	'PROPERTY_SPAN' => 'span',
 	'PROPERTY_STACK' => 'stack',
 	'PROPERTY_START' => 'start',
@@ -283,6 +294,8 @@ $properties = array(
 	'PROPERTY_SUB_FOLDER' => 'sub_folder',
 	'PROPERTY_SUB_OPERATIONS' => 'sub_operations',
 	'PROPERTY_SUBJECT' => 'subject',
+	'PROPERTY_SUBSTITUTION' => 'substitution',
+	'PROPERTY_SUBSTITUTIONS' => 'substitutions',
 	'PROPERTY_SUBTITLE' => 'subtitle',
 	'PROPERTY_SUCCESS' => 'success',
 	'PROPERTY_SUMMARY' => 'summary',
@@ -293,14 +306,19 @@ $properties = array(
 	'PROPERTY_TABLE_ALIAS' => 'table_alias',
 	'PROPERTY_TAG' => 'tag',
 	'PROPERTY_TARGET' => 'target',
+	'PROPERTY_TARGETS' => 'targets',
 	'PROPERTY_TARGET_TYPE' => 'target_type',
 	'PROPERTY_TEXT' => 'text',
 	'PROPERTY_THREAD' => 'thread',
+	'PROPERTY_TIMESTAMP' => 'timestamp',
 	'PROPERTY_TITLE' => 'title',
 	'PROPERTY_TOKEN' => 'token',
 	'PROPERTY_TOKEN_ACCESS' => 'access_token',
 	'PROPERTY_TOKEN_OAUTH' => 'oauth_token',
 	'PROPERTY_TOKEN_OAUTH_SECRET' => 'oauth_token_secret',
+	'PROPERTY_TOKENS' => 'tokens',
+	'PROPERTY_TRANSFORMATION' => 'transformation',
+	'PROPERTY_TRANSFORMATIONS' => 'transformations',
 	'PROPERTY_TYPE' => 'type',
 	'PROPERTY_URI_REQUEST' => 'request_uri',
 	'PROPERTY_URI' => 'uri',
@@ -322,3 +340,64 @@ $properties = array(
 );
 
 declareConstantsBatch( $properties, FALSE );
+
+/**
+*************
+* Changes log
+*
+*************
+* 2012 05 05
+*************
+* 
+* Declare following properties
+*
+* 	tokens count
+* 
+* (revision 905)
+*
+*************
+* 2012 05 08
+*************
+* 
+* Declare following properties
+*
+*	hashes
+*	history
+*	methods
+*	repeatable
+*	source
+*	substitution
+*	substitutions
+*	timestamp
+* 	transformation
+* 	transformations
+* 
+* (revision 911)
+*
+*************
+* 2012 05 09
+*************
+*
+* development :: code generation ::
+*
+* Declare following properties
+*
+*	persistency
+* 
+* (revision 926)
+*
+*************
+* 2012 05 10
+*************
+*
+* development :: code generation ::
+* 
+* Declare following properties
+*
+*	files names
+*	last occurrence
+*	targets
+* 
+* (revision 927)
+*
+*/
