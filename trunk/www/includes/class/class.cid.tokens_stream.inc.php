@@ -1988,7 +1988,7 @@ class Tokens_Stream extends \Alpha
 
         if ( ! file_exists( $root_directory ) )
         {
-            error_log(sprintf('[meta-programming] attempt to create sandbox (%s)', $root_directory
+            error_log(sprintf('[meta-programming] attempt to create sandbox (%s)', $root_directory ) );
             mkdir( $root_directory, 0770, true );
         }
         else if (

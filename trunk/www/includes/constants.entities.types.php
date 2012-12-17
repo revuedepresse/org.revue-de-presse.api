@@ -17,8 +17,8 @@ assignConstant( 'ACTION_TYPE_FETCH_DATA*', 1 );
 
 // Field affordance types
 
-assignConstant( 'AFFORDANCE_TYPE_SELECT_OPTIONS', 'select_options' );
 assignConstant( 'AFFORDANCE_TYPE_INPUT_TEXT*', 'input_text' );
+assignConstant( 'AFFORDANCE_TYPE_SELECT_OPTIONS', 'select_options' );
 
 // Aggregation type
 
@@ -33,10 +33,10 @@ assignConstant( 'API_TYPE_TWITTER*', 'twitter' );
 // Arc type
 
 assignConstant( 'ARC_TYPE_ENCAPSULATION', 5 );
-assignConstant( 'ARC_TYPE_MODEL', 0 );
-assignConstant( 'ARC_TYPE_OWNERSHIP*', 1 );
 assignConstant( 'ARC_TYPE_EXECUTE_QUERY', 2 );
 assignConstant( 'ARC_TYPE_INSTANTIATE_ENTITY', 3 );
+assignConstant( 'ARC_TYPE_MODEL', 0 );
+assignConstant( 'ARC_TYPE_OWNERSHIP*', 1 );
 assignConstant( 'ARC_TYPE_TAKE_SNAPSHOT', 4 );
 assignConstant( 'ARC_TYPE_VISIBILITY', 6 );
 
@@ -62,15 +62,15 @@ assignConstant( 'COLUMN_TYPE_INDEX', 'index' );
 assignConstant( 'CONSTRAINT_TYPE_PRIMARY_KEY*', 'primary key' );
 assignConstant( 'CONSTRAINT_TYPE_UNIQUE', 'unique' );
 
-// Content levels
-
-assignConstant( 'CONTENT_LEVEL_TYPE_ROOT*', 0 );
-assignConstant( 'CONTENT_LEVEL_TYPE_OVERVIEW', 1 );
-
 // Contact type
 
 assignConstant( 'CONTACT_TYPE_EMAIL', 1 );
 assignConstant( 'CONTACT_TYPE_USER_NAME', 0 );
+
+// Content levels
+
+assignConstant( 'CONTENT_LEVEL_TYPE_OVERVIEW', 1 );
+assignConstant( 'CONTENT_LEVEL_TYPE_ROOT*', 0 );
 
 // Content types
 
@@ -98,17 +98,29 @@ assignConstant( 'DATA_TYPE_NUMBER', 'number' );
 assignConstant( 'DATA_TYPE_OBJECT', 'object' );
 assignConstant( 'DATA_TYPE_UNKNOWN', 'unknown' );
 
+// Delimiter types
 
-// Deployment types
 assignConstant( 'DELIMITER_TYPE_CLOSING', 'closing' );
 assignConstant( 'DELIMITER_TYPE_OPENING', 'opening' );
 
-
 // Deployment types
+
 assignConstant( 'DEPLOYMENT_TYPE_DEVELOPMENT', 0 );
 assignConstant( 'DEPLOYMENT_TYPE_PREPRODUCTION', 1 );
-assignConstant( 'DEPLOYMENT_TYPE_UNIT_TESTING', 2 );
 assignConstant( 'DEPLOYMENT_TYPE_PRODUCTION*', 3 );
+assignConstant( 'DEPLOYMENT_TYPE_UNIT_TESTING', 2 );
+
+// Directory types
+
+assignConstant( 'DIRECTORY_TYPE_AGENT', 'agent' );
+assignConstant( 'DIRECTORY_TYPE_CLASS', 'class' );
+assignConstant( 'DIRECTORY_TYPE_LANGUAGE_SHORT', 'lang' );
+assignConstant( 'DIRECTORY_TYPE_INCLUDES', 'includes' );
+assignConstant( 'DIRECTORY_TYPE_INTERFACE', 'interface' );
+assignConstant( 'DIRECTORY_TYPE_MOCKUP', 'mockup' );
+assignConstant( 'DIRECTORY_TYPE_ROOT', '/' );
+assignConstant( 'DIRECTORY_TYPE_TEST', 'test' );
+assignConstant( 'DIRECTORY_TYPE_TRAIT', 'trait' );
 
 // Document types
 
@@ -118,23 +130,23 @@ assignConstant( 'DOCUMENT_TYPE_XHTML', 1 );
 // Edge types
 
 assignConstant( 'EDGE_TYPE_FORM', 0 );
-assignConstant( 'EDGE_TYPE_TEMPLATE_EMAIL', 4 );
 assignConstant( 'EDGE_TYPE_TEMPLATE_DISCLAIMER', 3 );
+assignConstant( 'EDGE_TYPE_TEMPLATE_EMAIL', 4 );
 
 // Edition mode
 
-assignConstant( 'EDITION_MODE_TYPE_POST*', 0 );
 assignConstant( 'EDITION_MODE_TYPE_EDITION', 1 );
+assignConstant( 'EDITION_MODE_TYPE_POST*', 0 );
 assignConstant( 'EDITION_MODE_TYPE_PREVIEW', 2 );
 
 // Event types
 
 assignConstant( 'EVENT_TYPE_ARCHIVE_OPENING', 2 );
 assignConstant( 'EVENT_TYPE_EXCEPTION_CAUGHT', 3 );
-assignConstant( 'EVENT_TYPE_LANGUAGE_ITEM_IMPORT', 1 );
-assignConstant( 'EVENT_TYPE_TAKE_SNAPSHOT', 4 );
 assignConstant( 'EVENT_TYPE_INSTANTIATE_ENTITY', 5 );
+assignConstant( 'EVENT_TYPE_LANGUAGE_ITEM_IMPORT', 1 );
 assignConstant( 'EVENT_TYPE_SYNCHRONIZE_ENTITY', 6 );
+assignConstant( 'EVENT_TYPE_TAKE_SNAPSHOT', 4 );
 
 // Extension types
 
@@ -143,31 +155,22 @@ assignConstant( 'EXTENSION_TYPE_HTML*', 0 );
 // Feedback types
 
 assignConstant( 'FEEDBACK_TYPE_FAILURE', 'failure' );
-assignConstant( 'FEEDBACK_TYPE_SUCCESS', 'success' );
-assignConstant( 'FEEDBACK_TYPE_SUGGEST_FEATURE_REQUEST', 5 );
-assignConstant( 'FEEDBACK_TYPE_SUGGEST_IMPROVEMENT', 4 );
 assignConstant( 'FEEDBACK_TYPE_REPORT_EPIC_FAIL', 3 );
 assignConstant( 'FEEDBACK_TYPE_REPORT_MALFUNCTION*', 1 );
 assignConstant( 'FEEDBACK_TYPE_REPORT_OTHER', 6 );
 assignConstant( 'FEEDBACK_TYPE_REPORT_PERFORMANCE_ISSUES', 2 );
-
-// Flags types
-
-assignConstant( 'FLAG_TYPE_ADMINISTRATION', 4 );
-assignConstant( 'FLAG_TYPE_LIKE', 0 );
-assignConstant( 'FLAG_TYPE_DO_NOT_LIKE', 1 );
-assignConstant( 'FLAG_TYPE_SHARE', 5 );
-assignConstant( 'FLAG_TYPE_SUGGEST_REMOVAL', 2 );
-assignConstant( 'FLAG_TYPE_REPORT', 3 );
+assignConstant( 'FEEDBACK_TYPE_SUCCESS', 'success' );
+assignConstant( 'FEEDBACK_TYPE_SUGGEST_FEATURE_REQUEST', 5 );
+assignConstant( 'FEEDBACK_TYPE_SUGGEST_IMPROVEMENT', 4 );
 
 // Feed types
 
 assignConstant( 'FEED_TYPE_ATOM', 2 );
-assignConstant( 'FEED_TYPE_TWINE', 0 );
 assignConstant( 'FEED_TYPE_RSS*', 1 );
+assignConstant( 'FEED_TYPE_TWINE', 0 );
+
 
 // Field types
-
 assignConstant( 'FIELD_TYPE_BUTTON', 'button' );
 assignConstant( 'FIELD_TYPE_CHECKBOX', 'checkbox' );
 assignConstant( 'FIELD_TYPE_EMAIL', 'email' );
@@ -184,8 +187,17 @@ assignConstant( 'FIELD_TYPE_TEXTAREA', 'textarea' );
 
 // File types
 
-assignConstant( 'FILE_TYPE_ORDINARY*', 0 );
 assignConstant( 'FILE_TYPE_DIRECTORY', 1 );
+assignConstant( 'FILE_TYPE_ORDINARY*', 0 );
+
+// Flags types
+
+assignConstant( 'FLAG_TYPE_ADMINISTRATION', 4 );
+assignConstant( 'FLAG_TYPE_DO_NOT_LIKE', 1 );
+assignConstant( 'FLAG_TYPE_LIKE', 0 );
+assignConstant( 'FLAG_TYPE_REPORT', 3 );
+assignConstant( 'FLAG_TYPE_SHARE', 5 );
+assignConstant( 'FLAG_TYPE_SUGGEST_REMOVAL', 2 );
 
 // Folder types
 
@@ -196,7 +208,7 @@ assignConstant( 'FOLDER_TYPE_TEMPLATE*', '../../..'.DIR_TEMPLATES );
 
 // Format types
 
-assignConstant( 'FORMAT_TYPE_XML', 'format_type_xml' );
+assignConstant( 'FORMAT_TYPE_XHTML*', 'xhtml' );
 
 // Form encoding
 
@@ -205,7 +217,6 @@ assignConstant( 'FORM_ENCODING_TYPE_MULTIPART',  'multipart/form-data' );
 // Formats
 
 assignConstant( 'FORMAT_TYPE_JSON', 'json' );
-assignConstant( 'FORMAT_TYPE_XHTML*', 'xhtml' );
 assignConstant( 'FORMAT_TYPE_XML', 'xml' );
 
 // Form field types
@@ -216,6 +227,7 @@ assignConstant( 'FORM_FIELD_TYPE_DATE', 'fieldDate' );
 assignConstant( 'FORM_FIELD_TYPE_EMAIL', 'fieldEmail' );
 assignConstant( 'FORM_FIELD_TYPE_FILE', 'fieldFile' );
 assignConstant( 'FORM_FIELD_TYPE_HIDDEN', 'fieldHidden' );
+assignConstant( 'FORM_FIELD_TYPE_IMAGE', 'fieldImage' );
 assignConstant( 'FORM_FIELD_TYPE_MULTIPLE', 'fieldMultiple' );
 assignConstant( 'FORM_FIELD_TYPE_PASSWORD', 'fieldPassword' );
 assignConstant( 'FORM_FIELD_TYPE_PHONE', 'fieldPhone' );
@@ -226,9 +238,8 @@ assignConstant( 'FORM_FIELD_TYPE_SELECT', 'fieldSelect' );
 assignConstant( 'FORM_FIELD_TYPE_SUBMIT', 'fieldSubmit' );
 assignConstant( 'FORM_FIELD_TYPE_TEXT', 'fieldText' );
 assignConstant( 'FORM_FIELD_TYPE_TEXTAREA', 'fieldTextarea' );
-assignConstant( 'FORM_FIELD_TYPE_TITLE', 'fieldTitle' );
 assignConstant( 'FORM_FIELD_TYPE_TIME', 'fieldTime' );
-assignConstant( 'FORM_FIELD_TYPE_IMAGE', 'fieldImage' );
+assignConstant( 'FORM_FIELD_TYPE_TITLE', 'fieldTitle' );
 assignConstant( 'FORM_FIELD_TYPE_URL', 'fieldUrl' );
 assignConstant( 'FORM_FIELD_TYPE_WORLD', 'fieldWorld' );
 
@@ -258,11 +269,6 @@ assignConstant( 'JSON_TYPE_FACEBOOK_FEED', 1 );
 assignConstant( 'JSON_TYPE_TWITTER_USER_STREAM', 2 );
 assignConstant( 'JSON_TYPE_GITHUB_STARRED_REPOSITORIES', 3 );
 
-// Language query types
-
-assignConstant( 'QUERY_LANGUAGE_TYPE_SPARQL', 1 );
-assignConstant( 'QUERY_LANGUAGE_TYPE_SQL*', 0 );
-
 // Layout types
 
 assignConstant( 'LAYOUT_TYPE_TABS', 'tabs' );
@@ -276,7 +282,7 @@ assignConstant( 'LEVEL_TYPE_ROOT', 0 );
 
 assignConstant( 'LINK_TYPE_CONFIRMATION', 1 );
 
-// Media types
+// Mashup types
 
 assignConstant( 'MASHUP_TYPE_OPEN_DATA*', 'open_data' );
 
@@ -326,6 +332,15 @@ assignConstant( 'OPERATION_TYPE_GET_TYPE', 'get_type' );
 assignConstant( 'OPERATION_TYPE_INSTANTIATE_ENTITY','instantiate_entity' );
 assignConstant( 'OPERATION_TYPE_SYNCHRONIZE_ENTITY','synchronize_entity' );
 
+// Panel types
+
+assignConstant( 'ORDER_BY_TYPE_ASC', 'asc' );
+assignConstant( 'ORDER_BY_TYPE_DESC', 'desc' );
+
+// Panel types
+
+assignConstant( 'PANEL_TYPE_AFFORDANCE', 'affordance' );
+
 // Parsing types
 
 assignConstant( 'PARSING_TYPE_ASSIGNMENT', 5 );
@@ -340,6 +355,10 @@ assignConstant( 'PARSING_TYPE_MEMBER', 2 );
 
 assignConstant( 'PLACEHOLDER_TYPE_STYLESHEET*', 0 );
 
+// Language query types
+assignConstant( 'QUERY_LANGUAGE_TYPE_SPARQL', 1 );
+assignConstant( 'QUERY_LANGUAGE_TYPE_SQL*', 0 );
+
 // Query types 
 
 assignConstant( 'QUERY_TYPE_ALTER', 4 );
@@ -347,10 +366,6 @@ assignConstant( 'QUERY_TYPE_DELETE', 3 );
 assignConstant( 'QUERY_TYPE_INSERT', 0 );
 assignConstant( 'QUERY_TYPE_SELECT*', 1 );
 assignConstant( 'QUERY_TYPE_UPDATE', 2 );
-
-// Panel types
-
-assignConstant( 'PANEL_TYPE_AFFORDANCE', 'affordance' );
 
 // Render types
 
@@ -374,15 +389,21 @@ assignConstant( 'ROUTE_TYPE_ROOT', 7 );
 // Schema types
 
 assignConstant( 'SCHEMA_TYPE_ARRAY', 1 );
-assignConstant( 'SCHEMA_TYPE_TREE', 2 );
 assignConstant( 'SCHEMA_TYPE_CHILDREN', 3 );
 assignConstant( 'SCHEMA_TYPE_PARENTS', 4 );
+assignConstant( 'SCHEMA_TYPE_TREE', 2 );
 
 // Service types
 
-assignConstant( 'SERVICE_TYPE_TWITTER*', 0 );
+assignConstant( 'SEARCH_TYPE_FULL_TEXT', 'full_text' );
+assignConstant( 'SEARCH_TYPE_REGEXP', 'regexp' );
+assignConstant( 'SEARCH_TYPE_TOKEN', 'token' );
+
+// Service types
+
 assignConstant( 'SERVICE_TYPE_AMAZON', 1 );
 assignConstant( 'SERVICE_TYPE_GITHUB', 2 );
+assignConstant( 'SERVICE_TYPE_TWITTER*', 0 );
 
 // Social network types
 
@@ -403,8 +424,8 @@ assignConstant( 'STORAGE_TYPE_FILE_SYSTEM*', 'file_system' );
 
 // Store item types
 
-assignConstant( 'STORE_ITEM_TYPE_STORE*', 1 );
 assignConstant( 'STORE_ITEM_TYPE_QUERY', 2 );
+assignConstant( 'STORE_ITEM_TYPE_STORE*', 1 );
 
 // Store types
 
@@ -416,14 +437,19 @@ assignConstant( 'STORE_TYPE_QUERY', 2 );
 assignConstant( 'STYLESHEET_TYPE_PRINT', 1 );
 assignConstant( 'STYLESHEET_TYPE_SCREEN*', 0 );
 
-// Syndication types
+// Subset types
 
-assignConstant( 'SYNDICATION_TYPE_RSS*', 0 );
+assignConstant( 'SUBSET_TYPE_DEFINITION', 'definition' );
+assignConstant( 'SUBSET_TYPE_PERSISTENCY', 'persistency' );
 
 // Target types
 
 assignConstant( 'SYNCHRONIZATION_TYPE_LAYER_TO_PHYSICAL', 1 );
 assignConstant( 'SYNCHRONIZATION_TYPE_PHYSICAL_TO_LAYER*', 0 );
+
+// Syndication types
+
+assignConstant( 'SYNDICATION_TYPE_RSS*', 0 );
 
 // Target types
 
@@ -453,14 +479,14 @@ assignConstant( 'TRAVERSING_TYPE_RECURSIVELY', 1 );
 // User types
 
 assignConstant( 'USER_TYPE_ADMINISTRATOR', 'admin' );
-assignConstant( 'USER_TYPE_VISITOR', 1 );
 assignConstant( 'USER_TYPE_SUPER_ADMINISTRATOR', 2 );
+assignConstant( 'USER_TYPE_VISITOR', 1 );
 
 // Visibility
 
 assignConstant( 'VISIBILITY_TYPE_PARANOID*', 0 );
-assignConstant( 'VISIBILITY_TYPE_SHARED', 1 );
 assignConstant( 'VISIBILITY_TYPE_PUBLIC', 2 );
+assignConstant( 'VISIBILITY_TYPE_SHARED', 1 );
 
 // View types
 
@@ -468,74 +494,125 @@ assignConstant( 'VIEW_TYPE_FORM', 1 );
 assignConstant( 'VIEW_TYPE_INJECTION', 2 );
 
 /**
- *************
- * Changes log
- *
- *************
- * 2011 09 27
- *************
- *
- * project :: wtw ::
- *
- * deployment :: template engine ::
- * 
- * Declare deployment stages
- * Revise path leading to templates
- * 
- * (branch 0.2 :: revision :: 327)
- *
- *************
- * 2011 10 01
- *************
- * 
- * Declare following entity types
- *
- *	Feed
- * 	Syndication
- * 
- * (branch 0.1 :: revision :: 662)
- *
- *************
- * 2011 10 03
- *************
- * 
- * Declare format types
- *
- *	XHTML
- *	XML
- * 	JSON
- * 
- * (branch 0.1 :: revision :: 379)
- * (branch 0.2 :: revision :: 674)
- *
- *************
- * 2011 10 18
- *************
- * 
- * Declare function calls aggregation types
- *
- * (branch 0.1 :: revision :: 393)
- * (branch 0.2 :: revision :: 715)
- *
- **************
- * 2012 04 03
- *************
- *
- * development :: api :: facebook ::
- *
- * Declare Facebook Json types
- *
- * (branch 0.1 :: revision 839)
- * (branch 0.2 :: revision 422)
- *
- * **************
- * 2012 05 01
- *************
- *
- * development :: api :: facebook ::
- *
- * Declare SQL Order By clause types
- *
- * (branch 0.1 :: revision 875)
- * 
- */
+*************
+* Changes log
+*
+*************
+* 2011 09 27
+*************
+*
+* project :: wtw ::
+*
+* deployment :: template engine ::
+* 
+* Declare deployment stages
+* Revise path leading to templates
+* 
+* (branch 0.2 :: revision :: 327)
+*
+*************
+* 2011 10 01
+*************
+* 
+* Declare following entity types
+*
+*	Feed
+* 	Syndication
+* 
+* (branch 0.1 :: revision :: 662)
+*
+*************
+* 2011 10 03
+*************
+* 
+* Declare format types
+*
+*	XHTML
+*	XML
+* 	JSON
+* 
+* (branch 0.1 :: revision :: 379)
+* (branch 0.2 :: revision :: 674)
+*
+*************
+* 2011 10 18
+*************
+* 
+* Declare function calls aggregation types
+*
+* (branch 0.1 :: revision :: 393)
+* (branch 0.2 :: revision :: 715)
+*
+*************
+* 2011 10 26
+*************
+*
+* project :: wtw ::
+* 
+* deployment :: template engine ::
+*
+* Revise relative path to templates
+* 
+* (branch 0.1 :: revision :: 796)
+* (branch 0.1 :: revision :: 402)
+*
+**************
+* 2012 04 03
+*************
+*
+* development :: api :: facebook ::
+*
+* Declare Facebook Json types
+*
+* (branch 0.1 :: revision :: 839)
+* (branch 0.2 :: revision :: 422)
+*
+**************
+* 2012 05 01
+*************
+*
+* development :: api :: facebook ::
+*
+* Declare SQL Order By clause types
+*
+* (branch 0.1 :: revision :: 875)
+*
+**************
+* 2012 05 05
+*************
+*
+* unit testing :: introspection ::
+*
+* Sort declarations of entities types by functions calls by first parameter
+*
+* (branch 0.1 :: revision :: 896)
+*
+**************
+* 2012 05 09
+*************
+*
+* unit testing :: code generation ::
+*
+* Declare types
+*
+*	definition
+*	directory
+* 	persistency
+* 	subset
+*
+* (branch 0.1 :: revision :: 926)
+*
+**************
+* 2012 05 10
+*************
+*
+* unit testing :: code generation ::
+*
+* Declare types
+*
+*	search
+*	target
+*
+* (branch 0.1 :: revision :: 927)
+*
+*/
