@@ -1982,8 +1982,8 @@ class Tokens_Stream extends \Alpha
             );
 
         $root_directory =
-            dirname( __FILE__ ) . '/../../' . DIR_API . '/' . DIR_WTW .
-            constant( $directory_symbol ) 
+            realpath( __DIR__ . '/../../' . DIR_API . '/' . DIR_WTW .
+                constant( $directory_symbol ) ) 
         ;
 
         if ( ! file_exists( $root_directory ) )
