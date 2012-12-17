@@ -31,6 +31,7 @@
                     "dflydev\\markdown": "src"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause"
             ],
@@ -90,6 +91,7 @@
                     "Doctrine\\Common": "lib/"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -135,19 +137,19 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/dbal",
-                "reference": "f63af1948a609a96b8ea1c1302c7cdf2f9f51468"
+                "reference": "00f9575d24a15931c2ccfafd888b3d1d0bb5bd03"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/doctrine/dbal/archive/f63af1948a609a96b8ea1c1302c7cdf2f9f51468.zip",
-                "reference": "f63af1948a609a96b8ea1c1302c7cdf2f9f51468",
+                "url": "https://github.com/doctrine/dbal/archive/00f9575d24a15931c2ccfafd888b3d1d0bb5bd03.zip",
+                "reference": "00f9575d24a15931c2ccfafd888b3d1d0bb5bd03",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3.2",
                 "doctrine/common": "2.3.*"
             },
-            "time": "2012-12-04 21:06:56",
+            "time": "2012-12-17 15:35:54",
             "type": "library",
             "extra": {
                 "branch-alias": {
@@ -160,6 +162,7 @@
                     "Doctrine\\DBAL": "lib/"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -339,12 +342,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/fabpot/Goutte",
-                "reference": "70c036b3ffe33521b95b8223bf062ae007da619f"
+                "reference": "36b8fef6e78bda9200b952e714ed75b35ec94b9b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/fabpot/Goutte/archive/70c036b3ffe33521b95b8223bf062ae007da619f.zip",
-                "reference": "70c036b3ffe33521b95b8223bf062ae007da619f",
+                "url": "https://github.com/fabpot/Goutte/archive/36b8fef6e78bda9200b952e714ed75b35ec94b9b.zip",
+                "reference": "36b8fef6e78bda9200b952e714ed75b35ec94b9b",
                 "shasum": ""
             },
             "require": {
@@ -357,7 +360,7 @@
                 "ext-curl": "*",
                 "guzzle/guzzle": "3.0.*"
             },
-            "time": "2012-12-03 13:38:32",
+            "time": "2012-12-17 21:16:28",
             "type": "application",
             "extra": {
                 "branch-alias": {
@@ -370,6 +373,7 @@
                     "Goutte": "."
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -412,6 +416,7 @@
                     "src"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "Apache2"
             ],
@@ -607,6 +612,7 @@
                     "JMS\\AopBundle": ""
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "Apache"
             ],
@@ -654,6 +660,7 @@
                     "CG\\": "src/"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "Apache2"
             ],
@@ -718,6 +725,7 @@
                     "JMS\\DiExtraBundle": ""
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "Apache"
             ],
@@ -761,6 +769,7 @@
                     "Metadata\\": "src/"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "Apache"
             ],
@@ -810,6 +819,7 @@
                     "JMS\\": "src/"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "Apache2"
             ],
@@ -865,6 +875,7 @@
                     "JMS\\SecurityExtraBundle": ""
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "Apache2"
             ],
@@ -872,7 +883,7 @@
                 {
                     "name": "Johannes M. Schmitt",
                     "email": "schmittjoh@gmail.com",
-                    "homepage": "http://jmsyst.com",
+                    "homepage": "https://github.com/schmittjoh",
                     "role": "Developer of wrapped JMSSerializerBundle"
                 }
             ],
@@ -896,7 +907,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/thierrymarianne/twitteroauth/zipball/7b8a09391dab6b5966290f3734c7387b983e859a",
+                "url": "https://api.github.com/repos/thierrymarianne/twitteroauth/zipball/7b8a09391dab6b5966290f3734c7387b983e859a",
                 "reference": "7b8a09391dab6b5966290f3734c7387b983e859a",
                 "shasum": ""
             },
@@ -952,6 +963,7 @@
                     "Knp\\Bundle\\MarkdownBundle": ""
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -1123,6 +1135,7 @@
                     "classes/phing/"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "LGPL3"
             ],
@@ -1335,6 +1348,7 @@
                     "Sensio\\Bundle\\DistributionBundle": ""
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -1435,6 +1449,7 @@
                     "Sensio\\Bundle\\GeneratorBundle": ""
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -1476,6 +1491,7 @@
                     "lib/swift_required.php"
                 ]
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "LGPL"
             ],
@@ -1598,6 +1614,7 @@
                     "Symfony\\Bundle\\MonologBundle": ""
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -1653,6 +1670,7 @@
                     "Symfony\\Bundle\\SwiftmailerBundle": ""
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -1780,6 +1798,7 @@
                     "Themattharris": "src"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "authors": [
                 {
                     "name": "Erwann MEST",
