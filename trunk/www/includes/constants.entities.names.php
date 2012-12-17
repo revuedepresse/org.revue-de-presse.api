@@ -61,8 +61,10 @@ $entities = array(
 	'ENTITY_DATA_MINER' => 'data_miner',
 	'ENTITY_DB' => 'db',
 	'ENTITY_DECLATION_CLASSES' => 'classes_declaration',
+	'ENTITY_DEFINITION' => 'definition',
 	'ENTITY_DELIMITER' => 'delimiter',
 	'ENTITY_DEPLOYER' => 'deployer',
+	'ENTITY_DESTINATION' => 'destination',
 	'ENTITY_DIALOG' => 'dialog',
 	'ENTITY_DIAPORAMA' => 'diaporama',
 	'ENTITY_DIRECTORY' => 'directory',
@@ -95,10 +97,10 @@ $entities = array(
 	'ENTITY_EXCEPTION_HANDLER' => 'exception_handler',
 	'ENTITY_EXECUTOR' => 'executor',
 	'ENTITY_FACEBOOK' => 'facebook',
-	'ENTITY_FACEBOOK_FEED' => 'facebook_feed',
-	'ENTITY_FACEBOOK_HOME' => 'facebook_home',
-	'ENTITY_FACTORY' => 'factory',
-	'ENTITY_FAILURE' => 'failure',
+    'ENTITY_FACEBOOK_FEED' => 'facebook_feed',
+    'ENTITY_FACEBOOK_HOME' => 'facebook_home',
+    'ENTITY_FACTORY' => 'factory',
+    'ENTITY_FAILURE' => 'failure',
 	'ENTITY_FAVORITE' => 'favorite',
 	'ENTITY_FEED' => 'feed',
 	'ENTITY_FEEDBACK' => 'feedback',
@@ -116,6 +118,7 @@ $entities = array(
 	'ENTITY_FORMAT' => 'format',
 	'ENTITY_FORM_MANAGER' => 'form_manager',
 	'ENTITY_FUNCTION' => 'function',
+	'ENTITY_GITHUB' => 'github',
 	'ENTITY_GITHUB_STARRED_REPOSITORIES' => 'github_starred_repositories',
 	'ENTITY_HASH' => 'hash',
 	'ENTITY_HEADER' => 'header',
@@ -167,6 +170,8 @@ $entities = array(
 	'ENTITY_METHOD_NAME' => 'method_name',
 	'ENTITY_METHOD_NAME_SECTION' => 'method_name_section',
 	'ENTITY_MICROBLOGGING' => 'microblogging',
+	'ENTITY_MODE_ACCESS' => 'access_mode',
+	'ENTITY_MODEL_JSON' => 'json_model',
 	'ENTITY_MYSQLI' => 'mysqli',
 	'ENTITY_NAME' => 'name',
 	'ENTITY_NAME_CLASS' => 'class_name',
@@ -190,6 +195,7 @@ $entities = array(
 	'ENTITY_PATH' => 'path',
 	'ENTITY_PATTERN' => 'pattern',
 	'ENTITY_PDO' => 'pdo',
+	'ENTITY_PERSISTENCY' => 'persistency',
 	'ENTITY_PHOTO' => 'photo',
 	'ENTITY_PHOTOGRAPH' => 'photograph',
 	'ENTITY_PHP_VARIABLE' => 'PHP_variable',
@@ -221,12 +227,15 @@ $entities = array(
 	'ENTITY_SERIALIZER' => 'serializer',
 	'ENTITY_SERVICE' => 'service',
 	'ENTITY_SERVICE_MANAGER' => 'service_manager',
+	'ENTITY_SIGNAL' => 'signal',
+	'ENTITY_SIZE' => 'size',
 	'ENTITY_SLICE' => 'slice',
 	'ENTITY_SMARTY_SEFI' => 'smarty_sefi',
 	'ENTITY_SMARTY_VARIABLE' => 'Smarty_variable',
 	'ENTITY_SNAPSHOT' => 'snapshot',
 	'ENTITY_SOCIAL_NETWORK' => 'social_network',
 	'ENTITY_SOURCE_BUILDER' => 'source_builder',
+	'ENTITY_SOURCE_TYPE' => 'source_type',
 	'ENTITY_SOURCE' => 'source',
 	'ENTITY_SPARQL' => 'sparql',
 	'ENTITY_SQL' => 'sql',
@@ -234,12 +243,14 @@ $entities = array(
 	'ENTITY_STANDARD_CLASS' => array(
 		PROPERTY_NAME => 'ENTITY_STANDARD', PROPERTY_CONSTANT => TRUE
 	),
+   'ENTITY_STARRED_REPOSITORIES' => 'starred_repositories',
 	'ENTITY_STEP' => 'step',
 	'ENTITY_STORAGE' => 'storage',
 	'ENTITY_STORE' => 'store',
 	'ENTITY_STORE_ITEM' => 'store_item',
 	'ENTITY_STREAM' => 'stream',
 	'ENTITY_STYLESHEET' => 'stylesheet',
+	'ENTITY_SUBSET' => 'subset',
 	'ENTITY_SUCCESS' => 'success',
 	'ENTITY_SYNCHRONIZATION' => 'synchronization',
 	'ENTITY_SYNCING' => 'syncing',
@@ -276,15 +287,17 @@ $entities = array(
 	'ENTITY_TOOLBOX' => 'toolbox',
 	'ENTITY_TRACKER' => 'tracker',
 	'ENTITY_TRANSFER' => 'transfer',
-    'ENTITY_TWITTER_USER_STREAM' => 'twitter_user_stream',
-    'ENTITY_TWITTEROAUTH' => 'twitteroauth',
+	'ENTITY_TWITTEROAUTH' => 'twitteroauth',
 	'ENTITY_TYPE' => 'type',
+   'ENTITY_TWITTER' => 'twitter',
+   'ENTITY_TWITTER_USER_STREAM' => 'twitter_user_stream',
 	'ENTITY_UNIT_TESTING' => 'unit_testing',
 	'ENTITY_URI' => 'URI',
 	'ENTITY_USER' => 'user',
 	'ENTITY_USER_HANDLER' => 'user_handler',
 	'ENTITY_USER_INTERFACE' => 'user_interface',
 	'ENTITY_USER_NAME' => 'user_name',
+   'ENTITY_USER_STREAM' => 'user_stream',
 	'ENTITY_VALIDATOR' => 'validator',
 	'ENTITY_VALUE' => 'value',
 	'ENTITY_VIEW' => 'view',
@@ -319,10 +332,41 @@ declareConstantsBatch( $entities, FALSE );
 *
 * Declare following entities
 *
-* 	Json
+* 	JSON
 * 	Store
 * 
-* (branch 0.1 :: revision 839)
-* (branch 0.2 :: revision 422)
+* (branch 0.1 :: revision :: 839)
+* (branch 0.2 :: revision :: 422)
+*
+*************
+* 2012 05 08
+*************
+*
+* development :: code generation ::
+*
+* Declare following entities
+*
+* 	access mode
+* 	definition
+* 	JSON model
+* 	signal
+* 	size
+* 	source type
+* 
+* (branch 0.1 :: revision :: 924)
+*
+*************
+* 2012 05 09
+*************
+*
+* development :: code generation ::
+*
+* Declare following entities
+*
+*	destination
+*	persistency
+* 	subset
+* 
+* (branch 0.1 :: revision :: 925)
 *
 */
