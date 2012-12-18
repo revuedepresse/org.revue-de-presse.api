@@ -37,6 +37,7 @@ class Service_Manager extends Deployer
 		$host_local_livecoding = 'livecoding.dev';
 		$host_local_snaps = 'snaps.dev';
 		$host_dev_tifa = '## FILL HOSTNAME ##';
+		$host_dev_wtw = '## FILL HOSTNAME ##';
 
 		$mode_cli = defined('STDIN');
 
@@ -85,7 +86,7 @@ class Service_Manager extends Deployer
         ;
 
         if ($debug_enabled)
-            error_log('[development environment] ' . $environment_development);
+            error_log('[development environment] ' . $environment_development ? 'true' : 'false');
 
         if ($environment_development)
 			$file_path =
@@ -95,6 +96,7 @@ class Service_Manager extends Deployer
 
 		else if (
             ! $build_jenkins &&
+            ! in_array( $server_name, array( $host_dev_wtw ) ) &&
 			isset( $server_port ) &&
 			in_array( $server_port, array( $port_http ) ) ||
 			(
@@ -128,7 +130,8 @@ class Service_Manager extends Deployer
                     ( FALSE !== strpos( $script_name, 'phpunit' ) ) ||
                     $build_jenkins
                 )
-			)
+			) ||
+            in_array( $server_name, array( $host_dev_wtw ) )
         ) {
             $target = 'ghost';
             if ($build_jenkins) 
