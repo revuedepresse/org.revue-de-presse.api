@@ -204,7 +204,7 @@ assignConstant( 'FLAG_TYPE_SUGGEST_REMOVAL', 2 );
 assignConstant( 'FOLDER_TYPE_CACHE', DIR_CACHE );
 assignConstant( 'FOLDER_TYPE_COMPILATION', DIR_TEMPLATES_C );
 assignConstant( 'FOLDER_TYPE_CONFIGURATION', DIR_CONFIG );
-assignConstant( 'FOLDER_TYPE_TEMPLATE*', '../../..'.DIR_TEMPLATES );
+assignConstant( 'FOLDER_TYPE_TEMPLATE*', '../../../..'.DIR_TEMPLATES );
 
 // Format types
 
