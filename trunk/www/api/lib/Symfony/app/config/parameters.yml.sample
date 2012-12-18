@@ -21,7 +21,7 @@ parameters:
 
     endpoint_facebook_feed:   http://## FILL ME ##/fb/api.facebook.get.feed.php
     endpoint_github_redirect: https://## FILL HOSTNAME ##/github/request
-    endpoint_twitter_feed:    https://## FILL HOSTNAME ##/twitter/timeline
+    endpoint_twitter_feed:    http://## FILL HOSTNAME ##/twitter/timeline
     endpoint_twitter_user:    https://userstream.twitter.com/%s/user.json
 
     tokenization_sandbox:     '## FILL ME #### FILL DOCUMENT ROOT ##/api/wtw/sandbox'
