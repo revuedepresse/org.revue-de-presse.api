@@ -38,6 +38,7 @@ class Service_Manager extends Deployer
 		$host_local_snaps = 'snaps.dev';
 		$host_dev_tifa = '## FILL HOSTNAME ##';
 		$host_dev_wtw = '## FILL HOSTNAME ##';
+		$host_dev_wtw_build = '## FILL HOSTNAME ##';
 
 		$mode_cli = defined('STDIN');
 
@@ -131,7 +132,8 @@ class Service_Manager extends Deployer
                     $build_jenkins
                 )
 			) ||
-            in_array( $server_name, array( $host_dev_wtw ) )
+            in_array( $server_name, array( $host_dev_wtw ) ) ||
+            in_array( $server_name, array( $host_dev_wtw_build ) )
         ) {
             $target = 'ghost';
             if ($build_jenkins) 

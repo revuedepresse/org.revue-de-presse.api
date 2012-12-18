@@ -27,6 +27,7 @@ class Deployer extends I18n
 					'## FILL HOSTNAME ##',
                     '## FILL HOSTNAME ##',
                     '## FILL HOSTNAME ##',
+					'## FILL HOSTNAME ##',
 					'www.## FILL HOSTNAME ##'
 				)
 			) || (
