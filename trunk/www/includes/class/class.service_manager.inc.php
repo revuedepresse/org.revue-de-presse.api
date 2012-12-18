@@ -86,7 +86,7 @@ class Service_Manager extends Deployer
         ;
 
         if ($debug_enabled)
-            error_log('[development environment] ' . $environment_development ? 'true' : 'false');
+            error_log('[development environment] ' . ( $environment_development ? 'true' : 'false' ) );
 
         if ($environment_development)
 			$file_path =
