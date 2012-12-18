@@ -8,13 +8,13 @@
     },
     "repositories":[
         {
-            "type":"vcs",
-            "url":"git@github.com:thierrymarianne/twitteroauth.git"
+            "type": "vcs",
+            "url": "git@github.com:thierrymarianne/twitteroauth.git"
         },
         {
-            "type":"vcs",
-            "url":"git@github.com:thierrymarianne/tmhOAuth.git",
-            "reference":"dev-master"
+            "type": "vcs",
+            "url": "git@github.com:thierrymarianne/tmhOAuth.git",
+            "reference": "dev-master"
         }
     ],
     "require":{
