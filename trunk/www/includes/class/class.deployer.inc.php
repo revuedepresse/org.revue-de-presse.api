@@ -25,7 +25,8 @@ class Deployer extends I18n
 					'light.dev',
 					'snaps.dev',
 					'## FILL HOSTNAME ##',
-					'## FILL HOSTNAME ##',
+                    '## FILL HOSTNAME ##',
+                    '## FILL HOSTNAME ##',
 					'www.## FILL HOSTNAME ##'
 				)
 			) || (
@@ -46,7 +47,7 @@ class Deployer extends I18n
 				$_SERVER['DOCUMENT_ROOT'] == '## FILL ABSOLUTE PATH ##''
 			)
 		;
-	
+
 		if ( $condition_deployment_first_level && defined( 'DEPLOYMENT_MODE' ) )
 
 			define( 'CURRENT_DEPLOYMENT_STAGE', DEPLOYMENT_MODE );

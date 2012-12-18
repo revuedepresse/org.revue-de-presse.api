@@ -36,20 +36,33 @@ class Dumper extends \Toolbox
 		if ( ! defined( 'AFFORDANCE_CATCH_EXCEPTION' ) )
 			define( 'AFFORDANCE_CATCH_EXCEPTION', TRUE );
 
-		if (
-			$force_display &&
-			defined( 'CURRENT_DEPLOYMENT_STAGE' ) &&
-			constant( 'CURRENT_DEPLOYMENT_STAGE' ) === 0
- 		)
+		if ( $force_display )
 		{
-			$this->start_log( $class_name, $method_name, $force_display );
-	
-			while ( list( $message_index, $message ) = each( $messages ) )
+            $development = defined( 'CURRENT_DEPLOYMENT_STAGE' ) &&
+                constant( 'CURRENT_DEPLOYMENT_STAGE' ) === 0;
 
-				$this->append_message( $message );
-	
-			$this->end_log();
-		}
+            if ( $development )
+            {
+                $this->start_log( $class_name, $method_name, $force_display );
+            }
+
+            while ( list( , $message ) = each( $messages ) )
+            {
+                if ($development)
+                {
+                    $this->append_message( $message );
+                }
+                else
+                {
+                    error_log('[current deployment mode] ' . print_r( $message, true) );
+                }
+            }
+
+            if ( $development )
+            {
+                $this->end_log();
+            }
+        }
 
 		// check if display and exit should be forced
 		if (
@@ -353,7 +366,7 @@ class Dumper extends \Toolbox
 		{
 			if ( is_array( $force_display ) && count( $force_display ) == 0 )
 
-				echo '<br /><pre>', print_r($messages, TRUE), '</pre><br />' ;		
+				echo '<br /><pre>', print_r($messages, TRUE), '</pre><br />' ;
 			else
 			{
 				if (
@@ -368,11 +381,11 @@ class Dumper extends \Toolbox
 					unset( $messages[ENTITY_ASSERTION] );
 				}
 
-				if (
-					! isset( $assertion ) ||
-					UNIT_TESTING_ASSERTIVE_MODE_STATUS &&
-					! $assertion[PROPERTY_EVALUATION]
-				)
+                $disabled_assertive_mode = ! isset( $assertion ) ||
+                    UNIT_TESTING_ASSERTIVE_MODE_STATUS &&
+                    ! $assertion[PROPERTY_EVALUATION];
+
+				if ($disabled_assertive_mode)
 					$dumper = new self(
 						'',
 						$method_name,
