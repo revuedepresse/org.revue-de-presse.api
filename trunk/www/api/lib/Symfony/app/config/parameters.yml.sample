@@ -16,8 +16,8 @@ parameters:
     secret:            ## FILL ME ##
 
     api_twitter_version:      1.1
-    api_twitter_user_token:   _
-    api_twitter_user_secret:  _
+    api_twitter_user_token:   ## FILL ME ##
+    api_twitter_user_secret:  ## FILL ME ##
 
     endpoint_facebook_feed:   http://## FILL ME ##/fb/api.facebook.get.feed.php
     endpoint_github_redirect: https://## FILL HOSTNAME ##/github/request
