@@ -176,7 +176,6 @@ class Deployer extends I18n
 							SCRIPT_API_TWITTER_FORGET_ACCESS_TOKEN,
 							SCRIPT_API_TWITTER_REQUEST_ACCESS_TOKEN,
 							SCRIPT_API_TWITTER_RESTORE_ACCESS,
-                            '/api.twitter.display.wall'.EXTENSION_PHP,
 						)
 					) && (
 						FALSE === strpos(
