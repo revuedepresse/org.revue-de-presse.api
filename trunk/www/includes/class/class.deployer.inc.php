@@ -172,16 +172,19 @@ class Deployer extends I18n
 							SCRIPT_API_ADOPTEUNMEC_SAVE_STORE,
 							SCRIPT_API_FLICKR_AUTHENTICATE,
 							SCRIPT_API_TWITTER_CHECK_RATE_LIMIT,
-							SCRIPT_API_TWITTER_DISPLAY_WALL,
+                            SCRIPT_API_TWITTER_DISPLAY_WALL,
 							SCRIPT_API_TWITTER_FORGET_ACCESS_TOKEN,
 							SCRIPT_API_TWITTER_REQUEST_ACCESS_TOKEN,
-							SCRIPT_API_TWITTER_RESTORE_ACCESS
+							SCRIPT_API_TWITTER_RESTORE_ACCESS,
+                            '/api.twitter.display.wall'.EXTENSION_PHP,
 						)
 					) && (
 						FALSE === strpos(
 							$_SERVER['REQUEST_URI'], DIR_LIBRARY . '/' . DIR_SYMFONY
 						)
-					)
+                    ) && ( 
+                        $_SERVER['SERVER_NAME'] !== '## FILL HOSTNAME ##'
+                    )
 				)
 			)
 			{
