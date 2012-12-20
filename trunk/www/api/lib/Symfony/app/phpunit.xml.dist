@@ -13,6 +13,12 @@
         syntaxCheck                 = "false"
         bootstrap                   = "bootstrap.test.php" >
 
+    <groups>
+        <exclude>
+            <group>tokenization</group>
+        </exclude>
+    </groups>
+
     <testsuites>
         <testsuite name="WTW Test Suite">
             <directory>../src/*/*/*Bundle/Tests</directory>
