@@ -181,8 +181,10 @@ class Deployer extends I18n
 						FALSE === strpos(
 							$_SERVER['REQUEST_URI'], DIR_LIBRARY . '/' . DIR_SYMFONY
 						)
-                    ) && ( 
-                        $_SERVER['SERVER_NAME'] !== '## FILL HOSTNAME ##'
+                    ) && (
+                        ! in_array($_SERVER['SERVER_NAME'], array(
+                            '## FILL HOSTNAME ##', '## FILL HOSTNAME ##'
+                        ))
                     )
 				)
 			)
