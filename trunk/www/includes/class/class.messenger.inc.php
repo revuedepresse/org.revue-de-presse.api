@@ -39,10 +39,10 @@ class Messenger extends Toolbox
 	*/
 	public static function checkOutbox()
 	{
-        global $build_jenkins;
+        global $build_jenkins, $using_composer, $using_pear, $using_phpunit;
 
 		// check if the CLI mode is enabled
-		if ( ! $build_jenkins &&  ! isset($_SERVER['SERVER_NAME'] ) )
+		if ( ! $build_jenkins &&  ! isset( $_SERVER['SERVER_NAME'] ) && ! $using_composer && ! $using_pear && ! $using_phpunit )
 
 			echo 'operation date: '.date('Y-m-d_H:i:s')."\n";
 

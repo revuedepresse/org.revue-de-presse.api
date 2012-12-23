@@ -114,6 +114,7 @@ class Service_Manager extends Deployer
             $mode_cli && ! is_null( $script_name ) && ( FALSE === strpos( $script_name, 'phpunit' ) ) &&
             (
 				( FALSE !== strpos( $script_name, '/web/## FILL PROJECT DIR ##/branches' ) ) ||
+				( FALSE !== strpos( $script_name, 'pear' ) ) ||
 				( $script_name === $script_app_console )
 			)
 		)
@@ -153,8 +154,7 @@ class Service_Manager extends Deployer
         $file_contents = self::loadFileContents( $file_path, EXTENSION_INI );
 
 		if (
-			is_array($file_contents) && count($file_contents) &&
-			is_array($file_contents)
+			is_array( $file_contents ) && count( $file_contents)
 		)
 		{
 			if (
