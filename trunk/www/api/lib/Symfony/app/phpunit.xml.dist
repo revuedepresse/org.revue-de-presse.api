@@ -9,16 +9,10 @@
         convertNoticesToExceptions  = "true"
         convertWarningsToExceptions = "true"
         processIsolation            = "false"
-        stopOnFailure               = "false"
-        syntaxCheck                 = "false"
+        stopOnFailure               = "true"
+        syntaxCheck                 = "true"
         bootstrap                   = "bootstrap.test.php" >
-
-    <groups>
-        <exclude>
-            <group>tokenization</group>
-        </exclude>
-    </groups>
-
+    
     <testsuites>
         <testsuite name="WTW Test Suite">
             <directory>../src/*/*/*Bundle/Tests</directory>
