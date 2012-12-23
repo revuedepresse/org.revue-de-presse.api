@@ -20,7 +20,11 @@ class Alpha implements Particle
     */
     private function spawnDefaultContext( $conditions, $quantities )
     {
-		global $build_jenkins, $class_application, $verbose_mode;
+		global 
+            $build_jenkins, 
+            $class_application,
+            $using_composer, $using_pear, $using_phpunit,
+            $verbose_mode;
 
 		$agent_context = $class_application::getContextAgent();
 		$class_dumper = $class_application::getDumperClass();
@@ -42,7 +46,7 @@ class Alpha implements Particle
 		);
 
 		// check if the CLI mode is enabled
-		if ( ! $build_jenkins && $cli_mode ) 
+		if ( ! $build_jenkins && $cli_mode && ! $using_composer && ! $using_pear && ! $using_phpunit ) 
 	
 			echo 'operation date: '.date('Y-m-d_H:i:s')."\n";
 
@@ -297,7 +301,10 @@ class Alpha implements Particle
         }
 
 		// check if the CLI mode is enabled
-		if ( $cli_mode )
+		if ( $cli_mode
+            && ! $using_pear
+            && ! $using_phpunit
+            && ! $using_composer )
 	
 			echo "\n";		
     }
