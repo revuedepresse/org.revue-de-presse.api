@@ -31,7 +31,7 @@ class Tokens_Stream extends \Alpha
     * @param    object  $conditions conditions
     * @return   object  Introspection
     */
-    public function __construct( $conditions = NULL, $quantities = NULL )
+    public function __construct( $conditions = null, $quantities = null )
     {
         if ( ! isset( $this->{PROPERTY_CONTEXT} ) )
             $this->{PROPERTY_CONTEXT} = array();
@@ -73,7 +73,7 @@ class Tokens_Stream extends \Alpha
     * @param    boolean $handle_only
     * @return   nothing
     */
-    public function close( $protocol = NULL, $handle_only = FALSE )
+    public function close( $protocol = null, $handle_only = false )
     {
         $context = &$this->getContext();
         if ( is_null( $protocol ) ) $protocol = self::getProtocol();
@@ -107,7 +107,7 @@ class Tokens_Stream extends \Alpha
     * @param    string  $key    access key 
     * @return   string  entry point
     */
-    public function &getEntryPoint( $key = NULL)
+    public function &getEntryPoint( $key = null)
     {
         $river = &$this->getRiver();
 
@@ -141,7 +141,7 @@ class Tokens_Stream extends \Alpha
     */
     public function getKey()
     {
-        $key = NULL;
+        $key = null;
         
         if ( isset( $this->{PROPERTY_KEY} ) ) $key = $this->{PROPERTY_KEY};
             
@@ -155,10 +155,10 @@ class Tokens_Stream extends \Alpha
     * @param    mixed   $protocol   protocol
     * @return   mixed   option value
     */
-    public function getOption( $name, $protocol = NULL )
+    public function getOption( $name, $protocol = null )
     {
         $option = 
-        $protocol_options = NULL;
+        $protocol_options = null;
         $options = $this->getOptions();
 
         if ( is_null( $protocol ) )
@@ -196,7 +196,7 @@ class Tokens_Stream extends \Alpha
 
         if ( 
             ( $consistent = $this->getOption( PROPERTY_SERIALIZABLE ) ) &&
-            ( $consistent === TRUE )
+            ( $consistent === true )
         )
             $this->setPosition( 0 );
     }
@@ -241,7 +241,7 @@ class Tokens_Stream extends \Alpha
         &$opened_path
     )
     {                   
-        $callback_parameters = FALSE;
+        $callback_parameters = false;
 
         if (
             ! in_array( $mode,
@@ -265,11 +265,11 @@ class Tokens_Stream extends \Alpha
         if (
             get_class(
                 $tokens_stream = self::initialize(
-                    $path, FALSE, $this->{PROPERTY_CONTEXT}, $this
+                    $path, false, $this->{PROPERTY_CONTEXT}, $this
                 )
             ) === __CLASS__
         )
-            $callback_parameters = TRUE;
+            $callback_parameters = true;
 
         return $callback_parameters;
     }
@@ -322,7 +322,7 @@ class Tokens_Stream extends \Alpha
                         ;
 
                         if ( str_mmb_obj(
-                                PROPERTY_OFFSET, ( object ) $options, FALSE
+                                PROPERTY_OFFSET, ( object ) $options, false
                         ) )
                             $offset = $options[PROPERTY_OFFSET];    
 
@@ -416,7 +416,7 @@ class Tokens_Stream extends \Alpha
             $bytes = self::renderSignal(
                 self::buildSignal( $stream->{PROPERTY_SUBSTREAM} ),
                 RENDER_TYPE_SIGNAL,
-                TRUE
+                true
             );
         else
 
@@ -469,14 +469,14 @@ class Tokens_Stream extends \Alpha
                 echo
                     '<pre>',
                         highlight_string( file_get_contents( $file_path ) ),
-                        '<br />', print_r( $output[1], TRUE ),
+                        '<br />', print_r( $output[1], true ),
                     '</pre>'
                 ;
                 global $class_application, $verbose_mode;
                 $class_dumper = $class_application::getDumperClass();
                 $class_dumper::log( __METHOD__, array(
                     $exception
-                ), TRUE, TRUE );    
+                ), true, true );
             }
             else self::log(
                 $exception->getMessage(), 'exception',
@@ -484,7 +484,7 @@ class Tokens_Stream extends \Alpha
             );
         }
 
-        $success = $result ? strlen( $bytes_written ) : FALSE;
+        $success = $result ? strlen( $bytes_written ) : false;
 
         return $success;
     }
@@ -549,7 +549,7 @@ class Tokens_Stream extends \Alpha
     * @return   $container
     */
     public static function addSubstitutions(
-        &$container, $substitutions = NULL, &$context = NULL
+        &$container, $substitutions = null, &$context = null
     )
     {
         if ( ! is_null( $context ) && is_resource( $context ) )
@@ -577,7 +577,7 @@ class Tokens_Stream extends \Alpha
                         PROPERTY_SUBSTITUTIONS => $_substitutions
                     ) )
                 ),
-                PROPERTY_REPEATABLE => FALSE
+                PROPERTY_REPEATABLE => false
             ) );
         }
 
@@ -592,7 +592,7 @@ class Tokens_Stream extends \Alpha
     */
     public static function addTransformation( $properties )
     {
-        $repeatable = TRUE;
+        $repeatable = true;
 
         /**
         * Extract properties
@@ -854,7 +854,7 @@ class Tokens_Stream extends \Alpha
     */
     public static function checkContext( &$properties )
     {
-        $full_read = FALSE;
+        $full_read = false;
         $hash_length = self::getHashLength();
         $protocol = self::getProtocol();
 
@@ -940,7 +940,7 @@ class Tokens_Stream extends \Alpha
     * @return   nothing
     */
     public static function checkContextAsReference(
-        &$properties, $access_mode = NULL, $protocol = NULL
+        &$properties, $access_mode = null, $protocol = null
     )
     {
         if ( is_null( $protocol ) )
@@ -1009,7 +1009,7 @@ class Tokens_Stream extends \Alpha
     * @param    integer $length stream length
     * @return   integer checked length
     */
-    public static function checkLength( $length = NULL )
+    public static function checkLength( $length = null )
     {
         if ( is_null( $length ) ) $length = 1;
         else if ( ( $length < 0 ) && ( $length !== -1 ) )
@@ -1041,11 +1041,11 @@ class Tokens_Stream extends \Alpha
     public static function checkOptions( $options )
     {
         $conditions = array();
-        $large_definition = FALSE;
-        $metadata = FALSE;
+        $large_definition = false;
+        $metadata = false;
         $file_path =
         $options_count =
-        $signal = NULL;
+        $signal = null;
         $protocol = self::getProtocol();
 
         if (
@@ -1149,11 +1149,11 @@ class Tokens_Stream extends \Alpha
 
         $directory_root = self::getRootDirectory();
 
-        $invalid_path = TRUE;
-        $invalid_request_uri = TRUE;
+        $invalid_path = true;
+        $invalid_request_uri = true;
 
         $path =
-        $request_uri = NULL;
+        $request_uri = null;
 
         $protocol = self::getProtocol();
 
@@ -1173,14 +1173,14 @@ class Tokens_Stream extends \Alpha
             ( $path = trim( $properties[PROPERTY_PATH] ) ) &&
             ( strlen( $path ) > 0 )
         )
-            $invalid_path = FALSE;
+            $invalid_path = false;
 
         if (
             isset( $properties[PROPERTY_URI_REQUEST] ) &&
             ( $request_uri = trim( $properties[PROPERTY_URI_REQUEST] ) ) &&
             ( strlen( $request_uri ) > 0 )
         )
-            $invalid_request_uri = FALSE;
+            $invalid_request_uri = false;
 
         if ( $invalid_path && $invalid_request_uri )
         
@@ -1205,7 +1205,7 @@ class Tokens_Stream extends \Alpha
             else if (
                 ! isset( $properties[PROPERTY_URI_REQUEST] ) &&
                 ! $invalid_path &&
-                ( FALSE === strpos( $path, $directory_root ) )
+                ( false === strpos( $path, $directory_root ) )
             )
                 $properties[PROPERTY_URI_REQUEST] = substr(
                     $path, strlen( $base_url )
@@ -1281,7 +1281,7 @@ class Tokens_Stream extends \Alpha
             $context = stream_context_create( $options );
 
             $tokens_stream = self::initialize(
-                $path, NULL, $context
+                $path, null, $context
             );
 
             $file_path = $tokens_stream->{PROPERTY_PATH_FILE};
@@ -1336,7 +1336,7 @@ class Tokens_Stream extends \Alpha
                 if ( ! isset( $properties[PROPERTY_FORMAT] ) )
     
                     $properties[PROPERTY_FORMAT] =
-                        $class_entity::getDefaultType( NULL, ENTITY_FORMAT )
+                        $class_entity::getDefaultType( null, ENTITY_FORMAT )
                             ->{PROPERTY_VALUE}
                     ; // xhtml is the default format type
 
@@ -1391,9 +1391,9 @@ class Tokens_Stream extends \Alpha
     * @param    mixed   &$context
     * @return   nothing
     */
-    public static function closeStream( &$context = NULL )
+    public static function closeStream( &$context = null )
     {
-        self::setOption( PROPERTY_SERIALIZABLE, TRUE, $context );
+        self::setOption( PROPERTY_SERIALIZABLE, true, $context );
     }
 
     /**
@@ -1457,7 +1457,7 @@ class Tokens_Stream extends \Alpha
                         {
                             $results = array(
                                 PROPERTY_OCCURRENCES => array(),
-                                PROPERTY_OCCURRENCE_LAST => NULL
+                                PROPERTY_OCCURRENCE_LAST => null
                             );
     
                             /**
@@ -1475,7 +1475,7 @@ class Tokens_Stream extends \Alpha
                                 {
                                     $_subject = self::getTokenValue( $item );
                                     $valid_string = ( strlen( trim( $_subject ) ) > 0 )
-                                        && ( FALSE !== strpos( $_subject, $pattern . '_' ) )
+                                        && ( false !== strpos( $_subject, $pattern . '_' ) )
                                     ;
                                         
                                     if ( $valid_string )
@@ -1484,32 +1484,6 @@ class Tokens_Stream extends \Alpha
                                         $results[PROPERTY_OCCURRENCE_LAST] = $index;
                                     }
                                 }
-
-                            // $xhprof_data = xhprof_disable();
-                            // $XHPROF_ROOT = dirname( __FILE__ ) . "/../../api/xhprof";
-                            // include_once $XHPROF_ROOT . "/xhprof_lib/utils/xhprof_lib.php";
-                            // include_once $XHPROF_ROOT . "/xhprof_lib/utils/xhprof_runs.php";
-                            
-                            // $xhprof_runs = new \XHProfRuns_Default();
-                            // $run_id = $xhprof_runs->save_run( $xhprof_data, "xhprof_testing" );
-                            
-                            // echo
-                            //  'http://## FILL HOSTNAME ##/api/xhprof/xhprof_html/' .
-                            //  'index.php?run=' . $run_id . '&source=xhprof_testing' . "\n"
-                            //;
-                            //fprint(  array(
-                            //  '[pattern]', $pattern,
-                            //  '[results]', $results,
-                            //  '[subject]', $subject
-                            //), TRUE, TRUE );      
-
-                            //global $class_application, $verbose_mode;
-                            //$class_dumper = $class_application::getDumperClass();
-                            //$class_dumper::log( __METHOD__, array(
-                            //  '[pattern]', $pattern,
-                            //  '[results]', $results,
-                            //  '[subject]', $subject
-                            //), TRUE, TRUE );
                         };
     
                         $find_in_stream( array(
@@ -1557,7 +1531,7 @@ class Tokens_Stream extends \Alpha
     */
     public static function extractOption( $request )
     {
-        $option = NULL;
+        $option = null;
         $options = new \stdClass();
         $protocol = self::getProtocol();
     
@@ -1593,7 +1567,7 @@ class Tokens_Stream extends \Alpha
     * 
     * @todo check alternate merge options
     */
-    public static function extractOptions( $store = NULL )
+    public static function extractOptions( $store = null )
     {
         $options = array();
         $protocol = self::getProtocol();
@@ -1622,13 +1596,13 @@ class Tokens_Stream extends \Alpha
                     ;
             }
         }
-        
+
         if (
             ! is_null( $store ) && is_array( $store ) &&
             ( count( $store ) > 0 )
         )
         {
-            $metadata = TRUE;
+            $metadata = true;
 
             $file_path = self::checkEndpoint( $store );
 
@@ -1651,7 +1625,7 @@ class Tokens_Stream extends \Alpha
             // forward pre-existing context
             if ( ! isset( $store[PROPERTY_CONTEXT] ) )
 
-                $store[PROPERTY_CONTEXT] = NULL;
+                $store[PROPERTY_CONTEXT] = null;
             
             else if ( is_resource( $store[PROPERTY_CONTEXT] ) )
             {
@@ -1737,7 +1711,7 @@ class Tokens_Stream extends \Alpha
     * @param    mixed   $substream  substream
     * @return   array   tokens
     */      
-    public static function extractTokens( $substream = NULL )
+    public static function extractTokens( $substream = null )
     {
         $tokens = array();
 
@@ -1765,7 +1739,7 @@ class Tokens_Stream extends \Alpha
     * @param    mixed   $entry_point    entry point
     * @return   nothing
     */
-    public static function feedRiver( $stream = NULL, $entry_point = NULL )
+    public static function feedRiver( $stream = null, $entry_point = null )
     {
         if ( ! is_null( $stream ) )
         {
@@ -1783,7 +1757,7 @@ class Tokens_Stream extends \Alpha
                         EXCEPTION_INVALID_ENTITY, ' ' . ENTITY_CONTENT
                     ) );
 
-                $entry_point[PROPERTY_POSITION] = NULL;
+                $entry_point[PROPERTY_POSITION] = null;
                 $entry_point[PROPERTY_STREAM] = $stream;
             }
             else
@@ -1839,11 +1813,13 @@ class Tokens_Stream extends \Alpha
         );
         return $handle;
     }
+
     /**
-    * Get the hash length 
-    * 
-    * @return integer   hash length 
-    */
+     * Gets the hash length
+     *
+     * @return integer   hash length
+     * @throws \Exception
+     */
     public static function getHashLength()
     {
         if ( defined( 'HASH_LENGTH_MD5' ) )
@@ -1905,7 +1881,7 @@ class Tokens_Stream extends \Alpha
     */
     public static function getPersistentHandle( $store )
     {
-        $handle = NULL;
+        $handle = null;
         $persistent_options = self::extractOptions( $store );
         $protocol = self::getProtocol();
 
@@ -1932,10 +1908,11 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
-    * Get the default protocol (represented by a 3-characters long string)
-    *
-    * @return   string  protocol used to handle a stream
-    */
+     * Gets the default protocol (represented by a 3-characters long string)
+     *
+     * @return   string  protocol used to handle a stream
+     * @throws \Exception
+     */
     public static function getProtocol()
     {
         $protocol_symbol = 'PROTOCOL_TOKEN';
@@ -2016,9 +1993,9 @@ class Tokens_Stream extends \Alpha
     public static function getSignal(
         $path,
         $mode,
-        $count = NULL,
-        $start = NULL,
-        $context = NULL
+        $count = null,
+        $start = null,
+        $context = null
     )
     {
         return self::buildSignal(
@@ -2027,15 +2004,16 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
-    * Get a stream
-    *
-    * @param    string  $key    access key providing entry point
-    * @return   mixed   stream
-    */
-    public static function &getStream( $key = NULL )
+     * Gets a stream
+     *
+     * @param null $key access key providing entry point
+     * @return mixed stream
+     * @throws \Exception
+     */
+    public static function &getStream( $key = null )
     {
         $river = &self::getRiver();
-        $stream = NULL;
+        $stream = null;
 
         if ( ! is_null( $key ) )
         {
@@ -2114,15 +2092,15 @@ class Tokens_Stream extends \Alpha
     * @return   string      $content    content
     */
     public static function getSubsequence(
-        $path = NULL,
-        $mode = NULL,
-        $count = NULL,
-        $start = NULL,
-        &$context = NULL
+        $path = null,
+        $mode = null,
+        $count = null,
+        $start = null,
+        &$context = null
     )
     {
-        $exceeded_max_length = FALSE;
-        $full_read = FALSE;
+        $exceeded_max_length = false;
+        $full_read = false;
         $hash_length = self::getHashLength();
         $max_length = self::getMaxChunkSize() / $hash_length;
         $options = self::extractOptions( $context );
@@ -2149,7 +2127,7 @@ class Tokens_Stream extends \Alpha
             // enable full read
             // when reading length has been set to "magic" value -1
             if ( ( $length = self::checkLength( $count ) ) === -1 )
-                $full_read = TRUE;
+                $full_read = true;
 
             $properties = array(
                 PROPERTY_CONTEXT => $context,
@@ -2195,7 +2173,7 @@ class Tokens_Stream extends \Alpha
 
                     $limit = $start + $length;
         
-                $exceeded_max_length = TRUE;
+                $exceeded_max_length = true;
             }
 
             $loop_index = 0;
@@ -2226,23 +2204,6 @@ class Tokens_Stream extends \Alpha
 
                 $subsequence .= self::getStreamSection( $properties );
 
-                //if ( $loop_index === 10 )
-                //{
-                //  $xhprof_data = xhprof_disable();
-                //  $XHPROF_ROOT = dirname( __FILE__ ) . "/../../api/xhprof";
-                //  include_once $XHPROF_ROOT . "/xhprof_lib/utils/xhprof_lib.php";
-                //  include_once $XHPROF_ROOT . "/xhprof_lib/utils/xhprof_runs.php";
-                //  
-                //  $xhprof_runs = new \XHProfRuns_Default();
-                //  $run_id = $xhprof_runs->save_run( $xhprof_data, "xhprof_testing" );
-                //  
-                //  echo
-                //      'http://## FILL HOSTNAME ##/api/xhprof/xhprof_html/' .
-                //      'index.php?run=' . $run_id . '&source=xhprof_testing' . "\n"
-                //  ;
-                //  exit();
-                //}
-
                 $start += $max_length;
                 $loop_index++;
             }
@@ -2262,11 +2223,11 @@ class Tokens_Stream extends \Alpha
     * @return   array       substream
     */
     public static function getSubstream(
-        $path = NULL,
-        $mode = NULL,
-        $count = NULL,
-        $start = NULL,
-        &$context = NULL
+        $path = null,
+        $mode = null,
+        $count = null,
+        $start = null,
+        &$context = null
     )
     {
         $old_position = self::getPosition();
@@ -2319,11 +2280,11 @@ class Tokens_Stream extends \Alpha
     * @return   string      $content    content
     */
     public static function getToken(
-        $path = NULL,
-        $mode = NULL,
-        $count = NULL,
-        $start = NULL,
-        &$context = NULL
+        $path = null,
+        $mode = null,
+        $count = null,
+        $start = null,
+        &$context = null
     )
     {
         $substream = self::getSubstream(
@@ -2401,12 +2362,13 @@ class Tokens_Stream extends \Alpha
     */
     public static function initialize(
         $path,
-        $metadata = FALSE,
-        &$context = NULL,
-        $binding = NULL
+        $metadata = false,
+        &$context = null,
+        $binding = null
     )
     {
         $tokens_stream = new \stdClass();
+
         list( $request_uri, $host ) = self::getCoordinates( $path );
 
         $store = array( 
@@ -2430,7 +2392,7 @@ class Tokens_Stream extends \Alpha
 
                 $path = $conditions->{PROPERTY_PATH_FILE};
 
-            self::addSubstitutions( $tokens_stream, NULL, $context );
+            self::addSubstitutions( $tokens_stream, null, $context );
 
             $tokens_stream->{PROPERTY_PATH_FILE} = $path;
         }
@@ -2531,8 +2493,8 @@ class Tokens_Stream extends \Alpha
     * @return   nothing
     */
     public static function log(
-        $information, $label = NULL,
-        $script = NULL, $line = NULL, $method = NULL 
+        $information, $label = null,
+        $script = null, $line = null, $method = null
     )
     {
         global $class_application, $verbose_mode;
@@ -2569,11 +2531,11 @@ class Tokens_Stream extends \Alpha
     * @return   resource    handle
     */
     public static function openStream(
-        $path, $access_mode, &$context = NULL
+        $path, $access_mode, &$context = null
     )
     {
-        self::setOption( PROPERTY_SERIALIZABLE, FALSE, $context );
-        $handle = fopen( $path, $access_mode, FALSE, $context );
+        self::setOption( PROPERTY_SERIALIZABLE, false, $context );
+        $handle = fopen( $path, $access_mode, false, $context );
         self::setOption(
             PROPERTY_CONTAINER_REFERENCES,
             array( PROPERTY_HANDLE => &$handle ),
@@ -2615,12 +2577,12 @@ class Tokens_Stream extends \Alpha
         $render = '';
 
         $format_default =
-            $class_entity::getDefaultType( NULL, ENTITY_FORMAT )
+            $class_entity::getDefaultType( null, ENTITY_FORMAT )
                 ->{PROPERTY_VALUE}
         ;
 
         $render_type_default =
-            $class_entity::getDefaultType( NULL, ENTITY_RENDER )
+            $class_entity::getDefaultType( null, ENTITY_RENDER )
                 ->{PROPERTY_VALUE}
         ;
 
@@ -2668,7 +2630,7 @@ class Tokens_Stream extends \Alpha
                 ( $end_of_line, &$excerpt, $render_type ) 
                 {
                     $excerpt .=
-                        print_r( $value, TRUE ) .
+                        print_r( $value, true ) .
                         (
                             $render_type === RENDER_TYPE_TOKEN
                             ? $end_of_line
@@ -2684,7 +2646,7 @@ class Tokens_Stream extends \Alpha
                     array_walk( $tokens, $aggregator );
 
                     if ( $render_type === RENDER_TYPE_SIGNAL )
-                        $excerpt = highlight_string( $excerpt, TRUE ); 
+                        $excerpt = highlight_string( $excerpt, true );
                 }
                 else
 
@@ -2697,7 +2659,7 @@ class Tokens_Stream extends \Alpha
             default:
 
                 $render .= 'stream length: '. $length_stream . $end_of_line;
-                $render .= '<pre>' . print_r( $tokens, TRUE ) . '</pre>'; 
+                $render .= '<pre>' . print_r( $tokens, true ) . '</pre>';
 
                     break;
         }
@@ -2714,7 +2676,7 @@ class Tokens_Stream extends \Alpha
     * @return   mixed   render
     */
     public static function renderSignal(
-        $signal, $render_type = NULL, $return = FALSE
+        $signal, $render_type = null, $return = false
     )
     {
         global $class_application, $verbose_mode;
@@ -2724,7 +2686,7 @@ class Tokens_Stream extends \Alpha
         $excerpt = '';
 
         $render_type_default =
-            $class_entity::getDefaultType( NULL, ENTITY_RENDER )
+            $class_entity::getDefaultType( null, ENTITY_RENDER )
                 ->{PROPERTY_VALUE}
         ;
 
@@ -2761,8 +2723,8 @@ class Tokens_Stream extends \Alpha
                         default:
 
                             if (
-                                ( FALSE === strpos( $value, '/**' ) ) &&
-                                ( FALSE === strpos( $value, '//' ) )
+                                ( false === strpos( $value, '/**' ) ) &&
+                                ( false === strpos( $value, '//' ) )
                             )
 
                                 $clean_value = htmlentities( str_replace(
@@ -2798,7 +2760,7 @@ class Tokens_Stream extends \Alpha
 
         array_walk( $signal, $aggregator );
     
-        if ( $return === FALSE )
+        if ( $return === false )
 
             echo htmlentities( $excerpt );
 
@@ -2814,7 +2776,7 @@ class Tokens_Stream extends \Alpha
     * @return   resource    context
     */
     public static function setOption(
-        $name, $value = NULL, &$context = NULL
+        $name, $value = null, &$context = null
     )
     {
         $protocol = self::getProtocol();
@@ -2831,9 +2793,9 @@ class Tokens_Stream extends \Alpha
     * @param    integer $position   position
     * @return   integer previous position of a stream
     */
-    public static function setPosition( $position = NULL )
+    public static function setPosition( $position = null )
     {
-        $previous_position = NULL;
+        $previous_position = null;
         if ( isset( self::$position ) ) $previous_position = self::$position;
         self::$position = $position;
         return $previous_position;
@@ -2859,7 +2821,7 @@ class Tokens_Stream extends \Alpha
             $properties[PROPERTY_PATH],
             FILE_ACCESS_MODE_READ_ONLY,
             -1,
-            NULL,
+            null,
             $properties[PROPERTY_CONTEXT]
         );
 
@@ -2890,10 +2852,10 @@ class Tokens_Stream extends \Alpha
     * @param    mixed   $context    stream contextual options
     * @return   integer length
     */
-    public static function slen( $path, &$context = NULL )
+    public static function slen( $path, &$context = null )
     {
         $length = 0;
-        $tokens_stream = self::initialize( $path, TRUE, $context );
+        $tokens_stream = self::initialize( $path, true, $context );
 
         if (
             isset( $tokens_stream->{PROPERTY_TOKEN} ) &&
@@ -2928,7 +2890,7 @@ class Tokens_Stream extends \Alpha
     *
     * @return   object  Token Stream
     */
-    public static function spawn( $conditions, $metadata = FALSE )
+    public static function spawn( $conditions, $metadata = false )
     {
         $hash_length = self::getHashLength();
 
@@ -2994,7 +2956,7 @@ class Tokens_Stream extends \Alpha
     * @param    object  &$container container
     * @return   object  container carrying streamlined content
     */
-    public static function streamlineContent( $tokens, &$container = NULL )
+    public static function streamlineContent( $tokens, &$container = null )
     {
         $count_tokens = count( $tokens );
         $full_stream = 
@@ -3099,7 +3061,7 @@ class Tokens_Stream extends \Alpha
     */
     public static function validMethod( $method )
     {
-        $result = FALSE;
+        $result = false;
     
         if ( 
             isset( $method ) &&
@@ -3174,7 +3136,7 @@ class Tokens_Stream extends \Alpha
         // third parameter has been set to length of 1 byte
         // to prevent atomic writing with append mode
         $result = fwrite( $handle, $data, 1 );
-        $bytes = $result ? $tokens_count : FALSE;
+        $bytes = $result ? $tokens_count : false;
 
         return $bytes;
     }
