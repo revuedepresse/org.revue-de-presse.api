@@ -24,6 +24,7 @@ class Service_Manager extends Deployer
             $build_jenkins,
             $debug_enabled,
             $directory_web_services,
+            $jenkins_workspace,
             $symfony_detected;
 
 		$directory_current = dirname( __FILE__ );
@@ -38,7 +39,8 @@ class Service_Manager extends Deployer
 		$host_local_snaps = 'snaps.dev';
 		$host_dev_tifa = '## FILL HOSTNAME ##';
 		$host_dev_wtw = '## FILL HOSTNAME ##';
-		$host_dev_wtw_build = '## FILL HOSTNAME ##';
+		$host_org_wtw_build = '## FILL HOSTNAME ##';
+        $host_org_wtw_stable = '## FILL HOSTNAME ##';
 
 		$mode_cli = defined('STDIN');
 
@@ -49,7 +51,9 @@ class Service_Manager extends Deployer
 		$script_app_console = 'app/console';
 
 		if ( isset( $_SERVER['HTTP_HOST'] ) )
-			$host = $_SERVER['HTTP_HOST'];
+            $host = $_SERVER['HTTP_HOST'];
+        if ( isset( $_SERVER['HTTP_X_FORWARDED_HOST'] ) )
+			$forwarded_host = $_SERVER['HTTP_X_FORWARDED_HOST'];
 		if ( isset( $_SERVER['REQUEST_URI'] ) )
 			$request_uri = $_SERVER['REQUEST_URI'];
 		if ( isset( $_SERVER['SCRIPT_NAME'] ) )
@@ -58,8 +62,8 @@ class Service_Manager extends Deployer
 			$server_name = $_SERVER['SERVER_NAME'];
 		if ( isset( $_SERVER['SERVER_PORT'] ) )
 			$server_port = $_SERVER['SERVER_PORT'];
-
-		$file_name_settings = $prefix_file_hidden.
+        
+        $file_name_settings = $prefix_file_hidden.
 			FILE_NAME_SERVICE_CONFIGURATION.EXTENSION_INI
 		;
 
@@ -87,7 +91,13 @@ class Service_Manager extends Deployer
         ;
 
         if ($debug_enabled)
-            error_log('[development environment] ' . ( $environment_development ? 'true' : 'false' ) );
+        {
+            error_log( '[build jenkins] ' . ( $build_jenkins ? 'true' : 'false' ) );
+            error_log( '[development environment] ' . ( $environment_development ? 'true' : 'false' ) );
+            error_log( '[forwarded host] ' . $forwarded_host );
+            error_log( '[jenkins workspace] ' . $jenkins_workspace );
+            error_log( '[server name] ' . $server_name );
+        }
 
         if ($environment_development)
 			$file_path =
@@ -134,10 +144,16 @@ class Service_Manager extends Deployer
                 )
 			) ||
             in_array( $server_name, array( $host_dev_wtw ) ) ||
-            in_array( $server_name, array( $host_dev_wtw_build ) )
+            in_array( $server_name, array( $host_org_wtw_build ) ) || 
+            (
+                isset( $forwarded_host ) &&
+                in_array( $forwarded_host, array( $host_org_wtw_stable ) )
+            )
         ) {
             $target = 'ghost';
-            if ($build_jenkins) 
+            if (isset($jenkins_workspace))
+                $target = $jenkins_workspace;
+            else if ($build_jenkins) 
                 $target = '## FILL ME ##';
 			$file_path = $directory_web_services.'/../settings/' . $target . '/'.
 				$file_name_settings
