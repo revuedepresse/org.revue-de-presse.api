@@ -17,7 +17,12 @@ class Deployer extends I18n
 	{
 		$callback_parameters = NULL;
 
-		$condition_deployment_first_level  =
+        if ( isset($_SERVER['HTTP_X_FORWARDED_HOST'] ) ) $forwarded_host = $_SERVER['HTTP_X_FORWARDED_HOST'];
+        else $forwarded_host = null;
+        $stable_wtw_org_detected = isset( $forwarded_host ) &&
+            in_array($forwarded_host, array( '## FILL HOSTNAME ##' ) );
+
+        $condition_deployment_first_level  =
 			isset( $_SERVER['SERVER_NAME'] ) &&
 			in_array(
 				$_SERVER['SERVER_NAME'],
@@ -30,7 +35,9 @@ class Deployer extends I18n
 					'## FILL HOSTNAME ##',
 					'www.## FILL HOSTNAME ##'
 				)
-			) || (
+            ) || ( 
+                $stable_wtw_org_detected 
+            ) || (
 				! isset( $_SERVER['SERVER_NAME'] ) &&
 				isset( $_SERVER['SCRIPT_NAME'] ) &&
 				preg_match('/tifa\//', $_SERVER['SCRIPT_NAME'])
@@ -185,7 +192,7 @@ class Deployer extends I18n
                         ! in_array($_SERVER['SERVER_NAME'], array(
                             '## FILL HOSTNAME ##', '## FILL HOSTNAME ##'
                         ))
-                    )
+                    ) && ! $stable_wtw_org_detected
 				)
 			)
 			{
