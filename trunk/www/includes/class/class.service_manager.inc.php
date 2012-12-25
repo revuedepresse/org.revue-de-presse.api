@@ -29,6 +29,7 @@ class Service_Manager extends Deployer
 
 		$directory_current = dirname( __FILE__ );
 
+		$forwarded_host =
 		$script_name =
 		$server_name =
 		$server_port = null;
@@ -38,6 +39,7 @@ class Service_Manager extends Deployer
 		$host_local_livecoding = 'livecoding.dev';
 		$host_local_snaps = 'snaps.dev';
 		$host_dev_tifa = '## FILL HOSTNAME ##';
+		$host_dev_wtw_stable = 'stable.## FILL HOSTNAME ##';
 		$host_dev_wtw = '## FILL HOSTNAME ##';
 		$host_org_wtw_build = '## FILL HOSTNAME ##';
         $host_org_wtw_stable = '## FILL HOSTNAME ##';
@@ -67,8 +69,14 @@ class Service_Manager extends Deployer
 			FILE_NAME_SERVICE_CONFIGURATION.EXTENSION_INI
 		;
 
+        $host_dev_wtw_stable_detected = (
+                isset( $forwarded_host ) &&
+                in_array( $forwarded_host, array( $host_dev_wtw_stable, $host_org_wtw_stable ) )
+        );
+
         $environment_development = ! $build_jenkins && ( 
                 ! $symfony_detected &&
+                ! $host_dev_wtw_stable_detected &&
                 ! is_null( $server_name ) &&
                 in_array(
                     $server_name,
@@ -107,7 +115,7 @@ class Service_Manager extends Deployer
 
 		else if (
             ! $build_jenkins &&
-            ! in_array( $server_name, array( $host_dev_wtw ) ) &&
+            ! in_array( $server_name, array( $host_dev_wtw, $host_dev_wtw_stable ) ) &&
 			isset( $server_port ) &&
 			in_array( $server_port, array( $port_http ) ) ||
 			(
@@ -143,12 +151,8 @@ class Service_Manager extends Deployer
                     $build_jenkins
                 )
 			) ||
-            in_array( $server_name, array( $host_dev_wtw ) ) ||
-            in_array( $server_name, array( $host_org_wtw_build ) ) || 
-            (
-                isset( $forwarded_host ) &&
-                in_array( $forwarded_host, array( $host_org_wtw_stable ) )
-            )
+            in_array( $server_name, array( $host_dev_wtw, $host_org_wtw_build ) ) ||
+            $host_dev_wtw_stable_detected 
         ) {
             $target = 'ghost';
             if (isset($jenkins_workspace))

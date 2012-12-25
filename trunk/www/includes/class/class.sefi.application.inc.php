@@ -2354,7 +2354,7 @@ class Application extends \Service_Manager
 			)
 
 				// make a new directory
-				mkdir( $dir_snapshots."/".$maximum_long_edge."_".$proportions );
+				mkdir( $dir_snapshots."/".$maximum_long_edge."_".$proportions, 0755, true );
 
 			// check if anybody there
 			if (
