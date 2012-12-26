@@ -849,6 +849,8 @@ class Photo extends Toolbox
                         catch ( Exception $exception )
                         {
                             file_put_contents( $path, base64_decode( $result->bytes ) );
+                            $result->bytes = null;
+                            unset($result->bytes);
                             /**
                             *
                             * FIXME
