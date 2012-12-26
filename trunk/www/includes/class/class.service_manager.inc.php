@@ -34,7 +34,6 @@ class Service_Manager extends Deployer
 		$server_name =
 		$server_port = null;
 
-		$host_lan_ip = '192.168.0.15';
 		$host_local_ip = '127.0.0.1';
 		$host_local_livecoding = 'livecoding.dev';
 		$host_local_snaps = 'snaps.dev';
@@ -81,8 +80,6 @@ class Service_Manager extends Deployer
                 in_array(
                     $server_name,
                     array(
-                        $host_local_ip,
-                        $host_lan_ip,
                         $host_local_livecoding,
                         $host_local_snaps,
                         $host_dev_tifa
@@ -115,7 +112,7 @@ class Service_Manager extends Deployer
 
 		else if (
             ! $build_jenkins &&
-            ! in_array( $server_name, array( $host_dev_wtw, $host_dev_wtw_stable ) ) &&
+            ! in_array( $server_name, array( $host_dev_wtw, $host_dev_wtw_stable, $host_local_ip ) ) &&
 			isset( $server_port ) &&
 			in_array( $server_port, array( $port_http ) ) ||
 			(
@@ -151,7 +148,7 @@ class Service_Manager extends Deployer
                     $build_jenkins
                 )
 			) ||
-            in_array( $server_name, array( $host_dev_wtw, $host_org_wtw_build ) ) ||
+            in_array( $server_name, array( $host_dev_wtw, $host_local_ip, $host_org_wtw_build ) ) ||
             $host_dev_wtw_stable_detected 
         ) {
             $target = 'ghost';
