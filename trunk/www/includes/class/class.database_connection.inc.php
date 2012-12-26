@@ -214,10 +214,13 @@ class Database_Connection
 				throw new Exception("Invalid query: ".$mysqli->error);
 	
 			if ($expected_data)
-	
+	        {
 				while ($row = $result->fetch_object())
 	
-						$rows[] = $row;
+			        $rows[] = $row;
+
+                $result->free_result();
+            }
 			else 
 	
 				$rows['result'] = $result;
