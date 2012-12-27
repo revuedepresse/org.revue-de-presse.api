@@ -15,13 +15,17 @@ parameters:
     locale:            en
     secret:            ## FILL ME ##
 
-    api_twitter_version:      1.1
-    api_twitter_user_token:   ## FILL ME ##
-    api_twitter_user_secret:  ## FILL ME ##
+    api_facebook_host_port:     %api.facebook.protocol%%api.facebook.host_port%
+    api_github_host_port:       %api.github.protocol%%api.github.host_port%
+    api_twitter_host_port:      %api.twitter.protocol%%api.twitter.host_port%
 
-    endpoint_facebook_feed:   http://## FILL ME ##/fb/api.facebook.get.feed.php
-    endpoint_github_redirect: https://## FILL HOSTNAME ##/github/request
-    endpoint_twitter_feed:    http://## FILL HOSTNAME ##/api/twitter/timeline
-    endpoint_twitter_user:    https://userstream.twitter.com/%s/user.json
+    api_twitter_version:        1.1
+    api_twitter_user_token:     ## FILL ME ##
+    api_twitter_user_secret:    ## FILL ME ##
 
-    tokenization_sandbox:     '## FILL ME #### FILL DOCUMENT ROOT ##/api/wtw/sandbox'
+    endpoint_facebook_feed:     %api_facebook_host_port%/fb/api.facebook.get.feed.php
+    endpoint_github_redirect:   %api_github_host_port%/github/request
+    endpoint_twitter_feed:      %api_twitter_host_port/api/twitter/timeline
+    endpoint_twitter_user:      https://userstream.twitter.com/%s/user.json
+
+    tokenization_sandbox:       %metaprogramming.sandbox%
