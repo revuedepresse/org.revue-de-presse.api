@@ -23,7 +23,7 @@ parameters:
     api_twitter_user_token:     ## FILL ME ##
     api_twitter_user_secret:    ## FILL ME ##
 
-    endpoint_facebook_feed:     %api_facebook_host_port%/fb/api.facebook.get.feed.php
+    endpoint_facebook_feed:     %api_facebook_host_port%/api/facebook/api.facebook.get.feed.php
     endpoint_github_redirect:   %api_github_host_port%/github/request
     endpoint_twitter_feed:      %api_twitter_host_port/api/twitter/timeline
     endpoint_twitter_user:      https://userstream.twitter.com/%s/user.json
