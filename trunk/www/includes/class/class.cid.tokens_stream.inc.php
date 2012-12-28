@@ -1496,7 +1496,7 @@ class Tokens_Stream extends \Alpha
                         $class_dumper = $class_application::getDumperClass();
                         $class_dumper::log( __METHOD__, array(
                             $substream
-                        ), TRUE, TRUE );
+                        ), true, true );
     
                         //$root_directory = self::getRootDirectory();
                         //$properties = array( PROPERTY_PATH =>
@@ -2082,58 +2082,58 @@ class Tokens_Stream extends \Alpha
 //  }
 
     /**
-    * Get a subsequence
-    *
-    * @param    string      $path       path
-    * @param    string      $mode       accessing mode
-    * @param    integer     $count      number of items to be retrieved
-    * @param    integer     $start      offset
-    * @param    resource    $context    stream contextual options
-    * @return   string      $content    content
-    */
+     * Gets a subsequence
+     *
+     * @param      $streamProperties
+     * @param null $context
+     *
+     * @return string
+     */
     public static function getSubsequence(
         $path = null,
         $mode = null,
         $count = null,
         $start = null,
-        &$context = null
-    )
+//       $streamProperties,
+        &$context = null)
     {
-        $exceeded_max_length = false;
-        $full_read = false;
-        $hash_length = self::getHashLength();
-        $max_length = self::getMaxChunkSize() / $hash_length;
+//        $path = $streamProperties[PROPERTY_PATH];
+//        $count = $streamProperties[PROPERTY_LENGTH];
+//        $mode = $streamProperties[PROPERTY_MODE_ACCESS];
+//        $full_read = $streamProperties[PROPERTY_READ_FULL];
+//        $start = $streamProperties[PROPERTY_OFFSET];
+        $max_length = self::getMaxChunkSize() / self::getHashLength();
         $options = self::extractOptions( $context );
         $protocol = self::getProtocol();
         $stream_length = self::slen( $path, $context );
-        $subsequence = '';
-        
+
         if ( isset( $options[$protocol][PROPERTY_SIGNAL] ) )
         {
             $stream = self::getStream();
-            $sequences = str_split(
-                $stream->{PROPERTY_SEQUENCE}, $hash_length
-            );
-            $count = ( $count === -1 ? count( $sequences ) : $count );
-            $start = empty( $start ) ? 0 : $start;
-            $subsequences = array_splice( $sequences, $start, $count );
-            $subsequence = implode( $subsequences );
-            $stream->{PROPERTY_SUBSEQUENCE} = $subsequence;
+            $stream->setStreamSubsequence($count, $start);
+            $subsequence = $stream->{PROPERTY_SUBSEQUENCE};
         }
         else
         {
             self::registerStreamWrapper();
 
+            $full_read = false;
+
             // enable full read
             // when reading length has been set to "magic" value -1
-            if ( ( $length = self::checkLength( $count ) ) === -1 )
+            if ( ( $length = self::checkLength( $count ) ) === -1 ) {
                 $full_read = true;
+            }
 
+//            $properties = array_merge(
+//                array(PROPERTY_CONTEXT => $context),
+//                $streamProperties
+//            );
             $properties = array(
                 PROPERTY_CONTEXT => $context,
+                PROPERTY_PATH => $path,
                 PROPERTY_MODE_ACCESS => $mode,
                 PROPERTY_OFFSET => $start,
-                PROPERTY_PATH => $path,
                 PROPERTY_READ_FULL => $full_read
             );
 
@@ -2149,58 +2149,40 @@ class Tokens_Stream extends \Alpha
             else if ( $start > $stream_length )
             {       
                 $start = $stream_length;
-                $lenght = 0;
+                $length = 0;
             }
 
-            if ( $length < $max_length ) // max = 8192 / hash length
+            if ($length < $max_length) // max = 8192 / hash length
             {
+                $exceeded_max_length = false;
                 $limit = $start;
                 $properties[PROPERTY_LENGTH] = $length;
 
-                if ( $length + $start > $stream_length )
-
+                if ( $length + $start > $stream_length ) {
                     $properties[PROPERTY_LENGTH] = $stream_length - $start;
+                }
             }
             else 
             {
-                $last_length = ( $length % $max_length );
-                $full_loops = ( int ) round( $length / $max_length );
-
-                if ( $start + $length > $stream_length )
-
-                    $limit = $stream_length;
-                else
-
-                    $limit = $start + $length;
-        
                 $exceeded_max_length = true;
+                $full_loops = ( int ) round( $length / $max_length );
+                $last_length = ( $length % $max_length );
+                $limit = $start + $length;
+
+                if ( $start + $length > $stream_length ) {
+                    $limit = $stream_length;
+                }
             }
 
             $loop_index = 0;
+            $subsequence = '';
 
             while ( $start <= $limit )
             {
                 $properties[PROPERTY_OFFSET] = $start;
                 
-                if (
-                    $exceeded_max_length && ( $loop_index === $full_loops )
-                )
+                if ($exceeded_max_length && ( $loop_index === $full_loops ))
                     $properties[PROPERTY_LENGTH] = $last_length;
-
-                if (
-                    INTROSPECTION_VERBOSE &&
-                    isset( $properties[PROPERTY_LENGTH] )
-                )
-                {
-                    global $class_application, $verbose_mode;
-                    $class_dumper = $class_application::getDumperClass();
-                    $class_dumper::log( __METHOD__, array(
-                        '[offset]', $start,
-                        '[limit]', $limit,
-                        '[length]', $properties[PROPERTY_LENGTH],
-                        '[loop index]', $loop_index
-                    ), INTROSPECTION_VERBOSE );
-                }
 
                 $subsequence .= self::getStreamSection( $properties );
 
@@ -2231,9 +2213,30 @@ class Tokens_Stream extends \Alpha
     )
     {
         $old_position = self::getPosition();
+
+//        $full_read = false;
+//
+//        // enable full read
+//        // when reading length has been set to "magic" value -1
+//        if ( ( $length = self::checkLength( $count ) ) === -1 ) {
+//            $full_read = true;
+//        }
+
+//        $streamProperties = array(
+//            PROPERTY_PATH => $path,
+//            PROPERTY_MODE_ACCESS => $mode,
+//            PROPERTY_LENGTH => $count,
+//            PROPERTY_OFFSET => $start,
+//            PROPERTY_READ_FULL => $full_read
+//        );
         $subsequence = self::getSubsequence(
-            $path, $mode, $count, $start, $context
-        );
+            $path,
+            $mode,
+            $count,
+            $start,
+//            $streamProperties,
+            $context);
+
         $definition = array(
             PROPERTY_LENGTH => $count,
             PROPERTY_OFFSET => $start,
@@ -2802,6 +2805,24 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
+     * @param $count
+     * @param $start
+     *
+     * @return string
+     */
+    public function setStreamSubsequence($count, $start)
+    {
+        $sequences                      = str_split($this->{PROPERTY_SEQUENCE}, self::getHashLength());
+        $count                          = ($count === -1 ? count($sequences) : $count);
+        $start                          = empty($start) ? 0 : $start;
+        $subsequences                   = array_splice($sequences, $start, $count);
+        $subsequence                    = implode($subsequences);
+        $this->{PROPERTY_SUBSEQUENCE}   = $subsequence;
+
+        return $this;
+    }
+
+    /**
     * Set a subsequence in a stream
     *
     * @param    array   $properties stream properties
@@ -3190,350 +3211,3 @@ class Tokens_Stream extends \Alpha
         return self::writeInStream( $_store );
     }
 }
-
-/// @endcond
-
-/**
-*******************
-***************
-*********
-*******
-*****   Changes log
-*******
-*********
-***************
-*******************
-* 2011 10 01
-*************
-*
-* development :: introspection ::
-*
-* Start implementing the Tokens_Stream class
-*
-* methods affected ::
-*
-*   TOKENS_STREAM :: __construct
-*   TOKENS_STREAM :: getContext
-*   TOKENS_STREAM :: getEntryPoint
-*   TOKENS_STREAM :: getOption
-*   TOKENS_STREAM :: getPosition
-*   TOKENS_STREAM :: setPosition
-*   TOKENS_STREAM->stream_close
-*   TOKENS_STREAM->stream_eof
-*   TOKENS_STREAM->stream_open
-*   TOKENS_STREAM->stream_read
-*   TOKENS_STREAM->stream_tell
-*
-* (branch 0.1 :: revision :: 664)
-*
-*************
-* 2011 10 03
-*************
-*
-* development :: introspection ::
-*
-* Implement rendering as XHTML document
-* Wrap the Token Stream wrapper callbacks with alternate reading function
-* to convert lines count to hashes length (md5) multipliers
-*
-* methods affected ::
-*
-*   TOKENS_STREAM :: __get
-*   TOKENS_STREAM :: checkProperties
-*   TOKENS_STREAM :: feedRiver
-*   TOKENS_STREAM :: getCoordinates
-*   TOKENS_STREAM :: initialize
-*   TOKENS_STREAM :: render
-*   TOKENS_STREAM :: spawn
-*   TOKENS_STREAM->getKey
-*   TOKENS_STREAM->getRiver
-*   TOKENS_STREAM->getSignal
-*   TOKENS_STREAM->getStream
-*   TOKENS_STREAM->getSubsequence
-*   TOKENS_STREAM->getSubstream
-*   TOKENS_STREAM->getToken
-*   TOKENS_STREAM->slen
-*   TOKENS_STREAM->stream_read
-*   TOKENS_STREAM->tokenize
-*
-* (branch 0.1 :: revision :: 665)
-*
-*************
-* 2011 10 04
-*************
-*
-* development :: introspection ::
-*
-* Start implementing writing methods
-*
-* methods affected ::
-*
-*   TOKENS_STREAM :: checkProperties
-*   TOKENS_STREAM :: setSubsequence
-*
-* (branch 0.1 :: revision :: 676)
-* (branch 0.2 :: revision :: 380)
-*
-*************
-* 2011 10 06
-*************
-*
-* development :: introspection ::
-*
-* Refactor methods of \cid\Tokens_Stream class
-* Resume implementation of write on stream
-*
-* methods affected ::
-*
-*   TOKENS_STREAM :: checkLength
-*   TOKENS_STREAM :: extractOptions
-*   TOKENS_STREAM :: getStreamSection
-*   TOKENS_STREAM :: getSubsequence
-*   TOKENS_STREAM :: registerStreamWrapper
-*
-* (branch 0.1 :: revision :: 683)
-* (branch 0.2 :: revision :: 381)
-*
-*************
-* 2011 10 08
-*************
-*
-* development :: introspection :: 
-*
-* Introduce sandboxing
-* Rename methods
-*
-* methods affected ::
-*   TOKENS_STREAM :: checkEndpoint
-*   TOKENS_STREAM :: getHashLength
-*   TOKENS_STREAM :: getHost
-*   TOKENS_STREAM :: getMaxChunkSize
-*   TOKENS_STREAM :: getRootDirectory
-*   TOKENS_STREAM :: getSignal
-*   TOKENS_STREAM :: getStreamSection
-*   TOKENS_STREAM :: getSubstream
-*   TOKENS_STREAM :: getSubsequence
-*   TOKENS_STREAM :: getToken
-*   TOKENS_STREAM :: setSequence
-*   TOKENS_STREAM :: streamlineContent
-*   TOKENS_STREAM :: writeInStream
-*   str_key_arr
-*   str_mmb_obj
-*
-* (branch 0.1 :: revision :: 684)
-*
-*************
-* 2011 10 10
-*************
-*
-* development :: introspection ::
-*
-* Implement stream closing
-*
-* methods affected ::
-*
-*   TOKENS_STREAM :: closeStream
-*   TOKENS_STREAM :: getProtocol
-*   TOKENS_STREAM->close
-*   TOKENS_STREAM->getOption
-*   TOKENS_STREAM->setOption
-*
-* (branch 0.1 :: revision :: 703)
-*
-*************
-* 2011 10 11
-*************
-*
-* development :: introspection ::
-*
-* Implement stream shaping
-*
-* methods affected ::
-*
-*   TOKENS_STREAM :: extractTokens
-*   TOKENS_STREAM :: shape
-*
-* (branch 0.1 :: revision :: 705)
-*
-*************
-* 2011 10 16
-*************
-*
-* development :: introspection ::
-*
-* Implement signal building
-*
-* methods affected ::
-*
-*   TOKENS_STREAM :: buildSignal
-*
-* (branch 0.1 :: revision :: 711)
-*
-*************
-* 2011 10 17
-*************
-*
-* development :: introspection ::
-*
-* Start implementing signal rendering
-*
-* methods affected ::
-*
-*   TOKENS_STREAM :: renderSignal
-*
-* (branch 0.1 :: revision :: 720)
-*
-*************
-* 2011 10 18
-*************
-*
-* development :: introspection ::
-*
-* Adapt signal building to aggregation results
-*
-* methods affected ::
-*
-*   TOKENS_STREAM :: buildSignal
-*
-* (branch 0.1 :: revision :: 722)
-* (branch 0.2 :: revision :: 393)
-*
-*************
-* 2012 05 03
-*************
-*
-* documentation :: introspection ::
-*
-* Revise root directory build
-*
-* methods affected ::
-*
-*   TOKENS_STREAM :: getRootDirectory
-*
-* (branch 0.1 :: revision :: 880)
-*
-*************
-* 2012 05 04
-*************
-*
-* development :: introspection ::
-*
-* Prevent 256 chunk limit from crashing the TOKEN_STREAM stream registration
-*
-* methods affected ::
-*
-*   TOKENS_STREAM :: getSubsequence
-*
-* (branch 0.1 :: revision :: 886)
-*
-*************
-* 2012 05 05
-*************
-*
-* development :: introspection ::
-* development :: code generation ::
-*
-* Fix end of stream detection
-* Fix full stream read
-* Revise subsequence extraction by correcting offset definition
-*
-* methods affected ::
-*
-*   TOKENS_STREAM :: getSubsequence
-*   TOKENS_STREAM :: getTokenValue
-*   TOKENS_STREAM :: writeInStream
-*   TOKENS_STREAM->stream_close
-*   TOKENS_STREAM->stream_eof
-*   TOKENS_STREAM->stream_write
-*   TOKENS_STREAM->tokenize
-*
-* (branch 0.1 :: revision :: 891)
-*
-*************
-* 2012 05 06
-*************
-*
-* development :: code generation ::
-*
-* Implement write to stream with offset and length
-* Prevent removal of white spaces at signal discovery
-*
-* methods affected ::
-*
-*   TOKENS_STREAM :: appendToStream
-*   TOKENS_STREAM :: injectIntoStream
-*   TOKENS_STREAM :: log
-*   TOKENS_STREAM :: writeInStream
-*   TOKENS_STREAM :: writeInSubstream
-*   TOKENS_STREAM->checkOptions
-*   TOKENS_STREAM->getSubsequence
-*   TOKENS_STREAM->stream_write
-*
-* (branch 0.1 :: revision :: 902)
-*
-*************
-* 2012 05 07
-*************
-*
-* development :: code generation ::
-*
-* Implement use of placeholders
-*
-* methods affected ::
-*
-*   TOKENS_STREAM :: applySubstitutions
-*   TOKENS_STREAM :: applyTransformations
-*   TOKENS_STREAM :: checkProperties
-*
-* (branch 0.1 :: revision :: 910)
-*
-*************
-* 2012 05 08
-*************
-*
-* development :: code generation ::
-*
-* Start implementing signal transformations
-* Implement retrieval of last revision committed to version control system
-*
-* methods affected ::
-*
-*   TOKENS_STREAM :: addTransformation
-*   TOKENS_STREAM :: addSubstitutions
-*   TOKENS_STREAM :: appendToHistory
-*   TOKENS_STREAM :: getLastRevision
-*   TOKENS_STREAM :: extractOption
-*   TOKENS_STREAM :: validMethod
-*
-* (branch 0.1 :: revision :: 911)
-*
-*************
-* 2012 05 09
-*************
-*
-* development :: code generation ::
-*
-* Implement persistency coordinates declaration
-*
-* methods affected ::
-*
-*   TOKENS_STREAM :: declarePersistencyCoordinates
-*   TOKENS_STREAM :: importPersistencyDeclarations
-*
-* (branch 0.1 :: revision :: 926)
-*
-*************
-* 2012 05 10
-*************
-*
-* development :: code generation ::
-*
-* Implement retrieval of persistent handle 
-*
-* methods affected ::
-*
-*   TOKENS_STREAM :: getPersistentHandle
-*
-* (branch 0.1 :: revision :: 927)
-*
-*/
