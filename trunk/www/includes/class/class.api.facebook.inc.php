@@ -94,7 +94,8 @@ namespace api
 		{
 			if (
 				$_SERVER['REMOTE_ADDR'] !== '## FILL IP ADDRESS ##' &&
-				$_SERVER['REMOTE_ADDR'] !== '::1'
+				$_SERVER['REMOTE_ADDR'] !== '::1' &&
+				$_SERVER['REMOTE_ADDR'] !== '127.0.0.1'
 			) {
 				exit( '[termination at line ' . __LINE__ . ']' );
 			}
