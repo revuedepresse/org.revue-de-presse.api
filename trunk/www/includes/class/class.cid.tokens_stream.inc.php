@@ -2089,19 +2089,37 @@ class Tokens_Stream extends \Alpha
      *
      * @return string
      */
-    public static function getSubsequence(
-        $path = null,
-        $mode = null,
-        $count = null,
-        $start = null,
-//       $streamProperties,
-        &$context = null)
+    public static function getSubsequence(array $streamProperties, &$context = null)
     {
-//        $path = $streamProperties[PROPERTY_PATH];
-//        $count = $streamProperties[PROPERTY_LENGTH];
-//        $mode = $streamProperties[PROPERTY_MODE_ACCESS];
-//        $full_read = $streamProperties[PROPERTY_READ_FULL];
-//        $start = $streamProperties[PROPERTY_OFFSET];
+        $path = null;
+        $count = null;
+        $start = null;
+        $mode = null;
+
+        if (isset($streamProperties[PROPERTY_LENGTH])) {
+            $count = $streamProperties[PROPERTY_LENGTH];
+        }
+
+        if (isset($streamProperties[PROPERTY_MODE_ACCESS])) {
+            $mode = $streamProperties[PROPERTY_MODE_ACCESS];
+        }
+
+        if (isset($streamProperties[PROPERTY_PATH])) {
+            $path = $streamProperties[PROPERTY_PATH];
+        }
+
+        if (isset($streamProperties[PROPERTY_OFFSET])) {
+            $start = $streamProperties[PROPERTY_OFFSET];
+        }
+
+        // enable full read
+        // when reading length has been set to "magic" value -1
+        if ( ( $length = self::checkLength( $count ) ) === -1 ) {
+            $full_read = true;
+        } else {
+            $full_read = false;
+        }
+
         $max_length = self::getMaxChunkSize() / self::getHashLength();
         $options = self::extractOptions( $context );
         $protocol = self::getProtocol();
@@ -2117,24 +2135,10 @@ class Tokens_Stream extends \Alpha
         {
             self::registerStreamWrapper();
 
-            $full_read = false;
-
-            // enable full read
-            // when reading length has been set to "magic" value -1
-            if ( ( $length = self::checkLength( $count ) ) === -1 ) {
-                $full_read = true;
-            }
-
-//            $properties = array_merge(
-//                array(PROPERTY_CONTEXT => $context),
-//                $streamProperties
-//            );
-            $properties = array(
-                PROPERTY_CONTEXT => $context,
-                PROPERTY_PATH => $path,
-                PROPERTY_MODE_ACCESS => $mode,
-                PROPERTY_OFFSET => $start,
-                PROPERTY_READ_FULL => $full_read
+            unset($streamProperties[PROPERTY_LENGTH]);
+            $properties = array_merge(
+                array(PROPERTY_CONTEXT => $context),
+                $streamProperties
             );
 
             self::checkContextAsReference( $properties, $mode );
@@ -2214,28 +2218,22 @@ class Tokens_Stream extends \Alpha
     {
         $old_position = self::getPosition();
 
-//        $full_read = false;
-//
-//        // enable full read
-//        // when reading length has been set to "magic" value -1
-//        if ( ( $length = self::checkLength( $count ) ) === -1 ) {
-//            $full_read = true;
-//        }
+        // enable full read
+        // when reading length has been set to "magic" value -1
+        if ( ( $length = self::checkLength( $count ) ) === -1 ) {
+            $full_read = true;
+        } else {
+            $full_read = false;
+        }
 
-//        $streamProperties = array(
-//            PROPERTY_PATH => $path,
-//            PROPERTY_MODE_ACCESS => $mode,
-//            PROPERTY_LENGTH => $count,
-//            PROPERTY_OFFSET => $start,
-//            PROPERTY_READ_FULL => $full_read
-//        );
-        $subsequence = self::getSubsequence(
-            $path,
-            $mode,
-            $count,
-            $start,
-//            $streamProperties,
-            $context);
+        $streamProperties = array(
+            PROPERTY_LENGTH => $count,
+            PROPERTY_MODE_ACCESS => $mode,
+            PROPERTY_OFFSET => $start,
+            PROPERTY_PATH => $path,
+            PROPERTY_READ_FULL => $full_read
+        );
+        $subsequence = self::getSubsequence($streamProperties, $context);
 
         $definition = array(
             PROPERTY_LENGTH => $count,
@@ -2601,14 +2599,26 @@ class Tokens_Stream extends \Alpha
         else
             $render_type = $properties[PROPERTY_RENDER];
 
-        $tokens = call_user_func(
-            array( __CLASS__, ACTION_GET . ucfirst( $render_type ) ),
-            $properties[PROPERTY_PATH],
-            $properties[PROPERTY_MODE_ACCESS],
-            $properties[PROPERTY_LENGTH],
-            $properties[PROPERTY_OFFSET],
-            $context
-        );
+        if (ucfirst( $render_type ) !== 'Subsequence') {
+            $tokens = call_user_func(
+                array( __CLASS__, ACTION_GET . ucfirst( $render_type ) ),
+                $properties[PROPERTY_PATH],
+                $properties[PROPERTY_MODE_ACCESS],
+                $properties[PROPERTY_LENGTH],
+                $properties[PROPERTY_OFFSET],
+                $context
+            );
+        } else {
+            $tokens = call_user_func(
+                array( __CLASS__, ACTION_GET . ucfirst( $render_type ) ),
+                array(
+                    PROPERTY_LENGTH => $properties[PROPERTY_LENGTH],
+                    PROPERTY_MODE_ACCESS => $properties[PROPERTY_MODE_ACCESS],
+                    PROPERTY_OFFSET => $properties[PROPERTY_OFFSET],
+                    PROPERTY_PATH => $properties[PROPERTY_PATH],
+                ), $context
+            );
+        }
 
         switch( $properties[PROPERTY_FORMAT] )
         {
