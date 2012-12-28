@@ -15,8 +15,7 @@ framework:
     validation:           { enable_annotations: true }
     templating:           { engines: ['twig'] }
     trust_proxy_headers:  false
-    session:
-        auto_start:
+    session:              ~
 
 # Twig Configuration
 twig:
@@ -25,7 +24,7 @@ twig:
 
 # Assetic Configuration
 assetic:
-    bundles: []
+    bundles:        []
     debug:          %kernel.debug%
     use_controller: false
     filters:
