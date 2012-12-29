@@ -2145,12 +2145,29 @@ class Tokens_Stream extends \Alpha
             $start = $interval[PROPERTY_OFFSET];
 
             $stream_length = self::slen( $path, $context );
+
+            $max_length = self::getMaxChunkSize() / self::getHashLength();
             $limit = $start;
 
-            if ($length < $max_length) // max = 8192 / hash length
-            {
-                $section_count = null;
+            if (self::fullCoverage($length, $max_length)) {
+                $limit =+ $length;
 
+                if (self::overflowingLength(array(
+                        PROPERTY_CONTEXT => $context,
+                        PROPERTY_LENGTH => $length,
+                        PROPERTY_OFFSET => $start,
+                        PROPERTY_PATH => $path
+                    ))) {
+                    $limit = $stream_length;
+                }
+            }
+
+            if (self::fullCoverage($length, $max_length))
+            {
+                $last_length = ( $length % $max_length );
+            }
+            else 
+            {
                 $properties[PROPERTY_LENGTH] = self::getSequenceLength(array(
                     PROPERTY_CONTEXT => $context,
                     PROPERTY_LENGTH => $length,
@@ -2158,16 +2175,8 @@ class Tokens_Stream extends \Alpha
                     PROPERTY_PATH => $path
                 ));
             }
-            else 
-            {
-                $section_count = ( int ) round( $length / $max_length );
-                $last_length = ( $length % $max_length );
-                $limit =+ $length;
 
-                if ( $start + $length > $stream_length ) {
-                    $limit = $stream_length;
-                }
-            }
+            $sections_count = self::getTotalSections($length, $max_length);
 
             $section_index = 0;
             $subsequence = '';
@@ -2176,7 +2185,7 @@ class Tokens_Stream extends \Alpha
             {
                 $properties[PROPERTY_OFFSET] = $start;
                 
-                if (isset($section_count) && ( $section_index === $section_count )) {
+                if (isset($sections_count) && ( $section_index === $sections_count )) {
                     $properties[PROPERTY_LENGTH] = $last_length;
                 }
 
@@ -2191,22 +2200,25 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
-     * @param $properties
+     * @param $length
+     * @param $max_length
+     *
+     * @return bool
+     */
+    public static function fullCoverage($length, $max_length)
+    {
+        // max_length = 8192 / hash length
+        return $length >= $max_length;
+    }
+
+    /**
+     * @param $length
      *
      * @return int
      */
-    public static function getSequenceLength($properties)
+    public static function fullRead($length)
     {
-        $start = $properties[PROPERTY_OFFSET];
-        $stream_length = self::slen( $properties[PROPERTY_PATH], $properties[PROPERTY_CONTEXT] );
-
-        if ($properties[PROPERTY_LENGTH] + $start > $stream_length) {
-            $sequence_length = $stream_length - $start;
-        } else {
-            $sequence_length = $properties[PROPERTY_LENGTH];
-        }
-
-        return $sequence_length;
+        return self::checkLength($length) === -1;
     }
 
     /**
@@ -2236,13 +2248,19 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
-     * @param $length
+     * @param $properties
      *
      * @return int
      */
-    public static function fullRead($length)
+    public static function getSequenceLength($properties)
     {
-        return self::checkLength($length) === -1;
+        if (self::overflowingLength($properties)) {
+            $sequence_length = self::limitSequenceLength($properties);
+        } else {
+            $sequence_length = $properties[PROPERTY_LENGTH];
+        }
+
+        return $sequence_length;
     }
 
     /**
@@ -2343,12 +2361,13 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
-    * Get the value of a token
-    *
-    * @param    mixed   $token
-    * @param    integer $property_index
-    * @result   string  value
-    */
+     * Gets a token value
+     *
+     * @param     $token
+     * @param int $property_index
+     *
+     * @return string
+     */
     public static function getTokenValue( $token, $property_index = 1 )
     {
         if ( is_array( $token ) )
@@ -2366,6 +2385,23 @@ class Tokens_Stream extends \Alpha
             $result = $token;               
 
         return $result;
+    }
+
+    /**
+     * @param $length
+     * @param $max_length
+     *
+     * @return int|null
+     */
+    public static function getTotalSections($length, $max_length)
+    {
+        if (self::fullCoverage($length, $max_length)) {
+            $sections_count = ( int )round($length / $max_length);
+        } else {
+            $sections_count = null;
+        }
+
+        return $sections_count;
     }
 
     /**
@@ -2531,6 +2567,21 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
+     * @param $properties
+     *
+     * @return int
+     */
+    public static function limitSequenceLength($properties)
+    {
+        $start           = $properties[PROPERTY_OFFSET];
+        $path            = $properties[PROPERTY_PATH];
+        $context         = $properties[PROPERTY_CONTEXT];
+        $stream_length   = self::slen($path, $context);
+
+        return $stream_length - $start;
+    }
+
+    /**
     * Log information
     *
     * @param    mixed   $information
@@ -2591,6 +2642,22 @@ class Tokens_Stream extends \Alpha
         );
         self::$persistent_context = $context;
         return $handle;
+    }
+
+    /**
+     * @param $properties
+     *
+     * @return bool
+     */
+    public static function overflowingLength($properties)
+    {
+        $context = $properties[PROPERTY_CONTEXT];
+        $length = $properties[PROPERTY_LENGTH];
+        $path = $properties[PROPERTY_PATH];
+        $start = $properties[PROPERTY_OFFSET];
+        $stream_length = self::slen( $path, $context );
+
+        return $length + $start > $stream_length;
     }
 
     /**
