@@ -871,7 +871,7 @@ class Tokens_Stream extends \Alpha
         * @tparam   $path           path leading to stream
         * @tparam   $signal         (optional)
         */
-        extract( $properties ); 
+        extract( $properties );
 
         if ( is_null( $context ) || is_resource( $context ) )
         {
@@ -923,7 +923,7 @@ class Tokens_Stream extends \Alpha
                 EXCEPTION_INVALID_ENTITY, ENTITY_CONTEXT
             ) );
 
-        $callback_parameters = array( 
+        $callback_parameters = array(
             PROPERTY_COUNT_BYTES => $length * $hash_length,
             PROPERTY_HANDLE => self::openStream( $path, $access_mode, $context )
         );
@@ -1468,7 +1468,7 @@ class Tokens_Stream extends \Alpha
                             * @tparam   mixed   $pattern
                             */
                             extract( $properties );
-    
+
                             if ( is_array( $subject ) && count( $subject ) )
     
                                 foreach ( $subject as $index => $item )
@@ -2112,18 +2112,9 @@ class Tokens_Stream extends \Alpha
             $start = $streamProperties[PROPERTY_OFFSET];
         }
 
-        // enable full read
-        // when reading length has been set to "magic" value -1
-        if ( ( $length = self::checkLength( $count ) ) === -1 ) {
-            $full_read = true;
-        } else {
-            $full_read = false;
-        }
-
         $max_length = self::getMaxChunkSize() / self::getHashLength();
         $options = self::extractOptions( $context );
         $protocol = self::getProtocol();
-        $stream_length = self::slen( $path, $context );
 
         if ( isset( $options[$protocol][PROPERTY_SIGNAL] ) )
         {
@@ -2145,16 +2136,16 @@ class Tokens_Stream extends \Alpha
 
             $properties[PROPERTY_LENGTH_MAX] = $max_length;
 
-            if ( $full_read )
-            {
-                $start = 0;
-                $length = $stream_length;
-            }
-            else if ( $start > $stream_length )
-            {       
-                $start = $stream_length;
-                $length = 0;
-            }
+            $interval = self::getInterval(array(
+                PROPERTY_CONTEXT => $context,
+                PROPERTY_LENGTH => $count,
+                PROPERTY_PATH => $path,
+                PROPERTY_OFFSET => $start));
+            $length = $interval[PROPERTY_LENGTH];
+            $start = $interval[PROPERTY_OFFSET];
+            $stream_length = $interval['stream_length'];
+
+            //$stream_length = self::slen( $path, $context );
 
             if ($length < $max_length) // max = 8192 / hash length
             {
@@ -2196,6 +2187,43 @@ class Tokens_Stream extends \Alpha
         }
 
         return $subsequence;
+    }
+
+    /**
+     * @param $properties
+     *
+     * @return mixed
+     */
+    public static function getInterval($properties)
+    {
+        $stream_length = self::slen($properties[PROPERTY_PATH], $properties[PROPERTY_CONTEXT]);
+
+        if (self::fullRead($properties[PROPERTY_LENGTH])) {
+            $length = $stream_length;
+            $start  = 0;
+        } else if ($properties[PROPERTY_OFFSET] > $stream_length) {
+            $length = 0;
+            $start  = $stream_length;
+        } else {
+            $length = self::checkLength($properties[PROPERTY_LENGTH]);
+            $start = $properties[PROPERTY_OFFSET];
+        }
+
+        return array(
+            'stream_length' => $stream_length,
+            PROPERTY_LENGTH => $length,
+            PROPERTY_OFFSET => $start
+        );
+    }
+
+    /**
+     * @param $length
+     *
+     * @return int
+     */
+    public static function fullRead($length)
+    {
+        return self::checkLength($length) === -1;
     }
 
     /**
@@ -2262,7 +2290,7 @@ class Tokens_Stream extends \Alpha
         * @tparam   $handle         handle
         */
         extract( self::checkContext( $properties ) );
-        
+
         if ( $bytes_count > 0 )
 
             $section .= fread( $handle, $bytes_count );
@@ -2452,7 +2480,7 @@ class Tokens_Stream extends \Alpha
             }
             else
             {
-                $result_opening = self::writeInSubstream( array(
+                self::writeInSubstream( array(
                     PROPERTY_LENGTH => $offset,
                     PROPERTY_MODE_ACCESS => FILE_ACCESS_MODE_WRITE_ONLY,
                     PROPERTY_OFFSET => 0,
@@ -2469,7 +2497,7 @@ class Tokens_Stream extends \Alpha
                     PROPERTY_SIGNAL => $signal
                 ) );
 
-                $result_closing = self::writeInSubstream( array(
+                self::writeInSubstream( array(
                     PROPERTY_LENGTH => $length - $offset + 1,
                     PROPERTY_MODE_ACCESS => FILE_ACCESS_MODE_APPEND_ONLY,
                     PROPERTY_OFFSET => $offset,
