@@ -2146,6 +2146,7 @@ class Tokens_Stream extends \Alpha
 
             $stream_length = self::slen( $path, $context );
             $limit = $start;
+            $section_count = null;
 
             if ($length < $max_length) // max = 8192 / hash length
             {
@@ -2157,7 +2158,7 @@ class Tokens_Stream extends \Alpha
             }
             else 
             {
-                $full_loops = ( int ) round( $length / $max_length );
+                $section_count = ( int ) round( $length / $max_length );
                 $last_length = ( $length % $max_length );
                 $limit =+ $length;
 
@@ -2166,20 +2167,20 @@ class Tokens_Stream extends \Alpha
                 }
             }
 
-            $loop_index = 0;
+            $section_index = 0;
             $subsequence = '';
 
             while ( $start <= $limit )
             {
                 $properties[PROPERTY_OFFSET] = $start;
                 
-                if (isset($full_loops) && ( $loop_index === $full_loops ))
+                if (isset($section_count) && ( $section_index === $section_count ))
                     $properties[PROPERTY_LENGTH] = $last_length;
 
                 $subsequence .= self::getStreamSection( $properties );
 
                 $start += $max_length;
-                $loop_index++;
+                $section_index++;
             }
         }
 
