@@ -2296,23 +2296,13 @@ class Tokens_Stream extends \Alpha
     {
         $old_position = self::getPosition();
 
-        // enable full read
-        // when reading length has been set to "magic" value -1
-        if ( ( $length = self::checkLength( $count ) ) === -1 ) {
-            $full_read = true;
-        } else {
-            $full_read = false;
-        }
-
         $streamProperties = array(
             PROPERTY_LENGTH => $count,
             PROPERTY_MODE_ACCESS => $mode,
             PROPERTY_OFFSET => $start,
-            PROPERTY_PATH => $path,
-            PROPERTY_READ_FULL => $full_read
+            PROPERTY_PATH => $path
         );
         $subsequence = self::getSubsequence($streamProperties, $context);
-
         $definition = array(
             PROPERTY_LENGTH => $count,
             PROPERTY_OFFSET => $start,
@@ -2320,6 +2310,7 @@ class Tokens_Stream extends \Alpha
             PROPERTY_SEQUENCE => $subsequence
         );
         $substream = self::extractSubstream( $definition );
+
         return $substream;
     }
 
@@ -2923,9 +2914,9 @@ class Tokens_Stream extends \Alpha
      */
     public static function replenishStreamProperties($streamProperties)
     {
-        $path  = null;
-        $count = null;
-        $start = null;
+        $path  =
+        $count =
+        $start =
         $mode  = null;
 
         if (isset($streamProperties[PROPERTY_LENGTH])) {
@@ -2946,9 +2937,9 @@ class Tokens_Stream extends \Alpha
 
         return array(
             PROPERTY_COUNT => $count,
+            PROPERTY_MODE_ACCESS => $mode,
             PROPERTY_PATH => $path,
-            PROPERTY_START => $start,
-            PROPERTY_MODE_ACCESS => $mode);
+            PROPERTY_START => $start);
     }
 
     /**
@@ -3374,17 +3365,12 @@ class Tokens_Stream extends \Alpha
         $properties[PROPERTY_MODE_ACCESS] = $access_mode;
         $properties = self::checkProperties( $properties );
         $handle = self::getHandle( $properties );
-        $substream = self::getSubstream(
+        self::getSubstream(
             $path, FILE_ACCESS_MODE_READ_ONLY,
             $length, $offset,
             $properties[PROPERTY_CONTEXT]
         );  
         $stream = self::getStream();
-        global $class_application, $verbose_mode;
-        $class_dumper = $class_application::getDumperClass();
-        $class_dumper::log( __METHOD__, array(
-            $stream
-        ), false );
         $_store = array(
             PROPERTY_DATA => $stream->{PROPERTY_SUBSEQUENCE},
             PROPERTY_HANDLE => $handle
