@@ -2101,10 +2101,8 @@ class Tokens_Stream extends \Alpha
          */
         extract($streamProperties = self::replenishStreamProperties($streamProperties));
 
-        $max_length = self::getTotalSequenceLength();
-        $protocol = self::getProtocol();
-
         $options = self::extractOptions( $context );
+        $protocol = self::getProtocol();
 
         if ( isset( $options[$protocol][PROPERTY_SIGNAL] ) )
         {
@@ -2132,18 +2130,7 @@ class Tokens_Stream extends \Alpha
             $length = $interval[PROPERTY_LENGTH];
             $start = $interval[PROPERTY_OFFSET];
 
-            $limit = self::getCoverageLimit(array(
-                PROPERTY_CONTEXT => $context,
-                PROPERTY_LENGTH => $length,
-                PROPERTY_OFFSET => $start,
-                PROPERTY_PATH => $path
-            ));
-
-            if (self::fullCoverage($length))
-            {
-                $last_length = ( $length % $max_length );
-            }
-            else
+            if (!self::fullCoverage($length))
             {
                 $properties[PROPERTY_LENGTH] = self::getSequenceLength(array(
                     PROPERTY_CONTEXT => $context,
@@ -2153,16 +2140,30 @@ class Tokens_Stream extends \Alpha
                 ));
             }
 
-            $sections_count = self::getTotalSections($length);
+            $limit = self::getCoverageLimit(array(
+                PROPERTY_CONTEXT => $context,
+                PROPERTY_LENGTH => $length,
+                PROPERTY_OFFSET => $start,
+                PROPERTY_PATH => $path
+                ));
+            $max_length = self::getTotalSequenceLength();
             $section_index = 0;
             $subsequence = '';
 
             while ( $start <= $limit )
             {
+                $properties[PROPERTY_INDEX] = $section_index;
                 $properties[PROPERTY_OFFSET] = $start;
-                
-                if (isset($sections_count) && ( $section_index === $sections_count )) {
-                    $properties[PROPERTY_LENGTH] = $last_length;
+
+                if ( self::fullCoverage($length) )
+                {
+                    $sections_count = self::getTotalSections($length);
+                    if ( isset($sections_count) &&
+                    ( $section_index === $sections_count ) ) {
+                        $max_length = self::getTotalSequenceLength();
+                        $last_length = ( $length % $max_length );
+                        $properties[PROPERTY_LENGTH] = $last_length;
+                    }
                 }
 
                 $subsequence .= self::getStreamSection( $properties );
