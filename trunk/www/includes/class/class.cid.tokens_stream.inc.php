@@ -2091,26 +2091,15 @@ class Tokens_Stream extends \Alpha
      */
     public static function getSubsequence(array $streamProperties, &$context = null)
     {
-        $path = null;
-        $count = null;
-        $start = null;
-        $mode = null;
-
-        if (isset($streamProperties[PROPERTY_LENGTH])) {
-            $count = $streamProperties[PROPERTY_LENGTH];
-        }
-
-        if (isset($streamProperties[PROPERTY_MODE_ACCESS])) {
-            $mode = $streamProperties[PROPERTY_MODE_ACCESS];
-        }
-
-        if (isset($streamProperties[PROPERTY_PATH])) {
-            $path = $streamProperties[PROPERTY_PATH];
-        }
-
-        if (isset($streamProperties[PROPERTY_OFFSET])) {
-            $start = $streamProperties[PROPERTY_OFFSET];
-        }
+        /**
+         * Extract replenished stream properties
+         *
+         * $count
+         * $start
+         * $access_mode
+         * $path
+         */
+        extract($streamProperties = self::replenishStreamProperties($streamProperties));
 
         $max_length = self::getMaxChunkSize() / self::getHashLength();
         $options = self::extractOptions( $context );
@@ -2132,7 +2121,7 @@ class Tokens_Stream extends \Alpha
                 $streamProperties
             );
 
-            self::checkContextAsReference( $properties, $mode );
+            self::checkContextAsReference( $properties, $access_mode );
 
             $properties[PROPERTY_LENGTH_MAX] = $max_length;
 
@@ -2155,7 +2144,7 @@ class Tokens_Stream extends \Alpha
             {
                 $last_length = ( $length % $max_length );
             }
-            else 
+            else
             {
                 $properties[PROPERTY_LENGTH] = self::getSequenceLength(array(
                     PROPERTY_CONTEXT => $context,
@@ -2916,6 +2905,41 @@ class Tokens_Stream extends \Alpha
             echo htmlentities( $excerpt );
 
         return $excerpt;
+    }
+
+    /**
+     * @param $streamProperties
+     *
+     * @return array
+     */
+    public static function replenishStreamProperties($streamProperties)
+    {
+        $path  = null;
+        $count = null;
+        $start = null;
+        $mode  = null;
+
+        if (isset($streamProperties[PROPERTY_LENGTH])) {
+            $count = $streamProperties[PROPERTY_LENGTH];
+        }
+
+        if (isset($streamProperties[PROPERTY_MODE_ACCESS])) {
+            $mode = $streamProperties[PROPERTY_MODE_ACCESS];
+        }
+
+        if (isset($streamProperties[PROPERTY_PATH])) {
+            $path = $streamProperties[PROPERTY_PATH];
+        }
+
+        if (isset($streamProperties[PROPERTY_OFFSET])) {
+            $start = $streamProperties[PROPERTY_OFFSET];
+        }
+
+        return array(
+            PROPERTY_COUNT => $count,
+            PROPERTY_PATH => $path,
+            PROPERTY_START => $start,
+            PROPERTY_MODE_ACCESS => $mode);
     }
 
     /**
