@@ -2146,15 +2146,17 @@ class Tokens_Stream extends \Alpha
 
             $stream_length = self::slen( $path, $context );
             $limit = $start;
-            $section_count = null;
 
             if ($length < $max_length) // max = 8192 / hash length
             {
-                if ( $length + $start > $stream_length ) {
-                    $properties[PROPERTY_LENGTH] = $stream_length - $start;
-                } else {
-                    $properties[PROPERTY_LENGTH] = $length;
-                }
+                $section_count = null;
+
+                $properties[PROPERTY_LENGTH] = self::getSequenceLength(array(
+                    PROPERTY_CONTEXT => $context,
+                    PROPERTY_LENGTH => $length,
+                    PROPERTY_OFFSET => $start,
+                    PROPERTY_PATH => $path
+                ));
             }
             else 
             {
@@ -2174,8 +2176,9 @@ class Tokens_Stream extends \Alpha
             {
                 $properties[PROPERTY_OFFSET] = $start;
                 
-                if (isset($section_count) && ( $section_index === $section_count ))
+                if (isset($section_count) && ( $section_index === $section_count )) {
                     $properties[PROPERTY_LENGTH] = $last_length;
+                }
 
                 $subsequence .= self::getStreamSection( $properties );
 
@@ -2185,6 +2188,25 @@ class Tokens_Stream extends \Alpha
         }
 
         return $subsequence;
+    }
+
+    /**
+     * @param $properties
+     *
+     * @return int
+     */
+    public static function getSequenceLength($properties)
+    {
+        $start = $properties[PROPERTY_OFFSET];
+        $stream_length = self::slen( $properties[PROPERTY_PATH], $properties[PROPERTY_CONTEXT] );
+
+        if ($properties[PROPERTY_LENGTH] + $start > $stream_length) {
+            $sequence_length = $stream_length - $start;
+        } else {
+            $sequence_length = $properties[PROPERTY_LENGTH];
+        }
+
+        return $sequence_length;
     }
 
     /**
