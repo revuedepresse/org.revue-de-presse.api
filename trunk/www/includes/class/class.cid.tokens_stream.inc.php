@@ -2144,23 +2144,12 @@ class Tokens_Stream extends \Alpha
             $length = $interval[PROPERTY_LENGTH];
             $start = $interval[PROPERTY_OFFSET];
 
-            $stream_length = self::slen( $path, $context );
-
-            $max_length = self::getMaxChunkSize() / self::getHashLength();
-            $limit = $start;
-
-            if (self::fullCoverage($length, $max_length)) {
-                $limit =+ $length;
-
-                if (self::overflowingLength(array(
-                        PROPERTY_CONTEXT => $context,
-                        PROPERTY_LENGTH => $length,
-                        PROPERTY_OFFSET => $start,
-                        PROPERTY_PATH => $path
-                    ))) {
-                    $limit = $stream_length;
-                }
-            }
+            $limit = self::getCoverageLimit(array(
+                PROPERTY_CONTEXT => $context,
+                PROPERTY_LENGTH => $length,
+                PROPERTY_OFFSET => $start,
+                PROPERTY_PATH => $path
+            ));
 
             if (self::fullCoverage($length, $max_length))
             {
@@ -2197,6 +2186,28 @@ class Tokens_Stream extends \Alpha
         }
 
         return $subsequence;
+    }
+
+    /**
+     * @param $properties
+     *
+     * @return int
+     */
+    public static function getCoverageLimit($properties)
+    {
+        $max_length = self::getMaxChunkSize() / self::getHashLength();
+        $length     = $properties[PROPERTY_LENGTH];
+        $start = $properties[PROPERTY_OFFSET];
+
+        if (self::fullCoverage($length, $max_length)) {
+            $limit = $start + $length;
+        } else if (self::overflowingLength($properties)) {
+            $limit = self::getOverflowingLimit($properties);
+        } else {
+            $limit = $start;
+        }
+
+        return $limit;
     }
 
     /**
@@ -2245,6 +2256,19 @@ class Tokens_Stream extends \Alpha
             PROPERTY_LENGTH => $length,
             PROPERTY_OFFSET => $start
         );
+    }
+
+    /**
+     * @param $properties
+     *
+     * @return int
+     */
+    public static function getOverflowingLimit($properties)
+    {
+        $context = $properties[PROPERTY_CONTEXT];
+        $path    = $properties[PROPERTY_PATH];
+
+        return self::slen($path, $context);
     }
 
     /**
