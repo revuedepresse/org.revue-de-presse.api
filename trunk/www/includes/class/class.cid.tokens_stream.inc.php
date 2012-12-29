@@ -856,6 +856,7 @@ class Tokens_Stream extends \Alpha
     {
         $full_read = false;
         $hash_length = self::getHashLength();
+        $max_length = self::getTotalSequenceLength();
         $protocol = self::getProtocol();
 
         /**
@@ -866,7 +867,6 @@ class Tokens_Stream extends \Alpha
         * @tparam   $full_read      full read flag
         * @tparam   $hash_length    hash length (optional)
         * @tparam   $length         stream length to be read (optional)
-        * @tparam   $max_length     max stream length
         * @tparam   $offset         offset to skip before read
         * @tparam   $path           path leading to stream
         * @tparam   $signal         (optional)
@@ -2094,16 +2094,17 @@ class Tokens_Stream extends \Alpha
         /**
          * Extract replenished stream properties
          *
+         * $access_mode
          * $count
          * $start
-         * $access_mode
          * $path
          */
         extract($streamProperties = self::replenishStreamProperties($streamProperties));
 
-        $max_length = self::getMaxChunkSize() / self::getHashLength();
-        $options = self::extractOptions( $context );
+        $max_length = self::getTotalSequenceLength();
         $protocol = self::getProtocol();
+
+        $options = self::extractOptions( $context );
 
         if ( isset( $options[$protocol][PROPERTY_SIGNAL] ) )
         {
@@ -2123,8 +2124,6 @@ class Tokens_Stream extends \Alpha
 
             self::checkContextAsReference( $properties, $access_mode );
 
-            $properties[PROPERTY_LENGTH_MAX] = $max_length;
-
             $interval = self::getInterval(array(
                 PROPERTY_CONTEXT => $context,
                 PROPERTY_LENGTH => $count,
@@ -2140,7 +2139,7 @@ class Tokens_Stream extends \Alpha
                 PROPERTY_PATH => $path
             ));
 
-            if (self::fullCoverage($length, $max_length))
+            if (self::fullCoverage($length))
             {
                 $last_length = ( $length % $max_length );
             }
@@ -2154,8 +2153,7 @@ class Tokens_Stream extends \Alpha
                 ));
             }
 
-            $sections_count = self::getTotalSections($length, $max_length);
-
+            $sections_count = self::getTotalSections($length);
             $section_index = 0;
             $subsequence = '';
 
@@ -2184,7 +2182,7 @@ class Tokens_Stream extends \Alpha
      */
     public static function getCoverageLimit($properties)
     {
-        $max_length = self::getMaxChunkSize() / self::getHashLength();
+        $max_length = self::getTotalSequenceLength();
         $length     = $properties[PROPERTY_LENGTH];
         $start = $properties[PROPERTY_OFFSET];
 
@@ -2201,12 +2199,13 @@ class Tokens_Stream extends \Alpha
 
     /**
      * @param $length
-     * @param $max_length
      *
      * @return bool
      */
-    public static function fullCoverage($length, $max_length)
+    public static function fullCoverage($length)
     {
+        $max_length = self::getTotalSequenceLength();
+
         // max_length = 8192 / hash length
         return $length >= $max_length;
     }
@@ -2402,12 +2401,13 @@ class Tokens_Stream extends \Alpha
 
     /**
      * @param $length
-     * @param $max_length
      *
      * @return int|null
      */
-    public static function getTotalSections($length, $max_length)
+    public static function getTotalSections($length)
     {
+        $max_length = self::getTotalSequenceLength();
+
         if (self::fullCoverage($length, $max_length)) {
             $sections_count = ( int )round($length / $max_length);
         } else {
@@ -2415,6 +2415,14 @@ class Tokens_Stream extends \Alpha
         }
 
         return $sections_count;
+    }
+
+    /**
+     * @return float
+     */
+    public static function getTotalSequenceLength()
+    {
+        return self::getMaxChunkSize() / self::getHashLength();
     }
 
     /**
