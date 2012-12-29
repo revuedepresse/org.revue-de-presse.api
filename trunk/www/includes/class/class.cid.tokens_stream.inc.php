@@ -864,17 +864,24 @@ class Tokens_Stream extends \Alpha
         *
         * @tparam   $access_mode    access mode
         * @tparam   $context        contextual options
+        * @tparam   $coverage_size  coverage size
         * @tparam   $full_read      full read flag
         * @tparam   $hash_length    hash length (optional)
         * @tparam   $length         stream length to be read (optional)
         * @tparam   $offset         offset to skip before read
         * @tparam   $path           path leading to stream
+        * @tparam   $section_index  section index
         * @tparam   $signal         (optional)
         */
         extract( $properties );
 
         if ( is_null( $context ) || is_resource( $context ) )
         {
+            if (isset($section_index) &&
+                self::fullyCoveredSequence($coverage_size, $section_index)) {
+                $length = self::getSequenceRemainderLength($coverage_size);
+            }
+
             if ( ! isset( $length ) ) $length = $max_length;
 
             $options = array(
@@ -1768,6 +1775,24 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
+     * @param $sequence_size
+     * @param $section_index
+     *
+     * @return bool
+     */
+    public static function fullyCoveredSequence($sequence_size, $section_index)
+    {
+        if (self::fullCoverage($sequence_size)) {
+            $total_sections = self::getTotalSections($sequence_size);
+            $fullyCoveredSequence = $section_index === $total_sections;
+        } else {
+            $fullyCoveredSequence = false;
+        }
+
+        return $fullyCoveredSequence;
+    }
+
+    /**
     * Get coordinates
     * 
     * @param    string  $path   path
@@ -2147,25 +2172,14 @@ class Tokens_Stream extends \Alpha
                 PROPERTY_PATH => $path
                 ));
             $max_length = self::getTotalSequenceLength();
+            $properties[PROPERTY_SIZE_COVERAGE] = $length;
             $section_index = 0;
             $subsequence = '';
 
             while ( $start <= $limit )
             {
-                $properties[PROPERTY_INDEX] = $section_index;
+                $properties[PROPERTY_INDEX_SECTION] = $section_index;
                 $properties[PROPERTY_OFFSET] = $start;
-
-                if ( self::fullCoverage($length) )
-                {
-                    $sections_count = self::getTotalSections($length);
-                    if ( isset($sections_count) &&
-                    ( $section_index === $sections_count ) ) {
-                        $max_length = self::getTotalSequenceLength();
-                        $last_length = ( $length % $max_length );
-                        $properties[PROPERTY_LENGTH] = $last_length;
-                    }
-                }
-
                 $subsequence .= self::getStreamSection( $properties );
 
                 $start += $max_length;
@@ -2277,6 +2291,18 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
+     * @param $length
+     *
+     * @return int
+     */
+    public static function getSequenceRemainderLength($length)
+    {
+        $max_length = self::getTotalSequenceLength();
+
+        return $length % $max_length;
+    }
+
+    /**
     * Get a substream
     *
     * @param    string      $path       path
@@ -2323,7 +2349,7 @@ class Tokens_Stream extends \Alpha
     public static function getStreamSection( $properties )
     {
         $section = '';
-        
+
         /**
         * Extract properties
         *
@@ -2400,13 +2426,7 @@ class Tokens_Stream extends \Alpha
     {
         $max_length = self::getTotalSequenceLength();
 
-        if (self::fullCoverage($length, $max_length)) {
-            $sections_count = ( int )round($length / $max_length);
-        } else {
-            $sections_count = null;
-        }
-
-        return $sections_count;
+        return ( int ) round( $length / $max_length );
     }
 
     /**
