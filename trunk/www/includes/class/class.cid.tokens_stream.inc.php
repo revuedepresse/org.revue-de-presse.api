@@ -2143,26 +2143,23 @@ class Tokens_Stream extends \Alpha
                 PROPERTY_OFFSET => $start));
             $length = $interval[PROPERTY_LENGTH];
             $start = $interval[PROPERTY_OFFSET];
-            $stream_length = $interval['stream_length'];
 
-            //$stream_length = self::slen( $path, $context );
+            $stream_length = self::slen( $path, $context );
+            $limit = $start;
 
             if ($length < $max_length) // max = 8192 / hash length
             {
-                $exceeded_max_length = false;
-                $limit = $start;
-                $properties[PROPERTY_LENGTH] = $length;
-
                 if ( $length + $start > $stream_length ) {
                     $properties[PROPERTY_LENGTH] = $stream_length - $start;
+                } else {
+                    $properties[PROPERTY_LENGTH] = $length;
                 }
             }
             else 
             {
-                $exceeded_max_length = true;
                 $full_loops = ( int ) round( $length / $max_length );
                 $last_length = ( $length % $max_length );
-                $limit = $start + $length;
+                $limit =+ $length;
 
                 if ( $start + $length > $stream_length ) {
                     $limit = $stream_length;
@@ -2176,7 +2173,7 @@ class Tokens_Stream extends \Alpha
             {
                 $properties[PROPERTY_OFFSET] = $start;
                 
-                if ($exceeded_max_length && ( $loop_index === $full_loops ))
+                if (isset($full_loops) && ( $loop_index === $full_loops ))
                     $properties[PROPERTY_LENGTH] = $last_length;
 
                 $subsequence .= self::getStreamSection( $properties );
@@ -2210,7 +2207,6 @@ class Tokens_Stream extends \Alpha
         }
 
         return array(
-            'stream_length' => $stream_length,
             PROPERTY_LENGTH => $length,
             PROPERTY_OFFSET => $start
         );
