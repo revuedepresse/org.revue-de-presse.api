@@ -84,8 +84,8 @@ class Tokens_Stream extends \Alpha
     public function close( $protocol = null, $handle_only = false )
     {
         $context = &$this->getContext();
+
         if ( is_null( $protocol ) ) $protocol = self::getProtocol();
-    
         if ( ! $handle_only ) self::closeStream( $context );
         
         $options = self::extractOptions( $context );
@@ -865,17 +865,17 @@ class Tokens_Stream extends \Alpha
                     is_string( $token ) ||
                     ( is_array( $token ) && isset( $token[1] ) )
                 )
-                    $signal[$token_index] = self::getTokenValue( $token );
+                    $signal[$token_index] = self::translateToken( $token );
                 else
                 {
                     $tokens = $token;
                     $signal[$token_index] = '';
 
                     while (
-                        list( $_token_index, $_token ) = each( $tokens )
+                        list( $_token ) = each( $tokens )
                     )
                         $signal[$token_index] .=
-                            self::getTokenValue( $_token )
+                            self::translateToken( $_token )
                         ;
                 } // taking care of aggregation results
             }
@@ -1515,7 +1515,7 @@ class Tokens_Stream extends \Alpha
     
                                 foreach ( $subject as $index => $item )
                                 {
-                                    $_subject = self::getTokenValue( $item );
+                                    $_subject = self::translateToken( $item );
                                     $valid_string = ( strlen( trim( $_subject ) ) > 0 )
                                         && ( false !== strpos( $_subject, $pattern . '_' ) )
                                     ;
@@ -1736,7 +1736,7 @@ class Tokens_Stream extends \Alpha
 
         while ( list( $token_index, $token ) = each( $substream ) )
 
-            $tokens[$token_index] = self::getTokenValue( $token, 0 );
+            $tokens[$token_index] = self::translateToken( $token, 0 );
 
         return $tokens;                 
     }
@@ -2522,33 +2522,6 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
-     * Gets a token value
-     *
-     * @param     $token
-     * @param int $property_index
-     *
-     * @return string
-     */
-    public static function getTokenValue( $token, $property_index = 1 )
-    {
-        if ( is_array( $token ) )
-        {
-            $token_value = $token[$property_index];
-
-            if ( is_long( $token_value ) )
-
-                $result = token_name( $token_value );
-            else 
-                $result = $token_value;
-        }
-        else if ( is_string( $token ) )
-
-            $result = $token;               
-
-        return $result;
-    }
-
-    /**
      * @param $length
      *
      * @return int|null
@@ -3195,17 +3168,20 @@ class Tokens_Stream extends \Alpha
     */
     public static function slen( $path, &$context = null )
     {
-        $length = 0;
         $tokens_stream = self::initialize(array(
             PROPERTY_CONTEXT => $context,
             PROPERTY_METADATA => true,
             PROPERTY_PATH => $path));
 
-        if (
-            isset( $tokens_stream->{PROPERTY_TOKEN} ) &&
-            is_array( $tokens_stream->{PROPERTY_TOKEN} )
-        )
+        if ( isset( $tokens_stream->{PROPERTY_TOKEN} ) &&
+            is_array( $tokens_stream->{PROPERTY_TOKEN} ) )
+        {
             $length = count( $tokens_stream->{PROPERTY_TOKEN} );
+        }
+        else
+        {
+            $length = 0;
+        }
 
         return $length;
     }
@@ -3322,19 +3298,19 @@ class Tokens_Stream extends \Alpha
         $hash_map = array();
         $sequence = '';
 
-            for (
+        for (
             $token_index = $count_tokens - 1 ;
             $token_index >= 0 ;
             $token_index--
-            )
-            {
-                $item = array(
-                    PROPERTY_HASH => md5( serialize( $tokens[$token_index] ) ),
-                    PROPERTY_INDEX => $token_index,
-                    PROPERTY_TOKEN => $tokens[$token_index]
-                );
-    
-                $hash_map[$item[PROPERTY_HASH]] = $item;
+        )
+        {
+            $item = array(
+                PROPERTY_HASH => md5( serialize( $tokens[$token_index] ) ),
+                PROPERTY_INDEX => $token_index,
+                PROPERTY_TOKEN => $tokens[$token_index]
+            );
+
+            $hash_map[$item[PROPERTY_HASH]] = $item;
             array_unshift( $full_stream, $item );
             $sequence = $item[PROPERTY_HASH] . $sequence;
         }
@@ -3346,6 +3322,47 @@ class Tokens_Stream extends \Alpha
         $container->{PROPERTY_STREAM_FULL} = $full_stream;
 
         return $container;
+    }
+
+    /**
+     * Gets a token value
+     *
+     * @param     $token
+     * @param int $property_index
+     *
+     * @return string
+     */
+    public static function translateToken( $token, $property_index = 1 )
+    {
+        if ( is_array( $token ) )
+        {
+            $translation = self::translateVectorToken($token, $property_index);
+        }
+        else if ( is_string( $token ) )
+        {
+            $translation = $token;
+        }
+
+        return $translation;
+    }
+
+    /**
+     * @param $token
+     * @param $property_index
+     *
+     * @return string
+     */
+    public static function translateVectorToken($token, $property_index)
+    {
+        $token_value = $token[$property_index];
+
+        if (is_long($token_value)) {
+            $translation = token_name($token_value);
+        } else {
+            $translation = $token_value;
+        }
+
+        return $translation;
     }
 
     /**
