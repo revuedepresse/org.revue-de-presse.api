@@ -309,13 +309,11 @@ class Tokens_Stream extends \Alpha
                 )
             );
 
-        if (
-            get_class(
-                $tokens_stream = self::initialize(
-                    $path, false, $this->{PROPERTY_CONTEXT}, $this
-                )
-            ) === __CLASS__
-        )
+        if ( get_class( $tokens_stream = self::initialize(array(
+                PROPERTY_CONTEXT => $this->{PROPERTY_CONTEXT},
+                PROPERTY_METADATA => false,
+                PROPERTY_PATH => $path
+            ), $this ) ) === __CLASS__ )
             $callback_parameters = true;
 
         return $callback_parameters;
@@ -1344,9 +1342,10 @@ class Tokens_Stream extends \Alpha
 
             $context = stream_context_create( $options );
 
-            $tokens_stream = self::initialize(
-                $path, null, $context
-            );
+            $tokens_stream = self::initialize( array(
+                PROPERTY_CONTEXT => $context,
+                PROPERTY_METADATA => null,
+                PROPERTY_PATH => $path ) );
 
             $file_path = $tokens_stream->{PROPERTY_PATH_FILE};
 
@@ -2429,6 +2428,45 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
+     * @param $tokens_stream
+     * @param $keychain
+     */
+    public static function addToKeychain($tokens_stream, $keychain)
+    {
+        if (
+            is_object($tokens_stream) &&
+            isset($tokens_stream->{PROPERTY_KEY}) &&
+            !is_null($keychain) && is_object($keychain)
+        ) // The access key of a TOKENS_STREAM object
+            // (used to access its entry point in the "river" container)
+            // is copied to the binding object
+            $keychain->{PROPERTY_KEY} = $tokens_stream->{PROPERTY_KEY};
+    }
+
+    /**
+     * @param $properties
+     *
+     * @return object
+     */
+    public static function getStreamingConditions($properties)
+    {
+        $context = $properties[PROPERTY_CONTEXT];
+        $metadata = $properties[PROPERTY_METADATA];
+        $path = $properties[PROPERTY_PATH];
+
+        list($request_uri, $host) = self::getCoordinates($path);
+
+        $store = array(
+            PROPERTY_CONTEXT     => $context,
+            PROPERTY_HOST        => $host,
+            PROPERTY_METADATA    => $metadata,
+            PROPERTY_URI_REQUEST => $request_uri
+        );
+
+        return ( object ) self::extractOptions($store);
+    }
+
+    /**
     * Get tokens
     *
     * @param    string      $path       path
@@ -2503,90 +2541,60 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
-    * Import persistency declarations
-    *
-    * @see      FILE_MANAGER :: importPersistencyDeclarations
-    */
+     * Imports persistency declarations
+     *
+     * @see      FILE_MANAGER :: importPersistencyDeclarations
+     * @return mixed
+     */
     public static function importPersistencyDeclarations()
     {
         global $class_application;
         $arguments = func_get_args();
         $class_file_manager = $class_application::getFileManagerClass();
+
         return call_user_func_array(
             array( $class_file_manager, __FUNCTION__ ), $arguments
         );
     }
 
     /**
-    * Retrieve "coordinates" (host and request URI)
-    * @see      TOKENS_STREAM :: getCoordinates
-    * 
-    * Extract contextual options (as an array typecasted as an array)
-    * from a resource if any is available
-    * @see      TOKENS_STREAM :: extractOptions
-    *
-    * Spawn an instance of TOKENS_STREAM for non-null metadata
-    * @see      TOKENS_STREAM :: spawn
-    *
-    * Populate the file path property of the TOKENS_STREAM to be returned
-    *
-    * Apply an optional key binding eventually
-    * @see      TOKENS_STREAM->getEntryPoint
-    * @see      TOKENS_STREAM->getKey
-    * 
-    * @param    string      $path       path leading to resource
-    * @param    boolean     $metadata   TRUE if only metadata (like length)
-    *                                   should be retrieved
-    *                                   FALSE otherwise
-    * @param    resource    &$context   stream contextual options
-    * @param    mixed       $binding    binding (optional)
-    * @return   nothing
-    */
-    public static function initialize(
-        $path,
-        $metadata = false,
-        &$context = null,
-        $binding = null
-    )
+     * Retrieves "coordinates" (host and request URI)
+     * @see      TOKENS_STREAM :: getCoordinates
+     *
+     * Extract contextual options (cast as array)
+     * from a resource if any is available
+     * @see      TOKENS_STREAM :: extractOptions
+     *
+     * Spawn an instance of TOKENS_STREAM for non-null metadata
+     * @see      TOKENS_STREAM :: spawn
+     *
+     * Populate the file path property of the TOKENS_STREAM to be returned
+     *
+     * Apply an optional key binding eventually
+
+     * @see      TOKENS_STREAM->getEntryPoint
+     * @see      TOKENS_STREAM->getKey
+     *
+     * @param      $streaming_conditions
+     * @param null $keychain
+     *
+     * @return object|\stdClass
+     */
+    public static function initialize($streaming_conditions, $keychain = null)
     {
-        $tokens_stream = new \stdClass();
+        $conditions = self::getStreamingConditions($streaming_conditions, $keychain);
 
-        list( $request_uri, $host ) = self::getCoordinates( $path );
-
-        $store = array( 
-            PROPERTY_CONTEXT => $context,
-            PROPERTY_HOST => $host,
-            PROPERTY_METADATA => $metadata,
-            PROPERTY_URI_REQUEST => $request_uri
-        );
-
-        $conditions = ( object ) self::extractOptions( $store );
-
-        if ( ! is_null( $metadata ) )
-
+        if (self::streamingWithoutMetadata($streaming_conditions)) {
+            $tokens_stream = new \stdClass();
+            self::addSubstitutions( $tokens_stream, null, $streaming_conditions[PROPERTY_CONTEXT] );
+            self::updateTokensStreamPath($tokens_stream, $conditions, $streaming_conditions[PROPERTY_PATH]);
+        } else {
             $tokens_stream = self::spawn(
-                $conditions, $metadata, $context
-            );
-        else
-        {
-            // a target file exists and might need to be truncated
-            if ( str_mmb_obj( PROPERTY_PATH_FILE, $conditions ) )
-
-                $path = $conditions->{PROPERTY_PATH_FILE};
-
-            self::addSubstitutions( $tokens_stream, null, $context );
-
-            $tokens_stream->{PROPERTY_PATH_FILE} = $path;
+                $conditions,
+                $streaming_conditions[PROPERTY_METADATA],
+                $streaming_conditions[PROPERTY_CONTEXT]);
         }
-
-        if (
-            is_object( $tokens_stream ) &&
-            isset( $tokens_stream->{PROPERTY_KEY} ) &&
-            ! is_null( $binding ) && is_object( $binding )
-        ) // The access key of a TOKENS_STREAM object
-        // (used to access its entry point in the "river" container)
-        // is copied to the binding object
-            $binding->{PROPERTY_KEY} = $tokens_stream->{PROPERTY_KEY};
+        self::addToKeychain($tokens_stream, $keychain);
 
         return $tokens_stream;
     }
@@ -3151,7 +3159,10 @@ class Tokens_Stream extends \Alpha
     public static function slen( $path, &$context = null )
     {
         $length = 0;
-        $tokens_stream = self::initialize( $path, true, $context );
+        $tokens_stream = self::initialize(array(
+            PROPERTY_CONTEXT => $context,
+            PROPERTY_METADATA => true,
+            PROPERTY_PATH => $path));
 
         if (
             isset( $tokens_stream->{PROPERTY_TOKEN} ) &&
@@ -3210,6 +3221,17 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
+     * @param $streaming_conditions
+     *
+     * @return bool
+     */
+    public static function streamingWithoutMetadata($streaming_conditions)
+    {
+        return is_null($streaming_conditions[PROPERTY_METADATA]);
+    }
+
+
+    /**
     * Streamline a content from tokens by building the following properties
     *   hashmap (tokens hashtable)
     *   sequence (concatenation of hashes)
@@ -3251,6 +3273,20 @@ class Tokens_Stream extends \Alpha
         $container->{PROPERTY_STREAM_FULL} = $full_stream;
 
         return $container;
+    }
+
+    /**
+     * @param $tokens_stream
+     * @param $conditions
+     * @param $path
+     */
+    public static function updateTokensStreamPath($tokens_stream, $conditions, $path)
+    { // a target file exists and might need to be truncated
+        if (!str_mmb_obj(PROPERTY_PATH_FILE, $conditions)) {
+            $conditions->{PROPERTY_PATH_FILE} = $path;
+        }
+
+        $tokens_stream->{PROPERTY_PATH_FILE} = $conditions->{PROPERTY_PATH_FILE};
     }
 
     /**
