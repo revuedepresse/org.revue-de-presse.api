@@ -854,10 +854,10 @@ class Tokens_Stream extends \Alpha
     */
     public static function checkContext( &$properties )
     {
-        $full_read = false;
+        $full_read   = false;
         $hash_length = self::getHashLength();
-        $max_length = self::getTotalSequenceLength();
-        $protocol = self::getProtocol();
+        $max_length  = self::getTotalSequenceLength();
+        $protocol    = self::getProtocol();
 
         /**
         * Extract properties
@@ -877,12 +877,20 @@ class Tokens_Stream extends \Alpha
 
         if ( is_null( $context ) || is_resource( $context ) )
         {
+            if ( ! isset( $length ) )
+            {
+                $length = $max_length;
+            }
+            else if ( ! self::fullCoverage( $length ) )
+            {
+                $properties[PROPERTY_LENGTH] = self::getSequenceLength($properties);
+            }
+
             if (isset($section_index) &&
                 self::fullyCoveredSequence($coverage_size, $section_index)) {
                 $length = self::getSequenceRemainderLength($coverage_size);
             }
 
-            if ( ! isset( $length ) ) $length = $max_length;
 
             $options = array(
                 $protocol => array(
@@ -2117,12 +2125,12 @@ class Tokens_Stream extends \Alpha
     public static function getSubsequence(array $streamProperties, &$context = null)
     {
         /**
-         * Extract replenished stream properties
+         * Extracts replenished stream properties
          *
          * $access_mode
          * $count
-         * $start
          * $path
+         * $start
          */
         extract($streamProperties = self::replenishStreamProperties($streamProperties));
 
@@ -2137,16 +2145,12 @@ class Tokens_Stream extends \Alpha
         }
         else
         {
-            self::registerStreamWrapper();
-
             unset($streamProperties[PROPERTY_LENGTH]);
             $properties = array_merge(
                 array(PROPERTY_CONTEXT => $context),
                 $streamProperties
             );
-
             self::checkContextAsReference( $properties, $access_mode );
-
             $interval = self::getInterval(array(
                 PROPERTY_CONTEXT => $context,
                 PROPERTY_LENGTH => $count,
@@ -2154,17 +2158,6 @@ class Tokens_Stream extends \Alpha
                 PROPERTY_OFFSET => $start));
             $length = $interval[PROPERTY_LENGTH];
             $start = $interval[PROPERTY_OFFSET];
-
-            if (!self::fullCoverage($length))
-            {
-                $properties[PROPERTY_LENGTH] = self::getSequenceLength(array(
-                    PROPERTY_CONTEXT => $context,
-                    PROPERTY_LENGTH => $length,
-                    PROPERTY_OFFSET => $start,
-                    PROPERTY_PATH => $path
-                ));
-            }
-
             $subsequence =  self::getStreamSubsequence(array_merge(
                 $properties, array(
                    PROPERTY_CONTEXT => $context,
@@ -2185,6 +2178,7 @@ class Tokens_Stream extends \Alpha
      */
     public static function getStreamSubsequence($properties)
     {
+        self::registerStreamWrapper();
         $limit         = self::getCoverageLimit($properties);
         $max_length    = self::getTotalSequenceLength();
         $offset        = $properties[PROPERTY_OFFSET];
