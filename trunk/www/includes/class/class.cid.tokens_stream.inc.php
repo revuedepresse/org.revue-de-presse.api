@@ -2266,15 +2266,17 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
-     * @param $properties
+     * @param $stream_properties
+     * @param $context
      *
      * @return string
      */
-    public static function getStreamSubsequence($properties)
+    public static function getStreamSubsequence( $stream_properties, &$context = null )
     {
         self::registerStreamWrapper();
-        $limit         = self::getCoverageLimit($properties);
-        $max_length    = self::getTotalSequenceLength();
+        $properties    = self::getIntervalDefinition($stream_properties, $context);
+        $max_length    = $properties[PROPERTY_LENGTH_MAX];
+        $limit         = $properties[PROPERTY_LIMIT];
         $offset        = $properties[PROPERTY_OFFSET];
         $section_index = 0;
         $subsequence   = '';
@@ -2372,8 +2374,7 @@ class Tokens_Stream extends \Alpha
         }
         else
         {
-            $interval_definition = self::getIntervalDefinition($stream_properties, $context);
-            $subsequence = self::getStreamSubsequence($interval_definition);
+            $subsequence = self::getStreamSubsequence( $stream_properties, $context );
         }
 
         return $subsequence;
@@ -2394,6 +2395,8 @@ class Tokens_Stream extends \Alpha
         $stream_properties[PROPERTY_OFFSET] = $interval[PROPERTY_OFFSET];
         $stream_properties[PROPERTY_LENGTH] = $interval[PROPERTY_LENGTH];
         $stream_properties[PROPERTY_SIZE_COVERAGE] = $interval[PROPERTY_LENGTH];
+        $stream_properties[PROPERTY_LIMIT] = self::getCoverageLimit($stream_properties);
+        $stream_properties[PROPERTY_LENGTH_MAX] = self::getTotalSequenceLength();
 
         return $stream_properties;
     }
