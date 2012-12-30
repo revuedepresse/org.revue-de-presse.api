@@ -1498,10 +1498,12 @@ class Tokens_Stream extends \Alpha
                         $properties[PROPERTY_LENGTH] = -1;
                         $properties[PROPERTY_OFFSET] = 0;
                         $properties[PROPERTY_SIGNAL] = $resource_value[PROPERTY_CONTENT];
-                        $substream = self::getSubstream(
-                            $properties[PROPERTY_PATH], FILE_ACCESS_MODE_READ_ONLY,
-                            $properties[PROPERTY_LENGTH], $properties[PROPERTY_OFFSET]
-                        );
+                        $substream = self::getSubstream(array(
+                            PROPERTY_LENGTH => $properties[PROPERTY_LENGTH],
+                            PROPERTY_MODE_ACCESS => FILE_ACCESS_MODE_READ_ONLY,
+                            PROPERTY_OFFSET => $properties[PROPERTY_OFFSET],
+                            PROPERTY_PATH => $properties[PROPERTY_PATH],
+                        ));
 
                         $find_in_stream = function ( $properties )
                         {
@@ -2039,8 +2041,12 @@ class Tokens_Stream extends \Alpha
     )
     {
         return self::buildSignal(
-            self::getSubstream( $path, $mode, $count, $start, $context )
-        );
+            self::getSubstream(array(
+                PROPERTY_LENGTH => $count,
+                PROPERTY_MODE_ACCESS => $mode,
+                PROPERTY_OFFSET => $start,
+                PROPERTY_PATH => $path),
+                $context));
     }
 
     /**
@@ -2230,34 +2236,17 @@ class Tokens_Stream extends \Alpha
     /**
     * Get a substream
     *
-    * @param    string      $path       path
-    * @param    string      $mode       accessing mode
-    * @param    integer     $count      number of items to be retrieved
-    * @param    integer     $start      offset
+    * @param    string      $substream_properties
     * @param    resource    &$context   stream contextual options
     * @return   array       substream
     */
-    public static function getSubstream(
-        $path = null,
-        $mode = null,
-        $count = null,
-        $start = null,
-        &$context = null
-    )
+    public static function getSubstream($substream_properties, &$context = null)
     {
-        $streamProperties = array(
-            PROPERTY_LENGTH => $count,
-            PROPERTY_MODE_ACCESS => $mode,
-            PROPERTY_OFFSET => $start,
-            PROPERTY_PATH => $path
-        );
-        $subsequence = self::getSubsequence($streamProperties, $context);
-        $definition = array(
-            PROPERTY_LENGTH => $count,
-            PROPERTY_OFFSET => $start,
+        $subsequence = self::getSubsequence($substream_properties, $context);
+        $definition = array_merge($substream_properties, array(
             PROPERTY_POSITION_OLD => self::getPosition(),
             PROPERTY_SEQUENCE => $subsequence
-        );
+        ));
         $substream = self::extractSubstream( $definition );
 
         return $substream;
@@ -2365,9 +2354,11 @@ class Tokens_Stream extends \Alpha
         &$context = null
     )
     {
-        $substream = self::getSubstream(
-            $path, $mode, $count, $start, $context
-        );
+        $substream = self::getSubstream(array(
+            PROPERTY_LENGTH => $count,
+            PROPERTY_MODE_ACCESS => $mode,
+            PROPERTY_OFFSET => $start,
+            PROPERTY_PATH => $path), $context);
 
         return self::extractTokens( $substream );
     }
@@ -3224,16 +3215,12 @@ class Tokens_Stream extends \Alpha
                 if ( ! isset( $store[PROPERTY_LENGTH] ) )
                     $store[PROPERTY_LENGTH] = -1;
 
-                self::getSubstream(
-                    $store[PROPERTY_PATH], FILE_ACCESS_MODE_READ_ONLY,
-                    $store[PROPERTY_LENGTH], $store[PROPERTY_OFFSET],
-                    $properties[PROPERTY_CONTEXT]
-                );
-                global $class_application, $verbose_mode;
-                $class_dumper = $class_application::getDumperClass();
-                $class_dumper::log( __METHOD__, array(
-                    $stream
-                ), false );
+                self::getSubstream(array(
+                    PROPERTY_LENGTH => $store[PROPERTY_LENGTH],
+                    PROPERTY_MODE_ACCESS => FILE_ACCESS_MODE_READ_ONLY,
+                    PROPERTY_OFFSET => $store[PROPERTY_OFFSET],
+                    PROPERTY_PATH => $store[PROPERTY_PATH]),
+                    $properties[PROPERTY_CONTEXT]);
                 $data = $stream->{PROPERTY_SUBSEQUENCE};
                 $tokens_count = strlen( $data ) / $hash_length;
             }
@@ -3289,9 +3276,11 @@ class Tokens_Stream extends \Alpha
         $properties[PROPERTY_MODE_ACCESS] = $access_mode;
         $properties = self::checkProperties( $properties );
         $handle = self::getHandle( $properties );
-        self::getSubstream(
-            $path, FILE_ACCESS_MODE_READ_ONLY,
-            $length, $offset,
+        self::getSubstream(array(
+            PROPERTY_LENGTH => $length,
+            PROPERTY_MODE_ACCESS => FILE_ACCESS_MODE_READ_ONLY,
+            PROPERTY_PATH => $path,
+            PROPERTY_OFFSET => $offset),
             $properties[PROPERTY_CONTEXT]
         );  
         $stream = self::getStream();
