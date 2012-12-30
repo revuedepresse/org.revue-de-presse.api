@@ -2179,33 +2179,6 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
-     * @param $streaming_conditions
-     *
-     * @return mixed
-     * @throws \Exception
-     */
-    public static function getStreamingSubstitutions($streaming_conditions)
-    {
-        $context = self::normalizeStreamingContext($streaming_conditions);
-
-        if (!is_null($context) && is_resource($context))
-        {
-            $substitutions = self::getDefaultSubstitutions($context);
-        }
-        else
-        {
-            $substitutions = $streaming_conditions[PROPERTY_SUBSTITUTIONS];
-        }
-
-        if (!self::validStreamingSubstitutions($streaming_conditions))
-        {
-            throw new \Exception(EXCEPTION_INVALID_ARGUMENT);
-        }
-
-        return $substitutions;
-    }
-
-    /**
      * @param $callable
      *
      * @return null|string
@@ -2375,6 +2348,33 @@ class Tokens_Stream extends \Alpha
             $section .= fread( $handle, $bytes_count );
 
         return $section;
+    }
+
+    /**
+     * @param $streaming_conditions
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    public static function getStreamingSubstitutions($streaming_conditions)
+    {
+        $context = self::normalizeStreamingContext($streaming_conditions);
+
+        if (!is_null($context) && is_resource($context))
+        {
+            $substitutions = self::getDefaultSubstitutions($context);
+        }
+        else
+        {
+            $substitutions = $streaming_conditions[PROPERTY_SUBSTITUTIONS];
+        }
+
+        if (!self::validStreamingSubstitutions($streaming_conditions))
+        {
+            throw new \Exception(EXCEPTION_INVALID_ARGUMENT);
+        }
+
+        return $substitutions;
     }
 
     /**
@@ -2610,19 +2610,10 @@ class Tokens_Stream extends \Alpha
      */
     public static function initialize($streaming_conditions, $keychain = null)
     {
-        $conditions = self::getStreamingConditions($streaming_conditions, $keychain);
-
-        if (self::streamingWithoutMetadata($streaming_conditions)) {
-            $tokens_stream = new \stdClass();
-            self::addSubstitutions( $tokens_stream, array(
-                PROPERTY_CONTEXT => $streaming_conditions[PROPERTY_CONTEXT],
-                PROPERTY_SUBSTITUTIONS => null ) );
-            self::updateTokensStreamPath($tokens_stream, $conditions, $streaming_conditions[PROPERTY_PATH]);
+        if (self::streamingFromScratch($streaming_conditions)) {
+            $tokens_stream = self::spawnFromScratch($streaming_conditions);
         } else {
-            $tokens_stream = self::spawn(
-                $conditions,
-                $streaming_conditions[PROPERTY_METADATA],
-                $streaming_conditions[PROPERTY_CONTEXT]);
+            $tokens_stream = self::spawnFromMetadata($streaming_conditions);
         }
         self::addToKeychain($tokens_stream, $keychain);
 
@@ -3269,13 +3260,49 @@ class Tokens_Stream extends \Alpha
     /**
      * @param $streaming_conditions
      *
+     * @return object
+     */
+    public static function spawnFromMetadata($streaming_conditions)
+    {
+        return self::spawn(
+            self::getStreamingConditions($streaming_conditions),
+            $streaming_conditions[PROPERTY_METADATA],
+            $streaming_conditions[PROPERTY_CONTEXT]
+        );
+    }
+
+    /**
+     * @param $streaming_conditions
+     *
+     * @return \stdClass
+     */
+    public static function spawnFromScratch($streaming_conditions)
+    {
+        $tokens_stream = new \stdClass();
+        self::addSubstitutions(
+            $tokens_stream,
+            array(
+                PROPERTY_CONTEXT       => $streaming_conditions[PROPERTY_CONTEXT],
+                PROPERTY_SUBSTITUTIONS => null
+            )
+        );
+        self::updateTokensStreamPath(
+            $tokens_stream,
+            self::getStreamingConditions($streaming_conditions),
+            $streaming_conditions[PROPERTY_PATH]);
+
+        return $tokens_stream;
+    }
+
+    /**
+     * @param $streaming_conditions
+     *
      * @return bool
      */
-    public static function streamingWithoutMetadata($streaming_conditions)
+    public static function streamingFromScratch($streaming_conditions)
     {
         return is_null($streaming_conditions[PROPERTY_METADATA]);
     }
-
 
     /**
     * Streamline a content from tokens by building the following properties
