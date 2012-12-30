@@ -1006,6 +1006,47 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
+     * Checks for invalid host or request uri
+     * @param $properties
+     *
+     * @return string
+     * @throws \Exception
+     */
+    public static function checkEndpoint( $properties )
+    {
+        self::checkEndpointHost($properties);
+        self::checkEndpointRequestUri($properties);
+
+        return self::getEndpoint($properties);
+    }
+
+    /**
+     * @param null $endpoint
+     *
+     * @throws \Exception
+     */
+    public static function checkEndpointHost($endpoint) {
+        if (!self::validEndpointHost($endpoint)) {
+            throw new \Exception(sprintf(
+                EXCEPTION_INVALID_ENTITY,
+                ENTITY_HOST . ' (' . print_r($endpoint, true) . ')'
+            ));
+        }
+    }
+
+    public static function checkEndpointRequestUri($endpoint)
+    {
+        if (!isset($endpoint[PROPERTY_URI_REQUEST])) {
+            throw new \Exception(
+                sprintf(
+                    EXCEPTION_INVALID_PROPERTY,
+                    str_replace('_', ' ', PROPERTY_URI_REQUEST)
+                )
+            );
+        }
+    }
+
+    /**
     * Make contextual options always available as a resource
     *
     * @param    array   &$properties    properties
@@ -1022,49 +1063,6 @@ class Tokens_Stream extends \Alpha
             $context = stream_context_create( $options );
             $properties[PROPERTY_CONTEXT] = &$context;
         }
-    }
-
-    /**
-    * Prevent use of host different from "sandbox" (set as default one)
-    * and invalid request uri from being queried
-    *
-    * @param    array   $properties endpoint properties
-    * @return   string  endpoint
-    */
-    public static function checkEndpoint( $properties )
-    {
-        $root_directory = '';
-
-        /**
-        * Extract properties
-        *
-        * @tparam   $host           host
-        * @tparam   $request_uri    request uri
-        */
-        extract( $properties ); 
-
-        if (
-            isset( $host ) &&
-            ! is_null( $host ) &&
-            ( $host !== APPLICATION_SANDBOX ) &&
-            ( strlen( $host ) > 0 )
-        )
-            throw new \Exception( sprintf(
-                EXCEPTION_INVALID_ENTITY, ENTITY_HOST . ' (' . $host .')'
-            ) );
-        else
-            $root_directory = self::getRootDirectory();
-
-        if ( ! isset( $request_uri ) )
-
-            throw new \Exception(
-                sprintf(
-                    EXCEPTION_INVALID_PROPERTY,
-                    str_replace( '_', ' ', PROPERTY_URI_REQUEST )
-                )
-            );
-
-        return $root_directory . $request_uri;
     }
 
     /**
@@ -1849,6 +1847,16 @@ class Tokens_Stream extends \Alpha
         ;
 
         return array( $request_uri, $host );
+    }
+
+    /**
+     * @param $properties
+     *
+     * @return string
+     */
+    public static function getEndpoint($properties)
+    {
+        return self::getRootDirectory() . $properties[PROPERTY_URI_REQUEST];
     }
 
     /**
@@ -3205,6 +3213,23 @@ class Tokens_Stream extends \Alpha
         $container->{PROPERTY_STREAM_FULL} = $full_stream;
 
         return $container;
+    }
+
+    /**
+     * @param $endpoint
+     *
+     * @return bool
+     */
+    public static function validEndpointHost($endpoint)
+    {
+        if (isset($endpoint[PROPERTY_HOST])) {
+            $host = $endpoint[PROPERTY_HOST];
+        }
+
+        return !isset($host) ||
+            is_null($host) ||
+            ($host === APPLICATION_SANDBOX) ||
+            (strlen($host) === 0);
     }
 
     /**
