@@ -22,27 +22,20 @@ class Tokens_Stream extends \Alpha
     static protected $river;
 
     /**
-    * Construct an introspection class
-    * Instantiate a TOKENS_STREAM
-    * by initializing CONTEXT and CONDITIONS properties
-    * @see      ALPHA::__construct
-    *
-    * @param    object  $quantities quantities
-    * @param    object  $conditions conditions
-    * @return   object  Introspection
-    */
+     * @param null $conditions
+     * @param null $quantities
+     */
     public function __construct( $conditions = null, $quantities = null )
     {
-        if ( ! isset( $this->{PROPERTY_CONTEXT} ) )
-            $this->{PROPERTY_CONTEXT} = array();
-
         if ( ! is_null( $conditions ) )
-
-            $tokens_stream = parent::__construct( $conditions, $quantities );
+        {
+            $tokens_stream = $this->buildTokensStream(array(
+                PROPERTY_CONDITIONS => $conditions,
+                PROPERTY_QUANTITIES => $quantities));
+        }
         else
         {
-            $this->{PROPERTY_CONDITIONS} = new \stdClass();
-            $tokens_stream = $this;
+            $tokens_stream = $this->initializeTokensStream();
         }
     
         return $tokens_stream;
@@ -57,26 +50,28 @@ class Tokens_Stream extends \Alpha
     public function &__get( $name )
     {
         if ( $name === PROPERTY_CONTEXT )
-
+        {
             $member_variable = &$this->{PROPERTY_CONTEXT};
+        }
         else
-
+        {
             $member_variable = &parent::__get( $name );
+        }
 
         return $member_variable;
     }
 
     /**
-     * @param $context
+     * @param $properties
      *
-     * @return bool
+     * @return \Alpha|object
      */
-    public static function availableSignal( $context )
+    public function buildTokensStream($properties)
     {
-        $options  = self::extractOptions( $context );
-        $protocol = self::getProtocol();
+        $conditions = $properties[PROPERTY_CONDITIONS];
+        $quantities = $properties[PROPERTY_QUANTITIES];
 
-        return isset( $options[$protocol][PROPERTY_SIGNAL] );
+        return parent::__construct($conditions, $quantities);
     }
 
     /**
@@ -222,6 +217,19 @@ class Tokens_Stream extends \Alpha
         $offset            = $stream_properties[PROPERTY_OFFSET];
 
         return empty($offset) ? 0 : $offset;
+    }
+
+    /**
+     * @return Tokens_Stream
+     */
+    public function initializeTokensStream()
+    {
+        if (!isset($this->{PROPERTY_CONTEXT})) {
+            $this->{PROPERTY_CONTEXT} = array();
+        }
+        $this->{PROPERTY_CONDITIONS} = new \stdClass();
+
+        return $this;
     }
 
     /**
@@ -844,6 +852,19 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
+     * @param $context
+     *
+     * @return bool
+     */
+    public static function availableSignal( $context )
+    {
+        $options  = self::extractOptions( $context );
+        $protocol = self::getProtocol();
+
+        return isset( $options[$protocol][PROPERTY_SIGNAL] );
+    }
+
+    /**
     * Build a signal from a stream
     *
     * @param    array   $stream     stream
@@ -930,7 +951,6 @@ class Tokens_Stream extends \Alpha
                 $length = self::getSequenceRemainderLength($coverage_size);
             }
 
-
             $options = array(
                 $protocol => array(
                     PROPERTY_LENGTH => $length,
@@ -993,25 +1013,15 @@ class Tokens_Stream extends \Alpha
     * @param    mixed   $protocol       protocol
     * @return   nothing
     */
-    public static function checkContextAsReference(
+    public static function normalizeStreamContext(
         &$properties, $access_mode = null, $protocol = null
     )
     {
-        if ( is_null( $protocol ) )
-            $protocol = self::getProtocol();
-
-        if ( is_null( $access_mode ) )
-            $access_mode = FILE_ACCESS_MODE_READ_ONLY;
-
-        $options = array(
-            $protocol => array( PROPERTY_MODE_ACCESS => $access_mode )
-        );
-
-        $context = stream_context_create( $options );
-
-        if ( ! isset( $properties[PROPERTY_CONTEXT] ) )
-
+        if ( ! isset( $properties[PROPERTY_CONTEXT] ) ) {
+            $options = self::getNormalizedContextOptions($protocol, $access_mode);
+            $context = stream_context_create( $options );
             $properties[PROPERTY_CONTEXT] = &$context;
+        }
     }
 
     /**
@@ -1176,28 +1186,28 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
-    * Initialize properties when needed and check their consistency
-    *   access mode
-    *   context
-    *   file path
-    *   format
-    *   length
-    *   offset
-    *   path
-    *   placeholders
-    *   signal
-    *   size
-    *   URI request
-    *
-    * @see      TOKENS_STREAM :: checkContextAsReference
-    * @see      TOKENS_STREAM :: extractOptions
-    * @see      TOKENS_STREAM :: getProtocol
-    * @see      TOKENS_STREAM :: getRootDirectory
-    * @see      TOKENS_STREAM :: initialize
-    * @see      TOKENS_STREAM :: slen
-    * @param    array   $properties properties
-    * @return   array   properties
-    */
+     * Initialize properties when needed and check their consistency
+     *   access mode
+     *   context
+     *   file path
+     *   format
+     *   length
+     *   offset
+     *   path
+     *   placeholders
+     *   signal
+     *   size
+     *   URI request
+     *
+     * @see      TOKENS_STREAM :: extractOptions
+     * @see      TOKENS_STREAM :: getProtocol
+     * @see      TOKENS_STREAM :: normalizeStreamContext
+     * @see      TOKENS_STREAM :: getRootDirectory
+     * @see      TOKENS_STREAM :: initialize
+     * @see      TOKENS_STREAM :: slen
+     * @param    array   $properties properties
+     * @return   array   properties
+     */
     public static function checkProperties( $properties )
     {
         global $class_application;
@@ -1378,7 +1388,7 @@ class Tokens_Stream extends \Alpha
                     );
             }
 
-            self::checkContextAsReference( $properties );
+            self::normalizeStreamContext( $properties );
         }
 
         $properties[PROPERTY_SIZE] = self::slen( $path );
@@ -1916,6 +1926,28 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
+     * @param $protocol
+     * @param $access_mode
+     *
+     * @return array
+     */
+    public static function getNormalizedContextOptions($protocol = null, $access_mode = null)
+    {
+        if (is_null($access_mode))
+        {
+            $access_mode = FILE_ACCESS_MODE_READ_ONLY;
+        }
+        if (is_null($protocol))
+        {
+            $protocol = self::getProtocol();
+        }
+
+        return array(
+            $protocol => array(PROPERTY_MODE_ACCESS => $access_mode)
+        );
+    }
+
+    /**
     * Get a persistent handle
     *
     * @param    resource    $store
@@ -2242,14 +2274,9 @@ class Tokens_Stream extends \Alpha
     */
     public static function getSubstream($substream_properties, &$context = null)
     {
-        $subsequence = self::getSubsequence($substream_properties, $context);
-        $definition = array_merge($substream_properties, array(
-            PROPERTY_POSITION_OLD => self::getPosition(),
-            PROPERTY_SEQUENCE => $subsequence
-        ));
-        $substream = self::extractSubstream( $definition );
+        $definition = self::getSubsequenceDefinition($substream_properties, $context);
 
-        return $substream;
+        return self::extractSubstream( $definition );
     }
 
     /**
@@ -2302,6 +2329,25 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
+     * @param      $substream_properties
+     * @param null $context
+     *
+     * @return array
+     */
+    public static function getSubsequenceDefinition($substream_properties, &$context = null)
+    {
+        $subsequence = self::getSubsequence($substream_properties, $context);
+
+        return array_merge(
+            $substream_properties,
+            array(
+                PROPERTY_POSITION_OLD => self::getPosition(),
+                PROPERTY_SEQUENCE     => $subsequence
+            )
+        );
+    }
+
+    /**
      * @param      $stream_properties
      * @param null $context
      *
@@ -2311,7 +2357,7 @@ class Tokens_Stream extends \Alpha
     {
         $access_mode = $stream_properties[PROPERTY_MODE_ACCESS];
         $stream_properties[PROPERTY_CONTEXT] = $context;
-        self::checkContextAsReference($stream_properties, $access_mode);
+        self::normalizeStreamContext($stream_properties, $access_mode);
         $interval = self::getInterval($stream_properties);
         $stream_properties[PROPERTY_OFFSET] = $interval[PROPERTY_OFFSET];
         $stream_properties[PROPERTY_LENGTH] = $interval[PROPERTY_LENGTH];
@@ -2528,7 +2574,7 @@ class Tokens_Stream extends \Alpha
 
             $store[PROPERTY_MODE_ACCESS] = FILE_ACCESS_MODE_READ_ONLY;
             $properties = self::checkProperties( $store );
-            $handle = self::getHandle( $properties );
+            self::getHandle( $properties );
             $stream = self::getStream();
             $existing_signal = $stream->{PROPERTY_SIGNAL};
             $store[PROPERTY_SIGNAL] = $existing_signal;
@@ -2537,7 +2583,7 @@ class Tokens_Stream extends \Alpha
             if ( $offset > $length )
             {
                 unset( $store[PROPERTY_OFFSET] );
-                $result = self::injectToStream( $store );
+                self::injectToStream( $store );
             }
             else
             {
