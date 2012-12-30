@@ -2165,26 +2165,39 @@ class Tokens_Stream extends \Alpha
                 ));
             }
 
-            $limit = self::getCoverageLimit(array(
-                PROPERTY_CONTEXT => $context,
-                PROPERTY_LENGTH => $length,
-                PROPERTY_OFFSET => $start,
-                PROPERTY_PATH => $path
-                ));
-            $max_length = self::getTotalSequenceLength();
-            $properties[PROPERTY_SIZE_COVERAGE] = $length;
-            $section_index = 0;
-            $subsequence = '';
+            $subsequence =  self::getStreamSubsequence(array_merge(
+                $properties, array(
+                   PROPERTY_CONTEXT => $context,
+                   PROPERTY_LENGTH => $length,
+                   PROPERTY_OFFSET => $start,
+                   PROPERTY_PATH => $path,
+                   PROPERTY_SIZE_COVERAGE => $length,
+                )));
+        }
 
-            while ( $start <= $limit )
-            {
-                $properties[PROPERTY_INDEX_SECTION] = $section_index;
-                $properties[PROPERTY_OFFSET] = $start;
-                $subsequence .= self::getStreamSection( $properties );
+        return $subsequence;
+    }
 
-                $start += $max_length;
-                $section_index++;
-            }
+    /**
+     * @param $properties
+     *
+     * @return string
+     */
+    public static function getStreamSubsequence($properties)
+    {
+        $limit         = self::getCoverageLimit($properties);
+        $max_length    = self::getTotalSequenceLength();
+        $offset        = $properties[PROPERTY_OFFSET];
+        $section_index = 0;
+        $subsequence   = '';
+
+        while ($offset <= $limit) {
+            $properties[PROPERTY_INDEX_SECTION] = $section_index;
+            $properties[PROPERTY_OFFSET]        = $offset;
+            $subsequence .= self::getStreamSection($properties);
+
+            $offset += $max_length;
+            $section_index++;
         }
 
         return $subsequence;
