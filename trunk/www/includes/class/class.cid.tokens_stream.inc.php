@@ -823,7 +823,7 @@ class Tokens_Stream extends \Alpha
                     
                         $transformation = $properties[PROPERTY_TRANSFORMATION];
 
-                    if ( $method = self::validMethod( $transformation ) )
+                    if ( $method = self::getMethod( $transformation ) )
                     {
                         $arguments = array();
 
@@ -2179,6 +2179,25 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
+     * @param $callable
+     *
+     * @return null|string
+     */
+    public static function getClassName($callable)
+    {
+        if ( self::validClass( $callable ) )
+        {
+            $class = trim( $callable[PROPERTY_METHOD][0] );
+        }
+        else
+        {
+            $class = null;
+        }
+
+        return $class;
+    }
+
+    /**
      * @param $properties
      *
      * @return mixed
@@ -2202,6 +2221,25 @@ class Tokens_Stream extends \Alpha
             PROPERTY_LENGTH => $length,
             PROPERTY_OFFSET => $start
         );
+    }
+
+    /**
+     * @param $callable
+     *
+     * @return null
+     */
+    public static function getMethod($callable)
+    {
+        if (self::validMethod($callable))
+        {
+            return $callable[PROPERTY_METHOD][1];
+        }
+        else
+        {
+            $method = null;
+        }
+
+        return $method;
     }
 
     /**
@@ -2369,9 +2407,9 @@ class Tokens_Stream extends \Alpha
         $interval = self::getInterval($stream_properties);
         $stream_properties[PROPERTY_OFFSET] = $interval[PROPERTY_OFFSET];
         $stream_properties[PROPERTY_LENGTH] = $interval[PROPERTY_LENGTH];
-        $stream_properties[PROPERTY_SIZE_COVERAGE] = $interval[PROPERTY_LENGTH];
-        $stream_properties[PROPERTY_LIMIT] = self::getCoverageLimit($stream_properties);
         $stream_properties[PROPERTY_LENGTH_MAX] = self::getTotalSequenceLength();
+        $stream_properties[PROPERTY_LIMIT] = self::getCoverageLimit($stream_properties);
+        $stream_properties[PROPERTY_SIZE_COVERAGE] = $interval[PROPERTY_LENGTH];
 
         return $stream_properties;
     }
@@ -3216,6 +3254,20 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
+     * @param $callbable
+     *
+     * @return bool
+     */
+    public static function validClass($callbable)
+    {
+        return isset( $callbable[PROPERTY_METHOD] ) &&
+            (is_array( $callbable[PROPERTY_METHOD] ) ) &&
+            isset( $callbable[PROPERTY_METHOD][0] ) &&
+            ($class = trim( $callbable[PROPERTY_METHOD][0] ) ) &&
+            class_exists( $class );
+    }
+
+    /**
      * @param $endpoint
      *
      * @return bool
@@ -3233,30 +3285,18 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
-    * Check if a method is valid
-    *
-    * @param    $method 
-    * @return   result
-    */
-    public static function validMethod( $method )
+     * @param $callable
+     *
+     * @return bool
+     */
+    public static function validMethod($callable)
     {
-        $result = false;
-    
-        if ( 
-            isset( $method ) &&
-            isset( $method[PROPERTY_METHOD] ) &&
-            ( is_array( $method[PROPERTY_METHOD] ) ) &&
-            isset( $method[PROPERTY_METHOD][0] ) &&
-            ( $class = trim( $method[PROPERTY_METHOD][0] ) ) &&
-            class_exists( $class ) &&
-            ( $methods = get_class_methods( $class ) ) &&
-            isset( $method[PROPERTY_METHOD][1] ) &&
-            ( $function = trim( $method[PROPERTY_METHOD][1] ) ) &&
-            in_array( $function, $methods )
-        )
-            $result = array( $class, $function );
-    
-        return $result;
+        $class = self::getClassName($callable);
+
+        return $class && isset($callable[PROPERTY_METHOD][1]) &&
+            ($function = trim($callable[PROPERTY_METHOD][1])) &&
+            ($methods = get_class_methods($class)) &&
+            in_array($function, $methods);
     }
 
     /**
