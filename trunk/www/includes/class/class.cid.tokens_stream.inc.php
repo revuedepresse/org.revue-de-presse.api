@@ -67,6 +67,19 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
+     * @param $context
+     *
+     * @return bool
+     */
+    public static function availableSignal( $context )
+    {
+        $options  = self::extractOptions( $context );
+        $protocol = self::getProtocol();
+
+        return isset( $options[$protocol][PROPERTY_SIGNAL] );
+    }
+
+    /**
     * Close stream
     *
     * @param    mixed   $protocol   protocol
@@ -183,6 +196,32 @@ class Tokens_Stream extends \Alpha
         $context = $this->getContext();
 
         return self::extractOptions( $context );
+    }
+
+    /**
+     * @param $stream_properties
+     *
+     * @return int
+     */
+    public function getSubstreamLength($stream_properties)
+    {
+        $stream_properties  = self::replenishStreamProperties($stream_properties);
+        $length = $stream_properties[PROPERTY_LENGTH];
+
+        return ($length === -1 ? count($this->getStreamSections()) : $length);
+    }
+
+    /**
+     * @param $stream_properties
+     *
+     * @return int
+     */
+    public function getSubstreamOffset($stream_properties)
+    {
+        $stream_properties = self::replenishStreamProperties($stream_properties);
+        $offset            = $stream_properties[PROPERTY_OFFSET];
+
+        return empty($offset) ? 0 : $offset;
     }
 
     /**
@@ -2115,89 +2154,6 @@ class Tokens_Stream extends \Alpha
 //  }
 
     /**
-     * Gets a subsequence
-     *
-     * @param      $streamProperties
-     * @param null $context
-     *
-     * @return string
-     */
-    public static function getSubsequence(array $streamProperties, &$context = null)
-    {
-        /**
-         * Extracts replenished stream properties
-         *
-         * $access_mode
-         * $count
-         * $path
-         * $start
-         */
-        extract($streamProperties = self::replenishStreamProperties($streamProperties));
-
-        $options = self::extractOptions( $context );
-        $protocol = self::getProtocol();
-
-        if ( isset( $options[$protocol][PROPERTY_SIGNAL] ) )
-        {
-            $stream = self::getStream();
-            $stream->setStreamSubsequence($count, $start);
-            $subsequence = $stream->{PROPERTY_SUBSEQUENCE};
-        }
-        else
-        {
-            unset($streamProperties[PROPERTY_LENGTH]);
-            $properties = array_merge(
-                array(PROPERTY_CONTEXT => $context),
-                $streamProperties
-            );
-            self::checkContextAsReference( $properties, $access_mode );
-            $interval = self::getInterval(array(
-                PROPERTY_CONTEXT => $context,
-                PROPERTY_LENGTH => $count,
-                PROPERTY_PATH => $path,
-                PROPERTY_OFFSET => $start));
-            $length = $interval[PROPERTY_LENGTH];
-            $start = $interval[PROPERTY_OFFSET];
-            $subsequence =  self::getStreamSubsequence(array_merge(
-                $properties, array(
-                   PROPERTY_CONTEXT => $context,
-                   PROPERTY_LENGTH => $length,
-                   PROPERTY_OFFSET => $start,
-                   PROPERTY_PATH => $path,
-                   PROPERTY_SIZE_COVERAGE => $length,
-                )));
-        }
-
-        return $subsequence;
-    }
-
-    /**
-     * @param $properties
-     *
-     * @return string
-     */
-    public static function getStreamSubsequence($properties)
-    {
-        self::registerStreamWrapper();
-        $limit         = self::getCoverageLimit($properties);
-        $max_length    = self::getTotalSequenceLength();
-        $offset        = $properties[PROPERTY_OFFSET];
-        $section_index = 0;
-        $subsequence   = '';
-
-        while ($offset <= $limit) {
-            $properties[PROPERTY_INDEX_SECTION] = $section_index;
-            $properties[PROPERTY_OFFSET]        = $offset;
-            $subsequence .= self::getStreamSection($properties);
-
-            $offset += $max_length;
-            $section_index++;
-        }
-
-        return $subsequence;
-    }
-
-    /**
      * @param $properties
      *
      * @return int
@@ -2310,6 +2266,32 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
+     * @param $properties
+     *
+     * @return string
+     */
+    public static function getStreamSubsequence($properties)
+    {
+        self::registerStreamWrapper();
+        $limit         = self::getCoverageLimit($properties);
+        $max_length    = self::getTotalSequenceLength();
+        $offset        = $properties[PROPERTY_OFFSET];
+        $section_index = 0;
+        $subsequence   = '';
+
+        while ($offset <= $limit) {
+            $properties[PROPERTY_INDEX_SECTION] = $section_index;
+            $properties[PROPERTY_OFFSET]        = $offset;
+            $subsequence .= self::getStreamSection($properties);
+
+            $offset += $max_length;
+            $section_index++;
+        }
+
+        return $subsequence;
+    }
+
+    /**
     * Get a substream
     *
     * @param    string      $path       path
@@ -2370,6 +2352,64 @@ class Tokens_Stream extends \Alpha
             $section .= fread( $handle, $bytes_count );
 
         return $section;
+    }
+
+    /**
+     * Gets a subsequence
+     *
+     * @param      $stream_properties
+     * @param null $context
+     *
+     * @return string
+     */
+    public static function getSubsequence(array $stream_properties, &$context = null)
+    {
+        if ( self::availableSignal( $context ) )
+        {
+            $stream = self::getStream();
+            $stream->setStreamSubsequence( $stream_properties );
+            $subsequence = $stream->{PROPERTY_SUBSEQUENCE};
+        }
+        else
+        {
+            $interval_definition = self::getIntervalDefinition($stream_properties, $context);
+            $subsequence = self::getStreamSubsequence($interval_definition);
+        }
+
+        return $subsequence;
+    }
+
+    /**
+     * @param      $stream_properties
+     * @param null $context
+     *
+     * @return array
+     */
+    public static function getIntervalDefinition($stream_properties, &$context = null)
+    {
+        $access_mode = $stream_properties[PROPERTY_MODE_ACCESS];
+        $stream_properties[PROPERTY_CONTEXT] = $context;
+        self::checkContextAsReference($stream_properties, $access_mode);
+        $interval = self::getInterval($stream_properties);
+        $stream_properties[PROPERTY_OFFSET] = $interval[PROPERTY_OFFSET];
+        $stream_properties[PROPERTY_LENGTH] = $interval[PROPERTY_LENGTH];
+        $stream_properties[PROPERTY_SIZE_COVERAGE] = $interval[PROPERTY_LENGTH];
+
+        return $stream_properties;
+    }
+
+    /**
+     * @param $stream_properties
+     *
+     * @return array
+     */
+    public function getSubstreamSections($stream_properties)
+    {
+        $length             = $this->getSubstreamLength($stream_properties);
+        $offset             = $this->getSubstreamOffset($stream_properties);
+        $stream_sections    = $this->getStreamSections();
+
+        return array_splice($stream_sections, $offset, $length);
     }
 
     /**
@@ -2935,38 +2975,38 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
-     * @param $streamProperties
+     * @param $stream_properties
      *
      * @return array
      */
-    public static function replenishStreamProperties($streamProperties)
+    public static function replenishStreamProperties($stream_properties)
     {
-        $path  =
-        $count =
-        $start =
-        $mode  = null;
+        $length =
+        $mode   =
+        $offset =
+        $path   = null;
 
-        if (isset($streamProperties[PROPERTY_LENGTH])) {
-            $count = $streamProperties[PROPERTY_LENGTH];
+        if (isset($stream_properties[PROPERTY_LENGTH])) {
+            $length = $stream_properties[PROPERTY_LENGTH];
         }
 
-        if (isset($streamProperties[PROPERTY_MODE_ACCESS])) {
-            $mode = $streamProperties[PROPERTY_MODE_ACCESS];
+        if (isset($stream_properties[PROPERTY_MODE_ACCESS])) {
+            $mode = $stream_properties[PROPERTY_MODE_ACCESS];
         }
 
-        if (isset($streamProperties[PROPERTY_PATH])) {
-            $path = $streamProperties[PROPERTY_PATH];
+        if (isset($stream_properties[PROPERTY_PATH])) {
+            $path = $stream_properties[PROPERTY_PATH];
         }
 
-        if (isset($streamProperties[PROPERTY_OFFSET])) {
-            $start = $streamProperties[PROPERTY_OFFSET];
+        if (isset($stream_properties[PROPERTY_OFFSET])) {
+            $offset = $stream_properties[PROPERTY_OFFSET];
         }
 
         return array(
-            PROPERTY_COUNT => $count,
+            PROPERTY_LENGTH => $length,
             PROPERTY_MODE_ACCESS => $mode,
-            PROPERTY_PATH => $path,
-            PROPERTY_START => $start);
+            PROPERTY_OFFSET => $offset,
+            PROPERTY_PATH => $path);
     }
 
     /**
@@ -3004,19 +3044,22 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
-     * @param $count
-     * @param $start
-     *
-     * @return string
+     * @return array
      */
-    public function setStreamSubsequence($count, $start)
+    public function getStreamSections()
     {
-        $sequences                      = str_split($this->{PROPERTY_SEQUENCE}, self::getHashLength());
-        $count                          = ($count === -1 ? count($sequences) : $count);
-        $start                          = empty($start) ? 0 : $start;
-        $subsequences                   = array_splice($sequences, $start, $count);
-        $subsequence                    = implode($subsequences);
-        $this->{PROPERTY_SUBSEQUENCE}   = $subsequence;
+        return str_split($this->{PROPERTY_SEQUENCE}, self::getHashLength());
+    }
+
+    /**
+     * @param $stream_properties
+     *
+     * @return Tokens_Stream
+     */
+    public function setStreamSubsequence($stream_properties)
+    {
+        $substream_sections = $this->getSubstreamSections($stream_properties);
+        $this->{PROPERTY_SUBSEQUENCE} = implode($substream_sections);
 
         return $this;
     }
