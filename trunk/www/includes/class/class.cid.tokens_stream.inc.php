@@ -586,45 +586,30 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
-    * Add substitutions as a new transformation
-    *
-    * @param    object      $container
-    * @param    array       $substitutions
-    * @param    resource    $context
-    * @return   $container
-    */
-    public static function addSubstitutions(
-        &$container, $substitutions = null, &$context = null
-    )
+     * Adds substitutions as a new transformation
+     *
+     * @param $container
+     * @param $streaming_conditions
+     *
+     * @return mixed
+     * @throws \Exception
+     */
+    public static function addSubstitutions(&$container, $streaming_conditions)
     {
-        if ( ! is_null( $context ) && is_resource( $context ) )
+        $substitutions = self::getStreamingSubstitutions($streaming_conditions);;
 
-            $_substitutions = self::extractOption( array(
-                PROPERTY_CONTEXT => $context,
-                PROPERTY_NAME => PROPERTY_SUBSTITUTIONS
-            ) );
-
-        else if ( is_array( $substitutions ) )
-        
-            $_substitutions = $substitutions;
-
-        else throw new \Exception( EXCEPTION_INVALID_ARGUMENT );
-
-        if ( ! is_null( $_substitutions ) )
-        {
-            self::addTransformation( array(
-                PROPERTY_CONTAINER => &$container,
-                PROPERTY_TRANSFORMATION => array(
-                    PROPERTY_METHOD => array(
-                        __CLASS__, 'applySubstitutions'
-                    ),
-                    PROPERTY_ARGUMENTS => array( array(
-                        PROPERTY_SUBSTITUTIONS => $_substitutions
-                    ) )
-                ),
-                PROPERTY_REPEATABLE => false
-            ) );
-        }
+        self::addTransformation( array(
+            PROPERTY_CONTAINER => &$container,
+            PROPERTY_REPEATABLE => false,
+            PROPERTY_TRANSFORMATION => array(
+                PROPERTY_ARGUMENTS => array( array(
+                    PROPERTY_SUBSTITUTIONS => $substitutions
+                ) ),
+                PROPERTY_METHOD => array(
+                    __CLASS__, 'applySubstitutions'
+                )
+            )
+        ) );
 
         return $container;
     }
@@ -1157,10 +1142,8 @@ class Tokens_Stream extends \Alpha
             if ( isset( $protocol_options[PROPERTY_SUBSTITUTIONS] ) )
             {
                 $substitutions = $protocol_options[PROPERTY_SUBSTITUTIONS];
-                self::addSubstitutions( $conditions, $substitutions );
-                self::appendToHistory(
-                    PROPERTY_SIGNAL, $signal, $conditions
-                );
+                self::addSubstitutions( $conditions, array( PROPERTY_SUBSTITUTIONS => $substitutions ) );
+                self::appendToHistory( PROPERTY_SIGNAL, $signal, $conditions );
             }
 
             $path_sections = explode( CHARACTER_SLASH, $file_path );
@@ -1799,6 +1782,19 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
+     * @param $length
+     *
+     * @return bool
+     */
+    public static function fullCoverage($length)
+    {
+        $max_length = self::getTotalSequenceLength();
+
+        // max_length = 8192 / hash length
+        return $length >= $max_length;
+    }
+
+    /**
      * @param $sequence_size
      * @param $section_index
      *
@@ -1817,11 +1813,23 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
-    * Get coordinates
-    * 
-    * @param    string  $path   path
-    * @return   array   containing current host and request URI
-    */
+     * @param $length
+     *
+     * @return int
+     */
+    public static function fullRead($length)
+    {
+        return self::checkLength($length) === -1;
+    }
+
+    /**
+     * Gets coordinates
+     *
+     * @param $path
+     *
+     * @return array
+     * @throws \Exception
+     */
     public static function getCoordinates( $path )
     {
         if ( ! str_valid( $path ) )
@@ -1846,6 +1854,43 @@ class Tokens_Stream extends \Alpha
         ;
 
         return array( $request_uri, $host );
+    }
+
+    /**
+     * @param $properties
+     *
+     * @return int
+     */
+    public static function getCoverageLimit($properties)
+    {
+        $max_length = self::getTotalSequenceLength();
+        $length     = $properties[PROPERTY_LENGTH];
+        $start = $properties[PROPERTY_OFFSET];
+
+        if (self::fullCoverage($length, $max_length)) {
+            $limit = $start + $length;
+        } else if (self::overflowingLength($properties)) {
+            $limit = self::getOverflowingLimit($properties);
+        } else {
+            $limit = $start;
+        }
+
+        return $limit;
+    }
+
+    /**
+     * @param $context
+     *
+     * @return mixed
+     */
+    public static function getDefaultSubstitutions($context)
+    {
+        return self::extractOption(
+            array(
+                PROPERTY_CONTEXT => $context,
+                PROPERTY_NAME    => PROPERTY_SUBSTITUTIONS
+            )
+        );
     }
 
     /**
@@ -2008,6 +2053,7 @@ class Tokens_Stream extends \Alpha
 
         return $protocol;
     }
+
     /**
     * Initialize an array as a static property of the TOKENS_STREAM class
     * to become a container called "river"
@@ -2133,48 +2179,30 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
-     * @param $properties
+     * @param $streaming_conditions
      *
-     * @return int
+     * @return mixed
+     * @throws \Exception
      */
-    public static function getCoverageLimit($properties)
+    public static function getStreamingSubstitutions($streaming_conditions)
     {
-        $max_length = self::getTotalSequenceLength();
-        $length     = $properties[PROPERTY_LENGTH];
-        $start = $properties[PROPERTY_OFFSET];
+        $context = self::normalizeStreamingContext($streaming_conditions);
 
-        if (self::fullCoverage($length, $max_length)) {
-            $limit = $start + $length;
-        } else if (self::overflowingLength($properties)) {
-            $limit = self::getOverflowingLimit($properties);
-        } else {
-            $limit = $start;
+        if (!is_null($context) && is_resource($context))
+        {
+            $substitutions = self::getDefaultSubstitutions($context);
+        }
+        else
+        {
+            $substitutions = $streaming_conditions[PROPERTY_SUBSTITUTIONS];
         }
 
-        return $limit;
-    }
+        if (!self::validStreamingSubstitutions($streaming_conditions))
+        {
+            throw new \Exception(EXCEPTION_INVALID_ARGUMENT);
+        }
 
-    /**
-     * @param $length
-     *
-     * @return bool
-     */
-    public static function fullCoverage($length)
-    {
-        $max_length = self::getTotalSequenceLength();
-
-        // max_length = 8192 / hash length
-        return $length >= $max_length;
-    }
-
-    /**
-     * @param $length
-     *
-     * @return int
-     */
-    public static function fullRead($length)
-    {
-        return self::checkLength($length) === -1;
+        return $substitutions;
     }
 
     /**
@@ -2586,7 +2614,9 @@ class Tokens_Stream extends \Alpha
 
         if (self::streamingWithoutMetadata($streaming_conditions)) {
             $tokens_stream = new \stdClass();
-            self::addSubstitutions( $tokens_stream, null, $streaming_conditions[PROPERTY_CONTEXT] );
+            self::addSubstitutions( $tokens_stream, array(
+                PROPERTY_CONTEXT => $streaming_conditions[PROPERTY_CONTEXT],
+                PROPERTY_SUBSTITUTIONS => null ) );
             self::updateTokensStreamPath($tokens_stream, $conditions, $streaming_conditions[PROPERTY_PATH]);
         } else {
             $tokens_stream = self::spawn(
@@ -2725,6 +2755,22 @@ class Tokens_Stream extends \Alpha
 
 
         $class_dumper::error_log( $information );
+    }
+
+    /**
+     * @param $streaming_conditions
+     *
+     * @return null
+     */
+    public static function normalizeStreamingContext($streaming_conditions)
+    {
+        if (!isset($streaming_conditions[PROPERTY_CONTEXT])) {
+            $context = null;
+        } else {
+            $context = $streaming_conditions[PROPERTY_CONTEXT];
+        }
+
+        return $context;
     }
 
     /**
@@ -3333,6 +3379,16 @@ class Tokens_Stream extends \Alpha
             ($function = trim($callable[PROPERTY_METHOD][1])) &&
             ($methods = get_class_methods($class)) &&
             in_array($function, $methods);
+    }
+
+    /**
+     * @param $substitutions
+     *
+     * @return bool
+     */
+    public static function validStreamingSubstitutions($substitutions)
+    {
+        return is_null($substitutions) || is_array($substitutions);
     }
 
     /**
