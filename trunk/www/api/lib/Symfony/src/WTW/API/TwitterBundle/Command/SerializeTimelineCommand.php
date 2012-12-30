@@ -46,7 +46,7 @@ class SerializeTimelineCommand extends ContainerAwareCommand
     {
         $container = $this->getContainer();
         $miner     = $container->get('data_mining.miner.twitter');
-        $miner->setQueryString('/' . $input->getOption('user') . '/1');
+        $miner->setQueryString('&u=' . $input->getOption('user'));
 
         $output->writeln($miner->getFeed());
     }
