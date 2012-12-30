@@ -1058,11 +1058,13 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
-    * Check stream length to be read
-    *
-    * @param    integer $length stream length
-    * @return   integer checked length
-    */
+     * Checks stream length to be read
+     *
+     * @param null $length
+     *
+     * @return int|null
+     * @throws \Exception
+     */
     public static function checkLength( $length = null )
     {
         if ( is_null( $length ) ) $length = 1;
@@ -1451,19 +1453,13 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
-    * Declare persistency coordinates
-    *
-    * @param    array   $coordinates
-    * @param    string  $entity
-    * @return   mixed   option
-    */
-    public static function declarePersistencyCoordinates(
-        $coordinates, $entity
-    )
+     * Declares persistency coordinates
+     * @param $coordinates
+     *
+     * @throws Exception
+     */
+    public static function declarePersistencyCoordinates($coordinates)
     {
-        global $class_application, $verbose_mode;
-        $class_dumper = $class_application::getDumperClass();
-
         $table_prefix = substr( PREFIX_TABLE, 0, -1 );
         $table_prefix_prefix = PREFIX_PREFIX . substr( PREFIX_TABLE, 0, -1 );
         $column_prefix =
@@ -1545,32 +1541,6 @@ class Tokens_Stream extends \Alpha
                             PROPERTY_TYPE => SEARCH_TYPE_FULL_TEXT,
                             PROPERTY_PATTERN => strtoupper( $coordinate_name )
                         ) );
-    
-                        global $class_application, $verbose_mode;
-                        $class_dumper = $class_application::getDumperClass();
-                        $class_dumper::log( __METHOD__, array(
-                            $substream
-                        ), true, true );
-    
-                        //$root_directory = self::getRootDirectory();
-                        //$properties = array( PROPERTY_PATH =>
-                        //  PROTOCOL_TOKEN . '://' . self::getHost() . substr(
-                        //      $resource_property[PROPERTY_PATH],
-                        //      strlen( $root_directory )
-                        //  )
-                        //);
-                        //$properties[PROPERTY_LENGTH] = 8;
-                        //$properties[PROPERTY_OFFSET] = 26;
-                        //$properties[PROPERTY_SIGNAL] = $resource_property[PROPERTY_CONTENT];
-                        //
-                        //# reading first token hash
-                        //
-                        //$tokens_count = $class_tokens_stream::appendToStream( $properties );
-                        //global $class_application, $verbose_mode;
-                        //$class_dumper = $class_application::getDumperClass();
-                        //$class_dumper::log( __METHOD__, array(
-                        //  $coordinates->$prefix_table_column
-                        //), TRUE, TRUE );
                     }
 
             }
@@ -1736,9 +1706,7 @@ class Tokens_Stream extends \Alpha
 
         $first_index = $offset;
         $last_index = min( $first_index + $length - 1, $count_max - 1 );
-
         $hash_table = str_split( $sequence, $hash_length );
-        $length_max = self::getMaxChunkSize() / $hash_length;
 
         for ( $index = $last_index ; $index >= $first_index ; $index-- )
         {
@@ -2119,40 +2087,6 @@ class Tokens_Stream extends \Alpha
         return $stream;
     }
 
-//  public static function &getStream( $key = NULL )
-//  {
-//      $river = &self::getRiver();
-//      $stream = NULL;
-//
-//      if ( ! is_null( $key ) )
-//      {
-//          if (
-//              isset( $river[$key] ) &&
-//              isset( $river[$key][PROPERTY_STREAM] )
-//          )
-//              $stream = &$river[$key][PROPERTY_STREAM];
-//          else
-//              throw new \Exception(
-//                  sprintf( EXCEPTION_INVALID_ENTITY, ENTITY_STREAM )
-//              );
-//      }
-//      else
-//      {
-//          if ( count( $river ) > 0 )
-//          {
-//              $properties = &$river[count( $river ) - 1];
-//
-//              if (
-//                  is_array( $properties ) &&
-//                  isset( $properties[PROPERTY_STREAM] )
-//              )
-//                  $stream = &$properties[PROPERTY_STREAM];
-//          }
-//      }
-//
-//      return $stream;
-//  }
-
     /**
      * @param $properties
      *
@@ -2210,7 +2144,7 @@ class Tokens_Stream extends \Alpha
         if (self::fullRead($properties[PROPERTY_LENGTH])) {
             $length = $stream_length;
             $start  = 0;
-        } else if ($properties[PROPERTY_OFFSET] > $stream_length) {
+        } else if (self::overflowingOffset($properties)) {
             $length = 0;
             $start  = $stream_length;
         } else {
@@ -2311,8 +2245,6 @@ class Tokens_Stream extends \Alpha
         &$context = null
     )
     {
-        $old_position = self::getPosition();
-
         $streamProperties = array(
             PROPERTY_LENGTH => $count,
             PROPERTY_MODE_ACCESS => $mode,
@@ -2323,7 +2255,7 @@ class Tokens_Stream extends \Alpha
         $definition = array(
             PROPERTY_LENGTH => $count,
             PROPERTY_OFFSET => $start,
-            PROPERTY_POSITION_OLD => $old_position,
+            PROPERTY_POSITION_OLD => self::getPosition(),
             PROPERTY_SEQUENCE => $subsequence
         );
         $substream = self::extractSubstream( $definition );
@@ -2741,6 +2673,21 @@ class Tokens_Stream extends \Alpha
         $stream_length = self::slen( $path, $context );
 
         return $length + $start > $stream_length;
+    }
+
+    /**
+     * @param $properties
+     *
+     * @return bool
+     */
+    public static function overflowingOffset($properties)
+    {
+        $context = $properties[PROPERTY_CONTEXT];
+        $offset = $properties[PROPERTY_OFFSET];
+        $path = $properties[PROPERTY_PATH];
+        $stream_length = self::slen($path, $context);
+
+        return $offset > $stream_length;
     }
 
     /**
@@ -3179,38 +3126,6 @@ class Tokens_Stream extends \Alpha
         return $tokens_stream;
     }
 
-//  public static function spawn( $conditions, $metadata = FALSE )
-//  {
-//      $hash_length = self::getHashLength();
-//      $stream = self::getStream();
-//
-//      if ( ! is_object( $conditions ) )
-//
-//          throw new \Exception( EXCEPTION_INVALID_ARGUMENT );
-//
-//      if ( is_null( $stream ) )
-//      {
-//          $tokens_stream = new self( $conditions );
-//          $tokens = $tokens_stream->tokenize();
-//          $count_tokens = count( $tokens );
-//          $tokens_stream->{PROPERTY_TOKEN} = $tokens;
-//          $tokens_stream->{PROPERTY_SIZE} = $count_tokens * $hash_length;
-//      }
-//      else
-//      {
-//          $tokens_stream = $stream;
-//          $tokens = $tokens_stream->{PROPERTY_TOKEN};
-//      }
-//
-//      if ( ! $metadata )
-//      {
-//          self::streamlineContent( $tokens, $tokens_stream );
-//          self::feedRiver( $tokens_stream );
-//      }
-//
-//      return $tokens_stream;
-//  }
-
     /**
     * Streamline a content from tokens by building the following properties
     *   hashmap (tokens hashtable)
@@ -3254,70 +3169,6 @@ class Tokens_Stream extends \Alpha
 
         return $container;
     }
-
-    /**
-    * Streamline a content from tokens by building the following properties
-    *   hashmap (tokens hashtable)
-    *   sequence (concatenation of hashes)
-    *   full stream (tokens indexed on position)
-    *
-    *
-    * @param    array   $tokens tokens
-    * @param    object  &$container container
-    * @return   object  container carrying streamlined content
-    */
-//    public static function streamlineContent( $tokens, &$container = NULL )
-//    {
-//        global $class_application;
-//        $class_memento = $class_application::getMementoClass();
-//        $count_tokens = count( $tokens );
-//        $_container = new \stdClass();
-//        $full_stream =
-//        $hash_map = array();
-//        $sequence = '';
-//
-//        $memento_key = md5( serialize( array(
-//            __METHOD__, $container->{PROPERTY_PATH_FILE}
-//        ) ) );
-//        $callback_parameters_cached = $class_memento::retrieveData(
-//            $memento_key
-//        );
-//
-//        if ( FALSE === $callback_parameters_cached )
-//        {
-//            for (
-//                $token_index = 0;
-//                $token_index < $count_tokens;
-//                $token_index++
-//            )
-//            {
-//                $item = array(
-//                    PROPERTY_HASH => md5( serialize( $tokens[$token_index] ) ),
-//                    PROPERTY_INDEX => $token_index,
-//                    PROPERTY_TOKEN => $tokens[$token_index]
-//                );
-//
-//                $hash_map[$item[PROPERTY_HASH]] = $item;
-//                $full_stream[] = $item;
-//                $sequence .= $item[PROPERTY_HASH];
-//            }
-//
-//            $_container->{PROPERTY_HASH_MAP} = $hash_map;
-//            $_container->{PROPERTY_SEQUENCE} = $sequence;
-//            $_container->{PROPERTY_STREAM_FULL} = $full_stream;
-//
-//            $class_memento::storeData( $_container, $memento_key );
-//        }
-//        else
-//
-//            $_container = $callback_parameters_cached;
-//
-//        foreach ( $_container as $name => $value )
-//
-//            $container->$name = $value;
-//
-//        return $container;
-//    }
 
     /**
     * Check if a method is valid
