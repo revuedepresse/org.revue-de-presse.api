@@ -62,6 +62,20 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
+     * @param $protocol
+     *
+     * @return bool
+     */
+    public function availableStreamReferences($protocol)
+    {
+        $options = self::extractOptions( $context );
+
+        return isset($options[$protocol]) &&
+            ($protocol_options = $options[$protocol]) &&
+            isset($protocol_options[PROPERTY_CONTAINER_REFERENCES]);
+    }
+
+    /**
      * @param $properties
      *
      * @return \Alpha|object
@@ -83,23 +97,15 @@ class Tokens_Stream extends \Alpha
     */
     public function close( $protocol = null, $handle_only = false )
     {
-        $context = &$this->getContext();
-
-        if ( is_null( $protocol ) ) $protocol = self::getProtocol();
-        if ( ! $handle_only ) self::closeStream( $context );
-        
-        $options = self::extractOptions( $context );
-
-        if (
-            isset( $options[$protocol] ) &&
-            ( $protocol_options = $options[$protocol] ) &&
-            isset( $protocol_options[PROPERTY_CONTAINER_REFERENCES] ) && (
-            $references = $protocol_options[PROPERTY_CONTAINER_REFERENCES]
-            ) && isset( $references[PROPERTY_HANDLE] ) &&
-            ( $handle = $references[PROPERTY_HANDLE] )
-        )
+        if ( ! $handle_only )
         {
-            if ( is_resource( $handle ) ) fclose( $handle );
+            $context = &$this->getContext();
+            self::closeStream( $context );
+        }
+
+        if ( $handle = $this->getStreamHandle( $protocol ) )
+        {
+            fclose( $handle );
         }
     }
 
@@ -191,6 +197,48 @@ class Tokens_Stream extends \Alpha
         $context = $this->getContext();
 
         return self::extractOptions( $context );
+    }
+
+    /**
+     * @param $protocol
+     *
+     * @return null
+     */
+    public function getStreamHandle($protocol = null)
+    {
+        if ( ( $references = $this->getStreamReferences( $protocol ) ) &&
+            isset( $references[PROPERTY_HANDLE] ) &&
+            is_resource( $references[PROPERTY_HANDLE] ) )
+        {
+            $handle = $references[PROPERTY_HANDLE];
+        }
+        else
+        {
+            $handle = null;
+        }
+
+        return $handle;
+    }
+
+    /**
+     * @param $protocol
+     *
+     * @return null
+     */
+    public function getStreamReferences( $protocol = null )
+    {
+        if ( is_null( $protocol ) )
+        {
+            $protocol = self::getProtocol();
+        }
+
+        if ($this->availableStreamReferences($protocol)) {
+            $references = $protocol_options[PROPERTY_CONTAINER_REFERENCES];
+        } else {
+            $references = null;
+        }
+
+        return $references;
     }
 
     /**
