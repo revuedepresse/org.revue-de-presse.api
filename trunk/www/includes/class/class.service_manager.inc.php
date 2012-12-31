@@ -74,6 +74,7 @@ class Service_Manager extends Deployer
         );
 
         $environment_development = ! $build_jenkins && ( 
+                ! isset( $jenkins_workspace ) &&
                 ! $symfony_detected &&
                 ! $host_dev_wtw_stable_detected &&
                 ! is_null( $server_name ) &&
@@ -125,7 +126,8 @@ class Service_Manager extends Deployer
 			;
 
 		else if (
-			! $build_jenkins &&
+            ! $build_jenkins &&
+            ! ! isset($jenkins_workspace) &&
             $mode_cli && ! is_null( $script_name ) && ( FALSE === strpos( $script_name, 'phpunit' ) ) &&
             (
 				( FALSE !== strpos( $script_name, '/web/## FILL PROJECT DIR ##/branches' ) ) ||
@@ -147,7 +149,8 @@ class Service_Manager extends Deployer
                     ( FALSE !== strpos( $script_name, 'phpunit' ) ) ||
                     $build_jenkins
                 )
-			) ||
+            ) ||
+            isset($jenkins_workspace) ||
             in_array( $server_name, array( $host_dev_wtw, $host_local_ip, $host_org_wtw_build ) ) ||
             $host_dev_wtw_stable_detected 
         ) {
