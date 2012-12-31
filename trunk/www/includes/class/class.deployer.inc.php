@@ -21,6 +21,8 @@ class Deployer extends I18n
         else $forwarded_host = null;
         $stable_wtw_org_detected = isset( $forwarded_host ) &&
             in_array($forwarded_host, array( '## FILL HOSTNAME ##' ) );
+        $unstable_wtw_org_detected = isset( $forwarded_host ) &&
+            in_array($forwarded_host, array( '## FILL HOSTNAME ##' ) );
 
         $condition_deployment_first_level  =
 			isset( $_SERVER['SERVER_NAME'] ) &&
@@ -36,7 +38,8 @@ class Deployer extends I18n
 					'www.## FILL HOSTNAME ##'
 				)
             ) || ( 
-                $stable_wtw_org_detected 
+                $stable_wtw_org_detected ||
+                $unstable_wtw_org_detected 
             ) || (
 				! isset( $_SERVER['SERVER_NAME'] ) &&
 				isset( $_SERVER['SCRIPT_NAME'] ) &&
@@ -193,6 +196,7 @@ class Deployer extends I18n
                             '## FILL HOSTNAME ##', '## FILL HOSTNAME ##'
                         ))
                     ) && ! $stable_wtw_org_detected
+                    && ! $unstable_wtw_org_detected
 				)
 			)
 			{
