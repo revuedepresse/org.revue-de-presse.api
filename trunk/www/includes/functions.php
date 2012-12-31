@@ -631,9 +631,9 @@ if ( ! function_exists( FUNCTION_START_SESSION ) )
 	*/
 	function &sessionStart( $bootstrap = FALSE )
 	{
-		global $session_id;
+		global $session_id, $jenkins_workspace;
 
-		if ( headers_sent() && $bootstrap )
+		if ( headers_sent() && $bootstrap && ! $jenkins_workspace )
 
 			throw new Exception(
 				sprintf(
@@ -642,7 +642,7 @@ if ( ! function_exists( FUNCTION_START_SESSION ) )
 				)
 			);
 
-		else if ( ( $session_id = session_id() ) === '' )
+		else if ( ! $jenkins_workspace && ( $session_id = session_id() ) === '' )
 		{
 			session_cache_limiter( 'using private_no_expire' );
 
