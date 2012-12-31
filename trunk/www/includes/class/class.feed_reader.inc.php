@@ -665,9 +665,12 @@ class Feed_Reader extends File_Manager
                 )
                 {
                     if ( isset( $items->{PROPERTY_ERRORS} ) )  {
-                        if ($items->{PROPERTY_ERRORS}['code'] == 32) {
-                            error_log('[api][twitter] authentication issue');
-                            $error_authentication = true;
+                        foreach ( $items->{PROPERTY_ERRORS} as $error ) 
+                        {
+                            if ( $error->code === 32 ) {
+                                error_log('[api][twitter] authentication issue');
+                                $error_authentication = true;
+                            }
                         } 
                     }
                     else 
