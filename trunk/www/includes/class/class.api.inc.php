@@ -293,7 +293,7 @@ class Api extends Transfer
 
 			$store_parent = $social_network_type_default;
 
-		if ( strlen( session_id() ) === 0)
+		if ( ! headers_sent() && strlen( session_id() ) === 0)
 		
 			session_start();
 
