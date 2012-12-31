@@ -642,7 +642,7 @@ if ( ! function_exists( FUNCTION_START_SESSION ) )
 				)
 			);
 
-		else if ( ! $jenkins_workspace && ( $session_id = session_id() ) === '' )
+		else if ( ( $session_id = session_id() ) === '' )
 		{
 			session_cache_limiter( 'using private_no_expire' );
 
@@ -677,8 +677,10 @@ if ( ! function_exists( FUNCTION_START_SESSION ) )
 				$_SERVER['REQUEST_URI'] = '/'; // emulate interactive mode
 			}
 
-			// start a session
-			$session_id = session_start();
+            if ( ! headers_sent() ) 
+            {
+                $session_id = session_start();
+            }
 		}
 
 		$session = &$_SESSION;			
