@@ -45,11 +45,6 @@ class Alpha implements Particle
 			ENTITY_STORAGE
 		);
 
-		// check if the CLI mode is enabled
-		if ( ! $build_jenkins && $cli_mode && ! $using_composer && ! $using_pear && ! $using_phpunit ) 
-	
-			echo 'operation date: '.date('Y-m-d_H:i:s')."\n";
-
         // check the quantities argument
         if ( isset( $quantities ) && is_object( $quantities ) )
 
@@ -299,14 +294,6 @@ class Alpha implements Particle
                 serialize( $this )
             );
         }
-
-		// check if the CLI mode is enabled
-		if ( $cli_mode
-            && ! $using_pear
-            && ! $using_phpunit
-            && ! $using_composer )
-	
-			echo "\n";		
     }
 
     /**
