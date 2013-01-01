@@ -405,7 +405,7 @@ class Database_Connection
 
 		else if ( ! $mysqli->select_db($database) )
 
-			throw new Exception('Cannot use '.$database, ' ['.$mysqli->error.']');
+			throw new Exception(sprintf('Cannot use %s [%s]', $database, $mysqli->error));
 		else
 
 			return $mysqli;
