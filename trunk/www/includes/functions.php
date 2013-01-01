@@ -718,7 +718,7 @@ if (
 		$autoload_functions
 	)
 )
-	spl_autoload_register( FUNCTION_AUTOLOAD_SEFI );
+	spl_autoload_register( FUNCTION_AUTOLOAD_SEFI, true, true );
 
 /**
 *************
