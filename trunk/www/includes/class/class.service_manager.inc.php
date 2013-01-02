@@ -49,7 +49,6 @@ class Service_Manager extends Deployer
 		$port_ghost = '8086';
 
 		$prefix_file_hidden = '.';
-		$script_app_console = 'app/console';
 
 		if ( isset( $_SERVER['HTTP_HOST'] ) )
             $host = $_SERVER['HTTP_HOST'];
@@ -88,9 +87,7 @@ class Service_Manager extends Deployer
                 ) || (
                     $mode_cli && (
                         ( false === strpos( $script_name, 'phpunit' ) ) &&
-                        ( false === strpos( $script_name, 'app/console' ) ) &&
-                        ( false === strpos( $script_name, 'installer.php' ) ) &&
-                        ( isset($argv[1]) && false !== strpos($argv[1], 'wtw:api') )
+                        ( false === strpos( $script_name, 'installer.php' ) )
                     )
                 )
             )
@@ -127,12 +124,11 @@ class Service_Manager extends Deployer
 
 		else if (
             ! $build_jenkins &&
-            ! ! isset($jenkins_workspace) &&
+            ! isset($jenkins_workspace) &&
             $mode_cli && ! is_null( $script_name ) && ( FALSE === strpos( $script_name, 'phpunit' ) ) &&
             (
 				( FALSE !== strpos( $script_name, '/web/## FILL PROJECT DIR ##/branches' ) ) ||
-				( FALSE !== strpos( $script_name, 'pear' ) ) ||
-				( $script_name === $script_app_console )
+				( FALSE !== strpos( $script_name, 'pear' ) )
 			)
 		)
 			$file_path = $directory_current.'/../../'.
