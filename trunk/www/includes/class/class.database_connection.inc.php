@@ -214,13 +214,10 @@ class Database_Connection
 				throw new Exception("Invalid query: ".$mysqli->error);
 	
 			if ($expected_data)
-	        {
+	
 				while ($row = $result->fetch_object())
 	
-			        $rows[] = $row;
-
-                $result->free_result();
-            }
+						$rows[] = $row;
 			else 
 	
 				$rows['result'] = $result;
@@ -405,7 +402,7 @@ class Database_Connection
 
 		else if ( ! $mysqli->select_db($database) )
 
-			throw new Exception(sprintf('Cannot use %s [%s]', $database, $mysqli->error));
+			throw new Exception('Cannot use '.$database . ' ['.$mysqli->error.']');
 		else
 
 			return $mysqli;
