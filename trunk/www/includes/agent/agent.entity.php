@@ -609,6 +609,12 @@ class Entity implements Model_Entity
 			$_entity_type = static::getSignature();
 
 			$entity_type = $_entity_type;
+
+            if (!is_null(self::$namespace) &&
+                !in_array($_entity_type, array(CLASS_ENTITY, CLASS_ENTITY_TYPE)))
+            {
+                $entity_type = self::$namespace . '\\' . $entity_type;
+            }
 		}
 
 		if ( is_null( $properties ) )
@@ -881,7 +887,14 @@ class Entity implements Model_Entity
 	{
 		$configuration = array();
 
-		self::checkStaticParameters($entity_type);
+		static::checkStaticParameters($entity_type);
+
+        if (false !== strpos($entity_type, '\\')) {
+            $classParts = explode('\\', $entity_type);
+            $namespacedClassName = $classParts[count($classParts) - 1];
+        } else {
+            $namespacedClassName = $entity_type;
+        }
 
 		switch ($configuration_type)
 		{
@@ -895,7 +908,7 @@ class Entity implements Model_Entity
 									PREFIX_PREFIX.
 									PREFIX_TABLE.
 									PREFIX_COLUMN.
-									$entity_type
+                                    $namespacedClassName
 								)							
 							)
 						?
@@ -904,7 +917,7 @@ class Entity implements Model_Entity
 									PREFIX_PREFIX.
 									PREFIX_TABLE.
 									PREFIX_COLUMN.
-									$entity_type
+                                    $namespacedClassName
 								)
 							)
 						:
@@ -916,14 +929,14 @@ class Entity implements Model_Entity
 							defined(
 								strtoupper(
 									PREFIX_TABLE.
-									$entity_type
+                                    $namespacedClassName
 								)
 							)
 						?
 								constant(
 									strtoupper(
 										PREFIX_TABLE.
-										$entity_type
+                                        $namespacedClassName
 									)
 								)
 						:
@@ -934,14 +947,14 @@ class Entity implements Model_Entity
 							defined(
 								strtoupper(
 									PREFIX_TABLE.PREFIX_ALIAS.
-									$entity_type
+                                    $namespacedClassName
 								)
 							)
 						?
 								constant(
 									strtoupper(
 										PREFIX_TABLE.PREFIX_ALIAS.
-										$entity_type
+                                        $namespacedClassName
 									)
 								)
 						:
