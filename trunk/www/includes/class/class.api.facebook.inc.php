@@ -175,10 +175,10 @@ namespace api
 		public static function encode( $resource, $encoding = NULL )
 		{
 			$_resource = $resource;
-		
-			if ( str_valid( $encoding ) && function_exists( $encoding ) );
-		
-				$_resource = $encoding( $resource );	
+
+			if ( str_valid( $encoding ) && function_exists( $encoding ) ) {
+				$_resource = $encoding( $resource );
+         }
 		
 			return $_resource;
 		}
