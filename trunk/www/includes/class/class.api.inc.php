@@ -698,7 +698,7 @@ class Api extends Transfer
 	{
 		global $class_application, $verbose_mode;
 
-		$class_token = $class_application::getTokenClass();
+		$class_token = $class_application::getTokenClass(NAMESPACE_API);
 
 		$tokens_tuples = array();
 	
@@ -1080,7 +1080,7 @@ class Api extends Transfer
 
 		$class_data_fetcher = $class_application::getDataFetcherClass();
 		$class_dumper = $class_application::getDumperClass();
-		$class_token = $class_application::getTokenClass();
+		$class_token = $class_application::getTokenClass(NAMESPACE_API);
 		$class_twitteroauth = $class_application::getTwitteroauthClass();
 
 		if ( ! $verbose )
@@ -1483,7 +1483,7 @@ class Api extends Transfer
 
 		$class_dumper = $class_application::getDumperClass();
 
-		$class_token = $class_application::getTokenClass();
+		$class_token = $class_application::getTokenClass(NAMESPACE_API);
 
 		list( $service, $service_type_default ) = self::checkService( $service );
 
@@ -1533,7 +1533,7 @@ class Api extends Transfer
 
 		$class_dumper = $class_application::getDumperClass();
 
-		$class_token = $class_application::getTokenClass();
+		$class_token = $class_application::getTokenClass(NAMESPACE_API);
 
 		list( $service, $service_type_default ) = self::checkService( $service );
 
