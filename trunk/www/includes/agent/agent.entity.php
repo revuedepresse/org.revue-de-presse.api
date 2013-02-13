@@ -564,6 +564,10 @@ class Entity implements Model_Entity
 		{
 			$class = static::getSignature( TRUE );
 
+            if (!class_exists($class) && !is_null(static::$namespace)) {
+                $class = static::$namespace . '\\' . $class;
+            }
+
 			$entity = new $class( $properties );
 
 			$last_insert_id = $entity->serialize(

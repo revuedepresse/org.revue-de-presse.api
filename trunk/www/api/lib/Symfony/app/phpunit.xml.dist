@@ -12,7 +12,7 @@
         stopOnFailure               = "true"
         syntaxCheck                 = "true"
         bootstrap                   = "bootstrap.test.php" >
-    
+
     <testsuites>
         <testsuite name="WTW Test Suite">
             <directory>../src/*/*/*Bundle/Tests</directory>

@@ -15,7 +15,7 @@ if ( ! function_exists( 'assignConstant' ) )
     }
 }
 
-$cli_mode = defined( 'STDIN' ) ? TRUE : FALSE;
+$cli_mode = defined( 'STDIN' ) ? true : false;
 
 assignConstant( 'CLI_MODE', $cli_mode );
 assignConstant( 'USER_SYSTEM', exec( 'whoami' ) );
@@ -53,7 +53,7 @@ if ( ! function_exists( FUNCTION_ARRAY_HAS_VALUE ) )
 	{
 		if ( ! is_string( $str) || ! is_array( $arr ) )
 
-			$result = NULL;
+			$result = null;
 		else
 			$result = isset( $arr[$str] ) && ( count( $arr[$str] ) > 0 );
 
@@ -73,7 +73,7 @@ if ( ! function_exists( FUNCTION_ARRAY_VALID ) )
 	{
 		if ( ! is_array( $arr ) || is_null( $arr ) )
 
-			$result = NULL;
+			$result = null;
 		else
 			$result = count( $arr ) > 0;
 
@@ -91,7 +91,7 @@ if ( ! function_exists( FUNCTION_AUTOLOAD_SEFI ) )
 	*/
 	function autoloadSefi( $class )
 	{
-		$verbose_mode = FALSE;
+		$verbose_mode = false;
 	
 		$base_directory = dirname(__FILE__);
 	
@@ -107,7 +107,7 @@ if ( ! function_exists( FUNCTION_AUTOLOAD_SEFI ) )
 		$_namespace = '';
 		
 		// loop for namespaces
-		if ( strpos($class, "\\") !== FALSE )
+		if ( strpos($class, "\\") !== false )
 		{
 			// get the namespace
 			list($namespace, $class) = explode("\\", $class);
@@ -238,7 +238,7 @@ if ( ! function_exists( FUNCTION_DECLARE_CONSTANT_BATCH ) )
     * 									in a reverse order
     * @return  	nothing
     */
-    function declareConstantsBatch( $batch, $reverse_order = TRUE )
+    function declareConstantsBatch( $batch, $reverse_order = true )
     {
 		if ( is_array( $batch ) && count( $batch ) )
 		{
@@ -394,19 +394,19 @@ if ( ! function_exists( FUNCTION_FPRINT ) )
 	*/	
 	function fprint(
 		$var,
-		$display = FALSE,
-		$exit = FALSE,
-		$return = FALSE,
+		$display = false,
+		$exit = false,
+		$return = false,
 		$tag = 'pre'
 	)
 	{
-		$no_tag = FALSE;
+		$no_tag = false;
 
 		if ( is_null( $tag ) )
 		{
 			$line_feed = "\n\n";
 
-			$no_tag = TRUE;
+			$no_tag = true;
 		}
 		else 
 
@@ -420,7 +420,7 @@ if ( ! function_exists( FUNCTION_FPRINT ) )
 					(
 							is_object( $var ) || is_array( $var )
 						?
-							print_r( $var, TRUE)
+							print_r( $var, true)
 						:
 							(
 									is_string( $var )
@@ -442,7 +442,7 @@ if ( ! function_exists( FUNCTION_FPRINT ) )
 		if ( $condition_display ) echo $_message;
 		else if ( $condition_return ) return $_message;
 		
-		if ( $exit !== FALSE )
+		if ( $exit !== false )
 		{
 			if (
 				is_array( $exit ) &&
@@ -477,7 +477,7 @@ if ( ! function_exists( FUNCTION_GET_VARIABLE_NAME ) )
 	*/	
 	function getVariableName(
 		&$var,
-		$scope = FALSE,
+		$scope = false,
 		$prefix = 'unique',
 		$suffix = 'value'
 	)
@@ -493,7 +493,7 @@ if ( ! function_exists( FUNCTION_GET_VARIABLE_NAME ) )
 	
 		$var = $new = $prefix.rand().$suffix;
 		
-		$vname = FALSE;
+		$vname = false;
 	
 		if ( is_array( $vals ) && count( $vals ) > 0 )
 	
@@ -506,7 +506,7 @@ if ( ! function_exists( FUNCTION_GET_VARIABLE_NAME ) )
 			}
 		else
 
-			return NULL;
+			return null;
 
 		$var = $old;
 		
@@ -524,10 +524,10 @@ if ( ! function_exists( FUNCTION_CONSTANT_REVERSE ) )
 	* @param	boolean	$strict	strict reverse
 	* @return  	string  reversed constant
 	*/	
-	function reverse_constant( $value, $prefix, $strict = FALSE )
+	function reverse_constant( $value, $prefix, $strict = false )
 	{
 		// get the user defined constants
-		$constants = get_defined_constants( TRUE );
+		$constants = get_defined_constants( true );
 	
 		// get the matching keys
 		$keys = array_keys( $constants['user'], $value, $strict );
@@ -595,7 +595,7 @@ if ( ! function_exists( FUNCTION_OBJECT_HAS_NON_EMPTY_STRING_MEMBER ) )
 	* 					variable of the object $obj
 	* 					FALSE otherwise
 	*/
-    function str_mmb_obj( $str, $obj, $string = TRUE )
+    function str_mmb_obj( $str, $obj, $string = true )
     {
 		if (
 			! is_object( $obj ) ||
@@ -604,7 +604,7 @@ if ( ! function_exists( FUNCTION_OBJECT_HAS_NON_EMPTY_STRING_MEMBER ) )
 			( strlen( $str ) === 0 )
 		)
 
-			$result = NULL;
+			$result = null;
 		else 
 			$result = 
 				is_object( $obj ) && isset( $obj->$str ) &&
@@ -623,17 +623,19 @@ if ( ! function_exists( FUNCTION_OBJECT_HAS_NON_EMPTY_STRING_MEMBER ) )
 
 if ( ! function_exists( FUNCTION_START_SESSION ) )
 {
-	/**
-	* Start a new session
-	*
-	* @param	boolean	$bootstrap	boostrap flag
-	* @return	nothing
-	*/
-	function &sessionStart( $bootstrap = FALSE )
+    /**
+     * Start a new session
+     * @param bool $bootstrap
+     *
+     * @return mixed
+     * @throws Exception
+     */
+    function &sessionStart( $bootstrap = false )
 	{
-		global $session_id, $jenkins_workspace;
+		global $session_id, $jenkins_workspace, $use_front_controller;
 
-		if ( headers_sent() && $bootstrap && ! $jenkins_workspace )
+		if ( headers_sent() && $bootstrap
+            && ! $jenkins_workspace && ! $use_front_controller )
 
 			throw new Exception(
 				sprintf(
@@ -648,7 +650,7 @@ if ( ! function_exists( FUNCTION_START_SESSION ) )
 
 			if ( CLI_MODE ) // if cli mode is enabled
 			{
-				$close = function() { return TRUE; };
+				$close = function() { return true; };
 
 				$destroy =
 					function( $session_id )
@@ -664,20 +666,20 @@ if ( ! function_exists( FUNCTION_START_SESSION ) )
 					}
 				;
 
-				$gc = function() { return TRUE; };
+				$gc = function() { return true; };
 
-				$open = function( $save_path, $session_id ) { return TRUE; };
+				$open = function( $save_path, $session_id ) { return true; };
 
-				$read = function() { return FALSE; };
+				$read = function() { return false; };
 
-				$write = function( $key, $value ) { return TRUE; };
+				$write = function( $key, $value ) { return true; };
 				
 				session_set_save_handler( $open, $close, $read, $write, $destroy, $gc );
 
 				$_SERVER['REQUEST_URI'] = '/'; // emulate interactive mode
 			}
 
-            if ( ! headers_sent() ) 
+            if ( ! headers_sent() && ! $use_front_controller )
             {
                 $session_id = session_start();
             }
@@ -701,7 +703,7 @@ if ( ! function_exists( FUNCTION_STRING_VALID ) )
 	{
 		if ( is_null( $str ) || ! is_string( $str ) )
 
-			$result = NULL;
+			$result = null;
 		else
 			$result = ( strlen( $str ) > 0 ) ;
 
