@@ -15,6 +15,6 @@ wtw_api_facebook_bundle:
     prefix:       /
 
 wtw_documentation_markdown:
-    resource:     "@WTWDocumentationMarkdownBundle/Controller/"
+    resource:     "@WTWDocumentationMarkdownBundle/Controller"
     type:         annotation
     prefix:       /

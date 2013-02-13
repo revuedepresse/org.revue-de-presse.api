@@ -3,6 +3,6 @@ wtw_api_facebook_bundle:
     prefix:   /sf2
 
 wtw_documentation_markdown:
-    resource: "@WTWDocumentationMarkdownBundle/Controller/"
+    resource: "@WTWDocumentationMarkdownBundle/Controller"
     type:     annotation
     prefix:   /sf2
