@@ -104,7 +104,7 @@ class Service_Manager extends Deployer
 
         if ($environment_development)
 			$file_path =
-				$directory_current . '/../../' .
+				$directory_current . '/../../../settings/' .
 				$file_name_settings
 			;
 
