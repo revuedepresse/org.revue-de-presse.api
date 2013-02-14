@@ -17,8 +17,13 @@ namespace cid;
 class Tokens_Stream extends \Alpha
 {
     public $context;
+
     static protected $persistent_context;
+
     static protected $position;
+
+    static protected $properties;
+
     static protected $river;
 
     /**
@@ -556,7 +561,7 @@ class Tokens_Stream extends \Alpha
         }
 
         if (file_exists($phpBinary)) {
-            $result = exec( '/opt/local/php/bin/php -l "' . $file_path . '"', $output );
+            $result = exec( $phpBinary . ' -l "' . $file_path . '"', $output );
 
             try {
                 if ( 0 !== strpos( $result, 'No syntax errors detected' ) )
@@ -1236,47 +1241,22 @@ class Tokens_Stream extends \Alpha
         global $class_application;
         $class_entity = $class_application::getEntityClass();
 
-        self::validateAccessMode($properties);
-        self::validateEntryPoint($properties);
-
-        $directory_root = self::getRootDirectory();
+        self::$properties = new \stdClass();
+        self::validateProperties($properties);
 
         $protocol = self::getProtocol();
         $validPath = self::isPathValid($properties);
         $validRequestURI = self::isRequestURIValid($properties);
 
         $access_mode = self::extractAccessMode($properties);
-        $path = self::extractPath($properties);
 
         if ( !$validPath || !$validRequestURI )
         {
-            $requestUri = self::inferRequestUri($properties);
-
-            if ( $validRequestURI )
-            {
-                $path = self::inferPathFromRequestUri($requestUri);
-                $properties[PROPERTY_PATH] = $path;
-            } else {
-                if (
-                    !$validPath ||
-                    ( false !== strpos( $path, $directory_root ) )
-                )
-                {
-                    $properties[PROPERTY_PATH] = self::inferPathFromRootDirectory($path);
-                    $properties[PROPERTY_PATH_FILE] = $path;
-                    $path = $requestUri;
-                }
-
-                $properties[PROPERTY_URI_REQUEST] = $requestUri;
-            }
-
-            if ( ! isset( $properties[PROPERTY_PATH_FILE] ) )
-            {
-                $properties[PROPERTY_PATH_FILE] =
-                    $directory_root .
-                    $properties[PROPERTY_URI_REQUEST]
-                ;
-            }
+            self::validateFilePath($properties);
+            $path = self::inferPath($properties);
+            $properties = self::forwardProperties($properties);
+        } else {
+            $path = self::extractPath($properties);
         }
 
         if (
@@ -1434,11 +1414,88 @@ class Tokens_Stream extends \Alpha
     /**
      * @param $properties
      *
+     * @return string
+     */
+    public static function inferPath($properties)
+    {
+        self::$properties->requestUri = self::inferRequestUri($properties);
+        $path = self::extractPath($properties);
+
+        if (self::isRequestUriValid($properties)) {
+            $path                   = self::inferPathFromRequestUri(self::$properties->requestUri);
+            self::$properties->path = $path;
+        } elseif (
+            !self::isPathValid($properties) ||
+            self::isPathNormalized($properties)
+        ) {
+            self::$properties->path     = self::inferPathFromRootDirectory($path);
+            self::$properties->filePath = $path;
+            $path                       = self::$properties->requestUri;
+        }
+
+        return $path;
+    }
+
+    /**
+     * @param $properties
+     *
+     * @return bool
+     */
+    public static function isPathNormalized($properties)
+    {
+        $rootDirectory = self::getRootDirectory();
+        $path = self::extractPath($properties);
+
+        return (false !== strpos($path, $rootDirectory));
+    }
+
+    /**
+     * @param $properties
+     */
+    public static function validateFilePath($properties)
+    {
+        $directory_root = self::getRootDirectory();
+
+        if (!isset($properties[PROPERTY_PATH_FILE])) {
+            self::$properties->filePath =
+                $directory_root . self::$properties->requestUri;
+        }
+    }
+
+    public static function validateProperties($properties)
+    {
+        self::validateAccessMode($properties);
+        self::validateEntryPoint($properties);
+    }
+
+    /**
+     * @param $properties
+     *
+     * @return mixed
+     */
+    public static function forwardProperties($properties)
+    {
+        if (isset(self::$properties->filePath)) {
+            $properties[PROPERTY_PATH_FILE] = self::$properties->filePath;
+        }
+        if (isset(self::$properties->requestUri)) {
+            $properties[PROPERTY_URI_REQUEST] = self::$properties->requestUri;
+        }
+        if (isset(self::$properties->path)) {
+            $properties[PROPERTY_PATH] = self::$properties->path;
+        }
+
+        return $properties;
+    }
+
+    /**
+     * @param $properties
+     *
      * @return null|string
      */
     public static function inferRequestUri($properties)
     {
-        $validRequestURI = self::isRequestURIValid($properties);
+        $validRequestURI = self::isRequestUriValid($properties);
 
         if ($validRequestURI) {
             $requestUri = self::extractRequestURI($properties);
@@ -1484,15 +1541,13 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
-     * @param $requestUri
-     *
      * @return string
      */
-    public static function inferPathFromRequestUri($requestUri)
+    public static function inferPathFromRequestUri()
     {
         $baseUrl = self::getProtocol() . '://' . self::getHost();
 
-        return $baseUrl . $requestUri;
+        return $baseUrl . self::$properties->requestUri;
     }
 
     /**
@@ -1581,7 +1636,7 @@ class Tokens_Stream extends \Alpha
     {
         if (
             !($validPath = self::isPathValid($properties)) &&
-            !($validRequestURI = self::isRequestURIValid($properties))
+            !($validRequestURI = self::isRequestUriValid($properties))
         ) {
             throw new \Exception(
                 sprintf(EXCEPTION_INVALID_PROPERTY, PROPERTY_ENDPOINT));
@@ -1637,7 +1692,7 @@ class Tokens_Stream extends \Alpha
      *
      * @return bool
      */
-    public static function isRequestURIValid($properties)
+    public static function isRequestUriValid($properties)
     {
         return self::isPropertyValid(PROPERTY_URI_REQUEST, $properties);
     }
