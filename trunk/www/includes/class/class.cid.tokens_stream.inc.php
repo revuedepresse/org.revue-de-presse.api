@@ -1238,26 +1238,14 @@ class Tokens_Stream extends \Alpha
      */
     public static function checkProperties( $properties )
     {
-        global $class_application;
-        $class_entity = $class_application::getEntityClass();
-
         self::$properties = new \stdClass();
         self::validateProperties($properties);
 
-        $protocol = self::getProtocol();
-        $validPath = self::isPathValid($properties);
-        $validRequestURI = self::isRequestURIValid($properties);
+        $path = self::checkPath($properties);
 
+        self::validateFilePath($properties);
+        $properties = self::forwardProperties($properties);
         $access_mode = self::extractAccessMode($properties);
-
-        if ( !$validPath || !$validRequestURI )
-        {
-            self::validateFilePath($properties);
-            $path = self::inferPath($properties);
-            $properties = self::forwardProperties($properties);
-        } else {
-            $path = self::extractPath($properties);
-        }
 
         if (
             in_array( $access_mode, array(
@@ -1269,13 +1257,15 @@ class Tokens_Stream extends \Alpha
         ) // these accessing modes induce the creation of non existing files
         {
             if ( isset( $properties[PROPERTY_SIGNAL] ) )
-
+            {
+                $protocol = self::getProtocol();
                 $signal = $properties[PROPERTY_SIGNAL];
-            else
-
+            }
+            else {
                 throw new \Exception( sprintf(
                     EXCEPTION_INVALID_ENTITY, ENTITY_SIGNAL
                 ) );
+            }
 
             $options = array(
                 $protocol => array(
@@ -1359,13 +1349,14 @@ class Tokens_Stream extends \Alpha
             case FILE_ACCESS_MODE_READ_ONLY:
             case FILE_ACCESS_MODE_WRITE:
 
-                if ( ! isset( $properties[PROPERTY_FORMAT] ) )
-
+                if ( ! isset( $properties[PROPERTY_FORMAT] ) ) {
+                    global $class_application;
+                    $class_entity = $class_application::getEntityClass();
                     $properties[PROPERTY_FORMAT] =
                         $class_entity::getDefaultType( null, ENTITY_FORMAT )
                             ->{PROPERTY_VALUE}
                     ; // xhtml is the default format type
-
+                }
                 // Default length and offset properties definition
                 // aim to handle the whole signal
                 if ( ! isset( $properties[PROPERTY_LENGTH] ) )
@@ -1414,6 +1405,22 @@ class Tokens_Stream extends \Alpha
     /**
      * @param $properties
      *
+     * @return null|string
+     */
+    public static function checkPath($properties)
+    {
+        if (!self::isPathValid($properties) || !self::isRequestURIValid($properties)) {
+            $path = self::inferPath($properties);
+        } else {
+            $path = self::extractPath($properties);
+        }
+
+        return $path;
+    }
+
+    /**
+     * @param $properties
+     *
      * @return string
      */
     public static function inferPath($properties)
@@ -1451,14 +1458,20 @@ class Tokens_Stream extends \Alpha
 
     /**
      * @param $properties
+     *
+     * @throws \RuntimeException
      */
     public static function validateFilePath($properties)
     {
         $directory_root = self::getRootDirectory();
 
         if (!isset($properties[PROPERTY_PATH_FILE])) {
-            self::$properties->filePath =
-                $directory_root . self::$properties->requestUri;
+            if (!isset(self::$properties->requestUri)) {
+                throw new \RuntimeException('Invalid request URI');
+            } else {
+                self::$properties->filePath =
+                    $directory_root . self::$properties->requestUri;
+            }
         }
     }
 
