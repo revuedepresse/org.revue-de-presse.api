@@ -118,7 +118,7 @@ class Tokens_Stream extends \Alpha
     * (of the current TOKENS_STREAM object)
     * @see      TOKENS_STREAM->getRiver()
     *
-    * @param    string  $key    access key 
+    * @param    string  $key    access key
     * @return   string  entry point
     */
     public function &getEntryPoint( $key = null)
@@ -150,15 +150,15 @@ class Tokens_Stream extends \Alpha
 
     /**
     * Get a key
-    * 
+    *
     * @return mixed key
     */
     public function getKey()
     {
         $key = null;
-        
+
         if ( isset( $this->{PROPERTY_KEY} ) ) $key = $this->{PROPERTY_KEY};
-            
+
         return $key;
     }
 
@@ -171,7 +171,7 @@ class Tokens_Stream extends \Alpha
     */
     public function getOption( $name, $protocol = null )
     {
-        $option = 
+        $option =
         $protocol_options = null;
         $options = $this->getOptions();
 
@@ -289,7 +289,7 @@ class Tokens_Stream extends \Alpha
     {
         //$this->close( NULL, TRUE );
 
-        if ( 
+        if (
             ( $consistent = $this->getOption( PROPERTY_SERIALIZABLE ) ) &&
             ( $consistent === true )
         )
@@ -300,7 +300,7 @@ class Tokens_Stream extends \Alpha
     * Tests for end-of-file on a file pointer
     * Retrieve current stream size before checking
     * if current position incremented with the current number of bytes read
-    * would not reach nor exceed the limit 
+    * would not reach nor exceed the limit
     *
     * @return   nothing
     */
@@ -319,14 +319,14 @@ class Tokens_Stream extends \Alpha
 
         return $position >= $size;
     }
-    
+
     /**
     * Open a stream
     *
     * @param    string  $path           access path
     * @param    string  $mode           opening mode
     * @param    integer $options        optional flags
-    * @param    string  &$opened_path   path to opened resource 
+    * @param    string  &$opened_path   path to opened resource
     * @return   stream resource
     */
     public function stream_open(
@@ -335,7 +335,7 @@ class Tokens_Stream extends \Alpha
         $options = STREAM_REPORT_ERRORS,
         &$opened_path
     )
-    {                   
+    {
         $callback_parameters = false;
 
         if (
@@ -417,19 +417,19 @@ class Tokens_Stream extends \Alpha
                         if ( str_mmb_obj(
                                 PROPERTY_OFFSET, ( object ) $options, false
                         ) )
-                            $offset = $options[PROPERTY_OFFSET];    
+                            $offset = $options[PROPERTY_OFFSET];
 
                         $length_bytes = $length * $hash_length;
                         $offset_bytes = $offset * $hash_length;
-    
+
                         if ( $length_bytes > $max_chunk_size )
                             $length_bytes = $max_chunk_size;
-                        
+
                         $new_position = $offset_bytes + $length_bytes;
-    
+
                         if ( $new_position > $size - $hash_length )
                             $new_position = $size - $hash_length;
-    
+
                         self::setPosition( $new_position );
 
                         $subsequence = substr(
@@ -445,7 +445,7 @@ class Tokens_Stream extends \Alpha
                     throw new \Exception( sprintf(
                         EXCEPTION_INVALID_PROPERTY, ENTITY_SIZE
                     ) );
-            }       
+            }
             else
                 throw new \Exception( sprintf(
                     EXCEPTION_INVALID_PROPERTY, ENTITY_SEQUENCE
@@ -467,7 +467,7 @@ class Tokens_Stream extends \Alpha
     */
     public function stream_seek( $offset, $whence = SEEK_SET )
     {
-    }       
+    }
 
     /**
     * Retrieve the current position of a stream
@@ -505,7 +505,7 @@ class Tokens_Stream extends \Alpha
         $read_tokens_count = self::slen( $properties[PROPERTY_URI_REQUEST] );
 
         if ( isset( $stream->{PROPERTY_SUBSTREAM} ) )
-        
+
             $bytes = self::renderSignal(
                 self::buildSignal( $stream->{PROPERTY_SUBSTREAM} ),
                 RENDER_TYPE_SIGNAL,
@@ -552,7 +552,7 @@ class Tokens_Stream extends \Alpha
             if ( 0 !== strpos( $result, 'No syntax errors detected' ) )
 
                 throw new \Exception(
-                    EXCEPTION_SOURCE_BUILDER_SYNTAX_ERROR 
+                    EXCEPTION_SOURCE_BUILDER_SYNTAX_ERROR
                 );
         }
         catch ( \Exception $exception )
@@ -590,7 +590,7 @@ class Tokens_Stream extends \Alpha
     public function tokenize()
     {
         $tokens = array();
-        
+
         $check_single_token = function( $token )
         {
             list( , $properties ) = each( $token );
@@ -604,10 +604,10 @@ class Tokens_Stream extends \Alpha
             $this->{PROPERTY_SIGNAL} = self::applyTransformations( array(
                 PROPERTY_CONTAINER => $this,
                 PROPERTY_SUBJECT => $this->{PROPERTY_SIGNAL}
-            ) );        
+            ) );
             $tokens = token_get_all( $this->{PROPERTY_SIGNAL} );
         }
-    
+
         if ( count( $tokens ) === 1 )
         {
             if ( $check_single_token( $tokens ) )
@@ -624,7 +624,7 @@ class Tokens_Stream extends \Alpha
                     );
                 else
                 {
-                    array_shift( $_tokens );                        
+                    array_shift( $_tokens );
                     $tokens = $_tokens;
                 }
             }
@@ -663,7 +663,7 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
-    * Add a transformation 
+    * Add a transformation
     *
     * @param    array   $properties
     * @return   container
@@ -718,7 +718,7 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
-    * Add a transformation 
+    * Add a transformation
     *
     * @param    string  $name
     * @param    mixed   $value
@@ -758,7 +758,7 @@ class Tokens_Stream extends \Alpha
     */
     public static function appendToStream( $store )
     {
-        $store[PROPERTY_MODE_ACCESS] = FILE_ACCESS_MODE_APPEND_ONLY; 
+        $store[PROPERTY_MODE_ACCESS] = FILE_ACCESS_MODE_APPEND_ONLY;
         return self::writeInStream( $store );
     }
 
@@ -815,7 +815,7 @@ class Tokens_Stream extends \Alpha
             $_subject = str_replace(
                 $collection_search, $collection_replace,
                 $subject
-            );                  
+            );
 
 
         return $_subject;
@@ -840,7 +840,7 @@ class Tokens_Stream extends \Alpha
         if ( isset( $container->{PROPERTY_TRANSFORMATIONS} ) )
         {
             $transformations = $container->{PROPERTY_TRANSFORMATIONS};
-        
+
             if (
                 isset( $transformations[PROPERTY_STACK] ) &&
                 is_array( $transformations[PROPERTY_STACK] )
@@ -851,7 +851,7 @@ class Tokens_Stream extends \Alpha
                 foreach ( $stack as $index => $properties )
                 {
                     if ( isset( $properties[PROPERTY_TRANSFORMATION] ) )
-                    
+
                         $transformation = $properties[PROPERTY_TRANSFORMATION];
 
                     if ( $method = self::getMethod( $transformation ) )
@@ -863,15 +863,15 @@ class Tokens_Stream extends \Alpha
                             $arguments = $transformation[PROPERTY_ARGUMENTS];
 
                         if ( $arguments[0] && is_array( $arguments[0] ) )
-                        
+
                             $arguments[0][PROPERTY_SUBJECT] = $subject;
 
                         $result = call_user_func_array(
-                            $method, $arguments 
+                            $method, $arguments
                         );
                     }
                     else
-                        throw new \Exception( sprintf( 
+                        throw new \Exception( sprintf(
                             EXCEPTION_INVALID_ENTITY, ENTITY_METHOD
                         ) );
 
@@ -879,7 +879,7 @@ class Tokens_Stream extends \Alpha
             }
         }
 
-        return $result; 
+        return $result;
     }
 
     /**
@@ -906,7 +906,7 @@ class Tokens_Stream extends \Alpha
         $signal = array();
 
         if ( is_array( $stream ) )
-    
+
             while ( list( $token_index, $token ) = each( $stream ) )
             {
                 if (
@@ -1002,7 +1002,7 @@ class Tokens_Stream extends \Alpha
                     $options[$protocol] = array_merge(
                         $_options[$protocol], $options[$protocol]
                     );
-                    
+
                 }
                 else if (
                     isset( $_options[$protocol][PROPERTY_SIGNAL] ) &&
@@ -1010,7 +1010,7 @@ class Tokens_Stream extends \Alpha
                 )
                     $options[$protocol][PROPERTY_SIGNAL] =
                         $_options[$protocol][PROPERTY_SIGNAL]
-                    ;               
+                    ;
             }
 
             if ( ! isset( $options[PROPERTY_CONTAINER_REFERENCES] ) )
@@ -1117,9 +1117,9 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
-    * Count options to detect possible need for signal retrieval 
+    * Count options to detect possible need for signal retrieval
     * A special conditional flag "large definition" is made active
-    * when a contextual option is available 
+    * when a contextual option is available
     *   either as a "signal" and contains a non empty value
     *   or as a "file path" and matches with an actual script
     *
@@ -1160,7 +1160,7 @@ class Tokens_Stream extends \Alpha
                 )
             ;
 
-            $large_definition = 
+            $large_definition =
                 (
                     isset( $protocol_options[PROPERTY_PATH_FILE] ) &&
                     ( $file_path = trim(
@@ -1169,7 +1169,7 @@ class Tokens_Stream extends \Alpha
                     ( strlen( $file_path ) > 0 ) &&
                     file_exists( $file_path )
                 ) || $large_definition
-            ;               
+            ;
 
             if ( isset( $protocol_options[PROPERTY_METADATA] ) )
                 $metadata = $protocol_options[PROPERTY_METADATA];
@@ -1213,77 +1213,30 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
-     * Initialize properties when needed and check their consistency
-     *   access mode
-     *   context
-     *   file path
-     *   format
-     *   length
-     *   offset
-     *   path
-     *   placeholders
-     *   signal
-     *   size
-     *   URI request
+     * @param $properties
      *
-     * @see      TOKENS_STREAM :: extractOptions
-     * @see      TOKENS_STREAM :: getProtocol
-     * @see      TOKENS_STREAM :: normalizeStreamContext
-     * @see      TOKENS_STREAM :: getRootDirectory
-     * @see      TOKENS_STREAM :: initialize
-     * @see      TOKENS_STREAM :: slen
-     * @param    array   $properties properties
-     * @return   array   properties
+     * @return mixed
+     * @throws \Exception
      */
     public static function checkProperties( $properties )
     {
         global $class_application;
         $class_entity = $class_application::getEntityClass();
 
+        self::validateAccessMode($properties);
+        self::validateEntryPoint($properties);
+
         $directory_root = self::getRootDirectory();
 
-        $invalid_path = true;
-        $invalid_request_uri = true;
-
-        $path =
-        $request_uri = null;
-
         $protocol = self::getProtocol();
+        $validPath = self::isPathValid($properties);
+        $validRequestURI = self::isRequestURIValid($properties);
 
-        if (
-            ! isset( $properties[PROPERTY_MODE_ACCESS] ) ||
-            ! ( $access_mode = $properties[PROPERTY_MODE_ACCESS] )
-        )
-            throw new \Exception(
-                sprintf(
-                    EXCEPTION_INVALID_PROPERTY,
-                    str_replace( '_', ' ', PROPERTY_MODE_ACCESS )
-                )
-            );
+        $access_mode = self::extractAccessMode($properties);
+        $path = self::extractPath($properties);
+        $request_uri = self::extractRequestURI($properties);
 
-        if (
-            isset( $properties[PROPERTY_PATH] ) &&
-            ( $path = trim( $properties[PROPERTY_PATH] ) ) &&
-            ( strlen( $path ) > 0 )
-        )
-            $invalid_path = false;
-
-        if (
-            isset( $properties[PROPERTY_URI_REQUEST] ) &&
-            ( $request_uri = trim( $properties[PROPERTY_URI_REQUEST] ) ) &&
-            ( strlen( $request_uri ) > 0 )
-        )
-            $invalid_request_uri = false;
-
-        if ( $invalid_path && $invalid_request_uri )
-        
-            throw new \Exception(
-                sprintf( EXCEPTION_INVALID_PROPERTY, PROPERTY_ENDPOINT )
-            );
-
-        else if (
-            $invalid_path || ! isset( $properties[PROPERTY_URI_REQUEST] )
-        )
+        if ( ! $validPath || is_null( $request_uri ) )
         {
             $base_url = self::getProtocol() . '://' . self::getHost();
 
@@ -1297,7 +1250,7 @@ class Tokens_Stream extends \Alpha
             }
             else if (
                 ! isset( $properties[PROPERTY_URI_REQUEST] ) &&
-                ! $invalid_path &&
+                $validPath &&
                 ( false === strpos( $path, $directory_root ) )
             )
                 $properties[PROPERTY_URI_REQUEST] = substr(
@@ -1305,7 +1258,7 @@ class Tokens_Stream extends \Alpha
                 ) ;
 
             else if (
-                ! isset( $properties[PROPERTY_URI_REQUEST] ) && 
+                ! isset( $properties[PROPERTY_URI_REQUEST] ) &&
                 ( 0 === strpos( $path, $directory_root ) )
             )
             {
@@ -1334,10 +1287,10 @@ class Tokens_Stream extends \Alpha
                 FILE_ACCESS_MODE_OVERWRITE,
                 FILE_ACCESS_MODE_WRITE_ONLY
             ) )
-        ) // these accessing modes induce the creation of non existing files 
+        ) // these accessing modes induce the creation of non existing files
         {
             if ( isset( $properties[PROPERTY_SIGNAL] ) )
-            
+
                 $signal = $properties[PROPERTY_SIGNAL];
             else
 
@@ -1383,7 +1336,7 @@ class Tokens_Stream extends \Alpha
             $properties[PROPERTY_CONTEXT] = &$context;
             $properties[PROPERTY_PATH_FILE] = $file_path;
 
-            if ( $invalid_request_uri )
+            if ( !$validRequestURI )
 
                 $properties[PROPERTY_URI_REQUEST] =
                     substr(
@@ -1393,12 +1346,12 @@ class Tokens_Stream extends \Alpha
                 ;
 
             $handle = fopen( $file_path, $access_mode );
-            fclose( $handle ); 
+            fclose( $handle );
         }
         else if (
             in_array( $access_mode, array( FILE_ACCESS_MODE_READ_ONLY ) )
         )
-        {   
+        {
             if (
                 ! isset( $properties[PROPERTY_SIGNAL] ) &&
                 isset( $properties[PROPERTY_PATH_FILE] ) &&
@@ -1426,9 +1379,9 @@ class Tokens_Stream extends \Alpha
             case FILE_ACCESS_MODE_APPEND:
             case FILE_ACCESS_MODE_READ_ONLY:
             case FILE_ACCESS_MODE_WRITE:
-    
+
                 if ( ! isset( $properties[PROPERTY_FORMAT] ) )
-    
+
                     $properties[PROPERTY_FORMAT] =
                         $class_entity::getDefaultType( null, ENTITY_FORMAT )
                             ->{PROPERTY_VALUE}
@@ -1446,7 +1399,7 @@ class Tokens_Stream extends \Alpha
 
                     break;
         }
-        
+
         switch ( $access_mode )
         {
             case FILE_ACCESS_MODE_APPEND_ONLY:
@@ -1477,6 +1430,134 @@ class Tokens_Stream extends \Alpha
         } // checking signal consistency
 
         return $properties;
+    }
+
+    public static function extractAccessMode($properties)
+    {
+        return self::extractProperty(PROPERTY_MODE_ACCESS, $properties);
+    }
+
+    public static function extractPath($properties)
+    {
+        return self::extractProperty(PROPERTY_PATH, $properties);
+    }
+
+    public static function extractRequestURI($properties)
+    {
+        return self::extractProperty(PROPERTY_URI_REQUEST, $properties);
+    }
+
+    /**
+     * @param $name
+     * @param $properties
+     *
+     * @return null
+     */
+    public static function extractProperty($name, $properties)
+    {
+        $property = null;
+
+        if (self::isPropertyValid($name, $properties))
+        {
+            $property = $properties[$name];
+        }
+
+        return $property;
+    }
+
+    public static function validateAccessMode($properties)
+    {
+        $validAccessMode = self::isPropertyValid(PROPERTY_MODE_ACCESS, $properties);
+
+        if (!$validAccessMode)
+        {
+            throw new \Exception(
+                sprintf(
+                    EXCEPTION_INVALID_PROPERTY,
+                    str_replace('_', ' ', PROPERTY_MODE_ACCESS)
+                )
+            );
+        }
+    }
+
+    /**
+     * @param $properties
+     *
+     * @throws \Exception
+     */
+    public static function validateEntryPoint($properties)
+    {
+        if (
+            !($validPath = self::isPathValid($properties)) &&
+            !($validRequestURI = self::isRequestURIValid($properties))
+        ) {
+            throw new \Exception(
+                sprintf(EXCEPTION_INVALID_PROPERTY, PROPERTY_ENDPOINT));
+        }
+    }
+
+    /**
+     * @param $name
+     * @param $properties
+     *
+     * @return bool
+     */
+    public static function isPropertyValid($name, $properties)
+    {
+        $validProperty = false;
+
+        if (
+            self::isPropertyAvailable($name, $properties) &&
+            ($property = self::trimProperty($properties, $name)) &&
+            (strlen($property) > 0)
+        )
+        {
+            $validProperty = true;
+        }
+
+        return $validProperty;
+    }
+
+    /**
+     * @param $name
+     * @param $properties
+     *
+     * @return bool
+     */
+    public static function isPropertyAvailable($name, $properties)
+    {
+        return isset($properties[$name]);
+    }
+
+    /**
+     * @param $properties
+     * @param $name
+     *
+     * @return string
+     */
+    public static function trimProperty($properties, $name)
+    {
+        return trim($properties[$name]);
+    }
+
+    /**
+     * @param $properties
+     *
+     * @return bool
+     */
+    public static function isRequestURIValid($properties)
+    {
+        return self::isPropertyValid(PROPERTY_URI_REQUEST, $properties);
+    }
+
+    /**
+     * @param $properties
+     *
+     * @return bool
+     */
+    public static function isPathValid($properties)
+    {
+        return self::isPropertyValid(PROPERTY_PATH, $properties);
     }
 
     /**
