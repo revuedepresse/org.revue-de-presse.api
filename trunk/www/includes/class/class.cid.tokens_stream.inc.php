@@ -1250,42 +1250,33 @@ class Tokens_Stream extends \Alpha
 
         if ( !$validPath || !$validRequestURI )
         {
-            $base_url = self::getProtocol() . '://' . self::getHost();
+            $requestUri = self::inferRequestUri($properties);
 
             if ( $validRequestURI )
             {
-                $path = $base_url . self::extractRequestURI($properties);
+                $path = self::inferPathFromRequestUri($requestUri);
                 $properties[PROPERTY_PATH] = $path;
-            }
-            else if (
-                $validPath &&
-                ( false === strpos( $path, $directory_root ) )
-            )
-                $properties[PROPERTY_URI_REQUEST] = substr(
-                    $path, strlen( $base_url )
-                ) ;
+            } else {
+                if (
+                    !$validPath ||
+                    ( false !== strpos( $path, $directory_root ) )
+                )
+                {
+                    $properties[PROPERTY_PATH] = self::inferPathFromRootDirectory($path);
+                    $properties[PROPERTY_PATH_FILE] = $path;
+                    $path = $requestUri;
+                }
 
-            else if (
-                !$validRequestURI &&
-                ( 0 === strpos( $path, $directory_root ) )
-            )
-            {
-                $properties[PROPERTY_URI_REQUEST] =
-                    substr( $path, strlen( $directory_root ) )
-                ;
-                $properties[PROPERTY_PATH] =
-                    $base_url . $properties[PROPERTY_URI_REQUEST]
-                ;
-                $properties[PROPERTY_PATH_FILE] = $path;
-                $path = $properties[PROPERTY_URI_REQUEST];
+                $properties[PROPERTY_URI_REQUEST] = $requestUri;
             }
 
             if ( ! isset( $properties[PROPERTY_PATH_FILE] ) )
-
+            {
                 $properties[PROPERTY_PATH_FILE] =
                     $directory_root .
                     $properties[PROPERTY_URI_REQUEST]
                 ;
+            }
         }
 
         if (
@@ -1438,6 +1429,99 @@ class Tokens_Stream extends \Alpha
         } // checking signal consistency
 
         return $properties;
+    }
+
+    /**
+     * @param $properties
+     *
+     * @return null|string
+     */
+    public static function inferRequestUri($properties)
+    {
+        $validRequestURI = self::isRequestURIValid($properties);
+
+        if ($validRequestURI) {
+            $requestUri = self::extractRequestURI($properties);
+        } else {
+            $requestUri = self::getRequestUriFromPath($properties);
+        }
+
+        return $requestUri;
+    }
+
+    /**
+     * @param $properties
+     *
+     * @return string
+     */
+    public static function getRequestUriFromPath($properties)
+    {
+        $rootDirectory = self::getRootDirectory();
+        $path = self::extractPath($properties);
+
+        if (
+            self::isPathValid($properties) &&
+            (false === strpos($path, $rootDirectory))
+        ) {
+            $requestUri = self::inferRequestUriFromBaseUrl($path);
+        } else {
+            $requestUri = self::inferRequestUriFromFilePath($path);
+        }
+
+        return $requestUri;
+    }
+
+    /**
+     * @param $path
+     *
+     * @return string
+     */
+    public static function inferPathFromRootDirectory($path)
+    {
+        $baseUrl = self::getProtocol() . '://' . self::getHost();
+
+        return $baseUrl . self::inferRequestUriFromFilePath($path);
+    }
+
+    /**
+     * @param $requestUri
+     *
+     * @return string
+     */
+    public static function inferPathFromRequestUri($requestUri)
+    {
+        $baseUrl = self::getProtocol() . '://' . self::getHost();
+
+        return $baseUrl . $requestUri;
+    }
+
+    /**
+     * @param $path
+     *
+     * @return string
+     */
+    public static function inferRequestUriFromFilePath($path)
+    {
+        $rootDirectory = self::getRootDirectory();
+
+        return self::inferRequestUriFromPath($path, $rootDirectory);
+    }
+
+    /**
+     * @param $path
+     *
+     * @return string
+     */
+    public static function inferRequestUriFromBaseUrl($path)
+    {
+        $baseURL = self::getProtocol() . '://' . self::getHost();
+
+        return self::inferRequestUriFromPath($path, $baseURL);
+    }
+
+    public static function inferRequestUriFromPath($path, $reference)
+    {
+        return substr($path, strlen($reference));
     }
 
     public static function extractAccessMode($properties)
