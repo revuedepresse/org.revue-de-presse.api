@@ -482,10 +482,12 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
-    * Write to a stream
-    *
-    * @return   mixed   position
-    */
+     * Write to a stream
+     * @param $data
+     *
+     * @return bool|int
+     * @throws \Exception
+     */
     public function stream_write( $data )
     {
         $key = $this->getKey();
@@ -493,11 +495,9 @@ class Tokens_Stream extends \Alpha
         $bytes_written = strlen( $data );
         $current_position = 0;
         $hash_length = self::getHashLength();
-        $protocol = self::getProtocol();
         $stream = &self::getStream( $key );
         $file_path = $stream->{PROPERTY_PATH_FILE};
         $signal = $stream->{PROPERTY_SIGNAL};
-        $size = $stream->{PROPERTY_SIZE};
         $properties = self::checkProperties( array(
             PROPERTY_MODE_ACCESS => FILE_ACCESS_MODE_READ_ONLY,
             PROPERTY_PATH => $file_path
@@ -545,39 +545,52 @@ class Tokens_Stream extends \Alpha
                 ) );
         }
 
+        /**
+         * @todo Imports php binary location from legacy services settings
+         */
         $output = array();
-        $result = exec( 'php -l "' . $file_path . '"', $output );
 
-        try {
-            if ( 0 !== strpos( $result, 'No syntax errors detected' ) )
-
-                throw new \Exception(
-                    EXCEPTION_SOURCE_BUILDER_SYNTAX_ERROR
-                );
+        $phpBinary = '/opt/local/php/bin/php';
+        if (!file_exists($phpBinary)) {
+            $phpBinary = '/opt/local/php/cgi/bin/php';
         }
-        catch ( \Exception $exception )
-        {
-            if ( INTROSPECTION_VERBOSE )
-            {
-                echo
-                    '<pre>',
-                        highlight_string( file_get_contents( $file_path ) ),
-                        '<br />', print_r( $output[1], true ),
-                    '</pre>'
-                ;
-                global $class_application, $verbose_mode;
-                $class_dumper = $class_application::getDumperClass();
-                $class_dumper::log( __METHOD__, array(
-                    $exception
-                ), true, true );
+
+        if (file_exists($phpBinary)) {
+            $result = exec( '/opt/local/php/bin/php -l "' . $file_path . '"', $output );
+
+            try {
+                if ( 0 !== strpos( $result, 'No syntax errors detected' ) )
+
+                    throw new \Exception(
+                        EXCEPTION_SOURCE_BUILDER_SYNTAX_ERROR
+                    );
             }
-            else self::log(
-                $exception->getMessage(), 'exception',
-                __FILE__, __LINE__, __METHOD__
-            );
-        }
+            catch ( \Exception $exception )
+            {
+                if ( INTROSPECTION_VERBOSE )
+                {
+                    echo
+                        '<pre>',
+                            highlight_string( file_get_contents( $file_path ) ),
+                            '<br />', print_r( $output[1], true ),
+                        '</pre>'
+                    ;
+                    global $class_application, $verbose_mode;
+                    $class_dumper = $class_application::getDumperClass();
+                    $class_dumper::log( __METHOD__, array(
+                        $exception
+                    ), true, true );
+                }
+                else self::log(
+                    $exception->getMessage(), 'exception',
+                    __FILE__, __LINE__, __METHOD__
+                );
+            }
 
-        $success = $result ? strlen( $bytes_written ) : false;
+            $success = $result ? strlen( $bytes_written ) : false;
+        } else {
+            throw new \RuntimeException('PHP binary cannot be found to check script syntax');
+        }
 
         return $success;
     }
@@ -1234,22 +1247,17 @@ class Tokens_Stream extends \Alpha
 
         $access_mode = self::extractAccessMode($properties);
         $path = self::extractPath($properties);
-        $request_uri = self::extractRequestURI($properties);
 
-        if ( ! $validPath || is_null( $request_uri ) )
+        if ( !$validPath || !$validRequestURI )
         {
             $base_url = self::getProtocol() . '://' . self::getHost();
 
-            if ( isset( $properties[PROPERTY_URI_REQUEST] ) )
+            if ( $validRequestURI )
             {
-                $path =
-                    $base_url .
-                    $properties[PROPERTY_URI_REQUEST]
-                ;
+                $path = $base_url . self::extractRequestURI($properties);
                 $properties[PROPERTY_PATH] = $path;
             }
             else if (
-                ! isset( $properties[PROPERTY_URI_REQUEST] ) &&
                 $validPath &&
                 ( false === strpos( $path, $directory_root ) )
             )
@@ -1258,7 +1266,7 @@ class Tokens_Stream extends \Alpha
                 ) ;
 
             else if (
-                ! isset( $properties[PROPERTY_URI_REQUEST] ) &&
+                !$validRequestURI &&
                 ( 0 === strpos( $path, $directory_root ) )
             )
             {
@@ -1336,14 +1344,14 @@ class Tokens_Stream extends \Alpha
             $properties[PROPERTY_CONTEXT] = &$context;
             $properties[PROPERTY_PATH_FILE] = $file_path;
 
-            if ( !$validRequestURI )
-
+            if ( !self::isRequestURIValid($properties) ) {
                 $properties[PROPERTY_URI_REQUEST] =
                     substr(
                         $properties[PROPERTY_PATH_FILE],
                        strlen( self::getRootDirectory() )
                     )
                 ;
+            }
 
             $handle = fopen( $file_path, $access_mode );
             fclose( $handle );
