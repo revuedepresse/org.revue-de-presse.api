@@ -1245,104 +1245,245 @@ class Tokens_Stream extends \Alpha
      */
     public static function checkProperties( $properties )
     {
-        self::$properties = new \stdClass();
         self::validateProperties($properties);
-
         $path = self::checkPath($properties);
         $properties = self::validateFilePath($properties);
+        $properties = self::checkAccessMode($properties, $path);
+        self::setTokensStreamSize($path);
+
+        return self::forwardProperties($properties);
+    }
+
+    /**
+     * @param $properties
+     * @param $path
+     *
+     * @return mixed
+     */
+    public static function checkAccessMode($properties, $path)
+    {
         self::setTokenizationMode($properties);
+        $properties = self::identifyAccessMode($properties, $path);
 
-        // these accessing modes induce the creation of non existing files
-        if ( self::isWriteAccess() )
-        {
-            self::setTokenizationProtocol();
-            self::checkSignal($properties);
-            self::setTokenizationSignal($properties);
-            self::setContextualOptions();
-            self::addDefaultContextualOptions($properties);
-            $properties = self::openTokensStreamFile($path, $properties);
+        return self::checkAccessModeRequirements($properties);
+    }
+
+    /**
+     * @param $properties
+     * @param $path
+     *
+     * @return mixed
+     */
+    public static function identifyAccessMode($properties, $path)
+    {
+        if (self::isWriteAccessMode()) {
+            $properties = self::getWriteProperties($properties, $path);
+        } elseif (self::isReadAccessMode()) {
+            $properties = self::getReadProperties($properties);
+            self::normalizeStreamContext($properties);
         }
-        else if ( self::isReadAccess() )
-        {
-            if (
-                ! isset( $properties[PROPERTY_SIGNAL] ) &&
-                isset( $properties[PROPERTY_PATH_FILE] ) &&
-                str_valid( $file_path = $properties[PROPERTY_PATH_FILE] )
-            )
-            {
-                if ( file_exists( $file_path ) )
-
-                    $properties[PROPERTY_SIGNAL] = file_get_contents(
-                        $file_path
-                    );
-                else
-                    throw new \Exception(
-                        EXCEPTION_MISSING_RESOURCE . ' (' . $file_path . ')'
-                    );
-            }
-
-            self::normalizeStreamContext( $properties );
-        }
-
-        $properties[PROPERTY_SIZE] = self::slen( $path );
-
-        switch ( self::$properties->accessMode )
-        {
-            case FILE_ACCESS_MODE_APPEND:
-            case FILE_ACCESS_MODE_READ_ONLY:
-            case FILE_ACCESS_MODE_WRITE:
-
-                if ( ! isset( $properties[PROPERTY_FORMAT] ) ) {
-                    global $class_application;
-                    $class_entity = $class_application::getEntityClass();
-                    $properties[PROPERTY_FORMAT] =
-                        $class_entity::getDefaultType( null, ENTITY_FORMAT )
-                            ->{PROPERTY_VALUE}
-                    ; // xhtml is the default format type
-                }
-                // Default length and offset properties definition
-                // aim to handle the whole signal
-                if ( ! isset( $properties[PROPERTY_LENGTH] ) )
-
-                    $properties[PROPERTY_LENGTH] = -1;
-
-                if ( ! isset( $properties[PROPERTY_OFFSET] ) )
-
-                    $properties[PROPERTY_OFFSET] = 0;
-
-                    break;
-        }
-
-        switch ( self::$properties->accessMode )
-        {
-            case FILE_ACCESS_MODE_APPEND_ONLY:
-            case FILE_ACCESS_MODE_APPEND:
-            case FILE_ACCESS_MODE_OVERWRITE:
-            case FILE_ACCESS_MODE_READ_ONLY:
-            case FILE_ACCESS_MODE_WRITE_ONLY:
-            case FILE_ACCESS_MODE_WRITE:
-
-                if (
-                    ! in_array(
-                        self::$properties->accessMode,
-                        // following modes could be used for reading only
-                        // no error should be raised when using them
-                        // when no contents is provided
-                        array( FILE_ACCESS_MODE_APPEND, FILE_ACCESS_MODE_WRITE )
-                    ) && ! isset( $properties[PROPERTY_SIGNAL] )
-                )
-                    throw new \Exception( sprintf(
-                        EXCEPTION_INVALID_PROPERTY, PROPERTY_SIGNAL
-                    ) );
-
-                else if ( ! isset( $properties[PROPERTY_SIGNAL] ) )
-
-                    $properties[PROPERTY_SIGNAL] = '';
-
-                    break;
-        } // checking signal consistency
 
         return $properties;
+    }
+
+    /**
+     * @param $properties
+     *
+     * @return mixed
+     */
+    public static function checkAccessModeRequirements($properties)
+    {
+        if (self::isDimensionsCheckRequired()) {
+            self::checkStreamFormat($properties);
+            self::checkStreamDimensions($properties);
+        }
+
+        if (self::isSignalCheckRequired()) {
+            $properties = self::checkStreamSignal($properties);
+        }
+
+        return $properties;
+    }
+
+    /**
+     * @return bool
+     */
+    public static function isDimensionsCheckRequired()
+    {
+        $accessModes = self::dimensionsCheckRequiringAccessModes();
+
+        return array_key_exists(self::$properties->accessMode, $accessModes);
+    }
+
+    /**
+     * @return bool
+     */
+    public static function isSignalCheckRequired()
+    {
+        $accessModes = self::signalCheckRequiringAccessModes();
+
+        return array_key_exists(self::$properties->accessMode, $accessModes);
+    }
+
+    /**
+     * @return array
+     */
+    public static function dimensionsCheckRequiringAccessModes()
+    {
+        return array(
+            FILE_ACCESS_MODE_APPEND    => 0,
+            FILE_ACCESS_MODE_READ_ONLY => 8,
+            FILE_ACCESS_MODE_WRITE     => 16);
+    }
+
+    /**
+     * @return array
+     */
+    public static function signalCheckRequiringAccessModes()
+    {
+        return array(
+            FILE_ACCESS_MODE_APPEND => 0,
+            FILE_ACCESS_MODE_APPEND_ONLY => 1,
+            FILE_ACCESS_MODE_OVERWRITE => 2,
+            FILE_ACCESS_MODE_READ_ONLY => 8,
+            FILE_ACCESS_MODE_WRITE_ONLY => 4,
+            FILE_ACCESS_MODE_WRITE => 16);
+    }
+
+    /**
+     * @param $properties
+     *
+     * @return mixed
+     */
+    public static function checkStreamSignal($properties)
+    {
+        self::isWriteSignalValid($properties);
+
+        if ( ! self::isPropertyAvailable(PROPERTY_SIGNAL, $properties) ) {
+            self::$properties->signal = '';
+        } else {
+            self::$properties->signal = $properties[PROPERTY_SIGNAL];
+        }
+
+        return self::forwardProperties($properties);
+    }
+
+    /**
+     * @param $properties
+     *
+     * @throws \Exception
+     */
+    public static function isWriteSignalValid($properties)
+    {
+        if (
+            !in_array(
+                self::$properties->accessMode,
+                // following modes could be used for reading only
+                // no error should be raised when using them
+                // when no contents is provided
+                array(FILE_ACCESS_MODE_APPEND, FILE_ACCESS_MODE_WRITE)
+            ) && !self::isPropertyAvailable(PROPERTY_SIGNAL, $properties)
+        )
+        {
+            throw new \Exception(sprintf(
+                EXCEPTION_INVALID_PROPERTY,
+                PROPERTY_SIGNAL
+            ));
+        }
+    }
+
+    public static function checkStreamFormat($properties)
+    {
+        if (!self::isPropertyAvailable(PROPERTY_FORMAT, $properties)) {
+            // xhtml is the default format type
+            self::$properties->format = $defaultStreamFormat = self::getDefaultStreamFormat();
+        }
+    }
+
+    /**
+     * @param $properties
+     */
+    public static function checkStreamDimensions($properties)
+    {   // Default length and offset properties definition aims at handling the whole signal
+        if (!self::isPropertyAvailable(PROPERTY_LENGTH, $properties)) {
+            self::$properties->length = -1;
+        }
+
+        if (!self::isPropertyAvailable(PROPERTY_OFFSET, $properties)) {
+            self::$properties->offset = 0;
+        }
+    }
+
+    /**
+     * @return mixed
+     */
+    public static function getDefaultStreamFormat()
+    {
+        global $class_application;
+
+        $class_entity = $class_application::getEntityClass();
+        $defaultFormat = $class_entity::getDefaultType(null, ENTITY_FORMAT)->{PROPERTY_VALUE};
+
+        return $defaultFormat;
+    }
+
+    /**
+     * @param $path
+     */
+    public static function setTokensStreamSize($path)
+    {
+        self::$properties->size = self::slen($path);
+    }
+
+    /**
+     * @param $properties
+     *
+     * @return mixed
+     */
+    public static function getReadProperties($properties)
+    {
+        if (
+            !self::isPropertyAvailable(PROPERTY_SIGNAL, $properties) &&
+            self::isPropertyAvailable(PROPERTY_PATH_FILE, $properties) &&
+            !self::isPropertyBlank($file_path = $properties[PROPERTY_PATH_FILE])
+        ) {
+            self::checkFileExistence($file_path);
+            self::$properties->signal = file_get_contents($file_path);
+        }
+
+        return self::forwardProperties($properties);
+    }
+
+    /**
+     * @param $properties
+     * @param $path
+     *
+     * @return mixed
+     */
+    public static function getWriteProperties($properties, $path)
+    {
+        self::setTokenizationProtocol();
+        self::checkSignal($properties);
+        self::setTokenizationSignal($properties);
+        self::setContextualOptions();
+        self::addDefaultContextualOptions($properties);
+
+        return self::openTokensStreamFile($path, $properties);
+    }
+
+    /**
+     * @param $file_path
+     *
+     * @throws \Exception
+     */
+    public static function checkFileExistence($file_path)
+    {
+        if (!file_exists($file_path))
+        {
+            throw new \Exception(
+                EXCEPTION_MISSING_RESOURCE . ' (' . $file_path . ')'
+            );
+        }
     }
 
     /**
@@ -1496,26 +1637,39 @@ class Tokens_Stream extends \Alpha
     /**
      * @return bool
      */
-    public static function isReadAccess()
+    public static function isReadAccessMode()
     {
-        $modes = array(FILE_ACCESS_MODE_READ_ONLY => 16);
+        $modes = self::getReadAccessModes();
 
         return array_key_exists( self::$properties->accessMode, $modes );
     }
 
     /**
+     * @return array
+     */
+    public static function getReadAccessModes()
+    {
+        return array(FILE_ACCESS_MODE_READ_ONLY => 8);
+    }
+
+    /**
      * @return bool
      */
-    public static function isWriteAccess()
+    public static function isWriteAccessMode()
     {
-        $modes = array(
-            FILE_ACCESS_MODE_APPEND      => 1,
-            FILE_ACCESS_MODE_APPEND_ONLY => 2,
-            FILE_ACCESS_MODE_OVERWRITE   => 4,
-            FILE_ACCESS_MODE_WRITE_ONLY  => 8
-        );
+        $modes = self::getWriteAccessModes();
 
         return array_key_exists( self::$properties->accessMode, $modes );
+    }
+
+    public static function getWriteAccessModes()
+    {
+        return array(
+            FILE_ACCESS_MODE_APPEND      => 0,
+            FILE_ACCESS_MODE_APPEND_ONLY => 1,
+            FILE_ACCESS_MODE_OVERWRITE   => 2,
+            FILE_ACCESS_MODE_WRITE_ONLY  => 4
+        );
     }
 
     /**
@@ -1596,6 +1750,7 @@ class Tokens_Stream extends \Alpha
 
     public static function validateProperties($properties)
     {
+        self::$properties = new \stdClass();
         self::validateAccessMode($properties);
         self::validateEntryPoint($properties);
     }
@@ -1607,17 +1762,22 @@ class Tokens_Stream extends \Alpha
      */
     public static function forwardProperties($properties)
     {
-        if (isset(self::$properties->context)) {
-            $properties[PROPERTY_CONTEXT] = self::$properties->context;
-        }
-        if (isset(self::$properties->filePath)) {
-            $properties[PROPERTY_PATH_FILE] = self::$properties->filePath;
-        }
-        if (isset(self::$properties->requestUri)) {
-            $properties[PROPERTY_URI_REQUEST] = self::$properties->requestUri;
-        }
-        if (isset(self::$properties->path)) {
-            $properties[PROPERTY_PATH] = self::$properties->path;
+        $types = array(
+            'context' => PROPERTY_CONTEXT,
+            'format' => PROPERTY_FORMAT,
+            'filePath' => PROPERTY_PATH_FILE,
+            'length' => PROPERTY_LENGTH,
+            'requestUri' => PROPERTY_URI_REQUEST,
+            'offset' => PROPERTY_OFFSET,
+            'path' => PROPERTY_PATH,
+            'signal' => PROPERTY_SIGNAL,
+            'size' => PROPERTY_SIZE,
+        );
+
+        foreach ($types as $name => $constant) {
+            if (isset(self::$properties->$name)) {
+                $properties[$constant] = self::$properties->$name;
+            }
         }
 
         return $properties;
