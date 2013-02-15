@@ -24,6 +24,10 @@ class Tokens_Stream extends \Alpha
 
     static protected $properties;
 
+    static protected $protocol;
+
+    static protected $options;
+
     static protected $river;
 
     /**
@@ -465,11 +469,13 @@ class Tokens_Stream extends \Alpha
     }
 
     /**
-    * Seek to specific location in an instance of Tokens_Stream
-    *
-    * @todo     implement manual position adjustment
-    * @return   boolean position update indicator
-    */
+     * Seek to specific location in an instance of Tokens_Stream
+     *
+     * @todo     implement manual position adjustment
+     *
+     * @param     $offset
+     * @param int $whence
+     */
     public function stream_seek( $offset, $whence = SEEK_SET )
     {
     }
@@ -491,6 +497,7 @@ class Tokens_Stream extends \Alpha
      * @param $data
      *
      * @return bool|int
+     * @throws \RuntimeException
      * @throws \Exception
      */
     public function stream_write( $data )
@@ -1242,84 +1249,20 @@ class Tokens_Stream extends \Alpha
         self::validateProperties($properties);
 
         $path = self::checkPath($properties);
+        $properties = self::validateFilePath($properties);
+        self::setTokenizationMode($properties);
 
-        self::validateFilePath($properties);
-        $properties = self::forwardProperties($properties);
-        $access_mode = self::extractAccessMode($properties);
-
-        if (
-            in_array( $access_mode, array(
-                FILE_ACCESS_MODE_APPEND,
-                FILE_ACCESS_MODE_APPEND_ONLY,
-                FILE_ACCESS_MODE_OVERWRITE,
-                FILE_ACCESS_MODE_WRITE_ONLY
-            ) )
-        ) // these accessing modes induce the creation of non existing files
+        // these accessing modes induce the creation of non existing files
+        if ( self::isWriteAccess() )
         {
-            if ( isset( $properties[PROPERTY_SIGNAL] ) )
-            {
-                $protocol = self::getProtocol();
-                $signal = $properties[PROPERTY_SIGNAL];
-            }
-            else {
-                throw new \Exception( sprintf(
-                    EXCEPTION_INVALID_ENTITY, ENTITY_SIGNAL
-                ) );
-            }
-
-            $options = array(
-                $protocol => array(
-                    PROPERTY_MODE_ACCESS => $access_mode,
-                    PROPERTY_SIGNAL => $signal
-                )
-            );
-
-            if (
-                isset( $properties[PROPERTY_SUBSTITUTIONS] ) &&
-                ! isset( $options[$protocol][PROPERTY_SUBSTITUTIONS] )
-            )
-                $options[$protocol][PROPERTY_SUBSTITUTIONS] =
-                    $properties[PROPERTY_SUBSTITUTIONS]
-                ;
-
-            if ( isset( $properties[PROPERTY_CONTEXT] ) )
-            {
-                $_options = self::extractOptions(
-                    $properties[PROPERTY_CONTEXT]
-                );
-
-                $options[$protocol] = array_merge(
-                    $_options[$protocol], $options[$protocol]
-                );
-            }
-
-            $context = stream_context_create( $options );
-
-            $tokens_stream = self::initialize( array(
-                PROPERTY_CONTEXT => $context,
-                PROPERTY_METADATA => null,
-                PROPERTY_PATH => $path ) );
-
-            $file_path = $tokens_stream->{PROPERTY_PATH_FILE};
-
-            $properties[PROPERTY_CONTEXT] = &$context;
-            $properties[PROPERTY_PATH_FILE] = $file_path;
-
-            if ( !self::isRequestURIValid($properties) ) {
-                $properties[PROPERTY_URI_REQUEST] =
-                    substr(
-                        $properties[PROPERTY_PATH_FILE],
-                       strlen( self::getRootDirectory() )
-                    )
-                ;
-            }
-
-            $handle = fopen( $file_path, $access_mode );
-            fclose( $handle );
+            self::setTokenizationProtocol();
+            self::checkSignal($properties);
+            self::setTokenizationSignal($properties);
+            self::setContextualOptions();
+            self::addDefaultContextualOptions($properties);
+            $properties = self::openTokensStreamFile($path, $properties);
         }
-        else if (
-            in_array( $access_mode, array( FILE_ACCESS_MODE_READ_ONLY ) )
-        )
+        else if ( self::isReadAccess() )
         {
             if (
                 ! isset( $properties[PROPERTY_SIGNAL] ) &&
@@ -1343,7 +1286,7 @@ class Tokens_Stream extends \Alpha
 
         $properties[PROPERTY_SIZE] = self::slen( $path );
 
-        switch ( $access_mode )
+        switch ( self::$properties->accessMode )
         {
             case FILE_ACCESS_MODE_APPEND:
             case FILE_ACCESS_MODE_READ_ONLY:
@@ -1370,7 +1313,7 @@ class Tokens_Stream extends \Alpha
                     break;
         }
 
-        switch ( $access_mode )
+        switch ( self::$properties->accessMode )
         {
             case FILE_ACCESS_MODE_APPEND_ONLY:
             case FILE_ACCESS_MODE_APPEND:
@@ -1381,7 +1324,7 @@ class Tokens_Stream extends \Alpha
 
                 if (
                     ! in_array(
-                        $access_mode,
+                        self::$properties->accessMode,
                         // following modes could be used for reading only
                         // no error should be raised when using them
                         // when no contents is provided
@@ -1400,6 +1343,179 @@ class Tokens_Stream extends \Alpha
         } // checking signal consistency
 
         return $properties;
+    }
+
+    /**
+     * @param $path
+     * @param $properties
+     *
+     * @return mixed
+     */
+    public static function openTokensStreamFile($path, $properties)
+    {
+        self::$properties->tokensStream = self::initializeTokensStreamByPath($path);
+        self::updateStreamEntryPoints($properties);
+        self::openTokensStream();
+
+        return self::forwardProperties($properties);
+    }
+
+    /**
+     * @param $properties
+     */
+    public static function updateStreamEntryPoints($properties)
+    {
+        self::$properties->filePath = self::$properties->tokensStream->{PROPERTY_PATH_FILE};
+        self::updateRequestUri($properties);
+    }
+
+    /**
+     * @param $properties
+     */
+    public static function updateRequestUri($properties)
+    {
+        if (!self::isRequestURIValid($properties)) {
+            self::$properties->requestUri = self::inferRequestUriFromFilePath(
+                self::$properties->filePath);
+        }
+    }
+
+    public static function openTokensStream()
+    {
+        $handle = fopen(
+            self::$properties->tokensStream->{PROPERTY_PATH_FILE},
+            self::$properties->accessMode
+        );
+        fclose($handle);
+    }
+
+    /**
+     * @param $path
+     *
+     * @return object|\stdClass
+     */
+    public static function initializeTokensStreamByPath($path)
+    {
+        self::$properties->context = stream_context_create(self::$options);
+
+        return self::initialize(
+            array(
+                PROPERTY_CONTEXT  => self::$properties->context,
+                PROPERTY_METADATA => null,
+                PROPERTY_PATH     => $path
+            )
+        );
+    }
+
+    /**
+     * @param      $properties
+     * @param null $options
+     */
+    public static function addDefaultContextualOptions( $properties, $options = null )
+    {
+        if ( is_null( $options ) ) {
+            $options = array(PROPERTY_SUBSTITUTIONS, PROPERTY_CONTEXT);
+        }
+
+        foreach ( $options as $option ) {
+            self::setContextualOption( $option, $properties );
+        }
+    }
+
+    /**
+     * @param $name
+     * @param $properties
+     */
+    public static function setContextualOption( $name, $properties )
+    {
+        if ( self::isPropertyAvailable( $name, $properties ) )
+        {
+            self::addContextualOption( $name, $properties[$name] );
+        }
+    }
+
+    /**
+     * @param $name
+     * @param $value
+     */
+    public static function addContextualOption($name, $value)
+    {
+        self::$options[self::$protocol][$name] = $value;
+    }
+
+    /**
+     * @return array
+     */
+    public static function setContextualOptions()
+    {
+        self::$options = array(
+            self::$protocol => array(
+                PROPERTY_MODE_ACCESS => self::$properties->accessMode,
+                PROPERTY_SIGNAL      => self::$properties->signal
+            )
+        );
+    }
+
+    public static function setTokenizationProtocol()
+    {
+        self::$protocol = self::getProtocol();
+    }
+
+    /**
+     * @param $properties
+     */
+    public static function setTokenizationMode($properties)
+    {
+        self::$properties->accessMode = self::extractAccessMode($properties);
+    }
+
+    /**
+     * @param $properties
+     */
+    public static function setTokenizationSignal($properties)
+    {
+        self::$properties->signal = $properties[PROPERTY_SIGNAL];
+    }
+
+    /**
+     * @param $properties
+     *
+     * @throws \Exception
+     */
+    public static function checkSignal($properties)
+    {
+        if ( ! self::isPropertyAvailable( PROPERTY_SIGNAL, $properties ) )
+        {
+            throw new \Exception(sprintf(
+                EXCEPTION_INVALID_ENTITY,
+                ENTITY_SIGNAL
+            ));
+        }
+    }
+
+    /**
+     * @return bool
+     */
+    public static function isReadAccess()
+    {
+        $modes = array(FILE_ACCESS_MODE_READ_ONLY => 16);
+
+        return array_key_exists( self::$properties->accessMode, $modes );
+    }
+
+    /**
+     * @return bool
+     */
+    public static function isWriteAccess()
+    {
+        $modes = array(
+            FILE_ACCESS_MODE_APPEND      => 1,
+            FILE_ACCESS_MODE_APPEND_ONLY => 2,
+            FILE_ACCESS_MODE_OVERWRITE   => 4,
+            FILE_ACCESS_MODE_WRITE_ONLY  => 8
+        );
+
+        return array_key_exists( self::$properties->accessMode, $modes );
     }
 
     /**
@@ -1459,6 +1575,7 @@ class Tokens_Stream extends \Alpha
     /**
      * @param $properties
      *
+     * @return mixed
      * @throws \RuntimeException
      */
     public static function validateFilePath($properties)
@@ -1473,6 +1590,8 @@ class Tokens_Stream extends \Alpha
                     $directory_root . self::$properties->requestUri;
             }
         }
+
+        return self::forwardProperties($properties);
     }
 
     public static function validateProperties($properties)
@@ -1488,6 +1607,9 @@ class Tokens_Stream extends \Alpha
      */
     public static function forwardProperties($properties)
     {
+        if (isset(self::$properties->context)) {
+            $properties[PROPERTY_CONTEXT] = self::$properties->context;
+        }
         if (isset(self::$properties->filePath)) {
             $properties[PROPERTY_PATH_FILE] = self::$properties->filePath;
         }
@@ -1669,13 +1791,23 @@ class Tokens_Stream extends \Alpha
         if (
             self::isPropertyAvailable($name, $properties) &&
             ($property = self::trimProperty($properties, $name)) &&
-            (strlen($property) > 0)
+            !self::isPropertyBlank($property)
         )
         {
             $validProperty = true;
         }
 
         return $validProperty;
+    }
+
+    /**
+     * @param $property
+     *
+     * @return bool
+     */
+    public static function isPropertyBlank($property)
+    {
+        return strlen($property) === 0;
     }
 
     /**
