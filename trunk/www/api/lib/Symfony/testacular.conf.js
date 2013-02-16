@@ -28,7 +28,7 @@ exclude = [
 reporters = ['dots', 'junit'];
 
 junitReporter = {
-  outputFile: 'testascular-test-results.xml'
+  outputFile: 'testacular-test-results.xml'
 };
 
 // web server port
