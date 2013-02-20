@@ -1764,12 +1764,12 @@ class Tokens_Stream extends \Alpha
     {
         $types = array(
             'context' => PROPERTY_CONTEXT,
-            'format' => PROPERTY_FORMAT,
             'filePath' => PROPERTY_PATH_FILE,
+            'format' => PROPERTY_FORMAT,
             'length' => PROPERTY_LENGTH,
-            'requestUri' => PROPERTY_URI_REQUEST,
             'offset' => PROPERTY_OFFSET,
             'path' => PROPERTY_PATH,
+            'requestUri' => PROPERTY_URI_REQUEST,
             'signal' => PROPERTY_SIGNAL,
             'size' => PROPERTY_SIZE,
         );
