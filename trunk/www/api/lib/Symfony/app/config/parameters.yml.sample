@@ -18,8 +18,9 @@ parameters:
     api_facebook_host_port:         %api.facebook.protocol%%api.facebook.host_port%
     api_github_host_port:           %api.github.protocol%%api.github.host_port%
     api_google_drive_api_key:       ## FILL ME ##
-    api_google_drive_client_id:     ## FILL ME ##
-    api_google_drive_public_key:    ## FILL ME ##
+    api_google_drive_client_id:     %api.google_drive.client_id%
+    api_google_drive_client_secret: %api.google_drive.client_secret%
+    api_google_drive_redirect_uri:  %api.google_drive.redirect_uri%
     api_twitter_host_port:          %api.twitter.protocol%%api.twitter.host_port%
 
     api_twitter_version:            1.1
