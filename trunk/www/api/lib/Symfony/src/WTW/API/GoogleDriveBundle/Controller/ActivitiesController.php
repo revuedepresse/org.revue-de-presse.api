@@ -78,9 +78,12 @@ class ActivitiesController extends Controller
     }
 
     public function getConfiguredClient()
-    { // Set your cached access token. Remember to replace $_SESSION with a
-        // real database or memcached.
-        session_start();
+    {
+        if (session_id() === '') {
+            // Set your cached access token. Remember to replace $_SESSION with a
+            // real database or memcached.
+            session_start();
+        }
 
         $client = new \Google_Client();
         $client->setApplicationName('Google+ PHP Starter Application');
