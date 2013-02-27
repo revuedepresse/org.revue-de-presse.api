@@ -15,17 +15,21 @@ parameters:
     locale:            en
     secret:            ## FILL ME ##
 
-    api_facebook_host_port:     %api.facebook.protocol%%api.facebook.host_port%
-    api_github_host_port:       %api.github.protocol%%api.github.host_port%
-    api_twitter_host_port:      %api.twitter.protocol%%api.twitter.host_port%
+    api_facebook_host_port:         %api.facebook.protocol%%api.facebook.host_port%
+    api_github_host_port:           %api.github.protocol%%api.github.host_port%
+    api_google_drive_api_key:       ## FILL ME ##
+    api_google_drive_client_id:     ## FILL ME ##
+    api_google_drive_public_key:    ## FILL ME ##
+    api_twitter_host_port:          %api.twitter.protocol%%api.twitter.host_port%
 
-    api_twitter_version:        1.1
-    api_twitter_user_token:     %api.twitter.user_token%
-    api_twitter_user_secret:    %api.twitter.user_secret%
+    api_twitter_version:            1.1
+    api_twitter_user_token:         %api.twitter.user_token%
+    api_twitter_user_secret:        %api.twitter.user_secret%
 
-    endpoint_facebook_feed:     %api_facebook_host_port%/api/facebook/api.facebook.get.feed.php
-    endpoint_github_redirect:   %api_github_host_port%/github/request
-    endpoint_twitter_feed:      %api_twitter_host_port%/api/api.twitter.display.wall.php?twr=1&res=timeline
-    endpoint_twitter_user:      https://userstream.twitter.com/%s/user.json
+    endpoint_facebook_feed:         %api_facebook_host_port%/api/facebook/api.facebook.get.feed.php
+    endpoint_github_redirect:       %api_github_host_port%/github/request
+    endpoint_twitter_feed:          %api_twitter_host_port%/api/api.twitter.display.wall.php?twr=1&res=timeline
+    endpoint_twitter_user:          https://userstream.twitter.com/%s/user.json
 
-    tokenization_sandbox:       %metaprogramming.sandbox%
+    tokenization_sandbox:           %metaprogramming.sandbox%
+
