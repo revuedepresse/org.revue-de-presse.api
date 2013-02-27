@@ -28,7 +28,8 @@ class AppKernel extends Kernel
             new WTW\CodeGeneration\QualityAssuranceBundle\WTWCodeGenerationQualityAssuranceBundle(),
             new WTW\Documentation\MarkdownBundle\WTWDocumentationMarkdownBundle(),
             new WTW\Legacy\ProviderBundle\WTWLegacyProviderBundle(),
-            new WTW\CodeGeneration\AnalysisBundle\WTWCodeGenerationAnalysisBundle()
+            new WTW\CodeGeneration\AnalysisBundle\WTWCodeGenerationAnalysisBundle(),
+            new WTW\API\GoogleDriveBundle\WTWAPIGoogleDriveBundle(),
         );
 
         if (in_array($this->getEnvironment(), array('dev', 'test'))) {
