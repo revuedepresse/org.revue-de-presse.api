@@ -6,7 +6,7 @@
 * Class for handling an affordance
 * @package  sefi
 */
-class Affordance extends Token
+class Affordance extends cid\Token
 {
 	/**
 	* Get a signature
