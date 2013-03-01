@@ -14,7 +14,7 @@ namespace cid
 	* Class for managing tokens
 	* @package  sefi
 	*/
-	class Token extends Source
+	class Token extends \Source
 	{
 		/**
 		* Get a signature
