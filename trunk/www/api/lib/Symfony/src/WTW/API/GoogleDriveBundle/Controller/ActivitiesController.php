@@ -49,11 +49,6 @@ class ActivitiesController extends Controller
         $this->developerKey = $developerKey;
     }
 
-    protected function setLibrary($library)
-    {
-        $this->library = $library;
-    }
-
     protected function setOauthRedirectUri($oauthRedirectUri)
     {
         $this->oauthRedirectUri = $oauthRedirectUri;
