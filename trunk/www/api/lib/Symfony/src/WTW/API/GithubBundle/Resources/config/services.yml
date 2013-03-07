@@ -1,22 +1,23 @@
 parameters:
-    api.github.access.token:  ## FILL ME ##
-    api.github.client.class:  WTW\API\GithubBundle\Client
-    api.github.client.id:     ## FILL ME ##
-    api.github.client.secret: ## FILL ME ##
+    api.github.access.token:                    ## FILL ME ##
+    api.github.client.class:                    WTW\API\GithubBundle\Client
+    api.github.client.id:                       ## FILL ME ##
+    api.github.client.secret:                   ## FILL ME ##
+    api.github.repos_serializer_command.class:  WTW\API\GithubBundle\Command\SerializeStarredRepositoriesCommand
     api.github.sitemap:
         url:
-            base:             https://api.github.com
-            main:             https://github.com
-            redirect:         %endpoint_github_redirect%
+            base:                               https://api.github.com
+            main:                               https://github.com
+            redirect:                           %endpoint_github_redirect%
         uri:
-            access_token:     /login/oauth/access_token
-            authorize:        /login/oauth/authorize
-            get_following:    /user/following
-            get_orgs:         /user/orgs
-            get_repos:        /user/repos
-            get_user:         /user
-            get_starred:      /users/:user/starred
-    logger.dumper.class:      WTW\Legacy\ProviderBundle\Logger
+            access_token:                       /login/oauth/access_token
+            authorize:                          /login/oauth/authorize
+            get_following:                      /user/following
+            get_orgs:                           /user/orgs
+            get_repos:                          /user/repos
+            get_user:                           /user
+            get_starred:                        /users/:user/starred
+    logger.dumper.class:                        WTW\Legacy\ProviderBundle\Logger
 
 services:
     api.github.client:
