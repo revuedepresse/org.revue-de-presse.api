@@ -1,3 +1,10 @@
+doctrine:
+    dbal:
+        driver:           pdo_sqlite
+        charset:          UTF8
+        memory:           %test_database_memory%
+        path:             %test_database_path%
+
 imports:
     - { resource: config_dev.yml }
 
