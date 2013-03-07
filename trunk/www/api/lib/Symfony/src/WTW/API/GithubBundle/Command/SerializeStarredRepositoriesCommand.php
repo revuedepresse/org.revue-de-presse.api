@@ -84,8 +84,6 @@ class SerializeStarredRepositoriesCommand extends ContainerAwareCommand
 
             $output->writeln($encodedData);
             $client->saveRepositories($encodedData);
-
-            break;
         }
     }
 }
