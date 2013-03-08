@@ -79,11 +79,16 @@ class SerializeStarredRepositoriesCommand extends ContainerAwareCommand
      */
     protected function getUsersStarredRepositories($users, $client, $output)
     {
+        $environment = $this->getContainer()->getParameter('kernel.environment');
+
         foreach ($users as $user) {
             $encodedData = $this->getUserStarredRepositories($user['login'], $client);
-
             $output->writeln($encodedData);
             $client->saveRepositories($encodedData);
+
+            if ($environment === 'test') {
+                break;
+            }
         }
     }
 }
