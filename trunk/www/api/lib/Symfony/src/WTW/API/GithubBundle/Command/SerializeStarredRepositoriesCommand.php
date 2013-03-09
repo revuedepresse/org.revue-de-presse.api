@@ -16,11 +16,6 @@ class SerializeStarredRepositoriesCommand extends ContainerAwareCommand
 {
     protected $client;
 
-    public function setClient($client)
-    {
-        $this->client = $client;
-    }
-
     /**
      * Configures executable commands
      */
@@ -54,6 +49,11 @@ class SerializeStarredRepositoriesCommand extends ContainerAwareCommand
         } else {
             throw new \Exception('JSON decoding failure (error code: ' . $lastError . ')');
         }
+    }
+
+    public function setClient($client)
+    {
+        $this->client = $client;
     }
 
     /**
