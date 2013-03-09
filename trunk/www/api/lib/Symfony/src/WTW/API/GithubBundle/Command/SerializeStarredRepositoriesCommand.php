@@ -14,6 +14,13 @@ use Symfony\Component\Console\Input\InputOption;
  */
 class SerializeStarredRepositoriesCommand extends ContainerAwareCommand
 {
+    protected $client;
+
+    public function setClient($client)
+    {
+        $this->client = $client;
+    }
+
     /**
      * Configures executable commands
      */
@@ -37,8 +44,7 @@ class SerializeStarredRepositoriesCommand extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $container = $this->getContainer();
-        $client    = $container->get('api.github.client');
+        $client = $this->setUpClient();
 
         $users     = json_decode($client->getFollowedUsers(), true);
         $lastError = json_last_error();
@@ -48,6 +54,21 @@ class SerializeStarredRepositoriesCommand extends ContainerAwareCommand
         } else {
             throw new \Exception('JSON decoding failure (error code: ' . $lastError . ')');
         }
+    }
+
+    /**
+     * @return object
+     */
+    protected function setUpClient()
+    {
+        if (is_null($this->client)) {
+            $container = $this->getContainer();
+            $client = $container->get('api.github.client');
+        } else {
+            $client = $this->client;
+        }
+
+        return $client;
     }
 
     /**
@@ -80,10 +101,14 @@ class SerializeStarredRepositoriesCommand extends ContainerAwareCommand
     protected function getUsersStarredRepositories($users, $client, $output)
     {
         $environment = $this->getContainer()->getParameter('kernel.environment');
+        $translator = $this->getContainer()->get('translator');
 
         foreach ($users as $user) {
             $encodedData = $this->getUserStarredRepositories($user['login'], $client);
-            $output->writeln($encodedData);
+            $serializationSuccessMessage = $translator->trans('repositories_serialization_success',
+                array('{{ user }}' => $user['login']));
+
+            $output->writeln($serializationSuccessMessage);
             $client->saveRepositories($encodedData);
 
             if ($environment === 'test') {
