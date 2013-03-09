@@ -105,8 +105,9 @@ class SerializeStarredRepositoriesCommand extends ContainerAwareCommand
 
         foreach ($users as $user) {
             $encodedData = $this->getUserStarredRepositories($user['login'], $client);
-            $serializationSuccessMessage = $translator->trans('repositories_serialization_success',
-                array('{{ user }}' => $user['login']));
+            $serializationSuccessMessage = '[' . date('Y-m-d H:i'). '] ' .
+                $translator->trans('repositories_serialization_success',
+                    array('{{ user }}' => $user['login']));
 
             $output->writeln($serializationSuccessMessage);
             $client->saveRepositories($encodedData);
