@@ -100,21 +100,29 @@ class SerializeStarredRepositoriesCommand extends ContainerAwareCommand
      */
     protected function getUsersStarredRepositories($users, $client, $output)
     {
-        $environment = $this->getContainer()->getParameter('kernel.environment');
-        $translator = $this->getContainer()->get('translator');
 
         foreach ($users as $user) {
             $encodedData = $this->getUserStarredRepositories($user['login'], $client);
-            $serializationSuccessMessage = '[' . date('Y-m-d H:i'). '] ' .
-                $translator->trans('repositories_serialization_success',
-                    array('{{ user }}' => $user['login']));
-
-            $output->writeln($serializationSuccessMessage);
             $client->saveRepositories($encodedData);
-
-            if ($environment === 'test') {
-                break;
-            }
+            $serializationSuccessMessage = $this->getSerializationSuccessMessage($user);
+            $output->writeln($serializationSuccessMessage);
         }
+    }
+
+    /**
+     * @param $user
+     *
+     * @return string
+     */
+    protected function getSerializationSuccessMessage($user)
+    {
+        $translator = $this->getContainer()->get('translator');
+        $serializationSuccessMessage = '[' . date('Y-m-d H:i') . '] ' .
+            $translator->trans(
+                'repositories_serialization_success',
+                array('{{ user }}' => $user['login'])
+            );
+
+        return $serializationSuccessMessage;
     }
 }
