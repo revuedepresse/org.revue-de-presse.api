@@ -154,14 +154,13 @@ class Client
     /**
      * Crawls a URL
      *
-     * @todo handle pagination
-     *
-     * @param $url
+     * @param      $url
+     * @param bool $headers
      *
      * @return mixed
      * @throws \Exception
      */
-    public function crawlUrl($url)
+    public function crawlUrl($url, $headers = false)
     {
         $resource = curl_init();
 
@@ -169,6 +168,10 @@ class Client
         curl_setopt($resource, CURLOPT_URL, $url);
         curl_setopt($resource, CURLOPT_SSL_VERIFYHOST, false);
         curl_setopt($resource, CURLOPT_SSL_VERIFYPEER, false);
+
+        if ($headers) {
+            curl_setopt($resource, CURLOPT_HEADER, true);
+        }
 
         $response = curl_exec($resource);
 
@@ -183,29 +186,160 @@ class Client
     /**
      * Gets following
      *
+     * @param array $extraParameters
+     *
      * @return mixed
      */
-    public function getFollowedUsers()
+    public function getFollowedUsers(array $extraParameters = [])
+    {
+        $uri = $this->getUserFollowingUri();
+        $uri = $this->appendExtraParameters($uri, $extraParameters);
+        $response = $this->crawlUrl($uri, $headers = true);
+
+        $headerFields = $this->parseHeader($response);
+        $response = $this->removeHeaders($response);
+
+        if (isset($headerFields['Link'])) {
+            $links = $this->parseLinks($headerFields);
+            $nextPage = $this->hasNextPage($extraParameters, $links);
+
+            if ($nextPage) {
+                $followedUsers = $this->getFollowedUserByPage($links['next']['page']);
+                $response = $this->mergeJsonResponses($response, $followedUsers);
+            }
+        }
+
+        return $response;
+    }
+
+    /**
+     * @param $page
+     *
+     * @return mixed
+     */
+    public function getFollowedUserByPage($page)
+    {
+        return $this->getFollowedUsers(['page' => $page]);
+    }
+
+    /**
+     * @param $extraParameters
+     * @param $links
+     *
+     * @return mixed
+     */
+    public function hasNextPage($extraParameters, $links)
+    {
+        return !isset($extraParameters['page']) ||
+            isset($links['last']) &&
+            $links['last']['page'] > $extraParameters['page'];
+    }
+
+    /**
+     * @param $response
+     * @param $followedUsers
+     *
+     * @return string|void
+     */
+    public function mergeJsonResponses($response, $followedUsers)
+    {
+        return json_encode(
+            array_merge(
+                json_decode($response, true),
+                json_decode($followedUsers, true)
+            )
+        );
+    }
+
+    /**
+     * @param $headerFields
+     *
+     * @return array
+     */
+    public function parseLinks($headerFields)
+    {
+        $parsingResults = [];
+        $fieldValue = $headerFields['Link'];
+        $links = explode(',', $fieldValue);
+        $pattern  = '/\s?<(?<uri>[^>]+page=' .
+            '(?<page>[0-9]+)[^>]+)>; ' .
+            'rel="(?<rel>[^"]+)"/';
+
+        foreach ($links as $link) {
+            $match = preg_match($pattern, $link, $matches);
+
+            if ($match) {
+                $parsingResults[$matches['rel']] = array(
+                    'uri'  => $matches['uri'],
+                    'page' => $matches['page']
+                );
+            }
+        }
+
+        return $parsingResults;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUserFollowingUri()
     {
         $parameterToken = $this->getTokenParameter();
         $siteMap        = $this->getSiteMap();
 
-        $endpoint = $siteMap['url']['base'] . $siteMap['uri']['get_following'] .
+        return $siteMap['url']['base'] . $siteMap['uri']['get_following'] .
             '?' . $parameterToken .
             '&' . 'redirect_uri=' . urlencode($this->getRedirect());
-        $response = $this->crawlUrl($endpoint);
+    }
 
-        $this->log(
-            __METHOD__,
-            array(
-                '[endpoint]',
-                $endpoint,
-                '[response]',
-                $response
-            )
-        );
+    /**
+     * @param       $uri
+     * @param array $extraParameters
+     *
+     * @return string
+     */
+    public function appendExtraParameters($uri, array $extraParameters = [])
+    {
+        foreach ($extraParameters as $name => $value) {
+            $uri .= '&' . $name . '=' . $value;
+        }
 
-        return $response;
+        return $uri;
+    }
+
+    /**
+     * @param $response
+     *
+     * @return array
+     */
+    public function parseHeader($response)
+    {
+        $headers = [];
+        $match = preg_match('/(HTTP\/.+)\r\n\r\n/ms', $response, $matches);
+
+        if ($match) {
+            $fields = explode("\r\n", $matches[1]);
+            unset($fields[0]); // Removes status line
+            foreach ($fields as $field) {
+                $delimiter = ': ';
+                if (strpos($field, $delimiter) !== false) {
+                    list($key, $value) = explode($delimiter, $field, 2);
+                    $headers[$key] = $value;
+                }
+            }
+        }
+
+        return $headers;
+    }
+
+    /**
+     * @param $response
+     *
+     * @return mixed
+     */
+    public function removeHeaders($response)
+    {
+        return preg_replace('/HTTP\/.+\r\n\r\n/ms', '', $response);
     }
 
     /**
