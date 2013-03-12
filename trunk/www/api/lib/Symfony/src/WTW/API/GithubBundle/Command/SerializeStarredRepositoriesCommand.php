@@ -81,10 +81,11 @@ class SerializeStarredRepositoriesCommand extends ContainerAwareCommand
      */
     protected function getUserStarredRepositories($user, $client)
     {
-        $starredRepositories = json_decode($client->getStarredRepositories($user, true));
+        $starredRepositories = $client->getStarredRepositories($user);
+        $decodedStarredRepositories = json_decode($starredRepositories, true);
         $data                = array(
             'user'      => $user,
-            'data'      => $starredRepositories,
+            'data'      => $decodedStarredRepositories,
             'data_type' => 'starred_repositories'
         );
 
