@@ -196,20 +196,84 @@ class Client
         $uri = $this->appendExtraParameters($uri, $extraParameters);
         $response = $this->crawlUrl($uri, $headers = true);
 
-        $headerFields = $this->parseHeader($response);
+        $links = $this->parseHeaderLinks($response);
         $response = $this->removeHeaders($response);
 
-        if (isset($headerFields['Link'])) {
-            $links = $this->parseLinks($headerFields);
-            $nextPage = $this->hasNextPage($extraParameters, $links);
-
-            if ($nextPage) {
-                $followedUsers = $this->getFollowedUserByPage($links['next']['page']);
-                $response = $this->mergeJsonResponses($response, $followedUsers);
+        if (count($links)) {
+            if ($this->hasNextPage($extraParameters, $links)) {
+                $response = $this->mergeResponseRecursively(
+                    $response,
+                    'getFollowedUserByPage',
+                    array($links['next']['page']));
             }
         }
 
         return $response;
+    }
+
+    /**
+     * @param $response
+     *
+     * @return array
+     */
+    public function parseHeaderLinks($response)
+    {
+        $headers = $this->parseHeaders($response);
+
+        return $this->parseLinks($headers);
+    }
+
+    public function parseHeaders($response)
+    {
+        $headers = [];
+        $match   = preg_match('/(HTTP\/.+)\r\n\r\n/ms', $response, $matches);
+
+        if ($match) {
+            $fields = explode("\r\n", $matches[1]);
+            unset($fields[0]); // Removes status line
+            foreach ($fields as $field) {
+                $delimiter = ': ';
+                if (strpos($field, $delimiter) !== false) {
+                    list($key, $value) = explode($delimiter, $field, 2);
+                    $headers[$key] = $value;
+                }
+            }
+        }
+
+        return $headers;
+    }
+
+    /**
+     * @param $headerFields
+     *
+     * @return array
+     */
+    public function parseLinks($headerFields)
+    {
+        $parsingResults = [];
+
+        if (!array_key_exists('Link', $headerFields)) {
+            return $parsingResults;
+        }
+
+        $fieldValue = $headerFields['Link'];
+        $links = explode(',', $fieldValue);
+        $pattern  = '/\s?<(?<uri>[^>]+page=' .
+            '(?<page>[0-9]+)[^>]+)>; ' .
+            'rel="(?<rel>[^"]+)"/';
+
+        foreach ($links as $link) {
+            $match = preg_match($pattern, $link, $matches);
+
+            if ($match) {
+                $parsingResults[$matches['rel']] = array(
+                    'uri'  => $matches['uri'],
+                    'page' => $matches['page']
+                );
+            }
+        }
+
+        return $parsingResults;
     }
 
     /**
@@ -237,46 +301,18 @@ class Client
 
     /**
      * @param $response
-     * @param $followedUsers
+     * @param $appendance
      *
      * @return string|void
      */
-    public function mergeJsonResponses($response, $followedUsers)
+    public function mergeJsonResponses($response, $appendance)
     {
         return json_encode(
             array_merge(
                 json_decode($response, true),
-                json_decode($followedUsers, true)
+                json_decode($appendance, true)
             )
         );
-    }
-
-    /**
-     * @param $headerFields
-     *
-     * @return array
-     */
-    public function parseLinks($headerFields)
-    {
-        $parsingResults = [];
-        $fieldValue = $headerFields['Link'];
-        $links = explode(',', $fieldValue);
-        $pattern  = '/\s?<(?<uri>[^>]+page=' .
-            '(?<page>[0-9]+)[^>]+)>; ' .
-            'rel="(?<rel>[^"]+)"/';
-
-        foreach ($links as $link) {
-            $match = preg_match($pattern, $link, $matches);
-
-            if ($match) {
-                $parsingResults[$matches['rel']] = array(
-                    'uri'  => $matches['uri'],
-                    'page' => $matches['page']
-                );
-            }
-        }
-
-        return $parsingResults;
     }
 
     /**
@@ -305,31 +341,6 @@ class Client
         }
 
         return $uri;
-    }
-
-    /**
-     * @param $response
-     *
-     * @return array
-     */
-    public function parseHeader($response)
-    {
-        $headers = [];
-        $match = preg_match('/(HTTP\/.+)\r\n\r\n/ms', $response, $matches);
-
-        if ($match) {
-            $fields = explode("\r\n", $matches[1]);
-            unset($fields[0]); // Removes status line
-            foreach ($fields as $field) {
-                $delimiter = ': ';
-                if (strpos($field, $delimiter) !== false) {
-                    list($key, $value) = explode($delimiter, $field, 2);
-                    $headers[$key] = $value;
-                }
-            }
-        }
-
-        return $headers;
     }
 
     /**
@@ -407,32 +418,69 @@ class Client
     /**
      * Gets user starred repositories
      *
-     * @param $user
+     * @param       $user
+     * @param array $extraParameters
      *
      * @return mixed
      */
-    public function getStarredRepositories($user)
+    public function getStarredRepositories($user, array $extraParameters = [])
     {
-        $siteMap        = $this->getSiteMap();
-        $parameterToken = $this->getTokenParameter();
-        $endpoint       = str_replace(':user', $user, $siteMap['uri']['get_starred']);
+        $uri = $this->makeStarredRepositoriesUri($user, $extraParameters);
+        $response = $this->crawlUrl($uri, true);
 
-        $endpoint = $siteMap['url']['base'] . $endpoint .
-            '?' . $parameterToken .
-            '&' . 'redirect_uri=' . $this->getRedirect();
-        $response = $this->crawlUrl($endpoint);
+        $links = $this->parseHeaderLinks($response);
+        $response = $this->removeHeaders($response);
+
+        if (count($links)) {
+            if ($this->hasNextPage($extraParameters, $links)) {
+                $response = $this->mergeResponseRecursively(
+                    $response,
+                    'getUserStarredRepositoriesByPage',
+                    array($user, (int)$links['next']['page']));
+            }
+        }
 
         $this->log(
             __METHOD__,
             array(
-                '[endpoint]',
-                $endpoint,
-                '[response]',
-                $response
+                '[endpoint]', $uri,
+                '[response]', $response
             )
         );
 
         return $response;
+    }
+
+    /**
+     * @param $response
+     * @param $method
+     * @param $arguments
+     *
+     * @return string|void
+     */
+    public function mergeResponseRecursively($response, $method, $arguments)
+    {
+        $appendance = call_user_func_array(array($this, $method) , $arguments);
+
+        return $this->mergeJsonResponses($response, $appendance);
+    }
+
+    public function makeStarredRepositoriesUri($user, array $extraParameters = [])
+    {
+        $siteMap        = $this->getSiteMap();
+        $parameterToken = $this->getTokenParameter();
+
+        $uri            = str_replace(':user', $user, $siteMap['uri']['get_starred']);
+        $uri            = $siteMap['url']['base'] . $uri . '?' . $parameterToken;
+
+        return $this->appendExtraParameters($uri, array_merge(
+            ['redirect_uri' => $this->getRedirect()],
+            $extraParameters));
+    }
+
+    public function getUserStarredRepositoriesByPage($user, $nextPageIndex)
+    {
+        return $this->getStarredRepositories($user, ['page' => $nextPageIndex]);
     }
 
     /**
