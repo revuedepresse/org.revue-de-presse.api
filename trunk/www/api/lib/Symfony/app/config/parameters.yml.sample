@@ -15,8 +15,8 @@ parameters:
 
     api_wtw_repositories_items_per_page: 30
 
-    bower_binary:                   %bower.binary%
-    bower_endpoint:                 %bower.endpoint%
+    bower_binary:                   /usr/local/bin/bower
+    bower_endpoint:                 https://bower.herokuapp.com
 
     database_charset:  UTF8
     database_driver:   pdo_mysql
