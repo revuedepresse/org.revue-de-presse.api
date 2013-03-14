@@ -67,6 +67,31 @@ propel:
 
 sensio_framework_extra:
     view:    { annotations: false }
+    router:  { annotations: true }
+
+sp_bower:
+    install_on_warmup:  false
+    keep_bowerrc:       false
+    bin:                %bower_binary%
+    assetic:
+        enabled: true
+        filters:
+            css:
+                - ?yui_css
+            js:
+                - ?uglifyjs
+            packages:
+                bootstrap:
+                    css:
+                        - cssrewrite
+                    js:
+                        - ?yui_js
+    bundles:
+        WTWDashboardBundle:
+            config_dir: Resources/config/bower
+            asset_dir:  ../../public/components
+            json_file:  component.json
+            endpoint:   %bower_endpoint%
 
 # Swiftmailer Configuration
 swiftmailer:

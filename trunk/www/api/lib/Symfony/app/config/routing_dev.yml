@@ -13,16 +13,21 @@ _configurator:
     resource:     "@SensioDistributionBundle/Resources/config/routing/webconfigurator.xml"
     prefix:       /_configurator
 
-wtw_api_data_mining_bundle:
+wtw_api_data_mining:
     resource:     "@WTWAPIDataMiningBundle/Resources/config/routing.yml"
     prefix:       /
 
-wtw_api_facebook_bundle:
+wtw_api_facebook:
     resource:     "@WTWAPIFacebookBundle/Resources/config/routing.yml"
     prefix:       /
 
-wtw_api_facebook_bundle:
+wtw_api_facebook:
     resource:     "@WTWAPIGoogleDriveBundle/Controller"
+    type:         annotation
+    prefix:       /
+
+wtw_dashboard:
+    resource:     "@WTWDashboardBundle/Controller"
     type:         annotation
     prefix:       /
 
