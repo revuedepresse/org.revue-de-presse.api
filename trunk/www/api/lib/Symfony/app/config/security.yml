@@ -17,7 +17,7 @@ security:
         in_memory:
             memory:
                 users:
-                    adama:  { password: ## FILL ME ##, roles: [ 'ROLE_USER' ] }
+                    %api_wtw_repositories_user_name%:  { password: %api_wtw_repositories_password%, roles: [ 'ROLE_USER' ] }
 
     firewalls:
         dev:
