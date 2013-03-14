@@ -22,6 +22,7 @@ class AppKernel extends Kernel
             new FOS\RestBundle\FOSRestBundle(),
             new Propel\PropelBundle\PropelBundle(),
             new Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle(),
+            new Sp\BowerBundle\SpBowerBundle(),
             new Knp\Bundle\MarkdownBundle\KnpMarkdownBundle(),
             new WTW\API\FacebookBundle\WTWAPIFacebookBundle(),
             new WTW\API\DataMiningBundle\WTWAPIDataMiningBundle(),
@@ -32,6 +33,7 @@ class AppKernel extends Kernel
             new WTW\Legacy\ProviderBundle\WTWLegacyProviderBundle(),
             new WTW\CodeGeneration\AnalysisBundle\WTWCodeGenerationAnalysisBundle(),
             new WTW\API\GoogleDriveBundle\WTWAPIGoogleDriveBundle(),
+            new WTW\DashboardBundle\WTWDashboardBundle(),
         );
 
         if (in_array($this->getEnvironment(), array('dev', 'test'))) {

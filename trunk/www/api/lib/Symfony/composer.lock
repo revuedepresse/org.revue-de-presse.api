@@ -1,5 +1,5 @@
 {
-    "hash": "e4c8dad8ae47b5186a7758cd7cfaa700",
+    "hash": "2da2d0ee21bed1fca6c3a535865cc8c5",
     "packages": [
         {
             "name": "dflydev/markdown",
@@ -710,12 +710,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/doctrine2.git",
-                "reference": "563fdb953be4f86eeb5b9ab82e82e6a98cf14f6b"
+                "reference": "8a2d7374b123dd28303d9891e607501411d065d3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/doctrine2/zipball/563fdb953be4f86eeb5b9ab82e82e6a98cf14f6b",
-                "reference": "563fdb953be4f86eeb5b9ab82e82e6a98cf14f6b",
+                "url": "https://api.github.com/repos/doctrine/doctrine2/zipball/8a2d7374b123dd28303d9891e607501411d065d3",
+                "reference": "8a2d7374b123dd28303d9891e607501411d065d3",
                 "shasum": ""
             },
             "require": {
@@ -772,7 +772,7 @@
                 "database",
                 "orm"
             ],
-            "time": "2013-03-12 21:53:10"
+            "time": "2013-03-14 19:08:37"
         },
         {
             "name": "fabpot/goutte",
@@ -927,12 +927,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/FriendsOfSymfony/FOSRestBundle.git",
-                "reference": "0766e66f77c3ba41553b3b1d49858915a214134d"
+                "reference": "96cfb148d4f4bdd758e10206ca09935567f858f7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/FriendsOfSymfony/FOSRestBundle/zipball/0766e66f77c3ba41553b3b1d49858915a214134d",
-                "reference": "0766e66f77c3ba41553b3b1d49858915a214134d",
+                "url": "https://api.github.com/repos/FriendsOfSymfony/FOSRestBundle/zipball/96cfb148d4f4bdd758e10206ca09935567f858f7",
+                "reference": "96cfb148d4f4bdd758e10206ca09935567f858f7",
                 "shasum": ""
             },
             "require": {
@@ -990,7 +990,7 @@
             "keywords": [
                 "rest"
             ],
-            "time": "2013-03-13 12:27:03"
+            "time": "2013-03-14 17:52:06"
         },
         {
             "name": "guzzle/guzzle",
@@ -1530,12 +1530,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/schmittjoh/JMSSerializerBundle.git",
-                "reference": "fa2447f4e225307e340b07e9fb97ade896291cc7"
+                "reference": "ab2ca253c3e2fb12dfbe3f1048224661ebf25494"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/schmittjoh/JMSSerializerBundle/zipball/fa2447f4e225307e340b07e9fb97ade896291cc7",
-                "reference": "fa2447f4e225307e340b07e9fb97ade896291cc7",
+                "url": "https://api.github.com/repos/schmittjoh/JMSSerializerBundle/zipball/ab2ca253c3e2fb12dfbe3f1048224661ebf25494",
+                "reference": "ab2ca253c3e2fb12dfbe3f1048224661ebf25494",
                 "shasum": ""
             },
             "require": {
@@ -1589,7 +1589,7 @@
                 "serialization",
                 "xml"
             ],
-            "time": "2013-02-23 13:35:57"
+            "time": "2013-03-14 09:30:30"
         },
         {
             "name": "kertz/twitteroauth",
@@ -2250,6 +2250,67 @@
             "time": "2013-02-22 17:59:21"
         },
         {
+            "name": "sp/bower-bundle",
+            "version": "dev-master",
+            "target-dir": "Sp/BowerBundle",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Spea/SpBowerBundle.git",
+                "reference": "55e380181520af042916b8efc1794702be43ace7"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Spea/SpBowerBundle/zipball/55e380181520af042916b8efc1794702be43ace7",
+                "reference": "55e380181520af042916b8efc1794702be43ace7",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.3",
+                "symfony/assetic-bundle": ">=2.1,<2.3-dev",
+                "symfony/framework-bundle": ">=2.1,<2.3-dev",
+                "symfony/process": ">=2.1,<2.3-dev"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "3.7.*",
+                "symfony/console": ">=2.1,<2.3-dev",
+                "symfony/filesystem": ">=2.1,<2.3-dev"
+            },
+            "type": "symfony-bundle",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "0.6-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Sp\\BowerBundle": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Martin Parsiegla",
+                    "email": "martin.parsiegla@gmail.com",
+                    "homepage": "http://speanet.info"
+                },
+                {
+                    "name": "Community contributions",
+                    "homepage": "https://github.com/Spea/SpBowerBundle/contributors"
+                }
+            ],
+            "description": "Handle asset dependencies with bower",
+            "keywords": [
+                "asset",
+                "bower",
+                "bower manager",
+                "dependencies"
+            ],
+            "time": "2013-03-14 19:10:16"
+        },
+        {
             "name": "swiftmailer/swiftmailer",
             "version": "dev-master",
             "source": {
@@ -2480,12 +2541,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/symfony.git",
-                "reference": "d32c1c0d9c0bb54c40d4edf0492e471f8e6f0544"
+                "reference": "82a78ed54515a914e46ccbad617d6f683e6a5acf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/symfony/zipball/d32c1c0d9c0bb54c40d4edf0492e471f8e6f0544",
-                "reference": "d32c1c0d9c0bb54c40d4edf0492e471f8e6f0544",
+                "url": "https://api.github.com/repos/symfony/symfony/zipball/82a78ed54515a914e46ccbad617d6f683e6a5acf",
+                "reference": "82a78ed54515a914e46ccbad617d6f683e6a5acf",
                 "shasum": ""
             },
             "require": {
@@ -2571,7 +2632,7 @@
             "keywords": [
                 "framework"
             ],
-            "time": "2013-03-13 13:44:31"
+            "time": "2013-03-14 13:30:47"
         },
         {
             "name": "themattharris/tmhoauth",
