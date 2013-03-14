@@ -36,10 +36,38 @@ doctrine:
         auto_generate_proxy_classes: %kernel.debug%
         auto_mapping: true
 
+fos_rest:
+    allowed_methods_listener: true
+
+    param_fetcher_listener:   true
+
+    routing_loader:
+        default_format:       json
+
+    view:
+        formats:
+            json: true
+        mime_types:
+            json: ['application/json', 'application/x-json', 'application/vnd.## FILL HOSTNAME ##+json']
+        force_redirects:
+            html: true
+        view_response_listener: force
+
+    format_listener:
+        default_priorities:
+            - json
+            - html
+            - '*/*'
+        fallback_format:      json
+        prefer_extension:     true
+
 propel:
     path:       "%kernel.root_dir%/../vendor/propel"
     phing_path: "%kernel.root_dir%/../vendor/phing"
-    
+
+sensio_framework_extra:
+    view:    { annotations: false }
+
 # Swiftmailer Configuration
 swiftmailer:
     spool:     { type: memory }
