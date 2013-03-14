@@ -4,7 +4,6 @@ namespace WTW\API\GoogleDriveBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
@@ -56,7 +55,6 @@ class ActivitiesController extends Controller
 
     /**
      * @Route("/api/google/drive", name="api_google_drive")
-     * @Template()
      */
     public function showActivitiesAction($code = null)
     {
@@ -69,7 +67,9 @@ class ActivitiesController extends Controller
         $this->updateAccessToken($client);
         $activities = $this->showActivities($client);
 
-        return array('activities' => $activities);
+        return $this->render(
+            'WTWAPIGoogleDriveBundle:Activities:showActivities.html.twig',
+            array('activities' => $activities));
     }
 
     public function getConfiguredClient()

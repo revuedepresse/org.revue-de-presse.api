@@ -13,6 +13,10 @@ _configurator:
     resource:     "@SensioDistributionBundle/Resources/config/routing/webconfigurator.xml"
     prefix:       /_configurator
 
+wtw_api_data_mining_bundle:
+    resource:     "@WTWAPIDataMiningBundle/Resources/config/routing.yml"
+    prefix:       /
+
 wtw_api_facebook_bundle:
     resource:     "@WTWAPIFacebookBundle/Resources/config/routing.yml"
     prefix:       /
