@@ -1,5 +1,11 @@
 {% javascripts
-    "@bootstrap_js"
-    "@angular_js"  output='js/compiled/main.js' %}
+    '@WTWDashboardBundle/Resources/public/wtw/lib/angular/angular.js'
+    '@WTWDashboardBundle/Resources/public/wtw/js/app.js'
+    '@WTWDashboardBundle/Resources/public/wtw/js/services.js'
+    '@WTWDashboardBundle/Resources/public/wtw/js/controllers.js'
+    '@WTWDashboardBundle/Resources/public/wtw/js/filters.js'
+    '@WTWDashboardBundle/Resources/public/wtw/js/directives.js'
+    '@bootstrap_js'
+    output='js/compiled/main.js' %}
     <script src="{{ asset_url }}"></script>
 {% endjavascripts %}
