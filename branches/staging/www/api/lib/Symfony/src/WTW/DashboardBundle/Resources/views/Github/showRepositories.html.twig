@@ -1,0 +1,14 @@
+{% extends "::base.html.twig" %}
+
+{% block body %}
+{% endblock %}
+
+{% javascripts
+    "@bootstrap_js" %}
+    "@angular_js" %}
+    <script src="{{ asset_url }}"></script>
+{% endjavascripts %}
+{% stylesheets
+    "@bootstrap_css" %}
+    <link rel="stylesheet" href="{{ asset_url }}" />
+{% endstylesheets %}

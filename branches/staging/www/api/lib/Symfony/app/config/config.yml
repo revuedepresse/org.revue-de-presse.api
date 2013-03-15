@@ -1,0 +1,102 @@
+imports:
+    - { resource: parameters.yml }
+    - { resource: parameters.php }
+    - { resource: security.yml }
+
+framework:
+    default_locale:       %locale%
+    translator:           { fallback: en }
+    secret:               %secret%
+    router:
+        resource: "%kernel.root_dir%/config/routing.yml"
+        strict_requirements: %kernel.debug%
+    form:                 true
+    csrf_protection:      true
+    validation:           { enable_annotations: true }
+    templating:           { engines: ['twig'] }
+    trust_proxy_headers:  false
+    session:              ~
+
+# Twig Configuration
+twig:
+    debug:            %kernel.debug%
+    strict_variables: %kernel.debug%
+
+# Assetic Configuration
+assetic:
+    bundles:        []
+    debug:          %kernel.debug%
+    use_controller: false
+    filters:
+        cssrewrite: ~
+
+# Doctrine Configuration
+doctrine:
+    orm:
+        auto_generate_proxy_classes: %kernel.debug%
+        auto_mapping: true
+
+fos_rest:
+    allowed_methods_listener: true
+
+    param_fetcher_listener:   true
+
+    routing_loader:
+        default_format:       json
+
+    view:
+        formats:
+            json: true
+        mime_types:
+            json: ['application/json', 'application/x-json', 'application/vnd.## FILL HOSTNAME ##+json']
+        force_redirects:
+            html: true
+        view_response_listener: force
+
+    format_listener:
+        default_priorities:
+            - json
+            - html
+            - '*/*'
+        fallback_format:      json
+        prefer_extension:     true
+
+propel:
+    path:       "%kernel.root_dir%/../vendor/propel"
+    phing_path: "%kernel.root_dir%/../vendor/phing"
+
+sensio_framework_extra:
+    view:    { annotations: false }
+    router:  { annotations: true }
+
+sp_bower:
+    install_on_warmup:  false
+    keep_bowerrc:       false
+    bin:                %bower_binary%
+    assetic:
+        enabled: true
+        filters:
+            css:
+                - ?yui_css
+            js:
+                - ?uglifyjs
+            packages:
+                bootstrap:
+                    css:
+                        - cssrewrite
+                    js:
+                        - ?yui_js
+    bundles:
+        WTWDashboardBundle:
+            config_dir: Resources/config/bower
+            asset_dir:  ../../public/components
+            json_file:  component.json
+            endpoint:   %bower_endpoint%
+
+# Swiftmailer Configuration
+swiftmailer:
+    spool:     { type: memory }
+    transport: %mailer_transport%
+    host:      %mailer_host%
+    username:  %mailer_user%
+    password:  %mailer_password%

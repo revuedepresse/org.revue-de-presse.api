@@ -1,0 +1,21 @@
+disclaimers:
+  -
+    do_you
+fields:
+  -
+    accesskey: c
+    class: confirmation
+    name: confirm
+    provide.with.options: confirm
+    type: radio*
+    tabindex: 0
+  -
+    accesskey: s
+    class: submit_confirmation
+    name: submit
+    type: submit
+    value: submit
+options:
+  confirm:
+    1: i18n.yes
+    2: i18n.no

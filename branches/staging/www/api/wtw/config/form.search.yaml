@@ -1,0 +1,13 @@
+fields:
+  -
+    accesskey: k
+    name: keywords
+    tabindex: 1
+    type: text*
+  -  
+    accesskey: s
+    id: look_up
+    name: search
+    tabindex: 2
+    type: submit
+    value: search
