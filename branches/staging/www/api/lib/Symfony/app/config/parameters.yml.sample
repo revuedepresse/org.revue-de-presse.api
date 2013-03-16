@@ -24,9 +24,9 @@ parameters:
     database_driver:   pdo_mysql
     database_host:     localhost
     database_port:     3306
-    database_name:     _
-    database_user:     _
-    database_password: _
+    database_name:     %mysql.database%
+    database_user:     %mysql.user%
+    database_password: %mysql.password%
 
     endpoint_facebook_feed:         %api_facebook_host_port%/api/facebook/api.facebook.get.feed.php
     endpoint_github_redirect:       %api_github_host_port%/github/request
