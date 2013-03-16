@@ -42,6 +42,7 @@ class Service_Manager extends Deployer
 		$host_dev_wtw = '## FILL HOSTNAME ##';
 		$host_org_wtw_build = '## FILL HOSTNAME ##';
         $host_org_wtw_stable = '## FILL HOSTNAME ##';
+        $host_org_wtw_unstable = '## FILL HOSTNAME ##';
 
 		$mode_cli = defined('STDIN');
 
@@ -152,12 +153,13 @@ class Service_Manager extends Deployer
             ) ||
             isset($jenkins_workspace) ||
             in_array( $server_name, array( $host_dev_wtw, $host_local_ip, $host_org_wtw_build ) ) ||
-            $host_dev_wtw_stable_detected 
+            $host_dev_wtw_stable_detected || 
+            $host_dev_wtw_unstable_detected 
         ) {
             $target = 'ghost/';
             if (isset($jenkins_workspace))
                 $target = $jenkins_workspace .
-                    ( strlen($jenkins_workspace) > 0 ) ? '/' : '';
+                    ( strlen($jenkins_workspace) > 0 ? '/' : '' );
             else if ($build_jenkins) 
                 $target = 'jenkins/' ;
 
