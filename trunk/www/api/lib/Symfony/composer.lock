@@ -62,16 +62,16 @@
         },
         {
             "name": "doctrine/annotations",
-            "version": "v1.0",
+            "version": "v1.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/annotations.git",
-                "reference": "v1.0"
+                "reference": "v1.1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://github.com/doctrine/annotations/archive/v1.0.zip",
-                "reference": "v1.0",
+                "url": "https://api.github.com/repos/doctrine/annotations/zipball/v1.1",
+                "reference": "v1.1",
                 "shasum": ""
             },
             "require": {
@@ -124,7 +124,7 @@
                 "docblock",
                 "parser"
             ],
-            "time": "2013-01-12 19:23:32"
+            "time": "2013-03-17 14:03:10"
         },
         {
             "name": "doctrine/cache",
@@ -132,12 +132,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/cache.git",
-                "reference": "f82e2e24d429d36a02266a584b889bd2d09e4fd2"
+                "reference": "b5716ea776f349a0fedcf0e7d032386c1f696f76"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/cache/zipball/f82e2e24d429d36a02266a584b889bd2d09e4fd2",
-                "reference": "f82e2e24d429d36a02266a584b889bd2d09e4fd2",
+                "url": "https://api.github.com/repos/doctrine/cache/zipball/b5716ea776f349a0fedcf0e7d032386c1f696f76",
+                "reference": "b5716ea776f349a0fedcf0e7d032386c1f696f76",
                 "shasum": ""
             },
             "require": {
@@ -165,7 +165,7 @@
                     "homepage": "http://www.jwage.com/"
                 },
                 {
-                    "name": "Christoph Dorn",
+                    "name": "Guilherme Blanco",
                     "email": "guilhermeblanco@gmail.com",
                     "homepage": "http://www.instaclick.com"
                 },
@@ -180,7 +180,7 @@
                 {
                     "name": "Johannes Schmitt",
                     "email": "schmittjoh@gmail.com",
-                    "homepage": "https://github.com/schmittjoh",
+                    "homepage": "http://jmsyst.com",
                     "role": "Developer of wrapped JMSSerializerBundle"
                 }
             ],
@@ -190,7 +190,7 @@
                 "cache",
                 "caching"
             ],
-            "time": "2013-03-07 12:15:13"
+            "time": "2013-03-17 13:59:02"
         },
         {
             "name": "doctrine/collections",
@@ -198,12 +198,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/collections.git",
-                "reference": "560f29c39cfcfbcd210e5d549d993a39d898b04b"
+                "reference": "df2138bcb467533bfe6b3a01301d480aec008b93"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/collections/zipball/560f29c39cfcfbcd210e5d549d993a39d898b04b",
-                "reference": "560f29c39cfcfbcd210e5d549d993a39d898b04b",
+                "url": "https://api.github.com/repos/doctrine/collections/zipball/df2138bcb467533bfe6b3a01301d480aec008b93",
+                "reference": "df2138bcb467533bfe6b3a01301d480aec008b93",
                 "shasum": ""
             },
             "require": {
@@ -231,7 +231,7 @@
                     "homepage": "http://www.jwage.com/"
                 },
                 {
-                    "name": "Christoph Dorn",
+                    "name": "Guilherme Blanco",
                     "email": "guilhermeblanco@gmail.com",
                     "homepage": "http://www.instaclick.com"
                 },
@@ -246,7 +246,7 @@
                 {
                     "name": "Johannes Schmitt",
                     "email": "schmittjoh@gmail.com",
-                    "homepage": "https://github.com/schmittjoh",
+                    "homepage": "http://jmsyst.com",
                     "role": "Developer of wrapped JMSSerializerBundle"
                 }
             ],
@@ -257,7 +257,7 @@
                 "collections",
                 "iterator"
             ],
-            "time": "2013-03-07 12:15:54"
+            "time": "2013-03-17 14:01:33"
         },
         {
             "name": "doctrine/common",
@@ -394,12 +394,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/dbal.git",
-                "reference": "569f1aed578585df904c7dbfc43aa39cb09877cc"
+                "reference": "8df9cd3668363f017dfea56b5ad448ea74dae49b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/dbal/zipball/569f1aed578585df904c7dbfc43aa39cb09877cc",
-                "reference": "569f1aed578585df904c7dbfc43aa39cb09877cc",
+                "url": "https://api.github.com/repos/doctrine/dbal/zipball/8df9cd3668363f017dfea56b5ad448ea74dae49b",
+                "reference": "8df9cd3668363f017dfea56b5ad448ea74dae49b",
                 "shasum": ""
             },
             "require": {
@@ -449,7 +449,7 @@
                 "persistence",
                 "queryobject"
             ],
-            "time": "2013-03-04 22:37:48"
+            "time": "2013-03-14 21:55:05"
         },
         {
             "name": "doctrine/doctrine-bundle",
@@ -710,12 +710,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/doctrine2.git",
-                "reference": "8a2d7374b123dd28303d9891e607501411d065d3"
+                "reference": "ae1f903080407c97847d5bab325bba208622bb3a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/doctrine2/zipball/8a2d7374b123dd28303d9891e607501411d065d3",
-                "reference": "8a2d7374b123dd28303d9891e607501411d065d3",
+                "url": "https://api.github.com/repos/doctrine/doctrine2/zipball/ae1f903080407c97847d5bab325bba208622bb3a",
+                "reference": "ae1f903080407c97847d5bab325bba208622bb3a",
                 "shasum": ""
             },
             "require": {
@@ -772,7 +772,7 @@
                 "database",
                 "orm"
             ],
-            "time": "2013-03-14 19:08:37"
+            "time": "2013-03-17 20:49:24"
         },
         {
             "name": "fabpot/goutte",
@@ -780,12 +780,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/fabpot/Goutte.git",
-                "reference": "v1.0.1"
+                "reference": "3ebd52cee0c997d4e4c5e2fb5f10ee9de0e3fc46"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/fabpot/Goutte/zipball/v1.0.1",
-                "reference": "v1.0.1",
+                "url": "https://api.github.com/repos/fabpot/Goutte/zipball/3ebd52cee0c997d4e4c5e2fb5f10ee9de0e3fc46",
+                "reference": "3ebd52cee0c997d4e4c5e2fb5f10ee9de0e3fc46",
                 "shasum": ""
             },
             "require": {
@@ -824,7 +824,7 @@
             "keywords": [
                 "scraper"
             ],
-            "time": "2013-03-08 08:00:58"
+            "time": "2013-03-15 10:18:26"
         },
         {
             "name": "facebook/php-sdk",
@@ -927,12 +927,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/FriendsOfSymfony/FOSRestBundle.git",
-                "reference": "96cfb148d4f4bdd758e10206ca09935567f858f7"
+                "reference": "9fdceb12597651ecb7fdcd7bc67f6ca27806e4e6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/FriendsOfSymfony/FOSRestBundle/zipball/96cfb148d4f4bdd758e10206ca09935567f858f7",
-                "reference": "96cfb148d4f4bdd758e10206ca09935567f858f7",
+                "url": "https://api.github.com/repos/FriendsOfSymfony/FOSRestBundle/zipball/9fdceb12597651ecb7fdcd7bc67f6ca27806e4e6",
+                "reference": "9fdceb12597651ecb7fdcd7bc67f6ca27806e4e6",
                 "shasum": ""
             },
             "require": {
@@ -941,10 +941,10 @@
                 "symfony/framework-bundle": ">=2.1,<2.3-dev"
             },
             "conflict": {
-                "jms/serializer-bundle": "<0.11-dev"
+                "jms/serializer-bundle": "<0.12-dev"
             },
             "require-dev": {
-                "jms/serializer-bundle": "0.11.*",
+                "jms/serializer-bundle": "0.12.*",
                 "sensio/framework-extra-bundle": ">=2.1,<2.4-dev",
                 "symfony/form": ">=2.1,<2.4-dev",
                 "symfony/security": ">=2.1,<2.4-dev",
@@ -990,7 +990,7 @@
             "keywords": [
                 "rest"
             ],
-            "time": "2013-03-14 17:52:06"
+            "time": "2013-03-18 13:39:58"
         },
         {
             "name": "guzzle/guzzle",
@@ -1092,12 +1092,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/jdorn/sql-formatter.git",
-                "reference": "999f8125a66f44da7ee53db64e7aee3be8fa91ec"
+                "reference": "46ec57eb77c2aaf6e685ecb9864ac01a5878cc77"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/jdorn/sql-formatter/zipball/999f8125a66f44da7ee53db64e7aee3be8fa91ec",
-                "reference": "999f8125a66f44da7ee53db64e7aee3be8fa91ec",
+                "url": "https://api.github.com/repos/jdorn/sql-formatter/zipball/46ec57eb77c2aaf6e685ecb9864ac01a5878cc77",
+                "reference": "46ec57eb77c2aaf6e685ecb9864ac01a5878cc77",
                 "shasum": ""
             },
             "require": {
@@ -1134,7 +1134,7 @@
                 "highlight",
                 "sql"
             ],
-            "time": "2013-03-11 18:41:07"
+            "time": "2013-03-15 20:25:42"
         },
         {
             "name": "jms/aop-bundle",
@@ -1755,12 +1755,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Seldaek/monolog.git",
-                "reference": "041aa3930f8d2b466ae897440ec9471d5159c5bf"
+                "reference": "dd0b216e0229a24178c2f0782f8a7172c7ed1c96"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/041aa3930f8d2b466ae897440ec9471d5159c5bf",
-                "reference": "041aa3930f8d2b466ae897440ec9471d5159c5bf",
+                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/dd0b216e0229a24178c2f0782f8a7172c7ed1c96",
+                "reference": "dd0b216e0229a24178c2f0782f8a7172c7ed1c96",
                 "shasum": ""
             },
             "require": {
@@ -1809,7 +1809,7 @@
                 "logging",
                 "psr-3"
             ],
-            "time": "2013-02-26 10:18:11"
+            "time": "2013-03-18 18:06:02"
         },
         {
             "name": "phing/phing",
@@ -2255,13 +2255,13 @@
             "target-dir": "Sp/BowerBundle",
             "source": {
                 "type": "git",
-                "url": "https://github.com/Spea/SpBowerBundle.git",
-                "reference": "55e380181520af042916b8efc1794702be43ace7"
+                "url": "https://github.com/thierrymarianne/SpBowerBundle.git",
+                "reference": "0fa9cd67ca232cdfbf5ca9a225df33b1c82958e2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Spea/SpBowerBundle/zipball/55e380181520af042916b8efc1794702be43ace7",
-                "reference": "55e380181520af042916b8efc1794702be43ace7",
+                "url": "https://api.github.com/repos/thierrymarianne/SpBowerBundle/zipball/0fa9cd67ca232cdfbf5ca9a225df33b1c82958e2",
+                "reference": "0fa9cd67ca232cdfbf5ca9a225df33b1c82958e2",
                 "shasum": ""
             },
             "require": {
@@ -2286,7 +2286,6 @@
                     "Sp\\BowerBundle": ""
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -2308,7 +2307,10 @@
                 "bower manager",
                 "dependencies"
             ],
-            "time": "2013-03-14 19:10:16"
+            "support": {
+                "source": "https://github.com/thierrymarianne/SpBowerBundle/tree/master"
+            },
+            "time": "2013-03-14 20:02:25"
         },
         {
             "name": "swiftmailer/swiftmailer",
@@ -2541,12 +2543,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/symfony.git",
-                "reference": "82a78ed54515a914e46ccbad617d6f683e6a5acf"
+                "reference": "ed6c52b712237aea9aed587931c942112d472129"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/symfony/zipball/82a78ed54515a914e46ccbad617d6f683e6a5acf",
-                "reference": "82a78ed54515a914e46ccbad617d6f683e6a5acf",
+                "url": "https://api.github.com/repos/symfony/symfony/zipball/ed6c52b712237aea9aed587931c942112d472129",
+                "reference": "ed6c52b712237aea9aed587931c942112d472129",
                 "shasum": ""
             },
             "require": {
@@ -2632,7 +2634,7 @@
             "keywords": [
                 "framework"
             ],
-            "time": "2013-03-14 13:30:47"
+            "time": "2013-03-18 14:29:32"
         },
         {
             "name": "themattharris/tmhoauth",
