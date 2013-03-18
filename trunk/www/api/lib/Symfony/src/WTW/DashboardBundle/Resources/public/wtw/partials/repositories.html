@@ -1,0 +1,23 @@
+<div class="span12" ng-controller="ShowRepositoriesAction">
+    <h1>{{ dashboard.data_type | title }}</h1>
+    <h2>{{ dashboard.user }}</h2>
+    <table class="table table-condensed">
+        <tr ng-repeat="item in dashboard.data">
+            <td><div class="span1" id="{{ $index }}">{{ item.owner.avatar_url | helperAvatar:$index }}</div></td>
+            <td>
+                <dl class="dl-horizontal">
+                    <dt>Owner</dt>
+                    <dd>{{ item.owner.login }}</dd>
+                    <dt>Repository</dt>
+                    <dd>{{ item.name }}</dd>
+                    <dt>Description</dt>
+                    <dd>{{ item.description }}</dd>
+                </dl>
+            </td>
+            <td><a class="btn btn-link" href="{{ item.clone_url }}">source</a></td>
+        </tr>
+    </table>
+    <div ng-model="dashboard">
+    </div>
+</div>
+
