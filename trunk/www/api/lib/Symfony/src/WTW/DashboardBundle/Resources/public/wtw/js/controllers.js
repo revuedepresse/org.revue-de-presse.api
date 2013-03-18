@@ -2,11 +2,9 @@
 
 /* Controllers */
 
-
-function MyCtrl1() {}
-MyCtrl1.$inject = [];
-
-
-function MyCtrl2() {
+function ShowRepositoriesAction($scope, $http) {
+    $http.get('http://## FILL HOSTNAME ##/sf2/api/github/repositories').success(function (data) {
+        $scope.dashboard = data[0]
+    })
 }
-MyCtrl2.$inject = [];
+ShowRepositoriesAction.$inject = ['$scope', '$http'];
