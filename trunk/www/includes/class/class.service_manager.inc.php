@@ -23,7 +23,7 @@ class Service_Manager extends Deployer
         global $argv,
             $build_jenkins,
             $debug_enabled,
-            $directory_web_services,
+            $directory_includes,
             $jenkins_workspace,
             $symfony_detected;
 
@@ -74,7 +74,10 @@ class Service_Manager extends Deployer
         );
 
         $environment_development = ! $build_jenkins && ( 
-                ! isset( $jenkins_workspace ) &&
+                (
+                    ! isset( $jenkins_workspace ) ||
+                    strlen($jenkins_workspace) === 0
+                ) &&
                 ! $symfony_detected &&
                 ! $host_dev_wtw_stable_detected &&
                 ! is_null( $server_name ) &&
@@ -83,7 +86,8 @@ class Service_Manager extends Deployer
                     array(
                         $host_local_livecoding,
                         $host_local_snaps,
-                        $host_dev_tifa
+                        $host_dev_tifa,
+                        $host_dev_wtw
                     )
                 ) || (
                     $mode_cli && (
@@ -152,13 +156,14 @@ class Service_Manager extends Deployer
             $host_dev_wtw_stable_detected || 
             $host_dev_wtw_unstable_detected 
         ) {
-            $target = 'ghost';
+            $target = 'ghost/';
             if (isset($jenkins_workspace))
                 $target = $jenkins_workspace .
                     ( strlen($jenkins_workspace) > 0 ? '/' : '' );
             else if ($build_jenkins) 
-                $target = '## FILL ME ##';
-			$file_path = $directory_web_services.'/../settings/' . $target . '/'.
+                $target = 'jenkins/' ;
+
+			$file_path = $directory_includes .'/../../settings/' . $target .
 				$file_name_settings
             ;	
         }	

@@ -19,6 +19,8 @@ class GithubController extends Controller
     public function showRepositoriesAction()
     {
         return $this->render(
-            'WTWDashboardBundle:Github:showRepositories.html.twig');
+            'WTWDashboardBundle:Github:showRepositories.html.twig', array(
+                'title' => 'Github Starred Repositories'
+            ));
     }
 }

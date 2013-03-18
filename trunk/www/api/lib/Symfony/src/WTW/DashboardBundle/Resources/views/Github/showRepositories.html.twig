@@ -1,14 +1,20 @@
 {% extends "::base.html.twig" %}
 
-{% block body %}
-{% endblock %}
+{% block title %}{{ title }}{% endblock %}
 
-{% javascripts
-    "@bootstrap_js" %}
-    "@angular_js" %}
-    <script src="{{ asset_url }}"></script>
-{% endjavascripts %}
-{% stylesheets
-    "@bootstrap_css" %}
-    <link rel="stylesheet" href="{{ asset_url }}" />
-{% endstylesheets %}
+{% block body %}
+    <div class="container">
+        <div class="row">
+            <div class="span12 navbar">
+                <div class="navbar-inner">
+                    <ul class="nav nav-pills">
+                        <li class="active">
+                            <a href="#/github-repositories">Github Repositories</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div ng-view></div>
+        </div>
+    <div>
+{% endblock %}
