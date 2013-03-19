@@ -31,6 +31,7 @@
         "facebook/php-sdk":"3.2.1",
         "fabpot/goutte":"dev-master",
         "friendsofsymfony/rest-bundle":"dev-master",
+        "friendsofsymfony/jsrouting-bundle": "1.1.*",
         "guzzle/guzzle":"3.1.2 as 3.0.7",
         "kertz/twitteroauth":"dev-master",
         "jms/di-extra-bundle":"1.3.*",
