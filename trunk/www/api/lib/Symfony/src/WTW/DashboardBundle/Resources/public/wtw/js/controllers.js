@@ -3,7 +3,9 @@
 /* Controllers */
 
 function ShowRepositoriesAction($scope, $http) {
-    $http.get('http://## FILL HOSTNAME ##/sf2/api/github/repositories').success(function (data) {
+    var getRepositoriesUrl = Routing.generate('get_repositories', {}, true);
+
+    $http.get(getRepositoriesUrl).success(function (data) {
         $scope.dashboard = data[0]
     })
 }
