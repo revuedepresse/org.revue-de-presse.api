@@ -2,7 +2,7 @@
 
 angular.module('WTW', ['WTW.filters']).config(
     ['$routeProvider', function($routeProvider) {
-        var templatesDir = '/sf2/bundles/wtwdashboard/wtw/partials/';
+        var templatesDir = '/bundles/wtwdashboard/wtw/partials';
 
         $routeProvider.when('/github-repositories', {
             templateUrl: templatesDir + '/repositories.html',
