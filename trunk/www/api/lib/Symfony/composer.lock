@@ -1288,17 +1288,17 @@
         },
         {
             "name": "jms/di-extra-bundle",
-            "version": "dev-master",
+            "version": "1.3.0",
             "target-dir": "JMS/DiExtraBundle",
             "source": {
                 "type": "git",
                 "url": "https://github.com/schmittjoh/JMSDiExtraBundle.git",
-                "reference": "bc4f3280e472d48dec2c410c853f8188897ccec4"
+                "reference": "1.3.0"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/schmittjoh/JMSDiExtraBundle/zipball/bc4f3280e472d48dec2c410c853f8188897ccec4",
-                "reference": "bc4f3280e472d48dec2c410c853f8188897ccec4",
+                "url": "https://api.github.com/repos/schmittjoh/JMSDiExtraBundle/zipball/1.3.0",
+                "reference": "1.3.0",
                 "shasum": ""
             },
             "require": {
@@ -1351,7 +1351,7 @@
                 "annotations",
                 "dependency injection"
             ],
-            "time": "2013-02-22 19:24:48"
+            "time": "2013-01-30 21:51:54"
         },
         {
             "name": "jms/metadata",
@@ -1442,7 +1442,7 @@
         },
         {
             "name": "jms/security-extra-bundle",
-            "version": "dev-master",
+            "version": "1.4.0",
             "target-dir": "JMS/SecurityExtraBundle",
             "source": {
                 "type": "git",
@@ -1739,12 +1739,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/kriswallsmith/assetic.git",
-                "reference": "fcee205a5a3a859c009d976ba3acfe67958e912c"
+                "reference": "89e9837425ec32dedf1c90bb3cc48056b9315113"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/kriswallsmith/assetic/zipball/fcee205a5a3a859c009d976ba3acfe67958e912c",
-                "reference": "fcee205a5a3a859c009d976ba3acfe67958e912c",
+                "url": "https://api.github.com/repos/kriswallsmith/assetic/zipball/89e9837425ec32dedf1c90bb3cc48056b9315113",
+                "reference": "89e9837425ec32dedf1c90bb3cc48056b9315113",
                 "shasum": ""
             },
             "require": {
@@ -1802,7 +1802,7 @@
                 "compression",
                 "minification"
             ],
-            "time": "2013-03-05 17:56:54"
+            "time": "2013-03-20 02:05:59"
         },
         {
             "name": "monolog/monolog",
@@ -2071,12 +2071,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/propelorm/Propel.git",
-                "reference": "4152367d69277710835cd10dd21a76260b57c84b"
+                "reference": "a73f19f38ff2d50de195ba1431658fef1422d346"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/propelorm/Propel/zipball/4152367d69277710835cd10dd21a76260b57c84b",
-                "reference": "4152367d69277710835cd10dd21a76260b57c84b",
+                "url": "https://api.github.com/repos/propelorm/Propel/zipball/a73f19f38ff2d50de195ba1431658fef1422d346",
+                "reference": "a73f19f38ff2d50de195ba1431658fef1422d346",
                 "shasum": ""
             },
             "require": {
@@ -2123,7 +2123,7 @@
                 "orm",
                 "persistence"
             ],
-            "time": "2013-03-04 21:02:16"
+            "time": "2013-03-20 15:59:29"
         },
         {
             "name": "psr/log",
@@ -2543,25 +2543,25 @@
             "target-dir": "Symfony/Bundle/SwiftmailerBundle",
             "source": {
                 "type": "git",
-                "url": "https://github.com/symfony/SwiftmailerBundle",
-                "reference": "v2.2.0-BETA2"
+                "url": "https://github.com/symfony/SwiftmailerBundle.git",
+                "reference": "3947fe3a1cf88b373fe0f0cc37dbffeb02ca8d6f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/SwiftmailerBundle/zipball/v2.2.0-BETA2",
-                "reference": "v2.2.0-BETA2",
+                "url": "https://api.github.com/repos/symfony/SwiftmailerBundle/zipball/3947fe3a1cf88b373fe0f0cc37dbffeb02ca8d6f",
+                "reference": "3947fe3a1cf88b373fe0f0cc37dbffeb02ca8d6f",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3.2",
                 "swiftmailer/swiftmailer": ">=4.2.0,<4.4-dev",
-                "symfony/swiftmailer-bridge": ">=2.1.0,<2.3-dev"
+                "symfony/swiftmailer-bridge": ">=2.1,<3.0"
             },
             "require-dev": {
-                "symfony/config": ">=2.1.0,<2.3-dev",
-                "symfony/dependency-injection": ">=2.1.0,<2.3-dev",
-                "symfony/http-kernel": ">=2.1.0,<2.3-dev",
-                "symfony/yaml": ">=2.1.0,<2.3-dev"
+                "symfony/config": ">=2.1,<3.0",
+                "symfony/dependency-injection": ">=2.1,<3.0",
+                "symfony/http-kernel": ">=2.1,<3.0",
+                "symfony/yaml": ">=2.1,<3.0"
             },
             "type": "symfony-bundle",
             "extra": {
@@ -2590,7 +2590,7 @@
             ],
             "description": "Symfony SwiftmailerBundle",
             "homepage": "http://symfony.com",
-            "time": "2013-01-08 20:24:29"
+            "time": "2013-03-20 15:59:44"
         },
         {
             "name": "symfony/symfony",
@@ -2598,12 +2598,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/symfony.git",
-                "reference": "e055b806bfd197bcc0f4885ebedbff0678d2f832"
+                "reference": "e24ce2f22f880de1b706755fa7e21d8bbd65954e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/symfony/zipball/e055b806bfd197bcc0f4885ebedbff0678d2f832",
-                "reference": "e055b806bfd197bcc0f4885ebedbff0678d2f832",
+                "url": "https://api.github.com/repos/symfony/symfony/zipball/e24ce2f22f880de1b706755fa7e21d8bbd65954e",
+                "reference": "e24ce2f22f880de1b706755fa7e21d8bbd65954e",
                 "shasum": ""
             },
             "require": {
@@ -2689,7 +2689,7 @@
             "keywords": [
                 "framework"
             ],
-            "time": "2013-03-19 14:30:59"
+            "time": "2013-03-20 13:55:39"
         },
         {
             "name": "themattharris/tmhoauth",
