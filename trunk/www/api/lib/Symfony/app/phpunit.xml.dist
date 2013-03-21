@@ -20,7 +20,7 @@
     </testsuites>
 
     <php>
-        <server name="KERNEL_DIR" value="app"/>
+        <server name="KERNEL_DIR" value="/Users/shal/labodev/web/## FILL PROJECT DIR ##/branches/staging/www/api/lib/Symfony/app"/>
     </php>
 
     <filter>
