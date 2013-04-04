@@ -168,10 +168,8 @@ class Exception_Handler extends Event_Manager
 			if ( DEPLOYMENT_LOG === 1 ) error_log(implode("\n", $context));
 			else if ( DEPLOYMENT_LOG === 0 )
 			{
+                error_log(print_r($context, true));
 				self::logContext( $context );
-                if (defined('STDIN')) {
-                    error_log(print_r($context, true));
-                }
                 $firephp = $class_firephp::getInstance( TRUE );
 				$firephp->log( $exception );
 			}
