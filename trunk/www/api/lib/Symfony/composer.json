@@ -18,10 +18,6 @@
         {
             "type":"vcs",
             "url":"git@github.com:thierrymarianne/guzzle.git"
-        },
-        {
-            "type":"vcs",
-            "url":"git@github.com:thierrymarianne/SpBowerBundle.git"
         }
     ],
     "require":{
@@ -37,7 +33,7 @@
         "jms/di-extra-bundle":"1.3.*",
         "jms/security-extra-bundle":"1.4.*",
         "jms/serializer-bundle": "0.*",
-        "sp/bower-bundle": "*",
+        "sp/bower-bundle": "dev-master",
         "php":">=5.4.8",
         "propel/propel-bundle":"1.1.*",
         "symfony/assetic-bundle":"2.1.*",

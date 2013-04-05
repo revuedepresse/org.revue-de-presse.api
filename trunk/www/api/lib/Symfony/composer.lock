@@ -1,5 +1,5 @@
 {
-    "hash": "6fb53305fdc5d52fea4f1988bf8f8d1e",
+    "hash": "8a44349353df8e97bf1fb9e343286ec4",
     "packages": [
         {
             "name": "dflydev/markdown",
@@ -1810,12 +1810,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Seldaek/monolog.git",
-                "reference": "3f8c37b23c893ab72d85b6deb02cea9e215d2d3c"
+                "reference": "88d705c19f8cc08c2cc5a0a615907df5e9dd376e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/3f8c37b23c893ab72d85b6deb02cea9e215d2d3c",
-                "reference": "3f8c37b23c893ab72d85b6deb02cea9e215d2d3c",
+                "url": "https://api.github.com/repos/Seldaek/monolog/zipball/88d705c19f8cc08c2cc5a0a615907df5e9dd376e",
+                "reference": "88d705c19f8cc08c2cc5a0a615907df5e9dd376e",
                 "shasum": ""
             },
             "require": {
@@ -1864,7 +1864,7 @@
                 "logging",
                 "psr-3"
             ],
-            "time": "2013-03-28 10:41:04"
+            "time": "2013-04-05 13:36:57"
         },
         {
             "name": "phing/phing",
@@ -2071,12 +2071,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/propelorm/Propel.git",
-                "reference": "a73f19f38ff2d50de195ba1431658fef1422d346"
+                "reference": "1.6.9"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/propelorm/Propel/zipball/a73f19f38ff2d50de195ba1431658fef1422d346",
-                "reference": "a73f19f38ff2d50de195ba1431658fef1422d346",
+                "url": "https://api.github.com/repos/propelorm/Propel/zipball/1.6.9",
+                "reference": "1.6.9",
                 "shasum": ""
             },
             "require": {
@@ -2123,7 +2123,7 @@
                 "orm",
                 "persistence"
             ],
-            "time": "2013-03-20 15:59:29"
+            "time": "2013-03-31 17:25:18"
         },
         {
             "name": "psr/log",
@@ -2310,13 +2310,13 @@
             "target-dir": "Sp/BowerBundle",
             "source": {
                 "type": "git",
-                "url": "https://github.com/thierrymarianne/SpBowerBundle.git",
-                "reference": "0fa9cd67ca232cdfbf5ca9a225df33b1c82958e2"
+                "url": "https://github.com/Spea/SpBowerBundle.git",
+                "reference": "f1bd1fe8621b8e541c85ca1d37c91447b42e376a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thierrymarianne/SpBowerBundle/zipball/0fa9cd67ca232cdfbf5ca9a225df33b1c82958e2",
-                "reference": "0fa9cd67ca232cdfbf5ca9a225df33b1c82958e2",
+                "url": "https://api.github.com/repos/Spea/SpBowerBundle/zipball/f1bd1fe8621b8e541c85ca1d37c91447b42e376a",
+                "reference": "f1bd1fe8621b8e541c85ca1d37c91447b42e376a",
                 "shasum": ""
             },
             "require": {
@@ -2341,6 +2341,7 @@
                     "Sp\\BowerBundle": ""
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -2362,10 +2363,7 @@
                 "bower manager",
                 "dependencies"
             ],
-            "support": {
-                "source": "https://github.com/thierrymarianne/SpBowerBundle/tree/master"
-            },
-            "time": "2013-03-14 20:02:25"
+            "time": "2013-03-30 19:56:10"
         },
         {
             "name": "swiftmailer/swiftmailer",
@@ -2598,12 +2596,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/symfony.git",
-                "reference": "92501eb0affead8b06cc8c762583fa08c3c98539"
+                "reference": "50822015a6ec0e4893a2c39950a63c8b39fa3753"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/symfony/zipball/92501eb0affead8b06cc8c762583fa08c3c98539",
-                "reference": "92501eb0affead8b06cc8c762583fa08c3c98539",
+                "url": "https://api.github.com/repos/symfony/symfony/zipball/50822015a6ec0e4893a2c39950a63c8b39fa3753",
+                "reference": "50822015a6ec0e4893a2c39950a63c8b39fa3753",
                 "shasum": ""
             },
             "require": {
@@ -2689,7 +2687,7 @@
             "keywords": [
                 "framework"
             ],
-            "time": "2013-03-28 17:35:23"
+            "time": "2013-04-01 08:06:05"
         },
         {
             "name": "themattharris/tmhoauth",
@@ -2786,12 +2784,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/fabpot/Twig.git",
-                "reference": "e8991cc2f9c84b2b5c782203904898717d46e56a"
+                "reference": "399916916533589c95dc04e1afd4aeefa34928ad"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/fabpot/Twig/zipball/e8991cc2f9c84b2b5c782203904898717d46e56a",
-                "reference": "e8991cc2f9c84b2b5c782203904898717d46e56a",
+                "url": "https://api.github.com/repos/fabpot/Twig/zipball/399916916533589c95dc04e1afd4aeefa34928ad",
+                "reference": "399916916533589c95dc04e1afd4aeefa34928ad",
                 "shasum": ""
             },
             "require": {
@@ -2827,7 +2825,7 @@
             "keywords": [
                 "templating"
             ],
-            "time": "2013-03-25 07:43:31"
+            "time": "2013-04-01 08:27:18"
         }
     ],
     "packages-dev": [
@@ -2843,6 +2841,7 @@
         "friendsofsymfony/rest-bundle": 20,
         "guzzle/guzzle": 20,
         "kertz/twitteroauth": 20,
+        "sp/bower-bundle": 20,
         "knplabs/knp-markdown-bundle": 20,
         "themattharris/tmhoauth": 20
     },
