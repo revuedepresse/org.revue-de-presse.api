@@ -1,0 +1,1 @@
+{$object}{$get_member}{$member} {$equal} {$value}{$semi_column}{$lf}

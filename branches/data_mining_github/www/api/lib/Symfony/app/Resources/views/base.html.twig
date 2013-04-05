@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="WTW">
+<head>
+    <meta charset="UTF-8"/>
+    <title>{% block title %}{% endblock %} :: Weaving The Web experiments</title>
+    {% block stylesheets %}{% include "::stylesheets.html.twig" %}{% endblock %}
+    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}"/>
+</head>
+<body>
+{% block body %}{% endblock %}
+{% block javascripts %}{% include "::javascripts.html.twig" %}{% endblock %}
+</body>
+</html>

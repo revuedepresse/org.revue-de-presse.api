@@ -1,0 +1,23 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="row">
+            <div class="span12 navbar">
+                <div class="navbar-inner">
+                    <ul class="nav nav-pills">
+                        <li class="active">
+                            <a href="#/github-repositories">Github Repositories</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div ng-view></div>
+        </div>
+    <div>
+    <script type="text/javascript">
+        partials = "{{ asset('bundles/wtwdashboard/wtw/partials/') }}";
+    </script>
+{% endblock %}
