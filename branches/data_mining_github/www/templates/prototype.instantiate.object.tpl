@@ -1,0 +1,1 @@
+{if isset( $var) }{$var}{/if}{$variable_name} {$equal} {$new} {$class_name}
