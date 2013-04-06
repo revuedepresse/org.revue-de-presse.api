@@ -1,1 +1,0 @@
-{$var}{$variable_name} {$equal} {$value}
