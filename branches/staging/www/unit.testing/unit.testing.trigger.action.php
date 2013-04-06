@@ -1,3 +1,0 @@
-<?php
-\sefi\application::route()
-?>
