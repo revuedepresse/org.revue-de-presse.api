@@ -1,1 +1,0 @@
-{if isset($menu_header)}{$menu_header}{/if}{$form_sign_in}

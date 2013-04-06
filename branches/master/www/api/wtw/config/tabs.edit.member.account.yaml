@@ -1,9 +1,0 @@
-tabs:
-  - 
-    affordance: edit.basic.information
-    menu: contact_information
-    type: form
-  - 
-    affordance: change.password
-    menu: alter_password
-    type: form
