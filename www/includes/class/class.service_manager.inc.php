@@ -39,10 +39,13 @@ class Service_Manager extends Deployer
 		$host_local_snaps = 'snaps.dev';
 		$host_dev_tifa = '## FILL HOSTNAME ##';
 		$host_dev_wtw_stable = 'stable.## FILL HOSTNAME ##';
+        $host_dev_wtw_unstable = 'unstable.## FILL HOSTNAME ##';
 		$host_dev_wtw = '## FILL HOSTNAME ##';
 		$host_org_wtw_build = '## FILL HOSTNAME ##';
         $host_org_wtw_stable = '## FILL HOSTNAME ##';
         $host_org_wtw_unstable = '## FILL HOSTNAME ##';
+        $host_org_wtw_staging = '## FILL HOSTNAME ##';
+        $host_org_wtw_master = '## FILL HOSTNAME ##';
 
 		$mode_cli = defined('STDIN');
 
@@ -51,12 +54,8 @@ class Service_Manager extends Deployer
 
 		$prefix_file_hidden = '.';
 
-		if ( isset( $_SERVER['HTTP_HOST'] ) )
-            $host = $_SERVER['HTTP_HOST'];
         if ( isset( $_SERVER['HTTP_X_FORWARDED_HOST'] ) )
 			$forwarded_host = $_SERVER['HTTP_X_FORWARDED_HOST'];
-		if ( isset( $_SERVER['REQUEST_URI'] ) )
-			$request_uri = $_SERVER['REQUEST_URI'];
 		if ( isset( $_SERVER['SCRIPT_NAME'] ) )
 			$script_name = $_SERVER['SCRIPT_NAME'];
 		if ( isset( $_SERVER['SERVER_NAME'] ) )
@@ -68,9 +67,20 @@ class Service_Manager extends Deployer
 			FILE_NAME_SERVICE_CONFIGURATION.EXTENSION_INI
 		;
 
-        $host_dev_wtw_stable_detected = (
+        $host_wtw_stable_detected = (
                 isset( $forwarded_host ) &&
-                in_array( $forwarded_host, array( $host_dev_wtw_stable, $host_org_wtw_stable ) )
+                in_array( $forwarded_host, array(
+                    $host_dev_wtw_stable,
+                    $host_org_wtw_master,
+                    $host_org_wtw_stable ) )
+        );
+
+        $host_wtw_unstable_detected = (
+                isset( $forwarded_host ) &&
+                in_array( $forwarded_host, array(
+                    $host_dev_wtw_unstable,
+                    $host_org_wtw_staging,
+                    $host_org_wtw_unstable ) )
         );
 
         $environment_development = ! $build_jenkins && ( 
@@ -79,7 +89,7 @@ class Service_Manager extends Deployer
                     strlen($jenkins_workspace) === 0
                 ) &&
                 ! $symfony_detected &&
-                ! $host_dev_wtw_stable_detected &&
+                ! $host_wtw_stable_detected &&
                 ! is_null( $server_name ) &&
                 in_array(
                     $server_name,
@@ -152,9 +162,9 @@ class Service_Manager extends Deployer
                 )
             ) ||
             isset($jenkins_workspace) ||
-            in_array( $server_name, array( $host_dev_wtw, $host_local_ip, $host_org_wtw_build ) ) ||
-            $host_dev_wtw_stable_detected || 
-            $host_dev_wtw_unstable_detected 
+            in_array( $server_name, array(
+                    $host_dev_wtw, $host_local_ip, $host_org_wtw_build ) ) ||
+            $host_wtw_unstable_detected
         ) {
             $target = 'ghost/';
             if (isset($jenkins_workspace))
