@@ -35,7 +35,11 @@ class Deployer extends I18n
                     '## FILL HOSTNAME ##',
                     '## FILL HOSTNAME ##',
 					'## FILL HOSTNAME ##',
-					'www.## FILL HOSTNAME ##'
+					'www.## FILL HOSTNAME ##',
+					'## FILL HOSTNAME ##',
+					'## FILL HOSTNAME ##',
+					'## FILL HOSTNAME ##',
+					'## FILL HOSTNAME ##'
 				)
             ) || ( 
                 $stable_wtw_org_detected ||
