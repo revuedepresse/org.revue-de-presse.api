@@ -21,7 +21,7 @@ class Deployer extends I18n
         else $forwarded_host = null;
         $master_wtw_org_detected = isset( $forwarded_host ) &&
             in_array($forwarded_host, array( '## FILL HOSTNAME ##' ) );
-        $$staging_wtw_org_detected = isset( $forwarded_host ) &&
+        $staging_wtw_org_detected = isset( $forwarded_host ) &&
             in_array($forwarded_host, array( '## FILL HOSTNAME ##' ) );
 
         $condition_deployment_first_level  =
