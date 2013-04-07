@@ -8,12 +8,14 @@
 */
 class Exception_Handler extends Event_Manager
 {
-	/**
-	* Handler assertions
-	*
-	* @return	nothing
-	*/	
-	public static function assertionHandler( $file, $line, $expression )
+    /**
+     * @param $file
+     * @param $line
+     * @param $expression
+     *
+     * @throws Exception
+     */
+    public static function assertionHandler( $file, $line, $expression )
 	{
 		fprint( ENTITY_ASSERTION.': '."\n".$expression, UNIT_TESTING_MODE_STATUS );
 
@@ -56,14 +58,14 @@ class Exception_Handler extends Event_Manager
 
 		$class_firephp = CLASS_FIREPHP;
 
-		$mysqli_object_error = FALSE;
+		$mysqli_object_error = false;
 
-		if ( strpos( $message, 'Couldn\'t fetch mysqli' ) === FALSE )
+		if ( strpos( $message, 'Couldn\'t fetch mysqli' ) === false )
 			
 			$exception = new Exception( $message, $code );
 		else
 		
-			$mysqli_object_error = TRUE;
+			$mysqli_object_error = true;
 
 		// check if the detected error is not related to the Smarty template engine
 		if (
@@ -89,12 +91,12 @@ class Exception_Handler extends Event_Manager
 				is_string( $message ) &&
 				(
 					$mysqli_object_error ||
-					( strpos( strtolower( $message ), 'deprecated' ) !== FALSE ) ||
-					( strpos( strtolower( $message ), 'magic' ) !== FALSE ) || 
-					( strpos( strtolower( $message ), 'compatible' ) !== FALSE ) ||
+					( strpos( strtolower( $message ), 'deprecated' ) !== false ) ||
+					( strpos( strtolower( $message ), 'magic' ) !== false ) ||
+					( strpos( strtolower( $message ), 'compatible' ) !== false ) ||
 					(
-						( strpos( strtolower( $message ), 'mb_detect_encoding' ) !== FALSE ) &&
-						( FALSE !== strpos( $file_name, 'firephp' ) )
+						( strpos( strtolower( $message ), 'mb_detect_encoding' ) !== false ) &&
+						( false !== strpos( $file_name, 'firephp' ) )
 					) 
 				)
 			)
@@ -140,7 +142,7 @@ class Exception_Handler extends Event_Manager
 							$verbose_mode
 						?
 							'backtrace: <pre '.str_replace('{}', '', $style).'>'.
-							print_r($backtrace, TRUE)
+							print_r($backtrace, true)
 						:
 							''
 					),
@@ -152,7 +154,7 @@ class Exception_Handler extends Event_Manager
 			}
 
 			$context = array(
-				PROPERTY_CONTEXT => print_r( $context_http, TRUE ),
+				PROPERTY_CONTEXT => print_r( $context_http, true ),
 				PROPERTY_DESCRIPTION => sprintf(
 					EVENT_DESCRIPTION_EXCEPTION_CAUGHT,
 					$code,
@@ -170,7 +172,7 @@ class Exception_Handler extends Event_Manager
 			{
                 error_log(print_r($context, true));
 				self::logContext( $context );
-                $firephp = $class_firephp::getInstance( TRUE );
+                $firephp = $class_firephp::getInstance( true );
 				$firephp->log( $exception );
 			}
 
@@ -190,9 +192,9 @@ class Exception_Handler extends Event_Manager
 	* @return 	nothing
 	*/
 	public static function logTrace(
-		$trace = NULL,
-		$informant = NULL,
-		$assert = FALSE
+		$trace = null,
+		$informant = null,
+		$assert = false
 	)
 	{
 		global $class_application;
@@ -223,7 +225,7 @@ class Exception_Handler extends Event_Manager
 		);
 
 		$context = array(
-			PROPERTY_CONTEXT => print_r( $context_http, TRUE ),
+			PROPERTY_CONTEXT => print_r( $context_http, true ),
 			PROPERTY_DESCRIPTION => sprintf(
 				EVENT_DESCRIPTION_EXCEPTION_CAUGHT,
 				$exception->getCode(),
@@ -331,7 +333,7 @@ class Exception_Handler extends Event_Manager
 		}
 
 		$context = array(
-			PROPERTY_CONTEXT => print_r( $context_http, TRUE ),
+			PROPERTY_CONTEXT => print_r( $context_http, true ),
 			PROPERTY_DESCRIPTION => sprintf(
 				EVENT_DESCRIPTION_EXCEPTION_CAUGHT,
 				$exception->getCode(),
@@ -374,7 +376,7 @@ class Exception_Handler extends Event_Manager
 
 		$class_dumper = $class_application::getDumperClass();
 		
-		$error_occurrence = FALSE;
+		$error_occurrence = false;
 		
 		if  ( $error_properties = error_get_last() )
 		{
@@ -385,7 +387,7 @@ class Exception_Handler extends Event_Manager
 				case E_COMPILE_ERROR:
 				case E_USER_ERROR:
 
-					$error_occurrence = TRUE;
+					$error_occurrence = true;
 
 						break;
 			}
