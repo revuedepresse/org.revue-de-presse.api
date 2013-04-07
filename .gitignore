@@ -1,6 +1,9 @@
 .DS_Store
 /check_wtw.php
-/logs
+
+/api/lib/Symfony/app/cache
+/api/lib/Symfony/app/logs
+
 /api/lib/Smarty/demo
 /api/lib/Smarty/www-data
 /api/lib/Symfony/app/cache
