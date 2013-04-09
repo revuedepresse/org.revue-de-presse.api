@@ -1,4 +1,6 @@
-.DS_Store
+*.DS_Store
+*.pyc
+
 /check_wtw.php
 
 /api/lib/Symfony/app/cache
