@@ -20,3 +20,12 @@ web_profiler:
 
 swiftmailer:
     disable_delivery: true
+
+parameters:
+    data_mining.command_provider.class: WTW\API\DataMiningBundle\Command\Tester\ReductionCommandProvider
+
+services:
+    data_mining.command_provider:
+        class: %data_mining.command_provider.class%
+        calls:
+          - [ setContainer, [ @service_container ] ]
