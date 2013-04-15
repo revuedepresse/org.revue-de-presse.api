@@ -22,7 +22,7 @@ swiftmailer:
     disable_delivery: true
 
 parameters:
-    data_mining.command_provider.class: WTW\API\DataMiningBundle\Command\Tester\ReductionCommandProvider
+    data_mining.command_provider.class: WTW\API\DataMiningBundle\Command\Tester\TransformationCommandProvider
 
 services:
     data_mining.command_provider:
