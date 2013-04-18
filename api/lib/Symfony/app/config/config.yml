@@ -28,6 +28,10 @@ assetic:
     use_controller: false
     filters:
         cssrewrite: ~
+        less:
+            node:       %assetic_node%
+            node_paths: [ %assetic_node_module% ]
+            apply_to:   "\.less$"
 
 # Doctrine Configuration
 doctrine:
