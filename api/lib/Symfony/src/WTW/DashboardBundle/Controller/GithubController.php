@@ -14,7 +14,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
 class GithubController extends Controller
 {
     /**
-     * @Extra\Route("/repositories", name="dashboard_show_repositories")
+     * @Extra\Route("/repositories", name="wtw_dashboard_show_repositories")
      */
     public function showRepositoriesAction()
     {

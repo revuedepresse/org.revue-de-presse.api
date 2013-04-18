@@ -2,8 +2,8 @@ fos_js_routing:
     resource: "@FOSJsRoutingBundle/Resources/config/routing/routing.xml"
 
 wtw_api_data_mining:
-    resource: "@WTWAPIDataMiningBundle/Resources/config/routing.yml"
-    prefix:   /sf2
+    resource:     "@WTWAPIDataMiningBundle/Resources/config/routing.yml"
+    prefix:       /sf2
 
 wtw_api_facebook:
     resource: "@WTWAPIFacebookBundle/Resources/config/routing.yml"

@@ -54,7 +54,7 @@ class ActivitiesController extends Controller
     }
 
     /**
-     * @Route("/api/google/drive", name="api_google_drive")
+     * @Route("/api/google/drive", name="wtw_api_google_drive")
      */
     public function showActivitiesAction($code = null)
     {
