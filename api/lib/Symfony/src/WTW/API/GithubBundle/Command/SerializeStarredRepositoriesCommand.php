@@ -121,7 +121,8 @@ class SerializeStarredRepositoriesCommand extends ContainerAwareCommand
         $serializationSuccessMessage = '[' . date('Y-m-d H:i') . '] ' .
             $translator->trans(
                 'repositories_serialization_success',
-                array('{{ user }}' => $user['login'])
+                array('{{ user }}' => $user['login']),
+                'messages'
             );
 
         return $serializationSuccessMessage;
