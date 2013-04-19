@@ -15,7 +15,7 @@ wtw_api_google_drive:
     type:     annotation
 
 wtw_dashboard:
-    resource: "@WTWDashboardBundle/Controller"
+    resource: "@WTWDashboardBundle/Controller/"
     type:     annotation
     prefix:   /
 

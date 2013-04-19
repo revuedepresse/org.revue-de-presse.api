@@ -21,7 +21,7 @@ wtw_api_facebook:
     resource:     "@WTWAPIFacebookBundle/Resources/config/routing.yml"
     prefix:       /
 
-wtw_api_facebook:
+wtw_api_google_drive:
     resource:     "@WTWAPIGoogleDriveBundle/Controller"
     type:         annotation
     prefix:       /
