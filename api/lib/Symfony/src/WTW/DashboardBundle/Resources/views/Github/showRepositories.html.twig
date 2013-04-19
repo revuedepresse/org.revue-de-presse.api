@@ -21,3 +21,18 @@
         partials = "{{ asset('bundles/wtwdashboard/wtw/partials/') }}";
     </script>
 {% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+
+    {% javascripts
+        '@WTWDashboardBundle/Resources/public/wtw/lib/angular/angular.js'
+        '@WTWDashboardBundle/Resources/public/wtw/js/app.js'
+        '@WTWDashboardBundle/Resources/public/wtw/js/services.js'
+        '@WTWDashboardBundle/Resources/public/wtw/js/controllers.js'
+        '@WTWDashboardBundle/Resources/public/wtw/js/filters.js'
+        '@WTWDashboardBundle/Resources/public/wtw/js/directives.js'
+        output='js/compiled/main_angular.js' %}
+        <script src="{{ asset_url }}"></script>
+    {% endjavascripts %}
+{% endblock %}
