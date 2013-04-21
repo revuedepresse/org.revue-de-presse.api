@@ -25,22 +25,31 @@
                     </div>
                 </div>
             </form>
-            <table class="table table-condensed">
-            {% for result_index, columns in results %}
-            {% if result_index == 0 %}
-            <tr>
-                {% for name, value in columns %}
-                <td>{{ name }}</td>
+            {% if error is defined %}
+            <div class="row span13">
+                {{ error }}
+            </div>
+            {% endif %}
+            <div class="row span13">
+                <table class="table table-condensed">
+                {% for result_index, columns in results %}
+                {% if loop.first %}
+                <tr>
+                    {% for name, value in columns %}
+                    <td>{{ name }}</td>
+                    {% endfor %}
+                </tr>
+                {% endif %}
+                <tr>
+                    {% for name, value in columns %}
+                    <td>{{ value }}</td>
+                    {% else %}
+                    {{ columns }}
+                    {% endfor %}
+                <tr>
                 {% endfor %}
-            </tr>
-             {% endif %}
-            <tr>
-                {% for name, value in columns %}
-                <td>{{ value }}</td>
-                {% endfor %}
-            <tr>
-            {% endfor %}
-            </table>
+                </table>
+            </div>
         </div>
     <div>
 {% endblock %}

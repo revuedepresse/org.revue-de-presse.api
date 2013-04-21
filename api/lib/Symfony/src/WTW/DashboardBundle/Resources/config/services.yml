@@ -4,6 +4,8 @@ parameters:
 services:
     dashboard.dbal_connection:
         class:  %dashboard.dbal_connection.class%
+        arguments:
+          - @logger
         calls:
           - [ setCharset, [ %database_charset% ] ]
           - [ setHost, [ %database_host% ] ]
@@ -11,3 +13,5 @@ services:
           - [ setPassword, [ %database_password% ] ]
           - [ setPort, [ %database_port% ] ]
           - [ setDatabase, [ %database_name% ] ]
+          - [ setEntityManager, [ @doctrine.orm.entity_manager ] ]
+          - [ setTranslator, [ @translator ] ]
