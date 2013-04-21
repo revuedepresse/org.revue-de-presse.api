@@ -1,0 +1,13 @@
+parameters:
+    dashboard.dbal_connection.class:  WTW\DashboardBundle\DBAL\Connection
+
+services:
+    dashboard.dbal_connection:
+        class:  %dashboard.dbal_connection.class%
+        calls:
+          - [ setCharset, [ %database_charset% ] ]
+          - [ setHost, [ %database_host% ] ]
+          - [ setUsername, [ %database_user% ] ]
+          - [ setPassword, [ %database_password% ] ]
+          - [ setPort, [ %database_port% ] ]
+          - [ setDatabase, [ %database_name% ] ]
