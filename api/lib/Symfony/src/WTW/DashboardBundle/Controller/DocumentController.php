@@ -7,7 +7,6 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
 use Symfony\Component\HttpFoundation\Request;
 use WTW\DashboardBundle\DBAL\Connection;
 
-
 /**
  * Class DocumentController
  *
