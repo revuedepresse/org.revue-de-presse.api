@@ -5,40 +5,40 @@
 {% block body %}
     <div class="container">
         <div class="span12">
-            <h1>{{ title }}</h1>
             <form method="post" action="{{ url('wtw_dashboard_show_documents') }}">
                 <div class="row">
                     <div class="span13">
-                        <div class="span13">
-                            <label for="query">Sandbox</label>
+                        <div class="span7">
+                            <h1>{{ title }}</h1>
+                            <label for="query"><b>Type your query:</b></label>
+                        </div>
+                        <div class="span6">
+                            <textarea id="query" rows="5" name="query">{{ default_query }}</textarea>
                         </div>
                     </div>
                 </div>
                 <div class="row">
-                    <div class="span13">
-                        <textarea id="query" rows="5" name="query">{{ default_query }}</textarea>
-                    </div>
-                    <div class="span13">
-                        <input class="btn" type="submit" value="Submit your query" />
+                    <div class="offset1 span13">
+                        <div class="span6">
+                            <input class="btn" type="submit" value="Submit your query" />
+                        </div>
                     </div>
                 </div>
             </form>
             <table class="table table-condensed">
-            {% for row in rows %}
-                {% for row_index, columns in row %}
-                {% if row_index == 0 %}
-                <tr>
-                    {% for name, value in columns %}
-                    <td>{{ name }}</td>
-                    {% endfor %}
-                </tr>
-                 {% endif %}
-                <tr>
-                    {% for name, value in columns %}
-                    <td>{{ value }}</td>
-                    {% endfor %}
-                <tr>
+            {% for result_index, columns in results %}
+            {% if result_index == 0 %}
+            <tr>
+                {% for name, value in columns %}
+                <td>{{ name }}</td>
                 {% endfor %}
+            </tr>
+             {% endif %}
+            <tr>
+                {% for name, value in columns %}
+                <td>{{ value }}</td>
+                {% endfor %}
+            <tr>
             {% endfor %}
             </table>
         </div>
