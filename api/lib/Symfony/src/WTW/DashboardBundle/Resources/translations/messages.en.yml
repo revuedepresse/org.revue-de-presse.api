@@ -3,3 +3,4 @@ sorry: Sorry...
 title_documents: Data library
 wrong_query_execution: Something went wrong when executing your query.
 no_record: No record was returned by this query
+confusing_query: Sorry, we are confused by the number of query delimiters.

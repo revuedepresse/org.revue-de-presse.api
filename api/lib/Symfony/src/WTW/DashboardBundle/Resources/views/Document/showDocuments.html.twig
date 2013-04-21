@@ -32,7 +32,7 @@
             {% endif %}
             <div class="row span13">
                 <table class="table table-condensed">
-                {% for result_index, columns in results %}
+                {% for columns in records %}
                 {% if loop.first %}
                 <tr>
                     {% for name, value in columns %}
@@ -42,7 +42,7 @@
                 {% endif %}
                 <tr>
                     {% for name, value in columns %}
-                    <td>{{ value }}</td>
+                    <td>{{ value|raw }}</td>
                     {% else %}
                     {{ columns }}
                     {% endfor %}

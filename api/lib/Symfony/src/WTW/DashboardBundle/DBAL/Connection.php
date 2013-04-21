@@ -46,6 +46,43 @@ class Connection
         return $this->connection;
     }
 
+    /**
+     * @return string
+     */
+    public function getDefaultQuery()
+    {
+        /**
+         * @var $connection Connection
+         */
+        $connection = $this->get('dashboard.dbal_connection');
+
+        $defaultQuery = new \stdClass();
+        $defaultQuery->sql = 'invalid query';
+        $defaultQuery->error = null;
+
+        $baseQuery = <<< QUERY
+SELECT per_value AS query
+FROM {database}weaving_perspective
+WHERE per_type = {type}
+LIMIT 1
+QUERY;
+
+        $query = strtr($baseQuery, array(
+            '{database}' => $this->database . '.',
+            '{type}' => $connection::QUERY_TYPE_DEFAULT));
+
+        try {
+            $results = $connection->connect()->execute($query)->fetchResults();
+            if (count($results) > 0) {
+                $defaultQuery->sql = $results[0]['query'];
+            }
+        } catch (\Exception $exception) {
+            $defaultQuery->error = $exception->getMessage();
+        }
+
+        return $defaultQuery;
+    }
+
     public function setConnection($connection)
     {
         $this->connection = $connection;
@@ -119,23 +156,18 @@ class Connection
     public function execute($query)
     {
         $count = substr_count($query, ';');
-        $message = 'Have you forgotten a query delimiter? (maybe the final one)';
-        $missingDelimiter = false;
 
         if ($count >= 1) {
             $queries = explode(';', $query);
 
-            if (count($queries) - 1 < $count) {
-                $missingDelimiter = true;
-            } else {
+            if ((count($queries) === $count + 1) ||
+                (count($queries) === $count)) {
                 $this->queryCount = $count;
+            } else {
+                throw new \Exception('confusing_query');
             }
         } else {
-            $missingDelimiter = true;
-        }
-
-        if ($missingDelimiter) {
-            throw new \Exception($message);
+            $query .= ';';
         }
 
         if (!$this->connection->multi_query($query)) {
@@ -160,13 +192,6 @@ class Connection
      */
     public function delegateQueryExecution($query)
     {
-        /**
-         * @var $em EntityManager
-         */
-        if (is_null($this->entityManager)) {
-            throw new \Exception('Please inject Doctrine entity manager');
-        }
-
         $doctrineConnection = $this->entityManager->getConnection();
         $stmt               = $doctrineConnection->prepare($query);
         $stmt->execute();
@@ -181,15 +206,44 @@ class Connection
     }
 
     /**
+     * @param $sql
+     *
+     * @return \stdClass
+     */
+    public function executeQuery($sql)
+    {
+        $query          = new \stdClass;
+        $query->error   = null;
+        $query->records = [];
+        $query->sql = $sql;
+
+        if ($this->idempotentQuery($query->sql)) {
+            try {
+                if ($this->pdoSafe($query->sql)) {
+                    $query->records = $this->delegateQueryExecution($query->sql);
+                } else {
+                    $query->records = $this->connect()->execute($query->sql)->fetchAll();
+
+                    return $query;
+                }
+            } catch (\Exception $exception) {
+                $query->error = $exception->getMessage();
+
+                return $query;
+            }
+        } else {
+            $query->records = [$this->translator->trans('requirement_valid_query', array(), 'messages')];
+        }
+
+        return $query;
+    }
+
+    /**
      * @return array
      * @throws \Exception
      */
-    public function fetchResults()
+    public function fetchAll()
     {
-        if (is_null($this->translator)) {
-            throw new \Exception('Please inject a translator');
-        }
-
         $results = [$this->translator->trans('sorry', array(), 'messages'),
             $this->translator->trans('wrong_query_execution', array(), 'messages')];
 
@@ -208,7 +262,7 @@ class Connection
                 while ($result = $queryResult->fetch_array(MYSQLI_ASSOC)) {
                     $results[] = $result;
                 }
-                $result->close();
+                $queryResult->close();
             }
 
             if ($this->connection->more_results()) {
@@ -233,7 +287,8 @@ class Connection
     {
         return (false === strpos(strtolower($query), ':=')) &&
             (false === strpos(strtolower($query), '@')) &&
-            (false === strpos(strtolower($query), 'update'));
+            (false === strpos(strtolower($query), 'update')) &&
+            (false === strpos(strtolower($query), 'drop'));
     }
 
     /**
@@ -248,8 +303,8 @@ class Connection
             (false === strpos(strtolower($query), 'delete')) &&
             (false === strpos(strtolower($query), 'truncate')) &&
             (
-                false === strpos(strtolower($query), 'drop') ||
-                (1 === substr_count($query, 'drop')) &&
+                (false === strpos(strtolower($query), 'drop')) ||
+                (1 === substr_count(strtolower($query), 'drop')) &&
                 (false !== strpos(strtolower($query), 'drop table tmp_'))
             ) &&
             (false === strpos(strtolower($query), 'alter')) &&
