@@ -5,7 +5,9 @@ namespace WTW\DashboardBundle\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
 use Symfony\Component\HttpFoundation\Request,
     Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use WTW\DashboardBundle\DBAL\Connection;
+use Symfony\Component\HttpFoundation\Response;
+use WTW\DashboardBundle\DBAL\Connection,
+    WTW\DashboardBundle\Repository\PerspectiveRepository;
 
 /**
  * Class DocumentController
@@ -22,12 +24,12 @@ class DocumentController extends Controller
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Exception
      */
-    public function showAction()
+    public function showDocumentsAction()
     {
+        $error = null;
         /**
          * @var $request Request
          */
-        $error = null;
         $request = $this->get('request');
         $translator = $this->get('translator');
 
@@ -37,9 +39,12 @@ class DocumentController extends Controller
         $connection = $this->get('dashboard.dbal_connection');
 
         if ($request->request->has('query')) {
-            $sql = $request->get('query');
+            $sql = $request->request->get('query');
         } else {
-            $sql = $connection->getDefaultQuery();
+            $defaultQuery = $connection->getDefaultQuery();
+            if (is_null($defaultQuery->error)) {
+                $sql = $defaultQuery->sql;
+            }
         }
 
         $query = $connection->executeQuery($sql);
@@ -50,5 +55,56 @@ class DocumentController extends Controller
                 'default_query' => $query->sql,
                 'records' => $query->records,
                 'title' => $translator->trans('title_documents')));
+    }
+
+    /**
+     * @Extra\Route("/sql", name="wtw_dashboard_save_sql", options={"expose"=true})
+     * @Extra\Method({"POST"})
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
+     */
+    public function saveSqlAction()
+    {
+        $request = $this->get('request');
+        $translator = $this->get('translator');
+        $entityManager = $this->get('doctrine.orm.entity_manager');
+        $perspectiveRepository = $entityManager->getRepository('WTWDashboardBundle:Perspective');
+        $type = 'error';
+
+        if ($request->request->has('sql')) {
+            $error = null;
+            $sql = $request->request->get('sql');
+        } else {
+            $error = $translator->trans('save_query_failure', array(), 'messages');
+        }
+
+        $result = $perspectiveRepository->findByValue($sql);
+
+        if (count($result) === 0) {
+            try {
+                /**
+                 * @var $perspective PerspectiveRepository
+                 */
+                $perspective = $perspectiveRepository->savePerspective($sql);
+                $entityManager->persist($perspective);
+                $entityManager->flush();
+
+                $result = $translator->trans('save_query_success', array('{{ sql }}' => $sql), 'messages');
+                $type = 'success';
+            } catch (\Exception $exception) {
+                $result = $exception->getMessage();
+            }
+        } else {
+            $result = $translator->trans('query_exists_already', array(), 'messages');
+            $type = 'block';
+        }
+
+        return new Response(json_encode((object) array(
+                'result' => is_null($error) ? $result : $error,
+                'type' => $type
+            )),
+            200,
+            array('Context-type' => 'application/json'));
     }
 }

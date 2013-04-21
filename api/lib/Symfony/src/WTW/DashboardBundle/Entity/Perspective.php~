@@ -1,0 +1,58 @@
+<?php
+
+namespace WTW\DashboardBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * Perspective
+ *
+ * @ORM\Table(name="weaving_perspective")
+ * @ORM\Entity
+ */
+class Perspective
+{
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="per_id", type="integer")
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="IDENTITY")
+     */
+    protected $id;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="per_status", type="integer", nullable=true)
+     */
+    protected $status;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="per_type", type="integer", nullable=true)
+     */
+    protected $type;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="per_value", type="text", nullable=true)
+     */
+    protected $value;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="per_date_creation", type="datetime", nullable=true)
+     */
+    protected $creationDate;
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="per_date_update", type="datetime", nullable=true)
+     */
+    protected $updateDate;
+}
