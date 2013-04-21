@@ -12,32 +12,60 @@ use Doctrine\ORM\EntityManager;
  */
 class Connection
 {
-    protected $connection;
+    const QUERY_TYPE_DEFAULT = 0;
 
-    protected $host;
+    public $connection;
 
-    protected $username;
+    public $queryCount;
 
-    protected $port;
+    public $charset;
 
-    protected $database;
+    public $database;
 
-    protected $password;
+    public $host;
 
-    protected $entityManager;
+    public $port;
 
-    protected $charset;
+    public $logger;
 
-    public function connect() {
-        $this->connection = new \mysqli(
+    public $password;
+
+    public $entityManager;
+
+    public $translator;
+
+    public $username;
+
+    public function __construct($logger)
+    {
+        $this->logger = $logger;
+    }
+
+    public function getConnection()
+    {
+        return $this->connection;
+    }
+
+    public function setConnection($connection)
+    {
+        $this->connection = $connection;
+
+        return $this;
+    }
+
+    public function connect()
+    {
+        $connection = new \mysqli(
             $this->host,
             $this->username,
             $this->password,
             $this->database,
             $this->port);
 
-        if (!$this->connection) {
-            throw new \Exception(mysqli::$connect_error);
+        if (!$connection) {
+            throw new \Exception($connection->connect_error);
+        } else {
+            $this->setConnection($connection);
         }
 
         $this->setConnectionCharset();
@@ -45,9 +73,14 @@ class Connection
         return $this;
     }
 
+    public function setTranslator($translator)
+    {
+        $this->translator = $translator;
+    }
+
     protected function setConnectionCharset()
     {
-        if (!$this->connection->set_charset($this->charset)) {
+        if (!$this->getConnection()->set_charset($this->charset)) {
             throw new \Exception(sprintf(
                 'Impossible to set charset (%s): %S', $this->charset, mysqli::$error));
         }
@@ -85,8 +118,28 @@ class Connection
 
     public function execute($query)
     {
+        $count = substr_count($query, ';');
+        $message = 'Have you forgotten a query delimiter? (maybe the final one)';
+        $missingDelimiter = false;
+
+        if ($count >= 1) {
+            $queries = explode(';', $query);
+
+            if (count($queries) - 1 < $count) {
+                $missingDelimiter = true;
+            } else {
+                $this->queryCount = $count;
+            }
+        } else {
+            $missingDelimiter = true;
+        }
+
+        if ($missingDelimiter) {
+            throw new \Exception($message);
+        }
+
         if (!$this->connection->multi_query($query)) {
-            throw new \Exception(mysqli::error);
+            throw new \Exception($this->connection->error);
         }
 
         return $this;
@@ -111,7 +164,7 @@ class Connection
          * @var $em EntityManager
          */
         if (is_null($this->entityManager)) {
-            throw new \Exception('Doctrine entity manager has to be injected');
+            throw new \Exception('Please inject Doctrine entity manager');
         }
 
         $doctrineConnection = $this->entityManager->getConnection();
@@ -121,7 +174,7 @@ class Connection
         try {
             $results = $stmt->fetchAll();
         } catch (\Exception $exception) {
-            throw new \Exception($stmt->errorInfo());
+            $results = [$stmt->errorInfo()];
         }
 
         return $results;
@@ -129,23 +182,46 @@ class Connection
 
     /**
      * @return array
+     * @throws \Exception
      */
     public function fetchResults()
     {
-        $records = ['Sorry...', 'Something went wrong when executing your query.'];
+        if (is_null($this->translator)) {
+            throw new \Exception('Please inject a translator');
+        }
+
+        $results = [$this->translator->trans('sorry', array(), 'messages'),
+            $this->translator->trans('wrong_query_execution', array(), 'messages')];
 
         do {
             if (!$this->connection->field_count) {
-                $records[1] = 'No record was found when executing your query';
+                if (strlen($this->connection->error) > 0) {
+                    $error = $this->connection->error;
+                    $this->logger->info($error);
+                    throw new \Exception($error);
+                } else {
+                    $results[1] = $this->translator->trans('no_record', array(), 'messages');
+                }
             } else {
-                $result = $this->connection->use_result();
-                unset($records);
-                while ($records[] = $result->fetch_array(MYSQLI_ASSOC)) ;
-                $result->free();
+                $queryResult = $this->connection->use_result();
+                unset($results);
+                while ($result = $queryResult->fetch_array(MYSQLI_ASSOC)) {
+                    $results[] = $result;
+                }
+                $result->close();
             }
-        } while ($this->connection->more_results() && $this->connection->next_result());
 
-        return $records;
+            if ($this->connection->more_results()) {
+                $this->connection->next_result();
+            }
+
+            $this->queryCount--;
+        } while ($this->queryCount > 0);
+
+        $this->queryCount = null;
+        $this->connection->close();
+
+        return $results;
     }
 
     /**
@@ -156,7 +232,8 @@ class Connection
     public function pdoSafe($query)
     {
         return (false === strpos(strtolower($query), ':=')) &&
-            (false === strpos(strtolower($query), '@'));
+            (false === strpos(strtolower($query), '@')) &&
+            (false === strpos(strtolower($query), 'update'));
     }
 
     /**
@@ -168,11 +245,13 @@ class Connection
     {
         return
             (strlen($query) > 0) &&
-            (false === strpos(strtolower($query), 'update')) &&
-            (false === strpos(strtolower($query), 'insert')) &&
             (false === strpos(strtolower($query), 'delete')) &&
             (false === strpos(strtolower($query), 'truncate')) &&
-            (false === strpos(strtolower($query), 'drop')) &&
+            (
+                false === strpos(strtolower($query), 'drop') ||
+                (1 === substr_count($query, 'drop')) &&
+                (false !== strpos(strtolower($query), 'drop table tmp_'))
+            ) &&
             (false === strpos(strtolower($query), 'alter')) &&
             (false === strpos(strtolower($query), 'grant'));
     }
