@@ -51,11 +51,6 @@ class Connection
      */
     public function getDefaultQuery()
     {
-        /**
-         * @var $connection Connection
-         */
-        $connection = $this->get('dashboard.dbal_connection');
-
         $defaultQuery = new \stdClass();
         $defaultQuery->sql = 'invalid query';
         $defaultQuery->error = null;
@@ -69,10 +64,10 @@ QUERY;
 
         $query = strtr($baseQuery, array(
             '{database}' => $this->database . '.',
-            '{type}' => $connection::QUERY_TYPE_DEFAULT));
+            '{type}' => self::QUERY_TYPE_DEFAULT));
 
         try {
-            $results = $connection->connect()->execute($query)->fetchResults();
+            $results = $this->connect()->execute($query)->fetchAll();
             if (count($results) > 0) {
                 $defaultQuery->sql = $results[0]['query'];
             }
@@ -223,13 +218,9 @@ QUERY;
                     $query->records = $this->delegateQueryExecution($query->sql);
                 } else {
                     $query->records = $this->connect()->execute($query->sql)->fetchAll();
-
-                    return $query;
                 }
             } catch (\Exception $exception) {
                 $query->error = $exception->getMessage();
-
-                return $query;
             }
         } else {
             $query->records = [$this->translator->trans('requirement_valid_query', array(), 'messages')];
@@ -279,35 +270,41 @@ QUERY;
     }
 
     /**
-     * @param $query
+     * @param $sql
      *
      * @return bool
      */
-    public function pdoSafe($query)
+    public function pdoSafe($sql)
     {
-        return (false === strpos(strtolower($query), ':=')) &&
-            (false === strpos(strtolower($query), '@')) &&
-            (false === strpos(strtolower($query), 'update')) &&
-            (false === strpos(strtolower($query), 'drop'));
+        return (false === strpos(strtolower($sql), ':=')) &&
+            (false === strpos(strtolower($sql), '@')) &&
+            (false === strpos(strtolower($sql), 'update')) &&
+            (false === strpos(strtolower($sql), 'drop'));
     }
 
     /**
-     * @param $query
+     * @param $sql
      *
      * @return bool
      */
-    public function idempotentQuery($query)
+    public function idempotentQuery($sql)
     {
         return
-            (strlen($query) > 0) &&
-            (false === strpos(strtolower($query), 'delete')) &&
-            (false === strpos(strtolower($query), 'truncate')) &&
+            (strlen($sql) > 0) &&
             (
-                (false === strpos(strtolower($query), 'drop')) ||
-                (1 === substr_count(strtolower($query), 'drop')) &&
-                (false !== strpos(strtolower($query), 'drop table tmp_'))
+                (false === strpos(strtolower($sql), 'delete')) ||
+                (1 === substr_count(strtolower($sql), 'delete')) &&
+                (false !== strpos(strtolower($sql), 'delete from tmp_'))
             ) &&
-            (false === strpos(strtolower($query), 'alter')) &&
-            (false === strpos(strtolower($query), 'grant'));
+            (false === strpos(strtolower($sql), 'truncate')) &&
+            (
+                (false === strpos(strtolower($sql), 'drop')) ||
+                (1 === substr_count(strtolower($sql), 'drop')) && (
+                    (false !== strpos(strtolower($sql), 'drop table tmp_')) ||
+                    (false !== strpos(strtolower($sql), 'drop table if exists tmp_'))
+                )
+            ) &&
+            (false === strpos(strtolower($sql), 'alter')) &&
+            (false === strpos(strtolower($sql), 'grant'));
     }
 }
