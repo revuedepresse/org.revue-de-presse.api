@@ -41,7 +41,7 @@ class Connection
         $this->logger = $logger;
     }
 
-    public function getConnection()
+    public function getWrappedConnection()
     {
         return $this->connection;
     }
@@ -112,7 +112,7 @@ QUERY;
 
     protected function setConnectionCharset()
     {
-        if (!$this->getConnection()->set_charset($this->charset)) {
+        if (!$this->getWrappedConnection()->set_charset($this->charset)) {
             throw new \Exception(sprintf(
                 'Impossible to set charset (%s): %S', $this->charset, mysqli::$error));
         }
@@ -293,8 +293,10 @@ QUERY;
             (strlen($sql) > 0) &&
             (
                 (false === strpos(strtolower($sql), 'delete')) ||
-                (1 === substr_count(strtolower($sql), 'delete')) &&
-                (false !== strpos(strtolower($sql), 'delete from tmp_'))
+                (
+                    (1 === substr_count(strtolower($sql), 'delete')) &&
+                    (false !== strpos(strtolower($sql), 'delete from tmp_'))
+                )
             ) &&
             (false === strpos(strtolower($sql), 'truncate')) &&
             (
