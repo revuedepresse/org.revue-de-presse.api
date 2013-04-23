@@ -15,7 +15,7 @@ class Version20130423220449 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() != "mysql", "Migration can only be executed safely on 'mysql'.");
 
-        $this->addSql('CREATE TABLE weaving_perspective (
+        $this->addSql('CREATE TABLE IF NOT EXISTS weaving_perspective (
             per_id INT AUTO_INCREMENT NOT NULL, per_status
             INT DEFAULT NULL, per_type INT DEFAULT NULL,
             per_value LONGTEXT DEFAULT NULL,
