@@ -38,6 +38,13 @@ class Perspective
     /**
      * @var string
      *
+     * @ORM\Column(name="per_description", type="text", nullable=true)
+     */
+    protected $description;
+
+    /**
+     * @var string
+     *
      * @ORM\Column(name="per_value", type="text", nullable=true)
      */
     protected $value;
@@ -179,5 +186,28 @@ class Perspective
     public function getUpdateDate()
     {
         return $this->updateDate;
+    }
+
+    /**
+     * Set description
+     *
+     * @param string $description
+     * @return Perspective
+     */
+    public function setDescription($description)
+    {
+        $this->description = $description;
+    
+        return $this;
+    }
+
+    /**
+     * Get description
+     *
+     * @return string 
+     */
+    public function getDescription()
+    {
+        return $this->description;
     }
 }
