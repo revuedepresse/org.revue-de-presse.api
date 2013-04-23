@@ -22,7 +22,7 @@
     ],
     "require":{
         "doctrine/doctrine-bundle": "1.2.*",
-        "doctrine/migrations": "dev-master",
+        "doctrine/doctrine-migrations-bundle": "dev-master",
         "doctrine/doctrine-fixtures-bundle": "dev-master",
         "doctrine/orm":">=2.2.3,<2.4-dev",
         "facebook/php-sdk":"3.2.1",
