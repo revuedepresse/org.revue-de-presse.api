@@ -23,7 +23,6 @@ class Version20130423220449 extends AbstractMigration
             per_date_update DATETIME DEFAULT NULL,
             per_description LONGTEXT DEFAULT NULL,
             PRIMARY KEY(per_id)) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB');
-        $this->addSql("ALTER TABLE weaving_perspective ADD per_description LONGTEXT DEFAULT NULL, CHANGE per_status per_status INT DEFAULT NULL, CHANGE per_type per_type INT DEFAULT NULL, CHANGE per_value per_value LONGTEXT DEFAULT NULL, CHANGE per_date_creation per_date_creation DATETIME DEFAULT NULL, CHANGE per_date_update per_date_update DATETIME DEFAULT NULL");
     }
 
     public function down(Schema $schema)
