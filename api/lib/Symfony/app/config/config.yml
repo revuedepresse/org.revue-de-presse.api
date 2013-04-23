@@ -38,6 +38,13 @@ doctrine:
     dbal:
         default_connection: default
         connections:
+            admin:
+                charset:  %database_charset_admin%
+                driver:   %database_driver_admin%
+                host:     %database_host_admin%
+                dbname:   %database_name_admin%
+                user:     %database_user_admin%
+                password: %database_password_admin%
             test_mysql:
                 charset:  %database_charset_test%
                 driver:   %database_driver_test%
@@ -50,6 +57,13 @@ doctrine:
         entity_managers:
             default:
                 connection: default
+                mappings:
+                    WTWAPIDataMiningBundle: ~
+                    WTWAPIFacebookBundle: ~
+                    WTWCodeGenerationAnalysisBundle: ~
+                    WTWDashboardBundle: ~
+            admin:
+                connection: admin
                 mappings:
                     WTWAPIDataMiningBundle: ~
                     WTWAPIFacebookBundle: ~
