@@ -1,6 +1,8 @@
 *.DS_Store
 *.pyc
 
+composer.phar
+
 /check_wtw.php
 
 /api/lib/Symfony/app/cache
