@@ -15,7 +15,6 @@ class Version20130423220449 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() != "mysql", "Migration can only be executed safely on 'mysql'.");
 
-        $this->addSql("DROP INDEX query ON weaving_perspective");
         $this->addSql("ALTER TABLE weaving_perspective ADD per_description LONGTEXT DEFAULT NULL, CHANGE per_status per_status INT DEFAULT NULL, CHANGE per_type per_type INT DEFAULT NULL, CHANGE per_value per_value LONGTEXT DEFAULT NULL, CHANGE per_date_creation per_date_creation DATETIME DEFAULT NULL, CHANGE per_date_update per_date_update DATETIME DEFAULT NULL");
     }
 
@@ -25,6 +24,5 @@ class Version20130423220449 extends AbstractMigration
         $this->abortIf($this->connection->getDatabasePlatform()->getName() != "mysql", "Migration can only be executed safely on 'mysql'.");
 
         $this->addSql("ALTER TABLE weaving_perspective DROP per_description, CHANGE per_status per_status INT NOT NULL, CHANGE per_type per_type INT NOT NULL, CHANGE per_value per_value LONGTEXT NOT NULL, CHANGE per_date_creation per_date_creation DATETIME DEFAULT CURRENT_TIMESTAMP NOT NULL, CHANGE per_date_update per_date_update DATETIME DEFAULT '0000-00-00 00:00:00' NOT NULL");
-        $this->addSql("CREATE INDEX query ON weaving_perspective (per_value)");
     }
 }
