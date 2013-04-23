@@ -37,14 +37,13 @@ class DocumentController extends Controller
          * @var $connection Connection
          */
         $connection = $this->get('dashboard.dbal_connection');
+        $defaultQuery = $connection->getDefaultQuery();
+        $sql = 'SELECT 1';
 
         if ($request->request->has('query')) {
             $sql = $request->request->get('query');
-        } else {
-            $defaultQuery = $connection->getDefaultQuery();
-            if (is_null($defaultQuery->error)) {
-                $sql = $defaultQuery->sql;
-            }
+        } elseif (is_null($defaultQuery->error)) {
+            $sql = $defaultQuery->sql;
         }
 
         $query = $connection->executeQuery($sql);
