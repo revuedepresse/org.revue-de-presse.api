@@ -1,6 +1,6 @@
 
 $saveQueryButton = $('#action-save-query');
-$queries = $('pre');
+$queries = $('div.query button');
 
 if ($saveQueryButton.length > 0) {
     $saveQueryButton.click(function (event) {
@@ -26,14 +26,19 @@ if ($saveQueryButton.length > 0) {
     });
 }
 
-$queries.bind('dblclick', function(event) {
-    var $query = $(event.currentTarget);
+$queries.bind('click', function(event) {
+    var $button = $(event.currentTarget),
+        sql = $button.parent().find('.sql').text(),
+        trimmedSql = sql.toLowerCase().trim();
 
     if (
-        ($query.text().toLowerCase().trim().indexOf('select') == 0) ||
-        ($query.text().toLowerCase().trim().indexOf('create table') == 0) ||
-        ($query.text().toLowerCase().trim().indexOf('drop table') == 0)) {
-        $('#sql').val($query.text());
+        (trimmedSql.indexOf('# show') == 0) ||
+        (trimmedSql.indexOf('select') == 0) ||
+        (trimmedSql.indexOf('create table') == 0) ||
+        (trimmedSql.indexOf('drop table') == 0)) {
+        $('#sql').val(sql);
         $('.container form').submit();
     }
+
+    event.preventDefault();
 });
