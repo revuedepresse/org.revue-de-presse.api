@@ -4,6 +4,7 @@ parameters:
     api.github.client.id:                       ## FILL ME ##
     api.github.client.secret:                   ## FILL ME ##
     api.github.repos_serializer_command.class:  WTW\API\GithubBundle\Command\SerializeStarredRepositoriesCommand
+    api.github.user_agent:                      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_3) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.65 Safari/537.31"
     api.github.sitemap:
         url:
             base:                               https://api.github.com
@@ -30,5 +31,6 @@ services:
           - [ setClientId, [ %api.github.client.id% ] ]
           - [ setJsonStore, [ @provider.store.json ] ]
           - [ setSiteMap, [ %api.github.sitemap% ] ]
+          - [ setUserAgent, [ %api.github.user_agent% ] ]
     logger.dumper:
         class:  %logger.dumper.class%

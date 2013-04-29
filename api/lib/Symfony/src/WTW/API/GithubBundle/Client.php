@@ -25,6 +25,8 @@ class Client
 
     protected $siteMap = null;
 
+    protected $userAgent = null;
+
     public function __construct($dumper = null)
     {
         if (!is_null($dumper)) {
@@ -165,6 +167,7 @@ class Client
         $resource = curl_init();
 
         curl_setopt($resource, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($resource, CURLOPT_USERAGENT, $this->userAgent);
         curl_setopt($resource, CURLOPT_URL, $url);
         curl_setopt($resource, CURLOPT_SSL_VERIFYHOST, false);
         curl_setopt($resource, CURLOPT_SSL_VERIFYPEER, false);
@@ -692,5 +695,13 @@ class Client
     public function setSiteMap($siteMap)
     {
         $this->siteMap = $siteMap;
+    }
+
+    /**
+     * @param $userAgent
+     */
+    public function setUserAgent($userAgent)
+    {
+        $this->userAgent = $userAgent;
     }
 }
