@@ -23,6 +23,7 @@ class AppKernel extends Kernel
             new FOS\JsRoutingBundle\FOSJsRoutingBundle(),
             new FOS\RestBundle\FOSRestBundle(),
             new FOS\UserBundle\FOSUserBundle(),
+            new FOS\TwitterBundle\FOSTwitterBundle(),
             new Propel\PropelBundle\PropelBundle(),
             new Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle(),
             new Sp\BowerBundle\SpBowerBundle(),
