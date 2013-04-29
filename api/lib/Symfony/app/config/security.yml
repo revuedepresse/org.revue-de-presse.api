@@ -12,36 +12,36 @@ security:
 
     role_hierarchy:
         ROLE_ADMIN:       ROLE_USER
-        ROLE_SUPER_ADMIN: ROLE_ADMIN
+        ROLE_SUPER_ADMIN: [ROLE_USER, ROLE_ADMIN, ROLE_ALLOWED_TO_SWITCH]
 
     providers:
         fos_userbundle:
             id: fos_user.user_provider.username
+        fos_twitter:
+            id: dashboard.twitter_user
         in_memory:
             memory:
                 users:
                     %api_wtw_repositories_user_name%:  { password: %api_wtw_repositories_password%, roles: [ 'ROLE_USER' ] }
 
     firewalls:
-        main:
-            pattern: ^/
-            form_login:
-                provider: fos_userbundle
-                csrf_provider: form.csrf_provider
-            logout:       true
-            anonymous:    true
+        public:
+            pattern:                  ^/
+            fos_twitter:
+                login_path:           /twitter/connect
+                check_path:           /twitter/login_check
+                default_target_path:  /documents
+                provider:             fos_twitter
+            anonymous:                false
+
         dev:
             pattern:  ^/(_(profiler|wdt)|css|images|js)/
             security: false
-
-        api:
-            pattern:    ^/(sf2/)?api
-            http_basic:
-                realm: "Welcome to the dream land"
-                provider: in_memory
 
     access_control:
         - { path: ^/login$, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/register, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/resetting, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/admin/, role: ROLE_ADMIN }
+        - { path: /.*, role: [IS_AUTHENTICATED_ANONYMOUSLY] }
+

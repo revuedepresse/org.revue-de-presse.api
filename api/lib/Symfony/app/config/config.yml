@@ -20,7 +20,13 @@ framework:
 fos_user:
     db_driver:      orm
     firewall_name:  main
-    user_class:     WTW\API\DataMiningBundle\Entity\User
+    user_class:     WTW\DashboardBundle\Entity\User
+
+fos_twitter:
+    file: %kernel.root_dir%/../vendor/kertz/twitteroauth/twitteroauth/twitteroauth.php
+    consumer_key:     %api_twitter_consumer_key%
+    consumer_secret:  %api_twitter_consumer_secret%
+    callback_url:     %api_twitter_callback_url%
 
 # Twig Configuration
 twig:

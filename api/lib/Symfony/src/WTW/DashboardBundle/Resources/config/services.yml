@@ -15,6 +15,13 @@ services:
           - [ setDatabase, [ %database_name% ] ]
           - [ setEntityManager, [ @doctrine.orm.entity_manager ] ]
           - [ setTranslator, [ @translator ] ]
+    dashboard.twitter_user:
+        class: WTW\DashboardBundle\Security\User\Provider\TwitterUserProvider
+        arguments:
+            twitter_oauth: "@fos_twitter.api"
+            userManager: "@fos_user.user_manager"
+            validator: "@validator"
+            session: "@session"
     twig.extension.text:
         class: Twig_Extensions_Extension_Text
         tags:

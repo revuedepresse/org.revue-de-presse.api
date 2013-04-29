@@ -3,9 +3,10 @@
 namespace WTW\DashboardBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
-use Symfony\Component\HttpFoundation\Request,
-    Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\RedirectResponse,
+    Symfony\Component\HttpFoundation\Request,
+    Symfony\Bundle\FrameworkBundle\Controller\Controller,
+    Symfony\Component\HttpFoundation\Response;
 use WTW\DashboardBundle\DBAL\Connection,
     WTW\DashboardBundle\Repository\PerspectiveRepository;
 
@@ -17,6 +18,35 @@ use WTW\DashboardBundle\DBAL\Connection,
  */
 class DocumentController extends Controller
 {
+    /**
+     * @Extra\Route("/twitter/connect", name="connect_twitter")
+     */
+    public function connectTwitterAction()
+    {
+        $request = $this->get('request');
+        $twitter = $this->get('fos_twitter.service');
+
+        $authURL = $twitter->getLoginUrl($request);
+
+        return new RedirectResponse($authURL);
+    }
+
+    /**
+     * @Extra\Route("/twitter/login_check", name="twitter_login_check")
+     */
+    public function loginCheckAction()
+    {
+        $oauthToken = $this->getRequest()->get('oauth_token');
+        $oauthVerifier = $this->getRequest()->get('oauth_verifier');
+        $response = new RedirectResponse(
+            'http://wtw.dev/api/api.twitter.request.access.token.php' .
+            '&oauth_token=' . $oauthToken .
+            '&oauth_verifier=' . $oauthVerifier
+        );
+
+        return $response;
+    }
+
     /**
      * @Extra\Route("/documents", name="wtw_dashboard_show_documents")
      * @Extra\Method({"GET", "POST"})
