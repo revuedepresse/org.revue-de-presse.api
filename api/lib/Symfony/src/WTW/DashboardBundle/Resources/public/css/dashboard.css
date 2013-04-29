@@ -6,3 +6,7 @@ textarea {
 pre {
     cursor: pointer;
 }
+
+.shorten {
+    cursor: pointer;
+}
