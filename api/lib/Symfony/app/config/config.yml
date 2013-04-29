@@ -17,6 +17,11 @@ framework:
     trust_proxy_headers:  false
     session:              ~
 
+fos_user:
+    db_driver:      orm
+    firewall_name:  main
+    user_class:     WTW\API\DataMiningBundle\Entity\User
+
 # Twig Configuration
 twig:
     debug:            %kernel.debug%
