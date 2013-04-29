@@ -8,6 +8,9 @@ parameters:
     api_google_drive_client_secret:         %api.google_drive.client_secret%
     api_google_drive_redirect_uri:          %api.google_drive.redirect_uri%
 
+    api_twitter_consumer_key:               %api.twitter.consumer_key%
+    api_twitter_consumer_secret:            %api.twitter.consumer_secret%
+    api_twitter_callback_url:               %api.twitter.callback_url%
     api_twitter_host_port:                  %api.twitter.protocol%%api.twitter.host_port%
     api_twitter_version:                    1.1
     api_twitter_user_token:                 %api.twitter.user_token%
