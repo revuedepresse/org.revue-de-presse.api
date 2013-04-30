@@ -22,7 +22,10 @@ composer.phar
 /api/lib/Symfony/web/bundles
 /api/lib/Symfony/web/css
 /api/lib/Symfony/web/js
+
 /api/twitter/timeline/user_timeline_*
+/api/twitter/favorite/*
+
 /blog
 /snapshots
 /unit.testing/*.testing.subversion.log.php
