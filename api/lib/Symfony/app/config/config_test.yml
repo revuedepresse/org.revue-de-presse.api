@@ -23,6 +23,7 @@ swiftmailer:
 
 parameters:
     data_mining.command_provider.class: WTW\API\DataMiningBundle\Command\Tester\TransformationCommandProvider
+    anonymous_access:                   true
 
 services:
     data_mining.command_provider:

@@ -32,7 +32,7 @@ security:
                 check_path:           /twitter/login_check
                 default_target_path:  /documents
                 provider:             fos_twitter
-            anonymous:                false
+            anonymous:                %anonymous_access%
 
         dev:
             pattern:  ^/(_(profiler|wdt)|css|images|js)/
