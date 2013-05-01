@@ -74,6 +74,13 @@ class User extends BaseUSer
     /**
      * @var string
      *
+     * @ORM\Column(name="usr_full_name", type="string", length=255, nullable=true)
+     */
+    protected $fullName;
+
+    /**
+     * @var string
+     *
      * @ORM\Column(name="usr_last_name", type="string", length=255, nullable=true)
      */
     protected $lastName;
@@ -360,16 +367,6 @@ class User extends BaseUSer
     }
 
     /**
-    * Get twitterID
-    *
-    * @return string
-    */
-    public function getTwitterId()
-    {
-        return $this->twitterID;
-    }
-
-    /**
     * Set twitter_username
     *
     * @param string $twitterUsername
@@ -387,5 +384,61 @@ class User extends BaseUSer
     public function getTwitterUsername()
     {
       return $this->twitter_username;
+    }
+
+    /**
+     * Get twitterID
+     *
+     * @return string 
+     */
+    public function getTwitterID()
+    {
+        return $this->twitterID;
+    }
+
+    /**
+     * Set enabled
+     *
+     * @param boolean $enabled
+     * @return User
+     */
+    public function setEnabled($enabled)
+    {
+        $this->enabled = $enabled;
+    
+        return $this;
+    }
+
+    /**
+     * Get enabled
+     *
+     * @return boolean 
+     */
+    public function getEnabled()
+    {
+        return $this->enabled;
+    }
+
+    /**
+     * Set fullName
+     *
+     * @param string $fullName
+     * @return User
+     */
+    public function setFullName($fullName)
+    {
+        $this->fullName = $fullName;
+    
+        return $this;
+    }
+
+    /**
+     * Get fullName
+     *
+     * @return string 
+     */
+    public function getFullName()
+    {
+        return $this->fullName;
     }
 }
