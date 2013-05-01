@@ -12,7 +12,6 @@ class Version20130423220449 extends AbstractMigration
 {
     public function up(Schema $schema)
     {
-        // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() != "mysql", "Migration can only be executed safely on 'mysql'.");
 
         $this->addSql('CREATE TABLE IF NOT EXISTS weaving_perspective (
@@ -27,8 +26,8 @@ class Version20130423220449 extends AbstractMigration
 
     public function down(Schema $schema)
     {
-        // this down() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() != "mysql", "Migration can only be executed safely on 'mysql'.");
+
         $this->addSql("DROP TABLE weaving_perspective");
     }
 }

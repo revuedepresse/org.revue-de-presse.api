@@ -8,19 +8,19 @@ use Doctrine\DBAL\Migrations\AbstractMigration,
 /**
  * Auto-generated Migration: Please modify to your need!
  */
-class Version20130429223018 extends AbstractMigration
+class Version20130430210314 extends AbstractMigration
 {
     public function up(Schema $schema)
     {
         $this->abortIf($this->connection->getDatabasePlatform()->getName() != "mysql", "Migration can only be executed safely on 'mysql'.");
 
-        $this->addSql("ALTER TABLE weaving_user ADD usr_twitter_id INT NOT NULL, ADD usr_twitter_username VARCHAR(255) NOT NULL");
+        $this->addSql("ALTER TABLE weaving_user ADD usr_full_name VARCHAR(255) DEFAULT NULL, CHANGE usr_status usr_status TINYINT(1) NOT NULL");
     }
 
     public function down(Schema $schema)
     {
         $this->abortIf($this->connection->getDatabasePlatform()->getName() != "mysql", "Migration can only be executed safely on 'mysql'.");
 
-        $this->addSql("ALTER TABLE weaving_user DROP usr_twitter_id, DROP usr_twitter_username");
+        $this->addSql("ALTER TABLE weaving_user DROP usr_full_name, CHANGE usr_status usr_status TINYINT(1) DEFAULT NULL");
     }
 }
