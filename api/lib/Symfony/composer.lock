@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "e57c36c967ef0b745656dc905e3448c7",
+    "hash": "a3ca842a9424a882329df12805cce74b",
     "packages": [
         {
             "name": "behat/behat",
@@ -3413,7 +3413,6 @@
         "friendsofsymfony/twitter-bundle": 20,
         "guzzle/guzzle": 20,
         "kertz/twitteroauth": 20,
-        "sp/bower-bundle": 20,
         "knplabs/knp-markdown-bundle": 20,
         "themattharris/tmhoauth": 20
     },
