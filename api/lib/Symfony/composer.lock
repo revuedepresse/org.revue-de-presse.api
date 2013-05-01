@@ -743,12 +743,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/dbal.git",
-                "reference": "3a3013c8dac5b20a6aa66cd43b6fbaeb652d93a5"
+                "reference": "597da8c33261fc3b1deff25c14cc6202a3458485"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/dbal/zipball/3a3013c8dac5b20a6aa66cd43b6fbaeb652d93a5",
-                "reference": "3a3013c8dac5b20a6aa66cd43b6fbaeb652d93a5",
+                "url": "https://api.github.com/repos/doctrine/dbal/zipball/597da8c33261fc3b1deff25c14cc6202a3458485",
+                "reference": "597da8c33261fc3b1deff25c14cc6202a3458485",
                 "shasum": ""
             },
             "require": {
@@ -798,7 +798,7 @@
                 "persistence",
                 "queryobject"
             ],
-            "time": "2013-05-01 12:39:58"
+            "time": "2013-05-01 13:09:27"
         },
         {
             "name": "doctrine/doctrine-bundle",
@@ -1510,13 +1510,13 @@
             "target-dir": "FOS/TwitterBundle",
             "source": {
                 "type": "git",
-                "url": "https://github.com/FriendsOfSymfony/FOSTwitterBundle.git",
-                "reference": "af7ba5839b1b5d17c0a0efc32df10fe1bb092d68"
+                "url": "https://github.com/thierrymarianne/FOSTwitterBundle.git",
+                "reference": "00a253886a6eed5076af30e5af88773fe82907f7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/FriendsOfSymfony/FOSTwitterBundle/zipball/af7ba5839b1b5d17c0a0efc32df10fe1bb092d68",
-                "reference": "af7ba5839b1b5d17c0a0efc32df10fe1bb092d68",
+                "url": "https://api.github.com/repos/thierrymarianne/FOSTwitterBundle/zipball/00a253886a6eed5076af30e5af88773fe82907f7",
+                "reference": "00a253886a6eed5076af30e5af88773fe82907f7",
                 "shasum": ""
             },
             "require": {
@@ -1531,7 +1531,6 @@
                     "FOS\\TwitterBundle": ""
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -1546,7 +1545,10 @@
             "keywords": [
                 "Twitter authentication"
             ],
-            "time": "2013-02-11 23:09:22"
+            "support": {
+                "source": "https://github.com/thierrymarianne/FOSTwitterBundle/tree/thierrymarianne-master"
+            },
+            "time": "2013-05-01 12:27:11"
         },
         {
             "name": "friendsofsymfony/user-bundle",
