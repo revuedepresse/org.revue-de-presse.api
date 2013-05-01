@@ -39,7 +39,8 @@ class DocumentController extends Controller
         $oauthToken = $this->getRequest()->get('oauth_token');
         $oauthVerifier = $this->getRequest()->get('oauth_verifier');
         $response = new RedirectResponse(
-            'http://wtw.dev/api/api.twitter.request.access.token.php' .
+            $this->getRequest()->getBaseUrl() .
+            '/api/api.twitter.request.access.token.php' .
             '&oauth_token=' . $oauthToken .
             '&oauth_verifier=' . $oauthVerifier
         );
