@@ -25,7 +25,7 @@ class User extends BaseUSer
     /**
     * @var string
     *
-    * @ORM\Column(name="usr_twitter_id", type="string", nullable=false)
+    * @ORM\Column(name="usr_twitter_id", type="integer", nullable=false)
     */
     protected $twitterID;
 
