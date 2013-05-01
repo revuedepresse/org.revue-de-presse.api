@@ -3,9 +3,6 @@ jms_security_extra:
     expressions: true
 
 security:
-    access_control:
-        - { path: ^/(sf2/)?api, roles: ROLE_USER }
-
     encoders:
         Symfony\Component\Security\Core\User\User: plaintext
         FOS\UserBundle\Model\UserInterface: sha512
@@ -15,24 +12,34 @@ security:
         ROLE_SUPER_ADMIN: [ROLE_USER, ROLE_ADMIN, ROLE_ALLOWED_TO_SWITCH]
 
     providers:
-        fos_userbundle:
-            id: fos_user.user_provider.username
-        fos_twitter:
-            id: dashboard.twitter_user
+        chain_provider:
+            chain:
+                providers: [in_memory, fos_userbundle, fos_twitter]
         in_memory:
             memory:
                 users:
                     %api_wtw_repositories_user_name%:  { password: %api_wtw_repositories_password%, roles: [ 'ROLE_USER' ] }
+        fos_userbundle:
+            id: fos_user.user_provider.username
+        fos_twitter:
+            id: dashboard.twitter_user
 
     firewalls:
-        public:
+        documents:
             pattern:                  ^/
+            http_basic:
+                realm:                "Please enter your login information for Weaving the Web"
+                provider:             chain_provider
+            form_login:
+                provider:             chain_provider
+                csrf_provider:        form.csrf_provider
             fos_twitter:
                 login_path:           /twitter/connect
                 check_path:           /twitter/login_check
                 default_target_path:  /documents
-                provider:             fos_twitter
-            anonymous:                %anonymous_access%
+                provider:             chain_provider
+            logout:                   true
+            anonymous:                true
 
         dev:
             pattern:  ^/(_(profiler|wdt)|css|images|js)/
@@ -42,6 +49,7 @@ security:
         - { path: ^/login$, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/register, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/resetting, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/(sf2/)?api, roles: ROLE_USER }
         - { path: ^/admin/, role: ROLE_ADMIN }
         - { path: /.*, role: [IS_AUTHENTICATED_ANONYMOUSLY] }
 
