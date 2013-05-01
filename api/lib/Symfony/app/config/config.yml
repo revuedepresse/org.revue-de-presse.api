@@ -73,6 +73,7 @@ doctrine:
                     WTWAPIFacebookBundle: ~
                     WTWCodeGenerationAnalysisBundle: ~
                     WTWDashboardBundle: ~
+                    WTWLegacyProviderBundle: ~
             admin:
                 connection: admin
                 mappings:
@@ -80,6 +81,7 @@ doctrine:
                     WTWAPIFacebookBundle: ~
                     WTWCodeGenerationAnalysisBundle: ~
                     WTWDashboardBundle: ~
+                    WTWLegacyProviderBundle: ~
             test_mysql:
                 connection: test_mysql
                 mappings:
