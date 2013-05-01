@@ -38,6 +38,13 @@ class Perspective
     /**
      * @var string
      *
+     * @ORM\Column(name="per_name", type="string", nullable=true)
+     */
+    protected $name;
+
+    /**
+     * @var string
+     *
      * @ORM\Column(name="per_description", type="text", nullable=true)
      */
     protected $description;
