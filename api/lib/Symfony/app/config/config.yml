@@ -124,6 +124,7 @@ sensio_framework_extra:
 
 sp_bower:
     install_on_warmup:  false
+    keep_bowerrc:       true
     bin:                %bower_binary%
     assetic:
         enabled: true
