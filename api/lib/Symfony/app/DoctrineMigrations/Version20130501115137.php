@@ -16,7 +16,6 @@ class Version20130501115137 extends AbstractMigration
         $this->abortIf($this->connection->getDatabasePlatform()->getName() != "mysql", "Migration can only be executed safely on 'mysql'.");
         
         $this->addSql("ALTER TABLE weaving_user CHANGE usr_first_name usr_first_name VARCHAR(255) DEFAULT NULL");
-        $this->addSql("ALTER TABLE weaving_privilege CHANGE prv_id prv_id TINYINT(1) NOT NULL");
     }
 
     public function down(Schema $schema)
@@ -24,7 +23,6 @@ class Version20130501115137 extends AbstractMigration
         // this down() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() != "mysql", "Migration can only be executed safely on 'mysql'.");
         
-        $this->addSql("ALTER TABLE weaving_privilege CHANGE prv_id prv_id TINYINT(1) NOT NULL");
         $this->addSql("ALTER TABLE weaving_user CHANGE usr_first_name usr_first_name VARCHAR(255) NOT NULL");
     }
 }
