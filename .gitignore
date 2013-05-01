@@ -5,6 +5,8 @@
 
 composer.phar
 
+/api/lib/Symfony/bin/behat
+
 /check_wtw.php
 
 /api/lib/Symfony/app/cache
