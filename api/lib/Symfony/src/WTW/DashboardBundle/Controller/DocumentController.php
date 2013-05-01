@@ -2,6 +2,7 @@
 
 namespace WTW\DashboardBundle\Controller;
 
+use FOS\TwitterBundle\Services\Twitter;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
 use Symfony\Component\HttpFoundation\RedirectResponse,
     Symfony\Component\HttpFoundation\Request,
@@ -19,7 +20,17 @@ use WTW\DashboardBundle\DBAL\Connection,
 class DocumentController extends Controller
 {
     /**
-     * @Extra\Route("/twitter/connect", name="connect_twitter")
+     * @Extra\Route("/", name="wtw_dashboard_homepage")
+     */
+    public function homepageAction()
+    {
+        $showDocumentsUri = $this->get('router')->generate('wtw_dashboard_show_documents');
+
+        return new RedirectResponse($showDocumentsUri);
+    }
+
+    /**
+     * @Extra\Route("/twitter/connect", name="wtw_dashboard_twitter_connect")
      */
     public function connectTwitterAction()
     {
@@ -32,20 +43,26 @@ class DocumentController extends Controller
     }
 
     /**
-     * @Extra\Route("/twitter/login_check", name="twitter_login_check")
+     * @Extra\Route("/twitter/login_check", name="wtw_dashboard_twitter_login_check")
      */
     public function loginCheckAction()
     {
+        /**
+         * @var $twitter Twitter
+         */
+        $twitter = $this->get('fos_twitter.service');
         $oauthToken = $this->getRequest()->get('oauth_token');
         $oauthVerifier = $this->getRequest()->get('oauth_verifier');
-        $response = new RedirectResponse(
-            $this->getRequest()->getBaseUrl() .
-            '/api/api.twitter.request.access.token.php' .
-            '&oauth_token=' . $oauthToken .
-            '&oauth_verifier=' . $oauthVerifier
-        );
+        $accessToken = $twitter->getAccessToken($oauthToken, $oauthVerifier);
 
-        return $response;
+        return new Response($accessToken);
+    }
+
+    /**
+     * @Extra\Route("/could-not-login", name="wtw_dashboard_login_failure")
+     */
+    public function loginFailureAction()
+    {
     }
 
     /**
