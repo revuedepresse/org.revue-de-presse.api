@@ -123,8 +123,7 @@ sensio_framework_extra:
     router:  { annotations: true }
 
 sp_bower:
-    install_on_warmup:  true
-    keep_bowerrc:       true
+    install_on_warmup:  false
     bin:                %bower_binary%
     assetic:
         enabled: true
