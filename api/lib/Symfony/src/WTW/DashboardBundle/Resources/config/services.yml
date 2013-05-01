@@ -23,12 +23,6 @@ services:
             userManager: "@fos_user.user_manager"
             validator: "@validator"
             session: "@session"
-    dashboard.bower_execution_listener:
-        class: WTW\DashboardBundle\EventListener\BowerEventSubscriber
-        calls:
-            - [ setConfigurationDir, [%dashboard.bower_config_dir%] ]
-        tags:
-            - { name: kernel.event_listener, event: bower.pre_exec, method: onPreExec }
     twig.extension.text:
         class: Twig_Extensions_Extension_Text
         tags:
