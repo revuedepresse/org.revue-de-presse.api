@@ -3,32 +3,32 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "a3ca842a9424a882329df12805cce74b",
+    "hash": "99a3d88197db72824a0e14f6a828944f",
     "packages": [
         {
             "name": "behat/behat",
-            "version": "dev-develop",
+            "version": "v2.4.5",
             "source": {
                 "type": "git",
-                "url": "https://github.com/Behat/Behat.git",
-                "reference": "b69dc512a2face8e210891e770b1aa2b6c9752c3"
+                "url": "git://github.com/Behat/Behat.git",
+                "reference": "v2.4.5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Behat/Behat/zipball/b69dc512a2face8e210891e770b1aa2b6c9752c3",
-                "reference": "b69dc512a2face8e210891e770b1aa2b6c9752c3",
+                "url": "https://github.com/Behat/Behat/archive/v2.4.5.zip",
+                "reference": "v2.4.5",
                 "shasum": ""
             },
             "require": {
-                "behat/gherkin": ">=2.2.9,<2.3",
+                "behat/gherkin": ">=2.2.4,<2.3-dev",
                 "php": ">=5.3.1",
-                "symfony/config": ">=2.0,<3.0",
-                "symfony/console": ">=2.0,<3.0",
-                "symfony/dependency-injection": ">=2.0,<3.0",
-                "symfony/event-dispatcher": ">=2.0,<3.0",
-                "symfony/finder": ">=2.0,<3.0",
-                "symfony/translation": ">=2.0,<3.0",
-                "symfony/yaml": ">=2.0,<3.0"
+                "symfony/config": ">=2.0,<2.3-dev",
+                "symfony/console": ">=2.0,<2.3-dev",
+                "symfony/dependency-injection": ">=2.0,<2.3-dev",
+                "symfony/event-dispatcher": ">=2.0,<2.3-dev",
+                "symfony/finder": ">=2.0,<2.3-dev",
+                "symfony/translation": ">=2.0,<2.3-dev",
+                "symfony/yaml": ">=2.0,<2.3-dev"
             },
             "suggest": {
                 "behat/mink-extension": "for integration with Mink testing framework",
@@ -67,7 +67,7 @@
                 "Behat",
                 "Symfony2"
             ],
-            "time": "2013-04-14 00:40:10"
+            "time": "2013-01-27 14:45:41"
         },
         {
             "name": "behat/gherkin",
@@ -132,21 +132,21 @@
         },
         {
             "name": "behat/mink",
-            "version": "dev-develop",
+            "version": "v1.4.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Behat/Mink.git",
-                "reference": "8c6c5f1f5cc33f157d14d819679d490a5a45e488"
+                "reference": "v1.4.3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Behat/Mink/zipball/8c6c5f1f5cc33f157d14d819679d490a5a45e488",
-                "reference": "8c6c5f1f5cc33f157d14d819679d490a5a45e488",
+                "url": "https://api.github.com/repos/Behat/Mink/zipball/v1.4.3",
+                "reference": "v1.4.3",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3.1",
-                "symfony/css-selector": ">=2.0,<3.0"
+                "symfony/css-selector": ">=2.0,<2.4-dev"
             },
             "suggest": {
                 "behat/mink-browserkit-driver": "extremely fast headless driver for Symfony\\Kernel-based apps (Sf2, Silex)",
@@ -157,7 +157,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-develop": "1.5.x-dev"
+                    "dev-develop": "1.4.x-dev"
                 }
             },
             "autoload": {
@@ -183,24 +183,24 @@
                 "testing",
                 "web"
             ],
-            "time": "2013-04-13 23:39:34"
+            "time": "2013-03-02 15:53:18"
         },
         {
             "name": "behat/mink-browserkit-driver",
-            "version": "dev-master",
+            "version": "v1.0.5",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Behat/MinkBrowserKitDriver.git",
-                "reference": "v1.1.0"
+                "reference": "v1.0.5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Behat/MinkBrowserKitDriver/zipball/v1.1.0",
-                "reference": "v1.1.0",
+                "url": "https://api.github.com/repos/Behat/MinkBrowserKitDriver/zipball/v1.0.5",
+                "reference": "v1.0.5",
                 "shasum": ""
             },
             "require": {
-                "behat/mink": ">=1.5,<1.6",
+                "behat/mink": ">=1.4.3,<1.5",
                 "php": ">=5.3.1",
                 "symfony/browser-kit": ">=2.0,<3.0",
                 "symfony/dom-crawler": ">=2.0,<3.0"
@@ -211,7 +211,7 @@
             "type": "mink-driver",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.1.x-dev"
+                    "dev-master": "1.0.x-dev"
                 }
             },
             "autoload": {
@@ -238,7 +238,7 @@
                 "browser",
                 "testing"
             ],
-            "time": "2013-04-13 23:46:30"
+            "time": "2013-04-13 12:17:15"
         },
         {
             "name": "behat/mink-extension",
@@ -344,6 +344,178 @@
                 "testing"
             ],
             "time": "2013-04-13 23:30:23"
+        },
+        {
+            "name": "behat/mink-selenium2-driver",
+            "version": "v1.0.6",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Behat/MinkSelenium2Driver.git",
+                "reference": "v1.0.6"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Behat/MinkSelenium2Driver/zipball/v1.0.6",
+                "reference": "v1.0.6",
+                "shasum": ""
+            },
+            "require": {
+                "behat/mink": ">=1.4.3,<1.5",
+                "instaclick/php-webdriver": ">=1.0.12.0,<1.1",
+                "php": ">=5.3.1"
+            },
+            "type": "mink-driver",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Behat\\Mink\\Driver": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Konstantin Kudryashov",
+                    "email": "ever.zet@gmail.com",
+                    "homepage": "http://everzet.com"
+                },
+                {
+                    "name": "Pete Otaqui",
+                    "email": "pete@otaqui.com",
+                    "homepage": "https://github.com/pete-otaqui"
+                }
+            ],
+            "description": "Selenium2 (WebDriver) driver for Mink framework",
+            "homepage": "http://mink.behat.org/",
+            "keywords": [
+                "ajax",
+                "browser",
+                "javascript",
+                "selenium",
+                "testing",
+                "webdriver"
+            ],
+            "time": "2013-04-13 12:56:28"
+        },
+        {
+            "name": "behat/mink-zombie-driver",
+            "version": "v1.0.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Behat/MinkZombieDriver.git",
+                "reference": "v1.0.4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Behat/MinkZombieDriver/zipball/v1.0.4",
+                "reference": "v1.0.4",
+                "shasum": ""
+            },
+            "require": {
+                "behat/mink": ">=1.4.3,<1.5",
+                "php": ">=5.3.1",
+                "symfony/process": ">=2.1,<3.0"
+            },
+            "type": "mink-driver",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Behat\\Mink\\Driver": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Konstantin Kudryashov",
+                    "email": "ever.zet@gmail.com",
+                    "homepage": "http://everzet.com"
+                },
+                {
+                    "name": "Pascal Cremer",
+                    "email": "b00gizm@gmail.com",
+                    "homepage": "http://github.com/b00gizm"
+                }
+            ],
+            "description": "Zombie.js driver for Mink framework",
+            "homepage": "http://mink.behat.org/",
+            "keywords": [
+                "ajax",
+                "browser",
+                "headless",
+                "javascript",
+                "testing",
+                "zombie"
+            ],
+            "time": "2013-04-13 12:54:30"
+        },
+        {
+            "name": "behat/symfony2-extension",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Behat/Symfony2Extension.git",
+                "reference": "567ceeb4ea049d19ffea26c9cce65df5fb7bd23a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Behat/Symfony2Extension/zipball/567ceeb4ea049d19ffea26c9cce65df5fb7bd23a",
+                "reference": "567ceeb4ea049d19ffea26c9cce65df5fb7bd23a",
+                "shasum": ""
+            },
+            "require": {
+                "behat/behat": ">=2.4.5,<2.5",
+                "php": ">=5.3.2",
+                "symfony/framework-bundle": ">=2.0,<3.0"
+            },
+            "require-dev": {
+                "behat/mink": ">=1.4.3,<1.5",
+                "behat/mink-browserkit-driver": ">=1.0.4,<1.1",
+                "behat/mink-extension": ">=1.0.1,<1.1",
+                "symfony/symfony": ">=2.1,<3.0"
+            },
+            "type": "behat-extension",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Behat\\Symfony2Extension": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Konstantin Kudryashov",
+                    "email": "ever.zet@gmail.com",
+                    "homepage": "http://everzet.com"
+                }
+            ],
+            "description": "Symfony2 framework extension for Behat",
+            "homepage": "http://behat.org",
+            "keywords": [
+                "BDD",
+                "framework",
+                "symfony"
+            ],
+            "time": "2013-04-03 11:53:42"
         },
         {
             "name": "dflydev/markdown",
@@ -743,12 +915,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/dbal.git",
-                "reference": "597da8c33261fc3b1deff25c14cc6202a3458485"
+                "reference": "ac0c0630e63ae5b3c569996aac8f174a74ba599b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/dbal/zipball/597da8c33261fc3b1deff25c14cc6202a3458485",
-                "reference": "597da8c33261fc3b1deff25c14cc6202a3458485",
+                "url": "https://api.github.com/repos/doctrine/dbal/zipball/ac0c0630e63ae5b3c569996aac8f174a74ba599b",
+                "reference": "ac0c0630e63ae5b3c569996aac8f174a74ba599b",
                 "shasum": ""
             },
             "require": {
@@ -798,7 +970,7 @@
                 "persistence",
                 "queryobject"
             ],
-            "time": "2013-05-01 13:09:27"
+            "time": "2013-05-01 17:16:27"
         },
         {
             "name": "doctrine/doctrine-bundle",
@@ -1438,12 +1610,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/FriendsOfSymfony/FOSRestBundle.git",
-                "reference": "061d226c28f406fdb5cd7d6dad620413447a30b9"
+                "reference": "1054f30c1e95e6b8dc30c66afe28b972d6b01606"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/FriendsOfSymfony/FOSRestBundle/zipball/061d226c28f406fdb5cd7d6dad620413447a30b9",
-                "reference": "061d226c28f406fdb5cd7d6dad620413447a30b9",
+                "url": "https://api.github.com/repos/FriendsOfSymfony/FOSRestBundle/zipball/1054f30c1e95e6b8dc30c66afe28b972d6b01606",
+                "reference": "1054f30c1e95e6b8dc30c66afe28b972d6b01606",
                 "shasum": ""
             },
             "require": {
@@ -1502,7 +1674,7 @@
             "keywords": [
                 "rest"
             ],
-            "time": "2013-04-21 17:58:02"
+            "time": "2013-05-01 17:35:09"
         },
         {
             "name": "friendsofsymfony/twitter-bundle",
@@ -1709,6 +1881,60 @@
                 "source": "https://github.com/thierrymarianne/guzzle/tree/master"
             },
             "time": "2013-02-11 04:28:35"
+        },
+        {
+            "name": "instaclick/php-webdriver",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/instaclick/php-webdriver.git",
+                "reference": "6f2196bc09dbf4f8eaa2bbcc94d4fc979544706a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/instaclick/php-webdriver/zipball/6f2196bc09dbf4f8eaa2bbcc94d4fc979544706a",
+                "reference": "6f2196bc09dbf4f8eaa2bbcc94d4fc979544706a",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.2"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "WebDriver": "lib/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "Justin Bishop",
+                    "email": "jubishop@gmail.com",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Anthon Pang",
+                    "email": "apang@softwaredevelopment.ca",
+                    "role": "Fork Maintainer"
+                }
+            ],
+            "description": "PHP WebDriver for Selenium 2",
+            "homepage": "http://instaclick.com/torontotechjobs/",
+            "keywords": [
+                "browser",
+                "selenium",
+                "webdriver",
+                "webtest"
+            ],
+            "time": "2013-02-21 16:05:33"
         },
         {
             "name": "jdorn/sql-formatter",
@@ -2734,17 +2960,17 @@
         },
         {
             "name": "sensio/distribution-bundle",
-            "version": "dev-master",
+            "version": "2.2.x-dev",
             "target-dir": "Sensio/Bundle/DistributionBundle",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sensio/SensioDistributionBundle.git",
-                "reference": "4a2c803dc8db79952ad5e71783c16178427bbc02"
+                "reference": "v2.3.0-BETA1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sensio/SensioDistributionBundle/zipball/4a2c803dc8db79952ad5e71783c16178427bbc02",
-                "reference": "4a2c803dc8db79952ad5e71783c16178427bbc02",
+                "url": "https://api.github.com/repos/sensio/SensioDistributionBundle/zipball/v2.3.0-BETA1",
+                "reference": "v2.3.0-BETA1",
                 "shasum": ""
             },
             "require": {
@@ -2832,12 +3058,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sensio/SensioGeneratorBundle.git",
-                "reference": "90a7f11dde3d77bdac866933976bfedb0d83044e"
+                "reference": "v2.3.0-BETA1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sensio/SensioGeneratorBundle/zipball/90a7f11dde3d77bdac866933976bfedb0d83044e",
-                "reference": "90a7f11dde3d77bdac866933976bfedb0d83044e",
+                "url": "https://api.github.com/repos/sensio/SensioGeneratorBundle/zipball/v2.3.0-BETA1",
+                "reference": "v2.3.0-BETA1",
                 "shasum": ""
             },
             "require": {
@@ -3353,12 +3579,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/fabpot/Twig.git",
-                "reference": "2acd63ae31f035084e57f0fbbd06b180507205ab"
+                "reference": "7f70bbf77581c25a5b225823e2dde578b63fddb3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/fabpot/Twig/zipball/2acd63ae31f035084e57f0fbbd06b180507205ab",
-                "reference": "2acd63ae31f035084e57f0fbbd06b180507205ab",
+                "url": "https://api.github.com/repos/fabpot/Twig/zipball/7f70bbf77581c25a5b225823e2dde578b63fddb3",
+                "reference": "7f70bbf77581c25a5b225823e2dde578b63fddb3",
                 "shasum": ""
             },
             "require": {
@@ -3367,7 +3593,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.12-dev"
+                    "dev-master": "1.13-dev"
                 }
             },
             "autoload": {
@@ -3394,7 +3620,7 @@
             "keywords": [
                 "templating"
             ],
-            "time": "2013-05-01 08:03:10"
+            "time": "2013-05-01 19:03:39"
         }
     ],
     "packages-dev": [
@@ -3413,6 +3639,7 @@
         "friendsofsymfony/twitter-bundle": 20,
         "guzzle/guzzle": 20,
         "kertz/twitteroauth": 20,
+        "behat/behat": 0,
         "knplabs/knp-markdown-bundle": 20,
         "themattharris/tmhoauth": 20
     },

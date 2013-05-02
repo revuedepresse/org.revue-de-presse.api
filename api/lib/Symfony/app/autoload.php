@@ -1,6 +1,7 @@
 <?php
 
 use Doctrine\Common\Annotations\AnnotationRegistry;
+use Doctrine\Common\Annotations\AnnotationReader;
 
 $loader = include __DIR__ . '/../vendor/autoload.php';
 
@@ -12,5 +13,13 @@ if (!function_exists('intl_get_error_code')) {
 }
 
 AnnotationRegistry::registerLoader(array($loader, 'loadClass'));
+
+# ignore behat mink annotations
+AnnotationReader::addGlobalIgnoredName('BeforeScenario');
+AnnotationReader::addGlobalIgnoredName('Given');
+AnnotationReader::addGlobalIgnoredName('When');
+AnnotationReader::addGlobalIgnoredName('Then');
+AnnotationReader::addGlobalIgnoredName('BeforeSuite');
+AnnotationReader::addGlobalIgnoredName('AfterScenario');
 
 return $loader;
