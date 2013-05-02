@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "99a3d88197db72824a0e14f6a828944f",
+    "hash": "0b4a6fdb77716af07671c6d0b47e7e65",
     "packages": [
         {
             "name": "behat/behat",
@@ -1793,13 +1793,13 @@
             "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "https://github.com/thierrymarianne/guzzle.git",
-                "reference": "e612fe1ff79936b87e4564c23098eb4a41ad9316"
+                "url": "https://github.com/guzzle/guzzle.git",
+                "reference": "6e48b4db00ba6a460378783860c0f4590231a43b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thierrymarianne/guzzle/zipball/e612fe1ff79936b87e4564c23098eb4a41ad9316",
-                "reference": "e612fe1ff79936b87e4564c23098eb4a41ad9316",
+                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/6e48b4db00ba6a460378783860c0f4590231a43b",
+                "reference": "6e48b4db00ba6a460378783860c0f4590231a43b",
                 "shasum": ""
             },
             "require": {
@@ -1822,6 +1822,7 @@
                 "guzzle/plugin-cache": "self.version",
                 "guzzle/plugin-cookie": "self.version",
                 "guzzle/plugin-curlauth": "self.version",
+                "guzzle/plugin-error-response": "self.version",
                 "guzzle/plugin-history": "self.version",
                 "guzzle/plugin-log": "self.version",
                 "guzzle/plugin-md5": "self.version",
@@ -1831,9 +1832,10 @@
                 "guzzle/stream": "self.version"
             },
             "require-dev": {
-                "doctrine/common": "*",
+                "doctrine/cache": "*",
                 "monolog/monolog": "1.*",
                 "phpunit/phpunit": "3.7.*",
+                "psr/log": "1.0.*",
                 "symfony/class-loader": "*",
                 "zend/zend-cache1": "1.12",
                 "zend/zend-log1": "1.12",
@@ -1843,7 +1845,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "3.1-dev"
+                    "dev-master": "3.4-dev"
                 }
             },
             "autoload": {
@@ -1852,6 +1854,7 @@
                     "Guzzle": "src/"
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -1869,18 +1872,15 @@
             "description": "Guzzle is a PHP HTTP client library and framework for building RESTful web service clients",
             "homepage": "http://guzzlephp.org/",
             "keywords": [
-                "HTTP client",
                 "client",
                 "curl",
                 "framework",
                 "http",
+                "http client",
                 "rest",
                 "web service"
             ],
-            "support": {
-                "source": "https://github.com/thierrymarianne/guzzle/tree/master"
-            },
-            "time": "2013-02-11 04:28:35"
+            "time": "2013-05-02 00:13:13"
         },
         {
             "name": "instaclick/php-webdriver",
@@ -2447,12 +2447,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/thierrymarianne/twitteroauth.git",
-                "reference": "113de38f29c3c8cf9896265598ed2b2e15bb760f"
+                "reference": "aeddafb60a4eed95e7652e248f1b71c39bbc298a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thierrymarianne/twitteroauth/zipball/113de38f29c3c8cf9896265598ed2b2e15bb760f",
-                "reference": "113de38f29c3c8cf9896265598ed2b2e15bb760f",
+                "url": "https://api.github.com/repos/thierrymarianne/twitteroauth/zipball/aeddafb60a4eed95e7652e248f1b71c39bbc298a",
+                "reference": "aeddafb60a4eed95e7652e248f1b71c39bbc298a",
                 "shasum": ""
             },
             "require": {
@@ -2467,7 +2467,7 @@
             "support": {
                 "source": "https://github.com/thierrymarianne/twitteroauth/tree/master"
             },
-            "time": "2013-03-08 07:36:59"
+            "time": "2013-05-02 22:10:40"
         },
         {
             "name": "knplabs/knp-markdown-bundle",
