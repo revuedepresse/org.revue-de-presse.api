@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "0b4a6fdb77716af07671c6d0b47e7e65",
+    "hash": "4b4f93789fba762fa2d0f60fd85cc1d1",
     "packages": [
         {
             "name": "behat/behat",
@@ -1790,16 +1790,16 @@
         },
         {
             "name": "guzzle/guzzle",
-            "version": "dev-master",
+            "version": "v3.3.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/guzzle.git",
-                "reference": "6e48b4db00ba6a460378783860c0f4590231a43b"
+                "reference": "v3.3.1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/6e48b4db00ba6a460378783860c0f4590231a43b",
-                "reference": "6e48b4db00ba6a460378783860c0f4590231a43b",
+                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/v3.3.1",
+                "reference": "v3.3.1",
                 "shasum": ""
             },
             "require": {
@@ -1835,7 +1835,6 @@
                 "doctrine/cache": "*",
                 "monolog/monolog": "1.*",
                 "phpunit/phpunit": "3.7.*",
-                "psr/log": "1.0.*",
                 "symfony/class-loader": "*",
                 "zend/zend-cache1": "1.12",
                 "zend/zend-log1": "1.12",
@@ -1845,7 +1844,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "3.4-dev"
+                    "dev-master": "3.3-dev"
                 }
             },
             "autoload": {
@@ -1880,7 +1879,7 @@
                 "rest",
                 "web service"
             ],
-            "time": "2013-05-02 00:13:13"
+            "time": "2013-03-10 23:05:38"
         },
         {
             "name": "instaclick/php-webdriver",
@@ -3637,7 +3636,6 @@
         "friendsofsymfony/rest-bundle": 20,
         "friendsofsymfony/user-bundle": 20,
         "friendsofsymfony/twitter-bundle": 20,
-        "guzzle/guzzle": 20,
         "kertz/twitteroauth": 20,
         "behat/behat": 0,
         "knplabs/knp-markdown-bundle": 20,
