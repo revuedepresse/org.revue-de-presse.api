@@ -76,7 +76,6 @@ class Version20130501112348 extends AbstractMigration
         $this->abortIf($this->connection->getDatabasePlatform()->getName() != "mysql", "Migration can only be executed safely on 'mysql'.");
         
         $this->addSql("
-
 CREATE TABLE IF NOT EXISTS weaving_arc (
   arc_id int(11) NOT NULL AUTO_INCREMENT,
   arc_status tinyint(4) NOT NULL DEFAULT '1',
