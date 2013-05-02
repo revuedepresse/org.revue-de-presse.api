@@ -75,6 +75,89 @@ class Version20130501112348 extends AbstractMigration
         // this down() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() != "mysql", "Migration can only be executed safely on 'mysql'.");
         
+        $this->addSql("
+
+CREATE TABLE IF NOT EXISTS weaving_arc (
+  arc_id int(11) NOT NULL AUTO_INCREMENT,
+  arc_status tinyint(4) NOT NULL DEFAULT '1',
+  arc_type int(11) NOT NULL,
+  arc_source int(11) NOT NULL,
+  arc_destination int(11) NOT NULL,
+  PRIMARY KEY (arc_id),
+  UNIQUE KEY arc_type (arc_type,arc_source,arc_destination),
+  KEY etp_id (arc_type)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=12516 ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table weaving_edge
+--
+
+CREATE TABLE IF NOT EXISTS weaving_edge (
+  edg_id int(11) NOT NULL AUTO_INCREMENT,
+  ety_id mediumint(9) NOT NULL COMMENT 'type of entity',
+  edg_status tinyint(4) NOT NULL DEFAULT '1',
+  edg_key int(11) NOT NULL,
+  PRIMARY KEY (edg_id),
+  UNIQUE KEY edg_type (ety_id,edg_key)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=19646 ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table weaving_entity
+--
+
+CREATE TABLE IF NOT EXISTS weaving_entity (
+  ety_id int(11) NOT NULL AUTO_INCREMENT,
+  ety_name varchar(255) COLLATE utf8_unicode_ci NOT NULL,
+  ety_date_creation timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  ety_date_modification timestamp NOT NULL DEFAULT '0000-00-00 00:00:00',
+  PRIMARY KEY (ety_id),
+  UNIQUE KEY ety_name (ety_name)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=149 ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table weaving_entity_type
+--
+
+CREATE TABLE IF NOT EXISTS weaving_entity_type (
+  etp_id int(11) NOT NULL AUTO_INCREMENT,
+  ety_id int(11) NOT NULL COMMENT 'entity identifier',
+  etp_status tinyint(1) NOT NULL DEFAULT '1' COMMENT 'active or not',
+  etp_default tinyint(1) DEFAULT NULL COMMENT 'marker for setting one type per entity as default type',
+  etp_index tinyint(1) NOT NULL COMMENT 'sorting index',
+  etp_name varchar(100) COLLATE utf8_unicode_ci NOT NULL COMMENT 'denomination of a kind of entity',
+  etp_value varchar(100) COLLATE utf8_unicode_ci NOT NULL DEFAULT '0' COMMENT 'value corresponding to an entity type',
+  etp_description text COLLATE utf8_unicode_ci NOT NULL COMMENT 'short description of an entity type',
+  PRIMARY KEY (etp_id),
+  UNIQUE KEY type (ety_id,etp_name,etp_value)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=228 ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table weaving_event
+--
+
+CREATE TABLE IF NOT EXISTS weaving_event (
+  evt_id int(11) NOT NULL AUTO_INCREMENT,
+  ety_id int(11) NOT NULL COMMENT 'Entity responsible for the event occurrence',
+  etp_id int(1) NOT NULL,
+  evt_occurrence int(11) DEFAULT '1',
+  evt_source int(11) NOT NULL,
+  evt_target int(11) NOT NULL,
+  evt_success tinyint(1) DEFAULT NULL COMMENT 'success reporting value',
+  evt_date timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  evt_date_last_occurrence datetime DEFAULT NULL,
+  PRIMARY KEY (evt_id),
+  KEY evt_source (evt_source)
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci AUTO_INCREMENT=7160 ;        
+        ");
+
         $this->addSql("DROP TABLE IF EXISTS weaving_github_repositories");
         $this->addSql("DROP TABLE IF EXISTS weaving_json");
         $this->addSql("DROP TABLE IF EXISTS weaving_twitter_user_stream");
@@ -84,16 +167,11 @@ class Version20130501112348 extends AbstractMigration
         $this->addSql("DROP TABLE IF EXISTS weaving_facebook_video");
         $this->addSql("DROP TABLE IF EXISTS weaving_perspective");
         $this->addSql("DROP TABLE IF EXISTS weaving_user");
-        $this->addSql("DROP TABLE IF EXISTS weaving_arc");
         $this->addSql("DROP TABLE IF EXISTS weaving_author");
         $this->addSql("DROP TABLE IF EXISTS weaving_contact");
         $this->addSql("DROP TABLE IF EXISTS weaving_content");
         $this->addSql("DROP TABLE IF EXISTS weaving_content_type");
-        $this->addSql("DROP TABLE IF EXISTS weaving_edge");
-        $this->addSql("DROP TABLE IF EXISTS weaving_entity");
         $this->addSql("DROP TABLE IF EXISTS weaving_entity_table");
-        $this->addSql("DROP TABLE IF EXISTS weaving_entity_type");
-        $this->addSql("DROP TABLE IF EXISTS weaving_event");
         $this->addSql("DROP TABLE IF EXISTS weaving_feed");
         $this->addSql("DROP TABLE IF EXISTS weaving_feedback");
         $this->addSql("DROP TABLE IF EXISTS weaving_file");
