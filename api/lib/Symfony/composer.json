@@ -10,16 +10,13 @@
         {
             "type":"vcs",
             "url":"git@github.com:thierrymarianne/FOSTwitterBundle.git"
-        },
-        {
+        }, {
             "type":"vcs",
             "url":"git@github.com:thierrymarianne/twitteroauth.git"
-        },
-        {
+        }, {
             "type":"vcs",
             "url":"git@github.com:thierrymarianne/tmhoauth.git"
-        },
-        {
+        }, {
             "type":"vcs",
             "url":"git@github.com:thierrymarianne/guzzle.git"
         }
