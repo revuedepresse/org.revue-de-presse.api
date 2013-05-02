@@ -5,9 +5,12 @@
 
 *~*
 
+/api/lib/Symfony/build/
+
 composer.phar
 
 /api/lib/Symfony/bin/behat
+behat_report.html
 
 /check_wtw.php
 
