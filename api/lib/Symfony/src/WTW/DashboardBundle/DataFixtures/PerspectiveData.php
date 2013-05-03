@@ -9,7 +9,10 @@ use WTW\DashboardBundle\Entity\Perspective,
 
 class PerspectiveData implements FixtureInterface
 {
-    const DEFAULT_QUERY = 'SELECT * FROM perspective';
+    const DEFAULT_QUERY = '# Update administration panel
+SELECT per_id as id, per_name as name, per_value AS pre_sql, per_name as hid_name, per_value as btn_sql
+FROM weaving_perspective
+ORDER BY per_id DESC';
 
     /**
      * {@inheritDoc}
