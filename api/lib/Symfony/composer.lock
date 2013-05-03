@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "65102e7237cfac6b89244ce967a90c7f",
+    "hash": "f0694e5523d6f93f71c17a9f22bc5bb7",
     "packages": [
         {
             "name": "behat/behat",
@@ -3630,14 +3630,14 @@
     ],
     "minimum-stability": "dev",
     "stability-flags": {
-        "doctrine/doctrine-migrations-bundle": 20,
+        "behat/behat": 0,
         "doctrine/doctrine-fixtures-bundle": 20,
+        "doctrine/doctrine-migrations-bundle": 20,
         "fabpot/goutte": 20,
         "friendsofsymfony/rest-bundle": 20,
-        "friendsofsymfony/user-bundle": 20,
         "friendsofsymfony/twitter-bundle": 20,
+        "friendsofsymfony/user-bundle": 20,
         "kertz/twitteroauth": 20,
-        "behat/behat": 0,
         "knplabs/knp-markdown-bundle": 20,
         "themattharris/tmhoauth": 20
     },
