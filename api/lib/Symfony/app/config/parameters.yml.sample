@@ -1,4 +1,6 @@
 parameters:
+    app_version: 0.1
+
     api_facebook_host_port:                 %api.facebook.protocol%%api.facebook.host_port%
 
     api_github_host_port:                   %api.github.protocol%%api.github.host_port%
