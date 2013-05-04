@@ -15,24 +15,19 @@ _configurator:
 
 wtw_api_data_mining:
     resource:     "@WTWAPIDataMiningBundle/Resources/config/routing.yml"
-    prefix:       /
 
 wtw_api_facebook:
     resource:     "@WTWAPIFacebookBundle/Resources/config/routing.yml"
-    prefix:       /
 
 wtw_api_google_drive:
     resource:     "@WTWAPIGoogleDriveBundle/Controller"
     type:         annotation
-    prefix:       /
 
 wtw_dashboard:
     resource:     "@WTWDashboardBundle/Controller"
     type:         annotation
-    prefix:       /
 
 wtw_documentation_markdown:
     resource:     "@WTWDocumentationMarkdownBundle/Controller"
     type:         annotation
-    prefix:       /
 
