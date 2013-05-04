@@ -3,25 +3,20 @@ fos_js_routing:
 
 wtw_api_data_mining:
     resource:     "@WTWAPIDataMiningBundle/Resources/config/routing.yml"
-    prefix:       /%app_version%
 
 wtw_api_facebook:
     resource: "@WTWAPIFacebookBundle/Resources/config/routing.yml"
-    prefix:   /%app_version%
 
 wtw_api_google_drive:
     resource: "@WTWAPIGoogleDriveBundle/Controller"
-    prefix:   /%app_version%
     type:     annotation
 
 wtw_dashboard:
     resource: "@WTWDashboardBundle/Controller/"
-    prefix:   /%app_version%
     type:     annotation
 
 wtw_documentation_markdown:
     resource: "@WTWDocumentationMarkdownBundle/Controller"
-    prefix:   /%app_version%
     type:     annotation
 
 fos_user_security:
