@@ -10,6 +10,7 @@
 composer.phar
 
 /api/lib/Symfony/bin/behat
+/api/lib/Symfony/behat
 behat_report.html
 
 /check_wtw.php
