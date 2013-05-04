@@ -195,8 +195,8 @@ class Deployer extends I18n
                         ! in_array($_SERVER['SERVER_NAME'], array(
                             '## FILL HOSTNAME ##', '## FILL HOSTNAME ##'
                         ))
-                    ) && ! $stable_wtw_org_detected
-                    && ! $unstable_wtw_org_detected
+                    ) && ! $staging_wtw_org_detected
+                    && ! $master_wtw_org_detected
 				)
 			)
 			{
