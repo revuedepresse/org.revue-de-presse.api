@@ -7,6 +7,10 @@
 
 /api/lib/Symfony/build/
 
+# api :: twitter
+api/.htaccess
+
+# dependencies management
 composer.phar
 
 /api/lib/Symfony/bin/behat
