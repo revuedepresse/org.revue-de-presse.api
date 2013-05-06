@@ -562,9 +562,29 @@ class Tokens_Stream extends \Alpha
          */
         $output = array();
 
-        $phpBinary = '/opt/local/php/bin/php';
-        if (!file_exists($phpBinary)) {
-            $phpBinary = '/opt/local/php/cgi/bin/php';
+        switch (true) {
+
+            case file_exists('/opt/local/php/bin/php'):
+
+                $phpBinary = '/opt/local/php/bin/php';
+
+                break;
+
+            case file_exists('/opt/local/php/cgi/bin/php'):
+
+                $phpBinary = '/opt/local/php/cgi/bin/php';
+
+                break;
+
+            case file_exists('/opt/local/php/fpm/bin/php'):
+
+                $phpBinary = '/opt/local/php/fpm/bin/php';
+
+                break;
+
+            default:
+
+                $phpBinary = '/usr/bin/php';
         }
 
         if (file_exists($phpBinary)) {
