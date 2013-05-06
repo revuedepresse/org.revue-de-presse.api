@@ -3,6 +3,10 @@
 namespace WTW\DashboardBundle\DBAL;
 
 use Doctrine\ORM\EntityManager;
+use WTW\DashboardBundle\Validator\Constraints\Query;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Translation\Translator,
+    Symfony\Component\Validator\Validator;
 
 /**
  * Class Connection
@@ -26,19 +30,31 @@ class Connection
 
     public $port;
 
+    public $username;
+
     public $logger;
 
     public $password;
 
+    /**
+     * @var $entityManager EntityManager
+     */
     public $entityManager;
 
+    /**
+     * @var $translator Translator
+     */
     public $translator;
 
-    public $username;
+    /**
+     * @var $validator Validator
+     */
+    public $validator;
 
-    public function __construct($logger)
+    public function __construct(Validator $validator, LoggerInterface $logger)
     {
         $this->logger = $logger;
+        $this->validator = $validator;
     }
 
     public function getWrappedConnection()
@@ -207,7 +223,7 @@ QUERY;
      */
     public function executeQuery($sql)
     {
-        $query          = new \stdClass;
+        $query       = new \stdClass;
         $query->error   = null;
         $query->records = [];
         $query->sql = $sql;
@@ -289,24 +305,9 @@ QUERY;
      */
     public function allowedQuery($sql)
     {
-        return
-            (strlen($sql) > 0) &&
-            (
-                (false === strpos(strtolower($sql), 'delete')) ||
-                (
-                    (1 === substr_count(strtolower($sql), 'delete')) &&
-                    (false !== strpos(strtolower($sql), 'delete from tmp_'))
-                )
-            ) &&
-            (false === strpos(strtolower($sql), 'truncate')) &&
-            (
-                (false === strpos(strtolower($sql), 'drop')) ||
-                (1 === substr_count(strtolower($sql), 'drop')) && (
-                    (false !== strpos(strtolower($sql), 'drop table tmp_')) ||
-                    (false !== strpos(strtolower($sql), 'drop table if exists tmp_'))
-                )
-            ) &&
-            (false === strpos(strtolower($sql), 'alter')) &&
-            (false === strpos(strtolower($sql), 'grant'));
+        $queryConstraint = new Query();
+        $errorList = $this->validator->validateValue($sql, $queryConstraint);
+
+        return count($errorList) === 0;
     }
 }
