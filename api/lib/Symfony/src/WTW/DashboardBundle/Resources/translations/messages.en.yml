@@ -1,3 +1,10 @@
+constraint_violation.query.alter: ALTER queries are not allowed.
+constraint_violation.query.grant: GRANT privileges queries are not allowed.
+constraint_violation.query.invalid: An invalid query has been detected.
+constraint_violation.query.delete: DELETE queries are not allowed.
+constraint_violation.query.non_empty: Empty queries are allowed.
+constraint_violation.query.truncate: TRUNCATE queries are not allowed.
+constraint_violation.query.drop: DROP queries are not allowed.
 requirement_valid_query: Please provide us with a valid query
 sorry: Sorry...
 title_documents: Data library

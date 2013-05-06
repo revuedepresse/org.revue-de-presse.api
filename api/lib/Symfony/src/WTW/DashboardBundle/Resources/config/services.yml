@@ -6,6 +6,7 @@ services:
     wtw.dashboard.dbal_connection:
         class:  %wtw.dashboard.dbal_connection.class%
         arguments:
+            - @validator
             - @logger
         calls:
             - [ setCharset, [ %database_charset% ] ]
@@ -24,11 +25,11 @@ services:
             validator: "@validator"
             session: "@session"
     wtw.dashboard.query_validator:
-        class: WTW\DashboardBundle\Validator\Constraint\PerspectiveValidator
+        class: WTW\DashboardBundle\Validator\Constraints\QueryValidator
         calls:
             - [ setTranslator, [ @translator ] ]
         tags:
-            - { name: validator.constraint_validator, alias: wtw.dashboard.validator.perspective }
+            - { name: validator.constraint_validator, alias: wtw.validator.query }
     twig.extension.text:
         class: Twig_Extensions_Extension_Text
         tags:
