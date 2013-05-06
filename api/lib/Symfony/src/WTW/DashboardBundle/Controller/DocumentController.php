@@ -84,7 +84,7 @@ class DocumentController extends Controller
         /**
          * @var $connection Connection
          */
-        $connection = $this->get('dashboard.dbal_connection');
+        $connection = $this->get('wtw.dashboard.dbal_connection');
         $defaultQuery = $connection->getDefaultQuery();
         $sql = 'SELECT 1';
 

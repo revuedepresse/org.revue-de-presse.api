@@ -16,7 +16,7 @@ security:
             chain:
                 providers: [in_memory, fos_user]
         fos_twitter:
-            id: dashboard.twitter_user
+            id: wtw.dashboard.twitter_user
         in_memory:
             memory:
                 users:

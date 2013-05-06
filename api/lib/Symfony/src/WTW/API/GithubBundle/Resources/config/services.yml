@@ -1,11 +1,11 @@
 parameters:
-    api.github.access.token:                    ## FILL ME ##
-    api.github.client.class:                    WTW\API\GithubBundle\Client
-    api.github.client.id:                       ## FILL ME ##
-    api.github.client.secret:                   ## FILL ME ##
-    api.github.repos_serializer_command.class:  WTW\API\GithubBundle\Command\SerializeStarredRepositoriesCommand
-    api.github.user_agent:                      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_3) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.65 Safari/537.31"
-    api.github.sitemap:
+    wtw.api.github.access.token:                    ## FILL ME ##
+    wtw.api.github.client.class:                    WTW\API\GithubBundle\Client
+    wtw.api.github.client.id:                       ## FILL ME ##
+    wtw.api.github.client.secret:                   ## FILL ME ##
+    wtw.api.github.repos_serializer_command.class:  WTW\API\GithubBundle\Command\SerializeStarredRepositoriesCommand
+    wtw.api.github.user_agent:                      "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_8_3) AppleWebKit/537.31 (KHTML, like Gecko) Chrome/26.0.1410.65 Safari/537.31"
+    wtw.api.github.sitemap:
         url:
             base:                               https://api.github.com
             main:                               https://github.com
@@ -18,19 +18,19 @@ parameters:
             get_repos:                          /user/repos
             get_user:                           /user
             get_starred:                        /users/:user/starred
-    logger.dumper.class:                        WTW\Legacy\ProviderBundle\Logger
+    wtw.logger.dumper.class:                    WTW\Legacy\ProviderBundle\Logger
 
 services:
-    api.github.client:
-        class:  %api.github.client.class%
+    wtw.api.github.client:
+        class:  %wtw.api.github.client.class%
         arguments:
-          - ?@logger.dumper
+          - ?@wtw.logger.dumper
         calls:
-          - [ setAccessToken, [ %api.github.access.token% ] ]
-          - [ setClientSecret, [ %api.github.client.secret% ] ]
-          - [ setClientId, [ %api.github.client.id% ] ]
-          - [ setJsonStore, [ @provider.store.json ] ]
-          - [ setSiteMap, [ %api.github.sitemap% ] ]
-          - [ setUserAgent, [ %api.github.user_agent% ] ]
-    logger.dumper:
-        class:  %logger.dumper.class%
+          - [ setAccessToken, [ %wtw.api.github.access.token% ] ]
+          - [ setClientSecret, [ %wtw.api.github.client.secret% ] ]
+          - [ setClientId, [ %wtw.api.github.client.id% ] ]
+          - [ setJsonStore, [ @wtw.provider.store.json ] ]
+          - [ setSiteMap, [ %wtw.api.github.sitemap% ] ]
+          - [ setUserAgent, [ %wtw.api.github.user_agent% ] ]
+    wtw.logger.dumper:
+        class:  %wtw.logger.dumper.class%
