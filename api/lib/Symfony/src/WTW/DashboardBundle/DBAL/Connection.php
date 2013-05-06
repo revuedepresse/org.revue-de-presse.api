@@ -212,7 +212,7 @@ QUERY;
         $query->records = [];
         $query->sql = $sql;
 
-        if ($this->idempotentQuery($query->sql)) {
+        if ($this->allowedQuery($query->sql)) {
             try {
                 if ($this->pdoSafe($query->sql)) {
                     $query->records = $this->delegateQueryExecution($query->sql);
@@ -287,7 +287,7 @@ QUERY;
      *
      * @return bool
      */
-    public function idempotentQuery($sql)
+    public function allowedQuery($sql)
     {
         return
             (strlen($sql) > 0) &&

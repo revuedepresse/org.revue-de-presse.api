@@ -63,7 +63,7 @@ class SerializeStarredRepositoriesCommand extends ContainerAwareCommand
     {
         if (is_null($this->client)) {
             $container = $this->getContainer();
-            $client = $container->get('api.github.client');
+            $client = $container->get('wtw.api.github.client');
         } else {
             $client = $this->client;
         }

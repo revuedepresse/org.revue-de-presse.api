@@ -51,7 +51,7 @@ class SerializeUserStreamCommand extends ContainerAwareCommand
     {
         $container = $this->getContainer();
 
-        $this->feedReader = $container->get('provider.feed_reader');
+        $this->feedReader = $container->get('wtw.provider.feed_reader');
         $this->setCredentials($input);
         $this->feedReader->setOutputInterface($output);
         $this->feedReader->getUserStream();

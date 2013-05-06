@@ -22,8 +22,7 @@ swiftmailer:
     disable_delivery: true
 
 parameters:
-    anonymous_access:                   true
-    data_mining.command_provider.class: WTW\API\DataMiningBundle\Command\Tester\TransformationCommandProvider
+    anonymous_access:  true
     database_charset:  UTF8
     database_driver:   pdo_mysql
     database_host:     %database_host_test%
@@ -31,9 +30,10 @@ parameters:
     database_name:     %database_name_test%
     database_user:     %database_user_test%
     database_password: %database_password_test%
+    wtw.data_mining.command_provider.class: WTW\API\DataMiningBundle\Command\Tester\TransformationCommandProvider
 
 services:
-    data_mining.command_provider:
-        class: %data_mining.command_provider.class%
+    wtw.data_mining.command_provider:
+        class: %wtw.data_mining.command_provider.class%
         calls:
           - [ setContainer, [ @service_container ] ]

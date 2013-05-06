@@ -1,35 +1,41 @@
 parameters:
-    dashboard.dbal_connection.class:  WTW\DashboardBundle\DBAL\Connection
-    dashboard.bower_config_dir:       %kernel.root_dir%/Resources
+    wtw.dashboard.dbal_connection.class:  WTW\DashboardBundle\DBAL\Connection
+    wtw.dashboard.bower_config_dir:       %kernel.root_dir%/Resources
 
 services:
-    dashboard.dbal_connection:
-        class:  %dashboard.dbal_connection.class%
+    wtw.dashboard.dbal_connection:
+        class:  %wtw.dashboard.dbal_connection.class%
         arguments:
-          - @logger
+            - @logger
         calls:
-          - [ setCharset, [ %database_charset% ] ]
-          - [ setHost, [ %database_host% ] ]
-          - [ setUsername, [ %database_user% ] ]
-          - [ setPassword, [ %database_password% ] ]
-          - [ setPort, [ %database_port% ] ]
-          - [ setDatabase, [ %database_name% ] ]
-          - [ setEntityManager, [ @doctrine.orm.entity_manager ] ]
-          - [ setTranslator, [ @translator ] ]
-    dashboard.twitter_user:
+            - [ setCharset, [ %database_charset% ] ]
+            - [ setHost, [ %database_host% ] ]
+            - [ setUsername, [ %database_user% ] ]
+            - [ setPassword, [ %database_password% ] ]
+            - [ setPort, [ %database_port% ] ]
+            - [ setDatabase, [ %database_name% ] ]
+            - [ setEntityManager, [ @doctrine.orm.entity_manager ] ]
+            - [ setTranslator, [ @translator ] ]
+    wtw.dashboard.twitter_user:
         class: WTW\DashboardBundle\Security\User\Provider\TwitterUserProvider
         arguments:
             twitter_oauth: "@fos_twitter.api"
             userManager: "@fos_user.user_manager"
             validator: "@validator"
             session: "@session"
+    wtw.dashboard.query_validator:
+        class: WTW\DashboardBundle\Validator\Constraint\PerspectiveValidator
+        calls:
+            - [ setTranslator, [ @translator ] ]
+        tags:
+            - { name: validator.constraint_validator, alias: wtw.dashboard.validator.perspective }
     twig.extension.text:
         class: Twig_Extensions_Extension_Text
         tags:
-          - { name: twig.extension }
+            - { name: twig.extension }
     sp_bower.dependency_cache_warmer:
         class: %sp_bower.dependency_cache_warmer.class%
         arguments:
-          - @sp_bower.bower_manager
-          - @sp_bower.bower
-          - %sp_bower.install_on_warmup%
+            - @sp_bower.bower_manager
+            - @sp_bower.bower
+            - %sp_bower.install_on_warmup%
