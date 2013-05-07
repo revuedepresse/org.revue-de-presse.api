@@ -27,15 +27,15 @@ security:
             id: fos_user.user_provider.username
 
     firewalls:
-        sign_in_with_twitter:
-            context:                  weaving_the_web
-            pattern:                  ^/twitter
-            fos_twitter:
-                login_path:           /twitter/connect
-                check_path:           /twitter/login_check
-                provider:             fos_twitter
-            logout:                   true
-            anonymous:                true
+#        sign_in_with_twitter:
+#            context:                  weaving_the_web
+#            pattern:                  ^/twitter
+#            fos_twitter:
+#                login_path:           /twitter/connect
+#                check_path:           /twitter/login_check
+#                provider:             fos_twitter
+#            logout:                   true
+#            anonymous:                true
 
         homepage:
             context:                  weaving_the_web
