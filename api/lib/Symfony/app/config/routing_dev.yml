@@ -30,4 +30,3 @@ wtw_dashboard:
 wtw_documentation_markdown:
     resource:     "@WTWDocumentationMarkdownBundle/Controller"
     type:         annotation
-
