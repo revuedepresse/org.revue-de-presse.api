@@ -4,8 +4,10 @@ Weaving the web Experiments
 1) Sitemap
 --------------------------------
 
-* JSON store inspection - ([documentation]({{ baseurl }}/cid/0/1/1))
-* Documentation - ([documentation]({{ baseurl }}/cid/doc/readme))
+* Documentation - ([documentation]({{ baseurl }}/doc/readme))
+* JSON store inspection - ([documentation]({{ baseurl }}/0/1/1))
+* Social Media Dashboard - ([dashboard]({{ baseurl }}/documents))
+* Sign in with Twitter - ([sign in]({{ baseurl }}/twitter/connect))
 
 2) Tests
 --------------------------------
