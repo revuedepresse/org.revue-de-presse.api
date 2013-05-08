@@ -29,7 +29,9 @@
                 {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
                     <a class="nav" href="{{ path('fos_user_security_logout') }}">{{ 'layout.logout'|trans({}, 'FOSUserBundle') }}</a>
                 {% else %}
+                    {% block navigation_login %}
                     <a class="nav" href="{{ path('fos_user_security_login') }}">{{ 'layout.login'|trans({}, 'FOSUserBundle') }}</a>
+                    {%  endblock navigation_login %}
                 {% endif %}
             </li>
         </ul>
