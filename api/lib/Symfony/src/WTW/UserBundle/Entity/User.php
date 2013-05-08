@@ -32,7 +32,7 @@ class User extends BaseUSer
     /**
      * @var string
      *
-     * @ORM\Column(name="usr_twitter_username", type="string", nullable=false)
+     * @ORM\Column(name="usr_twitter_username", type="string", nullable=true)
      */
     protected $twitter_username;
 
@@ -239,19 +239,6 @@ class User extends BaseUSer
     public function getStatus()
     {
         return $this->status;
-    }
-
-    /**
-     * Set userName
-     *
-     * @param string $userName
-     * @return User
-     */
-    public function setUserName($userName)
-    {
-        $this->userName = $userName;
-    
-        return $this;
     }
 
     /**
@@ -515,19 +502,6 @@ class User extends BaseUSer
     }
 
     /**
-     * Set username
-     *
-     * @param string $username
-     * @return User
-     */
-    public function setUsername($username)
-    {
-        $this->username = $username;
-    
-        return $this;
-    }
-
-    /**
      * Set usernameCanonical
      *
      * @param string $usernameCanonical
@@ -643,29 +617,6 @@ class User extends BaseUSer
     }
 
     /**
-     * Set credentialsExpired
-     *
-     * @param boolean $credentialsExpired
-     * @return User
-     */
-    public function setCredentialsExpired($credentialsExpired)
-    {
-        $this->credentialsExpired = $credentialsExpired;
-    
-        return $this;
-    }
-
-    /**
-     * Get credentialsExpired
-     *
-     * @return boolean 
-     */
-    public function getCredentialsExpired()
-    {
-        return $this->credentialsExpired;
-    }
-
-    /**
      * Set confirmationToken
      *
      * @param string $confirmationToken
@@ -689,12 +640,48 @@ class User extends BaseUSer
     }
 
     /**
+     * Set username
+     *
+     * @param string $username
+     * @return User
+     */
+    public function setUsername($username)
+    {
+        $this->username = $username;
+    
+        return $this;
+    }
+
+    /**
+     * Set credentialsExpired
+     *
+     * @param boolean $credentialsExpired
+     * @return User
+     */
+    public function setCredentialsExpired($credentialsExpired)
+    {
+        $this->credentialsExpired = $credentialsExpired;
+    
+        return $this;
+    }
+
+    /**
+     * Get credentialsExpired
+     *
+     * @return boolean 
+     */
+    public function getCredentialsExpired()
+    {
+        return $this->credentialsExpired;
+    }
+
+    /**
      * Set expiresAt
      *
      * @param \DateTime $expiresAt
      * @return User
      */
-    public function setExpiresAt($expiresAt)
+    public function setExpiresAt(\DateTime $expiresAt = null)
     {
         $this->expiresAt = $expiresAt;
     
@@ -717,7 +704,7 @@ class User extends BaseUSer
      * @param \DateTime $lastLogin
      * @return User
      */
-    public function setLastLogin($lastLogin)
+    public function setLastLogin(\DateTime $lastLogin = null)
     {
         $this->lastLogin = $lastLogin;
     
@@ -740,7 +727,7 @@ class User extends BaseUSer
      * @param \DateTime $passwordRequestedAt
      * @return User
      */
-    public function setPasswordRequestedAt($passwordRequestedAt)
+    public function setPasswordRequestedAt(\DateTime $passwordRequestedAt = null)
     {
         $this->passwordRequestedAt = $passwordRequestedAt;
     
@@ -763,7 +750,7 @@ class User extends BaseUSer
      * @param \DateTime $credentialsExpireAt
      * @return User
      */
-    public function setCredentialsExpireAt($credentialsExpireAt)
+    public function setCredentialsExpireAt(\DateTime $credentialsExpireAt = null)
     {
         $this->credentialsExpireAt = $credentialsExpireAt;
     
