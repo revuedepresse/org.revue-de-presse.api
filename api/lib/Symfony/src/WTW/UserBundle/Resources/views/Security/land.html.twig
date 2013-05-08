@@ -6,6 +6,15 @@
 {% set title = 'title_homepage' %}
 {% endif %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    {% stylesheets
+        "@WTWUserBundle/Resources/public/css/land.css"
+        filter='cssrewrite'%}
+        <link rel="stylesheet" href="{{ asset_url }}" />
+    {% endstylesheets %}
+{% endblock %}
+
 {% block title %}{{ title|trans }}{% endblock %}
 
 {% block body %}
