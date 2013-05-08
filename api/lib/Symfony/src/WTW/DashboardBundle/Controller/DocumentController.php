@@ -20,16 +20,6 @@ use WTW\DashboardBundle\DBAL\Connection,
 class DocumentController extends Controller
 {
     /**
-     * @Extra\Route("/", name="wtw_dashboard_homepage")
-     */
-    public function homepageAction()
-    {
-        $showDocumentsUri = $this->get('router')->generate('wtw_dashboard_show_documents');
-
-        return new RedirectResponse($showDocumentsUri);
-    }
-
-    /**
      * @Extra\Route("/twitter/connect", name="wtw_dashboard_twitter_connect")
      */
     public function connectTwitterAction()
