@@ -1,6 +1,6 @@
 parameters:
-    wtw.dashboard.dbal_connection.class:  WTW\DashboardBundle\DBAL\Connection
-    wtw.dashboard.bower_config_dir:       %kernel.root_dir%/Resources
+    wtw.dashboard.dbal_connection.class: WTW\DashboardBundle\DBAL\Connection
+    wtw.dashboard.bower_config_dir:      %kernel.root_dir%/Resources
 
 services:
     wtw.dashboard.dbal_connection:
