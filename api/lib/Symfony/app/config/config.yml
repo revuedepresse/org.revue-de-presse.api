@@ -74,6 +74,7 @@ doctrine:
                     WTWCodeGenerationAnalysisBundle: ~
                     WTWDashboardBundle: ~
                     WTWLegacyProviderBundle: ~
+                    WTWUserBundle: ~
             admin:
                 connection: admin
                 mappings:
@@ -82,6 +83,7 @@ doctrine:
                     WTWCodeGenerationAnalysisBundle: ~
                     WTWDashboardBundle: ~
                     WTWLegacyProviderBundle: ~
+                    WTWUserBundle: ~
             test_mysql:
                 connection: test_mysql
                 mappings:
