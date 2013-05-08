@@ -27,7 +27,8 @@
 
             {% block login_form %}{% endblock %}
 
-            {% block registration %}{% endblock %}
+            {% if not is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+                {% block registration_form %}{% endblock %}
             {% endif %}
         </div>
     <div>
