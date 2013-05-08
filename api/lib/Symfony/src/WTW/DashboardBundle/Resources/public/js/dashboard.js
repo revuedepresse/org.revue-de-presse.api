@@ -33,6 +33,7 @@ $queries.bind('click', function(event) {
 
     if (
         (trimmedSql.indexOf('# show') == 0) ||
+        (trimmedSql.indexOf('# count') == 0) ||
         (trimmedSql.indexOf('select') == 0) ||
         (trimmedSql.indexOf('create table') == 0) ||
         (trimmedSql.indexOf('drop table') == 0)) {
