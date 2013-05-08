@@ -1,0 +1,39 @@
+{% extends "WTWUserBundle:Security:land.html.twig" %}
+
+{% trans_default_domain 'FOSUserBundle' %}
+
+{% set title = 'title_sign_in_with_wtw' %}
+{% block title %}{{ title|trans({}, 'security') }}{% endblock %}
+{% block main_title %}{{ title|trans({}, 'security') }}{% endblock %}
+
+{% block login_form %}
+{% if error %}
+    <div>{{ error|trans }}</div>
+{% endif %}
+
+{% block navigation_login %}
+{% endblock %}
+
+<form action="{{ path("fos_user_security_check") }}" method="post">
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />
+
+    <div class="row">
+        <label for="username">{{ 'security.login.username'|trans }}</label>
+        <input type="text" id="username" name="_username" value="{{ last_username }}" required="required" />
+    </div>
+
+    <div class="row">
+        <label for="password">{{ 'security.login.password'|trans }}</label>
+        <input type="password" id="password" name="_password" required="required" />
+    </div>
+
+    <div class="row">
+
+        <input type="checkbox" id="remember_me" name="_remember_me" value="on" />
+        <label for="remember_me" class="label">{{ 'security.login.remember_me'|trans }}</label>
+    </div>
+    <div class="row">
+        <button type="submit" id="_submit" name="_submit" class="btn">{{ 'security.login.submit'|trans }}</button>
+    </div>
+</form>
+{% endblock login_form %}
