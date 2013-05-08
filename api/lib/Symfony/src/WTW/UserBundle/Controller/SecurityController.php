@@ -26,31 +26,4 @@ class SecurityController extends BaseController implements LogoutHandlerInterfac
     {
         $request->getSession()->set('requested_logout', true);
     }
-
-    /**
-     * @Extra\Route("/wtw/login", name="wtw_dashboard_login")
-     */
-    public function loginAction(Request $request)
-    {
-        return parent::loginAction($request);
-    }
-
-//    /**
-//     * @Extra\Route("/logout", name="wtw_dashboard_logout_wtw")
-//     */
-//    public function logoutAction()
-//    {
-//        re
-//        $securityContext = $this->container->get('security_context');
-//        $securityContext->setToken(null);
-//
-//        $request = $this->container->get('request');
-//        $session = $request->getSession();
-//        $session->invalidate();
-//
-//        $router = $this->container->get('router');
-//        $homepageUrl = $router->generate('fos_user_registration_register');
-//
-//        return new RedirectResponse($homepageUrl, 302);
-//    }
 }
