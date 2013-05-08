@@ -27,28 +27,40 @@ security:
             id: fos_user.user_provider.username
 
     firewalls:
-#        sign_in_with_twitter:
-#            context:                  weaving_the_web
-#            pattern:                  ^/twitter
+#        twitter_connect:
+#            context:              weaving_the_web
+#            pattern:              ^/twitter
 #            fos_twitter:
-#                login_path:           /twitter/connect
-#                check_path:           /twitter/login_check
-#                provider:             fos_twitter
-#            logout:                   true
-#            anonymous:                true
+#                login_path:       /twitter/connect
+#                check_path:       /twitter/login_check
+#                provider:         fos_twitter
+#            logout:               true
+#            anonymous:            true
 
-        homepage:
-            context:                  weaving_the_web
-            pattern:                  ^/
+        basic_connect:
+            context:              weaving_the_web
+            pattern:              ^/
             http_basic:
-                realm:                "Please enter your login information for Weaving the Web"
-                provider:             chain_provider
-            anonymous:                %anonymous_access%
-            logout:                   true
+                realm:            "Please enter your login information for Weaving the Web"
+                provider:         chain_provider
+            anonymous:            true
+            logout:
+                path:             /basic/logout
+                target:           /
+                handlers:         [ wtw.user.security_controller ]
+
+        wtw_connect:
+            context:              weaving_the_web
+            pattern:              ^/wtw
+            form_login:
+                provider:         fos_user
+                csrf_provider:    form.csrf_provider
+            logout:               true
+            anonymous:            true
 
         login_failure:
-            pattern:                  ^/could-not-login
-            anonymous:                true
+            pattern:              ^/could-not-login
+            anonymous:            true
 
         dev:
             pattern:  ^/(_(profiler|wdt)|css|images|js)/
@@ -57,3 +69,7 @@ security:
     access_control:
         - { path: ^/documents, role: ROLE_USER }
         - { path: ^/, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/login$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/basic/logout, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/register, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/resetting, role: IS_AUTHENTICATED_ANONYMOUSLY }

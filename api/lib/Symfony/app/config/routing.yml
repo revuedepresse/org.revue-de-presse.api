@@ -1,3 +1,7 @@
+wtw_user:
+    resource: "@WTWUserBundle/Controller/"
+    type:     annotation
+
 fos_js_routing:
     resource: "@FOSJsRoutingBundle/Resources/config/routing/routing.xml"
 
@@ -27,8 +31,12 @@ fos_user_profile:
     prefix:   /profile
 
 fos_user_register:
-    resource: "@FOSUserBundle/Resources/config/routing/registration.xml"
+    resource: "@WTWUserBundle/Resources/config/routing/registration.xml"
     prefix:   /register
+
+fos_user_registration_register:
+    pattern:  /
+    defaults: { _controller: FOSUserBundle:Registration:register }
 
 fos_user_resetting:
     resource: "@FOSUserBundle/Resources/config/routing/resetting.xml"

@@ -19,8 +19,8 @@ framework:
 
 fos_user:
     db_driver:      orm
-    firewall_name:  main
-    user_class:     WTW\DashboardBundle\Entity\User
+    firewall_name:  wtw_connect
+    user_class:     WTW\UserBundle\Entity\User
 
 fos_twitter:
     file:             %kernel.root_dir%/../vendor/kertz/twitteroauth/twitteroauth/twitteroauth.php
@@ -142,6 +142,3 @@ swiftmailer:
     host:      %mailer_host%
     username:  %mailer_user%
     password:  %mailer_password%
-
-parameters:
-    anonymous_access: false
