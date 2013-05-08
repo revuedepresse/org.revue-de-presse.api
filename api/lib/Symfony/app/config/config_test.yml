@@ -22,7 +22,6 @@ swiftmailer:
     disable_delivery: true
 
 parameters:
-    anonymous_access:  true
     database_charset:  UTF8
     database_driver:   pdo_mysql
     database_host:     %database_host_test%

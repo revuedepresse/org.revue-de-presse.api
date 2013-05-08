@@ -1,0 +1,17 @@
+{% extends "::base.html.twig" %}
+
+{% trans_default_domain "messages" %}
+
+{% set title = 'title_homepage' %}
+{% block title %}{{ title|trans }}{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <div class="row">
+            <div>
+                <h1>{% block main_title %}{{ title|trans }}{% endblock main_title %}</h1>
+            </div>
+            {% block fos_user_content %}{% endblock %}
+        </div>
+    <div>
+{% endblock %}

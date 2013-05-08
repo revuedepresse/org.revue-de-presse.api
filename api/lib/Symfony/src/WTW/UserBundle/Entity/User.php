@@ -1,6 +1,6 @@
 <?php
 
-namespace WTW\DashboardBundle\Entity;
+namespace WTW\UserBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use FOS\UserBundle\Entity\User as BaseUSer;
@@ -25,7 +25,7 @@ class User extends BaseUSer
     /**
     * @var string
     *
-    * @ORM\Column(name="usr_twitter_id", type="integer", nullable=false)
+    * @ORM\Column(name="usr_twitter_id", type="integer", nullable=true)
     */
     protected $twitterID;
 
@@ -55,7 +55,13 @@ class User extends BaseUSer
      *
      * @ORM\Column(name="usr_user_name", type="string", length=255, nullable=false)
      */
-    protected $userName;
+    protected $username;
+
+    /**
+     * @var string
+     * @ORM\Column(name="usr_username_canonical", type="string", length=255, nullable=true)
+     */
+    protected $usernameCanonical;
 
     /**
      * @var integer
@@ -101,6 +107,12 @@ class User extends BaseUSer
 
     /**
      * @var string
+     * @ORM\Column(name="usr_email_canonical", type="string", length=255, nullable=true)
+     */
+    protected $emailCanonical;
+
+    /**
+     * @var string
      *
      * @ORM\Column(name="usr_phone", type="string", length=30, nullable=true)
      */
@@ -112,6 +124,66 @@ class User extends BaseUSer
      * @ORM\Column(name="usr_password", type="string", length=255, nullable=true)
      */
     protected $password;
+
+    /**
+     * The salt to use for hashing
+     *
+     * @var string
+     * @ORM\Column(name="usr_salt", type="string", length=255, nullable=true)
+     */
+    protected $salt;
+
+    /**
+     * @var boolean
+     * @ORM\Column(name="usr_locked", type="boolean")
+     */
+    protected $locked;
+
+
+    /**
+     * @var boolean
+     * @ORM\Column(name="usr_expired", type="boolean", nullable=true)
+     */
+    protected $expired;
+
+    /**
+     * @var boolean
+     * @ORM\Column(name="usr_credentials_expired", type="boolean", nullable=true)
+     */
+    protected $credentialsExpired;
+
+
+    /**
+     * Random string sent to the user email address in order to verify it
+     *
+     * @var string
+     * @ORM\Column(name="usr_confirmation_token", type="string", length=255, nullable=true)
+     */
+    protected $confirmationToken;
+
+    /**
+     * @var \DateTime
+     * @ORM\Column(name="usr_expires_at", type="datetime", nullable=true)
+     */
+    protected $expiresAt;
+
+    /**
+     * @var \DateTime
+     * @ORM\Column(name="usr_last_login", type="datetime", nullable=true)
+     */
+    protected $lastLogin;
+
+    /**
+     * @var \DateTime
+     * @ORM\Column(name="usr_password_requested_at", type="datetime", nullable=true)
+     */
+    protected $passwordRequestedAt;
+
+    /**
+     * @var \DateTime
+     * @ORM\Column(name="usr_credentials_expires_at", type="datetime", nullable=true)
+     */
+    protected $credentialsExpireAt;
 
     /**
      * Get id
