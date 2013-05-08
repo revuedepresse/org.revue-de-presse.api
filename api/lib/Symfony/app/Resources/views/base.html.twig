@@ -4,7 +4,10 @@
     <meta charset="UTF-8"/>
     <title>{% block title %}{% endblock %} :: Weaving The Web experiments</title>
     {% block stylesheets %}{% include "::stylesheets.html.twig" %}{% endblock %}
-    <link rel="shortcut icon" href="tesseract.ico"/>
+    {% javascripts
+        'tesseract.ico' %}
+        <link rel="shortcut icon" href="{{ asset_url }}"/>
+    {% endjavascripts %}
 </head>
 <body>
 <div class="navbar navbar-static-top">
