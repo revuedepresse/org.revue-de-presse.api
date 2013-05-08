@@ -2,6 +2,18 @@
 
 {% block title %}{{ title }}{% endblock %}
 
+{% block navbar %}
+    <div class="navbar">
+      <div class="navbar-inner">
+        <a class="brand" href="#">Weaving the Web</a>
+        <ul class="nav">
+          <li class="active"><a href="#">Dashboard</a></li>
+          <li><a href="{{ path('wtw_dashboard_logout_basic') }}">Logout</a></li>
+        </ul>
+      </div>
+    </div>
+{% endblock %}
+
 {% block body %}
     <div class="container">
         <div>
