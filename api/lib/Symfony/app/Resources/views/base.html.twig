@@ -4,11 +4,35 @@
     <meta charset="UTF-8"/>
     <title>{% block title %}{% endblock %} :: Weaving The Web experiments</title>
     {% block stylesheets %}{% include "::stylesheets.html.twig" %}{% endblock %}
-    <link rel="shortcut icon" href="{{ asset('favicon.ico') }}"/>
+    <link rel="shortcut icon" href="tesseract.ico"/>
 </head>
 <body>
-{% block navbar %}{% include "::navbar.html.twig" %}{% endblock %}
-{% block body %}{% endblock %}
-{% block javascripts %}{% include "::javascripts.html.twig" %}{% endblock %}
+<div class="navbar navbar-static-top">
+    <div class="navbar-inner">
+        <a class="brand" href="#">Weaving the Web</a>
+        <ul class="nav">
+            <li>
+                <li class="active"><a href="#">Dashboard</a></li>
+            </li>
+        </ul>
+        <ul class="nav pull-right">
+            <li class="nav">
+                {# authentication status #}
+                {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+                    <p class="navbar-text">{{ 'layout.logged_in_as'|trans({'%username%': app.user.username}, 'FOSUserBundle') }}</p>
+                {% endif %}
+            </li>
+            <li class="nav">
+                {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+                    <a class="nav" href="{{ path('fos_user_security_logout') }}">{{ 'layout.logout'|trans({}, 'FOSUserBundle') }}</a>
+                {% else %}
+                    <a class="nav" href="{{ path('fos_user_security_login') }}">{{ 'layout.login'|trans({}, 'FOSUserBundle') }}</a>
+                {% endif %}
+            </li>
+        </ul>
+    </div>
+</div>
+{% block body %}{% endblock body %}
+{% block javascripts %}{% include "::javascripts.html.twig" %}{% endblock javascripts %}
 </body>
 </html>

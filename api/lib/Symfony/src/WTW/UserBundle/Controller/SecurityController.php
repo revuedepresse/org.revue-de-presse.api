@@ -2,12 +2,13 @@
 
 namespace WTW\UserBundle\Controller;
 
+use FOS\UserBundle\Controller\SecurityController as BaseController;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
-use Symfony\Component\HttpFoundation\Response,
+use Symfony\Component\DependencyInjection\ContainerAware,
+    Symfony\Component\HttpFoundation\Response,
     Symfony\Component\HttpFoundation\Request,
     Symfony\Component\Security\Http\Logout\LogoutHandlerInterface,
-    Symfony\Component\Security\Core\Authentication\Token\TokenInterface,
-    Symfony\Component\Templating\EngineInterface;
+    Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 
 /**
  * Class SecurityController
@@ -16,18 +17,8 @@ use Symfony\Component\HttpFoundation\Response,
  * @package WTW\DashboardBundle\Controller
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
-class SecurityController implements LogoutHandlerInterface
+class SecurityController extends BaseController implements LogoutHandlerInterface
 {
-    /**
-     * @var $templating EngineInterface
-     */
-    protected $templating;
-
-    public function setTemplating(EngineInterface $templating)
-    {
-        $this->templating = $templating;
-    }
-
     /**
      * @Extra\Route("/basic/logout", name="wtw_dashboard_logout_basic")
      */
@@ -35,4 +26,31 @@ class SecurityController implements LogoutHandlerInterface
     {
         $request->getSession()->set('requested_logout', true);
     }
+
+    /**
+     * @Extra\Route("/wtw/login", name="wtw_dashboard_login")
+     */
+    public function loginAction(Request $request)
+    {
+        return parent::loginAction($request);
+    }
+
+//    /**
+//     * @Extra\Route("/logout", name="wtw_dashboard_logout_wtw")
+//     */
+//    public function logoutAction()
+//    {
+//        re
+//        $securityContext = $this->container->get('security_context');
+//        $securityContext->setToken(null);
+//
+//        $request = $this->container->get('request');
+//        $session = $request->getSession();
+//        $session->invalidate();
+//
+//        $router = $this->container->get('router');
+//        $homepageUrl = $router->generate('fos_user_registration_register');
+//
+//        return new RedirectResponse($homepageUrl, 302);
+//    }
 }

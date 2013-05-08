@@ -37,9 +37,18 @@ security:
 #            logout:               true
 #            anonymous:            true
 
-        basic_connect:
+        wtw_connect:
             context:              weaving_the_web
             pattern:              ^/
+            form_login:
+                provider:         fos_user
+                csrf_provider:    form.csrf_provider
+            logout:               true
+            anonymous:            true
+
+        basic_connect:
+            context:              weaving_the_web
+            pattern:              ^/documents
             http_basic:
                 realm:            "Please enter your login information for Weaving the Web"
                 provider:         chain_provider
@@ -48,15 +57,6 @@ security:
                 path:             /basic/logout
                 target:           /
                 handlers:         [ wtw.user.security_controller ]
-
-        wtw_connect:
-            context:              weaving_the_web
-            pattern:              ^/wtw
-            form_login:
-                provider:         fos_user
-                csrf_provider:    form.csrf_provider
-            logout:               true
-            anonymous:            true
 
         login_failure:
             pattern:              ^/could-not-login

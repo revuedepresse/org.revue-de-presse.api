@@ -1,0 +1,25 @@
+{% extends "WTWUserBundle:Security:land.html.twig" %}
+
+{% trans_default_domain 'FOSUserBundle' %}
+
+{% set title = 'title_confirmed_registration' %}
+{% block title %}{{ title|trans({}, 'security') }}{% endblock %}
+{% block main_title %}{{ title|trans({}, 'security') }}{% endblock %}
+
+{% block confirmed_registration %}
+    <div>
+        <p>{{ 'registration.confirmed'|trans({'%username%': user.username}, 'security') }}</p>
+        <p>{{ 'call_to_action'|trans({}, 'security') }}</p>
+        <ul>
+            <li>{{ 'action.connect_to_socnets'|trans({}, 'security') }}</li>
+            <li>{{ 'action.recollect_data'|trans({}, 'security') }}</li>
+            <li>{{ 'action.explore_web'|trans({}, 'security') }}</li>
+        </ul>
+    </div>
+    {% if app.session is not empty %}
+        {% set targetUrl = app.session.get('_security.' ~ app.security.token.providerKey ~ '.target_path') %}
+        {% if targetUrl is not empty %}
+            <p><a href="{{ targetUrl }}">{{ 'registration.back'|trans }}</a></p>
+        {% endif %}
+    {% endif %}
+{% endblock confirmed_registration %}

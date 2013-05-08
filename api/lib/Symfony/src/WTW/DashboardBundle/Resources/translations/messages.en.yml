@@ -8,7 +8,6 @@ constraint_violation.query.drop: DROP queries are not allowed.
 requirement_valid_query: Please provide us with a valid query
 sorry: Sorry...
 title_documents: Data library
-title_homepage: Welcome to your personal edge of the web
 wrong_query_execution: Something went wrong when executing your query.
 no_record: No record was returned by this query
 confusing_query: Sorry, we are confused by the number of query delimiters.
