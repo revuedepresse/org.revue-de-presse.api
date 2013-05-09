@@ -36,6 +36,7 @@ behat_report.html
 /api/lib/Symfony/web/bundles
 /api/lib/Symfony/web/css
 /api/lib/Symfony/web/js
+/api/lib/Symfony/web/images
 
 /api/twitter/timeline/user_timeline_*
 /api/twitter/favorite/*
