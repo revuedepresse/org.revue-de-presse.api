@@ -34,9 +34,3 @@ services:
         class: Twig_Extensions_Extension_Text
         tags:
             - { name: twig.extension }
-    sp_bower.dependency_cache_warmer:
-        class: %sp_bower.dependency_cache_warmer.class%
-        arguments:
-            - @sp_bower.bower_manager
-            - @sp_bower.bower
-            - %sp_bower.install_on_warmup%
