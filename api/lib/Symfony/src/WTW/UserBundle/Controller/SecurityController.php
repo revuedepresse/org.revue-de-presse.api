@@ -9,6 +9,7 @@ use Symfony\Component\DependencyInjection\ContainerAware,
     Symfony\Component\HttpFoundation\Request,
     Symfony\Component\Security\Http\Logout\LogoutHandlerInterface,
     Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Class SecurityController
@@ -22,8 +23,14 @@ class SecurityController extends BaseController implements LogoutHandlerInterfac
     /**
      * @Extra\Route("/basic/logout", name="wtw_dashboard_logout_basic")
      */
-    public function logout(Request $request, Response $response, TokenInterface $token)
+    public function logout(Request $request, Response $response = null, TokenInterface $token = null)
     {
-        $request->getSession()->set('requested_logout', true);
+        if (!is_null($response)) {
+            $request->getSession()->set('requested_logout', true);
+        } else {
+            $homepageUrl = $this->container->get('router')->generate('fos_user_registration_register');
+
+            return new RedirectResponse($homepageUrl, 302);
+        }
     }
 }
