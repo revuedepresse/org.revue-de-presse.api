@@ -20,7 +20,8 @@ class GithubController extends Controller
     {
         return $this->render(
             'WTWDashboardBundle:Github:showRepositories.html.twig', array(
-                'title' => 'Github Starred Repositories'
+                'active_menu_item' => 'github_repositories',
+                'title'            => 'Github Starred Repositories'
             ));
     }
 }

@@ -88,6 +88,7 @@ class DocumentController extends Controller
 
         return $this->render(
             'WTWDashboardBundle:Document:showDocuments.html.twig', array(
+                'active_menu_item' => 'dashboard',
                 'error' => $query->error,
                 'default_query' => $query->sql,
                 'records' => $query->records,
