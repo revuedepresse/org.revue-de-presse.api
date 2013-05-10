@@ -1,10 +1,10 @@
 {% trans_default_domain 'FOSUserBundle' %}
 
-<div class="row">
+<div class="row-fluid">
     <h2>{{ "title_register"|trans({}, 'security') }}</h2>
 </div>
 <form action="{{ path('fos_user_registration_register') }}" {{ form_enctype(form) }} method="POST" class="fos_user_registration_register">
-    <div class="row">
+    <div class="row-fluid">
         {{ form_widget(form) }}
         <button class="btn" type="submit">{{ 'registration.submit'|trans }}</button>
     </div>

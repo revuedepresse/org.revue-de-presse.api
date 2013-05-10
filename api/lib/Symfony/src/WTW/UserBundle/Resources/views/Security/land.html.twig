@@ -18,11 +18,10 @@
 
 {% block body %}
     <div class="container">
-        <div class="row">
-            <div class="main-title">
+        <div class="span11">
+            <div class="offset1">
                 <h1>{% block main_title %}{{ title|trans }}{% endblock main_title %}</h1>
             </div>
-
             {% for type, messages in app.session.flashbag.all() %}
                 {% for message in messages %}
                     <div class="flash-{{ type }}">
