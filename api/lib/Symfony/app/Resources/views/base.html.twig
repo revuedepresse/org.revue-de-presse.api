@@ -17,10 +17,10 @@
             {% set active_menu_item = '' %}
             {% endif %}
             <li{% if active_menu_item == 'dashboard' %} class="active"{% endif %}>
-                <a href="#">Dashboard</a>
+                <a href="{{ path('wtw_dashboard_show_documents') }}">Dashboard</a>
             </li>
             <li{% if active_menu_item == 'github_repositories' %} class="active"{% endif %}>
-                <a href="#/github-repositories">Github Repositories</a>
+                <a href="{{ path('wtw_dashboard_show_repositories') }}">Github Repositories</a>
             </li>
         </ul>
         <ul class="nav pull-right">
