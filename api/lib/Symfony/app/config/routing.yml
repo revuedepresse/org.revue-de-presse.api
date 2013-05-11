@@ -19,6 +19,10 @@ wtw_dashboard:
     resource: "@WTWDashboardBundle/Controller/"
     type:     annotation
 
+wtw_code_generatis_analysis:
+    resource: "@WTWCodeGenerationAnalysisBundle/Controller/"
+    type:     annotation
+
 wtw_registration_land:
     pattern:  /
     defaults: { _controller: FOSUserBundle:Registration:land }
