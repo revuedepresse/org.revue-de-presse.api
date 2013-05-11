@@ -634,6 +634,12 @@ if ( ! function_exists( FUNCTION_START_SESSION ) )
 	{
 		global $session_id, $jenkins_workspace, $use_front_controller;
 
+        if (!function_exists('session_id')) {
+            $reference = null;
+            error_log('[session extension missing]');
+            return $reference;
+        }
+
 		if ( headers_sent() && $bootstrap
             && ! $jenkins_workspace && ! $use_front_controller )
 

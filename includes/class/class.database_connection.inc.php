@@ -389,6 +389,11 @@ class Database_Connection
 
 			throw new Exception(EXCEPTION_DATABASE_CONNECTION_WRONG_USER_NAME);
 
+        if (!class_exists($class_mysqli)) {
+            error_log('[mysqli extension missing]');
+            return;
+        }
+
 		$mysqli = new $class_mysqli();
 
 		$mysqli->init();
