@@ -1,5 +1,9 @@
 <?php
 
+if (!defined('MEMCACHE_COMPRESSED')) {
+    define('MEMCACHE_COMPRESSED', 2);
+}
+
 /**
 * Memento class
 *
@@ -226,8 +230,13 @@ class Memento extends Serializer
 
 		$class_memory_cache = $class_application::getMemoryCacheClass();
 
-		$memory_cache = new $class_memory_cache;
-		
+        if (!class_exists($class_memory_cache)) {
+            error_log('[memcache extension missing]');
+            return;
+        } else {
+            $memory_cache = new $class_memory_cache;
+        }
+
 		if ( is_null( $host ) )
 		
 			$host = MEMCACHED_HOST;
@@ -276,6 +285,9 @@ class Memento extends Serializer
 	)
 	{
 		$memory_cache = self::openConnection();
+        if (!is_object($memory_cache)) {
+            return;
+        }
 		
 		if ( MEMCACHED_ACTIVE )
 		
@@ -331,6 +343,9 @@ class Memento extends Serializer
 		}
 
 		$memory_cache = self::openConnection();
+        if (!is_object($memory_cache)) {
+            return;
+        }
 
 		if ( $replace && ( FALSE !== self::retrieveData( $key ) ) )
 		{
