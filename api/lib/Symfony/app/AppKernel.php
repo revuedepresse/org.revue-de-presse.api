@@ -31,20 +31,24 @@ class AppKernel extends Kernel
             new WTW\API\FacebookBundle\WTWAPIFacebookBundle(),
             new WTW\API\DataMiningBundle\WTWAPIDataMiningBundle(),
             new WTW\API\GithubBundle\WTWAPIGithubBundle(),
+            new WTW\API\GoogleDriveBundle\WTWAPIGoogleDriveBundle(),
             new WTW\API\TwitterBundle\WTWAPITwitterBundle(),
             new WTW\CodeGeneration\QualityAssuranceBundle\WTWCodeGenerationQualityAssuranceBundle(),
+            new WTW\CodeGeneration\AnalysisBundle\WTWCodeGenerationAnalysisBundle(),
+            new WTW\DashboardBundle\WTWDashboardBundle(),
             new WTW\Documentation\MarkdownBundle\WTWDocumentationMarkdownBundle(),
             new WTW\Legacy\ProviderBundle\WTWLegacyProviderBundle(),
-            new WTW\CodeGeneration\AnalysisBundle\WTWCodeGenerationAnalysisBundle(),
-            new WTW\API\GoogleDriveBundle\WTWAPIGoogleDriveBundle(),
-            new WTW\DashboardBundle\WTWDashboardBundle(),
             new WTW\UserBundle\WTWUserBundle(),
         );
 
-        if (in_array($this->getEnvironment(), array('dev', 'test'))) {
+        if (in_array($this->getEnvironment(), array('dev', 'test', 'prof'))) {
             $bundles[] = new Symfony\Bundle\WebProfilerBundle\WebProfilerBundle();
             $bundles[] = new Sensio\Bundle\DistributionBundle\SensioDistributionBundle();
             $bundles[] = new Sensio\Bundle\GeneratorBundle\SensioGeneratorBundle();
+        }
+
+        if (in_array($this->getEnvironment(), array('prof'))) {
+            $bundles[] = new Jns\Bundle\XhprofBundle\JnsXhprofBundle();
         }
 
         return $bundles;
