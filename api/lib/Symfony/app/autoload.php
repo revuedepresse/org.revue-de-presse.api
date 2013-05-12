@@ -14,6 +14,9 @@ if (!function_exists('intl_get_error_code')) {
 
 AnnotationRegistry::registerLoader(array($loader, 'loadClass'));
 
+# ignore api flag
+AnnotationReader::addGlobalIgnoredName('api');
+
 # ignore behat mink annotations
 AnnotationReader::addGlobalIgnoredName('BeforeScenario');
 AnnotationReader::addGlobalIgnoredName('Given');
