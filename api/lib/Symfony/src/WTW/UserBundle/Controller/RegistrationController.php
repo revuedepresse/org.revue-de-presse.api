@@ -2,11 +2,14 @@
 
 namespace WTW\UserBundle\Controller;
 
-use FOS\UserBundle\Controller\RegistrationController as BaseController;
-use FOS\UserBundle\Event\UserEvent;
-use FOS\UserBundle\FOSUserEvents;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Security\Core\SecurityContext;
+use FOS\UserBundle\Controller\RegistrationController as BaseController,
+    FOS\UserBundle\Event\UserEvent,
+    FOS\UserBundle\FOSUserEvents,
+    FOS\UserBundle\Event\FormEvent,
+    FOS\UserBundle\Event\FilterUserResponseEvent;
+use Symfony\Component\HttpFoundation\RedirectResponse,
+    Symfony\Component\HttpFoundation\Request,
+    Symfony\Component\Security\Core\SecurityContext;
 
 class RegistrationController extends BaseController
 {
