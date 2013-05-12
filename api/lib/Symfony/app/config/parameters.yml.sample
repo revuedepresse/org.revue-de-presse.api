@@ -28,8 +28,6 @@ parameters:
     bower_binary:           /opt/local/nodejs/lib/node_modules/bower/bin/bower
     bower_endpoint:         https://bower.herokuapp.com
 
-    dashboard_offline:  false
-
     database_charset:   UTF8
     database_driver:    pdo_mysql
     database_host:      localhost
@@ -69,9 +67,9 @@ parameters:
     profiling_active:           false
     profiling_active:           true
     profiling_xhprof_dir:       %kernel.root_dir%/../web # xhprof web dir
-    profiling_xhprof_config:    %xhprof_dir%/xhprof_lib/config.php
-    profiling_xhprof_lib:       %xhprof_dir%/xhprof_lib/utils/xhprof_lib.php
-    profiling_xhprof_runs:      %xhprof_dir%/xhprof_lib/utils/xhprof_runs.php
+    profiling_xhprof_config:    %profiling_xhprof_dir%/xhprof_lib/config.php
+    profiling_xhprof_lib:       %profiling_xhprof_dir%/xhprof_lib/utils/xhprof_lib.php
+    profiling_xhprof_runs:      %profiling_xhprof_dir%/xhprof_lib/utils/xhprof_runs.php
     profiling_xhprof_web:       http://xhprof.dev
 
     secret:                     ## FILL ME ##
