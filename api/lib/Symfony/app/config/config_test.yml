@@ -22,13 +22,14 @@ swiftmailer:
     disable_delivery: true
 
 parameters:
-    database_charset:  UTF8
-    database_driver:   pdo_mysql
-    database_host:     %database_host_test%
-    database_port:     %database_port_test%
-    database_name:     %database_name_test%
-    database_user:     %database_user_test%
-    database_password: %database_password_test%
+    basic_auth_pattern: ^/(documents|github)
+    database_charset:   UTF8
+    database_driver:    pdo_mysql
+    database_host:      %database_host_test%
+    database_port:      %database_port_test%
+    database_name:      %database_name_test%
+    database_user:      %database_user_test%
+    database_password:  %database_password_test%
     wtw.data_mining.command_provider.class: WTW\API\DataMiningBundle\Command\Tester\TransformationCommandProvider
 
 services:
