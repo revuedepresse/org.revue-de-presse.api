@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse,
     Symfony\Component\HttpFoundation\Response;
 use WTW\DashboardBundle\DBAL\Connection,
     WTW\DashboardBundle\Repository\PerspectiveRepository;
+use JMS\SecurityExtraBundle\Annotation\Secure;
 
 /**
  * Class DocumentController
@@ -61,10 +62,11 @@ class DocumentController extends Controller
      *
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Exception
+     *
+     * @Secure(roles="ROLE_USER")
      */
     public function showDocumentsAction()
     {
-        $error = null;
         /**
          * @var $request Request
          */
