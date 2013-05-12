@@ -173,6 +173,11 @@ class Service_Manager extends Deployer
             else if ($build_jenkins) 
                 $target = 'jenkins/' ;
 
+            $path_length = strlen($directory_includes);
+            if (substr($directory_includes, $path_length - 1, 1) === '/') {
+                $directory_includes = substr($directory_includes, 0, $path_length - 1);
+            }
+
 			$file_path = $directory_includes .'/../../settings/' . $target .
 				$file_name_settings
             ;	
