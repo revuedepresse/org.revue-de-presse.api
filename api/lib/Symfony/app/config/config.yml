@@ -125,7 +125,7 @@ sensio_framework_extra:
     router:  { annotations: true }
 
 sp_bower:
-    install_on_warmup:  true
+    install_on_warmup:  false
     keep_bowerrc:       false
     bin:                %bower_binary%
     assetic:
@@ -144,6 +144,3 @@ swiftmailer:
     host:      %mailer_host%
     username:  %mailer_user%
     password:  %mailer_password%
-
-wtw_dashboard:
-    offline_mode: %dashboard_offline%
