@@ -4,12 +4,11 @@ use Symfony\Component\HttpFoundation\Request;
 
 xhprof_enable();
 
-$loader = require_once __DIR__ . '/../app/bootstrap.php.cache';
+$loader = require_once __DIR__ . '/../app/autoload.php';
 
 require_once __DIR__ . '/../app/AppKernel.php';
 
 $kernel = new AppKernel('prof', true);
-$kernel->loadClassCache();
 $request  = Request::createFromGlobals();
 $response = $kernel->handle($request);
 $response->send();
@@ -30,5 +29,5 @@ $profilingUrl = 'http://' . $xhprofHost. '/index.php?' .
 'run=' . $runId .
 '&source=' . $namespace;
 
-error_log(sprintf('-----------------[ %s ]----------------', $profilingUrl));
+error_log(sprintf('-----------------[ %s %s ]----------------', '[request handling]', $profilingUrl));
 
