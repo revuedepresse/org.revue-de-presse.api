@@ -10,6 +10,7 @@ use Symfony\Component\DependencyInjection\ContainerAware,
     Symfony\Component\Security\Http\Logout\LogoutHandlerInterface,
     Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 /**
  * Class SecurityController
@@ -32,5 +33,13 @@ class SecurityController extends BaseController implements LogoutHandlerInterfac
 
             return new RedirectResponse($homepageUrl, 302);
         }
+    }
+
+    public function loginAction(Request $request)
+    {
+        $path['_controller'] = 'WTWUserBundle:Registration:land';
+        $subRequest = $this->container->get('request')->duplicate(array(), null, $path);
+
+        return $this->container->get('http_kernel')->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
     }
 }
