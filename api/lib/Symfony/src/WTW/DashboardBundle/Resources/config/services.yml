@@ -19,10 +19,10 @@ services:
     wtw.dashboard.twitter_user:
         class: WTW\DashboardBundle\Security\User\Provider\TwitterUserProvider
         arguments:
-            twitter_oauth: "@fos_twitter.api"
-            userManager: "@fos_user.user_manager"
-            validator: "@validator"
-            session: "@session"
+            twitter_oauth:  "@fos_twitter.api"
+            userManager:    "@fos_user.user_manager"
+            validator:      "@validator"
+            session:        "@session"
     wtw.dashboard.query_validator:
         class: WTW\DashboardBundle\Validator\Constraints\QueryValidator
         calls:
