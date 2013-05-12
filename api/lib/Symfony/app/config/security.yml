@@ -38,7 +38,7 @@ security:
 #            anonymous:            true
         basic_connect:
             context:              weaving_the_web
-            pattern:              ^/documents
+            pattern:              %basic_auth_pattern%
             http_basic:
                 realm:            "Please enter your login information for Weaving the Web"
                 provider:         chain_provider
