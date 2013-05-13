@@ -32,7 +32,8 @@ class RegistrationController extends BaseController
         $form->setData($user);
 
         if ('POST' === $request->getMethod()) {
-            if (null !== $this->getRegistrationFormResponse($request, $form, $user)) {
+            $response = $this->getRegistrationFormResponse($request, $form, $user);
+            if (!is_null($response)) {
                 return $response;
             }
         }
