@@ -39,6 +39,7 @@ class AppKernel extends Kernel
             new WTW\Documentation\MarkdownBundle\WTWDocumentationMarkdownBundle(),
             new WTW\Legacy\ProviderBundle\WTWLegacyProviderBundle(),
             new WTW\UserBundle\WTWUserBundle(),
+            new WTW\API\WordpressBundle\WTWAPIWordpressBundle(),
         );
 
         if (in_array($this->getEnvironment(), array('dev', 'test', 'prof'))) {

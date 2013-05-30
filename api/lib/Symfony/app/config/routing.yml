@@ -1,9 +1,11 @@
+wtw_api_wordpress:
+    resource: "@WTWAPIWordpressBundle/Controller/"
+    type:     annotation
+    prefix:   /
+
 wtw_user:
     resource: "@WTWUserBundle/Controller/"
     type:     annotation
-
-fos_js_routing:
-    resource: "@FOSJsRoutingBundle/Resources/config/routing/routing.xml"
 
 wtw_api_data_mining:
     resource:     "@WTWAPIDataMiningBundle/Resources/config/routing.yml"
@@ -30,6 +32,9 @@ wtw_registration_land:
 wtw_documentation_markdown:
     resource: "@WTWDocumentationMarkdownBundle/Controller"
     type:     annotation
+
+fos_js_routing:
+    resource: "@FOSJsRoutingBundle/Resources/config/routing/routing.xml"
 
 fos_user_security:
     resource: "@WTWUserBundle/Resources/config/routing/security.xml"
