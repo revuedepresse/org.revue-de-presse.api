@@ -22,6 +22,10 @@ parameters:
     api_wtw_repositories_user_name:         adama
     api_wtw_repositories_password:          ## FILL ME ##
 
+    api_wtw_wordpress_endpoint:             http://## FILL ME ##/xmlrpc.php
+    api_wtw_wordpress_username:             ## FILL ME ##
+    api_wtw_wordpress_password:             ~
+
     assetic_node:           %assetic.node%
     assetic_node_module:    %assetic.modules%
 
