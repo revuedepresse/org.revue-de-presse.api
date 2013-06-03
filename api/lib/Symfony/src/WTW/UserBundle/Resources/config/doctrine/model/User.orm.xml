@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                  http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <mapped-superclass name="FOS\UserBundle\Model\User">
+
+        <field name="username" column="usr_user_name" type="string" length="255" nullable="false" />
+
+        <field
+            name="usernameCanonical"
+            column="usr_username_canonical"
+            type="string"
+            length="255"
+            unique="true"
+            nullable="false" />
+
+        <field name="email" column="usr_email" type="string" length="255" nullable="true" />
+
+        <field name="emailCanonical" column="usr_email_canonical" type="string" length="255" unique="true" />
+
+        <field name="enabled" column="usr_status" type="boolean" nullable="false" />
+
+        <field name="salt" column="usr_salt" type="string" length="255" nullable="true" />
+
+        <field name="password" column="usr_password" type="string" length="255" nullable="true" />
+
+        <field name="lastLogin" column="usr_last_login" type="datetime" nullable="true" />
+
+        <field name="locked" column="usr_locked" type="boolean" />
+
+        <field name="expired" column="usr_expired" type="boolean" nullable="true"  />
+
+        <field name="expiresAt" column="usr_expires_at" type="datetime" nullable="true" />
+
+        <field
+            name="confirmationToken"
+            column="usr_confirmation_token"
+            type="string"
+            length="255"
+            nullable="true" />
+
+        <field name="passwordRequestedAt" column="usr_password_requested_at" type="datetime" nullable="true" />
+
+        <field name="roles" column="roles" type="array" />
+
+        <field name="credentialsExpired" column="usr_credentials_expired" type="boolean" nullable="true" />
+
+        <field name="credentialsExpireAt" column="usr_credentials_expires_at" type="datetime" nullable="true" />
+
+    </mapped-superclass>
+
+</doctrine-mapping>
