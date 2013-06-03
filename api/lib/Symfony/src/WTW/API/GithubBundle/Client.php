@@ -160,28 +160,33 @@ class Client
      * @param bool $headers
      *
      * @return mixed
+     * @throws \RuntimeException
      * @throws \Exception
      */
     public function crawlUrl($url, $headers = false)
     {
-        $resource = curl_init();
+        if (extension_loaded('curl')) {
+            $resource = curl_init();
 
-        curl_setopt($resource, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($resource, CURLOPT_USERAGENT, $this->userAgent);
-        curl_setopt($resource, CURLOPT_URL, $url);
-        curl_setopt($resource, CURLOPT_SSL_VERIFYHOST, false);
-        curl_setopt($resource, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($resource, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($resource, CURLOPT_USERAGENT, $this->userAgent);
+            curl_setopt($resource, CURLOPT_URL, $url);
+            curl_setopt($resource, CURLOPT_SSL_VERIFYHOST, false);
+            curl_setopt($resource, CURLOPT_SSL_VERIFYPEER, false);
 
-        if ($headers) {
-            curl_setopt($resource, CURLOPT_HEADER, true);
+            if ($headers) {
+                curl_setopt($resource, CURLOPT_HEADER, true);
+            }
+
+            $response = curl_exec($resource);
+
+            if ($error = curl_error($resource)) {
+                throw new \Exception($error . ' (' . $url . ')');
+            }
+            curl_close($resource);
+        } else {
+            throw new \RuntimeException('cURL extension is required to run this client');
         }
-
-        $response = curl_exec($resource);
-
-        if ($error = curl_error($resource)) {
-            throw new \Exception($error . ' (' . $url . ')');
-        }
-        curl_close($resource);
 
         return $response;
     }
