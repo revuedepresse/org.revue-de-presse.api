@@ -1,36 +1,15 @@
 parameters:
     app_version: 0.1
 
-    api_facebook_host_port:                 %api.facebook.protocol%%api.facebook.host_port%
-
-    api_github_host_port:                   %api.github.protocol%%api.github.host_port%
-
-    api_google_drive_api_key:               ## FILL ME ##
-    api_google_drive_client_id:             %api.google_drive.client_id%
-    api_google_drive_client_secret:         %api.google_drive.client_secret%
-    api_google_drive_redirect_uri:          %api.google_drive.redirect_uri%
-
-    api_twitter_consumer_key:               %api.twitter.consumer_key%
-    api_twitter_consumer_secret:            %api.twitter.consumer_secret%
-    api_twitter_callback_url:               %api.twitter.callback_url%
-    api_twitter_host_port:                  %api.twitter.protocol%%api.twitter.host_port%
-    api_twitter_version:                    1.1
-    api_twitter_user_token:                 %api.twitter.user_token%
-    api_twitter_user_secret:                %api.twitter.user_secret%
-
-    api_wtw_repositories_items_per_page:    30
-    api_wtw_repositories_user_name:         adama
-    api_wtw_repositories_password:          ## FILL ME ##
-
     api_wtw_wordpress_endpoint:             http://## FILL ME ##/xmlrpc.php
     api_wtw_wordpress_username:             ## FILL ME ##
     api_wtw_wordpress_password:             ~
 
+    api_wtw_repositories_user_name:       adama
+    api_wtw_repositories_password:        ## FILL ME ##
+
     assetic_node:           %assetic.node%
     assetic_node_module:    %assetic.modules%
-
-    bower_binary:           /opt/local/nodejs/lib/node_modules/bower/bin/bower
-    bower_endpoint:         https://bower.herokuapp.com
 
     database_charset:   UTF8
     database_driver:    pdo_mysql
@@ -56,11 +35,6 @@ parameters:
     database_user_admin:        ## FILL ME ##
     database_password_admin:    %mysql.admin_password%
 
-    endpoint_facebook_feed:         %api_facebook_host_port%/api/facebook/api.facebook.get.feed.php
-    endpoint_github_redirect:       %api_github_host_port%/github/request
-    endpoint_twitter_feed:          %api_twitter_host_port%/api/api.twitter.display.wall.php?twr=1&res=timeline
-    endpoint_twitter_user:          https://userstream.twitter.com/%s/user.json
-
     locale:             en
 
     mailer_transport:   smtp
@@ -68,18 +42,7 @@ parameters:
     mailer_user:        ~
     mailer_password:    ~
 
-    profiling_active:           false
-    profiling_active:           true
-    profiling_xhprof_dir:       %kernel.root_dir%/../web # xhprof web dir
-    profiling_xhprof_config:    %profiling_xhprof_dir%/xhprof_lib/config.php
-    profiling_xhprof_lib:       %profiling_xhprof_dir%/xhprof_lib/utils/xhprof_lib.php
-    profiling_xhprof_runs:      %profiling_xhprof_dir%/xhprof_lib/utils/xhprof_runs.php
-    profiling_xhprof_web:       http://xhprof.dev
-
     secret:                     ## FILL ME ##
 
     test_database_memory:       false
     test_database_path:         %kernel.cache_dir%/## FILL ME ##
-
-    tokenization_sandbox:       %metaprogramming.sandbox%
-

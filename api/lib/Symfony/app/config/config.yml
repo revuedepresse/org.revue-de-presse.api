@@ -14,19 +14,7 @@ framework:
     csrf_protection:      true
     validation:           { enable_annotations: true }
     templating:           { engines: ['twig'] }
-    trust_proxy_headers:  false
     session:              ~
-
-fos_user:
-    db_driver:      orm
-    firewall_name:  wtw_connect
-    user_class:     WTW\UserBundle\Entity\User
-
-fos_twitter:
-    file:             %kernel.root_dir%/../vendor/kertz/twitteroauth/twitteroauth/twitteroauth.php
-    consumer_key:     %api_twitter_consumer_key%
-    consumer_secret:  %api_twitter_consumer_secret%
-    callback_url:     %api_twitter_callback_url%
 
 # Twig Configuration
 twig:
@@ -69,73 +57,20 @@ doctrine:
             default:
                 connection: default
                 mappings:
-                    WTWAPIDataMiningBundle: ~
-                    WTWAPIFacebookBundle: ~
-                    WTWCodeGenerationAnalysisBundle: ~
-                    WTWDashboardBundle: ~
-                    WTWLegacyProviderBundle: ~
-                    WTWUserBundle: ~
+                    WTWAPIWordpressBundle: ~
             admin:
                 connection: admin
                 mappings:
-                    WTWAPIDataMiningBundle: ~
-                    WTWAPIFacebookBundle: ~
-                    WTWCodeGenerationAnalysisBundle: ~
-                    WTWDashboardBundle: ~
-                    WTWLegacyProviderBundle: ~
-                    WTWUserBundle: ~
+                    WTWAPIWordpressBundle: ~
             test_mysql:
                 connection: test_mysql
                 mappings:
-                    WTWAPIDataMiningBundle: ~
-                    WTWDashboardBundle: ~
+                    WTWAPIWordpressBundle: ~
         auto_generate_proxy_classes: %kernel.debug%
-
-fos_rest:
-    allowed_methods_listener: true
-
-    param_fetcher_listener:   true
-
-    routing_loader:
-        default_format:       json
-
-    view:
-        formats:
-            json: true
-        mime_types:
-            json: ['application/json', 'application/x-json', 'application/vnd.## FILL HOSTNAME ##+json']
-        force_redirects:
-            html: true
-        view_response_listener: force
-
-    format_listener:
-        default_priorities:
-            - json
-            - html
-            - '*/*'
-        fallback_format:      json
-        prefer_extension:     true
-
-propel:
-    path:       "%kernel.root_dir%/../vendor/propel"
-    phing_path: "%kernel.root_dir%/../vendor/phing"
 
 sensio_framework_extra:
     view:    { annotations: false }
     router:  { annotations: true }
-
-sp_bower:
-    install_on_warmup:  false
-    keep_bowerrc:       false
-    bin:                %bower_binary%
-    assetic:
-        enabled: true
-    bundles:
-        WTWDashboardBundle:
-            config_dir: Resources/config/bower
-            asset_dir:  ../../public/components
-            json_file:  component.json
-            endpoint:   %bower_endpoint%
 
 # Swiftmailer Configuration
 swiftmailer:
