@@ -1,2 +1,0 @@
-{$function_name}{$column} {$directive_function}{$parenthesis_start}{foreach from=$arguments key=argument_index item=argument name=iterator}{$argument}{if !$smarty.foreach.iterator.last}{$comma} {/if}{/foreach}
-{$parenthesis_end}

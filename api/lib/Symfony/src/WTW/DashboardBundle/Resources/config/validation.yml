@@ -1,4 +1,0 @@
-WTW\DashboardBundle\Entity\Perspective:
-    properties:
-        value:
-          - WTW\DashboardBundle\Validator\Constraints\Query: ~

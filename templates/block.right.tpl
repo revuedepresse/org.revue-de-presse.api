@@ -1,1 +1,0 @@
-{if isset($right)}{$right}{/if}
