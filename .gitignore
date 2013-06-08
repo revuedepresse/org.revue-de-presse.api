@@ -5,8 +5,8 @@
 
 *~*
 
-/api/lib/Symfony/build/*
-!/api/lib/Symfony/build/.gitignore
+/build/*
+!/build/.gitignore
 
 # api :: twitter
 api/.htaccess
@@ -14,30 +14,30 @@ api/.htaccess
 # dependencies management
 composer.phar
 
-/api/lib/Symfony/bin/behat
-/api/lib/Symfony/behat
+/bin/behat
+/behat
 behat_report.html
 
 /check_wtw.php
 
-/api/lib/Symfony/app/cache
-/api/lib/Symfony/app/logs
+/app/cache
+/app/logs
 
 /api/lib/Smarty/demo
 /api/lib/Smarty/www-data
-/api/lib/Symfony/app/cache
-/api/lib/Symfony/app/config/parameters.yml
-/api/lib/Symfony/app/logs
-/api/lib/Symfony/app/phpunit.xml
-/api/lib/Symfony/devops/files/*.tar.gz
-/api/lib/Symfony/mobile
-/api/lib/Symfony/src/WTW/DashboardBundle/Resources/public/components
-/api/lib/Symfony/vendor
-/api/lib/Symfony/web/assetic
-/api/lib/Symfony/web/bundles
-/api/lib/Symfony/web/css
-/api/lib/Symfony/web/js
-/api/lib/Symfony/web/images
+/app/cache
+/app/config/parameters.yml
+/app/logs
+/app/phpunit.xml
+/devops/files/*.tar.gz
+/mobile
+/src/WTW/DashboardBundle/Resources/public/components
+/vendor
+/web/assetic
+/web/bundles
+/web/css
+/web/js
+/web/images
 
 /api/twitter/timeline/user_timeline_*
 /api/twitter/favorite/*
