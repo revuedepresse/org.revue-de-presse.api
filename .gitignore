@@ -5,6 +5,7 @@
 
 *~*
 
+/api/lib/Symfony/Capfile
 /api/lib/Symfony/build/*
 !/api/lib/Symfony/build/.gitignore
 
