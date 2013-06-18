@@ -5,6 +5,8 @@
 
 *~*
 
+/.idea/*
+/api/*
 /build/*
 !/build/.gitignore
 
