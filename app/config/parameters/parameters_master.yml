@@ -5,6 +5,7 @@ parameters:
     api_wtw_wordpress_password:             %ws.xml_rpc.password%
     api_wtw_wordpress_endpoint:             %ws.xml_rpc.endpoint%
     api_wtw_wordpress_short_domain:         %ws.xml_rpc.short_domain%
+    api_wtw_wordpress_prefix:               %ws.xml_rpc.prefix%
 
     api_wtw_repositories_user_name:       adama
     api_wtw_repositories_password:        ## FILL ME ##
