@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+        <parameter key="wtw.user.security_controller.class">WTW\UserBundle\Controller\SecurityController</parameter>
+        <parameter key="security.authentication.listener.basic.class">WTW\UserBundle\EventListener\BasicAuthenticationListener</parameter>
+    </parameters>
+
+    <services>
+        <service id="fos_user.user_provider.username" class="WTW\UserBundle\Security\UserProvider" public="false">
+            <argument type="service" id="fos_user.user_manager" />
+        </service>
+        <service id="wtw.user.security_controller" class="%wtw.user.security_controller.class%">
+            <call method="setContainer">
+                <argument type="service" id="service_container" />
+            </call>
+        </service>
+    </services>
+</container>

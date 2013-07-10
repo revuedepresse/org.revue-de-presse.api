@@ -1,0 +1,11 @@
+{% extends "WTWUserBundle:Security:land.html.twig" %}
+
+{% trans_default_domain 'FOSUserBundle' %}
+
+{% set title = 'title_homepage' %}
+{% block title %}{{ title|trans({}, 'security') }}{% endblock %}
+{% block main_title %}{{ title|trans({}, 'security') }}{% endblock %}
+
+{% block login_form %}
+    {% include 'WTWUserBundle:Security:login_form_standalone.html.twig' %}
+{% endblock login_form %}
