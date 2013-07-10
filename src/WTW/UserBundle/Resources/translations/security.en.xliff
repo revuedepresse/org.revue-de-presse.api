@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<xliff version="1.2" xmlns="urn:oasis:names:tc:xliff:document:1.2">
+    <file source-language="en" datatype="plaintext" original="file.ext">
+        <body>
+            <trans-unit id="1">
+                <source>title_register</source>
+                <target>Become a web weaver</target>
+            </trans-unit>
+            <trans-unit id="2">
+                <source>registration.confirmed</source>
+                <target>Congratulations %username%, your personal edge has been attached to the giant global graph.</target>
+            </trans-unit>
+            <trans-unit id="3">
+                <source>call_to_action</source>
+                <target>You can use the navigation menu to:</target>
+            </trans-unit>
+             <trans-unit id="4">
+                 <source>action.recollect_data</source>
+                 <target>Recollect your data</target>
+             </trans-unit>
+             <trans-unit id="5">
+                 <source>action.connect_to_socnets</source>
+                 <target>Connect to centralized social networks</target>
+             </trans-unit>
+             <trans-unit id="6">
+                 <source>action.explore_web</source>
+                 <target>Explore your own web</target>
+             </trans-unit>
+            <trans-unit id="7">
+                <source>title_confirmed_registration</source>
+                <target>Thank you, you've just signed up for a better Web!</target>
+            </trans-unit>
+            <trans-unit id="8">
+                <source>title_homepage</source>
+                <target>Reclaim your personal bleeding edges from the web</target>
+            </trans-unit>
+            <trans-unit id="9">
+                <source>title_sign_in_with_wtw</source>
+                <target>Start weaving now</target>
+            </trans-unit>
+            <trans-unit id="10">
+                <source>error_username_already_taken</source>
+                <target>This username has already been taken</target>
+            </trans-unit>
+            <trans-unit id="11">
+                <source>error_email_already_taken</source>
+                <target>This email has already been taken</target>
+            </trans-unit>
+        </body>
+    </file>
+</xliff>

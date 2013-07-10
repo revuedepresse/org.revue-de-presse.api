@@ -1,0 +1,16 @@
+constraint_violation.query.alter: ALTER queries are not allowed.
+constraint_violation.query.grant: GRANT privileges queries are not allowed.
+constraint_violation.query.invalid: An invalid query has been detected.
+constraint_violation.query.delete: DELETE queries are not allowed.
+constraint_violation.query.non_empty: Empty queries are allowed.
+constraint_violation.query.truncate: TRUNCATE queries are not allowed.
+constraint_violation.query.drop: DROP queries are not allowed.
+requirement_valid_query: Please provide us with a valid query
+sorry: Sorry...
+title_documents: Data library
+wrong_query_execution: Something went wrong when executing your query.
+no_record: No record was returned by this query
+confusing_query: Sorry, we are confused by the number of query delimiters.
+save_query_failure: Sorry, we could not save this query.
+save_query_success: The query "{{ sql }}" has been saved successfully.
+query_exists_already: This query has already been recorded in the past.

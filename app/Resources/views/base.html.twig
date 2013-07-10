@@ -9,6 +9,39 @@
     {% endimage %}
 </head>
 <body>
+<div class="navbar navbar-static-top">
+    <div class="navbar-inner">
+        <a class="brand" href="{{ path('fos_user_registration_register') }}">Weaving the Web</a>
+        <ul class="nav">
+            {% if not active_menu_item is defined %}
+            {% set active_menu_item = '' %}
+            {% endif %}
+            <li{% if active_menu_item == 'dashboard' %} class="active"{% endif %}>
+                <a href="{{ path('wtw_dashboard_show_documents') }}">Dashboard</a>
+            </li>
+            <li{% if active_menu_item == 'github_repositories' %} class="active"{% endif %}>
+                <a href="{{ path('wtw_dashboard_show_repositories') }}">Github Repositories</a>
+            </li>
+        </ul>
+        <ul class="nav pull-right">
+            <li class="nav">
+                {# authentication status #}
+                {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+                    <p class="navbar-text">{{ 'layout.logged_in_as'|trans({'%username%': app.user.username}, 'FOSUserBundle') }}</p>
+                {% endif %}
+            </li>
+            <li class="nav">
+                {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+                    <a class="nav" href="{{ path('fos_user_security_logout') }}">{{ 'layout.logout'|trans({}, 'FOSUserBundle') }}</a>
+                {% else %}
+                    {% block navigation_login %}
+                    <a class="nav" href="{{ path('fos_user_security_login') }}">{{ 'layout.login'|trans({}, 'FOSUserBundle') }}</a>
+                    {%  endblock navigation_login %}
+                {% endif %}
+            </li>
+        </ul>
+    </div>
+</div>
 {% block body %}{% endblock body %}
 {% block javascripts %}{% include "::javascripts.html.twig" %}{% endblock javascripts %}
 </body>

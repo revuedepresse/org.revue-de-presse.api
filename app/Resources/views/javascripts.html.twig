@@ -1,5 +1,7 @@
-<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
-{% javascripts output="js/compiled/main.js"
-    '@WTWAPIWordpressBundle/Resources/public/script.js' %}
+{% javascripts
+    '@bootstrap_js'
+    "@font_awesome_js" %}
     <script src="{{ asset_url }}"></script>
 {% endjavascripts %}
+<script type="text/javascript" src="{{ asset('bundles/fosjsrouting/js/router.js') }}"></script>
+<script type="text/javascript" src="{{ path('fos_js_routing_js', {"callback": "fos.Router.setData"}) }}"></script>

@@ -1,4 +1,37 @@
-wtw_api_wordpress:
-    resource: "@WTWAPIWordpressBundle/Controller/"
+wtw_user:
+    resource: "@WTWUserBundle/Controller/"
     type:     annotation
-    prefix:   /
+
+wtw_dashboard:
+    resource: "@WTWDashboardBundle/Controller/"
+    type:     annotation
+
+wtw_registration_land:
+    pattern:  /
+    defaults: { _controller: FOSUserBundle:Registration:land }
+
+fos_js_routing:
+    resource: "@FOSJsRoutingBundle/Resources/config/routing/routing.xml"
+
+fos_user_security:
+    resource: "@WTWUserBundle/Resources/config/routing/security.xml"
+
+fos_user_profile:
+    resource: "@FOSUserBundle/Resources/config/routing/profile.xml"
+    prefix:   /profile
+
+fos_user_register:
+    resource: "@WTWUserBundle/Resources/config/routing/registration.xml"
+    prefix:   /register
+
+fos_user_registration_register:
+    pattern:  /
+    defaults: { _controller: FOSUserBundle:Registration:register }
+
+fos_user_resetting:
+    resource: "@FOSUserBundle/Resources/config/routing/resetting.xml"
+    prefix:   /resetting
+
+fos_user_change_password:
+    resource: "@FOSUserBundle/Resources/config/routing/change_password.xml"
+    prefix:   /profile
