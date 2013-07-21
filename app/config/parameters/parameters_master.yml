@@ -1,50 +1,50 @@
 parameters:
     app_version: 0.1
 
-    api_wtw_wordpress_username:             %ws.xml_rpc.username%
-    api_wtw_wordpress_password:             %ws.xml_rpc.password%
-    api_wtw_wordpress_endpoint:             %ws.xml_rpc.endpoint%
-    api_wtw_wordpress_short_domain:         %ws.xml_rpc.short_domain%
-    api_wtw_wordpress_prefix:               %ws.xml_rpc.prefix%
+    api_facebook_host_port:     %api.facebook.protocol%%api.facebook.host_port%
 
+    api_wtw_repositories_items_per_page:  30
     api_wtw_repositories_user_name:       adama
     api_wtw_repositories_password:        ## FILL ME ##
 
-    assetic_node:           %assetic.node%
-    assetic_node_module:    %assetic.modules%
+    assetic_node:               %assetic.node%
+    assetic_node_module:        %assetic.modules%
 
-    database_charset:   UTF8
-    database_driver:    pdo_mysql
-    database_host:      localhost
-    database_port:      3306
-    database_name:      _mysql.database_
-    database_user:      _mysql.user_
-    database_password:  _mysql.password_
+    database_charset:           UTF8
+    database_driver:            pdo_mysql
+    database_host:              localhost
+    database_port:              3306
+    database_name:              %mysql.database%
+    database_user:              %mysql.user%
+    database_password:          %mysql.password%
+    database_dsn:               %database_driver%:host=%database_host%;port=%database_port%;dbname=%database_name%;charset=%database_charset%
 
-    database_charset_test:  UTF8
-    database_driver_test:   pdo_mysql
-    database_host_test:     localhost
-    database_port_test:     3308
-    database_name_test:     _mysql.test_database_
-    database_user_test:     _mysql.test_user_
-    database_password_test: _mysql.test_password_
+    database_charset_test:      UTF8
+    database_driver_test:       pdo_mysql
+    database_host_test:         localhost
+    database_port_test:         3308
+    database_name_test:         %mysql.test_database%
+    database_user_test:         %mysql.test_user%
+    database_password_test:     %mysql.test_password%
 
     database_charset_admin:     UTF8
     database_driver_admin:      pdo_mysql
     database_host_admin:        localhost
     database_port_admin:        3308
-    database_name_admin:        _mysql.database_
+    database_name_admin:        %mysql.database%
     database_user_admin:        ## FILL ME ##
-    database_password_admin:    _mysql.admin_password_
+    database_password_admin:    %mysql.admin_password%
 
-    locale:             en
+    endpoint_facebook_feed:     %api_facebook_host_port%/api/facebook/api.facebook.get.feed.php
 
-    mailer_transport:   smtp
-    mailer_host:        localhost
-    mailer_user:        ~
-    mailer_password:    ~
+    locale:                     en
+
+    mailer_transport:           smtp
+    mailer_host:                localhost
+    mailer_user:                ~
+    mailer_password:            ~
 
     secret:                     ## FILL ME ##
 
     test_database_memory:       false
-    test_database_path:         %kernel.cache_dir%/## FILL ME ##
+    test_database_path:         %kernel.cache_dir%/wtw_dashboard.db
