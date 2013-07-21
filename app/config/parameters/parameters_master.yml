@@ -1,11 +1,16 @@
 parameters:
     app_version: 0.1
 
-    api_facebook_host_port:     %api.facebook.protocol%%api.facebook.host_port%
+    api_facebook_host_port:         %api.facebook.protocol%%api.facebook.host_port%
+    api_twitter_host_port:          %api.twitter.protocol%%api.twitter.host_port%
 
-    api_wtw_repositories_items_per_page:  30
-    api_wtw_repositories_user_name:       adama
-    api_wtw_repositories_password:        ## FILL ME ##
+    api_twitter_consumer_key:       %api.twitter.consumer_key%
+    api_twitter_consumer_secret:    %api.twitter.consumer_secret%
+    api_twitter_callback_url:       %api.twitter.callback_url%
+
+    api_wtw_repositories_items_per_page:    30
+    api_wtw_repositories_user_name:         adama
+    api_wtw_repositories_password:          ## FILL ME ##
 
     assetic_node:               %assetic.node%
     assetic_node_module:        %assetic.modules%
