@@ -22,9 +22,12 @@ class UserType extends AbstractType
             ->add('twitter_username', 'text')
             ->add('username', 'text')
             ->add('email', 'text')
+            ->add('password', 'password')
+            ->add('password_again', 'password', ['mapped' => false])
             ->add('firstName', 'text', ['required' => false])
             ->add('lastName', 'text', ['required' => false])
-            ->add('disabled', 'checkbox', ['mapped' => false]) // TODO As a weaver, I can prevent my data from being collected
+            ->add('disabled', 'checkbox', ['mapped' => false, 'required' => false]) // TODO As a weaver, I can prevent my data from being collected
+            ->add('url', 'url', ['mapped' => false])
             ->add('save', 'submit');
     }
 

@@ -13,21 +13,11 @@ class SettingsController extends ContainerAware
 
     public function showAction()
     {
-        $user = new User();
-
-        /**
-         * @var $formFactory \Symfony\Component\Routing\Router
-         */
-        $router = $this->container->get('router');
-
         /**
          * @var $formFactory \Symfony\Component\Form\FormFactory
          */
         $formFactory = $this->container->get('form.factory');
-        $form = $formFactory->create('user', $user, [
-            'method' => 'POST',
-            'action' => $router->generate('weaving_the_web_user_save_settings')
-        ]);
+        $form = $formFactory->create('user', new User());
 
         /**
          * @var $templating \Symfony\Bundle\TwigBundle\TwigEngine

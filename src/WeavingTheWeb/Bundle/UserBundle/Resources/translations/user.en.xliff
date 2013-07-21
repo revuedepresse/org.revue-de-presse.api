@@ -6,6 +6,10 @@
                 <source>title_settings</source>
                 <target>Settings</target>
             </trans-unit>
+            <trans-unit id="label_disabled">
+                <source>label_disabled</source>
+                <target>Disabled</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>
