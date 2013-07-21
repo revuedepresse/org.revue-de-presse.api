@@ -1,0 +1,20 @@
+repositories:
+    resource: WeavingTheWeb\Bundle\ApiBundle\Controller\GithubController
+    type:     rest
+    prefix:   /api/github
+    options:
+        expose: true
+
+user_streams:
+    resource: WeavingTheWeb\Bundle\ApiBundle\Controller\TwitterController
+    type:     rest
+    prefix:   /api/twitter
+    options:
+        expose: true
+
+feeds:
+    resource: WeavingTheWeb\Bundle\ApiBundle\Controller\FacebookController
+    type:     rest
+    prefix:   /api/facebook
+    options:
+        expose: true
