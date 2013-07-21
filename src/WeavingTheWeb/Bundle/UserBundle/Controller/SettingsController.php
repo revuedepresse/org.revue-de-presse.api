@@ -24,16 +24,10 @@ class SettingsController extends ContainerAware
          * @var $formFactory \Symfony\Component\Form\FormFactory
          */
         $formFactory = $this->container->get('form.factory');
-        $form = $formFactory->createBuilder('form', $user)
-            ->setMethod('POST')
-            ->setAction($router->generate('weaving_the_web_user_save_settings'))
-            ->add('twitter_username', 'text')
-            ->add('username', 'text')
-            ->add('email', 'text')
-            ->add('firstName', 'text', ['required' => false])
-            ->add('lastName', 'text', ['required' => false])
-            ->add('save', 'submit', [])
-            ->getForm();
+        $form = $formFactory->create('user', $user, [
+            'method' => 'POST',
+            'action' => $router->generate('weaving_the_web_user_save_settings')
+        ]);
 
         /**
          * @var $templating \Symfony\Bundle\TwigBundle\TwigEngine
