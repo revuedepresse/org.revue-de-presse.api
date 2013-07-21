@@ -20,6 +20,9 @@ framework:
 twig:
     debug:            %kernel.debug%
     strict_variables: %kernel.debug%
+    form:
+        resources:
+            - ':Form:submit_widget.html.twig'
 
 # Assetic Configuration
 assetic:

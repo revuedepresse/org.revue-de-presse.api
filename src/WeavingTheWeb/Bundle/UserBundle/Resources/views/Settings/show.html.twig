@@ -40,12 +40,3 @@
     <link rel="stylesheet" href="{{ asset_url }}" />
 {% endstylesheets %}
 {% endblock %}
-
-{% block submit_widget %}
-{% spaceless %}
-    {% set attr = {'class': 'btn'} %}
-    {% set type = type|default('submit') %}
-    {{ block('button_widget') }}
-{% endspaceless %}
-{% endblock submit_widget %}
-{% form_theme form _self %}
