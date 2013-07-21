@@ -28,6 +28,7 @@ class AppKernel extends Kernel
             new WTW\CodeGeneration\QualityAssuranceBundle\WTWCodeGenerationQualityAssuranceBundle(),
             new WTW\DashboardBundle\WTWDashboardBundle(),
             new WTW\UserBundle\WTWUserBundle(),
+            new WeavingTheWeb\Bundle\ApiBundle\WeavingTheWebApiBundle(),
         );
 
         if (in_array($this->getEnvironment(), array('dev', 'test'))) {

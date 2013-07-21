@@ -66,15 +66,18 @@ doctrine:
                 mappings:
                     WTWDashboardBundle: ~
                     WTWUserBundle: ~
+                    WeavingTheWebApiBundle: ~
             admin:
                 connection: admin
                 mappings:
                     WTWDashboardBundle: ~
                     WTWUserBundle: ~
+                    WeavingTheWebApiBundle: ~
             test_mysql:
                 connection: test_mysql
                 mappings:
                     WTWDashboardBundle: ~
+                    WeavingTheWebApiBundle: ~
         auto_generate_proxy_classes: %kernel.debug%
 
 fos_user:
