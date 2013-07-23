@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "4bc1c60ce44e9b464bf2fc8d2c56feee",
+    "hash": "ff82a8ceaa4bf5eb25d25b0a706f8c68",
     "packages": [
         {
             "name": "behat/behat",
@@ -666,12 +666,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/collections.git",
-                "reference": "3db3ab843ff76774bee4679d4cb3a10cffb0a935"
+                "reference": "623caf42551b416460df786154d89bc50e3d1798"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/collections/zipball/3db3ab843ff76774bee4679d4cb3a10cffb0a935",
-                "reference": "3db3ab843ff76774bee4679d4cb3a10cffb0a935",
+                "url": "https://api.github.com/repos/doctrine/collections/zipball/623caf42551b416460df786154d89bc50e3d1798",
+                "reference": "623caf42551b416460df786154d89bc50e3d1798",
                 "shasum": ""
             },
             "require": {
@@ -725,7 +725,7 @@
                 "collections",
                 "iterator"
             ],
-            "time": "2013-05-26 05:21:22"
+            "time": "2013-07-23 08:27:26"
         },
         {
             "name": "doctrine/common",
@@ -2596,12 +2596,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sensiolabs/SensioDistributionBundle.git",
-                "reference": "v2.3.2"
+                "reference": "370eb0c43ebd532af880f5eeb422b108c58c4823"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sensiolabs/SensioDistributionBundle/zipball/v2.3.2",
-                "reference": "v2.3.2",
+                "url": "https://api.github.com/repos/sensiolabs/SensioDistributionBundle/zipball/370eb0c43ebd532af880f5eeb422b108c58c4823",
+                "reference": "370eb0c43ebd532af880f5eeb422b108c58c4823",
                 "shasum": ""
             },
             "require": {
@@ -2633,7 +2633,7 @@
                 "configuration",
                 "distribution"
             ],
-            "time": "2013-07-17 06:24:17"
+            "time": "2013-07-23 14:20:16"
         },
         {
             "name": "sensio/framework-extra-bundle",
@@ -3069,12 +3069,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/symfony.git",
-                "reference": "9dbffeec3e137f362a325e3be7ca9cc6d0357dc0"
+                "reference": "b45f18b81d52a730c5857a5f886e6b0d96368c89"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/symfony/zipball/9dbffeec3e137f362a325e3be7ca9cc6d0357dc0",
-                "reference": "9dbffeec3e137f362a325e3be7ca9cc6d0357dc0",
+                "url": "https://api.github.com/repos/symfony/symfony/zipball/b45f18b81d52a730c5857a5f886e6b0d96368c89",
+                "reference": "b45f18b81d52a730c5857a5f886e6b0d96368c89",
                 "shasum": ""
             },
             "require": {
@@ -3169,7 +3169,7 @@
             "keywords": [
                 "framework"
             ],
-            "time": "2013-07-21 12:12:19"
+            "time": "2013-07-21 20:18:49"
         },
         {
             "name": "twig/extensions",
@@ -3224,12 +3224,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/fabpot/Twig.git",
-                "reference": "c35d7f267ffed95060066a6edd610cb23e9e3e50"
+                "reference": "9fa5410a861427d378f9665e370e997483797cac"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/fabpot/Twig/zipball/c35d7f267ffed95060066a6edd610cb23e9e3e50",
-                "reference": "c35d7f267ffed95060066a6edd610cb23e9e3e50",
+                "url": "https://api.github.com/repos/fabpot/Twig/zipball/9fa5410a861427d378f9665e370e997483797cac",
+                "reference": "9fa5410a861427d378f9665e370e997483797cac",
                 "shasum": ""
             },
             "require": {
@@ -3265,11 +3265,65 @@
             "keywords": [
                 "templating"
             ],
-            "time": "2013-07-15 15:12:47"
+            "time": "2013-07-23 15:49:22"
         }
     ],
     "packages-dev": [
-
+        {
+            "name": "elao/web-profiler-extra-bundle",
+            "version": "dev-master",
+            "target-dir": "Elao/WebProfilerExtraBundle",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Elao/WebProfilerExtraBundle.git",
+                "reference": "c722e52bd59f3912e6ae651fbab98fe404e4e570"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Elao/WebProfilerExtraBundle/zipball/c722e52bd59f3912e6ae651fbab98fe404e4e570",
+                "reference": "c722e52bd59f3912e6ae651fbab98fe404e4e570",
+                "shasum": ""
+            },
+            "require": {
+                "symfony/framework-bundle": "~2.1",
+                "symfony/twig-bundle": "~2.0",
+                "twig/twig": "~1.12"
+            },
+            "type": "symfony-bundle",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "2.3-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Elao\\WebProfilerExtraBundle": "."
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Elao Team",
+                    "homepage": "http://www.elao.com"
+                },
+                {
+                    "name": "Contributors",
+                    "homepage": "http://github.com/Elao/WebProfilerExtraBundle/contributors"
+                }
+            ],
+            "description": "Add routing, container, assetic & twig information inside the profiler",
+            "homepage": "http://github.com/Elao/WebProfilerExtraBundle",
+            "keywords": [
+                "bundle",
+                "elao",
+                "extra",
+                "profiler"
+            ],
+            "time": "2013-07-08 07:22:07"
+        }
     ],
     "aliases": [
 
@@ -3281,7 +3335,8 @@
         "friendsofsymfony/twitter-bundle": 20,
         "friendsofsymfony/user-bundle": 20,
         "jms/serializer-bundle": 20,
-        "kertz/twitteroauth": 20
+        "kertz/twitteroauth": 20,
+        "elao/web-profiler-extra-bundle": 20
     },
     "platform": {
         "php": ">=5.4.8"
