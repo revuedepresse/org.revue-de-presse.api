@@ -96,6 +96,9 @@ fos_rest:
     routing_loader:
         default_format:       json
 
+    service:
+        view_handler: weaving_the_web.api.view_handler
+
     view:
         formats:
             json: true
