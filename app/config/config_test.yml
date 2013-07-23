@@ -22,7 +22,7 @@ swiftmailer:
     disable_delivery: true
 
 parameters:
-    basic_auth_pattern: ^/(documents|github)
+    basic_auth_pattern: ^/(documents|github|settings)
     database_charset:   UTF8
     database_driver:    pdo_mysql
     database_host:      %database_host_test%
