@@ -5,6 +5,7 @@ jms_security_extra:
 security:
     encoders:
         Symfony\Component\Security\Core\User\User: plaintext
+        WTW\UserBundle\Tests\Security\Core\User\User: plaintext
         FOS\UserBundle\Model\UserInterface: sha512
 
     role_hierarchy:
@@ -42,7 +43,7 @@ security:
             http_basic:
                 realm:            "Please enter your login information for Weaving the Web"
                 provider:         chain_provider
-            anonymous:            true
+            anonymous:            false
             logout:
                 path:             /basic/logout
                 target:           /
@@ -66,7 +67,7 @@ security:
             security: false
 
     access_control:
-        - { path: ^/documents, role: ROLE_USER }
+        - { path: ^/(documents|user), role: ROLE_USER }
         - { path: ^/, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/login$, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/basic/logout, role: IS_AUTHENTICATED_ANONYMOUSLY }
