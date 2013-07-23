@@ -30,7 +30,9 @@ parameters:
     database_name:      %database_name_test%
     database_user:      %database_user_test%
     database_password:  %database_password_test%
-    wtw.data_mining.command_provider.class: WTW\API\DataMiningBundle\Command\Tester\TransformationCommandProvider
+    security.user.provider.in_memory.class:       WTW\UserBundle\Tests\Security\Core\User\InMemoryUserProvider
+    security.user.provider.in_memory.user.class:  WTW\UserBundle\Tests\Security\Core\User\User
+    wtw.data_mining.command_provider.class:       WTW\API\DataMiningBundle\Command\Tester\TransformationCommandProvider
 
 services:
     fos_user.mailer.default:

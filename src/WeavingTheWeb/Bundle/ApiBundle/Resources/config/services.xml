@@ -8,6 +8,8 @@
         <parameter key="weaving_the_web.api.data_provider.class">WeavingTheWeb\Bundle\ApiBundle\DataProvider</parameter>
         <parameter key="weaving_the_web.api.query_factory.class">WeavingTheWeb\Bundle\ApiBundle\ORM\QueryFactory</parameter>
         <parameter key="weaving_the_web.api.endpoint.facebook.feed">%endpoint_facebook_feed%</parameter>
+        <parameter key="weaving_the_web.api.view_handler.class">WeavingTheWeb\Bundle\ApiBundle\View\ViewHandler</parameter>
+        <parameter key="weaving_the_web.api.view_response_listener.class">WeavingTheWeb\Bundle\ApiBundle\EventListener\ViewResponseListener</parameter>
     </parameters>
 
     <services>
@@ -17,6 +19,22 @@
         <service id="weaving_the_web.api.query_factory" class="%weaving_the_web.api.query_factory.class%">
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="logger" />
+        </service>
+        <service id="weaving_the_web.api.view_handler" class="%weaving_the_web.api.view_handler.class%" public="false">
+            <argument>%fos_rest.formats%</argument>
+            <argument>%fos_rest.failed_validation%</argument>
+            <argument>%fos_rest.empty_content%</argument>
+            <argument>%fos_rest.serialize_null%</argument>
+            <argument>%fos_rest.force_redirects%</argument>
+            <argument>%fos_rest.default_engine%</argument>
+            <call method="setContainer">
+                <argument type="service" id="service_container" />
+            </call>
+        </service>
+        <service id="fos_rest.view_response_listener" class="%weaving_the_web.api.view_response_listener.class%">
+            <tag name="kernel.event_listener" event="kernel.controller" method="onKernelController" />
+            <tag name="kernel.event_listener" event="kernel.view" method="onKernelView" priority="-200" />
+            <argument type="service" id="service_container" />
         </service>
     </services>
 </container>
