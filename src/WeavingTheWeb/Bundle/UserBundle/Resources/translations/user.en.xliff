@@ -10,6 +10,18 @@
                 <source>label_disabled</source>
                 <target>Disabled</target>
             </trans-unit>
+            <trans-unit id="field_current_password">
+                <source>field_current_password</source>
+                <target>Your current password</target>
+            </trans-unit>
+            <trans-unit id="field_new_password">
+                <source>field_new_password</source>
+                <target>New password (only to change it)</target>
+            </trans-unit>
+            <trans-unit id="field_password_again">
+                <source>field_password_again</source>
+                <target>New password again</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>
