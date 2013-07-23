@@ -22,12 +22,13 @@ class UserType extends AbstractType
             ->add('twitter_username', 'text')
             ->add('username', 'text')
             ->add('email', 'text')
-            ->add('password', 'password')
-            ->add('password_again', 'password', ['mapped' => false])
-            ->add('firstName', 'text', ['required' => false])
-            ->add('lastName', 'text', ['required' => false])
-            ->add('disabled', 'checkbox', ['mapped' => false, 'required' => false]) // TODO As a weaver, I can prevent my data from being collected
-            ->add('url', 'url', ['mapped' => false])
+            ->add('currentPassword', 'password', ['label' => 'field_current_password', 'mapped' => false])
+            ->add('password', 'repeated', [
+                'type' => 'password',
+                'first_options' => [ 'label' => 'field_new_password'],
+                'second_options' => [ 'label' => 'field_password_again'],
+                'required' => false
+            ])
             ->add('save', 'submit');
     }
 
@@ -41,6 +42,9 @@ class UserType extends AbstractType
 
     public function setDefaultOptions(OptionsResolverInterface $resolver)
     {
-        $resolver->setDefaults(['data_class' => 'WTW\UserBundle\Entity\User']);
+        $resolver->setDefaults([
+            'data_class' => 'WTW\UserBundle\Entity\User',
+            'translation_domain' => 'user'
+        ]);
     }
 }
