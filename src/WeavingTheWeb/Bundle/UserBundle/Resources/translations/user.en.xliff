@@ -16,11 +16,15 @@
             </trans-unit>
             <trans-unit id="field_new_password">
                 <source>field_new_password</source>
-                <target>New password (only to change it)</target>
+                <target>New password</target>
             </trans-unit>
             <trans-unit id="field_password_again">
                 <source>field_password_again</source>
                 <target>New password again</target>
+            </trans-unit>
+            <trans-unit id="field_error_current_password">
+                <source>field_error_current_password</source>
+                <target>Invalid password</target>
             </trans-unit>
         </body>
     </file>
