@@ -26,9 +26,15 @@
         <ul class="nav pull-right">
             <li class="nav">
                 {# authentication status #}
+                {% spaceless %}
                 {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-                    <p class="navbar-text">{{ 'layout.logged_in_as'|trans({'%username%': app.user.username}, 'FOSUserBundle') }}</p>
+                    <p class="navbar-text">
+                        <a href="{{ path('weaving_the_web_user_show_settings')  }}">
+                            {{ app.user.username }}
+                        </a>
+                    </p>
                 {% endif %}
+                {% endspaceless %}
             </li>
             <li class="nav">
                 {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
