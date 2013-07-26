@@ -67,7 +67,7 @@ security:
             security: false
 
     access_control:
-        - { path: ^/(documents|user), role: ROLE_USER }
+        - { path: ^/(documents|user), role: ROLE_ADMIN }
         - { path: ^/, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/login$, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/basic/logout, role: IS_AUTHENTICATED_ANONYMOUSLY }

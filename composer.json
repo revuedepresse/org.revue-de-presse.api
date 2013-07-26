@@ -26,6 +26,7 @@
         "behat/symfony2-extension": "*",
         "doctrine/doctrine-bundle": "1.2.*",
         "doctrine/doctrine-fixtures-bundle": "dev-master",
+        "doctrine/doctrine-migrations-bundle": "dev-master",
         "doctrine/orm": ">=2.2.3,<2.4-dev",
         "friendsofsymfony/jsrouting-bundle": "1.1.*",
         "friendsofsymfony/rest-bundle":"0.12.*",
