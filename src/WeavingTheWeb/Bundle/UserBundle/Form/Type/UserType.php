@@ -23,7 +23,7 @@ class UserType extends AbstractType
             ->add('username', 'text')
             ->add('email', 'text')
             ->add('currentPassword', 'password', ['label' => 'field_current_password', 'mapped' => false])
-            ->add('password', 'repeated', [
+            ->add('plainPassword', 'repeated', [
                 'type' => 'password',
                 'first_options' => [ 'label' => 'field_new_password'],
                 'second_options' => [ 'label' => 'field_password_again'],

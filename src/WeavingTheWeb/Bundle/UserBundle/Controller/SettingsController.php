@@ -2,8 +2,12 @@
 
 namespace WeavingTheWeb\Bundle\UserBundle\Controller;
 
+use FOS\UserBundle\Model\UserManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerAware,
-    Symfony\Component\HttpFoundation\Request;
+    Symfony\Component\HttpFoundation\Request,
+    Symfony\Component\HttpFoundation\RedirectResponse,
+    Symfony\Component\Security\Core\Validator\Constraints\UserPassword,
+    Symfony\Component\Form\FormError;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
 use WTW\UserBundle\Entity\User;
 
@@ -19,17 +23,44 @@ class SettingsController extends ContainerAware
      */
     public function saveAction(Request $request)
     {
-        $user = $this->getUser();
-        $form = $this->getSettingsForm($user);
+        $currentUser = $this->getUser();
+        $form = $this->getSettingsForm($currentUser);
         $form->handleRequest($request);
 
-        if ($form->isValid()) {
-            /**
-             * @var $entityManager \Doctrine\Orm\EntityManager
-             */
-            $entityManager = $this->container->get('doctrine.orm.entity_manager');
-            $entityManager->persist($user);
+        if ($request->getMethod() === 'POST')
+        {
+            if ($form->isValid()) {
+                $currentPassword = $form->get('currentPassword')->getData();
+
+                /**
+                 * @var $validator \Symfony\Component\Validator\Validator
+                 */
+                $validator = $this->container->get('validator');
+                $errorList = $validator->validateValue($currentPassword, new UserPassword());
+
+                if (count($errorList) === 0) {
+                    $plainPassword = $form->get('plainPassword')->getData();
+                    if (strlen(trim($plainPassword)) === 0) {
+                        $currentUser->setPlainPassword($currentPassword);
+                    }
+
+                    /**
+                     * @var $userManager \FOS\UserBundle\Model\UserManagerInterface
+                     */
+                    $userManager = $this->container->get('weaving_the_web_user.user_manager');
+                    $userManager->updateUser($currentUser);
+
+                    return new RedirectResponse($this->container->get('router')
+                        ->generate('weaving_the_web_user_show_settings'));
+                } else {
+                    $translator = $this->container->get('translator');
+                    $currentPasswordError = $translator->trans('field_error_current_password', [], 'user');
+                    $form->get('currentPassword')->addError(new FormError($currentPasswordError));
+                }
+            }
         }
+
+        return ['form' => $form->createView()];
     }
 
     /**

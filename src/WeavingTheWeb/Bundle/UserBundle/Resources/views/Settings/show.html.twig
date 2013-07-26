@@ -14,23 +14,43 @@
                 <h1>{{ title }}</h1>
             </div>
             <div class="row-fluid">
-                {% if form_errors(form) %}
-                <div class="offset1 label label-important">{{ form_errors(form) }}</div>
-                {% endif %}
                 <div class="span5">
                     <form action="{{ path("weaving_the_web_user_save_settings") }}"
                           id="login"
-                          method="post">
+                          method="post" novalidate>
+                        {% set fields = [
+                                'username',
+                                'email',
+                                'twitter_username',
+                                'currentPassword',
+                            ]
+                        %}
+                        {% for field in fields %}
                         <div class="row-fluid">
-                            {{ form_row(form.username) }}
+                            <div class="control-group{% if form_errors(form[field]) %} error{% endif %}">
+                            {% if form_errors(form[field]) %}
+                            {{ form_errors(form[field]) }}
+                            {% endif %}
+                            {{ form_label(form[field]) }}
+                            {{ form_widget(form[field]) }}
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        <div class="row-fluid">
+                            {% if form_errors(form.plainPassword.first) %}
+                            {{ form_errors(form.plainPassword.first) }}
+                            {% endif %}
+                            {{ form_label(form.plainPassword.first) }}
+                            {{ form_widget(form.plainPassword.first) }}
                         </div>
 
                         <div class="row-fluid">
-                            {{ form_row(form.email) }}
-                        </div>
-
-                        <div class="row-fluid">
-                            {{ form_row(form.twitter_username) }}
+                            {% if form_errors(form.plainPassword.second) %}
+                            {{ form_errors(form.plainPassword.second) }}
+                            {% endif %}
+                            {{ form_label(form.plainPassword.second) }}
+                            {{ form_widget(form.plainPassword.second) }}
                         </div>
 
                         <div class="row-fluid">
@@ -38,19 +58,8 @@
                         </div>
 
                         <div class="row-fluid">
-                            {{ form_row(form.currentPassword) }}
-                        </div>
-
-                        <div class="row-fluid">
-                            {{ form_row(form.password.first) }}
-                        </div>
-
-                        <div class="row-fluid">
-                            {{ form_row(form.password.second) }}
-                        </div>
-
-                        <div class="row-fluid">
-                            {{ form_row(form.save) }}
+                            {{ form_label(form.save) }}
+                            {{ form_widget(form.save) }}
                         </div>
                     </form>
                 </div>
