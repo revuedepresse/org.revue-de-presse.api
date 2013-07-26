@@ -69,26 +69,37 @@ doctrine:
             default:
                 connection: default
                 mappings:
+                    WTWCodeGenerationAnalysisBundle: ~
                     WTWDashboardBundle: ~
+                    WTWLegacyProviderBundle: ~
                     WTWUserBundle: ~
                     WeavingTheWebApiBundle: ~
+                    WeavingTheWebUserBundle: ~
             admin:
                 connection: admin
                 mappings:
+                    WTWCodeGenerationAnalysisBundle: ~
                     WTWDashboardBundle: ~
                     WTWUserBundle: ~
+                    WTWLegacyProviderBundle: ~
                     WeavingTheWebApiBundle: ~
+                    WeavingTheWebUserBundle: ~
             test_mysql:
                 connection: test_mysql
                 mappings:
+                    WTWCodeGenerationAnalysisBundle: ~
                     WTWDashboardBundle: ~
+                    WTWLegacyProviderBundle: ~
                     WeavingTheWebApiBundle: ~
+                    WeavingTheWebUserBundle: ~
         auto_generate_proxy_classes: %kernel.debug%
 
 fos_user:
     db_driver:      orm
     firewall_name:  wtw_connect
     user_class:     WTW\UserBundle\Entity\User
+    group:
+        group_class: WeavingTheWeb\UserBundle\Entity\Group
 
 fos_rest:
     allowed_methods_listener: true
