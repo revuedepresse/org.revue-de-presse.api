@@ -185,6 +185,15 @@ class User extends BaseUser
     protected $lastLogin;
 
     /**
+     * @ORM\ManyToMany(targetEntity="WeavingTheWeb\Bundle\UserBundle\Entity\Group")
+     * @ORM\JoinTable(name="weaving_user_group",
+     *      joinColumns={@ORM\JoinColumn(name="id", referencedColumnName="usr_id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="id", referencedColumnName="rol_id")}
+     * )
+     */
+   protected $groups;
+
+    /**
      * Get id
      *
      * @return integer 
