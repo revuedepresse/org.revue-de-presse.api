@@ -113,7 +113,7 @@ class User extends BaseUser
     /**
      * @var string
      *
-     * @ORM\Column(name="usr_email", type="string", length=255, nullable=true)
+     * @ORM\Column(name="usr_email", type="string", length=255)
      */
     protected $email;
 
@@ -493,7 +493,7 @@ class User extends BaseUser
      *
      * @return boolean 
      */
-    public function getEnabled()
+    public function isEnabled()
     {
         return $this->enabled;
     }

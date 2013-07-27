@@ -46,6 +46,22 @@
                 <source>error_email_already_taken</source>
                 <target>This email has already been taken</target>
             </trans-unit>
+            <trans-unit id="User account is disabled.">
+                <source>Account is disabled.</source>
+                <target>This account has not yet been activated.</target>
+            </trans-unit>
+            <trans-unit id="registration.error.plainPassword">
+                <source>registration.error.plainPassword</source>
+                <target>Please fill out this field with a password and repeat it</target>
+            </trans-unit>
+            <trans-unit id="registration.error.email">
+                <source>registration.error.email</source>
+                <target>Please fill out this field with a valid email</target>
+            </trans-unit>
+            <trans-unit id="registration.error.username">
+                <source>registration.error.username</source>
+                <target>Please fill out this field with a username</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

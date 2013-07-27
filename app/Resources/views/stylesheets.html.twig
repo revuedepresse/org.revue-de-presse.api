@@ -1,6 +1,9 @@
 {% stylesheets
     "@bootstrap_css"
     "@font_awesome_css"
-    filter='cssrewrite' %}
-    <link rel="stylesheet" href="{{ asset_url }}" />
+    "../app/Resources/public/css/shared.css"
+    filter='cssrewrite'
+    output='css/shared.css'
+%}
+<link rel="stylesheet" href="{{ asset_url }}" />
 {% endstylesheets %}
