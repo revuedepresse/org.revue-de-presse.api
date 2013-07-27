@@ -9,9 +9,16 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * @ORM\Entity(repositoryClass="WeavingTheWeb\Bundle\ApiBundle\Repository\JsonRepository")
  * @ORM\Table(name="weaving_json",
- *  indexes={@ORM\Index(
- *      name="jsn_hash",
- *      columns={"jsn_hash"})}
+ *  uniqueConstraints={
+ *      @ORM\UniqueConstraint(
+ *          name="jsn_hash",
+ *          columns={"jsn_hash"}),
+ *  },
+ *  indexes={
+ *      @ORM\Index(
+ *          name="jsn_status",
+ *          columns={"jsn_status"})
+ *  }
  * )
  */
 class Json
