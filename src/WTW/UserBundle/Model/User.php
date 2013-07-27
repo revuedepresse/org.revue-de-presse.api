@@ -1,14 +1,5 @@
 <?php
 
-/*
- * This file is part of the FOSUserBundle package.
- *
- * (c) FriendsOfSymfony <http://friendsofsymfony.github.com/>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
-
 namespace WTW\UserBundle\Model;
 
 use Doctrine\Common\Collections\Collection,
@@ -17,7 +8,6 @@ use Doctrine\Common\Collections\Collection,
 use FOS\UserBundle\Model\UserInterface,
     FOS\UserBundle\Model\GroupableInterface,
     FOS\UserBundle\Model\GroupInterface;
-
 
 /**
  * Storage agnostic user object
@@ -103,9 +93,9 @@ abstract class User implements UserInterface, GroupableInterface
     protected $expiresAt;
 
     /**
-     * @var array
+     * @var ArrayCollection
      */
-    protected $roles = [];
+    protected $roles;
 
     /**
      * @var boolean
@@ -134,13 +124,21 @@ abstract class User implements UserInterface, GroupableInterface
 
     public function addRole($role)
     {
+        if (is_null($this->roles)) {
+            $this->roles = new ArrayCollection();
+        }
+
         $role = strtoupper($role);
         if ($role === static::ROLE_DEFAULT) {
             return $this;
         }
 
-        if (!in_array($role, $this->roles, true)) {
-            $this->roles[] = $role;
+        if (is_array($this->roles)) {
+            if (!in_array($role, $this->roles, true)) {
+                $this->roles[] = $role;
+            }
+        } elseif (!$this->roles->contains($role)) {
+            $this->roles->add($role);
         }
 
         return $this;
@@ -273,7 +271,7 @@ abstract class User implements UserInterface, GroupableInterface
      */
     public function getRoles()
     {
-        $roles = $this->roles;
+        $roles = $this->roles->toArray();
 
         foreach ($this->getGroups() as $group) {
             $roles = array_merge($roles, $group->getRoles());
@@ -367,7 +365,10 @@ abstract class User implements UserInterface, GroupableInterface
     {
         if (false !== $key = array_search(strtoupper($role), $this->roles, true)) {
             unset($this->roles[$key]);
-            $this->roles = array_values($this->roles);
+
+            if (is_array($this->roles)) {
+                $this->roles = array_values($this->roles);
+            }
         }
 
         return $this;

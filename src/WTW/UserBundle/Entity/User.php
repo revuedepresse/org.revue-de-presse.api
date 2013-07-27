@@ -200,7 +200,7 @@ class User extends BaseUser
      *      inverseJoinColumns={@ORM\JoinColumn(name="role_id", referencedColumnName="id")}
      * )
      */
-    protected $roles;
+    protected $roles = [];
 
     /**
      * Get id
@@ -781,5 +781,45 @@ class User extends BaseUser
     public function getCredentialsExpireAt()
     {
         return $this->credentialsExpireAt;
+    }
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->roles = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+     * Add roles
+     *
+     * @param \WeavingTheWeb\Bundle\UserBundle\Entity\Role $roles
+     * @return User
+     */
+    public function addRole($roles)
+    {
+        $this->roles[] = $roles;
+    
+        return $this;
+    }
+
+    /**
+     * Remove roles
+     *
+     * @param \WeavingTheWeb\Bundle\UserBundle\Entity\Role $roles
+     */
+    public function removeRole($roles)
+    {
+        $this->roles->removeElement($roles);
+    }
+
+    /**
+     * Get roles
+     *
+     * @return \Doctrine\Common\Collections\Collection 
+     */
+    public function getRoles()
+    {
+        return $this->roles->toArray();
     }
 }
