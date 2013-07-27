@@ -7,9 +7,6 @@ parameters:
     api_twitter_consumer_key:       %api.twitter.consumer_key%
     api_twitter_consumer_secret:    %api.twitter.consumer_secret%
     api_twitter_callback_url:       %api.twitter.callback_url%
-    api_twitter_version:            1.1
-    api_twitter_user_token:         %api.twitter.user_token%
-    api_twitter_user_secret:        %api.twitter.user_secret%
 
     api_wtw_repositories_items_per_page:    30
     api_wtw_repositories_user_name:         adama
