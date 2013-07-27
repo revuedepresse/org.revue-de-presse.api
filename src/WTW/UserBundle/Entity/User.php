@@ -2,7 +2,8 @@
 
 namespace WTW\UserBundle\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection,
+    Doctrine\ORM\Mapping as ORM;
 use WTW\UserBundle\Model\User as BaseUser;
 
 /**
@@ -10,6 +11,9 @@ use WTW\UserBundle\Model\User as BaseUser;
  *
  * @ORM\Table(name="weaving_user")
  * @ORM\Entity
+ *
+ * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ * @package WTW\UserBundle\Entity
  */
 class User extends BaseUser
 {
@@ -17,7 +21,7 @@ class User extends BaseUser
      * @var integer
      *
      * @ORM\Id
-     * @ORM\Column(name="usr_id", type="integer", nullable=false)
+     * @ORM\Column(name="usr_id", type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     protected $id;
@@ -194,13 +198,13 @@ class User extends BaseUser
     protected $groups;
 
     /**
-     * @ORM\ManyToMany(targetEntity="WeavingTheWeb\Bundle\UserBundle\Entity\Role")
+     * @ORM\ManyToMany(targetEntity="WeavingTheWeb\Bundle\UserBundle\Entity\Role", inversedBy="users")
      * @ORM\JoinTable(name="weaving_user_role",
      *      joinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="usr_id")},
      *      inverseJoinColumns={@ORM\JoinColumn(name="role_id", referencedColumnName="id")}
      * )
      */
-    protected $roles = [];
+    protected $roles;
 
     /**
      * Get id
@@ -820,6 +824,23 @@ class User extends BaseUser
      */
     public function getRoles()
     {
+        if (is_null($this->roles) || (!$this->roles instanceof ArrayCollection)) {
+            $collection = new ArrayCollection();
+
+            foreach ($this->roles as $role) {
+                $role = (string)$role;
+                if (!$collection->contains($role)) {
+                    $collection->add($role);
+                }
+            }
+
+            if (!$collection->contains(self::ROLE_DEFAULT)) {
+                $collection->add(self::ROLE_DEFAULT);
+            }
+
+            $this->roles = $collection;
+        }
+
         return $this->roles->toArray();
     }
 }

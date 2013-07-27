@@ -2,9 +2,9 @@
 
 namespace WeavingTheWeb\Bundle\UserBundle\Entity;
 
-use Symfony\Component\Security\Core\Role\RoleInterface;
 use Doctrine\Common\Collections\ArrayCollection,
     Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\Role\RoleInterface;
 
 /**
  * Class Role
@@ -18,8 +18,10 @@ use Doctrine\Common\Collections\ArrayCollection,
 class Role implements RoleInterface
 {
     /**
-     * @ORM\Column(name="id", type="integer")
+     * @var integer
+     *
      * @ORM\Id
+     * @ORM\Column(name="id", type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     protected $id;
