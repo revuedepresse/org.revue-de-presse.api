@@ -105,7 +105,7 @@ abstract class User implements UserInterface, GroupableInterface
     /**
      * @var array
      */
-    protected $roles;
+    protected $roles = [];
 
     /**
      * @var boolean
