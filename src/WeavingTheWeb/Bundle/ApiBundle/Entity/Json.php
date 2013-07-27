@@ -17,7 +17,7 @@ use Doctrine\ORM\Mapping as ORM;
  *  indexes={
  *      @ORM\Index(
  *          name="jsn_status",
- *          columns={"jsn_status"})
+ *          columns={"jsn_status", "jsn_type"})
  *  }
  * )
  */
