@@ -90,6 +90,7 @@ doctrine:
                     WTWCodeGenerationAnalysisBundle: ~
                     WTWDashboardBundle: ~
                     WTWLegacyProviderBundle: ~
+                    WTWUserBundle: ~
                     WeavingTheWebApiBundle: ~
                     WeavingTheWebUserBundle: ~
         auto_generate_proxy_classes: %kernel.debug%

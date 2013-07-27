@@ -24,6 +24,9 @@ security:
                     %api_wtw_repositories_user_name%:
                         password: %api_wtw_repositories_password%
                         roles: [ROLE_ADMIN]
+                    %api_wtw_repositories_user_name_super%:
+                        password: %api_wtw_repositories_password%
+                        roles: [ROLE_SUPER_ADMIN]
         fos_user:
             id: fos_user.user_provider.username
 
