@@ -5,6 +5,7 @@ namespace WeavingTheWeb\Bundle\UserBundle\Entity;
 use Doctrine\Common\Collections\ArrayCollection,
     Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Security\Core\Role\RoleInterface;
+use WTW\UserBundle\Entity\User;
 
 /**
  * Class Role
@@ -108,10 +109,10 @@ class Role implements RoleInterface
     /**
      * Add users
      *
-     * @param \WeavingTheWeb\Bundle\UserBundle\Entity\User $users
+     * @param User $users
      * @return Role
      */
-    public function addUser(\WeavingTheWeb\Bundle\UserBundle\Entity\User $users)
+    public function addUser(User $users)
     {
         $this->users[] = $users;
     
@@ -121,9 +122,9 @@ class Role implements RoleInterface
     /**
      * Remove users
      *
-     * @param \WeavingTheWeb\Bundle\UserBundle\Entity\User $users
+     * @param User $users
      */
-    public function removeUser(\WeavingTheWeb\Bundle\UserBundle\Entity\User $users)
+    public function removeUser(User $users)
     {
         $this->users->removeElement($users);
     }
