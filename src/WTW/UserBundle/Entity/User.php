@@ -187,8 +187,8 @@ class User extends BaseUser
     /**
      * @ORM\ManyToMany(targetEntity="WeavingTheWeb\Bundle\UserBundle\Entity\Group")
      * @ORM\JoinTable(name="weaving_user_group",
-     *      joinColumns={@ORM\JoinColumn(name="id", referencedColumnName="usr_id")},
-     *      inverseJoinColumns={@ORM\JoinColumn(name="id", referencedColumnName="rol_id")}
+     *      joinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="usr_id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="group_id", referencedColumnName="rol_id")}
      * )
      */
    protected $groups;
