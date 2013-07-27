@@ -10,26 +10,37 @@ use FOS\UserBundle\Controller\RegistrationController as BaseController,
     FOS\UserBundle\Event\FilterUserResponseEvent;
 use Symfony\Component\HttpFoundation\RedirectResponse,
     Symfony\Component\HttpFoundation\Request,
-    Symfony\Component\Security\Core\SecurityContext;
+    Symfony\Component\Security\Core\SecurityContext,
+    Symfony\Component\Form\FormError,
+    Symfony\Component\Form\FormInterface,
+    Symfony\Component\Validator\Constraints\Email,
+    Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
+use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\NotNull;
 
 class RegistrationController extends BaseController
 {
+    /**
+     * @param Request $request
+     * @return RedirectResponse
+     * @Extra\Template("WTWUserBundle:Registration:register.html.twig")
+     */
     public function landAction(Request $request)
     {
-        /** @var $formFactory \FOS\UserBundle\Form\Factory\FactoryInterface */
-        $formFactory = $this->container->get('fos_user.registration.form.factory');
         /** @var $userManager \FOS\UserBundle\Model\UserManagerInterface */
         $userManager = $this->container->get('fos_user.user_manager');
-        /** @var $dispatcher \Symfony\Component\EventDispatcher\EventDispatcherInterface */
-        $dispatcher = $this->container->get('event_dispatcher');
-
         $user = $userManager->createUser();
-        $user->setEnabled(true);
+
         $exceptions = [];
 
+        /** @var $dispatcher \Symfony\Component\EventDispatcher\EventDispatcherInterface */
+        $dispatcher = $this->container->get('event_dispatcher');
         $dispatcher->dispatch(FOSUserEvents::REGISTRATION_INITIALIZE, new UserEvent($user, $request));
         $loginFormParameters = $this->getLoginFormParameters($request);
 
+        /** @var $formFactory \FOS\UserBundle\Form\Factory\FactoryInterface */
+        $formFactory = $this->container->get('fos_user.registration.form.factory');
+        /** @var $form \Symfony\Component\Form\Form */
         $form = $formFactory->createForm();
         $form->setData($user);
 
@@ -38,6 +49,11 @@ class RegistrationController extends BaseController
                 $response = $this->getRegistrationFormResponse($request, $form, $user);
             } catch (DBALException $exception) {
                 $message = $exception->getMessage();
+
+                /** @var $logger \Psr\Log\LoggerInterface; */
+                $logger = $this->container->get('logger');
+                $logger->error($message);
+
                 if (false !== strpos($message, "'usr_user_name'")) {
                     $exceptions[] = 'error_username_already_taken';
                 }
@@ -51,12 +67,12 @@ class RegistrationController extends BaseController
             }
         }
 
-        return $this->container->get('templating')->renderResponse(
-            'WTWUserBundle:Registration:register.html.'.$this->getEngine(), array_merge(
-                $loginFormParameters,
-                array(
-                    'form' => $form->createView(),
-                    'exceptions' => $exceptions)));
+        return array_merge(
+            $loginFormParameters, [
+                'form' => $form,
+                'exceptions' => $exceptions
+            ]
+        );
     }
 
     protected function getLoginFormParameters(Request $request)
@@ -75,9 +91,10 @@ class RegistrationController extends BaseController
         }
 
         if ($error) {
-            // TODO: this is a potential security risk (see http://trac.symfony-project.org/ticket/9523)
-            $error = $error->getMessage();
+            $translator = $this->container->get('translator');
+            $error = $translator->trans($error->getMessageKey(), [], 'security');
         }
+
         // last username entered by the user
         $lastUsername = (null === $session) ? '' : $session->get(SecurityContext::LAST_USERNAME);
 
@@ -108,12 +125,18 @@ class RegistrationController extends BaseController
         /** @var $dispatcher \Symfony\Component\EventDispatcher\EventDispatcherInterface */
         $dispatcher = $this->container->get('event_dispatcher');
 
-        $form->bind($request);
+        $form->handleRequest($request);
+
+        $this->validatePassword($form);
+        $this->validateEmail($form);
+        $this->validateUsername($form);
 
         if ($form->isValid()) {
             $event = new FormEvent($form, $request);
             $dispatcher->dispatch(FOSUserEvents::REGISTRATION_SUCCESS, $event);
 
+            $user->setEnabled(false);
+            $user->setLocked(false);
             $userManager->updateUser($user);
 
             if (null === $response = $event->getResponse()) {
@@ -128,5 +151,69 @@ class RegistrationController extends BaseController
         }
 
         return $response;
+    }
+
+    /**
+     * @param FormInterface $form
+     */
+    protected function validatePassword(FormInterface  $form)
+    {
+        $plainPassword = $form->get('plainPassword')->getData();
+        if (is_null($plainPassword) || (strlen(trim($plainPassword)) === 0)) {
+            $translator = $this->container->get('translator');
+            $emptyPassword = $translator->trans('registration.password.empty', [], 'security');
+            $form->get('plainPassword')->addError(new FormError($emptyPassword));
+        }
+    }
+
+    /**
+     * @param FormInterface $form
+     */
+    protected function validateEmail(FormInterface $form)
+    {
+        $translator = $this->container->get('translator');
+        $email = $form->get('email');
+        $emailValue = $email->getData();
+        $emailConstraint = new Email();
+        $emailConstraint->message = $translator->trans('registration.email.invalid', [], 'security');
+        $notBlankConstraint = new NotBlank();
+        $notBlankConstraint->message = $translator->trans('registration.email.blank', [], 'security');
+
+        /**
+         * @var $validator \Symfony\Component\Validator\Validator
+         */
+        $validator = $this->container->get('validator');
+        $errorList = $validator->validateValue(
+            $emailValue,
+            [
+                $notBlankConstraint,
+                $emailConstraint
+            ]
+        );
+        if (count($errorList) > 0) {
+            $email->addError(new FormError($errorList[0]));
+        }
+    }
+
+    /**
+     * @param FormInterface $form
+     */
+    protected function validateUsername(FormInterface  $form)
+    {
+        $username = $form->get('username');
+        $usernameValue = $username->getData();
+        $notBlankConstraint = new NotBlank();
+
+        $translator = $this->container->get('translator');
+        $notBlankConstraint->message = $translator->trans('registration.username.blank', [], 'security');
+
+        /**
+         * @var $validator \Symfony\Component\Validator\Validator
+         */
+        $validator = $this->container->get('validator');
+        $errorList = $validator->validateValue($usernameValue, $notBlankConstraint);
+        if (count($errorList) > 0) {
+            $username->addError(new FormError($errorList[0]));
+        }
     }
 }
