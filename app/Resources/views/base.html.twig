@@ -16,9 +16,11 @@
             {% if not active_menu_item is defined %}
             {% set active_menu_item = '' %}
             {% endif %}
+            {% if is_granted("ROLE_SUPER_ADMIN") %}
             <li{% if active_menu_item == 'dashboard' %} class="active"{% endif %}>
                 <a href="{{ path('wtw_dashboard_show_documents') }}">Dashboard</a>
             </li>
+            {% endif %}
             <li{% if active_menu_item == 'github_repositories' %} class="active"{% endif %}>
                 <a href="{{ path('wtw_dashboard_show_repositories') }}">Github Repositories</a>
             </li>
