@@ -191,7 +191,16 @@ class User extends BaseUser
      *      inverseJoinColumns={@ORM\JoinColumn(name="group_id", referencedColumnName="rol_id")}
      * )
      */
-   protected $groups;
+    protected $groups;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="WeavingTheWeb\Bundle\UserBundle\Entity\Role")
+     * @ORM\JoinTable(name="weaving_user_role",
+     *      joinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="usr_id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="role_id", referencedColumnName="id")}
+     * )
+     */
+    protected $roles;
 
     /**
      * Get id
