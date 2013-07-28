@@ -15,5 +15,4 @@ _configurator:
 
 weaving_the_web_twitter:
     resource: "@WeavingTheWebUserBundle/Controller/"
-    schemes: [%channel%]
     type:     annotation
