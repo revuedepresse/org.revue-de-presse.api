@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "d013e91e307027f2f1e67c989b83700a",
+    "hash": "7505ff97b22f63099928fb52b65c3b14",
     "packages": [
         {
             "name": "behat/behat",
@@ -1588,16 +1588,16 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/FriendsOfSymfony/FOSTwitterBundle.git",
-                "reference": "6c04fdef19bd06007cddfe730447dbfcfd93dd57"
+                "reference": "d777561581c7d89945e517b33d03bfe349280314"
             },
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/FriendsOfSymfony/FOSTwitterBundle/zipball/6c04fdef19bd06007cddfe730447dbfcfd93dd57",
-                "reference": "6c04fdef19bd06007cddfe730447dbfcfd93dd57",
+                "reference": "d777561581c7d89945e517b33d03bfe349280314",
                 "shasum": ""
             },
             "require": {
-                "kertz/twitteroauth": "*",
+                "kertz/twitteroauth": "dev-master#8c750cd",
                 "php": ">=5.3.2",
                 "symfony/framework-bundle": "2.*",
                 "symfony/security-bundle": "~2.1"
@@ -1623,7 +1623,7 @@
             "keywords": [
                 "Twitter authentication"
             ],
-            "time": "2013-06-03 19:02:38"
+            "time": "2013-07-27 21:51:28"
         },
         {
             "name": "friendsofsymfony/user-bundle",
@@ -2405,12 +2405,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/thierrymarianne/twitteroauth.git",
-                "reference": "264abb31a3f3424ff2096b2912883e813e25d78d"
+                "reference": "8c750cdacaa7ce7890d454f93dd9104f80f5cdef"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thierrymarianne/twitteroauth/zipball/264abb31a3f3424ff2096b2912883e813e25d78d",
-                "reference": "264abb31a3f3424ff2096b2912883e813e25d78d",
+                "url": "https://api.github.com/repos/thierrymarianne/twitteroauth/zipball/8c750cdacaa7ce7890d454f93dd9104f80f5cdef",
+                "reference": "8c750cdacaa7ce7890d454f93dd9104f80f5cdef",
                 "shasum": ""
             },
             "require": {
@@ -2425,7 +2425,7 @@
             "support": {
                 "source": "https://github.com/thierrymarianne/twitteroauth/tree/master"
             },
-            "time": "2013-05-03 00:35:24"
+            "time": "2013-07-27 21:50:44"
         },
         {
             "name": "kriswallsmith/assetic",
@@ -3177,12 +3177,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/symfony.git",
-                "reference": "de1915f40506fc86a8b5f2ca0af3478044ddf58b"
+                "reference": "9d53905b88d55d0bf828e5714c9c012fb8bab3c6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/symfony/zipball/de1915f40506fc86a8b5f2ca0af3478044ddf58b",
-                "reference": "de1915f40506fc86a8b5f2ca0af3478044ddf58b",
+                "url": "https://api.github.com/repos/symfony/symfony/zipball/9d53905b88d55d0bf828e5714c9c012fb8bab3c6",
+                "reference": "9d53905b88d55d0bf828e5714c9c012fb8bab3c6",
                 "shasum": ""
             },
             "require": {
@@ -3277,7 +3277,7 @@
             "keywords": [
                 "framework"
             ],
-            "time": "2013-07-26 11:48:41"
+            "time": "2013-07-27 05:01:40"
         },
         {
             "name": "twig/extensions",

@@ -21,42 +21,6 @@ use JMS\SecurityExtraBundle\Annotation\Secure;
 class DocumentController extends Controller
 {
     /**
-     * @Extra\Route("/twitter/connect", name="wtw_dashboard_twitter_connect")
-     */
-    public function connectTwitterAction()
-    {
-        $request = $this->get('request');
-        $twitter = $this->get('fos_twitter.service');
-
-        $authURL = $twitter->getLoginUrl($request);
-
-        return new RedirectResponse($authURL);
-    }
-
-    /**
-     * @Extra\Route("/twitter/login_check", name="wtw_dashboard_twitter_login_check")
-     */
-    public function loginCheckAction()
-    {
-        /**
-         * @var $twitter Twitter
-         */
-        $twitter = $this->get('fos_twitter.service');
-        $oauthToken = $this->getRequest()->get('oauth_token');
-        $oauthVerifier = $this->getRequest()->get('oauth_verifier');
-        $accessToken = $twitter->getAccessToken($oauthToken, $oauthVerifier);
-
-        return new Response($accessToken);
-    }
-
-    /**
-     * @Extra\Route("/could-not-login", name="wtw_dashboard_login_failure")
-     */
-    public function loginFailureAction()
-    {
-    }
-
-    /**
      * @Extra\Route("/documents", name="wtw_dashboard_show_documents")
      * @Extra\Method({"GET", "POST"})
      *
