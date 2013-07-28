@@ -2,7 +2,6 @@
 
 namespace WTW\DashboardBundle\Validator\Constraints;
 
-
 use Symfony\Component\Translation\Translator,
     Symfony\Component\Validator\Constraint;
 

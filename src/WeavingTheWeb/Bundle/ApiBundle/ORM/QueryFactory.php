@@ -95,7 +95,8 @@ class QueryFactory
      *
      * @return QueryBuilder
      */
-    public function count(QueryBuilder $queryBuilder, $alias) {
+    public function count(QueryBuilder $queryBuilder, $alias)
+    {
         return $queryBuilder->select('count(' . $alias . ')');
     }
 
@@ -139,7 +140,8 @@ class QueryFactory
      * @param $constraints
      * @param $key
      */
-    public function ensuresHasArrayValue(&$constraints, $key) {
+    public function ensuresHasArrayValue(&$constraints, $key)
+    {
         if (array_key_exists($key, $constraints)) {
             $sortingColumns = $constraints[$key];
         } else {
@@ -401,7 +403,8 @@ class QueryFactory
     /**
      * @return string
      */
-    public function getDelimiter() {
+    public function getDelimiter()
+    {
         return '$_$_$';
     }
 
@@ -425,9 +428,9 @@ class QueryFactory
             'language'    => $store['language'],
             'status'      => 0
         ];
+
         return $this->makeInstance('WeavingTheWeb\Bundle\ApiBundle\GithubRepository', $properties);
     }
-
 
     /**
      * @param $store
@@ -473,7 +476,7 @@ class QueryFactory
      */
     public function disableJsonById($jsonId)
     {
-        $queryBuilder = $this->queryJsonSelection(array('id' => (int)$jsonId));
+        $queryBuilder = $this->queryJsonSelection(array('id' => (int) $jsonId));
         $results = $queryBuilder->getQuery()->getResult();
 
         if (count($results) && (false !== array_key_exists(0, $results))) {

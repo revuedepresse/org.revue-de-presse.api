@@ -16,12 +16,11 @@ use Symfony\Component\HttpFoundation\RedirectResponse,
     Symfony\Component\Validator\Constraints\Email,
     Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\NotNull;
 
 class RegistrationController extends BaseController
 {
     /**
-     * @param Request $request
+     * @param  Request          $request
      * @return RedirectResponse
      * @Extra\Template("WTWUserBundle:Registration:register.html.twig")
      */

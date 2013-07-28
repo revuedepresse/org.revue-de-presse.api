@@ -27,8 +27,7 @@ class SettingsController extends ContainerAware
         $form = $this->getSettingsForm($currentUser);
         $form->handleRequest($request);
 
-        if ($request->getMethod() === 'POST')
-        {
+        if ($request->getMethod() === 'POST') {
             if ($form->isValid()) {
                 $currentPassword = $form->get('currentPassword')->getData();
 

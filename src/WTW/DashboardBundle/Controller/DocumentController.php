@@ -2,7 +2,6 @@
 
 namespace WTW\DashboardBundle\Controller;
 
-use FOS\TwitterBundle\Services\Twitter;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
 use Symfony\Component\HttpFoundation\RedirectResponse,
     Symfony\Component\HttpFoundation\Request,

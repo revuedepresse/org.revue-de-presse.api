@@ -37,8 +37,8 @@ class TwitterController extends ResourceController
             'WeavingTheWebApiBundle:Json',
             array(
                 'type' => 2,
-                'offset' => (int)$parameters['offset'],
-                'limit' => (int)$parameters['limit']));
+                'offset' => (int) $parameters['offset'],
+                'limit' => (int) $parameters['limit']));
         $resources = $this->classifyResources($jsonResources);
         $target = 'value';
         $expander = function (&$properties) use ($target) {

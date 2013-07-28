@@ -2,7 +2,6 @@
 
 namespace WeavingTheWeb\Bundle\ApiBundle\View;
 
-use JMS\Serializer\SerializationContext;
 use Symfony\Bundle\FrameworkBundle\Templating\TemplateReference,
     Symfony\Component\HttpFoundation\Response;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;

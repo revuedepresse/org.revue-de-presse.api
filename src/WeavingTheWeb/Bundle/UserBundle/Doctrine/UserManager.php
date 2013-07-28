@@ -6,7 +6,6 @@ use Doctrine\Common\Persistence\ObjectManager;
 use FOS\UserBundle\Model\UserInterface,
     FOS\UserBundle\Util\CanonicalizerInterface,
     FOS\UserBundle\Doctrine\UserManager as BaseUserManager;
-use Symfony\Component\Security\Core\Encoder\EncoderFactoryInterface;
 
 class UserManager extends BaseUserManager
 {
@@ -37,7 +36,7 @@ class UserManager extends BaseUserManager
         $roleRepository = $this->objectManager->getRepository('WeavingTheWebUserBundle:Role');
 
         foreach ($roles as $role) {
-            $roleName = (string)$role;
+            $roleName = (string) $role;
             $roleEntity = $roleRepository->findOneByRole($roleName);
 
             $user->removeRole($role);

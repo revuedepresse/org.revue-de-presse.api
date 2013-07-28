@@ -37,8 +37,8 @@ class GithubController extends ResourceController
             array(
                 'sorting_columns' => array('DESC' => 'id'),
                 'grouping_columns' => array('cloneUrl'),
-                'limit' => (int)$parameters['limit'],
-                'offset' => (int)$parameters['offset']));
+                'limit' => (int) $parameters['limit'],
+                'offset' => (int) $parameters['offset']));
         $classifiedResources = $this->classifyResources($jsonResources);
 
         return array(

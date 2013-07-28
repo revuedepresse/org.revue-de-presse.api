@@ -49,4 +49,4 @@ class TwitterController extends ContainerAware
     public function denyLoginAction()
     {
     }
-} 
+}

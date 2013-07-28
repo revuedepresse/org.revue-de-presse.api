@@ -36,8 +36,8 @@ class FacebookController extends ResourceController
             'WeavingTheWebApiBundle:Json',
             array(
                 'type' => 0,
-                'offset' => (int)$parameters['offset'],
-                'limit' => (int)$parameters['limit']));
+                'offset' => (int) $parameters['offset'],
+                'limit' => (int) $parameters['limit']));
         $resources = $this->classifyResources($jsonResources);
         $target = 'value';
         $expander = function (&$properties) use ($target) {

@@ -73,7 +73,7 @@ class Perspective
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -83,20 +83,20 @@ class Perspective
     /**
      * Set status
      *
-     * @param integer $status
+     * @param  integer     $status
      * @return Perspective
      */
     public function setStatus($status)
     {
         $this->status = $status;
-    
+
         return $this;
     }
 
     /**
      * Get status
      *
-     * @return integer 
+     * @return integer
      */
     public function getStatus()
     {
@@ -106,20 +106,20 @@ class Perspective
     /**
      * Set type
      *
-     * @param integer $type
+     * @param  integer     $type
      * @return Perspective
      */
     public function setType($type)
     {
         $this->type = $type;
-    
+
         return $this;
     }
 
     /**
      * Get type
      *
-     * @return integer 
+     * @return integer
      */
     public function getType()
     {
@@ -129,20 +129,20 @@ class Perspective
     /**
      * Set value
      *
-     * @param string $value
+     * @param  string      $value
      * @return Perspective
      */
     public function setValue($value)
     {
         $this->value = $value;
-    
+
         return $this;
     }
 
     /**
      * Get value
      *
-     * @return string 
+     * @return string
      */
     public function getValue()
     {
@@ -152,20 +152,20 @@ class Perspective
     /**
      * Set creationDate
      *
-     * @param \DateTime $creationDate
+     * @param  \DateTime   $creationDate
      * @return Perspective
      */
     public function setCreationDate($creationDate)
     {
         $this->creationDate = $creationDate;
-    
+
         return $this;
     }
 
     /**
      * Get creationDate
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getCreationDate()
     {
@@ -175,20 +175,20 @@ class Perspective
     /**
      * Set updateDate
      *
-     * @param \DateTime $updateDate
+     * @param  \DateTime   $updateDate
      * @return Perspective
      */
     public function setUpdateDate($updateDate)
     {
         $this->updateDate = $updateDate;
-    
+
         return $this;
     }
 
     /**
      * Get updateDate
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getUpdateDate()
     {
@@ -198,20 +198,20 @@ class Perspective
     /**
      * Set description
      *
-     * @param string $description
+     * @param  string      $description
      * @return Perspective
      */
     public function setDescription($description)
     {
         $this->description = $description;
-    
+
         return $this;
     }
 
     /**
      * Get description
      *
-     * @return string 
+     * @return string
      */
     public function getDescription()
     {

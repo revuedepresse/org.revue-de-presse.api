@@ -63,7 +63,7 @@ class Role implements RoleInterface
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -73,20 +73,20 @@ class Role implements RoleInterface
     /**
      * Set name
      *
-     * @param string $name
+     * @param  string $name
      * @return Role
      */
     public function setName($name)
     {
         $this->name = $name;
-    
+
         return $this;
     }
 
     /**
      * Get name
      *
-     * @return string 
+     * @return string
      */
     public function getName()
     {
@@ -96,26 +96,26 @@ class Role implements RoleInterface
     /**
      * Set role
      *
-     * @param string $role
+     * @param  string $role
      * @return Role
      */
     public function setRole($role)
     {
         $this->role = $role;
-    
+
         return $this;
     }
 
     /**
      * Add users
      *
-     * @param User $users
+     * @param  User $users
      * @return Role
      */
     public function addUser(User $users)
     {
         $this->users[] = $users;
-    
+
         return $this;
     }
 
@@ -132,7 +132,7 @@ class Role implements RoleInterface
     /**
      * Get users
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
     public function getUsers()
     {
