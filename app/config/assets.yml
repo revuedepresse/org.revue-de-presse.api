@@ -14,12 +14,6 @@ assetic:
         uglifycss:
             bin:  %kernel.root_dir%/Resources/node_modules/uglifycss/uglifycss
             apply_to:  "\.css"
-#        yui_css:
-#            jar: "%kernel.root_dir%/Resources/java/yuicompressor.jar"
-#            apply_to:   "\.css"
-#        yui_js:
-#            jar: "%kernel.root_dir%/Resources/java/yuicompressor.jar"
-#            apply_to:   "\.js"
 
 sp_bower:
     install_on_warmup:  false
