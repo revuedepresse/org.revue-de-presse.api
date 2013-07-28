@@ -16,3 +16,7 @@ _configurator:
 wtw_dashboard:
     resource:     "@WTWDashboardBundle/Controller"
     type:         annotation
+
+weaving_the_web_twitter:
+    resource: "@WeavingTheWebUserBundle/Controller/"
+    type:     annotation

@@ -1,6 +1,6 @@
 <?php
 
-namespace WTW\UserBundle\Security;
+namespace WeavingTheWeb\Bundle\UserBundle\Security\Core\User;
 
 use Symfony\Component\Security\Core\Exception\UnsupportedUserException,
     Symfony\Component\Security\Core\Exception\UsernameNotFoundException,

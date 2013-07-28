@@ -6,6 +6,7 @@
 
     <parameters>
         <parameter key="weaving_the_web_user.user_manager.class">WeavingTheWeb\Bundle\UserBundle\Doctrine\UserManager</parameter>
+        <parameter key="weaving_the_web_user.twitter_user_provider.class">WeavingTheWeb\Bundle\UserBundle\Security\Core\User\TwitterUserProvider</parameter>
         <parameter key="weaving_the_web_user.model.user.class">WTW\UserBundle\Entity\User</parameter>
     </parameters>
 
@@ -16,6 +17,20 @@
             <argument type="service" id="fos_user.util.email_canonicalizer" />
             <argument type="service" id="fos_user.entity_manager" />
             <argument>%weaving_the_web_user.model.user.class%</argument>
+        </service>
+        <service id="weaving_the_web_user.twitter_user_provider" class="%weaving_the_web_user.twitter_user_provider.class%">
+            <call method="setTwitterOauth">
+                <argument type="service" id="fos_twitter.api" />
+            </call>
+            <call method="setUserManager">
+                <argument type="service" id="fos_user.user_manager" />
+            </call>
+            <call method="setSession">
+                <argument type="service" id="session" />
+            </call>
+            <call method="setValidator">
+                <argument type="service" id="validator" />
+            </call>
         </service>
     </services>
 </container>
