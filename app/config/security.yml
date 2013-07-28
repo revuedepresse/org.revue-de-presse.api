@@ -62,7 +62,7 @@ security:
             anonymous:            true
 
         login_failure:
-            pattern:              ^/could-not-login
+            pattern:              ^/twitter/could-not-login
             anonymous:            true
 
         dev:
