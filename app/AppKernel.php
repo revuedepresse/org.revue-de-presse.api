@@ -29,9 +29,9 @@ class AppKernel extends Kernel
             new Sp\BowerBundle\SpBowerBundle(),
             new WTW\CodeGeneration\QualityAssuranceBundle\WTWCodeGenerationQualityAssuranceBundle(),
             new WTW\CodeGeneration\AnalysisBundle\WTWCodeGenerationAnalysisBundle(),
-            new WTW\DashboardBundle\WTWDashboardBundle(),
             new WTW\Legacy\ProviderBundle\WTWLegacyProviderBundle(),
             new WTW\UserBundle\WTWUserBundle(),
+            new WeavingTheWeb\Bundle\DashboardBundle\WeavingTheWebDashboardBundle(),
             new WeavingTheWeb\Bundle\ApiBundle\WeavingTheWebApiBundle(),
             new WeavingTheWeb\Bundle\UserBundle\WeavingTheWebUserBundle(),
         );

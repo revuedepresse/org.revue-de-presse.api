@@ -15,7 +15,7 @@ sp_bower:
     assetic:
         enabled: true
     bundles:
-        WTWDashboardBundle:
+        WeavingTheWebDashboardBundle:
             config_dir: Resources/config/bower
             asset_dir:  ../../public/components
             json_file:  component.json
