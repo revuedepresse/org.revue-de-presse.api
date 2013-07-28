@@ -24,8 +24,6 @@ swiftmailer:
 parameters:
     basic_auth_pattern: ^/(documents|github|user)
 
-    channel:            https
-
     database_charset:   UTF8
     database_driver:    pdo_mysql
     database_host:      %database_host_test%

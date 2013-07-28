@@ -39,6 +39,3 @@ monolog:
             to_email:     thierry.marianne@weaving-the-web.org
             subject:      "[Weaving the Web] Snaps, something went wrong :/"
             level:        debug
-
-parameters:
-    channel:  https

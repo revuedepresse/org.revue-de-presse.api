@@ -3,5 +3,5 @@ _main:
 
 weaving_the_web_twitter:
     resource: "@WeavingTheWebUserBundle/Controller/"
-    schemes: [https]
+    schemes: [%channel%]
     type:     annotation
