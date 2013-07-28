@@ -21,9 +21,11 @@
                 <a href="{{ path('weaving_the_web_dashboard_show_documents') }}">Dashboard</a>
             </li>
             {% endif %}
+            {% if is_granted("ROLE_USER") %}
             <li{% if active_menu_item == 'github_repositories' %} class="active"{% endif %}>
                 <a href="{{ path('weaving_the_web_dashboard_show_repositories') }}">Github Repositories</a>
             </li>
+            {% endif %}
         </ul>
         <ul class="nav pull-right">
             <li class="nav">
