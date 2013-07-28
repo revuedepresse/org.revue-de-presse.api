@@ -19,8 +19,11 @@ require_once __DIR__ . '/../app/AppKernel.php';
 $kernel = new AppKernel('prod', false);
 $kernel->loadClassCache();
 //$kernel = new AppCache($kernel);
-Request::trustProxyData();
+
+Request::setTrustedProxies(['127.0.0.1']);
 $request  = Request::createFromGlobals();
+
 $response = $kernel->handle($request);
 $response->send();
+
 $kernel->terminate($request, $response);
