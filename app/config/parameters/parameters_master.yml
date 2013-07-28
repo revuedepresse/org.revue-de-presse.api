@@ -19,8 +19,6 @@ parameters:
     bower_binary:               %assetic_node_module%/bower/bin/bower
     bower_endpoint:             https://bower.herokuapp.com
 
-    channel:                    http
-
     database_charset:           UTF8
     database_driver:            pdo_mysql
     database_host:              localhost

@@ -1,56 +1,44 @@
 wtw_user:
     resource: "@WTWUserBundle/Controller/"
-    schemes: [%channel%]
     type:     annotation
 
 wtw_registration_land:
     defaults: { _controller: FOSUserBundle:Registration:land }
     pattern:  /
-    schemes: [%channel%]
 
 fos_js_routing:
     resource: "@FOSJsRoutingBundle/Resources/config/routing/routing.xml"
-    schemes: [%channel%]
 
 fos_user_security:
     resource: "@WTWUserBundle/Resources/config/routing/security.xml"
-    schemes: [%channel%]
 
 fos_user_profile:
     prefix:   /profile
     resource: "@FOSUserBundle/Resources/config/routing/profile.xml"
-    schemes: [%channel%]
 
 fos_user_register:
     prefix:   /register
     resource: "@WTWUserBundle/Resources/config/routing/registration.xml"
-    schemes: [%channel%]
 
 fos_user_registration_register:
     defaults: { _controller: FOSUserBundle:Registration:register }
     pattern:  /
-    schemes: [%channel%]
 
 fos_user_resetting:
     prefix:   /resetting
     resource: "@FOSUserBundle/Resources/config/routing/resetting.xml"
-    schemes: [%channel%]
 
 fos_user_change_password:
     prefix:   /profile
     resource: "@FOSUserBundle/Resources/config/routing/change_password.xml"
-    schemes: [%channel%]
 
 weaving_the_web_api:
     resource:     "@WeavingTheWebApiBundle/Resources/config/routing.yml"
-    schemes: [%channel%]
 
 weaving_the_web_dashboard:
     resource: "@WeavingTheWebDashboardBundle/Controller/"
-    schemes: [%channel%]
     type:     annotation
 
 weaving_the_web_user:
     prefix:   /user
     resource: "@WeavingTheWebUserBundle/Resources/config/routing.xml"
-    schemes: [%channel%]
