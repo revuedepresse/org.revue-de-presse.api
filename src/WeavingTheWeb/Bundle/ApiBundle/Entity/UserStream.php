@@ -63,7 +63,7 @@ class UserStream
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -73,20 +73,20 @@ class UserStream
     /**
      * Set screeName
      *
-     * @param string $screenName
+     * @param  string     $screenName
      * @return UserStream
      */
     public function setScreenName($screenName)
     {
         $this->screenName = $screenName;
-    
+
         return $this;
     }
 
     /**
      * Get screeName
      *
-     * @return string 
+     * @return string
      */
     public function getScreenName()
     {
@@ -96,20 +96,20 @@ class UserStream
     /**
      * Set name
      *
-     * @param string $name
+     * @param  string     $name
      * @return UserStream
      */
     public function setName($name)
     {
         $this->name = $name;
-    
+
         return $this;
     }
 
     /**
      * Get name
      *
-     * @return string 
+     * @return string
      */
     public function getName()
     {
@@ -119,20 +119,20 @@ class UserStream
     /**
      * Set text
      *
-     * @param string $text
+     * @param  string     $text
      * @return UserStream
      */
     public function setText($text)
     {
         $this->text = $text;
-    
+
         return $this;
     }
 
     /**
      * Get text
      *
-     * @return string 
+     * @return string
      */
     public function getText()
     {
@@ -142,31 +142,30 @@ class UserStream
     /**
      * Set userAvatar
      *
-     * @param string $userAvatar
+     * @param  string     $userAvatar
      * @return UserStream
      */
     public function setUserAvatar($userAvatar)
     {
         $this->userAvatar = $userAvatar;
-    
+
         return $this;
     }
 
     /**
      * Get userAvatar
      *
-     * @return string 
+     * @return string
      */
     public function getUserAvatar()
     {
         return $this->userAvatar;
     }
 
-
     /**
      * Set identifier
      *
-     * @param string $identifier
+     * @param  string     $identifier
      * @return UserStream
      */
     public function setIdentifier($identifier)
@@ -189,20 +188,20 @@ class UserStream
     /**
      * Set createdAt
      *
-     * @param \DateTime $createdAt
+     * @param  \DateTime  $createdAt
      * @return UserStream
      */
     public function setCreatedAt($createdAt)
     {
         $this->createdAt = $createdAt;
-    
+
         return $this;
     }
 
     /**
      * Get createdAt
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getCreatedAt()
     {
@@ -212,20 +211,20 @@ class UserStream
     /**
      * Set updatedAt
      *
-     * @param \DateTime $updatedAt
+     * @param  \DateTime  $updatedAt
      * @return UserStream
      */
     public function setUpdatedAt($updatedAt)
     {
         $this->updatedAt = $updatedAt;
-    
+
         return $this;
     }
 
     /**
      * Get updatedAt
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getUpdatedAt()
     {

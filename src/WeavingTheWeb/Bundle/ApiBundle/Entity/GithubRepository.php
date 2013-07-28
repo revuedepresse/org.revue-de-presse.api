@@ -125,7 +125,7 @@ class GithubRepository
     /**
      * Set githubId
      *
-     * @param integer $githubId
+     * @param  integer    $githubId
      * @return GithubRepo
      */
     public function setGithubId($githubId)
@@ -148,7 +148,7 @@ class GithubRepository
     /**
      * Set forks
      *
-     * @param integer $forks
+     * @param  integer    $forks
      * @return GithubRepo
      */
     public function setForks($forks)
@@ -171,7 +171,7 @@ class GithubRepository
     /**
      * Set watchers
      *
-     * @param integer $watchers
+     * @param  integer    $watchers
      * @return GithubRepo
      */
     public function setWatchers($watchers)
@@ -194,7 +194,7 @@ class GithubRepository
     /**
      * Set status
      *
-     * @param integer $status
+     * @param  integer    $status
      * @return GithubRepo
      */
     public function setStatus($status)
@@ -217,7 +217,7 @@ class GithubRepository
     /**
      * Set ownerId
      *
-     * @param integer $ownerId
+     * @param  integer    $ownerId
      * @return GithubRepo
      */
     public function setOwnerId($ownerId)
@@ -240,7 +240,7 @@ class GithubRepository
     /**
      * Set owner
      *
-     * @param string $owner
+     * @param  string     $owner
      * @return GithubRepo
      */
     public function setOwner($owner)
@@ -263,7 +263,7 @@ class GithubRepository
     /**
      * Set language
      *
-     * @param string $language
+     * @param  string     $language
      * @return GithubRepo
      */
     public function setLanguage($language)
@@ -286,7 +286,7 @@ class GithubRepository
     /**
      * Set name
      *
-     * @param string $name
+     * @param  string     $name
      * @return GithubRepo
      */
     public function setName($name)
@@ -309,7 +309,7 @@ class GithubRepository
     /**
      * Set avatarUrl
      *
-     * @param string $avatarUrl
+     * @param  string     $avatarUrl
      * @return GithubRepo
      */
     public function setAvatarUrl($avatarUrl)
@@ -332,7 +332,7 @@ class GithubRepository
     /**
      * Set cloneUrl
      *
-     * @param string $cloneUrl
+     * @param  string     $cloneUrl
      * @return GithubRepo
      */
     public function setCloneUrl($cloneUrl)
@@ -355,7 +355,7 @@ class GithubRepository
     /**
      * Set description
      *
-     * @param string $description
+     * @param  string     $description
      * @return GithubRepo
      */
     public function setDescription($description)
@@ -378,7 +378,7 @@ class GithubRepository
     /**
      * Set createdAt
      *
-     * @param \DateTime $createdAt
+     * @param  \DateTime  $createdAt
      * @return GithubRepo
      */
     public function setCreatedAt($createdAt)
@@ -401,7 +401,7 @@ class GithubRepository
     /**
      * Set updatedAt
      *
-     * @param \DateTime $updatedAt
+     * @param  \DateTime  $updatedAt
      * @return GithubRepo
      */
     public function setUpdatedAt($updatedAt)

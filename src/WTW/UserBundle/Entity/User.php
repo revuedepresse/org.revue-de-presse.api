@@ -209,7 +209,7 @@ class User extends BaseUser
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -219,20 +219,20 @@ class User extends BaseUser
     /**
      * Set groupId
      *
-     * @param integer $groupId
+     * @param  integer $groupId
      * @return User
      */
     public function setGroupId($groupId)
     {
         $this->groupId = $groupId;
-    
+
         return $this;
     }
 
     /**
      * Get groupId
      *
-     * @return integer 
+     * @return integer
      */
     public function getGroupId()
     {
@@ -242,20 +242,20 @@ class User extends BaseUser
     /**
      * Set status
      *
-     * @param boolean $status
+     * @param  boolean $status
      * @return User
      */
     public function setStatus($status)
     {
         $this->status = $status;
-    
+
         return $this;
     }
 
     /**
      * Get status
      *
-     * @return boolean 
+     * @return boolean
      */
     public function getStatus()
     {
@@ -265,7 +265,7 @@ class User extends BaseUser
     /**
      * Get userName
      *
-     * @return string 
+     * @return string
      */
     public function getUsername()
     {
@@ -275,20 +275,20 @@ class User extends BaseUser
     /**
      * Set avatar
      *
-     * @param integer $avatar
+     * @param  integer $avatar
      * @return User
      */
     public function setAvatar($avatar)
     {
         $this->avatar = $avatar;
-    
+
         return $this;
     }
 
     /**
      * Get avatar
      *
-     * @return integer 
+     * @return integer
      */
     public function getAvatar()
     {
@@ -298,20 +298,20 @@ class User extends BaseUser
     /**
      * Set firstName
      *
-     * @param string $firstName
+     * @param  string $firstName
      * @return User
      */
     public function setFirstName($firstName)
     {
         $this->firstName = $firstName;
-    
+
         return $this;
     }
 
     /**
      * Get firstName
      *
-     * @return string 
+     * @return string
      */
     public function getFirstName()
     {
@@ -321,20 +321,20 @@ class User extends BaseUser
     /**
      * Set lastName
      *
-     * @param string $lastName
+     * @param  string $lastName
      * @return User
      */
     public function setLastName($lastName)
     {
         $this->lastName = $lastName;
-    
+
         return $this;
     }
 
     /**
      * Get lastName
      *
-     * @return string 
+     * @return string
      */
     public function getLastName()
     {
@@ -344,20 +344,20 @@ class User extends BaseUser
     /**
      * Set middleName
      *
-     * @param string $middleName
+     * @param  string $middleName
      * @return User
      */
     public function setMiddleName($middleName)
     {
         $this->middleName = $middleName;
-    
+
         return $this;
     }
 
     /**
      * Get middleName
      *
-     * @return string 
+     * @return string
      */
     public function getMiddleName()
     {
@@ -367,20 +367,20 @@ class User extends BaseUser
     /**
      * Set email
      *
-     * @param string $email
+     * @param  string $email
      * @return User
      */
     public function setEmail($email)
     {
         $this->email = $email;
-    
+
         return $this;
     }
 
     /**
      * Get email
      *
-     * @return string 
+     * @return string
      */
     public function getEmail()
     {
@@ -390,20 +390,20 @@ class User extends BaseUser
     /**
      * Set phone
      *
-     * @param string $phone
+     * @param  string $phone
      * @return User
      */
     public function setPhone($phone)
     {
         $this->phone = $phone;
-    
+
         return $this;
     }
 
     /**
      * Get phone
      *
-     * @return string 
+     * @return string
      */
     public function getPhone()
     {
@@ -413,26 +413,25 @@ class User extends BaseUser
     /**
      * Set password
      *
-     * @param string $password
+     * @param  string $password
      * @return User
      */
     public function setPassword($password)
     {
         $this->password = $password;
-    
+
         return $this;
     }
 
     /**
      * Get password
      *
-     * @return string 
+     * @return string
      */
     public function getPassword()
     {
         return $this->password;
     }
-
 
     /**
      * Set twitterID
@@ -468,7 +467,7 @@ class User extends BaseUser
     /**
      * Get twitterID
      *
-     * @return string 
+     * @return string
      */
     public function getTwitterID()
     {
@@ -478,20 +477,20 @@ class User extends BaseUser
     /**
      * Set enabled
      *
-     * @param boolean $enabled
+     * @param  boolean $enabled
      * @return User
      */
     public function setEnabled($enabled)
     {
         $this->enabled = $enabled;
-    
+
         return $this;
     }
 
     /**
      * Get enabled
      *
-     * @return boolean 
+     * @return boolean
      */
     public function isEnabled()
     {
@@ -501,20 +500,20 @@ class User extends BaseUser
     /**
      * Set fullName
      *
-     * @param string $fullName
+     * @param  string $fullName
      * @return User
      */
     public function setFullName($fullName)
     {
         $this->fullName = $fullName;
-    
+
         return $this;
     }
 
     /**
      * Get fullName
      *
-     * @return string 
+     * @return string
      */
     public function getFullName()
     {
@@ -524,20 +523,20 @@ class User extends BaseUser
     /**
      * Set usernameCanonical
      *
-     * @param string $usernameCanonical
+     * @param  string $usernameCanonical
      * @return User
      */
     public function setUsernameCanonical($usernameCanonical)
     {
         $this->usernameCanonical = $usernameCanonical;
-    
+
         return $this;
     }
 
     /**
      * Get usernameCanonical
      *
-     * @return string 
+     * @return string
      */
     public function getUsernameCanonical()
     {
@@ -547,20 +546,20 @@ class User extends BaseUser
     /**
      * Set emailCanonical
      *
-     * @param string $emailCanonical
+     * @param  string $emailCanonical
      * @return User
      */
     public function setEmailCanonical($emailCanonical)
     {
         $this->emailCanonical = $emailCanonical;
-    
+
         return $this;
     }
 
     /**
      * Get emailCanonical
      *
-     * @return string 
+     * @return string
      */
     public function getEmailCanonical()
     {
@@ -570,20 +569,20 @@ class User extends BaseUser
     /**
      * Set salt
      *
-     * @param string $salt
+     * @param  string $salt
      * @return User
      */
     public function setSalt($salt)
     {
         $this->salt = $salt;
-    
+
         return $this;
     }
 
     /**
      * Get salt
      *
-     * @return string 
+     * @return string
      */
     public function getSalt()
     {
@@ -593,20 +592,20 @@ class User extends BaseUser
     /**
      * Set locked
      *
-     * @param boolean $locked
+     * @param  boolean $locked
      * @return User
      */
     public function setLocked($locked)
     {
         $this->locked = $locked;
-    
+
         return $this;
     }
 
     /**
      * Get locked
      *
-     * @return boolean 
+     * @return boolean
      */
     public function getLocked()
     {
@@ -616,20 +615,20 @@ class User extends BaseUser
     /**
      * Set expired
      *
-     * @param boolean $expired
+     * @param  boolean $expired
      * @return User
      */
     public function setExpired($expired)
     {
         $this->expired = $expired;
-    
+
         return $this;
     }
 
     /**
      * Get expired
      *
-     * @return boolean 
+     * @return boolean
      */
     public function getExpired()
     {
@@ -639,20 +638,20 @@ class User extends BaseUser
     /**
      * Set confirmationToken
      *
-     * @param string $confirmationToken
+     * @param  string $confirmationToken
      * @return User
      */
     public function setConfirmationToken($confirmationToken)
     {
         $this->confirmationToken = $confirmationToken;
-    
+
         return $this;
     }
 
     /**
      * Get confirmationToken
      *
-     * @return string 
+     * @return string
      */
     public function getConfirmationToken()
     {
@@ -662,33 +661,33 @@ class User extends BaseUser
     /**
      * Set username
      *
-     * @param string $username
+     * @param  string $username
      * @return User
      */
     public function setUsername($username)
     {
         $this->username = $username;
-    
+
         return $this;
     }
 
     /**
      * Set credentialsExpired
      *
-     * @param boolean $credentialsExpired
+     * @param  boolean $credentialsExpired
      * @return User
      */
     public function setCredentialsExpired($credentialsExpired)
     {
         $this->credentialsExpired = $credentialsExpired;
-    
+
         return $this;
     }
 
     /**
      * Get credentialsExpired
      *
-     * @return boolean 
+     * @return boolean
      */
     public function getCredentialsExpired()
     {
@@ -698,20 +697,20 @@ class User extends BaseUser
     /**
      * Set expiresAt
      *
-     * @param \DateTime $expiresAt
+     * @param  \DateTime $expiresAt
      * @return User
      */
     public function setExpiresAt(\DateTime $expiresAt = null)
     {
         $this->expiresAt = $expiresAt;
-    
+
         return $this;
     }
 
     /**
      * Get expiresAt
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getExpiresAt()
     {
@@ -721,20 +720,20 @@ class User extends BaseUser
     /**
      * Set lastLogin
      *
-     * @param \DateTime $lastLogin
+     * @param  \DateTime $lastLogin
      * @return User
      */
     public function setLastLogin(\DateTime $lastLogin = null)
     {
         $this->lastLogin = $lastLogin;
-    
+
         return $this;
     }
 
     /**
      * Get lastLogin
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getLastLogin()
     {
@@ -744,20 +743,20 @@ class User extends BaseUser
     /**
      * Set passwordRequestedAt
      *
-     * @param \DateTime $passwordRequestedAt
+     * @param  \DateTime $passwordRequestedAt
      * @return User
      */
     public function setPasswordRequestedAt(\DateTime $passwordRequestedAt = null)
     {
         $this->passwordRequestedAt = $passwordRequestedAt;
-    
+
         return $this;
     }
 
     /**
      * Get passwordRequestedAt
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getPasswordRequestedAt()
     {
@@ -767,20 +766,20 @@ class User extends BaseUser
     /**
      * Set credentialsExpireAt
      *
-     * @param \DateTime $credentialsExpireAt
+     * @param  \DateTime $credentialsExpireAt
      * @return User
      */
     public function setCredentialsExpireAt(\DateTime $credentialsExpireAt = null)
     {
         $this->credentialsExpireAt = $credentialsExpireAt;
-    
+
         return $this;
     }
 
     /**
      * Get credentialsExpireAt
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getCredentialsExpireAt()
     {
@@ -797,13 +796,13 @@ class User extends BaseUser
     /**
      * Add roles
      *
-     * @param \WeavingTheWeb\Bundle\UserBundle\Entity\Role $roles
+     * @param  \WeavingTheWeb\Bundle\UserBundle\Entity\Role $roles
      * @return User
      */
     public function addRole($roles)
     {
         $this->roles[] = $roles;
-    
+
         return $this;
     }
 
@@ -820,7 +819,7 @@ class User extends BaseUser
     /**
      * Get roles
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
     public function getRoles()
     {
@@ -828,7 +827,7 @@ class User extends BaseUser
             $collection = new ArrayCollection();
 
             foreach ($this->roles as $role) {
-                $role = (string)$role;
+                $role = (string) $role;
                 if (!$collection->contains($role)) {
                     $collection->add($role);
                 }

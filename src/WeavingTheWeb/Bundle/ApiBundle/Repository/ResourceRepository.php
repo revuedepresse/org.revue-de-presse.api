@@ -2,7 +2,6 @@
 
 namespace WeavingTheWeb\Bundle\ApiBundle\Repository;
 
-use Symfony\Component\DependencyInjection\ContainerAwareInterface;
 use JMS\DiExtraBundle\Annotation as DI;
 use Doctrine\ORM\EntityRepository;
 

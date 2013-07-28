@@ -66,11 +66,10 @@ class Json
      */
     private $value;
 
-
     /**
      * Get id
      *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -80,20 +79,20 @@ class Json
     /**
      * Set status
      *
-     * @param boolean $status
+     * @param  boolean $status
      * @return Json
      */
     public function setStatus($status)
     {
         $this->status = $status;
-    
+
         return $this;
     }
 
     /**
      * Get status
      *
-     * @return boolean 
+     * @return boolean
      */
     public function getStatus()
     {
@@ -103,20 +102,20 @@ class Json
     /**
      * Set type
      *
-     * @param boolean $type
+     * @param  boolean $type
      * @return Json
      */
     public function setType($type)
     {
         $this->type = $type;
-    
+
         return $this;
     }
 
     /**
      * Get type
      *
-     * @return boolean 
+     * @return boolean
      */
     public function getType()
     {
@@ -126,20 +125,20 @@ class Json
     /**
      * Set hash
      *
-     * @param string $hash
+     * @param  string $hash
      * @return Json
      */
     public function setHash($hash)
     {
         $this->hash = $hash;
-    
+
         return $this;
     }
 
     /**
      * Get hash
      *
-     * @return string 
+     * @return string
      */
     public function getHash()
     {
@@ -149,20 +148,20 @@ class Json
     /**
      * Set value
      *
-     * @param string $value
+     * @param  string $value
      * @return Json
      */
     public function setValue($value)
     {
         $this->value = $value;
-    
+
         return $this;
     }
 
     /**
      * Get value
      *
-     * @return string 
+     * @return string
      */
     public function getValue()
     {

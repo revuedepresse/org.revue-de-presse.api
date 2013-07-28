@@ -6,8 +6,6 @@ use FOS\RestBundle\EventListener\ViewResponseListener as BaseListener;
 
 use JMS\Serializer\SerializationContext;
 
-use Sensio\Bundle\FrameworkExtraBundle\EventListener\TemplateListener;
-
 use Symfony\Component\HttpKernel\Event\FilterControllerEvent,
     Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent,
     Symfony\Component\DependencyInjection\ContainerInterface,

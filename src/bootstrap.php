@@ -1,15 +1,5 @@
 <?php
 
-
-
-
-
-
-
-
-
-
-
 function includeIfExists($file)
 {
 if (file_exists($file)) {

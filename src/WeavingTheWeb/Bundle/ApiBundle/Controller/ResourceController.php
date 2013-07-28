@@ -39,7 +39,7 @@ abstract class ResourceController extends Controller
      *
      * @return array
      */
-    function getEntityColumnNames($entity)
+    public function getEntityColumnNames($entity)
     {
         $entityManager = $this->container->get('doctrine.orm.entity_manager');
 

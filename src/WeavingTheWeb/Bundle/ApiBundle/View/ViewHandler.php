@@ -124,7 +124,7 @@ class ViewHandler extends ContainerAware implements ViewHandlerInterface
      * the key 'form' in the View's data it will return the failed_validation
      * configuration if the form instance has errors.
      *
-     * @param View $view view instance
+     * @param View  $view    view instance
      * @param mixed $content
      *
      * @return int HTTP status code
@@ -277,6 +277,7 @@ class ViewHandler extends ContainerAware implements ViewHandlerInterface
 
         $response->setStatusCode($code);
         $response->headers->set('Location', $location);
+
         return $response;
     }
 

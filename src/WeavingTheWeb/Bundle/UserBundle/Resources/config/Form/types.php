@@ -1,7 +1,5 @@
 <?php
 
-use Symfony\Component\DependencyInjection\Definition;
-
 $container->register(
         'weaving_the_web_user_form_type_user',
         'WeavingTheWeb\Bundle\UserBundle\Form\Type\UserType'
