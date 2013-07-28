@@ -2,11 +2,24 @@ assetic:
     debug:          %kernel.debug%
     use_controller: true
     filters:
-        cssrewrite: ~
+        cssrewrite:
+            apply_to:   "\.css"
         less:
             node:       %assetic_node%
             node_paths: [ %assetic_node_module% ]
             apply_to:   "\.less$"
+        uglifyjs:
+            bin:  %kernel.root_dir%/Resources/node_modules/uglify-js/bin/uglifyjs
+            apply_to:  "\.js"
+        uglifycss:
+            bin:  %kernel.root_dir%/Resources/node_modules/uglifycss/uglifycss
+            apply_to:  "\.css"
+#        yui_css:
+#            jar: "%kernel.root_dir%/Resources/java/yuicompressor.jar"
+#            apply_to:   "\.css"
+#        yui_js:
+#            jar: "%kernel.root_dir%/Resources/java/yuicompressor.jar"
+#            apply_to:   "\.js"
 
 sp_bower:
     install_on_warmup:  false
