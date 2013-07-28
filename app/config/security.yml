@@ -70,10 +70,10 @@ security:
             security: false
 
     access_control:
-        - { path: ^/documents, role: ROLE_SUPER_ADMIN, requires_channel: %channel% }
-        - { path: ^/user, role: ROLE_USER, requires_channel: %channel% }
-        - { path: ^/, role: IS_AUTHENTICATED_ANONYMOUSLY, requires_channel: %channel% }
-        - { path: ^/login$, role: IS_AUTHENTICATED_ANONYMOUSLY, requires_channel: %channel% }
-        - { path: ^/basic/logout, role: IS_AUTHENTICATED_ANONYMOUSLY, requires_channel: %channel% }
-        - { path: ^/register, role: IS_AUTHENTICATED_ANONYMOUSLY, requires_channel: %channel% }
-        - { path: ^/resetting, role: IS_AUTHENTICATED_ANONYMOUSLY, requires_channel: %channel% }
+        - { path: ^/documents, role: ROLE_SUPER_ADMIN }
+        - { path: ^/user, role: ROLE_USER }
+        - { path: ^/, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/login$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/basic/logout, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/register, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/resetting, role: IS_AUTHENTICATED_ANONYMOUSLY }
