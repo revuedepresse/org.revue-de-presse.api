@@ -4,6 +4,8 @@ imports:
 framework:
     router:
         strict_requirements: null
+    framework:
+        esi:  true
 
 doctrine:
     orm:
