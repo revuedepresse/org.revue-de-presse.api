@@ -1,6 +1,9 @@
 imports:
-    - { resource: parameters.yml }
+    - { resource: assets.yml }
+    - { resource: friendofsymfony.yml }
+    - { resource: dbal.yml }
     - { resource: parameters.php }
+    - { resource: parameters.yml }
     - { resource: security.yml }
 
 framework:
@@ -16,7 +19,6 @@ framework:
     templating:           { engines: ['twig'] }
     session:              ~
 
-# Twig Configuration
 twig:
     debug:            %kernel.debug%
     strict_variables: %kernel.debug%
@@ -25,118 +27,6 @@ twig:
             - ':Form:submit_widget.html.twig'
             - ':Form:form_errors.html.twig'
             - ':Form:form_label.html.twig'
-
-# Assetic Configuration
-assetic:
-    debug:          %kernel.debug%
-    use_controller: true
-    filters:
-        cssrewrite: ~
-        less:
-            node:       %assetic_node%
-            node_paths: [ %assetic_node_module% ]
-            apply_to:   "\.less$"
-
-# Doctrine Configuration
-doctrine:
-    dbal:
-        default_connection: default
-        connections:
-            default:
-                charset:  %database_charset%
-                driver:   %database_driver%
-                host:     %database_host%
-                dbname:   %database_name%
-                user:     %database_user%
-                password: %database_password%
-            admin:
-                charset:  %database_charset_admin%
-                driver:   %database_driver_admin%
-                host:     %database_host_admin%
-                dbname:   %database_name_admin%
-                user:     %database_user_admin%
-                password: %database_password_admin%
-            test_mysql:
-                charset:  %database_charset_test%
-                driver:   %database_driver_test%
-                host:     %database_host_test%
-                dbname:   %database_name_test%
-                user:     %database_user_test%
-                password: %database_password_test%
-    orm:
-        default_entity_manager: default
-        entity_managers:
-            default:
-                connection: default
-                mappings:
-                    WTWCodeGenerationAnalysisBundle: ~
-                    WTWDashboardBundle: ~
-                    WTWLegacyProviderBundle: ~
-                    WTWUserBundle: ~
-                    WeavingTheWebApiBundle: ~
-                    WeavingTheWebUserBundle: ~
-            admin:
-                connection: admin
-                mappings:
-                    WTWCodeGenerationAnalysisBundle: ~
-                    WTWDashboardBundle: ~
-                    WTWUserBundle: ~
-                    WTWLegacyProviderBundle: ~
-                    WeavingTheWebApiBundle: ~
-                    WeavingTheWebUserBundle: ~
-            test_mysql:
-                connection: test_mysql
-                mappings:
-                    WTWCodeGenerationAnalysisBundle: ~
-                    WTWDashboardBundle: ~
-                    WTWLegacyProviderBundle: ~
-                    WTWUserBundle: ~
-                    WeavingTheWebApiBundle: ~
-                    WeavingTheWebUserBundle: ~
-        auto_generate_proxy_classes: %kernel.debug%
-
-fos_user:
-    db_driver:      orm
-    firewall_name:  wtw_connect
-    user_class:     WTW\UserBundle\Entity\User
-    group:
-        group_class: WeavingTheWeb\Bundle\UserBundle\Entity\Group
-    service:
-        user_manager: weaving_the_web_user.user_manager
-
-fos_rest:
-    allowed_methods_listener: true
-
-    param_fetcher_listener:   true
-
-    routing_loader:
-        default_format:       json
-
-    service:
-        view_handler: weaving_the_web.api.view_handler
-
-    view:
-        formats:
-            json: true
-        mime_types:
-            json: ['application/json', 'application/x-json', 'application/vnd.## FILL HOSTNAME ##+json']
-        force_redirects:
-            html: true
-        view_response_listener: force
-
-    format_listener:
-        default_priorities:
-            - json
-            - html
-            - '*/*'
-        fallback_format:      json
-        prefer_extension:     true
-
-fos_twitter:
-    file:             %kernel.root_dir%/../vendor/kertz/twitteroauth/twitteroauth/twitteroauth.php
-    consumer_key:     %api_twitter_consumer_key%
-    consumer_secret:  %api_twitter_consumer_secret%
-    callback_url:     %api_twitter_callback_url%
 
 sensio_framework_extra:
     view:    { annotations: false }
@@ -149,19 +39,6 @@ swiftmailer:
     host:      %mailer_host%
     username:  %mailer_user%
     password:  %mailer_password%
-
-sp_bower:
-    install_on_warmup:  false
-    keep_bowerrc:       false
-    bin:                %bower_binary%
-    assetic:
-        enabled: true
-    bundles:
-        WTWDashboardBundle:
-            config_dir: Resources/config/bower
-            asset_dir:  ../../public/components
-            json_file:  component.json
-            endpoint:   %bower_endpoint%
 
 parameters:
     basic_auth_pattern: /this-route-is-undefined-in-production

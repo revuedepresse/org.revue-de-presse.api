@@ -1,0 +1,22 @@
+assetic:
+    debug:          %kernel.debug%
+    use_controller: true
+    filters:
+        cssrewrite: ~
+        less:
+            node:       %assetic_node%
+            node_paths: [ %assetic_node_module% ]
+            apply_to:   "\.less$"
+
+sp_bower:
+    install_on_warmup:  false
+    keep_bowerrc:       false
+    bin:                %bower_binary%
+    assetic:
+        enabled: true
+    bundles:
+        WTWDashboardBundle:
+            config_dir: Resources/config/bower
+            asset_dir:  ../../public/components
+            json_file:  component.json
+            endpoint:   %bower_endpoint%
