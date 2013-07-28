@@ -39,6 +39,10 @@ fos_user_change_password:
 weaving_the_web_api:
     resource:     "@WeavingTheWebApiBundle/Resources/config/routing.yml"
 
+weaving_the_web_twitter:
+    resource: "@WeavingTheWebUserBundle/Controller/"
+    type:     annotation
+
 weaving_the_web_user:
     resource: "@WeavingTheWebUserBundle/Resources/config/routing.xml"
     prefix:   /user

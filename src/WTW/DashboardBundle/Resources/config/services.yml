@@ -18,11 +18,11 @@ services:
             - [ setTranslator, [ @translator ] ]
     wtw.dashboard.twitter_user:
         class: WTW\DashboardBundle\Security\User\Provider\TwitterUserProvider
-        arguments:
-            twitter_oauth:  "@fos_twitter.api"
-            userManager:    "@fos_user.user_manager"
-            validator:      "@validator"
-            session:        "@session"
+        calls:
+            - [ setTwitterOauth, [ @fos_twitter.api] ]
+            - [ setUserManager, [ @fos_user.user_manager ] ]
+            - [ setSession, [ @session] ]
+            - [ setValidator, [ @validator ] ]
     wtw.dashboard.query_validator:
         class: WTW\DashboardBundle\Validator\Constraints\QueryValidator
         calls:

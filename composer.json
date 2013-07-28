@@ -30,7 +30,7 @@
         "doctrine/orm": ">=2.2.3,<2.4-dev",
         "friendsofsymfony/jsrouting-bundle": "1.1.*",
         "friendsofsymfony/rest-bundle":"0.12.*",
-        "friendsofsymfony/twitter-bundle": "dev-master",
+        "friendsofsymfony/twitter-bundle": "dev-master#d777561581c7d89945e517b33d03bfe349280314",
         "friendsofsymfony/user-bundle": "dev-master",
         "guzzle/guzzle":"3.3.1",
         "incenteev/composer-parameter-handler": "~2.0",
