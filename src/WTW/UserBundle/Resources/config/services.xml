@@ -10,7 +10,7 @@
     </parameters>
 
     <services>
-        <service id="fos_user.user_provider.username" class="WTW\UserBundle\Security\UserProvider" public="false">
+        <service id="fos_user.user_provider.username" class="WeavingTheWeb\Bundle\UserBundle\Security\Core\User\UserProvider" public="false">
             <argument type="service" id="fos_user.user_manager" />
         </service>
         <service id="wtw.user.security_controller" class="%wtw.user.security_controller.class%">

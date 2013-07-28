@@ -1,6 +1,6 @@
 <?php
 
-namespace WTW\DashboardBundle\Security\User\Provider;
+namespace WeavingTheWeb\Bundle\UserBundle\Security\Core\User;
 
 use FOS\UserBundle\Doctrine\UserManager;
 use Symfony\Component\Security\Core\Exception\UsernameNotFoundException,
@@ -10,7 +10,7 @@ use Symfony\Component\Security\Core\Exception\UsernameNotFoundException,
     Symfony\Component\Security\Core\User\UserInterface,
     Symfony\Component\HttpFoundation\Session\Session,
     Symfony\Component\Validator\Validator;
-use \TwitterOAuth;
+use TwitterOAuth;
 
 /**
  * Class TwitterUserProvider
@@ -134,7 +134,7 @@ class TwitterUserProvider implements UserProviderInterface
 
            if (empty($user)) {
                $user = $this->userManager->createUser();
-               $user->setEnabled(false);
+               $user->setEnabled(true);
                $user->setLocked(false);
            }
 

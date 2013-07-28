@@ -16,13 +16,6 @@ services:
             - [ setDatabase, [ %database_name% ] ]
             - [ setEntityManager, [ @doctrine.orm.entity_manager ] ]
             - [ setTranslator, [ @translator ] ]
-    wtw.dashboard.twitter_user:
-        class: WTW\DashboardBundle\Security\User\Provider\TwitterUserProvider
-        calls:
-            - [ setTwitterOauth, [ @fos_twitter.api] ]
-            - [ setUserManager, [ @fos_user.user_manager ] ]
-            - [ setSession, [ @session] ]
-            - [ setValidator, [ @validator ] ]
     wtw.dashboard.query_validator:
         class: WTW\DashboardBundle\Validator\Constraints\QueryValidator
         calls:

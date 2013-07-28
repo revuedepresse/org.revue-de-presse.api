@@ -17,7 +17,7 @@ security:
             chain:
                 providers: [in_memory, fos_user]
         fos_twitter:
-            id: wtw.dashboard.twitter_user
+            id: weaving_the_web_user.twitter_user_provider
         in_memory:
             memory:
                 users:
