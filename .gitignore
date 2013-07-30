@@ -33,7 +33,8 @@ behat_report.html
 /app/phpunit.xml
 /devops/files/*.tar.gz
 /mobile
-/src/WTW/DashboardBundle/Resources/public/components
+
+/src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/components
 /vendor
 /web/assetic
 /web/bundles
