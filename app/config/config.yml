@@ -40,5 +40,10 @@ swiftmailer:
     username:  %mailer_user%
     password:  %mailer_password%
 
+ornicar_apc:
+    host: %api_twitter_host_port%
+    mode: curl
+    web_dir: %kernel.root_dir%/../web
+
 parameters:
     basic_auth_pattern: /this-route-is-undefined-in-production
