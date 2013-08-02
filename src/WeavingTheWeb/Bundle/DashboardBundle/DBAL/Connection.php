@@ -130,7 +130,7 @@ QUERY;
     {
         if (!$this->getWrappedConnection()->set_charset($this->charset)) {
             throw new \Exception(sprintf(
-                'Impossible to set charset (%s): %S', $this->charset, mysqli::$error));
+                'Impossible to set charset (%s): %S', $this->charset, \mysqli::$error));
         }
     }
 
