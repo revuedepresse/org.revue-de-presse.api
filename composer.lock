@@ -2169,12 +2169,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/schmittjoh/parser-lib.git",
-                "reference": "4d469a70c6dd03f921cbdeadafbcb261bb23e8b0"
+                "reference": "316cffddc833c424f730723eaba9f6b8dcb25ef6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/schmittjoh/parser-lib/zipball/4d469a70c6dd03f921cbdeadafbcb261bb23e8b0",
-                "reference": "4d469a70c6dd03f921cbdeadafbcb261bb23e8b0",
+                "url": "https://api.github.com/repos/schmittjoh/parser-lib/zipball/316cffddc833c424f730723eaba9f6b8dcb25ef6",
+                "reference": "316cffddc833c424f730723eaba9f6b8dcb25ef6",
                 "shasum": ""
             },
             "require": {
@@ -2196,7 +2196,7 @@
                 "Apache2"
             ],
             "description": "A library for easily creating recursive-descent parsers.",
-            "time": "2012-11-30 08:11:04"
+            "time": "2013-08-03 15:44:32"
         },
         {
             "name": "jms/security-extra-bundle",
@@ -2574,22 +2574,28 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/thierrymarianne/ApcBundle.git",
-                "reference": "e8e938e4645f86a81afc17ee9ea016859e700790"
+                "reference": "f08334ce0ac6efb5b24a434a42eb6dcfd378f074"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thierrymarianne/ApcBundle/zipball/e8e938e4645f86a81afc17ee9ea016859e700790",
-                "reference": "e8e938e4645f86a81afc17ee9ea016859e700790",
+                "url": "https://api.github.com/repos/thierrymarianne/ApcBundle/zipball/f08334ce0ac6efb5b24a434a42eb6dcfd378f074",
+                "reference": "f08334ce0ac6efb5b24a434a42eb6dcfd378f074",
                 "shasum": ""
             },
             "require": {
+                "fabpot/goutte": "1.*",
                 "symfony/framework-bundle": ">=2.0,<3.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "3.7.*",
+                "symfony/console": ">=2.0,<3.0"
             },
             "type": "symfony-bundle",
             "extra": {
                 "branch-alias": {
                     "dev-master": "1.0.x-dev"
-                }
+                },
+                "symfony-vendor-dir": "vendor"
             },
             "autoload": {
                 "psr-0": {
@@ -2618,7 +2624,7 @@
             "support": {
                 "source": "https://github.com/thierrymarianne/ApcBundle/tree/master"
             },
-            "time": "2013-08-03 12:04:34"
+            "time": "2013-08-03 16:03:27"
         },
         {
             "name": "phpcollection/phpcollection",
@@ -3392,12 +3398,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/fabpot/Twig.git",
-                "reference": "0e63ef04a00fb238ee457708f8b4e8918aa51d7e"
+                "reference": "730aa25bedeee922c361640f6e4c01e4e6bac998"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/fabpot/Twig/zipball/0e63ef04a00fb238ee457708f8b4e8918aa51d7e",
-                "reference": "0e63ef04a00fb238ee457708f8b4e8918aa51d7e",
+                "url": "https://api.github.com/repos/fabpot/Twig/zipball/730aa25bedeee922c361640f6e4c01e4e6bac998",
+                "reference": "730aa25bedeee922c361640f6e4c01e4e6bac998",
                 "shasum": ""
             },
             "require": {
@@ -3406,7 +3412,7 @@
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.13-dev"
+                    "dev-master": "1.14-dev"
                 }
             },
             "autoload": {
@@ -3433,7 +3439,7 @@
             "keywords": [
                 "templating"
             ],
-            "time": "2013-07-24 03:16:45"
+            "time": "2013-08-03 15:50:09"
         },
         {
             "name": "willdurand/negotiation",
