@@ -25,6 +25,7 @@ class AppKernel extends Kernel
             new Doctrine\Bundle\DoctrineBundle\DoctrineBundle(),
             new Doctrine\Bundle\FixturesBundle\DoctrineFixturesBundle(),
             new Doctrine\Bundle\MigrationsBundle\DoctrineMigrationsBundle(),
+            new Knp\Bundle\MarkdownBundle\KnpMarkdownBundle(),
             new Ornicar\ApcBundle\OrnicarApcBundle(),
             new Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle(),
             new Sp\BowerBundle\SpBowerBundle(),
@@ -33,6 +34,7 @@ class AppKernel extends Kernel
             new WTW\Legacy\ProviderBundle\WTWLegacyProviderBundle(),
             new WTW\UserBundle\WTWUserBundle(),
             new WeavingTheWeb\Bundle\DashboardBundle\WeavingTheWebDashboardBundle(),
+            new WeavingTheWeb\Bundle\Documentation\MarkdownBundle\WeavingTheWebDocumentationMarkdownBundle(),
             new WeavingTheWeb\Bundle\ApiBundle\WeavingTheWebApiBundle(),
             new WeavingTheWeb\Bundle\UserBundle\WeavingTheWebUserBundle(),
         );

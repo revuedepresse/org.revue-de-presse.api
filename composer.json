@@ -42,6 +42,7 @@
         "jms/security-extra-bundle":"1.5.*",
         "jms/serializer-bundle": "dev-master",
         "kertz/twitteroauth":"dev-master",
+        "knplabs/knp-markdown-bundle": "1.2.*",
         "ornicar/apc-bundle": "1.*",
         "php":">=5.4.8",
         "symfony/assetic-bundle":"2.3.*",

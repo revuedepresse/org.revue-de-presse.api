@@ -1,4 +1,4 @@
-Weaving the web Experiments
+Weaving The Web Experiments
 ========================
 
 1) Sitemap
@@ -15,6 +15,22 @@ Weaving the web Experiments
 From project directory, run following command:
 
     phpunit -c ./app
+
+3) Requirements
+--------------------------------
+
+Follow [dotdeb instructions](http://www.dotdeb.org/instructions/) to add new repositories to your apt source list
+
+    deb http://packages.dotdeb.org wheezy all
+    deb-src http://packages.dotdeb.org wheezy all
+
+    deb http://packages.dotdeb.org wheezy-php55 all
+    deb-src http://packages.dotdeb.org wheezy-php55 all
+
+    wget http://www.dotdeb.org/dotdeb.gpg
+    cat dotdeb.gpg | sudo apt-key add -
+
+    apt-get install redis-server php5-redis php5-apcu
 
 3) Commands
 --------------------------------
