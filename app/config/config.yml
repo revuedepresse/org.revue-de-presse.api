@@ -6,6 +6,21 @@ imports:
     - { resource: parameters.yml }
     - { resource: security.yml }
 
+snc_redis:
+    clients:
+        default:
+            alias:        default
+            dsn:          redis://localhost
+            logging:      %kernel.debug%
+            type:         predis
+        session:
+            type:         predis
+            alias:        session
+            dsn:          redis://localhost
+    session:
+        client:           session
+        ttl:              1200
+
 framework:
     default_locale:       %locale%
     translator:           { fallback: en }

@@ -19,5 +19,10 @@ web_profiler:
     toolbar: false
     intercept_redirects: false
 
+snc_redis:
+    session:
+        use_as_default: false
+
 swiftmailer:
     disable_delivery: true
+
