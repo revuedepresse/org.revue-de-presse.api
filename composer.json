@@ -9,6 +9,10 @@
     "repositories":[
         {
             "type":"vcs",
+            "url":"git@github.com:thierrymarianne/ApcBundle.git"
+        },
+        {
+            "type":"vcs",
             "url":"git@github.com:thierrymarianne/FOSTwitterBundle.git"
         }, {
             "type":"vcs",

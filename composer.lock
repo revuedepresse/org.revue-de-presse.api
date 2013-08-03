@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "923ad0f19db7218a5ef619690a6c4975",
+    "hash": "bfc83b435722fb866bc10edbece3f9da",
     "packages": [
         {
             "name": "behat/behat",
@@ -2573,13 +2573,13 @@
             "target-dir": "Ornicar/ApcBundle",
             "source": {
                 "type": "git",
-                "url": "https://github.com/ornicar/ApcBundle.git",
-                "reference": "1.0.0"
+                "url": "https://github.com/thierrymarianne/ApcBundle.git",
+                "reference": "e8e938e4645f86a81afc17ee9ea016859e700790"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ornicar/ApcBundle/zipball/1.0.0",
-                "reference": "1.0.0",
+                "url": "https://api.github.com/repos/thierrymarianne/ApcBundle/zipball/e8e938e4645f86a81afc17ee9ea016859e700790",
+                "reference": "e8e938e4645f86a81afc17ee9ea016859e700790",
                 "shasum": ""
             },
             "require": {
@@ -2596,7 +2596,6 @@
                     "Ornicar\\ApcBundle": ""
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -2616,7 +2615,10 @@
                 "apc",
                 "task"
             ],
-            "time": "2013-06-10 09:33:57"
+            "support": {
+                "source": "https://github.com/thierrymarianne/ApcBundle/tree/master"
+            },
+            "time": "2013-08-03 12:04:34"
         },
         {
             "name": "phpcollection/phpcollection",
@@ -3235,12 +3237,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/symfony.git",
-                "reference": "fcea011138f71f8d1953182b7c0bb8be3a871076"
+                "reference": "fbb78ec62f74b6116e587d0f34805ac9927dcb52"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/symfony/zipball/fcea011138f71f8d1953182b7c0bb8be3a871076",
-                "reference": "fcea011138f71f8d1953182b7c0bb8be3a871076",
+                "url": "https://api.github.com/repos/symfony/symfony/zipball/fbb78ec62f74b6116e587d0f34805ac9927dcb52",
+                "reference": "fbb78ec62f74b6116e587d0f34805ac9927dcb52",
                 "shasum": ""
             },
             "require": {
@@ -3335,7 +3337,7 @@
             "keywords": [
                 "framework"
             ],
-            "time": "2013-08-02 14:25:13"
+            "time": "2013-08-03 05:54:12"
         },
         {
             "name": "twig/extensions",
