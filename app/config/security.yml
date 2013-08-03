@@ -40,6 +40,7 @@ security:
                 provider:         fos_twitter
             logout:               true
             anonymous:            true
+
         basic_connect:
             context:              weaving_the_web
             pattern:              %basic_auth_pattern%
@@ -58,8 +59,10 @@ security:
             form_login:
                 provider:         fos_user
                 csrf_provider:    form.csrf_provider
+                login_path:       /
+                check_path:       fos_user_security_check
             logout:               true
-            anonymous:            true
+            anonymous:            ~
 
         login_failure:
             pattern:              ^/twitter/could-not-login

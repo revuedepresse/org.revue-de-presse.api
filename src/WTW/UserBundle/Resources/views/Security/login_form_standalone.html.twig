@@ -5,9 +5,7 @@
         <h2>{{ "title_sign_in_with_wtw"|trans({}, 'security') }}</h2>
     </div>
 
-    <form action="{{ path("fos_user_security_check") }}"
-          id="login"
-          method="post">
+    <form action="{{ path("fos_user_security_check") }}" id="login" method="post">
 
         {% if error %}
         <div class="row-fluid">
