@@ -35,6 +35,8 @@ behat_report.html
 /mobile
 
 /src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/components
+
+/app/bootstrap.php.cache
 /vendor
 /web/assetic
 /web/bundles
