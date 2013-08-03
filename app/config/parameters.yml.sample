@@ -1,6 +1,8 @@
 parameters:
     app_version: 0.1
 
+    apc_host:                       %apc.host%
+
     api_facebook_host_port:         %api.facebook.protocol%%api.facebook.host_port%
     api_twitter_host_port:          %api.twitter.protocol%%api.twitter.host_port%
 

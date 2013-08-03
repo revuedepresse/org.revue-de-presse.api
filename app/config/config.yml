@@ -41,7 +41,7 @@ swiftmailer:
     password:  %mailer_password%
 
 ornicar_apc:
-    host: %api_twitter_host_port%
+    host: %apc_host%
     mode: curl
     web_dir: %kernel.root_dir%/../web
 
