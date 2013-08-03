@@ -74,6 +74,7 @@ security:
 
     access_control:
         - { path: ^/documents, role: ROLE_SUPER_ADMIN }
+        - { path: ^/doc/, role: ROLE_SUPER_ADMIN }
         - { path: ^/user, role: ROLE_USER }
         - { path: ^/, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/login$, role: IS_AUTHENTICATED_ANONYMOUSLY }
