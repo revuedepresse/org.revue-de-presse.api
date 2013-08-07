@@ -45,3 +45,14 @@ From project root directory, execute the following commands to transform
 
     # data collected from personal Twitter user stream
     php app/console wtw:api:manage:transformation --process_isolation --save --type=user_stream
+
+4) Known issues
+--------------------------------
+
+Running WeavingTheWebApiBundle test suite sequentially fails with following message:
+
+    posix_isatty(): could not use stream of type 'MEMORY'
+
+A solution consists in running the tests in parallel:
+
+    ant -f build.xml phpunit-isolated
