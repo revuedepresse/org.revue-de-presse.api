@@ -22,5 +22,9 @@ monolog:
 assetic:
     use_controller: false
 
+snc_redis:
+    session:
+        use_as_default: false
+
 swiftmailer:
     delivery_address: ## FILL ME ##
