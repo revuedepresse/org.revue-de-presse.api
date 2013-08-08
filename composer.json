@@ -10,8 +10,7 @@
         {
             "type":"vcs",
             "url":"git@github.com:thierrymarianne/ApcBundle.git"
-        },
-        {
+        }, {
             "type":"vcs",
             "url":"git@github.com:thierrymarianne/FOSTwitterBundle.git"
         }, {
@@ -43,6 +42,7 @@
         "jms/serializer-bundle": "dev-master",
         "kertz/twitteroauth":"dev-master",
         "knplabs/knp-markdown-bundle": "1.2.*",
+        "oldsound/rabbitmq-bundle": "1.1.*",
         "ornicar/apc-bundle": "1.*",
         "php":">=5.4.8",
         "snc/redis-bundle": "1.1.*",
@@ -54,6 +54,7 @@
         "sensio/framework-extra-bundle":"2.3.*",
         "sensio/generator-bundle":"2.3.*",
         "sp/bower-bundle": "*",
+        "themattharris/tmhOAuth": "dev-master",
         "twig/extensions":"1.0.*"
     },
     "require-dev": {

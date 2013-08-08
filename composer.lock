@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "fdbe8ec0094be2425ca5924d170ec8d0",
+    "hash": "38348dfd197cc9b1dc9dbaf1b02ec837",
     "packages": [
         {
             "name": "behat/behat",
@@ -1909,18 +1909,21 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/instaclick/php-webdriver.git",
-                "reference": "3af07b82598506e765cffdf4cf1385b117cf0a41"
+                "reference": "5ff757c6daf1cfc223928e860385952abbbdb531"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/instaclick/php-webdriver/zipball/3af07b82598506e765cffdf4cf1385b117cf0a41",
-                "reference": "3af07b82598506e765cffdf4cf1385b117cf0a41",
+                "url": "https://api.github.com/repos/instaclick/php-webdriver/zipball/5ff757c6daf1cfc223928e860385952abbbdb531",
+                "reference": "5ff757c6daf1cfc223928e860385952abbbdb531",
                 "shasum": ""
             },
             "require": {
                 "ext-curl": "*",
                 "php": ">=5.3.2"
             },
+            "bin": [
+                "bin/webunit"
+            ],
             "type": "library",
             "extra": {
                 "branch-alias": {
@@ -1949,14 +1952,14 @@
                 }
             ],
             "description": "PHP WebDriver for Selenium 2",
-            "homepage": "http://instaclick.com/torontotechjobs/",
+            "homepage": "http://instaclick.com/",
             "keywords": [
                 "browser",
                 "selenium",
                 "webdriver",
                 "webtest"
             ],
-            "time": "2013-06-19 13:54:29"
+            "time": "2013-08-08 14:22:54"
         },
         {
             "name": "jdorn/sql-formatter",
@@ -2686,40 +2689,84 @@
             "time": "2013-08-01 19:30:22"
         },
         {
+            "name": "oldsound/rabbitmq-bundle",
+            "version": "v1.1.3",
+            "target-dir": "OldSound/RabbitMqBundle",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/videlalvaro/RabbitMqBundle.git",
+                "reference": "v1.1.3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/videlalvaro/RabbitMqBundle/zipball/v1.1.3",
+                "reference": "v1.1.3",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0",
+                "symfony/framework-bundle": ">=2.0,<2.4",
+                "symfony/yaml": ">=2.0,<3.0",
+                "videlalvaro/php-amqplib": "2.0.*"
+            },
+            "require-dev": {
+                "symfony/console": ">=2.0,<3.0"
+            },
+            "type": "symfony-bundle",
+            "autoload": {
+                "psr-0": {
+                    "OldSound\\RabbitMqBundle\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Alvaro Videla"
+                }
+            ],
+            "description": "Integrates php-amqplib with Symfony2 and RabbitMq",
+            "keywords": [
+                "Symfony2",
+                "message",
+                "queue",
+                "rabbitmq"
+            ],
+            "time": "2013-05-24 13:26:58"
+        },
+        {
             "name": "ornicar/apc-bundle",
             "version": "dev-master",
             "target-dir": "Ornicar/ApcBundle",
             "source": {
                 "type": "git",
-                "url": "https://github.com/thierrymarianne/ApcBundle.git",
-                "reference": "eb64da49a577857cf5244fdc12387182582db83e"
+                "url": "https://github.com/ornicar/ApcBundle.git",
+                "reference": "9a0e76023d12339326e7e4fac9592146027fb7df"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thierrymarianne/ApcBundle/zipball/eb64da49a577857cf5244fdc12387182582db83e",
-                "reference": "eb64da49a577857cf5244fdc12387182582db83e",
+                "url": "https://api.github.com/repos/ornicar/ApcBundle/zipball/9a0e76023d12339326e7e4fac9592146027fb7df",
+                "reference": "9a0e76023d12339326e7e4fac9592146027fb7df",
                 "shasum": ""
             },
             "require": {
-                "fabpot/goutte": "1.*",
-                "symfony/framework-bundle": ">=2.0,<3.0"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "3.7.*",
-                "symfony/console": ">=2.0,<3.0"
+                "symfony/framework-bundle": ">=2.1,<3.0"
             },
             "type": "symfony-bundle",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "1.0.x-dev"
-                },
-                "symfony-vendor-dir": "vendor"
+                    "dev-1.0": "1.0.x-dev",
+                    "dev-master": "1.1.x-dev"
+                }
             },
             "autoload": {
                 "psr-0": {
                     "Ornicar\\ApcBundle": ""
                 }
             },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -2739,10 +2786,7 @@
                 "apc",
                 "task"
             ],
-            "support": {
-                "source": "https://github.com/thierrymarianne/ApcBundle/tree/master"
-            },
-            "time": "2013-08-04 15:23:56"
+            "time": "2013-08-04 15:10:17"
         },
         {
             "name": "phpcollection/phpcollection",
@@ -2888,12 +2932,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/sensiolabs/SensioDistributionBundle.git",
-                "reference": "v2.3.3"
+                "reference": "f666c65c810f6a23455966c37f99ba76094775b5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sensiolabs/SensioDistributionBundle/zipball/v2.3.3",
-                "reference": "v2.3.3",
+                "url": "https://api.github.com/repos/sensiolabs/SensioDistributionBundle/zipball/f666c65c810f6a23455966c37f99ba76094775b5",
+                "reference": "f666c65c810f6a23455966c37f99ba76094775b5",
                 "shasum": ""
             },
             "require": {
@@ -2925,7 +2969,7 @@
                 "configuration",
                 "distribution"
             ],
-            "time": "2013-07-24 08:45:20"
+            "time": "2013-08-08 12:18:08"
         },
         {
             "name": "sensio/framework-extra-bundle",
@@ -3029,12 +3073,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/snc/SncRedisBundle.git",
-                "reference": "1f99523092c1129b27f3dd6747cee364b53fab44"
+                "reference": "4ca1615e3ee1dc341f8191d4b8904f89883ef9f5"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/snc/SncRedisBundle/zipball/1f99523092c1129b27f3dd6747cee364b53fab44",
-                "reference": "1f99523092c1129b27f3dd6747cee364b53fab44",
+                "url": "https://api.github.com/repos/snc/SncRedisBundle/zipball/4ca1615e3ee1dc341f8191d4b8904f89883ef9f5",
+                "reference": "4ca1615e3ee1dc341f8191d4b8904f89883ef9f5",
                 "shasum": ""
             },
             "require": {
@@ -3084,7 +3128,7 @@
                 "redis",
                 "symfony"
             ],
-            "time": "2013-07-29 08:20:39"
+            "time": "2013-08-08 18:02:40"
         },
         {
             "name": "sp/bower-bundle",
@@ -3093,12 +3137,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Spea/SpBowerBundle.git",
-                "reference": "d39fa423e05bbc11fe5a18b797590bcfe1db0a22"
+                "reference": "8d059422106e738736c17a0e8922fa82d7f057a8"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Spea/SpBowerBundle/zipball/d39fa423e05bbc11fe5a18b797590bcfe1db0a22",
-                "reference": "d39fa423e05bbc11fe5a18b797590bcfe1db0a22",
+                "url": "https://api.github.com/repos/Spea/SpBowerBundle/zipball/8d059422106e738736c17a0e8922fa82d7f057a8",
+                "reference": "8d059422106e738736c17a0e8922fa82d7f057a8",
                 "shasum": ""
             },
             "require": {
@@ -3144,7 +3188,7 @@
                 "bower manager",
                 "dependencies"
             ],
-            "time": "2013-06-20 21:40:06"
+            "time": "2013-08-08 21:34:21"
         },
         {
             "name": "swiftmailer/swiftmailer",
@@ -3425,12 +3469,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/symfony.git",
-                "reference": "v2.3.3"
+                "reference": "0d16f5dd45788d85d020f47b71f15681d409d039"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/symfony/zipball/v2.3.3",
-                "reference": "v2.3.3",
+                "url": "https://api.github.com/repos/symfony/symfony/zipball/0d16f5dd45788d85d020f47b71f15681d409d039",
+                "reference": "0d16f5dd45788d85d020f47b71f15681d409d039",
                 "shasum": ""
             },
             "require": {
@@ -3525,7 +3569,49 @@
             "keywords": [
                 "framework"
             ],
-            "time": "2013-08-07 17:11:16"
+            "time": "2013-08-08 14:16:27"
+        },
+        {
+            "name": "themattharris/tmhoauth",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/themattharris/tmhOAuth.git",
+                "reference": "0.8.2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/themattharris/tmhOAuth/zipball/0.8.2",
+                "reference": "0.8.2",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "tmhOAuth": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Apache-2.0"
+            ],
+            "authors": [
+                {
+                    "name": "themattharris",
+                    "email": "matt@themattharris.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "An OAuth library written in PHP by @themattharris",
+            "keywords": [
+                "oauth",
+                "twitter"
+            ],
+            "time": "2013-06-15 18:00:16"
         },
         {
             "name": "twig/extensions",
@@ -3622,6 +3708,47 @@
                 "templating"
             ],
             "time": "2013-08-07 12:53:34"
+        },
+        {
+            "name": "videlalvaro/php-amqplib",
+            "version": "v2.0.2",
+            "source": {
+                "type": "git",
+                "url": "git://github.com/videlalvaro/php-amqplib.git",
+                "reference": "v2.0.2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/videlalvaro/php-amqplib/zipball/v2.0.2",
+                "reference": "v2.0.2",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "PhpAmqpLib": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "LGPL-2.1"
+            ],
+            "authors": [
+                {
+                    "name": "Alvaro Videla"
+                }
+            ],
+            "description": "This library is a pure PHP implementation of the AMQP protocol. It's been tested against RabbitMQ.",
+            "homepage": "https://github.com/videlalvaro/php-amqplib/",
+            "keywords": [
+                "message",
+                "queue",
+                "rabbitmq"
+            ],
+            "time": "2013-02-13 19:43:51"
         },
         {
             "name": "willdurand/negotiation",
@@ -3789,6 +3916,7 @@
         "friendsofsymfony/user-bundle": 20,
         "jms/serializer-bundle": 20,
         "kertz/twitteroauth": 20,
+        "themattharris/tmhoauth": 20,
         "elao/web-profiler-extra-bundle": 20
     },
     "platform": {
