@@ -32,27 +32,27 @@ doctrine:
                 connection: default
                 mappings:
                     WTWCodeGenerationAnalysisBundle: ~
-                    WTWLegacyProviderBundle: ~
                     WTWUserBundle: ~
                     WeavingTheWebApiBundle: ~
                     WeavingTheWebDashboardBundle: ~
+                    WeavingTheWebLegacyProviderBundle: ~
                     WeavingTheWebUserBundle: ~
             admin:
                 connection: admin
                 mappings:
                     WTWCodeGenerationAnalysisBundle: ~
                     WTWUserBundle: ~
-                    WTWLegacyProviderBundle: ~
                     WeavingTheWebApiBundle: ~
                     WeavingTheWebDashboardBundle: ~
+                    WeavingTheWebLegacyProviderBundle: ~
                     WeavingTheWebUserBundle: ~
             test_mysql:
                 connection: test_mysql
                 mappings:
                     WTWCodeGenerationAnalysisBundle: ~
-                    WTWLegacyProviderBundle: ~
                     WTWUserBundle: ~
                     WeavingTheWebApiBundle: ~
                     WeavingTheWebDashboardBundle: ~
+                    WeavingTheWebLegacyProviderBundle: ~
                     WeavingTheWebUserBundle: ~
         auto_generate_proxy_classes: %kernel.debug%
