@@ -67,3 +67,6 @@ parameters:
 
     test_database_memory:       false
     test_database_path:         %kernel.cache_dir%/wtw_dashboard.db
+
+    legacy_bootstrap_script:    %legacy.bootstrap_script%
+    legacy_workspace:           %legacy.workspace%
