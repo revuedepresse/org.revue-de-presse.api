@@ -1,0 +1,10 @@
+parameters:
+    weaving_the_web_twitter.endpoint.feed:                        %endpoint_twitter_feed%
+    weaving_the_web_twitter.serialize_user_stream_command.class:  WeavingTheWeb\Bundle\TwitterBundle\Command\SerializeUserStreamCommand
+    weaving_the_web_twitter.version:                              %api_twitter_version%
+
+services:
+    weaving_the_web_twitter.miner:
+        class:  %weaving_the_web_data_mining.miner.class%
+        arguments:
+            - %weaving_the_web_twitter.endpoint.feed%
