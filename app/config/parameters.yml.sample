@@ -50,6 +50,8 @@ parameters:
     database_password_admin:    %mysql.admin_password%
 
     endpoint_facebook_feed:     %api_facebook_host_port%/api/facebook/api.facebook.get.feed.php
+    endpoint_twitter_feed:      %api_twitter_host_port%/api/api.twitter.display.wall.php?twr=1&res=timeline
+    endpoint_twitter_user:      https://userstream.twitter.com/%s/user.json
 
     locale:                     en
 
