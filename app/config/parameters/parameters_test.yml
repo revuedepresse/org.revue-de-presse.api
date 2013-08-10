@@ -12,8 +12,6 @@ parameters:
     security.user.provider.in_memory.class:       WTW\UserBundle\Tests\Security\Core\User\InMemoryUserProvider
     security.user.provider.in_memory.user.class:  WTW\UserBundle\Tests\Security\Core\User\User
 
-    wtw.data_mining.command_provider.class:       WTW\API\DataMiningBundle\Command\Tester\TransformationCommandProvider
-
 services:
     fos_user.mailer.default:
         class: FOS\UserBundle\Mailer\NoopMailer
