@@ -16,6 +16,8 @@ From project directory, run following command:
 
     phpunit -c ./app
 
+Testing controllers and matching routes requires updating ``basic_auth_pattern`` parameter in ``app/config/config_test.yml``
+
 3) Requirements
 --------------------------------
 
