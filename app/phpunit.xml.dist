@@ -13,6 +13,12 @@
         syntaxCheck                 = "true"
         bootstrap                   = "bootstrap.php.cache" >
 
+    <groups>
+        <exclude>
+            <group>twitter</group>
+        </exclude>
+    </groups>
+
     <testsuites>
         <testsuite name="WTW Test Suite">
             <directory>../src/*/*/*Bundle/Tests</directory>
