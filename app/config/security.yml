@@ -73,12 +73,12 @@ security:
             security: false
 
     access_control:
-        - { path: ^/, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/api, role: ROLE_USER }
-        - { path: ^/basic/logout, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/documents, role: ROLE_SUPER_ADMIN }
         - { path: ^/doc/, role: ROLE_SUPER_ADMIN }
+        - { path: ^/user, role: ROLE_USER }
+        - { path: ^/, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/login$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/basic/logout, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/register, role: IS_AUTHENTICATED_ANONYMOUSLY }
         - { path: ^/resetting, role: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/user, role: ROLE_USER }
