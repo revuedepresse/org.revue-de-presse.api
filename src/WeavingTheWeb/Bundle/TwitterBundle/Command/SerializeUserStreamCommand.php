@@ -30,14 +30,12 @@ class SerializeUserStreamCommand extends ContainerAwareCommand
             null,
             InputOption::VALUE_REQUIRED,
             'A token is required'
-        )
-            ->addOption(
+        )->addOption(
             'secret',
             null,
             InputOption::VALUE_REQUIRED,
             'A secret is required'
-        )
-            ->setAliases(array('wtw:api:tw:usr_str'));
+        )->setAliases(array('wtw:api:tw:usr_str'));
     }
 
     /**
