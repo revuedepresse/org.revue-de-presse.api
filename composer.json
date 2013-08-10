@@ -46,6 +46,7 @@
         "oldsound/rabbitmq-bundle": "1.1.*",
         "ornicar/apc-bundle": "dev-master",
         "php":">=5.4.8",
+        "predis/predis": "0.8.*",
         "snc/redis-bundle": "1.1.*",
         "symfony/assetic-bundle":"2.3.*",
         "symfony/monolog-bundle":"2.3.*",
@@ -57,9 +58,6 @@
         "sp/bower-bundle": "*",
         "themattharris/tmhOAuth": "dev-master",
         "twig/extensions":"1.0.*"
-    },
-    "require-dev": {
-        "predis/predis": "0.8.*"
     },
     "scripts":{
         "post-install-cmd":[
