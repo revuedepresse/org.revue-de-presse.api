@@ -20,7 +20,7 @@ monolog:
             level:  debug
 
 assetic:
-    use_controller: false
+    use_controller: true
 
 snc_redis:
     session:

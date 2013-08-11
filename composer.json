@@ -32,7 +32,7 @@
         "doctrine/doctrine-migrations-bundle": "dev-master",
         "doctrine/orm": ">=2.2.3,<2.4-dev",
         "elao/web-profiler-extra-bundle": "dev-master",
-        "friendsofsymfony/jsrouting-bundle": "1.1.*",
+        "friendsofsymfony/jsrouting-bundle": "1.2.*",
         "friendsofsymfony/rest-bundle":"0.*",
         "friendsofsymfony/twitter-bundle": "dev-master#d777561581c7d89945e517b33d03bfe349280314",
         "friendsofsymfony/user-bundle": "dev-master",
@@ -63,16 +63,12 @@
         "post-install-cmd":[
             "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::buildBootstrap",
             "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::clearCache",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installAssets",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installRequirementsFile",
-            "Sp\\BowerBundle\\Composer\\ScriptHandler::bowerInstall"
+            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installRequirementsFile"
         ],
         "post-update-cmd":[
             "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::buildBootstrap",
             "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::clearCache",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installAssets",
-            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installRequirementsFile",
-            "Sp\\BowerBundle\\Composer\\ScriptHandler::bowerInstall"
+            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installRequirementsFile"
         ]
 
     },

@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "8984a0f6af604594a4d23889cd362319",
+    "hash": "5af45c8b0cfa28c402e08bf99509eab2",
     "packages": [
         {
             "name": "behat/behat",
@@ -78,12 +78,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Behat/Gherkin.git",
-                "reference": "240e8939f65780a1cd407667e74d1663d0be9c47"
+                "reference": "d5972da0dd86fd1d0e507ab273c0e22bc426a9b2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Behat/Gherkin/zipball/240e8939f65780a1cd407667e74d1663d0be9c47",
-                "reference": "240e8939f65780a1cd407667e74d1663d0be9c47",
+                "url": "https://api.github.com/repos/Behat/Gherkin/zipball/d5972da0dd86fd1d0e507ab273c0e22bc426a9b2",
+                "reference": "d5972da0dd86fd1d0e507ab273c0e22bc426a9b2",
                 "shasum": ""
             },
             "require": {
@@ -131,7 +131,7 @@
                 "Symfony2",
                 "parser"
             ],
-            "time": "2013-08-04 00:37:48"
+            "time": "2013-08-11 02:33:12"
         },
         {
             "name": "behat/mink",
@@ -1416,12 +1416,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Elao/WebProfilerExtraBundle.git",
-                "reference": "3f7efc52ea6837fe9741eb2e63a33566bd88f342"
+                "reference": "20e24753f82209acdcdd4c38ad61ab7a9c7b5b09"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Elao/WebProfilerExtraBundle/zipball/3f7efc52ea6837fe9741eb2e63a33566bd88f342",
-                "reference": "3f7efc52ea6837fe9741eb2e63a33566bd88f342",
+                "url": "https://api.github.com/repos/Elao/WebProfilerExtraBundle/zipball/20e24753f82209acdcdd4c38ad61ab7a9c7b5b09",
+                "reference": "20e24753f82209acdcdd4c38ad61ab7a9c7b5b09",
                 "shasum": ""
             },
             "require": {
@@ -1462,7 +1462,7 @@
                 "extra",
                 "profiler"
             ],
-            "time": "2013-07-28 12:26:44"
+            "time": "2013-08-11 07:52:29"
         },
         {
             "name": "fabpot/goutte",
@@ -1522,7 +1522,7 @@
         },
         {
             "name": "friendsofsymfony/jsrouting-bundle",
-            "version": "dev-master",
+            "version": "1.2.0",
             "target-dir": "FOS/JsRoutingBundle",
             "source": {
                 "type": "git",
@@ -2121,12 +2121,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/schmittjoh/cg-library.git",
-                "reference": "75a519d83a33f6b893a25aef835a1e5fc166a6d7"
+                "reference": "0d8d8c7e964e0ee1b5743f23117a541873d9bfef"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/schmittjoh/cg-library/zipball/75a519d83a33f6b893a25aef835a1e5fc166a6d7",
-                "reference": "75a519d83a33f6b893a25aef835a1e5fc166a6d7",
+                "url": "https://api.github.com/repos/schmittjoh/cg-library/zipball/0d8d8c7e964e0ee1b5743f23117a541873d9bfef",
+                "reference": "0d8d8c7e964e0ee1b5743f23117a541873d9bfef",
                 "shasum": ""
             },
             "require": {
@@ -2159,7 +2159,7 @@
             "keywords": [
                 "code generation"
             ],
-            "time": "2013-03-23 08:03:00"
+            "time": "2013-08-11 11:06:02"
         },
         {
             "name": "jms/di-extra-bundle",

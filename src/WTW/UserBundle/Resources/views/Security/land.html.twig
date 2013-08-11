@@ -8,7 +8,6 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    {% include "WTWUserBundle:Registration:stylesheets.html.twig" %}
 {% endblock %}
 
 {% block title %}{{ title|trans }}{% endblock %}
@@ -17,7 +16,7 @@
 {% block navigation_login %}{% endblock %}
 
 {% block body %}
-    <div class="container">
+    <div class="container mainland">
         <div class="span11">
             <div class="offset1">
                 <h1>{% block main_title %}{{ title|trans }}{% endblock main_title %}</h1>
