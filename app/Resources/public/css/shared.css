@@ -3,3 +3,11 @@
     list-style-type: none;
     margin-left: 0;
 }
+
+.mainland h1 {
+    font-size: 1.75em;
+}
+
+.mainland h2 {
+    font-size: 1.5em;
+}
