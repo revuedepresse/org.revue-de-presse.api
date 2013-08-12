@@ -1,5 +1,6 @@
 parameters:
-    weaving_the_web_dashboard.dbal_connection.class:  WeavingTheWeb\Bundle\DashboardBundle\DBAL\Connection
+    weaving_the_web_dashboard.dbal_connection.class:          WeavingTheWeb\Bundle\DashboardBundle\DBAL\Connection
+    weaving_the_web_dashboard.map_perspective_command.class:  WeavingTheWeb\Bundle\DashboardBundle\Command\MapPerspectiveCommand
 
 services:
     weaving_the_web_dashboard.dbal_connection:

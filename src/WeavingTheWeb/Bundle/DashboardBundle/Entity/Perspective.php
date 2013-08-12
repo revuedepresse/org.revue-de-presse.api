@@ -45,6 +45,20 @@ class Perspective
     /**
      * @var string
      *
+     * @ORM\Column(name="per_uuid", type="string", length=36, nullable=true)
+     */
+    protected $uuid;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="per_hash", type="string", length=40, nullable=true)
+     */
+    protected $hash;
+
+    /**
+     * @var string
+     *
      * @ORM\Column(name="per_description", type="text", nullable=true)
      */
     protected $description;
@@ -78,6 +92,22 @@ class Perspective
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * @param string $name
+     */
+    public function setName($name)
+    {
+        $this->name = $name;
+    }
+
+    /**
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->name;
     }
 
     /**
@@ -216,5 +246,37 @@ class Perspective
     public function getDescription()
     {
         return $this->description;
+    }
+
+    /**
+     * @param string $hash
+     */
+    public function setHash($hash)
+    {
+        $this->hash = $hash;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHash()
+    {
+        return $this->hash;
+    }
+
+    /**
+     * @param string $uuid
+     */
+    public function setUuid($uuid)
+    {
+        $this->uuid = $uuid;
+    }
+
+    /**
+     * @return string
+     */
+    public function getUuid()
+    {
+        return $this->uuid;
     }
 }
