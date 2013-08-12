@@ -9,14 +9,25 @@ Weaving The Web Experiments
 * Social Media Dashboard - ([dashboard]({{ baseurl }}/documents))
 * Sign in with Twitter - ([sign in]({{ baseurl }}/twitter/connect))
 
-2) Tests
+2) Testing
 --------------------------------
+
+### Running test suite ###
 
 From project directory, run following command:
 
     phpunit -c ./app
 
+### Testing controllers ###
+
 Testing controllers and matching routes requires updating ``basic_auth_pattern`` parameter in ``app/config/config_test.yml``
+
+### Testing commands ###
+
+To load data fixtures before testing a command class:
+
+ * Declare a command test class extending ``WTW\CodeGeneration\QualityAssuranceBundle\Test\CommandTestCase``
+ * Implement a special method ``requiredFixtures`` which return value evaluates to ``true``.
 
 3) Requirements
 --------------------------------
