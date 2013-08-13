@@ -14,7 +14,10 @@ return function (Perspective $instance) {
 
     $uuid = vsprintf('%s%s-%s-%s-%s-%s%s%s', str_split(bin2hex($data), 4));
 
-    $instance->setUuid($uuid);
+    $perspectiveUuid  = $instance->getUuid();
+    if (is_null($perspectiveUuid)) {
+        $instance->setUuid($uuid);
+    }
 
     return $instance;
 };
