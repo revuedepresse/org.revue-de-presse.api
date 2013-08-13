@@ -23,4 +23,19 @@ class PerspectiveRepository extends EntityRepository
 
         return $perspective;
     }
+
+    /**
+     * @param $hash
+     * @return mixed
+     */
+    public function findOneByPartialHash($hash)
+    {
+        $paddedHash = str_pad(substr($hash, 0, 7), 7, '-', STR_PAD_RIGHT) . substr($hash, 7);
+
+        $queryBuilder = $this->createQueryBuilder('p');
+        $queryBuilder->andWhere('p.hash LIKE :hash');
+        $queryBuilder->setParameter('hash', $paddedHash . '%');
+
+        return $queryBuilder->getQuery()->getSingleResult();
+    }
 }

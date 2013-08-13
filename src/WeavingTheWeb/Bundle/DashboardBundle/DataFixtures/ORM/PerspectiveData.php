@@ -9,7 +9,7 @@ use WeavingTheWeb\Bundle\DashboardBundle\Entity\Perspective,
 
 class PerspectiveData implements FixtureInterface
 {
-    const DEFAULT_QUERY = '# Update administration panel
+    const DEFAULT_QUERY = '# Show administration panel
 SELECT per_id as id, per_name as name, per_value AS pre_sql, per_name as hid_name, per_value as btn_sql
 FROM weaving_perspective
 ORDER BY per_id DESC';
@@ -19,12 +19,20 @@ ORDER BY per_id DESC';
      */
     public function load(ObjectManager $manager)
     {
-        $json = new Perspective();
-        $json->setValue(self::DEFAULT_QUERY);
-        $json->setType(Connection::QUERY_TYPE_DEFAULT);
-        $manager->persist($json);
+        $perspective = new Perspective();
+        $perspective->setValue(self::DEFAULT_QUERY);
+        $perspective->setType(Connection::QUERY_TYPE_DEFAULT);
+        $manager->persist($perspective);
 
         $manager->flush();
 
+        $perspective= new Perspective();
+        $perspective->setValue(self::DEFAULT_QUERY);
+        $perspective->setStatus($perspective::STATUS_PUBLIC);
+        $perspective->setType(Connection::QUERY_TYPE_DEFAULT);
+        $perspective->setHash(sha1(self::DEFAULT_QUERY));
+        $manager->persist($perspective);
+
+        $manager->flush();
     }
 }
