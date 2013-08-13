@@ -1,0 +1,67 @@
+<div class="row">
+    <table class="table table-condensed">
+    {% for columns in records %}
+    {% if loop.first %}
+    <tr>
+        {% for name, value in columns %}
+        {% set starts_with = name|slice(0,4) %}
+        <td>
+        {% if starts_with != "hid_" %}
+            {% if
+                starts_with == "raw_" or
+                starts_with == "img_" or
+                starts_with == "lnk_" or
+                starts_with == "trc_" or
+                starts_with == "pre_" or
+                starts_with == "btn_" %}
+                {{ name[4:] }}
+            {% else  %}
+                {{ name }}
+            {% endif %}
+        {% endif %}
+        </td>
+        {% endfor %}
+    </tr>
+    {% endif %}
+    <tr>
+        {% for name, value in columns %}
+        <td>
+        {% set starts_with = name|slice(0,4) %}
+        {% if starts_with == "raw_" %}
+            {{ value|raw }}
+        {% elseif starts_with == "img_" %}
+            <img src="{{ value }}" />
+        {% elseif starts_with == "lnk_" %}
+            <a href="{{ value }}">
+            {% if columns.hid_img is defined %}
+            <img src="{{ columns.hid_img_trc }}" />
+            {% elseif columns.hid_trc_label is defined %}
+            <p class="shorten" title="{{ columns.hid_trc_label|raw }}">
+                {{ columns.hid_trc_label|truncate(15, true)|trim }}
+            </p>
+            {% else %}
+            {{ value }}
+            {% endif %}
+            </a>
+        {% elseif starts_with == "trc_" %}
+            <p class="shorten" title="{{ value|raw }}">{{ value|truncate(15, true) }}</p>
+        {% elseif starts_with == "pre_" %}
+            <pre>{{ value }}</pre>
+        {% elseif starts_with == "btn_" %}
+            <div class="query" title="{{ value|escape }}">
+                {% if columns.hid_name is defined %}
+                <button type="button" class="btn">{{ columns.hid_name }}</button>
+                {% endif %}
+                <span class="sql hide">{{ value }}</span>
+            </div>
+        {% elseif starts_with != "hid_"  %}
+            {{ value }}
+        {% endif %}
+        </td>
+        {% else %}
+            {{ columns }}
+        {% endfor %}
+    <tr>
+    {% endfor %}
+    </table>
+</div>

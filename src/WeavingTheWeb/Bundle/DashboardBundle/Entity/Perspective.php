@@ -12,6 +12,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Perspective
 {
+    const STATUS_PUBLIC = 2;
+
     /**
      * @var integer
      *
