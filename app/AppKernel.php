@@ -39,6 +39,7 @@ class AppKernel extends Kernel
             new WeavingTheWeb\Bundle\DataMiningBundle\WeavingTheWebDataMiningBundle(),
             new WeavingTheWeb\Bundle\Documentation\MarkdownBundle\WeavingTheWebDocumentationMarkdownBundle(),
             new WeavingTheWeb\Bundle\Legacy\ProviderBundle\WeavingTheWebLegacyProviderBundle(),
+            new WeavingTheWeb\Bundle\MappingBundle\WeavingTheWebMappingBundle(),
             new WeavingTheWeb\Bundle\TwitterBundle\WeavingTheWebTwitterBundle(),
             new WeavingTheWeb\Bundle\UserBundle\WeavingTheWebUserBundle(),
         );
