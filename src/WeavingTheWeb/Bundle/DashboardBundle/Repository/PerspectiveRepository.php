@@ -13,13 +13,22 @@ use WeavingTheWeb\Bundle\DashboardBundle\Entity\Perspective;
  */
 class PerspectiveRepository extends EntityRepository
 {
-    public function savePerspective($sql)
+    /**
+     * @param $sql
+     * @param \ArrayAccess $setters
+     * @return Perspective
+     */
+    public function savePerspective($sql, \ArrayAccess $setters = null)
     {
         $perspective = new Perspective();
         $perspective->setValue($sql);
         $perspective->setType(1);
         $perspective->setStatus(1);
         $perspective->setCreationDate(new \DateTime());
+
+        foreach ($setters as $setter) {
+            $perspective = $setter($perspective);
+        }
 
         return $perspective;
     }
