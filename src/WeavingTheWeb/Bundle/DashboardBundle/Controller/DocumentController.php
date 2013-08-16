@@ -7,8 +7,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse,
     Symfony\Component\HttpFoundation\Request,
     Symfony\Bundle\FrameworkBundle\Controller\Controller,
     Symfony\Component\HttpFoundation\Response;
-use WeavingTheWeb\Bundle\DashboardBundle\DBAL\Connection,
-    WeavingTheWeb\Bundle\DashboardBundle\Repository\PerspectiveRepository;
+use WeavingTheWeb\Bundle\DashboardBundle\DBAL\Connection;
 use JMS\SecurityExtraBundle\Annotation\Secure;
 
 /**
@@ -72,7 +71,6 @@ class DocumentController extends Controller
         $request = $this->get('request');
         $translator = $this->get('translator');
         $entityManager = $this->get('doctrine.orm.entity_manager');
-        $perspectiveRepository = $entityManager->getRepository('WeavingTheWebDashboardBundle:Perspective');
         $type = 'error';
 
         if ($request->request->has('sql')) {
@@ -80,16 +78,23 @@ class DocumentController extends Controller
             $sql = $request->request->get('sql');
         } else {
             $error = $translator->trans('save_query_failure', array(), 'messages');
+            $sql = '';
         }
 
-        $result = $perspectiveRepository->findByValue($sql);
+        /**
+         * @var $perspectiveRepository \WeavingTheWeb\Bundle\DashboardBundle\Repository\PerspectiveRepository
+         */
+        $perspectiveRepository = $entityManager->getRepository('WeavingTheWebDashboardBundle:Perspective');
+        $result = $perspectiveRepository->findBy(['value' => $sql]);
 
         if (count($result) === 0) {
             try {
+                $setters= $this->get('weaving_the_web_mapping.mapping');
+
                 /**
-                 * @var $perspective PerspectiveRepository
+                 * @var $perspective \WeavingTheWeb\Bundle\DashboardBundle\Entity\Perspective
                  */
-                $perspective = $perspectiveRepository->savePerspective($sql);
+                $perspective = $perspectiveRepository->savePerspective($sql, $setters);
                 $entityManager->persist($perspective);
                 $entityManager->flush();
 
@@ -107,7 +112,7 @@ class DocumentController extends Controller
                 'result' => is_null($error) ? $result : $error,
                 'type' => $type
             )),
-            200,
+            201,
             array('Context-type' => 'application/json'));
     }
 }
