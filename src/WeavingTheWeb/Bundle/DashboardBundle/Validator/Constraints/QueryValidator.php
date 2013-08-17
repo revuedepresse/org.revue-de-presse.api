@@ -26,6 +26,9 @@ class QueryValidator extends ConstraintValidator
 
     public function validate($value, Constraint $constraint)
     {
+        /**
+         * @var Query $constraint
+         */
         if (strlen(trim($value)) === 0) {
             $this->context->addViolation($this->translator->trans(
                 $constraint->nonEmptyViolation, [], 'messages'));
@@ -38,6 +41,10 @@ class QueryValidator extends ConstraintValidator
             ['method' => 'alterSchema'],
             ['method' => 'grantPrivilege']
         ];
+
+        if ($this->context->getGroup() === $constraint::GROUP_PUBLIC_QUERIES) {
+            $checklist[] = ['method' => 'updateData'];
+        }
 
         foreach ($checklist as $checkpoint) {
             $breakConstraint = $checkpoint['method'];
@@ -73,7 +80,6 @@ class QueryValidator extends ConstraintValidator
 
     /**
      * @param $sql
-     *
      * @return bool
      */
     public function dropData($sql)
@@ -93,6 +99,17 @@ class QueryValidator extends ConstraintValidator
         $validQueryCount = $this->validQueryCount($sql, 'truncate', 'truncate table tmp_');
 
         return $this->assertContains('truncate', $sql) && !$validQueryCount;
+    }
+
+    /**
+     * @param $sql
+     * @return bool
+     */
+    public function updateData($sql)
+    {
+        $validQueryCount = $this->validQueryCount($sql, 'update', 'update tmp_');
+
+        return $this->assertContains('update', $sql) && !$validQueryCount;
     }
 
     /**

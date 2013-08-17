@@ -13,17 +13,21 @@ use Symfony\Component\Translation\Translator,
  */
 class Query extends Constraint
 {
+    const GROUP_PUBLIC_QUERIES = 'public_queries';
+
+    public $alterSchemaViolation = 'constraint_violation.query.alter';
+
     public $deleteDataViolation = 'constraint_violation.query.delete';
 
-    public $nonEmptyViolation= 'constraint_violation.query.non_empty';
+    public $dropDataViolation = 'constraint_violation.query.drop';
 
-    public $truncateTableViolation= 'constraint_violation.query.truncate';
+    public $grantPrivilegeViolation = 'constraint_violation.query.grant';
 
-    public $dropDataViolation= 'constraint_violation.query.drop';
+    public $nonEmptyViolation = 'constraint_violation.query.non_empty';
 
-    public $alterSchemaViolation= 'constraint_violation.query.alter';
+    public $truncateTableViolation = 'constraint_violation.query.truncate';
 
-    public $grantPrivilegeViolation= 'constraint_violation.query.grant';
+    public $updateDataViolation = 'constraint_violation.query.update';
 
     public function validatedBy()
     {
