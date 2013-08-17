@@ -5,6 +5,7 @@ parameters:
     weaving_the_web_dashboard.entity.perspective:             WeavingTheWebDashboardBundle:Perspective
     weaving_the_web_dashboard.perspective_validator.class:    WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints\PerspectiveValidator
     weaving_the_web_dashboard.query_validator.class:          WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints\QueryValidator
+    weaving_the_web_dashboard.router.class:                   WeavingTheWeb\Bundle\DashboardBundle\Routing\Router
 
 services:
     weaving_the_web_dashboard.dbal_connection:
@@ -27,6 +28,18 @@ services:
             - [ setTranslator, [ @translator ] ]
         tags:
             - { name: validator.constraint_validator, alias: weaving_the_web.validator.query }
+    weaving_the_web_dashboard.perspective_validator:
+        class: %weaving_the_web_dashboard.perspective_validator.class%
+        calls:
+            - [ setTranslator, [ @translator ] ]
+            - [ setValidator, [ @validator ] ]
+        tags:
+            - { name: validator.constraint_validator, alias: weaving_the_web.validator.perspective }
+    weaving_the_web_dashboard.router:
+        class: %weaving_the_web_dashboard.router.class%
+        calls:
+            - [ setRouter, [ @router ] ]
+            - [ setEntityManager, [ @doctrine.orm.entity_manager ] ]
     twig.extension.text:
         class: Twig_Extensions_Extension_Text
         tags:
