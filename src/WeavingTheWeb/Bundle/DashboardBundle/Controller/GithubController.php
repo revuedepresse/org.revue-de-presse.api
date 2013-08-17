@@ -2,7 +2,8 @@
 
 namespace WeavingTheWeb\Bundle\DashboardBundle\Controller;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller,
+    Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
 use JMS\SecurityExtraBundle\Annotation\Secure;
 
