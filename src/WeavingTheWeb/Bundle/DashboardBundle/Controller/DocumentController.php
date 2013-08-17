@@ -6,7 +6,8 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
 use Symfony\Component\HttpFoundation\RedirectResponse,
     Symfony\Component\HttpFoundation\Request,
     Symfony\Bundle\FrameworkBundle\Controller\Controller,
-    Symfony\Component\HttpFoundation\Response;
+    Symfony\Component\HttpFoundation\Response,
+    Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
 use WeavingTheWeb\Bundle\DashboardBundle\DBAL\Connection;
 use JMS\SecurityExtraBundle\Annotation\Secure;
 
@@ -18,6 +19,34 @@ use JMS\SecurityExtraBundle\Annotation\Secure;
  */
 class DocumentController extends Controller
 {
+    /**
+     * @Extra\Route("/navigation/{activeMenu}", name="weaving_the_web_dashboard_show_navigation")
+     * @Extra\Method({"GET"})
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Exception
+     */
+    public function showNavigationAction($activeMenu = 'github_repositories')
+    {
+        $response = $this->render('::navigation.html.twig', array('active_menu_item' => $activeMenu));
+
+        /**
+         * @var \Symfony\Component\Security\Core\SecurityContext $securityContext
+         */
+        $securityContext = $this->get('security.context');
+        $token = $securityContext->getToken();
+
+        if ($token instanceof AnonymousToken) {
+            $response->setPublic();
+            $response->setSharedMaxAge(3600*2);
+        } else {
+            $response->setPrivate();
+            $response->setSharedMaxAge(0);
+        }
+
+        return $response;
+    }
+
     /**
      * @Extra\Route("/documents", name="weaving_the_web_dashboard_show_documents")
      * @Extra\Method({"GET", "POST"})
