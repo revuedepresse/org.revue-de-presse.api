@@ -47,4 +47,34 @@ class PerspectiveRepository extends EntityRepository
 
         return $queryBuilder->getQuery()->getSingleResult();
     }
+
+    /**
+     * @param array $columns
+     * @param array $conditions
+     * @param array $parameters
+     * @return \Doctrine\ORM\Internal\Hydration\IterableResult
+     */
+    public function getIterablePerspectives(array $columns = [], array $conditions = [], array $parameters = [])
+    {
+        $perspectiveAlias = 'p';
+
+        /**
+         * @var $queryBuilder \Doctrine\ORM\QueryBuilder
+         */
+        $queryBuilder = $this->createQueryBuilder($perspectiveAlias);
+
+        foreach ($conditions as $condition) {
+            $queryBuilder->andWhere(str_replace('{alias}', $perspectiveAlias, $condition));
+        }
+        if (!empty($columns)) {
+            $queryBuilder->select(str_replace('{alias}', $perspectiveAlias, $columns));
+        }
+        foreach ($parameters as $name => $value) {
+            $queryBuilder->setParameter($name, $value);
+        }
+
+        $query = $queryBuilder->getQuery();
+
+        return $query->iterate();
+    }
 }
