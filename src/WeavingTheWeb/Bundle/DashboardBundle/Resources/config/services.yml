@@ -1,6 +1,10 @@
 parameters:
     weaving_the_web_dashboard.dbal_connection.class:          WeavingTheWeb\Bundle\DashboardBundle\DBAL\Connection
     weaving_the_web_dashboard.map_perspective_command.class:  WeavingTheWeb\Bundle\DashboardBundle\Command\MapPerspectiveCommand
+    weaving_the_web_dashboard.repository.perspective.class:   WeavingTheWeb\Bundle\DashboardBundle\Repository\PerspectiveRepository
+    weaving_the_web_dashboard.entity.perspective:             WeavingTheWebDashboardBundle:Perspective
+    weaving_the_web_dashboard.perspective_validator.class:    WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints\PerspectiveValidator
+    weaving_the_web_dashboard.query_validator.class:          WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints\QueryValidator
 
 services:
     weaving_the_web_dashboard.dbal_connection:
@@ -27,3 +31,8 @@ services:
         class: Twig_Extensions_Extension_Text
         tags:
             - { name: twig.extension }
+    weaving_the_web_dashboard.repository.perspective:
+        class: %weaving_the_web_dashboard.repository.perspective.class%
+        factory_service: doctrine.orm.entity_manager
+        factory_method: getRepository
+        arguments: [%weaving_the_web_dashboard.entity.perspective%]
