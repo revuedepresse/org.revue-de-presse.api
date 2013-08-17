@@ -21,7 +21,6 @@ class Version20130727093601 extends AbstractMigration
         $this->addSql("ALTER TABLE weaving_user_group ADD CONSTRAINT FK_760325A2FE54D947 FOREIGN KEY (group_id) REFERENCES weaving_group (rol_id)");
         $this->addSql("DROP INDEX jsn_hash ON weaving_json");
         $this->addSql("CREATE UNIQUE INDEX jsn_hash ON weaving_json (jsn_hash)");
-        $this->addSql("DROP INDEX jsn_status ON weaving_json");
         $this->addSql("CREATE INDEX jsn_status ON weaving_json (jsn_status, jsn_type)");
     }
 
