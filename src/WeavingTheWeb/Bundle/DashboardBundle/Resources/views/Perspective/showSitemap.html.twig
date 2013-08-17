@@ -1,0 +1,22 @@
+{% extends "::base.html.twig" %}
+
+{% set title = title|trans([], 'messages') %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block body %}
+    <div class="container-fluid sitemap">
+        <div class="row-fluid">
+            <div class="span4">
+                <h1>{{ title }}</h1>
+                {% if perspectives|length > 0 %}
+                <ul>
+                    {% for name, perspective in perspectives %}
+                        <li><a href="{{ perspective }}">{{ name }}</a></li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+        </div>
+    <div>
+{% endblock %}
