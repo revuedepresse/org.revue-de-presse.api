@@ -18,7 +18,7 @@ use Doctrine\Orm\NoResultException;
 class PerspectiveController extends ContainerAware
 {
     /**
-     * @Extra\Cache(expires="+2 hours")
+     * @Extra\Cache(expires="+2 hours", public="true")
      * @Extra\Route("/{hash}", name="weaving_the_web_dashboard_show_perspective")
      */
     public function showPerspectiveAction($hash)
