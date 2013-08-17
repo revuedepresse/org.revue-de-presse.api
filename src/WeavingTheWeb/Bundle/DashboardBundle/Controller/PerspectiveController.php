@@ -19,6 +19,24 @@ class PerspectiveController extends ContainerAware
 {
     /**
      * @Extra\Cache(expires="+2 hours", public="true")
+     * @Extra\Route("/sitemap", name="weaving_the_web_dashboard_show_sitemap")
+     * @Extra\Template("WeavingTheWebDashboardBundle:Perspective:showSitemap.html.twig")
+     */
+    public function showSitemapAction()
+    {
+        /**
+         * @var \WeavingTheWeb\Bundle\DashboardBundle\Routing\Router $router
+         */
+        $router = $this->container->get('weaving_the_web_dashboard.router');
+
+        return [
+            'perspectives' => $router->getPublicPerspectivesSitemap(),
+            'title' => 'title_sitemap'
+        ];
+    }
+
+    /**
+     * @Extra\Cache(expires="+2 hours", public="true")
      * @Extra\Route("/{hash}", name="weaving_the_web_dashboard_show_perspective")
      */
     public function showPerspectiveAction($hash)
