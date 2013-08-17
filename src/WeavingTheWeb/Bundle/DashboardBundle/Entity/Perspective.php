@@ -2,6 +2,7 @@
 
 namespace WeavingTheWeb\Bundle\DashboardBundle\Entity;
 
+use WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints as WeavingTheWebAssert;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -9,6 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * @ORM\Table(name="weaving_perspective")
  * @ORM\Entity(repositoryClass="WeavingTheWeb\Bundle\DashboardBundle\Repository\PerspectiveRepository")
+ * @WeavingTheWebAssert\Perspective(groups="public_perspectives")
  */
 class Perspective
 {

@@ -38,17 +38,17 @@ class PerspectiveController extends ContainerAware
              * @var \WeavingTheWeb\Bundle\DashboardBundle\Entity\Perspective $perspective
              */
             $perspective = $perspectiveRepository->findOneByPartialHash($hash);
-            $sql = $perspective->getValue();
         } catch (NoResultException $exception) {
             throw new NotFoundHttpException('The requested query it not available', $exception);
         }
 
-        if ($this->isQueryValid($sql) && ($perspective->getStatus() === $perspective::STATUS_PUBLIC)) {
+        if ($this->validPerspective($perspective)) {
             /**
-              * @var $connection \WeavingTheWeb\Bundle\DashboardBundle\DBAL\Connection
+              * @var \WeavingTheWeb\Bundle\DashboardBundle\DBAL\Connection $connection
               */
              $connection = $this->container->get('weaving_the_web_dashboard.dbal_connection');
-             $query = $connection->executeQuery($sql);
+
+             $query = $connection->executeQuery($perspective->getValue());
              $translator = $this->container->get('translator');
 
              /**
@@ -77,15 +77,16 @@ class PerspectiveController extends ContainerAware
     }
 
     /**
-     * @param $sql
+     * @param $perspective
      */
-    public function isQueryValid($sql)
+    public function validPerspective($perspective)
     {
-        $loweredQuery = strtolower($sql);
+        /**
+         * @var \Symfony\Component\Validator\Validator $validator
+         */
+        $validator = $this->container->get('validator');
+            $constraintsViolationsList = $validator->validate($perspective, ['public_perspectives']);
 
-        return false === strpos($loweredQuery, 'delete') &&
-            false === strpos($loweredQuery, 'update') &&
-            false === strpos($loweredQuery, 'grant') &&
-            false === strpos($loweredQuery, 'create');
+        return count($constraintsViolationsList) === 0;
     }
 } 

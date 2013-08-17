@@ -3,7 +3,8 @@
 namespace WeavingTheWeb\Bundle\DashboardBundle\DataFixtures\ORM;
 
 use Doctrine\Common\DataFixtures\FixtureInterface,
-    Doctrine\Common\Persistence\ObjectManager;
+    Doctrine\Common\Persistence\ObjectManager,
+    Doctrine\Common\Inflector\Inflector;
 use WeavingTheWeb\Bundle\DashboardBundle\Entity\Perspective,
     WeavingTheWeb\Bundle\DashboardBundle\DBAL\Connection;
 
@@ -19,19 +20,50 @@ ORDER BY per_id DESC';
      */
     public function load(ObjectManager $manager)
     {
-        $perspective = new Perspective();
-        $perspective->setValue(self::DEFAULT_QUERY);
-        $perspective->setType(Connection::QUERY_TYPE_DEFAULT);
-        $manager->persist($perspective);
+        $updateTemporaryDataQueries = [
+            'nearly_valid_data_updating_perspective' => '# Update tmp_data' . "\n" . 'Update data SET jsn_hash = md5(jsn_value) LIMIT 1;',
+            'invalid_data_updating_perspective' => '# Update data' . "\n" . 'Update weaving_json SET jsn_hash = md5(jsn_value) LIMIT 1;',
+            'valid_data_updating_perspective' => '# Update tmp_data' . "\n" . 'Update tmp_data SET jsn_hash = md5(jsn_value) LIMIT 1;'
+        ];
 
-        $manager->flush();
+        $propertiesCollection = [
+            [
+                'value' => self::DEFAULT_QUERY,
+                'type' => Connection::QUERY_TYPE_DEFAULT,
+            ], [
+                'value' => self::DEFAULT_QUERY,
+                'status' => Perspective::STATUS_PUBLIC,
+                'type' => Connection::QUERY_TYPE_DEFAULT,
+                'hash' => sha1(self::DEFAULT_QUERY),
+            ], [
+                'name' => 'invalid_data_updating_perspective',
+                'value' => $updateTemporaryDataQueries['invalid_data_updating_perspective'],
+                'type' => Connection::QUERY_TYPE_DEFAULT,
+                'hash' => sha1($updateTemporaryDataQueries['invalid_data_updating_perspective']),
+            ], [
+                'name' => 'valid_data_updating_perspective',
+                'value' => $updateTemporaryDataQueries['valid_data_updating_perspective'],
+                'type' => Connection::QUERY_TYPE_DEFAULT,
+                'hash' => sha1($updateTemporaryDataQueries['valid_data_updating_perspective']),
+            ], [
+                'name' => 'nearly_valid_data_updating_perspective',
+                'value' => $updateTemporaryDataQueries['nearly_valid_data_updating_perspective'],
+                'type' => Connection::QUERY_TYPE_DEFAULT,
+                'hash' => sha1($updateTemporaryDataQueries['nearly_valid_data_updating_perspective']),
+            ]
+        ];
 
-        $perspective= new Perspective();
-        $perspective->setValue(self::DEFAULT_QUERY);
-        $perspective->setStatus($perspective::STATUS_PUBLIC);
-        $perspective->setType(Connection::QUERY_TYPE_DEFAULT);
-        $perspective->setHash(sha1(self::DEFAULT_QUERY));
-        $manager->persist($perspective);
+        foreach ($propertiesCollection as $properties) {
+            $perspective = new Perspective();
+
+            foreach ($properties as $name => $value) {
+                $classifiedName = Inflector::classify($name);
+                $setter = 'set' . $classifiedName;
+                $perspective->$setter($value);
+            }
+
+            $manager->persist($perspective);
+        }
 
         $manager->flush();
     }
