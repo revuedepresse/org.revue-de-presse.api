@@ -1,12 +1,6 @@
 imports:
     - { resource: config.yml }
 
-framework:
-    esi:  true
-    router:
-        strict_requirements: null
-    trusted_proxies:  [127.0.0.1]
-
 doctrine:
     orm:
         metadata_cache_driver: apc

@@ -1,0 +1,15 @@
+imports:
+    - { resource: config_prod.yml }
+    - { resource: ../parameters/parameters_test.yml }
+
+doctrine:
+    dbal:
+        driver:           pdo_sqlite
+        charset:          UTF8
+        memory:           %test_database_memory%
+        path:             %test_database_path%
+
+framework:
+    profiler:
+        collect: false
+    test: ~

@@ -1,10 +1,10 @@
 imports:
-    - { resource: assets.yml }
-    - { resource: friendofsymfony.yml }
-    - { resource: dbal.yml }
-    - { resource: parameters.php }
-    - { resource: parameters.yml }
-    - { resource: security.yml }
+    - { resource: ../extensions/assets.yml }
+    - { resource: ../extensions/friendofsymfony.yml }
+    - { resource: ../extensions/dbal.yml }
+    - { resource: ../parameters.php }
+    - { resource: ../parameters.yml }
+    - { resource: ../extensions/security.yml }
 
 snc_redis:
     clients:
@@ -20,19 +20,24 @@ snc_redis:
     session:
         client:           session
         ttl:              1200
+framework:
+
 
 framework:
+    csrf_protection:      true
     default_locale:       %locale%
-    translator:           { fallback: en }
+    esi:                  true
+    form:                 true
+    fragments:            { path: /_fragment }
     secret:               %secret%
     router:
-        resource: "%kernel.root_dir%/config/routing.yml"
+        resource: "%kernel.root_dir%/config/routing/routing.yml"
         strict_requirements: %kernel.debug%
-    form:                 true
-    csrf_protection:      true
-    validation:           { enable_annotations: true }
-    templating:           { engines: ['twig'] }
     session:              ~
+    templating:           { engines: ['twig'] }
+    trusted_proxies:      [127.0.0.1]
+    translator:           { fallback: en }
+    validation:           { enable_annotations: true }
 
 twig:
     debug:            %kernel.debug%
