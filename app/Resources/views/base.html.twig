@@ -9,7 +9,7 @@
     {% endimage %}
 </head>
 <body>
-<div class="navbar navbar-static-top">
+<nav class="navbar navbar-static-top">
     <div class="navbar-inner">
         <a class="brand" href="{{ path('fos_user_registration_register') }}">Weaving the Web</a>
         {% block menu %}
@@ -19,7 +19,7 @@
         {{ render_esi(controller('WeavingTheWebDashboardBundle:Document:showNavigation', { 'activeMenu': active_menu_item })) }}
         {% endblock menu %}
     </div>
-</div>
+</nav>
 {% block body %}{% endblock body %}
 {% block javascripts %}{% include "::javascripts.html.twig" %}{% endblock javascripts %}
 </body>
