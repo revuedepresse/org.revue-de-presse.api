@@ -5,8 +5,7 @@ namespace WeavingTheWeb\Bundle\UserBundle\DependencyInjection;
 use Symfony\Component\DependencyInjection\ContainerBuilder,
     Symfony\Component\Config\FileLocator,
     Symfony\Component\HttpKernel\DependencyInjection\Extension,
-    Symfony\Component\DependencyInjection\Loader\XmlFileLoader,
-    Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
+    Symfony\Component\DependencyInjection\Loader\XmlFileLoader;
 
 /**
  * This is the class that loads and manages your bundle configuration
@@ -26,9 +25,5 @@ class WeavingTheWebUserExtension extends Extension
         $fileLocator = new FileLocator(__DIR__ . '/../Resources/config');
         $loader = new XmlFileLoader($container, $fileLocator);
         $loader->load('services.xml');
-
-        $formFileLocator = new FileLocator(__DIR__ . '/../Resources/config/Form');
-        $phpLoader = new PhpFileLoader($container, $formFileLocator);
-        $phpLoader->load('types.php');
     }
 }
