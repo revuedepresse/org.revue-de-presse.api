@@ -30,7 +30,7 @@ behat_report.html
 /app/cache
 /app/config/parameters.yml
 /app/logs
-/app/phpunit.xml
+/app/*.xml
 /devops/files/*.tar.gz
 /mobile
 
