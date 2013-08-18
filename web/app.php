@@ -14,12 +14,7 @@ $kernel = new AppKernel('prod', false);
 $kernel->loadClassCache();
 
 $request  = Request::createFromGlobals();
-
 Request::setTrustedProxies(['127.0.0.1']);
-
-$request->setTrustedHeaderName(Request::HEADER_CLIENT_PROTO, 'X-Proxy-Proto');
-$request->setTrustedHeaderName(Request::HEADER_CLIENT_IP, 'X-Proxy-For');
-$request->setTrustedHeaderName(Request::HEADER_CLIENT_HOST, 'X-Proxy-Host');
 
 $response = $kernel->handle($request);
 $response->send();
