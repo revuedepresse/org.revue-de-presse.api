@@ -23,7 +23,7 @@ class GithubController extends ResourceController
      * @Rest\QueryParam(name="page", requirements="\d+", default="1", description="page")
      * @Rest\QueryParam(name="limit", requirements="\d+", default="50", description="limit")
      *
-     * @Cache(expires="tomorrow")
+     * @Cache(expires="tomorrow", public="true")
      *
      * @return array
      */
