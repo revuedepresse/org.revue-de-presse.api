@@ -13,8 +13,6 @@ parameters:
     security.user.provider.in_memory.user.class:  WTW\UserBundle\Tests\Security\Core\User\User
 
 services:
-    fos_user.mailer.default:
-        class: FOS\UserBundle\Mailer\NoopMailer
     weaving_the_web_legacy_provider.feed_reader:
         class: %weaving_the_web_legacy_provider.feed_reader.class%
         parent: weaving_the_web_legacy_provider.reader

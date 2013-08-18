@@ -1,8 +1,7 @@
 imports:
     - { resource: ../extensions/assets.yml }
-    - { resource: ../extensions/friendofsymfony.yml }
     - { resource: ../extensions/dbal.yml }
-    - { resource: ../parameters.php }
+    - { resource: ../extensions/friendofsymfony.yml }
     - { resource: ../parameters.yml }
     - { resource: ../extensions/security.yml }
 
@@ -52,14 +51,6 @@ sensio_framework_extra:
     view:    { annotations: false }
     router:  { annotations: true }
 
-# Swiftmailer Configuration
-swiftmailer:
-    spool:     { type: memory }
-    transport: %mailer_transport%
-    host:      %mailer_host%
-    username:  %mailer_user%
-    password:  %mailer_password%
-
 ornicar_apc:
     host: %apc_host%
     mode: curl
@@ -67,3 +58,7 @@ ornicar_apc:
 
 parameters:
     basic_auth_pattern: /this-route-is-undefined-in-production
+
+services:
+    fos_user.mailer.default:
+        class: FOS\UserBundle\Mailer\NoopMailer

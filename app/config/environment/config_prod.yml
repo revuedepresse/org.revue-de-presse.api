@@ -15,17 +15,8 @@ monolog:
             handler:      grouped
         grouped:
             type:         group
-            members:      [streamed, buffered]
+            members:      [streamed]
         streamed:
             type:         stream
             path:         "%kernel.logs_dir%/%kernel.environment%.log"
-            level:        debug
-        buffered:
-            type:         buffer
-            handler:      swift
-        swift:
-            type:         swift_mailer
-            from_email:   exceptions@weaving-the-web.org
-            to_email:     thierry.marianne@weaving-the-web.org
-            subject:      "[Weaving the Web] Snaps, something went wrong :/"
             level:        debug
