@@ -22,7 +22,3 @@ web_profiler:
 snc_redis:
     session:
         use_as_default: false
-
-swiftmailer:
-    disable_delivery: true
-

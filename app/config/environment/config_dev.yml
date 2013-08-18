@@ -25,6 +25,3 @@ assetic:
 snc_redis:
     session:
         use_as_default: false
-
-swiftmailer:
-    delivery_address: ## FILL ME ##
