@@ -8,22 +8,16 @@
         convertErrorsToExceptions   = "true"
         convertNoticesToExceptions  = "true"
         convertWarningsToExceptions = "true"
-        processIsolation            = "false"
+        processIsolation            = "true"
         stopOnFailure               = "true"
         syntaxCheck                 = "true"
         bootstrap                   = "bootstrap.php.cache" >
-
-    <groups>
-        <exclude>
-            <group>twitter</group>
-            <group>isolated-testing</group>
-        </exclude>
-    </groups>
 
     <testsuites>
         <testsuite name="WTW Test Suite">
             <directory>../src/*/*/*Bundle/Tests</directory>
             <directory>../src/*/*Bundle/Tests</directory>
+            <directory>../src/*/*/*/*Bundle/Tests</directory>
         </testsuite>
     </testsuites>
 
@@ -39,6 +33,8 @@
                 <directory>../src/*/*/*Bundle/Tests</directory>
                 <directory>../src/*/Bundle/*Bundle/Resources</directory>
                 <directory>../src/*/Bundle/*Bundle/Tests</directory>
+                <directory>../src/*/Bundle/*/*Bundle/Resources</directory>
+                <directory>../src/*/*/*/*Bundle/Tests</directory>
             </exclude>
         </whitelist>
     </filter>
