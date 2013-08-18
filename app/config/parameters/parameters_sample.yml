@@ -6,7 +6,7 @@ parameters:
     api_facebook_host_port:                 %api.facebook.protocol%%api.facebook.host_port%
     api_twitter_host_port:                  %api.twitter.protocol%%api.twitter.host_port%
 
-    api_twitter_callback_url:               %api.twitter.callback_url%
+    api_twitter_callback_url:               %api_twitter_host_port%/twitter/login_check
     api_twitter_consumer_key:               %api.twitter.consumer_key%
     api_twitter_consumer_secret:            %api.twitter.consumer_secret%
     api_twitter_user_secret:                %api.twitter.user_secret%
