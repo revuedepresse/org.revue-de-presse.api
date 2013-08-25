@@ -10,10 +10,10 @@ use WeavingTheWeb\Bundle\DashboardBundle\Entity\Perspective,
 
 class PerspectiveData implements FixtureInterface
 {
-    const DEFAULT_QUERY = '# Show administration panel
+    const DEFAULT_QUERY = "# Show administration panel\n
 SELECT per_id as id, per_name as name, per_value AS pre_sql, per_name as hid_name, per_value as btn_sql
 FROM weaving_perspective
-ORDER BY per_id DESC';
+ORDER BY per_id DESC";
 
     /**
      * {@inheritDoc}
