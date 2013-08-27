@@ -34,6 +34,7 @@ class AppKernel extends Kernel
             new WTW\CodeGeneration\AnalysisBundle\WTWCodeGenerationAnalysisBundle(),
             new WTW\UserBundle\WTWUserBundle(),
             new WeavingTheWeb\Bundle\ApiBundle\WeavingTheWebApiBundle(),
+            new WeavingTheWeb\Bundle\AMQPBundle\WeavingTheWebAMQPBundle(),
             new WeavingTheWeb\Bundle\DashboardBundle\WeavingTheWebDashboardBundle(),
             new WeavingTheWeb\Bundle\DataMiningBundle\WeavingTheWebDataMiningBundle(),
             new WeavingTheWeb\Bundle\Documentation\MarkdownBundle\WeavingTheWebDocumentationMarkdownBundle(),
