@@ -21,8 +21,6 @@ class SerializeUserStreamCommand extends ContainerAwareCommand
      */
     protected function configure()
     {
-        parent::configure();
-
         $this->setName('wtw:api:twitter:user_stream:serialize')
             ->setDescription('Serialize response returned when accessing user stream endpoint from twitter api')
             ->addOption(

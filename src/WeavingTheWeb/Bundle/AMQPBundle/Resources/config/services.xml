@@ -1,0 +1,18 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+        <parameter key="weaving_the_web_amqp.twitter.user_timeline.class">WeavingTheWeb\Bundle\AMQPBundle\Twitter\UserTimeline</parameter>
+    </parameters>
+
+    <services>
+        <service id="weaving_the_web_amqp.twitter.user_timeline" class="%weaving_the_web_amqp.twitter.user_timeline.class%">
+            <call method="setFeedReader">
+                <argument type="service" id="weaving_the_web_legacy_provider.feed_reader" />
+            </call>
+        </service>
+    </services>
+</container>

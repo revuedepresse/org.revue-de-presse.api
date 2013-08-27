@@ -19,8 +19,6 @@ snc_redis:
     session:
         client:           session
         ttl:              1200
-framework:
-
 
 framework:
     csrf_protection:      true
@@ -50,6 +48,25 @@ twig:
 sensio_framework_extra:
     view:    { annotations: false }
     router:  { annotations: true }
+
+old_sound_rabbit_mq:
+    connections:
+        default:
+            host:      localhost
+            port:      5672
+            user:      weaver
+            password:  ## FILL ME ##
+            vhost:     '## FILL ME ##'
+    producers:
+        weaving_the_web_amqp.twitter.user_timeline:
+            connection: default
+            exchange_options: {name: 'get-user-timeline', type: direct}
+    consumers:
+        weaving_the_web_amqp.twitter.user_timeline:
+            connection: default
+            exchange_options: {name: 'get-user-timeline', type: direct}
+            queue_options:    {name: 'get-user-timeline'}
+            callback:         weaving_the_web_amqp.twitter.user_timeline
 
 ornicar_apc:
     host: %apc_host%
