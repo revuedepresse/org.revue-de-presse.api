@@ -1,6 +1,7 @@
 imports:
     - { resource: config_dev.yml }
     - { resource: ../parameters/parameters_test.yml }
+    - { resource: ../extensions/dbal_test.yml }
 
 doctrine:
     dbal:
@@ -8,25 +9,6 @@ doctrine:
         charset:          UTF8
         memory:           %test_database_memory%
         path:             %test_database_path%
-    orm:
-        default_entity_manager: default
-        entity_managers:
-            default:
-                connection: default
-                mappings:
-                    WTWUserBundleTest:
-                        dir: %kernel.root_dir%/../src/WTW/UserBundle/Tests/Security/Core/User
-                        prefix: WTW\UserBundle\Tests\Security\Core\User
-                        type: annotation
-                        is_bundle: false
-            test_mysql:
-                connection: test_mysql
-                mappings:
-                    WTWUserBundleTest:
-                        dir: %kernel.root_dir%/../src/WTW/UserBundle/Tests/Security/Core/User
-                        prefix: WTW\UserBundle\Tests\Security\Core\User
-                        type: annotation
-                        is_bundle: false
 
 framework:
     router:   { resource: "%kernel.root_dir%/config/routing/routing_test.yml" }
