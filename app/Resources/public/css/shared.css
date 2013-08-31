@@ -12,3 +12,8 @@
 .mainland h2 {
     font-size: 1.5em;
 }
+
+#settings .alert {
+    width: 198px;
+    padding: 10px;
+}
