@@ -26,6 +26,10 @@
                 <source>field_error_current_password</source>
                 <target>Invalid password</target>
             </trans-unit>
+            <trans-unit id="label_connect_to_twitter">
+                <source>label_connect_to_twitter</source>
+                <target>Connect to twitter</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

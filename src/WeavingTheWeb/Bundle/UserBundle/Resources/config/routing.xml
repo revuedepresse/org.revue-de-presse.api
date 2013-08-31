@@ -10,4 +10,10 @@
     <route id="weaving_the_web_user_save_settings" pattern="/save-settings">
         <default key="_controller">WeavingTheWebUserBundle:Settings:save</default>
     </route>
+    <route id="weaving_the_web_user_connect_to_twitter" pattern="/connect-to-twitter">
+        <default key="_controller">WeavingTheWebUserBundle:Settings:connectToTwitter</default>
+    </route>
+    <route id="weaving_the_web_user_save_token" pattern="/save-token">
+        <default key="_controller">WeavingTheWebUserBundle:Settings:saveToken</default>
+    </route>
 </routes>
