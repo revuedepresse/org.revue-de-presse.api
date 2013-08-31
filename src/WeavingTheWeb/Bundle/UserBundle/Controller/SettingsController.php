@@ -10,7 +10,6 @@ use Symfony\Component\DependencyInjection\ContainerAware,
     Symfony\Component\Form\FormError,
     Symfony\Component\HttpKernel\HttpKernelInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
-
 use WTW\UserBundle\Entity\User;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Token;
 
@@ -126,11 +125,8 @@ class SettingsController extends ContainerAware
          */
         $request = $this->container->get('request');
 
-        if (!$request->query->has('oauth_token') || !$request->query->has('oauth_token_secret')) {
-            $router = $this->container->get('router');
-            $showSettingsUrl = $router->generate('weaving_the_web_user_show_settings');
-
-            return new RedirectResponse($showSettingsUrl);
+        if (!$request->query->has('oauth_token') || !$request->query->has('oauth_verifier')) {
+            return $this->redirectToSettings();
         }
 
         $path['_controller'] = 'WeavingTheWebUserBundle:Twitter:getAccessToken';
@@ -148,7 +144,7 @@ class SettingsController extends ContainerAware
         $tokenParameters = json_decode($content, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new \RuntimeException('Access token could not be retrieved');
+            return $this->redirectToSettings();
         }
         $this->persistToken($tokenParameters);
 
@@ -156,9 +152,20 @@ class SettingsController extends ContainerAware
          * @var \Symfony\Component\HttpFoundation\Request $request
          */
         $request = $this->container->get('request');
-        $subRequest = $request ->duplicate([], [], ['_controller' => 'WeavingTheWebUserBundle:Settings:show']);
+        $subRequest = $request->duplicate(null, null, ['_controller' => 'WeavingTheWebUserBundle:Settings:show']);
 
         return $this->container->get('http_kernel')->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
+    }
+
+    /**
+     * @return RedirectResponse
+     */
+    public function redirectToSettings()
+    {
+        $router = $this->container->get('router');
+        $showSettingsUrl = $router->generate('weaving_the_web_user_show_settings');
+
+        return new RedirectResponse($showSettingsUrl);
     }
 
     /**
@@ -172,6 +179,11 @@ class SettingsController extends ContainerAware
         $entityManager = $this->container->get('doctrine.orm.entity_manager');
         $tokenRepository = $entityManager->getRepository('WeavingTheWebApiBundle:Token');
         $tokens = $tokenRepository->findBy(['oauthToken' => $tokenParameters['oauth_token']]);
+
+        /**
+         * @var \Symfony\Component\HttpFoundation\Session\Session $session
+         */
+        $session = $this->container->get('session');
 
         if (count($tokens) === 0) {
             if ($tokenParameters['oauth_token']);
@@ -199,6 +211,13 @@ class SettingsController extends ContainerAware
 
             $entityManager->persist($user);
             $entityManager->flush();
+            $noticeMessage = 'successful_access_token_persistence';
+        } else {
+            $noticeMessage = 'existing_access_token';
         }
+
+        $session->getFlashBag()->add(
+           'notice', $noticeMessage
+       );
     }
 }
