@@ -15,7 +15,7 @@ use WTW\UserBundle\Model\User as BaseUser;
  * @ORM\Table(name="weaving_user")
  * @ORM\Entity
  * @ORM\InheritanceType("SINGLE_TABLE")
- * @ORM\DiscriminatorColumn(name="positionInHierarchy", type="integer")
+ * @ORM\DiscriminatorColumn(name="usr_position_in_hierarchy", type="integer")
  * @ORM\DiscriminatorMap({"1" = "User", "0" = "\WTW\UserBundle\Tests\Security\Core\User\User"})
  */
 class User extends BaseUser
@@ -199,6 +199,11 @@ class User extends BaseUser
      * )
      */
     protected $groups;
+
+    /**
+     * @var \DateTime
+     */
+    protected $positionInHierarchy;
 
     /**
      * @ORM\ManyToMany(targetEntity="WeavingTheWeb\Bundle\UserBundle\Entity\Role", inversedBy="users")

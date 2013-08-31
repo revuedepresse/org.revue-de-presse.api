@@ -108,6 +108,11 @@ abstract class User implements UserInterface, GroupableInterface
     protected $credentialsExpireAt;
 
     /**
+     * @var integer
+     */
+    protected $positionInHierarchy;
+
+    /**
      * @var string
      */
     protected $email;
@@ -119,6 +124,7 @@ abstract class User implements UserInterface, GroupableInterface
         $this->locked = false;
         $this->expired = false;
         $this->roles = [];
+        $this->positionInHierarchy = 1;
         $this->credentialsExpired = false;
     }
 
