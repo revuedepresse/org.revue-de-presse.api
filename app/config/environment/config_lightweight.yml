@@ -1,7 +1,6 @@
 imports:
     - { resource: config_prod.yml }
     - { resource: ../parameters/parameters_test.yml }
-    - { resource: ../extensions/dbal_test.yml }
 
 doctrine:
     dbal:

@@ -1,3 +1,2 @@
 imports:
     - { resource: config_test.yml }
-    - { resource: ../extensions/dbal_test.yml }
