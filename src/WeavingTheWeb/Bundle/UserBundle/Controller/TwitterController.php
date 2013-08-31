@@ -33,14 +33,6 @@ class TwitterController extends ContainerAware
      */
     public function checkLoginAction()
     {
-        $request = $this->container->get('request');
-        $oauthToken = $request->get('oauth_token');
-        $oauthVerifier = $request->get('oauth_verifier');
-
-        $twitter = $this->container->get('fos_twitter.service');
-        $accessToken = $twitter->getAccessToken($oauthToken, $oauthVerifier);
-
-        return new Response($accessToken);
     }
 
     /**
@@ -48,5 +40,27 @@ class TwitterController extends ContainerAware
      */
     public function denyLoginAction()
     {
+    }
+
+    /**
+     * @Extra\Route("/access-token", name="weaving_the_web_user_twitter_get_access_token")
+     */
+    public function getAccessTokenAction()
+    {
+        /**
+         * @var $request \Symfony\Component\HttpFoundation\Request
+         */
+        $request = $this->container->get('request');
+        $oauthToken = $request->get('oauth_token');
+        $oauthVerifier = $request->get('oauth_verifier');
+
+        $twitter = $this->container->get('fos_twitter.service');
+        $accessToken = $twitter->getAccessToken($oauthToken, $oauthVerifier);
+
+        $response = new Response();
+        $response->setContent(json_encode($accessToken));
+        $response->headers->set('Content-Type', 'application/json');
+
+        return $response;
     }
 }

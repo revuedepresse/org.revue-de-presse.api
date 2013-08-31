@@ -2,12 +2,18 @@
 
 namespace WeavingTheWeb\Bundle\UserBundle\DataFixtures\ORM;
 
-use Doctrine\Common\DataFixtures\FixtureInterface,
+use Doctrine\Common\DataFixtures\AbstractFixture,
+    Doctrine\Common\DataFixtures\OrderedFixtureInterface,
     Doctrine\Common\Persistence\ObjectManager;
 use WeavingTheWeb\Bundle\UserBundle\Entity\Role;
 
-class RoleData implements FixtureInterface
+class RoleData extends AbstractFixture implements OrderedFixtureInterface
 {
+    public function getOrder()
+    {
+        return 100;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -31,6 +37,8 @@ class RoleData implements FixtureInterface
 
             $role->setName($roleProperties['name']);
             $role->setRole($roleProperties['role']);
+
+            $this->addReference(strtolower($roleProperties['role']), $role);
 
             $manager->persist($role);
         }

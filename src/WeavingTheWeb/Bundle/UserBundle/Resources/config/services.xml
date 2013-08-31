@@ -9,6 +9,7 @@
         <parameter key="weaving_the_web_user.twitter_user_provider.class">WeavingTheWeb\Bundle\UserBundle\Security\Core\User\TwitterUserProvider</parameter>
         <parameter key="weaving_the_web_user.model.user.class">WTW\UserBundle\Entity\User</parameter>
         <parameter key="weaving_the_web_user.form_type.user_type.class">WeavingTheWeb\Bundle\UserBundle\Form\Type\UserType</parameter>
+        <parameter key="weaving_the_web_user.twitter.class">WeavingTheWeb\Bundle\UserBundle\Services\Twitter</parameter>
     </parameters>
 
     <services>
@@ -21,6 +22,14 @@
             <argument type="service" id="fos_user.util.email_canonicalizer" />
             <argument type="service" id="fos_user.entity_manager" />
             <argument>%weaving_the_web_user.model.user.class%</argument>
+        </service>
+        <service id="weaving_the_web_user.twitter" class="%weaving_the_web_user.twitter.class%">
+            <argument type="service" id="fos_twitter.api"/>
+            <argument type="service" id="session" />
+            <call method="setCallbackRoute">
+                <argument type="service" id="router" />
+                <argument type="string">weaving_the_web_user_save_token</argument>
+            </call>
         </service>
         <service id="weaving_the_web_user.twitter_user_provider" class="%weaving_the_web_user.twitter_user_provider.class%">
             <call method="setTwitterOauth">

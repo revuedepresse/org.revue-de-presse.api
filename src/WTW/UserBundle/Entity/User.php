@@ -7,13 +7,16 @@ use Doctrine\Common\Collections\ArrayCollection,
 use WTW\UserBundle\Model\User as BaseUser;
 
 /**
- * User
- *
- * @ORM\Table(name="weaving_user")
- * @ORM\Entity
+ * Class User
  *
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  * @package WTW\UserBundle\Entity
+ *
+ * @ORM\Table(name="weaving_user")
+ * @ORM\Entity
+ * @ORM\InheritanceType("SINGLE_TABLE")
+ * @ORM\DiscriminatorColumn(name="positionInHierarchy", type="integer")
+ * @ORM\DiscriminatorMap({"1" = "User", "0" = "\WTW\UserBundle\Tests\Security\Core\User\User"})
  */
 class User extends BaseUser
 {
@@ -205,6 +208,15 @@ class User extends BaseUser
      * )
      */
     protected $roles;
+
+    /**
+     * @ORM\ManyToMany(targetEntity="WeavingTheWeb\Bundle\ApiBundle\Entity\Token", inversedBy="users")
+     * @ORM\JoinTable(name="weaving_user_token",
+     *      joinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="usr_id")},
+     *      inverseJoinColumns={@ORM\JoinColumn(name="token_id", referencedColumnName="id")}
+     * )
+     */
+    protected $tokens;
 
     /**
      * Get id
@@ -841,5 +853,48 @@ class User extends BaseUser
         }
 
         return $this->roles->toArray();
+    }
+
+    /**
+     * Get enabled
+     *
+     * @return boolean 
+     */
+    public function getEnabled()
+    {
+        return $this->enabled;
+    }
+
+    /**
+     * Add tokens
+     *
+     * @param \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $tokens
+     * @return User
+     */
+    public function addToken(\WeavingTheWeb\Bundle\ApiBundle\Entity\Token $tokens)
+    {
+        $this->tokens[] = $tokens;
+    
+        return $this;
+    }
+
+    /**
+     * Remove tokens
+     *
+     * @param \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $tokens
+     */
+    public function removeToken(\WeavingTheWeb\Bundle\ApiBundle\Entity\Token $tokens)
+    {
+        $this->tokens->removeElement($tokens);
+    }
+
+    /**
+     * Get tokens
+     *
+     * @return \Doctrine\Common\Collections\Collection 
+     */
+    public function getTokens()
+    {
+        return $this->tokens;
     }
 }

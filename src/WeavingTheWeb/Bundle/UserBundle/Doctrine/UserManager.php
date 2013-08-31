@@ -2,9 +2,7 @@
 
 namespace WeavingTheWeb\Bundle\UserBundle\Doctrine;
 
-use Doctrine\Common\Persistence\ObjectManager;
 use FOS\UserBundle\Model\UserInterface,
-    FOS\UserBundle\Util\CanonicalizerInterface,
     FOS\UserBundle\Doctrine\UserManager as BaseUserManager;
 
 class UserManager extends BaseUserManager

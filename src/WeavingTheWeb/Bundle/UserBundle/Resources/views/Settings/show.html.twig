@@ -26,11 +26,16 @@
                         {% for field in fields %}
                         <div class="row-fluid">
                             <div class="control-group{% if form_errors(form[field]) %} error{% endif %}">
-                            {% if form_errors(form[field]) %}
-                            {{ form_errors(form[field]) }}
-                            {% endif %}
-                            {{ form_label(form[field]) }}
-                            {{ form_widget(form[field]) }}
+                                {% if form_errors(form[field]) %}
+                                {{ form_errors(form[field]) }}
+                                {% endif %}
+                                {{ form_label(form[field]) }}
+                                {{ form_widget(form[field]) }}
+                                {% if field == 'twitter_username' and form.vars.value.twitterUsername|trim|length > 0 %}
+                                <div class="row-fluid">
+                                    <a class="btn" href="{{ path('weaving_the_web_user_connect_to_twitter') }}">{{ 'label_connect_to_twitter'|trans }}</a>
+                                </div>
+                                {% endif %}
                             </div>
                         </div>
                         {% endfor %}

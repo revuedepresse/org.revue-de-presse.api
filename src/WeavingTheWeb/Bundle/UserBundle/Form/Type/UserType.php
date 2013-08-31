@@ -19,7 +19,7 @@ class UserType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('twitter_username', 'text')
+            ->add('twitter_username', 'text', ['required' => false])
             ->add('username', 'text')
             ->add('email', 'text')
             ->add('currentPassword', 'password', ['label' => 'field_current_password', 'mapped' => false])
