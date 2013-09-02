@@ -20,6 +20,11 @@
                         {{ flashMessage|trans([], 'user') }}
                     </div>
                     {% endfor %}
+                    {% for flashMessage in app.session.flashbag.get('error') %}
+                    <div class="alert alert-error">
+                        {{ flashMessage }}
+                    </div>
+                    {% endfor %}
                     <form action="{{ path("weaving_the_web_user_save_settings") }}" id="login" method="post">
                         {% set fields = [
                                 'username',

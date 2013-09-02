@@ -11,7 +11,9 @@ use Symfony\Component\HttpFoundation\RedirectResponse,
  * Class TwitterConnectController
  * @package WeavingTheWeb\Bundle\UserBundle\Controller
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ *
  * @Extra\Route("/twitter")
+ * @Extra\Route(service="weaving_the_web_user.controller.twitter")
  */
 class TwitterController extends ContainerAware
 {

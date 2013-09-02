@@ -2,16 +2,14 @@
 
 namespace WeavingTheWeb\Bundle\UserBundle\Controller;
 
-use FOS\UserBundle\Model\UserManagerInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
 use Symfony\Component\DependencyInjection\ContainerAware,
     Symfony\Component\HttpFoundation\Request,
     Symfony\Component\HttpFoundation\RedirectResponse,
     Symfony\Component\Security\Core\Validator\Constraints\UserPassword,
     Symfony\Component\Form\FormError,
     Symfony\Component\HttpKernel\HttpKernelInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
 use WTW\UserBundle\Entity\User;
-use WeavingTheWeb\Bundle\ApiBundle\Entity\Token;
 
 /**
  * Class SettingsController
@@ -19,6 +17,153 @@ use WeavingTheWeb\Bundle\ApiBundle\Entity\Token;
  */
 class SettingsController extends ContainerAware
 {
+    /**
+     * @var \Doctrine\ORM\EntityManager $entityManager
+     */
+    protected $entityManager;
+
+    /**
+     * @var \Symfony\Component\Form\FormFactory $formFactory
+     */
+    protected $formFactory;
+
+    /**
+     * @var \Symfony\Component\HttpKernel\Kernel $kernel
+     */
+    protected $kernel;
+
+    /**
+     * @var \Symfony\Component\HttpFoundation\Request $request
+     */
+    protected $request;
+
+    /**
+     * @var \Symfony\Component\Routing\Router $router
+     */
+    protected $router;
+
+    /**
+     * @var \Symfony\Component\Security\Core\SecurityContext $securityContext
+     */
+    protected $securityContext;
+
+    /**
+     * @var \Symfony\Component\HttpFoundation\Session\Session $session
+     */
+    protected $session;
+
+    /**
+     * @var \WeavingTheWeb\Bundle\ApiBundle\Repository\TokenRepository $tokenRepository
+     */
+    protected $tokenRepository;
+
+    /**
+     * @var \Symfony\Component\Translation\Translator $translator
+     */
+    protected $translator;
+
+    /**
+     * @var \WeavingTheWeb\Bundle\UserBundle\Services\Twitter $twitter
+     */
+    protected $twitter;
+
+    /**
+     * @var \WeavingTheWeb\Bundle\UserBundle\Doctrine\UserManager $userManager
+     */
+    protected $userManager;
+
+    /**
+     * @var \Symfony\Component\Validator\Validator $validator
+     */
+    protected $validator;
+
+    /**
+     * @param \Doctrine\ORM\EntityManager $entityManager
+     */
+    public function setEntityManager($entityManager)
+    {
+        $this->entityManager = $entityManager;
+    }
+
+    /**
+     * @param \Symfony\Component\Form\FormFactory $formFactory
+     */
+    public function setFormFactory($formFactory)
+    {
+        $this->formFactory = $formFactory;
+    }
+
+    /**
+     * @param \Symfony\Component\HttpKernel\Kernel $kernel
+     */
+    public function setKernel($kernel)
+    {
+        $this->kernel = $kernel;
+    }
+
+    /**
+     * @param \Symfony\Component\HttpFoundation\Request $request
+     */
+    public function setRequest($request)
+    {
+        $this->request = $request;
+    }
+
+    /**
+     * @param \Symfony\Component\Routing\Router $router
+     */
+    public function setRouter($router)
+    {
+        $this->router = $router;
+    }
+
+    public function setSession($session)
+    {
+        $this->session = $session;
+    }
+
+    public function setSecurityContext($securityContext)
+    {
+        $this->securityContext = $securityContext;
+    }
+
+    /**
+     * @param \Symfony\Component\Translation\Translator $translator
+     */
+    public function setTranslator($translator)
+    {
+        $this->translator = $translator;
+    }
+
+    /**
+     * @param \WeavingTheWeb\Bundle\ApiBundle\Repository\TokenRepository $tokenRepository
+     */
+    public function setTokenRepository($tokenRepository)
+    {
+        $this->tokenRepository = $tokenRepository;
+    }
+
+    public function setTwitter($twitter)
+    {
+        $this->twitter = $twitter;
+    }
+
+    /**
+     * @param \Symfony\Component\Validator\Validator $validator
+     */
+    public function setValidator($validator)
+    {
+        $this->validator = $validator;
+    }
+
+    /**
+     * @param \WeavingTheWeb\Bundle\UserBundle\Doctrine\UserManager $userManager
+     */
+    public function setUserManager($userManager)
+    {
+        $this->userManager = $userManager;
+    }
+
     /**
      * @param Request $request
      * @Extra\Template("WeavingTheWebUserBundle:Settings:show.html.twig")
@@ -32,30 +177,18 @@ class SettingsController extends ContainerAware
         if ($request->getMethod() === 'POST') {
             if ($form->isValid()) {
                 $currentPassword = $form->get('currentPassword')->getData();
-
-                /**
-                 * @var $validator \Symfony\Component\Validator\Validator
-                 */
-                $validator = $this->container->get('validator');
-                $errorList = $validator->validateValue($currentPassword, new UserPassword());
+                $errorList = $this->validator->validateValue($currentPassword, new UserPassword());
 
                 if (count($errorList) === 0) {
                     $plainPassword = $form->get('plainPassword')->getData();
                     if (strlen(trim($plainPassword)) === 0) {
                         $currentUser->setPlainPassword($currentPassword);
                     }
+                    $this->userManager->updateUser($currentUser);
 
-                    /**
-                     * @var $userManager \FOS\UserBundle\Model\UserManagerInterface
-                     */
-                    $userManager = $this->container->get('weaving_the_web_user.user_manager');
-                    $userManager->updateUser($currentUser);
-
-                    return new RedirectResponse($this->container->get('router')
-                        ->generate('weaving_the_web_user_show_settings'));
+                    return new RedirectResponse($this->router->generate('weaving_the_web_user_show_settings'));
                 } else {
-                    $translator = $this->container->get('translator');
-                    $currentPasswordError = $translator->trans('field_error_current_password', [], 'user');
+                    $currentPasswordError = $this->translator->trans('field_error_current_password', [], 'user');
                     $form->get('currentPassword')->addError(new FormError($currentPasswordError));
                 }
             }
@@ -81,12 +214,7 @@ class SettingsController extends ContainerAware
      */
     protected function getSettingsForm(User $user)
     {
-        /**
-         * @var $formFactory \Symfony\Component\Form\FormFactory
-         */
-        $formFactory = $this->container->get('form.factory');
-
-        return $formFactory->create('user', $user);
+        return $this->formFactory->create('user', $user);
     }
 
     /**
@@ -94,12 +222,7 @@ class SettingsController extends ContainerAware
      */
     protected function getUser()
     {
-        /**
-         * @var $securityContext \Symfony\Component\Security\Core\SecurityContext
-         */
-        $securityContext = $this->container->get('security.context');
-
-        return $securityContext->getToken()->getUser();
+        return $this->securityContext->getToken()->getUser();
     }
 
     /**
@@ -107,10 +230,13 @@ class SettingsController extends ContainerAware
      */
     public function connectToTwitterAction()
     {
-        /**
-         * @var $twitter \FOS\TwitterBundle\Services\Twitter
-         */
-        $authURL = $this->container->get('weaving_the_web_user.twitter')->getLoginUrl();
+        try {
+            $authURL = $this->twitter->getLoginUrl();
+        } catch (\RuntimeException $exception) {
+            $this->session->getFlashBag()->add('error', $exception->getMessage());
+
+            return $this->goToSettingsAction();
+        }
 
         return new RedirectResponse($authURL);
     }
@@ -120,52 +246,41 @@ class SettingsController extends ContainerAware
      */
     public function saveTokenAction()
     {
-        /**
-         * @var \Symfony\Component\HttpFoundation\Request $request
-         */
-        $request = $this->container->get('request');
-
-        if (!$request->query->has('oauth_token') || !$request->query->has('oauth_verifier')) {
-            return $this->redirectToSettings();
+        if (!$this->request->query->has('oauth_token') || !$this->request->query->has('oauth_verifier')) {
+            return $this->goToSettingsAction();
         }
 
-        $path['_controller'] = 'WeavingTheWebUserBundle:Twitter:getAccessToken';
+        $path['_controller'] = 'weaving_the_web_user.controller.twitter:getAccessTokenAction';
 
-        $subRequest = $request ->duplicate([
-                'oauth_token' => $request->get('oauth_token'),
-                'oauth_verifier' => $request->get('oauth_verifier')
+        $subRequest = $this->request->duplicate([
+                'oauth_token' => $this->request->get('oauth_token'),
+                'oauth_verifier' => $this->request->get('oauth_verifier')
             ], null, $path);
 
         /**
          * @var \Symfony\Component\HttpFoundation\Response $response
          */
-        $response = $this->container->get('http_kernel')->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
+        $response = $this->kernel->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
         $content = $response->getContent();
         $tokenParameters = json_decode($content, true);
 
         if (json_last_error() !== JSON_ERROR_NONE) {
-            return $this->redirectToSettings();
+            return $this->goToSettingsAction();
         }
         $this->persistToken($tokenParameters);
 
-        /**
-         * @var \Symfony\Component\HttpFoundation\Request $request
-         */
-        $request = $this->container->get('request');
-        $subRequest = $request->duplicate(null, null, ['_controller' => 'WeavingTheWebUserBundle:Settings:show']);
+        $subRequest = $this->request->duplicate(null, null,
+            ['_controller' => 'weaving_the_web_user.controller.settings:showAction']);
 
-        return $this->container->get('http_kernel')->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
+        return $this->kernel->handle($subRequest, HttpKernelInterface::SUB_REQUEST);
     }
 
     /**
      * @return RedirectResponse
      */
-    public function redirectToSettings()
+    protected function goToSettingsAction()
     {
-        $router = $this->container->get('router');
-        $showSettingsUrl = $router->generate('weaving_the_web_user_show_settings');
-
-        return new RedirectResponse($showSettingsUrl);
+        return new RedirectResponse($this->router->generate('weaving_the_web_user_show_settings'));
     }
 
     /**
@@ -173,51 +288,32 @@ class SettingsController extends ContainerAware
      */
     protected function persistToken($tokenParameters)
     {
-        /**
-         * @var \Doctrine\ORM\EntityManager $entityManager
-         */
-        $entityManager = $this->container->get('doctrine.orm.entity_manager');
-        $tokenRepository = $entityManager->getRepository('WeavingTheWebApiBundle:Token');
-        $tokens = $tokenRepository->findBy(['oauthToken' => $tokenParameters['oauth_token']]);
-
-        /**
-         * @var \Symfony\Component\HttpFoundation\Session\Session $session
-         */
-        $session = $this->container->get('session');
+        $tokens = $this->tokenRepository->findBy(['oauthToken' => $tokenParameters['oauth_token']]);
 
         if (count($tokens) === 0) {
-            if ($tokenParameters['oauth_token']);
-            $token = new Token();
-
-            $now = new \DateTime();
-            $token->setCreatedAt($now);
-            $token->setUpdatedAt($now);
-
-            $token->setOauthToken($tokenParameters['oauth_token']);
-            $token->setOauthTokenSecret($tokenParameters['oauth_token_secret']);
+            $token = $this->tokenRepository->makeToken($tokenParameters);
 
             /**
              * @var \WTW\UserBundle\Entity\User $user
              */
             $user = $this->getUser();
-            $user->setTwitterUsername($tokenParameters['screen_name']);
-            $user->setTwitterID($tokenParameters['user_id']);
-            $token->addUser($user);
+            $this->userManager->updateUserTwitterCredentials($user, $tokenParameters);
 
-            $entityManager->persist($token);
-            $entityManager->flush();
+            $token->addUser($user);
+            $this->entityManager->persist($token);
+            $this->entityManager->flush();
 
             $user->addToken($token);
+            $this->entityManager->persist($user);
+            $this->entityManager->flush();
 
-            $entityManager->persist($user);
-            $entityManager->flush();
             $noticeMessage = 'successful_access_token_persistence';
         } else {
             $noticeMessage = 'existing_access_token';
         }
 
-        $session->getFlashBag()->add(
+        $this->session->getFlashBag()->add(
            'notice', $noticeMessage
-       );
+        );
     }
 }

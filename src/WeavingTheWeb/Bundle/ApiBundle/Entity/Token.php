@@ -10,7 +10,7 @@ use WTW\UserBundle\Entity\User;
  * Token
  *
  * @ORM\Table(name="weaving_access_token")
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="WeavingTheWeb\Bundle\ApiBundle\Repository\TokenRepository")
  */
 class Token
 {
