@@ -9,8 +9,12 @@ parameters:
     database_user:      %database_user_test%
     database_password:  %database_password_test%
 
-    security.user.provider.in_memory.class:       WTW\UserBundle\Tests\Security\Core\User\InMemoryUserProvider
-    security.user.provider.in_memory.user.class:  WTW\UserBundle\Tests\Security\Core\User\User
+    fos_twitter.api.class:  WeavingTheWeb\Bundle\UserBundle\Tests\TwitterOauth
+    fos_twitter.file:       %kernel.root_dir%/../src/WeavingTheWeb/Bundle/UserBundle/Tests/TwitterOauth.php
+
+    security.user.provider.in_memory.class:         WTW\UserBundle\Tests\Security\Core\User\InMemoryUserProvider
+    security.user.provider.in_memory.user.class:    WTW\UserBundle\Tests\Security\Core\User\User
+    weaving_the_web_user.controller_twitter.class:  WeavingTheWeb\Bundle\UserBundle\Tests\Controller\ControllerMock
 
 services:
     weaving_the_web_legacy_provider.feed_reader:
@@ -20,3 +24,5 @@ services:
             - [ activatePollingMode, [] ]
             - [ disableStandardOutput, [] ]
             - [ setTargetDirectory,  [ %weaving_the_web_legacy_provider.directory.store.twitter%_test ] ]
+    weaving_the_web_user.controller.twitter:
+        class: %weaving_the_web_user.controller_twitter.class%

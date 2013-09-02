@@ -8,3 +8,7 @@ weaving_the_web_twitter:
 weaving_the_web_documentation_markdown:
     resource:     "@WeavingTheWebDocumentationMarkdownBundle/Controller"
     type:         annotation
+
+weaving_the_web_user:
+    prefix:   /user
+    resource: "@WeavingTheWebUserBundle/Tests/Resources/config/routing_test.xml"

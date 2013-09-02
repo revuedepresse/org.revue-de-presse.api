@@ -26,6 +26,19 @@ class UserManager extends BaseUserManager
     }
 
     /**
+     * @param $user
+     * @param $tokenParameters
+     */
+    public function updateUserTwitterCredentials(UserInterface $user, $credentials)
+    {
+        /**
+         * @var \WTW\UserBundle\Entity\User $user
+         */
+        $user->setTwitterUsername($credentials['screen_name']);
+        $user->setTwitterID($credentials['user_id']);
+    }
+
+    /**
      *
      */
     public function updateRoles(UserInterface $user)
