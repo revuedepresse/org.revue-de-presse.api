@@ -25,5 +25,11 @@ class WeavingTheWebUserExtension extends Extension
         $fileLocator = new FileLocator(__DIR__ . '/../Resources/config');
         $loader = new XmlFileLoader($container, $fileLocator);
         $loader->load('services.xml');
+
+        if ($container->getParameter('kernel.environment') === 'test') {
+            $fileLocator = new FileLocator(__DIR__ . '/../Tests/Resources/config');
+            $loader = new XmlFileLoader($container, $fileLocator);
+            $loader->load('services_test.xml');
+        }
     }
 }
