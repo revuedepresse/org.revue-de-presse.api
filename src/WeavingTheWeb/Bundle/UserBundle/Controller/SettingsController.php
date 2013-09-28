@@ -253,9 +253,9 @@ class SettingsController extends ContainerAware
         $path['_controller'] = 'weaving_the_web_user.controller.twitter:getAccessTokenAction';
 
         $subRequest = $this->request->duplicate([
-                'oauth_token' => $this->request->get('oauth_token'),
-                'oauth_verifier' => $this->request->get('oauth_verifier')
-            ], null, $path);
+            'oauth_token' => $this->request->get('oauth_token'),
+            'oauth_verifier' => $this->request->get('oauth_verifier')
+        ], null, $path);
 
         /**
          * @var \Symfony\Component\HttpFoundation\Response $response
