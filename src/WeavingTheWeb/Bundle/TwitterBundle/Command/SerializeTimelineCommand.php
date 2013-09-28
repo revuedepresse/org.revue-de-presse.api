@@ -33,14 +33,8 @@ class SerializeTimelineCommand extends ContainerAwareCommand
     }
 
     /**
-     * Logs performance metrics to server logs and compile them
-     *
      * @param InputInterface  $input  An InputInterface instance
      * @param OutputInterface $output An OutputInterface instance
-     *
-     * @return integer 0 if everything went fine, or an error code
-     *
-     * @throws \RuntimeException
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
