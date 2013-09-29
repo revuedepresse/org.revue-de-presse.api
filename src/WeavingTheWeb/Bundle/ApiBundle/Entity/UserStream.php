@@ -47,6 +47,11 @@ class UserStream
     protected $identifier;
 
     /**
+     * @ORM\Column(name="ust_status_id", type="string", length=255, nullable=true)
+     */
+    protected $statusId;
+
+    /**
      * @var \DateTime
      *
      * @ORM\Column(name="ust_created_at", type="datetime")
@@ -183,6 +188,16 @@ class UserStream
     public function getIdentifier()
     {
         return $this->identifier;
+    }
+
+    public function setStatusId($statusId)
+    {
+        $this->statusId = $statusId;
+    }
+
+    public function getStatusId()
+    {
+        return $this->statusId;
     }
 
     /**
