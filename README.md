@@ -59,6 +59,14 @@ From project root directory, execute the following commands to transform
     # data collected from personal Twitter user stream
     php app/console wtw:api:manage:transformation --process_isolation --save --type=user_stream
 
+Messaging
+
+    # To produce a message
+    app/console wtw:amqp:twitter:produce:user_timeline --token=xxxx --secret=xxxx
+
+    # To consume the first message ever produced before
+    app/console rabbitmq:consumer -m 1 weaving_the_web_amqp.twitter.user_timeline
+
 4) Known issues
 --------------------------------
 
