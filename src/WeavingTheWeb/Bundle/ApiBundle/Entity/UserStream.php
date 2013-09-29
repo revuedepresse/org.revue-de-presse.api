@@ -19,46 +19,46 @@ class UserStream
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="IDENTITY")
      */
-    private $id;
+    protected $id;
 
     /**
      * @ORM\Column(name="ust_full_name", type="string", length=32)
      */
-    private $screenName;
+    protected $screenName;
 
     /**
      * @ORM\Column(name="ust_name", type="string", length=32)
      */
-    private $name;
+    protected $name;
 
     /**
      * @ORM\Column(name="ust_text", type="string", length=140)
      */
-    private $text;
+    protected $text;
 
     /**
      * @ORM\Column(name="ust_avatar", type="string", length=255)
      */
-    private $userAvatar;
+    protected $userAvatar;
 
     /**
      * @ORM\Column(name="ust_access_token", type="string", length=255)
      */
-    private $identifier;
+    protected $identifier;
 
     /**
      * @var \DateTime
      *
      * @ORM\Column(name="ust_created_at", type="datetime")
      */
-    private $createdAt;
+    protected $createdAt;
 
     /**
      * @var \DateTime
      *
      * @ORM\Column(name="ust_updated_at", type="datetime", nullable=true)
      */
-    private $updatedAt;
+    protected $updatedAt;
 
     /**
      * Get id
