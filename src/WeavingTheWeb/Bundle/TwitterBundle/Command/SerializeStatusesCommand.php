@@ -78,23 +78,12 @@ class SerializeStatusesCommand extends ContainerAwareCommand
             'screen_name' => $input->getOption('screen_name')
         ];
         $statuses = $feedReader->fetchTimelineStatuses($options);
+
         /**
-         * @var \WeavingTheWeb\Bundle\DataMiningBundle\ORM\QueryFactory $queryFactory
+         * @var \WeavingTheWeb\Bundle\ApiBundle\Repository\UserStreamRepository $userStreamRepository
          */
-        $queryFactory = $container->get('weaving_the_web_data_mining.query_factory');
-        $usersStatuses = $queryFactory->processUsersStatuses($statuses);
-        $entityManager = $this->getContainer()->get('doctrine.orm.entity_manager');
-
-        foreach ($usersStatuses as $userStatus) {
-            /**
-             * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream $userStream
-             */
-            $userStream = $queryFactory->makeUserStream($userStatus);
-            $userStream->setIdentifier($input->getOption('oauth'));
-            $entityManager->persist($userStream);
-        }
-
-        $entityManager->flush();
+        $userStreamRepository = $container->get('weaving_the_web_api.repository.user_stream');
+        $userStreamRepository->saveStatuses($statuses, $input->getOption('oauth'));
 
         /**
          * @var \Symfony\Component\Translation\Translator $translator
