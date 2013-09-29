@@ -10,7 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand,
 /**
  * Timeline serialization command
  *
- * @author Thierry Marianne <thierrym@theodo.fr>
+ * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
 class SerializeTimelineCommand extends ContainerAwareCommand
 {
