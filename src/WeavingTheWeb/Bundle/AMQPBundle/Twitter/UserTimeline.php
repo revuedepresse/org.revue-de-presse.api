@@ -23,8 +23,7 @@ class UserTimeline implements ConsumerInterface
     public function setFeedReader($feedReader)
     {
         $this->feedReader = $feedReader;
-        $this->feedReader->activatePollingMode()
-            ->disableStandardOutput();
+        $this->feedReader->activatePollingMode()->disableStandardOutput();
     }
 
     /**
