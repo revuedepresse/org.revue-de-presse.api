@@ -14,7 +14,7 @@ use Doctrine\ORM\EntityRepository;
 abstract class ResourceRepository extends EntityRepository
 {
     /**
-     * @var \WTW\API\DataMiningBundle\ORM\QueryFactory
+     * @var \WeavingTheWeb\Bundle\ApiBundle\ORM\QueryFactory
      */
     protected $queryFactory;
 

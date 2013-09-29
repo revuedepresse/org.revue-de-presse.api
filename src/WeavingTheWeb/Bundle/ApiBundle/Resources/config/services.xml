@@ -11,7 +11,9 @@
         <parameter key="weaving_the_web.api.view_handler.class">WeavingTheWeb\Bundle\ApiBundle\View\ViewHandler</parameter>
         <parameter key="weaving_the_web.api.view_response_listener.class">WeavingTheWeb\Bundle\ApiBundle\EventListener\ViewResponseListener</parameter>
         <parameter key="weaving_the_web_api.repository.token.class">WeavingTheWeb\Bundle\ApiBundle\Repository\TokenRepository</parameter>
+        <parameter key="weaving_the_web_api.repository.user_stream.class">WeavingTheWeb\Bundle\ApiBundle\Repository\UserStreamRepository</parameter>
         <parameter key="weaving_the_web_api.entity.token.class">WeavingTheWeb\Bundle\ApiBundle\Entity\Token</parameter>
+        <parameter key="weaving_the_web_api.entity.user_stream.class">WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream</parameter>
     </parameters>
 
     <services>
@@ -37,6 +39,10 @@
             <tag name="kernel.event_listener" event="kernel.controller" method="onKernelController" />
             <tag name="kernel.event_listener" event="kernel.view" method="onKernelView" priority="-200" />
             <argument type="service" id="service_container" />
+        </service>
+        <service id="weaving_the_web_api.repository.user_stream" class="%weaving_the_web_api.repository.user_stream.class%"
+                 factory-service="doctrine.orm.entity_manager" factory-method="getRepository">
+            <argument type="string">%weaving_the_web_api.entity.user_stream.class%</argument>
         </service>
         <service id="weaving_the_web_api.repository.token" class="%weaving_the_web_api.repository.token.class%"
                  factory-service="doctrine.orm.entity_manager" factory-method="getRepository">

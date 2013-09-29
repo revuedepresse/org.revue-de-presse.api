@@ -195,7 +195,7 @@ class QueryFactory
     }
 
     /**
-     * @param $queryBuilder
+     * @param QueryBuilder $queryBuilder
      * @param $constraints
      *
      * @return mixed
@@ -401,6 +401,27 @@ class QueryFactory
     }
 
     /**
+     * @param $jsonId
+     */
+    public function disableJsonById($jsonId)
+    {
+        $queryBuilder = $this->queryJsonSelection(array('id' => (int) $jsonId));
+        $results = $queryBuilder->getQuery()->getResult();
+
+        if (count($results) && (false !== array_key_exists(0, $results))) {
+            /**
+             * @var $json Json
+             */
+            $json = $results[0];
+            $json->setStatus(0);
+            $this->entityManager->persist($json);
+
+            $this->entityManager->flush();
+            $this->entityManager->clear();
+        }
+    }
+
+    /**
      * @return string
      */
     public function getDelimiter()
@@ -411,7 +432,7 @@ class QueryFactory
     /**
      * @param $store
      *
-     * @return GithubRepository
+     * @return \WeavingTheWeb\Bundle\ApiBundle\Entity\GithubRepository
      */
     public function makeGithubRepository($store)
     {
@@ -435,7 +456,7 @@ class QueryFactory
     /**
      * @param $store
      *
-     * @return UserStream
+     * @return \WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream
      */
     public function makeUserStream($store)
     {
@@ -469,27 +490,6 @@ class QueryFactory
         }
 
         return $instance;
-    }
-
-    /**
-     * @param $jsonId
-     */
-    public function disableJsonById($jsonId)
-    {
-        $queryBuilder = $this->queryJsonSelection(array('id' => (int) $jsonId));
-        $results = $queryBuilder->getQuery()->getResult();
-
-        if (count($results) && (false !== array_key_exists(0, $results))) {
-            /**
-             * @var $json Json
-             */
-            $json = $results[0];
-            $json->setStatus(0);
-            $this->entityManager->persist($json);
-
-            $this->entityManager->flush();
-            $this->entityManager->clear();
-        }
     }
 
     /**
