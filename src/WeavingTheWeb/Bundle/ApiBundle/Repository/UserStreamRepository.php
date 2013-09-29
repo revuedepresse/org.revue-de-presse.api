@@ -53,6 +53,7 @@ class UserStreamRepository extends ResourceRepository
                     'screen_name' => $status->user->screen_name,
                     'name' => $status->user->name,
                     'user_avatar' => $status->user->profile_image_url,
+                    'status_id' => $status->id_str,
                 ];
                 $extract = $setter($extract);
                 $extracts[] = $extract;
