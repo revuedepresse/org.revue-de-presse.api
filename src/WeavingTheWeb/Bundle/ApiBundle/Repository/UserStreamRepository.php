@@ -26,12 +26,14 @@ class UserStreamRepository extends ResourceRepository
         });
 
         foreach ($extracts as $extract) {
-            /**
-             * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream $userStream
-             */
-            $userStream = $this->queryFactory->makeUserStream($extract);
-            $userStream->setIdentifier($extract['identifier']);
-            $entityManager->persist($userStream);
+            if (!$this->existsAlready($extract['identifier'], $extract['status_id'])) {
+                /**
+                 * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream $userStream
+                 */
+                $userStream = $this->queryFactory->makeUserStream($extract);
+                $userStream->setIdentifier($extract['identifier']);
+                $entityManager->persist($userStream);
+            }
         }
 
         $entityManager->flush();
@@ -61,6 +63,18 @@ class UserStreamRepository extends ResourceRepository
         }
 
         return $extracts;
+    }
+
+    public function existsAlready($oauthToken, $statusId)
+    {
+        $queryBuilder = $this->createQueryBuilder('u');
+        $queryBuilder->select('count(u.id) as count_')
+            ->andWhere('u.identifier = :oauthToken')
+            ->andWhere('u.statusId = :statusId');
+        $queryBuilder->setParameter('oauthToken', $oauthToken);
+        $queryBuilder->setParameter('statusId', $statusId);
+
+        return $queryBuilder->getQuery()->getSingleScalarResult() > 0;
     }
 
     /**
