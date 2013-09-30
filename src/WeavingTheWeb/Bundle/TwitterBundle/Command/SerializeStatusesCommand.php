@@ -74,13 +74,6 @@ class SerializeStatusesCommand extends ContainerAwareCommand
                 'Results count',
                 200
             )
-            ->addOption(
-                'page',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'Page index',
-                1
-            )
             ->setDescription('Serialize response returned when accessing user statuses endpoint from twitter api')
             ->setAliases(array('wtw:api:tw:statuses'));
     }
@@ -96,7 +89,6 @@ class SerializeStatusesCommand extends ContainerAwareCommand
         $options = [
             'oauth' => $oauthTokens['token'],
             'count' => $input->getOption('count'),
-            'page' => $input->getOption('page'),
             'screen_name' => $input->getOption('screen_name')
         ];
         $this->setUpFeedReader($oauthTokens);
@@ -149,7 +141,7 @@ class SerializeStatusesCommand extends ContainerAwareCommand
      */
     protected function remainingStatuses($options)
     {
-        $count = $this->userStreamRepository->countStatuses($options['oauth']);
+        $count = $this->userStreamRepository->countStatuses($options['oauth'], $options['screen_name']);
         $user = $this->feedReader->showUser($options['screen_name']);
 
         return $count < $user->statuses_count;
