@@ -30,7 +30,7 @@ class UserStreamRepository extends ResourceRepository
         });
 
         foreach ($extracts as $key => $extract) {
-            if (!$this->existsAlready($extract['identifier'], $extract['status_id'])) {
+            if (!$this->existsAlready($extract['identifier'], $extract['status_id'], $extract['screen_name'])) {
                 /**
                  * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream $userStream
                  */
@@ -73,13 +73,15 @@ class UserStreamRepository extends ResourceRepository
         return $extracts;
     }
 
-    public function existsAlready($oauthToken, $statusId)
+    public function existsAlready($oauthToken, $screenName, $statusId)
     {
-        $queryBuilder = $this->createQueryBuilder('u');
-        $queryBuilder->select('count(u.id) as count_')
-            ->andWhere('u.identifier = :oauthToken')
-            ->andWhere('u.statusId = :statusId');
+        $queryBuilder = $this->createQueryBuilder('s');
+        $queryBuilder->select('count(s.id) as count_')
+            ->andWhere('s.identifier = :oauthToken')
+            ->andWhere('s.statusId = :statusId')
+            ->andWhere('s.screenName = :screenName');
         $queryBuilder->setParameter('oauthToken', $oauthToken);
+        $queryBuilder->setParameter('screenName', $screenName);
         $queryBuilder->setParameter('statusId', $statusId);
         $count = $queryBuilder->getQuery()->getSingleScalarResult();
 
@@ -88,15 +90,18 @@ class UserStreamRepository extends ResourceRepository
 
     /**
      * @param $oauthToken
+     * @param $screenName
      * @return mixed
      */
-    public function countStatuses($oauthToken)
+    public function countStatuses($oauthToken, $screenName)
     {
-        $countQueryBuilder = $this->createQueryBuilder('u');
-        $countQueryBuilder->select('count(u.id) as count_')
-            ->where('u.identifier = :oauth');
-        $countQueryBuilder->setParameter('oauth', $oauthToken);
-        $count = $countQueryBuilder->getQuery()->getSingleScalarResult();
+        $queryBuilder = $this->createQueryBuilder('s');
+        $queryBuilder->select('count(s.id) as count_')
+            ->where('s.identifier = :oauth')
+            ->andWhere('s.screenName = :screenName');
+        $queryBuilder->setParameter('oauth', $oauthToken);
+        $queryBuilder->setParameter('screenName', $screenName);
+        $count = $queryBuilder->getQuery()->getSingleScalarResult();
 
         return $count;
     }
