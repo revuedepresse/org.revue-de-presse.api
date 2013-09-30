@@ -62,4 +62,43 @@ class UserStreamRepository extends ResourceRepository
 
         return $extracts;
     }
+
+    /**
+     * @param $oauthToken
+     * @return mixed
+     */
+    public function countStatuses($oauthToken)
+    {
+        $countQueryBuilder = $this->createQueryBuilder('u');
+        $countQueryBuilder->select('count(u.id) as count_')
+            ->where('u.identifier = :oauth');
+        $countQueryBuilder->setParameter('oauth', $oauthToken);
+
+        return $countQueryBuilder->getQuery()->getSingleScalarResult();
+    }
+
+    /**
+     * @param $oauthToken
+     * @return mixed
+     */
+    public function findNextMaxStatus($oauthToken)
+    {
+        $subqueryBuilder = $this->createQueryBuilder('u');
+        $subqueryBuilder->select('min(u.statusId) as since_id')
+            ->where('u.identifier = :oauth');
+
+        $queryBuilder = $this->createQueryBuilder('s');
+        $queryBuilder->select('s.statusId')
+            ->andWhere('s.identifier = :oauth')
+            ->andWhere(
+                $queryBuilder->expr()->in(
+                    's.statusId',
+                    $subqueryBuilder->getDql()
+                )
+            );
+
+        $queryBuilder->setParameter('oauth', $oauthToken);
+
+        return $queryBuilder->getQuery()->getSingleResult();
+    }
 }

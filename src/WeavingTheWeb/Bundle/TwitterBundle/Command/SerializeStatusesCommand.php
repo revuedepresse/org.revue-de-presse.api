@@ -20,6 +20,11 @@ class SerializeStatusesCommand extends ContainerAwareCommand
     protected $feedReader;
 
     /**
+     * @var \WeavingTheWeb\Bundle\ApiBundle\Repository\UserStreamRepository $userStreamRepository
+     */
+    protected $userStreamRepository;
+
+    /**
      * Configures executable commands
      */
     protected function configure()
@@ -84,12 +89,12 @@ class SerializeStatusesCommand extends ContainerAwareCommand
             'screen_name' => $input->getOption('screen_name')
         ];
         $this->setUpFeedReader($oauthTokens);
-
+        $this->userStreamRepository = $this->getContainer()->get('weaving_the_web_api.repository.user_stream');
 
         $apiRateLimitReached = $this->isApiRateLimitReached();
-        $remainingUserTweets = $this->remainingTweetsForUser($options);
+        $remainingStatuses = $this->remainingStatuses($options);
 
-        while ($remainingUserTweets && !$apiRateLimitReached) {
+        while ($remainingStatuses && !$apiRateLimitReached) {
 
             $this->persistStatuses($options);
 
@@ -97,12 +102,12 @@ class SerializeStatusesCommand extends ContainerAwareCommand
                 break;
             }
 
-            $status = $this->findNextMaxStatus($options);
+            $status = $this->userStreamRepository->findNextMaxStatus($options['oauth']);
             if ((count($status) === 1) && array_key_exists('statusId', $status)) {
                 $options['max_id'] = $status['statusId'] - 1;
             }
             $apiRateLimitReached = $this->isApiRateLimitReached();
-            $remainingUserTweets = $this->remainingTweetsForUser($options);
+            $remainingStatuses = $this->remainingStatuses($options);
         }
 
         /**
@@ -110,6 +115,20 @@ class SerializeStatusesCommand extends ContainerAwareCommand
          */
         $translator = $this->getContainer()->get('translator');
         $output->writeln($translator->trans('twitter.statuses.persistence.success'));
+    }
+
+    /**
+     * @param $options
+     * @param $count
+     * @return bool
+     */
+    protected function remainingStatuses($options)
+    {
+        $count = $this->userStreamRepository->countStatuses($options['oauth']);
+        $user = $this->feedReader->showUser($options['screen_name']);
+
+        // Introduces 10 percent margin to be safe
+        return $count < ($user->statuses_count - $user->statuses_count / 10);
     }
 
     /**
@@ -146,57 +165,6 @@ class SerializeStatusesCommand extends ContainerAwareCommand
     }
 
     /**
-     * @param $options
-     * @return bool
-     */
-    protected function remainingTweetsForUser($options)
-    {
-        /**
-         * @var \WeavingTheWeb\Bundle\ApiBundle\Repository\UserStreamRepository $userStreamRepository
-         */
-        $userStreamRepository = $this->getContainer()->get('weaving_the_web_api.repository.user_stream');
-        $countQueryBuilder = $userStreamRepository->createQueryBuilder('u');
-        $countQueryBuilder->select('count(u.id) as count_')
-            ->where('u.identifier = :oauth');
-        $countQueryBuilder->setParameter('oauth', $options['oauth']);
-        $count = $countQueryBuilder->getQuery()->getSingleScalarResult();
-        $user = $this->feedReader->showUser($options['screen_name']);
-
-        // Introduces 10 percent margin to be safe
-        return $count < ($user->statuses_count - $user->statuses_count / 10);
-    }
-
-    /**
-     * @param $options
-     * @return \WeavingTheWeb\Bundle\ApiBundle\Repository\UserStreamRepository
-     */
-    protected function findNextMaxStatus($options)
-    {
-        /**
-         * @var \WeavingTheWeb\Bundle\ApiBundle\Repository\UserStreamRepository $userStreamRepository
-         */
-        $userStreamRepository = $this->getContainer()->get('weaving_the_web_api.repository.user_stream');
-
-        $subqueryBuilder = $userStreamRepository->createQueryBuilder('u');
-        $subqueryBuilder->select('min(u.statusId) as since_id')
-            ->where('u.identifier = :oauth');
-
-        $queryBuilder = $userStreamRepository->createQueryBuilder('s');
-        $queryBuilder->select('s.statusId')
-            ->andWhere('s.identifier = :oauth')
-            ->andWhere(
-                $queryBuilder->expr()->in(
-                    's.statusId',
-                    $subqueryBuilder->getDql()
-                )
-            );
-
-        $queryBuilder->setParameter('oauth', $options['oauth']);
-
-        return $queryBuilder->getQuery()->getSingleResult();
-    }
-
-    /**
      * @return bool
      */
     protected function isApiRateLimitReached()
@@ -213,11 +181,6 @@ class SerializeStatusesCommand extends ContainerAwareCommand
     protected function persistStatuses($options)
     {
         $statuses = $this->feedReader->fetchTimelineStatuses($options);
-
-        /**
-         * @var \WeavingTheWeb\Bundle\ApiBundle\Repository\UserStreamRepository $userStreamRepository
-         */
-        $userStreamRepository = $this->getContainer()->get('weaving_the_web_api.repository.user_stream');
-        $userStreamRepository->saveStatuses($statuses, $options['oauth']);
+        $this->userStreamRepository->saveStatuses($statuses, $options['oauth']);
     }
 }
