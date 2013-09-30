@@ -2,7 +2,11 @@
 
 namespace WeavingTheWeb\Bundle\ApiBundle\Repository;
 
+use Doctrine\ORM\NoResultException;
+
 /**
+ * Class UserStreamRepository
+ * @package WeavingTheWeb\Bundle\ApiBundle\Repository
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
 class UserStreamRepository extends ResourceRepository
@@ -25,7 +29,7 @@ class UserStreamRepository extends ResourceRepository
             return $extract;
         });
 
-        foreach ($extracts as $extract) {
+        foreach ($extracts as $key => $extract) {
             if (!$this->existsAlready($extract['identifier'], $extract['status_id'])) {
                 /**
                  * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream $userStream
@@ -33,10 +37,14 @@ class UserStreamRepository extends ResourceRepository
                 $userStream = $this->queryFactory->makeUserStream($extract);
                 $userStream->setIdentifier($extract['identifier']);
                 $entityManager->persist($userStream);
+            } else {
+                unset($extracts[$key]);
             }
         }
 
         $entityManager->flush();
+
+        return $extracts;
     }
 
     /**
@@ -73,8 +81,9 @@ class UserStreamRepository extends ResourceRepository
             ->andWhere('u.statusId = :statusId');
         $queryBuilder->setParameter('oauthToken', $oauthToken);
         $queryBuilder->setParameter('statusId', $statusId);
+        $count = $queryBuilder->getQuery()->getSingleScalarResult();
 
-        return $queryBuilder->getQuery()->getSingleScalarResult() > 0;
+        return $count > 0;
     }
 
     /**
@@ -87,32 +96,34 @@ class UserStreamRepository extends ResourceRepository
         $countQueryBuilder->select('count(u.id) as count_')
             ->where('u.identifier = :oauth');
         $countQueryBuilder->setParameter('oauth', $oauthToken);
+        $count = $countQueryBuilder->getQuery()->getSingleScalarResult();
 
-        return $countQueryBuilder->getQuery()->getSingleScalarResult();
+        return $count;
     }
 
     /**
      * @param $oauthToken
+     * @param $screenName
      * @return mixed
      */
-    public function findNextMaxStatus($oauthToken)
+    public function findNextMaxStatus($oauthToken, $screenName)
     {
-        $subqueryBuilder = $this->createQueryBuilder('u');
-        $subqueryBuilder->select('min(u.statusId) as since_id')
-            ->where('u.identifier = :oauth');
-
         $queryBuilder = $this->createQueryBuilder('s');
         $queryBuilder->select('s.statusId')
-            ->andWhere('s.identifier = :oauth')
-            ->andWhere(
-                $queryBuilder->expr()->in(
-                    's.statusId',
-                    $subqueryBuilder->getDql()
-                )
-            );
+            ->andWhere('s.screenName = :screenName')
+            ->andWhere('s.identifier = :identifier')
+            ->orderBy('s.statusId + 1', 'asc')
+            ->setMaxResults(1);
 
-        $queryBuilder->setParameter('oauth', $oauthToken);
+        $queryBuilder->setParameter('identifier', $oauthToken);
+        $queryBuilder->setParameter('screenName', $screenName);
 
-        return $queryBuilder->getQuery()->getSingleResult();
+        try {
+            $singleResult = $queryBuilder->getQuery()->getSingleResult();
+        } catch (NoResultException $exception) {
+            return [];
+        }
+
+        return $singleResult;
     }
 }

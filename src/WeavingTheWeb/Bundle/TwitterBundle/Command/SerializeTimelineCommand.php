@@ -8,8 +8,8 @@ use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand,
     Symfony\Component\Console\Input\InputOption;
 
 /**
- * Timeline serialization command
- *
+ * Class SerializeTimelineCommand
+ * @package WeavingTheWeb\Bundle\TwitterBundle\Command
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
 class SerializeTimelineCommand extends ContainerAwareCommand

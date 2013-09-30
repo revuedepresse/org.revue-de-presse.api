@@ -8,8 +8,8 @@ use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand,
     Symfony\Component\Console\Input\InputOption;
 
 /**
- * Statuses serialization command
- *
+ * Class SerializeStatusesCommand
+ * @package WeavingTheWeb\Bundle\TwitterBundle\Command
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
 class SerializeStatusesCommand extends ContainerAwareCommand
@@ -64,9 +64,8 @@ class SerializeStatusesCommand extends ContainerAwareCommand
             ->addOption(
                 'log',
                 null,
-                InputOption::VALUE_REQUIRED,
-                'Logs count of statuses persisted for each loop',
-                false
+                InputOption::VALUE_NONE,
+                'Logs count of statuses persisted for each loop'
             )
             ->addOption(
                 'count',
@@ -103,23 +102,16 @@ class SerializeStatusesCommand extends ContainerAwareCommand
         $this->setUpFeedReader($oauthTokens);
         $this->userStreamRepository = $this->getContainer()->get('weaving_the_web_api.repository.user_stream');
 
-        $apiRateLimitReached = $this->isApiRateLimitReached();
-        $remainingStatuses = $this->remainingStatuses($options);
+        $context = $this->updateContext($options);
 
-        while ($remainingStatuses && !$apiRateLimitReached) {
+        while ($context['condition']) {
+            $saveStatuses = $this->persistStatuses($context['options']);
 
-            $this->persistStatuses($options);
-
-            if (!$input->hasOption('greedy') || !$input->getOption('greedy')) {
+            if (!$input->hasOption('greedy') || !$input->getOption('greedy') || is_null($saveStatuses)) {
                 break;
             }
 
-            $status = $this->userStreamRepository->findNextMaxStatus($options['oauth']);
-            if ((count($status) === 1) && array_key_exists('statusId', $status)) {
-                $options['max_id'] = $status['statusId'] - 1;
-            }
-            $apiRateLimitReached = $this->isApiRateLimitReached();
-            $remainingStatuses = $this->remainingStatuses($options);
+            $context = $this->updateContext($context['options']);
         }
 
         /**
@@ -127,6 +119,27 @@ class SerializeStatusesCommand extends ContainerAwareCommand
          */
         $translator = $this->getContainer()->get('translator');
         $output->writeln($translator->trans('twitter.statuses.persistence.success'));
+    }
+
+    /**
+     * @param $options
+     * @return array
+     */
+    protected function updateContext($options)
+    {
+        $apiRateLimitReached = $this->isApiRateLimitReached();
+        $remainingStatuses = $this->remainingStatuses($options);
+        $status = $this->userStreamRepository->findNextMaxStatus($options['oauth'], $options['screen_name']);
+
+        if ((count($status) === 1) && array_key_exists('statusId', $status)) {
+            $options['max_id'] = $status['statusId'] - 1;
+            $this->getContainer()->get('logger')->info('[max id] ' . $options['max_id']);
+        }
+
+        return [
+            'condition' => !$apiRateLimitReached && $remainingStatuses,
+            'options' => $options
+        ];
     }
 
     /**
@@ -192,11 +205,17 @@ class SerializeStatusesCommand extends ContainerAwareCommand
     protected function persistStatuses($options)
     {
         $statuses = $this->feedReader->fetchTimelineStatuses($options);
-        $this->userStreamRepository->saveStatuses($statuses, $options['oauth']);
+        if (count($statuses) > 0) {
+            $savedStatuses = $this->userStreamRepository->saveStatuses($statuses, $options['oauth']);
 
-        if ($this->log) {
-            $logger = $this->getContainer()->get('logger');
-            $logger->info('[' . count($statuses) . ' status(es) saved]');
+            if ($this->log) {
+                $logger = $this->getContainer()->get('logger');
+                $logger->info('[' . count($savedStatuses) . ' status(es) saved]');
+            }
+
+            return $savedStatuses;
+        } else {
+            return null;
         }
     }
 }
