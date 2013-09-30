@@ -1,5 +1,7 @@
 parameters:
     weaving_the_web_twitter.endpoint.feed:                        %endpoint_twitter_feed%
+    weaving_the_web_twitter.oauth_token.default:                  %api_twitter_user_token%
+    weaving_the_web_twitter.oauth_secret.default:                 %api_twitter_user_secret%
     weaving_the_web_twitter.serialize_statuses.class:             WeavingTheWeb\Bundle\TwitterBundle\Command\SerializeStatusesCommand
     weaving_the_web_twitter.serialize_timeline_command.class:     WeavingTheWeb\Bundle\TwitterBundle\Command\SerializeTimelineCommand
     weaving_the_web_twitter.serialize_user_stream_command.class:  WeavingTheWeb\Bundle\TwitterBundle\Command\SerializeUserStreamCommand

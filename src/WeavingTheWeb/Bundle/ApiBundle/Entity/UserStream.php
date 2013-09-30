@@ -9,6 +9,7 @@ use Doctrine\ORM\Mapping as ORM;
  *
  * @ORM\Entity(repositoryClass="WeavingTheWeb\Bundle\ApiBundle\Repository\UserStreamRepository")
  * @ORM\Table(name="weaving_twitter_user_stream")
+ * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
 class UserStream
 {
