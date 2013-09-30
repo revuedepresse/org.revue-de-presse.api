@@ -25,6 +25,11 @@ class SerializeStatusesCommand extends ContainerAwareCommand
     protected $userStreamRepository;
 
     /**
+     * @var bool
+     */
+    protected $log;
+
+    /**
      * Configures executable commands
      */
     protected function configure()
@@ -53,8 +58,14 @@ class SerializeStatusesCommand extends ContainerAwareCommand
             ->addOption(
                 'greedy',
                 null,
+                InputOption::VALUE_NONE,
+                'Try saving all statuses provided rate limits of Twitter API consumption and user statuses count'
+            )
+            ->addOption(
+                'log',
+                null,
                 InputOption::VALUE_REQUIRED,
-                'Try saving all statuses provided rate limits of Twitter API consumption and user statuses count',
+                'Logs count of statuses persisted for each loop',
                 false
             )
             ->addOption(
@@ -81,6 +92,7 @@ class SerializeStatusesCommand extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->log = $input->getOption('log');
         $oauthTokens = $this->getOauthTokens($input);
         $options = [
             'oauth' => $oauthTokens['token'],
@@ -98,7 +110,7 @@ class SerializeStatusesCommand extends ContainerAwareCommand
 
             $this->persistStatuses($options);
 
-            if (!$input->getOption('greedy')) {
+            if (!$input->hasOption('greedy') || !$input->getOption('greedy')) {
                 break;
             }
 
@@ -127,8 +139,7 @@ class SerializeStatusesCommand extends ContainerAwareCommand
         $count = $this->userStreamRepository->countStatuses($options['oauth']);
         $user = $this->feedReader->showUser($options['screen_name']);
 
-        // Introduces 10 percent margin to be safe
-        return $count < ($user->statuses_count - $user->statuses_count / 10);
+        return $count < $user->statuses_count;
     }
 
     /**
@@ -182,5 +193,10 @@ class SerializeStatusesCommand extends ContainerAwareCommand
     {
         $statuses = $this->feedReader->fetchTimelineStatuses($options);
         $this->userStreamRepository->saveStatuses($statuses, $options['oauth']);
+
+        if ($this->log) {
+            $logger = $this->getContainer()->get('logger');
+            $logger->info('[' . count($statuses) . ' status(es) saved]');
+        }
     }
 }
