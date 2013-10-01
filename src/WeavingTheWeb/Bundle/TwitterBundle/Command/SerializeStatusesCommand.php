@@ -91,7 +91,7 @@ class SerializeStatusesCommand extends ContainerAwareCommand
             'count' => $input->getOption('count'),
             'screen_name' => $input->getOption('screen_name')
         ];
-        $this->setUpFeedReader($oauthTokens);
+        $this->setupFeedReader($oauthTokens);
         $this->userStreamRepository = $this->getContainer()->get('weaving_the_web_api.repository.user_stream');
 
         $context = $this->updateContext($options);
@@ -170,7 +170,7 @@ class SerializeStatusesCommand extends ContainerAwareCommand
     /**
      * @param $oauthTokens
      */
-    protected function setUpFeedReader($oauthTokens)
+    protected function setupFeedReader($oauthTokens)
     {
         /**
          * @var \WeavingTheWeb\Bundle\Legacy\ProviderBundle\Reader\FeedReader $feedReader
