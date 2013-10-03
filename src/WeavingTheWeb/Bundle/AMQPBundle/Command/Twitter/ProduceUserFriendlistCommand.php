@@ -6,6 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand,
     Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Input\InputOption,
     Symfony\Component\Console\Output\OutputInterface;
+use WTW\UserBundle\Entity\User;
 
 /**
  * Class ProduceUserFriendListCommand
@@ -70,21 +71,50 @@ class ProduceUserFriendListCommand extends ContainerAwareCommand
         $messageBody = $tokens;
         $this->logger = $this->getContainer()->get('logger');
 
+
+        /**
+         * @var \WTW\UserBundle\Repository\UserRepository $userRepository
+         */
+        $userRepository = $this->getContainer()->get('wtw_user.repository.user');
+        /**
+         * @var \Doctrine\ORM\EntityManager $entityManager
+         */
+        $entityManager = $this->getContainer()->get('doctrine.orm.entity_manager');
+
         foreach ($friends->ids as $friend) {
-            $user = $this->feedReader->showUser($friend);
-            if ($input->hasOption('log')) {
-                if (isset($user->screen_name)) {
-                    $message = '[publishing new message produced for "' . ( $user->screen_name ) . '"]';
-                    $this->logger->info($message);
-                } elseif (isset($user->errors) && is_array($user->errors) && isset($user->errors[0])) {
-                    $message = print_r($user->errors[0]->message, true);
-                    $this->logger->info($message);
+
+            $result = $userRepository->findOneBy(['twitterID' => $friend]);
+            if (count($result) === 1) {
+                $user = $result;
+            } else {
+                $twitterUser = $this->feedReader->showUser($friend);
+                if (isset($twitterUser->screen_name)) {
+                    if ($input->hasOption('log')) {
+                        $message = '[publishing new message produced for "' . ( $twitterUser->screen_name ) . '"]';
+                        $this->logger->info($message);
+                    }
+
+                    $user = new User();
+                    $user->setTwitterUsername($twitterUser->screen_name);
+                    $user->setTwitterID($friend);
+                    $user->setEnabled(false);
+                    $user->setLocked(false);
+                    $user->setEmail('@' . $twitterUser->screen_name);
+                    $user->setStatus(0);
+
+                    $entityManager->persist($user);
+                    $entityManager->flush();
+                } elseif (isset($twitterUser->errors) && is_array($twitterUser->errors) && isset($twitterUser->errors[0])) {
+                    if ($input->hasOption('log')) {
+                        $message = print_r($twitterUser->errors[0]->message, true);
+                        $this->logger->info($message);
+                    }
 
                     break;
                 }
             }
 
-            $messageBody['screen_name'] = $user->screen_name;
+            $messageBody['screen_name'] = $user->getTwitterUsername();
             $producer->publish(serialize(json_encode($messageBody)));
             $producer->setContentType('application/json');
         }
