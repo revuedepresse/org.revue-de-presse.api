@@ -2,6 +2,7 @@ parameters:
     weaving_the_web_twitter.endpoint.feed:                        %endpoint_twitter_feed%
     weaving_the_web_twitter.oauth_token.default:                  %api_twitter_user_token%
     weaving_the_web_twitter.oauth_secret.default:                 %api_twitter_user_secret%
+    weaving_the_web_twitter.serializer.user_status.class:         WeavingTheWeb\Bundle\TwitterBundle\Serializer\UserStatus
     weaving_the_web_twitter.serialize_statuses.class:             WeavingTheWeb\Bundle\TwitterBundle\Command\SerializeStatusesCommand
     weaving_the_web_twitter.serialize_timeline_command.class:     WeavingTheWeb\Bundle\TwitterBundle\Command\SerializeTimelineCommand
     weaving_the_web_twitter.serialize_user_stream_command.class:  WeavingTheWeb\Bundle\TwitterBundle\Command\SerializeUserStreamCommand
@@ -15,3 +16,9 @@ services:
         calls:
           - [ setHttpClientClass, [ '\Guzzle\Http\Client' ] ]
           - [ setClientClass, [ '\Goutte\Client' ] ]
+    weaving_the_web_twitter.serializer.user_status:
+        class:  %weaving_the_web_twitter.serializer.user_status.class%
+        calls:
+          - [ setFeedReader, [ '@weaving_the_web_legacy_provider.feed_reader' ] ]
+          - [ setUserStreamRepository, [ '@weaving_the_web_api.repository.user_stream' ] ]
+          - [ setLogger, [ '@logger' ] ]

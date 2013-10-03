@@ -5,14 +5,14 @@
     xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <parameters>
-        <parameter key="weaving_the_web_amqp.produce_friend_list_command.class">WeavingTheWeb\Bundle\AMQPBundle\Command\Twitter\ProduceUserFriendListCommand</parameter>
-        <parameter key="weaving_the_web_amqp.twitter.user_timeline.class">WeavingTheWeb\Bundle\AMQPBundle\Twitter\UserTimeline</parameter>
+        <parameter key="weaving_the_web_amqp.produce_user_friendlist_command.class">WeavingTheWeb\Bundle\AMQPBundle\Command\Twitter\ProduceUserFriendListCommand</parameter>
+        <parameter key="weaving_the_web_amqp.twitter.user_status.class">WeavingTheWeb\Bundle\AMQPBundle\Twitter\UserStatus</parameter>
     </parameters>
 
     <services>
-        <service id="weaving_the_web_amqp.twitter.user_timeline" class="%weaving_the_web_amqp.twitter.user_timeline.class%">
-            <call method="setFeedReader">
-                <argument type="service" id="weaving_the_web_legacy_provider.feed_reader" />
+        <service id="weaving_the_web_amqp.twitter.user_status" class="%weaving_the_web_amqp.twitter.user_status.class%">
+            <call method="setSerializer">
+                <argument type="service" id="weaving_the_web_twitter.serializer.user_status" />
             </call>
         </service>
     </services>
