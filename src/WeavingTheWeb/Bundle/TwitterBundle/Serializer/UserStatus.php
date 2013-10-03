@@ -63,7 +63,7 @@ class UserStatus
         while ($context['condition']) {
             $saveStatuses = $this->persistStatuses($context['options'], $logLevel);
 
-            if ($greedyMode || is_null($saveStatuses)) {
+            if (!$greedyMode || is_null($saveStatuses)) {
                 break;
             }
 
@@ -111,6 +111,7 @@ class UserStatus
             $remainingCall = $rateLimitStatus->resources->statuses->{'/statuses/user_timeline'}->remaining;
             $message = '[rate limit status] ' . $remainingCall;
         }
+
         if ($logLevel == 'info') {
             $this->logger->info($message);
         }
