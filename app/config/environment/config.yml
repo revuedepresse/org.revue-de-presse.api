@@ -58,15 +58,15 @@ old_sound_rabbit_mq:
             password:  ## FILL ME ##
             vhost:     '## FILL ME ##'
     producers:
-        weaving_the_web_amqp.twitter.user_timeline:
+        weaving_the_web_amqp.twitter.user_status:
             connection: default
-            exchange_options: {name: 'get-user-timeline', type: direct}
+            exchange_options: {name: 'get-user-status', type: direct}
     consumers:
-        weaving_the_web_amqp.twitter.user_timeline:
+        weaving_the_web_amqp.twitter.user_status:
             connection: default
-            exchange_options: {name: 'get-user-timeline', type: direct}
-            queue_options:    {name: 'get-user-timeline'}
-            callback:         weaving_the_web_amqp.twitter.user_timeline
+            exchange_options: {name: 'get-user-status', type: direct}
+            queue_options:    {name: 'get-user-status'}
+            callback:         weaving_the_web_amqp.twitter.user_status
 
 ornicar_apc:
     host: %apc_host%

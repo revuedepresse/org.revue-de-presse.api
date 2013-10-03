@@ -15,21 +15,6 @@ use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand,
 class SerializeStatusesCommand extends ContainerAwareCommand
 {
     /**
-     * @var \WeavingTheWeb\Bundle\Legacy\ProviderBundle\Reader\FeedReader $feedReader
-     */
-    protected $feedReader;
-
-    /**
-     * @var \WeavingTheWeb\Bundle\ApiBundle\Repository\UserStreamRepository $userStreamRepository
-     */
-    protected $userStreamRepository;
-
-    /**
-     * @var bool
-     */
-    protected $log;
-
-    /**
      * Configures executable commands
      */
     protected function configure()
@@ -91,60 +76,19 @@ class SerializeStatusesCommand extends ContainerAwareCommand
             'count' => $input->getOption('count'),
             'screen_name' => $input->getOption('screen_name')
         ];
-        $this->setupFeedReader($oauthTokens);
-        $this->userStreamRepository = $this->getContainer()->get('weaving_the_web_api.repository.user_stream');
 
-        $context = $this->updateContext($options);
-
-        while ($context['condition']) {
-            $saveStatuses = $this->persistStatuses($context['options']);
-
-            if (!$input->hasOption('greedy') || !$input->getOption('greedy') || is_null($saveStatuses)) {
-                break;
-            }
-
-            $context = $this->updateContext($context['options']);
-        }
+        /**
+         * @var \WeavingTheWeb\Bundle\TwitterBundle\Serializer\UserStatus $serializer
+         */
+        $serializer = $this->getContainer()->get('weaving_the_web_twitter.serializer.user_status');
+        $greedyMode = !$input->hasOption('greedy') || !$input->getOption('greedy');
+        $serializer->serialize($options, $input->getOption('log') ? 'info' : null, $greedyMode);
 
         /**
          * @var \Symfony\Component\Translation\Translator $translator
          */
         $translator = $this->getContainer()->get('translator');
         $output->writeln($translator->trans('twitter.statuses.persistence.success'));
-    }
-
-    /**
-     * @param $options
-     * @return array
-     */
-    protected function updateContext($options)
-    {
-        $apiRateLimitReached = $this->isApiRateLimitReached();
-        $remainingStatuses = $this->remainingStatuses($options);
-        $status = $this->userStreamRepository->findNextMaxStatus($options['oauth'], $options['screen_name']);
-
-        if ((count($status) === 1) && array_key_exists('statusId', $status)) {
-            $options['max_id'] = $status['statusId'] - 1;
-            $this->getContainer()->get('logger')->info('[max id] ' . $options['max_id']);
-        }
-
-        return [
-            'condition' => !$apiRateLimitReached && $remainingStatuses,
-            'options' => $options
-        ];
-    }
-
-    /**
-     * @param $options
-     * @param $count
-     * @return bool
-     */
-    protected function remainingStatuses($options)
-    {
-        $count = $this->userStreamRepository->countStatuses($options['oauth'], $options['screen_name']);
-        $user = $this->feedReader->showUser($options['screen_name']);
-
-        return $count < $user->statuses_count;
     }
 
     /**
@@ -165,49 +109,5 @@ class SerializeStatusesCommand extends ContainerAwareCommand
         }
 
         return array('token' => $token, 'secret' => $secret);
-    }
-
-    /**
-     * @param $oauthTokens
-     */
-    protected function setupFeedReader($oauthTokens)
-    {
-        /**
-         * @var \WeavingTheWeb\Bundle\Legacy\ProviderBundle\Reader\FeedReader $feedReader
-         */
-        $this->feedReader = $this->getContainer()->get('weaving_the_web_legacy_provider.feed_reader');
-        $this->feedReader->setUserToken($oauthTokens['token']);
-        $this->feedReader->setUserSecret($oauthTokens['secret']);
-    }
-
-    /**
-     * @return bool
-     */
-    protected function isApiRateLimitReached()
-    {
-        $rateLimitStatus = $this->feedReader->fetchRateLimitStatus();
-        $leastUpperBound = ($rateLimitStatus->resources->statuses->{'/statuses/user_timeline'}->limit / 10);
-
-        return $rateLimitStatus->resources->statuses->{'/statuses/user_timeline'}->remaining <= $leastUpperBound;
-    }
-
-    /**
-     * @param $options
-     */
-    protected function persistStatuses($options)
-    {
-        $statuses = $this->feedReader->fetchTimelineStatuses($options);
-        if (count($statuses) > 0) {
-            $savedStatuses = $this->userStreamRepository->saveStatuses($statuses, $options['oauth']);
-
-            if ($this->log) {
-                $logger = $this->getContainer()->get('logger');
-                $logger->info('[' . count($savedStatuses) . ' status(es) saved]');
-            }
-
-            return $savedStatuses;
-        } else {
-            return null;
-        }
     }
 }

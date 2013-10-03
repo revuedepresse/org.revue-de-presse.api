@@ -61,21 +61,32 @@ class ProduceUserFriendListCommand extends ContainerAwareCommand
         /**
          * @var \OldSound\RabbitMqBundle\RabbitMq\Producer $producer
          */
-        $producer = $this->getContainer()->get('old_sound_rabbit_mq.weaving_the_web_amqp.twitter.user_timeline_producer');
-        $this->logger = $this->getContainer()->get('logger');
+        $producer = $this->getContainer()->get('old_sound_rabbit_mq.weaving_the_web_amqp.twitter.user_status_producer');
         $tokens = $this->getTokens($input);
 
         $this->setupFeedReader($tokens);
         $friends = $this->feedReader->showUserFriends($input->getOption('screen_name'));
 
         $messageBody = $tokens;
+        $this->logger = $this->getContainer()->get('logger');
 
         foreach ($friends->ids as $friend) {
             $user = $this->feedReader->showUser($friend);
+            if ($input->hasOption('log')) {
+                if (isset($user->screen_name)) {
+                    $message = '[publishing new message produced for "' . ( $user->screen_name ) . '"]';
+                    $this->logger->info($message);
+                } elseif (isset($user->errors) && is_array($user->errors) && isset($user->errors[0])) {
+                    $message = print_r($user->errors[0]->message, true);
+                    $this->logger->info($message);
+
+                    break;
+                }
+            }
+
             $messageBody['screen_name'] = $user->screen_name;
             $producer->publish(serialize(json_encode($messageBody)));
             $producer->setContentType('application/json');
-            $this->logger->info('[publishing new message produced for "' . $user->screen_name . '"]');
         }
 
         /**

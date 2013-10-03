@@ -62,10 +62,10 @@ From project root directory, execute the following commands to transform
 Messaging
 
     # To produce a message
-    app/console wtw:amqp:twitter:produce:user_timeline --token=xxxx --secret=xxxx
+    app/console wtw:amqp:twitter:produce:user_timeline [--token=xxxx] [--secret=xxxx] [--log] --screen_name=thierrymarianne
 
     # To consume the first message ever produced before
-    app/console rabbitmq:consumer -m 1 weaving_the_web_amqp.twitter.user_timeline
+    app/console rabbitmq:consumer -m 130 weaving_the_web_amqp.twitter.user_status
 
 4) Known issues
 --------------------------------
