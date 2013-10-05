@@ -52,11 +52,11 @@ sensio_framework_extra:
 old_sound_rabbit_mq:
     connections:
         default:
-            host:      localhost
-            port:      5672
-            user:      weaver
-            password:  ## FILL ME ##
-            vhost:     '## FILL ME ##'
+            host:      %rabbitmq_host%
+            port:      %rabbitmq_port%
+            user:      %rabbitmq_user%
+            password:  %rabbitmq_password%
+            vhost:     %rabbitmq_vhost%
     producers:
         weaving_the_web_amqp.twitter.user_status:
             connection: default
