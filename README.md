@@ -67,6 +67,29 @@ Messaging
     # To consume the first message ever produced before
     app/console rabbitmq:consumer -m 130 weaving_the_web_amqp.twitter.user_status
 
+Rabbitmq
+
+    # List exchanges
+    rabbitmqctl list_exchanges name
+
+    # List consumers
+    rabbitmqctl list_consumers -p /weaving_the_web
+
+    # List channels
+    rabbitmqctl list_channels  -p /weaving_the_web
+
+    # List queues
+    rabbitmqctl list_queues -p /weaving_the_web
+
+    # Declare user
+    rabbitmqadmin declare user name=weaver password='***' tags=administrator,management,monitoring
+
+    # List user
+    rabbitmqadmin list users -u weaver -p '***'
+
+    # Delete default user
+    rabbitmqadmin delete user name=guest
+
 4) Known issues
 --------------------------------
 
