@@ -90,6 +90,14 @@ Rabbitmq
     # Delete default user
     rabbitmqadmin delete user name=guest
 
+User management
+
+    # Promote user
+    app/console fos:user:promote --super gordon
+
+    # Activate user
+    app/console fos:user:activate
+
 4) Known issues
 --------------------------------
 
