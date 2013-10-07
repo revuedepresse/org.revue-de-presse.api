@@ -128,7 +128,7 @@ class UserStatus
     {
         $count = $this->userStreamRepository->countStatuses($options['oauth'], $options['screen_name']);
         $user = $this->feedReader->showUser($options['screen_name']);
-        if (!isset($user->statuses_count)) {
+        if (!isset($user->statuses_count) || $user->protected) {
             $statusesCount = 0;
         } else {
             $statusesCount = $user->statuses_count;
