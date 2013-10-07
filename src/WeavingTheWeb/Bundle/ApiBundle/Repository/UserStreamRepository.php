@@ -30,7 +30,7 @@ class UserStreamRepository extends ResourceRepository
         });
 
         foreach ($extracts as $key => $extract) {
-            if (!$this->existsAlready($extract['identifier'], $extract['status_id'], $extract['screen_name'])) {
+            if (!$this->existsAlready($extract['identifier'], $extract['screen_name'], $extract['status_id'])) {
                 /**
                  * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream $userStream
                  */
