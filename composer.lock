@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "425a4e7702859765802955b75b19644f",
+    "hash": "e3f145137f97855036af2688a73dc548",
     "packages": [
         {
             "name": "behat/behat",
@@ -2524,6 +2524,55 @@
             "time": "2013-09-09 07:25:33"
         },
         {
+            "name": "jns/xhprof-bundle",
+            "version": "dev-master",
+            "target-dir": "Jns/Bundle/XhprofBundle",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/jonaswouters/XhprofBundle.git",
+                "reference": "11fd2023e3146b48e1ed9d9a4b2b92ffb5eb5d13"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/jonaswouters/XhprofBundle/zipball/11fd2023e3146b48e1ed9d9a4b2b92ffb5eb5d13",
+                "reference": "11fd2023e3146b48e1ed9d9a4b2b92ffb5eb5d13",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.2",
+                "symfony/dependency-injection": "2.*",
+                "symfony/http-kernel": "2.*"
+            },
+            "suggest": {
+                "doctrine/orm": "Persist details in a storage via doctrine",
+                "ext-xhprof": "Hierarchical Profiler for PHP"
+            },
+            "type": "symfony-bundle",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-0": {
+                    "Jns\\Bundle\\XhprofBundle": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "authors": [
+                {
+                    "name": "Jonas Wouters",
+                    "email": "hello@jonaswouters.be"
+                }
+            ],
+            "description": "Symfony JnsXhprofBundle",
+            "homepage": "https://github.com/jonaswouters/XhprofBundle",
+            "keywords": [
+                "xhprof"
+            ],
+            "time": "2013-08-26 08:06:14"
+        },
+        {
             "name": "kertz/twitteroauth",
             "version": "dev-master",
             "source": {
@@ -4196,6 +4245,7 @@
         "friendsofsymfony/twitter-bundle": 20,
         "friendsofsymfony/user-bundle": 20,
         "jms/serializer-bundle": 20,
+        "jns/xhprof-bundle": 20,
         "kertz/twitteroauth": 20,
         "ornicar/apc-bundle": 20,
         "themattharris/tmhoauth": 20
