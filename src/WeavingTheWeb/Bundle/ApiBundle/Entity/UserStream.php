@@ -8,7 +8,10 @@ use Doctrine\ORM\Mapping as ORM;
  * Json
  *
  * @ORM\Entity(repositoryClass="WeavingTheWeb\Bundle\ApiBundle\Repository\UserStreamRepository")
- * @ORM\Table(name="weaving_twitter_user_stream")
+ * @ORM\Table(
+ *      name="weaving_twitter_user_stream",
+ *      indexes={@ORM\index(name="hash", columns={"ust_hash"})}
+ * )
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
 class UserStream
@@ -21,6 +24,13 @@ class UserStream
      * @ORM\GeneratedValue(strategy="IDENTITY")
      */
     protected $id;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="ust_hash", type="string", length=40, nullable=true)
+     */
+    protected $hash;
 
     /**
      * @ORM\Column(name="ust_full_name", type="string", length=32)
@@ -74,6 +84,22 @@ class UserStream
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * @param string $hash
+     */
+    public function setHash($hash)
+    {
+        $this->hash = $hash;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHash()
+    {
+        return $this->hash;
     }
 
     /**
