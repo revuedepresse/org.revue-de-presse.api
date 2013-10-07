@@ -23,7 +23,8 @@ if ($env === 'prof') {
 
 $kernel = new AppKernel($env, $debug);
 $application = new Application($kernel);
-$application->run();
+$application->setAutoExit(false);
+$exitCode = $application->run();
 
 if ($env === 'prof') {
     $xhprofData = xhprof_disable();
@@ -43,3 +44,5 @@ if ($env === 'prof') {
 
     error_log(sprintf('-----------------[ %s %s ]----------------', '[request handling]', $profilingUrl));
 }
+
+exit($exitCode);
