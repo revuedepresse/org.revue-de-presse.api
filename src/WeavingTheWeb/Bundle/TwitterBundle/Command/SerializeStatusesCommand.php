@@ -81,7 +81,7 @@ class SerializeStatusesCommand extends ContainerAwareCommand
          * @var \WeavingTheWeb\Bundle\TwitterBundle\Serializer\UserStatus $serializer
          */
         $serializer = $this->getContainer()->get('weaving_the_web_twitter.serializer.user_status');
-        $greedyMode = !$input->hasOption('greedy') || !$input->getOption('greedy');
+        $greedyMode = !$input->hasOption('greedy') || $input->getOption('greedy');
         $serializer->serialize($options, $input->getOption('log') ? 'info' : null, $greedyMode);
 
         /**
