@@ -44,11 +44,15 @@ class AppKernel extends Kernel
             new WeavingTheWeb\Bundle\UserBundle\WeavingTheWebUserBundle(),
         );
 
-        if (in_array($this->getEnvironment(), array('dev', 'test', 'bdd', 'cache'))) {
+        if (in_array($this->getEnvironment(), array('dev', 'test', 'bdd', 'cache', 'prof'))) {
             $bundles[] = new Symfony\Bundle\WebProfilerBundle\WebProfilerBundle();
             $bundles[] = new Sensio\Bundle\DistributionBundle\SensioDistributionBundle();
             $bundles[] = new Sensio\Bundle\GeneratorBundle\SensioGeneratorBundle();
             $bundles[] = new Elao\WebProfilerExtraBundle\WebProfilerExtraBundle();
+        }
+
+        if (in_array($this->getEnvironment(), array('prof'))) {
+            $bundles[] = new Jns\Bundle\XhprofBundle\JnsXhprofBundle();
         }
 
         return $bundles;
