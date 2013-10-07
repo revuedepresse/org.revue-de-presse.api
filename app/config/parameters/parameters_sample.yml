@@ -60,7 +60,6 @@ parameters:
     mailer_user:                ~
     mailer_password:            ~
 
-    profiling_active:           false
     profiling_active:           true
     profiling_xhprof_dir:       %kernel.root_dir%/../web # xhprof web dir
     profiling_xhprof_config:    %profiling_xhprof_dir%/xhprof_lib/config.php
