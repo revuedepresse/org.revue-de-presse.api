@@ -10,6 +10,10 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity(repositoryClass="WeavingTheWeb\Bundle\ApiBundle\Repository\UserStreamRepository")
  * @ORM\Table(
  *      name="weaving_twitter_user_stream",
+ *      uniqueConstraints={
+ *          @ORM\UniqueConstraint(
+ *              name="unique_hash", columns={"ust_hash"}),
+ *      },
  *      indexes={
  *          @ORM\index(name="hash", columns={"ust_hash"}),
  *          @ORM\index(name="screen_name", columns={"ust_full_name"}),

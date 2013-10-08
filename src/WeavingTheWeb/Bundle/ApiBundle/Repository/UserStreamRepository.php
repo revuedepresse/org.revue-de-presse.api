@@ -59,6 +59,7 @@ class UserStreamRepository extends ResourceRepository
         foreach ($statuses as $status) {
             if (property_exists($status, 'text')) {
                 $extract = [
+                    'hash' => sha1($status->text . $status->id_str),
                     'text' => $status->text,
                     'screen_name' => $status->user->screen_name,
                     'name' => $status->user->name,
