@@ -2,23 +2,9 @@ imports:
     - { resource: ../extensions/assets.yml }
     - { resource: ../extensions/dbal.yml }
     - { resource: ../extensions/friendofsymfony.yml }
+    - { resource: ../extensions/messaging.yml }
     - { resource: ../parameters.yml }
     - { resource: ../extensions/security.yml }
-
-snc_redis:
-    clients:
-        default:
-            alias:        default
-            dsn:          redis://localhost
-            logging:      %kernel.debug%
-            type:         predis
-        session:
-            type:         predis
-            alias:        session
-            dsn:          redis://localhost
-    session:
-        client:           session
-        ttl:              1200
 
 framework:
     csrf_protection:      true
@@ -36,6 +22,26 @@ framework:
     translator:           { fallback: en }
     validation:           { enable_annotations: true }
 
+ornicar_apc:
+    host: %apc_host%
+    mode: curl
+    web_dir: %kernel.root_dir%/../web
+
+snc_redis:
+    clients:
+        default:
+            alias:        default
+            dsn:          redis://localhost
+            logging:      %kernel.debug%
+            type:         predis
+        session:
+            type:         predis
+            alias:        session
+            dsn:          redis://localhost
+    session:
+        client:           session
+        ttl:              1200
+
 twig:
     debug:            %kernel.debug%
     strict_variables: %kernel.debug%
@@ -48,30 +54,6 @@ twig:
 sensio_framework_extra:
     view:    { annotations: false }
     router:  { annotations: true }
-
-old_sound_rabbit_mq:
-    connections:
-        default:
-            host:      %rabbitmq_host%
-            port:      %rabbitmq_port%
-            user:      %rabbitmq_user%
-            password:  %rabbitmq_password%
-            vhost:     %rabbitmq_vhost%
-    producers:
-        weaving_the_web_amqp.twitter.user_status:
-            connection: default
-            exchange_options: {name: 'get-user-status', type: direct}
-    consumers:
-        weaving_the_web_amqp.twitter.user_status:
-            connection: default
-            exchange_options: {name: 'get-user-status', type: direct}
-            queue_options:    {name: 'get-user-status'}
-            callback:         weaving_the_web_amqp.twitter.user_status
-
-ornicar_apc:
-    host: %apc_host%
-    mode: curl
-    web_dir: %kernel.root_dir%/../web
 
 parameters:
     basic_auth_pattern: /this-route-is-undefined-in-production
