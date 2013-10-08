@@ -1,6 +1,6 @@
 <?php
 
-namespace WeavingTheWeb\Bundle\AMQPBundle\Command;
+namespace WeavingTheWeb\Bundle\AmqpBundle\Command;
 
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand,
     Symfony\Component\Console\Input\InputInterface,
@@ -10,7 +10,7 @@ use WTW\UserBundle\Entity\User;
 
 /**
  * Class ProduceUserFriendListCommand
- * @package WeavingTheWeb\Bundle\AMQPBundle\Command\Twitter
+ * @package WeavingTheWeb\Bundle\AmqpBundle\Command\Twitter
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
 class ProduceUserFriendListCommand extends ContainerAwareCommand

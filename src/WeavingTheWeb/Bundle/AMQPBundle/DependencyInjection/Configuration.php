@@ -1,6 +1,6 @@
 <?php
 
-namespace WeavingTheWeb\Bundle\AMQPBundle\DependencyInjection;
+namespace WeavingTheWeb\Bundle\AmqpBundle\DependencyInjection;
 
 use Symfony\Component\Config\Definition\Builder\TreeBuilder;
 use Symfony\Component\Config\Definition\ConfigurationInterface;
