@@ -2578,12 +2578,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/thierrymarianne/twitteroauth.git",
-                "reference": "8c750cdacaa7ce7890d454f93dd9104f80f5cdef"
+                "reference": "98433802e9939038ba1054909ba52b5b405046a7"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/thierrymarianne/twitteroauth/zipball/8c750cdacaa7ce7890d454f93dd9104f80f5cdef",
-                "reference": "8c750cdacaa7ce7890d454f93dd9104f80f5cdef",
+                "url": "https://api.github.com/repos/thierrymarianne/twitteroauth/zipball/98433802e9939038ba1054909ba52b5b405046a7",
+                "reference": "98433802e9939038ba1054909ba52b5b405046a7",
                 "shasum": ""
             },
             "require": {
@@ -2598,7 +2598,7 @@
             "support": {
                 "source": "https://github.com/thierrymarianne/twitteroauth/tree/master"
             },
-            "time": "2013-07-27 21:50:44"
+            "time": "2013-10-08 19:09:28"
         },
         {
             "name": "knplabs/knp-markdown-bundle",
