@@ -1,13 +1,13 @@
 <?php
 
-namespace WeavingTheWeb\Bundle\AMQPBundle\Twitter;
+namespace WeavingTheWeb\Bundle\AmqpBundle\Twitter;
 
 use OldSound\RabbitMqBundle\RabbitMq\ConsumerInterface;
 use PhpAmqpLib\Message\AMQPMessage;
 
 /**
  * Class UserStatus
- * @package WeavingTheWeb\Bundle\AMQPBundle\Twitter
+ * @package WeavingTheWeb\Bundle\AmqpBundle\Twitter
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
 class UserStatus implements ConsumerInterface

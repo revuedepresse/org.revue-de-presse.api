@@ -1,9 +1,9 @@
 <?php
 
-namespace WeavingTheWeb\Bundle\AMQPBundle;
+namespace WeavingTheWeb\Bundle\AmqpBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
-class WeavingTheWebAMQPBundle extends Bundle
+class WeavingTheWebAmqpBundle extends Bundle
 {
 }
