@@ -118,7 +118,7 @@ class UserStreamRepository extends ResourceRepository
         $queryBuilder->select('s.statusId')
             ->andWhere('s.screenName = :screenName')
             ->andWhere('s.identifier = :identifier')
-            ->orderBy('s.statusId + 1', 'asc')
+            ->orderBy('s.statusId + 0', 'asc')
             ->setMaxResults(1);
 
         $queryBuilder->setParameter('identifier', $oauthToken);

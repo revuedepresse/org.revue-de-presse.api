@@ -134,7 +134,8 @@ class UserStatus
             $statusesCount = $user->statuses_count;
         }
 
-        return $count < $statusesCount;
+        // Twitter allows 3200 tweets to be retrieved at most from now for any given user
+        return $count < max($statusesCount, 3200);
     }
 
     /**
@@ -150,7 +151,11 @@ class UserStatus
                 $this->logger->info('[' . count($savedStatuses) . ' status(es) saved]');
             }
 
-            return $savedStatuses;
+            if (count($savedStatuses) === 0) {
+                return null;
+            } else {
+                return $savedStatuses;
+            }
         } else {
             return null;
         }
