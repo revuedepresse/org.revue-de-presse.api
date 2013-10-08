@@ -1,6 +1,6 @@
 <?php
 
-namespace WeavingTheWeb\Bundle\AMQPBundle\Command\Twitter;
+namespace WeavingTheWeb\Bundle\AMQPBundle\Command;
 
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand,
     Symfony\Component\Console\Input\InputInterface,

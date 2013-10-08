@@ -144,7 +144,7 @@ class UserStatus
     protected function persistStatuses($options, $logLevel = 'info')
     {
         $statuses = $this->feedReader->fetchTimelineStatuses($options);
-        if (count($statuses) > 0) {
+        if (is_array($statuses) && count($statuses) > 0) {
             $savedStatuses = $this->userStreamRepository->saveStatuses($statuses, $options['oauth']);
 
             if ($logLevel === 'info') {
