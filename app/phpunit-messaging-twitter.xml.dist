@@ -20,10 +20,10 @@
     </groups>
 
     <testsuites>
-        <testsuite name="Twitter Command-Line Test Suite">
+        <testsuite name="Messaging Test Suite for Twitter">
+            <directory>../src/*/*/*/*Bundle/Tests</directory>
             <directory>../src/*/*/*Bundle/Tests</directory>
             <directory>../src/*/*Bundle/Tests</directory>
-            <directory>../src/*/*/*/*Bundle/Tests</directory>
         </testsuite>
     </testsuites>
 
@@ -35,12 +35,12 @@
         <whitelist>
             <directory>../src</directory>
             <exclude>
-                <directory>../src/*/Bundle/*Bundle/Resources</directory>
-                <directory>../src/*/Bundle/*Bundle/Tests</directory>
-                 <directory>../src/*/*/*Bundle/Resources</directory>
-                <directory>../src/*/*/*Bundle/Tests</directory>
                 <directory>../src/*/*/*/*Bundle/Resources</directory>
                 <directory>../src/*/*/*/*Bundle/Tests</directory>
+                <directory>../src/*/*/*Bundle/Resources</directory>
+                <directory>../src/*/*/*Bundle/Tests</directory>
+                <directory>../src/*/*Bundle/Resources</directory>
+                <directory>../src/*/*Bundle/Tests</directory>
             </exclude>
         </whitelist>
     </filter>

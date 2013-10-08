@@ -21,7 +21,8 @@
     </groups>
 
     <testsuites>
-        <testsuite name="WTW Test Suite">
+        <testsuite name="Dashboard Suite">
+            <directory>../src/*/*/*/*Bundle/Tests</directory>
             <directory>../src/*/*/*Bundle/Tests</directory>
             <directory>../src/*/*Bundle/Tests</directory>
         </testsuite>
@@ -35,10 +36,12 @@
         <whitelist>
             <directory>../src</directory>
             <exclude>
+                <directory>../src/*/*/*/*Bundle/Resources</directory>
+                <directory>../src/*/*/*/*Bundle/Tests</directory>
                 <directory>../src/*/*/*Bundle/Resources</directory>
                 <directory>../src/*/*/*Bundle/Tests</directory>
-                <directory>../src/*/Bundle/*Bundle/Resources</directory>
-                <directory>../src/*/Bundle/*Bundle/Tests</directory>
+                <directory>../src/*/*Bundle/Resources</directory>
+                <directory>../src/*/*Bundle/Tests</directory>
             </exclude>
         </whitelist>
     </filter>
