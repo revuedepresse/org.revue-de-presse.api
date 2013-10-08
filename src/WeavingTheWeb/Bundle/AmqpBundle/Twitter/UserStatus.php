@@ -3,7 +3,7 @@
 namespace WeavingTheWeb\Bundle\AmqpBundle\Twitter;
 
 use OldSound\RabbitMqBundle\RabbitMq\ConsumerInterface;
-use PhpAmqpLib\Message\AMQPMessage;
+use PhpAmqpLib\Message\AmqpMessage;
 
 /**
  * Class UserStatus
@@ -39,10 +39,10 @@ class UserStatus implements ConsumerInterface
     }
 
     /**
-     * @param AMQPMessage $message
+     * @param AmqpMessage $message
      * @return bool
      */
-    public function execute(AMQPMessage $message)
+    public function execute(AmqpMessage $message)
     {
         try {
             $options = $this->parseMessage($message);
@@ -59,10 +59,10 @@ class UserStatus implements ConsumerInterface
     }
 
     /**
-     * @param AMQPMessage $message
+     * @param AmqpMessage $message
      * @throws \InvalidArgumentException
      */
-    public function parseMessage(AMQPMessage $message)
+    public function parseMessage(AmqpMessage $message)
     {
         $options = json_decode(unserialize($message->body), true);
         if (json_last_error() !== JSON_ERROR_NONE) {
