@@ -18,6 +18,8 @@ services:
           - [ setClientClass, [ '\Goutte\Client' ] ]
     weaving_the_web_twitter.serializer.user_status:
         class:  %weaving_the_web_twitter.serializer.user_status.class%
+        arguments:
+            - ~
         calls:
           - [ setFeedReader, [ '@weaving_the_web_legacy_provider.feed_reader' ] ]
           - [ setUserStreamRepository, [ '@weaving_the_web_api.repository.user_stream' ] ]
