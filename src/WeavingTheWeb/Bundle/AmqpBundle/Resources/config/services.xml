@@ -5,7 +5,7 @@
     xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <parameters>
-        <parameter key="weaving_the_web_amqp.produce_user_friendlist_command.class">WeavingTheWeb\Bundle\AmqpBundle\Command\ProduceUserFriendListCommand</parameter>
+        <parameter key="weaving_the_web_amqp.produce_user_friendlist_command.class">WeavingTheWeb\Bundle\AmqpBundle\Command\ProduceUserFriendlistCommand</parameter>
         <parameter key="weaving_the_web_amqp.twitter.user_status.class">WeavingTheWeb\Bundle\AmqpBundle\Twitter\UserStatus</parameter>
     </parameters>
 
