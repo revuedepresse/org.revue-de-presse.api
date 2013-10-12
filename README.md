@@ -81,14 +81,20 @@ Rabbitmq
     # List queues
     rabbitmqctl list_queues -p /weaving_the_web
 
-    # Add user
-    rabbitmqctl add_user weaver '## FILL ME ##'
-
     # Add vhost
     rabbitmqctl add_vhost /weaving_the_web
 
     # Declare user
     rabbitmqadmin declare user name=weaver password='***' tags=administrator,management,monitoring
+
+    # OR in order to add a user
+    rabbitmqctl add_user weaver '***'
+
+    # AND to set his user tags
+    rabbitmqctl set_user_tags weaver administrator,management,monitoring
+
+    # Sets permissions
+    rabbitmqctl set_permissions -p /weaving_the_web weaver ".*" ".*" ".*"
 
     # List user
     rabbitmqadmin list users -u weaver -p '***'
