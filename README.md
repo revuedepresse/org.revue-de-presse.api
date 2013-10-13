@@ -43,31 +43,19 @@ Follow [dotdeb instructions](http://www.dotdeb.org/instructions/) to add new rep
     wget http://www.dotdeb.org/dotdeb.gpg
     cat dotdeb.gpg | sudo apt-key add -
 
-    apt-get install redis-server php5-redis php5-apcu
+Redis server and redis extension for PHP
 
-3) Commands
---------------------------------
+    # Install Redis
+    apt-get install redis-server php5-redis
 
-From project root directory, execute the following commands to transform
+APCU extension for PHP
 
-    # data collected about GitHub repositories
-    php app/console wtw:api:manage:transformation --process_isolation --save [--type=repositories]
+    apt-get install php5-apcu
 
-    # data collected from personal Facebook newsfeed
-    php app/console wtw:api:manage:transformation --process_isolation --save --type=feed
+RabbiMQ server
 
-    # data collected from personal Twitter user stream
-    php app/console wtw:api:manage:transformation --process_isolation --save --type=user_stream
-
-Messaging
-
-    # To produce a message
-    app/console wtw:amqp:twitter:produce:user_timeline [--oauth_token=xxxx] [--oauth_secret=xxxx] [--log] --screen_name=thierrymarianne
-
-    # To consume the first message ever produced before
-    app/console rabbitmq:consumer -m 130 weaving_the_web_amqp.twitter.user_status
-
-Rabbitmq
+    # Install RabbitMQ server
+    apt-get install rabbitmq-server
 
     # Enable mod_proxy and mod_proxy_http
     a2enmod proxy proxy_http
@@ -108,6 +96,35 @@ Rabbitmq
     # Delete default user
     rabbitmqadmin delete user name=guest
 
+Elastic Search
+
+    cd ~
+    wget https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-0.90.5.deb
+    dpkg -i https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-0.90.5.deb
+    rm ./elasticsearch-0.90.5.deb
+
+4) Commands
+--------------------------------
+
+From project root directory, execute the following commands to transform
+
+    # data collected about GitHub repositories
+    php app/console wtw:api:manage:transformation --process_isolation --save [--type=repositories]
+
+    # data collected from personal Facebook newsfeed
+    php app/console wtw:api:manage:transformation --process_isolation --save --type=feed
+
+    # data collected from personal Twitter user stream
+    php app/console wtw:api:manage:transformation --process_isolation --save --type=user_stream
+
+Messaging
+
+    # To produce a message
+    app/console wtw:amqp:twitter:produce:user_timeline [--oauth_token=xxxx] [--oauth_secret=xxxx] [--log] --screen_name=thierrymarianne
+
+    # To consume the first message ever produced before
+    app/console rabbitmq:consumer -m 130 weaving_the_web_amqp.twitter.user_status
+
 User management
 
     # Promote user
@@ -116,7 +133,7 @@ User management
     # Activate user
     app/console fos:user:activate
 
-4) Known issues
+5) Known issues
 --------------------------------
 
 Running WeavingTheWebApiBundle test suite sequentially fails with following message:
