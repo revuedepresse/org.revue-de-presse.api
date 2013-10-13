@@ -67,8 +67,8 @@ parameters:
     profiling_xhprof_runs:      %profiling_xhprof_dir%/xhprof_lib/utils/xhprof_runs.php
     profiling_xhprof_web:       http://xhprof.dev
 
-    rabbitmq_user:              ~
-    rabbitmq_password:          ~
+    rabbitmq_user:              %rabbitmq.user%
+    rabbitmq_password:          %rabbitmq.password%
     rabbitmq_port:              5672
     rabbitmq_host:              localhost
     rabbitmq_vhost:             '## FILL ME ##'
