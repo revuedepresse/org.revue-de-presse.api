@@ -103,6 +103,23 @@ Elastic Search
     dpkg -i https://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-0.90.5.deb
     rm ./elasticsearch-0.90.5.deb
 
+    wget https://github.com/downloads/Asquera/elasticsearch-http-basic/elasticsearch-http-basic-1.0.3.jar
+    mkdir /usr/share/elasticsearch/plugins
+    cp elasticsearch-http-basic-1.0.3.jar /usr/share/elasticsearch/plugins
+
+    In configuration (/etc/elasticsearch/elasticsearch.yml), appends following directives
+
+    cluster.name: elastic-search-libran
+
+    # basic authentication
+    http.enabled: false
+    http.basic.enabled: true
+    ## FILL ME ##
+    http.basic.password: "## FILL ME ##"
+
+    # generate basic authentication password
+    htpasswd  -cm /etc/elasticsearch/libran.passwd ## FILL ME ##
+
 4) Commands
 --------------------------------
 
