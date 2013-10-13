@@ -126,3 +126,6 @@ Running WeavingTheWebApiBundle test suite sequentially fails with following mess
 A solution consists in running the tests in parallel:
 
     ant -f build.xml phpunit-isolated
+
+Try to avoid values containing '&' for environment variables to be injected to shell scripts
+(or figure out how to escape properly special characters when using capistrano).
