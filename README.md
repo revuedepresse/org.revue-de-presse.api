@@ -69,6 +69,12 @@ Messaging
 
 Rabbitmq
 
+    # Enable mod_proxy and mod_proxy_http
+    a2enmod proxy proxy_http
+
+    # Enable RabbitMQ management plugin
+    rabbitmq-plugins enable rabbitmq_management
+
     # List exchanges
     rabbitmqctl list_exchanges name
 
