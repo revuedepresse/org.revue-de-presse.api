@@ -98,10 +98,15 @@ RabbiMQ server
 
 Elastic Search
 
-    Downloads .tar.gz archive and extract its content to /usr/share/elasticsearch
+    # Downloads .tar.gz archive and extract its content to /usr/share/elasticsearch
 
     In configuration (/etc/elasticsearch/elasticsearch.yml), uncomment following directives
     cluster.name: elastic-search-libran
+
+Kibana
+
+    # Download archive and extract its content to /usr/share/elasticsearch/kibana
+    https://download.elasticsearch.org/kibana/kibana/kibana-latest.tar.gz
 
 4) Commands
 --------------------------------
