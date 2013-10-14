@@ -77,46 +77,27 @@ class UserStatus
      */
     protected function updateContext($options, $logLevel = 'info')
     {
-        $apiRateLimitReached = $this->isApiRateLimitReached($logLevel);
-        $remainingStatuses = $this->remainingStatuses($options);
-        $status = $this->userStreamRepository->findNextMaxStatus($options['oauth'], $options['screen_name']);
+        $apiRateLimitReached = $this->feedReader->isApiRateLimitReached($logLevel, '/statuses/user_timeline');
 
-        if ((count($status) === 1) && array_key_exists('statusId', $status)) {
-            $options['max_id'] = $status['statusId'] - 1;
+        if (!$apiRateLimitReached) {
+            $remainingStatuses = $this->remainingStatuses($options);
+            $status = $this->userStreamRepository->findNextMaxStatus($options['oauth'], $options['screen_name']);
 
-            if ($logLevel === 'info') {
-                $this->logger->info('[max id retrieved for "' . $options['screen_name'] . '"] ' . $options['max_id']);
+            if ((count($status) === 1) && array_key_exists('statusId', $status)) {
+                $options['max_id'] = $status['statusId'] - 1;
+
+                if ($logLevel === 'info') {
+                    $this->logger->info('[max id retrieved for "' . $options['screen_name'] . '"] ' . $options['max_id']);
+                }
             }
+        } else {
+            $remainingStatuses = null;
         }
 
         return [
             'condition' => !$apiRateLimitReached && $remainingStatuses,
             'options' => $options
         ];
-    }
-
-    /**
-     * @return bool
-     */
-    protected function isApiRateLimitReached($logLevel = 'info')
-    {
-        $rateLimitStatus = $this->feedReader->fetchRateLimitStatus();
-
-        if (isset($rateLimitStatus->errors) && is_array($rateLimitStatus->errors) && isset($rateLimitStatus->errors[0])) {
-            $leastUpperBound = 1;
-            $remainingCall = 0;
-            $message = print_r($rateLimitStatus->errors[0], true);
-        } else {
-            $leastUpperBound = $rateLimitStatus->resources->statuses->{'/statuses/user_timeline'}->limit;
-            $remainingCall = $rateLimitStatus->resources->statuses->{'/statuses/user_timeline'}->remaining;
-            $message = '[rate limit status] ' . $remainingCall;
-        }
-
-        if ($logLevel == 'info') {
-            $this->logger->info($message);
-        }
-
-        return $remainingCall < floor($leastUpperBound * (1/10));
     }
 
     /**

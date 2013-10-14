@@ -2,6 +2,7 @@ parameters:
     weaving_the_web_dashboard.dbal_connection.class:          WeavingTheWeb\Bundle\DashboardBundle\DBAL\Connection
     weaving_the_web_dashboard.entity.perspective:             WeavingTheWebDashboardBundle:Perspective
     weaving_the_web_dashboard.map_perspective_command.class:  WeavingTheWeb\Bundle\DashboardBundle\Command\MapPerspectiveCommand
+    weaving_the_web_dashboard.map_status_command.class:       WeavingTheWeb\Bundle\DashboardBundle\Command\MapStatusCommand
     weaving_the_web_dashboard.perspective_validator.class:    WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints\PerspectiveValidator
     weaving_the_web_dashboard.repository.perspective.class:   WeavingTheWeb\Bundle\DashboardBundle\Repository\PerspectiveRepository
     weaving_the_web_dashboard.query_validator.class:          WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints\QueryValidator
