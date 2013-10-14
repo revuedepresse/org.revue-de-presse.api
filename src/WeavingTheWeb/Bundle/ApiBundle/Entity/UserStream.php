@@ -71,6 +71,11 @@ class UserStream
     protected $statusId;
 
     /**
+     * @ORM\Column(name="ust_api_document", type="text", nullable=true)
+     */
+    protected $apiDocument;
+
+    /**
      * @var \DateTime
      *
      * @ORM\Column(name="ust_created_at", type="datetime")
@@ -233,6 +238,16 @@ class UserStream
     public function getStatusId()
     {
         return $this->statusId;
+    }
+
+    public function setApiDocument($apiDocument)
+    {
+        $this->apiDocument = $apiDocument;
+    }
+
+    public function getApiDocument()
+    {
+        return $this->apiDocument;
     }
 
     /**

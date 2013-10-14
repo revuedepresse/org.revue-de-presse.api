@@ -23,3 +23,4 @@ save_query_failure: Sorry, we could not save this query.
 save_query_success: The query "{{ sql }}" has been saved successfully.
 query_exists_already: This query has already been recorded in the past.
 perspective_mapping_success: All perspectives have been successfully mapped.
+status_mapping_success: All statuses have been successfully mapped.

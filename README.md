@@ -138,6 +138,11 @@ User management
     # Activate user
     app/console fos:user:activate
 
+Status Mapping
+
+    # Update statuses
+    app/console wtw:das:map:sts ./src/WeavingTheWeb/Bundle/DashboardBundle/Resources/closures/updateStatusCreatedAt.php
+
 5) Known issues
 --------------------------------
 

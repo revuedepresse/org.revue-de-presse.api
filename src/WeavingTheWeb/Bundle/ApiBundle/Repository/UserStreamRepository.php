@@ -65,6 +65,8 @@ class UserStreamRepository extends ResourceRepository
                     'name' => $status->user->name,
                     'user_avatar' => $status->user->profile_image_url,
                     'status_id' => $status->id_str,
+                    'api_document' => json_encode($status),
+                    'created_at' => new \DateTime($status->created_at),
                 ];
                 $extract = $setter($extract);
                 $extracts[] = $extract;

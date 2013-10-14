@@ -19,6 +19,7 @@ class UserStreamData implements FixtureInterface
             'name' => 'Thierry Marianne',
             'screen_name' => 'thierrymarianne',
             'user_avatar' => 'http://avatar.url',
+            'status_id' => 194987972,
         ];
 
         $repository = new UserStream();
@@ -28,6 +29,7 @@ class UserStreamData implements FixtureInterface
         $repository->setName($properties['name']);
         $repository->setScreenName($properties['screen_name']);
         $repository->setIdentifier($properties['identifier']);
+        $repository->setStatusId($properties['status_id']);
         $repository->setCreatedAt(new \DateTime());
         $repository->setUpdatedAt(new \DateTime());
 
