@@ -31,10 +31,26 @@ class UserStreamRepository extends ResourceRepository
 
         foreach ($extracts as $key => $extract) {
             if (!$this->existsAlready($extract['identifier'], $extract['screen_name'], $extract['status_id'])) {
-                /**
-                 * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream $userStream
-                 */
-                $userStream = $this->queryFactory->makeUserStream($extract);
+
+                if ($this->existsAlready($extract['identifier'], $extract['screen_name'], $extract['status_id'], false)) {
+                    /**
+                     * @var \WeavingTheWeb\Bundle\ApiBundle\Repository\UserStreamRepository $userStreamRepository
+                     */
+                    $userStreamRepository = $entityManager->getRepository('WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream');
+                    /**
+                     * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream $userStream
+                     */
+                    $userStream = $userStreamRepository->findOneBy(['statusId' => $extract['status_id']]);
+                    $userStream->setCreatedAt($extract['created_at']);
+                    $userStream->setApiDocument($extract['api_document']);
+                    $userStream->setUpdatedAt(new \DateTime());
+                } else {
+                    /**
+                     * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream $userStream
+                     */
+                    $userStream = $this->queryFactory->makeUserStream($extract);
+                }
+
                 $userStream->setIdentifier($extract['identifier']);
                 $entityManager->persist($userStream);
             } else {
@@ -76,13 +92,25 @@ class UserStreamRepository extends ResourceRepository
         return $extracts;
     }
 
-    public function existsAlready($oauthToken, $screenName, $statusId)
+    /**
+     * @param $oauthToken
+     * @param $screenName
+     * @param $statusId
+     * @param bool $serializedApiDocument
+     * @return bool
+     */
+    public function existsAlready($oauthToken, $screenName, $statusId, $serializedApiDocument = true)
     {
         $queryBuilder = $this->createQueryBuilder('s');
         $queryBuilder->select('count(s.id) as count_')
             ->andWhere('s.identifier = :oauthToken')
             ->andWhere('s.statusId = :statusId')
             ->andWhere('s.screenName = :screenName');
+
+        if ($serializedApiDocument) {
+             $queryBuilder->andWhere('s.apiDocument is not null');
+         }
+
         $queryBuilder->setParameter('oauthToken', $oauthToken);
         $queryBuilder->setParameter('screenName', $screenName);
         $queryBuilder->setParameter('statusId', $statusId);
@@ -120,6 +148,7 @@ class UserStreamRepository extends ResourceRepository
         $queryBuilder->select('s.statusId')
             ->andWhere('s.screenName = :screenName')
             ->andWhere('s.identifier = :identifier')
+            ->andWhere('s.apiDocument is not null')
             ->orderBy('s.statusId + 0', 'asc')
             ->setMaxResults(1);
 
