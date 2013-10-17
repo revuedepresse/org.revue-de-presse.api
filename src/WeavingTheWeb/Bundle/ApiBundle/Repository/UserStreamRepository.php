@@ -170,7 +170,6 @@ class UserStreamRepository extends ResourceRepository
     public function createRemainingUserStatusQueryBuilder()
     {
         $queryBuilder = $this->createQueryBuilder('s');
-        $queryBuilder->andWhere('s.id > 569991');
 
         return $queryBuilder;
     }
