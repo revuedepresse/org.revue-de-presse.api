@@ -108,6 +108,16 @@ Kibana
     # Download archive and extract its content to /usr/share/elasticsearch/kibana
     https://download.elasticsearch.org/kibana/kibana/kibana-latest.tar.gz
 
+Supervisor
+
+    ## Debian
+    apt-get install supervisor
+
+    # After updating configuration of data collection workers
+    supervisor reread
+
+    supervisor update
+
 4) Commands
 --------------------------------
 
