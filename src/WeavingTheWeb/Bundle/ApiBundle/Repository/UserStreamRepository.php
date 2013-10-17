@@ -163,4 +163,15 @@ class UserStreamRepository extends ResourceRepository
 
         return $singleResult;
     }
+
+    /**
+     * @return mixed
+     */
+    public function createRemainingUserStatusQueryBuilder()
+    {
+        $queryBuilder = $this->createQueryBuilder('s');
+        $queryBuilder->andWhere('s.id > 569991');
+
+        return $queryBuilder;
+    }
 }
