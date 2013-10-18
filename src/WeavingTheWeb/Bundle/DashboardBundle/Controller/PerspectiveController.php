@@ -37,9 +37,9 @@ class PerspectiveController extends ContainerAware
     }
 
     /**
-     * @Extra\Route("/", name="weaving_the_web_dashboard_show_sitemap_default")
+     * @Extra\Route("/", name="weaving_the_web_dashboard_show_public_perspectives")
      */
-    public function showDefaultAction()
+    public function showPublicPerspectivesAction()
     {
         /**
          * @var \Symfony\Component\Routing\Router $router
