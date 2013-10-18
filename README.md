@@ -153,7 +153,60 @@ Status Mapping
     # Update statuses
     app/console wtw:das:map:sts ./src/WeavingTheWeb/Bundle/DashboardBundle/Resources/closures/updateStatusCreatedAt.php
 
-5) Known issues
+5) Perspectives
+
+--------------------------------
+
+Examples
+
+    # Update facebook perspective
+    UPDATE weaving_perspective
+    SET per_value =
+        CONCAT(
+            '# Show links from Facebook ', "\n",
+            'SELECT ', "\n",
+            '# picture as img_Thumbnail,', "\n",
+            'name AS Title,', "\n",
+            'description as Description,', "\n",
+            'count(link) hid_count_, ', "\n",
+            'link as lnk_Source, ', "\n",
+            '#message as Message,', "\n",
+            '#caption as Caption, ', "\n",
+            'REPLACE(SUBSTRING(createdTime, 1, 10), "-", "/") as "Date?",', "\n",
+            'REPLACE(SUBSTRING(createdTime, 12, 5), "-", "/") as "Time?"', "\n",
+            'FROM weaving_facebook_link', "\n",
+            'WHERE LENGTH(message) > 0 ', "\n",
+            'AND LENGTH(description) > 0', "\n",
+            'AND LENGTH(caption) > 0', "\n",
+            'AND link not like "%bible%" > 0', "\n",
+            'GROUP BY link ', "\n",
+            'ORDER BY createdTime DESC, hid_count_ desc', "\n",
+            'LIMIT 0,50'
+        )
+    WHERE per_id = 52;
+
+    # Update default perspective
+    UPDATE weaving_perspective
+    SET per_value =
+        CONCAT(
+            '# Show administration panel', "\n",
+            'SELECT per_id as id,', "\n",
+            'per_name as name,', "\n",
+            'SUBSTRING(per_hash, 1, 7) as hash,', "\n",
+            'per_value AS pre_sql,', "\n",
+            'per_name as hid_name,', "\n",
+            'per_value as btn_sql,', "\n",
+            'CONCAT(	"https://## FILL HOSTNAME ##/perspective/",', "\n",
+            ' 	SUBSTRING(per_hash, 1, 7)', "\n",
+            ') AS lnk_share_link', "\n",
+            'FROM weaving_perspective', "\n",
+            'WHERE per_name IS NOT NULL', "\n",
+            'AND per_value LIKE "# SHOW%"', "\n",
+            'ORDER BY per_id DESC'
+        )
+    WHERE per_type = 0 AND per_id = 29;
+
+6) Known issues
 --------------------------------
 
 Running WeavingTheWebApiBundle test suite sequentially fails with following message:
