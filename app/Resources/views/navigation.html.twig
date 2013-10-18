@@ -28,7 +28,14 @@
             <a class="nav" href="{{ path('fos_user_security_logout') }}">{{ 'layout.logout'|trans({}, 'FOSUserBundle') }}</a>
         {% else %}
             {% block navigation_login %}
-            <a class="nav" href="{{ path('fos_user_security_login') }}">{{ 'layout.login'|trans({}, 'FOSUserBundle') }}</a>
+            {% if show_sitemap %}
+                {% set label = 'intent.continue_weaving' %}
+                {% set route = 'fos_user_security_login' %}
+            {% else %}
+                {% set label = 'intent.discover_perspectives' %}
+                {% set route = 'weaving_the_web_dashboard_show_sitemap' %}
+            {% endif %}
+            <a class="nav" href="{{ path(route) }}">{{ label|trans({}, 'FOSUserBundle') }}</a>
             {%  endblock navigation_login %}
         {% endif %}
     </li>
