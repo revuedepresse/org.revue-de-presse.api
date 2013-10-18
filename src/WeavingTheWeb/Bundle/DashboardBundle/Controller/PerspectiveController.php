@@ -6,6 +6,7 @@ use Symfony\Component\DependencyInjection\ContainerAware,
     Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
 use Doctrine\Orm\NoResultException;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Class PerspectiveController
@@ -33,6 +34,21 @@ class PerspectiveController extends ContainerAware
             'perspectives' => $router->getPublicPerspectivesSitemap(),
             'title' => 'title_sitemap'
         ];
+    }
+
+    /**
+     * @Extra\Route("/", name="weaving_the_web_dashboard_show_sitemap_default")
+     */
+    public function showDefaultAction()
+    {
+        /**
+         * @var \Symfony\Component\Routing\Router $router
+         */
+        $router = $this->container->get('router');
+        $url = $router->generate('weaving_the_web_dashboard_show_sitemap');
+
+        return new RedirectResponse($url);
+
     }
 
     /**
