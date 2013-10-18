@@ -16,7 +16,11 @@
         {% if not active_menu_item is defined %}
         {% set active_menu_item = '' %}
         {% endif %}
-        {{ render_esi(controller('WeavingTheWebDashboardBundle:Document:showNavigation', { 'activeMenu': active_menu_item })) }}
+        {% if not show_sitemap is defined %}
+            {% set show_sitemap = app.request.attributes.get('_route') == 'weaving_the_web_dashboard_show_sitemap' %}
+        {% endif %}
+
+        {{ render_esi(controller('WeavingTheWebDashboardBundle:Document:showNavigation', { 'activeMenu': active_menu_item, 'showSitemap': show_sitemap })) }}
         {% endblock menu %}
     </div>
 </nav>

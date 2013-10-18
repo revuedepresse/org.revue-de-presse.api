@@ -26,9 +26,12 @@ class DocumentController extends Controller
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Exception
      */
-    public function showNavigationAction($activeMenu = 'github_repositories')
+    public function showNavigationAction($activeMenu = 'github_repositories', $showSitemap = false)
     {
-        $response = $this->render('::navigation.html.twig', array('active_menu_item' => $activeMenu));
+        $response = $this->render('::navigation.html.twig', [
+            'active_menu_item' => $activeMenu,
+            'show_sitemap' => $showSitemap
+        ]);
 
         /**
          * @var \Symfony\Component\Security\Core\SecurityContext $securityContext

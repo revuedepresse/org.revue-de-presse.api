@@ -1,3 +1,7 @@
+intent:
+    continue_weaving: Continue weaving
+    discover_perspectives: Discover perspectives
+
 registration:
     flash:
         user_created: |
