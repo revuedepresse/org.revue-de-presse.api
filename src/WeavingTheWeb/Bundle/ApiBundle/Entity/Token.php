@@ -40,7 +40,7 @@ class Token
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="frozen_until", type="datetime")
+     * @ORM\Column(name="frozen_until", type="datetime", nullable=true)
      */
     protected $frozenUntil;
 
