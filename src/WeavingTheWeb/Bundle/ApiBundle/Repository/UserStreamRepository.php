@@ -142,14 +142,34 @@ class UserStreamRepository extends ResourceRepository
      * @param $screenName
      * @return mixed
      */
-    public function findNextMaxStatus($oauthToken, $screenName)
+    public function findNextMaximum($oauthToken, $screenName)
+    {
+        return $this->findNextExtremum($oauthToken, $screenName, 'asc');
+    }
+
+    /**
+     * @param $oauthToken
+     * @param $screenName
+     * @return mixed
+     */
+    public function findNextMininum($oauthToken, $screenName)
+    {
+        return $this->findNextExtremum($oauthToken, $screenName, 'desc');
+    }
+
+    /**
+     * @param $oauthToken
+     * @param $screenName
+     * @return array|mixed
+     */
+    protected function findNextExtremum($oauthToken, $screenName, $direction = 'asc')
     {
         $queryBuilder = $this->createQueryBuilder('s');
         $queryBuilder->select('s.statusId')
             ->andWhere('s.screenName = :screenName')
             ->andWhere('s.identifier = :identifier')
             ->andWhere('s.apiDocument is not null')
-            ->orderBy('s.statusId + 0', 'asc')
+            ->orderBy('s.statusId + 0', $direction)
             ->setMaxResults(1);
 
         $queryBuilder->setParameter('identifier', $oauthToken);
@@ -170,6 +190,7 @@ class UserStreamRepository extends ResourceRepository
     public function createRemainingUserStatusQueryBuilder()
     {
         $queryBuilder = $this->createQueryBuilder('s');
+        $queryBuilder->andWhere('s.id > 1031692');
 
         return $queryBuilder;
     }
