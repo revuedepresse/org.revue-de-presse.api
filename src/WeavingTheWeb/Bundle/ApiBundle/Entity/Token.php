@@ -40,6 +40,13 @@ class Token
     /**
      * @var \DateTime
      *
+     * @ORM\Column(name="frozen_until", type="datetime")
+     */
+    protected $frozenUntil;
+
+    /**
+     * @var \DateTime
+     *
      * @ORM\Column(name="created_at", type="datetime")
      */
     protected $createdAt;
@@ -197,5 +204,21 @@ class Token
     public function getUsers()
     {
         return $this->users;
+    }
+
+    /**
+     * @param \DateTime $frozenUntil
+     */
+    public function setFrozenUntil($frozenUntil)
+    {
+        $this->frozenUntil = $frozenUntil;
+    }
+
+    /**
+     * @return \DateTime
+     */
+    public function getFrozenUntil()
+    {
+        return $this->frozenUntil;
     }
 }

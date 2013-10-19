@@ -29,4 +29,21 @@ class TokenRepository extends EntityRepository
 
         return $token;
     }
+
+    /**
+     * @param $oauthToken
+     */
+    public function freezeToken($oauthToken)
+    {
+        $entityManager = $this->getEntityManager();
+
+        /**
+         * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token
+         */
+        $token = $this->findOneBy(['oauthToken' => $oauthToken]);
+        $token->setFrozenUntil(new \DateTime('now + 15min'));
+
+        $entityManager->persist($token);
+        $entityManager->flush($token);
+    }
 }

@@ -21,4 +21,5 @@ services:
         calls:
           - [ setFeedReader, [ @weaving_the_web_legacy_provider.feed_reader ] ]
           - [ setUserStreamRepository, [ @weaving_the_web_api.repository.user_stream ] ]
+          - [ setTokenRepository, [ @weaving_the_web_api.repository.token] ]
           - [ setLogger, [ @logger ] ]
