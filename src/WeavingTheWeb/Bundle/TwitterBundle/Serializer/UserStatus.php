@@ -58,16 +58,16 @@ class UserStatus
     }
 
     public function serialize($options, $logLevel = 'info', $greedyMode) {
-        $context = $this->updateContext($options, $logLevel);
+        $updateMaxId = true;
 
-        while ($context['condition']) {
+        while (($context = $this->updateContext($options, $logLevel, $updateMaxId)) && $context['condition']) {
             $saveStatuses = $this->persistStatuses($context['options'], $logLevel);
 
-            if (!$greedyMode || is_null($saveStatuses)) {
+            if (!$greedyMode || (is_null($saveStatuses) && $updateMaxId === false)) {
                 break;
+            } else {
+                $updateMaxId = false;
             }
-
-            $context = $this->updateContext($context['options']);
         }
     }
 
@@ -75,21 +75,14 @@ class UserStatus
      * @param $options
      * @return array
      */
-    protected function updateContext($options, $logLevel = 'info')
+    protected function updateContext($options, $logLevel = 'info', $updateMaxId = true)
     {
         $apiRateLimitReached = $this->feedReader->isApiRateLimitReached($logLevel, '/statuses/user_timeline');
 
         if (!$apiRateLimitReached) {
             $remainingStatuses = $this->remainingStatuses($options);
-            $status = $this->userStreamRepository->findNextMaxStatus($options['oauth'], $options['screen_name']);
 
-            if ((count($status) === 1) && array_key_exists('statusId', $status)) {
-                $options['max_id'] = $status['statusId'] - 1;
-
-                if ($logLevel === 'info') {
-                    $this->logger->info('[max id retrieved for "' . $options['screen_name'] . '"] ' . $options['max_id']);
-                }
-            }
+            $options = $this->updateExtremum($options, $logLevel, $updateMaxId);
         } else {
             $remainingStatuses = null;
         }
@@ -98,6 +91,39 @@ class UserStatus
             'condition' => !$apiRateLimitReached && $remainingStatuses,
             'options' => $options
         ];
+    }
+
+    /**
+     * @param $options
+     * @param $logLevel
+     * @param $updateMaxId
+     * @return mixed
+     */
+    protected function updateExtremum($options, $logLevel, $updateMaxId = true)
+    {
+        if ($updateMaxId) {
+            $option = 'max_id';
+            $shift = -1;
+            $updateMethod = 'findNextMaximum';
+        } else {
+            $option = 'since_id';
+            $shift = 1;
+            $updateMethod = 'findNextMininum';
+        }
+
+        $status = $this->userStreamRepository->$updateMethod($options['oauth'], $options['screen_name']);
+
+        if ((count($status) === 1) && array_key_exists('statusId', $status)) {
+            $options[$option] = $status['statusId'] + $shift;
+
+            if ($logLevel === 'info') {
+                $this->logger->info(
+                    '[extremum (' . $option . ') retrieved for "' . $options['screen_name'] . '"] ' . $options[$option]
+                );
+            }
+        }
+
+        return $options;
     }
 
     /**
