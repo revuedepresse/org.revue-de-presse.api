@@ -14,10 +14,14 @@ class UserStatus
     protected $feedReader;
 
     /**
+     * @var \WeavingTheWeb\Bundle\ApiBundle\Repository\tokenRepository $tokenRepository
+     */
+    protected $tokenRepository;
+
+    /**
      * @var \WeavingTheWeb\Bundle\ApiBundle\Repository\UserStreamRepository $userStreamRepository
      */
     protected $userStreamRepository;
-
 
     /**
      * @var \Psr\Log\LoggerInterface
@@ -46,6 +50,14 @@ class UserStatus
     public function setUserStreamRepository($userStreamRepository)
     {
         $this->userStreamRepository = $userStreamRepository;
+    }
+
+    /**
+     * @param \WeavingTheWeb\Bundle\ApiBundle\Repository\TokenRepository $tokenRepository
+     */
+    public function setTokenRepository($tokenRepository)
+    {
+        $this->tokenRepository = $tokenRepository;
     }
 
     /**
