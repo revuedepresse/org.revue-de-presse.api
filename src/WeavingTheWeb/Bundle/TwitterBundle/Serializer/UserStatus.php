@@ -60,15 +60,48 @@ class UserStatus
     public function serialize($options, $logLevel = 'info', $greedyMode) {
         $updateMaxId = true;
 
-        while (($context = $this->updateContext($options, $logLevel, $updateMaxId)) && $context['condition']) {
-            $saveStatuses = $this->persistStatuses($context['options'], $logLevel);
+        if (!$this->isSerializationLocked()) {
+            while (($context = $this->updateContext($options, $logLevel, $updateMaxId)) && $context['condition']) {
+                $saveStatuses = $this->persistStatuses($context['options'], $logLevel);
 
-            if (!$greedyMode || (is_null($saveStatuses) && $updateMaxId === false)) {
-                break;
-            } else {
-                $updateMaxId = false;
+                if (!$greedyMode || (is_null($saveStatuses) && $updateMaxId === false)) {
+                    break;
+                } else {
+                    $updateMaxId = false;
+                }
+            }
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * @return $this|bool
+     */
+    protected function isSerializationLocked()
+    {
+        $locked = false;
+        /**
+         * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token
+         */
+        $token = $this->tokenRepository->findOneBy(['oauthToken' => $this->feedReader->userToken]);
+        if (!is_null($token->getFrozenUntil())) {
+            $now = new \DateTime();
+
+            if ($token->getFrozenUntil()->getTimestamp() > $now->getTimestamp()) {
+                $locked = true;
+                $minutes = 15;
+                $this->logger->info(
+                    'API limit has been reached for token "' . substr($this->feedReader->userToken, 0, '8') . '...' . '", ' .
+                    'operations are currently frozen (waiting for ' . $minutes . 'min)'
+                );
+                sleep($minutes * 60);
             }
         }
+
+        return $locked;
     }
 
     /**
@@ -77,20 +110,23 @@ class UserStatus
      */
     protected function updateContext($options, $logLevel = 'info', $updateMaxId = true)
     {
-        $apiRateLimitReached = $this->feedReader->isApiRateLimitReached($logLevel, '/statuses/user_timeline');
+        if (!$this->isSerializationLocked()) {
+            $apiRateLimitReached = $this->feedReader->isApiRateLimitReached($logLevel, '/statuses/user_timeline');
 
-        if (!$apiRateLimitReached) {
-            $remainingStatuses = $this->remainingStatuses($options);
+            if (!$apiRateLimitReached) {
+                $remainingStatuses = $this->remainingStatuses($options);
 
-            $options = $this->updateExtremum($options, $logLevel, $updateMaxId);
+                $options = $this->updateExtremum($options, $logLevel, $updateMaxId);
+            } else {
+                $remainingStatuses = null;
+
+                $this->tokenRepository->freezeToken($this->feedReader->userToken);
+            }
+
+            return ['condition' => !$apiRateLimitReached && $remainingStatuses, 'options' => $options];
         } else {
-            $remainingStatuses = null;
+            return ['condition' => false];
         }
-
-        return [
-            'condition' => !$apiRateLimitReached && $remainingStatuses,
-            'options' => $options
-        ];
     }
 
     /**
