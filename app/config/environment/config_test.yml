@@ -9,6 +9,23 @@ doctrine:
         memory:           %test_database_memory%
         path:             %test_database_path%
 
+fos_elastica:
+    clients:
+        default: { host: localhost, port: 9200 }
+    indexes:
+        twitter:
+            client: default
+            types:
+                user_status:
+                    persistence:
+                        driver: orm
+                        model: WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream
+                        listener:
+                            insert: false
+                            update: false
+                            delete: false
+                        identifier: statusId
+
 framework:
     router:   { resource: "%kernel.root_dir%/config/routing/routing_test.yml" }
     test: ~
