@@ -32,17 +32,17 @@ class TokenRepository extends EntityRepository
     }
 
     /**
-     * @param $token
-     * @param \Psr\Log\LoggerInterface $logger
+     * @param $oauthToken
+     * @param LoggerInterface $logger
      * @return bool
      */
-    public function isSerializationLocked($token, LoggerInterface $logger = null)
+    public function isSerializationLocked($oauthToken, LoggerInterface $logger = null)
     {
         $locked = false;
         /**
          * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token
          */
-        $token = $this->findOneBy(['oauthToken' => $token]);
+        $token = $this->findOneBy(['oauthToken' => $oauthToken]);
         if (!is_null($token) && !is_null($token->getFrozenUntil())) {
             $now = new \DateTime();
 
