@@ -4,6 +4,7 @@ namespace WeavingTheWeb\Bundle\ApiBundle\Repository;
 
 use Doctrine\ORM\EntityRepository;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Token;
+use Psr\Log\LoggerInterface;
 
 /**
  * Class TokenRepository
@@ -28,6 +29,38 @@ class TokenRepository extends EntityRepository
         $token->setOauthTokenSecret($properties['oauth_token_secret']);
 
         return $token;
+    }
+
+    /**
+     * @param $token
+     * @param \Psr\Log\LoggerInterface $logger
+     * @return bool
+     */
+    public function isSerializationLocked($token, LoggerInterface $logger = null)
+    {
+        $locked = false;
+        /**
+         * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token
+         */
+        $token = $this->findOneBy(['oauthToken' => $token]);
+        if (!is_null($token) && !is_null($token->getFrozenUntil())) {
+            $now = new \DateTime();
+
+            if ($token->getFrozenUntil()->getTimestamp() > $now->getTimestamp()) {
+                $locked = true;
+                $minutes = 15;
+
+                if (!is_null($logger)) {
+                    $logger->info(
+                        'API limit has been reached for token "' . substr($token, 0, '8') . '...' . '", ' .
+                        'operations are currently frozen (waiting for ' . $minutes . 'min)'
+                    );
+                }
+                sleep($minutes * 60);
+            }
+        }
+
+        return $locked;
     }
 
     /**

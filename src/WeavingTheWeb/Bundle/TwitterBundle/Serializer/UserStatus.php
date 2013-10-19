@@ -14,7 +14,7 @@ class UserStatus
     protected $feedReader;
 
     /**
-     * @var \WeavingTheWeb\Bundle\ApiBundle\Repository\tokenRepository $tokenRepository
+     * @var \WeavingTheWeb\Bundle\ApiBundle\Repository\TokenRepository $tokenRepository
      */
     protected $tokenRepository;
 
@@ -72,7 +72,7 @@ class UserStatus
     public function serialize($options, $logLevel = 'info', $greedyMode) {
         $updateMaxId = true;
 
-        if (!$this->isSerializationLocked()) {
+        if (!$this->tokenRepository->isSerializationLocked($this->feedReader->userToken, $this->logger)) {
             while (($context = $this->updateContext($options, $logLevel, $updateMaxId)) && $context['condition']) {
                 $saveStatuses = $this->persistStatuses($context['options'], $logLevel);
 
@@ -90,39 +90,12 @@ class UserStatus
     }
 
     /**
-     * @return $this|bool
-     */
-    protected function isSerializationLocked()
-    {
-        $locked = false;
-        /**
-         * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token
-         */
-        $token = $this->tokenRepository->findOneBy(['oauthToken' => $this->feedReader->userToken]);
-        if (!is_null($token->getFrozenUntil())) {
-            $now = new \DateTime();
-
-            if ($token->getFrozenUntil()->getTimestamp() > $now->getTimestamp()) {
-                $locked = true;
-                $minutes = 15;
-                $this->logger->info(
-                    'API limit has been reached for token "' . substr($this->feedReader->userToken, 0, '8') . '...' . '", ' .
-                    'operations are currently frozen (waiting for ' . $minutes . 'min)'
-                );
-                sleep($minutes * 60);
-            }
-        }
-
-        return $locked;
-    }
-
-    /**
      * @param $options
      * @return array
      */
     protected function updateContext($options, $logLevel = 'info', $updateMaxId = true)
     {
-        if (!$this->isSerializationLocked()) {
+        if (!$this->tokenRepository->isSerializationLocked($this->feedReader->userToken, $this->logger)) {
             $apiRateLimitReached = $this->feedReader->isApiRateLimitReached($logLevel, '/statuses/user_timeline');
 
             if (!$apiRateLimitReached) {
