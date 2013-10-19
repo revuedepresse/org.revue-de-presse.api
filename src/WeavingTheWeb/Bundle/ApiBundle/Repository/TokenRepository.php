@@ -46,17 +46,24 @@ class TokenRepository extends EntityRepository
         if (!is_null($token) && !is_null($token->getFrozenUntil())) {
             $now = new \DateTime();
 
-            if ($token->getFrozenUntil()->getTimestamp() > $now->getTimestamp()) {
+            $waitForNextWindow = $token->getFrozenUntil()->getTimestamp() > $now->getTimestamp();
+            if ($waitForNextWindow) {
+                $waitTime = $token->getFrozenUntil()->getTimestamp() - $now->getTimestamp();
                 $locked = true;
-                $minutes = 15;
 
                 if (!is_null($logger)) {
+                    if ($waitTime < 60) {
+                        $humanWaitTime = $waitTime . ' more seconds';
+                    } else {
+                        $humanWaitTime = floor($waitTime / 60) . ' more minutes';
+                    }
+
                     $logger->info(
                         'API limit has been reached for token "' . substr($token, 0, '8') . '...' . '", ' .
-                        'operations are currently frozen (waiting for ' . $minutes . 'min)'
+                        'operations are currently frozen (waiting for ' . $humanWaitTime . ')'
                     );
                 }
-                sleep($minutes * 60);
+                sleep($waitTime);
             }
         }
 
