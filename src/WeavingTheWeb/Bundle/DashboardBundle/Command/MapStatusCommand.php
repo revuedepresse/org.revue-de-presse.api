@@ -46,9 +46,6 @@ class MapStatusCommand extends ContainerAwareCommand
         $this->entityManager = $this->getContainer()->get('doctrine.orm.entity_manager');
         $iterableResult = $this->getIterableResult();
 
-        /**
-         * @var \WeavingTheWeb\Bundle\Legacy\ProviderBundle\Reader\FeedReader $feedReader
-         */
         $this->feedReader = $this->getContainer()->get('weaving_the_web_legacy_provider.feed_reader');
         $this->logger = $this->getContainer()->get('logger');
 
@@ -59,7 +56,12 @@ class MapStatusCommand extends ContainerAwareCommand
 
         foreach ($iterableResult AS $collection) {
             foreach ($collection as $item) {
-                if (!$this->feedReader->isApiRateLimitReached()) {
+                $limitReached = $this->feedReader->isApiRateLimitReached();
+
+                if (is_integer($limitReached) || $limitReached) {
+                    $this->logger->info('Twitter API limit has been reached. Now waiting for 15 minutes.');
+                    sleep(15*60);
+                } else {
                     /**
                      * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream $item
                      */
@@ -69,9 +71,6 @@ class MapStatusCommand extends ContainerAwareCommand
                     $this->logger->info(sprintf('Persisted status with id %s', $item->getStatusId()));
                     $this->entityManager->flush($item);
                     $this->entityManager->detach($item);
-                } else {
-                    $this->logger->info('Twitter API limit has been reached. Now waiting for 15 minutes.');
-                    sleep(15*60);
                 }
             }
         }

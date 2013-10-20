@@ -47,12 +47,6 @@ class SerializeStatusesCommand extends ContainerAwareCommand
                 'Try saving all statuses provided rate limits of Twitter API consumption and user statuses count'
             )
             ->addOption(
-                'log',
-                null,
-                InputOption::VALUE_NONE,
-                'Logs count of statuses persisted for each loop'
-            )
-            ->addOption(
                 'count',
                 null,
                 InputOption::VALUE_REQUIRED,
@@ -69,7 +63,6 @@ class SerializeStatusesCommand extends ContainerAwareCommand
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->log = $input->getOption('log');
         $oauthTokens = $this->getOauthTokens($input);
         $options = [
             'oauth' => $oauthTokens['token'],
@@ -82,13 +75,15 @@ class SerializeStatusesCommand extends ContainerAwareCommand
          */
         $serializer = $this->getContainer()->get('weaving_the_web_twitter.serializer.user_status');
         $greedyMode = !$input->hasOption('greedy') || $input->getOption('greedy');
-        $serializer->serialize($options, $input->getOption('log') ? 'info' : null, $greedyMode);
+        $success = $serializer->serialize($options, $greedyMode);
 
         /**
          * @var \Symfony\Component\Translation\Translator $translator
          */
         $translator = $this->getContainer()->get('translator');
         $output->writeln($translator->trans('twitter.statuses.persistence.success'));
+
+        return $success ? 0 : 1;
     }
 
     /**
