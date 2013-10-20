@@ -69,12 +69,12 @@ class UserStatus
         $this->feedReader->setUserSecret($oauthTokens['secret']);
     }
 
-    public function serialize($options, $logLevel = 'info', $greedyMode) {
+    public function serialize($options, $greedyMode) {
         $updateMaxId = true;
 
-        if (!$this->tokenRepository->isSerializationLocked($this->feedReader->userToken, $this->logger)) {
-            while (($context = $this->updateContext($options, $logLevel, $updateMaxId)) && $context['condition']) {
-                $saveStatuses = $this->persistStatuses($context['options'], $logLevel);
+        if (!$this->tokenRepository->isTokenFrozen($this->feedReader->userToken, $this->logger)) {
+            while (($context = $this->updateContext($options, $updateMaxId)) && $context['granted']) {
+                $saveStatuses = $this->persistStatuses($context['options']);
 
                 if (!$greedyMode || (is_null($saveStatuses) && $updateMaxId === false)) {
                     break;
@@ -83,34 +83,36 @@ class UserStatus
                 }
             }
 
-            return true;
+            $success = !array_key_exists('error_code', $context);
         } else {
-            return false;
+            $success = false;
         }
+
+        return $success;
     }
 
     /**
      * @param $options
      * @return array
      */
-    protected function updateContext($options, $logLevel = 'info', $updateMaxId = true)
+    protected function updateContext($options, $updateMaxId = true)
     {
-        if (!$this->tokenRepository->isSerializationLocked($this->feedReader->userToken, $this->logger)) {
-            $apiRateLimitReached = $this->feedReader->isApiRateLimitReached($logLevel, '/statuses/user_timeline');
+        if ($this->tokenRepository->isTokenFrozen($this->feedReader->userToken, $this->logger)) {
+            return ['granted' => false];
+        }
 
-            if (!$apiRateLimitReached) {
-                $remainingStatuses = $this->remainingStatuses($options);
+        $apiRateLimitReached = $this->feedReader->isApiRateLimitReached('/statuses/user_timeline');
 
-                $options = $this->updateExtremum($options, $logLevel, $updateMaxId);
-            } else {
-                $remainingStatuses = null;
+        if (is_integer($apiRateLimitReached) || $apiRateLimitReached) {
+            $remainingStatuses = null;
+            $this->tokenRepository->freezeToken($this->feedReader->userToken);
 
-                $this->tokenRepository->freezeToken($this->feedReader->userToken);
-            }
-
-            return ['condition' => !$apiRateLimitReached && $remainingStatuses, 'options' => $options];
+            return ['granted' => false, 'error_code' => $apiRateLimitReached];
         } else {
-            return ['condition' => false];
+            $remainingStatuses = $this->remainingStatuses($options);
+            $options = $this->updateExtremum($options, $updateMaxId);
+
+            return ['granted' => $remainingStatuses, 'options' => $options];
         }
     }
 
@@ -120,7 +122,7 @@ class UserStatus
      * @param $updateMaxId
      * @return mixed
      */
-    protected function updateExtremum($options, $logLevel, $updateMaxId = true)
+    protected function updateExtremum($options, $updateMaxId = true)
     {
         if ($updateMaxId) {
             $option = 'max_id';
@@ -137,11 +139,9 @@ class UserStatus
         if ((count($status) === 1) && array_key_exists('statusId', $status)) {
             $options[$option] = $status['statusId'] + $shift;
 
-            if ($logLevel === 'info') {
-                $this->logger->info(
-                    '[extremum (' . $option . ') retrieved for "' . $options['screen_name'] . '"] ' . $options[$option]
-                );
-            }
+            $this->logger->info(
+                '[extremum (' . $option . ') retrieved for "' . $options['screen_name'] . '"] ' . $options[$option]
+            );
         }
 
         return $options;
@@ -169,15 +169,12 @@ class UserStatus
     /**
      * @param $options
      */
-    protected function persistStatuses($options, $logLevel = 'info')
+    protected function persistStatuses($options)
     {
         $statuses = $this->feedReader->fetchTimelineStatuses($options);
         if (is_array($statuses) && count($statuses) > 0) {
             $savedStatuses = $this->userStreamRepository->saveStatuses($statuses, $options['oauth']);
-
-            if ($logLevel === 'info') {
-                $this->logger->info('[' . count($savedStatuses) . ' status(es) saved]');
-            }
+            $this->logger->info('[' . count($savedStatuses) . ' status(es) saved]');
 
             if (count($savedStatuses) === 0) {
                 return null;

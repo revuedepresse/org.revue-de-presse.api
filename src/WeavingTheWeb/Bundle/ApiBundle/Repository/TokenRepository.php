@@ -33,12 +33,30 @@ class TokenRepository extends EntityRepository
 
     /**
      * @param $oauthToken
+     */
+    public function freezeToken($oauthToken)
+    {
+        $entityManager = $this->getEntityManager();
+
+        /**
+         * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token
+         */
+        $token = $this->findOneBy(['oauthToken' => $oauthToken]);
+        $token->setFrozenUntil(new \DateTime('now + 15min'));
+
+        $entityManager->persist($token);
+        $entityManager->flush($token);
+    }
+
+    /**
+     * @param $oauthToken
      * @param LoggerInterface $logger
      * @return bool
      */
-    public function isSerializationLocked($oauthToken, LoggerInterface $logger = null)
+    public function isTokenFrozen($oauthToken, LoggerInterface $logger = null)
     {
-        $locked = false;
+        $frozen = false;
+
         /**
          * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token
          */
@@ -49,7 +67,7 @@ class TokenRepository extends EntityRepository
             $waitForNextWindow = $token->getFrozenUntil()->getTimestamp() > $now->getTimestamp();
             if ($waitForNextWindow) {
                 $waitTime = $token->getFrozenUntil()->getTimestamp() - $now->getTimestamp();
-                $locked = true;
+                $frozen = true;
 
                 if (!is_null($logger)) {
                     if ($waitTime < 60) {
@@ -67,23 +85,6 @@ class TokenRepository extends EntityRepository
             }
         }
 
-        return $locked;
-    }
-
-    /**
-     * @param $oauthToken
-     */
-    public function freezeToken($oauthToken)
-    {
-        $entityManager = $this->getEntityManager();
-
-        /**
-         * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token
-         */
-        $token = $this->findOneBy(['oauthToken' => $oauthToken]);
-        $token->setFrozenUntil(new \DateTime('now + 15min'));
-
-        $entityManager->persist($token);
-        $entityManager->flush($token);
+        return $frozen;
     }
 }

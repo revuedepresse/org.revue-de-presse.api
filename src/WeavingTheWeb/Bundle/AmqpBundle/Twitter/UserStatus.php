@@ -56,7 +56,7 @@ class UserStatus implements ConsumerInterface
             'screen_name' => $options['screen_name']
         ];
 
-        return $this->serializer->serialize($options, 'info', $greedyMode = true);
+        return $this->serializer->serialize($options, $greedyMode = true);
     }
 
     /**
