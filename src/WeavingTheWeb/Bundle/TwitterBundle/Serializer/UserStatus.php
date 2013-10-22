@@ -69,21 +69,21 @@ class UserStatus
         $this->feedReader->setUserSecret($oauthTokens['secret']);
     }
 
-    public function serialize($options, $greedyMode) {
-        $updateMaxId = true;
+    public function serialize($options, $greedy = false, $discoverPastTweets = true)
+    {
+        $success = true;
 
-        if (!$this->tokenRepository->isTokenFrozen($this->feedReader->userToken, $this->logger)) {
-            while (($context = $this->updateContext($options, $updateMaxId)) && $context['granted']) {
-                $saveStatuses = $this->persistStatuses($context['options']);
+        if ($this->isTwitterApiAvailable() && $this->remainingStatuses($options)) {
+            $options = $this->updateExtremum($options, $discoverPastTweets);
+            $saveStatuses = $this->saveStatuses($options);
 
-                if (!$greedyMode || (is_null($saveStatuses) && $updateMaxId === false)) {
-                    break;
-                } else {
-                    $updateMaxId = false;
+            if (!is_null($saveStatuses) || $discoverPastTweets) {
+                $discoverPastTweets = !is_null($saveStatuses) && $discoverPastTweets;
+
+                if ($greedy) {
+                    return $this->serialize($options, $greedy, $discoverPastTweets);
                 }
             }
-
-            $success = !array_key_exists('error_code', $context);
         } else {
             $success = false;
         }
@@ -92,39 +92,34 @@ class UserStatus
     }
 
     /**
-     * @param $options
-     * @return array
+     * @return bool
      */
-    protected function updateContext($options, $updateMaxId = true)
+    protected function isTwitterApiAvailable()
     {
-        if ($this->tokenRepository->isTokenFrozen($this->feedReader->userToken, $this->logger)) {
-            return ['granted' => false];
+        $availableTwitterApi = false;
+
+        if (!$this->tokenRepository->isTokenFrozen($this->feedReader->userToken, $this->logger)) {
+            $apiRateLimitReached = $this->feedReader->isApiRateLimitReached('/statuses/user_timeline');
+            if (is_integer($apiRateLimitReached) || $apiRateLimitReached) {
+                $remainingStatuses = null;
+                $this->tokenRepository->freezeToken($this->feedReader->userToken);
+            } else {
+                $availableTwitterApi = true;
+            }
         }
 
-        $apiRateLimitReached = $this->feedReader->isApiRateLimitReached('/statuses/user_timeline');
-
-        if (is_integer($apiRateLimitReached) || $apiRateLimitReached) {
-            $remainingStatuses = null;
-            $this->tokenRepository->freezeToken($this->feedReader->userToken);
-
-            return ['granted' => false, 'error_code' => $apiRateLimitReached];
-        } else {
-            $remainingStatuses = $this->remainingStatuses($options);
-            $options = $this->updateExtremum($options, $updateMaxId);
-
-            return ['granted' => $remainingStatuses, 'options' => $options];
-        }
+        return $availableTwitterApi;
     }
 
     /**
      * @param $options
      * @param $logLevel
-     * @param $updateMaxId
+     * @param $discoverPastTweets
      * @return mixed
      */
-    protected function updateExtremum($options, $updateMaxId = true)
+    protected function updateExtremum($options, $discoverPastTweets = true)
     {
-        if ($updateMaxId) {
+        if ($discoverPastTweets) {
             $option = 'max_id';
             $shift = -1;
             $updateMethod = 'findNextMaximum';
@@ -169,20 +164,28 @@ class UserStatus
     /**
      * @param $options
      */
-    protected function persistStatuses($options)
+    protected function saveStatuses($options)
     {
         $statuses = $this->feedReader->fetchTimelineStatuses($options);
-        if (is_array($statuses) && count($statuses) > 0) {
-            $savedStatuses = $this->userStreamRepository->saveStatuses($statuses, $options['oauth']);
-            $this->logger->info('[' . count($savedStatuses) . ' status(es) saved]');
+        $success = null;
 
-            if (count($savedStatuses) === 0) {
-                return null;
-            } else {
-                return $savedStatuses;
+        if (is_array($statuses) && count($statuses) > 0) {
+            try {
+                $statuses = $this->userStreamRepository->saveStatuses($statuses, $options['oauth']);
+
+                $statusesCount = count($statuses);
+                if ($statusesCount > 0) {
+                    $success = $statusesCount;
+                    $this->logger->info('[' . $statusesCount . ' status(es) saved]');
+                } else {
+                    $this->logger->info('[nothing new for ' . $options['screen_name'] . ']');
+                }
+            } catch (\Exception $exception) {
+                $success = false;
+                $this->logger->error('[' . $exception->getMessage() . ']');
             }
-        } else {
-            return null;
         }
+
+        return $success;
     }
 }

@@ -53,10 +53,10 @@ class UserStatus implements ConsumerInterface
         $options = [
             'oauth' => $options['token'],
             'count' => 200,
-            'screen_name' => $options['screen_name']
+            'screen_name' => $options['screen_name'],
         ];
 
-        return $this->serializer->serialize($options, $greedyMode = true);
+        return $this->serializer->serialize($options, $greedy = true);
     }
 
     /**

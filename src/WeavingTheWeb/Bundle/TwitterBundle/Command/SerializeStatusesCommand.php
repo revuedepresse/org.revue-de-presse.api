@@ -67,15 +67,16 @@ class SerializeStatusesCommand extends ContainerAwareCommand
         $options = [
             'oauth' => $oauthTokens['token'],
             'count' => $input->getOption('count'),
-            'screen_name' => $input->getOption('screen_name')
+            'screen_name' => $input->getOption('screen_name'),
         ];
+        $greedy = !$input->hasOption('greedy') || $input->getOption('greedy');
+
 
         /**
          * @var \WeavingTheWeb\Bundle\TwitterBundle\Serializer\UserStatus $serializer
          */
         $serializer = $this->getContainer()->get('weaving_the_web_twitter.serializer.user_status');
-        $greedyMode = !$input->hasOption('greedy') || $input->getOption('greedy');
-        $success = $serializer->serialize($options, $greedyMode);
+        $success = $serializer->serialize($options, $greedy);
 
         /**
          * @var \Symfony\Component\Translation\Translator $translator
