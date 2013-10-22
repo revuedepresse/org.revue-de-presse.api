@@ -124,6 +124,7 @@ class UserStatus
             $shift = -1;
             $updateMethod = 'findNextMaximum';
         } else {
+            unset($options['max_id']);
             $option = 'since_id';
             $shift = 1;
             $updateMethod = 'findNextMininum';
