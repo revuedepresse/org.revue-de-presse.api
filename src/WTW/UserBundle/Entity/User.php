@@ -12,7 +12,12 @@ use WTW\UserBundle\Model\User as BaseUser;
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  * @package WTW\UserBundle\Entity
  *
- * @ORM\Table(name="weaving_user")
+ * @ORM\Table(
+ *      name="weaving_user",
+ *      uniqueConstraints={
+ *          @ORM\UniqueConstraint(name="unique_twitter_id", columns={"usr_twitter_id"}),
+ *      }
+ * )
  * @ORM\Entity
  * @ORM\InheritanceType("SINGLE_TABLE")
  * @ORM\DiscriminatorColumn(name="usr_position_in_hierarchy", type="integer")
