@@ -44,11 +44,6 @@ class ProduceUserFriendListCommand extends ContainerAwareCommand
             null,
             InputOption::VALUE_REQUIRED,
             'The screen name of a user'
-        )->addOption(
-            'log',
-            null,
-            InputOption::VALUE_NONE,
-            'Log'
         )->setAliases(array('wtw:amqp:tw:prd:utl'));
     }
 
@@ -89,10 +84,8 @@ class ProduceUserFriendListCommand extends ContainerAwareCommand
             } else {
                 $twitterUser = $this->feedReader->showUser($friend);
                 if (isset($twitterUser->screen_name)) {
-                    if ($input->hasOption('log')) {
-                        $message = '[publishing new message produced for "' . ( $twitterUser->screen_name ) . '"]';
-                        $this->logger->info($message);
-                    }
+                    $message = '[publishing new message produced for "' . ( $twitterUser->screen_name ) . '"]';
+                    $this->logger->info($message);
 
                     $user = new User();
                     $user->setTwitterUsername($twitterUser->screen_name);
@@ -105,10 +98,8 @@ class ProduceUserFriendListCommand extends ContainerAwareCommand
                     $entityManager->persist($user);
                     $entityManager->flush();
                 } elseif (isset($twitterUser->errors) && is_array($twitterUser->errors) && isset($twitterUser->errors[0])) {
-                    if ($input->hasOption('log')) {
-                        $message = print_r($twitterUser->errors[0]->message, true);
-                        $this->logger->info($message);
-                    }
+                    $message = print_r($twitterUser->errors[0]->message, true);
+                    $this->logger->error($message);
 
                     break;
                 }
