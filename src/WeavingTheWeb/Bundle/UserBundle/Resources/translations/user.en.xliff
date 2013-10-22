@@ -38,6 +38,10 @@
                 <source>existing_access_token</source>
                 <target>Your account is connected to Twitter already.</target>
             </trans-unit>
+            <trans-unit id="failure_during_oauth_validation">
+                <source>failure_during_oauth_validation</source>
+                <target>Failed to validate oauth signature and token..</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>

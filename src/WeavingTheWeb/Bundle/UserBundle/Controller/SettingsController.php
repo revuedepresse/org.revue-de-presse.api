@@ -233,7 +233,7 @@ class SettingsController extends ContainerAware
         try {
             $authURL = $this->twitter->getLoginUrl();
         } catch (\RuntimeException $exception) {
-            $this->session->getFlashBag()->add('error', $exception->getMessage());
+            $this->session->getFlashBag()->add('error', $this->translator->trans($exception->getMessage(), [], 'user'));
 
             return $this->goToSettingsAction();
         }

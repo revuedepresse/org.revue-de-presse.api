@@ -11,7 +11,7 @@ class UserData extends AbstractFixture implements OrderedFixtureInterface
 {
     public function getOrder()
     {
-        return 200;
+        return 300;
     }
 
     /**
@@ -28,6 +28,8 @@ class UserData extends AbstractFixture implements OrderedFixtureInterface
                 'username_canonical' => 'user',
                 'user_non_expired' => true,
                 'credentials_non_expired' => true,
+                'twitter_id' => 1,
+                'twitter_username' => 'user',
                 'roles' => [],
             ]
         ];
@@ -42,9 +44,14 @@ class UserData extends AbstractFixture implements OrderedFixtureInterface
                 $userProperties['credentials_non_expired']
             );
 
+            $user->setTwitterID($userProperties['twitter_id']);
+            $user->setTwitterUsername($userProperties['twitter_username']);
+
             $user->setEmail($userProperties['email']);
             $user->setUsernameCanonical($userProperties['username_canonical']);
             $user->addRole($manager->merge($this->getReference('role_user')));
+
+            $this->addReference($userProperties['username_canonical'], $user);
 
             $manager->persist($user);
         }
