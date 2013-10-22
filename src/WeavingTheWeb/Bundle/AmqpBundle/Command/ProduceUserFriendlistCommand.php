@@ -48,7 +48,7 @@ class ProduceUserFriendListCommand extends ContainerAwareCommand
             'log',
             null,
             InputOption::VALUE_NONE,
-            'The screen name of a user'
+            'Log'
         )->setAliases(array('wtw:amqp:tw:prd:utl'));
     }
 
@@ -115,8 +115,8 @@ class ProduceUserFriendListCommand extends ContainerAwareCommand
             }
 
             $messageBody['screen_name'] = $user->getTwitterUsername();
-            $producer->publish(serialize(json_encode($messageBody)));
             $producer->setContentType('application/json');
+            $producer->publish(serialize(json_encode($messageBody)));
         }
 
         /**
@@ -145,13 +145,13 @@ class ProduceUserFriendListCommand extends ContainerAwareCommand
      */
     protected function getTokens(InputInterface $input)
     {
-        if ($input->hasOption('secret') && !is_null($input->getOption('secret'))) {
-            $secret = $input->getOption('secret');
+        if ($input->hasOption('oauth_secret') && !is_null($input->getOption('oauth_secret'))) {
+            $secret = $input->getOption('oauth_secret');
         } else {
             $secret = $this->getContainer()->getParameter('weaving_the_web_twitter.oauth_secret.default');
         }
-        if ($input->hasOption('token') && !is_null($input->getOption('token'))) {
-            $token = $input->getOption('token');
+        if ($input->hasOption('oauth_token') && !is_null($input->getOption('oauth_token'))) {
+            $token = $input->getOption('oauth_token');
         } else {
             $token = $this->getContainer()->getParameter('weaving_the_web_twitter.oauth_token.default');
         }
