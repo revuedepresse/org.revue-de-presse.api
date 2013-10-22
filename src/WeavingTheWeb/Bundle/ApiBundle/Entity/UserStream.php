@@ -12,7 +12,7 @@ use Doctrine\ORM\Mapping as ORM;
  *      name="weaving_twitter_user_stream",
  *      uniqueConstraints={
  *          @ORM\UniqueConstraint(
- *              name="unique_hash", columns={"ust_hash"}),
+ *              name="unique_hash", columns={"ust_hash", "ust_access_token", "ust_full_name"}),
  *      },
  *      indexes={
  *          @ORM\index(name="hash", columns={"ust_hash"}),
