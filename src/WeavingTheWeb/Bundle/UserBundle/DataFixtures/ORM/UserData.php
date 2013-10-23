@@ -45,7 +45,6 @@ class UserData extends AbstractFixture implements OrderedFixtureInterface
             );
 
             $user->setTwitterID($userProperties['twitter_id']);
-            $user->setTwitterUsername($userProperties['twitter_username']);
 
             $user->setEmail($userProperties['email']);
             $user->setUsernameCanonical($userProperties['username_canonical']);
