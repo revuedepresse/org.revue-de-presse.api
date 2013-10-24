@@ -16,9 +16,9 @@ use WTW\UserBundle\Entity\User;
 class ProduceUserFriendListCommand extends ContainerAwareCommand
 {
     /**
-     * @var \WeavingTheWeb\Bundle\Legacy\ProviderBundle\Reader\FeedReader $feedReader
+     * @var \WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor $accessor
      */
-    protected $feedReader;
+    protected $accessor;
 
     /**
      * @var \Psr\Log\LoggerInterface $logger
@@ -60,8 +60,8 @@ class ProduceUserFriendListCommand extends ContainerAwareCommand
         $producer = $this->getContainer()->get('old_sound_rabbit_mq.weaving_the_web_amqp.twitter.user_status_producer');
         $tokens = $this->getTokens($input);
 
-        $this->setupFeedReader($tokens);
-        $friends = $this->feedReader->showUserFriends($input->getOption('screen_name'));
+        $this->setupAccessor($tokens);
+        $friends = $this->accessor->showUserFriends($input->getOption('screen_name'));
 
         $messageBody = $tokens;
         $this->logger = $this->getContainer()->get('logger');
@@ -82,7 +82,7 @@ class ProduceUserFriendListCommand extends ContainerAwareCommand
             if (count($result) === 1) {
                 $user = $result;
             } else {
-                $twitterUser = $this->feedReader->showUser($friend);
+                $twitterUser = $this->accessor->showUser($friend);
                 if (isset($twitterUser->screen_name)) {
                     $message = '[publishing new message produced for "' . ( $twitterUser->screen_name ) . '"]';
                     $this->logger->info($message);
@@ -120,14 +120,14 @@ class ProduceUserFriendListCommand extends ContainerAwareCommand
     /**
      * @param $oauthTokens
      */
-    protected function setupFeedReader($oauthTokens)
+    protected function setupAccessor($oauthTokens)
     {
         /**
-         * @var \WeavingTheWeb\Bundle\Legacy\ProviderBundle\Reader\FeedReader $feedReader
+         * @var \WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor $accessor
          */
-        $this->feedReader = $this->getContainer()->get('weaving_the_web_legacy_provider.feed_reader');
-        $this->feedReader->setUserToken($oauthTokens['token']);
-        $this->feedReader->setUserSecret($oauthTokens['secret']);
+        $this->accessor = $this->getContainer()->get('weaving_the_web_twitter.api_accessor');
+        $this->accessor->setUserToken($oauthTokens['token']);
+        $this->accessor->setUserSecret($oauthTokens['secret']);
     }
 
     /**

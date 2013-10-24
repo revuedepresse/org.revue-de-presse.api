@@ -9,9 +9,9 @@ namespace WeavingTheWeb\Bundle\TwitterBundle\Serializer;
 class UserStatus
 {
     /**
-     * @var \WeavingTheWeb\Bundle\Legacy\ProviderBundle\Reader\FeedReader $feedReader
+     * @var \WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor $accessor
      */
-    protected $feedReader;
+    protected $accessor;
 
     /**
      * @var \WeavingTheWeb\Bundle\ApiBundle\Repository\TokenRepository $tokenRepository
@@ -29,14 +29,6 @@ class UserStatus
     protected $logger;
 
     /**
-     * @param \WeavingTheWeb\Bundle\Legacy\ProviderBundle\Reader\FeedReader $feedReader
-     */
-    public function setFeedReader($feedReader)
-    {
-        $this->feedReader = $feedReader;
-    }
-
-    /**
      * @param \Psr\Log\LoggerInterface $logger
      */
     public function setLogger($logger)
@@ -50,6 +42,8 @@ class UserStatus
     public function setUserStreamRepository($userStreamRepository)
     {
         $this->userStreamRepository = $userStreamRepository;
+
+        return $this;
     }
 
     /**
@@ -58,15 +52,29 @@ class UserStatus
     public function setTokenRepository($tokenRepository)
     {
         $this->tokenRepository = $tokenRepository;
+
+        return $this;
+    }
+
+    /**
+     * @param \WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor $accessor
+     */
+    public function setAccessor($accessor)
+    {
+        $this->accessor = $accessor;
+
+        return $this;
     }
 
     /**
      * @param $oauthTokens
      */
-    public function setupFeedReader($oauthTokens)
+    public function setupAccessor($oauthTokens)
     {
-        $this->feedReader->setUserToken($oauthTokens['token']);
-        $this->feedReader->setUserSecret($oauthTokens['secret']);
+        $this->accessor->setUserToken($oauthTokens['token']);
+        $this->accessor->setUserSecret($oauthTokens['secret']);
+
+        return $this;
     }
 
     public function serialize($options, $greedy = false, $discoverPastTweets = true)
@@ -98,11 +106,11 @@ class UserStatus
     {
         $availableTwitterApi = false;
 
-        if (!$this->tokenRepository->isTokenFrozen($this->feedReader->userToken, $this->logger)) {
-            $apiRateLimitReached = $this->feedReader->isApiRateLimitReached('/statuses/user_timeline');
+        if (!$this->tokenRepository->isTokenFrozen($this->accessor->userToken, $this->logger)) {
+            $apiRateLimitReached = $this->accessor->isApiRateLimitReached('/statuses/user_timeline');
             if (is_integer($apiRateLimitReached) || $apiRateLimitReached) {
                 $remainingStatuses = null;
-                $this->tokenRepository->freezeToken($this->feedReader->userToken);
+                $this->tokenRepository->freezeToken($this->accessor->userToken);
             } else {
                 $availableTwitterApi = true;
             }
@@ -151,7 +159,7 @@ class UserStatus
     protected function remainingStatuses($options)
     {
         $count = $this->userStreamRepository->countStatuses($options['oauth'], $options['screen_name']);
-        $user = $this->feedReader->showUser($options['screen_name']);
+        $user = $this->accessor->showUser($options['screen_name']);
         if (!isset($user->statuses_count) || $user->protected) {
             $statusesCount = 0;
         } else {
@@ -167,7 +175,7 @@ class UserStatus
      */
     protected function saveStatuses($options)
     {
-        $statuses = $this->feedReader->fetchTimelineStatuses($options);
+        $statuses = $this->accessor->fetchTimelineStatuses($options);
         $success = null;
 
         if (is_array($statuses) && count($statuses) > 0) {
