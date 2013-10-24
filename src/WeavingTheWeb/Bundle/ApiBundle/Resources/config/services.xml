@@ -40,10 +40,6 @@
             <tag name="kernel.event_listener" event="kernel.view" method="onKernelView" priority="-200" />
             <argument type="service" id="service_container" />
         </service>
-        <service id="weaving_the_web_api.repository.user_stream" class="%weaving_the_web_api.repository.user_stream.class%"
-                 factory-service="doctrine.orm.entity_manager" factory-method="getRepository">
-            <argument type="string">%weaving_the_web_api.entity.user_stream.class%</argument>
-        </service>
         <service id="weaving_the_web_api.repository.token" class="%weaving_the_web_api.repository.token.class%"
                  factory-service="doctrine.orm.entity_manager" factory-method="getRepository">
             <argument type="string">%weaving_the_web_api.entity.token.class%</argument>
