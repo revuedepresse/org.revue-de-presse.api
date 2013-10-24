@@ -34,7 +34,7 @@ class UserStatus implements ConsumerInterface
         if (!array_key_exists('token', $tokens) || !array_key_exists('secret', $tokens)) {
             throw new \InvalidArgumentException('Valid token and secret are required');
         } else {
-            $this->serializer->setupFeedReader($tokens);
+            $this->serializer->setupAccessor($tokens);
         }
     }
 

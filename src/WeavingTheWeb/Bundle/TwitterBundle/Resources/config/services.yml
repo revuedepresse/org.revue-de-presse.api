@@ -1,5 +1,9 @@
 parameters:
+    weaving_the_web_twitter.api_accessor.class:                   WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor
+    weaving_the_web_twitter.consumer_key:                         %api_twitter_consumer_key%
+    weaving_the_web_twitter.consumer_secret:                      %api_twitter_consumer_secret%
     weaving_the_web_twitter.endpoint.feed:                        %endpoint_twitter_feed%
+    weaving_the_web_twitter.http_client.class:                    TwitterOAuth
     weaving_the_web_twitter.oauth_token.default:                  %api_twitter_user_token%
     weaving_the_web_twitter.oauth_secret.default:                 %api_twitter_user_secret%
     weaving_the_web_twitter.serializer.user_status.class:         WeavingTheWeb\Bundle\TwitterBundle\Serializer\UserStatus
@@ -9,6 +13,18 @@ parameters:
     weaving_the_web_twitter.version:                              %api_twitter_version%
 
 services:
+    weaving_the_web_twitter.api_accessor:
+        class: %weaving_the_web_twitter.api_accessor.class%
+        arguments:
+            - @logger
+        calls:
+            - [ setUserSecret, [ %weaving_the_web_twitter.oauth_secret.default% ] ]
+            - [ setUserToken, [ %weaving_the_web_twitter.oauth_token.default% ] ]
+            - [ setConsumerKey, [ %weaving_the_web_twitter.consumer_key% ] ]
+            - [ setConsumerSecret, [ %weaving_the_web_twitter.consumer_secret% ] ]
+        properties:
+            environment: %kernel.environment%
+            httpClient: %weaving_the_web_twitter.http_client.class%
     weaving_the_web_twitter.miner:
         class:  %weaving_the_web_data_mining.miner.class%
         arguments:
@@ -19,7 +35,7 @@ services:
     weaving_the_web_twitter.serializer.user_status:
         class:  %weaving_the_web_twitter.serializer.user_status.class%
         calls:
-          - [ setFeedReader, [ @weaving_the_web_legacy_provider.feed_reader ] ]
+          - [ setAccessor, [ @weaving_the_web_twitter.api_accessor ] ]
           - [ setUserStreamRepository, [ @weaving_the_web_api.repository.user_stream ] ]
           - [ setTokenRepository, [ @weaving_the_web_api.repository.token] ]
           - [ setLogger, [ @logger ] ]

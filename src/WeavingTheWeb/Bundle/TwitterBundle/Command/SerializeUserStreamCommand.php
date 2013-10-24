@@ -14,6 +14,9 @@ use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand,
  */
 class SerializeUserStreamCommand extends ContainerAwareCommand
 {
+    /**
+     * @var \WeavingTheWeb\Bundle\Legacy\ProviderBundle\Reader\FeedReader $feedReader
+     */
     protected $feedReader;
 
     /**
@@ -58,11 +61,10 @@ class SerializeUserStreamCommand extends ContainerAwareCommand
     /**
      * Sets credentials
      *
-     * @param $input
-     *
      * @throws \InvalidArgumentException
+     * @param InputInterface $input
      */
-    protected function setCredentials($input)
+    protected function setCredentials(InputInterface $input)
     {
         $token  = $input->getOption('token');
         $secret = $input->getOption('secret');
