@@ -13,6 +13,16 @@ parameters:
     weaving_the_web_twitter.version:                              %api_twitter_version%
 
 services:
+    weaving_the_web_twitter.repository.user_stream:
+        class: %weaving_the_web_api.repository.user_stream.class%
+        factory_service: doctrine.orm.entity_manager
+        factory_method: getRepository
+        arguments: [%weaving_the_web_api.entity.user_stream.class%]
+    weaving_the_web_twitter.repository.token:
+        class: %weaving_the_web_api.repository.token.class%
+        factory_service: doctrine.orm.entity_manager
+        factory_method: getRepository
+        arguments: [%weaving_the_web_api.entity.token.class%]
     weaving_the_web_twitter.api_accessor:
         class: %weaving_the_web_twitter.api_accessor.class%
         arguments:
@@ -36,6 +46,6 @@ services:
         class:  %weaving_the_web_twitter.serializer.user_status.class%
         calls:
           - [ setAccessor, [ @weaving_the_web_twitter.api_accessor ] ]
-          - [ setUserStreamRepository, [ @weaving_the_web_api.repository.user_stream ] ]
-          - [ setTokenRepository, [ @weaving_the_web_api.repository.token] ]
+          - [ setUserStreamRepository, [ @weaving_the_web_twitter.repository.user_stream ] ]
+          - [ setTokenRepository, [ @weaving_the_web_twitter.repository.token ] ]
           - [ setLogger, [ @logger ] ]
