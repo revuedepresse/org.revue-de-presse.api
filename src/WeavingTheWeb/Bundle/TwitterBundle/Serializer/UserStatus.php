@@ -81,7 +81,7 @@ class UserStatus
     {
         $success = true;
 
-        if ($this->isTwitterApiAvailable() && $this->remainingStatuses($options)) {
+        if ($this->isTwitterApiAvailable() && ($remainingStatuses = $this->remainingStatuses($options))) {
             $options = $this->updateExtremum($options, $discoverPastTweets);
             $saveStatuses = $this->saveStatuses($options);
 
@@ -92,7 +92,7 @@ class UserStatus
                     return $this->serialize($options, $greedy, $discoverPastTweets);
                 }
             }
-        } else {
+        } elseif (!isset($remainingStatuses)) {
             $success = false;
         }
 
@@ -159,12 +159,15 @@ class UserStatus
     protected function remainingStatuses($options)
     {
         $count = $this->userStreamRepository->countStatuses($options['oauth'], $options['screen_name']);
+        $this->logger->info('[count of statuses already retrieved for user "'.$options['screen_name'].'"] '. $count);
+
         $user = $this->accessor->showUser($options['screen_name']);
         if (!isset($user->statuses_count) || $user->protected) {
             $statusesCount = 0;
         } else {
             $statusesCount = $user->statuses_count;
         }
+        $this->logger->info('[total public statuses updated by user "'.$options['screen_name'].'"] '. $statusesCount);
 
         // Twitter allows 3200 tweets to be retrieved at most from now for any given user
         return $count < max($statusesCount, 3200);
