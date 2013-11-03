@@ -5,6 +5,7 @@ namespace WeavingTheWeb\Bundle\ApiBundle\Entity;
 use Doctrine\ORM\Mapping as ORM,
     Doctrine\Common\Collections\ArrayCollection;
 use WTW\UserBundle\Entity\User;
+use WeavingTheWeb\Bundle\ApiBundle\Entity\TokenType;
 
 /**
  * Token
@@ -22,6 +23,14 @@ class Token
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     protected $id;
+
+    /**
+     * @var string
+     *
+     * @ORM\OneToOne(targetEntity="WeavingTheWeb\Bundle\ApiBundle\Entity\TokenType")
+     * @ORM\JoinColumn(name="type", referencedColumnName="id")
+     */
+    protected $type;
 
     /**
      * @var string
@@ -62,7 +71,6 @@ class Token
      * @ORM\ManyToMany(targetEntity="WTW\UserBundle\Entity\User", mappedBy="tokens")
      */
     protected $users;
-
 
     /**
      * Get id
@@ -228,5 +236,28 @@ class Token
     public function __toString()
     {
         return $this->getOauthToken();
+    }
+
+    /**
+     * Set type
+     *
+     * @param \WeavingTheWeb\Bundle\ApiBundle\Entity\TokenType $type
+     * @return Token
+     */
+    public function setType(TokenType $type = null)
+    {
+        $this->type = $type;
+    
+        return $this;
+    }
+
+    /**
+     * Get type
+     *
+     * @return \WeavingTheWeb\Bundle\ApiBundle\Entity\TokenType 
+     */
+    public function getType()
+    {
+        return $this->type;
     }
 }
