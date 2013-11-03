@@ -35,14 +35,14 @@ class Token
     /**
      * @var string
      *
-     * @ORM\Column(name="oauth_token", type="string", length=255)
+     * @ORM\Column(name="token", type="string", length=255)
      */
     protected $oauthToken;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="oauth_token_secret", type="string", length=255)
+     * @ORM\Column(name="secret", type="string", length=255, nullable=true)
      */
     protected $oauthTokenSecret;
 

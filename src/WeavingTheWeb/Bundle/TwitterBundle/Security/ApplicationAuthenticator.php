@@ -3,6 +3,7 @@
 namespace WeavingTheWeb\Bundle\TwitterBundle\Security;
 
 use Symfony\Component\BrowserKit\Response;
+use WeavingTheWeb\Bundle\ApiBundle\Entity\Token;
 
 /**
  * Class ApplicationAuthenticator
@@ -21,9 +22,24 @@ class ApplicationAuthenticator
      */
     protected $client;
 
+    /**
+     * @var string $key
+     */
+    public $key;
+
+    /**
+     * @var string $secret
+     */
+    public $secret;
+
     public $apiHost;
 
     public $authenticationUri;
+
+    /**
+     * @var \WeavingTheWeb\Bundle\ApiBundle\Repository\TokenRepository $tokenRepository
+     */
+    public $tokenRepository;
 
     protected function getApiBaseUrl()
     {
@@ -56,7 +72,9 @@ class ApplicationAuthenticator
     }
 
     /**
-     *
+     * @param $basic
+     * @return mixed
+     * @throws \Exception
      */
     public function postOauth2Token($basic)
     {
@@ -64,11 +82,35 @@ class ApplicationAuthenticator
         $this->client->setHeader('Authorization', 'Basic ' . $basic);
         $this->client->setHeader('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8');
         $this->client->request('POST', $this->getApiBaseUrl() . '/' . $this->authenticationUri, [], [], [], $rquestBody);
+
         /**
          * @var $response Response
          */
         $response = $this->client->getResponse();
+        $decodedResponse = json_decode($response->getContent(), true);
+        $lastError = json_last_error();
 
-        return $response->getContent();
+        if ($lastError !== JSON_ERROR_NONE) {
+            throw new \Exception('An error occurred when decoding the response (Error code: ' . $lastError . ')');
+        }
+
+        return $decodedResponse;
+    }
+
+    /**
+     * @return object
+     */
+    public function authenticate()
+    {
+        $basic = $this->makeAuthorizationBasic($this->key, $this->secret);
+
+        $token = $this->tokenRepository->findOneBy(['oauthToken' => $this->key]);
+
+        if (is_null($token)) {
+            $response = $this->postOauth2Token($basic);
+            $token = $this->tokenRepository->persistBearerToken($this->key, $response['access_token']);
+        }
+
+        return $token->getOauthTokenSecret();
     }
 }

@@ -23,8 +23,11 @@ services:
         calls:
             - [ setupClient, [ %weaving_the_web_twitter.client.class%, %weaving_the_web_twitter.http_client.class% ] ]
         properties:
-            apiHost: %weaving_the_web_twitter.api_host%
-            authenticationUri: %weaving_the_web_twitter.authentication_uri%
+            apiHost:            %weaving_the_web_twitter.api_host%
+            authenticationUri:  %weaving_the_web_twitter.authentication_uri%
+            key:                %weaving_the_web_twitter.consumer_key%
+            secret:             %weaving_the_web_twitter.consumer_secret%
+            tokenRepository:    @weaving_the_web_twitter.repository.token
     weaving_the_web_twitter.repository.user_stream:
         class: %weaving_the_web_api.repository.user_stream.class%
         factory_service: doctrine.orm.entity_manager

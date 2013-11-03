@@ -87,4 +87,23 @@ class TokenRepository extends EntityRepository
 
         return $frozen;
     }
+
+    /**
+     * @param $applicationToken
+     * @param $accessToken
+     * @return Token
+     */
+    public function persistBearerToken($applicationToken, $accessToken)
+    {
+        $token = new Token();
+        $token->setOauthToken($applicationToken);
+        $token->setOauthTokenSecret($accessToken);
+        $token->setCreatedAt(new \DateTime());
+
+        $entityManager = $this->getEntityManager();
+        $entityManager->persist($token);
+        $entityManager->flush();
+
+        return $token;
+    }
 }
