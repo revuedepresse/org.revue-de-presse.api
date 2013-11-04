@@ -1,6 +1,7 @@
 parameters:
     weaving_the_web_twitter.api_accessor.class:                   WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor
     weaving_the_web_twitter.application_authenticator.class:      WeavingTheWeb\Bundle\TwitterBundle\Security\ApplicationAuthenticator
+    weaving_the_web_twitter.authenticate_application.class:       WeavingTheWeb\Bundle\TwitterBundle\Command\AuthenticateApplicationCommand
     weaving_the_web_twitter.consumer_key:                         %api_twitter_consumer_key%
     weaving_the_web_twitter.consumer_secret:                      %api_twitter_consumer_secret%
     weaving_the_web_twitter.endpoint.feed:                        %endpoint_twitter_feed%
