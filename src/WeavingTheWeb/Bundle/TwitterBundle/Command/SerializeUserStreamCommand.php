@@ -24,7 +24,7 @@ class SerializeUserStreamCommand extends ContainerAwareCommand
      */
     protected function configure()
     {
-        $this->setName('wtw:api:twitter:user_stream:serialize')
+        $this->setName('weaving_the_web:twitter:user_stream')
             ->setDescription('Serialize response returned when accessing user stream endpoint from twitter api')
             ->addOption(
             'token',
@@ -36,7 +36,7 @@ class SerializeUserStreamCommand extends ContainerAwareCommand
             null,
             InputOption::VALUE_REQUIRED,
             'A secret is required'
-        )->setAliases(array('wtw:api:tw:usr_str'));
+        )->setAliases(array('wtw:tw:str'));
     }
 
     /**

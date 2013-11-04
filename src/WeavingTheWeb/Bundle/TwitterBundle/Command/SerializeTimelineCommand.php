@@ -21,7 +21,7 @@ class SerializeTimelineCommand extends ContainerAwareCommand
     {
         parent::configure();
 
-        $this->setName('tw:api:twitter:timeline:serialize')
+        $this->setName('weaving_the_web:twitter:timeline')
             ->addOption(
             'user',
             null,
@@ -29,7 +29,7 @@ class SerializeTimelineCommand extends ContainerAwareCommand
             'A user handle is required'
         )
             ->setDescription('Serialize response returned when accessing timeline endpoint from twitter api')
-            ->setAliases(array('wtw:api:tw:timeline'));
+            ->setAliases(array('wtw:tw:tl'));
     }
 
     /**
