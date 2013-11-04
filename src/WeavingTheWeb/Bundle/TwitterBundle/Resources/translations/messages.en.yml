@@ -1,1 +1,2 @@
 twitter.statuses.persistence.success: Tweets have been successfully saved
+twitter.authentication.success: Application with consumer key {{ consumer_key }} has been successfully authenticated

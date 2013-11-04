@@ -100,8 +100,12 @@ class ApplicationAuthenticator
     /**
      * @return object
      */
-    public function authenticate()
+    public function authenticate($key = null, $secret = null)
     {
+        if (!is_null($key) && !is_null($secret)) {
+            $this->key = $key;
+            $this->secret = $secret;
+        }
         $basic = $this->makeAuthorizationBasic($this->key, $this->secret);
 
         $token = $this->tokenRepository->findOneBy(['oauthToken' => $this->key]);
@@ -111,6 +115,6 @@ class ApplicationAuthenticator
             $token = $this->tokenRepository->persistBearerToken($this->key, $response['access_token']);
         }
 
-        return $token->getOauthTokenSecret();
+        return ['consumer_key' => $this->key, 'access_token' => $token->getOauthTokenSecret()];
     }
 }
