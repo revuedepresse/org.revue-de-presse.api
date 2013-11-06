@@ -31,7 +31,7 @@ class MapStatusCommand extends ContainerAwareCommand
 
     public function configure()
     {
-        $this->setName('wtw:dashboard:map_status')
+        $this->setName('weaving_the_web:dashboard:map_status')
             ->setDescription('Iterates over statuses using a closure')
             ->addOption('mapper', null, InputOption::VALUE_REQUIRED,
                 'PHP Script returning a closure to which each perspective is passed as its first argument')

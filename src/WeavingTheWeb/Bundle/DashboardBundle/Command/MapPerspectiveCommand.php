@@ -21,7 +21,7 @@ class MapPerspectiveCommand extends ContainerAwareCommand
 
     public function configure()
     {
-        $this->setName('wtw:dashboard:map_perspective')
+        $this->setName('weaving_the_web:dashboard:map_perspective')
             ->setDescription('Iterates over perspectives using a closure')
             ->addOption('mapper', null, InputOption::VALUE_REQUIRED,
                 'PHP Script returning a closure to which each perspective is passed as its first argument')
