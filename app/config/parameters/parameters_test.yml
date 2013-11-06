@@ -1,20 +1,23 @@
 parameters:
-    basic_auth_pattern: ^/(documents|github|user|api)
+    basic_auth_pattern:         ^/(documents|github|user|api)
 
-    database_charset:   UTF8
-    database_driver:    pdo_mysql
-    database_host:      %database_host_test%
-    database_port:      %database_port_test%
-    database_name:      %database_name_test%
-    database_user:      %database_user_test%
-    database_password:  %database_password_test%
+    database_charset:           UTF8
+    database_driver:            pdo_mysql
+    database_host:              %database_host_test%
+    database_port:              %database_port_test%
+    database_name:              %database_name_test%
+    database_user:              %database_user_test%
+    database_password:          %database_password_test%
 
-    fos_twitter.api.class:  WeavingTheWeb\Bundle\UserBundle\Tests\TwitterOauth
-    fos_twitter.file:       %kernel.root_dir%/../src/WeavingTheWeb/Bundle/UserBundle/Tests/TwitterOauth.php
+    fos_elastica.client.class:  WeavingTheWeb\Bundle\TwitterBundle\QualityAssurance\Http\Client
+
+    fos_twitter.api.class:      WeavingTheWeb\Bundle\UserBundle\Tests\TwitterOauth
+    fos_twitter.file:           %kernel.root_dir%/../src/WeavingTheWeb/Bundle/UserBundle/Tests/TwitterOauth.php
 
     security.user.provider.in_memory.class:         WTW\UserBundle\Tests\Security\Core\User\InMemoryUserProvider
     security.user.provider.in_memory.user.class:    WTW\UserBundle\Tests\Security\Core\User\User
     weaving_the_web_user.controller_twitter.class:  WeavingTheWeb\Bundle\UserBundle\Tests\Controller\ControllerMock
+
 
 services:
     weaving_the_web_legacy_provider.feed_reader:
