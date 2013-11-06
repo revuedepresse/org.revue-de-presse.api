@@ -13,7 +13,14 @@ class Accessor
 {
     public $userToken;
 
+    /**
+     * @var \Goutte\Client $httpClient
+     */
     public $httpClient;
+
+    public $httpClientClass;
+
+    public $clientClass;
 
     public $environment = 'dev';
 
@@ -29,6 +36,8 @@ class Accessor
     protected $consumerKey;
 
     protected $consumerSecret;
+
+    protected $authenticationHeader;
 
     public function __construct(LoggerInterface $logger = null)
     {
@@ -109,12 +118,46 @@ class Accessor
     }
 
     /**
+     * Sets authentication header
+     *
+     * @param $userToken
+     */
+    public function setAuthenticationHeader($header)
+    {
+        $this->authenticationHeader = $header;
+
+        return $this;
+    }
+
+    /**
      * @param $host
      * @return $this
      */
     public function setApiHost($host)
     {
         $this->apiHost = $host;
+
+        return $this;
+    }
+
+    /**
+     * @param $clientClass
+     * @return $this
+     */
+    public function setClientClass($clientClass)
+    {
+        $this->clientClass = $clientClass;
+
+        return $this;
+    }
+
+    /**
+     * @param $httpClientClass
+     * @return $this
+     */
+    public function setHttpClientClass($httpClientClass)
+    {
+        $this->httpClientClass = $httpClientClass;
 
         return $this;
     }
@@ -213,29 +256,54 @@ class Accessor
         $tokens = $this->getTokens();
         $httpClient = $this->httpClient;
 
-        /**
-         * @var \TwitterOAuth $connection
-         */
-        $connection = new $httpClient(
-            $tokens['key'],
-            $tokens['secret'],
-            $tokens['oauth'],
-            $tokens['oauth_secret']
-        );
-
         try {
-            $response = $connection->get($endpoint, $parameters);
+            if (is_null($this->authenticationHeader)) {
+                /**
+                 * @var \TwitterOAuth $connection
+                 */
+                $connection = new $httpClient(
+                    $tokens['key'],
+                    $tokens['secret'],
+                    $tokens['oauth'],
+                    $tokens['oauth_secret']
+                );
+
+                $content = $connection->get($endpoint, $parameters);
+            } else {
+                $this->setupClient();
+                $this->httpClient->setHeader('Authorization', $this->authenticationHeader);
+                $this->httpClient->request('GET', $endpoint);
+
+                /**
+                 * @var \Symfony\Component\HttpFoundation\Response $response
+                 */
+                $response = $this->httpClient->getResponse();
+                $encodedContent = $response->getContent();
+                $content = json_decode($encodedContent);
+            }
         } catch (\Exception $exception) {
             $this->logger->error($exception->getMessage(), $exception->getTrace());
-            $response = (object)['errors' => [(object)[
+            $content = (object)['errors' => [(object)[
                 'message' => $exception->getMessage(),
                 'code' => $exception->getCode()
             ]]];
         }
 
-        return $response;
+        return $content;
     }
 
+    public function setupClient()
+    {
+        $clientClass = $this->clientClass;
+        $this->httpClient = new $clientClass();
+
+        $httpClientClass = $this->httpClientClass;
+        $httpClient = new $httpClientClass('', array(
+            $httpClientClass::SSL_CERT_AUTHORITY => false,
+            'curl.options' => array(CURLOPT_TIMEOUT => 1800)));
+
+        $this->httpClient->setClient($httpClient);
+    }
 
     /**
      * @return array
@@ -367,13 +435,5 @@ class Accessor
     protected function hasError($response)
     {
         return isset($response->errors) && is_array($response->errors) && isset($response->errors[0]);
-    }
-
-    /**
-     *
-     */
-    public function isUserStreamIndexable(UserStream $userStream)
-    {
-        return ($userStream->getId() > 1) && ($this->environment === 'prod' || $this->environment === 'dev');
     }
 }

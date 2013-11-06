@@ -48,6 +48,8 @@ services:
             - [ setUserToken, [ %weaving_the_web_twitter.oauth_token.default% ] ]
             - [ setConsumerKey, [ %weaving_the_web_twitter.consumer_key% ] ]
             - [ setConsumerSecret, [ %weaving_the_web_twitter.consumer_secret% ] ]
+            - [ setHttpClientClass, [ '\Guzzle\Http\Client' ] ]
+            - [ setClientClass, [ '\Goutte\Client' ] ]
         properties:
             environment: %kernel.environment%
             httpClient: %weaving_the_web_twitter.oauth_client.class%
@@ -56,12 +58,12 @@ services:
         arguments:
             - %weaving_the_web_twitter.endpoint.feed%
         calls:
-          - [ setHttpClientClass, [ '\Guzzle\Http\Client' ] ]
-          - [ setClientClass, [ '\Goutte\Client' ] ]
+            - [ setHttpClientClass, [ '\Guzzle\Http\Client' ] ]
+            - [ setClientClass, [ '\Goutte\Client' ] ]
     weaving_the_web_twitter.serializer.user_status:
         class:  %weaving_the_web_twitter.serializer.user_status.class%
         calls:
-          - [ setAccessor, [ @weaving_the_web_twitter.api_accessor ] ]
-          - [ setUserStreamRepository, [ @weaving_the_web_twitter.repository.user_stream ] ]
-          - [ setTokenRepository, [ @weaving_the_web_twitter.repository.token ] ]
-          - [ setLogger, [ @logger ] ]
+            - [ setAccessor, [ @weaving_the_web_twitter.api_accessor ] ]
+            - [ setUserStreamRepository, [ @weaving_the_web_twitter.repository.user_stream ] ]
+            - [ setTokenRepository, [ @weaving_the_web_twitter.repository.token ] ]
+            - [ setLogger, [ @logger ] ]
