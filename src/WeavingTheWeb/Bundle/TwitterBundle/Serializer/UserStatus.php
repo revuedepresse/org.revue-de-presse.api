@@ -79,24 +79,28 @@ class UserStatus
 
     public function serialize($options, $greedy = false, $discoverPastTweets = true)
     {
-        $success = true;
-
         if ($this->isTwitterApiAvailable() && ($remainingStatuses = $this->remainingStatuses($options))) {
             $options = $this->updateExtremum($options, $discoverPastTweets);
-            $saveStatuses = $this->saveStatuses($options);
 
-            if (!is_null($saveStatuses) || $discoverPastTweets) {
-                $discoverPastTweets = !is_null($saveStatuses) && $discoverPastTweets;
+            try {
+                $savedStatuses = $this->saveStatuses($options);
+                $success = true;
 
-                if ($greedy) {
-                    return $this->serialize($options, $greedy, $discoverPastTweets);
+                if (!is_null($savedStatuses) || $discoverPastTweets) {
+                    $discoverPastTweets = !is_null($savedStatuses) && $discoverPastTweets;
+                    if ($greedy) {
+                        $success = $this->serialize($options, $greedy, $discoverPastTweets);
+                    }
                 }
+            } catch (\Exception $exception) {
+                $this->logger->error('[' . $exception->getMessage() . ']');
+                $success = false;
             }
-        } elseif (!isset($remainingStatuses)) {
-            $success = false;
-        }
 
-        return $success;
+            return $success;
+        } elseif (!isset($remainingStatuses)) {
+            return false;
+        }
     }
 
     /**
@@ -182,19 +186,14 @@ class UserStatus
         $success = null;
 
         if (is_array($statuses) && count($statuses) > 0) {
-            try {
-                $statuses = $this->userStreamRepository->saveStatuses($statuses, $options['oauth']);
+            $statuses = $this->userStreamRepository->saveStatuses($statuses, $options['oauth']);
 
-                $statusesCount = count($statuses);
-                if ($statusesCount > 0) {
-                    $success = $statusesCount;
-                    $this->logger->info('[' . $statusesCount . ' status(es) saved]');
-                } else {
-                    $this->logger->info('[nothing new for ' . $options['screen_name'] . ']');
-                }
-            } catch (\Exception $exception) {
-                $success = false;
-                $this->logger->error('[' . $exception->getMessage() . ']');
+            $statusesCount = count($statuses);
+            if ($statusesCount > 0) {
+                $success = $statusesCount;
+                $this->logger->info('[' . $statusesCount . ' status(es) saved]');
+            } else {
+                $this->logger->info('[nothing new for ' . $options['screen_name'] . ']');
             }
         }
 
