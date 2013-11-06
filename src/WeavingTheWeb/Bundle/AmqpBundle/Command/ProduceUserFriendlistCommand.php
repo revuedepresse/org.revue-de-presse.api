@@ -27,7 +27,7 @@ class ProduceUserFriendListCommand extends ContainerAwareCommand
 
     public function configure()
     {
-        $this->setName('wtw:amqp:twitter:produce:user_timeline')
+        $this->setName('weaving_the_web:amqp:produce:user_timeline')
             ->setDescription('Produce a message to get a user timeline')
             ->addOption(
             'oauth_token',
