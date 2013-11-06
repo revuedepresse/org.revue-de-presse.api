@@ -71,8 +71,12 @@ class UserStatus
      */
     public function setupAccessor($oauthTokens)
     {
-        $this->accessor->setUserToken($oauthTokens['token']);
-        $this->accessor->setUserSecret($oauthTokens['secret']);
+        if (!array_key_exists('authentication_header', $oauthTokens)) {
+            $this->accessor->setUserToken($oauthTokens['token']);
+            $this->accessor->setUserSecret($oauthTokens['secret']);
+        } else {
+            $this->accessor->setAuthenticationHeader($oauthTokens['authentication_header']);
+        }
 
         return $this;
     }

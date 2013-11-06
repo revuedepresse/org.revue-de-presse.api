@@ -12,6 +12,10 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class TokenType
 {
+    const USER = 'user';
+
+    const APPLICATION = 'application';
+
     /**
      * @var integer
      *

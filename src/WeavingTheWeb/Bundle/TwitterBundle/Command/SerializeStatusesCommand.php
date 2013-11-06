@@ -41,24 +41,30 @@ class SerializeStatusesCommand extends ContainerAwareCommand
                 'Screen name'
             )
             ->addOption(
-                'greedy',
-                null,
-                InputOption::VALUE_NONE,
-                'Try saving all statuses provided rate limits of Twitter API consumption and user statuses count'
-            )
-            ->addOption(
                 'count',
                 null,
                 InputOption::VALUE_REQUIRED,
                 'Results count',
                 200
             )
+            ->addOption(
+                'greedy',
+                null,
+                InputOption::VALUE_NONE,
+                'Try saving all statuses provided rate limits of Twitter API consumption and user statuses count'
+            )
+            ->addOption(
+                'bearer',
+                null,
+                InputOption::VALUE_NONE,
+                'Use application bearer token'
+            )
             ->setDescription('Serialize response returned when accessing user statuses endpoint from twitter api')
             ->setAliases(array('wtw:tw:sts'));
     }
 
     /**
-     * @param InputInterface  $input  An InputInterface instance
+     * @param InputInterface $input  An InputInterface instance
      * @param OutputInterface $output An OutputInterface instance
      */
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -68,14 +74,19 @@ class SerializeStatusesCommand extends ContainerAwareCommand
             'oauth' => $oauthTokens['token'],
             'count' => $input->getOption('count'),
             'screen_name' => $input->getOption('screen_name'),
+            'bearer' => $input->getOption('bearer'),
         ];
-        $greedy = !$input->hasOption('greedy') || $input->getOption('greedy');
-
 
         /**
          * @var \WeavingTheWeb\Bundle\TwitterBundle\Serializer\UserStatus $serializer
          */
         $serializer = $this->getContainer()->get('weaving_the_web_twitter.serializer.user_status');
+        if ($input->hasOption('bearer') && $input->getOption('bearer')) {
+            $header = $this->getAuthenticationHeader();
+            $serializer->setupAccessor(['authentication_header' => $header]);
+        }
+
+        $greedy = $input->hasOption('greedy') && $input->getOption('greedy');
         $success = $serializer->serialize($options, $greedy);
 
         /**
@@ -85,6 +96,24 @@ class SerializeStatusesCommand extends ContainerAwareCommand
         $output->writeln($translator->trans('twitter.statuses.persistence.success'));
 
         return $success ? 0 : 1;
+    }
+
+    /**
+     * @param $oauthTokens
+     * @return string
+     */
+    protected function getAuthenticationHeader()
+    {
+        /**
+         * @var \WeavingTheWeb\Bundle\TwitterBundle\Security\ApplicationAuthenticator $authenticator
+         */
+        $authenticator = $this->getContainer()->get('weaving_the_web_twitter.application_authenticator');
+        $authenticationResult = $authenticator->authenticate(
+            $this->getContainer()->getParameter('weaving_the_web_twitter.consumer_key'),
+            $this->getContainer()->getParameter('weaving_the_web_twitter.consumer_secret')
+        );
+
+        return 'Bearer ' . $authenticationResult['access_token'];
     }
 
     /**

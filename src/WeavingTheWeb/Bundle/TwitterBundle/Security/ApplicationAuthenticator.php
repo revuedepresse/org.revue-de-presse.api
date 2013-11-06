@@ -112,7 +112,11 @@ class ApplicationAuthenticator
 
         if (is_null($token)) {
             $response = $this->postOauth2Token($basic);
-            $token = $this->tokenRepository->persistBearerToken($this->key, $response['access_token']);
+            if (array_key_exists('errors', $response)) {
+                throw new \Exception($response['errors'][0]['message']);
+            } else {
+                $token = $this->tokenRepository->persistBearerToken($this->key, $response['access_token']);
+            }
         }
 
         return ['consumer_key' => $this->key, 'access_token' => $token->getOauthTokenSecret()];

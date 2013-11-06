@@ -5,6 +5,7 @@ namespace WeavingTheWeb\Bundle\ApiBundle\Repository;
 use Doctrine\ORM\EntityRepository;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Token;
 use Psr\Log\LoggerInterface;
+use WeavingTheWeb\Bundle\ApiBundle\Entity\TokenType;
 
 /**
  * Class TokenRepository
@@ -95,9 +96,13 @@ class TokenRepository extends EntityRepository
      */
     public function persistBearerToken($applicationToken, $accessToken)
     {
+        $tokenRepository = $this->getEntityManager()->getRepository('WeavingTheWebApiBundle:TokenType');
+        $tokenType = $tokenRepository->findOneBy(['name' => TokenType::APPLICATION]);
+
         $token = new Token();
         $token->setOauthToken($applicationToken);
         $token->setOauthTokenSecret($accessToken);
+        $token->setType($tokenType);
         $token->setCreatedAt(new \DateTime());
 
         $entityManager = $this->getEntityManager();
