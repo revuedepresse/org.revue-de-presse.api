@@ -14,8 +14,7 @@ class Version20131103203009 extends AbstractMigration
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() != "mysql", "Migration can only be executed safely on 'mysql'.");
-
-        $this->addSql("DROP INDEX unique_twitter_id ON weaving_user");
+        
         $this->addSql("CREATE TABLE weaving_token_type (id INT AUTO_INCREMENT NOT NULL, name VARCHAR(255) NOT NULL, PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB");
         $this->addSql("CREATE UNIQUE INDEX unique_twitter_id ON weaving_user (usr_twitter_id)");
         $this->addSql("ALTER TABLE weaving_access_token ADD type INT DEFAULT NULL, CHANGE updated_at updated_at DATETIME DEFAULT NULL");
