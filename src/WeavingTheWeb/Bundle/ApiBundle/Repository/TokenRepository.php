@@ -62,7 +62,10 @@ class TokenRepository extends EntityRepository
          * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token
          */
         $token = $this->findOneBy(['oauthToken' => $oauthToken]);
-        if (!is_null($token) && !is_null($token->getFrozenUntil())) {
+
+        if (is_null($token)) {
+            $this->makeToken(['oauth_token' => $oauthToken, 'oauth_token_secret' => null]);
+        } elseif (!is_null($token->getFrozenUntil())) {
             $now = new \DateTime();
 
             $waitForNextWindow = $token->getFrozenUntil()->getTimestamp() > $now->getTimestamp();
