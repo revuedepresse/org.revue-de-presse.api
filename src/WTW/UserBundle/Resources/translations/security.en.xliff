@@ -36,7 +36,7 @@
             </trans-unit>
             <trans-unit id="9">
                 <source>title_sign_in_with_wtw</source>
-                <target>Login to your own web</target>
+                <target>Own your data again</target>
             </trans-unit>
             <trans-unit id="10">
                 <source>error_username_already_taken</source>
