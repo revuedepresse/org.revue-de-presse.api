@@ -4,7 +4,7 @@
         <body>
             <trans-unit id="1">
                 <source>title_register</source>
-                <target>Sign up as a weaver</target>
+                <target>Sign up as a new weaver</target>
             </trans-unit>
             <trans-unit id="2">
                 <source>registration.confirmed</source>
@@ -36,7 +36,7 @@
             </trans-unit>
             <trans-unit id="9">
                 <source>title_sign_in_with_wtw</source>
-                <target>Own your data again</target>
+                <target>Sign in as a registered weaver</target>
             </trans-unit>
             <trans-unit id="10">
                 <source>error_username_already_taken</source>
