@@ -29,7 +29,7 @@ behat_report.html
 /api/lib/Smarty/demo
 /api/lib/Smarty/www-data
 /app/cache
-/app/config/parameters.yml
+/app/config/*.yml
 /app/logs
 /app/*.xml
 /devops/files/*.tar.gz
