@@ -33,11 +33,11 @@
             {% block confirmed_registration %}{% endblock %}
 
             {% if not is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+                {% block registration_form %}{% endblock %}
+
                 {% block login_form %}
                     {% embed 'WTWUserBundle:Security:login_form_standalone.html.twig' %}{% endembed %}
                 {% endblock %}
-
-                {% block registration_form %}{% endblock %}
             {% endif %}
         </div>
     <div>
