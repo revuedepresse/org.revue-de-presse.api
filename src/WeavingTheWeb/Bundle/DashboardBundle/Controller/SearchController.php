@@ -4,7 +4,8 @@ namespace WeavingTheWeb\Bundle\DashboardBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as Routing;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface,
-    Symfony\Component\DependencyInjection\ContainerInterface;
+    Symfony\Component\DependencyInjection\ContainerInterface,
+    Symfony\Component\HttpFoundation\RedirectResponse;
 use WeavingTheWeb\Bundle\DashboardBundle\Entity\Search;
 
 /**
