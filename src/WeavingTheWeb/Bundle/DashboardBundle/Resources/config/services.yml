@@ -1,6 +1,8 @@
 parameters:
+    weaving_the_web_dashboard.controller.class:               WeavingTheWeb\Bundle\DashboardBundle\Controller\SearchController
     weaving_the_web_dashboard.dbal_connection.class:          WeavingTheWeb\Bundle\DashboardBundle\DBAL\Connection
     weaving_the_web_dashboard.entity.perspective:             WeavingTheWebDashboardBundle:Perspective
+    weaving_the_web_dashboard.form_type.search.class:         WeavingTheWeb\Bundle\DashboardBundle\Form\Type\SearchType
     weaving_the_web_dashboard.map_perspective_command.class:  WeavingTheWeb\Bundle\DashboardBundle\Command\MapPerspectiveCommand
     weaving_the_web_dashboard.map_status_command.class:       WeavingTheWeb\Bundle\DashboardBundle\Command\MapStatusCommand
     weaving_the_web_dashboard.perspective_validator.class:    WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints\PerspectiveValidator
@@ -23,6 +25,14 @@ services:
             - [ setDatabase, [ %database_name% ] ]
             - [ setEntityManager, [ @doctrine.orm.entity_manager ] ]
             - [ setTranslator, [ @translator ] ]
+    weaving_the_web_dashboard.search_controller:
+        class: %weaving_the_web_dashboard.controller.class%
+        calls:
+            - [ setContainer, [ @service_container ] ]
+    weaving_the_web_dashboard.form_type.search:
+        class: %weaving_the_web_dashboard.form_type.search.class%
+        tags:
+            - { name: form.type, alias: elasticsearch }
     weaving_the_web_dashboard.query_validator:
         class: %weaving_the_web_dashboard.query_validator.class%
         calls:
