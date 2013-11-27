@@ -15,8 +15,6 @@ use WeavingTheWeb\Bundle\ApiBundle\View\View;
 
 /**
  * The ViewResponseListener class handles the View core event as well as the "@extra:Template" annotation.
- *
- * @author Lukas Kahwe Smith <smith@pooteeweet.org>
  */
 class ViewResponseListener extends BaseListener
 {
