@@ -1,3 +1,16 @@
-{{ form_start(form) }}
-{{ form_row(form.keywords) }}
-{{ form_end(form) }}
+
+{% extends "::base.html.twig" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block body %}
+
+<div class="container">
+    <div class="span11">
+        <div class="offset1">
+        {% include 'WeavingTheWebDashboardBundle:Search:searchForm.html.twig' %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}
