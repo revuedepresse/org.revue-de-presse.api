@@ -97,6 +97,7 @@ class Accessor
      * Sets user secret
      *
      * @param $userSecret
+     * @return $this
      */
     public function setUserSecret($userSecret)
     {
@@ -109,6 +110,7 @@ class Accessor
      * Sets user token
      *
      * @param $userToken
+     * @return $this
      */
     public function setUserToken($userToken)
     {
@@ -120,7 +122,8 @@ class Accessor
     /**
      * Sets authentication header
      *
-     * @param $userToken
+     * @param $header
+     * @return $this
      */
     public function setAuthenticationHeader($header)
     {
@@ -163,12 +166,13 @@ class Accessor
     }
 
     /**
-   	* Fetch timeline statuses
-   	*
-   	* @param	mixed	$options
-   	* @return	mixed
-   	*/
-   	public function fetchTimelineStatuses($options){
+     * Fetch timeline statuses
+     *
+     * @param $options
+     * @return \API|mixed|object
+     * @throws \Exception
+     */
+    public function fetchTimelineStatuses($options){
    		if (is_null($options) || (!is_object($options) && !is_array($options))) {
             throw new \Exception('Invalid options');
         } else {
