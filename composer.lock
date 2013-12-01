@@ -3,7 +3,7 @@
         "This file locks the dependencies of your project to a known state",
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
     ],
-    "hash": "fb51f8e4469683ea2d4419f51a1f6ac9",
+    "hash": "ccb748ab6d0cfeb780ff33c9016353c7",
     "packages": [
         {
             "name": "behat/behat",
@@ -303,16 +303,17 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Behat/MinkGoutteDriver.git",
-                "reference": "c3b5772506be0126be95dce6e3ba5d27d4fda41e"
+                "reference": "4ed78077e413840ced60f31a6302c71ce632d2e3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Behat/MinkGoutteDriver/zipball/c3b5772506be0126be95dce6e3ba5d27d4fda41e",
-                "reference": "c3b5772506be0126be95dce6e3ba5d27d4fda41e",
+                "url": "https://api.github.com/repos/Behat/MinkGoutteDriver/zipball/4ed78077e413840ced60f31a6302c71ce632d2e3",
+                "reference": "4ed78077e413840ced60f31a6302c71ce632d2e3",
                 "shasum": ""
             },
             "require": {
-                "behat/mink-browserkit-driver": ">=1.0.5,<1.2.0",
+                "behat/mink": "~1.5.0@dev",
+                "behat/mink-browserkit-driver": "~1.1@dev",
                 "fabpot/goutte": "~1.0",
                 "php": ">=5.3.1"
             },
@@ -346,7 +347,7 @@
                 "headless",
                 "testing"
             ],
-            "time": "2013-10-07 09:45:23"
+            "time": "2013-12-01 12:58:25"
         },
         {
             "name": "behat/mink-selenium2-driver",
@@ -2936,29 +2937,34 @@
         },
         {
             "name": "oldsound/rabbitmq-bundle",
-            "version": "v1.1.3",
+            "version": "dev-master",
             "target-dir": "OldSound/RabbitMqBundle",
             "source": {
                 "type": "git",
                 "url": "https://github.com/videlalvaro/RabbitMqBundle.git",
-                "reference": "v1.1.3"
+                "reference": "3b66fdb2828de0991e34d2b45bb56e7e6c1d4dc4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/videlalvaro/RabbitMqBundle/zipball/v1.1.3",
-                "reference": "v1.1.3",
+                "url": "https://api.github.com/repos/videlalvaro/RabbitMqBundle/zipball/3b66fdb2828de0991e34d2b45bb56e7e6c1d4dc4",
+                "reference": "3b66fdb2828de0991e34d2b45bb56e7e6c1d4dc4",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3.0",
-                "symfony/framework-bundle": ">=2.0,<2.4",
-                "symfony/yaml": ">=2.0,<3.0",
-                "videlalvaro/php-amqplib": "2.0.*"
+                "symfony/framework-bundle": "~2.0",
+                "symfony/yaml": "~2.0",
+                "videlalvaro/php-amqplib": "2.2.*"
             },
             "require-dev": {
-                "symfony/console": ">=2.0,<3.0"
+                "symfony/console": "~2.0"
             },
             "type": "symfony-bundle",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.2.x-dev"
+                }
+            },
             "autoload": {
                 "psr-0": {
                     "OldSound\\RabbitMqBundle\\": ""
@@ -2980,7 +2986,7 @@
                 "queue",
                 "rabbitmq"
             ],
-            "time": "2013-05-24 13:26:58"
+            "time": "2013-11-29 00:47:23"
         },
         {
             "name": "ornicar/apc-bundle",
@@ -3522,12 +3528,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/nrk/predis.git",
-                "reference": "32aff28ef5721763e8a6988d3e3f17d0570c0f1c"
+                "reference": "987f27556fdb6acf5d6e3c6e80d809e4c9ecb0af"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nrk/predis/zipball/32aff28ef5721763e8a6988d3e3f17d0570c0f1c",
-                "reference": "32aff28ef5721763e8a6988d3e3f17d0570c0f1c",
+                "url": "https://api.github.com/repos/nrk/predis/zipball/987f27556fdb6acf5d6e3c6e80d809e4c9ecb0af",
+                "reference": "987f27556fdb6acf5d6e3c6e80d809e4c9ecb0af",
                 "shasum": ""
             },
             "require": {
@@ -3561,7 +3567,7 @@
                 "predis",
                 "redis"
             ],
-            "time": "2013-11-30 13:58:00"
+            "time": "2013-12-01 14:21:05"
         },
         {
             "name": "psr/log",
@@ -4027,33 +4033,35 @@
         },
         {
             "name": "symfony/monolog-bundle",
-            "version": "2.3.x-dev",
+            "version": "dev-master",
             "target-dir": "Symfony/Bundle/MonologBundle",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/MonologBundle.git",
-                "reference": "03ed73bc11367b3156cc21f22ac37c7f70fcd10a"
+                "reference": "fc178515164e05099f618025c842abfa79313cad"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/MonologBundle/zipball/03ed73bc11367b3156cc21f22ac37c7f70fcd10a",
-                "reference": "03ed73bc11367b3156cc21f22ac37c7f70fcd10a",
+                "url": "https://api.github.com/repos/symfony/MonologBundle/zipball/fc178515164e05099f618025c842abfa79313cad",
+                "reference": "fc178515164e05099f618025c842abfa79313cad",
                 "shasum": ""
             },
             "require": {
-                "monolog/monolog": "~1.3",
+                "monolog/monolog": "~1.6",
                 "php": ">=5.3.2",
-                "symfony/config": "~2.2-beta2",
-                "symfony/dependency-injection": "~2.2-beta2",
-                "symfony/monolog-bridge": "~2.2-beta2"
+                "symfony/config": "~2.3",
+                "symfony/dependency-injection": "~2.3",
+                "symfony/http-kernel": "~2.3",
+                "symfony/monolog-bridge": "~2.3"
             },
             "require-dev": {
-                "symfony/yaml": "~2.2-beta2"
+                "symfony/console": "~2.3",
+                "symfony/yaml": "~2.3"
             },
             "type": "symfony-bundle",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.2.x-dev"
+                    "dev-master": "2.4.x-dev"
                 }
             },
             "autoload": {
@@ -4081,20 +4089,20 @@
                 "log",
                 "logging"
             ],
-            "time": "2013-05-27 18:06:55"
+            "time": "2013-11-23 10:14:37"
         },
         {
             "name": "symfony/symfony",
-            "version": "2.3.x-dev",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/symfony.git",
-                "reference": "62d9cc803147530d988731d07b81b68d479b03b6"
+                "reference": "db4f5515272874eac36fb46a9d45737c2a1319ef"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/symfony/zipball/62d9cc803147530d988731d07b81b68d479b03b6",
-                "reference": "62d9cc803147530d988731d07b81b68d479b03b6",
+                "url": "https://api.github.com/repos/symfony/symfony/zipball/db4f5515272874eac36fb46a9d45737c2a1319ef",
+                "reference": "db4f5515272874eac36fb46a9d45737c2a1319ef",
                 "shasum": ""
             },
             "require": {
@@ -4115,6 +4123,7 @@
                 "symfony/doctrine-bridge": "self.version",
                 "symfony/dom-crawler": "self.version",
                 "symfony/event-dispatcher": "self.version",
+                "symfony/expression-language": "self.version",
                 "symfony/filesystem": "self.version",
                 "symfony/finder": "self.version",
                 "symfony/form": "self.version",
@@ -4131,7 +4140,11 @@
                 "symfony/proxy-manager-bridge": "self.version",
                 "symfony/routing": "self.version",
                 "symfony/security": "self.version",
+                "symfony/security-acl": "self.version",
                 "symfony/security-bundle": "self.version",
+                "symfony/security-core": "self.version",
+                "symfony/security-csrf": "self.version",
+                "symfony/security-http": "self.version",
                 "symfony/serializer": "self.version",
                 "symfony/stopwatch": "self.version",
                 "symfony/swiftmailer-bridge": "self.version",
@@ -4149,13 +4162,13 @@
                 "doctrine/orm": "~2.2,>=2.2.3",
                 "ircmaxell/password-compat": "1.0.*",
                 "monolog/monolog": "~1.3",
-                "ocramius/proxy-manager": ">=0.3.1,<0.4-dev",
+                "ocramius/proxy-manager": ">=0.3.1,<0.5-dev",
                 "propel/propel1": "1.6.*"
             },
             "type": "library",
             "extra": {
                 "branch-alias": {
-                    "dev-master": "2.3-dev"
+                    "dev-master": "2.5-dev"
                 }
             },
             "autoload": {
@@ -4189,7 +4202,7 @@
             "keywords": [
                 "framework"
             ],
-            "time": "2013-11-30 18:14:55"
+            "time": "2013-11-28 10:27:35"
         },
         {
             "name": "themattharris/tmhoauth",
@@ -4331,20 +4344,24 @@
         },
         {
             "name": "videlalvaro/php-amqplib",
-            "version": "v2.0.2",
+            "version": "v2.2.3",
             "source": {
                 "type": "git",
-                "url": "git://github.com/videlalvaro/php-amqplib.git",
-                "reference": "v2.0.2"
+                "url": "https://github.com/videlalvaro/php-amqplib.git",
+                "reference": "4451a22ef7b819e080112c7c5e8e91a8d989b591"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/videlalvaro/php-amqplib/zipball/v2.0.2",
-                "reference": "v2.0.2",
+                "url": "https://api.github.com/repos/videlalvaro/php-amqplib/zipball/4451a22ef7b819e080112c7c5e8e91a8d989b591",
+                "reference": "4451a22ef7b819e080112c7c5e8e91a8d989b591",
                 "shasum": ""
             },
             "require": {
+                "ext-bcmath": "*",
                 "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "3.7.*"
             },
             "type": "library",
             "autoload": {
@@ -4368,7 +4385,7 @@
                 "queue",
                 "rabbitmq"
             ],
-            "time": "2013-02-13 19:43:51"
+            "time": "2013-11-28 16:02:20"
         },
         {
             "name": "willdurand/negotiation",
