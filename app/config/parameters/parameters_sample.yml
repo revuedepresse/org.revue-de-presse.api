@@ -78,3 +78,4 @@ parameters:
     test_database_memory:       false
     test_database_path:         %kernel.cache_dir%/wtw_dashboard.db
 
+    twitter_search_index:       twitter
