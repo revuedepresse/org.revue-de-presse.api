@@ -64,8 +64,9 @@ class SerializeStatusesCommand extends ContainerAwareCommand
     }
 
     /**
-     * @param InputInterface $input  An InputInterface instance
-     * @param OutputInterface $output An OutputInterface instance
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int|null
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -99,7 +100,6 @@ class SerializeStatusesCommand extends ContainerAwareCommand
     }
 
     /**
-     * @param $oauthTokens
      * @return string
      */
     protected function getAuthenticationHeader()
