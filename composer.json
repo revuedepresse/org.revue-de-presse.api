@@ -79,7 +79,10 @@
         ]
     },
     "config":{
-        "bin-dir":"bin"
+        "bin-dir":"bin",
+        "github-oauth":{
+            "github.com": "## FILL ME ##"
+        }
     },
     "minimum-stability": "dev",
     "extra":{
