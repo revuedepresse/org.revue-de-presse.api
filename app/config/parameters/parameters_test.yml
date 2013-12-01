@@ -20,12 +20,5 @@ parameters:
 
 
 services:
-    weaving_the_web_legacy_provider.feed_reader:
-        class: %weaving_the_web_legacy_provider.feed_reader.class%
-        parent: weaving_the_web_legacy_provider.reader
-        calls:
-            - [ activatePollingMode, [] ]
-            - [ disableStandardOutput, [] ]
-            - [ setTargetDirectory,  [ %weaving_the_web_legacy_provider.directory.store.twitter%_test ] ]
     weaving_the_web_user.controller.twitter:
-        class: %weaving_the_web_user.controller_twitter.class%
+        class:                  %weaving_the_web_user.controller_twitter.class%
