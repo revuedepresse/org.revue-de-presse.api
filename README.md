@@ -153,6 +153,11 @@ Status Mapping
     # Update statuses
     app/console wtw:das:map:sts ./src/WeavingTheWeb/Bundle/DashboardBundle/Resources/closures/updateStatusCreatedAt.php
 
+Migrations
+
+    # The admin connection and ORM are specially configured to handle migrations
+    app/console doctrine:migrations:migrate --em=admin
+
 5) Perspectives
 
 --------------------------------
