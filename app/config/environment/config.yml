@@ -1,7 +1,7 @@
 imports:
     - { resource: ../extensions/assets.yml }
     - { resource: ../extensions/dbal.yml }
-    - { resource: ../extensions/friendofsymfony.yml }
+    - { resource: ../extensions/friendsofsymfony.yml }
     - { resource: ../extensions/messaging.yml }
     - { resource: ../parameters.yml }
     - { resource: ../extensions/security.yml }
