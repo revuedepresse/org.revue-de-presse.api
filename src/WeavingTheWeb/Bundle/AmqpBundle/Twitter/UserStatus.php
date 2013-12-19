@@ -61,6 +61,7 @@ class UserStatus implements ConsumerInterface
 
     /**
      * @param AmqpMessage $message
+     * @return mixed
      * @throws \InvalidArgumentException
      */
     public function parseMessage(AmqpMessage $message)

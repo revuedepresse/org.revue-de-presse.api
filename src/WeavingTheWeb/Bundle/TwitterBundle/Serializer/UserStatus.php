@@ -37,7 +37,8 @@ class UserStatus
     }
 
     /**
-     * @param \WeavingTheWeb\Bundle\ApiBundle\Repository\UserStreamRepository $userStreamRepository
+     * @param $userStreamRepository
+     * @return $this
      */
     public function setUserStreamRepository($userStreamRepository)
     {
@@ -47,7 +48,8 @@ class UserStatus
     }
 
     /**
-     * @param \WeavingTheWeb\Bundle\ApiBundle\Repository\TokenRepository $tokenRepository
+     * @param $tokenRepository
+     * @return $this
      */
     public function setTokenRepository($tokenRepository)
     {
@@ -57,7 +59,8 @@ class UserStatus
     }
 
     /**
-     * @param \WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor $accessor
+     * @param $accessor
+     * @return $this
      */
     public function setAccessor($accessor)
     {
@@ -68,6 +71,7 @@ class UserStatus
 
     /**
      * @param $oauthTokens
+     * @return $this
      */
     public function setupAccessor($oauthTokens)
     {
@@ -129,8 +133,7 @@ class UserStatus
 
     /**
      * @param $options
-     * @param $logLevel
-     * @param $discoverPastTweets
+     * @param bool $discoverPastTweets
      * @return mixed
      */
     protected function updateExtremum($options, $discoverPastTweets = true)
@@ -161,7 +164,6 @@ class UserStatus
 
     /**
      * @param $options
-     * @param $count
      * @return bool
      */
     protected function remainingStatuses($options)
@@ -183,6 +185,7 @@ class UserStatus
 
     /**
      * @param $options
+     * @return int|null
      */
     protected function saveStatuses($options)
     {
