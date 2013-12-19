@@ -152,4 +152,4 @@ class ProduceUserFriendListCommand extends ContainerAwareCommand
             'token' => $token,
         ];
     }
-} 
+}

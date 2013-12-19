@@ -331,6 +331,7 @@ class Accessor
 
     /**
      * @param $identifier
+     * @return \API|mixed|object
      */
     public function showUser($identifier)
     {
@@ -353,6 +354,7 @@ class Accessor
 
     /**
      * @param string $version
+     * @param string $option
      * @return string
      */
     protected function getShowUserEndpoint($version = '1.1', $option = 'screen_name')
@@ -368,6 +370,7 @@ class Accessor
 
     /**
      * @param $screenName
+     * @return \API|mixed|object
      */
     public function showUserFriends($screenName)
     {
