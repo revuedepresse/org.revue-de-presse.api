@@ -11,6 +11,9 @@ use Psr\Log\LoggerInterface;
  */
 class Accessor
 {
+    /**
+     * @var
+     */
     public $userToken;
 
     /**
@@ -18,12 +21,24 @@ class Accessor
      */
     public $httpClient;
 
+    /**
+     * @var
+     */
     public $httpClientClass;
 
+    /**
+     * @var
+     */
     public $clientClass;
 
+    /**
+     * @var string
+     */
     public $environment = 'dev';
 
+    /**
+     * @var string
+     */
     protected $apiHost = 'api.twitter.com';
 
     /**
@@ -31,19 +46,38 @@ class Accessor
      */
     protected $logger;
 
+    /**
+     * @var
+     */
     protected $userSecret;
 
+    /**
+     * @var
+     */
     protected $consumerKey;
 
+    /**
+     * @var
+     */
     protected $consumerSecret;
 
+    /**
+     * @var
+     */
     protected $authenticationHeader;
 
+    /**
+     * @param LoggerInterface $logger
+     */
     public function __construct(LoggerInterface $logger = null)
     {
         $this->setLogger($logger);
     }
 
+    /**
+     * @param null $logger
+     * @return $this
+     */
     public function setLogger($logger = null)
     {
         if (!is_null($logger)) {
@@ -75,6 +109,7 @@ class Accessor
 
     /**
      * @param $consumerKey
+     * @return $this
      */
     public function setConsumerKey($consumerKey)
     {
@@ -85,6 +120,7 @@ class Accessor
 
     /**
      * @param $consumerSecret
+     * @return $this
      */
     public function setConsumerSecret($consumerSecret)
     {
@@ -215,6 +251,10 @@ class Accessor
         return $this->getApiBaseUrl($version) . '/application/rate_limit_status.json?resources=statuses';
     }
 
+    /**
+     * @param string $version
+     * @return string
+     */
     protected function getApiBaseUrl($version = '1.1') {
         return 'https://' . $this->apiHost . '/' . $version;
     }
@@ -252,6 +292,10 @@ class Accessor
         return $validatedOptions;
     }
 
+    /**
+     * @param $endpoint
+     * @return \API|mixed|object
+     */
     public function contactEndpoint($endpoint)
     {
         $parameters = array();
@@ -296,6 +340,9 @@ class Accessor
         return $content;
     }
 
+    /**
+     *
+     */
     public function setupClient()
     {
         $clientClass = $this->clientClass;
@@ -399,6 +446,8 @@ class Accessor
 
     /**
      * @param $identifier
+     * @return \API|mixed|object
+     * @throws \InvalidArgumentException
      */
     public function showStatus($identifier)
     {
