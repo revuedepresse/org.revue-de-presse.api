@@ -6,11 +6,18 @@
 
     <parameters>
         <parameter key="weaving_the_web_amqp.produce_user_friendlist_command.class">WeavingTheWeb\Bundle\AmqpBundle\Command\ProduceUserFriendlistCommand</parameter>
+        <parameter key="weaving_the_web_amqp.produce_lists_members_command.class">WeavingTheWeb\Bundle\AmqpBundle\Command\ProduceListsMembersCommand</parameter>
         <parameter key="weaving_the_web_amqp.twitter.user_status.class">WeavingTheWeb\Bundle\AmqpBundle\Twitter\UserStatus</parameter>
     </parameters>
 
     <services>
         <service id="weaving_the_web_amqp.twitter.user_status" class="%weaving_the_web_amqp.twitter.user_status.class%">
+            <call method="setSerializer">
+                <argument type="service" id="weaving_the_web_twitter.serializer.user_status" />
+            </call>
+        </service>
+        <service id="weaving_the_web_amqp.twitter.lists_member_status"
+                 class="%weaving_the_web_amqp.produce_lists_members_command.class%">
             <call method="setSerializer">
                 <argument type="service" id="weaving_the_web_twitter.serializer.user_status" />
             </call>

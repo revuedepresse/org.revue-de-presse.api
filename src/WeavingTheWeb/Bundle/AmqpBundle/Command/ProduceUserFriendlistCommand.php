@@ -2,8 +2,7 @@
 
 namespace WeavingTheWeb\Bundle\AmqpBundle\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand,
-    Symfony\Component\Console\Input\InputInterface,
+use Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Input\InputOption,
     Symfony\Component\Console\Output\OutputInterface;
 use WTW\UserBundle\Entity\User;
@@ -13,18 +12,8 @@ use WTW\UserBundle\Entity\User;
  * @package WeavingTheWeb\Bundle\AmqpBundle\Command\Twitter
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
-class ProduceUserFriendListCommand extends ContainerAwareCommand
+class ProduceUserFriendListCommand extends AccessorAwareCommand
 {
-    /**
-     * @var \WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor $accessor
-     */
-    protected $accessor;
-
-    /**
-     * @var \Psr\Log\LoggerInterface $logger
-     */
-    protected $logger;
-
     public function configure()
     {
         $this->setName('weaving_the_web:amqp:produce:user_timeline')
@@ -60,11 +49,11 @@ class ProduceUserFriendListCommand extends ContainerAwareCommand
         $producer = $this->getContainer()->get('old_sound_rabbit_mq.weaving_the_web_amqp.twitter.user_status_producer');
         $tokens = $this->getTokens($input);
 
+        $this->setUpLogger();
         $this->setupAccessor($tokens);
         $friends = $this->accessor->showUserFriends($input->getOption('screen_name'));
 
         $messageBody = $tokens;
-        $this->logger = $this->getContainer()->get('logger');
 
 
         /**
@@ -115,41 +104,5 @@ class ProduceUserFriendListCommand extends ContainerAwareCommand
          */
         $translator = $this->getContainer()->get('translator');
         $output->writeln($translator->trans('amqp.friendlist.production.success', ['{{ count }}' => count($friends->ids)]));
-    }
-
-    /**
-     * @param $oauthTokens
-     */
-    protected function setupAccessor($oauthTokens)
-    {
-        /**
-         * @var \WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor $accessor
-         */
-        $this->accessor = $this->getContainer()->get('weaving_the_web_twitter.api_accessor');
-        $this->accessor->setUserToken($oauthTokens['token']);
-        $this->accessor->setUserSecret($oauthTokens['secret']);
-    }
-
-    /**
-     * @param InputInterface $input
-     * @return array
-     */
-    protected function getTokens(InputInterface $input)
-    {
-        if ($input->hasOption('oauth_secret') && !is_null($input->getOption('oauth_secret'))) {
-            $secret = $input->getOption('oauth_secret');
-        } else {
-            $secret = $this->getContainer()->getParameter('weaving_the_web_twitter.oauth_secret.default');
-        }
-        if ($input->hasOption('oauth_token') && !is_null($input->getOption('oauth_token'))) {
-            $token = $input->getOption('oauth_token');
-        } else {
-            $token = $this->getContainer()->getParameter('weaving_the_web_twitter.oauth_token.default');
-        }
-
-        return [
-            'secret' => $secret,
-            'token' => $token,
-        ];
     }
 }

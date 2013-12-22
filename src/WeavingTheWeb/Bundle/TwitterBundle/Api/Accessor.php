@@ -460,6 +460,42 @@ class Accessor
     }
 
     /**
+     * @param $screenName
+     * @return \API|mixed|object
+     */
+    public function getUserLists($screenName)
+    {
+        return $this->contactEndpoint(strtr($this->getUserListsEndpoint(), ['{{ screenName }}' => $screenName]));
+    }
+
+    /**
+     * @param string $version
+     * @return string
+     */
+    protected function getUserListsEndpoint($version = '1.1')
+    {
+        return $this->getApiBaseUrl($version) . '/lists/list.json?screen_name={{ screenName }}';
+    }
+
+    /**
+     * @param $id
+     * @return \API|mixed|object
+     */
+    public function getListMembers($id)
+    {
+        return $this->contactEndpoint(strtr($this->getListMembersEndpoint(), ['{{ id }}' => $id]));
+    }
+
+    /**
+     * @param string $version
+     * @return string
+     */
+    protected function getListMembersEndpoint($version = '1.1')
+    {
+        return $this->getApiBaseUrl($version) . '/lists/members.json?list_id={{ id }}';
+    }
+
+    /**
      * @param string $endpoint
      * @return bool
      */
