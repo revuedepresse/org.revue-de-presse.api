@@ -434,6 +434,9 @@ class Accessor
         return $content;
     }
 
+    /**
+     *
+     */
     public function setupClient()
     {
         $clientClass = $this->clientClass;
