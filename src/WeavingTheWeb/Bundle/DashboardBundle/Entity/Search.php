@@ -7,6 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 /**
  * Entity
  *
+ * @ORM\Table(name="weaving_search")
  * @ORM\Entity
  */
 class Search
