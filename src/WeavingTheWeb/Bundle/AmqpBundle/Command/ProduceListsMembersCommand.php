@@ -33,6 +33,11 @@ class ProduceListsMembersCommand extends AccessorAwareCommand
             null,
             InputOption::VALUE_REQUIRED,
             'The screen name of a user'
+        )->addOption(
+            'list',
+            null,
+            InputOption::VALUE_OPTIONAL,
+            'A list to which production is restricted to'
         )->setAliases(array('wtw:amqp:tw:prd:lm'));
     }
 
@@ -64,48 +69,59 @@ class ProduceListsMembersCommand extends AccessorAwareCommand
          */
         $entityManager = $this->getContainer()->get('doctrine.orm.entity_manager');
 
+        if ($input->hasOption('list') && !is_null($input->getOption('list'))) {
+            $listRestriction = $input->getOption('list');
+        } else {
+            $listRestriction = null;
+        }
+
         foreach ($lists as $list) {
-            $members = $this->accessor->getListMembers($list->id);
+            if (is_null($listRestriction) || $list->name === $listRestriction) {
+                $members = $this->accessor->getListMembers($list->id);
 
-            foreach ($members->users as $friend) {
+                foreach ($members->users as $friend) {
 
-                $result = $userRepository->findOneBy(['twitterID' => $friend->id]);
-                if (count($result) === 1) {
-                    $user = $result;
-                } else {
-                    $twitterUser = $this->accessor->showUser($friend->screen_name);
-                    if (isset($twitterUser->screen_name)) {
-                        $message = '[publishing new message produced for "' . ( $twitterUser->screen_name ) . '"]';
-                        $this->logger->info($message);
+                    $result = $userRepository->findOneBy(['twitterID' => $friend->id]);
+                    if (count($result) === 1) {
+                        $user = $result;
+                    } else {
+                        $twitterUser = $this->accessor->showUser($friend->screen_name);
+                        if (isset($twitterUser->screen_name)) {
+                            $message = '[publishing new message produced for "' . ( $twitterUser->screen_name ) . '"]';
+                            $this->logger->info($message);
 
-                        $user = new User();
-                        $user->setTwitterUsername($twitterUser->screen_name);
-                        $user->setTwitterID($friend->id);
-                        $user->setEnabled(false);
-                        $user->setLocked(false);
-                        $user->setEmail('@' . $twitterUser->screen_name);
-                        $user->setStatus(0);
+                            $user = new User();
+                            $user->setTwitterUsername($twitterUser->screen_name);
+                            $user->setTwitterID($friend->id);
+                            $user->setEnabled(false);
+                            $user->setLocked(false);
+                            $user->setEmail('@' . $twitterUser->screen_name);
+                            $user->setStatus(0);
 
-                        $entityManager->persist($user);
-                        $entityManager->flush();
-                    } elseif (isset($twitterUser->errors) && is_array($twitterUser->errors) && isset($twitterUser->errors[0])) {
-                        $message = print_r($twitterUser->errors[0]->message, true);
-                        $this->logger->error($message);
+                            $entityManager->persist($user);
+                            $entityManager->flush();
+                        } elseif (isset($twitterUser->errors) && is_array($twitterUser->errors) && isset($twitterUser->errors[0])) {
+                            $message = print_r($twitterUser->errors[0]->message, true);
+                            $this->logger->error($message);
 
-                        break;
+                            break;
+                        }
                     }
+
+                    $messageBody['screen_name'] = $user->getTwitterUsername();
+                    $producer->setContentType('application/json');
+                    $producer->publish(serialize(json_encode($messageBody)));
                 }
 
-                $messageBody['screen_name'] = $user->getTwitterUsername();
-                $producer->setContentType('application/json');
-                $producer->publish(serialize(json_encode($messageBody)));
+                /**
+                 * @var \Symfony\Bundle\FrameworkBundle\Translation\Translator $translator
+                 */
+                $translator = $this->getContainer()->get('translator');
+                $output->writeln($translator->trans('amqp.list_members.production.success', [
+                    '{{ count }}' => count($members->users),
+                    '{{ list }}' => $list->name,
+                ]));
             }
-
-            /**
-             * @var \Symfony\Bundle\FrameworkBundle\Translation\Translator $translator
-             */
-            $translator = $this->getContainer()->get('translator');
-            $output->writeln($translator->trans('amqp.friendlist.production.success', ['{{ count }}' => count($members->users)]));
         }
     }
 }

@@ -1,1 +1,2 @@
 amqp.friendlist.production.success: "{{ count }} messages have been produced"
+amqp.list_members.production.success: "{{ count }} messages have been produced for list {{ list }}"
