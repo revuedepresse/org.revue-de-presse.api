@@ -33,7 +33,7 @@
         "doctrine/inflector": "1.*",
         "doctrine/orm": ">=2.2.3,<2.4-dev",
         "elao/web-profiler-extra-bundle": "dev-master",
-        "friendsofsymfony/elastica-bundle": "2.1.2",
+        "friendsofsymfony/elastica-bundle": "dev-master",
         "friendsofsymfony/jsrouting-bundle": "1.2.*",
         "friendsofsymfony/rest-bundle":"0.*",
         "friendsofsymfony/twitter-bundle": "dev-master#f837424a069425721c1a744bdc60bb2869a8c691",
