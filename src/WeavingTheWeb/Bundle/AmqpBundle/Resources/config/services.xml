@@ -41,5 +41,11 @@
                 <argument type="service" id="weaving_the_web_twitter.serializer.user_status" />
             </call>
         </service>
+        <service id="weaving_the_web_amqp.twitter.lists_member_status"
+                 class="%weaving_the_web_amqp.produce_lists_members_command.class%">
+            <call method="setSerializer">
+                <argument type="service" id="weaving_the_web_twitter.serializer.user_status" />
+            </call>
+        </service>
     </services>
 </container>
