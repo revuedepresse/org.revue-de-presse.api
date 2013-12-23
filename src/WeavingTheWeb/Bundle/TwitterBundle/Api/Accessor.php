@@ -474,7 +474,7 @@ class Accessor
      */
     protected function getUserListsEndpoint($version = '1.1')
     {
-        return $this->getApiBaseUrl($version) . '/lists/list.json?screen_name={{ screenName }}';
+        return $this->getApiBaseUrl($version) . '/lists/list.json?reverse={{ reverse }}&screen_name={{ screenName }}';
     }
 
     /**
