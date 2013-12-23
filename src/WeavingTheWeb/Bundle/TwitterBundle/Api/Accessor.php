@@ -479,7 +479,12 @@ class Accessor
      */
     public function getUserLists($screenName)
     {
-        return $this->contactEndpoint(strtr($this->getUserListsEndpoint(), ['{{ screenName }}' => $screenName]));
+        return $this->contactEndpoint(strtr($this->getUserListsEndpoint(),
+            [
+                '{{ screenName }}'  => $screenName,
+                '{{ reverse }}'     => true,
+            ]
+        ));
     }
 
     /**
