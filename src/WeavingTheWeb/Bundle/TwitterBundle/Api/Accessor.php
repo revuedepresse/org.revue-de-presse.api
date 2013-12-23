@@ -337,6 +337,20 @@ class Accessor
             ]]];
         }
 
+        if (is_object($content) && isset($content->errors)) {
+            $errorMessage = $content->errors[0]->message;
+            $errorCode = $content->errors[0]->code;
+
+            $this->logger->error('[endpoint] ' . $endpoint);
+            $this->logger->error('[message] ' . $errorMessage);
+            $this->logger->error('[code] ' . $errorCode);
+
+            if ($errorCode === 88) {
+                $this->logger->error('[Waiting for 15 min because of exceeded API limit...]');
+                sleep(15 * 60);
+            }
+        }
+
         return $content;
     }
 
