@@ -73,6 +73,11 @@ class Token
     protected $users;
 
     /**
+     * @var boolean
+     */
+    protected $frozen;
+
+    /**
      * Get id
      *
      * @return integer 
@@ -81,11 +86,6 @@ class Token
     {
         return $this->id;
     }
-
-    /**
-     * @var boolean
-     */
-    public $frozen;
 
     /**
      * Set oauthToken
@@ -264,5 +264,26 @@ class Token
     public function getType()
     {
         return $this->type;
+    }
+
+    /**
+     * @param $frozen
+     * @return $this
+     */
+    public function setFrozen($frozen)
+    {
+        $this->frozen = $frozen;
+
+        return $this;
+    }
+
+    /**
+     * Get type
+     *
+     * @return \WeavingTheWeb\Bundle\ApiBundle\Entity\TokenType
+     */
+    public function isFrozen()
+    {
+        return $this->frozen;
     }
 }

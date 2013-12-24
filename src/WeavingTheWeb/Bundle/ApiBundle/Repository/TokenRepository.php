@@ -87,7 +87,7 @@ class TokenRepository extends EntityRepository
          *  }
          */
 
-        $token->frozen = $frozen;
+        $token->setFrozen($frozen);
 
         return $token;
     }
