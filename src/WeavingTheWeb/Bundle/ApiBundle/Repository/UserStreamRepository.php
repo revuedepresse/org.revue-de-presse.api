@@ -19,6 +19,7 @@ class UserStreamRepository extends ResourceRepository
     /**
      * @param $statuses
      * @param $identifier
+     * @return array
      */
     public function saveStatuses($statuses, $identifier)
     {
@@ -160,6 +161,7 @@ class UserStreamRepository extends ResourceRepository
     /**
      * @param $oauthToken
      * @param $screenName
+     * @param string $direction
      * @return array|mixed
      */
     protected function findNextExtremum($oauthToken, $screenName, $direction = 'asc')
