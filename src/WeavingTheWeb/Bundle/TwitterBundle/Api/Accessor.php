@@ -343,7 +343,7 @@ class Accessor
          * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token
          */
         $token = $this->tokenRepository->refreshFreezeCondition($tokens['oauth'], $this->logger);
-        if ($token->frozen) {
+        if ($token->isFrozen()) {
             $now = new \DateTime;
             $this->moderator->waitFor(
                 $token->getFrozenUntil()->getTimestamp() - $now->getTimestamp(),

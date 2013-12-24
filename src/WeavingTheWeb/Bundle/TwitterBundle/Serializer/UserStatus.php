@@ -139,7 +139,7 @@ class UserStatus
          */
         $token = $this->tokenRepository->refreshFreezeCondition($this->accessor->userToken, $this->logger);
 
-        if (!$token->frozen) {
+        if (!$token->isFrozen()) {
             $apiRateLimitReached = $this->accessor->isApiRateLimitReached('/statuses/user_timeline');
             if (is_integer($apiRateLimitReached) || $apiRateLimitReached) {
                 $remainingStatuses = null;
