@@ -83,6 +83,11 @@ class Token
     }
 
     /**
+     * @var boolean
+     */
+    public $frozen;
+
+    /**
      * Set oauthToken
      *
      * @param string $oauthToken

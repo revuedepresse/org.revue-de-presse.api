@@ -34,8 +34,9 @@ class TokenRepository extends EntityRepository
 
     /**
      * @param $oauthToken
+     * @param string $until
      */
-    public function freezeToken($oauthToken)
+    public function freezeToken($oauthToken, $until = 'now + 15min')
     {
         $entityManager = $this->getEntityManager();
 
@@ -43,7 +44,7 @@ class TokenRepository extends EntityRepository
          * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token
          */
         $token = $this->findOneBy(['oauthToken' => $oauthToken]);
-        $token->setFrozenUntil(new \DateTime('now + 15min'));
+        $token->setFrozenUntil(new \DateTime($until));
 
         $entityManager->persist($token);
         $entityManager->flush($token);
@@ -54,7 +55,7 @@ class TokenRepository extends EntityRepository
      * @param LoggerInterface $logger
      * @return bool
      */
-    public function isTokenFrozen($oauthToken, LoggerInterface $logger = null)
+    public function refreshFreezeCondition($oauthToken, LoggerInterface $logger = null)
     {
         $frozen = false;
 
@@ -71,31 +72,24 @@ class TokenRepository extends EntityRepository
             $entityManager->flush();
 
             $logger->info('[token creation] ' . $token->getOauthToken());
-        } elseif (!is_null($token->getFrozenUntil())) {
-            $now = new \DateTime();
-
-            $waitForNextWindow = $token->getFrozenUntil()->getTimestamp() > $now->getTimestamp();
-            if ($waitForNextWindow) {
-                $waitTime = $token->getFrozenUntil()->getTimestamp() - $now->getTimestamp();
-                $frozen = true;
-
-                if (!is_null($logger)) {
-                    if ($waitTime < 60) {
-                        $humanWaitTime = $waitTime . ' more seconds';
-                    } else {
-                        $humanWaitTime = floor($waitTime / 60) . ' more minutes';
-                    }
-
-                    $logger->info(
-                        'API limit has been reached for token "' . substr($token, 0, '8') . '...' . '", ' .
-                        'operations are currently frozen (waiting for ' . $humanWaitTime . ')'
-                    );
-                }
-                sleep($waitTime);
-            }
+        } elseif (
+            !is_null($token->getFrozenUntil()) &&
+            $token->getFrozenUntil()->getTimestamp() > (new \DateTime())->getTimestamp()
+        ) {
+            /**
+             * The token is frozen if the "frozen until" date is in the future
+             */
+            $frozen = true;
         }
+        /**
+         *  else {
+         *      The token was frozen but not anymore as "frozen until" date is now in the past
+         *  }
+         */
 
-        return $frozen;
+        $token->frozen = $frozen;
+
+        return $token;
     }
 
     /**
