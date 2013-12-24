@@ -67,7 +67,7 @@ class SearchController implements ContainerAwareInterface
              */
             $finder = $this->container->get('fos_elastica.finder.twitter.user_status');
             $keywords = $form->get('keywords')->getData();
-            $matches = $finder->find($keywords);
+            $matches = $finder->find($keywords, 100);
             $parameters['matches'] = $matches;
 
             return $parameters;
