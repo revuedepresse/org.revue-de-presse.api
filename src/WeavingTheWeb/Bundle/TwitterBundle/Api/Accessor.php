@@ -2,6 +2,7 @@
 
 namespace WeavingTheWeb\Bundle\TwitterBundle\Api;
 
+use Doctrine\Common\Persistence\ObjectRepository;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -47,6 +48,11 @@ class Accessor
     protected $logger;
 
     /**
+     * @var \WeavingTheWeb\Bundle\ApiBundle\Moderator\ApiLimitModerator $moderator
+     */
+    protected $moderator;
+
+    /**
      * @var
      */
     protected $userSecret;
@@ -67,6 +73,11 @@ class Accessor
     protected $authenticationHeader;
 
     /**
+     * @var \WeavingTheWeb\Bundle\ApiBundle\Repository\TokenRepository $tokenRepository
+     */
+    protected $tokenRepository;
+
+    /**
      * @param LoggerInterface $logger
      */
     public function __construct(LoggerInterface $logger = null)
@@ -82,6 +93,19 @@ class Accessor
     {
         if (!is_null($logger)) {
             $this->logger = $logger;
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param null $moderator
+     * @return $this
+     */
+    public function setModerator($moderator = null)
+    {
+        if (!is_null($moderator)) {
+            $this->moderator = $moderator;
         }
 
         return $this;
@@ -202,6 +226,17 @@ class Accessor
     }
 
     /**
+     * @param $tokenRepository
+     * @return $this
+     */
+    public function setTokenRepository(ObjectRepository $tokenRepository)
+    {
+        $this->tokenRepository = $tokenRepository;
+
+        return $this;
+    }
+
+    /**
      * Fetch timeline statuses
      *
      * @param $options
@@ -304,6 +339,20 @@ class Accessor
         $tokens = $this->getTokens();
         $httpClient = $this->httpClient;
 
+        /**
+         * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token
+         */
+        $token = $this->tokenRepository->refreshFreezeCondition($tokens['oauth'], $this->logger);
+        if ($token->frozen) {
+            $now = new \DateTime;
+            $this->moderator->waitFor(
+                $token->getFrozenUntil()->getTimestamp() - $now->getTimestamp(),
+                [
+                    '{{ token }}' => substr($token->getOauthToken(), 0, '8'),
+                ]
+            );
+        }
+
         try {
             if (is_null($this->authenticationHeader)) {
                 /**
@@ -345,10 +394,16 @@ class Accessor
             $this->logger->error('[message] ' . $errorMessage);
             $this->logger->error('[code] ' . $errorCode);
 
-            if ($errorCode === 88) {
-                $this->logger->error('[Waiting for 15 min because of exceeded API limit...]');
-                sleep(15 * 60);
-            }
+            /**
+             * Freeze token and wait for 15 minutes before getting back to operation
+             */
+            $this->tokenRepository->freezeToken($token);
+            $this->moderator->waitFor(
+                '15*60',
+                [
+                    '{{ token }}' => substr($token->getOauthToken(), 0, '8'),
+                ]
+            );
         }
 
         return $content;

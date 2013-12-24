@@ -14,14 +14,31 @@ class UserStatus
     protected $accessor;
 
     /**
-     * @var \WeavingTheWeb\Bundle\ApiBundle\Repository\TokenRepository $tokenRepository
+     * @param $accessor
+     * @return $this
      */
-    protected $tokenRepository;
+    public function setAccessor($accessor)
+    {
+        $this->accessor = $accessor;
+
+        return $this;
+    }
 
     /**
      * @var \WeavingTheWeb\Bundle\ApiBundle\Repository\UserStreamRepository $userStreamRepository
      */
     protected $userStreamRepository;
+
+    /**
+     * @param $userStreamRepository
+     * @return $this
+     */
+    public function setUserStreamRepository($userStreamRepository)
+    {
+        $this->userStreamRepository = $userStreamRepository;
+
+        return $this;
+    }
 
     /**
      * @var \Psr\Log\LoggerInterface
@@ -37,15 +54,25 @@ class UserStatus
     }
 
     /**
-     * @param $userStreamRepository
+     * @var \WeavingTheWeb\Bundle\ApiBundle\Moderator\ApiLimitModerator $moderator
+     */
+    protected $moderator;
+
+    /**
+     * @param $moderator
      * @return $this
      */
-    public function setUserStreamRepository($userStreamRepository)
+    public function setModerator($moderator)
     {
-        $this->userStreamRepository = $userStreamRepository;
+        $this->moderator = $moderator;
 
         return $this;
     }
+
+    /**
+     * @var \WeavingTheWeb\Bundle\ApiBundle\Repository\TokenRepository $tokenRepository
+     */
+    protected $tokenRepository;
 
     /**
      * @param $tokenRepository
@@ -54,17 +81,6 @@ class UserStatus
     public function setTokenRepository($tokenRepository)
     {
         $this->tokenRepository = $tokenRepository;
-
-        return $this;
-    }
-
-    /**
-     * @param $accessor
-     * @return $this
-     */
-    public function setAccessor($accessor)
-    {
-        $this->accessor = $accessor;
 
         return $this;
     }
@@ -118,7 +134,12 @@ class UserStatus
     {
         $availableTwitterApi = false;
 
-        if (!$this->tokenRepository->isTokenFrozen($this->accessor->userToken, $this->logger)) {
+        /**
+         * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token
+         */
+        $token = $this->tokenRepository->refreshFreezeCondition($this->accessor->userToken, $this->logger);
+
+        if (!$token->frozen) {
             $apiRateLimitReached = $this->accessor->isApiRateLimitReached('/statuses/user_timeline');
             if (is_integer($apiRateLimitReached) || $apiRateLimitReached) {
                 $remainingStatuses = null;
@@ -126,6 +147,14 @@ class UserStatus
             } else {
                 $availableTwitterApi = true;
             }
+        } else {
+            $now = new \DateTime;
+            $this->moderator->waitFor(
+                $token->getFrozenUntil()->getTimestamp() - $now->getTimestamp(),
+                [
+                    '{{ token }}' => substr($token->getOauthToken(), 0, '8'),
+                ]
+            );
         }
 
         return $availableTwitterApi;
