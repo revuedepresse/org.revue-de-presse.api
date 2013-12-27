@@ -76,6 +76,11 @@ class UserStream
     protected $apiDocument;
 
     /**
+     * @ORM\Column(name="ust_indexed", type="boolean", options={"default": false})
+     */
+    protected $indexed;
+
+    /**
      * @var \DateTime
      *
      * @ORM\Column(name="ust_created_at", type="datetime")
@@ -294,5 +299,28 @@ class UserStream
     public function getUpdatedAt()
     {
         return $this->updatedAt;
+    }
+
+    /**
+     * Set indexed
+     *
+     * @param boolean $indexed
+     * @return UserStream
+     */
+    public function setIndexed($indexed)
+    {
+        $this->indexed = $indexed;
+    
+        return $this;
+    }
+
+    /**
+     * Get indexed
+     *
+     * @return boolean 
+     */
+    public function getIndexed()
+    {
+        return $this->indexed;
     }
 }
