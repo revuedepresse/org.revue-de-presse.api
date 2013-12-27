@@ -3,6 +3,7 @@
 namespace WeavingTheWeb\Bundle\ApiBundle\Repository;
 
 use Doctrine\ORM\NoResultException;
+use FOS\ElasticaBundle\Doctrine\ORM\Provider;
 
 /**
  * Class UserStreamRepository
@@ -191,8 +192,9 @@ class UserStreamRepository extends ResourceRepository
      */
     public function createRemainingUserStatusQueryBuilder()
     {
-        $queryBuilder = $this->createQueryBuilder('a');
-        $queryBuilder->andWhere('a.id > 1031692');
+        $alias = Provider::ENTITY_ALIAS;
+        $queryBuilder = $this->createQueryBuilder($alias);
+        $queryBuilder->andWhere($alias . '.id > 1000364');
 
         return $queryBuilder;
     }
