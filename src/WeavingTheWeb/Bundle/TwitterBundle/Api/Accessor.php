@@ -393,17 +393,23 @@ class Accessor
             $this->logger->error('[endpoint] ' . $endpoint);
             $this->logger->error('[message] ' . $errorMessage);
             $this->logger->error('[code] ' . $errorCode);
+            $this->logger->error('[token] ' . $token->getOauthToken());
 
             /**
-             * Freeze token and wait for 15 minutes before getting back to operation
+             * error code 34 => Resource not found
              */
-            $this->tokenRepository->freezeToken($token);
-            $this->moderator->waitFor(
-                '15*60',
-                [
-                    '{{ token }}' => substr($token->getOauthToken(), 0, '8'),
-                ]
-            );
+            if ($errorCode !== 34) {
+                /**
+                 * Freeze token and wait for 15 minutes before getting back to operation
+                 */
+                $this->tokenRepository->freezeToken($token->getOauthToken());
+                $this->moderator->waitFor(
+                    '15*60',
+                    [
+                        '{{ token }}' => substr($token->getOauthToken(), 0, '8'),
+                    ]
+                );
+            }
         }
 
         return $content;
