@@ -396,15 +396,16 @@ class Accessor
             $this->logger->error('[token] ' . $token->getOauthToken());
 
             /**
-             * error code 34 => Resource not found
+             * error code 34 => Sorry, that page does not exist
+             * error code 52 => Empty reply from server
              */
-            if ($errorCode !== 34) {
+            if ($errorCode !== 34 && $errorCode !== 52) {
                 /**
                  * Freeze token and wait for 15 minutes before getting back to operation
                  */
                 $this->tokenRepository->freezeToken($token->getOauthToken());
                 $this->moderator->waitFor(
-                    '15*60',
+                    15*60,
                     [
                         '{{ token }}' => substr($token->getOauthToken(), 0, '8'),
                     ]

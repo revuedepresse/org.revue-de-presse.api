@@ -211,7 +211,10 @@ class UserStatus
 
             // Twitter allows 3200 tweets to be retrieved at most from now for any given user
             return $count < max($statusesCount, 3200);
-        } elseif ($user->errors[0]->code === 34) {
+        } elseif (
+            $user->errors[0]->code === 34 ||
+            $user->errors[0]->code === 52
+        ) {
             $this->logger->error($user->errors[0]->message);
 
             return false;
