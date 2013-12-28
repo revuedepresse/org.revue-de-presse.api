@@ -24,13 +24,13 @@ class UserStatusProvider extends Provider
             $objects = $this->fetchSlice($queryBuilder, $batchSize, $offset);
 
             $this->objectPersister->insertMany($objects);
-//            foreach ($objects as $object) {
-//                $object->setIndexed(true);
-//            }
-//
-//            $manager = $this->managerRegistry->getManager();
-//            $manager->persist($object);
-//            $manager->flush();
+            foreach ($objects as $object) {
+                $object->setIndexed(true);
+            }
+
+            $manager = $this->managerRegistry->getManager();
+            $manager->persist($object);
+            $manager->flush();
 
             if ($this->options['clear_object_manager']) {
                 $this->managerRegistry->getManagerForClass($this->objectClass)->clear();
