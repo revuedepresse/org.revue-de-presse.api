@@ -53,6 +53,7 @@ class UserStreamRepository extends ResourceRepository
                     $userStream = $this->queryFactory->makeUserStream($extract);
                 }
 
+                $userStream->setIndexed(true);
                 $userStream->setIdentifier($extract['identifier']);
                 $entityManager->persist($userStream);
             } else {
