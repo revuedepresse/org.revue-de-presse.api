@@ -3,6 +3,7 @@
 namespace WeavingTheWeb\Bundle\TwitterBundle\QualityAssurance\Http;
 
 use FOS\ElasticaBundle\Client as BaseClient;
+use Elastica\Request;
 
 /**
  * Class Client
@@ -11,7 +12,7 @@ use FOS\ElasticaBundle\Client as BaseClient;
  */
 class Client extends BaseClient
 {
-    public function request($path, $method, $data = array(), array $query = array())
+    public function request($path, $method = Request::GET, $data = array(), array $query = array())
     {
         return;
     }
