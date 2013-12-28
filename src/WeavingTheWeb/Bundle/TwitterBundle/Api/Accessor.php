@@ -386,7 +386,7 @@ class Accessor
             ]]];
         }
 
-        if (is_object($content) && isset($content->errors)) {
+        if ($this->hasError($content->errors)) {
             $errorMessage = $content->errors[0]->message;
             $errorCode = $content->errors[0]->code;
 
@@ -579,6 +579,7 @@ class Accessor
     /**
      * @param string $endpoint
      * @return bool
+     * @throws \Exception
      */
     public function isApiRateLimitReached($endpoint = '/statuses/show/:id')
     {
@@ -588,8 +589,7 @@ class Accessor
             $message = $rateLimitStatus->errors[0]->message;
 
             $this->logger->error($message);
-
-            return $rateLimitStatus->errors[0]->code;
+            throw new \Exception($message, $rateLimitStatus->errors[0]->code);
         } else {
             $leastUpperBound = $rateLimitStatus->resources->statuses->$endpoint->limit;
             $remainingCall = $rateLimitStatus->resources->statuses->$endpoint->remaining;
@@ -607,6 +607,9 @@ class Accessor
      */
     protected function hasError($response)
     {
-        return isset($response->errors) && is_array($response->errors) && isset($response->errors[0]);
+        return is_object($response) &&
+            isset($response->errors) &&
+            is_array($response->errors) &&
+            isset($response->errors[0]);
     }
 }

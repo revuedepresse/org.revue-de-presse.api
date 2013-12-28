@@ -140,12 +140,16 @@ class UserStatus
         $token = $this->tokenRepository->refreshFreezeCondition($this->accessor->userToken, $this->logger);
 
         if (!$token->isFrozen()) {
-            $apiRateLimitReached = $this->accessor->isApiRateLimitReached('/statuses/user_timeline');
-            if (is_integer($apiRateLimitReached) || $apiRateLimitReached) {
-                $remainingStatuses = null;
-                $this->tokenRepository->freezeToken($this->accessor->userToken);
-            } else {
-                $availableTwitterApi = true;
+            try {
+                if (!$this->accessor->isApiRateLimitReached('/statuses/user_timeline')) {
+                    $availableTwitterApi = true;
+                }
+            } catch (\Exception $exception) {
+                if ($exception->getCode() === 52) {
+                    $availableTwitterApi = true;
+                } else {
+                    $this->tokenRepository->freezeToken($this->accessor->userToken);
+                }
             }
         } else {
             $now = new \DateTime;
