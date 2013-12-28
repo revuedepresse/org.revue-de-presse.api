@@ -386,7 +386,7 @@ class Accessor
             ]]];
         }
 
-        if ($this->hasError($content->errors)) {
+        if ($this->hasError($content)) {
             $errorMessage = $content->errors[0]->message;
             $errorCode = $content->errors[0]->code;
 
