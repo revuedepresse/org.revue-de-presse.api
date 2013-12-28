@@ -71,6 +71,9 @@ class ProduceUserFriendListCommand extends AccessorAwareCommand
             if (count($result) === 1) {
                 $user = $result;
             } else {
+                /**
+                 * TODO Handle errors with exception
+                 */
                 $twitterUser = $this->accessor->showUser($friend);
                 if (isset($twitterUser->screen_name)) {
                     $message = '[publishing new message produced for "' . ( $twitterUser->screen_name ) . '"]';

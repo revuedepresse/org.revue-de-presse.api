@@ -199,6 +199,10 @@ class UserStatus
     {
         $count = $this->userStreamRepository->countStatuses($options['oauth'], $options['screen_name']);
         $this->logger->info('[count of statuses already retrieved for user "'.$options['screen_name'].'"] '. $count);
+
+        /**
+         * TODO Handle errors with exception
+         */
         $user = $this->accessor->showUser($options['screen_name']);
 
         if (!isset($user->errors)) {
