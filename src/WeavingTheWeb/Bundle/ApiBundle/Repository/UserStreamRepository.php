@@ -194,7 +194,8 @@ class UserStreamRepository extends ResourceRepository
     {
         $alias = Provider::ENTITY_ALIAS;
         $queryBuilder = $this->createQueryBuilder($alias);
-        $queryBuilder->andWhere($alias . '.id > 1000364');
+        $queryBuilder->andWhere($alias . '.indexed = :indexed');
+        $queryBuilder->setParameter('indexed', false, \PDO::PARAM_BOOL);
 
         return $queryBuilder;
     }

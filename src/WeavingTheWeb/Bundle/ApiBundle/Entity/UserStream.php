@@ -17,7 +17,8 @@ use Doctrine\ORM\Mapping as ORM;
  *      indexes={
  *          @ORM\index(name="hash", columns={"ust_hash"}),
  *          @ORM\index(name="screen_name", columns={"ust_full_name"}),
- *          @ORM\index(name="status_id", columns={"ust_status_id"})
+ *          @ORM\index(name="status_id", columns={"ust_status_id"}),
+ *          @ORM\index(name="indexed", columns={"ust_indexed"})
  *      }
  * )
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
