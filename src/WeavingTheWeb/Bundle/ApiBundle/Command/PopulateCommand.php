@@ -17,6 +17,8 @@ class PopulateCommand extends BaseCommand
      */
     protected function configure()
     {
+        parent::configure();
+
         $this
             ->setName('weaving_the_web:elastica:populate')
             ->addOption('index', null, InputOption::VALUE_OPTIONAL, 'The index to repopulate')
