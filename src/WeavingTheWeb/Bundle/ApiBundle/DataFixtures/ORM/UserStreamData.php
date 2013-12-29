@@ -16,6 +16,7 @@ class UserStreamData implements FixtureInterface
         $properties = [
             'text' => 'This is a tweet text.',
             'identifier' => 'access token',
+            'indexed' => false,
             'name' => 'Thierry Marianne',
             'screen_name' => 'thierrymarianne',
             'user_avatar' => 'http://avatar.url',
@@ -29,6 +30,7 @@ class UserStreamData implements FixtureInterface
         $repository->setName($properties['name']);
         $repository->setScreenName($properties['screen_name']);
         $repository->setIdentifier($properties['identifier']);
+        $repository->setIndexed($properties['indexed']);
         $repository->setStatusId($properties['status_id']);
         $repository->setCreatedAt(new \DateTime());
         $repository->setUpdatedAt(new \DateTime());
