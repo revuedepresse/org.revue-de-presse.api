@@ -19,6 +19,7 @@ composer.phar
 /bin/behat
 /bin/phpunit
 /behat
+/bin/phpspec
 behat_report.html
 
 /check_wtw.php
