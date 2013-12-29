@@ -1,2 +1,12 @@
-amqp.friendlist.production.success: "{{ count }} messages have been produced"
-amqp.list_members.production.success: "{{ count }} messages have been produced for list {{ list }}"
+amqp:
+    production:
+        friendlist:
+            success: '{{ count }} messages have been produced.'
+    production:
+        list_members:
+            success: '{{ count }} messages have been produced for list {{ list }}.'
+    info:
+        message_persisted: 'A message has been persisted for "{{ user }}".'
+        message_published: 'A message has been published for "{{ user }}".'
+    output:
+        unavailable_resource: 'A resource is not available for user "{{ user }}".'

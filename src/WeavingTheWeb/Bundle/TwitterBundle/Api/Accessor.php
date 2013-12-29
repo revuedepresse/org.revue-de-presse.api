@@ -341,9 +341,7 @@ class Accessor
         $tokens = $this->getTokens();
         $httpClient = $this->httpClient;
 
-        /**
-         * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token
-         */
+        /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token */
         $token = $this->tokenRepository->refreshFreezeCondition($tokens['oauth'], $this->logger);
         if ($token->isFrozen()) {
             $now = new \DateTime;
@@ -357,9 +355,7 @@ class Accessor
 
         try {
             if (is_null($this->authenticationHeader)) {
-                /**
-                 * @var \TwitterOAuth $connection
-                 */
+                /** @var \TwitterOAuth $connection */
                 $connection = new $httpClient(
                     $tokens['key'],
                     $tokens['secret'],
@@ -373,9 +369,7 @@ class Accessor
                 $this->httpClient->setHeader('Authorization', $this->authenticationHeader);
                 $this->httpClient->request('GET', $endpoint);
 
-                /**
-                 * @var \Symfony\Component\HttpFoundation\Response $response
-                 */
+                /** @var \Symfony\Component\HttpFoundation\Response $response */
                 $response = $this->httpClient->getResponse();
                 $encodedContent = $response->getContent();
                 $content = json_decode($encodedContent);
@@ -409,9 +403,7 @@ class Accessor
             ) {
                 throw new UnavailableResourceException($errorMessage, $errorCode);
             } else {
-                /**
-                 * Freeze token and wait for 15 minutes before getting back to operation
-                 */
+                /** Freeze token and wait for 15 minutes before getting back to operation */
                 $this->tokenRepository->freezeToken($token->getOauthToken());
                 $this->moderator->waitFor(
                     15*60,

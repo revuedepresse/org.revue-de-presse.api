@@ -60,6 +60,9 @@ abstract class AccessorAwareCommand extends ContainerAwareCommand
 
     protected function setUpLogger()
     {
+        /**
+         * @var \Psr\Log\LoggerInterface $logger
+         */
         $this->logger = $this->getContainer()->get('logger');
     }
 }

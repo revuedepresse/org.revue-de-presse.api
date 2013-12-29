@@ -5,6 +5,7 @@ namespace WeavingTheWeb\Bundle\AmqpBundle\Command;
 use Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Input\InputOption,
     Symfony\Component\Console\Output\OutputInterface;
+use WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;
 use WTW\UserBundle\Entity\User;
 
 /**
@@ -67,37 +68,36 @@ class ProduceUserFriendListCommand extends AccessorAwareCommand
             if (count($result) === 1) {
                 $user = $result;
             } else {
-                /**
-                 * TODO Handle errors with exception
-                 */
-                $twitterUser = $this->accessor->showUser($friend);
-                if (isset($twitterUser->screen_name) && !isset($twitterUser->protected)) {
-                    $publishedMessage = $translator->trans(
-                        'logs.info.message_published',
-                        ['{{ user }}' => $twitterUser->screen_name],
-                        'logs'
+                try {
+                    $twitterUser = $this->accessor->showUser($friend);
+                    if (isset($twitterUser->screen_name) && !isset($twitterUser->protected)) {
+                        $user = new User();
+                        $user->setTwitterUsername($twitterUser->screen_name);
+                        $user->setTwitterID($friend);
+                        $user->setEnabled(false);
+                        $user->setLocked(false);
+                        $user->setEmail('@' . $twitterUser->screen_name);
+                        $user->setStatus(0);
+
+                        $entityManager->persist($user);
+                        $entityManager->flush();
+                        $publishedMessage = $translator->trans(
+                            'amqp.info.message_persisted',
+                            ['{{ user }}' => $twitterUser->screen_name],
+                            'messages'
+                        );
+                        $this->logger->info($publishedMessage);
+                    }
+                } catch (UnavailableResourceException $exception) {
+                    $unavailableResource = $translator->trans(
+                        'amqp.output.unavailable_resource',
+                        ['{{ user }}' => $friend],
+                        'messages'
                     );
-                    $this->logger->info($publishedMessage);
+                    $output->writeln($unavailableResource);
+                    $this->logger->error($exception->getMessage());
 
-                    $user = new User();
-                    $user->setTwitterUsername($twitterUser->screen_name);
-                    $user->setTwitterID($friend);
-                    $user->setEnabled(false);
-                    $user->setLocked(false);
-                    $user->setEmail('@' . $twitterUser->screen_name);
-                    $user->setStatus(0);
-
-                    $entityManager->persist($user);
-                    $entityManager->flush();
-                } elseif (
-                    isset($twitterUser->errors) &&
-                    is_array($twitterUser->errors) &&
-                    isset($twitterUser->errors[0])
-                ) {
-                    $message = print_r($twitterUser->errors[0]->message, true);
-                    $this->logger->error($message);
-
-                    break;
+                    return $exception->getCode();
                 }
             }
 
@@ -105,12 +105,18 @@ class ProduceUserFriendListCommand extends AccessorAwareCommand
                 $messageBody['screen_name'] = $user->getTwitterUsername();
                 $producer->setContentType('application/json');
                 $producer->publish(serialize(json_encode($messageBody)));
+                $publishedMessage = $translator->trans(
+                    'amqp.info.message_published',
+                    ['{{ user }}' => $messageBody['screen_name']],
+                    'messages'
+                );
+                $this->logger->info($publishedMessage);
             }
         }
 
         $output->writeln(
             $translator->trans(
-                'amqp.friendlist.production.success',
+                'amqp.production.friendlist.success',
                 ['{{ count }}' => count($friends->ids)]
             )
         );
