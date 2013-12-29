@@ -23,6 +23,9 @@ class UserStreamData implements FixtureInterface
             'status_id' => 194987972,
         ];
 
+        /**
+         * TODO Rename user stream to user status
+         */
         $repository = new UserStream();
 
         $repository->setText($properties['text']);
