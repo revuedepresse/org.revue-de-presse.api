@@ -4,6 +4,9 @@ namespace WeavingTheWeb\Bundle\AmqpBundle\Twitter;
 
 use OldSound\RabbitMqBundle\RabbitMq\ConsumerInterface;
 use PhpAmqpLib\Message\AmqpMessage;
+use Psr\Log\LoggerInterface;
+use WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException,
+    WeavingTheWeb\Bundle\TwitterBundle\Exception\ProtectedAccountException;
 
 /**
  * Class UserStatus
@@ -12,6 +15,19 @@ use PhpAmqpLib\Message\AmqpMessage;
  */
 class UserStatus implements ConsumerInterface
 {
+    /**
+     * @var LoggerInterface
+     */
+    protected $logger;
+
+    /**
+     * @param \Psr\Log\LoggerInterface $logger
+     */
+    public function setLogger($logger)
+    {
+        $this->logger = $logger;
+    }
+
     /**
      * @var \WeavingTheWeb\Bundle\TwitterBundle\Serializer\UserStatus $serializer
      */
@@ -56,7 +72,22 @@ class UserStatus implements ConsumerInterface
             'screen_name' => $options['screen_name'],
         ];
 
-        return $this->serializer->serialize($options, $greedy = true);
+        try {
+            $success = $this->serializer->serialize($options, $greedy = true);
+        } catch (UnavailableResourceException $unavailableResource) {
+            if ($unavailableResource instanceof ProtectedAccountException) {
+                /**
+                 * This message should not be processed again for protected accounts
+                 */
+                $success = true;
+                $this->logger->info($unavailableResource->getMessage());
+            } else {
+                $success = false;
+                $this->logger->error($unavailableResource->getMessage());
+            }
+        }
+
+        return $success;
     }
 
     /**

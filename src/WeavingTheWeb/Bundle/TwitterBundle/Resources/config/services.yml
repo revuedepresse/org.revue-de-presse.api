@@ -74,3 +74,4 @@ services:
             - [ setModerator, [ @weaving_the_web_twitter.moderator.api_limit ] ]
             - [ setUserStreamRepository, [ @weaving_the_web_twitter.repository.user_stream ] ]
             - [ setTokenRepository, [ @weaving_the_web_twitter.repository.token ] ]
+            - [ setTranslator, [ @translator ] ]

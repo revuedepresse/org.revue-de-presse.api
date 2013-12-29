@@ -1,0 +1,7 @@
+logs:
+    info:
+        account_protected: Account of user "{{ user }}" is protected and thus its status cannot be discovered.
+        status_discovered: '{0} No status have been discovered for user "{{ user }}".|]1,Inf] {{ count }} status have been discovered for user "{{ user }}".'
+        status_existing: '{0} No status exist in the database for user "{{ user }}".|{1} {{ count }} status exists in the database for user "{{ user }}".|]1,Inf] {{ count }} status exist in the database for user "{{ user }}".'
+        status_saved: '{1} {{ count }} new status has been saved for user "{{ user }}".|]1,Inf] {{ count }} new status have been saved for user "{{ user }}".'
+        message_published: A new message has been published for "{{ user }}".
