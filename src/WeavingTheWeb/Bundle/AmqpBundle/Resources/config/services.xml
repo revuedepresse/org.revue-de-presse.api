@@ -15,6 +15,9 @@
             <call method="setSerializer">
                 <argument type="service" id="weaving_the_web_twitter.serializer.user_status" />
             </call>
+            <call method="setLogger">
+                <argument type="service" id="logger" />
+            </call>
         </service>
         <service id="weaving_the_web_amqp.twitter.lists_member_status"
                  class="%weaving_the_web_amqp.produce_lists_members_command.class%">

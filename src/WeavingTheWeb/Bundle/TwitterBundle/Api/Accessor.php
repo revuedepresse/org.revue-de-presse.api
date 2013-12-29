@@ -4,6 +4,7 @@ namespace WeavingTheWeb\Bundle\TwitterBundle\Api;
 
 use Doctrine\Common\Persistence\ObjectRepository;
 use Psr\Log\LoggerInterface;
+use WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;
 
 /**
  * Class Accessor
@@ -330,6 +331,7 @@ class Accessor
     /**
      * @param $endpoint
      * @return \API|mixed|object
+     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
      */
     public function contactEndpoint($endpoint)
     {
@@ -396,10 +398,17 @@ class Accessor
             $this->logger->error('[token] ' . $token->getOauthToken());
 
             /**
+             * error code  6 => cURL error: Could not resolve host
              * error code 34 => Sorry, that page does not exist
              * error code 52 => Empty reply from server
              */
-            if ($errorCode !== 34 && $errorCode !== 52) {
+            if (
+                $errorCode === 6 &&
+                $errorCode === 34 &&
+                $errorCode === 52
+            ) {
+                throw new UnavailableResourceException($errorMessage, $errorCode);
+            } else {
                 /**
                  * Freeze token and wait for 15 minutes before getting back to operation
                  */
@@ -416,9 +425,6 @@ class Accessor
         return $content;
     }
 
-    /**
-     *
-     */
     public function setupClient()
     {
         $clientClass = $this->clientClass;

@@ -2,12 +2,34 @@
 
 namespace WeavingTheWeb\Bundle\TwitterBundle\Serializer;
 
+use Symfony\Component\Translation\TranslatorInterface;
+use WeavingTheWeb\Bundle\TwitterBundle\Exception\ProtectedAccountException;
+use WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;
+
 /**
  * Class UserStatus
  * @package WeavingTheWeb\Bundle\TwitterBundle\Accessor
  */
 class UserStatus
 {
+    const MAX_AVAILABLE_TWEETS_PER_USER = 3200;
+
+    /**
+     * @var \Symfony\Component\Translation\Translator $translator
+     */
+    public $translator;
+
+    /**
+     * @param $translator
+     * @return $this
+     */
+    public function setTranslator(TranslatorInterface $translator)
+    {
+        $this->translator = $translator;
+
+        return $this;
+    }
+
     /**
      * @var \WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor $accessor
      */
@@ -122,7 +144,7 @@ class UserStatus
             }
 
             return $success;
-        } elseif (!isset($remainingStatuses)) {
+        } else {
             return false;
         }
     }
@@ -198,34 +220,67 @@ class UserStatus
     /**
      * @param $options
      * @return bool
+     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
      */
     protected function remainingStatuses($options)
     {
-        $count = $this->userStreamRepository->countStatuses($options['oauth'], $options['screen_name']);
-        $this->logger->info('[count of statuses already retrieved for user "'.$options['screen_name'].'"] '. $count);
+        $existingStatusCount = $this->userStreamRepository->countStatuses($options['oauth'], $options['screen_name']);
+        $existingStatus = $this->translator->transChoice(
+            'logs.info.status_existing',
+            $existingStatusCount,
+            [
+                '{{ status_count }}' => $existingStatusCount,
+                '{{ user }}' => $options['screen_name'],
+            ],
+            'logs'
+        );
+        $this->logger->info($existingStatus);
 
-        /**
-         * TODO Handle errors with exception
-         */
         $user = $this->accessor->showUser($options['screen_name']);
 
-        if (!isset($user->errors)) {
+        if (is_object($user) && !isset($user->errors)) {
             if (!isset($user->statuses_count) || $user->protected) {
                 $statusesCount = 0;
+                if ($user->protected) {
+                    $protectedAccount = $this->translator->trans(
+                        'logs.info.account_protected',
+                        ['{{ user }}' => $options['screen_name']],
+                        'logs'
+                    );
+                    throw new ProtectedAccountException($protectedAccount);
+                }
+
             } else {
-                $statusesCount = $user->statuses_count;
+                /**
+                 * Twitter allows 3200 past tweets at most to be retrieved for any given user
+                 */
+                $statusesCount = max($user->statuses_count, self::MAX_AVAILABLE_TWEETS_PER_USER);
             }
-            $this->logger->info('[total public statuses updated by user "'.$options['screen_name'].'"] '. $statusesCount);
 
-            // Twitter allows 3200 tweets to be retrieved at most from now for any given user
-            return $count < max($statusesCount, 3200);
-        } elseif (
-            $user->errors[0]->code === 34 ||
-            $user->errors[0]->code === 52
-        ) {
-            $this->logger->error($user->errors[0]->message);
+            $discoveredStatus = $this->translator->transChoice(
+                'logs.info.status_discovered',
+                $statusesCount, [
+                    '{{ user }}' => $options['screen_name'],
+                    '{{ count }}' => $statusesCount,
+                ],
+                'logs'
+            );
+            $this->logger->info($discoveredStatus);
 
-            return false;
+            return $existingStatusCount < $statusesCount;
+        } else {
+            if (!is_object($user)) {
+                $errorCode = 0;
+                $errorMessage = 'Unavailable user';
+                $logLevel = 'info';
+            } else {
+                $errorCode = $user->errors[0]->code;
+                $errorMessage = $user->errors[0]->message;
+                $logLevel = 'error';
+            }
+
+            $this->logger->$logLevel($user->errors[0]->message);
+            throw new UnavailableResourceException($errorMessage, $errorCode);
         }
     }
 
@@ -244,7 +299,15 @@ class UserStatus
             $statusesCount = count($statuses);
             if ($statusesCount > 0) {
                 $success = $statusesCount;
-                $this->logger->info('[' . $statusesCount . ' status(es) saved]');
+                $savedTweets = $this->translator->transChoice(
+                    'logs.info.status_saved',
+                    $statusesCount, [
+                        '{{ user }}' => $options['screen_name'],
+                        '{{ count }}' => $statusesCount,
+                    ],
+                    'logs'
+                );
+                $this->logger->info($savedTweets);
             } else {
                 $this->logger->info('[nothing new for ' . $options['screen_name'] . ']');
             }

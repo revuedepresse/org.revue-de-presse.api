@@ -6,6 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand,
     Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Output\OutputInterface,
     Symfony\Component\Console\Input\InputOption;
+use WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;
 
 /**
  * Class SerializeStatusesCommand
@@ -78,9 +79,7 @@ class SerializeStatusesCommand extends ContainerAwareCommand
             'bearer' => $input->getOption('bearer'),
         ];
 
-        /**
-         * @var \WeavingTheWeb\Bundle\TwitterBundle\Serializer\UserStatus $serializer
-         */
+        /** @var \WeavingTheWeb\Bundle\TwitterBundle\Serializer\UserStatus $serializer */
         $serializer = $this->getContainer()->get('weaving_the_web_twitter.serializer.user_status');
         if ($input->hasOption('bearer') && $input->getOption('bearer')) {
             $header = $this->getAuthenticationHeader();
@@ -88,11 +87,15 @@ class SerializeStatusesCommand extends ContainerAwareCommand
         }
 
         $greedy = $input->hasOption('greedy') && $input->getOption('greedy');
-        $success = $serializer->serialize($options, $greedy);
 
-        /**
-         * @var \Symfony\Component\Translation\Translator $translator
-         */
+        try {
+            $success = $serializer->serialize($options, $greedy);
+        } catch (UnavailableResourceException $unavailableResource) {
+            $success = false;
+            $this->getContainer()->get('logger')->error($unavailableResource->getMessage());
+        }
+
+        /** @var \Symfony\Component\Translation\Translator $translator */
         $translator = $this->getContainer()->get('translator');
         $output->writeln($translator->trans('twitter.statuses.persistence.success'));
 
@@ -104,9 +107,7 @@ class SerializeStatusesCommand extends ContainerAwareCommand
      */
     protected function getAuthenticationHeader()
     {
-        /**
-         * @var \WeavingTheWeb\Bundle\TwitterBundle\Security\ApplicationAuthenticator $authenticator
-         */
+        /** @var \WeavingTheWeb\Bundle\TwitterBundle\Security\ApplicationAuthenticator $authenticator */
         $authenticator = $this->getContainer()->get('weaving_the_web_twitter.application_authenticator');
         $authenticationResult = $authenticator->authenticate(
             $this->getContainer()->getParameter('weaving_the_web_twitter.consumer_key'),

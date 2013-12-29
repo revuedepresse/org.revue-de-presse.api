@@ -43,9 +43,7 @@ class ProduceUserFriendListCommand extends AccessorAwareCommand
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        /**
-         * @var \OldSound\RabbitMqBundle\RabbitMq\Producer $producer
-         */
+        /** @var \OldSound\RabbitMqBundle\RabbitMq\Producer $producer */
         $producer = $this->getContainer()->get('old_sound_rabbit_mq.weaving_the_web_amqp.twitter.user_status_producer');
         $tokens = $this->getTokens($input);
 
@@ -55,18 +53,16 @@ class ProduceUserFriendListCommand extends AccessorAwareCommand
 
         $messageBody = $tokens;
 
-
-        /**
-         * @var \WTW\UserBundle\Repository\UserRepository $userRepository
-         */
+        /** @var \WTW\UserBundle\Repository\UserRepository $userRepository */
         $userRepository = $this->getContainer()->get('wtw_user.repository.user');
-        /**
-         * @var \Doctrine\ORM\EntityManager $entityManager
-         */
+
+        /** @var \Doctrine\ORM\EntityManager $entityManager */
         $entityManager = $this->getContainer()->get('doctrine.orm.entity_manager');
 
-        foreach ($friends->ids as $friend) {
+        /** @var \Symfony\Bundle\FrameworkBundle\Translation\Translator $translator */
+        $translator = $this->getContainer()->get('translator');
 
+        foreach ($friends->ids as $friend) {
             $result = $userRepository->findOneBy(['twitterID' => $friend]);
             if (count($result) === 1) {
                 $user = $result;
@@ -75,9 +71,13 @@ class ProduceUserFriendListCommand extends AccessorAwareCommand
                  * TODO Handle errors with exception
                  */
                 $twitterUser = $this->accessor->showUser($friend);
-                if (isset($twitterUser->screen_name)) {
-                    $message = '[publishing new message produced for "' . ( $twitterUser->screen_name ) . '"]';
-                    $this->logger->info($message);
+                if (isset($twitterUser->screen_name) && !isset($twitterUser->protected)) {
+                    $publishedMessage = $translator->trans(
+                        'logs.info.message_published',
+                        ['{{ user }}' => $twitterUser->screen_name],
+                        'logs'
+                    );
+                    $this->logger->info($publishedMessage);
 
                     $user = new User();
                     $user->setTwitterUsername($twitterUser->screen_name);
@@ -89,7 +89,11 @@ class ProduceUserFriendListCommand extends AccessorAwareCommand
 
                     $entityManager->persist($user);
                     $entityManager->flush();
-                } elseif (isset($twitterUser->errors) && is_array($twitterUser->errors) && isset($twitterUser->errors[0])) {
+                } elseif (
+                    isset($twitterUser->errors) &&
+                    is_array($twitterUser->errors) &&
+                    isset($twitterUser->errors[0])
+                ) {
                     $message = print_r($twitterUser->errors[0]->message, true);
                     $this->logger->error($message);
 
@@ -97,15 +101,18 @@ class ProduceUserFriendListCommand extends AccessorAwareCommand
                 }
             }
 
-            $messageBody['screen_name'] = $user->getTwitterUsername();
-            $producer->setContentType('application/json');
-            $producer->publish(serialize(json_encode($messageBody)));
+            if (isset($user)) {
+                $messageBody['screen_name'] = $user->getTwitterUsername();
+                $producer->setContentType('application/json');
+                $producer->publish(serialize(json_encode($messageBody)));
+            }
         }
 
-        /**
-         * @var \Symfony\Bundle\FrameworkBundle\Translation\Translator $translator
-         */
-        $translator = $this->getContainer()->get('translator');
-        $output->writeln($translator->trans('amqp.friendlist.production.success', ['{{ count }}' => count($friends->ids)]));
+        $output->writeln(
+            $translator->trans(
+                'amqp.friendlist.production.success',
+                ['{{ count }}' => count($friends->ids)]
+            )
+        );
     }
 }

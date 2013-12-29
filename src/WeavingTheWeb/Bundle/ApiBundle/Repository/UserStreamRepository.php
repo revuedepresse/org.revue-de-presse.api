@@ -33,23 +33,20 @@ class UserStreamRepository extends ResourceRepository
 
         foreach ($extracts as $key => $extract) {
             if (!$this->existsAlready($extract['identifier'], $extract['screen_name'], $extract['status_id'])) {
-
+                /**
+                 * Make a distinction between records embedding the actual resource (api_document) and incomplete record
+                 * in order to update records which original resources are missing
+                 */
                 if ($this->existsAlready($extract['identifier'], $extract['screen_name'], $extract['status_id'], false)) {
-                    /**
-                     * @var \WeavingTheWeb\Bundle\ApiBundle\Repository\UserStreamRepository $userStreamRepository
-                     */
+                    /** @var \WeavingTheWeb\Bundle\ApiBundle\Repository\UserStreamRepository $userStreamRepository */
                     $userStreamRepository = $entityManager->getRepository('WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream');
-                    /**
-                     * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream $userStream
-                     */
+                    /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream $userStream */
                     $userStream = $userStreamRepository->findOneBy(['statusId' => $extract['status_id']]);
                     $userStream->setCreatedAt($extract['created_at']);
                     $userStream->setApiDocument($extract['api_document']);
                     $userStream->setUpdatedAt(new \DateTime());
                 } else {
-                    /**
-                     * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream $userStream
-                     */
+                    /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream $userStream */
                     $userStream = $this->queryFactory->makeUserStream($extract);
                 }
 
