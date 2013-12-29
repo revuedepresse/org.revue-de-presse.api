@@ -5,8 +5,8 @@ namespace WeavingTheWeb\Bundle\AmqpBundle\Command;
 use Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Input\InputOption,
     Symfony\Component\Console\Output\OutputInterface;
-use WeavingTheWeb\Bundle\TwitterBundle\Exception\ProtectedAccountException;
-use WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;
+use WeavingTheWeb\Bundle\TwitterBundle\Exception\ProtectedAccountException,
+    WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;
 use WTW\UserBundle\Entity\User;
 
 /**
