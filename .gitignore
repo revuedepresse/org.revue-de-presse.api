@@ -31,6 +31,8 @@ behat_report.html
 /app/cache
 /app/config/*.yml
 /app/logs
+/app/SymfonyRequirements.php
+
 /app/*.xml
 /devops/files/*.tar.gz
 /mobile
