@@ -229,7 +229,7 @@ class UserStatus
             'logs.info.status_existing',
             $existingStatusCount,
             [
-                '{{ status_count }}' => $existingStatusCount,
+                '{{ count }}' => $existingStatusCount,
                 '{{ user }}' => $options['screen_name'],
             ],
             'logs'
