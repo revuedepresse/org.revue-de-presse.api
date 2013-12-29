@@ -16,11 +16,12 @@ api/.htaccess
 # dependencies management
 composer.phar
 
+/behat
+behat_report.html
+
 /bin/behat
 /bin/phpunit
-/behat
 /bin/phpspec
-behat_report.html
 
 /check_wtw.php
 
@@ -29,12 +30,14 @@ behat_report.html
 
 /api/lib/Smarty/demo
 /api/lib/Smarty/www-data
+
+/app/*.xml
+
 /app/cache
 /app/config/*.yml
 /app/logs
 /app/SymfonyRequirements.php
 
-/app/*.xml
 /devops/files/*.tar.gz
 /mobile
 
