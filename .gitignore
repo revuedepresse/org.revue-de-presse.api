@@ -17,6 +17,7 @@ api/.htaccess
 composer.phar
 
 /behat
+/bin/phpspec
 behat_report.html
 
 /bin/behat
