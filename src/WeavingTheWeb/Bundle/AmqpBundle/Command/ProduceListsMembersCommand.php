@@ -120,7 +120,7 @@ class ProduceListsMembersCommand extends AccessorAwareCommand
                  * @var \Symfony\Bundle\FrameworkBundle\Translation\Translator $translator
                  */
                 $translator = $this->getContainer()->get('translator');
-                $output->writeln($translator->trans('amqp.list_members.production.success', [
+                $output->writeln($translator->trans('amqp.production.list_members.success', [
                     '{{ count }}' => count($members->users),
                     '{{ list }}' => $list->name,
                 ]));
