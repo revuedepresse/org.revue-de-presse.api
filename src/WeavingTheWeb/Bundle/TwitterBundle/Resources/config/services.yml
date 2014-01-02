@@ -52,6 +52,7 @@ services:
             - [ setTokenRepository, [ @weaving_the_web_twitter.repository.token ] ]
             - [ setUserSecret, [ %weaving_the_web_twitter.oauth_secret.default% ] ]
             - [ setUserToken, [ %weaving_the_web_twitter.oauth_token.default% ] ]
+            - [ setTranslator, [ @translator ] ]
         properties:
             environment: %kernel.environment%
             httpClient: %weaving_the_web_twitter.oauth_client.class%

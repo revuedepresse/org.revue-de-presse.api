@@ -145,7 +145,10 @@ class UserStatus
 
             return $success;
         } else {
-            return false;
+            /**
+             * Marks the serialization as successful if there are no remaining status
+             */
+            return isset($remainingStatuses) ?: false;
         }
     }
 
@@ -255,17 +258,16 @@ class UserStatus
                  * Twitter allows 3200 past tweets at most to be retrieved for any given user
                  */
                 $statusesCount = max($user->statuses_count, self::MAX_AVAILABLE_TWEETS_PER_USER);
+                $discoveredStatus = $this->translator->transChoice(
+                    'logs.info.status_discovered',
+                    $user->statuses_count, [
+                        '{{ user }}' => $options['screen_name'],
+                        '{{ count }}' => $statusesCount,
+                    ],
+                    'logs'
+                );
+                $this->logger->info($discoveredStatus);
             }
-
-            $discoveredStatus = $this->translator->transChoice(
-                'logs.info.status_discovered',
-                $statusesCount, [
-                    '{{ user }}' => $options['screen_name'],
-                    '{{ count }}' => $statusesCount,
-                ],
-                'logs'
-            );
-            $this->logger->info($discoveredStatus);
 
             return $existingStatusCount < $statusesCount;
         } else {
