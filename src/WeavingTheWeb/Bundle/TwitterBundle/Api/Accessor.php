@@ -424,6 +424,8 @@ class Accessor
                         '{{ token }}' => substr($token->getOauthToken(), 0, '8'),
                     ]
                 );
+
+                return $this->contactEndpoint($endpoint);
             }
         }
 
