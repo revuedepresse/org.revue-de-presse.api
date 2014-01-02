@@ -79,6 +79,19 @@ class Accessor
     protected $tokenRepository;
 
     /**
+     * @var \Symfony\Component\Translation\Translator $translator
+     */
+    protected $translator;
+
+    /**
+     * @param \Symfony\Component\Translation\Translator $translator
+     */
+    public function setTranslator($translator)
+    {
+        $this->translator = $translator;
+    }
+
+    /**
      * @param LoggerInterface $logger
      */
     public function __construct(LoggerInterface $logger = null)
@@ -590,12 +603,20 @@ class Accessor
             throw new \Exception($message, $rateLimitStatus->errors[0]->code);
         } else {
             $leastUpperBound = $rateLimitStatus->resources->statuses->$endpoint->limit;
-            $remainingCall = $rateLimitStatus->resources->statuses->$endpoint->remaining;
-            $message = '[rate limit for "' . $endpoint . '"] ' . $remainingCall;
+            $remainingCalls = $rateLimitStatus->resources->statuses->$endpoint->remaining;
+            $remainingCallsMessage = $this->translator->transChoice(
+                'logs.info.calls_remaining',
+                $remainingCalls,
+                [
+                    '{{ count }}' => $remainingCalls,
+                    '{{ endpoint }}' => $endpoint,
+                    '{{ identifier }}' => substr($this->userToken, 0, '8'),
+                ],
+                'logs'
+            );
+            $this->logger->info($remainingCallsMessage);
 
-            $this->logger->info($message);
-
-            return $remainingCall < floor($leastUpperBound * (1/10));
+            return $remainingCalls < floor($leastUpperBound * (1/10));
         }
     }
 

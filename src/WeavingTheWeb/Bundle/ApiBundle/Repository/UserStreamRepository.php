@@ -134,7 +134,7 @@ class UserStreamRepository extends ResourceRepository
         $queryBuilder->setParameter('screenName', $screenName);
         $count = $queryBuilder->getQuery()->getSingleScalarResult();
 
-        return $count;
+        return intval($count);
     }
 
     /**
