@@ -11,6 +11,9 @@ class UserStatusProvider extends Provider
      */
     public function populate(\Closure $loggerClosure = null, array $options = array())
     {
+        /**
+         * @var \Doctrine\ORM\QueryBuilder $queryBuilder
+         */
         $queryBuilder = $this->createQueryBuilder();
         $nbObjects = $this->countObjects($queryBuilder);
         $offset = isset($options['offset']) ? intval($options['offset']) : 0;
@@ -23,27 +26,32 @@ class UserStatusProvider extends Provider
             }
             $objects = $this->fetchSlice($queryBuilder, $batchSize, $offset);
 
-            $this->objectPersister->insertMany($objects);
-            foreach ($objects as $object) {
-                $object->setIndexed(true);
-            }
+            if (count($objects) > 0) {
+                $this->objectPersister->insertMany($objects);
+                foreach ($objects as $object) {
+                    $object->setIndexed(true);
+                }
 
-            $manager = $this->managerRegistry->getManager();
-            $manager->persist($object);
-            $manager->flush();
+                $manager = $this->managerRegistry->getManager();
+                $manager->persist($object);
+                $manager->flush();
 
-            if ($this->options['clear_object_manager']) {
-                $this->managerRegistry->getManagerForClass($this->objectClass)->clear();
-            }
+                if ($this->options['clear_object_manager']) {
+                    $this->managerRegistry->getManagerForClass($this->objectClass)->clear();
+                }
 
-            usleep($sleep);
+                usleep($sleep);
 
-            if ($loggerClosure) {
-                $stepNbObjects = count($objects);
-                $stepCount = $stepNbObjects + $offset;
-                $percentComplete = 100 * $stepCount / $nbObjects;
-                $objectsPerSecond = $stepNbObjects / (microtime(true) - $stepStartTime);
-                $loggerClosure(sprintf('%0.1f%% (%d/%d), %d objects/s', $percentComplete, $stepCount, $nbObjects, $objectsPerSecond));
+                if ($loggerClosure) {
+                    $stepNbObjects = count($objects);
+                    $stepCount = $stepNbObjects + $offset;
+                    $percentComplete = 100 * $stepCount / $nbObjects;
+                    $objectsPerSecond = $stepNbObjects / (microtime(true) - $stepStartTime);
+                    $loggerClosure(sprintf('%0.1f%% (%d/%d), %d objects/s', $percentComplete, $stepCount, $nbObjects, $objectsPerSecond));
+                }
+            } elseif ($offset > 0) {
+                $nbObjects = $this->countObjects($queryBuilder);
+                $offset--;
             }
         }
     }
