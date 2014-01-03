@@ -34,6 +34,18 @@ class ProduceUserFriendListCommand extends AccessorAwareCommand
             null,
             InputOption::VALUE_REQUIRED,
             'The screen name of a user'
+        )->addOption(
+            'routing_key',
+            null,
+            InputOption::VALUE_OPTIONAL,
+            'A producer key'
+        )
+        ->addOption(
+            'producer',
+            null,
+            InputOption::VALUE_OPTIONAL,
+            'A producer key',
+            'twitter.user_status'
         )->setAliases(array('wtw:amqp:tw:prd:utl'));
     }
 
@@ -44,8 +56,19 @@ class ProduceUserFriendListCommand extends AccessorAwareCommand
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
+        $producerKey = $input->getOption('producer');
+
         /** @var \OldSound\RabbitMqBundle\RabbitMq\Producer $producer */
-        $producer = $this->getContainer()->get('old_sound_rabbit_mq.weaving_the_web_amqp.twitter.user_status_producer');
+        $producer = $this->getContainer()->get(sprintf(
+            'old_sound_rabbit_mq.weaving_the_web_amqp.%s_producer', $producerKey
+        ));
+
+        if ($input->hasOption('routing_key') && !is_null($input->getOption('routing_key'))) {
+            $routingKey = $input->getOption('routing_key');
+        } else {
+            $routingKey = '';
+        }
+
         $tokens = $this->getTokens($input);
 
         $this->setUpLogger();
@@ -104,7 +127,7 @@ class ProduceUserFriendListCommand extends AccessorAwareCommand
             if (isset($user)) {
                 $messageBody['screen_name'] = $user->getTwitterUsername();
                 $producer->setContentType('application/json');
-                $producer->publish(serialize(json_encode($messageBody)));
+                $producer->publish(serialize(json_encode($messageBody)), $routingKey);
                 $publishedMessage = $translator->trans(
                     'amqp.info.message_published',
                     ['{{ user }}' => $messageBody['screen_name']],
@@ -117,7 +140,8 @@ class ProduceUserFriendListCommand extends AccessorAwareCommand
         $output->writeln(
             $translator->trans(
                 'amqp.production.friendlist.success',
-                ['{{ count }}' => count($friends->ids)]
+                ['{{ count }}' => count($friends->ids)],
+                'messages'
             )
         );
     }
