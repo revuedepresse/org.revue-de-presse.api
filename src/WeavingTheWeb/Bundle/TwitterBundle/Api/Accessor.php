@@ -405,14 +405,16 @@ class Accessor
             $this->logger->error('[token] ' . $token->getOauthToken());
 
             /**
-             * error code  6 => cURL error: Could not resolve host
-             * error code 34 => Sorry, that page does not exist
-             * error code 52 => Empty reply from server
+             * error code   6 => cURL error: Could not resolve host
+             * error code  34 => Sorry, that page does not exist
+             * error code  52 => Empty reply from server
+             * error code 130 => Over capacity
              */
             if (
                 $errorCode === 6 &&
                 $errorCode === 34 &&
-                $errorCode === 52
+                $errorCode === 52 &&
+                $errorCode === 130
             ) {
                 throw new UnavailableResourceException($errorMessage, $errorCode);
             } else {

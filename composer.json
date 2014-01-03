@@ -46,7 +46,7 @@
         "jns/xhprof-bundle": "dev-master",
         "kertz/twitteroauth":"dev-master",
         "knplabs/knp-markdown-bundle": "1.2.*",
-        "oldsound/rabbitmq-bundle": "1.2.*",
+        "oldsound/rabbitmq-bundle": " dev-master",
         "ornicar/apc-bundle": "dev-master",
         "php":">=5.4.8",
         "predis/predis": "0.8.*",
