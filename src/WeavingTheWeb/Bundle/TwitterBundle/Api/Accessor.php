@@ -398,7 +398,7 @@ class Accessor
         $this->logger->info('[info] ' . $endpoint);
         if ($this->hasError($content)) {
             $errorMessage = $content->errors[0]->message;
-            $errorCode = intval($content->errors[0]->code);
+            $errorCode = $content->errors[0]->code;
 
             $this->logger->error('[message] ' . $errorMessage);
             $this->logger->error('[code] ' . $errorCode);
