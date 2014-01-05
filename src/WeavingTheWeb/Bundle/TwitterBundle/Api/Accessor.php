@@ -397,7 +397,7 @@ class Accessor
 
         if ($this->hasError($content)) {
             $errorMessage = $content->errors[0]->message;
-            $errorCode = intval($content->errors[0]->code);
+            $errorCode = $content->errors[0]->code;
 
             $this->logger->error('[endpoint] ' . $endpoint);
             $this->logger->error('[message] ' . $errorMessage);
@@ -411,9 +411,9 @@ class Accessor
              * error code 130 => Over capacity
              */
             if (
-                $errorCode === 6 &&
-                $errorCode === 34 &&
-                $errorCode === 52 &&
+                $errorCode === 6 ||
+                $errorCode === 34 ||
+                $errorCode === 52 ||
                 $errorCode === 130
             ) {
                 throw new UnavailableResourceException($errorMessage, $errorCode);
