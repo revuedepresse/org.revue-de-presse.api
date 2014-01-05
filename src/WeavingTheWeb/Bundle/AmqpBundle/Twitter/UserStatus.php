@@ -75,7 +75,10 @@ class UserStatus implements ConsumerInterface
         try {
             $success = $this->serializer->serialize($options, $greedy = true);
         } catch (UnavailableResourceException $unavailableResource) {
-            if ($unavailableResource instanceof ProtectedAccountException) {
+            if (
+                ($unavailableResource instanceof ProtectedAccountException) ||
+                ($unavailableResource->getCode() === 34)
+            ) {
                 /**
                  * This message should not be processed again for protected accounts
                  */
