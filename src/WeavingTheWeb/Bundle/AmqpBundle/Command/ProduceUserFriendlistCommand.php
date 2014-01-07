@@ -122,7 +122,7 @@ class ProduceUserFriendListCommand extends AccessorAwareCommand
                         $entityManager->persist($user);
                         $entityManager->flush();
                         $publishedMessage = $translator->trans(
-                            'amqp.info.message_persisted',
+                            'amqp.info.user_persisted',
                             ['{{ user }}' => $twitterUser->screen_name],
                             'messages'
                         );
