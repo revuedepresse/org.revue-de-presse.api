@@ -15,10 +15,10 @@ use Doctrine\ORM\Mapping as ORM;
  *              name="unique_hash", columns={"ust_hash", "ust_access_token", "ust_full_name"}),
  *      },
  *      indexes={
- *          @ORM\index(name="hash", columns={"ust_hash"}),
- *          @ORM\index(name="screen_name", columns={"ust_full_name"}),
- *          @ORM\index(name="status_id", columns={"ust_status_id"}),
- *          @ORM\index(name="indexed", columns={"ust_indexed"})
+ *          @ORM\Index(name="hash", columns={"ust_hash"}),
+ *          @ORM\Index(name="screen_name", columns={"ust_full_name"}),
+ *          @ORM\Index(name="status_id", columns={"ust_status_id"}),
+ *          @ORM\Index(name="indexed", columns={"ust_indexed"})
  *      }
  * )
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
