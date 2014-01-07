@@ -110,6 +110,8 @@ class ProduceUserFriendListCommand extends AccessorAwareCommand
                             'messages'
                         );
                         $this->logger->info($publishedMessage);
+                    } else {
+                        $this->logger->info(serialize($twitterUser));
                     }
                 } catch (UnavailableResourceException $exception) {
                     $unavailableResource = $translator->trans(
