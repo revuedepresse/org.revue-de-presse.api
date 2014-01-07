@@ -5,6 +5,7 @@ namespace WeavingTheWeb\Bundle\AmqpBundle\Command;
 use Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Input\InputOption,
     Symfony\Component\Console\Output\OutputInterface;
+use WeavingTheWeb\Bundle\TwitterBundle\Exception\ProtectedAccountException;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;
 use WTW\UserBundle\Entity\User;
 
@@ -88,12 +89,28 @@ class ProduceUserFriendListCommand extends AccessorAwareCommand
 
         foreach ($friends->ids as $friend) {
             $result = $userRepository->findOneBy(['twitterID' => $friend]);
-            if (count($result) === 1) {
+
+            if ($result > 1) {
+                $errorMessage = sprintf('A user (with id #%s) has been persisted twice in the database', $friend);
+                $this->logger->error($errorMessage);
+                throw new \RuntimeException($errorMessage);
+
+                break;
+            } elseif (count($result) === 1) {
                 $user = $result;
             } else {
                 try {
                     $twitterUser = $this->accessor->showUser($friend);
-                    if (isset($twitterUser->screen_name) && !isset($twitterUser->protected)) {
+                    if ($twitterUser->protected) {
+                        $protectedAccount = $translator->trans(
+                            'logs.info.account_protected',
+                            ['{{ user }}' => $twitterUser->screen_name],
+                            'logs'
+                        );
+                        throw new ProtectedAccountException($protectedAccount);
+                    }
+
+                    if (isset($twitterUser->screen_name)) {
                         $user = new User();
                         $user->setTwitterUsername($twitterUser->screen_name);
                         $user->setTwitterID($friend);
@@ -113,6 +130,12 @@ class ProduceUserFriendListCommand extends AccessorAwareCommand
                     } else {
                         $this->logger->info(serialize($twitterUser));
                     }
+                } catch (ProtectedAccountException $exception) {
+                    $this->logger->info($exception->getMessage());
+
+                    // TODO Flag protected accounts
+                    // Skip protected accounts
+                    continue;
                 } catch (UnavailableResourceException $exception) {
                     $unavailableResource = $translator->trans(
                         'amqp.output.unavailable_resource',
