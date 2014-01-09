@@ -90,13 +90,7 @@ class ProduceUserFriendListCommand extends AccessorAwareCommand
         foreach ($friends->ids as $friend) {
             $result = $userRepository->findOneBy(['twitterID' => $friend]);
 
-            if ($result > 1) {
-                $errorMessage = sprintf('A user (with id #%s) has been persisted twice in the database', $friend);
-                $this->logger->error($errorMessage);
-                throw new \RuntimeException($errorMessage);
-
-                break;
-            } elseif (count($result) === 1) {
+            if (count($result) === 1) {
                 $user = $result;
             } else {
                 try {
