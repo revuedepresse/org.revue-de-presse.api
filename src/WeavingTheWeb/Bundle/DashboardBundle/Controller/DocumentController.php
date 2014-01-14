@@ -3,8 +3,7 @@
 namespace WeavingTheWeb\Bundle\DashboardBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
-use Symfony\Component\HttpFoundation\RedirectResponse,
-    Symfony\Component\HttpFoundation\Request,
+use Symfony\Component\HttpFoundation\Request,
     Symfony\Bundle\FrameworkBundle\Controller\Controller,
     Symfony\Component\HttpFoundation\Response,
     Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
@@ -23,8 +22,9 @@ class DocumentController extends Controller
      * @Extra\Route("/navigation/{activeMenu}", name="weaving_the_web_dashboard_show_navigation")
      * @Extra\Method({"GET"})
      *
-     * @return \Symfony\Component\HttpFoundation\Response
-     * @throws \Exception
+     * @param string $activeMenu
+     * @param bool $showSitemap
+     * @return Response
      */
     public function showNavigationAction($activeMenu = 'github_repositories', $showSitemap = false)
     {
