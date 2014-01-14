@@ -1,5 +1,0 @@
-weaving_the_web_amqp:
-    resource: "@WeavingTheWebAMQPBundle/Controller/"
-    type:     annotation
-    prefix:   /
-
