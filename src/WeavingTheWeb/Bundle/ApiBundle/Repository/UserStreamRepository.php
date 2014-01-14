@@ -197,4 +197,17 @@ class UserStreamRepository extends ResourceRepository
 
         return $queryBuilder;
     }
+
+    /**
+     * @return array
+     */
+    public function findLatest()
+    {
+        $queryBuilder = $this->createQueryBuilder('t');
+        $queryBuilder->select(['t.text', 't.screenName', 't.id', 't.starred']);
+        $queryBuilder->setMaxResults(50);
+        $queryBuilder->orderBy('t.id', 'desc');
+
+        return $queryBuilder->getQuery()->getResult();
+    }
 }
