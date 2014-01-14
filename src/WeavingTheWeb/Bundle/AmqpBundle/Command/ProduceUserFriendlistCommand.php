@@ -95,7 +95,7 @@ class ProduceUserFriendListCommand extends AccessorAwareCommand
             } else {
                 try {
                     $twitterUser = $this->accessor->showUser($friend);
-                    if ($twitterUser->protected) {
+                    if (isset($twitterUser->protected) && $twitterUser->protected) {
                         $protectedAccount = $translator->trans(
                             'logs.info.account_protected',
                             ['{{ user }}' => $twitterUser->screen_name],
