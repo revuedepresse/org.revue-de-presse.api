@@ -39,6 +39,11 @@ weaving_the_web_dashboard:
     resource: "@WeavingTheWebDashboardBundle/Controller/"
     type:     annotation
 
+weaving_the_web_twitter:
+    prefix:   /twitter
+    resource: "@WeavingTheWebTwitterBundle/Controller/"
+    type:     annotation
+
 weaving_the_web_user:
     prefix:   /user
     resource: "@WeavingTheWebUserBundle/Resources/config/routing.xml"

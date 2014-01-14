@@ -77,6 +77,30 @@ class UserStream
     protected $apiDocument;
 
     /**
+     * @ORM\Column(name="ust_starred", type="boolean", options={"default": false})
+     */
+    protected $starred = false;
+
+    /**
+     * @param $starred
+     * @return $this
+     */
+    public function setStarred($starred)
+    {
+        $this->starred = $starred;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function isStarred()
+    {
+        return $this->starred;
+    }
+
+    /**
      * @ORM\Column(name="ust_indexed", type="boolean", options={"default": false})
      */
     protected $indexed;
