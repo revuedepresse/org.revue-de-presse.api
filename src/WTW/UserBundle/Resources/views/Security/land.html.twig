@@ -32,9 +32,11 @@
 
             {% block confirmed_registration %}{% endblock %}
 
+            {% if feature_toggling.search %}
             <div class="offset1">
             {% render(controller('weaving_the_web_dashboard.search_controller:showSearchFormAction')) %}
             </div>
+            {% endif %}
 
             {% if not is_granted("IS_AUTHENTICATED_REMEMBERED") %}
                 {% block registration_form %}{% endblock %}
