@@ -2,6 +2,7 @@
 
 namespace WeavingTheWeb\Bundle\ApiBundle\Search;
 
+use Doctrine\ORM\NoResultException;
 use FOS\ElasticaBundle\Doctrine\ORM\Provider;
 
 class UserStatusProvider extends Provider
@@ -11,9 +12,7 @@ class UserStatusProvider extends Provider
      */
     public function populate(\Closure $loggerClosure = null, array $options = array())
     {
-        /**
-         * @var \Doctrine\ORM\QueryBuilder $queryBuilder
-         */
+        /** @var \Doctrine\ORM\QueryBuilder $queryBuilder */
         $queryBuilder = $this->createQueryBuilder();
         $nbObjects = $this->countObjects($queryBuilder);
         $offset = isset($options['offset']) ? intval($options['offset']) : 0;
@@ -50,8 +49,16 @@ class UserStatusProvider extends Provider
                     $loggerClosure(sprintf('%0.1f%% (%d/%d), %d objects/s', $percentComplete, $stepCount, $nbObjects, $objectsPerSecond));
                 }
             } elseif ($offset > 0) {
-                $nbObjects = $this->countObjects($queryBuilder);
-                $offset--;
+                try {
+                    /** @var \Doctrine\ORM\QueryBuilder $queryBuilder */
+                    $queryBuilder = $this->createQueryBuilder();
+                    $nbObjects = $this->countObjects($queryBuilder);
+                } catch (NoResultException $exception) {
+                    $nbObjects = ceil($nbObjects / 2);
+                    $loggerClosure('Could not count remaining objects using database engine');
+                }
+
+                $offset = 0;
             }
         }
     }
