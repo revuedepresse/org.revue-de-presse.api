@@ -15,6 +15,7 @@ api/.htaccess
 
 # dependencies management
 composer.phar
+composer.lock
 
 /behat
 behat_report.html
