@@ -49,6 +49,9 @@ parameters:
     database_user_admin:        ## FILL ME ##
     database_password_admin:    %mysql.admin_password%
 
+    elasticsearch_host:         %elasticsearch.host%
+    elasticsearch_port:         %elasticsearch.port%
+
     feature_toggling_search:    false
 
     endpoint_facebook_feed:     %api_facebook_host_port%/api/facebook/api.facebook.get.feed.php
