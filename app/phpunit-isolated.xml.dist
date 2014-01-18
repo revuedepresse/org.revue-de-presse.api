@@ -11,7 +11,7 @@
         processIsolation            = "true"
         stopOnFailure               = "true"
         syntaxCheck                 = "true"
-        bootstrap                   = "autoload.php">
+        bootstrap                   = "bootstrap.php.cache">
 
     <testsuites>
         <testsuite name="WTW Test Suite">
