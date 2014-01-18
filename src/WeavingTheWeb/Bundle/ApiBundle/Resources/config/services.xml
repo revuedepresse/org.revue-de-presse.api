@@ -19,16 +19,6 @@
     </parameters>
 
     <services>
-        <service id="weaving_the_web.search_provider.user_status"
-                 class="%weaving_the_web.api.search_provider.user_status.class%"
-                 parent="fos_elastica.provider.prototype.orm">
-            <tag name="fos_elastica.provider" index="twitter" type="user_status" />
-            <argument index="0" type="service" id="fos_elastica.object_persister.twitter.user_status" />
-            <argument index="1" type="string">%weaving_the_web.api.user_status%</argument>
-            <argument index="2" type="collection">
-                <argument key="query_builder_method" type="string">createRemainingUserStatusQueryBuilder</argument>
-            </argument>
-        </service>
         <service id="weaving_the_web.api.data_provider" class="%weaving_the_web.api.data_provider.class%">
             <argument type="service" id="weaving_the_web.api.query_factory" />
         </service>
