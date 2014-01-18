@@ -15,7 +15,6 @@ api/.htaccess
 
 # dependencies management
 composer.phar
-composer.lock
 
 /behat
 behat_report.html
@@ -45,7 +44,10 @@ behat_report.html
 /src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/components
 
 /app/bootstrap.php.cache
+
 /vendor
+/vendor-no-dev
+
 /web/assetic
 /web/bundles
 /web/css
