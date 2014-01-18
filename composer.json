@@ -43,7 +43,6 @@
         "jms/di-extra-bundle":"1.4.*",
         "jms/security-extra-bundle":"1.5.*",
         "jms/serializer-bundle": "dev-master",
-        "jns/xhprof-bundle": "dev-master",
         "kertz/twitteroauth":"dev-master",
         "knplabs/knp-markdown-bundle": "1.2.*",
         "oldsound/rabbitmq-bundle": " dev-master",
