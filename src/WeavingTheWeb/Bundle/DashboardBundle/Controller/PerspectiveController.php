@@ -22,18 +22,28 @@ class PerspectiveController extends ContainerAware
      * @Extra\Cache(expires="+2 hours", public="true")
      * @Extra\Route("/sitemap", name="weaving_the_web_dashboard_show_sitemap")
      * @Extra\Template("WeavingTheWebDashboardBundle:Perspective:showSitemap.html.twig")
+     *
+     * @return array
      */
     public function showSitemapAction()
     {
-        /**
-         * @var \WeavingTheWeb\Bundle\DashboardBundle\Routing\Router $router
-         */
+        /** @var \WeavingTheWeb\Bundle\DashboardBundle\Routing\Router $router */
         $router = $this->container->get('weaving_the_web_dashboard.router');
 
-        return [
-            'perspectives' => $router->getPublicPerspectivesSitemap(),
-            'title' => 'title_sitemap'
-        ];
+        /** @var \Symfony\Bundle\TwigBundle\TwigEngine $templateEngine */
+        $templateEngine = $this->container->get('templating');
+        $response = $templateEngine->renderResponse(
+             'WeavingTheWebDashboardBundle:Perspective:showSitemap.html.twig', array(
+                'perspectives' => $router->getPublicPerspectivesSitemap(),
+                'title' => 'title_sitemap'
+            )
+        );
+        $dateTime = new \DateTime();
+        $dateInterval = \DateInterval::createFromDateString('2 hours');
+        $expiresAt = $dateTime->add($dateInterval);
+        $response->setExpires($expiresAt);
+
+        return $response;
     }
 
     /**
@@ -85,9 +95,7 @@ class PerspectiveController extends ContainerAware
              $query = $connection->executeQuery($perspective->getValue());
              $translator = $this->container->get('translator');
 
-             /**
-              * @var \Symfony\Bundle\TwigBundle\TwigEngine $templateEngine
-              */
+             /** @var \Symfony\Bundle\TwigBundle\TwigEngine $templateEngine */
             $templateEngine = $this->container->get('templating');
 
             if ($perspective->getName() !== null) {
@@ -96,7 +104,7 @@ class PerspectiveController extends ContainerAware
                 $perspectiveTitle = $translator->trans('title_perspective');
             }
 
-            return $templateEngine->renderResponse(
+            $response = $templateEngine->renderResponse(
                  'WeavingTheWebDashboardBundle:Perspective:showPerspective.html.twig', array(
                      'active_menu_item' => 'dashboard',
                      'error' => $query->error,
@@ -105,6 +113,12 @@ class PerspectiveController extends ContainerAware
                      'title' => $perspectiveTitle
                 )
             );
+            $dateTime = new \DateTime();
+            $dateInterval = \DateInterval::createFromDateString('2 hours');
+            $expiresAt = $dateTime->add($dateInterval);
+            $response->setExpires($expiresAt);
+
+            return $response;
         } else {
             throw new NotFoundHttpException('The requested query it not available');
         }
@@ -112,6 +126,7 @@ class PerspectiveController extends ContainerAware
 
     /**
      * @param $perspective
+     * @return bool
      */
     public function validPerspective($perspective)
     {
