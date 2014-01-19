@@ -44,11 +44,11 @@ class WeavingTheWebApiExtension extends Extension
         $container->setDefinition('weaving_the_web.search_provider.user_status', $definitionDecorator)
             ->setClass('%weaving_the_web.api.search_provider.user_status.class%')
             ->replaceArgument(
-                0, [new Reference('fos_elastica.object_persister.' . $searchIndex . '.user_status')]
+                0, new Reference('fos_elastica.object_persister.' . $searchIndex . '.user_status')
             )->replaceArgument(
                 1, '%weaving_the_web.api.user_status%'
             )->replaceArgument(
-                1, ['query_builder_method' => 'createRemainingUserStatusQueryBuilder']
+                2, ['query_builder_method' => 'createRemainingUserStatusQueryBuilder']
             )
             ->addTag('fos_elastica.provider', ['index' => 'twitter', 'type' => 'user_status']);
     }
