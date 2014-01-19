@@ -192,6 +192,8 @@ class UserStreamRepository extends ResourceRepository
     {
         $alias = Provider::ENTITY_ALIAS;
         $queryBuilder = $this->createQueryBuilder($alias);
+        $queryBuilder->andWhere($alias . '.statusId > 0');
+        $queryBuilder->andWhere($alias . '.statusId is not null');
         $queryBuilder->andWhere($alias . '.indexed = :indexed');
         $queryBuilder->setParameter('indexed', false, \PDO::PARAM_BOOL);
 
