@@ -1,0 +1,24 @@
+imports:
+    - { resource: ../parameters/parameters_assets.yml }
+    - { resource: ../parameters/parameters_dbal.yml }
+    - { resource: ../parameters/parameters_elasticsearch.yml }
+    - { resource: ../parameters/parameters_facebook.yml }
+    - { resource: ../parameters/parameters_mailer.yml }
+    - { resource: ../parameters/parameters_rabbitmq.yml }
+    - { resource: ../parameters/parameters_twitter.yml }
+    - { resource: ../parameters/parameters_weaving_the_web.yml }
+    - { resource: ../parameters/parameters_xhprof.yml }
+
+parameters:
+    app_version:                0.1
+
+    apc_host:                   %apc.host%
+
+    feature_toggling_search:    false
+
+    locale:                     en
+
+    secret:                     ## FILL ME ##
+
+    test_database_memory:       false
+    test_database_path:         %kernel.cache_dir%/wtw_dashboard.db
