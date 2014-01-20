@@ -60,6 +60,11 @@ class TweetController extends Controller
     /**
      * @Extra\Route("/tweet/star/{id}", name="weaving_the_web_twitter_tweet_star")
      * @Extra\Method({"POST", "OPTIONS"})
+     * @Extra\ParamConverter(
+     *      "userStream",
+     *      class="WeavingTheWebApiBundle:UserStream",
+     *      options={"entity_manager"="write"}
+     * )
      *
      * @param UserStream $userStream
      * @return JsonResponse
@@ -72,6 +77,11 @@ class TweetController extends Controller
     /**
      * @Extra\Route("/tweet/unstar/{id}", name="weaving_the_web_twitter_tweet_unstar")
      * @Extra\Method({"POST", "OPTIONS"})
+     * @Extra\ParamConverter(
+     *      "userStream",
+     *      class="WeavingTheWebApiBundle:UserStream",
+     *      options={"entity_manager"="write"}
+     * )
      *
      * @param UserStream $userStream
      * @return JsonResponse
@@ -88,12 +98,13 @@ class TweetController extends Controller
      */
     protected function toggleStarringStatus(UserStream $userStream, $starred = false)
     {
+        /** @var \Symfony\Component\HttpFoundation\RequestStack $requestStack */
         $requestStack = $this->get('request_stack');
         $request = $requestStack->getMasterRequest();
 
         if ($request->isMethod('POST')) {
             $userStream->setStarred($starred);
-            $entityManager = $this->getDoctrine()->getManager();
+            $entityManager = $this->getDoctrine()->getManager('write');
             $entityManager->persist($userStream);
             $entityManager->flush();
 
