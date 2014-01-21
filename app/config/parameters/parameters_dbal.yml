@@ -19,17 +19,17 @@ parameters:
     database_driver_read:     pdo_mysql
     database_host_read:       %mysql.host_read%
     database_port_read:       %mysql.port_read%
-    database_name_read:       %mysql.test_database_read%
-    database_user_read:       %mysql.test_user_read%
-    database_password_read:   %mysql.test_password_read%
+    database_name_read:       %mysql.database_read%
+    database_user_read:       %mysql.user_read%
+    database_password_read:   %mysql.password_read%
     
     database_charset_write:   UTF8
     database_driver_write:    pdo_mysql
     database_host_write:      %mysql.host_write%
     database_port_write:      %mysql.port_write%
-    database_name_write:      %mysql.test_database_write%
-    database_user_write:      %mysql.test_user_write%
-    database_password_write:  %mysql.test_password_write%
+    database_name_write:      %mysql.database_write%
+    database_user_write:      %mysql.user_write%
+    database_password_write:  %mysql.password_write%
 
     database_charset_test:    UTF8
     database_driver_test:     pdo_mysql
