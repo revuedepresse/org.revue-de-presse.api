@@ -13,9 +13,10 @@ parameters:
     weaving_the_web_twitter.oauth_client.class:                   TwitterOAuth
     weaving_the_web_twitter.oauth_token.default:                  %api_twitter_user_token%
     weaving_the_web_twitter.oauth_secret.default:                 %api_twitter_user_secret%
+    weaving_the_web_twitter.repository.user_stream.class:         %weaving_the_web_api.entity.user_stream.class%
+    weaving_the_web_twitter.repository.token.class:               %weaving_the_web_api.entity.token.class%
     weaving_the_web_twitter.serializer.user_status.class:         WeavingTheWeb\Bundle\TwitterBundle\Serializer\UserStatus
     weaving_the_web_twitter.serialize_statuses.class:             WeavingTheWeb\Bundle\TwitterBundle\Command\SerializeStatusesCommand
-    weaving_the_web_twitter.serialize_timeline_command.class:     WeavingTheWeb\Bundle\TwitterBundle\Command\SerializeTimelineCommand
     weaving_the_web_twitter.version:                              %api_twitter_version%
 
 services:
@@ -33,12 +34,17 @@ services:
         class: %weaving_the_web_api.repository.user_stream.class%
         factory_service: doctrine.orm.entity_manager
         factory_method: getRepository
-        arguments: [%weaving_the_web_api.entity.user_stream.class%]
+        arguments: [%weaving_the_web_twitter.repository.user_stream.class%]
+    weaving_the_web_twitter.repository.read.user_stream:
+        class: %weaving_the_web_api.repository.user_stream.class%
+        factory_service: doctrine.orm.read_entity_manager
+        factory_method: getRepository
+        arguments: [%weaving_the_web_twitter.repository.user_stream.class%]
     weaving_the_web_twitter.repository.token:
         class: %weaving_the_web_api.repository.token.class%
         factory_service: doctrine.orm.entity_manager
         factory_method: getRepository
-        arguments: [%weaving_the_web_api.entity.token.class%]
+        arguments: [%weaving_the_web_twitter.repository.token.class%]
     weaving_the_web_twitter.api_accessor:
         class: %weaving_the_web_twitter.api_accessor.class%
         arguments:
