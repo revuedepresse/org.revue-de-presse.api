@@ -1,0 +1,23 @@
+<div class="span12" ng-controller="ShowTweetsAction">
+    <table class="table table-condensed">
+        <tr ng-repeat="tweet in tweets">
+            <td>
+                <dl class="dl-horizontal" id="{{ tweet.status_id }}">
+                    <dd>{{ tweet.text }}</dd>
+                    <dd>{{ tweet.screenName }}</dd>
+                    <dd>
+                        <button class="ui button" ng-class="{true: 'hide', false: ''}[tweet.starred]" ng-click="star(tweet.status_id, $index)">
+                            Star<span ng-if="tweet.starred">red</span>
+                        </button>
+                        <button class="ui button" ng-class="{true: '', false: 'hide'}[tweet.starred]" ng-click="unstar(tweet.status_id, $index)">
+                            Unstar<span ng-if="!tweet.starred">red</span>
+                        </button>
+                    </dd>
+                </dl>
+            </td>
+        </tr>
+    </table>
+    <div ng-model="tweets">
+    </div>
+</div>
+
