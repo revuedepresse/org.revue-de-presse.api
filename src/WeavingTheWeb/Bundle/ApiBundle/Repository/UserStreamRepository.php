@@ -12,6 +12,15 @@ use FOS\ElasticaBundle\Doctrine\ORM\Provider;
  */
 class UserStreamRepository extends ResourceRepository
 {
+    protected $oauthToken;
+
+    public function setOauthToken($oauthToken)
+    {
+        $this->oauthToken = $oauthToken;
+
+        return $this;
+    }
+
     public function getAlias()
     {
         return 'ust';
@@ -206,9 +215,12 @@ class UserStreamRepository extends ResourceRepository
     public function findLatest()
     {
         $queryBuilder = $this->createQueryBuilder('t');
-        $queryBuilder->select(['t.text', 't.screenName', 't.id', 't.starred']);
-        $queryBuilder->setMaxResults(50);
-        $queryBuilder->orderBy('t.id', 'desc');
+        $queryBuilder->select(['t.text', 't.screenName as screen_name', 't.id', 't.statusId as status_id', 't.starred'])
+            ->andWhere('t.identifier = :identifier')
+            ->setMaxResults(50)
+            ->orderBy('t.id', 'desc');
+
+        $queryBuilder->setParameter('identifier', $this->oauthToken);
 
         return $queryBuilder->getQuery()->getResult();
     }

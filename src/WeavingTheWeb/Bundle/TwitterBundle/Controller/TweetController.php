@@ -27,6 +27,13 @@ class TweetController extends Controller
             return $this->getCorsOptionsResponse();
         } else {
             $userStreamRepository = $this->get('weaving_the_web_twitter.repository.read.user_stream');
+            $userStreamRepository->setOauthToken(
+                $request->get(
+                    'token',
+                    null,
+                    $this->container->getParameter('weaving_the_web_twitter.oauth_token.default')
+                )
+            );
 
             return new JsonResponse($userStreamRepository->findLatest(), 200, ['Access-Control-Allow-Origin' => '*']);
         }
