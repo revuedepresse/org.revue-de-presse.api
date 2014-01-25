@@ -124,7 +124,7 @@ class TweetController extends Controller
             $entityManager->flush();
 
             return new JsonResponse([
-                'status' => $userStream->getId()
+                'status' => $userStream->getStatusId()
             ], 200, ['Access-Control-Allow-Origin' => '*']);
         } else {
             return $this->getCorsOptionsResponse();
