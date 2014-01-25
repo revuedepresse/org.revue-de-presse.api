@@ -1,0 +1,12 @@
+.ui.button {
+    margin-top: 10px;
+    width: 150px;
+}
+
+.ui.button.hide {
+    display: none;
+}
+
+dd {
+    margin-left: 5px;
+}

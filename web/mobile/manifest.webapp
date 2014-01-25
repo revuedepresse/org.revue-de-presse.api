@@ -1,0 +1,31 @@
+{
+  "name": "Weawer",
+  "description": "Own your tweets",
+  "version": "0.1",
+  "launch_path": "/mobile/app.html",
+  "icons": {
+    "16": "/mobile/app/images/icons/weaving-the-web-16.png",
+    "32": "/mobile/app/images/icons/weaving-the-web-32.png",
+    "48": "/mobile/app/images/icons/weaving-the-web-48.png",
+    "60": "/mobile/app/images/icons/weaving-the-web-60.png",
+    "90": "/mobile/app/images/icons/weaving-the-web-90.png",
+    "100": "/mobile/app/images/icons/weaving-the-web-100.png",
+    "120": "/mobile/app/images/icons/weaving-the-web-120.png",
+    "128": "/mobile/app/images/icons/weaving-the-web-128.png",
+    "256": "/mobile/app/images/icons/weaving-the-web-256.png"
+  },
+  "developer": {
+    "name": "Thierry Marianne",
+    "url": "http://## FILL HOSTNAME ##"
+  },
+  "chrome": {
+    "navigation": true
+  },
+  "default_locale": "en",
+  "installs_allowed_from": [
+    "https://marketplace.firefox.com",
+    "https://## FILL HOSTNAME ##"
+  ],
+  "origin": "app://## FILL HOSTNAME ##",
+  "type": "web"
+}
