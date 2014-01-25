@@ -65,7 +65,7 @@ class TweetController extends Controller
     }
 
     /**
-     * @Extra\Route("/tweet/star/{id}", name="weaving_the_web_twitter_tweet_star")
+     * @Extra\Route("/tweet/star/{statusId}", name="weaving_the_web_twitter_tweet_star")
      * @Extra\Method({"POST", "OPTIONS"})
      * @Extra\ParamConverter(
      *      "userStream",
@@ -82,7 +82,7 @@ class TweetController extends Controller
     }
 
     /**
-     * @Extra\Route("/tweet/unstar/{id}", name="weaving_the_web_twitter_tweet_unstar")
+     * @Extra\Route("/tweet/unstar/{statusId}", name="weaving_the_web_twitter_tweet_unstar")
      * @Extra\Method({"POST", "OPTIONS"})
      * @Extra\ParamConverter(
      *      "userStream",
@@ -111,8 +111,16 @@ class TweetController extends Controller
 
         if ($request->isMethod('POST')) {
             $userStream->setStarred($starred);
+
+            $clonedUserStream = clone $userStream;
+            $clonedUserStream->setUpdatedAt(new \DateTime());
+
             $entityManager = $this->getDoctrine()->getManager('write');
-            $entityManager->persist($userStream);
+
+            $entityManager->remove($userStream);
+            $entityManager->flush();
+
+            $entityManager->persist($clonedUserStream);
             $entityManager->flush();
 
             return new JsonResponse([
