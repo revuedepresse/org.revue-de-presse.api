@@ -1,6 +1,6 @@
 (function () {
     if (navigator.mozApps) {
-        var manifest_url = location.origin + '/manifest.webapp';
+        var manifest_url = location.origin + '/mobile/manifest.webapp';
         var installCheck = navigator.mozApps.checkInstalled(manifest_url);
 
         installCheck.onsuccess = function () {
