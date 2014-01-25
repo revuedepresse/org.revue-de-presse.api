@@ -1,11 +1,3 @@
-wtw_user:
-    resource: "@WTWUserBundle/Controller/"
-    type:     annotation
-
-wtw_registration_land:
-    defaults: { _controller: FOSUserBundle:Registration:land }
-    pattern:  /
-
 fos_js_routing:
     resource: "@FOSJsRoutingBundle/Resources/config/routing/routing.xml"
 
@@ -47,3 +39,11 @@ weaving_the_web_twitter:
 weaving_the_web_user:
     prefix:   /user
     resource: "@WeavingTheWebUserBundle/Resources/config/routing.xml"
+
+wtw_user:
+    resource: "@WTWUserBundle/Controller/"
+    type:     annotation
+
+wtw_registration_land:
+    defaults: { _controller: FOSUserBundle:Registration:land }
+    pattern:  /
