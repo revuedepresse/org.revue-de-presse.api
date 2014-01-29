@@ -3,8 +3,11 @@
         <tr ng-repeat="tweet in tweets">
             <td>
                 <dl class="dl-horizontal" id="{{ tweet.status_id }}">
-                    <dd>{{ tweet.text }}</dd>
-                    <dd>{{ tweet.screenName }}</dd>
+                    <dd>
+                        <img ng-src="{{ tweet.author_avatar }}" alt="http://twitter.com/{{ tweet.screen_name }}" />
+                        <a class="screen-name" href="http://twitter.com/{{ tweet.screen_name }}"><strong>@{{ tweet.screen_name }}</strong></a>
+                    </dd>
+                    <dd class="text" parse-url="props" ng-model="tweet">{{ tweet.text }}</dd>
                     <dd>
                         <button class="ui button" ng-class="{true: 'hide', false: ''}[tweet.starred]" ng-click="star(tweet.status_id, $index)">
                             Star<span ng-if="tweet.starred">red</span>

@@ -215,13 +215,32 @@ class UserStreamRepository extends ResourceRepository
     public function findLatest()
     {
         $queryBuilder = $this->createQueryBuilder('t');
-        $queryBuilder->select(['t.text', 't.screenName as screen_name', 't.id', 't.statusId as status_id', 't.starred'])
+        $queryBuilder->select(
+                [
+                    't.userAvatar as author_avatar',
+                    't.text',
+                    't.screenName as screen_name',
+                    't.id',
+                    't.statusId as status_id',
+                    't.starred',
+                    't.apiDocument original_document'
+                ]
+            )
             ->andWhere('t.identifier = :identifier')
             ->setMaxResults(50)
             ->orderBy('t.id', 'desc');
 
         $queryBuilder->setParameter('identifier', $this->oauthToken);
+        $result = $queryBuilder->getQuery()->getResult();
+        array_walk($result, function (&$value) {
+            $decodedValue = json_decode($value['original_document'], true);
+            if (array_key_exists('retweeted_status', $decodedValue)) {
+                $value['text'] = 'RT @' . $decodedValue['retweeted_status']['user']['screen_name'] . ': '.
+                    $decodedValue['retweeted_status']['text']
+                ;
+            }
+        });
 
-        return $queryBuilder->getQuery()->getResult();
+        return $result;
     }
 }
