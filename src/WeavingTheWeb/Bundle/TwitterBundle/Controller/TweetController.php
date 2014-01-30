@@ -9,7 +9,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller,
     Symfony\Component\HttpFoundation\File\Exception\AccessDeniedException,
     Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream;
-use WeavingTheWeb\Bundle\ApiBundle\Repository\TokenRepository;
 use WTW\UserBundle\Model\User;
 
 /**
@@ -35,7 +34,7 @@ class TweetController extends Controller
             $username = $request->get('username', null);
 
             if (is_null($username)) {
-                $token = $request->get(
+                $oauthToken = $request->get(
                     'token',
                     null,
                     $this->container->getParameter('weaving_the_web_twitter.oauth_token.default')
@@ -44,12 +43,17 @@ class TweetController extends Controller
                 /** @var \WTW\UserBundle\Entity\User $user */
                 $user = $userManager->findUserBy(['twitter_username' => $username]);
                 $tokens = $user->getTokens()->toArray();
+
+                /**
+                 * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token
+                 */
                 $token = $tokens[0];
+                $oauthToken = $token->getOauthToken();
             }
 
             /** @var User $user */
             $userStreamRepository = $this->get('weaving_the_web_twitter.repository.read.user_stream');
-            $userStreamRepository->setOauthToken($token);
+            $userStreamRepository->setOauthToken($oauthToken);
 
             return new JsonResponse($userStreamRepository->findLatest(), 200, ['Access-Control-Allow-Origin' => '*']);
         }
