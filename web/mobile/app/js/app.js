@@ -7,7 +7,7 @@ var weaverApp = angular.module('weaverApp', [
 
 weaverApp.config(
     ['$routeProvider', function($routeProvider) {
-        $routeProvider.when('/', {
+        $routeProvider.when('/:username', {
             templateUrl: '/mobile/app/partials/tweets.html',
             controller: 'ShowTweetsAction'
         });
