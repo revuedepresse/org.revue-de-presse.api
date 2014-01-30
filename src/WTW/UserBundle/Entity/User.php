@@ -220,7 +220,7 @@ class User extends BaseUser
     protected $roles;
 
     /**
-     * @ORM\ManyToMany(targetEntity="WeavingTheWeb\Bundle\ApiBundle\Entity\Token", inversedBy="users")
+     * @ORM\ManyToMany(targetEntity="WeavingTheWeb\Bundle\ApiBundle\Entity\Token", inversedBy="users", fetch="EAGER")
      * @ORM\JoinTable(name="weaving_user_token",
      *      joinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="usr_id")},
      *      inverseJoinColumns={@ORM\JoinColumn(name="token_id", referencedColumnName="id")}
@@ -813,6 +813,7 @@ class User extends BaseUser
     public function __construct()
     {
         $this->roles = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->tokens = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -829,9 +830,8 @@ class User extends BaseUser
     }
 
     /**
-     * Remove roles
-     *
-     * @param \WeavingTheWeb\Bundle\UserBundle\Entity\Role $roles
+     * @param string $roles
+     * @return $this|void
      */
     public function removeRole($roles)
     {

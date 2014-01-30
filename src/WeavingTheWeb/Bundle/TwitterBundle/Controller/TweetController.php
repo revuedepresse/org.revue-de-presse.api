@@ -5,8 +5,12 @@ namespace WeavingTheWeb\Bundle\TwitterBundle\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller,
     Symfony\Component\HttpFoundation\JsonResponse,
-    Symfony\Component\HttpFoundation\Request;
+    Symfony\Component\HttpFoundation\Request,
+    Symfony\Component\HttpFoundation\File\Exception\AccessDeniedException,
+    Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream;
+use WeavingTheWeb\Bundle\ApiBundle\Repository\TokenRepository;
+use WTW\UserBundle\Model\User;
 
 /**
  * Class TweetController
@@ -15,27 +19,45 @@ use WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream;
 class TweetController extends Controller
 {
     /**
-     * @Extra\Route("/tweet/latest", name="weaving_the_web_twitter_tweet_latest")
-     * @Extra\Method({"GET", "OPTIONS"})
-     *
      * @param Request $request
      * @return JsonResponse
+     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+     *
+     * @Extra\Route("/tweet/latest", name="weaving_the_web_twitter_tweet_latest")
+     * @Extra\Method({"GET", "OPTIONS"})
      */
     public function latestAction(Request $request)
     {
         if ($request->isMethod('OPTIONS')) {
             return $this->getCorsOptionsResponse();
         } else {
-            $userStreamRepository = $this->get('weaving_the_web_twitter.repository.read.user_stream');
-            $userStreamRepository->setOauthToken(
-                $request->get(
-                    'token',
-                    null,
-                    $this->container->getParameter('weaving_the_web_twitter.oauth_token.default')
-                )
-            );
+            if (is_null($request->get('username', null))) {
+                $this->get('logger')->error('username parameter is missing');
 
-            return new JsonResponse($userStreamRepository->findLatest(), 200, ['Access-Control-Allow-Origin' => '*']);
+                throw new NotFoundHttpException('This resource can not be found');
+            } else {
+                $userManager = $this->get('fos_user.user_provider.username');
+                $username = $request->get('username', null);
+
+                if (!is_null($username)) {
+                    /** @var \WTW\UserBundle\Entity\User $user */
+                    $user = $userManager->findUserBy(['twitter_username' => $username]);
+                    $tokens = $user->getTokens()->toArray();
+                    $token = $tokens[0];
+                } else {
+                    $token = $request->get(
+                        'token',
+                        null,
+                        $this->container->getParameter('weaving_the_web_twitter.oauth_token.default')
+                    );
+                }
+
+                /** @var User $user */
+                $userStreamRepository = $this->get('weaving_the_web_twitter.repository.read.user_stream');
+                $userStreamRepository->setOauthToken($token);
+
+                return new JsonResponse($userStreamRepository->findLatest(), 200, ['Access-Control-Allow-Origin' => '*']);
+            }
         }
     }
 
