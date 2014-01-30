@@ -31,33 +31,27 @@ class TweetController extends Controller
         if ($request->isMethod('OPTIONS')) {
             return $this->getCorsOptionsResponse();
         } else {
-            if (is_null($request->get('username', null))) {
-                $this->get('logger')->error('username parameter is missing');
+            $userManager = $this->get('fos_user.user_provider.username');
+            $username = $request->get('username', null);
 
-                throw new NotFoundHttpException('This resource can not be found');
+            if (is_null($username)) {
+                $token = $request->get(
+                    'token',
+                    null,
+                    $this->container->getParameter('weaving_the_web_twitter.oauth_token.default')
+                );
             } else {
-                $userManager = $this->get('fos_user.user_provider.username');
-                $username = $request->get('username', null);
-
-                if (!is_null($username)) {
-                    /** @var \WTW\UserBundle\Entity\User $user */
-                    $user = $userManager->findUserBy(['twitter_username' => $username]);
-                    $tokens = $user->getTokens()->toArray();
-                    $token = $tokens[0];
-                } else {
-                    $token = $request->get(
-                        'token',
-                        null,
-                        $this->container->getParameter('weaving_the_web_twitter.oauth_token.default')
-                    );
-                }
-
-                /** @var User $user */
-                $userStreamRepository = $this->get('weaving_the_web_twitter.repository.read.user_stream');
-                $userStreamRepository->setOauthToken($token);
-
-                return new JsonResponse($userStreamRepository->findLatest(), 200, ['Access-Control-Allow-Origin' => '*']);
+                /** @var \WTW\UserBundle\Entity\User $user */
+                $user = $userManager->findUserBy(['twitter_username' => $username]);
+                $tokens = $user->getTokens()->toArray();
+                $token = $tokens[0];
             }
+
+            /** @var User $user */
+            $userStreamRepository = $this->get('weaving_the_web_twitter.repository.read.user_stream');
+            $userStreamRepository->setOauthToken($token);
+
+            return new JsonResponse($userStreamRepository->findLatest(), 200, ['Access-Control-Allow-Origin' => '*']);
         }
     }
 
