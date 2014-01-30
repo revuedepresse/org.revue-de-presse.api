@@ -5,10 +5,10 @@
 var twitterControllers = angular.module('twitterControllers', []),
     baseUrl = 'https://## FILL HOSTNAME ##';
 
-twitterControllers.controller('ShowTweetsAction', ['$scope', '$http',
-    function ($scope, $http) {
-        var token = '## FILL ME ##',
-            showLatestTweetsUrl = baseUrl + '/twitter/tweet/latest?token=' + token;
+twitterControllers.controller('ShowTweetsAction', ['$scope', '$http', '$routeParams',
+    function ($scope, $http, $routeParams) {
+        var showLatestTweetsUrl = baseUrl + '/twitter/tweet/latest?username=' + $routeParams.username;
+
         $http.get(showLatestTweetsUrl).success(function (data) {
             $scope.tweets = data
         });
