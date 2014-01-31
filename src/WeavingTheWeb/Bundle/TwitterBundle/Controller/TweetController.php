@@ -20,7 +20,7 @@ class TweetController extends Controller
     /**
      * @param Request $request
      * @return JsonResponse
-     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+     * @throws \Exception
      *
      * @Extra\Route("/tweet/latest", name="weaving_the_web_twitter_tweet_latest")
      * @Extra\Method({"GET", "OPTIONS"})
@@ -42,13 +42,26 @@ class TweetController extends Controller
             } else {
                 /** @var \WTW\UserBundle\Entity\User $user */
                 $user = $userManager->findUserBy(['twitter_username' => $username]);
+
+                if (is_null($user)) {
+                    throw new \Exception(sprintf(
+                        'No user can be found for username "%s"',
+                        $username
+                    ));
+                }
+
                 $tokens = $user->getTokens()->toArray();
 
-                /**
-                 * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token
-                 */
+                /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token */
                 $token = $tokens[0];
                 $oauthToken = $token->getOauthToken();
+
+                if (strlen(trim($oauthToken)) === 0) {
+                    throw new \Exception(sprintf(
+                        'Invalid token for username "%s"',
+                        $username
+                    ));
+                }
             }
 
             /** @var User $user */
