@@ -21,3 +21,4 @@ weaverApp.directive('parseUrl', function () {
         }
     };
 });
+
