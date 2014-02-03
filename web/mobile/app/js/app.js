@@ -2,7 +2,8 @@
 
 var weaverApp = angular.module('weaverApp', [
     'ngRoute',
-    'twitterControllers'
+    'twitterControllers',
+    'infinite-scroll'
 ]);
 
 weaverApp.config(
