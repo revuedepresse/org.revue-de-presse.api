@@ -29,6 +29,10 @@ To load data fixtures before testing a command class:
  * Declare a command test class extending ``WTW\CodeGeneration\QualityAssuranceBundle\Test\CommandTestCase``
  * Implement a special method ``requiredFixtures`` which return value evaluates to ``true``.
 
+### Testing the mobile application ###
+
+    karma start tests/karma.config.js
+
 3) Requirements
 --------------------------------
 
