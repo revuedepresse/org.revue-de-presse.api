@@ -17,6 +17,7 @@ module.exports = function(config) {
       '../web/mobile/app/lib/angular/angular.js',
       '../web/mobile/app/lib/angular/angular-route.js',
       '../web/mobile/app/lib/ng-infinite-scroll.min.js',
+      '../web/mobile/app/lib/ng-cache.js',
       '../web/mobile/app/js/*.js',
       'angular-mocks.js',
       '*.test.js'
