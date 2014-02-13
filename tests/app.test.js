@@ -1,11 +1,11 @@
 'use strict';
 
 describe('ShowTweetsAction', function () {
-    var scope, httpBackend, locationMock, statusId, tweets,
-        $controller, $httpBackend, $log, $rootScope;
+    var $controller, $httpBackend, $log, $rootScope,
+        cache, scope, httpBackend, locationMock, statusId, tweets;
 
     beforeEach(angular.mock.module('weaverApp'));
-    beforeEach(inject(function ($injector, twitter) {
+    beforeEach(inject(function ($injector, $angularCacheFactory, twitter) {
         statusId = "420103690863669249"
         tweets = [
             {
@@ -37,13 +37,19 @@ describe('ShowTweetsAction', function () {
         $controller = $injector.get('$controller');
         $log = $injector.get('$log');
 
+        cache = $angularCacheFactory.get('localStorageCache');
+        if (cache === undefined) {
+            cache = $angularCacheFactory('localStorageCache');
+        }
+
         $controller('ShowTweetsAction', {
             $scope: scope,
             $http: $injector.get('$http'),
             $location: locationMock,
             $routeParams: {username: 'weaver'},
             $log: $log,
-            twitter: twitter
+            twitter: twitter,
+            $angularCacheFactory: $angularCacheFactory
         });
     }));
 
@@ -65,6 +71,7 @@ describe('ShowTweetsAction', function () {
         scope.star(statusId, 0);
         httpBackend.flush();
         expect(scope.tweets[0].starred).toEqual(true);
+        expect(cache.get(statusId)).toEqual({starred: true});
     });
 
     it('should unstar tweet', function () {
@@ -75,5 +82,6 @@ describe('ShowTweetsAction', function () {
         scope.unstar(statusId, 0);
         httpBackend.flush();
         expect(scope.tweets[0].starred).toEqual(false);
+        expect(cache.get(statusId)).toEqual({starred: false});
     });
 });
