@@ -1,11 +1,34 @@
 'use strict';
 
 describe('ShowTweetsAction', function () {
-    var $controller, $httpBackend, $log, $rootScope,
-        cache, scope, httpBackend, locationMock, statusId, tweets;
+    var $controller,
+        $httpBackend,
+        $log,
+        $routeParams,
+        $rootScope,
+        $scope,
+        cache,
+        httpBackend,
+        locationMock,
+        statusId,
+        tweets;
 
+    var locationMockService = new LocationMockService();
     beforeEach(angular.mock.module('weaverApp'));
-    beforeEach(inject(function ($injector, $angularCacheFactory, twitter) {
+
+    $routeParams = { username: 'weaver' };
+    beforeEach(angular.mock.module(function ($provide) {
+        $provide.value('$routeParams', $routeParams);
+    }));
+
+    $routeParams = { username: 'weaver' };
+    beforeEach(angular.mock.module(function ($provide) {
+        locationMock = locationMockService.getLocationMock();
+        $provide.value('$location', locationMock);
+    }));
+
+
+    beforeEach(inject(function ($injector, $angularCacheFactory, offlineCache) {
         statusId = "420103690863669249"
         tweets = [
             {
@@ -21,18 +44,8 @@ describe('ShowTweetsAction', function () {
         httpBackend = $httpBackend;
         $httpBackend.when('GET', 'https://## FILL HOSTNAME ##/twitter/tweet/latest?username=weaver').respond(tweets);
 
-        locationMock = jasmine.createSpyObj('location', ['protocol', 'host']);
-        locationMock.$host = '## FILL HOSTNAME ##';
-        locationMock.$protocol = 'https';
-        locationMock.host.andCallFake(function () {
-            return this.$host;
-        });
-        locationMock.protocol.andCallFake(function () {
-            return this.$protocol;
-        });
-
         $rootScope = $injector.get('$rootScope');
-        scope = $rootScope.$new();
+        $scope = $rootScope.$new();
 
         $controller = $injector.get('$controller');
         $log = $injector.get('$log');
@@ -42,14 +55,16 @@ describe('ShowTweetsAction', function () {
             cache = $angularCacheFactory('localStorageCache');
         }
 
+        var twitter = $injector.get('twitter');
+
         $controller('ShowTweetsAction', {
-            $scope: scope,
+            $scope: $scope,
             $http: $injector.get('$http'),
             $location: locationMock,
-            $routeParams: {username: 'weaver'},
             $log: $log,
+            $routeParams: $routeParams,
             twitter: twitter,
-            $angularCacheFactory: $angularCacheFactory
+            offlineCache: offlineCache
         });
     }));
 
@@ -60,7 +75,7 @@ describe('ShowTweetsAction', function () {
 
     it('should have tweets', function () {
         httpBackend.flush();
-        expect(scope.tweets).toEqual(tweets);
+        expect($scope.tweets).toEqual(tweets);
     });
 
     it('should star tweet', function () {
@@ -68,9 +83,9 @@ describe('ShowTweetsAction', function () {
         $httpBackend.when('POST', endpoint).respond({
             "status": statusId
         });
-        scope.star(statusId, 0);
+        $scope.star(statusId, 0);
         httpBackend.flush();
-        expect(scope.tweets[0].starred).toEqual(true);
+        expect($scope.tweets[0].starred).toEqual(true);
         expect(cache.get(statusId)).toEqual({starred: true});
     });
 
@@ -79,9 +94,9 @@ describe('ShowTweetsAction', function () {
         $httpBackend.when('POST', endpoint).respond({
             "status": statusId
         });
-        scope.unstar(statusId, 0);
+        $scope.unstar(statusId, 0);
         httpBackend.flush();
-        expect(scope.tweets[0].starred).toEqual(false);
+        expect($scope.tweets[0].starred).toEqual(false);
         expect(cache.get(statusId)).toEqual({starred: false});
     });
 });

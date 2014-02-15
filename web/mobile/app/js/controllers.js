@@ -5,22 +5,12 @@
 var twitterControllers = angular.module('twitterControllers', []);
 
 twitterControllers.controller('ShowTweetsAction', [
-    '$scope', '$http', '$location', '$routeParams', '$log', 'twitter', '$angularCacheFactory',
-    function ($scope, $http, $location, $routeParams, $log, twitter, $angularCacheFactory) {
+    '$scope', '$http', '$location', '$log', '$routeParams', 'twitter', 'offlineCache',
+    function ($scope, $http, $location, $log, $routeParams, twitter, offlineCache) {
         var host = $location.protocol() + '://' + $location.host();
-        var cache;
+        var cache = offlineCache.getLocalStorageCache();
 
-        cache = $angularCacheFactory.get('localStorageCache');
-        if (cache === undefined) {
-            cache = $angularCacheFactory('localStorageCache', {
-                maxAge: 7*24*3600, // Items added to this cache expire after 1 week.
-                cacheFlushInterval: 24*3600, // This cache will clear itself every day.
-                deleteOnExpire: 'aggressive', // Items will be deleted from this cache right when they expire.
-                storageMode: 'localStorage' // This cache will sync itself with `localStorage`.
-            });
-        }
-
-        twitter.showMoreTweets($http, $scope, $location, $routeParams, $log);
+        twitter.showMoreTweets($scope, $routeParams);
 
         $scope.star = function (statusId, index) {
             var startTweetUrl = host + '/twitter/tweet/star/' + statusId;
@@ -44,6 +34,28 @@ twitterControllers.controller('ShowTweetsAction', [
                     $log.error(data)
                 }
             });
+        }
+    }
+]);
+
+twitterControllers.controller('SyncTweetsStarringStatusAction', [
+    '$scope', '$http', '$location', '$angularCacheFactory',
+    function ($scope, $http, $location, $angularCacheFactory) {
+        var host = $location.protocol() + '://' + $location.host();
+        var cache;
+
+        cache = $angularCacheFactory.get('localStorageCache');
+        if (cache === undefined) {
+            cache = $angularCacheFactory('localStorageCache', {
+                maxAge: 7*24*3600, // Items added to this cache expire after 1 week.
+                cacheFlushInterval: 24*3600, // This cache will clear itself every day.
+                deleteOnExpire: 'aggressive', // Items will be deleted from this cache right when they expire.
+                storageMode: 'localStorage' // This cache will sync itself with `localStorage`.
+            });
+        }
+
+        $scope.sync = function (statusId, index) {
+
         }
     }
 ]);

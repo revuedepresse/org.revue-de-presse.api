@@ -20,7 +20,8 @@ module.exports = function(config) {
       '../web/mobile/app/lib/ng-cache.js',
       '../web/mobile/app/js/*.js',
       'angular-mocks.js',
-      '*.test.js'
+      'location-mock.js',
+      '*-test.js'
     ],
 
 
