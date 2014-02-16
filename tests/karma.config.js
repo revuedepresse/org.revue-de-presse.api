@@ -19,9 +19,10 @@ module.exports = function(config) {
             '../web/mobile/app/lib/ng-infinite-scroll.min.js',
             '../web/mobile/app/lib/ng-cache.js',
             '../web/mobile/app/js/*.js',
+            '../web/mobile/app/js/services/*.js',
             'angular-mocks.js',
             'location-mock.js',
-            '*-test.js'
+            'test-*.js'
         ],
 
 

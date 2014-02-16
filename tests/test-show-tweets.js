@@ -13,7 +13,6 @@ describe('ShowTweetsAction', function () {
         statusId,
         tweets;
 
-    var locationMockService = new LocationMockService();
     beforeEach(angular.mock.module('weaverApp'));
 
     $routeParams = { username: 'weaver' };
@@ -22,8 +21,17 @@ describe('ShowTweetsAction', function () {
     }));
 
     beforeEach(angular.mock.module(function ($provide) {
+        var locationMockService = new LocationMockService();
         locationMock = locationMockService.getLocationMock();
         $provide.value('$location', locationMock);
+    }));
+
+    beforeEach(angular.mock.module(function ($provide) {
+        var fallback = jasmine.createSpyObj('fallback', ['isNavigatorOnline']);
+        fallback.isNavigatorOnline.andCallFake(function () {
+            return true;
+        });
+        $provide.value('fallback', fallback);
     }));
 
     beforeEach(inject(function ($injector, $angularCacheFactory, offlineCache) {
@@ -35,7 +43,7 @@ describe('ShowTweetsAction', function () {
                 "screen_name": "nikita_ppv",
                 "id": 4366498,
                 "status_id": statusId,
-                "starred": true
+                "starred": false
             }
         ];
 
@@ -82,8 +90,8 @@ describe('ShowTweetsAction', function () {
         });
         $scope.star(statusId, 0);
         httpBackend.flush();
+
         expect($scope.tweets[0].starred).toEqual(true);
-        expect(cache.get(statusId)).toEqual({starred: true});
     });
 
     it('should mark a tweet as being not starred', function () {
@@ -93,7 +101,7 @@ describe('ShowTweetsAction', function () {
         });
         $scope.unstar(statusId, 0);
         httpBackend.flush();
+
         expect($scope.tweets[0].starred).toEqual(false);
-        expect(cache.get(statusId)).toEqual({starred: false});
     });
 });
