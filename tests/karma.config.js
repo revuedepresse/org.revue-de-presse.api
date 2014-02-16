@@ -21,8 +21,7 @@ module.exports = function(config) {
             '../web/mobile/app/js/*.js',
             'angular-mocks.js',
             'location-mock.js',
-            'show-tweets-action-test.js'
-//             , 'sync-tweets-starring-status-test.js'
+            '*-test.js'
         ],
 
 

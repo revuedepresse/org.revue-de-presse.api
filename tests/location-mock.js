@@ -1,4 +1,4 @@
-LocationMockService = (function (jasmine) {
+var LocationMockService = (function (jasmine) {
     var service = function () {
         this.locationMock = jasmine.createSpyObj('location', ['protocol', 'host']);
         this.$host = '## FILL HOSTNAME ##',

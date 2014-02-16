@@ -21,12 +21,10 @@ describe('ShowTweetsAction', function () {
         $provide.value('$routeParams', $routeParams);
     }));
 
-    $routeParams = { username: 'weaver' };
     beforeEach(angular.mock.module(function ($provide) {
         locationMock = locationMockService.getLocationMock();
         $provide.value('$location', locationMock);
     }));
-
 
     beforeEach(inject(function ($injector, $angularCacheFactory, offlineCache) {
         statusId = "420103690863669249"
@@ -40,6 +38,8 @@ describe('ShowTweetsAction', function () {
                 "starred": true
             }
         ];
+
+        // Prepares http backend to respond with a tweet sample when requesting for the lastest ones
         $httpBackend = $injector.get('$httpBackend');
         httpBackend = $httpBackend;
         $httpBackend.when('GET', 'https://## FILL HOSTNAME ##/twitter/tweet/latest?username=weaver').respond(tweets);
@@ -48,24 +48,21 @@ describe('ShowTweetsAction', function () {
         $scope = $rootScope.$new();
 
         $controller = $injector.get('$controller');
-        $log = $injector.get('$log');
-
-        cache = $angularCacheFactory.get('localStorageCache');
-        if (cache === undefined) {
-            cache = $angularCacheFactory('localStorageCache');
-        }
-
-        var twitter = $injector.get('twitter');
-
         $controller('ShowTweetsAction', {
             $scope: $scope,
             $http: $injector.get('$http'),
             $location: locationMock,
-            $log: $log,
+            $log: $injector.get('$log'),
             $routeParams: $routeParams,
-            twitter: twitter,
+            twitter: $injector.get('twitter'),
             offlineCache: offlineCache
         });
+
+        // Gets local storage cache to ensure items which have been starred are actually available in local storage
+        cache = $angularCacheFactory.get('localStorageCache');
+        if (cache === undefined) {
+            cache = $angularCacheFactory('localStorageCache');
+        }
     }));
 
     afterEach(function () {
@@ -73,12 +70,12 @@ describe('ShowTweetsAction', function () {
         $httpBackend.verifyNoOutstandingRequest();
     });
 
-    it('should have tweets', function () {
+    it('should have tweets in scope', function () {
         httpBackend.flush();
         expect($scope.tweets).toEqual(tweets);
     });
 
-    it('should star tweet', function () {
+    it('should mark a tweet as starred', function () {
         var endpoint = 'https://## FILL HOSTNAME ##/twitter/tweet/star/' + statusId;
         $httpBackend.when('POST', endpoint).respond({
             "status": statusId
@@ -89,7 +86,7 @@ describe('ShowTweetsAction', function () {
         expect(cache.get(statusId)).toEqual({starred: true});
     });
 
-    it('should unstar tweet', function () {
+    it('should mark a tweet as being not starred', function () {
         var endpoint = 'https://## FILL HOSTNAME ##/twitter/tweet/unstar/' + statusId;
         $httpBackend.when('POST', endpoint).respond({
             "status": statusId
