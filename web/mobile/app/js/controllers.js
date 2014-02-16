@@ -13,9 +13,9 @@ twitterControllers.controller('ShowTweetsAction', [
         twitter.showMoreTweets($scope, $routeParams);
 
         $scope.star = function (statusId, index) {
-            var startTweetUrl = host + '/twitter/tweet/star/' + statusId;
+            var starTweetUrl = host + '/twitter/tweet/star/' + statusId;
             cache.put(statusId, {'starred': true});
-            $http.post(startTweetUrl).success(function () {
+            $http.post(starTweetUrl).success(function () {
                 $scope.tweets[index].starred = true;
             }).error(function (data) {
                 if ($log !== undefined) {
@@ -25,9 +25,9 @@ twitterControllers.controller('ShowTweetsAction', [
         }
 
         $scope.unstar = function (statusId, index) {
-            var startTweetUrl = host + '/twitter/tweet/unstar/' + statusId;
+            var unstarTweetUrl = host + '/twitter/tweet/unstar/' + statusId;
             cache.put(statusId, {'starred': false});
-            $http.post(startTweetUrl).success(function () {
+            $http.post(unstarTweetUrl).success(function () {
                 $scope.tweets[index].starred = false;
             }).error(function (data) {
                 if ($log !== undefined) {
@@ -39,23 +39,37 @@ twitterControllers.controller('ShowTweetsAction', [
 ]);
 
 twitterControllers.controller('SyncTweetsStarringStatusAction', [
-    '$scope', '$http', '$location', '$angularCacheFactory',
-    function ($scope, $http, $location, $angularCacheFactory) {
-        var host = $location.protocol() + '://' + $location.host();
-        var cache;
+    '$scope', '$http', '$location', '$log', 'offlineCache',
+    function ($scope, $http, $location, $log, offlineCache) {
+        var cache = offlineCache.getLocalStorageCache();
 
-        cache = $angularCacheFactory.get('localStorageCache');
-        if (cache === undefined) {
-            cache = $angularCacheFactory('localStorageCache', {
-                maxAge: 7*24*3600, // Items added to this cache expire after 1 week.
-                cacheFlushInterval: 24*3600, // This cache will clear itself every day.
-                deleteOnExpire: 'aggressive', // Items will be deleted from this cache right when they expire.
-                storageMode: 'localStorage' // This cache will sync itself with `localStorage`.
+        $scope.sync = function () {
+            var host = $location.protocol() + '://' + $location.host();
+            var keys = cache.keys();
+            var starTweetUrlTemplate = host + '/twitter/tweet/star/';
+            var unstarTweetUrlTemplate = host + '/twitter/tweet/unstar/';
+
+            keys.forEach(function (statusId) {
+                var actionUrl;
+                var tweetStatus = cache.get(statusId);
+
+                if (tweetStatus.starred) {
+                    actionUrl = starTweetUrlTemplate + statusId;
+                } else if (!tweetStatus.starred) {
+                    actionUrl = unstarTweetUrlTemplate + statusId;
+                } else {
+                    throw Error('An invalid status has been stored in local storage');
+                }
+
+                $http.post(actionUrl).success(function () {
+                    cache.remove(statusId);
+                }).error(function (data) {
+                    if ($log !== undefined) {
+                        $log.error(data)
+                    }
+                });
             });
-        }
-
-        $scope.sync = function (statusId, index) {
-
+            $scope.synced = true;
         }
     }
 ]);

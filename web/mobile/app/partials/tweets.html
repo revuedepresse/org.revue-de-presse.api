@@ -1,3 +1,8 @@
+<div class="span12" ng-controller="SyncTweetsStarringStatusAction">
+    <button class="ui button" ng-class="{true: 'hide', false: ''}[synced]" ng-click="sync()">
+        Sync<span ng-if="synced">ed</span>
+    </button>
+</div>
 <div class="span12" ng-controller="ShowTweetsAction">
     <table class="table table-condensed">
         <tr ng-repeat="tweet in tweets">
