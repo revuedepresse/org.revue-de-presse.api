@@ -46,7 +46,7 @@ class AppKernel extends Kernel
             new WeavingTheWeb\Bundle\UserBundle\WeavingTheWebUserBundle(),
         );
 
-        if (in_array($this->getEnvironment(), array('dev', 'test', 'bdd', 'cache'))) {
+        if (in_array($this->getEnvironment(), array('dev', 'test', 'bdd', 'box', 'cache'))) {
             $bundles[] = new Symfony\Bundle\WebProfilerBundle\WebProfilerBundle();
             $bundles[] = new Sensio\Bundle\DistributionBundle\SensioDistributionBundle();
             $bundles[] = new Sensio\Bundle\GeneratorBundle\SensioGeneratorBundle();
@@ -54,6 +54,24 @@ class AppKernel extends Kernel
         }
 
         return $bundles;
+    }
+
+    public function getCacheDir()
+    {
+        if (in_array($this->environment, array('box'))) {
+            return '/dev/shm/weaving-the-web/cache/' .  $this->environment;
+        }
+
+        return parent::getCacheDir();
+    }
+
+    public function getLogDir()
+    {
+        if (in_array($this->environment, array('box'))) {
+            return '/dev/shm/weaving-the-web/logs';
+        }
+
+        return parent::getLogDir();
     }
 
     public function registerContainerConfiguration(LoaderInterface $loader)
