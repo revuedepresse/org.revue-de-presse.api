@@ -218,13 +218,26 @@ Examples
 6) Known issues
 --------------------------------
 
-Running WeavingTheWebApiBundle test suite sequentially fails with following message:
+**How to run the `WeavingTheWebApiBundle` test suite test suite?**
 
     posix_isatty(): could not use stream of type 'MEMORY'
 
-A solution consists in running the tests in parallel:
+Run tests in parallel:
 
     ant -f build.xml phpunit-isolated
 
-Try to avoid values containing '&' for environment variables to be injected to shell scripts
+**N.B.** Try to avoid values containing '&' for environment variables to be injected to shell scripts
 (or figure out how to escape properly special characters when using capistrano).
+
+**How to connect a Twitter account to an existing user?**
+
+    Failed to validate oauth signature and token.
+
+    # Update system time
+    sudo apt-get install ntpdate && tzselect
+
+    # Restart web server
+    sudo apache2 restart
+
+    # Declare timezone
+    echo "TZ='Europe/Paris'; export TZ" >> ~/.profile
