@@ -9,21 +9,23 @@
     {% endimage %}
 </head>
 <body>
+{% if displayMenu is not defined or displayMenu %}
 <nav class="navbar navbar-static-top">
     <div class="navbar-inner">
         <a class="brand" href="{{ path('fos_user_registration_register') }}">Weaving the Web</a>
         {% block menu %}
-        {% if not active_menu_item is defined %}
-        {% set active_menu_item = '' %}
-        {% endif %}
-        {% if not show_sitemap is defined %}
-            {% set show_sitemap = app.request.attributes.get('_route') == 'weaving_the_web_dashboard_show_sitemap' %}
-        {% endif %}
+            {% if not active_menu_item is defined %}
+                {% set active_menu_item = '' %}
+            {% endif %}
+            {% if not show_sitemap is defined %}
+                {% set show_sitemap = app.request.attributes.get('_route') == 'weaving_the_web_dashboard_show_sitemap' %}
+            {% endif %}
 
-        {{ render_esi(controller('WeavingTheWebDashboardBundle:Document:showNavigation', { 'activeMenu': active_menu_item, 'showSitemap': show_sitemap })) }}
+            {{ render_esi(controller('WeavingTheWebDashboardBundle:Document:showNavigation', { 'activeMenu': active_menu_item, 'showSitemap': show_sitemap })) }}
         {% endblock menu %}
     </div>
 </nav>
+{% endif %}
 {% block body %}{% endblock body %}
 {% block javascripts %}{% include "::javascripts.html.twig" %}{% endblock javascripts %}
 </body>
