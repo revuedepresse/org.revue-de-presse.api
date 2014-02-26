@@ -12,7 +12,7 @@
             <td>
                 <dl class="dl-horizontal" id="{{ tweet.status_id }}">
                     <dd>
-                        <img ng-src="{{ tweet.author_avatar }}" alt="http://twitter.com/{{ tweet.screen_name }}" />
+                        <img ng-src="{{ tweet.author_avatar|strict_https }}" alt="https://twitter.com/{{ tweet.screen_name }}" />
                         <a class="screen-name" href="http://twitter.com/{{ tweet.screen_name }}"><strong>@{{ tweet.screen_name }}</strong></a>
                     </dd>
                     <dd class="text" parse-url="props" ng-model="tweet">{{ tweet.text }}</dd>
