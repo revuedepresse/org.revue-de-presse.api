@@ -4,7 +4,8 @@ var weaverApp = angular.module('weaverApp', [
     'ngRoute',
     'twitterControllers',
     'infinite-scroll',
-    'jmdobry.angular-cache'
+    'jmdobry.angular-cache',
+    'strictHttpsFilter'
 ]);
 
 weaverApp.config(['$routeProvider', function($routeProvider) {
