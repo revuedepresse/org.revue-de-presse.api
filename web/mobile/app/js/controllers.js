@@ -11,39 +11,36 @@ twitterControllers.controller('ShowTweetsAction', [
             host = $location.protocol() + '://' + $location.host();
 
         twitter.showMoreTweets($scope, $routeParams);
-
-        $scope.star = function (statusId, index) {
-            var starTweetUrl = host + '/twitter/tweet/star/' + statusId;
-
+        var setTweetStarringStatus = function (statusId, index, starred) {
             if (offlineCache.isNavigatorOnline()) {
-                $http.post(starTweetUrl).success(function () {
-                    $scope.tweets[index].starred = true;
+                var endpointUrlTemplate = host + '/twitter/tweet/{{ action }}/' + statusId;
+                var endpointUrl;
+
+                if (starred) {
+                    endpointUrl = endpointUrlTemplate.replace('{{ action }}', 'star');
+                } else {
+                    endpointUrl = endpointUrlTemplate.replace('{{ action }}', 'unstar');
+                }
+
+                $http.post(endpointUrl).success(function () {
+                    $scope.tweets[index].starred = starred;
                 }).error(function (data) {
                     if ($log !== undefined) {
                         $log.error(data)
                     }
                 });
             } else {
-                cache.put(statusId, {'starred': true});
+                cache.put(statusId, {'starred': starred});
                 $scope.synced = false;
             }
         }
 
-        $scope.unstar = function (statusId, index) {
-            var unstarTweetUrl = host + '/twitter/tweet/unstar/' + statusId;
+        $scope.star = function (tweetId, tweetIndex) {
+            setTweetStarringStatus(tweetId, tweetIndex, true);
+        }
 
-            if (offlineCache.isNavigatorOnline()) {
-                $http.post(unstarTweetUrl).success(function () {
-                    $scope.tweets[index].starred = false;
-                }).error(function (data) {
-                    if ($log !== undefined) {
-                        $log.error(data)
-                    }
-                });
-            } else {
-                cache.put(statusId, {'starred': false});
-                $scope.synced = false;
-            }
+        $scope.unstar = function (tweetId, tweetIndex) {
+            setTweetStarringStatus(tweetId, tweetIndex, false);
         }
     }
 ]);
