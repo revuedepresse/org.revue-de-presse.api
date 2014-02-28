@@ -1,12 +1,10 @@
-<div class="span12" ng-controller="SyncTweetsStarringStatusAction">
-    <ul ng-repeat="error in errors">
-        <li>{{ error }}</li>
-    </ul>
-    <button class="ui button" ng-class="{true: 'hide', false: ''}[synced]" ng-click="sync()">
-        Sync<span ng-if="synced">ed</span>
-    </button>
-</div>
 <div class="span12" ng-controller="ShowTweetsAction">
+    <div class="span12">
+        <ul ng-repeat="error in errors">
+            <li>{{ error }}</li>
+        </ul>
+        <div ng-include="'app/partials/sync.html'"></div>
+    </div>
     <table class="table table-condensed">
         <tr ng-repeat="tweet in tweets">
             <td>

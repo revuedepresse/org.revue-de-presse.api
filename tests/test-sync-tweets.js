@@ -3,15 +3,17 @@
 describe('Syncing tweets status in offline mode', function () {
     var $controller,
         $httpBackend,
+        $routeParams,
         $scope,
         cache,
         httpBackend,
         locationMock,
-        statusId;
-    var locationMockService = new LocationMockService();
+        // Emulates previous use of offline cache service to store the result of a starring action
+        statusId = '420103690863669249';
 
     beforeEach(angular.mock.module('weaverApp'));
 
+    $routeParams = { username: 'weaver' };
     beforeEach(angular.mock.module(function ($provide) {
         var fallback = jasmine.createSpyObj('fallback', ['isNavigatorOnline']);
         fallback.isNavigatorOnline.andCallFake(function () {
@@ -20,26 +22,45 @@ describe('Syncing tweets status in offline mode', function () {
         $provide.value('fallback', fallback);
     }));
 
+    beforeEach(angular.mock.module(function ($provide) {
+        var locationMockService = new LocationMockService();
+        locationMock = locationMockService.getLocationMock();
+        $provide.value('$location', locationMock);
+    }));
+
     beforeEach(inject(function ($injector, offlineCache) {
         var $rootScope;
-
-        locationMock = locationMockService.getLocationMock();
+        var tweets = [
+                {
+                    "author_avatar": "http://pbs.twimg.com/profile_images/1803355808/377992_203375376416531_100002322093627_443137_1695065966_n_normal.jpg",
+                    "text": "@schmittjoh Are those changes pushed to https://t.co/8X8XXLOSnB yet? Can't find anything in the recent commits.",
+                    "screen_name": "nikita_ppv",
+                    "id": 4366498,
+                    "status_id": statusId,
+                    "starred": false
+                }
+            ];
 
         $rootScope = $injector.get('$rootScope');
         $scope = $rootScope.$new();
 
-        // Emulates previous use of offline cache service to store the result of a starring action
-        statusId = "420103690863669249"
+
         cache = offlineCache.getLocalStorageCache();
 
         $httpBackend = $injector.get('$httpBackend');
         httpBackend = $httpBackend;
 
+
+        $httpBackend.when('GET', 'https://## FILL HOSTNAME ##/twitter/tweet/latest?username=weaver').respond(tweets);
+
         $controller = $injector.get('$controller');
-        $controller('SyncTweetsStarringStatusAction', {
+        $controller('ShowTweetsAction', {
             $scope: $scope,
             $http: $injector.get('$http'),
             $location: locationMock,
+            $log: $injector.get('$log'),
+            $routeParams: $routeParams,
+            twitter: $injector.get('twitter'),
             offlineCache: offlineCache
         });
     }));
@@ -55,11 +76,15 @@ describe('Syncing tweets status in offline mode', function () {
         $httpBackend.verifyNoOutstandingRequest();
     });
 
-    it('should sync tweets', function () {
+    it('should sync tweets marked as starred', function () {
+        httpBackend.flush();
+
         cache.put(statusId, {'starred': true});
     });
 
-    it('should sync tweets', function () {
+    it('should sync tweets not marked as starred', function () {
+        httpBackend.flush();
+
         cache.put(statusId, {'starred': false});
     });
 });
@@ -67,13 +92,14 @@ describe('Syncing tweets status in offline mode', function () {
 describe('Syncing tweet status', function () {
     var $controller,
         $httpBackend,
+        $routeParams,
         $scope,
         cache,
         httpBackend,
         locationMock,
         statusId;
-    var locationMockService = new LocationMockService();
 
+    $routeParams = { username: 'weaver' };
     beforeEach(angular.mock.module('weaverApp'));
 
     beforeEach(angular.mock.module(function ($provide) {
@@ -84,10 +110,14 @@ describe('Syncing tweet status', function () {
         $provide.value('fallback', fallback);
     }));
 
+    beforeEach(angular.mock.module(function ($provide) {
+        var locationMockService = new LocationMockService();
+        locationMock = locationMockService.getLocationMock();
+        $provide.value('$location', locationMock);
+    }));
+
     beforeEach(inject(function ($injector, offlineCache) {
         var $rootScope;
-
-        locationMock = locationMockService.getLocationMock();
 
         $rootScope = $injector.get('$rootScope');
         $scope = $rootScope.$new();
@@ -99,11 +129,26 @@ describe('Syncing tweet status', function () {
         $httpBackend = $injector.get('$httpBackend');
         httpBackend = $httpBackend;
 
+        var tweets = [
+            {
+                "author_avatar": "http://pbs.twimg.com/profile_images/1803355808/377992_203375376416531_100002322093627_443137_1695065966_n_normal.jpg",
+                "text": "@schmittjoh Are those changes pushed to https://t.co/8X8XXLOSnB yet? Can't find anything in the recent commits.",
+                "screen_name": "nikita_ppv",
+                "id": 4366498,
+                "status_id": statusId,
+                "starred": false
+            }
+        ];
+        $httpBackend.when('GET', 'https://## FILL HOSTNAME ##/twitter/tweet/latest?username=weaver').respond(tweets);
+
         $controller = $injector.get('$controller');
-        $controller('SyncTweetsStarringStatusAction', {
+        $controller('ShowTweetsAction', {
             $scope: $scope,
             $http: $injector.get('$http'),
             $location: locationMock,
+            $log: $injector.get('$log'),
+            $routeParams: $routeParams,
+            twitter: $injector.get('twitter'),
             offlineCache: offlineCache
         });
     }));
@@ -119,7 +164,9 @@ describe('Syncing tweet status', function () {
         $httpBackend.verifyNoOutstandingRequest();
     });
 
-    it('should sync tweets', function () {
+    it('should sync tweets marked as starred', function () {
+        httpBackend.flush();
+
         var endpoint = 'https://## FILL HOSTNAME ##/twitter/tweet/star/' + statusId;
         $httpBackend.when('POST', endpoint).respond({
             "status": statusId
@@ -127,7 +174,9 @@ describe('Syncing tweet status', function () {
         cache.put(statusId, {'starred': true});
     });
 
-    it('should sync tweets', function () {
+    it('should sync tweets not marked as starred', function () {
+        httpBackend.flush();
+
         var endpoint = 'https://## FILL HOSTNAME ##/twitter/tweet/unstar/' + statusId;
         $httpBackend.when('POST', endpoint).respond({
             "status": statusId

@@ -3,9 +3,7 @@
 describe('Starring tweets in offline mode', function () {
     var $controller,
         $httpBackend,
-        $log,
         $routeParams,
-        $rootScope,
         $scope,
         cache,
         httpBackend,
@@ -35,6 +33,8 @@ describe('Starring tweets in offline mode', function () {
     }));
 
     beforeEach(inject(function ($injector, $angularCacheFactory, offlineCache) {
+        var $rootScope;
+
         statusId = "420103690863669249"
         tweets = [
             {
@@ -101,7 +101,6 @@ describe('Starring tweets', function () {
         $httpBackend,
         $log,
         $routeParams,
-        $rootScope,
         $scope,
         cache,
         httpBackend,
@@ -131,6 +130,8 @@ describe('Starring tweets', function () {
     }));
 
     beforeEach(inject(function ($injector, $angularCacheFactory, offlineCache) {
+        var $rootScope;
+
         statusId = "420103690863669249"
         tweets = [
             {
