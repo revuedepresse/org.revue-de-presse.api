@@ -8,7 +8,10 @@ twitterControllers.controller('ShowTweetsAction', [
     '$scope', '$http', '$location', '$log', '$routeParams', 'twitter', 'offlineCache',
     function ($scope, $http, $location, $log, $routeParams, twitter, offlineCache) {
         var cache = offlineCache.getLocalStorageCache(),
-            host = $location.protocol() + '://' + $location.host();
+            host = $location.protocol() + '://' + $location.host(),
+            errors = {};
+
+        $scope.synced = cache.keys().length === 0;
 
         twitter.showMoreTweets($scope, $routeParams);
         var setTweetStarringStatus = function (statusId, index, starred) {
@@ -32,6 +35,7 @@ twitterControllers.controller('ShowTweetsAction', [
             } else {
                 cache.put(statusId, {'starred': starred});
                 $scope.synced = false;
+                $scope.$apply();
             }
         }
 
@@ -42,21 +46,10 @@ twitterControllers.controller('ShowTweetsAction', [
         $scope.unstar = function (tweetId, tweetIndex) {
             setTweetStarringStatus(tweetId, tweetIndex, false);
         }
-    }
-]);
-
-twitterControllers.controller('SyncTweetsStarringStatusAction', [
-    '$scope', '$http', '$location', '$log', 'offlineCache',
-    function ($scope, $http, $location, $log, offlineCache) {
-        var cache = offlineCache.getLocalStorageCache(),
-            errors = {};
-
-        $scope.synced = cache.keys().length === 0;
 
         $scope.sync = function () {
             var host = $location.protocol() + '://' + $location.host(),
                 keys = cache.keys(),
-
                 unstarTweetUrlTemplate = host + '/twitter/tweet/unstar/',
                 starTweetUrlTemplate = host + '/twitter/tweet/star/';
 
