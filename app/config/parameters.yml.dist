@@ -3,6 +3,7 @@ imports:
     - { resource: parameters/parameters_dbal.yml }
     - { resource: parameters/parameters_elasticsearch.yml }
     - { resource: parameters/parameters_facebook.yml }
+    - { resource: parameters/parameters_imap.yml }
     - { resource: parameters/parameters_mailer.yml }
     - { resource: parameters/parameters_rabbitmq.yml }
     - { resource: parameters/parameters_twitter.yml }
