@@ -53,6 +53,15 @@ twitterControllers.controller('ShowTweetsAction', [
                 unstarTweetUrlTemplate = host + '/twitter/tweet/unstar/',
                 starTweetUrlTemplate = host + '/twitter/tweet/star/';
 
+            var updateSyncStatus = function () {
+                if (Object.keys(errors).length > 0) {
+                    $scope.errors = errors;
+                } else {
+                    $scope.synced = true;
+                    $scope.errors = undefined;
+                }
+            }
+
             angular.forEach(keys, function (statusId) {
                 var actionUrl,
                     tweetStatus = cache.get(statusId);
@@ -66,14 +75,21 @@ twitterControllers.controller('ShowTweetsAction', [
                 }
 
                 if (offlineCache.isNavigatorOnline()) {
-                    if (errors.brokenInternet !== undefined) {
-                        errors.brokenInternet = undefined;
-                    }
                     $http.post(actionUrl).success(function () {
                         cache.remove(statusId);
-                        errors.actionUrl = undefined;
-                    }).error(function (data) {
-                        errors.actionUrl = data;
+
+                        if (errors.actionUrl === actionUrl) {
+                            delete errors.actionUrl;
+                        }
+                        if (errors.brokenInternet !== undefined) {
+                            delete errors.brokenInternet;
+                        }
+
+                        updateSyncStatus();
+                    }).error(function () {
+                        errors.failedAction = 'Failed to access "{{ action }}"'.replace(
+                            '{{ action }}', actionUrl
+                        );
                     });
                 } else {
                     var brokenInternet = 'Oops, the Internet seems to be broken :/';
@@ -83,12 +99,7 @@ twitterControllers.controller('ShowTweetsAction', [
                 }
             });
 
-            if (Object.keys(errors).length > 0) {
-                $scope.errors = errors;
-            } else {
-                $scope.synced = true;
-                $scope.errors = undefined;
-            }
+            updateSyncStatus();
         }
     }
 ]);
