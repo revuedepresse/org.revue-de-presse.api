@@ -84,13 +84,11 @@ twitterControllers.controller('ShowTweetsAction', [
                         if (errors.brokenInternet !== undefined) {
                             delete errors.brokenInternet;
                         }
-
-                        updateSyncStatus();
                     }).error(function () {
                         errors.failedAction = 'Failed to access "{{ action }}"'.replace(
                             '{{ action }}', actionUrl
                         );
-                    });
+                    }).then(updateSyncStatus);
                 } else {
                     var brokenInternet = 'Oops, the Internet seems to be broken :/';
                     if (errors.brokenInternet === undefined) {
