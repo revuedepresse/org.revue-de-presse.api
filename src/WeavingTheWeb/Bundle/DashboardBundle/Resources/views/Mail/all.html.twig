@@ -1,0 +1,24 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <table class="table">
+        {% for email in emails %}
+            <tr>
+                <td>
+                    <pre>
+                        {{ email.header }}
+                    </pre>
+                </td>
+                <td>
+                    <pre>
+                        {{ email.body }}
+                    </pre>
+                </td>
+            </tr>
+        {% endfor %}
+        </table>
+    <div>
+{% endblock %}
