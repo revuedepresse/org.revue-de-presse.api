@@ -1,4 +1,6 @@
 mapping:
     mail:
+        update:
+            success: "{{ emails_count }} emails have been updated."
         headers:
-            success: All available email headers ({{ headers_count }}) have been successfully saved as properties.
+            success: "All available email headers ({{ headers_count }}) have been successfully saved as properties."
