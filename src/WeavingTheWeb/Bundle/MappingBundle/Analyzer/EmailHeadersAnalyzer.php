@@ -50,8 +50,17 @@ class EmailHeadersAnalyzer
         while ($options['offset'] <= $options['max_offset']) {
             $headers = $headerRepository->paginate($options['offset'], $options['items_per_page']);
 
+            /** @var \WeavingTheWeb\Bundle\Legacy\ProviderBundle\Entity\WeavingHeader $header */
             foreach ($headers as $header) {
-                $properties = $this->parser->parse($header['hdrValue']);
+                $properties = $this->parser->parse($header->getHdrValue());
+
+                $header->setFrom($properties['From']);
+                $header->setSubject($properties['Subject']);
+                if (array_key_exists('To', $properties)) {
+                    $header->setTo($properties['To']);
+                }
+
+                $entityManager->persist($header);
 
                 foreach ($properties as $name => $value) {
                     $emailHeadersProperties[$name] = $value;
@@ -64,6 +73,8 @@ class EmailHeadersAnalyzer
                     )
                 );
             }
+
+            $entityManager->flush();
 
             $options['offset']++;
             $this->logger->info(
