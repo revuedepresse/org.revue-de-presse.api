@@ -17,8 +17,15 @@ class SaveEmailHeadersCommand extends ContainerAwareCommand
         $this->setName('weaving_the_web:mapping:mail:headers')
             ->setDescription('Save emails headers as properties')
             ->addOption('limit', 'l', InputOption::VALUE_OPTIONAL, 'Number of item per processing page', 1000)
-            ->addOption('max_offset', 'm', InputOption::VALUE_OPTIONAL, 'Max offset to be reached while processing items', 100)
+            ->addOption(
+                'max_offset',
+                'mp',
+                InputOption::VALUE_OPTIONAL,
+                'Max offset to be reached while processing items',
+                100
+            )
             ->addOption('offset', 'o', InputOption::VALUE_OPTIONAL, 'Offset of first item to process first', 0)
+            ->addOption('memory_limit', 'ml', InputOption::VALUE_OPTIONAL, 'Memory limit not to be exceeded', 256)
             ->setAliases(['wtw:m:m:h']);
     }
 
@@ -31,13 +38,16 @@ class SaveEmailHeadersCommand extends ContainerAwareCommand
     {
         $options = $this->validateInput($input);
         $emailHeadersProperties = $this->getContainer()
-            ->get('weaving_the_web_mapping.analyzer.email_headers')->analyze($options);
+            ->get('weaving_the_web_mapping.analyzer.email_headers')->aggregateEmailHeadersProperties($options);
 
         $translator = $this->getContainer()->get('translator');
-        $output->writeLn($translator->trans(
-            'mapping.mail.headers.success',
-            ['{{ headers_count }}' => count($emailHeadersProperties)],
-            'command'));
+        $output->writeLn(
+            $translator->trans(
+                'mapping.mail.headers.success',
+                ['{{ headers_count }}' => count($emailHeadersProperties)],
+                'command'
+            )
+        );
     }
 
     /**
@@ -58,6 +68,12 @@ class SaveEmailHeadersCommand extends ContainerAwareCommand
             $offset = 0;
         }
 
+        if ($input->getOption('memory_limit') && is_numeric($input->getOption('memory_limit'))) {
+            $memoryLimit = intval($input->getOption('memory_limit'));
+        } else {
+            $memoryLimit = 256;
+        }
+
         if ($input->getOption('max_offset') && is_numeric($input->getOption('max_offset'))) {
             $maxOffset = intval($input->getOption('max_offset'));
         } else {
@@ -71,7 +87,8 @@ class SaveEmailHeadersCommand extends ContainerAwareCommand
         return array(
             'items_per_page' => $itemsCountPerPage,
             'offset' => $offset,
-            'max_offset' => $maxOffset
+            'memory_limit' => $memoryLimit,
+            'max_offset' => $maxOffset,
         );
     }
 }

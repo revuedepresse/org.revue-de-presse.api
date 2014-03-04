@@ -2,8 +2,8 @@
 
 namespace WeavingTheWeb\Bundle\MappingBundle\Analyzer;
 
-use WeavingTheWeb\Bundle\Legacy\ProviderBundle\Entity\WeavingHeader;
-use WeavingTheWeb\Bundle\MappingBundle\Entity\Property;
+use WeavingTheWeb\Bundle\Legacy\ProviderBundle\Entity\WeavingHeader,
+    WeavingTheWeb\Bundle\MappingBundle\Entity\Property;
 
 /**
  * @package WeavingTheWeb\Bundle\MappingBundle\Analyzer
@@ -29,19 +29,7 @@ class EmailHeadersAnalyzer
      * @param $options
      * @return array
      */
-    public function analyze(array $options)
-    {
-        $emailHeadersProperties = $this->aggregateEmailHeadersProperties($options);
-        $this->saveEmailsHeadersAsProperties($emailHeadersProperties);
-
-        return $emailHeadersProperties;
-    }
-
-    /**
-     * @param $options
-     * @return array
-     */
-    protected function aggregateEmailHeadersProperties($options)
+    public function aggregateEmailHeadersProperties($options)
     {
         /** @var \WeavingTheWeb\Bundle\Legacy\ProviderBundle\Repository\WeavingHeaderRepository $headerRepository */
         $headerRepository = $this->entityManager->getRepository('WeavingTheWebLegacyProviderBundle:WeavingHeader');
@@ -59,7 +47,19 @@ class EmailHeadersAnalyzer
                     $emailHeadersProperties[$name] = $value;
                 }
 
+                $this->saveEmailsHeadersAsProperties($emailHeadersProperties);
                 $this->logger->info(sprintf('%d headers have been parsed', count($emailHeadersProperties)));
+
+                $memoryPeakUsage = memory_get_peak_usage(true);
+                if ($memoryPeakUsage > $options['memory_limit'] * 1024 * 1024) {
+                    $this->entityManager->flush();
+                    $this->logger->info(sprintf(
+                        'Memory limit has been exceeded. Exiting now at offset %d with %d items per page',
+                        $options['offset'], $options['items_per_page']
+                    ));
+
+                    return $emailHeadersProperties;
+                }
             }
 
             $this->entityManager->flush();
@@ -88,7 +88,6 @@ class EmailHeadersAnalyzer
                 $this->entityManager->persist($property);
             }
         }
-        $this->entityManager->flush();
     }
 
     /**
