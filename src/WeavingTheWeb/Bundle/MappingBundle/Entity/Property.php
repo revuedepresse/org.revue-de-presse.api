@@ -12,6 +12,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Property
 {
+    const TYPE_EMAIL_HEADER = 0;
+
     /**
      * @var integer
      *
@@ -31,10 +33,16 @@ class Property
     /**
      * @var string
      *
-     * @ORM\Column(name="value", type="string", length=255)
+     * @ORM\Column(name="value", type="string", length=255, nullable=true)
      */
     private $value;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="type", type="integer", options={"default": 0})
+     */
+    private $type;
 
     /**
      * Get id
@@ -90,5 +98,28 @@ class Property
     public function getValue()
     {
         return $this->value;
+    }
+
+    /**
+     * Set type
+     *
+     * @param integer $type
+     * @return Property
+     */
+    public function setType($type)
+    {
+        $this->type = $type;
+    
+        return $this;
+    }
+
+    /**
+     * Get type
+     *
+     * @return integer 
+     */
+    public function getType()
+    {
+        return $this->type;
     }
 }

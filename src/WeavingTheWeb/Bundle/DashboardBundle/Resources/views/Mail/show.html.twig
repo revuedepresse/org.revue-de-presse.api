@@ -1,0 +1,11 @@
+{% if not plainText %}
+<!DOCTYPE html>
+<html>
+<head></head>
+<body>
+{% endif %}
+{{ emailBody|quoted_printable_decode|raw }}
+{% if not plainText %}
+</body>
+</html>
+{% endif %}
