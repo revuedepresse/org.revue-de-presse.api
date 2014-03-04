@@ -3,8 +3,8 @@
 namespace WeavingTheWeb\Bundle\DashboardBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
-use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-use Symfony\Component\HttpFoundation\Response;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller,
+    Symfony\Component\HttpFoundation\Response;
 
 /**
  * @package WeavingTheWeb\Bundle\DashboardBundle\Controller
@@ -39,9 +39,10 @@ class MailController extends Controller
         /** @var \WeavingTheWeb\Bundle\Legacy\ProviderBundle\Entity\WeavingMessage $message */
         $message = $messageRepository->findOneBy(['msgId' => $id]);
 
-        $encoding = 'Content-Transfer-Encoding:';
         $messageBody = $message->getMsgBodyHtml();
+        $encoding = 'Content-Transfer-Encoding:';
         $messageBodyProposal = $this->refineMessageBody($messageBody, $encoding);
+
         while ($messageBodyProposal !== $messageBody) {
             $messageBody = $messageBodyProposal;
             $messageBodyProposal = $this->refineMessageBody($messageBody, $encoding);
@@ -57,6 +58,7 @@ class MailController extends Controller
             $plainText = true;
             $response->headers->set('Content-Type', $properties['Content-Type']);
         } else {
+            $messageBody = $this->removeHtmlImgNodes($messageBody);
             $plainText = false;
         }
         $response->setContent(
@@ -69,6 +71,25 @@ class MailController extends Controller
             )
         );
         $response->send();
+    }
+
+    public function removeHtmlImgNodes($encodedDocument)
+    {
+        $document = quoted_printable_decode($encodedDocument);
+        if (false !== strpos($document, '<img')) {
+            $imagePatterns = [
+                '/<img(?!src=)(?:[^>]*)src=(?:\'|")([^"\']+)(?:\'|")[^>]*>/',
+                '/<img(?!SRC=)(?:[^>]*)SRC=(?:\'|")([^"\']+)(?:\'|")[^>]*>/'
+            ];
+
+            foreach ($imagePatterns as $imagePattern) {
+                $document = preg_replace($imagePattern, '', $document);
+            }
+
+            return $document;
+        } else {
+            return $document;
+        }
     }
 
     /**
