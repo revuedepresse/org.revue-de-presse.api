@@ -1,0 +1,4 @@
+mapping:
+    mail:
+        headers:
+            success: All available email headers ({{ headers_count }}) have been successfully saved as properties.

@@ -4,21 +4,9 @@
 
 {% block body %}
     <div class="container">
-        <table class="table">
         {% for email in emails %}
-            <tr>
-                <td>
-                    <pre>
-                        {{ email.header }}
-                    </pre>
-                </td>
-                <td>
-                    <pre>
-                        {{ email.body }}
-                    </pre>
-                </td>
-            </tr>
+            <iframe width="1024" height="500" src="{{ path('weaving_the_web_dashboard_mail_show', {id: email.mailBodyId}) }}">
+            </iframe>
         {% endfor %}
-        </table>
     <div>
 {% endblock %}
