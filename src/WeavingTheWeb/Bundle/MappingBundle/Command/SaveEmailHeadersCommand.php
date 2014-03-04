@@ -25,7 +25,8 @@ class SaveEmailHeadersCommand extends ContainerAwareCommand
                 100
             )
             ->addOption('offset', 'o', InputOption::VALUE_OPTIONAL, 'Offset of first item to process first', 0)
-            ->addOption('memory_limit', 'ml', InputOption::VALUE_OPTIONAL, 'Memory limit not to be exceeded', 256)
+            ->addOption('memory_limit', 'ml', InputOption::VALUE_OPTIONAL, 'Memory limit not to be exceeded', $this->getDefaultMemoryLimit())
+            ->addOption('save_headers_names', 'hn', InputOption::VALUE_NONE, 'Save headers names as properties')
             ->setAliases(['wtw:m:m:h']);
     }
 
@@ -37,17 +38,28 @@ class SaveEmailHeadersCommand extends ContainerAwareCommand
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $options = $this->validateInput($input);
-        $emailHeadersProperties = $this->getContainer()
-            ->get('weaving_the_web_mapping.analyzer.email_headers')->aggregateEmailHeadersProperties($options);
+        /**
+         * @var \WeavingTheWeb\Bundle\MappingBundle\Analyzer\EmailHeadersAnalyzer $emailHeadersAnalyzer
+         */
+        $emailHeadersAnalyzer = $this->getContainer()->get('weaving_the_web_mapping.analyzer.email_headers');
+        $affectedItems = $emailHeadersAnalyzer->aggregateEmailHeadersProperties($options);
 
         $translator = $this->getContainer()->get('translator');
-        $output->writeLn(
-            $translator->trans(
+
+        if ($options['save_headers_names']) {
+            $successMessage = $translator->trans(
                 'mapping.mail.headers.success',
-                ['{{ headers_count }}' => count($emailHeadersProperties)],
+                ['{{ headers_count }}' => count($affectedItems)],
                 'command'
-            )
-        );
+            );
+        } else {
+            $successMessage = $translator->trans(
+                'mapping.mail.update.success',
+                ['{{ emails_count }}' => $affectedItems],
+                'command'
+            );
+        }
+        $output->writeLn($successMessage);
     }
 
     /**
@@ -56,22 +68,28 @@ class SaveEmailHeadersCommand extends ContainerAwareCommand
      */
     protected function validateInput(InputInterface $input)
     {
-        if ($input->getOption('limit') && is_numeric($input->getOption('limit'))) {
+        if ($input->hasOption('limit') && is_numeric($input->getOption('limit'))) {
             $itemsCountPerPage = intval($input->getOption('limit'));
         } else {
             $itemsCountPerPage = 1000;
         }
 
-        if ($input->getOption('offset') && is_numeric($input->getOption('offset'))) {
+        if ($input->hasOption('offset') && is_numeric($input->getOption('offset'))) {
             $offset = intval($input->getOption('offset'));
         } else {
             $offset = 0;
         }
 
-        if ($input->getOption('memory_limit') && is_numeric($input->getOption('memory_limit'))) {
+        if ($input->hasOption('memory_limit') && is_numeric($input->getOption('memory_limit'))) {
             $memoryLimit = intval($input->getOption('memory_limit'));
         } else {
-            $memoryLimit = 256;
+            $memoryLimit = $this->getDefaultMemoryLimit();
+        }
+
+        if ($input->hasOption('save_headers_names') && $input->getOption('save_headers_names')) {
+            $saveHeadersNames = $input->getOption('save_headers_names');
+        } else {
+            $saveHeadersNames = false;
         }
 
         if ($input->getOption('max_offset') && is_numeric($input->getOption('max_offset'))) {
@@ -85,10 +103,19 @@ class SaveEmailHeadersCommand extends ContainerAwareCommand
         }
 
         return array(
+            'save_headers_names' => $saveHeadersNames,
             'items_per_page' => $itemsCountPerPage,
             'offset' => $offset,
             'memory_limit' => $memoryLimit,
             'max_offset' => $maxOffset,
         );
+    }
+
+    /**
+     * @return float
+     */
+    protected function getDefaultMemoryLimit()
+    {
+        return intval(ini_get('memory_limit')) * 1 / 3;
     }
 }

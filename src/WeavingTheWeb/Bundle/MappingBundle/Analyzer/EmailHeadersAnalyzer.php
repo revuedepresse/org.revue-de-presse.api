@@ -34,6 +34,8 @@ class EmailHeadersAnalyzer
         /** @var \WeavingTheWeb\Bundle\Legacy\ProviderBundle\Repository\WeavingHeaderRepository $headerRepository */
         $headerRepository = $this->entityManager->getRepository('WeavingTheWebLegacyProviderBundle:WeavingHeader');
 
+        $memoryExceeded = false;
+        $processedHeaders = 0;
         $emailHeadersProperties = array();
         while ($options['offset'] <= $options['max_offset']) {
             $headers = $headerRepository->paginate($options['offset'], $options['items_per_page'], $withoutSubject = true);
@@ -43,32 +45,48 @@ class EmailHeadersAnalyzer
                 $properties = $this->parser->parse($header->getHdrValue());
                 $this->updateHeader($header, $properties);
 
-                foreach ($properties as $name => $value) {
-                    $emailHeadersProperties[$name] = $value;
+                if ($options['save_headers_names']) {
+                    foreach ($properties as $name => $value) {
+                        $emailHeadersProperties[$name] = $value;
+                    }
+                    $this->saveEmailsHeadersAsProperties($emailHeadersProperties);
+                    $this->logger->info(sprintf('%d headers have been parsed', count($emailHeadersProperties)));
                 }
 
-                $this->saveEmailsHeadersAsProperties($emailHeadersProperties);
-                $this->logger->info(sprintf('%d headers have been parsed', count($emailHeadersProperties)));
-
                 $memoryPeakUsage = memory_get_peak_usage(true);
+                $processedHeaders++;
                 if ($memoryPeakUsage > $options['memory_limit'] * 1024 * 1024) {
-                    $this->entityManager->flush();
-                    $this->logger->info(sprintf(
-                        'Memory limit has been exceeded. Exiting now at offset %d with %d items per page',
-                        $options['offset'], $options['items_per_page']
-                    ));
-
-                    return $emailHeadersProperties;
+                    $memoryExceeded = true;
+                    break;
                 }
             }
 
             $this->entityManager->flush();
+            if ($memoryExceeded) {
+                break;
+            }
 
             $options['offset']++;
             $this->logger->info(sprintf('Moving selection cursor with offset set at %d', $options['offset']));
         }
 
-        return $emailHeadersProperties;
+        if ($options['save_headers_names']) {
+            $affectedItems = $emailHeadersProperties;
+        } elseif (!$memoryExceeded) {
+            $affectedItems = $options['offset'] * $options['items_per_page'] + $options['max_offset'] % $options['offset'];
+        } else {
+            $affectedItems = $processedHeaders;
+        }
+
+        if ($memoryExceeded) {
+            $this->entityManager->flush();
+            $this->logger->info(sprintf(
+                'Memory limit has been exceeded. Exiting now at offset %d with %d items per page',
+                $options['offset'], $options['items_per_page']
+            ));
+        }
+
+        return $affectedItems;
     }
 
     /**
@@ -88,6 +106,8 @@ class EmailHeadersAnalyzer
                 $this->entityManager->persist($property);
             }
         }
+
+        $this->entityManager->flush();
     }
 
     /**
