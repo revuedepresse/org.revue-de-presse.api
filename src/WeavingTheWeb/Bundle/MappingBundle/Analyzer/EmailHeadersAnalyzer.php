@@ -2,6 +2,7 @@
 
 namespace WeavingTheWeb\Bundle\MappingBundle\Analyzer;
 
+use WeavingTheWeb\Bundle\Legacy\ProviderBundle\Entity\WeavingHeader;
 use WeavingTheWeb\Bundle\MappingBundle\Entity\Property;
 
 /**
@@ -42,25 +43,17 @@ class EmailHeadersAnalyzer
      */
     protected function aggregateEmailHeadersProperties($options)
     {
-        $entityManager = $this->entityManager;
         /** @var \WeavingTheWeb\Bundle\Legacy\ProviderBundle\Repository\WeavingHeaderRepository $headerRepository */
-        $headerRepository = $entityManager->getRepository('WeavingTheWebLegacyProviderBundle:WeavingHeader');
+        $headerRepository = $this->entityManager->getRepository('WeavingTheWebLegacyProviderBundle:WeavingHeader');
 
         $emailHeadersProperties = array();
         while ($options['offset'] <= $options['max_offset']) {
-            $headers = $headerRepository->paginate($options['offset'], $options['items_per_page']);
+            $headers = $headerRepository->paginate($options['offset'], $options['items_per_page'], $withoutSubject = true);
 
             /** @var \WeavingTheWeb\Bundle\Legacy\ProviderBundle\Entity\WeavingHeader $header */
             foreach ($headers as $header) {
                 $properties = $this->parser->parse($header->getHdrValue());
-
-                $header->setFrom($properties['From']);
-                $header->setSubject($properties['Subject']);
-                if (array_key_exists('To', $properties)) {
-                    $header->setTo($properties['To']);
-                }
-
-                $entityManager->persist($header);
+                $this->updateHeader($header, $properties);
 
                 foreach ($properties as $name => $value) {
                     $emailHeadersProperties[$name] = $value;
@@ -68,13 +61,13 @@ class EmailHeadersAnalyzer
 
                 $this->logger->info(
                     sprintf(
-                        '%d have been parsed',
+                        '%d headers have been parsed',
                         count($emailHeadersProperties)
                     )
                 );
             }
 
-            $entityManager->flush();
+            $this->entityManager->flush();
 
             $options['offset']++;
             $this->logger->info(
@@ -106,5 +99,24 @@ class EmailHeadersAnalyzer
             }
         }
         $this->entityManager->flush();
+    }
+
+    /**
+     * @param WeavingHeader $header
+     * @param $properties
+     */
+    protected function updateHeader(WeavingHeader $header, $properties)
+    {
+        if (array_key_exists('From', $properties)) {
+            $header->setFrom($properties['From']);
+        }
+        if (array_key_exists('Subject', $properties)) {
+            $header->setSubject($properties['Subject']);
+        }
+        if (array_key_exists('To', $properties)) {
+            $header->setTo($properties['To']);
+        }
+
+        $this->entityManager->persist($header);
     }
 } 
