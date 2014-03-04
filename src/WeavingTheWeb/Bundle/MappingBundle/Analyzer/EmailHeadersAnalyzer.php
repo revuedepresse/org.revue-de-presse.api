@@ -59,23 +59,13 @@ class EmailHeadersAnalyzer
                     $emailHeadersProperties[$name] = $value;
                 }
 
-                $this->logger->info(
-                    sprintf(
-                        '%d headers have been parsed',
-                        count($emailHeadersProperties)
-                    )
-                );
+                $this->logger->info(sprintf('%d headers have been parsed', count($emailHeadersProperties)));
             }
 
             $this->entityManager->flush();
 
             $options['offset']++;
-            $this->logger->info(
-                sprintf(
-                    'Moving selection cursor with offset set at %d',
-                    $options['offset']
-                )
-            );
+            $this->logger->info(sprintf('Moving selection cursor with offset set at %d', $options['offset']));
         }
 
         return $emailHeadersProperties;
