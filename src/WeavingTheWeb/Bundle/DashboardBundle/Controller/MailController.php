@@ -3,8 +3,12 @@
 namespace WeavingTheWeb\Bundle\DashboardBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
+
 use Symfony\Bundle\FrameworkBundle\Controller\Controller,
     Symfony\Component\HttpFoundation\Response;
+
+use WeavingTheWeb\Bundle\Legacy\ProviderBundle\Entity\WeavingHeader,
+    WeavingTheWeb\Bundle\Legacy\ProviderBundle\Entity\WeavingMessage;
 
 /**
  * @package WeavingTheWeb\Bundle\DashboardBundle\Controller
@@ -38,86 +42,141 @@ class MailController extends Controller
         $messageRepository = $this->getDoctrine()->getRepository('WeavingTheWebLegacyProviderBundle:WeavingMessage');
         /** @var \WeavingTheWeb\Bundle\Legacy\ProviderBundle\Entity\WeavingMessage $message */
         $message = $messageRepository->findOneBy(['msgId' => $id]);
-
-        $messageBody = $message->getMsgBodyHtml();
-        $encoding = 'Content-Transfer-Encoding:';
-        $messageBodyProposal = $this->refineMessageBody($messageBody, $encoding);
-
-        while ($messageBodyProposal !== $messageBody) {
-            $messageBody = $messageBodyProposal;
-            $messageBodyProposal = $this->refineMessageBody($messageBody, $encoding);
-        }
-
-        $header = $message->getHeader();
-        /** @var \WeavingTheWeb\Bundle\MappingBundle\Parser\EmailHeadersParser $emailHeadersParser */
-        $emailHeadersParser = $this->get('weaving_the_web_mapping.parser.email_headers');
-        $properties = $emailHeadersParser->parse($header->getHdrValue());
-
         $response = new Response();
-        if (false !== strpos($properties['Content-Type'], 'text/plain')) {
-            $plainText = true;
-            $response->headers->set('Content-Type', $properties['Content-Type']);
-        } else {
-            $messageBody = $this->removeHtmlImgNodes($messageBody);
-            $plainText = false;
+        if ($this->isPlainTextMessage($message)) {
+            $response->headers->set('Content-Type', $this->getMessageContentType($message));
         }
         $response->setContent(
             $this->renderView(
                 'WeavingTheWebDashboardBundle:Mail:show.html.twig',
                 [
-                    'emailBody' => $messageBody,
-                    'plainText' => $plainText
+                    'message' => $this->parseMessage($message)
                 ]
             )
         );
         $response->send();
     }
 
-    public function removeHtmlImgNodes($encodedDocument)
+
+    /**
+     * @param WeavingMessage $message
+     * @return mixed
+     */
+    protected function parseMessage(WeavingMessage $message)
     {
-        $document = quoted_printable_decode($encodedDocument);
-        if (false !== strpos($document, '<img')) {
+        $bodyWithoutImages = $this->removeMessageImages($message);
+
+        if ($this->hasBoundary($message)) {
+            list(, $boundaryAndNextHeaders) = explode('boundary=', $this->getMessageContentType($message));
+            list($boundary) = explode("\r\n", $boundaryAndNextHeaders);
+            $messageParts = explode('--' . trim($boundary, '"'), $bodyWithoutImages);
+            /** Removes the double hyphen preceding the last boundary */
+            array_pop($messageParts);
+            $htmlBodyWithoutImages = array_pop($messageParts);
+
+            return $this->removeLastHeader($htmlBodyWithoutImages);
+        } else {
+            return $bodyWithoutImages;
+        }
+    }
+
+    /**
+     * @param $htmlBodyWithoutImages
+     * @return mixed
+     */
+    protected function removeLastHeader($htmlBodyWithoutImages)
+    {
+        $separator = "\r\n\r\n";
+        $parts = explode($separator, $htmlBodyWithoutImages);
+        unset($parts[0]);
+
+        return implode($separator, $parts);
+    }
+
+    /**
+     * @param WeavingMessage $message
+     * @return bool
+     */
+    protected function hasBoundary(WeavingMessage $message)
+    {
+        $contentType = $this->getMessageContentType($message);
+
+        return false !== strpos($contentType, 'boundary=');
+    }
+
+    /**
+     * @param WeavingMessage $message
+     * @return mixed
+     */
+    protected function getMessageContentType(WeavingMessage $message)
+    {
+        /** @var \WeavingTheWeb\Bundle\MappingBundle\Parser\EmailHeadersParser $emailHeadersParser */
+        $emailHeadersParser = $this->get('weaving_the_web_mapping.parser.email_headers');
+        $properties = $emailHeadersParser->parse($message->getHeader()->getHdrValue());
+
+        return $properties['Content-Type'];
+    }
+
+    /**
+     * @param WeavingMessage $message
+     * @return bool
+     */
+    protected function isPlainTextMessage(WeavingMessage $message)
+    {
+        /** @var \WeavingTheWeb\Bundle\MappingBundle\Parser\EmailHeadersParser $emailHeadersParser */
+        $emailHeadersParser = $this->get('weaving_the_web_mapping.parser.email_headers');
+        $properties = $emailHeadersParser->parse($message->getHeader()->getHdrValue());
+
+        return false !== strpos($properties['Content-Type'], 'text/plain');
+    }
+
+    /**
+     * @param WeavingMessage $message
+     * @return string
+     */
+    protected function removeMessageHeaders(WeavingMessage $message)
+    {
+        $htmlBody = $message->getMsgBodyHtml();
+        $bodyProposal = '';
+        while ($bodyProposal !== $htmlBody) {
+            $bodyProposal = str_replace($message->getHeader()->getHdrValue(), '', $htmlBody);
+            $htmlBody = $bodyProposal;
+        }
+
+        return $htmlBody;
+    }
+
+    /**
+     * @param $mail
+     * @return array
+     */
+    protected function hasContentTransferEncodingHeader($mail)
+    {
+        return false !== strpos($mail, 'Content-Transfer-Encoding:');
+    }
+
+    /**
+     * @param WeavingMessage $message
+     * @return mixed|string
+     */
+    protected function removeMessageImages(WeavingMessage $message)
+    {
+        $body = $this->removeMessageHeaders($message);
+        $decodedBody = quoted_printable_decode($body);
+
+        if (!$this->isPlainTextMessage($message) && false !== strpos($decodedBody, '<img')) {
             $imagePatterns = [
                 '/<img(?!src=)(?:[^>]*)src=(?:\'|")([^"\']+)(?:\'|")[^>]*>/',
                 '/<img(?!SRC=)(?:[^>]*)SRC=(?:\'|")([^"\']+)(?:\'|")[^>]*>/'
             ];
 
             foreach ($imagePatterns as $imagePattern) {
-                $document = preg_replace($imagePattern, '', $document);
+                $decodedBody = preg_replace($imagePattern, '', $decodedBody);
             }
 
-            return $document;
+            return $decodedBody;
         } else {
-            return $document;
+            return $decodedBody;
         }
-    }
-
-    /**
-     * @param $messageBody
-     * @param $encoding
-     * @return string
-     * @throws \Exception
-     */
-    protected function refineMessageBody($messageBody, $encoding)
-    {
-        $positionProposal = strpos($messageBody, $encoding);
-        if ($positionProposal !== false) {
-            $headerEndsAt = $positionProposal;
-            $positionProposal = strpos(substr($messageBody, $headerEndsAt + 1), $encoding);
-            if ($positionProposal !== false) {
-                $headerEndsAt = $positionProposal;
-            }
-
-            if (($bodyStartsAtProposal = strpos($messageBody, "\n\r\n", $headerEndsAt)) !== false) {
-                $bodyStartsAt = $bodyStartsAtProposal;
-            } elseif (($bodyStartsAtProposal = strpos($messageBody, "\n", $headerEndsAt)) !== false) {
-                $bodyStartsAt = $bodyStartsAtProposal;
-            } else {
-                throw new \Exception('No obvious separation between body and header');
-            }
-            $messageBody = substr($messageBody, $bodyStartsAt + 1);
-        }
-
-        return $messageBody;
     }
 }
