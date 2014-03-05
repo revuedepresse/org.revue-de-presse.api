@@ -136,6 +136,14 @@ From project root directory, execute the following commands to transform
     # data collected from personal Twitter user stream
     php app/console wtw:api:manage:transformation --process_isolation --save --type=user_stream
 
+Mail
+
+    # To save emails using IMAP
+    app/console weaving_the_web:email:save
+
+    # To save headers of messages available in the database as properties
+    app/console weaving_the_web:mapping:mail:headers
+
 Messaging
 
     # To produce a message
@@ -214,6 +222,12 @@ Examples
             'ORDER BY per_id DESC'
         )
     WHERE per_type = 0 AND per_id = 29;
+
+    # Count of messages which have not been processed yet for extraction of their subject, recipient and sender
+    SELECT count(*) FROM weaving_header WHERE fromField is null and toField is null and subject is null and rcl_id = 0;
+
+    # Count of messages which have been processed yet for extraction of their subject, recipient and sender
+    SELECT count(*) FROM weaving_header WHERE fromField is not null OR toField is not null OR subject is not null;
 
 6) Known issues
 --------------------------------
