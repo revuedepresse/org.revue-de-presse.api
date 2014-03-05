@@ -36,6 +36,7 @@ class EmailHeadersAnalyzer
 
         $memoryExceeded = false;
         $processedHeaders = 0;
+
         $emailHeadersProperties = array();
         while ($options['offset'] <= $options['max_offset']) {
             $headers = $headerRepository->paginate($options['offset'], $options['items_per_page'], $withoutSubject = true);
@@ -43,7 +44,9 @@ class EmailHeadersAnalyzer
             /** @var \WeavingTheWeb\Bundle\Legacy\ProviderBundle\Entity\WeavingHeader $header */
             foreach ($headers as $header) {
                 $properties = $this->parser->parse($header->getHdrValue());
-                $this->updateHeader($header, $properties);
+                if ($this->safeHeadersUpdate($header, $properties)) {
+                    $processedHeaders++;
+                }
 
                 if ($options['save_headers_names']) {
                     foreach ($properties as $name => $value) {
@@ -54,7 +57,6 @@ class EmailHeadersAnalyzer
                 }
 
                 $memoryPeakUsage = memory_get_peak_usage(true);
-                $processedHeaders++;
                 if ($memoryPeakUsage > $options['memory_limit'] * 1024 * 1024) {
                     $memoryExceeded = true;
                     break;
@@ -72,8 +74,6 @@ class EmailHeadersAnalyzer
 
         if ($options['save_headers_names']) {
             $affectedItems = $emailHeadersProperties;
-        } elseif (!$memoryExceeded) {
-            $affectedItems = $options['offset'] * $options['items_per_page'] + $options['max_offset'] % $options['offset'];
         } else {
             $affectedItems = $processedHeaders;
         }
@@ -97,10 +97,11 @@ class EmailHeadersAnalyzer
         /** @var \Doctrine\ORM\EntityRepository $propertyRepository */
         $propertyRepository = $this->entityManager->getRepository('WeavingTheWebMappingBundle:Property');
         foreach ($emailHeadersProperties as $name => $value) {
-            $header = $propertyRepository->findOneBy(['name' => $name]);
+            $normalizedName = strtolower($name);
+            $header = $propertyRepository->findOneBy(['name' => $normalizedName]);
             if (is_null($header)) {
                 $property = new Property();
-                $property->setName($name);
+                $property->setName(strtolower($normalizedName));
                 $property->setType($property::TYPE_EMAIL_HEADER);
 
                 $this->entityManager->persist($property);
@@ -113,19 +114,25 @@ class EmailHeadersAnalyzer
     /**
      * @param WeavingHeader $header
      * @param $properties
+     * @return bool
      */
-    protected function updateHeader(WeavingHeader $header, $properties)
+    protected function safeHeadersUpdate(WeavingHeader $header, $properties)
     {
-        if (array_key_exists('From', $properties)) {
-            $header->setFrom($properties['From']);
+        $beforeHash = spl_object_hash($header);
+
+        if (array_key_exists('from', $properties) && is_null($header->getFrom())) {
+            $header->setFrom($properties['from']);
         }
-        if (array_key_exists('Subject', $properties)) {
-            $header->setSubject($properties['Subject']);
+        if (array_key_exists('subject', $properties) && is_null($header->getSubject())) {
+            $header->setSubject($properties['subject']);
         }
-        if (array_key_exists('To', $properties)) {
-            $header->setTo($properties['To']);
+        if (array_key_exists('to', $properties) && is_null($header->getTo())) {
+            $header->setTo($properties['to']);
         }
 
         $this->entityManager->persist($header);
+        $afterHash = spl_object_hash($header);
+
+        return $beforeHash !== $afterHash;
     }
 } 
