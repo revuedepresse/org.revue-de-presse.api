@@ -29,7 +29,7 @@ class EmailHeadersParser implements ParserInterface
         foreach ($lines as $line) {
             if (strlen(trim($line)) > 0) {
                 list($name, $value) = explode(':', $line);
-                $properties[trim($name)] = trim($value);
+                $properties[trim(strtolower($name))] = trim($value);
             }
         }
 

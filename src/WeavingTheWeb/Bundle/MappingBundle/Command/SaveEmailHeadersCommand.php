@@ -16,17 +16,11 @@ class SaveEmailHeadersCommand extends ContainerAwareCommand
     {
         $this->setName('weaving_the_web:mapping:mail:headers')
             ->setDescription('Save emails headers as properties')
-            ->addOption('limit', 'l', InputOption::VALUE_OPTIONAL, 'Number of item per processing page', 1000)
-            ->addOption(
-                'max_offset',
-                'mp',
-                InputOption::VALUE_OPTIONAL,
-                'Max offset to be reached while processing items',
-                100
-            )
-            ->addOption('offset', 'o', InputOption::VALUE_OPTIONAL, 'Offset of first item to process first', 0)
-            ->addOption('memory_limit', 'ml', InputOption::VALUE_OPTIONAL, 'Memory limit not to be exceeded', $this->getDefaultMemoryLimit())
-            ->addOption('save_headers_names', 'hn', InputOption::VALUE_NONE, 'Save headers names as properties')
+            ->addOption('limit', null, InputOption::VALUE_OPTIONAL, 'Number of item per processing page', 1000)
+            ->addOption('max-offset', null, InputOption::VALUE_OPTIONAL, 'Max offset to be reached while processing items', 100)
+            ->addOption('offset', null, InputOption::VALUE_OPTIONAL, 'Offset of first item to process first', 0)
+            ->addOption('memory-limit', null, InputOption::VALUE_OPTIONAL, 'Memory limit not to be exceeded', $this->getDefaultMemoryLimit())
+            ->addOption('save-headers-names', null, InputOption::VALUE_NONE, 'Save headers names as properties')
             ->setAliases(['wtw:m:m:h']);
     }
 
@@ -42,7 +36,7 @@ class SaveEmailHeadersCommand extends ContainerAwareCommand
          * @var \WeavingTheWeb\Bundle\MappingBundle\Analyzer\EmailHeadersAnalyzer $emailHeadersAnalyzer
          */
         $emailHeadersAnalyzer = $this->getContainer()->get('weaving_the_web_mapping.analyzer.email_headers');
-        $affectedItems = $emailHeadersAnalyzer->aggregateEmailHeadersProperties($options);
+        $affectedItems = $emailHeadersAnalyzer->analyze($options);
 
         $translator = $this->getContainer()->get('translator');
 
@@ -80,20 +74,20 @@ class SaveEmailHeadersCommand extends ContainerAwareCommand
             $offset = 0;
         }
 
-        if ($input->hasOption('memory_limit') && is_numeric($input->getOption('memory_limit'))) {
-            $memoryLimit = intval($input->getOption('memory_limit'));
+        if ($input->hasOption('memory-limit') && is_numeric($input->getOption('memory-limit'))) {
+            $memoryLimit = intval($input->getOption('memory-limit'));
         } else {
             $memoryLimit = $this->getDefaultMemoryLimit();
         }
 
-        if ($input->hasOption('save_headers_names') && $input->getOption('save_headers_names')) {
-            $saveHeadersNames = $input->getOption('save_headers_names');
+        if ($input->hasOption('save-headers-names') && $input->getOption('save-headers-names')) {
+            $saveHeadersNames = $input->getOption('save-headers-names');
         } else {
             $saveHeadersNames = false;
         }
 
-        if ($input->getOption('max_offset') && is_numeric($input->getOption('max_offset'))) {
-            $maxOffset = intval($input->getOption('max_offset'));
+        if ($input->getOption('max-offset') && is_numeric($input->getOption('max-offset'))) {
+            $maxOffset = intval($input->getOption('max-offset'));
         } else {
             $entityManager = $this->getContainer()->get('doctrine.orm.entity_manager');
             /** @var \WeavingTheWeb\Bundle\Legacy\ProviderBundle\Repository\WeavingHeaderRepository $headerRepository */

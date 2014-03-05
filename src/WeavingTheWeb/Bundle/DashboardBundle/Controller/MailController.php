@@ -44,7 +44,7 @@ class MailController extends Controller
         $message = $messageRepository->findOneBy(['msgId' => $id]);
         $response = new Response();
         if ($this->isPlainTextMessage($message)) {
-            $response->headers->set('Content-Type', $this->getMessageContentType($message));
+            $response->headers->set('content-type', $this->getMessageContentType($message));
         }
         $response->setContent(
             $this->renderView(
@@ -114,7 +114,7 @@ class MailController extends Controller
         $emailHeadersParser = $this->get('weaving_the_web_mapping.parser.email_headers');
         $properties = $emailHeadersParser->parse($message->getHeader()->getHdrValue());
 
-        return $properties['Content-Type'];
+        return $properties['content-type'];
     }
 
     /**
@@ -127,7 +127,7 @@ class MailController extends Controller
         $emailHeadersParser = $this->get('weaving_the_web_mapping.parser.email_headers');
         $properties = $emailHeadersParser->parse($message->getHeader()->getHdrValue());
 
-        return false !== strpos($properties['Content-Type'], 'text/plain');
+        return false !== strpos($properties['content-type'], 'text/plain');
     }
 
     /**
