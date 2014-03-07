@@ -106,7 +106,12 @@ class EmailParser implements ParserInterface
     {
         while ($match = preg_match('#boundary="(?<boundary>[^"]+)"#', $lastMessagePart, $matches)) {
             $boundary = $matches['boundary'];
-            $lastMessagePart = $this->splitOnBoundary($lastMessagePart, $boundary);
+            $messageAfterSplit = $this->splitOnBoundary($lastMessagePart, $boundary);
+            if ($this->contains($messageAfterSplit, $boundary)) {
+                $lastMessagePart = str_replace('boundary="' . $boundary . '"', '', $messageAfterSplit);
+            } else {
+                $lastMessagePart = $messageAfterSplit;
+            }
         }
 
         return $lastMessagePart;
@@ -119,12 +124,65 @@ class EmailParser implements ParserInterface
      */
     protected function splitOnBoundary($message, $boundary)
     {
-        $parts = explode('--' . $boundary, $message);
-
+        $parts = explode('--' . $boundary, trim($message));
         // Removes double hyphens
         array_pop($parts);
+        $contentTypesIndex = null;
 
-        return array_pop($parts);
+        foreach ($parts as $index => $part) {
+            $contentTypeHeader = $this->parseContentTypeHeader($part);
+            if ($this->containsContentTransferEncoding($contentTypeHeader)) {
+                if ($this->containsTextHtmlContentType($contentTypeHeader)) {
+                    $contentTypesIndex['html'] = $index;
+                }
+                if ($this->containsTextPlainContentType($contentTypeHeader)) {
+                    $contentTypesIndex['text'] = $index;
+                }
+                $contentTransferEncoding = $this->parseContentTransferEncoding($part);
+                $decoder = $contentTransferEncoding . '_decode';
+                $partWithoutHeader = $this->removeLastHeader($part);
+
+                if (function_exists($decoder)) {
+                    if ($this->containsImagePngContentType($contentTypeHeader)) {
+                        $parts[$index] = $this->getImageAsDataURI($partWithoutHeader, 'image/png', $contentTransferEncoding);
+                    } elseif ($this->containsImageJpgContentType($contentTypeHeader)) {
+                        $parts[$index] = $this->getImageAsDataURI($partWithoutHeader, 'image/jpeg', $contentTransferEncoding);
+                    } else {
+                        $parts[$index] = $decoder($partWithoutHeader);
+                    }
+                } else {
+                    $parts[$index] = $partWithoutHeader;
+                }
+            }
+        }
+
+        if (
+            count($parts) > 2 &&
+            array_key_exists('html', $contentTypesIndex)
+        ) {
+            if (array_key_exists('text', $contentTypesIndex)) {
+                unset($parts[$contentTypesIndex['text']]);
+            } else {
+                $parts = array_slice($parts, $contentTypesIndex['html']);
+            }
+
+            return implode($parts);
+        } elseif (count($parts) > 1) {
+            return $parts[count($parts) - 1];
+        } else {
+            return $message;
+        }
+    }
+
+    /**
+     * @param $partWithoutHeader
+     * @param $contentType
+     * @param $encoding
+     * @return string
+     */
+    protected function getImageAsDataURI($partWithoutHeader, $contentType, $encoding)
+    {
+        return '<img src="data:' . $contentType . ';' . $encoding . ',' . trim($partWithoutHeader) . '" />';
     }
 
     /**
@@ -133,13 +191,24 @@ class EmailParser implements ParserInterface
      */
     protected function removeLastHeader($htmlBodyWithoutImages)
     {
-        $separator = "\r\n\r\n";
         $parts = $this->getLastHeaderParts($htmlBodyWithoutImages);
         if (count($parts) > 1) {
             unset($parts[0]);
         }
+        $separator = "\r\n\r\n";
 
         return implode($separator, $parts);
+    }
+
+    /**
+     * @param $htmlBodyWithoutImages
+     * @return array
+     */
+    protected function parseContentTypeHeader($htmlBodyWithoutImages)
+    {
+        $parts = $this->getLastHeaderParts($htmlBodyWithoutImages);
+
+        return strtolower($parts[0]);
     }
 
     /**
@@ -149,7 +218,18 @@ class EmailParser implements ParserInterface
     protected function getContentTransferEncoding(WeavingMessage $message)
     {
         $lastMessagePart = $this->getMessageLastPart($message);
-        $keyValuePairs = explode("\r\n", $lastMessagePart);
+
+        return $this->parseContentTransferEncoding($lastMessagePart);
+    }
+
+    /**
+     * @param $subject
+     * @return mixed
+     */
+    protected function parseContentTransferEncoding($subject)
+    {
+        $keyValuePairs = explode("\r\n", $subject);
+        $contentTransferEncoding = null;
         foreach ($keyValuePairs as $keyValuePair) {
             $loweredKeyValuePair = strtolower($keyValuePair);
             if ($this->containsContentTransferEncoding($loweredKeyValuePair)) {
@@ -228,6 +308,42 @@ class EmailParser implements ParserInterface
     }
 
     /**
+     * @param $haystack
+     * @return bool
+     */
+    protected function containsTextHtmlContentType($haystack)
+    {
+        return $this->contains($haystack, 'text/html');
+    }
+
+    /**
+     * @param $haystack
+     * @return bool
+     */
+    protected function containsImagePngContentType($haystack)
+    {
+        return $this->contains($haystack, 'image/png');
+    }
+
+    /**
+     * @param $haystack
+     * @return bool
+     */
+    protected function containsImageJpgContentType($haystack)
+    {
+        return $this->contains($haystack, 'image/jpg') || $this->contains($haystack, 'image/jpeg') ;
+    }
+
+    /**
+     * @param $haystack
+     * @return bool
+     */
+    protected function containsTextPlainContentType($haystack)
+    {
+        return $this->contains($haystack, 'text/plain');
+    }
+
+    /**
      * @param WeavingMessage $message
      * @return bool
      */
@@ -265,7 +381,7 @@ class EmailParser implements ParserInterface
             $bodyWithoutImages = preg_replace($imagePattern, '', $subject);
         }
 
-        return $bodyWithoutImages;
+        return trim($bodyWithoutImages);
     }
 
     /**
