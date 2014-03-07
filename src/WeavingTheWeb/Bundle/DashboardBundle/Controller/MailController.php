@@ -44,7 +44,9 @@ class MailController extends Controller
         $message = $messageRepository->findOneBy(['msgId' => $id]);
         $response = new Response();
         if ($this->isPlainTextMessage($message)) {
-            $response->headers->set('content-type', $this->getMessageContentType($message));
+            $response->headers->set('Content-Type', $this->getMessageContentType($message));
+        } else {
+            $response->headers->set('Content-Type', 'text/html; charset="UTF-8"');
         }
         $response->setContent(
             $this->renderView(
@@ -64,19 +66,29 @@ class MailController extends Controller
      */
     protected function parseMessage(WeavingMessage $message)
     {
-        $bodyWithoutImages = $this->removeMessageImages($message);
 
         if ($this->hasBoundary($message)) {
-            list(, $boundaryAndNextHeaders) = explode('boundary=', $this->getMessageContentType($message));
-            list($boundary) = explode("\r\n", $boundaryAndNextHeaders);
-            $messageParts = explode('--' . trim($boundary, '"'), $bodyWithoutImages);
-            /** Removes the double hyphen preceding the last boundary */
-            array_pop($messageParts);
-            $htmlBodyWithoutImages = array_pop($messageParts);
-
-            return $this->removeLastHeader($htmlBodyWithoutImages);
+            return $this->decodeMessage($message);
         } else {
-            return $bodyWithoutImages;
+            return $this->removeMessageImages($message);
+        }
+    }
+
+    /**
+     * @param WeavingMessage $message
+     * @return mixed
+     */
+    protected function decodeMessage(WeavingMessage $message)
+    {
+        $contentTransferEncoding = $this->getContentTransferEncoding($message);
+        $decoder = $contentTransferEncoding . '_decode';
+        $lastMessagePart = $this->getLastMessagePart($message);
+        $messageWithoutLastHeader = $this->removeLastHeader($lastMessagePart);
+
+        if (function_exists($decoder)) {
+            return $decoder($messageWithoutLastHeader);
+        } else {
+            return $messageWithoutLastHeader;
         }
     }
 
@@ -87,10 +99,92 @@ class MailController extends Controller
     protected function removeLastHeader($htmlBodyWithoutImages)
     {
         $separator = "\r\n\r\n";
-        $parts = explode($separator, $htmlBodyWithoutImages);
-        unset($parts[0]);
+        $parts = $this->getLastHeaderParts($htmlBodyWithoutImages);
+        if (count($parts) > 1) {
+            unset($parts[0]);
+        }
 
         return implode($separator, $parts);
+    }
+
+    /**
+     * @param WeavingMessage $message
+     * @return mixed
+     */
+    protected function getContentTransferEncoding(WeavingMessage $message)
+    {
+        $lastMessagePart = $this->getLastMessagePart($message);
+        $keyValuePairs = explode("\r\n", $lastMessagePart);
+        foreach ($keyValuePairs as $keyValuePair) {
+            $loweredKeyValuePair = strtolower($keyValuePair);
+            if ($this->containsContentTransferEncoding($loweredKeyValuePair)) {
+                list(, $contentTransferEncoding) = explode(':', $loweredKeyValuePair);
+
+                break;
+            }
+        }
+
+        if (!isset($contentTransferEncoding)) {
+            return 'quoted_printable';
+        } else {
+            return str_replace('-', '_', trim($contentTransferEncoding));
+        }
+    }
+
+    /**
+     * @param $loweredKeyValuePair
+     * @return bool
+     */
+    protected function containsContentTransferEncoding($loweredKeyValuePair)
+    {
+        return $this->contains($loweredKeyValuePair, 'content-transfer-encoding');
+    }
+
+    /**
+     * @param $haystack
+     * @param $needle
+     * @return bool
+     */
+    protected function contains($haystack, $needle)
+    {
+        return false !== strpos($haystack, $needle);
+    }
+
+    /**
+     * @param WeavingMessage $message
+     * @return mixed
+     */
+    protected function getLastMessagePart(WeavingMessage $message)
+    {
+        $messageParts = $this->getMessageParts($message);
+        /** Removes the double hyphen preceding the last boundary */
+        array_pop($messageParts);
+
+        return array_pop($messageParts);
+    }
+
+    /**
+     * @param WeavingMessage $message
+     * @return array
+     */
+    protected function getMessageParts(WeavingMessage $message)
+    {
+        $bodyWithoutImages = $this->removeMessageImages($message);
+        list(, $boundaryAndNextHeaders) = explode('boundary=', $this->getMessageContentType($message));
+        list($boundary) = explode("\r\n", $boundaryAndNextHeaders);
+
+        return explode('--' . trim($boundary, '"'), $bodyWithoutImages);
+    }
+
+    /**
+     * @param $htmlBodyWithoutImages
+     * @return array
+     */
+    protected function getLastHeaderParts($htmlBodyWithoutImages)
+    {
+        $separator = "\r\n\r\n";
+
+        return explode($separator, $htmlBodyWithoutImages);
     }
 
     /**
@@ -147,36 +241,34 @@ class MailController extends Controller
     }
 
     /**
-     * @param $mail
-     * @return array
-     */
-    protected function hasContentTransferEncodingHeader($mail)
-    {
-        return false !== strpos($mail, 'Content-Transfer-Encoding:');
-    }
-
-    /**
      * @param WeavingMessage $message
      * @return mixed|string
      */
     protected function removeMessageImages(WeavingMessage $message)
     {
         $body = $this->removeMessageHeaders($message);
-        $decodedBody = quoted_printable_decode($body);
 
-        if (!$this->isPlainTextMessage($message) && false !== strpos($decodedBody, '<img')) {
-            $imagePatterns = [
-                '/<img(?!src=)(?:[^>]*)src=(?:\'|")([^"\']+)(?:\'|")[^>]*>/',
-                '/<img(?!SRC=)(?:[^>]*)SRC=(?:\'|")([^"\']+)(?:\'|")[^>]*>/'
-            ];
-
+        if (!$this->isPlainTextMessage($message) && false !== strpos($body, '<img')) {
+            $imagePatterns = $this->getImageHTMLNodesPatterns();
+            $bodyWithoutImages = $body;
             foreach ($imagePatterns as $imagePattern) {
-                $decodedBody = preg_replace($imagePattern, '', $decodedBody);
+                $bodyWithoutImages = preg_replace($imagePattern, '', $body);
             }
 
-            return $decodedBody;
+            return $bodyWithoutImages;
         } else {
-            return $decodedBody;
+            return $body;
         }
+    }
+
+    /**
+     * @return array
+     */
+    protected function getImageHTMLNodesPatterns()
+    {
+        return $imagePatterns = [
+            '/<img(?!src=)(?:[^>]*)src=(?:\'|")([^"\']+)(?:\'|")[^>]*>/',
+            '/<img(?!SRC=)(?:[^>]*)SRC=(?:\'|")([^"\']+)(?:\'|")[^>]*>/'
+        ];
     }
 }
