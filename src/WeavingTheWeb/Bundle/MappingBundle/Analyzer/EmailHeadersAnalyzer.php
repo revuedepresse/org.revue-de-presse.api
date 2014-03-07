@@ -16,7 +16,7 @@ class EmailHeadersAnalyzer
     public $entityManager;
 
     /**
-     * @var \WeavingTheWeb\Bundle\MappingBundle\Parser\EmailHeadersParser $parser
+     * @var \WeavingTheWeb\Bundle\MappingBundle\Parser\EmailParser $parser
      */
     public $parser;
 
@@ -115,7 +115,7 @@ class EmailHeadersAnalyzer
 
         /** @var \Doctrine\ORM\EntityRepository $propertyRepository */
         $propertyRepository = $this->entityManager->getRepository('WeavingTheWebMappingBundle:Property');
-        $emailHeadersProperties = $this->parser->parse($header->getHdrValue());
+        $emailHeadersProperties = $this->parser->parseHeader($header->getHdrValue());
         foreach ($emailHeadersProperties as $name => $value) {
             $header = $propertyRepository->findOneBy(['name' => $name]);
             if (is_null($header)) {
@@ -139,7 +139,7 @@ class EmailHeadersAnalyzer
     protected function safeHeadersUpdate(WeavingHeader $header)
     {
         $beforeHash = spl_object_hash($header);
-        $parsedEmailHeadersProperties = $this->parser->parse($header->getHdrValue());
+        $parsedEmailHeadersProperties = $this->parser->parseHeader($header->getHdrValue());
         $targetHeadersProperties = ['from', 'to', 'subject'];
         foreach ($targetHeadersProperties as $headerProperty) {
             $getter = 'get' . ucfirst($headerProperty);

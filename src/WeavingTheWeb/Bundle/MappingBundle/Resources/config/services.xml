@@ -10,7 +10,7 @@
         <parameter key="weaving_the_web_mapping.mapping_configurator.class">WeavingTheWeb\Bundle\MappingBundle\Configurator\MappingConfigurator</parameter>
         <parameter key="weaving_the_web_mapping.mapping.class">WeavingTheWeb\Bundle\MappingBundle\Mapping</parameter>
         <parameter key="weaving_the_web_mapping.save_email_headers_command.class">WeavingTheWeb\Bundle\MappingBundle\Command\SaveEmailHeadersCommand</parameter>
-        <parameter key="weaving_the_web_mapping.parser.email_headers.class">WeavingTheWeb\Bundle\MappingBundle\Parser\EmailHeadersParser</parameter>
+        <parameter key="weaving_the_web_mapping.parser.email.class">WeavingTheWeb\Bundle\MappingBundle\Parser\EmailParser</parameter>
         <parameter key="weaving_the_web_mapping.analyzer.email_headers.class">WeavingTheWeb\Bundle\MappingBundle\Analyzer\EmailHeadersAnalyzer</parameter>
     </parameters>
 
@@ -31,11 +31,11 @@
         <service id="weaving_the_web_mapping.mapping" class="%weaving_the_web_mapping.mapping.class%"
             factory-service="weaving_the_web_mapping.mapping_factory" factory-method="get">
         </service>
-        <service id="weaving_the_web_mapping.parser.email_headers" class="%weaving_the_web_mapping.parser.email_headers.class%">
+        <service id="weaving_the_web_mapping.parser.email" class="%weaving_the_web_mapping.parser.email.class%">
         </service>
         <service id="weaving_the_web_mapping.analyzer.email_headers" class="%weaving_the_web_mapping.analyzer.email_headers.class%">
             <property name="entityManager" type="service" id="doctrine.orm.entity_manager" />
-            <property name="parser" type="service" id="weaving_the_web_mapping.parser.email_headers" />
+            <property name="parser" type="service" id="weaving_the_web_mapping.parser.email" />
             <property name="logger" type="service" id="logger" />
         </service>
     </services>
