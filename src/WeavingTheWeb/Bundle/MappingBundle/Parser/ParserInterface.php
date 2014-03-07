@@ -2,11 +2,14 @@
 
 namespace WeavingTheWeb\Bundle\MappingBundle\Parser;
 
+use WeavingTheWeb\Bundle\Legacy\ProviderBundle\Entity\WeavingMessage;
+
 /**
- * Interface ParserInterface
  * @package WeavingTheWeb\Bundle\MappingBundle\Tests\Parser
  */
 interface ParserInterface
 {
-    public function parse($subject);
+    public function parseHeader($subject);
+
+    public function parseBody(WeavingMessage $subject);
 }
