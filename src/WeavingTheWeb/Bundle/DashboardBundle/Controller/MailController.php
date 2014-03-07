@@ -47,11 +47,6 @@ class MailController extends Controller
         $parser = $this->get('weaving_the_web_mapping.parser.email');
 
         $response = new Response();
-        if ($parser->isPlainTextMessage($message)) {
-            $response->headers->set('Content-Type', $parser->getMessageContentType($message));
-        } else {
-            $response->headers->set('Content-Type', 'text/html; charset="UTF-8"');
-        }
         $response->setContent(
             $this->renderView(
                 'WeavingTheWebDashboardBundle:Mail:show.html.twig',
@@ -60,6 +55,7 @@ class MailController extends Controller
                 ]
             )
         );
+        $response->headers->set('Content-Type', $parser->guessMessageContentType($message));
         $response->send();
     }
 }

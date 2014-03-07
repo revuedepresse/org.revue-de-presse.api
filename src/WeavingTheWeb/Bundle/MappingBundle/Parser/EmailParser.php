@@ -9,6 +9,10 @@ use WeavingTheWeb\Bundle\Legacy\ProviderBundle\Entity\WeavingMessage;
  */
 class EmailParser implements ParserInterface
 {
+    protected $contentType = 'text/html';
+
+    protected $charset = 'charset="UTF-8"';
+
     public function parseHeader($emailHeaders)
     {
         if (!is_string($emailHeaders)) {
@@ -134,6 +138,10 @@ class EmailParser implements ParserInterface
             if ($this->containsContentTransferEncoding($contentTypeHeader)) {
                 if ($this->containsTextHtmlContentType($contentTypeHeader)) {
                     $contentTypesIndex['html'] = $index;
+                    list($contentTypeValue) = explode("\r\n", $contentTypeHeader);
+                    list(, $charset) = explode(';', $contentTypeValue);
+                    $this->contentType = 'text/html';
+                    $this->charset = trim($charset);
                 }
                 if ($this->containsTextPlainContentType($contentTypeHeader)) {
                     $contentTypesIndex['text'] = $index;
@@ -273,7 +281,7 @@ class EmailParser implements ParserInterface
     {
         $separator = "\r\n\r\n";
 
-        return explode($separator, $htmlBodyWithoutImages);
+        return explode($separator, trim($htmlBodyWithoutImages));
     }
 
     /**
@@ -285,6 +293,19 @@ class EmailParser implements ParserInterface
         $contentType = $this->getMessageContentType($message);
 
         return $this->containsBoundary($contentType);
+    }
+
+    /**
+     * @param WeavingMessage $message
+     * @return mixed
+     */
+    public function guessMessageContentType(WeavingMessage $message)
+    {
+        if ($this->isPlainTextMessage($message)) {
+            return $this->getMessageContentType($message);
+        } else {
+            return $this->contentType . '; ' . $this->charset;
+        }
     }
 
     /**
