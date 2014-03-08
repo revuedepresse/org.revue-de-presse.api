@@ -194,13 +194,13 @@ class EmailParser implements ParserInterface
     }
 
     /**
-     * @param $htmlBodyWithoutImages
+     * @param $subject
      * @return mixed
      */
-    protected function removeLastHeader($htmlBodyWithoutImages)
+    protected function removeLastHeader($subject)
     {
-        $parts = $this->getLastHeaderParts($htmlBodyWithoutImages);
-        if (count($parts) > 1) {
+        $parts = $this->getLastHeaderParts($subject);
+        if (count($parts) > 1 && $this->containsContentTransferEncoding($parts[0])) {
             unset($parts[0]);
         }
         $separator = "\r\n\r\n";
@@ -255,12 +255,12 @@ class EmailParser implements ParserInterface
     }
 
     /**
-     * @param $loweredKeyValuePair
+     * @param $subject
      * @return bool
      */
-    protected function containsContentTransferEncoding($loweredKeyValuePair)
+    protected function containsContentTransferEncoding($subject)
     {
-        return $this->contains($loweredKeyValuePair, 'content-transfer-encoding');
+        return $this->contains(strtolower($subject), 'content-transfer-encoding');
     }
 
     /**
