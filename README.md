@@ -298,3 +298,4 @@ Run tests in parallel:
 
     # Declare timezone
     echo "TZ='Europe/Paris'; export TZ" >> ~/.profile
+
