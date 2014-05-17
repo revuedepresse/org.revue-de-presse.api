@@ -9,7 +9,6 @@ use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand,
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;
 
 /**
- * Class SerializeStatusesCommand
  * @package WeavingTheWeb\Bundle\TwitterBundle\Command
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
