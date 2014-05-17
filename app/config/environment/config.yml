@@ -12,7 +12,7 @@ framework:
     esi:                  { enabled: true }
     form:                 true
     fragments:            { path: /_fragment }
-    secret:               %secret%
+    secret:               %framework_secret%
     router:
         resource: "%kernel.root_dir%/config/routing/routing.yml"
         strict_requirements: %kernel.debug%
