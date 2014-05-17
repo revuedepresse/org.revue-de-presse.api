@@ -7,6 +7,7 @@ use Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Output\OutputInterface;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\ProtectedAccountException,
     WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;
+use WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException;
 use WTW\UserBundle\Entity\User;
 
 /**
@@ -86,6 +87,8 @@ class ProduceUserFriendListCommand extends AccessorAwareCommand
         /** @var \Symfony\Bundle\FrameworkBundle\Translation\Translator $translator */
         $translator = $this->getContainer()->get('translator');
 
+        $invalidUsers = 0;
+
         foreach ($friends->ids as $friend) {
             $result = $userRepository->findOneBy(['twitterID' => $friend]);
 
@@ -123,8 +126,26 @@ class ProduceUserFriendListCommand extends AccessorAwareCommand
                     } else {
                         $this->logger->info(serialize($twitterUser));
                     }
+                } catch (SuspendedAccountException $exception) {
+                    $suspendedAccount = $translator->trans(
+                        'amqp.output.suspended_account',
+                        ['{{ user }}' => $friend],
+                        'messages'
+                    );
+                    $this->sendMessage($suspendedAccount, 'info', $output, $exception);
+                    $invalidUsers++;
+
+                    // TODO Flag suspended accounts
+                    // Skip suspended accounts
+                    continue;
                 } catch (ProtectedAccountException $exception) {
-                    $this->logger->info($exception->getMessage());
+                    $protectedAccount = $translator->trans(
+                        'amqp.output.protected_account',
+                        ['{{ user }}' => $friend],
+                        'messages'
+                    );
+                    $this->sendMessage($protectedAccount, 'info', $output, $exception);
+                    $invalidUsers++;
 
                     // TODO Flag protected accounts
                     // Skip protected accounts
@@ -135,8 +156,7 @@ class ProduceUserFriendListCommand extends AccessorAwareCommand
                         ['{{ user }}' => $friend],
                         'messages'
                     );
-                    $output->writeln($unavailableResource);
-                    $this->logger->error($exception->getMessage());
+                    $this->sendMessage($unavailableResource, 'error', $output, $exception);
 
                     return $exception->getCode();
                 }
@@ -158,9 +178,21 @@ class ProduceUserFriendListCommand extends AccessorAwareCommand
         $output->writeln(
             $translator->trans(
                 'amqp.production.friendlist.success',
-                ['{{ count }}' => count($friends->ids)],
+                ['{{ count }}' => count($friends->ids) - $invalidUsers],
                 'messages'
             )
         );
+    }
+
+    /**
+     * @param $message
+     * @param $level
+     * @param OutputInterface $output
+     * @param \Exception $exception
+     */
+    protected function sendMessage($message, $level, OutputInterface $output, \Exception $exception)
+    {
+        $output->writeln($message);
+        $this->logger->$level($exception->getMessage());
     }
 }
