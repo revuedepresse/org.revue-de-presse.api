@@ -7,7 +7,6 @@ use WeavingTheWeb\Bundle\TwitterBundle\Exception\ProtectedAccountException;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;
 
 /**
- * Class UserStatus
  * @package WeavingTheWeb\Bundle\TwitterBundle\Accessor
  */
 class UserStatus

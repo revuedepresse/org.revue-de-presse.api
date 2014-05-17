@@ -10,7 +10,6 @@ use WeavingTheWeb\Bundle\TwitterBundle\Exception\ProtectedAccountException,
 use WTW\UserBundle\Entity\User;
 
 /**
- * Class ProduceUserFriendListCommand
  * @package WeavingTheWeb\Bundle\AmqpBundle\Command\Twitter
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
