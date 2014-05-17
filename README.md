@@ -48,6 +48,14 @@ Most integration tests require `ElasticSearch`.
     ELASTICSEARCH_DIR=~/labodev/opt/local/elasticsearch-1.0.1 && \
     ES_HEAP_SIZE=4096m $ELASTICSEARCH_DIR/bin/elasticsearch 2> /dev/null 1> /dev/null &
 
+
+## Integration testing ##
+
+Integration tests require services which have to be started before executing corresponding scripts
+
+ * MySQL
+ * ElasticSearch
+
 Requirements
 --------------------------------
 
