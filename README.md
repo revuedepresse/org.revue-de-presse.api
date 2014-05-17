@@ -224,3 +224,11 @@ A solution consists in running the tests in parallel:
 
 Try to avoid values containing '&' for environment variables to be injected to shell scripts
 (or figure out how to escape properly special characters when using capistrano).
+
+7) Tests
+--------------------------------
+
+Integration tests require services which have to be started before executing corresponding scripts
+
+ * MySQL
+ * ElasticSearch
