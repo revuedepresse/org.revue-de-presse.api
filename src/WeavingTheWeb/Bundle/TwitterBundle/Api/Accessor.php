@@ -4,6 +4,7 @@ namespace WeavingTheWeb\Bundle\TwitterBundle\Api;
 
 use Doctrine\Common\Persistence\ObjectRepository;
 use Psr\Log\LoggerInterface;
+use WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;
 
 /**
@@ -11,7 +12,7 @@ use WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;
  * @package WeavingTheWeb\Bundle\TwitterBundle\Api
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
-class Accessor
+class Accessor implements TwitterErrorAwareInterface
 {
     /**
      * @var
@@ -379,11 +380,12 @@ class Accessor
                 $content = $connection->get($endpoint, $parameters);
             } else {
                 $this->setupClient();
-                $this->httpClient->setHeader('Authorization', $this->authenticationHeader);
-                $this->httpClient->request('GET', $endpoint);
+
+                $httpClient->setHeader('Authorization', $this->authenticationHeader);
+                $httpClient->request('GET', $endpoint);
 
                 /** @var \Symfony\Component\HttpFoundation\Response $response */
-                $response = $this->httpClient->getResponse();
+                $response = $httpClient->getResponse();
                 $encodedContent = $response->getContent();
                 $content = json_decode($encodedContent);
             }
@@ -404,19 +406,12 @@ class Accessor
             $this->logger->error('[code] ' . $errorCode);
             $this->logger->error('[token] ' . $token->getOauthToken());
 
-            /**
-             * error code   6 => cURL error: Could not resolve host
-             * error code  34 => Sorry, that page does not exist
-             * error code  52 => Empty reply from server
-             * error code 130 => Over capacity
-             */
-            if (
-                $errorCode === 6 ||
-                $errorCode === 34 ||
-                $errorCode === 52 ||
-                $errorCode === 130
-            ) {
-                throw new UnavailableResourceException($errorMessage, $errorCode);
+
+            $reflection = new \ReflectionClass(__NAMESPACE__ . '\TwitterErrorAwareInterface');
+            $errorCodes = $reflection->getConstants();
+
+            if (in_array($errorCode, $errorCodes)) {
+                $this->throwException($errorMessage, $errorCode);
             } else {
                 /** Freeze token and wait for 15 minutes before getting back to operation */
                 $this->tokenRepository->freezeToken($token->getOauthToken());
@@ -432,6 +427,20 @@ class Accessor
         }
 
         return $content;
+    }
+
+    /**
+     * @param $errorMessage
+     * @param $errorCode
+     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
+     */
+    protected function throwException($errorMessage, $errorCode)
+    {
+        if ($errorCode === self::ERROR_SUSPENDED_USER) {
+            throw new SuspendedAccountException($errorMessage, $errorCode);
+        } else {
+            throw new UnavailableResourceException($errorMessage, $errorCode);
+        }
     }
 
     public function setupClient()

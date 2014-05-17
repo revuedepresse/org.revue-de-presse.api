@@ -5,6 +5,7 @@ namespace WeavingTheWeb\Bundle\AmqpBundle\Twitter;
 use OldSound\RabbitMqBundle\RabbitMq\ConsumerInterface;
 use PhpAmqpLib\Message\AmqpMessage;
 use Psr\Log\LoggerInterface;
+use WeavingTheWeb\Bundle\TwitterBundle\Api\TwitterErrorAwareInterface;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException,
     WeavingTheWeb\Bundle\TwitterBundle\Exception\ProtectedAccountException;
 
@@ -75,11 +76,13 @@ class UserStatus implements ConsumerInterface
             $success = $this->serializer->serialize($options, $greedy = true);
         } catch (UnavailableResourceException $unavailableResource) {
             if (
-                ($unavailableResource instanceof ProtectedAccountException) ||
-                ($unavailableResource->getCode() === 34)
+                $unavailableResource instanceof ProtectedAccountException ||
+                $unavailableResource->getCode() === TwitterErrorAwareInterface::ERROR_NOT_FOUND ||
+                $unavailableResource->getCode() === TwitterErrorAwareInterface::ERROR_SUSPENDED_USER
             ) {
                 /**
-                 * This message should not be processed again for protected accounts
+                 * This message should not be processed again for protected accounts,
+                 * nor for suspended accounts
                  */
                 $success = true;
                 $this->logger->info($unavailableResource->getMessage());

@@ -9,3 +9,5 @@ amqp:
         message_published: 'A message has been published for "{{ user }}".'
     output:
         unavailable_resource: 'A resource is not available for user "{{ user }}".'
+        protected_account: 'The account of user "{{ user }}" is protected.'
+        suspended_account: 'The account of user "{{ user }}" is suspended.'
