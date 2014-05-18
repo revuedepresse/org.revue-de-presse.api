@@ -229,6 +229,27 @@ Examples
     # Count of messages which have been processed yet for extraction of their subject, recipient and sender
     SELECT count(*) FROM weaving_header WHERE fromField is not null OR toField is not null OR subject is not null;
 
+Configuration management
+--------------------------------
+
+When updating configuration parameters (`app/config` files), the next automation scripts needs to be updated as well:
+
+@valhalla
+
+    # manual maintenance
+    ~jenkins/common/export_dashboard_environment_variables
+
+@libran
+
+    # job:availability_dashboard
+    ~jenkins/workspace/common/env_dashboard_master.properties
+
+    # job:deliver_dashboard
+    ~jenkins/workspace/common/export_dashboard_master
+
+    # job:ship_dashboard
+    ~jenkins/workspace/common/env_dashboard_ship.properties
+
 Known issues
 --------------------------------
 
