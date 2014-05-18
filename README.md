@@ -1,7 +1,7 @@
 Weaving The Web Experiments
 ========================
 
-1) Sitemap
+Sitemap
 --------------------------------
 
 * Documentation - ([documentation]({{ baseurl }}/doc/readme))
@@ -9,7 +9,7 @@ Weaving The Web Experiments
 * Social Media Dashboard - ([dashboard]({{ baseurl }}/documents))
 * Sign in with Twitter - ([sign in]({{ baseurl }}/twitter/connect))
 
-2) Testing
+Testing
 --------------------------------
 
 ### Running test suite ###
@@ -33,7 +33,7 @@ To load data fixtures before testing a command class:
 
     karma start tests/karma.config.js
 
-3) Requirements
+Requirements
 --------------------------------
 
 Follow [dotdeb instructions](http://www.dotdeb.org/instructions/) to add new repositories to your apt source list
@@ -122,7 +122,7 @@ Supervisor
 
     supervisor update
 
-4) Commands
+Commands
 --------------------------------
 
 From project root directory, execute the following commands to transform
@@ -229,7 +229,7 @@ Examples
     # Count of messages which have been processed yet for extraction of their subject, recipient and sender
     SELECT count(*) FROM weaving_header WHERE fromField is not null OR toField is not null OR subject is not null;
 
-6) Known issues
+Known issues
 --------------------------------
 
 **How to run the `WeavingTheWebApiBundle` test suite test suite?**
