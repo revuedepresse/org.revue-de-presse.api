@@ -19,7 +19,7 @@ parameters:
 
     locale:                     en
 
-    secret:                     ## FILL ME ##
+    framework_secret:           ## FILL ME ##
 
     test_database_memory:       false
     test_database_path:         %kernel.cache_dir%/wtw_dashboard.db
