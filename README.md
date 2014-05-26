@@ -33,6 +33,14 @@ To load data fixtures before testing a command class:
 
     karma start tests/karma.config.js
 
+## Testing transactions ###
+
+Most integration tests require `ElasticSearch`.
+
+    # Run ElasticSearch in the background
+    ELASTICSEARCH_DIR=~/labodev/opt/local/elasticsearch-1.0.1 && \
+    ES_HEAP_SIZE=4096m $ELASTICSEARCH_DIR/bin/elasticsearch 2> /dev/null 1> /dev/null &
+
 Requirements
 --------------------------------
 
