@@ -75,7 +75,8 @@ class TweetController extends Controller
 
             $headers = ['Access-Control-Allow-Origin' => '*'];
             try {
-                $data = $userStreamRepository->findLatest();
+                $lastStatusId =$request->get('lastStatusId', null);
+                $data = $userStreamRepository->findLatest($lastStatusId);
                 $statusCode = 200;
             } catch (\Exception $exception) {
                 $data = ['error' => $exception->getMessage()];
