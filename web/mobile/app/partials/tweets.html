@@ -5,7 +5,7 @@
         </ul>
         <div ng-include="'app/partials/sync.html'"></div>
     </div>
-    <table class="table table-condensed">
+    <table class="table table-condensed" infinite-scroll="showMoreTweets()">
         <tr ng-repeat="tweet in tweets">
             <td>
                 <dl class="dl-horizontal" id="{{ tweet.status_id }}">
