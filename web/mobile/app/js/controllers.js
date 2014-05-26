@@ -14,6 +14,7 @@ twitterControllers.controller('ShowTweetsAction', [
         $scope.synced = cache.keys().length === 0;
 
         twitter.showMoreTweets($scope, $routeParams);
+
         var setTweetStarringStatus = function (statusId, index, starred) {
             if (offlineCache.isNavigatorOnline()) {
                 var endpointUrlTemplate = host + '/twitter/tweet/{{ action }}/' + statusId;
@@ -45,6 +46,16 @@ twitterControllers.controller('ShowTweetsAction', [
 
         $scope.unstar = function (tweetId, tweetIndex) {
             setTweetStarringStatus(tweetId, tweetIndex, false);
+        }
+
+        $scope.showMoreTweets = function () {
+            var lastStatus;
+
+            if ($scope.tweets !== undefined) {
+                lastStatus = $scope.tweets[$scope.tweets.length - 1];
+                $routeParams.lastStatusId = lastStatus.id;
+            }
+            twitter.showMoreTweets($scope, $routeParams);
         }
 
         $scope.sync = function () {
