@@ -213,9 +213,10 @@ class UserStreamRepository extends ResourceRepository
     }
 
     /**
+     * @param $lastStatusId
      * @return array
      */
-    public function findLatest()
+    public function findLatest($lastStatusId = null)
     {
         $queryBuilder = $this->createQueryBuilder('t');
         $queryBuilder->select([
@@ -230,6 +231,11 @@ class UserStreamRepository extends ResourceRepository
             ->andWhere('t.identifier IN (:identifier)')
             ->setMaxResults(50)
             ->orderBy('t.id', 'desc');
+
+        if (!is_null($lastStatusId)) {
+            $queryBuilder->andWhere('t.id < :lastStatusId');
+            $queryBuilder->setParameter('lastStatusId', $lastStatusId);
+        }
 
         $queryBuilder->setParameter('identifier', $this->oauthTokens);
         $result = $queryBuilder->getQuery()->getResult();
