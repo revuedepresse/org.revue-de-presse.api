@@ -3,12 +3,15 @@
 namespace WeavingTheWeb\Bundle\TwitterBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
+
 use Symfony\Bundle\FrameworkBundle\Controller\Controller,
     Symfony\Component\HttpFoundation\JsonResponse,
     Symfony\Component\HttpFoundation\Request,
     Symfony\Component\HttpFoundation\File\Exception\AccessDeniedException,
     Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+
 use WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream;
+
 use WTW\UserBundle\Model\User;
 
 /**
@@ -30,15 +33,15 @@ class TweetController extends Controller
         if ($request->isMethod('OPTIONS')) {
             return $this->getCorsOptionsResponse();
         } else {
-            $userManager = $this->get('fos_user.user_provider.username');
+            $userManager = $this->get('fos_user.user_manager');
             $username = $request->get('username', null);
 
             if (is_null($username)) {
-                $oauthToken = $request->get(
+                $oauthTokens = [$request->get(
                     'token',
                     null,
                     $this->container->getParameter('weaving_the_web_twitter.oauth_token.default')
-                );
+                )];
             } else {
                 /** @var \WTW\UserBundle\Entity\User $user */
                 $user = $userManager->findUserBy(['twitter_username' => $username]);
@@ -52,23 +55,34 @@ class TweetController extends Controller
 
                 $tokens = $user->getTokens()->toArray();
 
+                $oauthTokens = [];
                 /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token */
-                $token = $tokens[0];
-                $oauthToken = $token->getOauthToken();
-
-                if (strlen(trim($oauthToken)) === 0) {
-                    throw new \Exception(sprintf(
-                        'Invalid token for username "%s"',
-                        $username
-                    ));
+                foreach ($tokens as $token) {
+                    $oauthToken = $token->getOauthToken();
+                    $oauthTokens[] = $token->getOauthToken();
+                    if (strlen(trim($oauthToken)) === 0) {
+                        throw new \Exception(sprintf(
+                            'Invalid token for username "%s"',
+                            $username
+                        ));
+                    }
                 }
             }
 
             /** @var User $user */
             $userStreamRepository = $this->get('weaving_the_web_twitter.repository.read.user_stream');
-            $userStreamRepository->setOauthToken($oauthToken);
+            $userStreamRepository->setOauthTokens($oauthTokens);
 
-            return new JsonResponse($userStreamRepository->findLatest(), 200, ['Access-Control-Allow-Origin' => '*']);
+            $headers = ['Access-Control-Allow-Origin' => '*'];
+            try {
+                $data = $userStreamRepository->findLatest();
+                $statusCode = 200;
+            } catch (\Exception $exception) {
+                $data = ['error' => $exception->getMessage()];
+                $statusCode = 500;
+            }
+
+            return new JsonResponse($data, $statusCode, $headers);
         }
     }
 
