@@ -178,8 +178,7 @@ Migrations
     # The admin connection and ORM are specially configured to handle migrations
     app/console doctrine:migrations:migrate --em=admin
 
-5) Perspectives
-
+Perspectives
 --------------------------------
 
 Examples
