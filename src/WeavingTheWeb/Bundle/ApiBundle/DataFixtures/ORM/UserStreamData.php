@@ -13,8 +13,10 @@ class UserStreamData implements FixtureInterface
      */
     public function load(ObjectManager $manager)
     {
+        $status = 'This is a tweet text.';
         $properties = [
-            'text' => 'This is a tweet text.',
+            'text' => $status,
+            'api_document' => json_encode(['text' => $status]),
             'identifier' => 'access token',
             'indexed' => false,
             'name' => 'Thierry Marianne',
@@ -26,19 +28,20 @@ class UserStreamData implements FixtureInterface
         /**
          * TODO Rename user stream to user status
          */
-        $repository = new UserStream();
+        $userStream = new UserStream();
 
-        $repository->setText($properties['text']);
-        $repository->setUserAvatar($properties['user_avatar']);
-        $repository->setName($properties['name']);
-        $repository->setScreenName($properties['screen_name']);
-        $repository->setIdentifier($properties['identifier']);
-        $repository->setIndexed($properties['indexed']);
-        $repository->setStatusId($properties['status_id']);
-        $repository->setCreatedAt(new \DateTime());
-        $repository->setUpdatedAt(new \DateTime());
+        $userStream->setText($properties['text']);
+        $userStream->setApiDocument($properties['api_document']);
+        $userStream->setUserAvatar($properties['user_avatar']);
+        $userStream->setName($properties['name']);
+        $userStream->setScreenName($properties['screen_name']);
+        $userStream->setIdentifier($properties['identifier']);
+        $userStream->setIndexed($properties['indexed']);
+        $userStream->setStatusId($properties['status_id']);
+        $userStream->setCreatedAt(new \DateTime());
+        $userStream->setUpdatedAt(new \DateTime());
 
-        $manager->persist($repository);
+        $manager->persist($userStream);
 
         $manager->flush();
     }
