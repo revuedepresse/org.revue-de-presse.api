@@ -218,19 +218,7 @@ class UserStreamRepository extends ResourceRepository
      */
     public function findLatest($lastStatusId = null)
     {
-        $queryBuilder = $this->createQueryBuilder('t');
-        $queryBuilder->select([
-                't.userAvatar as author_avatar',
-                't.text',
-                't.screenName as screen_name',
-                't.id',
-                't.statusId as status_id',
-                't.starred',
-                't.apiDocument original_document'
-            ])
-            ->andWhere('t.identifier IN (:identifier)')
-            ->setMaxResults(50)
-            ->orderBy('t.id', 'desc');
+        $queryBuilder = $this->selectStatuses();
 
         if (!is_null($lastStatusId)) {
             $queryBuilder->andWhere('t.id < :lastStatusId');
@@ -238,26 +226,81 @@ class UserStreamRepository extends ResourceRepository
         }
 
         $queryBuilder->setParameter('identifier', $this->oauthTokens);
-        $result = $queryBuilder->getQuery()->getResult();
-        array_walk($result, function (&$value) {
-            $target = sprintf('user stream of id #%d', intval($value['id']));
-            if (strlen($value['original_document']) > 0) {
-                $decodedValue = json_decode($value['original_document'], true);
-                $lastJsonError = json_last_error();
-                if (JSON_ERROR_NONE === $lastJsonError) {
-                    if (array_key_exists('retweeted_status', $decodedValue)) {
-                        $value['text'] = 'RT @' . $decodedValue['retweeted_status']['user']['screen_name'] . ': '.
-                            $decodedValue['retweeted_status']['text']
-                        ;
+        $statuses = $queryBuilder->getQuery()->getResult();
+
+        return $this->highlightRetweets($statuses);
+    }
+
+    /**
+     * @return \Doctrine\ORM\QueryBuilder
+     */
+    protected function selectStatuses()
+    {
+        $queryBuilder = $this->createQueryBuilder('t');
+
+        return $queryBuilder->select(
+            [
+                't.userAvatar as author_avatar',
+                't.text',
+                't.screenName as screen_name',
+                't.id',
+                't.statusId as status_id',
+                't.starred',
+                't.apiDocument original_document'
+            ]
+        )
+            ->andWhere('t.identifier IN (:identifier)')
+            ->setMaxResults(50)
+            ->orderBy('t.id', 'desc');
+    }
+
+    /**
+     * @param $statusIds
+     * @return mixed
+     */
+    public function findBookmarks(array $statusIds)
+    {
+        if (count($statusIds) > 0) {
+            $queryBuilder = $this->selectStatuses()
+                ->andWhere('t.statusId IN (:statusIds)');
+
+            $queryBuilder->setParameter('identifier', $this->oauthTokens);
+            $queryBuilder->setParameter('statusIds', $statusIds);
+            $statuses = $queryBuilder->getQuery()->getResult();
+
+            return $this->highlightRetweets($statuses);
+        } else {
+            return [];
+        }
+    }
+
+    /**
+     * @param array $statuses
+     * @return mixed
+     */
+    protected function highlightRetweets(array $statuses)
+    {
+        array_walk(
+            $statuses,
+            function (&$status) {
+                $target = sprintf('user stream of id #%d', intval($status['id']));
+                if (strlen($status['original_document']) > 0) {
+                    $decodedValue = json_decode($status['original_document'], true);
+                    $lastJsonError = json_last_error();
+                    if (JSON_ERROR_NONE === $lastJsonError) {
+                        if (array_key_exists('retweeted_status', $decodedValue)) {
+                            $status['text'] = 'RT @' . $decodedValue['retweeted_status']['user']['screen_name'] . ': ' .
+                                $decodedValue['retweeted_status']['text'];
+                        }
+                    } else {
+                        throw new \Exception(sprintf($lastJsonError . ' affecting ' . $target));
                     }
                 } else {
-                    throw new \Exception(sprintf($lastJsonError . ' affecting ' . $target));
+                    throw new \Exception(sprintf('Empty JSON document for ' . $target));
                 }
-            } else {
-                throw new \Exception(sprintf('Empty JSON document for ' . $target));
             }
-        });
+        );
 
-        return $result;
+        return $statuses;
     }
 }
