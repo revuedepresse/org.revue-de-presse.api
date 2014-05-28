@@ -14,11 +14,13 @@ module.exports = function (config) {
 
         // list of files / patterns to load in the browser
         files: [
+            '../web/mobile/app/lib/lodash.min.js',
             '../web/mobile/app/lib/angular/angular.js',
             '../web/mobile/app/lib/angular/angular-route.js',
             '../web/mobile/app/lib/ng-infinite-scroll.min.js',
             '../web/mobile/app/lib/ng-cache.js',
             '../web/mobile/app/js/*.js',
+            '../web/mobile/app/js/controllers/*.js',
             '../web/mobile/app/js/services/*.js',
             'angular-mocks.js',
             'location-mock.js',

@@ -56,7 +56,7 @@ describe('Starring tweets in offline mode', function () {
         $scope = $rootScope.$new();
 
         $controller = $injector.get('$controller');
-        $controller('ShowTweetsAction', {
+        $controller('ShowStatusesAction', {
             $scope: $scope,
             $http: $injector.get('$http'),
             $location: locationMock,
@@ -153,7 +153,7 @@ describe('Starring tweets', function () {
         $scope = $rootScope.$new();
 
         $controller = $injector.get('$controller');
-        $controller('ShowTweetsAction', {
+        $controller('ShowStatusesAction', {
             $scope: $scope,
             $http: $injector.get('$http'),
             $location: locationMock,

@@ -54,7 +54,7 @@ describe('Syncing tweets status in offline mode', function () {
         $httpBackend.when('GET', 'https://## FILL HOSTNAME ##/twitter/tweet/latest?username=weaver').respond(tweets);
 
         $controller = $injector.get('$controller');
-        $controller('ShowTweetsAction', {
+        $controller('ShowStatusesAction', {
             $scope: $scope,
             $http: $injector.get('$http'),
             $location: locationMock,
@@ -142,7 +142,7 @@ describe('Syncing tweet status', function () {
         $httpBackend.when('GET', 'https://## FILL HOSTNAME ##/twitter/tweet/latest?username=weaver').respond(tweets);
 
         $controller = $injector.get('$controller');
-        $controller('ShowTweetsAction', {
+        $controller('ShowStatusesAction', {
             $scope: $scope,
             $http: $injector.get('$http'),
             $location: locationMock,
