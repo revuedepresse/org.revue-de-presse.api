@@ -1,6 +1,6 @@
 'use strict';
 
-describe('Starring tweets in offline mode', function () {
+describe('Offline mode', function () {
     var $controller,
         $httpBackend,
         $routeParams,
@@ -9,7 +9,7 @@ describe('Starring tweets in offline mode', function () {
         httpBackend,
         locationMock,
         statusId,
-        tweets;
+        statuses;
 
     beforeEach(angular.mock.module('weaverApp'));
 
@@ -36,7 +36,7 @@ describe('Starring tweets in offline mode', function () {
         var $rootScope;
 
         statusId = "420103690863669249"
-        tweets = [
+        statuses = [
             {
                 "author_avatar": "http://pbs.twimg.com/profile_images/1803355808/377992_203375376416531_100002322093627_443137_1695065966_n_normal.jpg",
                 "text": "@schmittjoh Are those changes pushed to https://t.co/8X8XXLOSnB yet? Can't find anything in the recent commits.",
@@ -50,7 +50,7 @@ describe('Starring tweets in offline mode', function () {
         // Prepares http backend to respond with a tweet sample when requesting for the lastest ones
         $httpBackend = $injector.get('$httpBackend');
         httpBackend = $httpBackend;
-        $httpBackend.when('GET', 'https://## FILL HOSTNAME ##/twitter/tweet/latest?username=weaver').respond(tweets);
+        $httpBackend.when('GET', 'https://## FILL HOSTNAME ##/twitter/tweet/latest?username=weaver').respond(statuses);
 
         $rootScope = $injector.get('$rootScope');
         $scope = $rootScope.$new();
@@ -78,25 +78,25 @@ describe('Starring tweets in offline mode', function () {
         $httpBackend.verifyNoOutstandingRequest();
     });
 
-    it('should have tweets in scope', function () {
+    it('should put statuses to scope', function () {
         httpBackend.flush();
-        expect($scope.tweets).toEqual(tweets);
+        expect($scope.tweets).toEqual(statuses);
     });
 
-    it('should mark a tweet as starred', function () {
+    it('should let a status be starred', function () {
         $scope.star(statusId, 0);
         httpBackend.flush();
         expect(cache.get(statusId)).toEqual({starred: true});
     });
 
-    it('should mark a tweet as being not starred', function () {
+    it('should let a status be unstarred', function () {
         $scope.unstar(statusId, 0);
         httpBackend.flush();
         expect(cache.get(statusId)).toEqual({starred: false});
     });
 });
 
-describe('Starring tweets', function () {
+describe('Posting statuses', function () {
     var $controller,
         $httpBackend,
         $log,
@@ -175,12 +175,12 @@ describe('Starring tweets', function () {
         $httpBackend.verifyNoOutstandingRequest();
     });
 
-    it('should have tweets in scope', function () {
+    it('should update scope', function () {
         httpBackend.flush();
         expect($scope.tweets).toEqual(tweets);
     });
 
-    it('should mark a tweet as starred', function () {
+    it('should mark status as starred', function () {
         var endpoint = 'https://## FILL HOSTNAME ##/twitter/tweet/star/' + statusId;
         $httpBackend.when('POST', endpoint).respond({
             "status": statusId
@@ -191,7 +191,7 @@ describe('Starring tweets', function () {
         expect($scope.tweets[0].starred).toEqual(true);
     });
 
-    it('should mark a tweet as being not starred', function () {
+    it('should mark status unstarred', function () {
         var endpoint = 'https://## FILL HOSTNAME ##/twitter/tweet/unstar/' + statusId;
         $httpBackend.when('POST', endpoint).respond({
             "status": statusId

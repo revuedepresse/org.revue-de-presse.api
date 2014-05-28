@@ -5,25 +5,22 @@
         </ul>
         <div ng-include="'app/partials/sync.html'"></div>
     </div>
-    <table class="table table-condensed" infinite-scroll="showMoreTweets()">
-        <tr ng-repeat="tweet in tweets">
-            <td>
-                <dl class="dl-horizontal" id="{{ tweet.status_id }}">
-                    <dd>
-                        <img ng-src="{{ tweet.author_avatar|strict_https }}" alt="https://twitter.com/{{ tweet.screen_name }}" />
-                        <a class="screen-name" href="http://twitter.com/{{ tweet.screen_name }}"><strong>@{{ tweet.screen_name }}</strong></a>
-                    </dd>
-                    <dd class="text" parse-url="props" ng-model="tweet">{{ tweet.text }}</dd>
-                    <dd>
-                        <button class="ui button" ng-class="{true: 'hide', false: ''}[tweet.starred]" ng-click="star(tweet.status_id, $index)">
-                            Star<span ng-if="tweet.starred">red</span>
-                        </button>
-                        <button class="ui button" ng-class="{true: '', false: 'hide'}[tweet.starred]" ng-click="unstar(tweet.status_id, $index)">
-                            Unstar<span ng-if="!tweet.starred">red</span>
-                        </button>
-                    </dd>
-                </dl>
-            </td>
-        </tr>
-    </table>
+    <div class="ui accordion" infinite-scroll="showMoreTweets()">
+        <div ng-repeat="tweet in tweets" id="{{ tweet.status_id }}" repeat-done>
+            <div class="title active">
+                <i class="dropdown icon"></i>
+                <img class="ui avatar image" ng-src="{{ tweet.author_avatar|strict_https }}" alt="https://twitter.com/{{ tweet.screen_name }}" />
+                <strong>@{{ tweet.screen_name }}</strong>
+            </div>
+            <div class="content text active">
+                <p parse-url="props" ng-model="tweet">{{ tweet.text }}</p>
+                <button class="ui button"
+                        ng-class="{true: 'hide', false: ''}[tweet.starred]"
+                        ng-click="star(tweet.status_id, $index)">Star<span ng-if="tweet.starred">red</span></button>
+                <button class="ui button"
+                        ng-class="{true: '', false: 'hide'}[tweet.starred]"
+                        ng-click="unstar(tweet.status_id, $index)">Unstar<span ng-if="!tweet.starred">red</span></button>
+            </div>
+        </div>
+    </div>
 </div>
