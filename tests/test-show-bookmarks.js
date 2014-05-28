@@ -8,7 +8,7 @@ describe('Show bookmarks', function () {
         httpBackend,
         locationMock,
         statusId,
-        tweets;
+        statuses;
 
     beforeEach(angular.mock.module('weaverApp'));
 
@@ -28,7 +28,7 @@ describe('Show bookmarks', function () {
             $rootScope;
 
         statusId = "420103690863669249";
-        tweets = [
+        statuses = [
             {
                 "author_avatar": "http://pbs.twimg.com/profile_images/1803355808/377992_203375376416531_100002322093627_443137_1695065966_n_normal.jpg",
                 "text": "@schmittjoh Are those changes pushed to https://t.co/8X8XXLOSnB yet? Can't find anything in the recent commits.",
@@ -47,7 +47,7 @@ describe('Show bookmarks', function () {
             username: $routeParams.username
         };
 
-        httpBackend.whenPOST('https://## FILL HOSTNAME ##/twitter/bookmarks', data).respond(tweets);
+        httpBackend.whenPOST('https://## FILL HOSTNAME ##/twitter/bookmarks', data).respond(statuses);
 
         $rootScope = $injector.get('$rootScope');
         $scope = $rootScope.$new();
@@ -77,6 +77,6 @@ describe('Show bookmarks', function () {
 
     it('should have tweets in scope', function () {
         httpBackend.flush();
-        expect($scope.tweets).toEqual(tweets);
+        expect($scope.statuses).toEqual(statuses);
     });
 });

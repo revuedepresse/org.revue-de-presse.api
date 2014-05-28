@@ -15,9 +15,11 @@ twitterControllers.controller('ShowStatusesAction', [
         $scope.synced = cache.keys().length === 0;
 
         $scope.$on('ngRepeatDone', function () {
-            if ($scope.tweets.length > 0) {
+            if ($scope.statuses.length > 0) {
                 $('.ui.accordion')
                     .accordion({
+                        'collapse': true,
+                        'exclusive': false,
                         'debug': debug,
                         'performance': performance,
                         'verbose': verbose
@@ -26,9 +28,9 @@ twitterControllers.controller('ShowStatusesAction', [
             }
         });
 
-        twitter.showMoreTweets($scope, $routeParams);
+        twitter.showMoreStatuses($scope, $routeParams);
 
-        var setTweetStarringStatus = function (statusId, index, starred) {
+        var setTweetStarringStatus = function (statusId, screenName, index, starred) {
             if (offlineCache.isNavigatorOnline()) {
                 var endpointUrlTemplate = host + '/twitter/tweet/{{ action }}/' + statusId;
                 var endpointUrl;
@@ -40,7 +42,7 @@ twitterControllers.controller('ShowStatusesAction', [
                 }
 
                 $http.post(endpointUrl).success(function () {
-                    $scope.tweets[index].starred = starred;
+                    $scope.screenNames[screenName].statuses[index].starred = starred;
                 }).error(function (data) {
                     if ($log !== undefined) {
                         $log.error(data)
@@ -53,16 +55,16 @@ twitterControllers.controller('ShowStatusesAction', [
             }
         }
 
-        $scope.star = function (tweetId, tweetIndex) {
-            setTweetStarringStatus(tweetId, tweetIndex, true);
+        $scope.star = function (tweetId, screenName, tweetIndex) {
+            setTweetStarringStatus(tweetId, screenName, tweetIndex, true);
         }
 
-        $scope.unstar = function (tweetId, tweetIndex) {
-            setTweetStarringStatus(tweetId, tweetIndex, false);
+        $scope.unstar = function (tweetId, screenName, tweetIndex) {
+            setTweetStarringStatus(tweetId, screenName, tweetIndex, false);
         }
 
-        $scope.showMoreTweets = function () {
-            twitter.showMoreTweets($scope, $routeParams);
+        $scope.showMoreStatuses = function () {
+            twitter.showMoreStatuses($scope, $routeParams);
         }
 
         $scope.sync = function () {
