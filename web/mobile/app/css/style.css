@@ -19,14 +19,16 @@ dd {
 .text {
     font-family: Georgia,"Times New Roman",serif;
     font-size: 22px;
-    width: 500px;
-    white-space: pre-wrap;
+    width: 300px;
 }
 
 .screen-name {
-    display: block;
     padding-top: 2px;
     margin-top: 3px;
     font-size: 18px;
     line-height: 1.25;
+}
+
+.content p {
+    margin-top: 0;
 }

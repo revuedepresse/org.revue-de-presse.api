@@ -1,6 +1,9 @@
 'use strict';
 
-var twitterControllers = angular.module('statusController', []);
+var debug = false,
+    verbose = false,
+    performance = false,
+    twitterControllers = angular.module('statusController', []);
 
 twitterControllers.controller('ShowStatusesAction', [
     '$scope', '$http', '$location', '$log', '$routeParams', 'twitter', 'offlineCache',
@@ -10,6 +13,18 @@ twitterControllers.controller('ShowStatusesAction', [
             errors = {};
 
         $scope.synced = cache.keys().length === 0;
+
+        $scope.$on('ngRepeatDone', function () {
+            if ($scope.tweets.length > 0) {
+                $('.ui.accordion')
+                    .accordion({
+                        'debug': debug,
+                        'performance': performance,
+                        'verbose': verbose
+                    })
+                ;
+            }
+        });
 
         twitter.showMoreTweets($scope, $routeParams);
 
@@ -47,12 +62,6 @@ twitterControllers.controller('ShowStatusesAction', [
         }
 
         $scope.showMoreTweets = function () {
-            var lastStatus;
-
-            if ($scope.tweets !== undefined) {
-                lastStatus = $scope.tweets[$scope.tweets.length - 1];
-                $routeParams.lastStatusId = lastStatus.id;
-            }
             twitter.showMoreTweets($scope, $routeParams);
         }
 
