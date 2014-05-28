@@ -1,10 +1,8 @@
 'use strict';
 
-/* Controllers */
+var twitterControllers = angular.module('statusController', []);
 
-var twitterControllers = angular.module('twitterControllers', []);
-
-twitterControllers.controller('ShowTweetsAction', [
+twitterControllers.controller('ShowStatusesAction', [
     '$scope', '$http', '$location', '$log', '$routeParams', 'twitter', 'offlineCache',
     function ($scope, $http, $location, $log, $routeParams, twitter, offlineCache) {
         var cache = offlineCache.getLocalStorageCache(),
