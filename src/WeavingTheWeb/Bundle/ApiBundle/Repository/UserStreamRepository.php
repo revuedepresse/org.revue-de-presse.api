@@ -4,6 +4,7 @@ namespace WeavingTheWeb\Bundle\ApiBundle\Repository;
 
 use Doctrine\ORM\NoResultException;
 use FOS\ElasticaBundle\Doctrine\ORM\Provider;
+use Symfony\Component\Validator\Constraints\DateTime;
 
 /**
  * Class UserStreamRepository
@@ -225,20 +226,19 @@ class UserStreamRepository extends ResourceRepository
             $queryBuilder->setParameter('lastStatusId', $lastStatusId);
         }
 
-        $queryBuilder->setParameter('identifier', $this->oauthTokens);
         $statuses = $queryBuilder->getQuery()->getResult();
 
         return $this->highlightRetweets($statuses);
     }
 
     /**
+     * @param bool $lastWeek
      * @return \Doctrine\ORM\QueryBuilder
      */
-    protected function selectStatuses()
+    protected function selectStatuses($lastWeek = false)
     {
         $queryBuilder = $this->createQueryBuilder('t');
-
-        return $queryBuilder->select(
+        $queryBuilder->select(
             [
                 't.userAvatar as author_avatar',
                 't.text',
@@ -250,8 +250,21 @@ class UserStreamRepository extends ResourceRepository
             ]
         )
             ->andWhere('t.identifier IN (:identifier)')
-            ->setMaxResults(50)
-            ->orderBy('t.id', 'desc');
+            ->orderBy('t.id', 'desc')
+            ->setMaxResults(300)
+        ;
+        $queryBuilder->setParameter('identifier', $this->oauthTokens);
+
+
+        if ($lastWeek) {
+            $queryBuilder->andWhere('ts.createdAt > :lastWeek');
+
+            $now = new \DateTime();
+            $lastWeek = $now->setTimestamp(strtotime('last week'));
+            $queryBuilder->setParameter('lastWeek', $lastWeek);
+        }
+
+        return $queryBuilder;
     }
 
     /**
@@ -263,9 +276,8 @@ class UserStreamRepository extends ResourceRepository
         if (count($statusIds) > 0) {
             $queryBuilder = $this->selectStatuses()
                 ->andWhere('t.statusId IN (:statusIds)');
-
-            $queryBuilder->setParameter('identifier', $this->oauthTokens);
             $queryBuilder->setParameter('statusIds', $statusIds);
+
             $statuses = $queryBuilder->getQuery()->getResult();
 
             return $this->highlightRetweets($statuses);
