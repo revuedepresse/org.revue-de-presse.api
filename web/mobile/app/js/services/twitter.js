@@ -3,33 +3,32 @@
 weaverApp.factory('twitter', ['$http', '$location', '$log', '$routeParams',
     function ($http, $location, $log, $routeParams) {
         var initializeStatuses = function ($scope) {
-            if ($scope.tweets === undefined) {
-                $scope.tweets = [];
+            if ($scope.statuses === undefined) {
+                $scope.statuses = [];
             }
         }
 
-        var showStatuses = function ($scope, tweets) {
+        var showStatuses = function ($scope, statuses) {
             initializeStatuses($scope);
 
-            if ($scope.tweets.length === 0) {
-                $scope.tweets = tweets
+            if (_.isUndefined($scope.statuses) || _.isEmpty($scope.statuses)) {
+                $scope.statuses = statuses
             } else {
-                var k;
-                for (k = 0; k < 50; k++) {
-                    $scope.tweets.push(tweets[k])
-                }
+                _.each(statuses, function (status) {
+                    $scope.statuses.push(status)
+                });
             }
         };
 
         return {
             showStatuses: showStatuses,
-            showMoreTweets: function ($scope, $routeParams) {
+            showMoreStatuses: function ($scope, $routeParams) {
                 var lastStatus;
 
                 initializeStatuses($scope);
 
-                if ($scope.tweets.length !== 0) {
-                    lastStatus = $scope.tweets[$scope.tweets.length - 1];
+                if (!_.isEmpty($scope.statuses)) {
+                    lastStatus = $scope.statuses[$scope.statuses.length - 1];
                     $routeParams.lastStatusId = lastStatus.id;
                 }
 
@@ -49,12 +48,24 @@ weaverApp.factory('twitter', ['$http', '$location', '$log', '$routeParams',
                 if ($scope.lockedRequests[hash] === undefined) {
                     $scope.lockedRequests[hash] = true;
 
-                    $http.get(showLatestTweetsUrl).success(function (tweets) {
-                        _.each(tweets, function () {
+                    $http.get(showLatestTweetsUrl).success(function (statuses) {
+                        if (_.isUndefined($scope.screenNames)) {
+                            $scope.screenNames = {};
+                        }
 
-                        });
+                        _.each(statuses, function (status) {
+                            if (_.isUndefined($scope.screenNames[status.screen_name])) {
+                                $scope.screenNames[status.screen_name] = {
+                                    authorAvatar: status.author_avatar,
+                                    screenName: status.screen_name,
+                                    statuses: []
+                                };
+                            }
 
-                        showStatuses($scope, tweets);
+                            $scope.screenNames[status.screen_name].statuses.push(status);
+                         });
+
+                        showStatuses($scope, statuses);
 
                         $scope.lockedRequests[hash] = undefined;
                     }).error(function (data) {

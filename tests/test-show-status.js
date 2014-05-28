@@ -80,7 +80,7 @@ describe('Offline mode', function () {
 
     it('should put statuses to scope', function () {
         httpBackend.flush();
-        expect($scope.tweets).toEqual(statuses);
+        expect($scope.statuses).toEqual(statuses);
     });
 
     it('should let a status be starred', function () {
@@ -105,6 +105,7 @@ describe('Posting statuses', function () {
         cache,
         httpBackend,
         locationMock,
+        screenName,
         statusId,
         tweets;
 
@@ -133,11 +134,12 @@ describe('Posting statuses', function () {
         var $rootScope;
 
         statusId = "420103690863669249"
+        screenName = "nikita_ppv";
         tweets = [
             {
                 "author_avatar": "http://pbs.twimg.com/profile_images/1803355808/377992_203375376416531_100002322093627_443137_1695065966_n_normal.jpg",
                 "text": "@schmittjoh Are those changes pushed to https://t.co/8X8XXLOSnB yet? Can't find anything in the recent commits.",
-                "screen_name": "nikita_ppv",
+                "screen_name": screenName,
                 "id": 4366498,
                 "status_id": statusId,
                 "starred": false
@@ -177,7 +179,7 @@ describe('Posting statuses', function () {
 
     it('should update scope', function () {
         httpBackend.flush();
-        expect($scope.tweets).toEqual(tweets);
+        expect($scope.statuses).toEqual(tweets);
     });
 
     it('should mark status as starred', function () {
@@ -185,10 +187,10 @@ describe('Posting statuses', function () {
         $httpBackend.when('POST', endpoint).respond({
             "status": statusId
         });
-        $scope.star(statusId, 0);
+        $scope.star(statusId, screenName, 0);
         httpBackend.flush();
 
-        expect($scope.tweets[0].starred).toEqual(true);
+        expect($scope.statuses[0].starred).toEqual(true);
     });
 
     it('should mark status unstarred', function () {
@@ -196,9 +198,9 @@ describe('Posting statuses', function () {
         $httpBackend.when('POST', endpoint).respond({
             "status": statusId
         });
-        $scope.unstar(statusId, 0);
+        $scope.unstar(statusId, screenName, 0);
         httpBackend.flush();
 
-        expect($scope.tweets[0].starred).toEqual(false);
+        expect($scope.statuses[0].starred).toEqual(false);
     });
 });
