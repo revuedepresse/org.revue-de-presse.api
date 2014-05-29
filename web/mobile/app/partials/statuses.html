@@ -9,7 +9,10 @@
         <div ng-repeat="(screenName, item) in screenNames" repeat-done>
             <div class="title">
                 <i class="dropdown icon"></i>
-                <img class="ui avatar image" ng-src="{{ item.authorAvatar|strict_https }}" alt="https://twitter.com/{{ screenName }}" />
+                <img class="ui avatar image"
+                     ng-src="{{ item.authorAvatar|strict_https }}"
+                     alt="https://twitter.com/{{ screenName }}"
+                     fallback-src="http://a0.twimg.com/sticky/default_profile_images/default_profile_2_normal.png" />
                 <strong>@{{ screenName }}</strong>
             </div>
             <div class="content">

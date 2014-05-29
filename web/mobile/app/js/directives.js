@@ -7,7 +7,7 @@ weaverApp.directive('parseUrl', function () {
         require: 'ngModel',
         replace: true,
         scope: { props: '=parseUrl', ngModel: '=ngModel' },
-        link: function compile(scope, element, attrs, controller) {
+        link: function compile(scope, element) {
             scope.$watch('ngModel.text', function (text) {
                 angular.forEach(text.match(urlPattern), function (url) {
                     if (scope.ngModel.parsed === undefined) {
@@ -33,5 +33,16 @@ weaverApp.directive('repeatDone', function ($timeout) {
             }
         }
     }
+});
+
+weaverApp.directive('fallbackSrc', function () {
+    return {
+        restrict: 'A',
+        link: function (scope, element, attrs) {
+            element.bind('error', function() {
+            angular.element(this).attr("src", attrs.fallbackSrc);
+          });
+        }
+   }
 });
 
