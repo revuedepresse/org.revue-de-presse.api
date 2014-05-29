@@ -1,5 +1,5 @@
-<div class="span12">
-    <div class="span12">
+<div class="statuses">
+    <div>
         <ul ng-repeat="error in errors">
             <li>{{ error }}</li>
         </ul>
@@ -14,10 +14,12 @@
                      alt="https://twitter.com/{{ screenName }}"
                      fallback-src="http://a0.twimg.com/sticky/default_profile_images/default_profile_2_normal.png" />
                 <strong>@{{ screenName }}</strong>
+                <i class="new-status icon bullhorn" ng-show="item.isNew"></i>
             </div>
             <div class="content">
                 <div ng-repeat="status in item.statuses" id="{{ status.status_id }}">
                     <div class="item text">
+                        <i class="new-status icon bullhorn" ng-show="status.isNew"></i>
                         <p class="text" parse-url="props" ng-model="status">{{ status.text }}</p>
                         <div class="ui huge star rating">
                             <i class="icon" ng-class="{active: status.starred}" ng-click="toggle(status.status_id, screenName, $index)"></i>

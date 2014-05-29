@@ -34,3 +34,7 @@ dd {
     margin-bottom: 0;
     margin-top: 0;
 }
+
+.statuses .new-status {
+    float: right;
+}

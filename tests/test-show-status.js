@@ -35,7 +35,7 @@ describe('Offline mode', function () {
     beforeEach(inject(function ($injector, $angularCacheFactory, offlineCache) {
         var $rootScope;
 
-        statusId = "420103690863669249"
+        statusId = "420103690863669249";
         statuses = [
             {
                 "author_avatar": "http://pbs.twimg.com/profile_images/1803355808/377992_203375376416531_100002322093627_443137_1695065966_n_normal.jpg",
@@ -80,6 +80,8 @@ describe('Offline mode', function () {
 
     it('should put statuses to scope', function () {
         httpBackend.flush();
+
+        statuses[0].isNew = false;
         expect($scope.statuses).toEqual(statuses);
     });
 
@@ -107,7 +109,7 @@ describe('Posting statuses', function () {
         locationMock,
         screenName,
         statusId,
-        tweets;
+        statuses;
 
     beforeEach(angular.mock.module('weaverApp'));
 
@@ -133,9 +135,9 @@ describe('Posting statuses', function () {
     beforeEach(inject(function ($injector, $angularCacheFactory, offlineCache) {
         var $rootScope;
 
-        statusId = "420103690863669249"
+        statusId = "420103690863669249";
         screenName = "nikita_ppv";
-        tweets = [
+        statuses = [
             {
                 "author_avatar": "http://pbs.twimg.com/profile_images/1803355808/377992_203375376416531_100002322093627_443137_1695065966_n_normal.jpg",
                 "text": "@schmittjoh Are those changes pushed to https://t.co/8X8XXLOSnB yet? Can't find anything in the recent commits.",
@@ -149,7 +151,7 @@ describe('Posting statuses', function () {
         // Prepares http backend to respond with a tweet sample when requesting for the lastest ones
         $httpBackend = $injector.get('$httpBackend');
         httpBackend = $httpBackend;
-        $httpBackend.when('GET', 'https://## FILL HOSTNAME ##/twitter/tweet/latest?username=weaver').respond(tweets);
+        $httpBackend.when('GET', 'https://## FILL HOSTNAME ##/twitter/tweet/latest?username=weaver').respond(statuses);
 
         $rootScope = $injector.get('$rootScope');
         $scope = $rootScope.$new();
@@ -179,7 +181,9 @@ describe('Posting statuses', function () {
 
     it('should update scope', function () {
         httpBackend.flush();
-        expect($scope.statuses).toEqual(tweets);
+
+        statuses[0].isNew = false;
+        expect($scope.statuses).toEqual(statuses);
     });
 
     it('should mark status as starred', function () {

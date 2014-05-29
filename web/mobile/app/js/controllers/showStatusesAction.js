@@ -36,13 +36,15 @@ twitterControllers.controller('ShowStatusesAction', [
         var setTweetStarringStatus = function (statusId, screenName, index, starred) {
             if (offlineCache.isNavigatorOnline()) {
                 var endpointUrlTemplate = host + '/twitter/tweet/{{ action }}/' + statusId,
-                    endpointUrl;
+                    endpointUrl,
+                    replace;
 
                 if (starred) {
-                    endpointUrl = endpointUrlTemplate.replace('{{ action }}', 'star');
+                    replace = 'star';
                 } else {
-                    endpointUrl = endpointUrlTemplate.replace('{{ action }}', 'unstar');
+                    replace = 'unstar';
                 }
+                endpointUrl = endpointUrlTemplate.replace('{{ action }}', replace);
 
                 $http.post(endpointUrl).success(function () {
                     $scope.screenNames[screenName].statuses[index].starred = starred;

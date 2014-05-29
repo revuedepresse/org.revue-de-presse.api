@@ -32,17 +32,17 @@ weaverApp.factory('twitter', ['$http', '$location', '$log', '$routeParams', '$ti
                 initializeStatuses($scope);
 
                 if (!_.isEmpty($scope.statuses)) {
-                    lastStatus = $scope.statuses[$scope.statuses.length - 1];
-                    $routeParams.lastStatusId = lastStatus.id;
+                    lastStatus = $scope.statuses[0];
+                    $routeParams.lastId = lastStatus.id;
                 }
 
                 var host = $location.protocol() + '://' + $location.host(),
                     showLatestTweetsUrl = host + '/twitter/tweet/latest?username=' + $routeParams.username,
                     hash = '_' + $routeParams.username;
 
-                if ($routeParams.lastStatusId !== undefined) {
-                    showLatestTweetsUrl = showLatestTweetsUrl + '&lastStatusId=' + $routeParams.lastStatusId;
-                    hash = hash + '_' + $routeParams.lastStatusId;
+                if ($routeParams.lastId !== undefined) {
+                    showLatestTweetsUrl = showLatestTweetsUrl + '&lastId=' + $routeParams.lastId;
+                    hash = hash + '_' + $routeParams.lastId;
                 }
 
                 if ($scope.lockedRequests === undefined) {
@@ -53,8 +53,11 @@ weaverApp.factory('twitter', ['$http', '$location', '$log', '$routeParams', '$ti
                     $scope.lockedRequests[hash] = true;
 
                     $http.get(showLatestTweetsUrl).success(function (statuses) {
+                        var firstRequest = false;
+
                         if (_.isUndefined($scope.screenNames)) {
                             $scope.screenNames = {};
+                            firstRequest = true;
                         }
 
                         statuses.sort(function (a, b) {
@@ -62,15 +65,25 @@ weaverApp.factory('twitter', ['$http', '$location', '$log', '$routeParams', '$ti
                         });
                         statuses.reverse();
 
+                        _.each($scope.screenNames, function (item) {
+                            _.each(item.statuses, function (status) {
+                                status.isNew = false;
+                            });
+                            item.isNew = false;
+                        });
+
                         _.each(statuses, function (status) {
                             if (_.isUndefined($scope.screenNames[status.screen_name])) {
                                 $scope.screenNames[status.screen_name] = {
                                     authorAvatar: status.author_avatar,
+                                    isNew: false,
                                     screenName: status.screen_name,
                                     statuses: []
                                 };
                             }
 
+                            status.isNew = !firstRequest;
+                            $scope.screenNames[status.screen_name].isNew = !firstRequest;
                             $scope.screenNames[status.screen_name].statuses.push(status);
                          });
 
