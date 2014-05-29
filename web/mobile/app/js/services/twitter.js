@@ -1,7 +1,7 @@
 'use strict';
 
-weaverApp.factory('twitter', ['$http', '$location', '$log', '$routeParams',
-    function ($http, $location, $log, $routeParams) {
+weaverApp.factory('twitter', ['$http', '$location', '$log', '$routeParams', '$timeout',
+    function ($http, $location, $log, $routeParams, $timeout) {
         var initializeStatuses = function ($scope) {
             if ($scope.statuses === undefined) {
                 $scope.statuses = [];
@@ -16,6 +16,10 @@ weaverApp.factory('twitter', ['$http', '$location', '$log', '$routeParams',
             } else {
                 _.each(statuses, function (status) {
                     $scope.statuses.push(status)
+                });
+
+                $timeout(function () {
+                    $scope.$emit('ngRepeatDone');
                 });
             }
         };

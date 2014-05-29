@@ -15,17 +15,15 @@ twitterControllers.controller('ShowStatusesAction', [
         $scope.synced = cache.keys().length === 0;
 
         $scope.$on('ngRepeatDone', function () {
-            if ($scope.statuses.length > 0) {
-                $('.ui.accordion')
-                    .accordion({
-                        'collapse': true,
-                        'exclusive': false,
-                        'debug': debug,
-                        'performance': performance,
-                        'verbose': verbose
-                    })
-                ;
-            }
+            $('.ui.accordion')
+                .accordion({
+                    'collapse': true,
+                    'exclusive': false,
+                    'debug': debug,
+                    'performance': performance,
+                    'verbose': verbose
+                })
+            ;
         });
 
         twitter.showMoreStatuses($scope, $routeParams);
