@@ -11,7 +11,7 @@ var weaverApp = angular.module('weaverApp', [
 
 weaverApp.config(['$routeProvider', function($routeProvider) {
     $routeProvider.when('/:username', {
-        templateUrl: '/mobile/app/partials/status.html',
+        templateUrl: '/mobile/app/partials/statuses.html',
         controller: 'ShowStatusesAction'
     });
     $routeProvider.when('/bookmarks/:username', {
