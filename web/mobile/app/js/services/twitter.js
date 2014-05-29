@@ -15,7 +15,7 @@ weaverApp.factory('twitter', ['$http', '$location', '$log', '$routeParams', '$ti
                 $scope.statuses = statuses
             } else {
                 _.each(statuses, function (status) {
-                    $scope.statuses.push(status)
+                    $scope.statuses.unshift(status)
                 });
 
                 $timeout(function () {
@@ -56,6 +56,11 @@ weaverApp.factory('twitter', ['$http', '$location', '$log', '$routeParams', '$ti
                         if (_.isUndefined($scope.screenNames)) {
                             $scope.screenNames = {};
                         }
+
+                        statuses.sort(function (a, b) {
+                            return a['status_id'] > b['status_id'] ? 1 : -1;
+                        });
+                        statuses.reverse();
 
                         _.each(statuses, function (status) {
                             if (_.isUndefined($scope.screenNames[status.screen_name])) {
