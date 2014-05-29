@@ -38,8 +38,8 @@ class TweetController extends Controller
                 $userStreamRepository = $this->get('weaving_the_web_twitter.repository.read.user_stream');
                 $userStreamRepository->setOauthTokens($oauthTokens);
 
-                $lastStatusId =$request->get('lastStatusId', null);
-                $statuses = $userStreamRepository->findLatest($lastStatusId);
+                $lastId = $request->get('lastId', null);
+                $statuses = $userStreamRepository->findLatest($lastId);
                 $statusCode = 200;
 
                 return new JsonResponse($statuses, $statusCode, $this->getAccessControlOriginHeaders());

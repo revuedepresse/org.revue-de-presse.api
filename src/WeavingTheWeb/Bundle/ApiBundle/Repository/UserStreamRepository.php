@@ -214,16 +214,16 @@ class UserStreamRepository extends ResourceRepository
     }
 
     /**
-     * @param $lastStatusId
+     * @param $lastId
      * @return array
      */
-    public function findLatest($lastStatusId = null)
+    public function findLatest($lastId = null)
     {
         $queryBuilder = $this->selectStatuses();
 
-        if (!is_null($lastStatusId)) {
-            $queryBuilder->andWhere('t.id < :lastStatusId');
-            $queryBuilder->setParameter('lastStatusId', $lastStatusId);
+        if (!is_null($lastId)) {
+            $queryBuilder->andWhere('t.id < :lastId');
+            $queryBuilder->setParameter('lastId', $lastId);
         }
 
         $statuses = $queryBuilder->getQuery()->getResult();
