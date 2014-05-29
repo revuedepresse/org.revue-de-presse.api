@@ -24,6 +24,11 @@ twitterControllers.controller('ShowStatusesAction', [
                     'verbose': verbose
                 })
             ;
+            $('.ui.rating')
+                .rating({
+                    clearable: true
+                })
+            ;
         });
 
         twitter.showMoreStatuses($scope, $routeParams);
@@ -55,6 +60,14 @@ twitterControllers.controller('ShowStatusesAction', [
 
         $scope.star = function (tweetId, screenName, tweetIndex) {
             setTweetStarringStatus(tweetId, screenName, tweetIndex, true);
+        }
+
+        $scope.toggle = function (tweetId, screenName, tweetIndex) {
+            if ($scope.screenNames[screenName].statuses[tweetIndex].starred) {
+                $scope.unstar(tweetId, screenName, tweetIndex);
+            } else {
+                $scope.star(tweetId, screenName, tweetIndex);
+            }
         }
 
         $scope.unstar = function (tweetId, screenName, tweetIndex) {

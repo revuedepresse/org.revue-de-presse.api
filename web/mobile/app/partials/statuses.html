@@ -19,12 +19,9 @@
                 <div ng-repeat="status in item.statuses" id="{{ status.status_id }}">
                     <div class="item text">
                         <p class="text" parse-url="props" ng-model="status">{{ status.text }}</p>
-                        <button class="ui button"
-                                ng-class="{true: 'hide', false: ''}[status.starred]"
-                                ng-click="star(status.status_id, screenName, $index)">Star<span ng-if="status.starred">red</span></button>
-                        <button class="ui button"
-                                ng-class="{true: '', false: 'hide'}[status.starred]"
-                                ng-click="unstar(status.status_id, screenName, $index)">Unstar<span ng-if="!status.starred">red</span></button>
+                        <div class="ui huge star rating">
+                            <i class="icon" ng-class="{active: status.starred}" ng-click="toggle(status.status_id, screenName, $index)"></i>
+                        </div>
                     </div>
                 </div>
             </div>
