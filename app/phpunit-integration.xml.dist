@@ -15,8 +15,8 @@
 
     <groups>
         <exclude>
-            <group>twitter</group>
             <group>isolated-testing</group>
+            <group>messaging-twitter</group>
         </exclude>
     </groups>
 
