@@ -3,20 +3,30 @@
 weaverApp.factory('twitter', ['$http', '$location', '$log', '$routeParams', '$timeout',
     function ($http, $location, $log, $routeParams, $timeout) {
         var initializeStatuses = function ($scope) {
-            if ($scope.statuses === undefined) {
+            if (_.isUndefined($scope.statuses)) {
                 $scope.statuses = [];
             }
-        }
+        };
+
+        var orderBy = function (field) {
+            return function (a, b) {
+                if (a === b) {
+                    return 0;
+                } else {
+                    return a[field] < b[field] ? -1 : 1;
+                }
+            };
+        };
 
         var showStatuses = function ($scope, statuses) {
-            initializeStatuses($scope);
-
-            if (_.isUndefined($scope.statuses) || _.isEmpty($scope.statuses)) {
-                $scope.statuses = statuses.reverse();
+            if (_.isEmpty($scope.statuses)) {
+                $scope.statuses = statuses.sort(orderBy('id')).reverse();
             } else {
                 _.each(statuses, function (status) {
                     $scope.statuses.unshift(status)
                 });
+
+                $scope.statuses = statuses.sort(orderBy('id')).reverse();
 
                 $timeout(function () {
                     $scope.$emit('ngRepeatDone');
@@ -24,88 +34,199 @@ weaverApp.factory('twitter', ['$http', '$location', '$log', '$routeParams', '$ti
             }
         };
 
-        return {
-            showStatuses: showStatuses,
-            showMoreStatuses: function ($scope, $routeParams) {
-                var lastStatus;
+        var deprecateNovelty = function ($scope) {
+            _.each($scope.users, function (item) {
+                _.each(item.sortedStatuses, function (status, index) {
+                    item.sortedStatuses[index].isNew = false;
+                });
+                item.isNew = false;
+            });
+        };
 
-                initializeStatuses($scope);
+        var getHost = function ($location) {
+            return $location.protocol() + '://' + $location.host();
+        };
 
-                if (!_.isEmpty($scope.statuses)) {
-                    lastStatus = $scope.statuses[0];
-                    $routeParams.lastId = lastStatus.id;
+        var getBookmarksPromise = function (ids) {
+            var statusURL = getHost($location) + '/twitter/bookmarks';
+
+            return $http.post(statusURL, {
+                statusIds: ids,
+                username: $routeParams.username
+            });
+        };
+
+        var initializeRequestLocking = function ($scope) {
+            if (_.isUndefined($scope.lockedRequests)) {
+                $scope.lockedRequests = {};
+            }
+        };
+
+        var latestStatusesEndpoint = function ($location, $scope, $routeParams) {
+            var endpoint = getHost($location) + '/twitter/tweet/latest',
+                params = getLatestStatusesParams($routeParams, $scope);
+
+            _.each(params, function (param, index) {
+                var separator;
+
+                if (index === 0) {
+                    separator = '?';
+                } else {
+                    separator = '&'
                 }
 
-                var host = $location.protocol() + '://' + $location.host(),
-                    showLatestTweetsUrl = host + '/twitter/tweet/latest?username=' + $routeParams.username,
-                    hash = '_' + $routeParams.username;
+                endpoint = endpoint + separator + param;
+            });
 
-                if ($routeParams.lastId !== undefined) {
-                    showLatestTweetsUrl = showLatestTweetsUrl + '&lastId=' + $routeParams.lastId;
-                    hash = hash + '_' + $routeParams.lastId;
-                }
+            return endpoint;
+        };
 
-                if ($scope.lockedRequests === undefined) {
-                    $scope.lockedRequests = {};
-                }
+        var setUserParam = function (user) {
+            return 'username=' + user;
+        };
 
-                if ($scope.lockedRequests[hash] === undefined) {
-                    $scope.lockedRequests[hash] = true;
+        var initializeHash = function (username) {
+            return '_' + username;
+        };
 
-                    $http.get(showLatestTweetsUrl).success(function (statuses) {
-                        var firstRequest = false;
+        var getOldestStatusId = function ($scope) {
+            var oldestStatus;
 
-                        if (_.isUndefined($scope.screenNames)) {
-                            $scope.screenNames = {};
-                            firstRequest = true;
+            if (!_.isEmpty($scope.statuses)) {
+                oldestStatus = $scope.statuses[$scope.statuses.length - 1];
+
+                return oldestStatus.id;
+            } else {
+                return undefined;
+            }
+        };
+
+        var getLatestStatusesParams = function ($routeParams, $scope) {
+            var params = [],
+                lastId = getOldestStatusId($scope);
+
+            params.push(setUserParam($routeParams.username));
+            if (!_.isUndefined(lastId)) {
+                params.push('lastId=' + lastId);
+            }
+
+            return params;
+        };
+
+        var hashRequestParams = function ($routeParams, $scope) {
+            var hash = initializeHash($routeParams.username);
+            if (!_.isUndefined(getOldestStatusId($scope))) {
+                hash = hash + '_' + getOldestStatusId($scope);
+            }
+
+            return hash;
+        };
+
+        var isFirstRequest = function ($scope, next) {
+            var firstRequest = false;
+            if (_.isUndefined($scope.users)) {
+                firstRequest = true;
+            }
+
+            next($scope);
+
+            return firstRequest;
+        };
+
+        var initializeUsers = function ($scope) {
+            if (_.isUndefined($scope.users)) {
+                $scope.users = {};
+            }
+        }
+
+        var sortUserStatuses = function ($scope) {
+            _.each($scope.users, function (item, screenName) {
+                item.sortedStatuses.sort(orderBy('id'));
+                item.sortedStatuses.reverse();
+
+                $scope.users[screenName].sortedStatuses = item.sortedStatuses;
+            });
+        };
+
+        var unlockRequest = function ($scope, hash) {
+            $scope.lockedRequests[hash] = undefined;
+        };
+
+        var lockRequest = function ($scope, hash) {
+            $scope.lockedRequests[hash] = true;
+        };
+
+        var isRequestLocked = function ($scope, hash) {
+            return _.isUndefined($scope.lockedRequests[hash]);
+        };
+
+        var declareNovelty = function (item, isNew) {
+            item.isNew = isNew;
+        };
+
+        var firstSeenUser = function ($scope, status) {
+            return _.isUndefined($scope.users[status.screen_name].statuses[status.status_id]);
+        };
+
+        var injectStatus = function ($scope, status) {
+            $scope.users[status.screen_name].statuses[status.status_id] = status;
+            $scope.users[status.screen_name].sortedStatuses.push(status);
+        };
+
+        var showMoreStatuses = function ($scope, $routeParams) {
+            var endpoint,
+                hash = hashRequestParams($routeParams, $scope);
+
+            initializeStatuses($scope);
+
+            endpoint = latestStatusesEndpoint($location, $scope, $routeParams);
+
+            initializeRequestLocking($scope);
+
+            if (isRequestLocked($scope, hash)) {
+                lockRequest($scope, hash);
+
+                $http.get(endpoint).success(function (statuses) {
+                    var firstRequest = isFirstRequest($scope, initializeUsers);
+
+                    deprecateNovelty($scope);
+
+                    _.each(statuses, function (status, index) {
+                        if (_.isUndefined($scope.users[status.screen_name])) {
+                            $scope.users[status.screen_name] = {
+                                authorAvatar: status.author_avatar,
+                                isNew: false,
+                                screenName: status.screen_name,
+                                statuses: {},
+                                sortedStatuses: []
+                            };
                         }
 
-                        statuses.sort(function (a, b) {
-                            return a['id'] > b['id'] ? 1 : -1;
-                        });
-                        statuses.reverse();
+                        declareNovelty(statuses[index], !firstRequest);
+                        declareNovelty($scope.users[status.screen_name], !firstRequest);
 
-                        _.each($scope.screenNames, function (item) {
-                            _.each(item.statuses, function (status) {
-                                status.isNew = false;
-                            });
-                            item.isNew = false;
-                        });
-
-                        _.each(statuses, function (status) {
-                            if (_.isUndefined($scope.screenNames[status.screen_name])) {
-                                $scope.screenNames[status.screen_name] = {
-                                    authorAvatar: status.author_avatar,
-                                    isNew: false,
-                                    screenName: status.screen_name,
-                                    statuses: {}
-                                };
-                            }
-
-                            status.isNew = !firstRequest;
-                            $scope.screenNames[status.screen_name].isNew = !firstRequest;
-                            $scope.screenNames[status.screen_name].statuses[status.status_id] = status;
-                         });
-
-                        showStatuses($scope, statuses);
-
-                        $scope.lockedRequests[hash] = undefined;
-                    }).error(function (data) {
-                        if ($log !== undefined) {
-                            $log.error(data)
+                        if (firstSeenUser($scope, status)) {
+                            injectStatus($scope, status);
                         }
-                    });
-                }
-            },
-            getBookmarksPromise: function (ids) {
-                var host = $location.protocol() + '://' + $location.host(),
-                    statusURL = host + '/twitter/bookmarks';
+                     });
 
-                return $http.post(statusURL, {
-                    statusIds: ids,
-                    username: $routeParams.username
+                    sortUserStatuses($scope);
+
+                    showStatuses($scope, statuses);
+
+                    unlockRequest($scope, hash);
+                }).error(function (data) {
+                    if ($log !== undefined) {
+                        $log.error(data)
+                    }
                 });
             }
+        };
+
+        return {
+            getBookmarksPromise: getBookmarksPromise,
+            showStatuses: showStatuses,
+            showMoreStatuses: showMoreStatuses
         };
     }]
 );
