@@ -1,5 +1,8 @@
 'use strict';
 
+// Emulates previous use of offline cache service to store the result of a starring action
+var statusId = '420103690863669249';
+
 describe('Syncing tweets status', function () {
     var $controller,
         $httpBackend,
@@ -7,9 +10,7 @@ describe('Syncing tweets status', function () {
         $scope,
         cache,
         httpBackend,
-        locationMock,
-        // Emulates previous use of offline cache service to store the result of a starring action
-        statusId = '420103690863669249';
+        locationMock;
 
     beforeEach(angular.mock.module('weaverApp'));
 
@@ -98,8 +99,7 @@ describe('Syncing tweet status', function () {
         $scope,
         cache,
         httpBackend,
-        locationMock,
-        statusId;
+        locationMock;
 
     $routeParams = { username: 'weaver' };
     beforeEach(angular.mock.module('weaverApp'));
@@ -125,7 +125,6 @@ describe('Syncing tweet status', function () {
         $scope = $rootScope.$new();
 
         // Emulates previous use of offline cache service to store the result of a starring action
-        statusId = "420103690863669249"
         cache = offlineCache.getLocalStorageCache();
 
         $httpBackend = $injector.get('$httpBackend');

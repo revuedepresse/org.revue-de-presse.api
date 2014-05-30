@@ -47,7 +47,7 @@ twitterStatuses.controller('ShowStatusesAction', [
                 endpointUrl = endpointUrlTemplate.replace('{{ action }}', replace);
 
                 $http.post(endpointUrl).success(function () {
-                    $scope.screenNames[screenName].statuses[statusId].starred = starred;
+                    $scope.users[screenName].statuses[statusId].starred = starred;
                 }).error(function (data) {
                     if ($log !== undefined) {
                         $log.error(data)
@@ -61,7 +61,7 @@ twitterStatuses.controller('ShowStatusesAction', [
         }
 
         $scope.toggle = function (statusId, screenName) {
-            if ($scope.screenNames[screenName].statuses[statusId].starred) {
+            if ($scope.users[screenName].statuses[statusId].starred) {
                 $scope.unstar(statusId, screenName);
             } else {
                 $scope.star(statusId, screenName);
