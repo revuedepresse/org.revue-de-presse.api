@@ -164,8 +164,12 @@ weaverApp.factory('twitter', ['$http', '$location', '$log', '$routeParams', '$ti
             item.isNew = isNew;
         };
 
-        var firstSeenUser = function ($scope, status) {
+        var firstSeenStatus = function ($scope, status) {
             return _.isUndefined($scope.users[status.screen_name].statuses[status.status_id]);
+        };
+
+        var firstSeenUser = function ($scope, status) {
+            return _.isUndefined($scope.users[status.screen_name]);
         };
 
         var injectStatus = function ($scope, status) {
@@ -192,7 +196,7 @@ weaverApp.factory('twitter', ['$http', '$location', '$log', '$routeParams', '$ti
                     deprecateNovelty($scope);
 
                     _.each(statuses, function (status, index) {
-                        if (_.isUndefined($scope.users[status.screen_name])) {
+                        if (firstSeenUser($scope, status)) {
                             $scope.users[status.screen_name] = {
                                 authorAvatar: status.author_avatar,
                                 isNew: false,
@@ -205,7 +209,7 @@ weaverApp.factory('twitter', ['$http', '$location', '$log', '$routeParams', '$ti
                         declareNovelty(statuses[index], !firstRequest);
                         declareNovelty($scope.users[status.screen_name], !firstRequest);
 
-                        if (firstSeenUser($scope, status)) {
+                        if (firstSeenStatus($scope, status)) {
                             injectStatus($scope, status);
                         }
                      });

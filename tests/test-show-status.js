@@ -183,7 +183,8 @@ describe('Accessing statuses', function () {
         });
 
         it('should highlight a user for whom more tweets have been published.', function () {
-            var status = statuses[0];
+            var status = statuses[0],
+                lastStatusIndex;
 
             // Responds with statuses
             $httpBackend.flush();
@@ -195,6 +196,10 @@ describe('Accessing statuses', function () {
             $httpBackend.flush();
 
             expect($scope.users[status.screen_name].isNew).toEqual(true);
+            expect($scope.users[status.screen_name].sortedStatuses[0].id).toEqual(ids[0]);
+
+            lastStatusIndex = $scope.users[status.screen_name].sortedStatuses.length - 1;
+            expect($scope.users[status.screen_name].sortedStatuses[lastStatusIndex].id).toEqual(ids[3]);
         });
 
         describe('Showing even more statuses belonging to other users', function () {
