@@ -12,7 +12,7 @@ weaverApp.factory('twitter', ['$http', '$location', '$log', '$routeParams', '$ti
             initializeStatuses($scope);
 
             if (_.isUndefined($scope.statuses) || _.isEmpty($scope.statuses)) {
-                $scope.statuses = statuses
+                $scope.statuses = statuses.reverse();
             } else {
                 _.each(statuses, function (status) {
                     $scope.statuses.unshift(status)
@@ -61,7 +61,7 @@ weaverApp.factory('twitter', ['$http', '$location', '$log', '$routeParams', '$ti
                         }
 
                         statuses.sort(function (a, b) {
-                            return a['status_id'] > b['status_id'] ? 1 : -1;
+                            return a['id'] > b['id'] ? 1 : -1;
                         });
                         statuses.reverse();
 
@@ -78,13 +78,13 @@ weaverApp.factory('twitter', ['$http', '$location', '$log', '$routeParams', '$ti
                                     authorAvatar: status.author_avatar,
                                     isNew: false,
                                     screenName: status.screen_name,
-                                    statuses: []
+                                    statuses: {}
                                 };
                             }
 
                             status.isNew = !firstRequest;
                             $scope.screenNames[status.screen_name].isNew = !firstRequest;
-                            $scope.screenNames[status.screen_name].statuses.push(status);
+                            $scope.screenNames[status.screen_name].statuses[status.status_id] = status;
                          });
 
                         showStatuses($scope, statuses);
