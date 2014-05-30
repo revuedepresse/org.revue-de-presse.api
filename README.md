@@ -12,11 +12,28 @@ Sitemap
 Testing
 --------------------------------
 
-### Running test suite ###
+## Running integration test suite ##
+
+Integration tests require services which have to be started before executing corresponding scripts
+
+ * MySQL
+ * ElasticSearch
 
 From project directory, run following command:
 
-    phpunit -c ./app
+    phpunit -c ./app/phpunit-integration.xml.dist
+
+## Running twitter messaging test suite ##
+
+From project directory, run following command:
+
+    phpunit -c ./app/phpunit-twitter-messaging.xml.dist
+
+## Running process isolation test suite ##
+
+From project directory, run following command:
+
+    phpunit -c ./app/phpunit-process-isolation.xml.dist
 
 ### Testing controllers ###
 
@@ -47,14 +64,6 @@ Most integration tests require `ElasticSearch`.
     # Run ElasticSearch in the background
     ELASTICSEARCH_DIR=~/labodev/opt/local/elasticsearch-1.0.1 && \
     ES_HEAP_SIZE=4096m $ELASTICSEARCH_DIR/bin/elasticsearch 2> /dev/null 1> /dev/null &
-
-
-## Integration testing ##
-
-Integration tests require services which have to be started before executing corresponding scripts
-
- * MySQL
- * ElasticSearch
 
 Requirements
 --------------------------------
