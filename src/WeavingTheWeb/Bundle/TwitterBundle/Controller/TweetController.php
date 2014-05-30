@@ -43,10 +43,32 @@ class TweetController extends Controller
                 $statusCode = 200;
 
                 return new JsonResponse($statuses, $statusCode, $this->getAccessControlOriginHeaders());
+            } catch (\PDOException $exception) {
+                return $this->getExceptionResponse(
+                    $exception,
+                    $this->get('translator')->trans('twitter.error.database_connection', [], 'messages')
+                );
             } catch (\Exception $exception) {
                 return $this->getExceptionResponse($exception);
             }
         }
+    }
+
+    /**
+     * @param \Exception $exception
+     * @param null $message
+     * @return JsonResponse
+     */
+    protected function getExceptionResponse(\Exception $exception, $message = null)
+    {
+        if (is_null($message)) {
+            $data = ['error' => $exception->getMessage()];
+        } else {
+            $data = ['error' => $message];
+        }
+        $statusCode = 500;
+
+        return new JsonResponse($data, $statusCode, $this->getAccessControlOriginHeaders());
     }
 
     /**
@@ -84,18 +106,6 @@ class TweetController extends Controller
     }
 
     /**
-     * @param \Exception $exception
-     * @return JsonResponse
-     */
-    protected function getExceptionResponse(\Exception $exception)
-    {
-        $data = ['error' => $exception->getMessage()];
-        $statusCode = 500;
-
-        return new JsonResponse($data, $statusCode, $this->getAccessControlOriginHeaders());
-    }
-
-    /**
      * @return array
      */
     protected function getAccessControlOriginHeaders()
@@ -123,7 +133,7 @@ class TweetController extends Controller
             if ($oauthToken !== null) {
                 $oauthTokens = [$oauthToken];
             } else {
-                throw new \Exception('No application token can be found');
+                throw new \Exception($this->get('translator')->trans('twitter.error.invalid_oauth_token', [], 'messages'));
             }
         } else {
             /** @var \WTW\UserBundle\Entity\User $user */
