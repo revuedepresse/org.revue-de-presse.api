@@ -1,4 +1,9 @@
 parameters:
+    api_twitter_consumer_key:     %api_twitter_consumer_key_test%
+    api_twitter_consumer_secret:  %api_twitter_consumer_secret_test%
+    api_twitter_user_secret:      %api_twitter_user_secret_test%
+    api_twitter_user_token:       %api_twitter_user_token_test%
+
     basic_auth_pattern:         ^/(documents|github|user|api)
 
     database_charset:           UTF8
