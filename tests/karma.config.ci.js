@@ -36,7 +36,7 @@ module.exports = function (config) {
 
         // test results reporter to use
         // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
-        reporters: ['spec'],
+        reporters: ['spec', 'junit'],
 
 
         // web server port
@@ -67,7 +67,7 @@ module.exports = function (config) {
         browsers: ['PhantomJS'],
 
         junitReporter: {
-            outputFile: '../build/mobile-test-results.xml',
+            outputFile: '../build/karma/mobile-test-results.xml',
             suite: 'Weaving the Web Mobile'
         },
 
