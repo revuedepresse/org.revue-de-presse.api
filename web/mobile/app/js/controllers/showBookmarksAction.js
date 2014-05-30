@@ -1,8 +1,8 @@
 'use strict';
 
-var twitterControllers = angular.module('bookmarkController', []);
+var twitterBookmarks = angular.module('twitterBookmarks', []);
 
-twitterControllers.controller('ShowBookmarksAction', [
+twitterBookmarks.controller('ShowBookmarksAction', [
     '$scope', '$log', 'offlineCache', 'twitter',
     function ($scope, $log, offlineCache, twitter) {
         var cache = offlineCache.getLocalStorageCache(),

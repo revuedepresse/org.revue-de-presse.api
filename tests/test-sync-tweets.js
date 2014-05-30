@@ -1,6 +1,6 @@
 'use strict';
 
-describe('Syncing tweets status in offline mode', function () {
+describe('Syncing tweets status', function () {
     var $controller,
         $httpBackend,
         $routeParams,
@@ -76,16 +76,18 @@ describe('Syncing tweets status in offline mode', function () {
         $httpBackend.verifyNoOutstandingRequest();
     });
 
-    it('should sync tweets marked as starred', function () {
-        httpBackend.flush();
+    describe('In offline mode', function () {
+        it('should sync tweets marked as starred', function () {
+            httpBackend.flush();
 
-        cache.put(statusId, {'starred': true});
-    });
+            cache.put(statusId, {'starred': true});
+        });
 
-    it('should sync tweets not marked as starred', function () {
-        httpBackend.flush();
+        it('should sync tweets not marked as starred', function () {
+            httpBackend.flush();
 
-        cache.put(statusId, {'starred': false});
+            cache.put(statusId, {'starred': false});
+        });
     });
 });
 

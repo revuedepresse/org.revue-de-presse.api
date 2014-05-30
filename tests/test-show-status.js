@@ -1,6 +1,6 @@
 'use strict';
 
-describe('Offline mode', function () {
+describe('Accessing statuses', function () {
     var $controller,
         $httpBackend,
         $routeParams,
@@ -78,27 +78,42 @@ describe('Offline mode', function () {
         $httpBackend.verifyNoOutstandingRequest();
     });
 
-    it('should put statuses to scope', function () {
+    it('should add statuses to the scope', function () {
         httpBackend.flush();
-
         statuses[0].isNew = false;
         expect($scope.statuses).toEqual(statuses);
     });
 
-    it('should let a status be starred', function () {
-        $scope.star(statusId, 0);
+    it('should sort statuses', function () {
+        var status;
+
         httpBackend.flush();
-        expect(cache.get(statusId)).toEqual({starred: true});
+
+        status = statuses[0];
+
+        expect($scope.screenNames).toBeDefined();
+        expect($scope.screenNames[status.screen_name]).toBeDefined();
+
+        expect($scope.screenNames[status.screen_name].isNew).toEqual(false);
+        expect($scope.screenNames[status.screen_name].statuses[status.status_id]).toBeDefined();
     });
 
-    it('should let a status be unstarred', function () {
-        $scope.unstar(statusId, 0);
-        httpBackend.flush();
-        expect(cache.get(statusId)).toEqual({starred: false});
-    });
+    describe('In offline mode', function () {
+        it('should put a status into cache when it has been starred', function () {
+            $scope.star(statusId, 0);
+            httpBackend.flush();
+            expect(cache.get(statusId)).toEqual({starred: true});
+        });
+
+        it('should put a status into cache when it has been unstarred', function () {
+            $scope.unstar(statusId, 0);
+            httpBackend.flush();
+            expect(cache.get(statusId)).toEqual({starred: false});
+        });
+    })
 });
 
-describe('Posting statuses', function () {
+describe('Pressing a favorite button', function () {
     var $controller,
         $httpBackend,
         $log,
@@ -179,14 +194,14 @@ describe('Posting statuses', function () {
         $httpBackend.verifyNoOutstandingRequest();
     });
 
-    it('should update scope', function () {
+    it('should add statuses to the scope', function () {
         httpBackend.flush();
 
         statuses[0].isNew = false;
         expect($scope.statuses).toEqual(statuses);
     });
 
-    it('should mark status as starred', function () {
+    it('should mark statuses in the scope as starred', function () {
         var endpoint = 'https://## FILL HOSTNAME ##/twitter/tweet/star/' + statusId;
         $httpBackend.when('POST', endpoint).respond({
             "status": statusId
@@ -197,7 +212,7 @@ describe('Posting statuses', function () {
         expect($scope.statuses[0].starred).toEqual(true);
     });
 
-    it('should mark status unstarred', function () {
+    it('should mark statuses in the scope as unstarred', function () {
         var endpoint = 'https://## FILL HOSTNAME ##/twitter/tweet/unstar/' + statusId;
         $httpBackend.when('POST', endpoint).respond({
             "status": statusId
