@@ -97,7 +97,7 @@ class SerializeStatusesCommand extends ContainerAwareCommand
 
         /** @var \Symfony\Component\Translation\Translator $translator */
         $translator = $this->getContainer()->get('translator');
-        $output->writeln($translator->trans('twitter.statuses.persistence.success'));
+        $output->writeln($translator->trans('twitter.success.statuses.persistence'));
 
         return $success ? 0 : 1;
     }
