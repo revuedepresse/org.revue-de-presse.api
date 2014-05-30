@@ -69,7 +69,7 @@ class AuthenticateApplicationCommand extends ContainerAwareCommand
              * @var \Symfony\Component\Translation\Translator $translator
              */
             $translator = $this->getContainer()->get('translator');
-            $output->writeln($translator->trans('twitter.authentication.success', ['{{ consumer_key }}' => $key]));
+            $output->writeln($translator->trans('twitter.success.authentication', ['{{ consumer_key }}' => $key]));
         } catch (\Exception $exception) {
             $this->getContainer()->get('logger')->error($exception->getMessage());
 
