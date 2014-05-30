@@ -22,7 +22,7 @@
                         <i class="new-status icon bullhorn" ng-show="status.isNew"></i>
                         <p class="text" parse-url="props" ng-model="status">{{ status.text }}</p>
                         <div class="ui huge star rating">
-                            <i class="icon" ng-class="{active: status.starred}" ng-click="toggle(statusId, screenName, $index)"></i>
+                            <i class="icon" ng-class="{active: status.starred}" ng-click="toggle(statusId, screenName)"></i>
                         </div>
                     </div>
                 </div>

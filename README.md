@@ -31,7 +31,14 @@ To load data fixtures before testing a command class:
 
 ### Testing the mobile application ###
 
-    karma start tests/karma.config.js
+    # Install development packages
+    npm install
+
+    # Execute test suite
+    npm test
+
+    # Run test continuously in TDD
+    npm run tdd
 
 ## Testing transactions ###
 

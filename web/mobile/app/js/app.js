@@ -2,11 +2,11 @@
 
 var weaverApp = angular.module('weaverApp', [
     'ngRoute',
-    'statusController',
-    'bookmarkController',
     'infinite-scroll',
     'jmdobry.angular-cache',
-    'strictHttpsFilter'
+    'strictHttpsFilter',
+    'twitterStatuses',
+    'twitterBookmarks'
 ]);
 
 weaverApp.config(['$routeProvider', function($routeProvider) {

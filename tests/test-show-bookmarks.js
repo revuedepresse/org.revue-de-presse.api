@@ -1,6 +1,6 @@
 'use strict';
 
-describe('Show bookmarks', function () {
+describe('Accessing bookmarks', function () {
     var $controller,
         $routeParams,
         $scope,
@@ -75,7 +75,7 @@ describe('Show bookmarks', function () {
         httpBackend.verifyNoOutstandingRequest();
     });
 
-    it('should have tweets in scope', function () {
+    it('should add bookmarks to scope', function () {
         httpBackend.flush();
         expect($scope.statuses).toEqual(statuses);
     });

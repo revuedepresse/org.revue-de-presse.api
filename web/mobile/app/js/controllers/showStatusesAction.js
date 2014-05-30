@@ -3,9 +3,9 @@
 var debug = false,
     verbose = false,
     performance = false,
-    twitterControllers = angular.module('statusController', []);
+    twitterStatuses = angular.module('twitterStatuses', []);
 
-twitterControllers.controller('ShowStatusesAction', [
+twitterStatuses.controller('ShowStatusesAction', [
     '$scope', '$http', '$location', '$log', '$routeParams', 'twitter', 'offlineCache',
     function ($scope, $http, $location, $log, $routeParams, twitter, offlineCache) {
         var cache = offlineCache.getLocalStorageCache(),
@@ -33,7 +33,7 @@ twitterControllers.controller('ShowStatusesAction', [
 
         twitter.showMoreStatuses($scope, $routeParams);
 
-        var setTweetStarringStatus = function (statusId, screenName, index, starred) {
+        var setTweetStarringStatus = function (statusId, screenName, starred) {
             if (offlineCache.isNavigatorOnline()) {
                 var endpointUrlTemplate = host + '/twitter/tweet/{{ action }}/' + statusId,
                     endpointUrl,
@@ -47,7 +47,7 @@ twitterControllers.controller('ShowStatusesAction', [
                 endpointUrl = endpointUrlTemplate.replace('{{ action }}', replace);
 
                 $http.post(endpointUrl).success(function () {
-                    $scope.screenNames[screenName].statuses[index].starred = starred;
+                    $scope.screenNames[screenName].statuses[statusId].starred = starred;
                 }).error(function (data) {
                     if ($log !== undefined) {
                         $log.error(data)
@@ -60,20 +60,20 @@ twitterControllers.controller('ShowStatusesAction', [
             }
         }
 
-        $scope.star = function (tweetId, screenName, tweetIndex) {
-            setTweetStarringStatus(tweetId, screenName, tweetIndex, true);
-        }
-
-        $scope.toggle = function (tweetId, screenName, tweetIndex) {
-            if ($scope.screenNames[screenName].statuses[tweetIndex].starred) {
-                $scope.unstar(tweetId, screenName, tweetIndex);
+        $scope.toggle = function (statusId, screenName) {
+            if ($scope.screenNames[screenName].statuses[statusId].starred) {
+                $scope.unstar(statusId, screenName);
             } else {
-                $scope.star(tweetId, screenName, tweetIndex);
+                $scope.star(statusId, screenName);
             }
         }
 
-        $scope.unstar = function (tweetId, screenName, tweetIndex) {
-            setTweetStarringStatus(tweetId, screenName, tweetIndex, false);
+        $scope.star = function (statusId, screenName) {
+            setTweetStarringStatus(statusId, screenName, true);
+        }
+
+        $scope.unstar = function (statusId, screenName) {
+            setTweetStarringStatus(statusId, screenName, false);
         }
 
         $scope.showMoreStatuses = function () {

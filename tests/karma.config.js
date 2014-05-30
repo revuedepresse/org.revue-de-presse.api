@@ -36,7 +36,7 @@ module.exports = function(config) {
 
         // test results reporter to use
         // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
-        reporters: ['dots', 'junit'],
+        reporters: ['spec'],
 
 
         // web server port
@@ -64,7 +64,7 @@ module.exports = function(config) {
         // - Safari (only Mac; has to be installed with `npm install karma-safari-launcher`)
         // - PhantomJS
         // - IE (only Windows; has to be installed with `npm install karma-ie-launcher`)
-        browsers: ['Firefox', 'Chrome', 'PhantomJS'],
+        browsers: ['ChromeCanary'],
 
         junitReporter: {
             outputFile: '../build/mobile-test-results.xml',
