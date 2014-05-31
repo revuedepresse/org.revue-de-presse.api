@@ -35,7 +35,7 @@ twitterStatuses.controller('ShowStatusesAction', [
 
         var setTweetStarringStatus = function (statusId, screenName, starred) {
             if (offlineCache.isNavigatorOnline()) {
-                var endpointUrlTemplate = host + '/twitter/tweet/{{ action }}/' + statusId,
+                var endpointUrlTemplate = host + '/api/twitter/tweet/{{ action }}/' + statusId,
                     endpointUrl,
                     replace;
 
@@ -83,8 +83,8 @@ twitterStatuses.controller('ShowStatusesAction', [
         $scope.sync = function () {
             var host = $location.protocol() + '://' + $location.host(),
                 keys = cache.keys(),
-                unstarTweetUrlTemplate = host + '/twitter/tweet/unstar/',
-                starTweetUrlTemplate = host + '/twitter/tweet/star/';
+                unstarTweetUrlTemplate = host + '/api/twitter/tweet/unstar/',
+                starTweetUrlTemplate = host + '/api/twitter/tweet/star/';
 
             var updateSyncStatus = function () {
                 if (Object.keys(errors).length > 0) {
