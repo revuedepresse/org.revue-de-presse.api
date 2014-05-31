@@ -20,3 +20,7 @@ weaverApp.config(['$routeProvider', function($routeProvider) {
     });
     $routeProvider.otherwise({redirectTo: '/'});
 }]);
+
+weaverApp.config(['$httpProvider', function ($httpProvider) {
+    $httpProvider.interceptors.push('authentication');
+}]);
