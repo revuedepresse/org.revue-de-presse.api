@@ -8,7 +8,6 @@ use Symfony\Component\HttpFoundation\RedirectResponse,
     Symfony\Component\DependencyInjection\ContainerAware;
 
 /**
- * Class TwitterConnectController
  * @package WeavingTheWeb\Bundle\UserBundle\Controller
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  *
