@@ -47,7 +47,7 @@ describe('Accessing bookmarks', function () {
             username: $routeParams.username
         };
 
-        httpBackend.whenPOST('https://## FILL HOSTNAME ##/twitter/bookmarks', data).respond(statuses);
+        httpBackend.whenPOST('https://## FILL HOSTNAME ##/api/twitter/bookmarks', data).respond(statuses);
 
         $rootScope = $injector.get('$rootScope');
         $scope = $rootScope.$new();

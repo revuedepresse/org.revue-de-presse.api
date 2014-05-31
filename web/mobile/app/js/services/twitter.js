@@ -48,7 +48,7 @@ weaverApp.factory('twitter', ['$http', '$location', '$log', '$routeParams', '$ti
         };
 
         var getBookmarksPromise = function (ids) {
-            var statusURL = getHost($location) + '/twitter/bookmarks';
+            var statusURL = getHost($location) + '/api/twitter/bookmarks';
 
             return $http.post(statusURL, {
                 statusIds: ids,
@@ -63,7 +63,7 @@ weaverApp.factory('twitter', ['$http', '$location', '$log', '$routeParams', '$ti
         };
 
         var latestStatusesEndpoint = function ($location, $scope, $routeParams) {
-            var endpoint = getHost($location) + '/twitter/tweet/latest',
+            var endpoint = getHost($location) + '/api/twitter/tweet/latest',
                 params = getLatestStatusesParams($routeParams, $scope);
 
             _.each(params, function (param, index) {
@@ -190,12 +190,12 @@ weaverApp.factory('twitter', ['$http', '$location', '$log', '$routeParams', '$ti
             if (isRequestLocked($scope, hash)) {
                 lockRequest($scope, hash);
 
-                $http.get(endpoint).success(function (statuses) {
+                $http.get(endpoint).success(function (data) {
                     var firstRequest = isFirstRequest($scope, initializeUsers);
 
                     deprecateNovelty($scope);
 
-                    _.each(statuses, function (status, index) {
+                    _.each(data, function (status, index) {
                         if (firstSeenUser($scope, status)) {
                             $scope.users[status.screen_name] = {
                                 authorAvatar: status.author_avatar,
@@ -206,7 +206,7 @@ weaverApp.factory('twitter', ['$http', '$location', '$log', '$routeParams', '$ti
                             };
                         }
 
-                        declareNovelty(statuses[index], !firstRequest);
+                        declareNovelty(data[index], !firstRequest);
                         declareNovelty($scope.users[status.screen_name], !firstRequest);
 
                         if (firstSeenStatus($scope, status)) {
@@ -216,12 +216,18 @@ weaverApp.factory('twitter', ['$http', '$location', '$log', '$routeParams', '$ti
 
                     sortUserStatuses($scope);
 
-                    showStatuses($scope, statuses);
+                    showStatuses($scope, data);
 
                     unlockRequest($scope, hash);
                 }).error(function (data) {
-                    if ($log !== undefined) {
-                        $log.error(data)
+                    if (!_.isUndefined(data.info)) {
+                        if (_.isUndefined($scope.errors)) {
+                            $scope.errors = [];
+                        }
+
+                        $scope.errors.push(data.info);
+                    } else if ($log !== undefined) {
+                        $log.info(data);
                     }
                 });
             }
@@ -232,5 +238,5 @@ weaverApp.factory('twitter', ['$http', '$location', '$log', '$routeParams', '$ti
             showStatuses: showStatuses,
             showMoreStatuses: showMoreStatuses
         };
-    }]
-);
+    }
+]);

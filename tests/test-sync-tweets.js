@@ -52,7 +52,7 @@ describe('Syncing tweets status', function () {
         httpBackend = $httpBackend;
 
 
-        $httpBackend.when('GET', 'https://## FILL HOSTNAME ##/twitter/tweet/latest?username=weaver').respond(tweets);
+        $httpBackend.when('GET', 'https://## FILL HOSTNAME ##/api/twitter/tweet/latest?username=weaver').respond(tweets);
 
         $controller = $injector.get('$controller');
         $controller('ShowStatusesAction', {
@@ -140,7 +140,7 @@ describe('Syncing tweet status', function () {
                 "starred": false
             }
         ];
-        $httpBackend.when('GET', 'https://## FILL HOSTNAME ##/twitter/tweet/latest?username=weaver').respond(tweets);
+        $httpBackend.when('GET', 'https://## FILL HOSTNAME ##/api/twitter/tweet/latest?username=weaver').respond(tweets);
 
         $controller = $injector.get('$controller');
         $controller('ShowStatusesAction', {
@@ -168,7 +168,7 @@ describe('Syncing tweet status', function () {
     it('should sync tweets marked as starred', function () {
         httpBackend.flush();
 
-        var endpoint = 'https://## FILL HOSTNAME ##/twitter/tweet/star/' + statusId;
+        var endpoint = 'https://## FILL HOSTNAME ##/api/twitter/tweet/star/' + statusId;
         $httpBackend.when('POST', endpoint).respond({
             "status": statusId
         });
@@ -178,7 +178,7 @@ describe('Syncing tweet status', function () {
     it('should sync tweets not marked as starred', function () {
         httpBackend.flush();
 
-        var endpoint = 'https://## FILL HOSTNAME ##/twitter/tweet/unstar/' + statusId;
+        var endpoint = 'https://## FILL HOSTNAME ##/api/twitter/tweet/unstar/' + statusId;
         $httpBackend.when('POST', endpoint).respond({
             "status": statusId
         });
