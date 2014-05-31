@@ -91,7 +91,7 @@ describe('Accessing statuses', function () {
         // Prepares http backend to respond with a tweet sample when requesting for the lastest ones
         $httpBackend = $injector.get('$httpBackend');
 
-        endpoint = 'https://## FILL HOSTNAME ##/twitter/tweet/latest?username=weaver';
+        endpoint = 'https://## FILL HOSTNAME ##/api/twitter/tweet/latest?username=weaver';
         $httpBackend.when('GET', endpoint).respond(responseGetter(endpoint, statuses));
 
         $rootScope = $injector.get('$rootScope');
@@ -178,7 +178,7 @@ describe('Accessing statuses', function () {
                 }
             ];
 
-            endpoint = 'https://## FILL HOSTNAME ##/twitter/tweet/latest?username=weaver&lastId=' + ids[2];
+            endpoint = 'https://## FILL HOSTNAME ##/api/twitter/tweet/latest?username=weaver&lastId=' + ids[2];
             $httpBackend.when('GET', endpoint).respond(responseGetter(endpoint, olderStatuses));
         });
 
@@ -220,7 +220,7 @@ describe('Accessing statuses', function () {
                     }
                 ];
 
-                endpoint = 'https://## FILL HOSTNAME ##/twitter/tweet/latest?username=weaver&lastId=' + ids[3];
+                endpoint = 'https://## FILL HOSTNAME ##/api/twitter/tweet/latest?username=weaver&lastId=' + ids[3];
                 $httpBackend.when('GET', endpoint).respond(responseGetter(endpoint, olderStatuses));
             });
 
@@ -296,7 +296,7 @@ describe('Pressing a favorite button', function () {
 
         // Prepares http backend to respond with a tweet sample when requesting for the lastest ones
         $httpBackend = $injector.get('$httpBackend');
-        $httpBackend.when('GET', 'https://## FILL HOSTNAME ##/twitter/tweet/latest?username=weaver').respond(statuses);
+        $httpBackend.when('GET', 'https://## FILL HOSTNAME ##/api/twitter/tweet/latest?username=weaver').respond(statuses);
 
         $rootScope = $injector.get('$rootScope');
         $scope = $rootScope.$new();
@@ -332,7 +332,7 @@ describe('Pressing a favorite button', function () {
     });
 
     it('should mark statuses in the scope as starred', function () {
-        var endpoint = 'https://## FILL HOSTNAME ##/twitter/tweet/star/' + statusId;
+        var endpoint = 'https://## FILL HOSTNAME ##/api/twitter/tweet/star/' + statusId;
         $httpBackend.when('POST', endpoint).respond({
             "status": statusId
         });
@@ -343,7 +343,7 @@ describe('Pressing a favorite button', function () {
     });
 
     it('should mark statuses in the scope as unstarred', function () {
-        var endpoint = 'https://## FILL HOSTNAME ##/twitter/tweet/unstar/' + statusId;
+        var endpoint = 'https://## FILL HOSTNAME ##/api/twitter/tweet/unstar/' + statusId;
         $httpBackend.when('POST', endpoint).respond({
             "status": statusId
         });
