@@ -13,7 +13,7 @@ weaving_the_web_dashboard:
     type:     annotation
 
 weaving_the_web_twitter:
-    prefix:   /twitter
+    prefix:   /api/twitter
     resource: "@WeavingTheWebTwitterBundle/Controller/"
     type:     annotation
 
