@@ -126,6 +126,9 @@ RabbiMQ server
     # Sets permissions
     rabbitmqctl set_permissions -p /weaving_the_web weaver ".*" ".*" ".*"
 
+    # Delete a virtual host
+    rabbitmqctl delete_vhost weaving_the_web
+
     # List user
     rabbitmqadmin list users -u weaver -p '***'
 
