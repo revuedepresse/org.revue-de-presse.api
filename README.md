@@ -310,3 +310,9 @@ Run tests in parallel:
 
     # Declare timezone
     echo "TZ='Europe/Paris'; export TZ" >> ~/.profile
+
+**How to install vendor libraries faster?**
+
+Disable xdebug extension for the PHP binary used to run
+
+    php composer.phar install --prefer-dist

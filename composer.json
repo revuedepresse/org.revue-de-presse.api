@@ -57,15 +57,15 @@
         "predis/predis": "0.8.*",
         "snc/redis-bundle": "1.1.*",
         "symfony/assetic-bundle": "2.3.*",
-        "symfony/monolog-bundle": "2.5.*",
+        "symfony/monolog-bundle": "2.6.*",
         "symfony/symfony": "2.4.2",
-        "sensio/distribution-bundle": "2.3.*",
+        "sensio/distribution-bundle": "3.*",
         "sensio/framework-extra-bundle": "3.*",
         "sensio/generator-bundle": "2.3.*",
         "sp/bower-bundle": "*",
         "themattharris/tmhOAuth": "dev-master",
         "twig/extensions": "1.0.*",
-        "weaving-the-web/mail-bundle": "dev-master"
+        "weaving-the-web/mail-bundle": "dev-master#21410995f7c47550b112fd1e50cf7c87bc2a2454"
     },
     "require-dev": {
         "phpunit/phpunit": "3.7.29",
