@@ -187,6 +187,9 @@ Messaging
     # To consume the first message ever produced before
     app/console rabbitmq:consumer -m 130 weaving_the_web_amqp.twitter.user_status
 
+    # To consume a "save gmail label" asynchronous message
+    app/console rabbitmq:consumer -m 1 -w -l 64  weaving_the_web_mail.gmail.mail_label
+
 User management
 
     # Promote user
