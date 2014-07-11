@@ -65,7 +65,7 @@
         "sp/bower-bundle": "*",
         "themattharris/tmhOAuth": "dev-master",
         "twig/extensions": "1.0.*",
-        "weaving-the-web/mail-bundle": "dev-master#0be1d4a4cbcdb43c2b1911cbab5f5ef90b257c7e"
+        "weaving-the-web/mail-bundle": "dev-master#3574c703f9eb62aad763f6a6bc91828146a56c13"
     },
     "require-dev": {
         "phpunit/phpunit": "3.7.29",
