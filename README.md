@@ -142,6 +142,12 @@ Elastic Search
     In configuration (/etc/elasticsearch/elasticsearch.yml), uncomment following directives
     cluster.name: elastic-search-libran
 
+    # Check cluster health
+    curl -XGET 'http://localhost:9200/_cluster/health?pretty=true'
+
+    # Check count of indexed document
+    curl -XGET 'http://localhost:9200/_nodes/stats' | python -mjson.tool | grep -A 5 -B 5 '"docs"'
+
 Kibana
 
     # Download archive and extract its content to /usr/share/elasticsearch/kibana
