@@ -1,3 +1,3 @@
 parameters:
-    imap.username: ~
-    imap.password: ~
+    imap_username: ~
+    imap_password: ~
