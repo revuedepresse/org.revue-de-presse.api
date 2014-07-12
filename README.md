@@ -319,3 +319,8 @@ Run tests in parallel:
 Disable xdebug extension for the PHP binary used to run
 
     php composer.phar install --prefer-dist
+
+**How to fix "Permission Denied: FastCGI" issue?**
+
+    # Fix owner of php fpm sockets
+    chown jenkins /var/run/php5-fpm*.sock
