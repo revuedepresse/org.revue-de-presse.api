@@ -330,3 +330,10 @@ Disable xdebug extension for the PHP binary used to run
 
     # Fix owner of php fpm sockets
     chown jenkins /var/run/php5-fpm*.sock
+
+**How to fix "Unsupported major.minor version 51.0" issue?
+
+Java needs to be upgraded.
+See also https://github.com/elasticsearch/elasticsearch/issues/6313
+
+For MacOSX, download latest JDK at http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html
