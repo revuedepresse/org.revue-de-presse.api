@@ -1,1 +1,3 @@
-{{ message|raw }}
+{% if message is defined %}
+    {{ message|raw }}
+{% endif %}

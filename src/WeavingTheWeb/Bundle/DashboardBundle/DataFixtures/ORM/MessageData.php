@@ -26,16 +26,17 @@ class MessageData extends AbstractFixture implements OrderedFixtureInterface
     {
         $message = new Message();
 
-        /**
-         * @var Header $header
-         */
+        /** @var Header $header */
         $header = $manager->merge($this->getReference('header'));
+
         $message->setHdrId($header->getHdrId());
         $message->setHeader($header);
         $message->setIndexed(false);
 
         $manager->persist($message);
+
         $header->setMessage($message);
+        $manager->persist($header);
 
         $manager->flush();
     }
