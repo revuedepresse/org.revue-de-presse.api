@@ -188,6 +188,9 @@ Mail
     # Parse emails
     php -dmemory_limit=8192M app/console weaving_the_web:mail:supervise --command='parse' --process_isolation --no-debug
 
+    # Save emails
+    php -dmemory_limit=8192M app/console weaving_the_web:mail:supervise --command='save' --process_isolation --no-debug
+
 Messaging
 
     # To produce a message
