@@ -185,6 +185,9 @@ Mail
     # To save headers of messages available in the database as properties
     app/console weaving_the_web:mapping:mail:headers
 
+    # Parse emails
+    php -dmemory_limit=8192M app/console weaving_the_web:mail:supervise --command='parse' --process_isolation --no-debug
+
 Messaging
 
     # To produce a message
