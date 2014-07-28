@@ -27,7 +27,7 @@ class HeaderData extends AbstractFixture implements OrderedFixtureInterface
         $header = new Header();
         $header->setHdrImapUid(1);
         $header->setDate(new \DateTime());
-        $header->setHdrValue('Ping: Pong');
+        $header->setHdrValue('content-type: text/plain');
         $header->setParsed(false);
         $header->setLabelled(false);
 

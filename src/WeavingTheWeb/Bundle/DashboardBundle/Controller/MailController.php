@@ -32,6 +32,7 @@ class MailController extends Controller
 
     /**
      * @Extra\Route("/{id}", name="weaving_the_web_dashboard_mail_show")
+     * @Extra\Template("WeavingTheWebDashboardBundle:Mail:show.html.twig")
      */
     public function showAction($id)
     {
