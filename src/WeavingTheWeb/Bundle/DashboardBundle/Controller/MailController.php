@@ -23,9 +23,20 @@ class MailController extends Controller
     {
         /** @var \WeavingTheWeb\Bundle\MailBundle\Repository\MessageRepository $messageRepository */
         $messageRepository = $this->get('weaving_the_web_mail.repository.message');
+        $messages = $messageRepository->findLast(10, 0);
+
+        /** @var \WeavingTheWeb\Bundle\MailBundle\Parser\EmailParser $parser */
+        $parser = $this->get('weaving_the_web_mail.parser.email');
+
+        foreach ($messages as $index => $message) {
+            $messages[$index] = [
+                'mailBodyId' => $message['mailBodyId'],
+                'subject' => $parser->parseSubject($message['subject'])
+            ];
+        }
 
         return [
-            'emails' => $messageRepository->findLast(10, 0),
+            'emails' => $messages,
             'title' => 'All mail'
         ];
     }
