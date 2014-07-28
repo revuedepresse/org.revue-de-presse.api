@@ -4,11 +4,10 @@ namespace WeavingTheWeb\Bundle\DashboardBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller,
-    Symfony\Component\HttpFoundation\Response;
+use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
-use WeavingTheWeb\Bundle\Legacy\ProviderBundle\Entity\WeavingHeader,
-    WeavingTheWeb\Bundle\Legacy\ProviderBundle\Entity\WeavingMessage;
+use Symfony\Component\HttpFoundation\Response,
+    Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
  * @package WeavingTheWeb\Bundle\DashboardBundle\Controller
@@ -22,13 +21,11 @@ class MailController extends Controller
      */
     public function allAction()
     {
-        /**
-         * @var \WeavingTheWeb\Bundle\Legacy\ProviderBundle\Repository\WeavingMessageRepository $messageRepository
-         */
-        $messageRepository = $this->getDoctrine()->getRepository('WeavingTheWebLegacyProviderBundle:WeavingMessage');
+        /** @var \WeavingTheWeb\Bundle\MailBundle\Repository\MessageRepository $messageRepository */
+        $messageRepository = $this->get('weaving_the_web_mail.repository.message');
 
         return [
-            'emails' => $messageRepository->findLast(10),
+            'emails' => $messageRepository->findLast(10, 0),
             'title' => 'All mail'
         ];
     }
@@ -38,13 +35,18 @@ class MailController extends Controller
      */
     public function showAction($id)
     {
-        /** @var \WeavingTheWeb\Bundle\Legacy\ProviderBundle\Repository\WeavingMessageRepository $messageRepository */
-        $messageRepository = $this->getDoctrine()->getRepository('WeavingTheWebLegacyProviderBundle:WeavingMessage');
-        /** @var \WeavingTheWeb\Bundle\Legacy\ProviderBundle\Entity\WeavingMessage $message */
+        /** @var \WeavingTheWeb\Bundle\MailBundle\Repository\MessageRepository $messageRepository */
+        $messageRepository = $this->get('weaving_the_web_mail.repository.message');
+
+        /** @var \WeavingTheWeb\Bundle\MailBundle\Entity\Message $message */
         $message = $messageRepository->findOneBy(['msgId' => $id]);
 
-        /** @var \WeavingTheWeb\Bundle\MappingBundle\Parser\EmailParser $parser */
-        $parser = $this->get('weaving_the_web_mapping.parser.email');
+        if (is_null($message)) {
+            throw new NotFoundHttpException('This message can not be found');
+        }
+
+        /** @var \WeavingTheWeb\Bundle\MailBundle\Parser\EmailParser $parser */
+        $parser = $this->get('weaving_the_web_mail.parser.email');
 
         $response = new Response();
         $response->setContent(

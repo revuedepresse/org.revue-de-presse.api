@@ -6,10 +6,33 @@ use Doctrine\Common\DataFixtures\AbstractFixture,
     Doctrine\Common\DataFixtures\OrderedFixtureInterface,
     Doctrine\Common\Persistence\ObjectManager;
 
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+
+use WeavingTheWeb\Bundle\UserBundle\Entity\RoleInterface;
+
 use WTW\UserBundle\Tests\Security\Core\User\User;
 
-class UserData extends AbstractFixture implements OrderedFixtureInterface
+class UserData extends AbstractFixture implements OrderedFixtureInterface,  ContainerAwareInterface
 {
+    /**
+     * @var \Doctrine\Common\Persistence\ObjectManager $manager
+     */
+    private $manager;
+
+    /**
+     * @var \Symfony\Component\DependencyInjection\ContainerInterface $container
+     */
+    private $container;
+
+    /**
+     * {@inheritDoc}
+     */
+    public function setContainer(ContainerInterface $container = null)
+    {
+        $this->container = $container;
+    }
+
     public function getOrder()
     {
         return 300;
@@ -20,10 +43,12 @@ class UserData extends AbstractFixture implements OrderedFixtureInterface
      */
     public function load(ObjectManager $manager)
     {
-        $rolesProperties = [
+        $this->manager = $manager;
+
+        $users = [
             [
-                'username' => 'User',
-                'password' => 'WN6!e1SfH92#8zbB#nnGKlrxHr*ounQJB^sML!Rb44Cs3I!Q^n',
+                'username' => $this->container->getParameter('wtw.qa.user.username'),
+                'password' => $this->container->getParameter('wtw.qa.user.password'),
                 'email' => 'user@weaving-the-web.org',
                 'enabled' => true,
                 'username_canonical' => 'user',
@@ -32,14 +57,25 @@ class UserData extends AbstractFixture implements OrderedFixtureInterface
                 'twitter_id' => 1,
                 'twitter_username' => 'user',
                 'roles' => [],
+            ], [
+                'username' => $this->container->getParameter('wtw.qa.super.username'),
+                'password' => $this->container->getParameter('wtw.qa.super.password'),
+                'email' => 'super@weaving-the-web.org',
+                'enabled' => true,
+                'username_canonical' => 'super',
+                'user_non_expired' => true,
+                'credentials_non_expired' => true,
+                'twitter_id' => 2,
+                'twitter_username' => 'super',
+                'roles' => ['super_admin'],
             ]
         ];
 
-        foreach ($rolesProperties as $userProperties) {
+        foreach ($users as $userProperties) {
             $user = new User(
                 $userProperties['username'],
                 $userProperties['password'],
-                $userProperties['roles'],
+                array(), // Roles declared as an empty array first of all
                 $userProperties['enabled'],
                 $userProperties['user_non_expired'],
                 $userProperties['credentials_non_expired']
@@ -51,11 +87,7 @@ class UserData extends AbstractFixture implements OrderedFixtureInterface
             $user->setUsernameCanonical($userProperties['username_canonical']);
             $user->setTwitterUsername($userProperties['twitter_username']);
 
-            /**
-             * @var \WeavingTheWeb\Bundle\UserBundle\Entity\Role; $role
-             */
-            $role = $manager->merge($this->getReference('role_user'));
-            $user->addRole($role);
+            $this->addUserRoles($user, $userProperties);
 
             /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $firstToken */
             $firstToken = $manager->merge($this->getReference('user_token_1'));
@@ -71,5 +103,30 @@ class UserData extends AbstractFixture implements OrderedFixtureInterface
         }
 
         $manager->flush();
+    }
+
+    /**
+     * @param $user
+     * @param $userProperties
+     */
+    protected function addUserRoles(User $user, $userProperties)
+    {
+        $roleReferencePrefix = 'role_';
+        $userRoleReferenceName = $roleReferencePrefix . RoleInterface::ROLE_USER;
+
+        /** @var \WeavingTheWeb\Bundle\UserBundle\Entity\Role $role */
+        $role = $this->manager->merge($this->getReference($userRoleReferenceName));
+        $user->addRole($role);
+
+        if (array_key_exists('roles', $userProperties) && count($userProperties['roles']) > 0) {
+            foreach ($userProperties['roles'] as $roleName) {
+                $roleConstant = constant(RoleInterface::class . '::' . strtoupper('role_' . $roleName));
+                $roleReferenceName = $roleReferencePrefix . $roleConstant;
+
+                /** @var \WeavingTheWeb\Bundle\UserBundle\Entity\Role; $role */
+                $role = $this->manager->merge($this->getReference($roleReferenceName));
+                $user->addRole($role);
+            }
+        }
     }
 }
