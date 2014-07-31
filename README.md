@@ -148,6 +148,12 @@ Elastic Search
     # Check count of indexed document
     curl -XGET 'http://localhost:9200/_nodes/stats' | python -mjson.tool | grep -A 5 -B 5 '"docs"'
 
+    # List indices
+    curl -XGET http://localhost:9200/_aliases?pretty=1
+
+    # Output insight about on-going index shard recoveries
+    curl -XGET http://localhost:9200/_recovery?pretty=true
+
 Kibana
 
     # Download archive and extract its content to /usr/share/elasticsearch/kibana
