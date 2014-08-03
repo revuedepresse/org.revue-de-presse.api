@@ -4,4 +4,16 @@
 
 {% block body %}
 
+
+{% endblock %}
+
+{% block stylesheets %}
+
+    {{ parent() }}
+
+    {% stylesheets
+        '@WeavingTheWebDashboardBundle/Resources/public/css/dashboard.css'
+        output='css/compiled/tweet.css' %}
+        <link rel="stylesheet" type="text/css" href="{{ asset_url }}" />
+    {% endstylesheets %}
 {% endblock %}
