@@ -8,7 +8,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
 use JMS\SecurityExtraBundle\Annotation\Secure;
 
 /**
- * Class GithubController
+ * Handles responses containing information about GitHub repositories
  *
  * @package WeavingTheWeb\Bundle\DashboardBundle\Controller
  * @Extra\Route("/github")
@@ -16,6 +16,9 @@ use JMS\SecurityExtraBundle\Annotation\Secure;
 class GithubController extends Controller
 {
     /**
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws \Symfony\Component\Security\Core\Exception\AccessDeniedException
+     *
      * @Extra\Route("/repositories", name="weaving_the_web_dashboard_show_repositories")
      * @Secure("ROLE_USER")
      */
