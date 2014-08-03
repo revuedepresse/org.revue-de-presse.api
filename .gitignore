@@ -16,6 +16,10 @@ api/.htaccess
 # dependencies management
 composer.phar
 
+# sessions
+app/var/session/*
+!app/var/session/.gitignore
+
 /behat
 /bin/phpspec
 
