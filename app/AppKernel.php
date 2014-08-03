@@ -4,8 +4,16 @@ use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\Loader;
 
+/**
+ * Registers bundles
+ *
+ * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ */
 class AppKernel extends Kernel
 {
+    /**
+     * @return array|\Symfony\Component\HttpKernel\Bundle\BundleInterface[]
+     */
     public function registerBundles()
     {
         $bundles = array(
@@ -32,6 +40,7 @@ class AppKernel extends Kernel
             new Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle(),
             new Snc\RedisBundle\SncRedisBundle(),
             new Sp\BowerBundle\SpBowerBundle(),
+            new Braincrafted\Bundle\BootstrapBundle\BraincraftedBootstrapBundle(),
             new WTW\CodeGeneration\QualityAssuranceBundle\WTWCodeGenerationQualityAssuranceBundle(),
             new WTW\CodeGeneration\AnalysisBundle\WTWCodeGenerationAnalysisBundle(),
             new WTW\UserBundle\WTWUserBundle(),
@@ -57,6 +66,9 @@ class AppKernel extends Kernel
         return $bundles;
     }
 
+    /**
+     * @return string
+     */
     public function getCacheDir()
     {
         if (in_array($this->environment, array('box'))) {
@@ -66,6 +78,9 @@ class AppKernel extends Kernel
         return parent::getCacheDir();
     }
 
+    /**
+     * @return string
+     */
     public function getLogDir()
     {
         if (in_array($this->environment, array('box'))) {
@@ -75,6 +90,9 @@ class AppKernel extends Kernel
         return parent::getLogDir();
     }
 
+    /**
+     * @param LoaderInterface $loader
+     */
     public function registerContainerConfiguration(LoaderInterface $loader)
     {
         $loader->load(__DIR__ . '/config/environment/config_' . $this->getEnvironment() . '.yml');
