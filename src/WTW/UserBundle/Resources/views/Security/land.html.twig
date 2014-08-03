@@ -17,8 +17,8 @@
 
 {% block body %}
     <div class="container mainland">
-        <div class="span11">
-            <div class="offset1">
+        <div class="col-sm-11 col-md-11 col-lg-offset-2">
+            <div class="col-lg-offset-1">
                 <h1>{% block main_title %}{{ title|trans }}{% endblock main_title %}</h1>
             </div>
 
@@ -33,17 +33,19 @@
             {% block confirmed_registration %}{% endblock %}
 
             {% if feature_toggling.search %}
-            <div class="offset1">
+            <div class="col-lg-offset-1">
             {% render(controller('weaving_the_web_dashboard.search_controller:showSearchFormAction')) %}
             </div>
             {% endif %}
 
             {% if not is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+            <div>
                 {% block registration_form %}{% endblock %}
 
                 {% block login_form %}
                     {% embed 'WTWUserBundle:Security:login_form_standalone.html.twig' %}{% endembed %}
                 {% endblock %}
+            </div>
             {% endif %}
         </div>
     <div>
