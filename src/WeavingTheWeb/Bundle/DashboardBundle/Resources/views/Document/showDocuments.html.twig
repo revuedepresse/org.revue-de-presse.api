@@ -7,7 +7,7 @@
         <form action="{{ path('weaving_the_web_dashboard_show_documents') }}"
               id="edit-query"
               method="post">
-            <div class="row">
+            <div class="form-group">
                 <div>
                     <h1>{{ title }}</h1>
                     <label for="query"><b>Type your query:</b></label>
@@ -16,16 +16,18 @@
                     <textarea id="sql" cols="20" rows="5" name="query">{{ default_query }}</textarea>
                 </div>
             </div>
-            <div class="row">
+            <div class="form-group">
                 <div class="span2">
                     <input id="action-save-query" class="btn" type="button" value="Save your query" />
                 </div>
+            </div>
+            <div class="form-group">
                 <div class="span2">
                     <input class="btn" type="submit" value="Submit your query" />
                 </div>
             </div>
         </form>
-        <div class="row">
+        <div class="form-group">
             <p id="notification" >
             {% if error is defined %}
             {{ error }}
