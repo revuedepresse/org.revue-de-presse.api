@@ -8,20 +8,20 @@
 
 {% block body %}
 <div class="container" id="settings">
-    <div class="span11">
-        <div class="offset1">
-            <div class="row-fluid">
+    <div class="col-sm-11 col-md-11">
+        <div class="col-lg-offset-1">
+            <div class="form-group">
                 <h1>{{ title }}</h1>
             </div>
-            <div class="row-fluid">
-                <div class="span5">
+            <div class="form-group">
+                <div class="col-sm-5 col-md-5">
                     {% for flashMessage in app.session.flashbag.get('notice') %}
                     <div class="alert alert-info">
                         {{ flashMessage|trans([], 'user') }}
                     </div>
                     {% endfor %}
                     {% for flashMessage in app.session.flashbag.get('error') %}
-                    <div class="alert alert-error">
+                    <div class="alert alert-error alert-warning">
                         {{ flashMessage }}
                     </div>
                     {% endfor %}
@@ -34,7 +34,7 @@
                             ]
                         %}
                         {% for field in fields %}
-                        <div class="row-fluid">
+                        <div class="form-group">
                             <div class="control-group{% if form_errors(form[field]) %} error{% endif %}">
                                 {% if form_errors(form[field]) %}
                                 {{ form_errors(form[field]) }}
@@ -42,15 +42,15 @@
                                 {{ form_label(form[field]) }}
                                 {{ form_widget(form[field]) }}
                                 {% if field == 'twitter_username' and form.vars.value.twitterUsername|trim|length > 0 %}
-                                <div class="row-fluid">
-                                    <a class="btn" href="{{ path('weaving_the_web_user_connect_to_twitter') }}">{{ 'label_connect_to_twitter'|trans }}</a>
+                                <div class="form-group connect-to-twitter">
+                                    <a class="btn btn-default" href="{{ path('weaving_the_web_user_connect_to_twitter') }}">{{ 'label_connect_to_twitter'|trans }}</a>
                                 </div>
                                 {% endif %}
                             </div>
                         </div>
                         {% endfor %}
 
-                        <div class="row-fluid">
+                        <div class="form-group">
                             {% if form_errors(form.plainPassword.first) %}
                             {{ form_errors(form.plainPassword.first) }}
                             {% endif %}
@@ -58,7 +58,7 @@
                             {{ form_widget(form.plainPassword.first) }}
                         </div>
 
-                        <div class="row-fluid">
+                        <div class="form-group">
                             {% if form_errors(form.plainPassword.second) %}
                             {{ form_errors(form.plainPassword.second) }}
                             {% endif %}
@@ -66,11 +66,11 @@
                             {{ form_widget(form.plainPassword.second) }}
                         </div>
 
-                        <div class="row-fluid">
+                        <div class="form-group">
                             {{ form_rest(form) }}
                         </div>
 
-                        <div class="row-fluid">
+                        <div class="form-group">
                             {{ form_label(form.save) }}
                             {{ form_widget(form.save) }}
                         </div>
