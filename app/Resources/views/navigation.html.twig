@@ -6,6 +6,9 @@
     <li{% if active_menu_item == 'emails' %} class="active"{% endif %}>
         <a href="{{ path('weaving_the_web_dashboard_mail_all') }}">{{ "menu.emails"|trans({}, 'menu') }}</a>
     </li>
+    <li{% if active_menu_item == 'tweets' %} class="active"{% endif %}>
+        <a href="{{ path('weaving_the_web_dashboard_tweet_github') }}">{{ "menu.tweets"|trans({}, 'menu') }}</a>
+    </li>
     {% endif %}
     {% if is_granted("ROLE_USER") %}
     <li{% if active_menu_item == 'github_repositories' %} class="active"{% endif %}>

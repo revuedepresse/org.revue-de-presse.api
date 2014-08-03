@@ -44,6 +44,7 @@ class MailController extends Controller
         }
 
         return [
+            'active_menu_item' => 'emails',
             'emails' => $messages,
             'title' => 'All mail'
         ];
