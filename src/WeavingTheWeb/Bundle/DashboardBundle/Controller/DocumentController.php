@@ -11,20 +11,21 @@ use WeavingTheWeb\Bundle\DashboardBundle\DBAL\Connection;
 use JMS\SecurityExtraBundle\Annotation\Secure;
 
 /**
- * Class DocumentController
+ * Handles SQL-based documents
  *
- * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  * @package WeavingTheWeb\Bundle\DashboardBundle\Controller
+ * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
 class DocumentController extends Controller
 {
     /**
+     * @param string $activeMenu
+     * @param bool   $showSitemap
+     *
+     * @return Response
+     *
      * @Extra\Route("/navigation/{activeMenu}", name="weaving_the_web_dashboard_show_navigation")
      * @Extra\Method({"GET"})
-     *
-     * @param string $activeMenu
-     * @param bool $showSitemap
-     * @return Response
      */
     public function showNavigationAction($activeMenu = 'github_repositories', $showSitemap = false)
     {

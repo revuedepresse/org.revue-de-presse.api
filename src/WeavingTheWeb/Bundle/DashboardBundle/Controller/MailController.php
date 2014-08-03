@@ -10,14 +10,22 @@ use Symfony\Component\HttpFoundation\Response,
     Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 /**
+ * Handles all mail related actions
+ *
  * @package WeavingTheWeb\Bundle\DashboardBundle\Controller
+ * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ *
  * @Extra\Route("/mail")
  */
 class MailController extends Controller
 {
     /**
+     * Show all paginated mail
+     *
      * @Extra\Route("/all", name="weaving_the_web_dashboard_mail_all")
      * @Extra\Template("WeavingTheWebDashboardBundle:Mail:all.html.twig")
+     *
+     * @return array
      */
     public function allAction()
     {
@@ -42,6 +50,10 @@ class MailController extends Controller
     }
 
     /**
+     * @param integer $id
+     *
+     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+     *
      * @Extra\Route("/{id}", name="weaving_the_web_dashboard_mail_show")
      * @Extra\Template("WeavingTheWebDashboardBundle:Mail:show.html.twig")
      */
