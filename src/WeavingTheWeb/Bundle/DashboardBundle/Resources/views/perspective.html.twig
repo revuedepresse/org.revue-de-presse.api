@@ -50,7 +50,7 @@
         {% elseif starts_with == "btn_" %}
             <div class="query" title="{{ value|escape }}">
                 {% if columns.hid_name is defined %}
-                <button type="button" class="btn">{{ columns.hid_name }}</button>
+                <button type="button" class="btn btn-default">{{ columns.hid_name }}</button>
                 {% endif %}
                 <span class="sql hide">{{ value }}</span>
             </div>
