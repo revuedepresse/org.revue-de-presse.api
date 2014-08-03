@@ -1,12 +1,15 @@
 <ul class="nav">
     {% if is_granted("ROLE_SUPER_ADMIN") %}
     <li{% if active_menu_item == 'dashboard' %} class="active"{% endif %}>
-        <a href="{{ path('weaving_the_web_dashboard_show_documents') }}">Dashboard</a>
+        <a href="{{ path('weaving_the_web_dashboard_show_documents') }}">{{ "menu.dashboard"|trans({}, 'menu') }}</a>
+    </li>
+    <li{% if active_menu_item == 'emails' %} class="active"{% endif %}>
+        <a href="{{ path('weaving_the_web_dashboard_mail_all') }}">{{ "menu.emails"|trans({}, 'menu') }}</a>
     </li>
     {% endif %}
     {% if is_granted("ROLE_USER") %}
     <li{% if active_menu_item == 'github_repositories' %} class="active"{% endif %}>
-        <a href="{{ path('weaving_the_web_dashboard_show_repositories') }}">Github Repositories</a>
+        <a href="{{ path('weaving_the_web_dashboard_show_repositories') }}">{{ "menu.github_repositories"|trans({}, 'menu') }}</a>
     </li>
     {% endif %}
 </ul>
