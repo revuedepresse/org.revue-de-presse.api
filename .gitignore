@@ -17,8 +17,8 @@ api/.htaccess
 composer.phar
 
 # sessions
-app/var/session/*
-!app/var/session/.gitignore
+app/var/sessions/*
+!app/var/sessions/.gitignore
 
 /behat
 /bin/phpspec
