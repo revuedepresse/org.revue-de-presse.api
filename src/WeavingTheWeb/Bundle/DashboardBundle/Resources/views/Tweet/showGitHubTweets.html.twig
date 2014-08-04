@@ -3,8 +3,13 @@
 {% block title %}{{ title }}{% endblock %}
 
 {% block body %}
-
-
+<div class="container-fluid col-xs-4">
+    <ul id="tweets" class="list-group">
+        {% for tweet in tweets %}
+        <li class="list-group-item tweet">{{ tweet.text|converturls }}</li>
+        {% endfor %}
+    </ul>
+</div>
 {% endblock %}
 
 {% block stylesheets %}
