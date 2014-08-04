@@ -66,7 +66,8 @@
         "themattharris/tmhOAuth": "dev-master",
         "twig/extensions": "1.0.*",
         "weaving-the-web/mail-bundle": "dev-master#fa7b701372b989d800db5d8d9b9b933a5aca60a2",
-        "braincrafted/bootstrap-bundle": "2.0.1"
+        "braincrafted/bootstrap-bundle": "2.0.1",
+        "liip/url-auto-converter-bundle": "1.0.1"
     },
     "require-dev": {
         "phpunit/phpunit": "3.7.29",

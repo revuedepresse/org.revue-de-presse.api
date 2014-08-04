@@ -17,43 +17,58 @@ class AppKernel extends Kernel
     public function registerBundles()
     {
         $bundles = array(
+            // Standard edition framework
             new Symfony\Bundle\FrameworkBundle\FrameworkBundle(),
             new Symfony\Bundle\SecurityBundle\SecurityBundle(),
             new Symfony\Bundle\TwigBundle\TwigBundle(),
             new Symfony\Bundle\MonologBundle\MonologBundle(),
             new Symfony\Bundle\AsseticBundle\AsseticBundle(),
-            new FOS\ElasticaBundle\FOSElasticaBundle(),
-            new FOS\JsRoutingBundle\FOSJsRoutingBundle(),
-            new FOS\RestBundle\FOSRestBundle(),
-            new FOS\UserBundle\FOSUserBundle(),
-            new FOS\TwitterBundle\FOSTwitterBundle(),
             new JMS\AopBundle\JMSAopBundle(),
             new JMS\DiExtraBundle\JMSDiExtraBundle($this),
             new JMS\SecurityExtraBundle\JMSSecurityExtraBundle(),
             new JMS\SerializerBundle\JMSSerializerBundle(),
+            new Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle(),
+            // User management
+            new FOS\UserBundle\FOSUserBundle(),
+            new Snc\RedisBundle\SncRedisBundle(),
+            new WTW\UserBundle\WTWUserBundle(),
+            new WeavingTheWeb\Bundle\UserBundle\WeavingTheWebUserBundle(),
+            // API
+            new FOS\RestBundle\FOSRestBundle(),
+            new FOS\TwitterBundle\FOSTwitterBundle(),
+            new WeavingTheWeb\Bundle\ApiBundle\WeavingTheWebApiBundle(),
+            new WeavingTheWeb\Bundle\MailBundle\WeavingTheWebMailBundle(),
+            new WeavingTheWeb\Bundle\TwitterBundle\WeavingTheWebTwitterBundle(),
+            new WeavingTheWeb\Bundle\DataMiningBundle\WeavingTheWebDataMiningBundle(),
+            // Search
+            new FOS\ElasticaBundle\FOSElasticaBundle(),
+            new WeavingTheWeb\Bundle\MappingBundle\WeavingTheWebMappingBundle(),
+            new WeavingTheWeb\Bundle\DashboardBundle\WeavingTheWebDashboardBundle(),
+            // Bootstrap
+            new Braincrafted\Bundle\BootstrapBundle\BraincraftedBootstrapBundle(),
+            // ORM
             new Doctrine\Bundle\DoctrineBundle\DoctrineBundle(),
             new Doctrine\Bundle\FixturesBundle\DoctrineFixturesBundle(),
             new Doctrine\Bundle\MigrationsBundle\DoctrineMigrationsBundle(),
+            // Documentation in Markdown
             new Knp\Bundle\MarkdownBundle\KnpMarkdownBundle(),
-            new OldSound\RabbitMqBundle\OldSoundRabbitMqBundle(),
-            new Ornicar\ApcBundle\OrnicarApcBundle(),
-            new Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle(),
-            new Snc\RedisBundle\SncRedisBundle(),
-            new Sp\BowerBundle\SpBowerBundle(),
-            new Braincrafted\Bundle\BootstrapBundle\BraincraftedBootstrapBundle(),
-            new WTW\CodeGeneration\QualityAssuranceBundle\WTWCodeGenerationQualityAssuranceBundle(),
-            new WTW\CodeGeneration\AnalysisBundle\WTWCodeGenerationAnalysisBundle(),
-            new WTW\UserBundle\WTWUserBundle(),
-            new WeavingTheWeb\Bundle\ApiBundle\WeavingTheWebApiBundle(),
-            new WeavingTheWeb\Bundle\AmqpBundle\WeavingTheWebAmqpBundle(),
-            new WeavingTheWeb\Bundle\DashboardBundle\WeavingTheWebDashboardBundle(),
-            new WeavingTheWeb\Bundle\DataMiningBundle\WeavingTheWebDataMiningBundle(),
             new WeavingTheWeb\Bundle\Documentation\MarkdownBundle\WeavingTheWebDocumentationMarkdownBundle(),
+            // AMQP consumers / producers
+            new OldSound\RabbitMqBundle\OldSoundRabbitMqBundle(),
+            new WeavingTheWeb\Bundle\AmqpBundle\WeavingTheWebAmqpBundle(),
+            // APC
+            new Ornicar\ApcBundle\OrnicarApcBundle(),
+            // Assets management
+            new Sp\BowerBundle\SpBowerBundle(),
+            // Routing
+            new FOS\JsRoutingBundle\FOSJsRoutingBundle(),
+            // View helper
+            new Liip\UrlAutoConverterBundle\LiipUrlAutoConverterBundle(),
+            // Quality assurance
+            new WTW\CodeGeneration\QualityAssuranceBundle\WTWCodeGenerationQualityAssuranceBundle(),
+            // Code analysis
+            new WTW\CodeGeneration\AnalysisBundle\WTWCodeGenerationAnalysisBundle(),
             new WeavingTheWeb\Bundle\Legacy\ProviderBundle\WeavingTheWebLegacyProviderBundle(),
-            new WeavingTheWeb\Bundle\MappingBundle\WeavingTheWebMappingBundle(),
-            new WeavingTheWeb\Bundle\MailBundle\WeavingTheWebMailBundle(),
-            new WeavingTheWeb\Bundle\TwitterBundle\WeavingTheWebTwitterBundle(),
-            new WeavingTheWeb\Bundle\UserBundle\WeavingTheWebUserBundle(),
         );
 
         if (in_array($this->getEnvironment(), array('dev', 'test', 'bdd', 'box', 'cache'))) {

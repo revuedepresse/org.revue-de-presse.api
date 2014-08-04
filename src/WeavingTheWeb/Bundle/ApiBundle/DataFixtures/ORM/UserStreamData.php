@@ -4,6 +4,7 @@ namespace WeavingTheWeb\Bundle\ApiBundle\DataFixtures\ORM;
 
 use Doctrine\Common\DataFixtures\FixtureInterface,
     Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Common\Inflector\Inflector;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream;
 
 class UserStreamData implements FixtureInterface
@@ -25,9 +26,28 @@ class UserStreamData implements FixtureInterface
             'status_id' => 194987972,
         ];
 
-        /**
-         * TODO Rename user stream to user status
-         */
+        $userStatus = $this->makeUserStatus($properties);
+        $manager->persist($userStatus);
+
+        $encodedUserStream = file_get_contents(__DIR__ . '/../../Tests/Resources/fixtures/user-stream.base64');
+        $userStatusCollection = unserialize(base64_decode($encodedUserStream));
+
+        foreach ($userStatusCollection as $userStatus) {
+            $manager->persist($userStatus);
+        }
+
+
+        $manager->flush();
+    }
+
+    /**
+     * @param array $properties
+     *
+     * @return UserStream
+     */
+    protected function makeUserStatus(array $properties)
+    {
+        /** TODO Rename user stream to user status */
         $userStream = new UserStream();
 
         $userStream->setText($properties['text']);
@@ -41,8 +61,6 @@ class UserStreamData implements FixtureInterface
         $userStream->setCreatedAt(new \DateTime());
         $userStream->setUpdatedAt(new \DateTime());
 
-        $manager->persist($userStream);
-
-        $manager->flush();
+        return $userStream;
     }
 }
