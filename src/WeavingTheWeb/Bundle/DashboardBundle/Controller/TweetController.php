@@ -27,6 +27,8 @@ class TweetController extends Controller
         $translator = $this->get('translator');
 
         $searchIndex = $this->container->getParameter('twitter_search_index');
+
+        /** @var \FOS\ElasticaBundle\Finder\FinderInterface $finder */
         $finder = $this->container->get('fos_elastica.finder.' . $searchIndex . '.user_status');
         $gitHubRelatedTweets = $finder->find('github');
 
