@@ -4,11 +4,15 @@
 
 {% block body %}
 <div class="container-fluid col-xs-4">
+    {% if tweets|length > 0  %}
     <ul id="tweets" class="list-group">
         {% for tweet in tweets %}
         <li class="list-group-item tweet">{{ tweet.text|converturls }}</li>
         {% endfor %}
     </ul>
+    {% else %}
+    <p>{{ "message.no_result.tweet"|trans({}, 'dashboard') }}</p>
+    {% endif %}
 </div>
 {% endblock %}
 
