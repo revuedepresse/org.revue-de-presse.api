@@ -24,10 +24,29 @@ class TweetController extends Controller
      * @Extra\Route("/github", name="weaving_the_web_dashboard_tweet_github")
      * @Extra\Method({"GET"})
      */
-    public function showGitHubTweets()
+    public function showGitHubTweetsAction()
     {
-        $translator = $this->get('translator');
+        return $this->showTweetsContaining('github');
+    }
 
+    /**
+     * @return \Symfony\Component\HttpFoundation\Response
+     *
+     * @Extra\Route("/links", name="weaving_the_web_dashboard_tweet_links")
+     * @Extra\Method({"GET"})
+     */
+    public function showTweetsWithLinksAction()
+    {
+        return $this->showTweetsContaining('t.co');
+    }
+
+    /**
+     * @param $subject
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    protected function showTweetsContaining($subject)
+    {
         $searchIndex = $this->container->getParameter('twitter_search_index');
 
         /** @var \FOS\ElasticaBundle\Finder\FinderInterface $finder */
@@ -35,16 +54,17 @@ class TweetController extends Controller
         $gitHubRelatedTweets = array();
 
         try {
-            $gitHubRelatedTweets = $finder->find('github');
+            $gitHubRelatedTweets = $finder->find($subject);
         } catch (HttpException $exception) {
             $this->get('logger')->error($exception->getMessage());
         }
 
         return $this->render(
-            'WeavingTheWebDashboardBundle:Tweet:showGitHubTweets.html.twig', [
+            'WeavingTheWebDashboardBundle:Tweet:showTweets.html.twig',
+            [
                 'active_menu_item' => 'tweets',
-                'tweets'           => $gitHubRelatedTweets,
-                'title'            => $translator->trans('title.tweet.github', [], 'dashboard')
-            ]);
+                'tweets' => $gitHubRelatedTweets,
+            ]
+        );
     }
 } 
