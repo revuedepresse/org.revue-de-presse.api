@@ -2,6 +2,8 @@
 
 namespace WeavingTheWeb\Bundle\DashboardBundle\Controller;
 
+use Elastica\Exception\Connection\HttpException;
+
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -30,7 +32,13 @@ class TweetController extends Controller
 
         /** @var \FOS\ElasticaBundle\Finder\FinderInterface $finder */
         $finder = $this->container->get('fos_elastica.finder.' . $searchIndex . '.user_status');
-        $gitHubRelatedTweets = $finder->find('github');
+        $gitHubRelatedTweets = array();
+
+        try {
+            $gitHubRelatedTweets = $finder->find('github');
+        } catch (HttpException $exception) {
+            $this->get('logger')->error($exception->getMessage());
+        }
 
         return $this->render(
             'WeavingTheWebDashboardBundle:Tweet:showGitHubTweets.html.twig', [
