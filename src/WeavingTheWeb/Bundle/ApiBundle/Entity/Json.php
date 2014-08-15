@@ -67,6 +67,32 @@ class Json
     private $value;
 
     /**
+     * @var boolean
+     *
+     * @ORM\Column(name="jsn_geolocated", type="boolean", nullable=true)
+     */
+    private $geolocated;
+
+    /**
+     * @param boolean $geolocated
+     * @return Json
+     */
+    public function setGeolocated($geolocated)
+    {
+        $this->geolocated = $geolocated;
+
+        return $this;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function getGeolocated()
+    {
+        return $this->geolocated;
+    }
+
+    /**
      * Get id
      *
      * @return integer
