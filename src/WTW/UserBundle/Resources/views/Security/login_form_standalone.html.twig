@@ -1,6 +1,7 @@
 {% trans_default_domain 'FOSUserBundle' %}
 
 <div class="col-sm-4 col-md-4">
+
     <div class="form-group">
         <h2>{{ "title_sign_in_with_wtw"|trans({}, 'security') }}</h2>
     </div>
@@ -8,9 +9,7 @@
     <form action="{{ path("fos_user_security_check") }}" id="login" method="post">
 
         {% if error %}
-        <div class="form-group">
-            <div class="alert alert-error col-sm-9 col-md-9 alert-warning">{{ error|trans }}</div>
-        </div>
+        <div class="alert alert-warning" role="alert">{{ error|trans }}</div>
         {% endif %}
 
         <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" class="form-control">
