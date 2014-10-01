@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "6389a8152a4df6e4108af372f6fc7574",
+    "hash": "287c441380f6b87132bd6e9afad6e46a",
     "packages": [
         {
             "name": "behat/behat",
@@ -1032,7 +1032,7 @@
                     "Doctrine\\Bundle\\DoctrineBundle": ""
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
+            "notification-url": "http://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -3050,12 +3050,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/thierrymarianne/ApcBundle.git",
-                "reference": "eb64da49a577857cf5244fdc12387182582db83e"
+                "reference": "0ddd8f3"
             },
             "dist": {
                 "type": "zip",
                 "url": "https://api.github.com/repos/thierrymarianne/ApcBundle/zipball/eb64da49a577857cf5244fdc12387182582db83e",
-                "reference": "eb64da49a577857cf5244fdc12387182582db83e",
+                "reference": "0ddd8f3",
                 "shasum": ""
             },
             "require": {
@@ -3100,7 +3100,7 @@
             "support": {
                 "source": "https://github.com/thierrymarianne/ApcBundle/tree/master"
             },
-            "time": "2013-08-04 15:23:56"
+            "time": "2014-09-30 23:45:50"
         },
         {
             "name": "phpcollection/phpcollection",
@@ -5142,6 +5142,7 @@
         "weaving-the-web/mail-bundle": 20,
         "phpspec/phpspec": 20
     },
+    "prefer-stable": false,
     "platform": {
         "php": ">=5.4.8"
     },
