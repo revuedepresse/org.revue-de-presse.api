@@ -52,7 +52,7 @@
         "kertz/twitteroauth": "dev-master",
         "knplabs/knp-markdown-bundle": "1.3.*",
         "oldsound/rabbitmq-bundle": " dev-master",
-        "ornicar/apc-bundle": "dev-master",
+        "ornicar/apc-bundle": "dev-master#0ddd8f3",
         "php": ">=5.4.8",
         "predis/predis": "0.8.*",
         "snc/redis-bundle": "1.1.*",
