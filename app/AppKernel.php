@@ -44,6 +44,7 @@ class AppKernel extends Kernel
             new WeavingTheWeb\Bundle\MappingBundle\WeavingTheWebMappingBundle(),
             new WeavingTheWeb\Bundle\TwitterBundle\WeavingTheWebTwitterBundle(),
             new WeavingTheWeb\Bundle\UserBundle\WeavingTheWebUserBundle(),
+            new WeavingTheWeb\Bundle\NewsfeedBundle\WeavingTheWebNewsfeedBundle(),
         );
 
         if (in_array($this->getEnvironment(), array('dev', 'test', 'bdd', 'cache'))) {

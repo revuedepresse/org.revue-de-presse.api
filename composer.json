@@ -16,6 +16,9 @@
         }, {
             "type":"vcs",
             "url":"git@github.com:thierrymarianne/twitteroauth.git"
+        }, {
+            "type": "git",
+            "url": "wtw:## FILL ME #### FILL ME ##"
         }
     ],
     "require":{
@@ -58,7 +61,8 @@
         "sensio/generator-bundle":"2.3.*",
         "sp/bower-bundle": "*",
         "themattharris/tmhOAuth": "dev-master",
-        "twig/extensions":"1.0.*"
+        "twig/extensions":"1.0.*",
+        "weaving-the-web/newsfeed-bundle": "dev-master#356f000"
     },
     "require-dev": {
         "phpunit/phpunit": "3.7.29",
