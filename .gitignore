@@ -37,6 +37,9 @@ app/var/sessions/*
 
 /app/*.xml
 
+/app/var/*
+
+
 /app/cache
 /app/config/*.yml
 /app/logs
@@ -50,6 +53,8 @@ app/var/sessions/*
 /src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/components
 
 /app/bootstrap.php.cache
+
+/node_modules
 
 /vendor
 /vendor-no-dev
