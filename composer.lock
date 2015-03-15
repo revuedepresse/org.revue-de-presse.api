@@ -1,9 +1,10 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
+        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "This file is @generated automatically"
     ],
-    "hash": "228a9f5e9f8b3bfa0ca4072efe4b5424",
+    "hash": "d187774c83cbdcd26c6ad6c1857fc65c",
     "packages": [
         {
             "name": "behat/behat",
@@ -1544,6 +1545,55 @@
             "time": "2014-01-18 19:09:49"
         },
         {
+            "name": "facebook/php-sdk-v4",
+            "version": "4.0.20",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/facebook/facebook-php-sdk-v4.git",
+                "reference": "0c8ea23d81e09cc7e2c38b1d7f663fd5006dce84"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/facebook/facebook-php-sdk-v4/zipball/0c8ea23d81e09cc7e2c38b1d7f663fd5006dce84",
+                "reference": "0c8ea23d81e09cc7e2c38b1d7f663fd5006dce84",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.4.0"
+            },
+            "require-dev": {
+                "guzzlehttp/guzzle": "~4.0",
+                "mockery/mockery": "dev-master",
+                "phpunit/phpunit": "3.7.*"
+            },
+            "suggest": {
+                "guzzlehttp/guzzle": "Allows for implementation of the Guzzle HTTP client"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Facebook\\": "src/Facebook/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "Facebook Platform"
+            ],
+            "authors": [
+                {
+                    "name": "Facebook",
+                    "homepage": "https://github.com/facebook/facebook-php-sdk-v4/contributors"
+                }
+            ],
+            "description": "Facebook SDK for PHP",
+            "homepage": "https://github.com/facebook/facebook-php-sdk-v4",
+            "keywords": [
+                "facebook",
+                "sdk"
+            ],
+            "time": "2015-03-03 00:03:54"
+        },
+        {
             "name": "friendsofsymfony/elastica-bundle",
             "version": "dev-master",
             "target-dir": "FOS/ElasticaBundle",
@@ -1687,17 +1737,17 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/FriendsOfSymfony/FOSRest.git",
-                "reference": "0.8.0"
+                "reference": "9a84df8220553e2ae3163b8325a3c4c2e9792426"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/FriendsOfSymfony/FOSRest/zipball/0.8.0",
-                "reference": "0.8.0",
+                "url": "https://api.github.com/repos/FriendsOfSymfony/FOSRest/zipball/9a84df8220553e2ae3163b8325a3c4c2e9792426",
+                "reference": "9a84df8220553e2ae3163b8325a3c4c2e9792426",
                 "shasum": ""
             },
             "require": {
                 "php": ">=5.3.2",
-                "symfony/http-foundation": ">=2.0,<3.0"
+                "symfony/http-foundation": "~2.0"
             },
             "type": "library",
             "extra": {
@@ -1738,12 +1788,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/FriendsOfSymfony/FOSRestBundle.git",
-                "reference": "0.13.1"
+                "reference": "2c3434f17fdbbcc22c2da2737b04234646749463"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/FriendsOfSymfony/FOSRestBundle/zipball/0.13.1",
-                "reference": "0.13.1",
+                "url": "https://api.github.com/repos/FriendsOfSymfony/FOSRestBundle/zipball/2c3434f17fdbbcc22c2da2737b04234646749463",
+                "reference": "2c3434f17fdbbcc22c2da2737b04234646749463",
                 "shasum": ""
             },
             "require": {
@@ -1812,12 +1862,12 @@
             "target-dir": "FOS/TwitterBundle",
             "source": {
                 "type": "git",
-                "url": "https://github.com/FriendsOfSymfony/FOSTwitterBundle.git",
+                "url": "https://github.com/thierrymarianne/FOSTwitterBundle.git",
                 "reference": "f837424a069425721c1a744bdc60bb2869a8c691"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/FriendsOfSymfony/FOSTwitterBundle/zipball/6c04fdef19bd06007cddfe730447dbfcfd93dd57",
+                "url": "https://api.github.com/repos/thierrymarianne/FOSTwitterBundle/zipball/f837424a069425721c1a744bdc60bb2869a8c691",
                 "reference": "f837424a069425721c1a744bdc60bb2869a8c691",
                 "shasum": ""
             },
@@ -1833,7 +1883,6 @@
                     "FOS\\TwitterBundle": ""
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -1848,7 +1897,10 @@
             "keywords": [
                 "Twitter authentication"
             ],
-            "time": "2013-06-03 19:02:38"
+            "support": {
+                "source": "https://github.com/thierrymarianne/FOSTwitterBundle/tree/master"
+            },
+            "time": "2013-09-01 10:59:55"
         },
         {
             "name": "friendsofsymfony/user-bundle",
@@ -1925,12 +1977,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/guzzle/guzzle.git",
-                "reference": "v3.3.1"
+                "reference": "0657f36c7780fb0f95cf117da3aab15cb580fb66"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/v3.3.1",
-                "reference": "v3.3.1",
+                "url": "https://api.github.com/repos/guzzle/guzzle/zipball/0657f36c7780fb0f95cf117da3aab15cb580fb66",
+                "reference": "0657f36c7780fb0f95cf117da3aab15cb580fb66",
                 "shasum": ""
             },
             "require": {
@@ -3952,6 +4004,44 @@
             "time": "2013-12-22 12:49:53"
         },
         {
+            "name": "weaving-the-web/newsfeed-bundle",
+            "version": "dev-master",
+            "target-dir": "WeavingTheWeb/Bundle/NewsfeedBundle",
+            "source": {
+                "type": "git",
+                "url": "wtw:## FILL ME #### FILL ME ##",
+                "reference": "356f000"
+            },
+            "require": {
+                "doctrine/orm": ">=2.2.3,<2.4.dev",
+                "facebook/php-sdk-v4": "4.0.*",
+                "php": ">=5.4.8"
+            },
+            "require-dev": {
+                "doctrine/doctrine-bundle": "1.2.*",
+                "doctrine/doctrine-migrations-bundle": "dev-master",
+                "phpspec/phpspec": "2.0.*@dev",
+                "phpunit/phpunit": "3.7.29",
+                "sensio/framework-extra-bundle": "3.*",
+                "symfony/monolog-bundle": "~2.6",
+                "weaving-the-web/quality-assurance-bundle": "dev-master#5c383a3693beb9c2b2514ec11f408cad6072b603"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "WeavingTheWeb\\Bundle\\NewsfeedBundle": ""
+                }
+            },
+            "authors": [
+                {
+                    "name": "Thierry Marianne",
+                    "homepage": "https://twitter.com/thierrymarianne"
+                }
+            ],
+            "description": "This bundle provides services to fetch and expose newsfeed",
+            "time": "2015-03-21 19:45:48"
+        },
+        {
             "name": "willdurand/negotiation",
             "version": "1.0.3",
             "source": {
@@ -4540,9 +4630,7 @@
             "time": "2013-07-23 04:42:59"
         }
     ],
-    "aliases": [
-
-    ],
+    "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
         "doctrine/doctrine-migrations-bundle": 20,
@@ -4554,12 +4642,13 @@
         "kertz/twitteroauth": 20,
         "ornicar/apc-bundle": 20,
         "themattharris/tmhoauth": 20,
+        "weaving-the-web/newsfeed-bundle": 20,
         "phpspec/phpspec": 20
     },
+    "prefer-stable": false,
+    "prefer-lowest": false,
     "platform": {
         "php": ">=5.4.8"
     },
-    "platform-dev": [
-
-    ]
+    "platform-dev": []
 }
