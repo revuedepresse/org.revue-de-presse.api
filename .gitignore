@@ -33,6 +33,9 @@ composer.phar
 
 /app/*.xml
 
+/app/var/*
+
+
 /app/cache
 /app/config/*.yml
 /app/logs
@@ -44,6 +47,8 @@ composer.phar
 /src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/components
 
 /app/bootstrap.php.cache
+
+/node_modules
 
 /vendor
 /vendor-no-dev
