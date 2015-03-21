@@ -37,9 +37,10 @@ class AppKernel extends Kernel
             new FOS\RestBundle\FOSRestBundle(),
             new FOS\TwitterBundle\FOSTwitterBundle(),
             new WeavingTheWeb\Bundle\ApiBundle\WeavingTheWebApiBundle(),
-            new WeavingTheWeb\Bundle\MailBundle\WeavingTheWebMailBundle(),
-            new WeavingTheWeb\Bundle\TwitterBundle\WeavingTheWebTwitterBundle(),
             new WeavingTheWeb\Bundle\DataMiningBundle\WeavingTheWebDataMiningBundle(),
+            new WeavingTheWeb\Bundle\MailBundle\WeavingTheWebMailBundle(),
+            new WeavingTheWeb\Bundle\NewsfeedBundle\WeavingTheWebNewsfeedBundle(),
+            new WeavingTheWeb\Bundle\TwitterBundle\WeavingTheWebTwitterBundle(),
             // Search
             new FOS\ElasticaBundle\FOSElasticaBundle(),
             new WeavingTheWeb\Bundle\MappingBundle\WeavingTheWebMappingBundle(),
@@ -69,10 +70,6 @@ class AppKernel extends Kernel
             // Code analysis
             new WTW\CodeGeneration\AnalysisBundle\WTWCodeGenerationAnalysisBundle(),
             new WeavingTheWeb\Bundle\Legacy\ProviderBundle\WeavingTheWebLegacyProviderBundle(),
-            new WeavingTheWeb\Bundle\MappingBundle\WeavingTheWebMappingBundle(),
-            new WeavingTheWeb\Bundle\TwitterBundle\WeavingTheWebTwitterBundle(),
-            new WeavingTheWeb\Bundle\UserBundle\WeavingTheWebUserBundle(),
-            new WeavingTheWeb\Bundle\NewsfeedBundle\WeavingTheWebNewsfeedBundle(),
         );
 
         if (in_array($this->getEnvironment(), array('dev', 'test', 'bdd', 'box', 'cache'))) {
