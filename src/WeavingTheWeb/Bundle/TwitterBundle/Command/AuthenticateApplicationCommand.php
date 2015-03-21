@@ -39,8 +39,9 @@ class AuthenticateApplicationCommand extends ContainerAwareCommand
     }
 
     /**
-     * @param InputInterface  $input  An InputInterface instance
-     * @param OutputInterface $output An OutputInterface instance
+     * @param InputInterface $input
+     * @param OutputInterface $output
+     * @return int|null
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -68,7 +69,7 @@ class AuthenticateApplicationCommand extends ContainerAwareCommand
              * @var \Symfony\Component\Translation\Translator $translator
              */
             $translator = $this->getContainer()->get('translator');
-            $output->writeln($translator->trans('twitter.authentication.success', ['{{ consumer_key }}' => $key]));
+            $output->writeln($translator->trans('twitter.success.authentication', ['{{ consumer_key }}' => $key]));
         } catch (\Exception $exception) {
             $this->getContainer()->get('logger')->error($exception->getMessage());
 

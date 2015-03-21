@@ -4,6 +4,7 @@ namespace WeavingTheWeb\Bundle\ApiBundle\Repository;
 
 use Doctrine\ORM\NoResultException;
 use FOS\ElasticaBundle\Doctrine\ORM\Provider;
+use Symfony\Component\Validator\Constraints\DateTime;
 
 /**
  * Class UserStreamRepository
@@ -12,6 +13,18 @@ use FOS\ElasticaBundle\Doctrine\ORM\Provider;
  */
 class UserStreamRepository extends ResourceRepository
 {
+    /**
+     * @var array
+     */
+    protected $oauthTokens;
+
+    public function setOauthTokens($oauthTokens)
+    {
+        $this->oauthTokens = $oauthTokens;
+
+        return $this;
+    }
+
     public function getAlias()
     {
         return 'ust';
@@ -201,15 +214,105 @@ class UserStreamRepository extends ResourceRepository
     }
 
     /**
+     * @param $lastId
      * @return array
      */
-    public function findLatest()
+    public function findLatest($lastId = null)
+    {
+        $queryBuilder = $this->selectStatuses();
+
+        if (!is_null($lastId)) {
+            $queryBuilder->andWhere('t.id < :lastId');
+            $queryBuilder->setParameter('lastId', $lastId);
+        }
+
+        $statuses = $queryBuilder->getQuery()->getResult();
+
+        return $this->highlightRetweets($statuses);
+    }
+
+    /**
+     * @param bool $lastWeek
+     * @return \Doctrine\ORM\QueryBuilder
+     */
+    protected function selectStatuses($lastWeek = false)
     {
         $queryBuilder = $this->createQueryBuilder('t');
-        $queryBuilder->select(['t.text', 't.screenName', 't.id', 't.starred']);
-        $queryBuilder->setMaxResults(50);
-        $queryBuilder->orderBy('t.id', 'desc');
+        $queryBuilder->select(
+            [
+                't.userAvatar as author_avatar',
+                't.text',
+                't.screenName as screen_name',
+                't.id',
+                't.statusId as status_id',
+                't.starred',
+                't.apiDocument original_document'
+            ]
+        )
+            ->andWhere('t.identifier IN (:identifier)')
+            ->orderBy('t.id', 'desc')
+            ->setMaxResults(300)
+        ;
+        $queryBuilder->setParameter('identifier', $this->oauthTokens);
 
-        return $queryBuilder->getQuery()->getResult();
+
+        if ($lastWeek) {
+            $queryBuilder->andWhere('ts.createdAt > :lastWeek');
+
+            $now = new \DateTime();
+            $lastWeek = $now->setTimestamp(strtotime('last week'));
+            $queryBuilder->setParameter('lastWeek', $lastWeek);
+        }
+
+        return $queryBuilder;
+    }
+
+    /**
+     * @param $statusIds
+     * @return mixed
+     */
+    public function findBookmarks(array $statusIds)
+    {
+        if (count($statusIds) > 0) {
+            $queryBuilder = $this->selectStatuses()
+                ->andWhere('t.statusId IN (:statusIds)');
+            $queryBuilder->setParameter('statusIds', $statusIds);
+
+            $statuses = $queryBuilder->getQuery()->getResult();
+
+            return $this->highlightRetweets($statuses);
+        } else {
+            return [];
+        }
+    }
+
+    /**
+     * @param array $statuses
+     * @return mixed
+     */
+    protected function highlightRetweets(array $statuses)
+    {
+        array_walk(
+            $statuses,
+            function (&$status) {
+                $target = sprintf('user stream of id #%d', intval($status['id']));
+                if (strlen($status['original_document']) > 0) {
+                    $decodedValue = json_decode($status['original_document'], true);
+                    $lastJsonError = json_last_error();
+                    if (JSON_ERROR_NONE === $lastJsonError) {
+                        if (array_key_exists('retweeted_status', $decodedValue)) {
+                            $status['text'] = 'RT @' . $decodedValue['retweeted_status']['user']['screen_name'] . ': ' .
+                                $decodedValue['retweeted_status']['text'];
+                        }
+                    } else {
+                        throw new \Exception(sprintf($lastJsonError . ' affecting ' . $target));
+                    }
+                } else {
+                    throw new \Exception(sprintf('Empty JSON document for ' . $target));
+                }
+            }
+        );
+
+        return $statuses;
     }
 }

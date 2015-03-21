@@ -1,30 +1,41 @@
-<!DOCTYPE html>
-<html lang="en" ng-app="WTW">
-<head>
-    <meta charset="UTF-8"/>
-    <title>{% block title %}{% endblock %} :: Weaving The Web experiments</title>
-    {% block stylesheets %}{% include "::stylesheets.html.twig" %}{% endblock %}
-    {% image 'tesseract.ico' %}
-    <link rel="shortcut icon" href="{{ asset_url }}"/>
-    {% endimage %}
-</head>
-<body>
-<nav class="navbar navbar-static-top">
-    <div class="navbar-inner">
-        <a class="brand" href="{{ path('fos_user_registration_register') }}">Weaving the Web</a>
-        {% block menu %}
-        {% if not active_menu_item is defined %}
-        {% set active_menu_item = '' %}
-        {% endif %}
-        {% if not show_sitemap is defined %}
-            {% set show_sitemap = app.request.attributes.get('_route') == 'weaving_the_web_dashboard_show_sitemap' %}
-        {% endif %}
+<!doctype html>
+<html lang="en" ng-app="WTW"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        {{ render_esi(controller('WeavingTheWebDashboardBundle:Document:showNavigation', { 'activeMenu': active_menu_item, 'showSitemap': show_sitemap })) }}
+    <title>{% block title %}{% endblock %} :: Weaving The Web experiments</title>
+
+    </head><body>{% block stylesheets %}{% include "::stylesheets.html.twig" %}{% endblock %}
+
+    {% image 'tesseract.ico' %}
+    <link rel="shortcut icon" href="{{ asset_url }}">
+    {% endimage %}
+
+    {% include 'BraincraftedBootstrapBundle::ie8-support.html.twig' %}
+
+{% if displayMenu is not defined or displayMenu %}
+<nav class="navbar navbar-default" role="navigation">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <a class="navbar-brand" href="{{ path('fos_user_registration_register') }}">Weaving the Web</a>
+        </div>
+
+        {% block menu %}
+            {% if not active_menu_item is defined %}
+                {% set active_menu_item = '' %}
+            {% endif %}
+            {% if not show_sitemap is defined %}
+                {% set show_sitemap = app.request.attributes.get('_route') == 'weaving_the_web_dashboard_show_sitemap' %}
+            {% endif %}
+
+            {{ render_esi(controller('WeavingTheWebDashboardBundle:Document:showNavigation', {
+                'activeMenu': active_menu_item, 'showSitemap': show_sitemap
+            })) }}
         {% endblock menu %}
     </div>
 </nav>
+{% endif %}
 {% block body %}{% endblock body %}
 {% block javascripts %}{% include "::javascripts.html.twig" %}{% endblock javascripts %}
-</body>
-</html>
+
+</body></html>

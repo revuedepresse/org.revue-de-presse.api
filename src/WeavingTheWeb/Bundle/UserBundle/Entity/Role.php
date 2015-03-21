@@ -4,7 +4,7 @@ namespace WeavingTheWeb\Bundle\UserBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection,
     Doctrine\ORM\Mapping as ORM;
-use Symfony\Component\Security\Core\Role\RoleInterface;
+
 use WTW\UserBundle\Entity\User;
 
 /**

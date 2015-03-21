@@ -40,9 +40,16 @@ services:
         factory_service: doctrine.orm.read_entity_manager
         factory_method: getRepository
         arguments: [%weaving_the_web_twitter.repository.user_stream.class%]
+        calls:
+            - [ setOauthTokens, [ [%weaving_the_web_twitter.oauth_token.default%] ] ]
     weaving_the_web_twitter.repository.token:
         class: %weaving_the_web_api.repository.token.class%
         factory_service: doctrine.orm.entity_manager
+        factory_method: getRepository
+        arguments: [%weaving_the_web_twitter.repository.token.class%]
+    weaving_the_web_twitter.repository.read.token:
+        class: %weaving_the_web_api.repository.token.class%
+        factory_service: doctrine.orm.read_entity_manager
         factory_method: getRepository
         arguments: [%weaving_the_web_twitter.repository.token.class%]
     weaving_the_web_twitter.api_accessor:

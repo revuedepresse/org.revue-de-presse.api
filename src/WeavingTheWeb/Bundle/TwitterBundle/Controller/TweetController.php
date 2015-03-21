@@ -3,9 +3,13 @@
 namespace WeavingTheWeb\Bundle\TwitterBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
+
 use Symfony\Bundle\FrameworkBundle\Controller\Controller,
     Symfony\Component\HttpFoundation\JsonResponse,
-    Symfony\Component\HttpFoundation\Request;
+    Symfony\Component\HttpFoundation\Request,
+    Symfony\Component\HttpFoundation\File\Exception\AccessDeniedException,
+    Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+
 use WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream;
 
 /**
@@ -15,21 +19,150 @@ use WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream;
 class TweetController extends Controller
 {
     /**
-     * @Extra\Route("/tweet/latest", name="weaving_the_web_twitter_tweet_latest")
-     * @Extra\Method({"GET", "OPTIONS"})
-     *
      * @param Request $request
      * @return JsonResponse
+     * @throws \Exception
+     *
+     * @Extra\Route("/tweet/latest", name="weaving_the_web_twitter_tweet_latest")
+     * @Extra\Method({"GET", "OPTIONS"})
      */
     public function latestAction(Request $request)
     {
         if ($request->isMethod('OPTIONS')) {
             return $this->getCorsOptionsResponse();
         } else {
-            $userStreamRepository = $this->get('weaving_the_web_twitter.repository.read.user_stream');
+            try {
+                $oauthTokens = $this->parseOAuthTokens($request);
 
-            return new JsonResponse($userStreamRepository->findLatest(), 200, ['Access-Control-Allow-Origin' => '*']);
+                /** @var \WeavingTheWeb\Bundle\ApiBundle\Repository\UserStreamRepository $userStreamRepository */
+                $userStreamRepository = $this->get('weaving_the_web_twitter.repository.read.user_stream');
+                $userStreamRepository->setOauthTokens($oauthTokens);
+
+                $lastId = $request->get('lastId', null);
+                $statuses = $userStreamRepository->findLatest($lastId);
+                $statusCode = 200;
+
+                return new JsonResponse($statuses, $statusCode, $this->getAccessControlOriginHeaders());
+            } catch (\PDOException $exception) {
+                return $this->getExceptionResponse(
+                    $exception,
+                    $this->get('translator')->trans('twitter.error.database_connection', [], 'messages')
+                );
+            } catch (\Exception $exception) {
+                return $this->getExceptionResponse($exception);
+            }
         }
+    }
+
+    /**
+     * @param \Exception $exception
+     * @param null $message
+     * @return JsonResponse
+     */
+    protected function getExceptionResponse(\Exception $exception, $message = null)
+    {
+        if (is_null($message)) {
+            $data = ['error' => $exception->getMessage()];
+        } else {
+            $data = ['error' => $message];
+        }
+        $statusCode = 500;
+
+        return new JsonResponse($data, $statusCode, $this->getAccessControlOriginHeaders());
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws \Exception
+     *
+     * @Extra\Route("/bookmarks", name="weaving_the_web_twitter_tweet_sync_bookmarks")
+     * @Extra\Method({"POST", "OPTIONS"})
+     */
+    public function syncBookmarksAction(Request $request)
+    {
+        if ($request->isMethod('OPTIONS')) {
+            return $this->getCorsOptionsResponse();
+        } else {
+            try {
+                $oauthTokens = $this->parseOAuthTokens($request);
+
+                /** @var \WeavingTheWeb\Bundle\ApiBundle\Repository\UserStreamRepository $userStreamRepository */
+                $userStreamRepository = $this->get('weaving_the_web_twitter.repository.read.user_stream');
+                $userStreamRepository->setOauthTokens($oauthTokens);
+
+                $statusIds = $request->get('statusIds', array());
+                $statuses = $userStreamRepository->findBookmarks($statusIds);
+
+                // TODO Mark statuses as starred before returning them
+
+                $statusCode = 200;
+
+                return new JsonResponse($statuses, $statusCode, $this->getAccessControlOriginHeaders());
+            } catch (\Exception $exception) {
+                return $this->getExceptionResponse($exception);
+            }
+        }
+    }
+
+    /**
+     * @return array
+     */
+    protected function getAccessControlOriginHeaders()
+    {
+        return ['Access-Control-Allow-Origin' => '*'];
+    }
+
+    /**
+     * @param Request $request
+     * @return array
+     * @throws \Exception
+     */
+    protected function parseOAuthTokens(Request $request)
+    {
+        $userManager = $this->get('fos_user.user_manager');
+        $username = $request->get('username', null);
+
+        if (is_null($username)) {
+            $oauthToken = $request->get(
+                'token',
+                null,
+                $this->container->getParameter('weaving_the_web_twitter.oauth_token.default')
+            );
+
+            if ($oauthToken !== null) {
+                $oauthTokens = [$oauthToken];
+            } else {
+                throw new \Exception($this->get('translator')->trans('twitter.error.invalid_oauth_token', [], 'messages'));
+            }
+        } else {
+            /** @var \WTW\UserBundle\Entity\User $user */
+            $user = $userManager->findUserBy(['twitter_username' => $username]);
+
+            if (is_null($user)) {
+                throw new \Exception(sprintf(
+                    'No user can be found for username "%s"',
+                    $username
+                ));
+            }
+
+            $tokens = $user->getTokens()->toArray();
+
+            $oauthTokens = [];
+            /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token */
+            foreach ($tokens as $token) {
+                $oauthToken = $token->getOauthToken();
+                $oauthTokens[] = $token->getOauthToken();
+                if (strlen(trim($oauthToken)) === 0) {
+                    throw new \Exception(sprintf(
+                        'Invalid token for username "%s"',
+                        $username
+                    ));
+                }
+            }
+        }
+
+        return $oauthTokens;
     }
 
     /**
@@ -58,7 +191,7 @@ class TweetController extends Controller
     }
 
     /**
-     * @Extra\Route("/tweet/star/{id}", name="weaving_the_web_twitter_tweet_star")
+     * @Extra\Route("/tweet/star/{statusId}", name="weaving_the_web_twitter_tweet_star")
      * @Extra\Method({"POST", "OPTIONS"})
      * @Extra\ParamConverter(
      *      "userStream",
@@ -75,7 +208,7 @@ class TweetController extends Controller
     }
 
     /**
-     * @Extra\Route("/tweet/unstar/{id}", name="weaving_the_web_twitter_tweet_unstar")
+     * @Extra\Route("/tweet/unstar/{statusId}", name="weaving_the_web_twitter_tweet_unstar")
      * @Extra\Method({"POST", "OPTIONS"})
      * @Extra\ParamConverter(
      *      "userStream",
@@ -104,12 +237,20 @@ class TweetController extends Controller
 
         if ($request->isMethod('POST')) {
             $userStream->setStarred($starred);
+
+            $clonedUserStream = clone $userStream;
+            $clonedUserStream->setUpdatedAt(new \DateTime());
+
             $entityManager = $this->getDoctrine()->getManager('write');
-            $entityManager->persist($userStream);
+
+            $entityManager->remove($userStream);
+            $entityManager->flush();
+
+            $entityManager->persist($clonedUserStream);
             $entityManager->flush();
 
             return new JsonResponse([
-                'status' => $userStream->getId()
+                'status' => $userStream->getStatusId()
             ], 200, ['Access-Control-Allow-Origin' => '*']);
         } else {
             return $this->getCorsOptionsResponse();

@@ -8,8 +8,6 @@ use FOS\RestBundle\Controller\Annotations as Rest,
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
 
 /**
- * Class TwitterController
- *
  * @package WeavingTheWeb\Bundle\ApiBundle\Controller
  *
  * @Rest\NamePrefix("weaving_the_web_api_")

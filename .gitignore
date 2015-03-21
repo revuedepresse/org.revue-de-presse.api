@@ -16,6 +16,10 @@ api/.htaccess
 # dependencies management
 composer.phar
 
+# sessions
+app/var/sessions/*
+!app/var/sessions/.gitignore
+
 /behat
 /bin/phpspec
 
@@ -43,6 +47,8 @@ composer.phar
 
 /devops/files/*.tar.gz
 /mobile
+
+/node_modules
 
 /src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/components
 

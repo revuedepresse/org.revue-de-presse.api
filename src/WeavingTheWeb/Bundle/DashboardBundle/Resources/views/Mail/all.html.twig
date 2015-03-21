@@ -1,0 +1,15 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block body %}
+    <div class="container">
+        {% for email in emails %}
+            <div>
+                {{ email.subject }}
+                <iframe height="500" src="{{ path('weaving_the_web_dashboard_mail_show', {id: email.mailBodyId}) }}">
+                </iframe>
+            </div>
+        {% endfor %}
+    <div>
+{% endblock %}

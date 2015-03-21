@@ -11,20 +11,21 @@ use WeavingTheWeb\Bundle\DashboardBundle\DBAL\Connection;
 use JMS\SecurityExtraBundle\Annotation\Secure;
 
 /**
- * Class DocumentController
+ * Handles SQL-based documents
  *
- * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  * @package WeavingTheWeb\Bundle\DashboardBundle\Controller
+ * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
 class DocumentController extends Controller
 {
     /**
+     * @param string $activeMenu
+     * @param bool   $showSitemap
+     *
+     * @return Response
+     *
      * @Extra\Route("/navigation/{activeMenu}", name="weaving_the_web_dashboard_show_navigation")
      * @Extra\Method({"GET"})
-     *
-     * @param string $activeMenu
-     * @param bool $showSitemap
-     * @return Response
      */
     public function showNavigationAction($activeMenu = 'github_repositories', $showSitemap = false)
     {
@@ -113,19 +114,15 @@ class DocumentController extends Controller
             $sql = '';
         }
 
-        /**
-         * @var $perspectiveRepository \WeavingTheWeb\Bundle\DashboardBundle\Repository\PerspectiveRepository
-         */
+        /** @var $perspectiveRepository \WeavingTheWeb\Bundle\DashboardBundle\Repository\PerspectiveRepository */
         $perspectiveRepository = $entityManager->getRepository('WeavingTheWebDashboardBundle:Perspective');
         $result = $perspectiveRepository->findBy(['value' => $sql]);
 
         if (count($result) === 0) {
             try {
-                $setters= $this->get('weaving_the_web_mapping.mapping');
+                $setters = $this->get('weaving_the_web_mapping.mapping');
 
-                /**
-                 * @var $perspective \WeavingTheWeb\Bundle\DashboardBundle\Entity\Perspective
-                 */
+                /** @var $perspective \WeavingTheWeb\Bundle\DashboardBundle\Entity\Perspective */
                 $perspective = $perspectiveRepository->savePerspective($sql, $setters);
                 $entityManager->persist($perspective);
                 $entityManager->flush();
