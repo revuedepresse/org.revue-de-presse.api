@@ -51,12 +51,19 @@ services:
         calls:
             - [ setRouter, [ @router ] ]
             - [ setEntityManager, [ @doctrine.orm.entity_manager ] ]
+
     twig.extension.text:
         class: Twig_Extensions_Extension_Text
         tags:
             - { name: twig.extension }
+
     weaving_the_web_dashboard.repository.perspective:
         class: %weaving_the_web_dashboard.repository.perspective.class%
         factory_service: doctrine.orm.entity_manager
         factory_method: getRepository
         arguments: [%weaving_the_web_dashboard.entity.perspective%]
+
+    weaving_the_web_dashboard.twig.email:
+        class: WeavingTheWeb\Bundle\DashboardBundle\Twig\EmailExtension
+        tags:
+            - { name: twig.extension }

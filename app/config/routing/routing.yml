@@ -1,36 +1,9 @@
-wtw_user:
-    resource: "@WTWUserBundle/Controller/"
-    type:     annotation
-
 wtw_registration_land:
     defaults: { _controller: FOSUserBundle:Registration:land }
     pattern:  /
 
-fos_js_routing:
-    resource: "@FOSJsRoutingBundle/Resources/config/routing/routing.xml"
-
-fos_user_security:
-    resource: "@WTWUserBundle/Resources/config/routing/security.xml"
-
-fos_user_profile:
-    prefix:   /profile
-    resource: "@FOSUserBundle/Resources/config/routing/profile.xml"
-
-fos_user_register:
-    prefix:   /register
-    resource: "@WTWUserBundle/Resources/config/routing/registration.xml"
-
-fos_user_registration_register:
-    defaults: { _controller: FOSUserBundle:Registration:register }
-    pattern:  /
-
-fos_user_resetting:
-    prefix:   /resetting
-    resource: "@FOSUserBundle/Resources/config/routing/resetting.xml"
-
-fos_user_change_password:
-    prefix:   /profile
-    resource: "@FOSUserBundle/Resources/config/routing/change_password.xml"
+_main:
+    resource: routing_friendsofsymfony.yml
 
 weaving_the_web_api:
     resource:     "@WeavingTheWebApiBundle/Resources/config/routing.yml"
@@ -40,10 +13,15 @@ weaving_the_web_dashboard:
     type:     annotation
 
 weaving_the_web_twitter:
-    prefix:   /twitter
+    prefix:   /api/twitter
     resource: "@WeavingTheWebTwitterBundle/Controller/"
     type:     annotation
 
 weaving_the_web_user:
     prefix:   /user
     resource: "@WeavingTheWebUserBundle/Resources/config/routing.xml"
+
+wtw_user:
+    resource: "@WTWUserBundle/Controller/"
+    type:     annotation
+

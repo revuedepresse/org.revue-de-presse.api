@@ -1,42 +1,50 @@
-<ul class="nav">
-    {% if is_granted("ROLE_SUPER_ADMIN") %}
-    <li{% if active_menu_item == 'dashboard' %} class="active"{% endif %}>
-        <a href="{{ path('weaving_the_web_dashboard_show_documents') }}">Dashboard</a>
-    </li>
-    {% endif %}
-    {% if is_granted("ROLE_USER") %}
-    <li{% if active_menu_item == 'github_repositories' %} class="active"{% endif %}>
-        <a href="{{ path('weaving_the_web_dashboard_show_repositories') }}">Github Repositories</a>
-    </li>
-    {% endif %}
-</ul>
-<ul class="nav pull-right">
-    <li class="nav">
-        {# authentication status #}
-        {% spaceless %}
-        {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-            <p class="navbar-text">
-                <a href="{{ path('weaving_the_web_user_show_settings')  }}">
-                    {{ app.user.username }}
-                </a>
-            </p>
+<div class="collapse navbar-collapse">
+    <ul class="nav navbar-nav navbar-left">
+        {% if is_granted("ROLE_SUPER_ADMIN") %}
+        <li{% if active_menu_item == 'dashboard' %} class="active"{% endif %}>
+            <a href="{{ path('weaving_the_web_dashboard_show_documents') }}">{{ "menu.dashboard"|trans({}, 'menu') }}</a>
+        </li>
+        <li{% if active_menu_item == 'emails' %} class="active"{% endif %}>
+            <a href="{{ path('weaving_the_web_dashboard_mail_all') }}">{{ "menu.emails"|trans({}, 'menu') }}</a>
+        </li>
+        <li{% if active_menu_item == 'tweets' %} class="active"{% endif %}>
+            <a href="{{ path('weaving_the_web_dashboard_tweet_github') }}">{{ "menu.tweets"|trans({}, 'menu') }}</a>
+        </li>
         {% endif %}
-        {% endspaceless %}
-    </li>
-    <li class="nav">
-        {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-            <a class="nav" href="{{ path('fos_user_security_logout') }}">{{ 'layout.logout'|trans({}, 'FOSUserBundle') }}</a>
-        {% else %}
-            {% block navigation_login %}
-            {% if show_sitemap %}
-                {% set label = 'intent.continue_weaving' %}
-                {% set route = 'fos_user_security_login' %}
-            {% else %}
-                {% set label = 'intent.discover_perspectives' %}
-                {% set route = 'weaving_the_web_dashboard_show_sitemap' %}
+        {% if is_granted("ROLE_USER") %}
+        <li{% if active_menu_item == 'github_repositories' %} class="active"{% endif %}>
+            <a href="{{ path('weaving_the_web_dashboard_show_repositories') }}">{{ "menu.github_repositories"|trans({}, 'menu') }}</a>
+        </li>
+        {% endif %}
+    </ul>
+    <ul class="nav navbar-nav navbar-right">
+        <li>
+            {# authentication status #}
+            {% spaceless %}
+            {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+                <p class="navbar-text username">
+                    <a href="{{ path('weaving_the_web_user_show_settings')  }}">
+                        {{ app.user.username }}
+                    </a>
+                </p>
             {% endif %}
-            <a class="nav" href="{{ path(route) }}">{{ label|trans({}, 'FOSUserBundle') }}</a>
-            {%  endblock navigation_login %}
-        {% endif %}
-    </li>
-</ul>
+            {% endspaceless %}
+        </li>
+        <li>
+            {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+                <a class="nav" href="{{ path('fos_user_security_logout') }}">{{ 'layout.logout'|trans({}, 'FOSUserBundle') }}</a>
+            {% else %}
+                {% block navigation_login %}
+                {% if show_sitemap %}
+                    {% set label = 'intent.continue_weaving' %}
+                    {% set route = 'fos_user_security_login' %}
+                {% else %}
+                    {% set label = 'intent.discover_perspectives' %}
+                    {% set route = 'weaving_the_web_dashboard_show_sitemap' %}
+                {% endif %}
+                <a class="nav" href="{{ path(route) }}">{{ label|trans({}, 'FOSUserBundle') }}</a>
+                {%  endblock navigation_login %}
+            {% endif %}
+        </li>
+    </ul>
+</div>

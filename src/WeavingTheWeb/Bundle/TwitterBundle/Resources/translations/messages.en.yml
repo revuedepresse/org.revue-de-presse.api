@@ -1,2 +1,4 @@
-twitter.statuses.persistence.success: Tweets have been successfully saved
-twitter.authentication.success: Application with consumer key {{ consumer_key }} has been successfully authenticated
+twitter.success.statuses.persistence: Tweets have been successfully saved.
+twitter.success.authentication: Application with consumer key {{ consumer_key }} has been successfully authenticated.
+twitter.error.database_connection: 'The API serving statuses is currently in maintenance. Sorry for the inconvenience!'
+twitter.error.invalid_oauth_token: 'No valid OAuth token has been provided.'

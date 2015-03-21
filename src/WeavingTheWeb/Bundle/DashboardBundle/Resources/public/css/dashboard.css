@@ -11,3 +11,7 @@ pre {
 .shorten {
     cursor: pointer;
 }
+
+.connect-to-twitter {
+    margin-top: 10px;
+}

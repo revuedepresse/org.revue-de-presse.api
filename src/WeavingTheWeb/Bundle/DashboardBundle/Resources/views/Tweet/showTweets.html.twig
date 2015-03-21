@@ -1,0 +1,28 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}{{ "title.tweet.github"|trans([], 'dashboard') }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid col-xs-4">
+    {% if tweets|length > 0  %}
+    <ul id="tweets" class="list-group">
+        {% for tweet in tweets %}
+        <li class="list-group-item tweet">{{ tweet.text|converturls }}</li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>{{ "message.no_result.tweet"|trans({}, 'dashboard') }}</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block stylesheets %}
+
+    {{ parent() }}
+
+    {% stylesheets
+        '@WeavingTheWebDashboardBundle/Resources/public/css/dashboard.css'
+        output='css/compiled/tweet.css' %}
+        <link rel="stylesheet" type="text/css" href="{{ asset_url }}" />
+    {% endstylesheets %}
+{% endblock %}

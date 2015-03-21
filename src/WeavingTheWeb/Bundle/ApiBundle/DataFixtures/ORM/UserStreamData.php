@@ -4,6 +4,7 @@ namespace WeavingTheWeb\Bundle\ApiBundle\DataFixtures\ORM;
 
 use Doctrine\Common\DataFixtures\FixtureInterface,
     Doctrine\Common\Persistence\ObjectManager;
+use Doctrine\Common\Inflector\Inflector;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream;
 
 class UserStreamData implements FixtureInterface
@@ -13,8 +14,10 @@ class UserStreamData implements FixtureInterface
      */
     public function load(ObjectManager $manager)
     {
+        $status = 'This is a tweet text.';
         $properties = [
-            'text' => 'This is a tweet text.',
+            'text' => $status,
+            'api_document' => json_encode(['text' => $status]),
             'identifier' => 'access token',
             'indexed' => false,
             'name' => 'Thierry Marianne',
@@ -23,23 +26,41 @@ class UserStreamData implements FixtureInterface
             'status_id' => 194987972,
         ];
 
-        /**
-         * TODO Rename user stream to user status
-         */
-        $repository = new UserStream();
+        $userStatus = $this->makeUserStatus($properties);
+        $manager->persist($userStatus);
 
-        $repository->setText($properties['text']);
-        $repository->setUserAvatar($properties['user_avatar']);
-        $repository->setName($properties['name']);
-        $repository->setScreenName($properties['screen_name']);
-        $repository->setIdentifier($properties['identifier']);
-        $repository->setIndexed($properties['indexed']);
-        $repository->setStatusId($properties['status_id']);
-        $repository->setCreatedAt(new \DateTime());
-        $repository->setUpdatedAt(new \DateTime());
+        $encodedUserStream = file_get_contents(__DIR__ . '/../../Tests/Resources/fixtures/user-stream.base64');
+        $userStatusCollection = unserialize(base64_decode($encodedUserStream));
 
-        $manager->persist($repository);
+        foreach ($userStatusCollection as $userStatus) {
+            $manager->persist($userStatus);
+        }
+
 
         $manager->flush();
+    }
+
+    /**
+     * @param array $properties
+     *
+     * @return UserStream
+     */
+    protected function makeUserStatus(array $properties)
+    {
+        /** TODO Rename user stream to user status */
+        $userStream = new UserStream();
+
+        $userStream->setText($properties['text']);
+        $userStream->setApiDocument($properties['api_document']);
+        $userStream->setUserAvatar($properties['user_avatar']);
+        $userStream->setName($properties['name']);
+        $userStream->setScreenName($properties['screen_name']);
+        $userStream->setIdentifier($properties['identifier']);
+        $userStream->setIndexed($properties['indexed']);
+        $userStream->setStatusId($properties['status_id']);
+        $userStream->setCreatedAt(new \DateTime());
+        $userStream->setUpdatedAt(new \DateTime());
+
+        return $userStream;
     }
 }

@@ -1,0 +1,32 @@
+<div class="statuses">
+    <div>
+        <ul ng-repeat="error in errors">
+            <li>{{ error }}</li>
+        </ul>
+        <div ng-include="'app/partials/sync.html'"></div>
+    </div>
+    <div class="ui accordion" infinite-scroll="showMoreStatuses()">
+        <div ng-repeat="(screenName, item) in users" repeat-done>
+            <div class="title">
+                <i class="dropdown icon"></i>
+                <img class="ui avatar image"
+                     ng-src="{{ item.authorAvatar|strict_https }}"
+                     alt="https://twitter.com/{{ screenName }}"
+                     fallback-src="http://a0.twimg.com/sticky/default_profile_images/default_profile_2_normal.png" />
+                <strong>@{{ screenName }}</strong>
+                <i class="new-status icon bullhorn" ng-show="item.isNew"></i>
+            </div>
+            <div class="content">
+                <div ng-repeat="status in item.sortedStatuses" id="{{ status.id }}">
+                    <div class="item text">
+                        <i class="new-status icon bullhorn" ng-show="status.isNew"></i>
+                        <p class="text" parse-url="props" ng-model="status">{{ status.text }}</p>
+                        <div class="ui huge star rating">
+                            <i class="icon" ng-class="{active: status.starred}" ng-click="toggle(status.statusId, screenName)"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -5,7 +5,7 @@ namespace WeavingTheWeb\Bundle\ApiBundle\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * GithubRepo
+ * Holds repositories watchers and counts among other properties obtained from GitHub API
  *
  * @ORM\Entity(repositoryClass="WeavingTheWeb\Bundle\ApiBundle\Repository\GithubRepository")
  * @ORM\Table(name="weaving_github_repositories")
@@ -125,8 +125,9 @@ class GithubRepository
     /**
      * Set githubId
      *
-     * @param  integer    $githubId
-     * @return GithubRepo
+     * @param integer $githubId
+     *
+     * @return GithubRepository
      */
     public function setGithubId($githubId)
     {
@@ -148,8 +149,9 @@ class GithubRepository
     /**
      * Set forks
      *
-     * @param  integer    $forks
-     * @return GithubRepo
+     * @param integer $forks
+     *
+     * @return GithubRepository
      */
     public function setForks($forks)
     {
@@ -171,8 +173,9 @@ class GithubRepository
     /**
      * Set watchers
      *
-     * @param  integer    $watchers
-     * @return GithubRepo
+     * @param integer $watchers
+     *
+     * @return GithubRepository
      */
     public function setWatchers($watchers)
     {
@@ -194,8 +197,9 @@ class GithubRepository
     /**
      * Set status
      *
-     * @param  integer    $status
-     * @return GithubRepo
+     * @param integer $status
+     *
+     * @return GithubRepository
      */
     public function setStatus($status)
     {
@@ -217,8 +221,9 @@ class GithubRepository
     /**
      * Set ownerId
      *
-     * @param  integer    $ownerId
-     * @return GithubRepo
+     * @param integer $ownerId
+     *
+     * @return GithubRepository
      */
     public function setOwnerId($ownerId)
     {
@@ -240,8 +245,9 @@ class GithubRepository
     /**
      * Set owner
      *
-     * @param  string     $owner
-     * @return GithubRepo
+     * @param string $owner
+     *
+     * @return GithubRepository
      */
     public function setOwner($owner)
     {
@@ -263,8 +269,9 @@ class GithubRepository
     /**
      * Set language
      *
-     * @param  string     $language
-     * @return GithubRepo
+     * @param string $language
+     *
+     * @return GithubRepository
      */
     public function setLanguage($language)
     {
@@ -286,8 +293,9 @@ class GithubRepository
     /**
      * Set name
      *
-     * @param  string     $name
-     * @return GithubRepo
+     * @param string $name
+     *
+     * @return GithubRepository
      */
     public function setName($name)
     {
@@ -309,8 +317,9 @@ class GithubRepository
     /**
      * Set avatarUrl
      *
-     * @param  string     $avatarUrl
-     * @return GithubRepo
+     * @param string $avatarUrl
+     *
+     * @return GithubRepository
      */
     public function setAvatarUrl($avatarUrl)
     {
@@ -332,8 +341,9 @@ class GithubRepository
     /**
      * Set cloneUrl
      *
-     * @param  string     $cloneUrl
-     * @return GithubRepo
+     * @param string $cloneUrl
+     *
+     * @return GithubRepository
      */
     public function setCloneUrl($cloneUrl)
     {
@@ -355,8 +365,9 @@ class GithubRepository
     /**
      * Set description
      *
-     * @param  string     $description
-     * @return GithubRepo
+     * @param string $description
+     *
+     * @return GithubRepository
      */
     public function setDescription($description)
     {
@@ -378,8 +389,9 @@ class GithubRepository
     /**
      * Set createdAt
      *
-     * @param  \DateTime  $createdAt
-     * @return GithubRepo
+     * @param \DateTime $createdAt
+     *
+     * @return GithubRepository
      */
     public function setCreatedAt($createdAt)
     {
@@ -401,8 +413,9 @@ class GithubRepository
     /**
      * Set updatedAt
      *
-     * @param  \DateTime  $updatedAt
-     * @return GithubRepo
+     * @param \DateTime $updatedAt
+     *
+     * @return GithubRepository
      */
     public function setUpdatedAt($updatedAt)
     {

@@ -1,5 +1,5 @@
 parameters:
     assetic_node:               %assetic.node%
     assetic_node_module:        %assetic.modules%
-    bower_binary:               %assetic_node_module%/bower/bin/bower
+    bower_binary:               %assetic.modules%/bower/bin/bower
     bower_endpoint:             https://bower.herokuapp.com

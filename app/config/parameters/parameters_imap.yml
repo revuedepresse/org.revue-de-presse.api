@@ -1,0 +1,3 @@
+parameters:
+    imap_username: ~
+    imap_password: ~

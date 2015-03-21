@@ -30,4 +30,13 @@ class UserProvider extends BaseUserProvider
 
         return $reloadedUser;
     }
+
+    /**
+     * @param $criteria
+     * @return \FOS\UserBundle\Model\UserInterface
+     */
+    public function findUserBy($criteria)
+    {
+        return $this->userManager->findUserBy($criteria);
+    }
 }
