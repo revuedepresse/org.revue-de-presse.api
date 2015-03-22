@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "f49d1eb864f5bc6daaebd5b61ac7ccac",
+    "hash": "73cb0d855660d0e01809e4f6e70e1d37",
     "packages": [
         {
             "name": "behat/behat",
@@ -4214,12 +4214,14 @@
             "source": {
                 "type": "git",
                 "url": "wtw:## FILL ME #### FILL ME ##",
-                "reference": "356f000"
+                "reference": "8b110b1"
             },
             "require": {
                 "doctrine/orm": ">=2.2.3,<2.4.dev",
                 "facebook/php-sdk-v4": "4.0.*",
-                "php": ">=5.4.8"
+                "php": ">=5.4.8",
+                "symfony/framework-bundle": "2.4.2",
+                "symfony/process": "2.4.2"
             },
             "require-dev": {
                 "doctrine/doctrine-bundle": "1.2.*",
@@ -4243,7 +4245,7 @@
                 }
             ],
             "description": "This bundle provides services to fetch and expose newsfeed",
-            "time": "2015-03-21 19:45:48"
+            "time": "2015-03-22 20:29:08"
         },
         {
             "name": "willdurand/negotiation",
