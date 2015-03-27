@@ -37,7 +37,7 @@ parameters:
     security.user.provider.in_memory.user.class:                WTW\UserBundle\Tests\Security\Core\User\User
     weaving_the_web_user.controller_twitter.class:              WeavingTheWeb\Bundle\UserBundle\Tests\Controller\ControllerMock
 
-    gmail_search_index:                                         gmail_test
+    mail_index:                                                 mail
     twitter_search_index:                                       twitter_test
 
 services:
