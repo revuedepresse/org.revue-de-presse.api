@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "4ccd5f9e0e07f96469aa1d90d8549511",
+    "hash": "8c767ae8ce8a486beeb8c689b7dee5a9",
     "packages": [
         {
             "name": "behat/behat",
@@ -4171,7 +4171,7 @@
             "source": {
                 "type": "git",
                 "url": "wtw:## FILL ME #### FILL ME ##",
-                "reference": "45eca8c"
+                "reference": "5ef35a4"
             },
             "require": {
                 "doctrine/orm": ">=2.2.3,<2.4-dev",
@@ -4205,7 +4205,7 @@
                 }
             ],
             "description": "This bundle provides services to fetch emails using IMAP and analyze them",
-            "time": "2015-03-26 10:02:48"
+            "time": "2015-03-27 06:49:48"
         },
         {
             "name": "weaving-the-web/newsfeed-bundle",
