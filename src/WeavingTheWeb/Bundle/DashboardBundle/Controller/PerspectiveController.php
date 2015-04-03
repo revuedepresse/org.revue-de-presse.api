@@ -134,7 +134,7 @@ class PerspectiveController extends ContainerAware
          * @var \Symfony\Component\Validator\Validator $validator
          */
         $validator = $this->container->get('validator');
-            $constraintsViolationsList = $validator->validate($perspective, ['public_perspectives']);
+        $constraintsViolationsList = $validator->validate($perspective, ['public_perspectives']);
 
         return count($constraintsViolationsList) === 0;
     }

@@ -26,7 +26,7 @@ class PerspectiveValidator extends ConstraintValidator
     protected $validator;
 
     /**
-     * @param $queryValidator
+     * @param ValidatorInterface $validator
      */
     public function setValidator(ValidatorInterface $validator)
     {
@@ -74,8 +74,7 @@ class PerspectiveValidator extends ConstraintValidator
 
     /**
      * @param $perspective
-     * @param Constraint $perspectiveConstraint
-     * @param $queryConstraintsViolationsList
+     * @param Perspective $perspectiveConstraint
      */
     public function validatePublicPerspectives($perspective, Perspective $perspectiveConstraint)
     {
