@@ -21,8 +21,7 @@ app/var/sessions/*
 !app/var/sessions/.gitignore
 
 /behat
-/bin/phpspec
-
+/bin/webunit
 /bin/behat
 /bin/phpunit
 /bin/phpspec
