@@ -12,9 +12,7 @@ use Symfony\Component\HttpFoundation\Response,
 /**
  * Handles all mail related actions
  *
- * @package WeavingTheWeb\Bundle\DashboardBundle\Controller
  * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
- *
  * @Extra\Route("/mail")
  */
 class MailController extends Controller
@@ -64,7 +62,7 @@ class MailController extends Controller
         $messageRepository = $this->get('weaving_the_web_mail.repository.message');
 
         /** @var \WeavingTheWeb\Bundle\MailBundle\Entity\Message $message */
-        $message = $messageRepository->findOneBy(['msgId' => $id]);
+        $message = $messageRepository->findOneBy(['id' => $id]);
 
         if (is_null($message)) {
             throw new NotFoundHttpException('This message can not be found');
