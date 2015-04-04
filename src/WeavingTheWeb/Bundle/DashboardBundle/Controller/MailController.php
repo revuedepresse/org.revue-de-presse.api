@@ -49,6 +49,37 @@ class MailController extends Controller
     }
 
     /**
+     * @Extra\Route("/collapsed", name="weaving_the_web_dashboard_mail_show_collapsed_mails")
+     * @Extra\Template("WeavingTheWebDashboardBundle:Mail:collapsed_mails.html.twig")
+     *
+     * @return array
+     */
+    public function showCollapsedMailsAction()
+    {
+        /** @var \WeavingTheWeb\Bundle\MailBundle\Repository\MessageRepository $messageRepository */
+        $messageRepository = $this->get('weaving_the_web_mail.repository.message');
+        $messages = $messageRepository->findLast(100, 0);
+
+        /** @var \WeavingTheWeb\Bundle\MailBundle\Parser\EmailParser $parser */
+        $parser = $this->get('weaving_the_web_mail.parser.email');
+
+        foreach ($messages as $index => $message) {
+            $messages[$index] = [
+                'sender' => $parser->decodeSender($message['sender']),
+                'subject' => $parser->parseSubject($message['subject']),
+                'id' => $message['mailBodyId']
+            ];
+        }
+
+        $collapsedMailTitle = $this->get('translator')->trans('title.collapsed_mails', [], 'mail');
+
+        return [
+            'emails' => $messages,
+            'title' => $collapsedMailTitle
+        ];
+    }
+
+    /**
      * @param integer $id
      *
      * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
