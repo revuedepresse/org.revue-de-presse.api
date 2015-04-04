@@ -65,3 +65,7 @@ parameters:
 services:
     fos_user.mailer.default:
         class: FOS\UserBundle\Mailer\NoopMailer
+    twig.extension.text:
+        class: Twig_Extensions_Extension_Text
+        tags:
+            - { name: twig.extension }
