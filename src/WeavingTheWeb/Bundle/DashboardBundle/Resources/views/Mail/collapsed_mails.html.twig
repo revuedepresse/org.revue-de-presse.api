@@ -1,0 +1,26 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block body %}
+    <div class="container">
+        {% if emails|length == 0 %}
+            <div class="alert alert-success">
+            {{ 'body.no_mail_left'|trans({}, 'mail', 'en')  }}
+            </div>
+        {% else %}
+            <table class="table table-striped table-bordered">
+            {% for email in emails %}
+                <tr>
+                    <td>{{ email.sender|truncate(40) }}</td>
+                    <td>
+                        <a href="{{ path('weaving_the_web_dashboard_mail_show', {id: email.id}) }}">
+                            {{ email.subject|truncate(60) }}
+                        </a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </table>
+        {% endif %}
+    <div>
+{% endblock %}
