@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "0e7c2abf00fa98f9661c9b5a3a69ba63",
+    "hash": "efe557c20ecbedb5484f1d52bd1ad84f",
     "packages": [
         {
             "name": "behat/behat",
@@ -1522,36 +1522,30 @@
         },
         {
             "name": "facebook/php-sdk-v4",
-            "version": "dev-master",
+            "version": "4.0.23",
             "source": {
                 "type": "git",
                 "url": "https://github.com/facebook/facebook-php-sdk-v4.git",
-                "reference": "816ba225235abfdae0b823e056e37d808044d87f"
+                "reference": "c82611e05596622c9bd7abfa1cea1512d885c95e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/facebook/facebook-php-sdk-v4/zipball/816ba225235abfdae0b823e056e37d808044d87f",
-                "reference": "816ba225235abfdae0b823e056e37d808044d87f",
+                "url": "https://api.github.com/repos/facebook/facebook-php-sdk-v4/zipball/c82611e05596622c9bd7abfa1cea1512d885c95e",
+                "reference": "c82611e05596622c9bd7abfa1cea1512d885c95e",
                 "shasum": ""
             },
             "require": {
-                "ext-mbstring": "*",
                 "php": ">=5.4.0"
             },
             "require-dev": {
-                "guzzlehttp/guzzle": "~5.0",
-                "mockery/mockery": "~0.8",
-                "phpunit/phpunit": "~4.0"
+                "guzzlehttp/guzzle": "~4.0",
+                "mockery/mockery": "dev-master",
+                "phpunit/phpunit": "3.7.*"
             },
             "suggest": {
                 "guzzlehttp/guzzle": "Allows for implementation of the Guzzle HTTP client"
             },
             "type": "library",
-            "extra": {
-                "branch-alias": {
-                    "dev-master": "4.1.x-dev"
-                }
-            },
             "autoload": {
                 "psr-4": {
                     "Facebook\\": "src/Facebook/"
@@ -1573,7 +1567,7 @@
                 "facebook",
                 "sdk"
             ],
-            "time": "2015-04-02 22:14:00"
+            "time": "2015-04-03 20:31:47"
         },
         {
             "name": "friendsofsymfony/elastica-bundle",
@@ -4183,12 +4177,12 @@
             "source": {
                 "type": "git",
                 "url": "wtw:## FILL ME #### FILL ME ##",
-                "reference": "cfc9f8c"
+                "reference": "33d0578"
             },
             "require": {
                 "doctrine/dbal": "~2.3",
                 "doctrine/orm": "~2.3",
-                "facebook/php-sdk-v4": "~4.0",
+                "facebook/php-sdk-v4": "4.0.*",
                 "php": ">=5.4.8",
                 "symfony/symfony": "2.6.*"
             },
@@ -4214,7 +4208,7 @@
                 }
             ],
             "description": "This bundle provides services to fetch and expose newsfeed",
-            "time": "2015-04-03 14:52:38"
+            "time": "2015-04-04 09:41:06"
         },
         {
             "name": "willdurand/negotiation",
