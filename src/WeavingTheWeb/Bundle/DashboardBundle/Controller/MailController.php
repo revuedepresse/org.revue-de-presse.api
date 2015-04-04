@@ -49,26 +49,47 @@ class MailController extends Controller
     }
 
     /**
-     * @Extra\Route("/collapsed", name="weaving_the_web_dashboard_mail_show_collapsed_mails")
+     * @Extra\Route(
+     *      "/collapsed/{keywords}",
+     *      name="weaving_the_web_dashboard_mail_show_collapsed_mails",
+     *      requirements={"keywords" = "[^/]+"},
+     *      defaults={"keywords" = null}
+     * )
      * @Extra\Template("WeavingTheWebDashboardBundle:Mail:collapsed_mails.html.twig")
      *
      * @return array
      */
-    public function showCollapsedMailsAction()
+    public function showCollapsedMailsAction($keywords = null)
     {
-        /** @var \WeavingTheWeb\Bundle\MailBundle\Repository\MessageRepository $messageRepository */
-        $messageRepository = $this->get('weaving_the_web_mail.repository.message');
-        $messages = $messageRepository->findLast(100, 0);
-
         /** @var \WeavingTheWeb\Bundle\MailBundle\Parser\EmailParser $parser */
         $parser = $this->get('weaving_the_web_mail.parser.email');
 
-        foreach ($messages as $index => $message) {
-            $messages[$index] = [
-                'sender' => $parser->decodeSender($message['sender']),
-                'subject' => $parser->parseSubject($message['subject']),
-                'id' => $message['mailBodyId']
-            ];
+        if (is_null($keywords)) {
+            /** @var \WeavingTheWeb\Bundle\MailBundle\Repository\MessageRepository $messageRepository */
+            $messageRepository = $this->get('weaving_the_web_mail.repository.message');
+            $messages = $messageRepository->findLast(100, 0);
+
+            foreach ($messages as $index => $message) {
+                $messages[$index] = [
+                    'sender' => $parser->decodeSender($message['sender']),
+                    'subject' => $parser->decodeSubject($message['subject']),
+                    'id' => $message['mailBodyId']
+                ];
+            }
+        } else {
+            $finder = $this->container->get('fos_elastica.finder.mail.message');
+            $messages = $finder->find($keywords, 100);
+
+            /**
+             * @var \WeavingTheWeb\Bundle\MailBundle\Entity\Message $message
+             */
+            foreach ($messages as $index => $message) {
+                $messages[$index] = [
+                    'sender' => $parser->decodeSender($message->getHeader()->getFrom()),
+                    'subject' => $parser->decodeSubject($message->getHeader()->getSubject()),
+                    'id' => $message->getId()
+                ];
+            }
         }
 
         $collapsedMailTitle = $this->get('translator')->trans('title.collapsed_mails', [], 'mail');
@@ -101,14 +122,13 @@ class MailController extends Controller
 
         /** @var \WeavingTheWeb\Bundle\MailBundle\Parser\EmailParser $parser */
         $parser = $this->get('weaving_the_web_mail.parser.email');
+        $parsedBody = $parser->parseBody($message);
 
         $response = new Response();
         $response->setContent(
             $this->renderView(
                 'WeavingTheWebDashboardBundle:Mail:show.html.twig',
-                [
-                    'message' => $parser->parseBody($message)
-                ]
+                ['message' => $parsedBody]
             )
         );
         $response->headers->set('Content-Type', $parser->guessMessageContentType($message));
