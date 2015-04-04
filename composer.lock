@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "4512fbd17d81cb8faa727202d85a0d79",
+    "hash": "96bea643d59e3512b7b6b8622d59e205",
     "packages": [
         {
             "name": "behat/behat",
@@ -4130,7 +4130,7 @@
             "source": {
                 "type": "git",
                 "url": "wtw:## FILL ME #### FILL ME ##",
-                "reference": "1550813"
+                "reference": "261e3b4"
             },
             "require": {
                 "doctrine/dbal": "~2.3",
@@ -4168,7 +4168,7 @@
                 }
             ],
             "description": "This bundle provides services to fetch emails using IMAP",
-            "time": "2015-04-04 13:19:16"
+            "time": "2015-04-04 21:17:02"
         },
         {
             "name": "weaving-the-web/newsfeed-bundle",
@@ -4706,6 +4706,40 @@
                 "instantiate"
             ],
             "time": "2015-01-16 19:29:51"
+        },
+        {
+            "name": "neitanod/forceutf8",
+            "version": "v1.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/neitanod/forceutf8.git",
+                "reference": "28d50d579179abac1f6a55b03c6d9d3f6573867c"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/neitanod/forceutf8/zipball/28d50d579179abac1f6a55b03c6d9d3f6573867c",
+                "reference": "28d50d579179abac1f6a55b03c6d9d3f6573867c",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.2.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "ForceUTF8\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "authors": [
+                {
+                    "name": "Sebastián Grignoli",
+                    "email": "grignoli@gmail.com"
+                }
+            ],
+            "description": "PHP Class Encoding featuring popular Encoding::toUTF8() function --formerly known as forceUTF8()-- that fixes mixed encoded strings.",
+            "homepage": "https://github.com/neitanod/forceutf8",
+            "time": "2014-09-24 14:59:43"
         },
         {
             "name": "phpdocumentor/reflection-docblock",
