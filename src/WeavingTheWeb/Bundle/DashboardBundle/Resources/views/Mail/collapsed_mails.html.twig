@@ -18,6 +18,9 @@
                             {{ email.subject|truncate(60) }}
                         </a>
                     </td>
+                    <td>
+                        {{ email.date|date('Y/m/d H:i', 'Europe/Paris')  }}
+                    </td>
                 </tr>
             {% endfor %}
             </table>

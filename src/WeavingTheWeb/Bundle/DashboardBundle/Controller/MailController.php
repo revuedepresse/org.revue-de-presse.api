@@ -9,6 +9,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Response,
     Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
+use WeavingTheWeb\Bundle\MailBundle\Entity\Header;
+
 /**
  * Handles all mail related actions
  *
@@ -37,7 +39,7 @@ class MailController extends Controller
         foreach ($messages as $index => $message) {
             $messages[$index] = [
                 'mailBodyId' => $message['mailBodyId'],
-                'subject' => $parser->parseSubject($message['subject'])
+                'subject' => $parser->decodeSubject($message['subject'])
             ];
         }
 
@@ -57,6 +59,7 @@ class MailController extends Controller
      * )
      * @Extra\Template("WeavingTheWebDashboardBundle:Mail:collapsed_mails.html.twig")
      *
+     * @param null $keywords
      * @return array
      */
     public function showCollapsedMailsAction($keywords = null)
@@ -71,9 +74,10 @@ class MailController extends Controller
 
             foreach ($messages as $index => $message) {
                 $messages[$index] = [
-                    'sender' => $parser->decodeSender($message['sender']),
-                    'subject' => $parser->decodeSubject($message['subject']),
-                    'id' => $message['mailBodyId']
+                    'sender'    => $parser->decodeSender($message['sender']),
+                    'subject'   => $parser->decodeSubject($message['subject']),
+                    'id'        => $message['mailBodyId'],
+                    'date'      => $message['date'],
                 ];
             }
         } else {
@@ -85,11 +89,14 @@ class MailController extends Controller
              */
             foreach ($messages as $index => $message) {
                 $messages[$index] = [
-                    'sender' => $parser->decodeSender($message->getHeader()->getFrom()),
-                    'subject' => $parser->decodeSubject($message->getHeader()->getSubject()),
-                    'id' => $message->getId()
+                    'sender'    => $parser->decodeSender($message->getHeader()->getFrom()),
+                    'subject'   => $parser->decodeSubject($message->getHeader()->getSubject()),
+                    'id'        => $message->getId(),
+                    'date'      => $message->getHeader()->getDate()
                 ];
             }
+
+            $messages = $this->orderMessagesByDescendingDate($messages);
         }
 
         $collapsedMailTitle = $this->get('translator')->trans('title.collapsed_mails', [], 'mail');
@@ -98,6 +105,34 @@ class MailController extends Controller
             'emails' => $messages,
             'title' => $collapsedMailTitle
         ];
+    }
+
+    /**
+     * @return mixed
+     */
+    protected function orderMessagesByDescendingDate($messages)
+    {
+        usort($messages, [$this, 'compareHeaders']);
+
+        return $messages;
+    }
+
+    /**
+     * @param array $leftMember
+     * @param array $rightMember
+     * @return int
+     */
+    public function compareHeaders(array $leftMember, array $rightMember)
+    {
+        if ($leftMember['date'] === $rightMember['date']) {
+            return 0;
+        }
+
+        if ($leftMember['date'] > $rightMember['date']) {
+            return -1;
+        } else {
+            return 1;
+        }
     }
 
     /**
