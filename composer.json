@@ -71,7 +71,7 @@
         "braincrafted/bootstrap-bundle": "2.0.1",
         "liip/url-auto-converter-bundle": "1.0.1",
         "weaving-the-web/mail-bundle": "dev-master#bd9947c",
-        "weaving-the-web/newsfeed-bundle": "dev-master#33d0578"
+        "weaving-the-web/newsfeed-bundle": "dev-master#1543ff9"
     },
     "require-dev": {
         "phpunit/phpunit": "3.7.29",

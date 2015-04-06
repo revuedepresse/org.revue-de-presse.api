@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "c61649450038a735b44bc2a0a1c50fd8",
+    "hash": "ccbd9c3a603f8db248cb0029417f5ea3",
     "packages": [
         {
             "name": "behat/behat",
@@ -4177,7 +4177,7 @@
             "source": {
                 "type": "git",
                 "url": "wtw:## FILL ME #### FILL ME ##",
-                "reference": "33d0578"
+                "reference": "1543ff9"
             },
             "require": {
                 "doctrine/dbal": "~2.3",
@@ -4208,7 +4208,7 @@
                 }
             ],
             "description": "This bundle provides services to fetch and expose newsfeed",
-            "time": "2015-04-04 09:41:06"
+            "time": "2015-04-06 16:35:32"
         },
         {
             "name": "willdurand/negotiation",
