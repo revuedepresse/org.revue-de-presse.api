@@ -6,10 +6,15 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
+use Symfony\Component\HttpFoundation\RedirectResponse;
+
 use Symfony\Component\HttpFoundation\Response,
     Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-use WeavingTheWeb\Bundle\MailBundle\Entity\Header;
+use WeavingTheWeb\Bundle\MailBundle\Entity\Header,
+    WeavingTheWeb\Bundle\MailBundle\Entity\Message;
+
+use WeavingTheWeb\Bundle\MailBundle\Exception\InvalidSequenceNumber;
 
 /**
  * Handles all mail related actions
@@ -168,5 +173,48 @@ class MailController extends Controller
         );
         $response->headers->set('Content-Type', $parser->guessMessageContentType($message));
         $response->send();
+    }
+
+    /**
+     * @Extra\Route(
+     *      "/move-to-spam/{id}",
+     *      name="weaving_the_web_dashboard_mail_move_to_spam",
+     *      requirements={"id" = "\d+"},
+     * )
+     * @Extra\Method({"POST"})
+     *
+     * @param Message $message
+     * @return Response
+     */
+    public function moveToSpam(Message $message)
+    {
+        $message->reportAsSpam();
+
+        /** @var \Doctrine\ORM\EntityManager $entityManager */
+        $entityManager = $this->getDoctrine()->getManager();
+
+        /** @var \WeavingTheWeb\Bundle\MailBundle\Storage\GmailAwareImap $storage */
+        $storage = $this->get('weaving_the_web_mail.storage.imap');
+
+        try {
+            $storage->moveToSpam($message->getHeader()->getImapNumber());
+        } catch (InvalidSequenceNumber $exception) {
+            $message->setSequenceNumberUnavailable(true);
+            $message->reportAsSpam(true);
+
+            $this->get('logger')->error($exception->getMessage());
+        } catch (\Exception $exception) {
+            return new Response(
+                sprintf('Could not move message with id #%d to spam', $message->getId()),
+                400
+            );
+        }
+
+        $entityManager->persist($message);
+        $entityManager->flush();
+
+        $collapsedMailsUrl = $this->generateUrl('weaving_the_web_dashboard_mail_show_collapsed_mails');
+
+        return new RedirectResponse($collapsedMailsUrl);
     }
 }
