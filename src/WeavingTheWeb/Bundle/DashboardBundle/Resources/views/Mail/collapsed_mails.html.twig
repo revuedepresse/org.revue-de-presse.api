@@ -21,6 +21,12 @@
                     <td>
                         {{ email.date|date('Y/m/d H:i', 'Europe/Paris')  }}
                     </td>
+                    <td>
+                        <form method="post"
+                              action="{{ path("weaving_the_web_dashboard_mail_move_to_spam", {id: email.id}) }}" }}>
+                            <button class="btn btn-default" type="submit">Report as spam</button>
+                        </form>
+                    </td>
                 </tr>
             {% endfor %}
             </table>
