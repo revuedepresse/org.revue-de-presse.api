@@ -70,7 +70,7 @@
         "twig/extensions": "1.0.*",
         "braincrafted/bootstrap-bundle": "2.0.1",
         "liip/url-auto-converter-bundle": "1.0.1",
-        "weaving-the-web/mail-bundle": "dev-master#881f94a",
+        "weaving-the-web/mail-bundle": "dev-master#0680534",
         "weaving-the-web/newsfeed-bundle": "dev-master#1543ff9"
     },
     "require-dev": {
