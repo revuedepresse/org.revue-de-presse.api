@@ -8,6 +8,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
+use Symfony\Component\HttpFoundation\Request;
+
 use Symfony\Component\HttpFoundation\Response,
     Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -141,15 +143,24 @@ class MailController extends Controller
     }
 
     /**
-     * @param integer $id
-     *
-     * @throws \Symfony\Component\HttpKernel\Exception\NotFoundHttpException
+     * @param $id
+     * @param Request $request
+     * @return RedirectResponse
      *
      * @Extra\Route("/{id}", name="weaving_the_web_dashboard_mail_show")
      * @Extra\Template("WeavingTheWebDashboardBundle:Mail:show.html.twig")
      */
-    public function showAction($id)
+    public function showAction($id, Request $request)
     {
+        if ($this->isGranted('ROLE_SUPER_ADMIN')) {
+            if ($request->query->get('update') === 'body') {
+                $updateBodyUrl = $this->generateUrl('weaving_the_web_dashboard_debug_update_body', ['id' => $id]);
+                $referrer = str_replace('?update=body', '', $request->getRequestUri());
+
+                return new RedirectResponse($updateBodyUrl . '?referrer=' . urlencode($referrer));
+            }
+        }
+
         /** @var \WeavingTheWeb\Bundle\MailBundle\Repository\MessageRepository $messageRepository */
         $messageRepository = $this->get('weaving_the_web_mail.repository.message');
 

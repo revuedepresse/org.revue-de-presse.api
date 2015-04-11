@@ -6,6 +6,9 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
+use Symfony\Component\HttpFoundation\RedirectResponse,
+    Symfony\Component\HttpFoundation\Request;
+
 use WeavingTheWeb\Bundle\MailBundle\Entity\Message;
 
 /**
@@ -51,7 +54,7 @@ class MailController extends Controller
      * @Extra\Route("/update/body/{id}", name="weaving_the_web_dashboard_debug_update_body")
      * @Extra\Template("WeavingTheWebDashboardBundle:Mail:Debug/update_body.html.twig")
      */
-    public function updateBodyAction(Message $message)
+    public function updateBodyAction(Message $message, Request $request)
     {
         /** @var \WeavingTheWeb\Bundle\MailBundle\Storage\GmailAwareImap $storage */
         $storage = $this->get('weaving_the_web_mail.storage.imap');
@@ -66,6 +69,12 @@ class MailController extends Controller
         $entityManager = $this->getDoctrine()->getManager();
         $entityManager->persist($message);
         $entityManager->flush();
+
+        if ($request->query->get('referrer')) {
+            $requestUri = urldecode($request->query->get('referrer'));
+
+            return new RedirectResponse($request->getSchemeAndHttpHost() . $requestUri);
+        }
 
         return [
             'message_id' => $message->getId()
