@@ -3,3 +3,4 @@ title:
 
 body:
     no_mail_left:       Well done! There is no mail left.
+    updated:            The body of message {{ message_id }} has been updated successfully.
