@@ -208,7 +208,7 @@ class MailController extends Controller
         $storage = $this->get('weaving_the_web_mail.storage.imap');
 
         try {
-            $storage->moveToSpam($message->getHeader()->getImapNumber());
+            $storage->moveToSpam($message->getHeader()->getImapUid());
         } catch (InvalidSequenceNumber $exception) {
             $message->setSequenceNumberUnavailable(true);
             $message->reportAsSpam(true);
