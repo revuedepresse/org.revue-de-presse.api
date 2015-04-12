@@ -8,8 +8,6 @@ use WTW\UserBundle\Entity\User;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\TokenType;
 
 /**
- * Token
- *
  * @ORM\Table(name="weaving_access_token")
  * @ORM\Entity(repositoryClass="WeavingTheWeb\Bundle\ApiBundle\Repository\TokenRepository")
  */
@@ -27,7 +25,7 @@ class Token
     /**
      * @var string
      *
-     * @ORM\OneToOne(targetEntity="WeavingTheWeb\Bundle\ApiBundle\Entity\TokenType")
+     * @ORM\ManyToOne(targetEntity="TokenType", inversedBy="tokens", cascade={"all"})
      * @ORM\JoinColumn(name="type", referencedColumnName="id")
      */
     protected $type;
