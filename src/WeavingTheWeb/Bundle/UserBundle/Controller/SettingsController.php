@@ -9,11 +9,11 @@ use Symfony\Component\DependencyInjection\ContainerAware,
     Symfony\Component\Security\Core\Validator\Constraints\UserPassword,
     Symfony\Component\Form\FormError,
     Symfony\Component\HttpKernel\HttpKernelInterface;
+
 use WTW\UserBundle\Entity\User;
 
 /**
- * Class SettingsController
- * @package WeavingTheWeb\Bundle\UserBundle\Controller
+ * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
 class SettingsController extends ContainerAware
 {
@@ -166,6 +166,8 @@ class SettingsController extends ContainerAware
 
     /**
      * @param Request $request
+     * @return array|RedirectResponse
+     *
      * @Extra\Template("WeavingTheWebUserBundle:Settings:show.html.twig")
      */
     public function saveAction(Request $request)
@@ -285,18 +287,33 @@ class SettingsController extends ContainerAware
 
     /**
      * @param $tokenParameters
+     * @throws \Exception
      */
     protected function persistToken($tokenParameters)
     {
+        if ($tokenParameters['screen_name'] !== $this->getUser()->getTwitterUserName()) {
+            throw new \Exception('The token doesn\'t match ' .
+                'with the declared twitter username of current user');
+        }
+
         $tokens = $this->tokenRepository->findBy(['oauthToken' => $tokenParameters['oauth_token']]);
 
         if (count($tokens) === 0) {
             $token = $this->tokenRepository->makeToken($tokenParameters);
 
-            /**
-             * @var \WTW\UserBundle\Entity\User $user
-             */
+            /** @var \WTW\UserBundle\Entity\User $user */
             $user = $this->getUser();
+
+            $phantomUser = $this->userManager->findUserBy([
+                'twitter_username' => $tokenParameters['screen_name'],
+                'twitterID' => $tokenParameters['user_id']
+            ]);
+            if (!is_null($phantomUser)) {
+                $phantomUser->setTwitterID(null);
+                $this->entityManager->persist($phantomUser);
+                $this->entityManager->flush();
+            }
+
             $this->userManager->updateUserTwitterCredentials($user, $tokenParameters);
 
             $token->addUser($user);
