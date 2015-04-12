@@ -175,7 +175,10 @@ class UserStatus
                     $this->tokenRepository->freezeToken($this->accessor->userToken);
                 }
             }
-        } else {
+        }
+
+        $token = $this->tokenRepository->findFirstUnfrozenToken();
+        if (is_null($token)) {
             $now = new \DateTime;
             $this->moderator->waitFor(
                 $token->getFrozenUntil()->getTimestamp() - $now->getTimestamp(),
@@ -183,6 +186,9 @@ class UserStatus
                     '{{ token }}' => substr($token->getOauthToken(), 0, '8'),
                 ]
             );
+        } else {
+            $this->setupAccessor(['token' => $token->getOauthToken(), 'secret' => $token->getOauthTokenSecret()]);
+            $availableTwitterApi = true;
         }
 
         return $availableTwitterApi;
