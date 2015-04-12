@@ -42,19 +42,6 @@ class UserStatus implements ConsumerInterface
     }
 
     /**
-     * @param $tokens
-     * @throws \InvalidArgumentException
-     */
-    protected function setupCredentials($tokens)
-    {
-        if ((!array_key_exists('token', $tokens) || !array_key_exists('secret', $tokens)) && !array_key_exists('bearer', $tokens)) {
-            throw new \InvalidArgumentException('Valid token and secret are required');
-        } else {
-            $this->serializer->setupAccessor($tokens);
-        }
-    }
-
-    /**
      * @param AmqpMessage $message
      * @return bool
      */
@@ -109,5 +96,18 @@ class UserStatus implements ConsumerInterface
         $this->setupCredentials($options);
 
         return $options;
+    }
+
+    /**
+     * @param $tokens
+     * @throws \InvalidArgumentException
+     */
+    protected function setupCredentials($tokens)
+    {
+        if ((!array_key_exists('token', $tokens) || !array_key_exists('secret', $tokens)) && !array_key_exists('bearer', $tokens)) {
+            throw new \InvalidArgumentException('Valid token and secret are required');
+        } else {
+            $this->serializer->setupAccessor($tokens);
+        }
     }
 }
