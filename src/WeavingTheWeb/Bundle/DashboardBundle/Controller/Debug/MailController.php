@@ -19,7 +19,7 @@ class MailController extends Controller
 {
     /**
      * @Extra\Route("/serialize/mail/{id}", name="weaving_the_web_dashboard_debug_serialize_mail")
-     * @Extra\Template("WeavingTheWebDashboardBundle:Mail:Debug/serialize.html.twig")
+     * @Extra\Template("WeavingTheWebDashboardBundle:Mail:Debug/serialize_mail.html.twig")
      */
     public function serializeAction(Message $message)
     {
