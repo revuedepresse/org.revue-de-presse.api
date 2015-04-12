@@ -175,6 +175,16 @@ class MailController extends Controller
         $parser = $this->get('weaving_the_web_mail.parser.email');
         $parsedBody = $parser->parseBody($message);
 
+        if (strpos($parsedBody, 'https://twitter.com/i/redirect')) {
+            $pattern = [
+                '#"https://twitter.com/i/redirect\?\s*url=(?<url>[^"]+)"#s',
+                '#"https://t.co/redirect\?\s*url=(?<url>[^"]+)"#s'
+            ];
+            $parsedBody = preg_replace_callback($pattern, function ($matches) {
+                return urldecode($matches['url']);
+            }, $parsedBody);
+        }
+
         $response = new Response();
         $response->setContent(
             $this->renderView(
