@@ -5,8 +5,6 @@ namespace WeavingTheWeb\Bundle\ApiBundle\Moderator;
 use Psr\Log\LoggerInterface;
 
 /**
- * Class ApiLimitModerator
- * @package WeavingTheWeb\Bundle\ApiBundle\Moderator
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
 class ApiLimitModerator
