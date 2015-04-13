@@ -17,9 +17,9 @@ class Version20150403163022 extends AbstractMigration
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() != 'mysql', 'Migration can only be executed safely on \'mysql\'.');
-
         $this->addSql('ALTER TABLE mail_uid CHANGE body_fetched fetched_body TINYINT(1) DEFAULT \'0\' NOT NULL');
         $this->addSql('ALTER TABLE message CHANGE msg_body_text text_body LONGTEXT DEFAULT NULL');
+        $this->addSql('ALTER TABLE message ADD indexed TINYINT(1) DEFAULT \'0\' NOT NULL;');
         $this->addSql('CREATE INDEX indexed ON message (indexed)');
         $this->addSql('DROP INDEX nativeId ON weaving_facebook_link');
         $this->addSql('CREATE UNIQUE INDEX native_id ON weaving_facebook_link (native_id, feed_item_id)');
