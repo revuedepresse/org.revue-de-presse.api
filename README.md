@@ -12,3 +12,5 @@ Weaving The Web Experiments
 # [Perspectives](app/Resources/doc/40-perspectives.md)
 
 # [Configuration management](app/Resources/doc/50-configuration-management.md)
+
+# [Known issues](app/Resources/doc/60-know-issues.md)

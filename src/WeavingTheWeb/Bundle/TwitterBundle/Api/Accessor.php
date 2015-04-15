@@ -411,6 +411,9 @@ class Accessor implements TwitterErrorAwareInterface
             $errorCodes = $reflection->getConstants();
 
             if (in_array($errorCode, $errorCodes)) {
+                if ($errorCode == self::ERROR_EXCEEDED_RATE_LIMIT) {
+                    $this->tokenRepository->freezeToken($token->getOauthToken());
+                }
                 $this->throwException($errorMessage, $errorCode);
             } else {
                 /** Freeze token and wait for 15 minutes before getting back to operation */
