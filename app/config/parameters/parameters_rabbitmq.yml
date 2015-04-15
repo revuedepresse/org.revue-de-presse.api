@@ -2,5 +2,5 @@ parameters:
     rabbitmq_user:              %rabbitmq.user%
     rabbitmq_password:          %rabbitmq.password%
     rabbitmq_port:              5672
-    rabbitmq_host:              localhost
+    rabbitmq_host:              ## FILL ME ##
     rabbitmq_vhost:             'weaving_the_web'
