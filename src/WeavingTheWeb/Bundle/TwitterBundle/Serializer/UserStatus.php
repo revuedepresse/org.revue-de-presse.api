@@ -158,9 +158,7 @@ class UserStatus
     {
         $availableTwitterApi = false;
 
-        /**
-         * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token
-         */
+        /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token */
         $token = $this->tokenRepository->refreshFreezeCondition($this->accessor->userToken, $this->logger);
 
         if (!$token->isFrozen()) {
@@ -175,20 +173,24 @@ class UserStatus
                     $this->tokenRepository->freezeToken($this->accessor->userToken);
                 }
             }
-        }
-
-        $token = $this->tokenRepository->findFirstUnfrozenToken();
-        if (is_null($token)) {
-            $now = new \DateTime;
-            $this->moderator->waitFor(
-                $token->getFrozenUntil()->getTimestamp() - $now->getTimestamp(),
-                [
-                    '{{ token }}' => substr($token->getOauthToken(), 0, '8'),
-                ]
-            );
         } else {
-            $this->setupAccessor(['token' => $token->getOauthToken(), 'secret' => $token->getOauthTokenSecret()]);
-            $availableTwitterApi = true;
+            /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $unfrozenToken */
+            $unfrozenToken = $this->tokenRepository->findFirstUnfrozenToken();
+            if (is_null($unfrozenToken)) {
+                $now = new \DateTime;
+                $this->moderator->waitFor(
+                    $token->getFrozenUntil()->getTimestamp() - $now->getTimestamp(),
+                    [
+                        '{{ token }}' => substr($token->getOauthToken(), 0, '8'),
+                    ]
+                );
+            } else {
+                $this->setupAccessor([
+                    'token' => $unfrozenToken->getOauthToken(),
+                    'secret' => $unfrozenToken->getOauthTokenSecret()]
+                );
+                $availableTwitterApi = true;
+            }
         }
 
         return $availableTwitterApi;
