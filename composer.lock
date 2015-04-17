@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "a31dbb2c9d8246967e8a933b0b9ad40f",
+    "hash": "cdb7f08e0a5809668c9bccf86459c9f7",
     "packages": [
         {
             "name": "behat/behat",
@@ -4215,6 +4215,86 @@
             "time": "2015-04-06 16:35:32"
         },
         {
+            "name": "weaving-the-web/search-bundle",
+            "version": "dev-master",
+            "target-dir": "WeavingTheWeb/Bundle/SearchBundle",
+            "source": {
+                "type": "git",
+                "url": "wtw:## FILL ME #### FILL ME ##",
+                "reference": "1c64206"
+            },
+            "require": {
+                "doctrine/dbal": "~2.3",
+                "doctrine/orm": "~2.3",
+                "friendsofsymfony/elastica-bundle": "~3.1",
+                "php": ">=5.4.8",
+                "symfony/symfony": "2.6.*",
+                "weaving-the-web/supervision-bundle": "dev-master"
+            },
+            "require-dev": {
+                "doctrine/doctrine-bundle": "~1.4",
+                "doctrine/doctrine-migrations-bundle": "dev-master",
+                "phpunit/phpunit": "3.7.29",
+                "sensio/framework-extra-bundle": "3.*",
+                "sensio/generator-bundle": "~2.3",
+                "symfony/monolog-bundle": "~2.6",
+                "weaving-the-web/quality-assurance-bundle": "dev-master#15e2801"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "WeavingTheWeb\\Bundle\\SearchBundle": ""
+                }
+            },
+            "authors": [
+                {
+                    "name": "Thierry Marianne",
+                    "homepage": "https://twitter.com/thierrymarianne"
+                }
+            ],
+            "description": "This bundle provides services for search",
+            "time": "2015-04-17 20:58:09"
+        },
+        {
+            "name": "weaving-the-web/supervision-bundle",
+            "version": "dev-master",
+            "target-dir": "WeavingTheWeb/Bundle/SupervisionBundle",
+            "source": {
+                "type": "git",
+                "url": "wtw:## FILL ME #### FILL ME ##",
+                "reference": "a7fc2d3"
+            },
+            "require": {
+                "doctrine/dbal": "~2.3",
+                "doctrine/orm": "~2.3",
+                "php": ">=5.4.8",
+                "symfony/symfony": "2.6.*"
+            },
+            "require-dev": {
+                "doctrine/doctrine-bundle": "~1.4",
+                "doctrine/doctrine-migrations-bundle": "dev-master",
+                "phpunit/phpunit": "3.7.29",
+                "sensio/framework-extra-bundle": "3.*",
+                "sensio/generator-bundle": "~2.3",
+                "symfony/monolog-bundle": "~2.6",
+                "weaving-the-web/quality-assurance-bundle": "dev-master#15e2801"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "WeavingTheWeb\\Bundle\\SupervisionBundle": ""
+                }
+            },
+            "authors": [
+                {
+                    "name": "Thierry Marianne",
+                    "homepage": "https://twitter.com/thierrymarianne"
+                }
+            ],
+            "description": "This bundle provides services for supervision",
+            "time": "2015-04-17 21:19:18"
+        },
+        {
             "name": "willdurand/jsonp-callback-validator",
             "version": "v1.1.0",
             "source": {
@@ -5623,6 +5703,8 @@
         "themattharris/tmhoauth": 20,
         "weaving-the-web/mail-bundle": 20,
         "weaving-the-web/newsfeed-bundle": 20,
+        "weaving-the-web/search-bundle": 20,
+        "weaving-the-web/supervision-bundle": 20,
         "phpspec/phpspec": 20
     },
     "prefer-stable": false,
