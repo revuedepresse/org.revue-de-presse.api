@@ -4,7 +4,7 @@ parameters:
     api_twitter_user_secret:                                    %api_twitter_user_secret_test%
     api_twitter_user_token:                                     %api_twitter_user_token_test%
 
-    basic_auth_pattern:                                         ^/(documents|github|user|api|mail|tweet)
+    basic_auth_pattern:                                         ^/(documents|github|user|api|mail|tweet|oauth)
 
     database_charset:                                           UTF8
     database_driver:                                            pdo_mysql
