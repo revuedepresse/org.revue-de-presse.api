@@ -7,8 +7,6 @@ use Doctrine\Common\Collections\ArrayCollection,
 use WTW\UserBundle\Model\User as BaseUser;
 
 /**
- * Class User
- *
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  * @package WTW\UserBundle\Entity
  *
