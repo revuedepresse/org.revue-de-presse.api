@@ -7,7 +7,7 @@ doctrine:
         result_cache_driver: apc
         query_cache_driver: apc
 
-assets:
+assetic:
     filters:
         uglifyjs:
             bin:  %kernel.root_dir%/Resources/node_modules/uglify-js/bin/uglifyjs
