@@ -1,31 +1,24 @@
 'use strict';
 
-weaverApp.factory('oauthAuthentication', ['$window', '$q', '$location',
-    function ($window, $q, $location) {
-
-        var authorizeClient = function () {
-            var clientId = '## FILL ME ##';
-            var redirectUri = $location.protocol() + '://' + $location.host() + '/mobile/app.html';
-
-            $window.location = '/oauth/v2/auth?client_id=' + clientId +
-                '&response_type=code' +
-                '&redirect_uri=' + encodeURIComponent(redirectUri)
-            ;
-        };
-
+weaverApp.factory('oauthAuthentication', ['$q', '$routeParams', '$rootScope',
+    function ($q, $routeParams, $rootScope) {
         return {
             request: function(config) {
-                config.headers = config.headers || {};
-                if ($window.oauthToken) {
-                    config.headers.Authorization = 'Bearer ' + $window.oauthToken;
-                } else {
-                    authorizeClient();
+                if (-1 !== config.url.indexOf('/api/twitter')) {
+                    config.headers = config.headers || {};
+                    if ($routeParams.oauth_token) {
+                        config.headers.Authorization = 'Bearer ' + $routeParams.oauth_token;
+                    }
                 }
 
                 return config || $q.when(config);
             },
-            response: function(response) {
-                return response || $q.when(response);
+            responseError: function(rejection) {
+                if (rejection.status === 401) {
+                    $rootScope.errors = ['Invalid access token'];
+                }
+
+                return $q.reject(rejection);
             }
         };
     }]
