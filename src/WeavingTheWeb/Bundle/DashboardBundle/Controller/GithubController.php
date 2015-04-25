@@ -33,7 +33,8 @@ class GithubController extends Controller
         return $this->render(
             'WeavingTheWebDashboardBundle:Github:showRepositories.html.twig', array(
                 'active_menu_item' => 'github_repositories',
-                'title'            => 'Github Starred Repositories'
+                'title'            => 'Github Starred Repositories',
+                'oauth_token'      => $this->container->getParameter('api_access_token')
             ));
     }
 }

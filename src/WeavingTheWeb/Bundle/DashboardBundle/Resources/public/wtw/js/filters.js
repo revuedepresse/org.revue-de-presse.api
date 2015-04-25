@@ -1,6 +1,6 @@
 'use strict';
 
-angular.module('WTW.filters', []).filter('title', function () {
+angular.module('repositoriesFilters', []).filter('title', function () {
         return function (input) {
             var capitalizedFirstLetter,
                 titleLength,
