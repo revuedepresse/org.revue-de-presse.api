@@ -9,9 +9,6 @@ use Doctrine\Orm\NoResultException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
- * Class PerspectiveController
- *
- * @package WeavingTheWeb\Bundle\DashboardBundle\Controller
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  *
  * @Extra\Route("/perspective")
