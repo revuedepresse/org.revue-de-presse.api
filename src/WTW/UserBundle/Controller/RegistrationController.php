@@ -96,6 +96,12 @@ class RegistrationController extends BaseController
             $error = '';
         }
 
+        if ($session->has('_security.target_path')) {
+            if (false !== strpos($session->get('_security.target_path'), $this->generateUrl('fos_oauth_server_authorize'))) {
+                $session->set('_fos_oauth_server.ensure_logout', true);
+            }
+        }
+
         if ($error) {
             $translator = $this->container->get('translator');
             $error = $translator->trans($error->getMessageKey(), [], 'security');
