@@ -1,0 +1,13 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}{{ 'title.authorization'|trans({}, 'authorization') }}{% endblock %}
+
+{% block body %}
+
+  <div class="container">
+    {{ 'oauth.request_authorization'| trans({}, 'authorization')  }}
+    {% include "FOSOAuthServerBundle:Authorize:authorize_content.html.twig" %}
+  </div>
+
+{% endblock %}
+

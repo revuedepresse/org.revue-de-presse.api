@@ -25,4 +25,9 @@ class Client extends BaseClient
     {
         parent::__construct();
     }
+
+    public function __toString()
+    {
+        return $this->getPublicId();
+    }
 }
