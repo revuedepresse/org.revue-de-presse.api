@@ -3,9 +3,14 @@
 namespace WeavingTheWeb\Bundle\ApiBundle\Controller;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
+
 use Doctrine\Common\Inflector\Inflector;
+
 use FOS\RestBundle\Request\ParamFetcherInterface;
 
+/**
+ * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ */
 abstract class ResourceController extends Controller
 {
     /**
