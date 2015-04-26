@@ -21,7 +21,7 @@ class Version20150326111307 extends AbstractMigration
         $this->addSql("CREATE TABLE weaving_facebook_interest (id INT AUTO_INCREMENT NOT NULL, native_id VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL, UNIQUE INDEX nativeId (native_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB");
         $this->addSql("ALTER TABLE mailbox_mail_uid ADD CONSTRAINT FK_F42524EB66EC35CC FOREIGN KEY (mailbox_id) REFERENCES mailbox (id)");
         $this->addSql("ALTER TABLE mailbox_mail_uid ADD CONSTRAINT FK_F42524EB8E72EBF0 FOREIGN KEY (mail_uid_id) REFERENCES mail_uid (id)");
-      
+
 
         $this->addSql("ALTER TABLE message DROP FOREIGN KEY FK_21806EA261E1892C");
         $this->addSql("ALTER TABLE header CHANGE hdr_id id INT AUTO_INCREMENT NOT NULL");
@@ -29,7 +29,6 @@ class Version20150326111307 extends AbstractMigration
         $this->addSql("CREATE INDEX cntId ON header (cnt_id)");
         $this->addSql("CREATE INDEX hdrImapUid ON header (hdr_imap_uid)");
 
-        $this->addSql("DROP INDEX UNIQ_B6BD307F61E1892C ON message");
         $this->addSql("ALTER TABLE message CHANGE hdr_id id INT NOT NULL");
         $this->addSql("ALTER TABLE message ADD CONSTRAINT FK_B6BD307FBF396750 FOREIGN KEY (id) REFERENCES header (id)");
         $this->addSql("CREATE UNIQUE INDEX UNIQ_B6BD307FBF396750 ON message (id)");
