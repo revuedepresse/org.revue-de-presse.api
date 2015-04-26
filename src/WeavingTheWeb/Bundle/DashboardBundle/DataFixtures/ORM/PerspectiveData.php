@@ -21,9 +21,8 @@ ORDER BY per_id DESC";
     public function load(ObjectManager $manager)
     {
         $updateTemporaryDataQueries = [
-            'nearly_valid_data_updating_perspective' => '# Update tmp_data' . "\n" . 'Update data SET jsn_hash = md5(jsn_value) LIMIT 1;',
-            'invalid_data_updating_perspective' => '# Update data' . "\n" . 'Update weaving_json SET jsn_hash = md5(jsn_value) LIMIT 1;',
-            'valid_data_updating_perspective' => '# Update tmp_data' . "\n" . 'Update tmp_data SET jsn_hash = md5(jsn_value) LIMIT 1;'
+            'valid_data_updating_perspective' => '# Update tmp_data' . "\n" .
+                'Update tmp_data SET jsn_hash = md5(jsn_value) LIMIT 1;'
         ];
 
         $propertiesCollection = [
@@ -36,21 +35,11 @@ ORDER BY per_id DESC";
                 'type' => Connection::QUERY_TYPE_DEFAULT,
                 'hash' => sha1(self::DEFAULT_QUERY),
             ], [
-                'name' => 'invalid_data_updating_perspective',
-                'value' => $updateTemporaryDataQueries['invalid_data_updating_perspective'],
-                'type' => Connection::QUERY_TYPE_DEFAULT,
-                'hash' => sha1($updateTemporaryDataQueries['invalid_data_updating_perspective']),
-            ], [
                 'name' => 'valid_data_updating_perspective',
                 'value' => $updateTemporaryDataQueries['valid_data_updating_perspective'],
                 'type' => Connection::QUERY_TYPE_DEFAULT,
                 'hash' => sha1($updateTemporaryDataQueries['valid_data_updating_perspective']),
-            ], [
-                'name' => 'nearly_valid_data_updating_perspective',
-                'value' => $updateTemporaryDataQueries['nearly_valid_data_updating_perspective'],
-                'type' => Connection::QUERY_TYPE_DEFAULT,
-                'hash' => sha1($updateTemporaryDataQueries['nearly_valid_data_updating_perspective']),
-            ]
+            ],
         ];
 
         foreach ($propertiesCollection as $properties) {

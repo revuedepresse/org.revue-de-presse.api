@@ -9,9 +9,6 @@ use Doctrine\Orm\NoResultException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
- * Class PerspectiveController
- *
- * @package WeavingTheWeb\Bundle\DashboardBundle\Controller
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  *
  * @Extra\Route("/perspective")
@@ -134,7 +131,7 @@ class PerspectiveController extends ContainerAware
          * @var \Symfony\Component\Validator\Validator $validator
          */
         $validator = $this->container->get('validator');
-            $constraintsViolationsList = $validator->validate($perspective, ['public_perspectives']);
+        $constraintsViolationsList = $validator->validate($perspective, ['public_perspectives']);
 
         return count($constraintsViolationsList) === 0;
     }

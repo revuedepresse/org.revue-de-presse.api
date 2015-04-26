@@ -3,22 +3,26 @@
 namespace WeavingTheWeb\Bundle\ApiBundle\DependencyInjection;
 
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+
 use Symfony\Component\Config\FileLocator;
-use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\DefinitionDecorator;
-use Symfony\Component\DependencyInjection\Reference;
+
+use Symfony\Component\DependencyInjection\Definition,
+    Symfony\Component\DependencyInjection\DefinitionDecorator,
+    Symfony\Component\DependencyInjection\Reference,
+    Symfony\Component\DependencyInjection\Loader;
+
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
-use Symfony\Component\DependencyInjection\Loader;
+
+use WeavingTheWeb\Bundle\SearchBundle\DependencyInjection\AbstractSearchProviderAware;
 
 /**
- * This is the class that loads and manages your bundle configuration
- *
- * To learn more see {@link http://symfony.com/doc/current/cookbook/bundles/extension.html}
+ * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
-class WeavingTheWebApiExtension extends Extension
+class WeavingTheWebApiExtension extends AbstractSearchProviderAware
 {
     /**
-     * {@inheritDoc}
+     * @param array $configs
+     * @param ContainerBuilder $container
      */
     public function load(array $configs, ContainerBuilder $container)
     {
@@ -28,28 +32,39 @@ class WeavingTheWebApiExtension extends Extension
         $loader = new Loader\XmlFileLoader($container, new FileLocator(__DIR__ . '/../Resources/config'));
         $loader->load('services.xml');
 
-        $environment = $container->getParameter('kernel.environment');
-        if (
-            $environment === 'bdd' ||
-            $environment === 'lightweight' ||
-            $environment === 'test'
-        )
-        {
-            $searchIndex = 'twitter_test';
-        } else {
-            $searchIndex = 'twitter';
-        }
+        $searchIndex  = $container->getParameter('twitter_search_index');
 
+        $this->defineSearchProvider($container, $searchIndex, 'user_status');
+    }
+
+    /**
+     * @param ContainerBuilder $container
+     * @param $searchIndex
+     * @param $type
+     */
+    public function defineSearchProvider(ContainerBuilder $container, $searchIndex, $type)
+    {
         $definitionDecorator = new DefinitionDecorator('fos_elastica.provider.prototype.orm');
-        $container->setDefinition('weaving_the_web.search_provider.user_status', $definitionDecorator)
-            ->setClass('%weaving_the_web.api.search_provider.user_status.class%')
+
+        $container->setDefinition('weaving_the_web_api.search_provider.' . $type, $definitionDecorator)
+            ->setClass('%weaving_the_web.api.search_provider.' . $type . '.class%')
             ->replaceArgument(
-                0, new Reference('fos_elastica.object_persister.' . $searchIndex . '.user_status')
+                0, new Reference('fos_elastica.object_persister.' . $searchIndex . '.' . $type)
             )->replaceArgument(
-                1, '%weaving_the_web.api.user_status%'
+                1, new Reference('fos_elastica.indexable')
             )->replaceArgument(
-                2, ['query_builder_method' => 'createRemainingUserStatusQueryBuilder']
-            )
-            ->addTag('fos_elastica.provider', ['index' => 'twitter', 'type' => 'user_status']);
+                2, '%weaving_the_web.api.entity.' . $type . '.class%'
+            )->replaceArgument(
+                3, [
+                    'query_builder_method' => 'createRemainingUserStatusQueryBuilder',
+                    'indexName' => $searchIndex,
+                    'typeName' => $type
+                ]
+            )->replaceArgument(
+                4, new Reference('doctrine')
+            )->setProperty('moderator', new Reference('weaving_the_web_supervision.moderator.memory_usage'))
+            ->setProperty('translator', new Reference('translator'))
+            ->setProperty('logger', new Reference('logger'))
+            ->addTag('fos_elastica.provider', ['index' => $searchIndex, 'type' => $type]);
     }
 }

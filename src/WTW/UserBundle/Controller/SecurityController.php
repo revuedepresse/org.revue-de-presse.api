@@ -13,8 +13,6 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 
 /**
- * Class SecurityController
- *
  * @Extra\Route(service="wtw.user.security_controller")
  * @package WTW\DashboardBundle\Controller
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>

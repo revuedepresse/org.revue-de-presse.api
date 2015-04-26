@@ -6,6 +6,8 @@ Use Symfony\Component\Translation\Translator,
     Symfony\Component\Validator\ConstraintValidator,
     Symfony\Component\Validator\Constraint;
 
+use Symfony\Component\Translation\TranslatorInterface;
+
 /**
  * Class QueryValidator
  *
@@ -15,11 +17,11 @@ Use Symfony\Component\Translation\Translator,
 class QueryValidator extends ConstraintValidator
 {
     /**
-     * @var $translator Translator
+     * @var \Symfony\Component\Translation\LoggingTranslator
      */
     protected $translator;
 
-    public function setTranslator(Translator $translator)
+    public function setTranslator(TranslatorInterface $translator)
     {
         $this->translator = $translator;
     }
@@ -113,8 +115,8 @@ class QueryValidator extends ConstraintValidator
     }
 
     /**
-     * @param $sql
-     *
+     * @param $needle
+     * @param $haystack
      * @return bool
      */
     public function assertContains($needle, $haystack)

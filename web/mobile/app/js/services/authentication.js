@@ -1,22 +1,25 @@
 'use strict';
 
-weaverApp.factory('authentication', ['$q',
-    function ($q) {
+weaverApp.factory('oauthAuthentication', ['$q', '$routeParams', '$rootScope',
+    function ($q, $routeParams, $rootScope) {
         return {
-            'response': function (response) {
-                if (!_.isUndefined(response.data) && !_.isUndefined(response.data.csrf_token)) {
-                    return $q.reject({
-                        data: {
-                            info: 'Please authenticate first in order to use this application.'
-                        },
-                        status: 302,
-                        headers: response.headers,
-                        config: response.config
-                    });
+            request: function(config) {
+                if (-1 !== config.url.indexOf('/api/twitter')) {
+                    config.headers = config.headers || {};
+                    if ($routeParams.oauth_token) {
+                        config.headers.Authorization = 'Bearer ' + $routeParams.oauth_token;
+                    }
                 }
 
-                return response;
+                return config || $q.when(config);
+            },
+            responseError: function(rejection) {
+                if (rejection.status === 401) {
+                    $rootScope.errors = ['Invalid access token'];
+                }
+
+                return $q.reject(rejection);
             }
-        }
-    }
-]);
+        };
+    }]
+);

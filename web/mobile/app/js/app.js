@@ -10,17 +10,19 @@ var weaverApp = angular.module('weaverApp', [
 ]);
 
 weaverApp.config(['$routeProvider', function($routeProvider) {
-    $routeProvider.when('/:username', {
-        templateUrl: '/mobile/app/partials/statuses.html',
-        controller: 'ShowStatusesAction'
+    $routeProvider.when('/:username/:oauth_token', {
+        controller: 'ShowStatusesAction',
+        templateUrl: '/mobile/app/partials/statuses.html'
     });
+
     $routeProvider.when('/bookmarks/:username', {
-        templateUrl: '/mobile/app/partials/bookmarks.html',
-        controller: 'ShowBookmarksAction'
+        controller: 'ShowBookmarksAction',
+        templateUrl: '/mobile/app/partials/bookmarks.html'
     });
+
     $routeProvider.otherwise({redirectTo: '/'});
 }]);
 
 weaverApp.config(['$httpProvider', function ($httpProvider) {
-    $httpProvider.interceptors.push('authentication');
+    $httpProvider.interceptors.push('oauthAuthentication');
 }]);

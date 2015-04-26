@@ -58,7 +58,7 @@ twitterStatuses.controller('ShowStatusesAction', [
                 $scope.synced = false;
                 $scope.$apply();
             }
-        }
+        };
 
         $scope.toggle = function (statusId, screenName) {
             if ($scope.users[screenName].statuses[statusId].starred) {
@@ -66,19 +66,19 @@ twitterStatuses.controller('ShowStatusesAction', [
             } else {
                 $scope.star(statusId, screenName);
             }
-        }
+        };
 
         $scope.star = function (statusId, screenName) {
             setTweetStarringStatus(statusId, screenName, true);
-        }
+        };
 
         $scope.unstar = function (statusId, screenName) {
             setTweetStarringStatus(statusId, screenName, false);
-        }
+        };
 
         $scope.showMoreStatuses = function () {
             twitter.showMoreStatuses($scope, $routeParams);
-        }
+        };
 
         $scope.sync = function () {
             var host = $location.protocol() + '://' + $location.host(),
@@ -93,7 +93,7 @@ twitterStatuses.controller('ShowStatusesAction', [
                     $scope.synced = true;
                     $scope.errors = undefined;
                 }
-            }
+            };
 
             angular.forEach(keys, function (statusId) {
                 var actionUrl,

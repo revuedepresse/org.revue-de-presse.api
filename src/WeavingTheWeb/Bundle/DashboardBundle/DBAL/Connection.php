@@ -3,10 +3,13 @@
 namespace WeavingTheWeb\Bundle\DashboardBundle\DBAL;
 
 use Doctrine\ORM\EntityManager;
+
 use WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints\Query;
+
 use Psr\Log\LoggerInterface;
+
 use Symfony\Component\Translation\Translator,
-    Symfony\Component\Validator\Validator;
+    Symfony\Component\Validator\Validator\LegacyValidator as Validator;
 
 /**
  * Class Connection

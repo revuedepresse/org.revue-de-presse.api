@@ -34,12 +34,14 @@ class AppKernel extends Kernel
             new WTW\UserBundle\WTWUserBundle(),
             new WeavingTheWeb\Bundle\UserBundle\WeavingTheWebUserBundle(),
             // API
+            new FOS\OAuthServerBundle\FOSOAuthServerBundle(),
             new FOS\RestBundle\FOSRestBundle(),
             new FOS\TwitterBundle\FOSTwitterBundle(),
             new WeavingTheWeb\Bundle\ApiBundle\WeavingTheWebApiBundle(),
-            new WeavingTheWeb\Bundle\MailBundle\WeavingTheWebMailBundle(),
-            new WeavingTheWeb\Bundle\TwitterBundle\WeavingTheWebTwitterBundle(),
             new WeavingTheWeb\Bundle\DataMiningBundle\WeavingTheWebDataMiningBundle(),
+            new WeavingTheWeb\Bundle\MailBundle\WeavingTheWebMailBundle(),
+            new WeavingTheWeb\Bundle\NewsfeedBundle\WeavingTheWebNewsfeedBundle(),
+            new WeavingTheWeb\Bundle\TwitterBundle\WeavingTheWebTwitterBundle(),
             // Search
             new FOS\ElasticaBundle\FOSElasticaBundle(),
             new WeavingTheWeb\Bundle\MappingBundle\WeavingTheWebMappingBundle(),
@@ -66,6 +68,7 @@ class AppKernel extends Kernel
             new Liip\UrlAutoConverterBundle\LiipUrlAutoConverterBundle(),
             // Quality assurance
             new WTW\CodeGeneration\QualityAssuranceBundle\WTWCodeGenerationQualityAssuranceBundle(),
+            new WeavingTheWeb\Bundle\SupervisionBundle\WeavingTheWebSupervisionBundle(),
             // Code analysis
             new WTW\CodeGeneration\AnalysisBundle\WTWCodeGenerationAnalysisBundle(),
             new WeavingTheWeb\Bundle\Legacy\ProviderBundle\WeavingTheWebLegacyProviderBundle(),
@@ -111,8 +114,5 @@ class AppKernel extends Kernel
     public function registerContainerConfiguration(LoaderInterface $loader)
     {
         $loader->load(__DIR__ . '/config/environment/config_' . $this->getEnvironment() . '.yml');
-        if (in_array($this->getEnvironment(), array('test'))) {
-            $loader->load(__DIR__ . '/config/environment/services_' . $this->getEnvironment() . '.xml', 'xml');
-        }
     }
 }
