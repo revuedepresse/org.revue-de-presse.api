@@ -24,6 +24,13 @@ parameters:
     test_database_memory:       false
     test_database_path:         %kernel.cache_dir%/wtw_dashboard.db
 
+    php_binary:                 /usr/bin/php
+
+    facebook_app_id:            ~
+    facebook_app_secret:        ~
+    facebook_redirect_url:      ~
+    facebook_oauth_token:       ~
+
     api_client id:              ~
     api_client_secret:          ~
     api_access_token:           ~
