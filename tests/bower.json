@@ -1,0 +1,24 @@
+{
+  "name": "tests",
+  "version": "0.1",
+  "authors": [
+    "Thierry Marianne <thierry.marianne@weaving-the-web.org>"
+  ],
+  "description": "Tests suite for Weaving The Web",
+  "main": "index.js",
+  "keywords": [
+    "Weaving The Web"
+  ],
+  "license": "MIT",
+  "homepage": "https://thierry.marianne.io",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "angular-mocks": "~1.3.15"
+  }
+}

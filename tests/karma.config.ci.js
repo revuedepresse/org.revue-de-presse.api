@@ -22,7 +22,7 @@ module.exports = function (config) {
             '../web/mobile/app/js/*.js',
             '../web/mobile/app/js/controllers/*.js',
             '../web/mobile/app/js/services/*.js',
-            'angular-mocks.js',
+            'bower_components/angular-mocks/angular-mocks.js',
             'location-mock.js',
             'test-*.js'
         ],
