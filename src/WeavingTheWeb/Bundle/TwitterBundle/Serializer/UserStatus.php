@@ -158,9 +158,7 @@ class UserStatus
     {
         $availableTwitterApi = false;
 
-        /**
-         * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token
-         */
+        /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token */
         $token = $this->tokenRepository->refreshFreezeCondition($this->accessor->userToken, $this->logger);
 
         if (!$token->isFrozen()) {
@@ -176,13 +174,23 @@ class UserStatus
                 }
             }
         } else {
-            $now = new \DateTime;
-            $this->moderator->waitFor(
-                $token->getFrozenUntil()->getTimestamp() - $now->getTimestamp(),
-                [
-                    '{{ token }}' => substr($token->getOauthToken(), 0, '8'),
-                ]
-            );
+            /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $unfrozenToken */
+            $unfrozenToken = $this->tokenRepository->findFirstUnfrozenToken();
+            if (is_null($unfrozenToken)) {
+                $now = new \DateTime;
+                $this->moderator->waitFor(
+                    $token->getFrozenUntil()->getTimestamp() - $now->getTimestamp(),
+                    [
+                        '{{ token }}' => substr($token->getOauthToken(), 0, '8'),
+                    ]
+                );
+            } else {
+                $this->setupAccessor([
+                    'token' => $unfrozenToken->getOauthToken(),
+                    'secret' => $unfrozenToken->getOauthTokenSecret()]
+                );
+                $availableTwitterApi = true;
+            }
         }
 
         return $availableTwitterApi;

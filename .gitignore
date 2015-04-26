@@ -1,58 +1,25 @@
+# environment
 *.DS_Store
 *.pyc
-
-.bowerrc
-
 *~*
-
 /.idea/*
-/api/*
+
 /build/*
 !/build/.gitignore
 
-# api :: twitter
-api/.htaccess
+/devops/files/*.tar.gz
 
-# dependencies management
-composer.phar
-
-# sessions
-app/var/sessions/*
-!app/var/sessions/.gitignore
-
-/behat
-/bin/phpspec
-
+# dependencies
+.bowerrc
+/bin/webunit
 /bin/behat
 /bin/phpunit
 /bin/phpspec
-
-/check_wtw.php
-
-/app/cache
-/app/logs
-
-/api/lib/Smarty/demo
-/api/lib/Smarty/www-data
-
-/app/*.xml
-
-/app/cache
-/app/config/*.yml
-/app/logs
-/app/SymfonyRequirements.php
-
-/devops/files/*.tar.gz
-/mobile
-
+bower_components/
+composer.phar
 /node_modules
-
 /src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/components
-
-/app/bootstrap.php.cache
-
 /vendor
-/vendor-no-dev
 
 /web/assetic
 /web/bundles
@@ -60,9 +27,14 @@ app/var/sessions/*
 /web/js
 /web/images
 
+# legacy
+api/.htaccess
+/api/lib/Smarty/demo
+/api/lib/Smarty/www-data
 /api/twitter/timeline/user_timeline_*
 /api/twitter/favorite/*
-
 /blog
+/check_wtw.php
+/mobile
 /snapshots
 /unit.testing/*.testing.subversion.log.php

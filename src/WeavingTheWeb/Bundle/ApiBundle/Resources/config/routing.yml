@@ -5,6 +5,10 @@ feeds:
     options:
         expose: true
 
+oauth:
+    resource: WeavingTheWeb\Bundle\ApiBundle\Controller\OAuthController
+    type:     annotation
+
 repositories:
     resource: WeavingTheWeb\Bundle\ApiBundle\Controller\GithubController
     type:     rest

@@ -2,15 +2,18 @@
 
 namespace WTW\UserBundle\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection,
-    Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\Collection,
+    Doctrine\Common\Collections\ArrayCollection;
+
+use Doctrine\ORM\Mapping as ORM;
+
+use WeavingTheWeb\Bundle\UserBundle\Entity\Role;
+
 use WTW\UserBundle\Model\User as BaseUser;
 
 /**
- * Class User
  *
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
- * @package WTW\UserBundle\Entity
  *
  * @ORM\Table(
  *      name="weaving_user",
@@ -211,7 +214,7 @@ class User extends BaseUser
     protected $positionInHierarchy;
 
     /**
-     * @ORM\ManyToMany(targetEntity="WeavingTheWeb\Bundle\UserBundle\Entity\Role", inversedBy="users")
+     * @ORM\ManyToMany(targetEntity="WeavingTheWeb\Bundle\UserBundle\Entity\Role", inversedBy="users", fetch="EAGER")
      * @ORM\JoinTable(name="weaving_user_role",
      *      joinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="usr_id")},
      *      inverseJoinColumns={@ORM\JoinColumn(name="role_id", referencedColumnName="id")}
@@ -845,24 +848,11 @@ class User extends BaseUser
      */
     public function getRoles()
     {
-        if (is_null($this->roles) || (!$this->roles instanceof ArrayCollection)) {
-            $collection = new ArrayCollection();
-
-            foreach ($this->roles as $role) {
-                $role = (string) $role;
-                if (!$collection->contains($role)) {
-                    $collection->add($role);
-                }
-            }
-
-            if (!$collection->contains(self::ROLE_DEFAULT)) {
-                $collection->add(self::ROLE_DEFAULT);
-            }
-
-            $this->roles = $collection;
+        if ($this->roles instanceof Collection) {
+            return $this->roles->toArray();
+        } else {
+            return $this->roles;
         }
-
-        return $this->roles->toArray();
     }
 
     /**

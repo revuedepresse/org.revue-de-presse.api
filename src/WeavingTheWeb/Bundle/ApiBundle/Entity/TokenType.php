@@ -2,6 +2,8 @@
 
 namespace WeavingTheWeb\Bundle\ApiBundle\Entity;
 
+use Doctrine\Common\Collections\ArrayCollection;
+
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -15,6 +17,11 @@ class TokenType
     const USER = 'user';
 
     const APPLICATION = 'application';
+
+    public function __construct()
+    {
+        $this->tokens = new ArrayCollection();
+    }
 
     /**
      * @var integer
@@ -64,4 +71,32 @@ class TokenType
     {
         return $this->name;
     }
+
+    /**
+     * @var ArrayCollection
+     * @ORM\OneToMany(targetEntity="Token", mappedBy="type")
+     */
+    protected $tokens;
+
+    public function getTokens()
+    {
+        return $this->tokens;
+    }
+
+    /**
+     * @param $token
+     */
+    public function addToken($token)
+    {
+        $this->tokens->add($token);
+    }
+
+    /**
+     * @param $token
+     */
+    public function removeToken($token)
+    {
+        $this->tokens->remove($token);
+    }
+
 }

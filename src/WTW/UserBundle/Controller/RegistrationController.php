@@ -3,18 +3,25 @@
 namespace WTW\UserBundle\Controller;
 
 use Doctrine\DBAL\DBALException;
+
 use FOS\UserBundle\Controller\RegistrationController as BaseController,
     FOS\UserBundle\Event\UserEvent,
     FOS\UserBundle\FOSUserEvents,
     FOS\UserBundle\Event\FormEvent,
     FOS\UserBundle\Event\FilterUserResponseEvent;
+
 use Symfony\Component\HttpFoundation\RedirectResponse,
-    Symfony\Component\HttpFoundation\Request,
-    Symfony\Component\Security\Core\SecurityContext,
-    Symfony\Component\Form\FormError,
-    Symfony\Component\Form\FormInterface,
-    Symfony\Component\Validator\Constraints\Email,
-    Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
+    Symfony\Component\HttpFoundation\Request;
+
+use Symfony\Component\Security\Core\SecurityContext;
+
+use Symfony\Component\Form\FormError,
+    Symfony\Component\Form\FormInterface;
+
+use Symfony\Component\Validator\Constraints\Email;
+
+use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
+
 use Symfony\Component\Validator\Constraints\NotBlank;
 
 class RegistrationController extends BaseController
@@ -89,6 +96,12 @@ class RegistrationController extends BaseController
             $error = '';
         }
 
+        if ($session->has('_security.target_path')) {
+            if (false !== strpos($session->get('_security.target_path'), $this->generateUrl('fos_oauth_server_authorize'))) {
+                $session->set('_fos_oauth_server.ensure_logout', true);
+            }
+        }
+
         if ($error) {
             $translator = $this->container->get('translator');
             $error = $translator->trans($error->getMessageKey(), [], 'security');
@@ -137,6 +150,10 @@ class RegistrationController extends BaseController
             $user->setEnabled(false);
             $user->setLocked(false);
             $userManager->updateUser($user);
+
+            /** @var \FOS\UserBundle\Util\UserManipulator $userManipulator */
+            $userManipulator = $this->container->get('fos_user.util.user_manipulator');
+            $userManipulator->addRole($user->getUsername(), $user::ROLE_DEFAULT);
 
             if (null === $response = $event->getResponse()) {
                 $url = $this->container->get('router')->generate('fos_user_registration_confirmed');

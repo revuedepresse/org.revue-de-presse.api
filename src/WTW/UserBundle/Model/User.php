@@ -5,6 +5,7 @@ namespace WTW\UserBundle\Model;
 use Doctrine\Common\Collections\Collection,
     Doctrine\Common\Collections\ArrayCollection,
     Doctrine\ORM\Mapping as ORM;
+
 use FOS\UserBundle\Model\UserInterface,
     FOS\UserBundle\Model\GroupableInterface,
     FOS\UserBundle\Model\GroupInterface;
@@ -297,13 +298,22 @@ abstract class User implements UserInterface, GroupableInterface
      *
      *         $securityContext->isGranted('ROLE_USER');
      *
-     * @param string $role
+     * @param string $roleName
      *
      * @return boolean
      */
-    public function hasRole($role)
+    public function hasRole($roleName)
     {
-        return in_array(strtoupper($role), $this->getRoles(), true);
+        $roles = $this->getRoles();
+
+        /** @var \WeavingTheWeb\Bundle\UserBundle\Entity\Role $role */
+        foreach ($roles as $role) {
+            if ($role->getRole() === $roleName) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function isAccountNonExpired()

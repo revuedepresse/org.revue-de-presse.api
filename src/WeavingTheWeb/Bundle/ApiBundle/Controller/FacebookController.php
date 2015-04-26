@@ -7,9 +7,7 @@ use FOS\RestBundle\Controller\Annotations as Rest,
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
 
 /**
- * Class FacebookController
- *
- * @package WeavingTheWeb\Bundle\ApiBundle\Controller
+ * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
  *
  * @Rest\NamePrefix("weaving_the_web_api_")
  */

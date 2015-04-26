@@ -22,6 +22,18 @@
         {
             "type": "git",
             "url": "wtw:## FILL ME #### FILL ME ##"
+        },
+        {
+            "type": "git",
+            "url": "wtw:## FILL ME #### FILL ME ##"
+        },
+        {
+            "type": "git",
+            "url": "wtw:## FILL ME #### FILL ME ##"
+        },
+        {
+            "type": "git",
+            "url": "wtw:## FILL ME #### FILL ME ##"
         }
     ],
     "require": {
@@ -33,14 +45,13 @@
         "behat/mink-selenium2-driver": "1.*",
         "behat/mink-zombie-driver": "1.1.*",
         "behat/symfony2-extension": "1.*",
+        "doctrine/inflector": "1.*",
         "doctrine/doctrine-bundle": "1.2.*",
         "doctrine/doctrine-fixtures-bundle": "2.2.*",
         "doctrine/doctrine-migrations-bundle": "dev-master",
-        "doctrine/inflector": "1.*",
-        "doctrine/orm": ">=2.2.3,<2.4-dev",
         "elao/web-profiler-extra-bundle": "dev-master",
-        "friendsofsymfony/elastica-bundle": "dev-master",
-        "friendsofsymfony/jsrouting-bundle": "1.2.*",
+        "friendsofsymfony/elastica-bundle": "~3.1",
+        "friendsofsymfony/jsrouting-bundle": "1.5.*",
         "friendsofsymfony/rest-bundle": "0.*",
         "friendsofsymfony/twitter-bundle": "dev-master#f837424a069425721c1a744bdc60bb2869a8c691",
         "friendsofsymfony/user-bundle": "dev-master",
@@ -51,23 +62,27 @@
         "jms/serializer-bundle": "dev-master",
         "kertz/twitteroauth": "dev-master",
         "knplabs/knp-markdown-bundle": "1.3.*",
-        "oldsound/rabbitmq-bundle": " dev-master",
-        "ornicar/apc-bundle": "dev-master",
+        "oldsound/rabbitmq-bundle": "dev-master",
+        "ornicar/apc-bundle": "dev-master#0ddd8f3",
         "php": ">=5.4.8",
         "predis/predis": "0.8.*",
         "snc/redis-bundle": "1.1.*",
         "symfony/assetic-bundle": "2.3.*",
         "symfony/monolog-bundle": "2.6.*",
-        "symfony/symfony": "2.4.2",
+        "symfony/symfony": "2.6.*",
         "sensio/distribution-bundle": "3.*",
         "sensio/framework-extra-bundle": "3.*",
         "sensio/generator-bundle": "2.3.*",
         "sp/bower-bundle": "*",
         "themattharris/tmhOAuth": "dev-master",
         "twig/extensions": "1.0.*",
-        "weaving-the-web/mail-bundle": "dev-master#fa7b701372b989d800db5d8d9b9b933a5aca60a2",
         "braincrafted/bootstrap-bundle": "2.0.1",
-        "liip/url-auto-converter-bundle": "1.0.1"
+        "liip/url-auto-converter-bundle": "1.0.1",
+        "weaving-the-web/mail-bundle": "dev-master#5b11151",
+        "weaving-the-web/newsfeed-bundle": "dev-master#1543ff9",
+        "weaving-the-web/search-bundle": "dev-master#1c64206",
+        "weaving-the-web/supervision-bundle": "dev-master#a7fc2d3",
+        "friendsofsymfony/oauth-server-bundle": "1.4.2"
     },
     "require-dev": {
         "phpunit/phpunit": "3.7.29",

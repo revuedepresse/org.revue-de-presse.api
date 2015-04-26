@@ -137,7 +137,7 @@ weaverApp.factory('twitter', ['$http', '$location', '$log', '$routeParams', '$ti
             if (_.isUndefined($scope.users)) {
                 $scope.users = {};
             }
-        }
+        };
 
         var sortUserStatuses = function ($scope) {
             _.each($scope.users, function (item, screenName) {

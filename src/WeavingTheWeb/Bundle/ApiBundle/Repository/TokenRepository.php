@@ -3,13 +3,13 @@
 namespace WeavingTheWeb\Bundle\ApiBundle\Repository;
 
 use Doctrine\ORM\EntityRepository;
-use WeavingTheWeb\Bundle\ApiBundle\Entity\Token;
+
 use Psr\Log\LoggerInterface;
-use WeavingTheWeb\Bundle\ApiBundle\Entity\TokenType;
+
+use WeavingTheWeb\Bundle\ApiBundle\Entity\Token,
+    WeavingTheWeb\Bundle\ApiBundle\Entity\TokenType;
 
 /**
- * Class TokenRepository
- * @package WeavingTheWeb\Bundle\UserBundle\Repository
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
 class TokenRepository extends EntityRepository
@@ -25,6 +25,12 @@ class TokenRepository extends EntityRepository
         $now = new \DateTime();
         $token->setCreatedAt($now);
         $token->setUpdatedAt($now);
+
+        $tokenRepository = $this->getEntityManager()->getRepository('WeavingTheWebApiBundle:TokenType');
+
+        /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\TokenType $tokenType */
+        $tokenType = $tokenRepository->findOneBy(['name' => TokenType::USER]);
+        $token->setType($tokenType);
 
         $token->setOauthToken($properties['oauth_token']);
         $token->setOauthTokenSecret($properties['oauth_token_secret']);
@@ -59,9 +65,7 @@ class TokenRepository extends EntityRepository
     {
         $frozen = false;
 
-        /**
-         * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token
-         */
+        /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token */
         $token = $this->findOneBy(['oauthToken' => $oauthToken]);
 
         if (is_null($token)) {
@@ -113,5 +117,28 @@ class TokenRepository extends EntityRepository
         $entityManager->flush();
 
         return $token;
+    }
+
+    /**
+     * @return array
+     */
+    public function findFirstUnfrozenToken()
+    {
+        $queryBuilder = $this->createQueryBuilder('t');
+
+        $tokenRepository = $this->getEntityManager()->getRepository('WeavingTheWebApiBundle:TokenType');
+        $tokenType = $tokenRepository->findOneBy(['name' => TokenType::USER]);
+
+        $queryBuilder->andWhere('t.type = :type');
+        $queryBuilder->setParameter('type', $tokenType);
+
+        $queryBuilder->andWhere('t.oauthTokenSecret IS NOT NULL');
+
+        $queryBuilder->andWhere('(t.frozenUntil IS NULL or t.frozenUntil < :now)');
+        $queryBuilder->setParameter('now', new \DateTime());
+
+        $queryBuilder->setMaxResults(1);
+
+        return $queryBuilder->getQuery()->getSingleResult();
     }
 }
