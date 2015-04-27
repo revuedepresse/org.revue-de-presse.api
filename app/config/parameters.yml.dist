@@ -31,7 +31,7 @@ parameters:
     facebook_redirect_url:      ~
     facebook_oauth_token:       ~
 
-    api_client id:              ~
+    api_client_id:              ~
     api_client_secret:          ~
     api_access_token:           ~
 
