@@ -7,11 +7,27 @@ use FOS\RestBundle\Controller\Annotations as Rest,
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
 
+use Symfony\Component\HttpFoundation\Request,
+    Symfony\Component\HttpFoundation\Response;
+
 /**
  * @Rest\NamePrefix("weaving_the_web_api_")
  */
 class TwitterController extends ResourceController
 {
+    /**
+     * @param Request $request
+     * @return Response
+     */
+    public function optionsUsersStreamsAction(Request $request)
+    {
+        return new Response('', 200, [
+            'Access-Control-Allow-Origin' => $request->getHost(),
+            'Access-Control-Allow-Methods' => 'GET, POST',
+            'Access-Control-Allow-Headers' => 'Autorization'
+        ]);
+    }
+
     /**
      * Get stream items
      *
