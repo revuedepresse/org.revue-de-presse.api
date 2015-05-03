@@ -48,6 +48,7 @@ class ModerateIndexPopulationCommand extends PopulateIndexCommand
 
             $projectDir = $this->getContainer()->getParameter('kernel.root_dir') . '/..';
             $process = new Process($command, $projectDir);
+            $process->setTimeout(3600);
             $process->run();
             if (!$process->isSuccessful()) {
                 throw new \RuntimeException($process->getErrorOutput());

@@ -6,6 +6,7 @@ use FOS\ElasticaBundle\Command\PopulateCommand as BaseCommand;
 use Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Input\InputOption,
     Symfony\Component\Console\Output\OutputInterface;
+use WeavingTheWeb\Bundle\MailBundle\Exception\ExceededMemoryException;
 
 /**
  * Populate the search index
@@ -48,11 +49,15 @@ class PopulateIndexCommand extends BaseCommand
         } else {
             $noReset = true;
         }
+
         $input->setOption('no-reset', $noReset);
 
-        parent::execute($input, $output);
-
-        $output->writeln($this->getNoLeftoversMessage());
+        try {
+            parent::execute($input, $output);
+            $output->writeln($this->getNoLeftoversMessage());
+        } catch (ExceededMemoryException $exception) {
+            $output->writeln($exception->getMessage());
+        }
     }
 
     /**
