@@ -4,6 +4,10 @@ namespace WeavingTheWeb\Bundle\DashboardBundle\Controller;
 
 use Elastica\Exception\Connection\HttpException;
 
+use Elastica\Query;
+
+use Elastica\QueryBuilder\DSL\Aggregation;
+
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
@@ -47,10 +51,7 @@ class TweetController extends Controller
      */
     protected function showTweetsContaining($subject)
     {
-        $searchIndex = $this->container->getParameter('twitter_search_index');
-
-        /** @var \FOS\ElasticaBundle\Finder\FinderInterface $finder */
-        $finder = $this->container->get('fos_elastica.finder.' . $searchIndex . '.user_status');
+        $finder = $this->getFinder();
         $gitHubRelatedTweets = array();
 
         try {
@@ -66,5 +67,56 @@ class TweetController extends Controller
                 'tweets' => $gitHubRelatedTweets,
             ]
         );
+    }
+
+    /**
+     * @Extra\Route("/from-people-talking-about/{keywords}", name="weaving_the_web_dashboard_people_talking_about")
+     * @Extra\Method({"GET"})
+     */
+    public function aggregateFilteredTermsAction($keywords)
+    {
+        $match = new Query\Match();
+        $match->setField('text', $keywords);
+
+        $query = new Query($match);
+
+        $aggregation = new Aggregation();
+        $termsAggregation = $aggregation->terms('aggregation_on_screen_name');
+        $termsAggregation->setField('screenName');
+
+        $query->addAggregation($termsAggregation);
+        $query->setSize(100);
+        $query->setExplain(true);
+
+        /** @var \FOS\ElasticaBundle\Finder\FinderInterface $finder */
+        $finder = $this->getFinder();
+        $screenNames = $finder->find($query);
+
+        /** @var \Symfony\Component\Translation\Translator $translator */
+        $translator = $this->get('translator');
+        $title = $translator->trans(
+            'title.tweet.people_talking_about',
+            ['{{ keywords }}' => $keywords],
+            'dashboard'
+        );
+
+        return $this->render(
+            'WeavingTheWebDashboardBundle:Tweet:showScreenNames.html.twig',
+            [
+                'active_menu_item' => 'tweets',
+                'title' => $title,
+                'screen_names' => $screenNames,
+            ]
+        );
+    }
+
+    /**
+     * @return \FOS\ElasticaBundle\Finder\FinderInterface
+     */
+    protected function getFinder()
+    {
+        $searchIndex = $this->container->getParameter('twitter_search_index');
+
+        return $this->container->get('fos_elastica.finder.' . $searchIndex . '.user_status');
     }
 } 
