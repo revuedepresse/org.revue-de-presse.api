@@ -1,4 +1,8 @@
-feeds:
+aggregation:
+    resource: WeavingTheWeb\Bundle\ApiBundle\Controller\AggregationController
+    type:     annotation
+
+newsfeed:
     resource: WeavingTheWeb\Bundle\ApiBundle\Controller\FacebookController
     type:     rest
     prefix:   /api/facebook
@@ -9,14 +13,14 @@ oauth:
     resource: WeavingTheWeb\Bundle\ApiBundle\Controller\OAuthController
     type:     annotation
 
-repositories:
+repository:
     resource: WeavingTheWeb\Bundle\ApiBundle\Controller\GithubController
     type:     rest
     prefix:   /api/github
     options:
         expose: true
 
-user_streams:
+status:
     resource: WeavingTheWeb\Bundle\ApiBundle\Controller\TwitterController
     type:     rest
     prefix:   /api/twitter
