@@ -7,8 +7,6 @@ use FOS\ElasticaBundle\Doctrine\ORM\Provider;
 use Symfony\Component\Validator\Constraints\DateTime;
 
 /**
- * Class UserStreamRepository
- * @package WeavingTheWeb\Bundle\ApiBundle\Repository
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
 class UserStreamRepository extends ResourceRepository

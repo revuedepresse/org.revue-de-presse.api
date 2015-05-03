@@ -1,0 +1,28 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid col-xs-4">
+    {% if screen_names|length > 0  %}
+    <ul id="tweets" class="list-group">
+        {% for screen_name in screen_names %}
+            <li class="list-group-item tweet">{{ screen_name.text|converturls }}</li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>{{ "message.no_result.screen_names"|trans({}, 'dashboard') }}</p>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block stylesheets %}
+
+    {{ parent() }}
+
+    {% stylesheets
+        '@WeavingTheWebDashboardBundle/Resources/public/css/dashboard.css'
+        output='css/compiled/tweet.css' %}
+        <link rel="stylesheet" type="text/css" href="{{ asset_url }}" />
+    {% endstylesheets %}
+{% endblock %}
