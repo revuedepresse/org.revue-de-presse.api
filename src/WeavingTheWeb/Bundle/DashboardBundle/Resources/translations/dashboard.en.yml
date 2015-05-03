@@ -1,8 +1,6 @@
 title:
     tweet:
         github:                 'Tweets containing GitHub repositories'
-        people_talking_about:   'Tweets from people talking about "{{ keywords }}"'
 
 message.no_result:
     tweet:                      'Sorry, no tweet containing these keywords have been found.'
-    screen_names:               'Sorry, nobody talking about this topic has been found.'
