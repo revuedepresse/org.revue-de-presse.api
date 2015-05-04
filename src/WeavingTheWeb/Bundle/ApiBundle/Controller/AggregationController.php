@@ -33,38 +33,79 @@ class AggregationController extends Controller
      */
     public function getAggregateFilteredTermsAction($keywords, \DateTime $since, \DateTime $until)
     {
-        $match = new Query\Match();
-        $match->setField('text', $keywords);
+        $termsAggregationName = 'screen_name_aggregations';
+        $filteredAggregationName = 'screen_name_aggregated_in_range';
 
-        $query = new Query($match);
+        $results = [];
 
-        $aggregation = new Aggregation();
+        $keywords = explode(',', $keywords);
 
-        $termsAggregation = $aggregation->terms('screen_name_aggregations');
-        $termsAggregation->setField('screenName');
-        $termsAggregation->setSize(30);
+        $i = 0;
 
-        $range = new Range('createdAt', [
-            'lte' => $until->format('c'),
-            'gte' => $since->format('c')
-        ]);
+        foreach ($keywords as $keyword) {
+            $match = new Query\Match();
+            $match->setField('text', $keyword);
 
-        $filterName = 'screen_name_aggregated_in_range';
-        $rangeFilterAggregation = $aggregation->filter($filterName, $range);
+            $query = new Query($match);
 
-        $rangeFilterAggregation->addAggregation($termsAggregation);
+            $aggregation = new Aggregation();
 
-        $query->addAggregation($rangeFilterAggregation);
-        $query->setSize(100);
+            $results[$i] = [];
 
-        $searchIndex = $this->container->getParameter('twitter_search_index');
+            foreach (range($since->format('Y'), $until->format('Y')) as $year) {
 
-        /** @var \FOS\ElasticaBundle\Elastica\Index $index */
-        $index = $this->get('fos_elastica.index.' . $searchIndex);
-        $userStatusType = $index->getType('user_status');
+                foreach (range(1, 12) as $month) {
+                    $termsAggregation = $aggregation->terms($termsAggregationName);
+                    $termsAggregation->setField('screenName');
+                    $termsAggregation->setSize(30);
 
-        $results = $userStatusType->search($query)->getAggregations();
+                    $startYear = $year;
 
-        return new JsonResponse($results[$filterName]);
+                    if ($month === 12) {
+                        $endYear = $year + 1;
+                        $endMonth = 1;
+                    } else {
+                        $endYear = $year;
+                        $endMonth = $month + 1;
+                    }
+
+
+                    $month = str_pad($month, 2, STR_PAD_LEFT, '0');
+                    $endMonth = str_pad($endMonth, 2, STR_PAD_LEFT, '0');
+
+                    $startDate = new \DateTime($startYear . '-' . $month . '-01') ;
+                    $endDate = new \DateTime($endYear . '-' . $endMonth . '-01');
+
+                    $range = new Range('createdAt', [
+                        'gte' => $startDate->format('c'),
+                        'lte' => $endDate->format('c')
+                    ]);
+
+                    $rangeFilterAggregation = $aggregation->filter($filteredAggregationName, $range);
+
+                    $rangeFilterAggregation->addAggregation($termsAggregation);
+
+                    $query->addAggregation($rangeFilterAggregation);
+                    $query->setSize(100);
+
+                    $searchIndex = $this->container->getParameter('twitter_search_index');
+
+                    /** @var \FOS\ElasticaBundle\Elastica\Index $index */
+                    $index = $this->get('fos_elastica.index.' . $searchIndex);
+                    $userStatusType = $index->getType('user_status');
+
+                    $aggregations = $userStatusType->search($query)->getAggregations();
+
+                    $results[$i][] = [
+                        'date' => $year . '-' . $endMonth . '-01',
+                        'mentions' => $aggregations[$filteredAggregationName]['doc_count']
+                    ];
+                }
+            }
+
+            $i++;
+        }
+
+        return new JsonResponse($results);
     }
 }
