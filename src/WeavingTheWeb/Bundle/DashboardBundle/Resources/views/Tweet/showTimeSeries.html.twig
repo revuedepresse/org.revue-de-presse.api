@@ -1,0 +1,42 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}{{ "title.tweet.time_series"|trans([], 'dashboard') }}{% endblock %}
+
+{% block body %}
+<div class="container-fluid col-xs-4">
+    <div id="time-series-mentions"></div>
+</div>
+
+<script>
+var token = '{{ token }}';
+var keywords = JSON.parse('{{ keywords|raw }}');
+</script>
+{% endblock %}
+
+{% block stylesheets %}
+
+    {{ parent() }}
+
+    {% stylesheets
+        '@WeavingTheWebDashboardBundle/Resources/public/components/metrics-graphics/dist/metricsgraphics.css'
+        '@WeavingTheWebDashboardBundle/Resources/public/css/dashboard.css'
+        output='css/compiled/tweet.css' %}
+        <link rel="stylesheet" type="text/css" href="{{ asset_url }}" />
+    {% endstylesheets %}
+
+{% endblock %}
+
+{% block javascripts %}
+
+    {% javascripts
+        '@WeavingTheWebDashboardBundle/Resources/public/components/jquery/jquery.min.js'
+        '@bootstrap_js'
+        '@WeavingTheWebDashboardBundle/Resources/public/components/d3/d3.js'
+        '@WeavingTheWebDashboardBundle/Resources/public/components/metrics-graphics/dist/metricsgraphics.js'
+        '@WeavingTheWebDashboardBundle/Resources/public/js/time-series.js'
+        output='js/components.js' %}
+        <script src="{{ asset_url }}" type="text/javascript"></script>
+    {% endjavascripts %}
+
+{% endblock %}
+

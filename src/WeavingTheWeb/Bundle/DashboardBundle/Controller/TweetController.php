@@ -8,6 +8,8 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
+use Symfony\Component\HttpFoundation\Request;
+
 /**
  * Handles responses related to tweets
  *
@@ -61,6 +63,31 @@ class TweetController extends Controller
             [
                 'active_menu_item' => 'tweets',
                 'tweets' => $gitHubRelatedTweets,
+            ]
+        );
+    }
+
+    /**
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\Response
+     *
+     * @Extra\Route(
+     *      "/time-series/{keywords}",
+     *      name="weaving_the_web_dashboard_time_series",
+     *      requirements={"keywords": "[,a-zA-Z0-9]+"}
+     * )
+     * @Extra\Method({"GET"})
+     */
+    public function showTimeSeriesAction(Request $request)
+    {
+        $keywords = $request->get('keywords');
+        $keywords = preg_replace('#[^,a-zA-Z0-9]#', '', $keywords);
+        $keywords = explode(',', $keywords);
+
+        return $this->render('WeavingTheWebDashboardBundle:Tweet:showTimeSeries.html.twig',
+            [
+                'token' => $this->container->getParameter('api_access_token'),
+                'keywords' => json_encode($keywords)
             ]
         );
     }
