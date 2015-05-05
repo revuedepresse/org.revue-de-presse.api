@@ -72,22 +72,24 @@ class TweetController extends Controller
      * @return \Symfony\Component\HttpFoundation\Response
      *
      * @Extra\Route(
-     *      "/time-series/{keywords}",
+     *      "/time-series/{keywords}/{since}/{until}",
      *      name="weaving_the_web_dashboard_time_series",
-     *      requirements={"keywords": "[,a-zA-Z0-9]+"}
+     *      requirements={"keywords": "[-,%\+a-zA-Z0-9]+"}
      * )
      * @Extra\Method({"GET"})
      */
-    public function showTimeSeriesAction(Request $request)
+    public function showTimeSeriesAction(Request $request, \DateTime $since, \DateTime $until)
     {
         $keywords = $request->get('keywords');
-        $keywords = preg_replace('#[^,a-zA-Z0-9]#', '', $keywords);
+        $keywords = preg_replace('#[^-,%\+a-zA-Z0-9]#', '', $keywords);
         $keywords = explode(',', $keywords);
 
         return $this->render('WeavingTheWebDashboardBundle:Tweet:showTimeSeries.html.twig',
             [
                 'token' => $this->container->getParameter('api_access_token'),
-                'keywords' => json_encode($keywords)
+                'keywords' => json_encode($keywords),
+                'since' => $since->format('c'),
+                'until' => $until->format('c')
             ]
         );
     }
