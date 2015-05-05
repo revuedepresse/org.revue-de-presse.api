@@ -4,6 +4,7 @@ namespace WeavingTheWeb\Bundle\ApiBundle\Controller;
 
 use FOS\RestBundle\Controller\Annotations as Rest,
     FOS\RestBundle\Request\ParamFetcherInterface;
+
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
 
 /**

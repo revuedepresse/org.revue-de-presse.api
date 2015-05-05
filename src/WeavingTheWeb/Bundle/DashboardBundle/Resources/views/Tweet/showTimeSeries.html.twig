@@ -3,13 +3,19 @@
 {% block title %}{{ "title.tweet.time_series"|trans([], 'dashboard') }}{% endblock %}
 
 {% block body %}
-<div class="container-fluid col-xs-4">
+<div class="container-fluid">
     <div id="time-series-mentions"></div>
+    <table class="table table-condensed" id="aggregated-mentions">
+        <thead></thead>
+        <tbody></tbody>
+    </table>
 </div>
 
 <script>
 var token = '{{ token }}';
 var keywords = JSON.parse('{{ keywords|raw }}');
+var since = '{{ since|raw }}';
+var until = '{{ until|raw }}';
 </script>
 {% endblock %}
 
