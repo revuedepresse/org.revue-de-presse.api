@@ -20,7 +20,7 @@ var keywords = JSON.parse('{{ keywords|raw }}');
     {% stylesheets
         '@WeavingTheWebDashboardBundle/Resources/public/components/metrics-graphics/dist/metricsgraphics.css'
         '@WeavingTheWebDashboardBundle/Resources/public/css/dashboard.css'
-        output='css/compiled/tweet.css' %}
+        output='css/compiled/show-time-series.css' %}
         <link rel="stylesheet" type="text/css" href="{{ asset_url }}" />
     {% endstylesheets %}
 
@@ -34,7 +34,7 @@ var keywords = JSON.parse('{{ keywords|raw }}');
         '@WeavingTheWebDashboardBundle/Resources/public/components/d3/d3.js'
         '@WeavingTheWebDashboardBundle/Resources/public/components/metrics-graphics/dist/metricsgraphics.js'
         '@WeavingTheWebDashboardBundle/Resources/public/js/time-series.js'
-        output='js/time-series-components.js' %}
+        output='js/show-time-series.js' %}
         <script src="{{ asset_url }}" type="text/javascript"></script>
     {% endjavascripts %}
 
