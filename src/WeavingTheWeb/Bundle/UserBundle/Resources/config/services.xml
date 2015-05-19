@@ -5,8 +5,10 @@
     xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <parameters>
+        <parameter key="weaving_the_web_user.controller.facebook.class">WeavingTheWeb\Bundle\UserBundle\Controller\FacebookController</parameter>
         <parameter key="weaving_the_web_user.controller.settings.class">WeavingTheWeb\Bundle\UserBundle\Controller\SettingsController</parameter>
         <parameter key="weaving_the_web_user.controller.twitter.class">WeavingTheWeb\Bundle\UserBundle\Controller\TwitterController</parameter>
+        <parameter key="weaving_the_web_user.entity.facebook.access_token.class">WeavingTheWeb\Bundle\UserBundle\Entity\AccessToken</parameter>
         <parameter key="weaving_the_web_user.event_subscriber.filter_controller.class">WeavingTheWeb\Bundle\UserBundle\Doctrine\UserManager</parameter>
         <parameter key="weaving_the_web_user.form_type.user_type.class">WeavingTheWeb\Bundle\UserBundle\Form\Type\UserType</parameter>
         <parameter key="weaving_the_web_user.model.user.class">WTW\UserBundle\Entity\User</parameter>
@@ -35,6 +37,21 @@
                 <argument type="service" id="router" />
                 <argument type="string">weaving_the_web_user_save_token</argument>
             </call>
+        </service>
+        <service id="weaving_the_web_user.repository.facebook.access_token"
+                 class="Doctrine\ORM\EntityRepository"
+                 factory-service="doctrine.orm.entity_manager"
+                 factory-method="getRepository">
+            <argument type="string">%weaving_the_web_user.entity.facebook.access_token.class%</argument>
+        </service>
+        <service id="weaving_the_web_user.controller.facebook" class="%weaving_the_web_user.controller.facebook.class%">
+            <property name="appId">%api_facebook_app_id%</property>
+            <property name="appSecret">%api_facebook_app_secret%</property>
+            <property name="router" type="service" id="router" />
+            <property name="session" type="service" id="session" />
+            <property name="logger" type="service" id="logger" />
+            <property name="accessTokenRepository" type="service" id="weaving_the_web_user.repository.facebook.access_token" />
+            <property name="entityManager" type="service" id="doctrine.orm.default_entity_manager" />
         </service>
         <service id="weaving_the_web_user.controller.settings" class="%weaving_the_web_user.controller.settings.class%"
                  lazy="true" scope="request">

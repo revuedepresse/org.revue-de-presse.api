@@ -42,6 +42,18 @@
                 <source>failure_during_oauth_validation</source>
                 <target>Failed to validate oauth signature and token.</target>
             </trans-unit>
+            <trans-unit id="title_facebook_get_access_token">
+                <source>title_facebook_get_access_token</source>
+                <target>Get Facebook Access token</target>
+            </trans-unit>
+            <trans-unit id="get_access_token_successfully">
+                <source>get_access_token_successfully</source>
+                <target>Your access token has been saved successfully.</target>
+            </trans-unit>
+            <trans-unit id="get_access_token_unsuccessfully">
+                <source>get_access_token_unsuccessfully</source>
+                <target>Your access token could not have been saved successfully.</target>
+            </trans-unit>
         </body>
     </file>
 </xliff>
