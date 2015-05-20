@@ -58,7 +58,36 @@ class FacebookController
 
         $helper = $this->getFacebookRedirectLoginHelper();
 
-        return new RedirectResponse($helper->getLoginUrl());
+        return new RedirectResponse($helper->getLoginUrl([
+            'user_birthday',
+            'user_religion_politics',
+            'user_relationships',
+            'user_relationship_details',
+            'user_hometown',
+            'user_location',
+            'user_likes',
+            'user_education_history',
+            'user_work_history',
+            'user_website',
+            'user_groups',
+            'user_managed_groups',
+            'user_events',
+            'user_photos',
+            'user_videos',
+            'user_friends',
+            'user_about_me',
+            'user_status',
+            'user_posts',
+            'read_stream',
+            'read_mailbox',
+            'email',
+            'ads_management',
+            'read_insights',
+            'manage_notifications',
+            'publish_actions',
+            'read_custom_friendlists',
+            'public_profile'
+        ]));
     }
 
     /**
