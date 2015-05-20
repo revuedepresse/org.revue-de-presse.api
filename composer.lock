@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "9aede13a09a07e24198b218093bb48c8",
+    "hash": "3a473231e2c49282ee7cc77784fbec11",
     "packages": [
         {
             "name": "behat/behat",
@@ -3943,7 +3943,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/symfony/zipball/6989f2d1ef9f1a7a84b95408455480a84522bf35",
+                "url": "https://api.github.com/repos/symfony/symfony/zipball/1e0685711b9b3ed03002bf190c3d4d4b661f372a",
                 "reference": "3da702c49b2e879b308d62ce62cd4c88504b8205",
                 "shasum": ""
             },
@@ -4304,7 +4304,7 @@
             "source": {
                 "type": "git",
                 "url": "wtw:## FILL ME #### FILL ME ##",
-                "reference": "7dd8c19"
+                "reference": "97f3acf"
             },
             "require": {
                 "doctrine/dbal": "~2.3",
@@ -4335,7 +4335,7 @@
                 }
             ],
             "description": "This bundle provides services to fetch and expose newsfeed",
-            "time": "2015-05-04 22:09:57"
+            "time": "2015-05-20 17:38:42"
         },
         {
             "name": "weaving-the-web/search-bundle",
@@ -5155,7 +5155,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpspec/prophecy/zipball/3132b1f44c7bf2ec4c7eb2d3cb78fdeca760d373",
+                "url": "https://api.github.com/repos/phpspec/prophecy/zipball/5a355f91730c845301a9e28f91c8a5053353c496",
                 "reference": "8724cd239f8ef4c046f55a3b18b4d91cc7f3e4c5",
                 "shasum": ""
             },
