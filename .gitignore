@@ -27,6 +27,12 @@ composer.phar
 /web/js
 /web/images
 
+provisioning/containers/nginx/env.sh
+provisioning/containers/nginx/env.sh.tpl
+provisioning/containers/nginx/.ssh
+provisioning/containers/php-fpm/dashboard.conf
+provisioning/containers/php-fpm/dashboard.conf.tpl
+
 # legacy
 api/.htaccess
 /api/lib/Smarty/demo
