@@ -40,6 +40,10 @@ parameters:
     mail_index:                                                 mail_test
     twitter_search_index:                                       twitter_test
 
+    encoders:
+        Symfony\Component\Security\Core\User\User: plaintext
+        WTW\UserBundle\Tests\Security\Core\User\User: plaintext
+
 services:
     weaving_the_web_user.controller.twitter:
         class:                                                  %weaving_the_web_user.controller_twitter.class%
