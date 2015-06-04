@@ -1,6 +1,6 @@
 
 INSERT INTO `weaving_user` (`usr_id`, `usr_twitter_id`, `usr_twitter_username`, `grp_id`, `usr_avatar`, `usr_first_name`, `usr_full_name`, `usr_last_name`, `usr_middle_name`, `usr_phone`, `usr_status`, `usr_user_name`, `usr_username_canonical`, `usr_email`, `usr_email_canonical`, `usr_password`, `usr_password_requested_at`, `usr_salt`, `usr_locked`, `usr_credentials_expired`, `usr_credentials_expires_at`, `usr_confirmation_token`, `usr_expired`, `usr_expires_at`, `usr_last_login`) VALUES
-(1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, 'Gordon', 'gordon', 'thyssy@gmail.com', 'thyssy@gmail.com', 'd6ltcVgQp2fB4oHWx2p6VPjTJKstw16PrqWPWeVJF4A2S6qZRxI4xnWp0M5aOqf00qkc07iU/mEC9JvJfN9T6Q==', NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL);
+(1, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, 'Gordon', 'gordon', 'thyssy@gmail.com', 'thyssy@gmail.com', 'n+HA1MGPxzGVU9LOtvih9DDJ9Lh5hflMMzH3iD7CkDBUqkS9KYlM9AQhlQ1gSW1wcFlTuM1QY7xTXBEvCLpljg==', NULL, NULL, 0, NULL, NULL, NULL, NULL, NULL, NULL);
 
 
 --
