@@ -6,6 +6,7 @@ imports:
     - { resource: parameters/parameters_imap.yml }
     - { resource: parameters/parameters_mailer.yml }
     - { resource: parameters/parameters_rabbitmq.yml }
+    - { resource: parameters/parameters_security.yml }
     - { resource: parameters/parameters_twitter.yml }
     - { resource: parameters/parameters_weaving_the_web.yml }
     - { resource: parameters/parameters_xhprof.yml }
