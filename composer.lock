@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "181fe7a607aab4dac0b1f3104c214be3",
+    "hash": "b7bbb172827ca633a9f22ada210849ec",
     "packages": [
         {
             "name": "behat/behat",
@@ -3943,7 +3943,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/symfony/zipball/75d5d547bb1ec758f1391ab552d23fe3024ec0ae",
+                "url": "https://api.github.com/repos/symfony/symfony/zipball/847a3e3348c9ca286dbe7a9998978b7b1b2289d9",
                 "reference": "3da702c49b2e879b308d62ce62cd4c88504b8205",
                 "shasum": ""
             },
@@ -4257,7 +4257,7 @@
             "source": {
                 "type": "git",
                 "url": "wtw:## FILL ME #### FILL ME ##",
-                "reference": "b34b05f"
+                "reference": "be82a82"
             },
             "require": {
                 "doctrine/dbal": "~2.3",
@@ -4295,7 +4295,7 @@
                 }
             ],
             "description": "This bundle provides services to fetch emails using IMAP",
-            "time": "2015-06-06 11:18:56"
+            "time": "2015-06-06 20:58:40"
         },
         {
             "name": "weaving-the-web/newsfeed-bundle",
@@ -4998,7 +4998,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpDocumentor/ReflectionDocBlock/zipball/ae15da2ce234d3ffe5d7fafcdad19c7f1acf3568",
+                "url": "https://api.github.com/repos/phpDocumentor/ReflectionDocBlock/zipball/afd2520734b8a46bb0e677a10f594f61afb132c4",
                 "reference": "d1da796ba5565789a623052eb9f2cf59d57fec60",
                 "shasum": ""
             },
