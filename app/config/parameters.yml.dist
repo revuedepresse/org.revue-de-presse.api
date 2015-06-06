@@ -27,6 +27,8 @@ parameters:
 
     php_binary:                 /usr/bin/php
 
+    database_charset:           UTF8
+
     imap_username:              ~
     imap_password:              ~
 
