@@ -27,6 +27,9 @@ parameters:
 
     php_binary:                 /usr/bin/php
 
+    imap_username:              ~
+    imap_password:              ~
+
     facebook_app_id:            ~
     facebook_app_secret:        ~
     facebook_redirect_url:      ~
