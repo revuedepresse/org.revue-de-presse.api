@@ -1,5 +1,5 @@
 parameters:
-    database_charset_admin:   UTF8
+    database_charset_admin:   %database_charset%
     database_driver_admin:    pdo_mysql
     database_host_admin:      %mysql.host%
     database_port_admin:      %mysql.port%
@@ -7,7 +7,7 @@ parameters:
     database_user_admin:      ## FILL ME ##
     database_password_admin:  %mysql.admin_password%
 
-    database_charset:         UTF8
+    database_charset:         %database_charset%
     database_driver:          pdo_mysql
     database_host:            %mysql.host%
     database_port:            %mysql.port%
@@ -15,7 +15,7 @@ parameters:
     database_user:            %mysql.user%
     database_password:        %mysql.password%
 
-    database_charset_read:    UTF8
+    database_charset_read:    %database_charset%
     database_driver_read:     pdo_mysql
     database_host_read:       %mysql.host_read%
     database_port_read:       %mysql.port_read%
@@ -23,7 +23,7 @@ parameters:
     database_user_read:       %mysql.user_read%
     database_password_read:   %mysql.password_read%
     
-    database_charset_write:   UTF8
+    database_charset_write:   %database_charset%
     database_driver_write:    pdo_mysql
     database_host_write:      %mysql.host_write%
     database_port_write:      %mysql.port_write%
@@ -31,7 +31,7 @@ parameters:
     database_user_write:      %mysql.user_write%
     database_password_write:  %mysql.password_write%
 
-    database_charset_test:    UTF8
+    database_charset_test:    %database_charset%
     database_driver_test:     pdo_mysql
     database_host_test:       %mysql.host%
     database_port_test:       %mysql.port%
