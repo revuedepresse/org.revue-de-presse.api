@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "b7bbb172827ca633a9f22ada210849ec",
+    "hash": "59fc240cbfedc46aeeebb44bdfa3280e",
     "packages": [
         {
             "name": "behat/behat",
@@ -3120,7 +3120,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/videlalvaro/RabbitMqBundle/zipball/5269d59e6d64a4a1b368d3890cbaaecdd82c12ca",
+                "url": "https://api.github.com/repos/videlalvaro/RabbitMqBundle/zipball/a71652cec6f688dddf884169d0d15fc2322cf334",
                 "reference": "1db502a306bb544ad15fcc06d8d0ecf8768874c7",
                 "shasum": ""
             },
@@ -3432,7 +3432,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ruflin/Elastica/zipball/f2f75d4ae090c05cd2c0e86686f40feeee7e1e68",
+                "url": "https://api.github.com/repos/ruflin/Elastica/zipball/4b64014ac980e6c072f7556589e8ba5acf0134e0",
                 "reference": "f2f75d4ae090c05cd2c0e86686f40feeee7e1e68",
                 "shasum": ""
             },
@@ -3760,7 +3760,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Spea/SpBowerBundle/zipball/7755bf304f2fb7394d07b0dae04ff9fa5e07aaf0",
+                "url": "https://api.github.com/repos/Spea/SpBowerBundle/zipball/51de513eac331efb2136777b0345227fbed8e115",
                 "reference": "d2f51eb9b894896ac53b303359ab18c66c9859ad",
                 "shasum": ""
             },
@@ -3943,7 +3943,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/symfony/zipball/847a3e3348c9ca286dbe7a9998978b7b1b2289d9",
+                "url": "https://api.github.com/repos/symfony/symfony/zipball/6fcdcb509ac05fb63e9577b448f40b82d7e6f075",
                 "reference": "3da702c49b2e879b308d62ce62cd4c88504b8205",
                 "shasum": ""
             },
@@ -4149,7 +4149,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/twigphp/Twig/zipball/dfddd2e0ef39fd39e201fd89f469769740d5a4a1",
+                "url": "https://api.github.com/repos/twigphp/Twig/zipball/e22fb8728b395b306a06785a3ae9b12f3fbc0294",
                 "reference": "67920147a81d5bd5bcd052b239ff85bae789f5a3",
                 "shasum": ""
             },
@@ -4257,7 +4257,7 @@
             "source": {
                 "type": "git",
                 "url": "wtw:## FILL ME #### FILL ME ##",
-                "reference": "be82a82"
+                "reference": "871212e"
             },
             "require": {
                 "doctrine/dbal": "~2.3",
@@ -4295,7 +4295,7 @@
                 }
             ],
             "description": "This bundle provides services to fetch emails using IMAP",
-            "time": "2015-06-06 20:58:40"
+            "time": "2015-06-08 15:05:45"
         },
         {
             "name": "weaving-the-web/newsfeed-bundle",
@@ -4998,7 +4998,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/phpDocumentor/ReflectionDocBlock/zipball/afd2520734b8a46bb0e677a10f594f61afb132c4",
+                "url": "https://api.github.com/repos/phpDocumentor/ReflectionDocBlock/zipball/ae15da2ce234d3ffe5d7fafcdad19c7f1acf3568",
                 "reference": "d1da796ba5565789a623052eb9f2cf59d57fec60",
                 "shasum": ""
             },
