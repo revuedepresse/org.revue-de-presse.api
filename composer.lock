@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "0a222fc90ef26f4cbcfcc00ba5ef1ecd",
+    "hash": "5e2976cd229b3795fbcfd49eda2a6520",
     "packages": [
         {
             "name": "behat/behat",
@@ -2014,7 +2014,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/FriendsOfSymfony/FOSUserBundle/zipball/92d5624f2a29e74d8fd9d2a94d7ed7998a8c2809",
+                "url": "https://api.github.com/repos/FriendsOfSymfony/FOSUserBundle/zipball/3efbc08a97f218d0a4524dee926fc4381e3d0947",
                 "reference": "808672b01f6aa6777417551c72a0be2c3545eafe",
                 "shasum": ""
             },
@@ -4257,7 +4257,7 @@
             "source": {
                 "type": "git",
                 "url": "wtw:## FILL ME #### FILL ME ##",
-                "reference": "dd859b1"
+                "reference": "665cb6e"
             },
             "require": {
                 "doctrine/dbal": "~2.3",
@@ -4295,7 +4295,7 @@
                 }
             ],
             "description": "This bundle provides services to fetch emails using IMAP",
-            "time": "2015-06-09 17:36:06"
+            "time": "2015-06-11 07:30:09"
         },
         {
             "name": "weaving-the-web/newsfeed-bundle",
