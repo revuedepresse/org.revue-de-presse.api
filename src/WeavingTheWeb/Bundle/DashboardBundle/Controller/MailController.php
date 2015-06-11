@@ -80,9 +80,11 @@ class MailController extends Controller
             $messages = $messageRepository->findLast(100, 0);
 
             foreach ($messages as $index => $message) {
+                $subject = $this->ensureNonEmptySubject($parser->decodeSubject($message['subject']));
+
                 $messages[$index] = [
                     'sender'    => $parser->decodeSender($message['sender']),
-                    'subject'   => $parser->decodeSubject($message['subject']),
+                    'subject'   => $subject,
                     'id'        => $message['mailBodyId'],
                     'date'      => $message['date'],
                 ];
@@ -95,9 +97,11 @@ class MailController extends Controller
              * @var \WeavingTheWeb\Bundle\MailBundle\Entity\Message $message
              */
             foreach ($messages as $index => $message) {
+                $subject = $this->ensureNonEmptySubject($parser->decodeSubject($message->getHeader()->getSubject()));
+
                 $messages[$index] = [
                     'sender'    => $parser->decodeSender($message->getHeader()->getFrom()),
-                    'subject'   => $parser->decodeSubject($message->getHeader()->getSubject()),
+                    'subject'   => $subject,
                     'id'        => $message->getId(),
                     'date'      => $message->getHeader()->getDate()
                 ];
@@ -112,6 +116,21 @@ class MailController extends Controller
             'emails' => $messages,
             'title' => $collapsedMailTitle
         ];
+    }
+
+    /**
+     * @param $candidate
+     * @return string
+     */
+    protected function ensureNonEmptySubject($candidate)
+    {
+        if (empty($candidate)) {
+            $subject = '<no subject>';
+        } else {
+            $subject = $candidate;
+        }
+
+        return $subject;
     }
 
     /**
