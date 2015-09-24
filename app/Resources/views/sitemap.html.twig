@@ -1,0 +1,8 @@
+{% if show_sitemap %}
+    {% set label = 'intent.continue_weaving' %}
+    {% set route = 'fos_user_security_login' %}
+{% else %}
+    {% set label = 'intent.discover_perspectives' %}
+    {% set route = 'weaving_the_web_dashboard_show_sitemap' %}
+{% endif %}
+<a class="nav" href="{{ path(route) }}">{{ label|trans({}, 'FOSUserBundle') }}</a>
