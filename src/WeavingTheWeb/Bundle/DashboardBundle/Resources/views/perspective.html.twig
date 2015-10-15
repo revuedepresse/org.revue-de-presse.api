@@ -56,6 +56,8 @@
             </div>
         {% elseif starts_with != "hid_"  %}
             {{ value }}
+        {% elseif starts_with == "hid_" %}
+            <span class="hide">{{ value }}</span>
         {% endif %}
         </td>
         {% else %}
