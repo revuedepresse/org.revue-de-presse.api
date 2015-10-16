@@ -1,0 +1,4 @@
+parameters:
+    oauth_client_id:     %oauth.client_id%
+    oauth_client_secret: %oauth.client_secret%
+    oauth_access_token:  %oauth.access_token%
