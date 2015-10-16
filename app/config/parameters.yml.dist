@@ -5,6 +5,7 @@ imports:
     - { resource: parameters/parameters_facebook.yml }
     - { resource: parameters/parameters_imap.yml }
     - { resource: parameters/parameters_mailer.yml }
+    - { resource: parameters/parameters_oauth.yml }
     - { resource: parameters/parameters_rabbitmq.yml }
     - { resource: parameters/parameters_security.yml }
     - { resource: parameters/parameters_twitter.yml }
@@ -37,8 +38,8 @@ parameters:
     facebook_redirect_url:      ~
     facebook_oauth_token:       ~
 
-    api_client_id:              ~
-    api_client_secret:          ~
-    api_access_token:           ~
+    api_client_id:              %oauth_client_id%
+    api_client_secret:          %oauth_client_secret%
+    api_access_token:           %oauth_access_token%
 
     php_binary:                 /usr/bin/php
