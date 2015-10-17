@@ -53,7 +53,8 @@ twig:
             - ':Form:form_label.html.twig'
     globals:
         feature_toggling:
-            search: %feature_toggling_search%
+            search:         %feature_toggling_search%
+            repositories:   %feature_toggling_repositories%
 
 sensio_framework_extra:
     view:    { annotations: false }

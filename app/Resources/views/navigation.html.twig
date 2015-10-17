@@ -1,4 +1,4 @@
-<div class="collapse navbar-collapse">
+<div class="collapse navbar-collapse" id="weaving-the-web-navbar">
     <ul class="nav navbar-nav navbar-left">
         {% if is_granted("ROLE_SUPER_ADMIN") %}
         <li{% if active_menu_item == 'dashboard' %} class="active"{% endif %}>
@@ -11,7 +11,7 @@
             <a href="{{ path('weaving_the_web_dashboard_tweet_github') }}">{{ "menu.tweets"|trans({}, 'menu') }}</a>
         </li>
         {% endif %}
-        {% if is_granted("ROLE_USER") %}
+        {% if feature_toggling.repositories and is_granted("ROLE_USER") %}
         <li{% if active_menu_item == 'github_repositories' %} class="active"{% endif %}>
             <a href="{{ path('weaving_the_web_dashboard_show_repositories') }}">{{ "menu.github_repositories"|trans({}, 'menu') }}</a>
         </li>
@@ -24,11 +24,9 @@
         <li>
             {% spaceless %}
             {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-                <p class="navbar-text username">
-                    <a href="{{ path('weaving_the_web_user_show_settings')  }}">
-                        {{ app.user.username }}
-                    </a>
-                </p>
+            <a class="nav" href="{{ path('weaving_the_web_user_show_settings')  }}">
+                {{ app.user.username }}
+            </a>
             {% endif %}
             {% endspaceless %}
         </li>

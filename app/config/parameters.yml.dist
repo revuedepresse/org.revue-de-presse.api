@@ -13,33 +13,34 @@ imports:
     - { resource: parameters/parameters_xhprof.yml }
 
 parameters:
-    app_version:                0.1
+    app_version:                    0.1
 
-    apc_host:                   %apc.host%
+    apc_host:                       %apc.host%
 
-    feature_toggling_search:    false
+    feature_toggling_search:        false
+    feature_toggling_repositories:  false
 
-    locale:                     en
+    locale:                         en
 
-    framework_secret:           ## FILL ME ##
+    framework_secret:               ## FILL ME ##
 
-    test_database_memory:       false
-    test_database_path:         %kernel.cache_dir%/wtw_dashboard.db
+    test_database_memory:           false
+    test_database_path:             %kernel.cache_dir%/wtw_dashboard.db
 
-    php_binary:                 /usr/bin/php
+    php_binary:                     /usr/bin/php
 
-    database_charset:           UTF8
+    database_charset:               UTF8
 
-    imap_username:              ~
-    imap_password:              ~
+    imap_username:                  ~
+    imap_password:                  ~
 
-    facebook_app_id:            ~
-    facebook_app_secret:        ~
-    facebook_redirect_url:      ~
-    facebook_oauth_token:       ~
+    facebook_app_id:                ~
+    facebook_app_secret:            ~
+    facebook_redirect_url:          ~
+    facebook_oauth_token:           ~
 
-    api_client_id:              %oauth_client_id%
-    api_client_secret:          %oauth_client_secret%
-    api_access_token:           %oauth_access_token%
+    api_client_id:                  %oauth_client_id%
+    api_client_secret:              %oauth_client_secret%
+    api_access_token:               %oauth_access_token%
 
-    php_binary:                 /usr/bin/php
+    php_binary:                     /usr/bin/php
