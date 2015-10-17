@@ -9,11 +9,9 @@ use WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints\Query;
 use Psr\Log\LoggerInterface;
 
 use Symfony\Component\Translation\Translator,
-    Symfony\Component\Validator\Validator\LegacyValidator as Validator;
+    Symfony\Component\Validator\Validator\RecursiveValidator as Validator;
 
 /**
- * Class Connection
- *
  * @package WeavingTheWeb\Bundle\DashboardBundle\DBAL
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
