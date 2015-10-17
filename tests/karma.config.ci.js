@@ -24,7 +24,7 @@ module.exports = function (config) {
             '../web/mobile/app/js/services/*.js',
             'bower_components/angular-mocks/angular-mocks.js',
             'location-mock.js',
-            'test-*.js'
+            'test-mobile-*.js'
         ],
 
 
