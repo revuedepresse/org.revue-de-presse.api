@@ -18,12 +18,14 @@
             </div>
             <div class="form-group">
                 <div class="span2">
-                    <input id="action-save-query" class="btn btn-default" type="button" value="Save your query" />
+                    <input id="action-save-query" class="btn btn-default" type="button"
+                           value="{{ 'document.button.save_query'|trans({}, 'document', 'en') }}" />
                 </div>
             </div>
             <div class="form-group">
                 <div class="span2">
-                    <input class="btn btn-default" type="submit" value="Submit your query" />
+                    <input id="action-export-query-execution-results" class="btn btn-default" type="submit"
+                           value="{{ 'document.button.export_query_execution_results'|trans({}, 'document', 'en')}}" />
                 </div>
             </div>
         </form>
