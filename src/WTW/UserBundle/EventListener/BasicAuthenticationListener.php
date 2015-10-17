@@ -5,37 +5,40 @@ namespace WTW\UserBundle\EventListener;
 use Symfony\Component\Security\Http\Firewall\BasicAuthenticationListener as AuthenticationListener,
     Symfony\Component\HttpKernel\Log\LoggerInterface,
     Symfony\Component\HttpKernel\Event\GetResponseEvent,
-    Symfony\Component\Security\Core\SecurityContextInterface,
+    Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface,
     Symfony\Component\Security\Core\Authentication\AuthenticationManagerInterface,
     Symfony\Component\Security\Http\EntryPoint\AuthenticationEntryPointInterface;
 
 /**
- * Class BasicAuthenticationListener
- *
  * @package WTW\DashboardBundle\EventListener
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
 class BasicAuthenticationListener extends AuthenticationListener
 {
-    protected $securityContext;
-
     protected $authenticationEntryPoint;
 
+    /**
+     * The token storage is exposed so that logout can be implemented by setting the authentication to null
+     *
+     * @var TokenStorageInterface
+     */
+    protected $securityTokenStorage;
+
     public function __construct(
-        SecurityContextInterface $securityContext,
+        TokenStorageInterface $tokenStorage,
         AuthenticationManagerInterface $authenticationManager,
         $providerKey,
         AuthenticationEntryPointInterface $authenticationEntryPoint,
         LoggerInterface $logger = null)
     {
         parent::__construct(
-            $securityContext,
+            $tokenStorage,
             $authenticationManager,
             $providerKey,
             $authenticationEntryPoint,
             $logger);
 
-        $this->securityContext = $securityContext;
+        $this->securityTokenStorage = $tokenStorage;
         $this->authenticationEntryPoint = $authenticationEntryPoint;
     }
 
@@ -51,7 +54,7 @@ class BasicAuthenticationListener extends AuthenticationListener
 
         if ($session->has('requested_logout')) {
             $session->invalidate();
-            $this->securityContext->setToken(null);
+            $this->securityTokenStorage->setToken(null);
             $event->setResponse($this->authenticationEntryPoint->start($request));
         }
     }
