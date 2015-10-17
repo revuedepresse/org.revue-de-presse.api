@@ -28,6 +28,12 @@
                            value="{{ 'document.button.export_query_execution_results'|trans({}, 'document', 'en')}}" />
                 </div>
             </div>
+            <div class="form-group">
+                <div class="span2">
+                    <input class="btn btn-default" type="submit"
+                           value="{{ 'document.button.execute_query'|trans({}, 'document', 'en') }}" />
+                </div>
+            </div>
         </form>
         <div class="form-group">
             <p id="notification" >
@@ -37,7 +43,7 @@
             </p>
         </div>
         {% include 'WeavingTheWebDashboardBundle::perspective.html.twig' %}
-    <div>
+    </div>
 {% endblock %}
 
 {% block javascripts %}

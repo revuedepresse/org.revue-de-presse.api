@@ -52,6 +52,7 @@
                 {% if columns.hid_name is defined %}
                 <button type="button" class="btn btn-default">{{ columns.hid_name }}</button>
                 {% endif %}
+                {# The column value aliased with a name starting with "btn_" should be a valid SQL query #}
                 <span class="sql hide">{{ value }}</span>
             </div>
         {% elseif starts_with != "hid_"  %}
