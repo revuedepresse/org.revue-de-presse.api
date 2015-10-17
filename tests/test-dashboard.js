@@ -158,8 +158,10 @@ describe('Dashboard', function () {
     }
 
     function assertQuerySubmittedForExecution(query, done) {
-        submitQuery(query, done);
-        expect(queryTextAreaElement.value).toEqual(query);
+        submitQuery(query, function () {
+            expect(queryTextAreaElement.val()).toEqual(query);
+            done();
+        });
     }
 
     describe('Execute query', function () {
@@ -169,7 +171,7 @@ describe('Dashboard', function () {
             assertQuerySubmittedForExecution(query, done);
         });
 
-        it('should submit a query containing a compliant comment', function (done) {
+        it('should submit a query starting with a compliant comment', function (done) {
             var query = '# count' + "\n" +
                 'SELECT @id;';
             assertQuerySubmittedForExecution(query, done);
@@ -188,6 +190,18 @@ describe('Dashboard', function () {
         it('should submit a "drop table" query.', function (done) {
             var query = 'DROP TABLE;';
             assertQuerySubmittedForExecution(query, done);
+        });
+
+        it('should not submit an illegal query', function () {
+            var query = 'DELETE';
+            submitQuery(query);
+            expect(queryTextAreaElement.value).not.toEqual(query);
+        });
+
+        it('should not submit a query starting with an illegal comment.', function () {
+            var query = '# this is not compliant';
+            submitQuery(query);
+            expect(queryTextAreaElement.value).not.toEqual(query);
         })
     });
 });
