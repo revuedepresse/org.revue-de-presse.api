@@ -68,6 +68,7 @@
         "oldsound/rabbitmq-bundle": "dev-master",
         "ornicar/apc-bundle": "dev-master#0ddd8f3",
         "php": ">=5.4.8",
+        "phpseclib/phpseclib": "2.0",
         "predis/predis": "0.8.*",
         "snc/redis-bundle": "1.1.*",
         "symfony/assetic-bundle": "2.7.0",
