@@ -64,7 +64,7 @@ class Connection
     }
 
     /**
-     * @return string
+     * @return \stdClass
      */
     public function getDefaultQuery()
     {

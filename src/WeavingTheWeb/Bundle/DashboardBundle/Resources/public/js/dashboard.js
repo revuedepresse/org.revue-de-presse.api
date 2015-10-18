@@ -55,7 +55,7 @@ function mountDashboard($, routes) {
         button.click(function (event) {
             var query = self.getQuery();
 
-            $.post(url, {sql: query}, self.handleResponse);
+            $.post(url, {query: query}, self.handleResponse);
 
             event.stopPropagation();
             event.preventDefault();
@@ -71,7 +71,7 @@ function mountDashboard($, routes) {
         button.click(function (event) {
             var query = self.getQuery();
 
-            $.get(url, {sql: query}, self.handleResponse);
+            $.get(url, {query: query}, self.handleResponse);
 
             event.stopPropagation();
             event.preventDefault();
@@ -108,7 +108,7 @@ if (window.Routing !== undefined) {
     mountDashboard(
         window.jQuery,
         {
-            saveQuery: routing.generate('weaving_the_web_dashboard_save_sql'),
+            saveQuery: routing.generate('weaving_the_web_dashboard_save_query'),
             exportQueryExecutionResults: routing.generate('weaving_the_web_dashboard_export_query_execution_results')
         }
     );
