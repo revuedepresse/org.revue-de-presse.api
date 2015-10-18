@@ -3,8 +3,8 @@
 describe('Dashboard', function () {
     var dashboard;
 
-    var queryId = 'query';
-    var queryElement;
+    var queryContainerId = 'query';
+    var queryContainerElement;
 
     var executeQueryButtonElement;
 
@@ -19,6 +19,9 @@ describe('Dashboard', function () {
     var saveQueryButtonId = 'action-save-query';
     var saveQueryButtonElement;
 
+    var exportQueryExecutionResultsButtonId = 'action-export-query-execution-results';
+    var exportQueryExecutionResultsButtonElement;
+
     var notificationCenterId = 'notification-center';
     var notificationCenterElement;
 
@@ -26,25 +29,41 @@ describe('Dashboard', function () {
     var notificationElement;
 
     var routes = {
-        saveSql: '/save-sql'
+        saveQuery: '/save-query',
+        exportQueryExecutionResults: '/export-query-execution-results'
     };
 
     var saveQueryResult = 'Execution effectuée avec succès';
-    var saveRequestMockId;
+    var exportQueryExecutionResult = 'Requête effectuée';
 
-    beforeEach(function () {
-        queryElement = $('<div />', {
-            id: queryId,
+    /**
+     * Create a HTML element containing a SQL query and a button to execute it
+     */
+    function createQueryContainer() {
+        var containerElement = $('<div />', {
+            id: queryContainerId,
             class: "query"
         });
         executeQueryButtonElement = $('<button />');
-        queryElement.append(executeQueryButtonElement);
+        containerElement.append(executeQueryButtonElement);
 
-        sqlElement= $('<span />', {'class': sqlClass});
-        queryElement.append(sqlElement);
+        sqlElement = $('<span />', {
+            'class': sqlClass
+        });
+        containerElement.append(sqlElement);
 
-        saveQueryButtonElement = $('<button >', {
+        return containerElement;
+    }
+
+    beforeEach(function () {
+        queryContainerElement = createQueryContainer();
+
+        saveQueryButtonElement = $('<button/>', {
             id: saveQueryButtonId
+        });
+
+        exportQueryExecutionResultsButtonElement = $('<button/>', {
+            id: exportQueryExecutionResultsButtonId
         });
 
         notificationCenterElement = $('<div />', {id: notificationCenterId});
@@ -57,16 +76,14 @@ describe('Dashboard', function () {
 
         var bodyElement = $('body');
 
-        bodyElement.append(queryElement);
-        bodyElement.append(saveQueryButtonElement);
-        bodyElement.append(notificationCenterElement);
-
         bodyElement.addClass('container');
         bodyElement.append(formElement);
 
-        $.mockjaxSettings.throwUnmocked = true;
-        $.mockjaxSettings.logging = false;
-        $.mockjaxSettings.responseTime = 0;
+        bodyElement.append(notificationCenterElement);
+        bodyElement.append(saveQueryButtonElement);
+        bodyElement.append(exportQueryExecutionResultsButtonElement);
+
+        bodyElement.append(queryContainerElement);
 
         // Ensure "before each" operations went smoothly
         expect(saveQueryButtonElement[0]).not.toBeUndefined();
@@ -74,69 +91,102 @@ describe('Dashboard', function () {
     });
 
     afterEach(function () {
-        queryElement.remove();
+        queryContainerElement.remove();
         saveQueryButtonElement.remove();
+        exportQueryExecutionResultsButtonElement.remove();
         notificationCenterElement.remove();
         formElement.remove();
     });
 
-    function mockRequest(type, assert) {
-        return $.mockjax({
-            url: routes.saveSql,
-            type: 'POST',
-            responseText: {
-                result: saveQueryResult,
-                type: type
-            },
-            onAfterSuccess: assert,
-            onAfterError: function (error) {
-                expect(error).toBeNull();
-            }
-        });
-    }
-
-    function assertErrorNotificationExists(done) {
-        saveRequestMockId = mockRequest('error', function () {
+    function notifyError(done) {
+        return function () {
             expect(notificationCenterElement.hasClass('alert-error')).toBeTruthy();
             expect(notificationCenterElement.hasClass('alert-success')).toBeFalsy();
-            done();
-        });
-        saveQueryButtonElement.click();
-        $.mockjax.clear(saveRequestMockId);
+
+            if (typeof done === 'function') {
+                done();
+            }
+        };
     }
 
-    function assertSuccessNotificationExists(done) {
-        saveRequestMockId = mockRequest('success', function () {
+    function getSaveSqlRequestMockery(done) {
+        var requestMockery = RequestMockery(routes.saveQuery);
+        requestMockery.onAfterSuccess(notifyError(done));
+        requestMockery.shouldPost();
+        requestMockery.respondWith({
+            result: saveQueryResult,
+            type: 'error'
+        });
+
+        return requestMockery;
+    }
+
+    function getExportQueryExecutionResultsRequestMockery(done) {
+        var requestMockery = RequestMockery(routes.exportQueryExecutionResults);
+        requestMockery.onAfterSuccess(notifyError(done));
+        requestMockery.respondWith({
+            result: exportQueryExecutionResult,
+            type: 'error'
+        });
+
+        return requestMockery;
+    }
+
+    function assertErrorNotificationExistsOnRequest(event, mockery) {
+        var mock = mockery.mock();
+        event();
+        mock.destroy();
+    }
+
+    function assertErrorNotificationExistsOn(event, done) {
+        var mockery = getSaveSqlRequestMockery(done);
+        var mock = mockery.mock();
+        event();
+        mock.destroy();
+    }
+
+    function assertSuccessNotificationExistsOn(event, done) {
+        var mockery = getSaveSqlRequestMockery(done);
+        mockery.onAfterSuccess(function () {
             expect(notificationCenterElement.hasClass('alert-success')).toBeTruthy();
             expect(notificationCenterElement.hasClass('alert-error')).toBeFalsy();
             if (typeof done === 'function') {
                 done();
             }
         });
-        saveQueryButtonElement.click();
-        $.mockjax.clear(saveRequestMockId);
+        mockery.respondWith({
+            result: saveQueryResult,
+            type: 'success'
+        });
+        var mock = mockery.mock();
+        event();
+        mock.destroy();
     }
 
     describe('Save query', function () {
         it('should show a recorded query when clicking on a button, which parent element has a "query" css class',
             function (done) {
-                saveRequestMockId = mockRequest('success', function () {
+                var mockery = getSaveSqlRequestMockery(done);
+                mockery.onAfterSuccess(function () {
                     expect(notificationElement[0]).not.toBeUndefined();
                     expect(notificationElement.text()).toEqual(saveQueryResult);
                     done();
                 });
+                var mock = mockery.mock();
                 saveQueryButtonElement.click();
-                $.mockjax.clear(saveRequestMockId);
+                mock.destroy();
             }
         );
 
         it('should show a success notification when a query has been saved successfully.', function (done) {
-            assertSuccessNotificationExists();
-            assertErrorNotificationExists(done);
+            var event = saveQueryButtonElement.click.bind(saveQueryButtonElement);
+            assertSuccessNotificationExistsOn(event);
+            assertErrorNotificationExistsOn(event, done);
         });
 
         it('should show an error notification when a query has not been saved successfully.', function (done) {
-            assertErrorNotificationExists(done);
+            var event = saveQueryButtonElement.click.bind(saveQueryButtonElement);
+            assertErrorNotificationExistsOn(event, done);
         });
     });
 
@@ -203,5 +253,17 @@ describe('Dashboard', function () {
             submitQuery(query);
             expect(queryTextAreaElement.value).not.toEqual(query);
         })
+    });
+
+    describe('Export query execution results', function () {
+        it('should show an error notification when the results of a query execution could not be exported',
+            function (done) {
+                var event = exportQueryExecutionResultsButtonElement.click
+                    .bind(exportQueryExecutionResultsButtonElement);
+                var mockery = getExportQueryExecutionResultsRequestMockery(done);
+
+                assertErrorNotificationExistsOnRequest(event, mockery);
+            }
+        )
     });
 });

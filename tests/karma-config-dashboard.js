@@ -15,8 +15,9 @@ module.exports = function(config) {
         // list of files / patterns to load in the browser
         files: [
             'bower_components/jquery/dist/jquery.js',
-            'bower_components/jquery-mockjax/dist/jquery.mockjax.js',
             '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/dashboard.js',
+            'bower_components/jquery-mockjax/dist/jquery.mockjax.js',
+            'request-mock.js',
             'test-dashboard.js'
         ],
 
