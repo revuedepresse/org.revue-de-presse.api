@@ -4,7 +4,7 @@ parameters:
     api_twitter_user_secret:                                    %api_twitter_user_secret_test%
     api_twitter_user_token:                                     %api_twitter_user_token_test%
 
-    basic_auth_pattern:                                         ^/(documents|github|user|api|mail|tweet|oauth)
+    basic_auth_pattern:                                         ^/(documents|github|user|api|mail|tweet|oauth|perspective/.*/export)
 
     database_charset:                                           UTF8
     database_driver:                                            pdo_mysql
@@ -48,3 +48,19 @@ parameters:
 services:
     weaving_the_web_user.controller.twitter:
         class:                                                  %weaving_the_web_user.controller_twitter.class%
+
+    # Perspective testing requires a MySQL database
+    weaving_the_web_dashboard.dbal_connection:
+        class:  %weaving_the_web_dashboard.dbal_connection.class%
+        arguments:
+            - @validator
+            - @logger
+        calls:
+            - [ setCharset, [ %database_charset% ] ]
+            - [ setHost, [ %database_host% ] ]
+            - [ setUsername, [ %database_user% ] ]
+            - [ setPassword, [ %database_password% ] ]
+            - [ setPort, [ %database_port% ] ]
+            - [ setDatabase, [ %database_name% ] ]
+            - [ setEntityManager, [ @doctrine.orm.test_mysql_entity_manager ] ]
+            - [ setTranslator, [ @translator ] ]

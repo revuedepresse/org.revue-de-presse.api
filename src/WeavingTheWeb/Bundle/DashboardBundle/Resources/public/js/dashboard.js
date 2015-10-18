@@ -7,7 +7,7 @@ function mountDashboard($, routes) {
 
     Dashboard.prototype.bindSubmitQueryListener = function () {
         var $ = this.$;
-        var $queries = $('div.query button');
+        var $queries = $('.query button');
         $queries.unbind('click');
 
         /**
@@ -64,14 +64,18 @@ function mountDashboard($, routes) {
         });
     };
 
-    Dashboard.prototype.bindExportQueryExecutionResults = function (button, url) {
+    Dashboard.prototype.bindExportPerspective = function (button, url) {
         var $ = this.$;
         var self = this;
 
         button.click(function (event) {
-            var query = self.getQuery();
-
-            $.get(url, {query: query}, self.handleResponse);
+            $.get(url, self.handleResponse)
+            .fail(function (error) {
+                self.handleResponse({
+                    result:  JSON.parse(error.responseText).error.exception[0].message,
+                    type: 'error'
+                });
+            });
 
             event.stopPropagation();
             event.preventDefault();
@@ -81,17 +85,24 @@ function mountDashboard($, routes) {
     };
 
     Dashboard.prototype.bindListeners = function () {
+        var self = this;
         var routes = this.routes;
 
         var saveQueryButton = $('#action-save-query');
-        var exportQueryExecutionResultsButton = $('#action-export-query-execution-results');
+        var exportPerspectiveButton = $('.perspective button');
 
         if (saveQueryButton[0]) {
             this.bindSaveQueryListener(saveQueryButton, routes.saveQuery);
         }
 
-        if (exportQueryExecutionResultsButton[0]) {
-            this.bindExportQueryExecutionResults(exportQueryExecutionResultsButton, routes.exportQueryExecutionResults);
+        if (exportPerspectiveButton[0]) {
+            exportPerspectiveButton.each(function (buttonIndex, button) {
+                var hash = $(button).parent().find('.hash').text();
+                self.bindExportPerspective(
+                    $(button),
+                    routes.exportPerspective(hash)
+                );
+            });
         }
 
         this.bindSubmitQueryListener();
@@ -109,7 +120,9 @@ if (window.Routing !== undefined) {
         window.jQuery,
         {
             saveQuery: routing.generate('weaving_the_web_dashboard_save_query'),
-            exportQueryExecutionResults: routing.generate('weaving_the_web_dashboard_export_query_execution_results')
+            exportPerspective: function (hash) {
+                return routing.generate('weaving_the_web_dashboard_export_perspective', {hash: hash});
+            }
         }
     );
 }

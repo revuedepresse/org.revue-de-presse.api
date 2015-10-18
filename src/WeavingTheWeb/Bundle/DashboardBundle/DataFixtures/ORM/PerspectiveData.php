@@ -25,6 +25,10 @@ ORDER BY per_id DESC";
                 'Update tmp_data SET jsn_hash = md5(jsn_value) LIMIT 1;'
         ];
 
+        $exportableDataQueries = [
+            'exportable_perspective' => self::DEFAULT_QUERY
+        ];
+
         $propertiesCollection = [
             [
                 'value' => self::DEFAULT_QUERY,
@@ -39,6 +43,15 @@ ORDER BY per_id DESC";
                 'value' => $updateTemporaryDataQueries['valid_data_updating_perspective'],
                 'type' => Connection::QUERY_TYPE_DEFAULT,
                 'hash' => sha1($updateTemporaryDataQueries['valid_data_updating_perspective']),
+            ], [
+                'name' => 'exportable_perspective',
+                'value' => $exportableDataQueries['exportable_perspective'],
+                'status' => Perspective::STATUS_EXPORTABLE,
+                'type' => Connection::QUERY_TYPE_DEFAULT,
+                'hash' => sha1(
+                    'status:' . Perspective::STATUS_EXPORTABLE . ':' .
+                    $exportableDataQueries['exportable_perspective']
+                ),
             ],
         ];
 
