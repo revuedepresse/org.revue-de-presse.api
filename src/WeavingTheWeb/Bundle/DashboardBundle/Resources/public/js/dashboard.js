@@ -1,13 +1,12 @@
 
 function mountDashboard($, routes) {
     var Dashboard = function ($, routes) {
-        var self = this;
-
-        self.jQuery = $;
-        self.routes = routes;
+        this.$ = $;
+        this.routes = routes;
     };
 
     Dashboard.prototype.bindSubmitQueryListener = function () {
+        var $ = this.$;
         var $queries = $('div.query button');
         $queries.unbind('click');
 
@@ -35,39 +34,67 @@ function mountDashboard($, routes) {
         });
     };
 
-    Dashboard.prototype.bindListeners = function () {
+    Dashboard.prototype.getQuery = function () {
+        return this.$('#sql').val();
+    };
+
+    Dashboard.prototype.handleResponse = function (data) {
+        var notification = $('#notification');
+
+        notification.text(data.result);
+        notification.parent().removeClass('alert-error');
+        notification.parent().removeClass('alert-block');
+        notification.parent().removeClass('alert-success');
+        notification.parent().addClass('alert alert-' + data.type);
+    };
+
+    Dashboard.prototype.bindSaveQueryListener = function (button, url) {
+        var $ = this.$;
         var self = this;
-        var $ = self.jQuery;
-        var routes = self.routes;
 
-        var $saveQueryButton = $('#action-save-query');
-        var $exportQueryExecutionResultsButton = $('#action-export-query-execution-results');
+        button.click(function (event) {
+            var query = self.getQuery();
 
-        if ($saveQueryButton.length > 0) {
-            $saveQueryButton.click(function (event) {
-                var saveSqlUrl = routes.saveSql,
-                    sql = $('#sql').val();
+            $.post(url, {sql: query}, self.handleResponse);
 
-                $.post(saveSqlUrl, {
-                    sql: sql
-                }, function (data) {
-                    var notification = $('#notification');
+            event.stopPropagation();
+            event.preventDefault();
 
-                    notification.text(data.result);
-                    notification.parent().removeClass('alert-error');
-                    notification.parent().removeClass('alert-block');
-                    notification.parent().removeClass('alert-success');
-                    notification.parent().addClass('alert alert-' + data.type);
-                });
+            return false;
+        });
+    };
 
-                event.stopPropagation();
-                event.preventDefault();
+    Dashboard.prototype.bindExportQueryExecutionResults = function (button, url) {
+        var $ = this.$;
+        var self = this;
 
-                return false;
-            });
+        button.click(function (event) {
+            var query = self.getQuery();
+
+            $.get(url, {sql: query}, self.handleResponse);
+
+            event.stopPropagation();
+            event.preventDefault();
+
+            return false;
+        });
+    };
+
+    Dashboard.prototype.bindListeners = function () {
+        var routes = this.routes;
+
+        var saveQueryButton = $('#action-save-query');
+        var exportQueryExecutionResultsButton = $('#action-export-query-execution-results');
+
+        if (saveQueryButton[0]) {
+            this.bindSaveQueryListener(saveQueryButton, routes.saveQuery);
         }
 
-        self.bindSubmitQueryListener();
+        if (exportQueryExecutionResultsButton[0]) {
+            this.bindExportQueryExecutionResults(exportQueryExecutionResultsButton, routes.exportQueryExecutionResults);
+        }
+
+        this.bindSubmitQueryListener();
     };
 
     var dashboard = new Dashboard($, routes);
@@ -77,10 +104,12 @@ function mountDashboard($, routes) {
 }
 
 if (window.Routing !== undefined) {
+    var routing = window.Routing;
     mountDashboard(
         window.jQuery,
         {
-            saveSql: window.Routing.generate('weaving_the_web_dashboard_save_sql')
+            saveQuery: routing.generate('weaving_the_web_dashboard_save_sql'),
+            exportQueryExecutionResults: routing.generate('weaving_the_web_dashboard_export_query_execution_results')
         }
     );
 }
