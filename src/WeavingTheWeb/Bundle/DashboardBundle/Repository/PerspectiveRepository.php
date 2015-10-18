@@ -6,8 +6,6 @@ use Doctrine\ORM\EntityRepository;
 use WeavingTheWeb\Bundle\DashboardBundle\Entity\Perspective;
 
 /**
- * Class PerspectiveRepository
- *
  * @package WTW\API\DataMiningBundle\Repository
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
@@ -27,7 +25,9 @@ class PerspectiveRepository extends EntityRepository
         $perspective->setCreationDate(new \DateTime());
 
         foreach ($setters as $setter) {
-            $perspective = $setter($perspective);
+            if (is_callable($setter)) {
+                $perspective = $setter($perspective);
+            }
         }
 
         return $perspective;

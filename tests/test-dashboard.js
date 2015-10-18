@@ -6,10 +6,17 @@ describe('Dashboard', function () {
     var queryContainerId = 'query';
     var queryContainerElement;
 
+    var queryClass = 'query';
+
     var executeQueryButtonElement;
 
     var sqlClass = 'sql';
     var sqlElement;
+
+    var perspectiveClass = 'perspective';
+
+    var hashClass = 'hash';
+    var hashElement;
 
     var queryTextAreaId = 'sql';
     var queryTextAreaElement;
@@ -19,8 +26,8 @@ describe('Dashboard', function () {
     var saveQueryButtonId = 'action-save-query';
     var saveQueryButtonElement;
 
-    var exportQueryExecutionResultsButtonId = 'action-export-query-execution-results';
-    var exportQueryExecutionResultsButtonElement;
+    var exportPerspectiveContainerElement;
+    var exportPerspectiveButtonElement;
 
     var notificationCenterId = 'notification-center';
     var notificationCenterElement;
@@ -30,19 +37,21 @@ describe('Dashboard', function () {
 
     var routes = {
         saveQuery: '/save-query',
-        exportQueryExecutionResults: '/export-query-execution-results'
+        exportPerspective: function (hash) {
+            return '/export-perspective/' + hash;
+        }
     };
 
     var saveQueryResult = 'Execution effectuée avec succès';
     var exportQueryExecutionResult = 'Requête effectuée';
 
     /**
-     * Create a HTML element containing a SQL query and a button to execute it
+     * Create a HTML element containing an SQL query and a button to execute it
      */
     function createQueryContainer() {
         var containerElement = $('<div />', {
             id: queryContainerId,
-            class: "query"
+            class: queryClass
         });
         executeQueryButtonElement = $('<button />');
         containerElement.append(executeQueryButtonElement);
@@ -55,6 +64,26 @@ describe('Dashboard', function () {
         return containerElement;
     }
 
+    /**
+     * Create a HTML element containing a perspective and a button to export it
+     */
+    function createPerspectiveContainer() {
+        var containerElement = $('<div />', {
+            id: queryContainerId,
+            class: perspectiveClass
+        });
+        exportPerspectiveButtonElement = $('<button />');
+        containerElement.append(exportPerspectiveButtonElement);
+
+        hashElement = $('<span />', {
+            'class': hashClass,
+            text:  'hash'
+        });
+        containerElement.append(hashElement);
+
+        return containerElement;
+    }
+
     beforeEach(function () {
         queryContainerElement = createQueryContainer();
 
@@ -62,9 +91,7 @@ describe('Dashboard', function () {
             id: saveQueryButtonId
         });
 
-        exportQueryExecutionResultsButtonElement = $('<button/>', {
-            id: exportQueryExecutionResultsButtonId
-        });
+        exportPerspectiveContainerElement = createPerspectiveContainer();
 
         notificationCenterElement = $('<div />', {id: notificationCenterId});
         notificationElement = $('<div />', {id: notificationId});
@@ -81,7 +108,7 @@ describe('Dashboard', function () {
 
         bodyElement.append(notificationCenterElement);
         bodyElement.append(saveQueryButtonElement);
-        bodyElement.append(exportQueryExecutionResultsButtonElement);
+        bodyElement.append(exportPerspectiveContainerElement);
 
         bodyElement.append(queryContainerElement);
 
@@ -93,7 +120,7 @@ describe('Dashboard', function () {
     afterEach(function () {
         queryContainerElement.remove();
         saveQueryButtonElement.remove();
-        exportQueryExecutionResultsButtonElement.remove();
+        exportPerspectiveContainerElement.remove();
         notificationCenterElement.remove();
         formElement.remove();
     });
@@ -121,8 +148,8 @@ describe('Dashboard', function () {
         return requestMockery;
     }
 
-    function getExportQueryExecutionResultsRequestMockery(done) {
-        var requestMockery = RequestMockery(routes.exportQueryExecutionResults);
+    function getExportPerspectiveRequestMockery(done, hash) {
+        var requestMockery = RequestMockery(routes.exportPerspective(hash));
         requestMockery.onAfterSuccess(notifyError(done));
         requestMockery.respondWith({
             result: exportQueryExecutionResult,
@@ -258,9 +285,10 @@ describe('Dashboard', function () {
     describe('Export query execution results', function () {
         it('should show an error notification when the results of a query execution could not be exported',
             function (done) {
-                var event = exportQueryExecutionResultsButtonElement.click
-                    .bind(exportQueryExecutionResultsButtonElement);
-                var mockery = getExportQueryExecutionResultsRequestMockery(done);
+                var event = exportPerspectiveButtonElement.click
+                    .bind(exportPerspectiveButtonElement);
+                var hash = exportPerspectiveButtonElement.parent().find('.hash').text();
+                var mockery = getExportPerspectiveRequestMockery(done, hash);
 
                 assertErrorNotificationExistsOnRequest(event, mockery);
             }

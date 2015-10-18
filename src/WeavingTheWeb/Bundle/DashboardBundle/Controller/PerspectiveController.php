@@ -2,11 +2,20 @@
 
 namespace WeavingTheWeb\Bundle\DashboardBundle\Controller;
 
-use Symfony\Component\DependencyInjection\ContainerAware,
-    Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
 use Doctrine\Orm\NoResultException;
-use Symfony\Component\HttpFoundation\RedirectResponse;
+
+use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
+
+use Symfony\Component\DependencyInjection\ContainerAware,
+    Symfony\Component\HttpKernel\Exception\NotFoundHttpException,
+    Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+
+use Symfony\Component\HttpFoundation\JsonResponse,
+    Symfony\Component\HttpFoundation\RedirectResponse;
+
+use WeavingTheWeb\Bundle\DashboardBundle\Entity\Perspective;
+
+use phpseclib\Crypt\AES;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
@@ -84,13 +93,9 @@ class PerspectiveController extends ContainerAware
         }
 
         if ($this->validPerspective($perspective)) {
-            /**
-              * @var \WeavingTheWeb\Bundle\DashboardBundle\DBAL\Connection $connection
-              */
-             $connection = $this->container->get('weaving_the_web_dashboard.dbal_connection');
+            $query = $this->executeQuery($perspective);
 
-             $query = $connection->executeQuery($perspective->getValue());
-             $translator = $this->container->get('translator');
+            $translator = $this->container->get('translator');
 
              /** @var \Symfony\Bundle\TwigBundle\TwigEngine $templateEngine */
             $templateEngine = $this->container->get('templating');
@@ -134,5 +139,66 @@ class PerspectiveController extends ContainerAware
         $constraintsViolationsList = $validator->validate($perspective, ['public_perspectives']);
 
         return count($constraintsViolationsList) === 0;
+    }
+
+    /**
+     * @Extra\Route("/{hash}/export", name="weaving_the_web_dashboard_export_perspective",
+     *              options={"expose"=true})
+     * @Extra\Method({"GET"})
+     * @Extra\ParamConverter(
+     *      "perspective",
+     *      class="WeavingTheWebDashboardBundle:Perspective"
+     * )
+     *
+     * @param Perspective $perspective
+     * @return NotFoundHttpException
+     */
+    public function exportPerspectiveAction(Perspective $perspective)
+    {
+        /**
+         * @var \Symfony\Component\Translation\Translator $translator
+         */
+        $translator = $this->container->get('translator');
+
+        if (false === $this->container->get('security.context')->isGranted('ROLE_SUPER_ADMIN')) {
+            throw new AccessDeniedHttpException();
+        }
+
+        if ($perspective->isExportable()) {
+            $query = $this->executeQuery($perspective);
+
+            if (is_null($query->error)) {
+                $cipher = new AES();
+                $cipher->setKey($this->container->getParameter('aes_key'));
+                $encodedRecords = json_encode($query->records);
+                $encryptedRecords = $cipher->encrypt($encodedRecords);
+
+                return new JsonResponse([
+                    'result' => base64_encode($encryptedRecords),
+                    'type' => 'success'
+                ]);
+            } else {
+                return new JsonResponse([
+                    'result' => $query->error,
+                    'type' => 'error'
+                ]);
+            }
+        } else {
+            throw new NotFoundHttpException($translator->trans('perspective.not_found', [], 'perspective', 'en'));
+        }
+    }
+
+    /**
+     * @param Perspective $perspective
+     * @return \stdClass
+     */
+    protected function executeQuery(Perspective $perspective)
+    {
+        /**
+         * @var \WeavingTheWeb\Bundle\DashboardBundle\DBAL\Connection $connection
+         */
+        $connection = $this->container->get('weaving_the_web_dashboard.dbal_connection');
+
+        return $connection->executeQuery($perspective->getValue());
     }
 } 

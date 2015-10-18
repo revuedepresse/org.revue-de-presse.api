@@ -6,8 +6,6 @@ use WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints as WeavingTheWebA
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Perspective
- *
  * @ORM\Table(name="weaving_perspective")
  * @ORM\Entity(repositoryClass="WeavingTheWeb\Bundle\DashboardBundle\Repository\PerspectiveRepository")
  * @WeavingTheWebAssert\Perspective(groups="public_perspectives")
@@ -15,6 +13,8 @@ use Doctrine\ORM\Mapping as ORM;
 class Perspective
 {
     const STATUS_PUBLIC = 2;
+
+    const STATUS_EXPORTABLE = 3;
 
     /**
      * @var integer
@@ -282,5 +282,13 @@ class Perspective
     public function getUuid()
     {
         return $this->uuid;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isExportable()
+    {
+        return $this->status === self::STATUS_EXPORTABLE;
     }
 }

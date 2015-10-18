@@ -2,4 +2,5 @@ document:
     button:
         save_query:                     'Save your query'
         execute_query:                  'Execute your query'
-        export_query_execution_results: 'Export query execution results'
+
+
