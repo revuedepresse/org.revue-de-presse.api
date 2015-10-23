@@ -114,7 +114,7 @@ describe('Dashboard', function () {
 
         // Ensure "before each" operations went smoothly
         expect(saveQueryButtonElement[0]).not.toBeUndefined();
-        dashboard = mountDashboard($, routes);
+        dashboard = mountDashboard({$: $, routes: routes});
     });
 
     afterEach(function () {
@@ -125,9 +125,13 @@ describe('Dashboard', function () {
         formElement.remove();
     });
 
-    function notifyError(done) {
+    function notifyError(done, alertType) {
+        if (alertType === undefined) {
+            alertType = 'error';
+        }
+
         return function () {
-            expect(notificationCenterElement.hasClass('alert-error')).toBeTruthy();
+            expect(notificationCenterElement.hasClass('alert-' + alertType)).toBeTruthy();
             expect(notificationCenterElement.hasClass('alert-success')).toBeFalsy();
 
             if (typeof done === 'function') {
@@ -150,7 +154,7 @@ describe('Dashboard', function () {
 
     function getExportPerspectiveRequestMockery(done, hash) {
         var requestMockery = RequestMockery(routes.exportPerspective(hash));
-        requestMockery.onAfterSuccess(notifyError(done));
+        requestMockery.onAfterSuccess(notifyError(done, 'danger'));
         requestMockery.respondWith({
             result: exportQueryExecutionResult,
             type: 'error'

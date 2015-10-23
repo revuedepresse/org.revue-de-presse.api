@@ -169,12 +169,31 @@ class PerspectiveController extends ContainerAware
 
             if (is_null($query->error)) {
                 $cipher = new AES();
-                $cipher->setKey($this->container->getParameter('aes_key'));
-                $encodedRecords = json_encode($query->records);
-                $encryptedRecords = $cipher->encrypt($encodedRecords);
+                $key = $this->container->getParameter('aes_key');
+                $iv = $this->container->getParameter('aes_iv');
+
+                $cipher->setKey(hex2bin($key));
+                $cipher->setIV(hex2bin($iv));
+                $jsonEncodedRecords = json_encode($query->records);
+
+                $missingCharacters = strlen($jsonEncodedRecords) % 16;
+                $cipher->disablePadding();
+
+                if ($missingCharacters > 0) {
+                    $paddedSubject = str_repeat('0', 16 - $missingCharacters - 1) . '-' . $jsonEncodedRecords;
+                } else {
+                    $paddedSubject = $jsonEncodedRecords;
+                }
+
+                file_put_contents('/tmp/clear-text.txt', $paddedSubject);
+                $encryptedRecords = $cipher->encrypt($paddedSubject);
+                $base64EncodedRecords = base64_encode($encryptedRecords);
+                file_put_contents('/tmp/enc', $base64EncodedRecords);
 
                 return new JsonResponse([
-                    'result' => base64_encode($encryptedRecords),
+                    'result' => $base64EncodedRecords,
+                    'key' => $key,
+                    'iv' => $iv,
                     'type' => 'success'
                 ]);
             } else {

@@ -1,8 +1,10 @@
 
-function mountDashboard($, routes) {
-    var Dashboard = function ($, routes) {
-        this.$ = $;
-        this.routes = routes;
+function mountDashboard(reqs) {
+    var Dashboard = function (reqs) {
+        this.$ = reqs.$;
+        this.crypto = reqs.crypto;
+        this.routes = reqs.routes;
+        this.fileSaver = reqs.fileSaver;
     };
 
     Dashboard.prototype.bindSubmitQueryListener = function () {
@@ -39,9 +41,50 @@ function mountDashboard($, routes) {
     };
 
     Dashboard.prototype.handleResponse = function (data) {
+        var $ = this.$;
         var notification = $('#notification');
+        var crypto = this.crypto;
 
-        notification.text(data.result);
+        if (data.shouldSaveAs) {
+            var errors = [];
+            if (!data.key) {
+                data.type = 'error';
+                errors.push('Missing key.');
+            }
+            if (!data.iv) {
+                data.type = 'error';
+                errors.push('Missing initialiation vector.');
+            }
+            if (!data.result) {
+                data.type = 'error';
+                errors.push('Missing data.');
+            }
+
+            if (errors.length === 0) {
+                var key = crypto.enc.Hex.parse(data.key);
+                var iv = crypto.enc.Hex.parse(data.iv);
+                var decryptedResponse = crypto.AES.decrypt({
+                    ciphertext: crypto.enc.Base64.parse(data.result)
+                }, key,
+                {iv: iv, padding: crypto.pad.NoPadding}).toString(crypto.enc.Latin1);
+                this.fileSaver(
+                    new Blob([decryptedResponse], {type: 'application/octet-stream;charset=utf-8'}),
+                    'perspective.bin'
+                );
+
+                data.result = 'This perspective has been successfully exported.';
+            } else {
+                data.type = 'danger';
+                data.result = errors.join('<br />');
+            }
+        }
+
+        if (data.type !== 'danger') {
+            notification.text(data.result);
+        } else {
+            notification.html(data.result);
+        }
+
         notification.parent().removeClass('alert-error');
         notification.parent().removeClass('alert-block');
         notification.parent().removeClass('alert-success');
@@ -55,7 +98,7 @@ function mountDashboard($, routes) {
         button.click(function (event) {
             var query = self.getQuery();
 
-            $.post(url, {query: query}, self.handleResponse);
+            $.post(url, {query: query}, self.handleResponse.bind(self));
 
             event.stopPropagation();
             event.preventDefault();
@@ -64,12 +107,15 @@ function mountDashboard($, routes) {
         });
     };
 
-    Dashboard.prototype.bindExportPerspective = function (button, url) {
+    Dashboard.prototype.bindExportPerspective = function (button, url, hash) {
         var $ = this.$;
         var self = this;
 
         button.click(function (event) {
-            $.get(url, self.handleResponse)
+            $.get(url, function (data) {
+                data.shouldSaveAs = hash;
+                self.handleResponse(data);
+            })
             .fail(function (error) {
                 self.handleResponse({
                     result:  JSON.parse(error.responseText).error.exception[0].message,
@@ -86,7 +132,8 @@ function mountDashboard($, routes) {
 
     Dashboard.prototype.bindListeners = function () {
         var self = this;
-        var routes = this.routes;
+        var routes = self.routes;
+        var $ = self.$;
 
         var saveQueryButton = $('#action-save-query');
         var exportPerspectiveButton = $('.perspective button');
@@ -100,7 +147,8 @@ function mountDashboard($, routes) {
                 var hash = $(button).parent().find('.hash').text();
                 self.bindExportPerspective(
                     $(button),
-                    routes.exportPerspective(hash)
+                    routes.exportPerspective(hash),
+                    hash
                 );
             });
         }
@@ -108,7 +156,7 @@ function mountDashboard($, routes) {
         this.bindSubmitQueryListener();
     };
 
-    var dashboard = new Dashboard($, routes);
+    var dashboard = new Dashboard(reqs);
     dashboard.bindListeners();
 
     return dashboard;
@@ -116,13 +164,15 @@ function mountDashboard($, routes) {
 
 if (window.Routing !== undefined) {
     var routing = window.Routing;
-    mountDashboard(
-        window.jQuery,
-        {
+    mountDashboard({
+        $: window.jQuery,
+        crypto: window.CryptoJS,
+        fileSaver: window.saveAs,
+        routes: {
             saveQuery: routing.generate('weaving_the_web_dashboard_save_query'),
             exportPerspective: function (hash) {
                 return routing.generate('weaving_the_web_dashboard_export_perspective', {hash: hash});
             }
         }
-    );
+    });
 }
