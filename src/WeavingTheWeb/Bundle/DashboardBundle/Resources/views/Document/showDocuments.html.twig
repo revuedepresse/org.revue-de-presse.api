@@ -44,6 +44,9 @@
     {{ parent() }}
 
     {% javascripts
+        '@WeavingTheWebDashboardBundle/Resources/public/components/crypto-js/crypto-js.js'
+        '@WeavingTheWebDashboardBundle/Resources/public/components/base64-js/lib/b64.js'
+        '@WeavingTheWebDashboardBundle/Resources/public/components/file-saver/FileSaver.min.js'
         '@WeavingTheWebDashboardBundle/Resources/public/js/dashboard.js'
         output='js/compiled/show-documents.js' %}
         <script src="{{ asset_url }}" type="text/javascript"></script>
