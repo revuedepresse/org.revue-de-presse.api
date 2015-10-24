@@ -180,9 +180,12 @@ class PerspectiveController extends ContainerAware
                 $cipher->disablePadding();
 
                 if ($missingCharacters > 0) {
-                    $paddedSubject = str_repeat('0', 16 - $missingCharacters - 1) . '-' . $jsonEncodedRecords;
+                    $padding = str_repeat('0', 16 - $missingCharacters - 1) . '-';
+                    $paddedSubject = $padding . $jsonEncodedRecords;
+                    $paddingLength = strlen($padding);
                 } else {
                     $paddedSubject = $jsonEncodedRecords;
+                    $paddingLength = 0;
                 }
 
                 file_put_contents('/tmp/clear-text.txt', $paddedSubject);
@@ -194,6 +197,7 @@ class PerspectiveController extends ContainerAware
                     'result' => $base64EncodedRecords,
                     'key' => $key,
                     'iv' => $iv,
+                    'padding' => $paddingLength,
                     'type' => 'success'
                 ]);
             } else {

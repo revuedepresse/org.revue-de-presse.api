@@ -40,6 +40,47 @@ function mountDashboard(reqs) {
         return this.$('#sql').val();
     };
 
+    Dashboard.prototype.validateDecryptionContext = function (data, errors) {
+        if (!data.key) {
+            data.type = 'error';
+            errors.push('Missing key.');
+        }
+        if (!data.iv) {
+            data.type = 'error';
+            errors.push('Missing initialiation vector.');
+        }
+        if (!data.result) {
+            data.type = 'error';
+            errors.push('Missing data.');
+        }
+        if (!data.padding) {
+            data.type = 'error';
+            errors.push('Missing padding.');
+        }
+
+        return errors;
+    };
+
+    Dashboard.prototype.decryptMessage = function (crypto, data) {
+        var key = crypto.enc.Hex.parse(data.key);
+        var iv = crypto.enc.Hex.parse(data.iv);
+        var encryptedContent = {
+            ciphertext: crypto.enc.Base64.parse(data.result)
+        };
+        var decryptionOptions = {iv: iv, padding: crypto.pad.NoPadding};
+        var decryptedResponse = crypto.AES.decrypt(encryptedContent, key, decryptionOptions)
+            .toString(crypto.enc.Latin1);
+
+        return decryptedResponse.substring(data.padding, decryptedResponse.length);
+    };
+
+    Dashboard.prototype.suggestDownload = function (content, contentType, filename) {
+        this.fileSaver(
+            new Blob([content], {type: contentType}),
+            filename
+        );
+    };
+
     Dashboard.prototype.handleResponse = function (data) {
         var $ = this.$;
         var notification = $('#notification');
@@ -47,33 +88,31 @@ function mountDashboard(reqs) {
 
         if (data.shouldSaveAs) {
             var errors = [];
-            if (!data.key) {
-                data.type = 'error';
-                errors.push('Missing key.');
-            }
-            if (!data.iv) {
-                data.type = 'error';
-                errors.push('Missing initialiation vector.');
-            }
-            if (!data.result) {
-                data.type = 'error';
-                errors.push('Missing data.');
+
+            if (data.shouldDecrypt) {
+                this.validateDecryptionContext(data, errors);
+                if (errors.length === 0) {
+                    var jsonEncodedResponse = this.decryptMessage(crypto, data);
+                    this.suggestDownload(jsonEncodedResponse, 'application/json; charset=utf-8', 'perspective.json');
+                } else {
+                    data.type = 'danger';
+                    data.result = errors.join('<br />');
+                }
+            } else {
+                if (data.type === 'error') {
+                    data.type = 'danger';
+                    errors.push(data.result);
+                } else {
+                    this.suggestDownload(data.result, 'application/octet-stream; charset=utf-8', 'perspective.bin');
+                }
             }
 
             if (errors.length === 0) {
-                var key = crypto.enc.Hex.parse(data.key);
-                var iv = crypto.enc.Hex.parse(data.iv);
-                var decryptedResponse = crypto.AES.decrypt({
-                    ciphertext: crypto.enc.Base64.parse(data.result)
-                }, key,
-                {iv: iv, padding: crypto.pad.NoPadding}).toString(crypto.enc.Latin1);
-                this.fileSaver(
-                    new Blob([decryptedResponse], {type: 'application/octet-stream;charset=utf-8'}),
-                    'perspective.bin'
-                );
-
-                data.result = 'This perspective has been successfully exported.';
+                var successMessage = 'This perspective ("{}") has been successfully exported.';
+                data.result = successMessage.replace('{}', data.shouldSaveAs);
             } else {
+                var errorMessage = 'This perspective ("{}") could not have been exported succesfully.';
+                errors.unshift(errorMessage.replace('{}', data.shouldSaveAs));
                 data.type = 'danger';
                 data.result = errors.join('<br />');
             }
@@ -114,6 +153,7 @@ function mountDashboard(reqs) {
         button.click(function (event) {
             $.get(url, function (data) {
                 data.shouldSaveAs = hash;
+                data.shouldDecrypt = true;
                 self.handleResponse(data);
             })
             .fail(function (error) {
