@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "5613f92db9e39f85075d0b5a943028e3",
-    "content-hash": "7bd25df592611a0c3f042264fc82d83d",
+    "hash": "0157b07611d0910cce8f50c1787df8eb",
+    "content-hash": "2f71daff86f8b2622736bca0454cd906",
     "packages": [
         {
             "name": "behat/behat",
@@ -787,7 +787,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/common/zipball/9f35e74fcbe9011b660e0b423e98c83b7a8699c0",
+                "url": "https://api.github.com/repos/doctrine/common/zipball/3d763ef5580f12fae0b270dca5fe1ec98ab1ca5c",
                 "reference": "9f35e74fcbe9011b660e0b423e98c83b7a8699c0",
                 "shasum": ""
             },
@@ -1290,7 +1290,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/migrations/zipball/bac31ab8484aad0a0fb09c852424a9d591c00c54",
+                "url": "https://api.github.com/repos/doctrine/migrations/zipball/68cc7bf629a7c1fc0696e583cc8ed46f897d0afb",
                 "reference": "65978aa4e9ffca3bb632225ad8c6320077d80d85",
                 "shasum": ""
             },
@@ -3180,6 +3180,72 @@
             "time": "2015-03-26 15:36:26"
         },
         {
+            "name": "oneup/uploader-bundle",
+            "version": "v1.3.1",
+            "target-dir": "Oneup/UploaderBundle",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/1up-lab/OneupUploaderBundle.git",
+                "reference": "00bff0181fc1592134f1aa36469ea44d69585a9a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/1up-lab/OneupUploaderBundle/zipball/00bff0181fc1592134f1aa36469ea44d69585a9a",
+                "reference": "00bff0181fc1592134f1aa36469ea44d69585a9a",
+                "shasum": ""
+            },
+            "require": {
+                "symfony/finder": ">=2.2.0",
+                "symfony/framework-bundle": ">=2.2"
+            },
+            "require-dev": {
+                "amazonwebservices/aws-sdk-for-php": "1.5.*",
+                "knplabs/gaufrette": "0.2.*@dev",
+                "phpunit/phpunit": "~4.1",
+                "sensio/framework-extra-bundle": "2.*",
+                "symfony/browser-kit": "2.*",
+                "symfony/class-loader": "2.*",
+                "symfony/security-bundle": "2.*"
+            },
+            "suggest": {
+                "knplabs/knp-gaufrette-bundle": "0.1.*"
+            },
+            "type": "symfony-bundle",
+            "autoload": {
+                "psr-0": {
+                    "Oneup\\UploaderBundle": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jim Schmid",
+                    "email": "js@1up.io",
+                    "homepage": "http://1up.io",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Handles multi file uploads in Symfony2. Features included: Chunked upload, Orphans management, Gaufrette support.",
+            "homepage": "http://1up.io",
+            "keywords": [
+                "FancyUpload",
+                "FineUploader",
+                "MooUpload",
+                "Uploadify",
+                "YUI3 Uploader",
+                "blueimp",
+                "dropzone",
+                "fileupload",
+                "jQuery File Uploader",
+                "plupload",
+                "upload"
+            ],
+            "time": "2014-07-04 14:58:01"
+        },
+        {
             "name": "ornicar/apc-bundle",
             "version": "dev-master",
             "target-dir": "Ornicar/ApcBundle",
@@ -3531,7 +3597,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ruflin/Elastica/zipball/9bb2ef13c73b5a6cfbae00e64f95adb919ca311c",
+                "url": "https://api.github.com/repos/ruflin/Elastica/zipball/585fba89099e05fc64d5b07b76132b0f900384fb",
                 "reference": "f2f75d4ae090c05cd2c0e86686f40feeee7e1e68",
                 "shasum": ""
             },
@@ -4260,7 +4326,7 @@
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/twigphp/Twig/zipball/656ecc0a5ce61c5b030eddb53c9e400fa99ee48a",
+                "url": "https://api.github.com/repos/twigphp/Twig/zipball/53aa70a3f43cc0094cf5a72b22f3d63a87713eb5",
                 "reference": "656ecc0a5ce61c5b030eddb53c9e400fa99ee48a",
                 "shasum": ""
             },

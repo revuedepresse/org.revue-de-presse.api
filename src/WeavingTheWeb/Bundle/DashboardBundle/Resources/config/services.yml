@@ -1,14 +1,17 @@
 parameters:
-    weaving_the_web_dashboard.controller.class:               WeavingTheWeb\Bundle\DashboardBundle\Controller\SearchController
-    weaving_the_web_dashboard.dbal_connection.class:          WeavingTheWeb\Bundle\DashboardBundle\DBAL\Connection
-    weaving_the_web_dashboard.entity.perspective:             WeavingTheWebDashboardBundle:Perspective
-    weaving_the_web_dashboard.form_type.search.class:         WeavingTheWeb\Bundle\DashboardBundle\Form\Type\SearchType
-    weaving_the_web_dashboard.map_perspective_command.class:  WeavingTheWeb\Bundle\DashboardBundle\Command\MapPerspectiveCommand
-    weaving_the_web_dashboard.map_status_command.class:       WeavingTheWeb\Bundle\DashboardBundle\Command\MapStatusCommand
-    weaving_the_web_dashboard.perspective_validator.class:    WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints\PerspectiveValidator
-    weaving_the_web_dashboard.repository.perspective.class:   WeavingTheWeb\Bundle\DashboardBundle\Repository\PerspectiveRepository
-    weaving_the_web_dashboard.query_validator.class:          WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints\QueryValidator
-    weaving_the_web_dashboard.router.class:                   WeavingTheWeb\Bundle\DashboardBundle\Routing\Router
+    weaving_the_web_dashboard.controller.class:                   WeavingTheWeb\Bundle\DashboardBundle\Controller\SearchController
+    weaving_the_web_dashboard.dbal_connection.class:              WeavingTheWeb\Bundle\DashboardBundle\DBAL\Connection
+    weaving_the_web_dashboard.entity.perspective:                 WeavingTheWebDashboardBundle:Perspective
+    weaving_the_web_dashboard.form_type.search.class:             WeavingTheWeb\Bundle\DashboardBundle\Form\Type\SearchType
+    weaving_the_web_dashboard.map_perspective_command.class:      WeavingTheWeb\Bundle\DashboardBundle\Command\MapPerspectiveCommand
+    weaving_the_web_dashboard.map_status_command.class:           WeavingTheWeb\Bundle\DashboardBundle\Command\MapStatusCommand
+    weaving_the_web_dashboard.perspective_validator.class:        WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints\PerspectiveValidator
+    weaving_the_web_dashboard.repository.perspective.class:       WeavingTheWeb\Bundle\DashboardBundle\Repository\PerspectiveRepository
+    weaving_the_web_dashboard.query_validator.class:              WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints\QueryValidator
+    weaving_the_web_dashboard.router.class:                       WeavingTheWeb\Bundle\DashboardBundle\Routing\Router
+    weaving_the_web_dashboard.twig.email.class:                   WeavingTheWeb\Bundle\DashboardBundle\Twig\EmailExtension
+    weaving_the_web_dashboard.upload_listener.class:              WeavingTheWeb\Bundle\DashboardBundle\EventListener\UploadListener
+    weaving_the_web_dashboard.error_handler.upload_file.class:    WeavingTheWeb\Bundle\DashboardBundle\ErrorHandler\UploadFile
 
 services:
     weaving_the_web_dashboard.dbal_connection:
@@ -64,6 +67,20 @@ services:
         arguments: [%weaving_the_web_dashboard.entity.perspective%]
 
     weaving_the_web_dashboard.twig.email:
-        class: WeavingTheWeb\Bundle\DashboardBundle\Twig\EmailExtension
+        class: %weaving_the_web_dashboard.twig.email.class%
         tags:
             - { name: twig.extension }
+
+    weaving_the_web_dashboard.error_handler.upload_file:
+        class: %weaving_the_web_dashboard.error_handler.upload_file.class%
+
+    weaving_the_web_dashboard.upload_listener:
+        class: %weaving_the_web_dashboard.upload_listener.class%
+        properties:
+            projectRootDir:         %kernel.root_dir%/..
+            logger:                 @logger
+            mapping:                @weaving_the_web_mapping.mapping
+            perspectiveRepository:  @weaving_the_web_dashboard.repository.perspective
+            entityManager:          @doctrine.orm.default_entity_manager
+        tags:
+            - { name: kernel.event_listener, event: oneup_uploader.post_persist, method: onUpload }

@@ -18,10 +18,21 @@ class PerspectiveRepository extends EntityRepository
      */
     public function savePerspective($sql, \ArrayAccess $setters = null)
     {
+        return $this->make($sql, Perspective::TYPE_SQL, $setters);
+    }
+
+    /**
+     * @param $value
+     * @param $type
+     * @param \ArrayAccess $setters
+     * @return Perspective
+     */
+    protected function make($value, $type, \ArrayAccess $setters)
+    {
         $perspective = new Perspective();
-        $perspective->setValue($sql);
-        $perspective->setType(1);
-        $perspective->setStatus(1);
+        $perspective->setValue($value);
+        $perspective->setType($type);
+        $perspective->setStatus(Perspective::STATUS_DEFAULT);
         $perspective->setCreationDate(new \DateTime());
 
         foreach ($setters as $setter) {
@@ -31,6 +42,16 @@ class PerspectiveRepository extends EntityRepository
         }
 
         return $perspective;
+    }
+
+    /**
+     * @param $filePath
+     * @param \ArrayAccess|null $setters
+     * @return Perspective
+     */
+    public function saveFilePerspective($filePath, \ArrayAccess $setters = null)
+    {
+        return $this->make($filePath, Perspective::TYPE_JSON, $setters);
     }
 
     /**

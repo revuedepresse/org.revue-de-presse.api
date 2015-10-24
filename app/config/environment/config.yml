@@ -60,6 +60,12 @@ sensio_framework_extra:
     view:    { annotations: false }
     router:  { annotations: true }
 
+oneup_uploader:
+    mappings:
+        perspective:
+            frontend: dropzone
+            error_handler: weaving_the_web_dashboard.error_handler.upload_file
+
 parameters:
     basic_auth_pattern: /this-route-is-undefined-in-production
 
