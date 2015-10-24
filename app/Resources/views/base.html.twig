@@ -1,48 +1,50 @@
 <!doctype html>
-<html lang="en" ng-app="weaverApp"><head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<html lang="en" ng-app="weaverApp">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>{% block title %}{% endblock %} :: Weaving The Web experiments</title>
+        <title>{% block title %}{% endblock %} :: Weaving The Web experiments</title>
 
-    </head><body>{% block stylesheets %}{% include "::stylesheets.html.twig" %}{% endblock %}
+        {% block stylesheets %}{% include "::stylesheets.html.twig" %}{% endblock %}
 
-    {% image 'tesseract.ico' %}
-    <link rel="shortcut icon" href="{{ asset_url }}">
-    {% endimage %}
+        {% image 'tesseract.ico' %}
+        <link rel="shortcut icon" href="{{ asset_url }}" type="image/x-icon" />
+        {% endimage %}
 
-    {% include 'BraincraftedBootstrapBundle::ie8-support.html.twig' %}
+        {% include 'BraincraftedBootstrapBundle::ie8-support.html.twig' %}
+    </head>
+    <body>
+    {% if displayMenu is not defined or displayMenu %}
+    <nav class="navbar navbar-default" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="{{ path('fos_user_registration_register') }}">Weaving the Web</a>
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                        data-target="#weaving-the-web-navbar" aria-expanded="false">
+                   <span class="sr-only">Toggle navigation</span>
+                   <span class="icon-bar"></span>
+                   <span class="icon-bar"></span>
+                   <span class="icon-bar"></span>
+                 </button>
+            </div>
 
-{% if displayMenu is not defined or displayMenu %}
-<nav class="navbar navbar-default" role="navigation">
-    <div class="container-fluid">
-        <div class="navbar-header">
-            <a class="navbar-brand" href="{{ path('fos_user_registration_register') }}">Weaving the Web</a>
-            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
-                    data-target="#weaving-the-web-navbar" aria-expanded="false">
-               <span class="sr-only">Toggle navigation</span>
-               <span class="icon-bar"></span>
-               <span class="icon-bar"></span>
-               <span class="icon-bar"></span>
-             </button>
+            {% block menu %}
+                {% if not active_menu_item is defined %}
+                    {% set active_menu_item = '' %}
+                {% endif %}
+                {% if not show_sitemap is defined %}
+                    {% set show_sitemap = app.request.attributes.get('_route') == 'weaving_the_web_dashboard_show_sitemap' %}
+                {% endif %}
+
+                {{ render_esi(controller('WeavingTheWebDashboardBundle:Document:showNavigation', {
+                    'activeMenu': active_menu_item, 'showSitemap': show_sitemap
+                })) }}
+            {% endblock menu %}
         </div>
-
-        {% block menu %}
-            {% if not active_menu_item is defined %}
-                {% set active_menu_item = '' %}
-            {% endif %}
-            {% if not show_sitemap is defined %}
-                {% set show_sitemap = app.request.attributes.get('_route') == 'weaving_the_web_dashboard_show_sitemap' %}
-            {% endif %}
-
-            {{ render_esi(controller('WeavingTheWebDashboardBundle:Document:showNavigation', {
-                'activeMenu': active_menu_item, 'showSitemap': show_sitemap
-            })) }}
-        {% endblock menu %}
-    </div>
-</nav>
-{% endif %}
-{% block body %}{% endblock body %}
-{% block javascripts %}{% include "::javascripts.html.twig" %}{% endblock javascripts %}
-
-</body></html>
+    </nav>
+    {% endif %}
+    {% block body %}{% endblock body %}
+    {% block javascripts %}{% include "::javascripts.html.twig" %}{% endblock javascripts %}
+    </body>
+</html>
