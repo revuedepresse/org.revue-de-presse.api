@@ -17,9 +17,7 @@ describe('Syncing tweets status', function () {
     $routeParams = { username: 'weaver' };
     beforeEach(angular.mock.module(function ($provide) {
         var fallback = jasmine.createSpyObj('fallback', ['isNavigatorOnline']);
-        fallback.isNavigatorOnline.andCallFake(function () {
-            return false;
-        });
+        fallback.isNavigatorOnline = jasmine.createSpy().and.returnValue(false);
         $provide.value('fallback', fallback);
     }));
 
@@ -106,9 +104,7 @@ describe('Syncing tweet status', function () {
 
     beforeEach(angular.mock.module(function ($provide) {
         var fallback = jasmine.createSpyObj('fallback', ['isNavigatorOnline']);
-        fallback.isNavigatorOnline.andCallFake(function () {
-            return true;
-        });
+        fallback.isNavigatorOnline = jasmine.createSpy().and.returnValue(true);
         $provide.value('fallback', fallback);
     }));
 
