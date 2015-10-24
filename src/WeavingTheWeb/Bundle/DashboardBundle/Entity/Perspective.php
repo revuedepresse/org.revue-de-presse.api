@@ -12,9 +12,28 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Perspective
 {
-    const STATUS_PUBLIC = 2;
+    const STATUS_DISABLED   = 0;
+
+    const STATUS_DEFAULT    = 1;
+
+    const STATUS_PUBLIC     = 2;
 
     const STATUS_EXPORTABLE = 3;
+
+    /**
+     * Default perspective
+     */
+    const TYPE_DEFAULT      = 0;
+
+    /**
+     * SQL perspective
+     */
+    const TYPE_SQL          = 1;
+
+    /**
+     * JSON perspective
+     */
+    const TYPE_JSON         = 2;
 
     /**
      * @var integer
