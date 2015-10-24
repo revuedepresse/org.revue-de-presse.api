@@ -26,9 +26,9 @@ class Perspective
     const TYPE_DEFAULT      = 0;
 
     /**
-     * SQL perspective
+     * Query perspective
      */
-    const TYPE_SQL          = 1;
+    const TYPE_QUERY        = 1;
 
     /**
      * JSON perspective
@@ -309,5 +309,21 @@ class Perspective
     public function isExportable()
     {
         return $this->status === self::STATUS_EXPORTABLE;
+    }
+
+    /**
+     * @return int
+     */
+    public function isQueryPerspective()
+    {
+        return $this->type = self::TYPE_QUERY;
+    }
+
+    /**
+     * @return int
+     */
+    public function isJsonPerspective()
+    {
+        return $this->type = self::TYPE_JSON;
     }
 }

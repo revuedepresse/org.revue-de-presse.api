@@ -92,35 +92,10 @@ class PerspectiveController extends ContainerAware
             throw new NotFoundHttpException('The requested query it not available', $exception);
         }
 
-        if ($this->validPerspective($perspective)) {
-            $query = $this->executeQuery($perspective);
-
-            $translator = $this->container->get('translator');
-
-             /** @var \Symfony\Bundle\TwigBundle\TwigEngine $templateEngine */
-            $templateEngine = $this->container->get('templating');
-
-            if ($perspective->getName() !== null) {
-                $perspectiveTitle = $perspective->getName();
-            } else {
-                $perspectiveTitle = $translator->trans('title_perspective');
-            }
-
-            $response = $templateEngine->renderResponse(
-                 'WeavingTheWebDashboardBundle:Perspective:showPerspective.html.twig', array(
-                     'active_menu_item' => 'dashboard',
-                     'error' => $query->error,
-                     'default_query' => $query->sql,
-                     'records' => $query->records,
-                     'title' => $perspectiveTitle
-                )
-            );
-            $dateTime = new \DateTime();
-            $dateInterval = \DateInterval::createFromDateString('2 hours');
-            $expiresAt = $dateTime->add($dateInterval);
-            $response->setExpires($expiresAt);
-
-            return $response;
+        if ($perspective->isQueryPerspective() && $this->validPerspective($perspective)) {
+            return $this->renderQueryPerspective($perspective);
+        } elseif ($perspective->isJsonPerspective()) {
+            return $this->renderJsonPerspective($perspective);
         } else {
             throw new NotFoundHttpException('The requested query it not available');
         }
@@ -223,5 +198,93 @@ class PerspectiveController extends ContainerAware
         $connection = $this->container->get('weaving_the_web_dashboard.dbal_connection');
 
         return $connection->executeQuery($perspective->getValue());
+    }
+
+    /**
+     * @param $perspective
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    protected function renderQueryPerspective(Perspective $perspective)
+    {
+        $query = $this->executeQuery($perspective);
+
+        $translator = $this->container->get('translator');
+
+        /** @var \Symfony\Bundle\TwigBundle\TwigEngine $templateEngine */
+        $templateEngine = $this->container->get('templating');
+
+        if ($perspective->getName() !== null) {
+            $perspectiveTitle = $perspective->getName();
+        } else {
+            $perspectiveTitle = $translator->trans('title_perspective');
+        }
+
+        $response = $templateEngine->renderResponse(
+            'WeavingTheWebDashboardBundle:Perspective:showPerspective.html.twig',
+            array(
+                'active_menu_item' => 'dashboard',
+                'error' => $query->error,
+                'default_query' => $query->sql,
+                'records' => $query->records,
+                'title' => $perspectiveTitle
+            )
+        );
+        $dateTime = new \DateTime();
+        $dateInterval = \DateInterval::createFromDateString('2 hours');
+        $expiresAt = $dateTime->add($dateInterval);
+        $response->setExpires($expiresAt);
+
+        return $response;
+    }
+
+    /**
+     * @param $perspective
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    protected function renderJsonPerspective(Perspective $perspective)
+    {
+        $translator = $this->container->get('translator');
+
+        /** @var \Symfony\Bundle\TwigBundle\TwigEngine $templateEngine */
+        $templateEngine = $this->container->get('templating');
+
+        if ($perspective->getName() !== null) {
+            $perspectiveTitle = $perspective->getName();
+        } else {
+            $perspectiveTitle = $translator->trans('title_perspective');
+        }
+
+        $relativePath = $perspective->getValue();
+        $projectRootDir = realpath($this->container->getParameter('kernel.root_dir') . '/..');
+        $jsonFilePath = $projectRootDir . '/' . $relativePath;
+
+        $error = null;
+        if (file_exists($jsonFilePath)) {
+            $records = json_decode(file_get_contents($jsonFilePath), $asAssocArray = true);
+            $jsonLastError = json_last_error();
+            if ($jsonLastError !== JSON_ERROR_NONE) {
+                $error = $jsonLastError;
+            }
+        } else {
+            $records = [];
+        }
+        $query = sprintf('SELECT * FROM weaving_perspective WHERE per_id = %d', $perspective->getId());
+
+        $response = $templateEngine->renderResponse(
+            'WeavingTheWebDashboardBundle:Perspective:showPerspective.html.twig',
+            array(
+                'active_menu_item' => 'dashboard',
+                'error' => $error,
+                'default_query' => $query,
+                'records' => $records,
+                'title' => $perspectiveTitle
+            )
+        );
+        $dateTime = new \DateTime();
+        $dateInterval = \DateInterval::createFromDateString('2 hours');
+        $expiresAt = $dateTime->add($dateInterval);
+        $response->setExpires($expiresAt);
+
+        return $response;
     }
 } 
