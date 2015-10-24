@@ -18,7 +18,7 @@ class PerspectiveRepository extends EntityRepository
      */
     public function savePerspective($sql, \ArrayAccess $setters = null)
     {
-        return $this->make($sql, Perspective::TYPE_SQL, $setters);
+        return $this->make($sql, Perspective::TYPE_QUERY, $setters);
     }
 
     /**
