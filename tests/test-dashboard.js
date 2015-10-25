@@ -98,7 +98,7 @@ describe('Dashboard', function () {
         notificationCenterElement.append(notificationElement);
 
         queryTextAreaElement = $('<textarea />', {id: queryTextAreaId});
-        formElement = $('<form />');
+        formElement = $('<form />', {id: 'edit-query'});
         formElement.append(queryTextAreaElement);
 
         var bodyElement = $('body');

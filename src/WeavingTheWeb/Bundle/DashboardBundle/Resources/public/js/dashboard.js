@@ -29,7 +29,7 @@ function mountDashboard(reqs) {
                 (trimmedSql.indexOf('create table') == 0) ||
                 (trimmedSql.indexOf('drop table') == 0)) {
                 $('#sql').val(sql);
-                $('.container form').submit();
+                $('.container form#edit-query').submit();
             }
 
             event.preventDefault();
