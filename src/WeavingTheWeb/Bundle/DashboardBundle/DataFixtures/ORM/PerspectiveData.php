@@ -29,7 +29,7 @@ ORDER BY per_id DESC";
             'exportable_perspective' => self::DEFAULT_QUERY
         ];
 
-        $perspectiveDefaultType = Perspective::STATUS_PUBLIC;
+        $perspectiveDefaultType = Perspective::TYPE_DEFAULT;
 
         $propertiesCollection = [
             [

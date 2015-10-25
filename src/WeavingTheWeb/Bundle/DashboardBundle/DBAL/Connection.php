@@ -19,6 +19,9 @@ class Connection
 {
     const QUERY_TYPE_DEFAULT = 0;
 
+    /**
+     * @var \Mysqli
+     */
     public $connection;
 
     public $queryCount;
@@ -51,6 +54,11 @@ class Connection
      * @var $validator Validator
      */
     public $validator;
+
+    /**
+     * @var \mysqli_result
+     */
+    private $lastResult;
 
     public function __construct(Validator $validator, LoggerInterface $logger)
     {
@@ -129,10 +137,13 @@ QUERY;
 
     protected function setConnectionCharset()
     {
-        if (!$this->getWrappedConnection()->set_charset($this->charset)) {
+        $result = $this->getWrappedConnection()->set_charset($this->charset);
+        if (!$result) {
             throw new \Exception(sprintf(
                 'Impossible to set charset (%s): %S', $this->charset, \mysqli::$error));
         }
+
+        $this->connection->use_result();
     }
 
     public function setCharset($charset)
@@ -182,7 +193,8 @@ QUERY;
             $query .= ';';
         }
 
-        if (!$this->connection->multi_query($query)) {
+        $this->lastResult = $this->connection->query($query);
+        if (!$this->lastResult) {
             throw new \Exception($this->connection->error);
         }
 
@@ -256,32 +268,38 @@ QUERY;
             $this->translator->trans('wrong_query_execution', array(), 'messages')];
 
         do {
-            if (!$this->connection->field_count) {
+            if (isset($this->connection->field_count) && !$this->connection->field_count) {
                 if (strlen($this->connection->error) > 0) {
                     $error = $this->connection->error;
-                    $this->logger->info($error);
+                    if ($this->connection->errno === 2014) { // Repair all tables of the test database
+                        $this->logger->error($error);
+                    } else {
+                        $this->logger->info($error);
+                    }
                     throw new \Exception($error);
                 } else {
                     $results[1] = $this->translator->trans('no_record', array(), 'messages');
                 }
             } else {
-                $queryResult = $this->connection->use_result();
-                unset($results);
-                while ($result = $queryResult->fetch_array(MYSQLI_ASSOC)) {
-                    $results[] = $result;
-                }
-                $queryResult->close();
-            }
+                $queryResult = $this->lastResult;
 
-            if ($this->connection->more_results()) {
-                $this->connection->next_result();
+                /**
+                 * @var \mysqli_result $queryResult
+                 */
+                if (is_object($queryResult) && ($queryResult instanceof \mysqli_result)) {
+                    $results = [];
+                    while ($result = $queryResult->fetch_array(MYSQLI_ASSOC)) {
+                        if (!is_null($result)) {
+                            $results[] = $result;
+                        }
+                    }
+                }
             }
 
             $this->queryCount--;
         } while ($this->queryCount > 0);
 
         $this->queryCount = null;
-        $this->connection->close();
 
         return $results;
     }
