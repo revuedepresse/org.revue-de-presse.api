@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "354a213629bfe70267659c9259048a84",
-    "content-hash": "0296fd2cff2baa88b210e60e45859b6c",
+    "hash": "503f58e8e168224df2728fa11187a3c6",
+    "content-hash": "3fa3055b4f940c0f34a24b5cf020ce66",
     "packages": [
         {
             "name": "braincrafted/bootstrap-bundle",
@@ -3514,13 +3514,13 @@
             "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "https://github.com/Spea/SpBowerBundle.git",
-                "reference": "70ba78761321934d80fe389f557fb6d886d20918"
+                "url": "https://github.com/thierrymarianne/SpBowerBundle.git",
+                "reference": "cd2678abaf83ff21d157c6758eaf95a26e83872f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Spea/SpBowerBundle/zipball/70ba78761321934d80fe389f557fb6d886d20918",
-                "reference": "70ba78761321934d80fe389f557fb6d886d20918",
+                "url": "https://api.github.com/repos/thierrymarianne/SpBowerBundle/zipball/cd2678abaf83ff21d157c6758eaf95a26e83872f",
+                "reference": "cd2678abaf83ff21d157c6758eaf95a26e83872f",
                 "shasum": ""
             },
             "require": {
@@ -6337,6 +6337,7 @@
         "kertz/twitteroauth": 20,
         "oldsound/rabbitmq-bundle": 20,
         "ornicar/apc-bundle": 20,
+        "sp/bower-bundle": 20,
         "themattharris/tmhoauth": 20,
         "weaving-the-web/mail-bundle": 20,
         "weaving-the-web/newsfeed-bundle": 20,
