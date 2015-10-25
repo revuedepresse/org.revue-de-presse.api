@@ -3,7 +3,6 @@
 namespace WeavingTheWeb\Bundle\MappingBundle\Factory;
 
 /**
- * Class MappingFactory
  * @package WeavingTheWeb\Bundle\MappingBundle\Factory
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */

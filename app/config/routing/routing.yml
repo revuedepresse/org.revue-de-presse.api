@@ -1,6 +1,6 @@
 wtw_registration_land:
     defaults: { _controller: FOSUserBundle:Registration:land }
-    pattern:  /
+    path:  /
 
 _main:
     resource: routing_friendsofsymfony.yml
@@ -25,3 +25,6 @@ wtw_user:
     resource: "@WTWUserBundle/Controller/"
     type:     annotation
 
+oneup_uploader:
+    resource: .
+    type: uploader

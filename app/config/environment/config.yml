@@ -53,11 +53,18 @@ twig:
             - ':Form:form_label.html.twig'
     globals:
         feature_toggling:
-            search: %feature_toggling_search%
+            search:         %feature_toggling_search%
+            repositories:   %feature_toggling_repositories%
 
 sensio_framework_extra:
     view:    { annotations: false }
     router:  { annotations: true }
+
+oneup_uploader:
+    mappings:
+        perspective:
+            frontend: dropzone
+            error_handler: weaving_the_web_dashboard.error_handler.upload_file
 
 parameters:
     basic_auth_pattern: /this-route-is-undefined-in-production

@@ -2,11 +2,11 @@
 
 namespace WeavingTheWeb\Bundle\TwitterBundle\Security;
 
+use GuzzleHttp\RequestOptions;
+
 use Symfony\Component\BrowserKit\Response;
-use WeavingTheWeb\Bundle\ApiBundle\Entity\Token;
 
 /**
- * Class ApplicationAuthenticator
  * @package WeavingTheWeb\Bundle\TwitterBundle\Security
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
@@ -52,11 +52,12 @@ class ApplicationAuthenticator
             $this->client = new $clientClass();
 
             /**
-             * @var \Guzzle\Http\Client $httpClientClass
+             * @var \GuzzleHttp\Client $httpClientClass
              */
-            $httpClient = new $httpClientClass('', array(
-                $httpClientClass::SSL_CERT_AUTHORITY => false,
-                'curl.options' => array(CURLOPT_TIMEOUT => 1800)));
+            $httpClient = new $httpClientClass([
+                RequestOptions::VERIFY => false,
+                RequestOptions::TIMEOUT => 1800
+            ]);
 
             $this->client->setClient($httpClient);
         }
@@ -65,6 +66,7 @@ class ApplicationAuthenticator
     /**
      * @param $token
      * @param $secret
+     * @return string
      */
     public function makeAuthorizationBasic($token, $secret)
     {

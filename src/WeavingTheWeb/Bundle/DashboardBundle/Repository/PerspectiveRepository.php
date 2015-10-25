@@ -6,8 +6,6 @@ use Doctrine\ORM\EntityRepository;
 use WeavingTheWeb\Bundle\DashboardBundle\Entity\Perspective;
 
 /**
- * Class PerspectiveRepository
- *
  * @package WTW\API\DataMiningBundle\Repository
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
@@ -20,17 +18,40 @@ class PerspectiveRepository extends EntityRepository
      */
     public function savePerspective($sql, \ArrayAccess $setters = null)
     {
+        return $this->make($sql, Perspective::TYPE_QUERY, $setters);
+    }
+
+    /**
+     * @param $value
+     * @param $type
+     * @param \ArrayAccess $setters
+     * @return Perspective
+     */
+    protected function make($value, $type, \ArrayAccess $setters)
+    {
         $perspective = new Perspective();
-        $perspective->setValue($sql);
-        $perspective->setType(1);
-        $perspective->setStatus(1);
+        $perspective->setValue($value);
+        $perspective->setType($type);
+        $perspective->setStatus(Perspective::STATUS_DEFAULT);
         $perspective->setCreationDate(new \DateTime());
 
         foreach ($setters as $setter) {
-            $perspective = $setter($perspective);
+            if (is_callable($setter)) {
+                $perspective = $setter($perspective);
+            }
         }
 
         return $perspective;
+    }
+
+    /**
+     * @param $filePath
+     * @param \ArrayAccess|null $setters
+     * @return Perspective
+     */
+    public function saveFilePerspective($filePath, \ArrayAccess $setters = null)
+    {
+        return $this->make($filePath, Perspective::TYPE_JSON, $setters);
     }
 
     /**

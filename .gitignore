@@ -15,6 +15,7 @@
 /bin/behat
 /bin/phpunit
 /bin/phpspec
+
 bower_components/
 composer.phar
 /node_modules
