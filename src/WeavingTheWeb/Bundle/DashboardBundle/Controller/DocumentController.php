@@ -73,15 +73,15 @@ class DocumentController extends Controller
          */
         $connection = $this->get('weaving_the_web_dashboard.dbal_connection');
         $defaultQuery = $connection->getDefaultQuery();
-        $sql = 'SELECT 1';
+        $query = 'SELECT 1';
 
         if ($request->request->has('query')) {
-            $sql = $request->request->get('query');
+            $query = $request->request->get('query');
         } elseif (is_null($defaultQuery->error)) {
-            $sql = $defaultQuery->sql;
+            $query = $defaultQuery->sql;
         }
 
-        $query = $connection->executeQuery($sql);
+        $query = $connection->executeQuery($query);
 
         return $this->render(
             'WeavingTheWebDashboardBundle:Document:showDocuments.html.twig', array(
@@ -93,41 +93,41 @@ class DocumentController extends Controller
     }
 
     /**
-     * @Extra\Route("/sql", name="weaving_the_web_dashboard_save_sql", options={"expose"=true})
+     * @Extra\Route("/query", name="weaving_the_web_dashboard_save_query", options={"expose"=true})
      * @Extra\Method({"POST"})
      *
      * @return \Symfony\Component\HttpFoundation\Response
      * @throws \Exception
      */
-    public function saveSqlAction()
+    public function saveQueryAction()
     {
         $request = $this->get('request');
         $translator = $this->get('translator');
         $entityManager = $this->get('doctrine.orm.entity_manager');
         $type = 'error';
 
-        if ($request->request->has('sql')) {
+        if ($request->request->has('query')) {
             $error = null;
-            $sql = $request->request->get('sql');
+            $query = $request->request->get('query');
         } else {
             $error = $translator->trans('save_query_failure', array(), 'messages');
-            $sql = '';
+            $query = '';
         }
 
         /** @var $perspectiveRepository \WeavingTheWeb\Bundle\DashboardBundle\Repository\PerspectiveRepository */
         $perspectiveRepository = $entityManager->getRepository('WeavingTheWebDashboardBundle:Perspective');
-        $result = $perspectiveRepository->findBy(['value' => $sql]);
+        $result = $perspectiveRepository->findBy(['value' => $query]);
 
         if (count($result) === 0) {
             try {
                 $setters = $this->get('weaving_the_web_mapping.mapping');
 
                 /** @var $perspective \WeavingTheWeb\Bundle\DashboardBundle\Entity\Perspective */
-                $perspective = $perspectiveRepository->savePerspective($sql, $setters);
+                $perspective = $perspectiveRepository->savePerspective($query, $setters);
                 $entityManager->persist($perspective);
                 $entityManager->flush();
 
-                $result = $translator->trans('save_query_success', array('{{ sql }}' => $sql), 'messages');
+                $result = $translator->trans('save_query_success', array('{{ query }}' => $query), 'messages');
                 $type = 'success';
             } catch (\Exception $exception) {
                 $result = $exception->getMessage();

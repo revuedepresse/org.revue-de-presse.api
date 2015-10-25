@@ -18,31 +18,42 @@
             </div>
             <div class="form-group">
                 <div class="span2">
-                    <input id="action-save-query" class="btn btn-default" type="button" value="Save your query" />
+                    <input id="action-save-query" class="btn btn-default" type="button"
+                           value="{{ 'document.button.save_query'|trans({}, 'document', 'en') }}" />
                 </div>
             </div>
             <div class="form-group">
                 <div class="span2">
-                    <input class="btn btn-default" type="submit" value="Submit your query" />
+                    <input class="btn btn-default" type="submit"
+                           value="{{ 'document.button.execute_query'|trans({}, 'document', 'en') }}" />
                 </div>
             </div>
+             <div class="form-group">
+                <p id="notification" >
+                {% if error is defined %}
+                {{ error }}
+                {% endif %}
+                </p>
+            </div>
         </form>
-        <div class="form-group">
-            <p id="notification" >
-            {% if error is defined %}
-            {{ error }}
-            {% endif %}
-            </p>
+        <div id="file-upload">
+            <p>or<p>
+            <form action="{{ oneup_uploader_endpoint('perspective') }}" id="perspective" class="dropzone">
+            </form>
         </div>
         {% include 'WeavingTheWebDashboardBundle::perspective.html.twig' %}
-    <div>
+    </div>
 {% endblock %}
 
 {% block javascripts %}
     {{ parent() }}
-
     {% javascripts
+        '@WeavingTheWebDashboardBundle/Resources/public/components/crypto-js/crypto-js.js'
+        '@WeavingTheWebDashboardBundle/Resources/public/components/dropzone/dist/min/dropzone.min.js'
+        '@WeavingTheWebDashboardBundle/Resources/public/components/base64-js/lib/b64.js'
+        '@WeavingTheWebDashboardBundle/Resources/public/components/file-saver.js/FileSaver.js'
         '@WeavingTheWebDashboardBundle/Resources/public/js/dashboard.js'
+        '@WeavingTheWebDashboardBundle/Resources/public/js/drag-and-drop.js'
         output='js/compiled/show-documents.js' %}
         <script src="{{ asset_url }}" type="text/javascript"></script>
     {% endjavascripts %}
@@ -53,6 +64,8 @@
 
     {% stylesheets
         '@WeavingTheWebDashboardBundle/Resources/public/css/dashboard.css'
+        '@WeavingTheWebDashboardBundle/Resources/public/components/dropzone/dist/min/basic.min.css'
+        '@WeavingTheWebDashboardBundle/Resources/public/components/dropzone/dist/min/dropzone.min.css'
         output='css/compiled/show-documents.css' %}
         <link rel="stylesheet" type="text/css" href="{{ asset_url }}" />
     {% endstylesheets %}

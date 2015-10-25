@@ -1,7 +1,7 @@
 // Karma configuration
 // Generated on Mon Feb 03 2014 19:57:02 GMT+0100 (CET)
 
-module.exports = function (config) {
+module.exports = function(config) {
     config.set({
 
         // base path, that will be used to resolve files and exclude
@@ -24,7 +24,7 @@ module.exports = function (config) {
             '../web/mobile/app/js/services/*.js',
             'bower_components/angular-mocks/angular-mocks.js',
             'location-mock.js',
-            'test-*.js'
+            'test-mobile-*.js'
         ],
 
 
@@ -36,7 +36,7 @@ module.exports = function (config) {
 
         // test results reporter to use
         // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
-        reporters: ['spec', 'junit'],
+        reporters: ['spec'],
 
 
         // web server port
@@ -49,7 +49,7 @@ module.exports = function (config) {
 
         // level of logging
         // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
-        logLevel: config.LOG_ERROR,
+        logLevel: config.LOG_INFO,
 
 
         // enable / disable watching file and executing tests whenever any file changes
@@ -64,10 +64,10 @@ module.exports = function (config) {
         // - Safari (only Mac; has to be installed with `npm install karma-safari-launcher`)
         // - PhantomJS
         // - IE (only Windows; has to be installed with `npm install karma-ie-launcher`)
-        browsers: ['PhantomJS'],
+        browsers: ['ChromeCanary'],
 
         junitReporter: {
-            outputFile: '../build/karma/mobile-test-results.xml',
+            outputFile: '../build/mobile-test-results.xml',
             suite: 'Weaving the Web Mobile'
         },
 
@@ -77,6 +77,6 @@ module.exports = function (config) {
 
         // Continuous Integration mode
         // if true, it capture browsers, run tests and exit
-        singleRun: true
+        singleRun: false
     });
 };

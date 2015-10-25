@@ -1,3 +1,6 @@
 parameters:
     encoders:
         FOS\UserBundle\Model\UserInterface: sha512
+    aes_key:                                %aes.key%
+    aes_iv:                                 %aes.iv%
+

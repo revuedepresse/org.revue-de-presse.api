@@ -25,20 +25,35 @@ ORDER BY per_id DESC";
                 'Update tmp_data SET jsn_hash = md5(jsn_value) LIMIT 1;'
         ];
 
+        $exportableDataQueries = [
+            'exportable_perspective' => self::DEFAULT_QUERY
+        ];
+
+        $perspectiveDefaultType = Perspective::STATUS_PUBLIC;
+
         $propertiesCollection = [
             [
                 'value' => self::DEFAULT_QUERY,
-                'type' => Connection::QUERY_TYPE_DEFAULT,
+                'type' => $perspectiveDefaultType,
             ], [
                 'value' => self::DEFAULT_QUERY,
                 'status' => Perspective::STATUS_PUBLIC,
-                'type' => Connection::QUERY_TYPE_DEFAULT,
+                'type' => $perspectiveDefaultType,
                 'hash' => sha1(self::DEFAULT_QUERY),
             ], [
                 'name' => 'valid_data_updating_perspective',
                 'value' => $updateTemporaryDataQueries['valid_data_updating_perspective'],
-                'type' => Connection::QUERY_TYPE_DEFAULT,
+                'type' => $perspectiveDefaultType,
                 'hash' => sha1($updateTemporaryDataQueries['valid_data_updating_perspective']),
+            ], [
+                'name' => 'exportable_perspective',
+                'value' => $exportableDataQueries['exportable_perspective'],
+                'status' => Perspective::STATUS_EXPORTABLE,
+                'type' => $perspectiveDefaultType,
+                'hash' => sha1(
+                    'status:' . Perspective::STATUS_EXPORTABLE . ':' .
+                    $exportableDataQueries['exportable_perspective']
+                ),
             ],
         ];
 

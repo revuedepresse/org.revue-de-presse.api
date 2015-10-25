@@ -6,15 +6,34 @@ use WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints as WeavingTheWebA
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Perspective
- *
  * @ORM\Table(name="weaving_perspective")
  * @ORM\Entity(repositoryClass="WeavingTheWeb\Bundle\DashboardBundle\Repository\PerspectiveRepository")
  * @WeavingTheWebAssert\Perspective(groups="public_perspectives")
  */
 class Perspective
 {
-    const STATUS_PUBLIC = 2;
+    const STATUS_DISABLED   = 0;
+
+    const STATUS_DEFAULT    = 1;
+
+    const STATUS_PUBLIC     = 2;
+
+    const STATUS_EXPORTABLE = 3;
+
+    /**
+     * Default perspective
+     */
+    const TYPE_DEFAULT      = 0;
+
+    /**
+     * Query perspective
+     */
+    const TYPE_QUERY        = 1;
+
+    /**
+     * JSON perspective
+     */
+    const TYPE_JSON         = 2;
 
     /**
      * @var integer
@@ -282,5 +301,29 @@ class Perspective
     public function getUuid()
     {
         return $this->uuid;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isExportable()
+    {
+        return $this->status === self::STATUS_EXPORTABLE;
+    }
+
+    /**
+     * @return int
+     */
+    public function isQueryPerspective()
+    {
+        return $this->type = self::TYPE_QUERY;
+    }
+
+    /**
+     * @return int
+     */
+    public function isJsonPerspective()
+    {
+        return $this->type = self::TYPE_JSON;
     }
 }

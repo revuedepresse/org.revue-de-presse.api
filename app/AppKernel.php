@@ -46,6 +46,8 @@ class AppKernel extends Kernel
             new FOS\ElasticaBundle\FOSElasticaBundle(),
             new WeavingTheWeb\Bundle\MappingBundle\WeavingTheWebMappingBundle(),
             new WeavingTheWeb\Bundle\DashboardBundle\WeavingTheWebDashboardBundle(),
+            // File upload
+            new Oneup\UploaderBundle\OneupUploaderBundle(),
             // Bootstrap
             new Braincrafted\Bundle\BootstrapBundle\BraincraftedBootstrapBundle(),
             // ORM

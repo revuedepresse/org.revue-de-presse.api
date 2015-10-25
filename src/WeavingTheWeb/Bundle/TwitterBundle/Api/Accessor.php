@@ -3,12 +3,15 @@
 namespace WeavingTheWeb\Bundle\TwitterBundle\Api;
 
 use Doctrine\Common\Persistence\ObjectRepository;
+
+use GuzzleHttp\RequestOptions;
+
 use Psr\Log\LoggerInterface;
-use WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException;
-use WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;
+
+use WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException,
+    WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;
 
 /**
- * Class Accessor
  * @package WeavingTheWeb\Bundle\TwitterBundle\Api
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
@@ -452,9 +455,10 @@ class Accessor implements TwitterErrorAwareInterface
         $this->httpClient = new $clientClass();
 
         $httpClientClass = $this->httpClientClass;
-        $httpClient = new $httpClientClass('', array(
-            $httpClientClass::SSL_CERT_AUTHORITY => false,
-            'curl.options' => array(CURLOPT_TIMEOUT => 1800)));
+        $httpClient = new $httpClientClass([
+            RequestOptions::VERIFY => false,
+            RequestOptions::TIMEOUT => 1800
+        ]);
 
         $this->httpClient->setClient($httpClient);
     }

@@ -6,7 +6,7 @@
         {% for name, value in columns %}
         {% set starts_with = name|slice(0,4) %}
         <td>
-        {% if starts_with != "hid_" %}
+        {% if starts_with != "hid_" and starts_with != "exp_"%}
             {% if
                 starts_with == "raw_" or
                 starts_with == "img_" or
@@ -27,6 +27,15 @@
         {% for name, value in columns %}
         <td>
         {% set starts_with = name|slice(0,4) %}
+            {% if starts_with == 'exp_' %}
+            <div class="perspective">
+                <button class="btn btn-default" type="submit"
+                    value="{{ 'perspective.button.export_perspective'|trans({}, 'perspective', 'en')}}">
+                    {{ 'perspective.button.export_perspective'|trans({}, 'perspective', 'en')}}
+                </button>
+                <span class="hide hash">{{ value }}</span>
+            </div>
+            {% endif %}
         {% if starts_with == "raw_" %}
             {{ value|raw }}
         {% elseif starts_with == "img_" %}
@@ -49,12 +58,13 @@
             <pre>{{ value }}</pre>
         {% elseif starts_with == "btn_" %}
             <div class="query" title="{{ value|escape }}">
-                {% if columns.hid_name is defined %}
+                {% if columns.hid_name is defined and columns.hid_name|length > 0 %}
                 <button type="button" class="btn btn-default">{{ columns.hid_name }}</button>
                 {% endif %}
+                {# The column value aliased with a name starting with "btn_" should be a valid SQL query #}
                 <span class="sql hide">{{ value }}</span>
             </div>
-        {% elseif starts_with != "hid_"  %}
+        {% elseif starts_with != "hid_" and starts_with != "exp_"  %}
             {{ value }}
         {% elseif starts_with == "hid_" %}
             <span class="hide">{{ value }}</span>

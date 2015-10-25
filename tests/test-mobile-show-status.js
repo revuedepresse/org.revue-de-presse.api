@@ -6,7 +6,7 @@ var statusIds = [
         "420103690863669247",
         "420103690863669246",
         "420103690863669245",
-        "420103690863669244",
+        "420103690863669244"
     ],
     verbose = 'DEBUG';
 
@@ -52,9 +52,7 @@ describe('Accessing statuses', function () {
 
     beforeEach(angular.mock.module(function ($provide) {
         var fallback = jasmine.createSpyObj('fallback', ['isNavigatorOnline']);
-        fallback.isNavigatorOnline.andCallFake(function () {
-            return false;
-        });
+        fallback.isNavigatorOnline = jasmine.createSpy().and.returnValue(false);
         $provide.value('fallback', fallback);
     }));
 
@@ -273,9 +271,7 @@ describe('Pressing a favorite button', function () {
 
     beforeEach(angular.mock.module(function ($provide) {
         var fallback = jasmine.createSpyObj('fallback', ['isNavigatorOnline']);
-        fallback.isNavigatorOnline.andCallFake(function () {
-            return true;
-        });
+        fallback.isNavigatorOnline = jasmine.createSpy().and.returnValue(true);
         $provide.value('fallback', fallback);
     }));
 

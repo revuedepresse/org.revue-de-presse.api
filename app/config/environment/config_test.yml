@@ -10,8 +10,8 @@ doctrine:
         path:             %test_database_path%
 
 framework:
-    router:   { resource: "%kernel.root_dir%/config/routing/routing_test.yml" }
-    test: ~
+    router:         { resource: "%kernel.root_dir%/config/routing/routing_test.yml" }
+    test:           ~
     session:
         storage_id: session.storage.mock_file
 

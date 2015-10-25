@@ -1,7 +1,7 @@
 var LocationMockService = (function (jasmine) {
     var service = function () {
-        this.locationMock = jasmine.createSpyObj('location', ['protocol', 'host']);
-        this.$host = '## FILL HOSTNAME ##',
+        this.locationMock = jasmine.createSpyObj('location', ['host', 'protocol']);
+        this.$host = '## FILL HOSTNAME ##';
         this.$protocol = 'https'
     };
 
@@ -9,15 +9,11 @@ var LocationMockService = (function (jasmine) {
         var $host = this.$host;
         var $protocol = this.$protocol;
 
-        this.locationMock.host.andCallFake(function () {
-            return $host;
-        });
-        this.locationMock.protocol.andCallFake(function () {
-            return $protocol;
-        });
+        this.locationMock.host = jasmine.createSpy().and.returnValue($host);
+        this.locationMock.protocol = jasmine.createSpy().and.returnValue($protocol);
 
         return this.locationMock;
-    }
+    };
 
     return service;
 })(jasmine);

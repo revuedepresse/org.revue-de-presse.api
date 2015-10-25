@@ -1,0 +1,4 @@
+perspective:
+    not_found:          'Sorry, there is no such perspective.'
+    button:
+        export_perspective: 'Export perspective'
