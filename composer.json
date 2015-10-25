@@ -13,6 +13,10 @@
         },
         {
             "type": "vcs",
+            "url": "git@github.com:thierrymarianne/SpBowerBundle.git"
+        },
+        {
+            "type": "vcs",
             "url": "git@github.com:thierrymarianne/FOSTwitterBundle.git"
         },
         {
@@ -70,7 +74,7 @@
         "sensio/distribution-bundle": "3.*",
         "sensio/framework-extra-bundle": "3.*",
         "sensio/generator-bundle": "2.3.*",
-        "sp/bower-bundle": "*",
+        "sp/bower-bundle": "dev-master#cd2678abaf83ff21d157c6758eaf95a26e83872f",
         "themattharris/tmhOAuth": "dev-master",
         "twig/extensions": "1.0.*",
         "braincrafted/bootstrap-bundle": "2.0.1",
