@@ -61,17 +61,16 @@ function mountDashboard(reqs) {
         return errors;
     };
 
-    Dashboard.prototype.decryptMessage = function (crypto, data) {
-        var key = crypto.enc.Hex.parse(data.key);
-        var iv = crypto.enc.Hex.parse(data.iv);
-        var encryptedContent = {
-            ciphertext: crypto.enc.Base64.parse(data.result)
-        };
-        var decryptionOptions = {iv: iv, padding: crypto.pad.NoPadding};
-        var decryptedResponse = crypto.AES.decrypt(encryptedContent, key, decryptionOptions)
-            .toString(crypto.enc.Latin1);
+    Dashboard.prototype.decryptMessage = function (crypto, data, success) {
+        var worker = new Worker('js/compiled/deciphering-worker.js');
 
-        return decryptedResponse.substring(data.padding, decryptedResponse.length);
+        worker.addEventListener('message', function(e) {
+            var decryptedMesage = e.data;
+            var unpaddedData = decryptedMesage.substring(data.padding, decryptedMesage.length);
+            success(unpaddedData);
+        }, false);
+
+        worker.postMessage(data);
     };
 
     Dashboard.prototype.suggestDownload = function (content, contentType, filename) {
@@ -81,43 +80,12 @@ function mountDashboard(reqs) {
         );
     };
 
-    Dashboard.prototype.handleResponse = function (data) {
-        var $ = this.$;
-        var notification = $('#notification');
-        var crypto = this.crypto;
+    Dashboard.prototype.prepareSuccessNotification = function (data) {
+        var successMessage = 'This perspective ("{}") has been successfully exported.';
+        data.result = successMessage.replace('{}', data.shouldSaveAs);
+    };
 
-        if (data.shouldSaveAs) {
-            var errors = [];
-
-            if (data.shouldDecrypt) {
-                this.validateDecryptionContext(data, errors);
-                if (errors.length === 0) {
-                    var jsonEncodedResponse = this.decryptMessage(crypto, data);
-                    this.suggestDownload(jsonEncodedResponse, 'application/json; charset=utf-8', 'perspective.json');
-                } else {
-                    data.type = 'danger';
-                    data.result = errors.join('<br />');
-                }
-            } else {
-                if (data.type === 'error') {
-                    data.type = 'danger';
-                    errors.push(data.result);
-                } else {
-                    this.suggestDownload(data.result, 'application/octet-stream; charset=utf-8', 'perspective.bin');
-                }
-            }
-
-            if (errors.length === 0) {
-                var successMessage = 'This perspective ("{}") has been successfully exported.';
-                data.result = successMessage.replace('{}', data.shouldSaveAs);
-            } else {
-                var errorMessage = 'This perspective ("{}") could not have been exported succesfully.';
-                errors.unshift(errorMessage.replace('{}', data.shouldSaveAs));
-                data.type = 'danger';
-                data.result = errors.join('<br />');
-            }
-        }
-
+    Dashboard.prototype.showNotification = function (data, notification) {
         if (data.type !== 'danger') {
             notification.text(data.result);
         } else {
@@ -128,6 +96,53 @@ function mountDashboard(reqs) {
         notification.parent().removeClass('alert-block');
         notification.parent().removeClass('alert-success');
         notification.parent().addClass('alert alert-' + data.type);
+    };
+
+    Dashboard.prototype.handleResponse = function (data) {
+        var $ = this.$;
+        var notification = $('#notification');
+        var crypto = this.crypto;
+        var self = this;
+
+        if (data.shouldSaveAs) {
+            var errors = [];
+
+            if (data.shouldDecrypt) {
+                this.validateDecryptionContext(data, errors);
+                if (errors.length === 0) {
+                    var success = function (jsonEncodedResponse) {
+                        self.suggestDownload(jsonEncodedResponse,
+                            'application/json; charset=utf-8', 'perspective.json'
+                        );
+                        self.prepareSuccessNotification(data);
+                        self.showNotification(data, notification);
+                    };
+                    this.decryptMessage(crypto, data, success);
+                } else {
+                    data.type = 'danger';
+                    data.result = errors.join('<br />');
+                }
+            } else {
+                if (data.type === 'error') {
+                    data.type = 'danger';
+                    errors.push(data.result);
+                } else {
+                    this.suggestDownload(data.result, 'application/octet-stream; charset=utf-8', 'perspective.bin');
+                    this.prepareSuccessNotification(data);
+                }
+            }
+
+            if (errors.length > 0) {
+                var errorMessage = 'This perspective ("{}") could not have been exported succesfully.';
+                errors.unshift(errorMessage.replace('{}', data.shouldSaveAs));
+                data.type = 'danger';
+                data.result = errors.join('<br />');
+            }
+        }
+
+        if (!data.shouldSaveAs || !data.shouldDecrypt || errors.length > 0) {
+            this.showNotification(data, notification);
+        }
     };
 
     Dashboard.prototype.bindSaveQueryListener = function (button, url) {
