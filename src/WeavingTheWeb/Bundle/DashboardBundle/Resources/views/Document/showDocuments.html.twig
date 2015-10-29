@@ -55,6 +55,14 @@
     {% endjavascripts %}
     {% javascripts
         '@WeavingTheWebDashboardBundle/Resources/public/components/crypto-js/crypto-js.js'
+        '@WeavingTheWebDashboardBundle/Resources/public/components/text-encoding/lib/encoding-indexes.js'
+        '@WeavingTheWebDashboardBundle/Resources/public/components/text-encoding/lib/encoding.js'
+        '@WeavingTheWebDashboardBundle/Resources/public/js/decipher-natively.js'
+        output='js/compiled/natively-deciphering-worker.js' %}
+        <script src="{{ asset_url }}" type="javascript/worker"></script>
+    {% endjavascripts %}
+    {% javascripts
+        '@WeavingTheWebDashboardBundle/Resources/public/components/crypto-js/crypto-js.js'
         '@WeavingTheWebDashboardBundle/Resources/public/components/dropzone/dist/min/dropzone.min.js'
         '@WeavingTheWebDashboardBundle/Resources/public/components/file-saver.js/FileSaver.js'
         '@WeavingTheWebDashboardBundle/Resources/public/js/dashboard.js'
