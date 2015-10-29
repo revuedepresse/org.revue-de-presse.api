@@ -53,24 +53,12 @@ function mountDashboard(reqs) {
             data.type = 'error';
             errors.push('Missing data.');
         }
-        if (!data.padding) {
+        if (data.padding === undefined) {
             data.type = 'error';
             errors.push('Missing padding.');
         }
 
         return errors;
-    };
-
-    Dashboard.prototype.decryptMessage = function (crypto, data, success) {
-        var worker = new Worker('js/compiled/deciphering-worker.js');
-
-        worker.addEventListener('message', function(e) {
-            var decryptedMesage = e.data;
-            var unpaddedData = decryptedMesage.substring(data.padding, decryptedMesage.length);
-            success(unpaddedData);
-        }, false);
-
-        worker.postMessage(data);
     };
 
     Dashboard.prototype.suggestDownload = function (content, contentType, filename) {
@@ -98,6 +86,33 @@ function mountDashboard(reqs) {
         notification.parent().addClass('alert alert-' + data.type);
     };
 
+
+    Dashboard.prototype.decryptMessage = function (crypto, data, success) {
+        var worker = new Worker('js/compiled/deciphering-worker.js');
+
+        worker.addEventListener('message', function(e) {
+            var decryptedMesage = e.data;
+            var unpaddedData = decryptedMesage.substring(data.padding, decryptedMesage.length);
+            success(unpaddedData);
+        }, false);
+
+        worker.postMessage(data);
+    };
+
+    Dashboard.prototype.decryptNativelyMessage = function (data, errors, success) {
+        var worker = new Worker('js/compiled/natively-deciphering-worker.js');
+
+        worker.addEventListener('message', function(e) {
+            if (e.data.error) {
+                errors.push(e.data.error);
+            } else {
+                success(e.data);
+            }
+        }, false);
+
+        worker.postMessage(data);
+    };
+
     Dashboard.prototype.handleResponse = function (data) {
         var $ = this.$;
         var notification = $('#notification');
@@ -117,7 +132,12 @@ function mountDashboard(reqs) {
                         self.prepareSuccessNotification(data);
                         self.showNotification(data, notification);
                     };
-                    this.decryptMessage(crypto, data, success);
+
+                    if (data.shouldDecryptNatively) {
+                        this.decryptNativelyMessage(data, errors, success);
+                    } else {
+                        this.decryptMessage(crypto, data, success);
+                    }
                 } else {
                     data.type = 'danger';
                     data.result = errors.join('<br />');
@@ -169,6 +189,7 @@ function mountDashboard(reqs) {
             $.get(url, function (data) {
                 data.shouldSaveAs = hash;
                 data.shouldDecrypt = true;
+                data.shouldDecryptNatively = true;
                 self.handleResponse(data);
             })
             .fail(function (error) {

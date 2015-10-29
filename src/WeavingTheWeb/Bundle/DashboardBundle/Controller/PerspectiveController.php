@@ -151,16 +151,25 @@ class PerspectiveController extends ContainerAware
                 $cipher->setIV(hex2bin($iv));
                 $jsonEncodedRecords = json_encode($query->records);
 
-                $missingCharacters = strlen($jsonEncodedRecords) % 16;
-                $cipher->disablePadding();
+                if (isset($manualPadding)) {
+                    $cipher->disablePadding();
 
-                if ($missingCharacters > 0) {
-                    $padding = str_repeat('0', 16 - $missingCharacters - 1) . '-';
-                    $paddedSubject = $padding . $jsonEncodedRecords;
-                    $paddingLength = strlen($padding);
-                } else {
+                    $blockSize = 32;
                     $paddedSubject = $jsonEncodedRecords;
+                    $padSize = $blockSize - (strlen($paddedSubject) % $blockSize);
+                    $paddedSubject = $paddedSubject . str_repeat(chr($padSize), $padSize);
+
+                    $missingCharacters = strlen($paddedSubject) % 16;
+                    if ($missingCharacters > 0) {
+                        $padding = str_repeat('0', 16 - $missingCharacters - 1) . '-';
+                        $paddedSubject = $padding . $paddedSubject;
+                        $paddingLength = strlen($padding);
+                    } else {
+                        $paddingLength = 0;
+                    }
+                } else {
                     $paddingLength = 0;
+                    $paddedSubject = $jsonEncodedRecords;
                 }
 
                 file_put_contents('/tmp/clear-text.txt', $paddedSubject);
