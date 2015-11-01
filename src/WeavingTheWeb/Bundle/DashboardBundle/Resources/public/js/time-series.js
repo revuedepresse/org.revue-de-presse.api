@@ -3,20 +3,9 @@
     since = new Date(since);
     until = new Date(until);
 
-    /**
-     * See http://stackoverflow.com/a/11172083/282073 to get local date
-     *
-     * @param date
-     * @returns {string}
-     */
-    function formatDate(date) {
-        var local = new Date(date);
-        local.setMinutes(date.getMinutes() - date.getTimezoneOffset());
-
-        return local.toJSON().slice(0, 10);
-    }
-
-    var endpoint = '/api/twitter/aggregate/' + keywords.join(',') + '/' + formatDate(since) + '/' + formatDate(until);
+    var stringFormatter = getStringFormatter();
+    var endpoint = '/api/twitter/aggregate/' + keywords.join(',') + '/' + stringFormatter.formatDate(since) +
+        '/' + stringFormatter.formatDate(until);
 
     d3.json(endpoint)
     .header("Authorization", "Bearer " + token)

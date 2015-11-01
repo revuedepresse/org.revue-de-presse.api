@@ -1,4 +1,11 @@
 <div class="row">
+    <label for="status-clipboard">External link</label>
+    <input id="status-clipboard" type="text" />
+    <button data-clipboard-action="copy"
+            data-clipboard-text=""
+            id="copy-status">Copy link</button>
+    <div id="status"></div>
+    <div id="graph"></div>
     <table class="table table-condensed">
     {% for columns in records %}
     {% if loop.first %}
@@ -67,7 +74,7 @@
         {% elseif starts_with != "hid_" and starts_with != "exp_"  %}
             {{ value }}
         {% elseif starts_with == "hid_" %}
-            <span class="hide">{{ value }}</span>
+            <span class="hide">{{ value|raw }}</span>
         {% endif %}
         </td>
         {% else %}
