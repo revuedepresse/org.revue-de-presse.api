@@ -7,3 +7,26 @@
         {% include 'WeavingTheWebDashboardBundle::perspective.html.twig' %}
     <div>
 {% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {% javascripts
+        '@WeavingTheWebDashboardBundle/Resources/public/components/clipboard/dist/clipboard.js'
+        '@WeavingTheWebDashboardBundle/Resources/public/components/d3/d3.js'
+        '@WeavingTheWebDashboardBundle/Resources/public/components/metrics-graphics/dist/metricsgraphics.js'
+        '@WeavingTheWebDashboardBundle/Resources/public/js/format-date.js'
+        '@WeavingTheWebDashboardBundle/Resources/public/js/metrics.js'
+        output='js/compiled/show-perspective.js' %}
+        <script src="{{ asset_url }}" type="text/javascript"></script>
+    {% endjavascripts %}
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {% stylesheets
+        '@WeavingTheWebDashboardBundle/Resources/public/components/metrics-graphics/dist/metricsgraphics.css'
+        '@WeavingTheWebDashboardBundle/Resources/public/css/metrics.css'
+        output='css/compiled/show-perspective.css' %}
+        <link rel="stylesheet" type="text/css" href="{{ asset_url }}" />
+    {% endstylesheets %}
+{% endblock %}
