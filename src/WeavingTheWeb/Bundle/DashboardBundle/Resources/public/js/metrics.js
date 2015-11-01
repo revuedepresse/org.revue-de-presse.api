@@ -26,31 +26,9 @@
 
     var setUpExportAsCsv = function (timeSeries, $, fileSaver) {
         $('#export-as-csv').click(function () {
-            var head;
-            var commaSeparatedRows = timeSeries.map(function (row, index) {
-                var rowCells;
-                if (index === 0) {
-                    head = Object.keys(row);
-                    rowCells = head;
-                } else {
-                    var columnIndex;
-                    rowCells = [];
-                    for (columnIndex = 0; columnIndex < head.length; columnIndex++) {
-                        var columnName = head[columnIndex];
-                        if (columnName == 'user') {
-                            rowCells.push('"' + row[columnName].screen_name + '"');
-                        } else {
-                            rowCells.push('"' + row[columnName] + '"');
-                        }
-
-                        if (columnName == 'text') {
-                            rowCells[rowCells.length - 1] = rowCells[rowCells.length - 1].replace(/\r\n/g, '\n');
-                        }
-                    }
-                }
-                return rowCells.join(',');
-            });
-            var csvDocument = commaSeparatedRows.join('\r\n');
+            var csvDocument = new CSV(timeSeries, {
+                header: ['interest', 'date', 'text', 'link', 'screen_name']
+            }).encode();
             fileSaver(new Blob([csvDocument], {type: 'text/csv'}), 'perspective.csv');
         });
     };
@@ -86,7 +64,8 @@
                 date: status[dateAccessor],
                 text: status[textAccessor],
                 link: link,
-                user: user
+                name: user.name,
+                screen_name: user.screen_name
             });
         }
     }
@@ -95,6 +74,7 @@
         return;
     }
 
+    setUpExportAsCsv(JSON.parse(JSON.stringify(timeSeries)), $, fileSaver);
     timeSeries = MG.convert.date(timeSeries, 'date', '%a %b %e %H:%M:%S %Z %Y');
 
     MG.data_graphic({
@@ -106,7 +86,7 @@
         markers: [],
         mouseover: function(d) {
             var rows = [
-                'Author: ' + d.user.name + ' (@' + d.user.screen_name + ')',
+                'Author: ' + d.name + ' (@' + d.screen_name + ')',
                 'Status: ' + d.text,
                 'Retweets: ' + d.interest
             ];
@@ -122,6 +102,5 @@
     });
 
     setUpClipboard();
-    setUpExportAsCsv(timeSeries, $, fileSaver);
 
 })(MG, window.document, window.saveAs, false);
