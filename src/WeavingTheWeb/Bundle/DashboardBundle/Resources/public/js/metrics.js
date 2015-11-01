@@ -1,5 +1,5 @@
 
-(function (MG, document, debug) {
+(function (MG, document, fileSaver, debug) {
     var index;
     var hiddenCells = $('tr td .json');
     var totalDocuments = hiddenCells.length;
@@ -11,7 +11,7 @@
     var escapedDocument;
     var dateAccessor = 'created_at';
     var textAccessor = 'text';
-    var metric = 'retweet_count';
+    var metric;
     var stringIdAccessor = 'id_str';
 
     var clipboard;
@@ -23,6 +23,44 @@
         clipboard.destroy();
         clipboard = new Clipboard(copyStatusButtonSelector);
     };
+
+    var setUpExportAsCsv = function (timeSeries, $, fileSaver) {
+        $('#export-as-csv').click(function () {
+            var head;
+            var commaSeparatedRows = timeSeries.map(function (row, index) {
+                var rowCells;
+                if (index === 0) {
+                    head = Object.keys(row);
+                    rowCells = head;
+                } else {
+                    var columnIndex;
+                    rowCells = [];
+                    for (columnIndex = 0; columnIndex < head.length; columnIndex++) {
+                        var columnName = head[columnIndex];
+                        if (columnName == 'user') {
+                            rowCells.push('"' + row[columnName].screen_name + '"');
+                        } else {
+                            rowCells.push('"' + row[columnName] + '"');
+                        }
+
+                        if (columnName == 'text') {
+                            rowCells[rowCells.length - 1] = rowCells[rowCells.length - 1].replace(/\r\n/g, '\n');
+                        }
+                    }
+                }
+                return rowCells.join(',');
+            });
+            var csvDocument = commaSeparatedRows.join('\r\n');
+            fileSaver(new Blob([csvDocument], {type: 'text/csv'}), 'perspective.csv');
+        });
+    };
+
+    var queryParams = getQueryParams();
+    if ('metric' in queryParams) {
+        metric = queryParams.metric;
+    } else {
+        metric = 'retweet_count';
+    }
 
     for (index = 1; index < totalDocuments; index++) {
         cell = hiddenCells[index];
@@ -38,12 +76,19 @@
             status = JSON.parse(escapedDocument);
         }
 
-        timeSeries.push({
-            interest: status[metric],
-            date: status[dateAccessor],
-            text: status[textAccessor],
-            status: status
-        });
+        if (metric in status) {
+            var user = status.user;
+            var statusId = status[stringIdAccessor];
+            var link = 'https://twitter.com/' + user.screen_name + '/status/' + statusId;
+
+            timeSeries.push({
+                interest: status[metric],
+                date: status[dateAccessor],
+                text: status[textAccessor],
+                link: link,
+                user: user
+            });
+        }
     }
 
     if (timeSeries.length === 0) {
@@ -60,19 +105,15 @@
         right: 150,
         markers: [],
         mouseover: function(d) {
-            var status = d.status;
-            var user = status.user;
-            var statusId = status[stringIdAccessor];
-            var link = 'https://twitter.com/' + user.screen_name + '/status/' + statusId;
             var rows = [
-                'Author: ' + user.name + ' (@' + user.screen_name + ')',
+                'Author: ' + d.user.name + ' (@' + d.user.screen_name + ')',
                 'Status: ' + d.text,
                 'Retweets: ' + d.interest
             ];
             $('#status').text(rows.join("\n"));
 
-            $(statusClipboardSelector).val(link);
-            $(copyStatusButtonSelector).attr('data-clipboard-text', link);
+            $(statusClipboardSelector).val(d.link);
+            $(copyStatusButtonSelector).attr('data-clipboard-text', d.link);
             $(statusClipboardSelector).focus();
         },
         target: document.getElementById('graph'),
@@ -81,4 +122,6 @@
     });
 
     setUpClipboard();
-})(MG, window.document, false);
+    setUpExportAsCsv(timeSeries, $, fileSaver);
+
+})(MG, window.document, window.saveAs, false);
