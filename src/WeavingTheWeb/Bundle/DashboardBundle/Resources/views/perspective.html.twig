@@ -1,4 +1,5 @@
 <div class="row">
+    {% if display_graph is defined %}
     <label for="status-clipboard">External link</label>
     <input id="status-clipboard" type="text" />
     <button data-clipboard-action="copy"
@@ -6,6 +7,7 @@
             id="copy-status">Copy link</button>
     <div id="status"></div>
     <div id="graph"></div>
+    {% endif %}
     <table class="table table-condensed">
     {% for columns in records %}
     {% if loop.first %}
@@ -31,10 +33,11 @@
     </tr>
     {% endif %}
     <tr>
-        {% for name, value in columns %}
+    {% for name, value in columns %}
         <td>
         {% set starts_with = name|slice(0,4) %}
-            {% if starts_with == 'exp_' %}
+        {% set follows_with = name|slice(4,4) %}
+        {% if starts_with == 'exp_' %}
             <div class="perspective">
                 <button class="btn btn-default" type="submit"
                     value="{{ 'perspective.button.export_perspective'|trans({}, 'perspective', 'en')}}">
@@ -73,14 +76,16 @@
             </div>
         {% elseif starts_with != "hid_" and starts_with != "exp_"  %}
             {{ value }}
+        {% elseif starts_with == "hid_" and follows_with == 'jsn_' %}
+            <textarea class="hide json">{{ value|raw }}</textarea>
         {% elseif starts_with == "hid_" %}
-            <span class="hide">{{ value|raw }}</span>
+            <span class="hide">{{ value }}</span>
         {% endif %}
         </td>
-        {% else %}
-            {{ columns }}
-        {% endfor %}
-    <tr>
+    {% else %}
+        {{ columns }}
+    {% endfor %}
+    </tr>
     {% endfor %}
     </table>
 </div>

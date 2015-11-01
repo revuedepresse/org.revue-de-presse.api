@@ -232,8 +232,8 @@ class PerspectiveController extends ContainerAware
             'WeavingTheWebDashboardBundle:Perspective:showPerspective.html.twig',
             array(
                 'active_menu_item' => 'dashboard',
-                'error' => $query->error,
                 'default_query' => $query->sql,
+                'error' => $query->error,
                 'records' => $query->records,
                 'title' => $perspectiveTitle
             )
@@ -284,6 +284,7 @@ class PerspectiveController extends ContainerAware
             array(
                 'active_menu_item' => 'dashboard',
                 'error' => $error,
+                'display_graph' => true,
                 'default_query' => $query,
                 'records' => $records,
                 'title' => $perspectiveTitle
