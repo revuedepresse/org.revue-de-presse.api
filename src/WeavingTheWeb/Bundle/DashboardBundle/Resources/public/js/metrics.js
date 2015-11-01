@@ -1,7 +1,7 @@
 
 (function (MG, document, debug) {
     var index;
-    var hiddenCells = $('tr td:nth-child(3)');
+    var hiddenCells = $('tr td .json');
     var totalDocuments = hiddenCells.length;
     var timeSeries = [];
     var cell;
@@ -22,12 +22,6 @@
         clipboard = new Clipboard(copyStatusButtonSelector);
         clipboard.destroy();
         clipboard = new Clipboard(copyStatusButtonSelector);
-        clipboard.on('success', function (e) {
-            console.log('Copied to clipboard: "{}".'.replace('{}', e.text));
-        });
-        clipboard.on('error', function (e) {
-            e.clearSelection();
-        });
     };
 
     for (index = 1; index < totalDocuments; index++) {
@@ -52,13 +46,17 @@
         });
     }
 
+    if (timeSeries.length === 0) {
+        return;
+    }
+
     timeSeries = MG.convert.date(timeSeries, 'date', '%a %b %e %H:%M:%S %Z %Y');
 
     MG.data_graphic({
         title: 'Perspective metrics',
         data: timeSeries,
         width: 1500,
-        height: 800,
+        height: 500,
         right: 150,
         markers: [],
         mouseover: function(d) {
@@ -75,21 +73,7 @@
 
             $(statusClipboardSelector).val(link);
             $(copyStatusButtonSelector).attr('data-clipboard-text', link);
-            var copyButton = $(copyStatusButtonSelector)[0];
-            var event = new MouseEvent('click', {
-                view: window,
-                bubbles: true,
-                defaultPrevented: false,
-                cancelable: false,
-                target: copyButton,
-                isTrusted: true
-            });
-            var canceled = copyButton.dispatchEvent(event);
-            if (canceled) {
-                console.log('event canceled');
-            } else {
-                console.log('event not canceled');
-            }
+            $(statusClipboardSelector).focus();
         },
         target: document.getElementById('graph'),
         x_accessor: 'date',
