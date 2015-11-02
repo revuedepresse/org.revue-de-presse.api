@@ -285,6 +285,7 @@ class PerspectiveController extends ContainerAware
                 'active_menu_item' => 'dashboard',
                 'error' => $error,
                 'display_graph' => true,
+                'enabled_search' => true,
                 'default_query' => $query,
                 'records' => $records,
                 'title' => $perspectiveTitle

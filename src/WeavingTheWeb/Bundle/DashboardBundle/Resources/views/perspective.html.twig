@@ -1,92 +1,111 @@
-<div class="row">
-    {% if display_graph is defined %}
-    <label for="status-clipboard">External link</label>
-    <input id="status-clipboard" type="text" />
-    <button data-clipboard-action="copy"
-            data-clipboard-text=""
-            id="copy-status">Copy link</button>
-    <button id="export-as-csv">Export as CSV</button>
-    <div id="status"></div>
+<form>
+{% if display_graph is defined %}
+    <div class="form-group">
+        <label for="status-clipboard" class="control-label">External link</label>
+        <input class="form-control" id="status-clipboard" type="text" />
+    </div>
+    <div class="form-group">
+        <button class="btn btn-default"
+                data-clipboard-action="copy"
+                data-clipboard-text=""
+                id="copy-status">Copy link</button>
+        <button class="btn btn-default" id="export-as-csv">Export as CSV</button>
+    </div>
+    <div class="form-group">
+        <div id="status" class="form-control-static"></div>
+    </div>
     <div id="graph"></div>
-    {% endif %}
+{% endif %}
+{% if enabled_search is defined %}
+    <div class="form-group">
+        <label for="jetsSearch" class="control-label">Search</label>
+        <input class="form-control" id="jetsSearch" type="search" />
+    </div>
+{% endif %}
+</form>
+<div class="row">
     <table class="table table-condensed">
-    {% for columns in records %}
-    {% if loop.first %}
-    <tr>
-        {% for name, value in columns %}
-        {% set starts_with = name|slice(0,4) %}
-        <td>
-        {% if starts_with != "hid_" and starts_with != "exp_"%}
-            {% if
-                starts_with == "raw_" or
-                starts_with == "img_" or
-                starts_with == "lnk_" or
-                starts_with == "trc_" or
-                starts_with == "pre_" or
-                starts_with == "btn_" %}
-                {{ name[4:] }}
-            {% else  %}
-                {{ name }}
-            {% endif %}
-        {% endif %}
-        </td>
-        {% endfor %}
-    </tr>
-    {% endif %}
-    <tr>
-    {% for name, value in columns %}
-        <td>
-        {% set starts_with = name|slice(0,4) %}
-        {% set follows_with = name|slice(4,4) %}
-        {% if starts_with == 'exp_' %}
-            <div class="perspective">
-                <button class="btn btn-default" type="submit"
-                    value="{{ 'perspective.button.export_perspective'|trans({}, 'perspective', 'en')}}">
-                    {{ 'perspective.button.export_perspective'|trans({}, 'perspective', 'en')}}
-                </button>
-                <span class="hide hash">{{ value }}</span>
-            </div>
-            {% endif %}
-        {% if starts_with == "raw_" %}
-            {{ value|raw }}
-        {% elseif starts_with == "img_" %}
-            <img src="{{ value }}" />
-        {% elseif starts_with == "lnk_" %}
-            <a href="{{ value }}">
-            {% if columns.hid_img is defined %}
-            <img src="{{ columns.hid_img_trc }}" />
-            {% elseif columns.hid_trc_label is defined %}
-            <p class="shorten" title="{{ columns.hid_trc_label|raw }}">
-                {{ columns.hid_trc_label|truncate(15, true)|trim }}
-            </p>
-            {% else %}
-            {{ value }}
-            {% endif %}
-            </a>
-        {% elseif starts_with == "trc_" %}
-            <p class="shorten" title="{{ value|raw }}">{{ value|truncate(15, true) }}</p>
-        {% elseif starts_with == "pre_" %}
-            <pre>{{ value }}</pre>
-        {% elseif starts_with == "btn_" %}
-            <div class="query" title="{{ value|escape }}">
-                {% if columns.hid_name is defined and columns.hid_name|length > 0 %}
-                <button type="button" class="btn btn-default">{{ columns.hid_name }}</button>
+        {% for columns in records %}
+        {% if loop.first %}
+        <thead>
+            <tr>
+                {% for name, value in columns %}
+                {% set starts_with = name|slice(0,4) %}
+                <td>
+                {% if starts_with != "hid_" and starts_with != "exp_"%}
+                    {% if
+                        starts_with == "raw_" or
+                        starts_with == "img_" or
+                        starts_with == "lnk_" or
+                        starts_with == "trc_" or
+                        starts_with == "pre_" or
+                        starts_with == "btn_" %}
+                        {{ name[4:] }}
+                    {% else  %}
+                        {{ name }}
+                    {% endif %}
                 {% endif %}
-                {# The column value aliased with a name starting with "btn_" should be a valid SQL query #}
-                <span class="sql hide">{{ value }}</span>
-            </div>
-        {% elseif starts_with != "hid_" and starts_with != "exp_"  %}
-            {{ value }}
-        {% elseif starts_with == "hid_" and follows_with == 'jsn_' %}
-            <textarea class="hide json">{{ value|raw }}</textarea>
-        {% elseif starts_with == "hid_" %}
-            <span class="hide">{{ value }}</span>
+                </td>
+                {% endfor %}
+            </tr>
+        </thead>
         {% endif %}
-        </td>
-    {% else %}
-        {{ columns }}
-    {% endfor %}
-    </tr>
-    {% endfor %}
+        <tbody{% if enabled_search is defined %} id="jetsContent"{% endif %}>
+            <tr>
+            {% for name, value in columns %}
+                <td>
+                    {% set starts_with = name|slice(0,4) %}
+                    {% set follows_with = name|slice(4,4) %}
+                    {% if starts_with == 'exp_' %}
+                    <div class="perspective">
+                        <button class="btn btn-default" type="submit"
+                            value="{{ 'perspective.button.export_perspective'|trans({}, 'perspective', 'en')}}">
+                            {{ 'perspective.button.export_perspective'|trans({}, 'perspective', 'en')}}
+                        </button>
+                        <span class="hide hash">{{ value }}</span>
+                    </div>
+                    {% endif %}
+                    {% if starts_with == "raw_" %}
+                    {{ value|raw }}
+                    {% elseif starts_with == "img_" %}
+                    <img src="{{ value }}" />
+                    {% elseif starts_with == "lnk_" %}
+                    <a href="{{ value }}">
+                    {% if columns.hid_img is defined %}
+                    <img src="{{ columns.hid_img_trc }}" />
+                    {% elseif columns.hid_trc_label is defined %}
+                    <p class="shorten" title="{{ columns.hid_trc_label|raw }}">
+                        {{ columns.hid_trc_label|truncate(15, true)|trim }}
+                    </p>
+                    {% else %}
+                    {{ value }}
+                    {% endif %}
+                    </a>
+                    {% elseif starts_with == "trc_" %}
+                    <p class="shorten" title="{{ value|raw }}">{{ value|truncate(15, true) }}</p>
+                    {% elseif starts_with == "pre_" %}
+                    <pre>{{ value }}</pre>
+                    {% elseif starts_with == "btn_" %}
+                    <div class="query" title="{{ value|escape }}">
+                        {% if columns.hid_name is defined and columns.hid_name|length > 0 %}
+                        <button type="button" class="btn btn-default">{{ columns.hid_name }}</button>
+                        {% endif %}
+                        {# The column value aliased with a name starting with "btn_" should be a valid SQL query #}
+                        <span class="sql hide">{{ value }}</span>
+                    </div>
+                    {% elseif starts_with != "hid_" and starts_with != "exp_"  %}
+                    {{ value }}
+                    {% elseif starts_with == "hid_" and follows_with == 'jsn_' %}
+                    <textarea class="hide json">{{ value|raw }}</textarea>
+                    {% elseif starts_with == "hid_" %}
+                    <span class="hide">{{ value }}</span>
+                    {% endif %}
+                </td>
+            {% else %}
+                {{ columns }}
+            {% endfor %}
+            </tr>
+        {% endfor %}
+        </tbody>
     </table>
 </div>
