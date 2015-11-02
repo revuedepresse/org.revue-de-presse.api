@@ -1,30 +1,36 @@
 
-function getQueryParams() {
+function getQueryParams(queryString) {
+    var QueryParams = function (queryString) {
+        this.queryString = queryString;
+    };
+
     /**
      * See also http://stackoverflow.com/a/1099670/282073
      *
-     * @param qs
-     * @returns {{}}
+     * @returns {Object}
      */
-    function getQueryParamsFromQueryString(qs) {
-        qs = qs.split('+').join(' ');
+    QueryParams.prototype.fromQueryString = function() {
+        var qs = this.queryString.split('+').join(' ');
 
         var params = {},
             tokens,
             re = /[?&]?([^=]+)=([^&]*)/g;
 
-        while (tokens = re.exec(qs)) {
+        tokens = re.exec(qs);
+        while (tokens) {
             params[decodeURIComponent(tokens[1])] = decodeURIComponent(tokens[2]);
+            tokens = re.exec(qs);
         }
 
         return params;
-    }
+    };
 
-    if (window && window.location !== undefined) {
-        return getQueryParamsFromQueryString(window.location.search);
-    } else {
-        throw Error('Window location is required to get query params.');
-    }
+    var queryParams = new QueryParams(queryString);
+
+    return queryParams.fromQueryString();
 }
 
+if (window && window.location) {
+    window.queryParams = getQueryParams(window.location.search);
+}
 

@@ -15,11 +15,20 @@ module.exports = function(config) {
         // list of files / patterns to load in the browser
         files: [
             'bower_components/jquery/dist/jquery.js',
-            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/dashboard.js',
-            'bower_components/jquery-mockjax/dist/jquery.mockjax.js',
-            'request-mock.js',
-            'test-dashboard.js'
+            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/components/clipboard/dist/clipboard.js',
+            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/components/d3/d3.js',
+            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/components/metrics-graphics/dist/metricsgraphics.js',
+            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/components/file-saver.js/FileSaver.js',
+            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/components/comma-separated-values/csv.min.js'            ,
+            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/get-query-params.js',
+            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/logger.js',
+            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/format-date.js',
+            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/metrics.js',
+            'test-format-date.js',
+            'test-get-query-params.js',
+            'test-metrics.js'
         ],
+
 
         // test results reporter to use
         // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
@@ -59,12 +68,15 @@ module.exports = function(config) {
         },
 
         preprocessors: {
-            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/dashboard.js': ['eslint']
+            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/metrics.js':           ['eslint'],
+            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/get-query-params.js':  ['eslint'],
+            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/format-date.js':       ['eslint'],
+            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/logger.js':            ['eslint']
         },
 
         junitReporter: {
-            outputFile: '../build/dashboard-test-results.xml',
-            suite: 'Dashboard'
+            outputFile: '../build/test-perspective.xml',
+            suite: 'Perspective'
         },
 
         // If browser does not capture in given timeout [ms], kill it

@@ -1,9 +1,8 @@
 
-(function (keywords, since, until) {
+(function (keywords, stringFormatter, since, until) {
     since = new Date(since);
     until = new Date(until);
 
-    var stringFormatter = getStringFormatter();
     var endpoint = '/api/twitter/aggregate/' + keywords.join(',') + '/' + stringFormatter.formatDate(since) +
         '/' + stringFormatter.formatDate(until);
 
@@ -67,4 +66,4 @@
             }
         }
     });
-})(keywords, since, until);
+})(keywords, stringFormatter, since, until);

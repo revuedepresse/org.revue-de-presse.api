@@ -10,7 +10,8 @@
     "test": "npm run test-mobile",
     "test-mobile": "karma start tests/karma-config-mobile-ci.js",
     "tdd-mobile": "karma start tests/karma-config-mobile.js",
-    "tdd-dashboard": "karma start tests/karma-config-dashboard.js"
+    "tdd-dashboard": "karma start tests/karma-config-dashboard.js",
+    "tdd-perspective": "karma start tests/karma-config-perspective.js"
   },
   "repository": {
     "type": "git",
