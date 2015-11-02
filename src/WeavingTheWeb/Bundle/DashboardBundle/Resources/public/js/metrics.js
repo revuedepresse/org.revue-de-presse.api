@@ -6,8 +6,8 @@
     var document = reqs.document;
     var MG = reqs.MG;
     var queryParams = reqs.queryParams;
-    var CSV = reqs.queryParams;
-    var Clipboard = reqs.queryParams;
+    var CSV = reqs.csv;
+    var Clipboard = reqs.clipboard;
     var logger = reqs.logger;
 
     var index;
@@ -49,6 +49,10 @@
         metric = 'retweet_count';
     }
 
+    var atLeastCondition;
+    var atMostCondition;
+    var screenNameCondition;
+
     for (index = 1; index < totalDocuments; index++) {
         cell = hiddenCells[index];
         rawDocument = $(cell).text();
@@ -68,14 +72,34 @@
             var statusId = status[stringIdAccessor];
             var link = 'https://twitter.com/' + user.screen_name + '/status/' + statusId;
 
-            timeSeries.push({
-                interest: status[metric],
-                date: status[dateAccessor],
-                text: status[textAccessor],
-                link: link,
-                name: user.name,
-                screen_name: user.screen_name
-            });
+            if (queryParams['less_than']) {
+                atMostCondition = status[metric] <= queryParams['less_than'];
+            } else {
+                atMostCondition = true;
+            }
+
+            if (queryParams['screen_name']) {
+                screenNameCondition = user.screen_name == queryParams['screen_name'];
+            } else {
+                screenNameCondition = true;
+            }
+
+            if (queryParams['at_least']) {
+                atLeastCondition = status[metric] >= queryParams['at_least'];
+            } else {
+                atLeastCondition = true;
+            }
+
+            if (atMostCondition && atLeastCondition && screenNameCondition) {
+                timeSeries.push({
+                    interest: status[metric],
+                    date: status[dateAccessor],
+                    text: status[textAccessor],
+                    link: link,
+                    name: user.name,
+                    screen_name: user.screen_name
+                });
+            }
         }
     }
 
@@ -86,10 +110,10 @@
     setUpExportAsCsv(JSON.parse(JSON.stringify(timeSeries)), $, fileSaver);
     timeSeries = MG.convert.date(timeSeries, 'date', '%a %b %e %H:%M:%S %Z %Y');
 
-    MG.data_graphic({
+    var graphicOptions = {
         title: 'Perspective metrics',
         data: timeSeries,
-        width: 1500,
+        width: 1300,
         height: 500,
         right: 150,
         markers: [],
@@ -108,13 +132,16 @@
         target: document.getElementById('graph'),
         x_accessor: 'date',
         y_accessor: 'interest'
-    });
+    };
+    if (queryParams.scale && queryParams.scale == 'log') {
+        graphicOptions.y_scale_type = 'log';
+    }
+    MG.data_graphic(graphicOptions);
 
     setUpClipboard();
-
 })({
-    Clipboard: window.Clipboard,
-    CSV: window.CSV,
+    clipboard: window.Clipboard,
+    csv: window.CSV,
     logger: window.logger,
     MG: window.MG,
     document: window.document,
