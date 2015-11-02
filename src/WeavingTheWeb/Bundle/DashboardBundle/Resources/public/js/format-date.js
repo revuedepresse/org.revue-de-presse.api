@@ -24,3 +24,6 @@ function getStringFormatter() {
     return new StringFormatter();
 }
 
+if (window) {
+    window.stringFormatter = getStringFormatter();
+}

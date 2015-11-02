@@ -1,5 +1,15 @@
 
-(function (MG, document, fileSaver, debug) {
+(function (reqs) {
+    var $ = reqs.$;
+    var debug = reqs.debug;
+    var fileSaver = reqs.fileSaver;
+    var document = reqs.document;
+    var MG = reqs.MG;
+    var queryParams = reqs.queryParams;
+    var CSV = reqs.queryParams;
+    var Clipboard = reqs.queryParams;
+    var logger = reqs.logger;
+
     var index;
     var hiddenCells = $('tr td .json');
     var totalDocuments = hiddenCells.length;
@@ -33,7 +43,6 @@
         });
     };
 
-    var queryParams = getQueryParams();
     if ('metric' in queryParams) {
         metric = queryParams.metric;
     } else {
@@ -47,7 +56,7 @@
             status = JSON.parse(rawDocument);
         } catch (error) {
             if (debug) {
-                console.log('Could not parse raw document at index {}'.replace('{}', index));
+                logger.log('Could not parse raw document at index {}'.replace('{}', index));
             }
             regExp = /:(\s*)"([^"]*)"([^",]*)"([^"]*)"/g;
             escapedDocument = rawDocument.replace(regExp, ':$1"$2\\\"$3\\\"$4"');
@@ -90,7 +99,7 @@
                 'Status: ' + d.text,
                 'Retweets: ' + d.interest
             ];
-            $('#status').text(rows.join("\n"));
+            $('#status').text(rows.join('\n'));
 
             $(statusClipboardSelector).val(d.link);
             $(copyStatusButtonSelector).attr('data-clipboard-text', d.link);
@@ -103,4 +112,14 @@
 
     setUpClipboard();
 
-})(MG, window.document, window.saveAs, false);
+})({
+    Clipboard: window.Clipboard,
+    CSV: window.CSV,
+    logger: window.logger,
+    MG: window.MG,
+    document: window.document,
+    fileSaver: window.saveAs,
+    $: window.jQuery,
+    queryParams: window.queryParams,
+    debug: false
+});
