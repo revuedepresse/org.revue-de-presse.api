@@ -25,12 +25,27 @@ class PerspectiveExtension extends \Twig_Extension
     
     const PREFIX_TRANSFORMABLE_LINK = 'lnk_';
 
+    /**
+     * @var \Symfony\Component\DependencyInjection\Container
+     */
+    public $container;
+
     public function getFilters()
     {
         return array(
             new \Twig_SimpleFilter('is_transformable', array($this, 'isTransformable')),
             new \Twig_SimpleFilter('absent_from_header', array($this, 'isAbsentFromHeader')),
             new \Twig_SimpleFilter('column_name', array($this, 'getColumnName')),
+            new \Twig_SimpleFilter('get_export_button', array($this, 'getExportButton'), ['is_safe' => ['all']]),
+        );
+    }
+
+    public function getExportButton($subject)
+    {
+        return $this->container->get('templating')->render(
+            'WeavingTheWebDashboardBundle:Perspective/Table/Body:_exp.html.twig', [
+                'value' => $subject
+            ]
         );
     }
 

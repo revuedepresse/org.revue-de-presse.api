@@ -73,6 +73,8 @@ services:
 
     weaving_the_web_dashboard.twig.perspective:
         class: %weaving_the_web_dashboard.twig.perspective.class%
+        properties:
+            container:  @service_container
         tags:
             - { name: twig.extension }
 
