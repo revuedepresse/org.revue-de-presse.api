@@ -1,0 +1,12 @@
+<table class="table table-condensed">
+    {% for columns in records %}
+    {% if loop.first %}
+    <thead>
+        {% include 'WeavingTheWebDashboardBundle:Perspective/Table/Head:row.html.twig' %}
+    </thead>
+    {% endif %}
+    <tbody{% if enabled_search is defined %} id="jetsContent"{% endif %}>
+        {% include 'WeavingTheWebDashboardBundle:Perspective/Table/Body:row.html.twig' %}
+    {% endfor %}
+    </tbody>
+</table>
