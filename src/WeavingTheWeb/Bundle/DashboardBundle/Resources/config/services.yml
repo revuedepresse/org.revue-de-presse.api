@@ -4,12 +4,12 @@ parameters:
     weaving_the_web_dashboard.entity.perspective:                 WeavingTheWebDashboardBundle:Perspective
     weaving_the_web_dashboard.form_type.search.class:             WeavingTheWeb\Bundle\DashboardBundle\Form\Type\SearchType
     weaving_the_web_dashboard.map_perspective_command.class:      WeavingTheWeb\Bundle\DashboardBundle\Command\MapPerspectiveCommand
-    weaving_the_web_dashboard.map_status_command.class:           WeavingTheWeb\Bundle\DashboardBundle\Command\MapStatusCommand
     weaving_the_web_dashboard.perspective_validator.class:        WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints\PerspectiveValidator
     weaving_the_web_dashboard.repository.perspective.class:       WeavingTheWeb\Bundle\DashboardBundle\Repository\PerspectiveRepository
     weaving_the_web_dashboard.query_validator.class:              WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints\QueryValidator
     weaving_the_web_dashboard.router.class:                       WeavingTheWeb\Bundle\DashboardBundle\Routing\Router
     weaving_the_web_dashboard.twig.email.class:                   WeavingTheWeb\Bundle\DashboardBundle\Twig\EmailExtension
+    weaving_the_web_dashboard.twig.perspective.class:             WeavingTheWeb\Bundle\DashboardBundle\Twig\PerspectiveExtension
     weaving_the_web_dashboard.upload_listener.class:              WeavingTheWeb\Bundle\DashboardBundle\EventListener\UploadListener
     weaving_the_web_dashboard.error_handler.upload_file.class:    WeavingTheWeb\Bundle\DashboardBundle\ErrorHandler\UploadFile
 
@@ -68,6 +68,11 @@ services:
 
     weaving_the_web_dashboard.twig.email:
         class: %weaving_the_web_dashboard.twig.email.class%
+        tags:
+            - { name: twig.extension }
+
+    weaving_the_web_dashboard.twig.perspective:
+        class: %weaving_the_web_dashboard.twig.perspective.class%
         tags:
             - { name: twig.extension }
 
