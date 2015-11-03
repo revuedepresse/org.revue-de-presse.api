@@ -1,6 +1,5 @@
 <tr>
 {% for name, value in columns %}
-    {% set starts_with = name|slice(0,4) %}
     <td>
     {% if not name|absent_from_header %}
     {{ name|column_name }}

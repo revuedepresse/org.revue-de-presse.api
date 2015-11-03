@@ -4,13 +4,7 @@
         {% set starts_with = name|slice(0,4) %}
         {% set follows_with = name|slice(4,4) %}
         {% if starts_with == 'exp_' %}
-        <div class="perspective">
-            <button class="btn btn-default" type="submit"
-                value="{{ 'perspective.button.export_perspective'|trans({}, 'perspective', 'en')}}">
-                {{ 'perspective.button.export_perspective'|trans({}, 'perspective', 'en')}}
-            </button>
-            <span class="hide hash">{{ value }}</span>
-        </div>
+        {{ value|get_export_button }}
         {% endif %}
         {% if starts_with == "raw_" %}
         {{ value|raw }}
