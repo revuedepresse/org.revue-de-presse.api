@@ -1,46 +1,30 @@
 <tr>
 {% for name, value in columns %}
     <td>
-        {% set starts_with = name|slice(0,4) %}
-        {% set follows_with = name|slice(4,4) %}
-        {% if starts_with == 'exp_' %}
+    {% set starts_with = name|slice(0,4) %}
+    {% set follows_with = name|slice(4,4) %}
+    {% if starts_with == 'exp_' %}
         {{ value|get_export_button }}
-        {% endif %}
-        {% if starts_with == "raw_" %}
+    {% endif %}
+    {% if starts_with == "raw_" %}
         {{ value|raw }}
-        {% elseif starts_with == "img_" %}
-        <img src="{{ value }}" />
-        {% elseif starts_with == "lnk_" %}
-        <a href="{{ value }}">
-        {% if columns.hid_img is defined %}
-        <img src="{{ columns.hid_img_trc }}" />
-        {% elseif columns.hid_trc_label is defined %}
-        <p class="shorten" title="{{ columns.hid_trc_label|raw }}">
-            {{ columns.hid_trc_label|truncate(15, true)|trim }}
-        </p>
-        {% else %}
+    {% elseif starts_with == "img_" %}
+        {{ value|get_image }}
+    {% elseif starts_with == "lnk_" %}
+        {{ value|get_link(columns) }}
+    {% elseif starts_with == "trc_" %}
+        {{ value|get_truncated_text }}
+    {% elseif starts_with == "pre_" %}
+        {{ value|get_pre_formatted_text }}
+    {% elseif starts_with == "btn_" %}
+        {{ value|get_button(columns) }}
+    {% elseif starts_with != "hid_" and starts_with != "exp_"  %}
         {{ value }}
-        {% endif %}
-        </a>
-        {% elseif starts_with == "trc_" %}
-        <p class="shorten" title="{{ value|raw }}">{{ value|truncate(15, true) }}</p>
-        {% elseif starts_with == "pre_" %}
-        <pre>{{ value }}</pre>
-        {% elseif starts_with == "btn_" %}
-        <div class="query" title="{{ value|escape }}">
-            {% if columns.hid_name is defined and columns.hid_name|length > 0 %}
-            <button type="button" class="btn btn-default">{{ columns.hid_name }}</button>
-            {% endif %}
-            {# The column value aliased with a name starting with "btn_" should be a valid SQL query #}
-            <span class="sql hide">{{ value }}</span>
-        </div>
-        {% elseif starts_with != "hid_" and starts_with != "exp_"  %}
-        {{ value }}
-        {% elseif starts_with == "hid_" and follows_with == 'jsn_' %}
-        <textarea class="hide json">{{ value|raw }}</textarea>
-        {% elseif starts_with == "hid_" %}
-        <span class="hide">{{ value }}</span>
-        {% endif %}
+    {% elseif starts_with == "hid_" and follows_with == 'jsn_' %}
+        {{ value|get_raw_json }}
+    {% elseif starts_with == "hid_" %}
+        {{ value|get_hidden_content }}
+    {% endif %}
     </td>
 {% else %}
     {{ columns }}
