@@ -47,16 +47,16 @@ class Perspective
     /**
      * @var integer
      *
-     * @ORM\Column(name="per_status", type="integer", nullable=true)
+     * @ORM\Column(name="per_status", type="integer", options={"default": 1})
      */
-    protected $status;
+    protected $status = self::STATUS_DEFAULT;
 
     /**
      * @var integer
      *
-     * @ORM\Column(name="per_type", type="integer", nullable=true)
+     * @ORM\Column(name="per_type", type="integer", options={"default": 0}))
      */
-    protected $type;
+    protected $type = self::TYPE_DEFAULT;
 
     /**
      * @var string
@@ -317,6 +317,22 @@ class Perspective
     public function isQueryPerspective()
     {
         return $this->type = self::TYPE_QUERY;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPublic()
+    {
+        return $this->status === self::STATUS_PUBLIC;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isPrivate()
+    {
+        return !$this->isPublic();
     }
 
     /**

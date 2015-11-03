@@ -68,6 +68,9 @@ class PerspectiveController extends ContainerAware
     }
 
     /**
+     * @param $hash
+     * @return \Symfony\Component\HttpFoundation\Response
+     *
      * @Extra\Cache(expires="+2 hours", public="true")
      * @Extra\Route("/{hash}", name="weaving_the_web_dashboard_show_perspective")
      */
@@ -89,7 +92,15 @@ class PerspectiveController extends ContainerAware
              */
             $perspective = $perspectiveRepository->findOneByPartialHash($hash);
         } catch (NoResultException $exception) {
-            throw new NotFoundHttpException('The requested query it not available', $exception);
+            return $this->raiseHttpNotFoundException($exception);
+        }
+
+        /**
+         * @var \Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface $authorizationChecker
+         */
+        $authorizationChecker = $this->container->get('security.authorization_checker');
+        if ($perspective->isPrivate() && !$authorizationChecker->isGranted('ROLE_ADMIN')) {
+            $this->raiseHttpNotFoundException();
         }
 
         if ($perspective->isQueryPerspective() && $this->validPerspective($perspective)) {
@@ -97,8 +108,16 @@ class PerspectiveController extends ContainerAware
         } elseif ($perspective->isJsonPerspective()) {
             return $this->renderJsonPerspective($perspective);
         } else {
-            throw new NotFoundHttpException('The requested query it not available');
+            $this->raiseHttpNotFoundException();
         }
+    }
+
+    /**
+     * @param $exception
+     */
+    protected function raiseHttpNotFoundException($exception = null)
+    {
+        throw new NotFoundHttpException('The requested query it not available', $exception);
     }
 
     /**
@@ -172,10 +191,8 @@ class PerspectiveController extends ContainerAware
                     $paddedSubject = $jsonEncodedRecords;
                 }
 
-                file_put_contents('/tmp/clear-text.txt', $paddedSubject);
                 $encryptedRecords = $cipher->encrypt($paddedSubject);
                 $base64EncodedRecords = base64_encode($encryptedRecords);
-                file_put_contents('/tmp/enc', $base64EncodedRecords);
 
                 return new JsonResponse([
                     'result' => $base64EncodedRecords,
@@ -233,6 +250,7 @@ class PerspectiveController extends ContainerAware
             array(
                 'active_menu_item' => 'dashboard',
                 'default_query' => $query->sql,
+                'enabled_search' => true,
                 'error' => $query->error,
                 'records' => $query->records,
                 'title' => $perspectiveTitle

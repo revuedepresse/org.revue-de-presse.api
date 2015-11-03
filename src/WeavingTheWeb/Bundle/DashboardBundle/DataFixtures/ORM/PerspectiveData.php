@@ -35,6 +35,10 @@ ORDER BY per_id DESC";
             [
                 'value' => self::DEFAULT_QUERY,
                 'type' => $perspectiveDefaultType,
+                'hash' => sha1(
+                    'status:' . Perspective::STATUS_DEFAULT . ':' .
+                    self::DEFAULT_QUERY
+                )
             ], [
                 'value' => self::DEFAULT_QUERY,
                 'status' => Perspective::STATUS_PUBLIC,
