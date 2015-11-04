@@ -1,29 +1,46 @@
 <tr>
 {% for name, value in columns %}
     <td>
-    {% set starts_with = name|slice(0,4) %}
-    {% set follows_with = name|slice(4,4) %}
-    {% if starts_with == 'exp_' %}
+    {% if name|should_export %}
+
         {{ value|get_export_button }}
-    {% endif %}
-    {% if starts_with == "raw_" %}
+
+    {% elseif name|should_not_alter %}
+
         {{ value|raw }}
-    {% elseif starts_with == "img_" %}
+
+    {% elseif name|should_render_as_image %}
+
         {{ value|get_image }}
-    {% elseif starts_with == "lnk_" %}
+
+    {% elseif name|should_render_as_link %}
+
         {{ value|get_link(columns) }}
-    {% elseif starts_with == "trc_" %}
+
+    {% elseif name|should_truncate %}
+
         {{ value|get_truncated_text }}
-    {% elseif starts_with == "pre_" %}
+
+    {% elseif name|should_pre_format %}
+
         {{ value|get_pre_formatted_text }}
-    {% elseif starts_with == "btn_" %}
+
+    {% elseif name|should_be_actionable %}
+
         {{ value|get_button(columns) }}
-    {% elseif starts_with != "hid_" and starts_with != "exp_"  %}
+
+    {% elseif not name|should_hide and not name|should_export  %}
+
         {{ value }}
-    {% elseif starts_with == "hid_" and follows_with == 'jsn_' %}
+
+    {% elseif name|should_hide and name|should_render_as_json %}
+
         {{ value|get_raw_json }}
-    {% elseif starts_with == "hid_" %}
+
+    {% elseif name|should_hide %}
+
         {{ value|get_hidden_content }}
+
     {% endif %}
     </td>
 {% else %}

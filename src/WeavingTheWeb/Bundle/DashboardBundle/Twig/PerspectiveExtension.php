@@ -27,6 +27,8 @@ class PerspectiveExtension extends \Twig_Extension
     
     const PREFIX_TRANSFORMABLE_LINK = 'lnk_';
 
+    const PREFIX_TRANSFORMABLE_JSON = 'jsn_';
+
     /**
      * @var \Symfony\Bundle\TwigBundle\TwigEngine
      */
@@ -51,7 +53,6 @@ class PerspectiveExtension extends \Twig_Extension
         $this->templating = $this->container->get('templating');
 
         return array(
-            new \Twig_SimpleFilter('is_transformable', array($this, 'isTransformable')),
             new \Twig_SimpleFilter('absent_from_header', array($this, 'isAbsentFromHeader')),
             new \Twig_SimpleFilter('column_name', array($this, 'getColumnName')),
             new \Twig_SimpleFilter('get_button', array($this, 'getButton'), $htmlSafeOption),
@@ -62,6 +63,16 @@ class PerspectiveExtension extends \Twig_Extension
             new \Twig_SimpleFilter('get_pre_formatted_text', array($this, 'getPreFormattedText'), $htmlSafeOption),
             new \Twig_SimpleFilter('get_raw_json', array($this, 'getRawJson'), $htmlSafeOption),
             new \Twig_SimpleFilter('get_truncated_text', array($this, 'getTruncatedText'), $htmlSafeOption),
+            new \Twig_SimpleFilter('is_transformable', array($this, 'isTransformable')),
+            new \Twig_SimpleFilter('should_be_actionable', array($this, 'shouldBeActionable'), $htmlSafeOption),
+            new \Twig_SimpleFilter('should_export', array($this, 'shouldExport'), $htmlSafeOption),
+            new \Twig_SimpleFilter('should_hide', array($this, 'shouldHide'), $htmlSafeOption),
+            new \Twig_SimpleFilter('should_not_alter', array($this, 'shouldNotAlter'), $htmlSafeOption),
+            new \Twig_SimpleFilter('should_pre_format', array($this, 'shouldPreFormat'), $htmlSafeOption),
+            new \Twig_SimpleFilter('should_render_as_image', array($this, 'shouldRenderAsImage'), $htmlSafeOption),
+            new \Twig_SimpleFilter('should_render_as_json', array($this, 'shouldRenderAsJson'), $htmlSafeOption),
+            new \Twig_SimpleFilter('should_render_as_link', array($this, 'shouldRenderAsLink'), $htmlSafeOption),
+            new \Twig_SimpleFilter('should_truncate', array($this, 'shouldTruncate'), $htmlSafeOption),
         );
     }
 
@@ -192,13 +203,14 @@ class PerspectiveExtension extends \Twig_Extension
 
     /**
      * @param $subject
+     * @param int $startAt
      * @return string
      * @throws \Exception
      */
-    protected function parsePrefix($subject)
+    protected function parsePrefix($subject, $startAt = 0)
     {
         if ($this->mayHaveValidPrefix($subject)) {
-            return substr($subject, 0, 4);
+            return substr($subject, $startAt, 4);
         } else {
             throw new \Exception(
                 'This column name is too short to contain a valid suffix',
@@ -261,5 +273,115 @@ class PerspectiveExtension extends \Twig_Extension
 
         return (array_key_exists($prefix, $flippedConstants) &&
             array_key_exists($flippedConstants[$prefix], $flaggedPrefixes));
+    }
+
+    /**
+     * @param $subject
+     * @return bool
+     * @throws \Exception
+     */
+    public function shouldTruncate($subject)
+    {
+        return $this->isPrefixedWith($subject, self::PREFIX_TRANSFORMABLE_TRUNCATED);
+    }
+
+    /**
+     * @param $subject
+     * @return bool
+     * @throws \Exception
+     */
+    public function shouldExport($subject)
+    {
+        return $this->isPrefixedWith($subject, self::PREFIX_ABSENT_FROM_HEADER_EXPORTABLE);
+    }
+
+    /**
+     * @param $subject
+     * @return bool
+     * @throws \Exception
+     */
+    public function shouldNotAlter($subject)
+    {
+        return $this->isPrefixedWith($subject, self::PREFIX_TRANSFORMABLE_RAW);
+    }
+
+    /**
+     * @param $subject
+     * @return bool
+     * @throws \Exception
+     */
+    public function shouldRenderAsImage($subject)
+    {
+        return $this->isPrefixedWith($subject, self::PREFIX_TRANSFORMABLE_IMAGE);
+    }
+
+    /**
+     * @param $subject
+     * @return bool
+     * @throws \Exception
+     */
+    public function shouldRenderAsLink($subject)
+    {
+        return $this->isPrefixedWith($subject, self::PREFIX_TRANSFORMABLE_LINK);
+    }
+
+    /**
+     * @param $subject
+     * @return bool
+     * @throws \Exception
+     */
+    public function shouldPreFormat($subject)
+    {
+        return $this->isPrefixedWith($subject, self::PREFIX_TRANSFORMABLE_PRE_FORMATTED);
+    }
+
+    /**
+     * @param $subject
+     * @return bool
+     * @throws \Exception
+     */
+    public function shouldHide($subject)
+    {
+        return $this->isPrefixedWith($subject, self::PREFIX_ABSENT_FROM_HEADER_HIDDEN);
+    }
+
+    /**
+     * @param $subject
+     * @return bool
+     * @throws \Exception
+     */
+    public function shouldBeActionable($subject)
+    {
+        return $this->isPrefixedWith($subject, self::PREFIX_TRANSFORMABLE_ACTIONABLE);
+    }
+
+    /**
+     * @param $subject
+     * @return bool
+     * @throws \Exception
+     */
+    public function shouldRenderAsJson($subject)
+    {
+        return $this->isPrefixedWith($subject, self::PREFIX_TRANSFORMABLE_JSON, 4);
+    }
+
+    /**
+     * @param $subject
+     * @param $prefix
+     * @param int $startAt
+     * @return bool
+     * @throws \Exception
+     */
+    protected function isPrefixedWith($subject, $prefix, $startAt = 0)
+    {
+        try {
+            return $this->parsePrefix($subject, $startAt) === $prefix;
+        } catch (\Exception $exception) {
+            if ($exception->getCode() == self::EXCEPTION_COLUMN_TOO_SHORT) {
+                return false;
+            } else {
+                throw $exception;
+            }
+        }
     }
 }
