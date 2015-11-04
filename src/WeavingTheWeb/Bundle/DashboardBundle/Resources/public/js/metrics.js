@@ -29,17 +29,26 @@
     var statusClipboardSelector = '#status-clipboard';
 
     var setUpClipboard = function () {
-        clipboard = new Clipboard(copyStatusButtonSelector);
-        clipboard.destroy();
-        clipboard = new Clipboard(copyStatusButtonSelector);
+        $(copyStatusButtonSelector).click(function (event) {
+            clipboard = new Clipboard(copyStatusButtonSelector);
+            clipboard.destroy();
+            clipboard = new Clipboard(copyStatusButtonSelector);
+
+            event.preventDefault();
+        });
     };
 
     var setUpExportAsCsv = function (timeSeries, $, fileSaver) {
-        $('#export-as-csv').click(function () {
+        $('#export-as-csv').click(function (event) {
             var csvDocument = new CSV(timeSeries, {
                 header: ['interest', 'date', 'text', 'link', 'screen_name']
             }).encode();
             fileSaver(new Blob([csvDocument], {type: 'text/csv'}), 'perspective.csv');
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            return false;
         });
     };
 
