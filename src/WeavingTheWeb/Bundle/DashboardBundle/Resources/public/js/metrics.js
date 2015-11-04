@@ -81,8 +81,8 @@
             var statusId = status[stringIdAccessor];
             var link = 'https://twitter.com/' + user.screen_name + '/status/' + statusId;
 
-            if (queryParams['less_than']) {
-                atMostCondition = status[metric] <= queryParams['less_than'];
+            if (queryParams['at_most']) {
+                atMostCondition = status[metric] <= queryParams['at_most'];
             } else {
                 atMostCondition = true;
             }
