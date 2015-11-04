@@ -23,7 +23,11 @@
 
     {% elseif name|should_pre_format %}
 
-        {{ value|get_pre_formatted_text }}
+        {% if name|should_render_as_editable %}
+            {{ value|get_editable_content(columns) }}
+        {% else %}
+            {{ value|get_pre_formatted_text }}
+        {% endif %}
 
     {% elseif name|should_be_actionable %}
 

@@ -15,6 +15,7 @@ module.exports = function(config) {
         // list of files / patterns to load in the browser
         files: [
             'bower_components/jquery/dist/jquery.js',
+            'bower_components/bind-polyfill/index.js',
             '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/notification-center.js',
             '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/dashboard.js',
             '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/editable-content.js',
@@ -27,7 +28,7 @@ module.exports = function(config) {
 
         // test results reporter to use
         // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
-        reporters: ['spec'],
+        reporters: ['spec', 'junit'],
 
 
         // web server port
@@ -55,7 +56,7 @@ module.exports = function(config) {
         // - Safari (only Mac; has to be installed with `npm install karma-safari-launcher`)
         // - PhantomJS
         // - IE (only Windows; has to be installed with `npm install karma-ie-launcher`)
-        browsers: ['ChromeCanary'],
+        browsers: ['PhantomJS'],
 
         eslint: {
             stopOnError: false,
@@ -69,7 +70,7 @@ module.exports = function(config) {
         },
 
         junitReporter: {
-            outputFile: '../build/dashboard-test-results.xml',
+            outputFile: '../build/karma/dashboard-test-results.xml',
             suite: 'Dashboard'
         },
 
@@ -79,6 +80,6 @@ module.exports = function(config) {
 
         // Continuous Integration mode
         // if true, it capture browsers, run tests and exit
-        singleRun: false
+        singleRun: true
     });
 };

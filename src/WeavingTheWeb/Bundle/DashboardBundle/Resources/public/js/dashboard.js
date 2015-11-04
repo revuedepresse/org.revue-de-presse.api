@@ -5,6 +5,7 @@ function mountDashboard(reqs) {
         this.crypto = reqs.crypto;
         this.routes = reqs.routes;
         this.fileSaver = reqs.fileSaver;
+        this.notificationCenter = reqs.notificationCenter;
     };
 
     Dashboard.prototype.bindSubmitQueryListener = function () {
@@ -73,20 +74,6 @@ function mountDashboard(reqs) {
         data.result = successMessage.replace('{}', data.shouldSaveAs);
     };
 
-    Dashboard.prototype.showNotification = function (data, notification) {
-        if (data.type !== 'danger') {
-            notification.text(data.result);
-        } else {
-            notification.html(data.result);
-        }
-
-        notification.parent().removeClass('alert-error');
-        notification.parent().removeClass('alert-block');
-        notification.parent().removeClass('alert-success');
-        notification.parent().addClass('alert alert-' + data.type);
-    };
-
-
     Dashboard.prototype.decryptMessage = function (crypto, data, success) {
         var worker = new Worker('js/compiled/deciphering-worker.js');
 
@@ -114,8 +101,6 @@ function mountDashboard(reqs) {
     };
 
     Dashboard.prototype.handleResponse = function (data) {
-        var $ = this.$;
-        var notification = $('#notification');
         var crypto = this.crypto;
         var self = this;
 
@@ -130,7 +115,7 @@ function mountDashboard(reqs) {
                             'application/json; charset=utf-8', 'perspective.json'
                         );
                         self.prepareSuccessNotification(data);
-                        self.showNotification(data, notification);
+                        self.notificationCenter.showNotification(data);
                     };
 
                     if (data.shouldDecryptNatively) {
@@ -161,7 +146,7 @@ function mountDashboard(reqs) {
         }
 
         if (!data.shouldSaveAs || !data.shouldDecrypt || errors.length > 0) {
-            this.showNotification(data, notification);
+            self.notificationCenter.showNotification(data);
         }
     };
 
@@ -244,6 +229,7 @@ if (window.Routing !== undefined) {
         $: window.jQuery,
         crypto: window.CryptoJS,
         fileSaver: window.saveAs,
+        notificationCenter: window.getNotificationCenter('notification', window.jQuery),
         routes: {
             saveQuery: routing.generate('weaving_the_web_dashboard_save_query'),
             exportPerspective: function (hash) {

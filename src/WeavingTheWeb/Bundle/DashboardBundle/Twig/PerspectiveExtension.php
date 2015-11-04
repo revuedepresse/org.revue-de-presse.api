@@ -29,6 +29,8 @@ class PerspectiveExtension extends \Twig_Extension
 
     const PREFIX_TRANSFORMABLE_JSON = 'jsn_';
 
+    const PREFIX_TRANSFORMABLE_EDITABLE = 'edt_';
+
     /**
      * @var \Symfony\Bundle\TwigBundle\TwigEngine
      */
@@ -57,6 +59,7 @@ class PerspectiveExtension extends \Twig_Extension
             new \Twig_SimpleFilter('column_name', array($this, 'getColumnName')),
             new \Twig_SimpleFilter('get_button', array($this, 'getButton'), $htmlSafeOption),
             new \Twig_SimpleFilter('get_export_button', array($this, 'getExportButton'), ['is_safe' => ['all']]),
+            new \Twig_SimpleFilter('get_editable_content', array($this, 'getEditableContent'), ['is_safe' => ['all']]),
             new \Twig_SimpleFilter('get_hidden_content', array($this, 'getHiddenContent'), $htmlSafeOption),
             new \Twig_SimpleFilter('get_image', array($this, 'getImage'), $htmlSafeOption),
             new \Twig_SimpleFilter('get_link', array($this, 'getLink'), $htmlSafeOption),
@@ -69,6 +72,7 @@ class PerspectiveExtension extends \Twig_Extension
             new \Twig_SimpleFilter('should_hide', array($this, 'shouldHide'), $htmlSafeOption),
             new \Twig_SimpleFilter('should_not_alter', array($this, 'shouldNotAlter'), $htmlSafeOption),
             new \Twig_SimpleFilter('should_pre_format', array($this, 'shouldPreFormat'), $htmlSafeOption),
+            new \Twig_SimpleFilter('should_render_as_editable', array($this, 'shouldRenderAsEditable'), $htmlSafeOption),
             new \Twig_SimpleFilter('should_render_as_image', array($this, 'shouldRenderAsImage'), $htmlSafeOption),
             new \Twig_SimpleFilter('should_render_as_json', array($this, 'shouldRenderAsJson'), $htmlSafeOption),
             new \Twig_SimpleFilter('should_render_as_link', array($this, 'shouldRenderAsLink'), $htmlSafeOption),
@@ -76,9 +80,18 @@ class PerspectiveExtension extends \Twig_Extension
         );
     }
 
+    public function render($view, $parameters)
+    {
+        if (is_null($this->templating)) {
+            $this->templating = $this->container->get('templating');
+        }
+
+        return $this->templating->render($view, $parameters);
+    }
+
     public function getExportButton($subject)
     {
-        return $this->templating->render(
+        return $this->render(
             'WeavingTheWebDashboardBundle:Perspective/Table/Body:_get_export_button.html.twig', [
                 'value' => $subject
             ]
@@ -87,7 +100,7 @@ class PerspectiveExtension extends \Twig_Extension
 
     public function getLink($subject, $columns)
     {
-        return $this->templating->render(
+        return $this->render(
             'WeavingTheWebDashboardBundle:Perspective/Table/Body:_get_link.html.twig', [
                 'value' => $subject,
                 'columns' => $columns
@@ -97,16 +110,26 @@ class PerspectiveExtension extends \Twig_Extension
 
     public function getImage($subject)
     {
-        return $this->templating->render(
+        return $this->render(
             'WeavingTheWebDashboardBundle:Perspective/Table/Body:_get_image.html.twig', [
                 'value' => $subject
             ]
         );
     }
 
+    public function getEditableContent($subject, $columns)
+    {
+        return $this->render(
+            'WeavingTheWebDashboardBundle:Perspective/Table/Body:_get_editable_content.html.twig', [
+                'value' => $subject,
+                'columns' => $columns
+            ]
+        );
+    }
+
     public function getTruncatedText($subject)
     {
-        return $this->templating->render(
+        return $this->render(
             'WeavingTheWebDashboardBundle:Perspective/Table/Body:_get_truncated_text.html.twig', [
                 'value' => $subject
             ]
@@ -115,7 +138,7 @@ class PerspectiveExtension extends \Twig_Extension
 
     public function getButton($subject, $columns)
     {
-        return $this->templating->render(
+        return $this->render(
             'WeavingTheWebDashboardBundle:Perspective/Table/Body:_get_button.html.twig', [
                 'value' => $subject,
                 'columns' => $columns
@@ -125,7 +148,7 @@ class PerspectiveExtension extends \Twig_Extension
 
     public function getPreFormattedText($subject)
     {
-        return $this->templating->render(
+        return $this->render(
             'WeavingTheWebDashboardBundle:Perspective/Table/Body:_get_pre_formatted_text.html.twig', [
                 'value' => $subject
             ]
@@ -134,7 +157,7 @@ class PerspectiveExtension extends \Twig_Extension
 
     public function getHiddenContent($subject)
     {
-        return $this->templating->render(
+        return $this->render(
             'WeavingTheWebDashboardBundle:Perspective/Table/Body:_get_hidden_content.html.twig', [
                 'value' => $subject
             ]
@@ -143,7 +166,7 @@ class PerspectiveExtension extends \Twig_Extension
 
     public function getRawJson($subject)
     {
-        return $this->templating->render(
+        return $this->render(
             'WeavingTheWebDashboardBundle:Perspective/Table/Body:_get_raw_json.html.twig', [
                 'value' => $subject
             ]
@@ -363,6 +386,16 @@ class PerspectiveExtension extends \Twig_Extension
     public function shouldRenderAsJson($subject)
     {
         return $this->isPrefixedWith($subject, self::PREFIX_TRANSFORMABLE_JSON, 4);
+    }
+
+    /**
+     * @param $subject
+     * @return bool
+     * @throws \Exception
+     */
+    public function shouldRenderAsEditable($subject)
+    {
+        return $this->isPrefixedWith($subject, self::PREFIX_TRANSFORMABLE_EDITABLE, 4);
     }
 
     /**

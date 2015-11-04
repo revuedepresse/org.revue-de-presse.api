@@ -1,0 +1,5 @@
+<pre contenteditable="true"
+     {% if columns.hid_col_ is defined %}data-col="{{ columns.hid_col_ }}"{% endif %}
+     {% if columns.hid_key_ is defined %}data-key="{{ columns.hid_key_ }}"{% endif %}
+     {% if columns.hid_tab_ is defined %}data-tab="{{ columns.hid_tab_ }}"{% endif %}
+     class="editable">{{ value }}</pre>

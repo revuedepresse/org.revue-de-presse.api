@@ -7,7 +7,9 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "npm run test-mobile",
+    "test": "npm run test-mobile && npm run test-dashboard && npm run test-perspective",
+    "test-dashboard": "karma start tests/karma-config-dashboard-ci.js",
+    "test-perspective": "karma start tests/karma-config-perspective-ci.js",
     "test-mobile": "karma start tests/karma-config-mobile-ci.js",
     "tdd-mobile": "karma start tests/karma-config-mobile.js",
     "tdd-dashboard": "karma start tests/karma-config-dashboard.js",

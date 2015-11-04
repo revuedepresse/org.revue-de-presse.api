@@ -29,12 +29,6 @@ describe('Dashboard', function () {
     var exportPerspectiveContainerElement;
     var exportPerspectiveButtonElement;
 
-    var notificationCenterId = 'notification-center';
-    var notificationCenterElement;
-
-    var notificationId = 'notification';
-    var notificationElement;
-
     var routes = {
         saveQuery: '/save-query',
         exportPerspective: function (hash) {
@@ -44,6 +38,8 @@ describe('Dashboard', function () {
 
     var saveQueryResult = 'Execution effectuée avec succès';
     var exportQueryExecutionResult = 'Requête effectuée';
+
+    var notificationCenterMock = mockNotificationCenter($);
 
     /**
      * Create a HTML element containing an SQL query and a button to execute it
@@ -93,10 +89,6 @@ describe('Dashboard', function () {
 
         exportPerspectiveContainerElement = createPerspectiveContainer();
 
-        notificationCenterElement = $('<div />', {id: notificationCenterId});
-        notificationElement = $('<div />', {id: notificationId});
-        notificationCenterElement.append(notificationElement);
-
         queryTextAreaElement = $('<textarea />', {id: queryTextAreaId});
         formElement = $('<form />', {id: 'edit-query'});
         formElement.append(queryTextAreaElement);
@@ -106,7 +98,8 @@ describe('Dashboard', function () {
         bodyElement.addClass('container');
         bodyElement.append(formElement);
 
-        bodyElement.append(notificationCenterElement);
+        notificationCenterMock.beforeEach();
+        bodyElement.append(notificationCenterMock.getNotificationCenterElement());
         bodyElement.append(saveQueryButtonElement);
         bodyElement.append(exportPerspectiveContainerElement);
 
@@ -114,35 +107,25 @@ describe('Dashboard', function () {
 
         // Ensure "before each" operations went smoothly
         expect(saveQueryButtonElement[0]).not.toBeUndefined();
-        dashboard = mountDashboard({$: $, routes: routes});
+        dashboard = mountDashboard({
+            $: $,
+            routes: routes,
+            notificationCenter: getNotificationCenter(notificationCenterMock.getNotificationElementId(), $)
+        });
     });
 
     afterEach(function () {
         queryContainerElement.remove();
         saveQueryButtonElement.remove();
         exportPerspectiveContainerElement.remove();
-        notificationCenterElement.remove();
         formElement.remove();
+
+        notificationCenterMock.afterEach();
     });
-
-    function notifyError(done, alertType) {
-        if (alertType === undefined) {
-            alertType = 'error';
-        }
-
-        return function () {
-            expect(notificationCenterElement.hasClass('alert-' + alertType)).toBeTruthy();
-            expect(notificationCenterElement.hasClass('alert-success')).toBeFalsy();
-
-            if (typeof done === 'function') {
-                done();
-            }
-        };
-    }
 
     function getSaveSqlRequestMockery(done) {
         var requestMockery = RequestMockery(routes.saveQuery);
-        requestMockery.onAfterSuccess(notifyError(done));
+        requestMockery.onAfterSuccess(notificationCenterMock.assertNotifyError(done));
         requestMockery.shouldPost();
         requestMockery.respondWith({
             result: saveQueryResult,
@@ -154,7 +137,7 @@ describe('Dashboard', function () {
 
     function getExportPerspectiveRequestMockery(done, hash) {
         var requestMockery = RequestMockery(routes.exportPerspective(hash));
-        requestMockery.onAfterSuccess(notifyError(done, 'danger'));
+        requestMockery.onAfterSuccess(notificationCenterMock.assertNotifyError(done, 'danger'));
         requestMockery.respondWith({
             result: exportQueryExecutionResult,
             type: 'error'
@@ -178,13 +161,7 @@ describe('Dashboard', function () {
 
     function assertSuccessNotificationExistsOn(event, done) {
         var mockery = getSaveSqlRequestMockery(done);
-        mockery.onAfterSuccess(function () {
-            expect(notificationCenterElement.hasClass('alert-success')).toBeTruthy();
-            expect(notificationCenterElement.hasClass('alert-error')).toBeFalsy();
-            if (typeof done === 'function') {
-                done();
-            }
-        });
+        mockery.onAfterSuccess(notificationCenterMock.assertNotifySuccess(done));
         mockery.respondWith({
             result: saveQueryResult,
             type: 'success'
@@ -198,11 +175,7 @@ describe('Dashboard', function () {
         it('should show a recorded query when clicking on a button, which parent element has a "query" css class',
             function (done) {
                 var mockery = getSaveSqlRequestMockery(done);
-                mockery.onAfterSuccess(function () {
-                    expect(notificationElement[0]).not.toBeUndefined();
-                    expect(notificationElement.text()).toEqual(saveQueryResult);
-                    done();
-                });
+                mockery.onAfterSuccess(notificationCenterMock.assertNotifyCustomMessage(saveQueryResult, done));
                 var mock = mockery.mock();
                 saveQueryButtonElement.click();
                 mock.destroy();
