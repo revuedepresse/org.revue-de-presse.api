@@ -3,11 +3,17 @@
 namespace WeavingTheWeb\Bundle\DashboardBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
-use Symfony\Component\HttpFoundation\Request,
+
+use Symfony\Component\HttpFoundation\JsonResponse,
+    Symfony\Component\HttpFoundation\Request,
     Symfony\Bundle\FrameworkBundle\Controller\Controller,
     Symfony\Component\HttpFoundation\Response,
     Symfony\Component\Security\Core\Authentication\Token\AnonymousToken;
-use WeavingTheWeb\Bundle\DashboardBundle\DBAL\Connection;
+
+use WeavingTheWeb\Bundle\DashboardBundle\DBAL\Connection,
+    WeavingTheWeb\Bundle\DashboardBundle\Exception\InvalidTableException,
+    WeavingTheWeb\Bundle\DashboardBundle\Exception\InvalidQueryParametersException;
+
 use JMS\SecurityExtraBundle\Annotation\Secure;
 
 /**
@@ -114,7 +120,10 @@ class DocumentController extends Controller
             $query = '';
         }
 
-        /** @var $perspectiveRepository \WeavingTheWeb\Bundle\DashboardBundle\Repository\PerspectiveRepository */
+        /**
+         * @var \WeavingTheWeb\Bundle\DashboardBundle\Repository\PerspectiveRepository  $perspectiveRepository
+         * @var \Doctrine\ORM\EntityManager                                             $entityManager
+         */
         $perspectiveRepository = $entityManager->getRepository('WeavingTheWebDashboardBundle:Perspective');
         $result = $perspectiveRepository->findBy(['value' => $query]);
 
@@ -143,5 +152,49 @@ class DocumentController extends Controller
             )),
             201,
             array('Context-type' => 'application/json'));
+    }
+
+    /**
+     * @Extra\Route(
+     *      "/content/{table}/{key}/{column}",
+     *      name="weaving_the_web_dashboard_save_content",
+     *      requirements={
+     *          "table" = "[_a-zA-Z]+",
+     *          "key" = "[0-9]+",
+     *          "column" = "[_a-zA-Z]+"
+     *      },
+     *      options={"expose"=true}
+     * )
+     * @Extra\Method({"POST"})
+     *
+     * @param Request $request
+     * @param $table
+     * @param $key
+     * @param $column
+     * @return JsonResponse
+     */
+    public function saveContentAction(Request $request, $table, $key, $column)
+    {
+        /**
+         * @var \WeavingTheWeb\Bundle\DashboardBundle\Dbal\Connection $connection
+         */
+        $connection = $this->get('weaving_the_web_dashboard.dbal_connection');
+        $content = $request->request->get('content');
+
+        try {
+            $records = $connection->saveContent($content, $table, $key, $column);
+        } catch (InvalidQueryParametersException $exception) {
+            return new JsonResponse([
+                'result' => 'Sorry, your request is invalid.',
+                'type' => 'error'
+            ], 400);
+        }
+
+        if ($records) {
+            return new JsonResponse([
+                'result' => 'The content has been successfully saved',
+                'type' => 'success'
+            ]);
+        }
     }
 }

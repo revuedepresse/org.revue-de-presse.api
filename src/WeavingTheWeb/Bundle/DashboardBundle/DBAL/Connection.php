@@ -4,7 +4,9 @@ namespace WeavingTheWeb\Bundle\DashboardBundle\DBAL;
 
 use Doctrine\ORM\EntityManager;
 
-use WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints\Query;
+use WeavingTheWeb\Bundle\DashboardBundle\Exception\InvalidQueryParametersException,
+    WeavingTheWeb\Bundle\DashboardBundle\Exception\NotImplementedException,
+    WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints\Query;
 
 use Psr\Log\LoggerInterface;
 
@@ -20,7 +22,7 @@ class Connection
     const QUERY_TYPE_DEFAULT = 0;
 
     /**
-     * @var \Mysqli
+     * @var \mysqli
      */
     public $connection;
 
@@ -59,6 +61,31 @@ class Connection
      * @var \mysqli_result
      */
     private $lastResult;
+
+    /**
+     * @var array
+     */
+    private $queryParams;
+
+    /**
+     * @var array
+     */
+    private $bindingArguments;
+
+    /**
+     * @var \mysqli_stmt
+     */
+    protected $statement;
+
+    /**
+     * @var integer
+     */
+    protected $affectedRows;
+
+    public function getAffectedRows()
+    {
+        return $this->affectedRows;
+    }
 
     public function __construct(Validator $validator, LoggerInterface $logger)
     {
@@ -176,7 +203,13 @@ QUERY;
         $this->username = $username;
     }
 
-    public function execute($query)
+    /**
+     * @param $query
+     * @param array $parameters
+     * @return $this
+     * @throws \Exception
+     */
+    public function execute($query, $parameters = [])
     {
         $count = substr_count($query, ';');
 
@@ -191,11 +224,34 @@ QUERY;
             }
         } else {
             $query .= ';';
+            $this->queryCount = 1;
         }
 
-        $this->lastResult = $this->connection->query($query);
+        $shouldPrepareQuery = count($parameters) > 0;
+
+        if ($shouldPrepareQuery) {
+            /** @var \mysqli_stmt $statement */
+            $this->statement = $this->connection->prepare($query);
+            $types = array_keys($parameters);
+            $this->queryParams = array_values($parameters);
+            $this->bindingArguments = [implode($types)];
+            foreach ($this->queryParams as $key => $value) {
+                $this->bindingArguments[] = &$this->queryParams[$key];
+            }
+            if (!call_user_func_array([$this->statement, 'bind_param'], $this->bindingArguments)) {
+                throw new \Exception('Could not bind parameters to MySQL statement');
+            }
+            $this->lastResult = $this->statement->execute();
+        } else {
+            $this->lastResult = $this->connection->query($query);
+        }
+
         if (!$this->lastResult) {
             throw new \Exception($this->connection->error);
+        }
+
+        if ($shouldPrepareQuery && $this->lastResult && isset($this->statement)) {
+            $this->affectedRows = $this->statement->affected_rows;
         }
 
         return $this;
@@ -231,22 +287,22 @@ QUERY;
 
     /**
      * @param $sql
-     *
+     * @param array $parameters
      * @return \stdClass
      */
-    public function executeQuery($sql)
+    public function executeQuery($sql, $parameters = [])
     {
-        $query       = new \stdClass;
+        $query          = new \stdClass;
         $query->error   = null;
         $query->records = [];
-        $query->sql = $sql;
+        $query->sql     = $sql;
 
         if ($this->allowedQuery($query->sql)) {
             try {
                 if ($this->pdoSafe($query->sql)) {
                     $query->records = $this->delegateQueryExecution($query->sql);
                 } else {
-                    $query->records = $this->connect()->execute($query->sql)->fetchAll();
+                    $query->records = $this->connect()->execute($query->sql, $parameters)->fetchAll();
                 }
             } catch (\Exception $exception) {
                 $query->error = $exception->getMessage();
@@ -272,13 +328,21 @@ QUERY;
                 if (strlen($this->connection->error) > 0) {
                     $error = $this->connection->error;
                     if ($this->connection->errno === 2014) { // Repair all tables of the test database
-                        $this->logger->error($error);
+                        $this->logger->error('[CONNECTION] ' . $error);
                     } else {
-                        $this->logger->info($error);
+                        $this->logger->info('[CONNECTION] '. $error);
                     }
+
                     throw new \Exception($error);
                 } else {
                     $results[1] = $this->translator->trans('no_record', array(), 'messages');
+                    if (!is_null($this->statement) && $this->statement instanceof \mysqli_stmt) {
+                        /**
+                         * @see http://stackoverflow.com/a/25377031/2820730 about using \mysqli and xdebug
+                         */
+                        $this->statement->close();
+                        unset($this->statement);
+                    }
                 }
             } else {
                 $queryResult = $this->lastResult;
@@ -298,8 +362,6 @@ QUERY;
 
             $this->queryCount--;
         } while ($this->queryCount > 0);
-
-        $this->queryCount = null;
 
         return $results;
     }
@@ -328,5 +390,154 @@ QUERY;
         $errorList = $this->validator->validateValue($sql, $queryConstraint);
 
         return count($errorList) === 0;
+    }
+
+    /**
+     * @param $table
+     * @return bool
+     * @throws \Exception
+     */
+    public function isTableValid($table)
+    {
+        $results = $this->executeQuery('Show tables;');
+        $records = $this->getRecordsSafely($results);
+        $tables = [];
+        array_walk($records, function ($value) use (&$tables) {
+            list(, $table) = each($value);
+            array_push($tables, $table);
+        });
+
+        return array_key_exists($table, array_flip($tables));
+    }
+
+    /**
+     * @param $table
+     * @return mixed
+     * @throws NotImplementedException
+     * @throws \Exception
+     */
+    public function getTablePrimaryKey($table)
+    {
+        $results = $this->executeQuery(sprintf('SHOW KEYS FROM %s WHERE Key_name = \'PRIMARY\'', $table));
+        $records = $this->getRecordsSafely($results);
+        if (count($records) === 0) {
+            throw new \Exception(sprintf('There is no primary key for table "%s".', $table));
+        } elseif (count($records) > 1) {
+            throw new NotImplementedException('Handling of composite primary keys is not implemented.');
+        } elseif (!array_key_exists('Column_name', $records[0])) {
+            throw new \Exception(sprintf('The primary key can not be identified for table "%s"', $table));
+        }
+
+        return $records[0]['Column_name'];
+    }
+
+    /**
+     * @param $value
+     * @param $table
+     * @return bool
+     * @throws NotImplementedException
+     * @throws \Exception
+     */
+    public function isPrimaryKeyValidForTable($value, $table)
+    {
+        $primaryKey = $this->getTablePrimaryKey($table);
+        $results = $this->executeQuery(sprintf('SELECT count(*) count_ FROM %s WHERE %s = %d',
+            $table,
+            $primaryKey,
+            $value));
+        $records = $this->getRecordsSafely($results);
+
+        return count($records) === 1 && intval($records[0]['count_']) === 1;
+    }
+
+    /**
+     * @param $column
+     * @param $table
+     * @return bool
+     * @throws \Exception
+     */
+    public function isColumnValidForTable($column, $table)
+    {
+        $results = $this->executeQuery(sprintf('DESCRIBE %s', $table));
+        $records = $this->getRecordsSafely($results);
+        $columns = [];
+        array_walk($records, function ($value) use (&$columns) {
+            array_push($columns, $value['Field']);
+        });
+
+        return array_key_exists($column, array_flip($columns));
+    }
+
+    public function saveContent($content, $table, $key, $column)
+    {
+        $key = intval($key);
+        $validColumn = false;
+        $validKey = false;
+
+        $validTable = $this->isTableValid($table);
+
+        if ($validTable) {
+            $validKey = $this->isPrimaryKeyValidForTable($key, $table);
+            if ($validKey) {
+                $validColumn = $this->isColumnValidForTable($column, $table);
+            }
+        }
+
+        $invalidQueryParameters = [];
+
+        if (!$validTable) {
+            $this->logger->info(sprintf('[CONNECTION] Invalid table ("%s") provided to save content', $table));
+            $invalidQueryParameters[] = 'table';
+        }
+
+        if (!$validKey) {
+            $this->logger->info(sprintf('[CONNECTION] Invalid key ("%d") provided to save content', $key));
+            $invalidQueryParameters[] = 'key';
+        }
+
+        if (!$validColumn) {
+            $this->logger->info(sprintf('[CONNECTION] Invalid column ("%d") provided to save content', $column));
+            $invalidQueryParameters[] = 'column';
+        }
+
+        if (!$validTable || !$validKey || !$validColumn) {
+            throw new InvalidQueryParametersException(sprintf('Invalid query parameters (%s)',
+                implode(', ', $invalidQueryParameters)));
+        } else {
+            $primaryKey = $this->getTablePrimaryKey($table);
+            $query = sprintf('UPDATE %s SET %s = ? WHERE %s = ?',
+                $table,
+                $column,
+                $primaryKey
+            );
+
+            $this->logger->info(sprintf('[CONNECTION] Executing: [%s]', $query));
+            $results = $this->executeQuery($query, [
+                's' => $content,
+                'i' => intval($key)
+            ]);
+            if ($results->error) {
+                throw new \Exception($results->error);
+            }
+
+            $this->logger->info(sprintf('[CONNECTION] %d row(s) affected by executing the last query', $this->affectedRows));
+            $this->affectedRows = null;
+
+            return $this->getRecordsSafely($results);
+        }
+    }
+
+    /**
+     * @param $results
+     * @return mixed
+     * @throws \Exception
+     */
+    protected function getRecordsSafely($results)
+    {
+        if (!is_null($results->error)) {
+            throw new \Exception($results->error);
+        }
+
+        return $results->records;
     }
 }

@@ -15,20 +15,23 @@ module.exports = function(config) {
         // list of files / patterns to load in the browser
         files: [
             'bower_components/jquery/dist/jquery.js',
-            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/notification-center.js',
-            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/dashboard.js',
-            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/editable-content.js',
-            'bower_components/jquery-mockjax/dist/jquery.mockjax.js',
-            'request-mock.js',
-            'notification-center-mock.js',
-            'test-dashboard.js',
-            'test-editable-content.js'
+            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/components/clipboard/dist/clipboard.js',
+            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/components/d3/d3.js',
+            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/components/metrics-graphics/dist/metricsgraphics.js',
+            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/components/file-saver.js/FileSaver.js',
+            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/components/comma-separated-values/csv.min.js',
+            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/get-query-params.js',
+            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/logger.js',
+            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/format-date.js',
+            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/metrics.js',
+            'test-format-date.js',
+            'test-get-query-params.js'
         ],
+
 
         // test results reporter to use
         // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
-        reporters: ['spec'],
-
+        reporters: ['spec', 'junit'],
 
         // web server port
         port: 9876,
@@ -55,7 +58,7 @@ module.exports = function(config) {
         // - Safari (only Mac; has to be installed with `npm install karma-safari-launcher`)
         // - PhantomJS
         // - IE (only Windows; has to be installed with `npm install karma-ie-launcher`)
-        browsers: ['ChromeCanary'],
+        browsers: ['PhantomJS'],
 
         eslint: {
             stopOnError: false,
@@ -63,14 +66,15 @@ module.exports = function(config) {
         },
 
         preprocessors: {
-            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/notification-center.js':   ['eslint'],
-            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/dashboard.js':             ['eslint'],
-            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/editable-content.js':      ['eslint']
+            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/metrics.js':           ['eslint'],
+            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/get-query-params.js':  ['eslint'],
+            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/format-date.js':       ['eslint'],
+            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/logger.js':            ['eslint']
         },
 
         junitReporter: {
-            outputFile: '../build/dashboard-test-results.xml',
-            suite: 'Dashboard'
+            outputFile: '../build/karma/perspective-test-results.xml',
+            suite: 'Perspective'
         },
 
         // If browser does not capture in given timeout [ms], kill it
@@ -79,6 +83,6 @@ module.exports = function(config) {
 
         // Continuous Integration mode
         // if true, it capture browsers, run tests and exit
-        singleRun: false
+        singleRun: true
     });
 };

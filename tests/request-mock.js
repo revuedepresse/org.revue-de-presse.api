@@ -43,6 +43,14 @@ var RequestMockery = (function ($) {
     };
 
     /**
+     * Send data when requesting a URL
+     * @param data
+     */
+    RequestMock.prototype.sendData = function (data) {
+        this.options.data = data;
+    };
+
+    /**
      * Destroy a mocked request
      *
      * @returns {RequestMock}
@@ -86,6 +94,15 @@ var RequestMockery = (function ($) {
     };
 
     /**
+     * Set the response status code
+     *
+     * @param statusCode
+     */
+    RequestMock.prototype.setStatusCode = function (statusCode) {
+        this.options.status = statusCode;
+    };
+
+    /**
      * Set on after success callback
      *
      * @param   {function} callback
@@ -98,7 +115,7 @@ var RequestMockery = (function ($) {
     };
 
     /**
-     * Set on after success callback
+     * Set on after error callback
      *
      * @param   {function} callback
      * @returns {RequestMock}
@@ -108,7 +125,21 @@ var RequestMockery = (function ($) {
             this.options.onAfterError = function (error) {
                 expect(error).toBeNull();
             };
+        } else {
+            this.options.onAfterError = callback;
         }
+
+        return this;
+    };
+
+    /**
+     * Set on after complete callback
+     *
+     * @param callback
+     * @returns {RequestMock}
+     */
+    RequestMock.prototype.onAfterComplete = function (callback) {
+        this.options.onAfterComplete = callback;
 
         return this;
     };
