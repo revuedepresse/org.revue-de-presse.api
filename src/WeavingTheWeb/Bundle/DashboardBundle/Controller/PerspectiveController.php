@@ -13,6 +13,8 @@ use Symfony\Component\DependencyInjection\ContainerAware,
 use Symfony\Component\HttpFoundation\JsonResponse,
     Symfony\Component\HttpFoundation\RedirectResponse;
 
+use Symfony\Component\Security\Core\Authorization\Voter\AuthenticatedVoter;
+
 use WeavingTheWeb\Bundle\DashboardBundle\Entity\Perspective;
 
 use phpseclib\Crypt\AES;
@@ -252,9 +254,17 @@ class PerspectiveController extends ContainerAware
             $perspectiveTitle = $translator->trans('title_perspective');
         }
 
+        /**
+         * @var \Symfony\Component\Security\Core\Authorization\AuthorizationChecker $authorizationChecker
+         */
+        $authorizationChecker = $this->container->get('security.authorization_checker');
+        $anonymousVisit = $perspective->isPublic() &&
+            !$authorizationChecker->isGranted(AuthenticatedVoter::IS_AUTHENTICATED_FULLY);
+
         $response = $templateEngine->renderResponse(
             'WeavingTheWebDashboardBundle:Perspective:showPerspective.html.twig',
             array(
+                'anonymous_visit' => $anonymousVisit,
                 'active_menu_item' => 'dashboard',
                 'default_query' => $query->sql,
                 'enabled_search' => true,
