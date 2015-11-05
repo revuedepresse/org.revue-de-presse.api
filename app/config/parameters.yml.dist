@@ -13,6 +13,9 @@ imports:
     - { resource: parameters/parameters_xhprof.yml }
 
 parameters:
+    analytics_domain:               analytics.sylvaine.me
+    analytics_site:                 3
+
     app_version:                    0.1
 
     apc_host:                       %apc.host%
