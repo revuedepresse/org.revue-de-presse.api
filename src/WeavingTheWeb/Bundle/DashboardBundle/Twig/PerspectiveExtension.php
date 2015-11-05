@@ -49,6 +49,9 @@ class PerspectiveExtension extends \Twig_Extension
         $this->container = $container;
     }
 
+    /**
+     * @return array
+     */
     public function getFilters()
     {
         $htmlSafeOption = ['is_safe' => ['all']];
@@ -80,6 +83,11 @@ class PerspectiveExtension extends \Twig_Extension
         );
     }
 
+    /**
+     * @param $view
+     * @param $parameters
+     * @return string
+     */
     public function render($view, $parameters)
     {
         if (is_null($this->templating)) {
@@ -89,6 +97,10 @@ class PerspectiveExtension extends \Twig_Extension
         return $this->templating->render($view, $parameters);
     }
 
+    /**
+     * @param $subject
+     * @return string
+     */
     public function getExportButton($subject)
     {
         return $this->render(
@@ -98,6 +110,11 @@ class PerspectiveExtension extends \Twig_Extension
         );
     }
 
+    /**
+     * @param $subject
+     * @param $columns
+     * @return string
+     */
     public function getLink($subject, $columns)
     {
         return $this->render(
@@ -108,6 +125,10 @@ class PerspectiveExtension extends \Twig_Extension
         );
     }
 
+    /**
+     * @param $subject
+     * @return string
+     */
     public function getImage($subject)
     {
         return $this->render(
@@ -117,6 +138,11 @@ class PerspectiveExtension extends \Twig_Extension
         );
     }
 
+    /**
+     * @param $subject
+     * @param $columns
+     * @return string
+     */
     public function getEditableContent($subject, $columns)
     {
         return $this->render(
@@ -127,6 +153,10 @@ class PerspectiveExtension extends \Twig_Extension
         );
     }
 
+    /**
+     * @param $subject
+     * @return string
+     */
     public function getTruncatedText($subject)
     {
         return $this->render(
@@ -136,6 +166,11 @@ class PerspectiveExtension extends \Twig_Extension
         );
     }
 
+    /**
+     * @param $subject
+     * @param $columns
+     * @return string
+     */
     public function getButton($subject, $columns)
     {
         return $this->render(
@@ -146,6 +181,10 @@ class PerspectiveExtension extends \Twig_Extension
         );
     }
 
+    /**
+     * @param $subject
+     * @return string
+     */
     public function getPreFormattedText($subject)
     {
         return $this->render(
@@ -155,6 +194,10 @@ class PerspectiveExtension extends \Twig_Extension
         );
     }
 
+    /**
+     * @param $subject
+     * @return string
+     */
     public function getHiddenContent($subject)
     {
         return $this->render(
@@ -164,6 +207,10 @@ class PerspectiveExtension extends \Twig_Extension
         );
     }
 
+    /**
+     * @param $subject
+     * @return string
+     */
     public function getRawJson($subject)
     {
         return $this->render(
@@ -173,10 +220,20 @@ class PerspectiveExtension extends \Twig_Extension
         );
     }
 
-    public function getColumnName($subject)
+    /**
+     * @param $subject
+     * @param int $depth
+     * @return string
+     * @throws \Exception
+     */
+    public function getColumnName($subject, $depth = 0)
     {
         if ($this->isTransformable($subject)) {
             $columnName = substr($subject, 4);
+            $depth++;
+            if ($depth < 2) {
+                $columnName = $this->getColumnName($columnName, $depth);
+            }
         } elseif ($this->isAbsentFromHeader($subject)) {
             $columnName = '';
         } else {
@@ -186,6 +243,11 @@ class PerspectiveExtension extends \Twig_Extension
         return $columnName;
     }
 
+    /**
+     * @param $subject
+     * @return bool
+     * @throws \Exception
+     */
     public function isTransformable($subject)
     {
         try {
@@ -200,11 +262,20 @@ class PerspectiveExtension extends \Twig_Extension
         }
     }
 
+    /**
+     * @param $subject
+     * @return bool
+     */
     protected function mayHaveValidPrefix($subject)
     {
         return strlen($subject) >= 4;
     }
 
+    /**
+     * @param $subject
+     * @return bool
+     * @throws \Exception
+     */
     public function isAbsentFromHeader($subject)
     {
         try {
@@ -219,6 +290,9 @@ class PerspectiveExtension extends \Twig_Extension
         }
     }
 
+    /**
+     * @return string
+     */
     public function getName()
     {
         return 'perspective';
