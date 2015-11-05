@@ -72,7 +72,11 @@ class PerspectiveController extends ContainerAware
      * @return \Symfony\Component\HttpFoundation\Response
      *
      * @Extra\Cache(expires="+2 hours", public="true")
-     * @Extra\Route("/{hash}", name="weaving_the_web_dashboard_show_perspective")
+     * @Extra\Route(
+     *      "/{hash}",
+     *      name="weaving_the_web_dashboard_show_perspective",
+     *      options={"expose"=true}
+     * )
      */
     public function showPerspectiveAction($hash)
     {
@@ -136,8 +140,11 @@ class PerspectiveController extends ContainerAware
     }
 
     /**
-     * @Extra\Route("/{hash}/export", name="weaving_the_web_dashboard_export_perspective",
-     *              options={"expose"=true})
+     * @Extra\Route(
+     *      "/{hash}/export",
+     *      name="weaving_the_web_dashboard_export_perspective",
+     *      options={"expose"=true}
+     * )
      * @Extra\Method({"GET"})
      * @Extra\ParamConverter(
      *      "perspective",

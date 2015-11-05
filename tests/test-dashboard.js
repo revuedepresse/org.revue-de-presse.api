@@ -3,30 +3,40 @@
 describe('Dashboard', function () {
     var dashboard;
 
-    var queryContainerId = 'query';
-    var queryContainerElement;
-
     var elementReferences = {};
 
-    var hashClass = 'hash';
-    var perspectiveClass = 'perspective';
+    // Queries
+    var formElement;
+    var queryContainerElement;
+    var queryTextAreaElement;
+    var saveQueryButtonElement;
+
     var queryClass = 'query';
     var sqlClass = 'sql';
 
+    var editQueryId = 'edit-query';
+    var queryContainerId = 'query';
     var queryTextAreaId = 'sql';
-    var queryTextAreaElement;
-
-    var formElement;
-
     var saveQueryButtonId = 'action-save-query';
-    var saveQueryButtonElement;
 
+    // Perspectives
     var exportPerspectiveContainerElement;
+    var hashClass = 'hash';
+    var perspectiveClass = 'perspective';
+
+    // JSON perspectives
+    var jsonPerspectiveContainerElement;
+    var navigationFormId;
+    var jsonPerspectiveClass = 'perspective-json';
+    var perspectiveHash = 'my-perspective-hash';
 
     var routes = {
         saveQuery: '/save-query',
         exportPerspective: function (hash) {
             return '/export-perspective/' + hash;
+        },
+        showPerspective: function (hash) {
+            return '/show-perspective/' + hash;
         }
     };
 
@@ -64,30 +74,42 @@ describe('Dashboard', function () {
                 'class': queryClass
             }, {
                 'class': sqlClass
-            },
-            elementReferences
+            }, elementReferences
         );
     }
 
     /**
-     * Create an HTML element containing a perspective and a button to export it
+     * Create an HTML element containing a perspective hash and a button to export it
      */
     function createPerspectiveContainer() {
         return createContainerElement(
             {
-                id: queryContainerId,
                 'class': perspectiveClass
             }, {
                 'class': hashClass,
                 text:  'hash'
-            },
-            elementReferences
+            }, elementReferences
+        );
+    }
+
+    /**
+     * Create an HTML element containing a perspective hash and a button to navigate to it
+     */
+    function createJsonPerspectiveContainer() {
+        return createContainerElement(
+            {
+                'class': jsonPerspectiveClass
+            }, {
+                'class': hashClass,
+                 text: 'my-perspective-hash'
+
+            }, elementReferences
         );
     }
 
     beforeEach(function () {
         queryTextAreaElement = $('<textarea />', {id: queryTextAreaId});
-        formElement = $('<form />', {id: 'edit-query'});
+        formElement = $('<form />', {id: editQueryId});
         formElement.append(queryTextAreaElement);
 
         var bodyElement = $('body');
@@ -107,8 +129,8 @@ describe('Dashboard', function () {
         queryContainerElement = createQueryContainer();
         bodyElement.append(queryContainerElement);
 
-        navigationFormElement = $('<form />', {id: 'navigator', 'method': 'GET'});
-        bodyElement.append(navigationFormElement);
+        jsonPerspectiveContainerElement = createJsonPerspectiveContainer();
+        bodyElement.append(jsonPerspectiveContainerElement);
 
         // Ensure "before each" operations went smoothly
         expect(saveQueryButtonElement[0]).not.toBeUndefined();
@@ -117,12 +139,14 @@ describe('Dashboard', function () {
             routes: routes,
             notificationCenter: getNotificationCenter(notificationCenterMock.getNotificationElementId(), $)
         });
+        navigationFormId = dashboard.getNavigationFormId();
     });
 
     afterEach(function () {
         queryContainerElement.remove();
         saveQueryButtonElement.remove();
         exportPerspectiveContainerElement.remove();
+        jsonPerspectiveContainerElement.remove();
         formElement.remove();
 
         notificationCenterMock.afterEach();
@@ -277,5 +301,26 @@ describe('Dashboard', function () {
                 assertErrorNotificationExistsOnRequest(event, mockery);
             }
         )
+    });
+
+    describe('Go to JSON perspective', function () {
+        it('should navigate to a JSON perspective when clicking on a button',
+            function (done) {
+                var navigationFormElement = dashboard.getNavigationForm();
+                var perspectiveUrl = routes.showPerspective(perspectiveHash);
+                navigationFormElement.submit(function (event) {
+                    event.preventDefault();
+
+                    expect($(event.target).attr('action')).toEqual(perspectiveUrl);
+
+                    done();
+
+                    return false;
+                });
+
+                var jsonPerspectiveButton = elementReferences[jsonPerspectiveClass].button;
+                jsonPerspectiveButton.click();
+            }
+        );
     });
 });

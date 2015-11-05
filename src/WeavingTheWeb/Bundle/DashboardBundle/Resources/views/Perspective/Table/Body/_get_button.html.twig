@@ -1,7 +1,13 @@
-<div class="query" title="{{ value|escape }}">
+{% set go_to_json_perspective = value|length == 7%}
+{% if go_to_json_perspective %}
+    {% set container_class = 'perspective-json' %}
+{% else %}
+    {% set container_class = 'query' %}
+{% endif %}
+<div class="{{ container_class }}" title="{{ value|escape }}">
     {% if columns.hid_name is defined and columns.hid_name|length > 0 %}
     <button type="button" class="btn btn-default">{{ columns.hid_name }}</button>
     {% endif %}
     {# The column value aliased with a name starting with "btn_" should be a valid SQL query #}
-    <span class="sql hide">{{ value }}</span>
+    <span class="sql hide{% if go_to_json_perspective %} hash{% endif %}">{{ value }}</span>
 </div>

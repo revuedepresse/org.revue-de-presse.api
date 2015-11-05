@@ -166,7 +166,7 @@ function mountDashboard(reqs) {
         });
     };
 
-    Dashboard.prototype.bindExportPerspective = function (button, url, hash) {
+    Dashboard.prototype.bindExportPerspectiveListeners = function (button, url, hash) {
         var $ = this.$;
         var self = this;
 
@@ -191,22 +191,76 @@ function mountDashboard(reqs) {
         });
     };
 
+    Dashboard.prototype.getNavigationFormId = function () {
+        return 'navigation-form';
+    };
+
+    Dashboard.prototype.getJsonPerspectiveSelector = function () {
+        return '.perspective-json';
+    };
+
+    Dashboard.prototype.getHashSelector = function () {
+        return '.hash';
+    };
+
+    Dashboard.prototype.getNavigationForm = function () {
+        var $ = this.$;
+        var navigationFormSelector = '#' + this.getNavigationFormId();
+        var navigationForm;
+        if ($(navigationFormSelector).length === 0) {
+            navigationForm = $('<form />', {
+                id: this.getNavigationFormId(),
+                method: 'GET',
+                'class': 'hide'
+            });
+        } else {
+            navigationForm = $(navigationFormSelector);
+        }
+
+        return navigationForm;
+    };
+
+    Dashboard.prototype.bindGoToJsonPerspectiveListeners = function () {
+        var self = this;
+        var $ = self.$;
+
+        var navigationForm = self.getNavigationForm();
+        $('body').append(navigationForm);
+
+        var jsonPerspectiveSelector = self.getJsonPerspectiveSelector();
+        $(jsonPerspectiveSelector + ' button').each(function (index, element) {
+            var hashSelector = self.getHashSelector();
+            var button = $(element);
+            var contentPlaceholder = button.parent().find(hashSelector);
+            var hash = contentPlaceholder.text();
+
+            button.click(function (e) {
+                e.preventDefault();
+                navigationForm.attr('action', self.routes.showPerspective(hash));
+                navigationForm.submit();
+
+                return false;
+            });
+        });
+    };
+
     Dashboard.prototype.bindListeners = function () {
         var self = this;
         var routes = self.routes;
         var $ = self.$;
 
-        var saveQueryButton = $('#action-save-query');
-        var exportPerspectiveButton = $('.perspective button');
+        self.bindSubmitQueryListener();
 
+        var saveQueryButton = $('#action-save-query');
         if (saveQueryButton[0]) {
-            this.bindSaveQueryListener(saveQueryButton, routes.saveQuery);
+            self.bindSaveQueryListener(saveQueryButton, routes.saveQuery);
         }
 
+        var exportPerspectiveButton = $('.perspective button');
         if (exportPerspectiveButton[0]) {
             exportPerspectiveButton.each(function (buttonIndex, button) {
                 var hash = $(button).parent().find('.hash').text();
-                self.bindExportPerspective(
+                self.bindExportPerspectiveListeners(
                     $(button),
                     routes.exportPerspective(hash),
                     hash
@@ -214,7 +268,7 @@ function mountDashboard(reqs) {
             });
         }
 
-        this.bindSubmitQueryListener();
+        self.bindGoToJsonPerspectiveListeners();
     };
 
     var dashboard = new Dashboard(reqs);
@@ -232,6 +286,9 @@ if (window.Routing !== undefined) {
         notificationCenter: window.getNotificationCenter('notification', window.jQuery),
         routes: {
             saveQuery: routing.generate('weaving_the_web_dashboard_save_query'),
+            showPerspective: function (hash) {
+                return routing.generate('weaving_the_web_dashboard_show_perspective', {hash: hash});
+            },
             exportPerspective: function (hash) {
                 return routing.generate('weaving_the_web_dashboard_export_perspective', {hash: hash});
             }
