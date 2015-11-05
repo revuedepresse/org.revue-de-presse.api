@@ -6,17 +6,12 @@ describe('Dashboard', function () {
     var queryContainerId = 'query';
     var queryContainerElement;
 
-    var queryClass = 'query';
-
-    var executeQueryButtonElement;
-
-    var sqlClass = 'sql';
-    var sqlElement;
-
-    var perspectiveClass = 'perspective';
+    var elementReferences = {};
 
     var hashClass = 'hash';
-    var hashElement;
+    var perspectiveClass = 'perspective';
+    var queryClass = 'query';
+    var sqlClass = 'sql';
 
     var queryTextAreaId = 'sql';
     var queryTextAreaElement;
@@ -27,7 +22,6 @@ describe('Dashboard', function () {
     var saveQueryButtonElement;
 
     var exportPerspectiveContainerElement;
-    var exportPerspectiveButtonElement;
 
     var routes = {
         saveQuery: '/save-query',
@@ -41,54 +35,57 @@ describe('Dashboard', function () {
 
     var notificationCenterMock = mockNotificationCenter($);
 
-    /**
-     * Create a HTML element containing an SQL query and a button to execute it
-     */
-    function createQueryContainer() {
-        var containerElement = $('<div />', {
-            id: queryContainerId,
-            class: queryClass
-        });
-        executeQueryButtonElement = $('<button />');
-        containerElement.append(executeQueryButtonElement);
+    var createContainerElement = function (containerProperties, childProperties, elementReferences) {
+        if (!containerProperties.hasOwnProperty('class')) {
+            throw Error('The container element to be created should have a "class" property.');
+        }
 
-        sqlElement = $('<span />', {
-            'class': sqlClass
-        });
-        containerElement.append(sqlElement);
+        elementReferences[containerProperties['class']] = {};
+
+        var containerElement = $('<div />', containerProperties);
+        var references = elementReferences[containerProperties['class']];
+
+        references.button = $('<button />');
+        containerElement.append(references.button);
+
+        references.contentPlaceholder = $('<span />', childProperties);
+        containerElement.append(references.contentPlaceholder);
 
         return containerElement;
+    };
+
+    /**
+     * Create an HTML element containing an SQL query and a button to execute it
+     */
+    function createQueryContainer() {
+        return createContainerElement(
+            {
+                id: queryContainerId,
+                'class': queryClass
+            }, {
+                'class': sqlClass
+            },
+            elementReferences
+        );
     }
 
     /**
-     * Create a HTML element containing a perspective and a button to export it
+     * Create an HTML element containing a perspective and a button to export it
      */
     function createPerspectiveContainer() {
-        var containerElement = $('<div />', {
-            id: queryContainerId,
-            class: perspectiveClass
-        });
-        exportPerspectiveButtonElement = $('<button />');
-        containerElement.append(exportPerspectiveButtonElement);
-
-        hashElement = $('<span />', {
-            'class': hashClass,
-            text:  'hash'
-        });
-        containerElement.append(hashElement);
-
-        return containerElement;
+        return createContainerElement(
+            {
+                id: queryContainerId,
+                'class': perspectiveClass
+            }, {
+                'class': hashClass,
+                text:  'hash'
+            },
+            elementReferences
+        );
     }
 
     beforeEach(function () {
-        queryContainerElement = createQueryContainer();
-
-        saveQueryButtonElement = $('<button/>', {
-            id: saveQueryButtonId
-        });
-
-        exportPerspectiveContainerElement = createPerspectiveContainer();
-
         queryTextAreaElement = $('<textarea />', {id: queryTextAreaId});
         formElement = $('<form />', {id: 'edit-query'});
         formElement.append(queryTextAreaElement);
@@ -100,10 +97,18 @@ describe('Dashboard', function () {
 
         notificationCenterMock.beforeEach();
         bodyElement.append(notificationCenterMock.getNotificationCenterElement());
+
+        saveQueryButtonElement = $('<button/>', {id: saveQueryButtonId});
         bodyElement.append(saveQueryButtonElement);
+
+        exportPerspectiveContainerElement = createPerspectiveContainer();
         bodyElement.append(exportPerspectiveContainerElement);
 
+        queryContainerElement = createQueryContainer();
         bodyElement.append(queryContainerElement);
+
+        navigationFormElement = $('<form />', {id: 'navigator', 'method': 'GET'});
+        bodyElement.append(navigationFormElement);
 
         // Ensure "before each" operations went smoothly
         expect(saveQueryButtonElement[0]).not.toBeUndefined();
@@ -195,7 +200,8 @@ describe('Dashboard', function () {
     });
 
     function submitQuery(query, done) {
-        sqlElement.text(query);
+        var references = elementReferences[queryClass];
+        references.contentPlaceholder.text(query);
 
         formElement.submit(function (event) {
             event.stopPropagation();
@@ -208,7 +214,7 @@ describe('Dashboard', function () {
 
             return false;
         });
-        executeQueryButtonElement.click();
+        references.button.click();
     }
 
     function assertQuerySubmittedForExecution(query, done) {
@@ -262,9 +268,10 @@ describe('Dashboard', function () {
     describe('Export query execution results', function () {
         it('should show an error notification when the results of a query execution could not be exported',
             function (done) {
-                var event = exportPerspectiveButtonElement.click
-                    .bind(exportPerspectiveButtonElement);
-                var hash = exportPerspectiveButtonElement.parent().find('.hash').text();
+                var button = elementReferences[perspectiveClass].button;
+                var event = button.click
+                    .bind(button);
+                var hash = button.parent().find('.hash').text();
                 var mockery = getExportPerspectiveRequestMockery(done, hash);
 
                 assertErrorNotificationExistsOnRequest(event, mockery);
