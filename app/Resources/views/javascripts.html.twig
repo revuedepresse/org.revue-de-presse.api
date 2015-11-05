@@ -6,3 +6,18 @@
 {% endjavascripts %}
 <script type="text/javascript" src="{{ asset('bundles/fosjsrouting/js/router.js') }}"></script>
 <script type="text/javascript" src="{{ path('fos_js_routing_js', {"callback": "fos.Router.setData"}) }}"></script>
+{% if app.environment == 'prod' %}
+<script type="text/javascript">
+  var _paq = _paq || [];
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
+  (function() {
+    var u="//{{ analytics_domain }}/";
+    _paq.push(['setTrackerUrl', u+'piwik.php']);
+    _paq.push(['setSiteId', {{ analytics_site }}]);
+    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+    g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'piwik.js'; s.parentNode.insertBefore(g,s);
+  })();
+</script>
+<noscript><p><img src="//{{ analytics_domain }}/piwik.php?idsite={{ analytics_site }}" style="border:0;" alt="" /></p></noscript>
+{% endif %}

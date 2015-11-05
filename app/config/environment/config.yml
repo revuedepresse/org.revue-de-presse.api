@@ -52,6 +52,8 @@ twig:
             - ':Form:form_errors.html.twig'
             - ':Form:form_label.html.twig'
     globals:
+        analytics_domain:   %analytics_domain%
+        analytics_site:     %analytics_site%
         feature_toggling:
             search:         %feature_toggling_search%
             repositories:   %feature_toggling_repositories%
