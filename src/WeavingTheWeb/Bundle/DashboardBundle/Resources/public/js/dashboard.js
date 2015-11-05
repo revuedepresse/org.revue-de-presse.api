@@ -9,7 +9,8 @@ function mountDashboard(reqs) {
     };
 
     Dashboard.prototype.bindSubmitQueryListener = function () {
-        var $ = this.$;
+        var self = this;
+        var $ = self.$;
         var $queries = $('.query button');
         $queries.unbind('click');
 
@@ -31,6 +32,11 @@ function mountDashboard(reqs) {
                 (trimmedSql.indexOf('drop table') == 0)) {
                 $('#sql').val(sql);
                 $('.container form#edit-query').submit();
+            } else {
+                self.notificationCenter.showNotification({
+                    result: 'Sorry, your query can not be executed as it has been considered to be unsafe.',
+                    type: 'danger'
+                });
             }
 
             event.preventDefault();
