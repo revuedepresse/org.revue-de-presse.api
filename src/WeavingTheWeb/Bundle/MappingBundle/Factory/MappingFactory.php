@@ -3,7 +3,6 @@
 namespace WeavingTheWeb\Bundle\MappingBundle\Factory;
 
 /**
- * @package WeavingTheWeb\Bundle\MappingBundle\Factory
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
 class MappingFactory implements MapperAwareInterface
@@ -48,6 +47,10 @@ class MappingFactory implements MapperAwareInterface
 
             $loader->setResourcesDir(__DIR__ . '/../Resources');
             $loader->setMapperName($mapper['name']);
+
+            if (array_key_exists('callback', $mapper)) {
+                $loader->setCallback($mapper['callback']);
+            }
 
             $mapping[$mapper['name']] = $loader->load();
         }

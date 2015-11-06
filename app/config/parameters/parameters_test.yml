@@ -4,6 +4,9 @@ parameters:
     api_twitter_user_secret:                                    %api_twitter_user_secret_test%
     api_twitter_user_token:                                     %api_twitter_user_token_test%
 
+    aes_key:                                                    0000200000000bc0c280c000A0000000e000c090000000B0c000030A000eDbb0
+    aes_iv:                                                     6c300000e0000000B000600A0000f0E0
+     
     basic_auth_pattern:                                         ^/(documents|github|user|api|query|content|mail|tweet|oauth|perspective/.*/export)
 
     database_charset:                                           UTF8
@@ -44,6 +47,8 @@ parameters:
         WTW\UserBundle\Tests\Security\Core\User\User:           plaintext
         FOS\UserBundle\Model\UserInterface:                     sha512
         Symfony\Component\Security\Core\User\User:              plaintext
+
+    weaving_the_web_dashboard.resources.perspectives:           %kernel.root_dir%/../src/WeavingTheWeb/Bundle/MappingBundle/Tests/Resources/perspectives
 
 services:
     weaving_the_web_user.controller.twitter:

@@ -6,6 +6,7 @@ use Doctrine\ORM\EntityManager;
 
 use WeavingTheWeb\Bundle\DashboardBundle\Exception\InvalidQueryParametersException,
     WeavingTheWeb\Bundle\DashboardBundle\Exception\NotImplementedException,
+    WeavingTheWeb\Bundle\DashboardBundle\Exception\QueryExecutionException,
     WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints\Query;
 
 use Psr\Log\LoggerInterface;
@@ -14,12 +15,15 @@ use Symfony\Component\Translation\Translator,
     Symfony\Component\Validator\Validator\RecursiveValidator as Validator;
 
 /**
- * @package WeavingTheWeb\Bundle\DashboardBundle\DBAL
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
 class Connection
 {
     const QUERY_TYPE_DEFAULT = 0;
+
+    const ERROR_NONE = 'no_error';
+
+    const RESULTS_NONE = 'no_results';
 
     /**
      * @var \mysqli
@@ -60,7 +64,7 @@ class Connection
     /**
      * @var \mysqli_result
      */
-    private $lastResult;
+    private $lastResults;
 
     /**
      * @var array
@@ -81,6 +85,23 @@ class Connection
      * @var integer
      */
     protected $affectedRows;
+
+    /**
+     * @var \stdClass
+     */
+    protected $query;
+
+    /**
+     * @var string|null
+     */
+    protected $lastError;
+
+    /**
+     * Raise an exception when executing an erroneous query
+     *
+     * @var bool
+     */
+    protected $raiseExceptionOnError = true;
 
     public function getAffectedRows()
     {
@@ -241,16 +262,16 @@ QUERY;
             if (!call_user_func_array([$this->statement, 'bind_param'], $this->bindingArguments)) {
                 throw new \Exception('Could not bind parameters to MySQL statement');
             }
-            $this->lastResult = $this->statement->execute();
+            $this->lastResults = $this->statement->execute();
         } else {
-            $this->lastResult = $this->connection->query($query);
+            $this->lastResults = $this->connection->query($query);
         }
 
-        if (!$this->lastResult) {
+        if (!$this->lastResults) {
             throw new \Exception($this->connection->error);
         }
 
-        if ($shouldPrepareQuery && $this->lastResult && isset($this->statement)) {
+        if ($shouldPrepareQuery && $this->lastResults && isset($this->statement)) {
             $this->affectedRows = $this->statement->affected_rows;
         }
 
@@ -315,6 +336,82 @@ QUERY;
     }
 
     /**
+     * @param $sql
+     * @param array $parameters
+     * @return $this
+     */
+    public function query($sql, $parameters = [])
+    {
+        $this->query = $this->executeQuery($sql, $parameters);
+
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasEncounteredNoError() {
+        return $this->lastError === self::ERROR_NONE;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasFoundNoResults()
+    {
+        return $this->lastResults === self::RESULTS_NONE;
+    }
+
+    public function shouldRaiseExceptionOnError()
+    {
+       $this->raiseExceptionOnError = true;
+    }
+
+    public function shouldNotRaiseExceptionOnError()
+    {
+        $this->raiseExceptionOnError = false;
+    }
+
+    /**
+     * @return array|null|string
+     * @throws QueryExecutionErrorException
+     */
+    public function getResults()
+    {
+        $this->handleError();
+
+        if ($this->hasEncounteredNoError()) {
+            if ($this->hasFoundNoResults()) {
+                return [];
+            }
+
+            return $this->query->records;
+        } else {
+            return $this->lastError;
+        }
+    }
+
+    /**
+     * @return $this
+     * @throws QueryExecutionErrorException
+     */
+    protected function handleError()
+    {
+        if (!is_null($this->query->error)) {
+            if ($this->raiseExceptionOnError) {
+                throw new QueryExecutionErrorException($this->query->error);
+            }
+
+            $this->lastError = $this->query->error;
+            $this->logger->info($this->query->error);
+        } else {
+            $this->lastError = self::ERROR_NONE;
+        }
+
+        return $this;
+    }
+
+    /**
      * @return array
      * @throws \Exception
      */
@@ -335,6 +432,7 @@ QUERY;
 
                     throw new \Exception($error);
                 } else {
+                    $this->lastResults = self::RESULTS_NONE;
                     $results[1] = $this->translator->trans('no_record', array(), 'messages');
                     if (!is_null($this->statement) && $this->statement instanceof \mysqli_stmt) {
                         /**
@@ -345,7 +443,7 @@ QUERY;
                     }
                 }
             } else {
-                $queryResult = $this->lastResult;
+                $queryResult = $this->lastResults;
 
                 /**
                  * @var \mysqli_result $queryResult

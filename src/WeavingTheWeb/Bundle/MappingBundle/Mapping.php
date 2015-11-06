@@ -3,8 +3,7 @@
 namespace WeavingTheWeb\Bundle\MappingBundle;
 
 /**
- * Class Mapping
- * @package WeavingTheWeb\Bundle\MappingBundle
+ * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
 class Mapping implements \ArrayAccess, \Countable, \Iterator
 {

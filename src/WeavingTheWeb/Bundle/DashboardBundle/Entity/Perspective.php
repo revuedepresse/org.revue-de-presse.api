@@ -2,7 +2,9 @@
 
 namespace WeavingTheWeb\Bundle\DashboardBundle\Entity;
 
-use WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints as WeavingTheWebAssert;
+use WeavingTheWeb\Bundle\DashboardBundle\Export\ExportableInterface,
+    WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints as WeavingTheWebAssert;
+
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -10,15 +12,27 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity(repositoryClass="WeavingTheWeb\Bundle\DashboardBundle\Repository\PerspectiveRepository")
  * @WeavingTheWebAssert\Perspective(groups="public_perspectives")
  */
-class Perspective
+class Perspective implements ExportableInterface
 {
-    const STATUS_DISABLED   = 0;
+    const STATUS_DISABLED           = 0;
 
-    const STATUS_DEFAULT    = 1;
+    const STATUS_DEFAULT            = 1;
 
-    const STATUS_PUBLIC     = 2;
+    const STATUS_PUBLIC             = 2;
 
-    const STATUS_EXPORTABLE = 3;
+    const STATUS_EXPORTABLE         = 3;
+
+    const STATUS_HAS_INVALID_VALUE  = 4;
+
+    /**
+     * @return $this
+     */
+    public function markAsHavingInvalidValue()
+    {
+        $this->status = self::STATUS_HAS_INVALID_VALUE;
+
+        return $this;
+    }
 
     /**
      * Default perspective
@@ -309,6 +323,25 @@ class Perspective
     public function isExportable()
     {
         return $this->status === self::STATUS_EXPORTABLE;
+    }
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="per_date_export", type="datetime", nullable=true)
+     */
+    protected $exportedAt;
+
+    public function getExportedAt()
+    {
+        return $this->exportedAt;
+    }
+
+    public function setExportedAt(\DateTime $exportedAt)
+    {
+        $this->exportedAt = $exportedAt;
+
+        return $this;
     }
 
     /**
