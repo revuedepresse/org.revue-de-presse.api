@@ -1,6 +1,6 @@
 <?php
 
-namespace WeavingTheWeb\Bundle\DashboardBundle\Export;
+namespace WeavingTheWeb\Bundle\DashboardBundle\ImportExport\Export;
 
 use WeavingTheWeb\Bundle\DashboardBundle\Entity\Perspective,
     WeavingTheWeb\Bundle\DashboardBundle\Exception\QueryExecutionErrorException;
@@ -33,7 +33,8 @@ class PerspectiveExporter extends AbstractExporter
             if ($perspective->isExportable()) {
                 $destinationPath = $this->destinationDirectory . '/' . $perspective->getUuid() . '.json';
                 if (file_exists($destinationPath)) {
-                    throw new \Exception(sprintf('A perspective has already been exported to "%s"', $destinationPath));
+                    $this->logger->info(sprintf('A perspective has already been exported to "%s"', $destinationPath));
+                    return;
                 }
 
                 try {

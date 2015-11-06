@@ -12,6 +12,8 @@ use WeavingTheWeb\Bundle\DashboardBundle\Entity\Perspective;
  */
 class PerspectiveRepository extends EntityRepository
 {
+    public $sourceDirectory;
+
     /**
      * @param $sql
      * @param \ArrayAccess $setters
@@ -108,5 +110,36 @@ class PerspectiveRepository extends EntityRepository
         return $this->findBy([
             'status' => Perspective::STATUS_EXPORTABLE,
         ]);
+    }
+
+    public function makeImportableJsonPerspective()
+    {
+        $perspective = new Perspective();
+        $perspective->setType(Perspective::TYPE_JSON);
+        $perspective->setStatus(Perspective::STATUS_IMPORTABLE);
+        $perspective->setCreationDate(new \DateTime());
+
+        return $perspective;
+    }
+
+    /**
+     * @return Perspective
+     * @throws \Exception
+     */
+    public function findImportableJsonPerspectives()
+    {
+        $jsonPerspectives = [];
+
+        /**
+         * @var \WeavingTheWeb\Bundle\DashboardBundle\Repository\PerspectiveRepository $perspectiveRepository
+         */
+
+        foreach (glob($this->sourceDirectory . '/[!_]*.json') as $file) {
+            $jsonPerspective = $this->makeImportableJsonPerspective();
+            $jsonPerspective->setValue($file);
+            $jsonPerspectives[] = $jsonPerspective;
+        }
+
+        return $jsonPerspectives;
     }
 }

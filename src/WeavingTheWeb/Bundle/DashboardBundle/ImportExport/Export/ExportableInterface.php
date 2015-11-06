@@ -1,6 +1,6 @@
 <?php
 
-namespace WeavingTheWeb\Bundle\DashboardBundle\Export;
+namespace WeavingTheWeb\Bundle\DashboardBundle\ImportExport\Export;
 
 interface ExportableInterface
 {

@@ -12,4 +12,10 @@ interface CryptoInterface
      * @return mixed
      */
     public function encrypt($message);
+
+    /**
+     * @param $encryptedMessage
+     * @return mixed
+     */
+    public function decrypt($encryptedMessage);
 }
