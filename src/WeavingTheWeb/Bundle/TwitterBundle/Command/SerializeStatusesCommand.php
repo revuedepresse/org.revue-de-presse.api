@@ -21,7 +21,7 @@ class SerializeStatusesCommand extends ContainerAwareCommand
     {
         parent::configure();
 
-        $this->setName('weaving_the_web:twitter:statuses:serialize')
+        $this->setName('weaving-the-web:twitter:statuses:serialize')
             ->addOption(
                 'oauth_token',
                 null,

@@ -18,7 +18,7 @@ class ProduceUserFriendListCommand extends AccessorAwareCommand
 {
     public function configure()
     {
-        $this->setName('weaving_the_web:amqp:produce:user_timeline')
+        $this->setName('weaving-the-web:amqp:produce:user-timeline')
             ->setDescription('Produce a message to get a user timeline')
             ->addOption(
             'oauth_token',
