@@ -3,8 +3,10 @@
 namespace WeavingTheWeb\Bundle\MappingBundle\Configurator;
 
 use WeavingTheWeb\Bundle\DashboardBundle\Entity\Perspective,
-    WeavingTheWeb\Bundle\DashboardBundle\Export\ExporterInterface,
-    WeavingTheWeb\Bundle\MappingBundle\Factory\MapperAwareInterface;
+    WeavingTheWeb\Bundle\DashboardBundle\ImportExport\Export\ExporterInterface,
+    WeavingTheWeb\Bundle\DashboardBundle\ImportExport\Import\ImporterInterface;
+
+use WeavingTheWeb\Bundle\MappingBundle\Factory\MapperAwareInterface;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
@@ -38,10 +40,7 @@ class MappingConfigurator
     public function configure(MapperAwareInterface $mappingFactory)
     {
         if (empty($this->mappersSettings)) {
-            $this->mappersSettings = [
-                [ 'name' => 'update_perspective_uuid', 'loader' => 'closure' ],
-                [ 'name' => 'update_perspective_hash', 'loader' => 'closure' ],
-            ];
+            $this->configureDefaultMappers();
         }
 
         $mappers = [];
@@ -84,7 +83,7 @@ class MappingConfigurator
      */
     public function configurePerspectiveExporter(ExporterInterface $exporter)
     {
-        $mapperName = 'export_perspective_as_json';
+        $mapperName = 'export_perspective_to_json';
         $this->mappersSettings[] = [
             'name' => $mapperName,
             'loader' => 'closure',
@@ -97,5 +96,40 @@ class MappingConfigurator
         ];
 
         return $mapperName;
+    }
+
+    /**
+     * @param ImporterInterface $importer
+     * @return string
+     */
+    public function configurePerspectiveImporter(ImporterInterface $importer)
+    {
+        $this->configureDefaultMappers();
+
+        $mapperName = 'import_perspective_from_json';
+        $this->mappersSettings[] = [
+            'name' => $mapperName,
+            'loader' => 'closure',
+            'callback' => function (Perspective $perspective) use ($importer) {
+                $importer->addImportable($perspective);
+                $importer->import();
+
+                return $perspective;
+            }
+        ];
+
+        return $mapperName;
+    }
+
+    public function configureDefaultMappers()
+    {
+        $defaultMappers = [
+            ['name' => 'update_perspective_uuid', 'loader' => 'closure'],
+            ['name' => 'update_perspective_hash', 'loader' => 'closure'],
+        ];
+
+        foreach ($defaultMappers as $mapper) {
+            $this->mappersSettings[] = $mapper;
+        }
     }
 }

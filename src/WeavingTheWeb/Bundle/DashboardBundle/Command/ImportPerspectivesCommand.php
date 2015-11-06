@@ -10,32 +10,32 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
-class ExportPerspectivesCommand extends AbstractImportExportCommand
+class ImportPerspectivesCommand extends AbstractImportExportCommand
 {
     public function configure()
     {
-        $this->setName('weaving-the-web:perspective:export')
-            ->setDescription('Iterates over perspectives to export those which can be')
+        $this->setName('weaving-the-web:perspective:import')
+            ->setDescription('Iterates over perspectives to import those available')
             ->addOption('all', null, InputOption::VALUE_NONE,
-                'Run command for all exportable perspectives by default.')
-            ->setAliases(['wtw:das:per:exp']);
+                'Run command for all available perspectives by default.')
+            ->setAliases(['wtw:das:per:imp']);
     }
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $perspectiveExporter = $this->getContainer()
-            ->get('weaving_the_web_dashboard.import_export.perspective_exporter');
-        $this->mappingConfigurator->configurePerspectiveExporter($perspectiveExporter);
-        $perspectives = $this->perspectiveRepository->findExportablePerspectives();
+        $perspectiveImporter = $this->getContainer()
+            ->get('weaving_the_web_dashboard.import_export.perspective_importer');
+        $this->mappingConfigurator->configurePerspectiveImporter($perspectiveImporter);
+        $perspectives = $this->perspectiveRepository->findImportableJsonPerspectives();
         $mapping = $this->getContainer()->get('weaving_the_web_mapping.mapping');
 
         try {
             $mapping->walk($perspectives);
-            $message = $this->translator->trans('perspective.export.success', [], 'perspective');
+            $message = $this->translator->trans('perspective.import.success', [], 'perspective');
             $returnCode = 0;
         } catch (\Exception $exception) {
             $this->logger->error($exception->getMessage());
-            $message = $this->translator->trans('perspective.export.error', [], 'perspective');
+            $message = $this->translator->trans('perspective.import.error', [], 'perspective');
             $returnCode = $exception->getCode();
         }
 

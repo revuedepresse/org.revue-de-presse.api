@@ -1,31 +1,18 @@
 <?php
 
-namespace WeavingTheWeb\Bundle\DashboardBundle\Export;
+namespace WeavingTheWeb\Bundle\DashboardBundle\ImportExport\Export;
+
+use WeavingTheWeb\Bundle\DashboardBundle\ImportExport\AbstractImportExport;
 
 /**
  * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
-abstract class AbstractExporter implements ExporterInterface
+abstract class AbstractExporter extends AbstractImportExport implements ExporterInterface
 {
     /**
      * @var array
      */
     protected $exportableCollection = [];
-
-    /**
-     * @var \Doctrine\ORM\EntityManagerInterface
-     */
-    public $entityManager;
-
-    /**
-     * @var \WeavingTheWeb\Bundle\DashboardBundle\Security\CryptoInterface
-     */
-    public $crypto;
-
-    /**
-     * @var \Psr\Log\LoggerInterface
-     */
-    public $logger;
 
     public $destinationDirectory;
 

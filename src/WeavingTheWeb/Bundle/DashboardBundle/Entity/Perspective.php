@@ -2,7 +2,8 @@
 
 namespace WeavingTheWeb\Bundle\DashboardBundle\Entity;
 
-use WeavingTheWeb\Bundle\DashboardBundle\Export\ExportableInterface,
+use WeavingTheWeb\Bundle\DashboardBundle\ImportExport\Export\ExportableInterface,
+    WeavingTheWeb\Bundle\DashboardBundle\ImportExport\Import\ImportableInterface,
     WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints as WeavingTheWebAssert;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -12,7 +13,7 @@ use Doctrine\ORM\Mapping as ORM;
  * @ORM\Entity(repositoryClass="WeavingTheWeb\Bundle\DashboardBundle\Repository\PerspectiveRepository")
  * @WeavingTheWebAssert\Perspective(groups="public_perspectives")
  */
-class Perspective implements ExportableInterface
+class Perspective implements ExportableInterface, ImportableInterface
 {
     const STATUS_DISABLED           = 0;
 
@@ -24,15 +25,7 @@ class Perspective implements ExportableInterface
 
     const STATUS_HAS_INVALID_VALUE  = 4;
 
-    /**
-     * @return $this
-     */
-    public function markAsHavingInvalidValue()
-    {
-        $this->status = self::STATUS_HAS_INVALID_VALUE;
-
-        return $this;
-    }
+    const STATUS_IMPORTABLE         = 5;
 
     /**
      * Default perspective
@@ -343,6 +336,33 @@ class Perspective implements ExportableInterface
 
         return $this;
     }
+    
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="per_date_import", type="datetime", nullable=true)
+     */
+    protected $importedAt;
+
+    public function getImportedAt()
+    {
+        return $this->importedAt;
+    }
+
+    public function setImportedAt(\DateTime $importedAt)
+    {
+        $this->importedAt = $importedAt;
+
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isImportable()
+    {
+        return $this->status === self::STATUS_IMPORTABLE;
+    }
 
     /**
      * @return int
@@ -374,5 +394,41 @@ class Perspective implements ExportableInterface
     public function isJsonPerspective()
     {
         return $this->type = self::TYPE_JSON;
+    }
+
+    /**
+     * @return $this
+     */
+    public function markAsHavingInvalidValue()
+    {
+        $this->status = self::STATUS_HAS_INVALID_VALUE;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     * @throws \Exception
+     */
+    public function getJsonFilename()
+    {
+        if ($this->type === self::TYPE_JSON && $this->status === self::STATUS_IMPORTABLE) {
+            $fileObject = new \SplFileObject($this->getValue());
+
+            return $fileObject->getFilename();
+        } else {
+            throw new \Exception('No JSON filename available for this perspective');
+        }
+    }
+
+    /**
+     * @param $sourceDirectory
+     * @return string
+     */
+    public function getNewFilename($sourceDirectory)
+    {
+        $filename = $this->getJsonFilename();
+
+        return realpath($sourceDirectory) . '/_' . $filename;
     }
 }

@@ -5,3 +5,6 @@ perspective:
     export:
         success:        'All perspectives have been exported successfully.'
         error:          'Some perspectives could not have been exported.'
+    import:
+        success:        'All available perspectives have been imported successfully.'
+        error:          'Some perspectives could not have been imported.'

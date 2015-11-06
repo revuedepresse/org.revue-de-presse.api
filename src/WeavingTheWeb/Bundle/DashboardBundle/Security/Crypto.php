@@ -12,25 +12,16 @@ class Crypto implements CryptoInterface
      */
     public $cipher;
 
-    private $key;
-
-    private $iv;
-
     public function __construct($aes, $key, $iv)
     {
         $this->cipher = new $aes();
-        $this->key = $key;
-        $this->iv = $iv;
+
+        $this->cipher->setKey(hex2bin($key));
+        $this->cipher->setIV(hex2bin($iv));
     }
 
     public function encrypt($message)
     {
-        $key = $this->key;
-        $iv = $this->iv;
-
-        $this->cipher->setKey(hex2bin($key));
-        $this->cipher->setIV(hex2bin($iv));
-
         if (isset($manualPadding)) {
             $this->cipher->disablePadding();
 
@@ -58,5 +49,10 @@ class Crypto implements CryptoInterface
             'padding_length' => $paddingLength,
             'encrypted_message' => base64_encode($encryptedRecords)
         ];
+    }
+
+    public function decrypt($encryptedMessage)
+    {
+        return $this->cipher->decrypt(base64_decode($encryptedMessage));
     }
 }
