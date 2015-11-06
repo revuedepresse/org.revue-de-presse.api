@@ -1,19 +1,39 @@
 parameters:
+    phpseclib.aes.class:                                          phpseclib\Crypt\AES
+    weaving_the_web_dashboard.command.export_perspectives.class:  WeavingTheWeb\Bundle\DashboardBundle\Command\ExportPerspectivesCommand
     weaving_the_web_dashboard.controller.class:                   WeavingTheWeb\Bundle\DashboardBundle\Controller\SearchController
     weaving_the_web_dashboard.dbal_connection.class:              WeavingTheWeb\Bundle\DashboardBundle\DBAL\Connection
     weaving_the_web_dashboard.entity.perspective:                 WeavingTheWebDashboardBundle:Perspective
+    weaving_the_web_dashboard.error_handler.upload_file.class:    WeavingTheWeb\Bundle\DashboardBundle\ErrorHandler\UploadFile
+    weaving_the_web_dashboard.export.perspective_exporter.class:  WeavingTheWeb\Bundle\DashboardBundle\Export\PerspectiveExporter
     weaving_the_web_dashboard.form_type.search.class:             WeavingTheWeb\Bundle\DashboardBundle\Form\Type\SearchType
     weaving_the_web_dashboard.map_perspective_command.class:      WeavingTheWeb\Bundle\DashboardBundle\Command\MapPerspectiveCommand
     weaving_the_web_dashboard.perspective_validator.class:        WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints\PerspectiveValidator
     weaving_the_web_dashboard.repository.perspective.class:       WeavingTheWeb\Bundle\DashboardBundle\Repository\PerspectiveRepository
     weaving_the_web_dashboard.query_validator.class:              WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints\QueryValidator
     weaving_the_web_dashboard.router.class:                       WeavingTheWeb\Bundle\DashboardBundle\Routing\Router
+    weaving_the_web_dashboard.security.crypto.class:              WeavingTheWeb\Bundle\DashboardBundle\Security\Crypto
     weaving_the_web_dashboard.twig.email.class:                   WeavingTheWeb\Bundle\DashboardBundle\Twig\EmailExtension
     weaving_the_web_dashboard.twig.perspective.class:             WeavingTheWeb\Bundle\DashboardBundle\Twig\PerspectiveExtension
     weaving_the_web_dashboard.upload_listener.class:              WeavingTheWeb\Bundle\DashboardBundle\EventListener\UploadListener
-    weaving_the_web_dashboard.error_handler.upload_file.class:    WeavingTheWeb\Bundle\DashboardBundle\ErrorHandler\UploadFile
+    weaving_the_web_dashboard.resources.perspectives:             %kernel.root_dir%/../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/perspectives
 
 services:
+
+    twig.extension.text:
+        class: Twig_Extensions_Extension_Text
+        tags:
+            - { name: twig.extension }
+
+    weaving_the_web_dashboard.command.export_perspectives:
+        class: %weaving_the_web_dashboard.command.export_perspectives.class%
+        properties:
+            mappingConfigurator:    @weaving_the_web_mapping.mapping_configurator
+            perspectiveRepository:  @weaving_the_web_dashboard.repository.perspective
+            translator:             @translator
+        tags:
+            - { name: console.command }
+
     weaving_the_web_dashboard.dbal_connection:
         class:  %weaving_the_web_dashboard.dbal_connection.class%
         arguments:
@@ -28,20 +48,42 @@ services:
             - [ setDatabase, [ %database_name% ] ]
             - [ setEntityManager, [ @doctrine.orm.entity_manager ] ]
             - [ setTranslator, [ @translator ] ]
+
+    weaving_the_web_dashboard.error_handler.upload_file:
+        class: %weaving_the_web_dashboard.error_handler.upload_file.class%
+
+    weaving_the_web_dashboard.export.exporter:
+        abstract:           true
+        properties:
+            crypto:         @weaving_the_web_dashboard.security.crypto
+            entityManager:  @doctrine.orm.entity_manager
+            logger:         @logger
+
+    weaving_the_web_dashboard.export.perspective_exporter:
+        class:                      %weaving_the_web_dashboard.export.perspective_exporter.class%
+        parent:                     weaving_the_web_dashboard.export.exporter
+        properties:
+            connection:             @weaving_the_web_dashboard.dbal_connection
+            repository:             @weaving_the_web_dashboard.repository.perspective
+            destinationDirectory:   %weaving_the_web_dashboard.resources.perspectives%
+
     weaving_the_web_dashboard.search_controller:
         class: %weaving_the_web_dashboard.controller.class%
         calls:
             - [ setContainer, [ @service_container ] ]
+
     weaving_the_web_dashboard.form_type.search:
         class: %weaving_the_web_dashboard.form_type.search.class%
         tags:
             - { name: form.type, alias: elasticsearch }
+
     weaving_the_web_dashboard.query_validator:
         class: %weaving_the_web_dashboard.query_validator.class%
         calls:
             - [ setTranslator, [ @translator ] ]
         tags:
             - { name: validator.constraint_validator, alias: weaving_the_web.validator.query }
+
     weaving_the_web_dashboard.perspective_validator:
         class: %weaving_the_web_dashboard.perspective_validator.class%
         calls:
@@ -49,22 +91,25 @@ services:
             - [ setValidator, [ @validator ] ]
         tags:
             - { name: validator.constraint_validator, alias: weaving_the_web.validator.perspective }
+
     weaving_the_web_dashboard.router:
         class: %weaving_the_web_dashboard.router.class%
         calls:
             - [ setRouter, [ @router ] ]
             - [ setEntityManager, [ @doctrine.orm.entity_manager ] ]
 
-    twig.extension.text:
-        class: Twig_Extensions_Extension_Text
-        tags:
-            - { name: twig.extension }
-
     weaving_the_web_dashboard.repository.perspective:
         class: %weaving_the_web_dashboard.repository.perspective.class%
         factory_service: doctrine.orm.entity_manager
         factory_method: getRepository
         arguments: [%weaving_the_web_dashboard.entity.perspective%]
+
+    weaving_the_web_dashboard.security.crypto:
+        class: %weaving_the_web_dashboard.security.crypto.class%
+        arguments:
+            - %phpseclib.aes.class%
+            - %aes_key%
+            - %aes_iv%
 
     weaving_the_web_dashboard.twig.email:
         class: %weaving_the_web_dashboard.twig.email.class%
@@ -77,9 +122,6 @@ services:
             container:  @service_container
         tags:
             - { name: twig.extension }
-
-    weaving_the_web_dashboard.error_handler.upload_file:
-        class: %weaving_the_web_dashboard.error_handler.upload_file.class%
 
     weaving_the_web_dashboard.upload_listener:
         class: %weaving_the_web_dashboard.upload_listener.class%

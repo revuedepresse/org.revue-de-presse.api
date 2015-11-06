@@ -39,20 +39,24 @@ ORDER BY per_id DESC";
                     'status:' . Perspective::STATUS_DEFAULT . ':' .
                     self::DEFAULT_QUERY
                 )
-            ], [
+            ],
+            [
                 'value' => self::DEFAULT_QUERY,
                 'status' => Perspective::STATUS_PUBLIC,
                 'type' => $perspectiveDefaultType,
                 'hash' => sha1(self::DEFAULT_QUERY),
-            ], [
+            ],
+            [
                 'name' => 'valid_data_updating_perspective',
                 'value' => $updateTemporaryDataQueries['valid_data_updating_perspective'],
                 'type' => $perspectiveDefaultType,
                 'hash' => sha1($updateTemporaryDataQueries['valid_data_updating_perspective']),
-            ], [
+            ],
+            [
                 'name' => 'exportable_perspective',
                 'value' => $exportableDataQueries['exportable_perspective'],
                 'status' => Perspective::STATUS_EXPORTABLE,
+                'uuid' => '513E1A98-E71B-40A5-B639-24E8C3A4FBA2',
                 'type' => $perspectiveDefaultType,
                 'hash' => sha1(
                     'status:' . Perspective::STATUS_EXPORTABLE . ':' .

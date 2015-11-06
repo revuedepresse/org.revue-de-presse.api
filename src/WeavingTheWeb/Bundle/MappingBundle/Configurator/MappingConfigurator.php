@@ -2,11 +2,11 @@
 
 namespace WeavingTheWeb\Bundle\MappingBundle\Configurator;
 
-use WeavingTheWeb\Bundle\MappingBundle\Factory\MapperAwareInterface;
+use WeavingTheWeb\Bundle\DashboardBundle\Entity\Perspective,
+    WeavingTheWeb\Bundle\DashboardBundle\Export\ExporterInterface,
+    WeavingTheWeb\Bundle\MappingBundle\Factory\MapperAwareInterface;
 
 /**
- * Class MappingConfigurator
- * @package WeavingTheWeb\Bundle\MappingBundle\Configurator
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
 class MappingConfigurator
@@ -17,9 +17,9 @@ class MappingConfigurator
     protected $loaders = [];
 
     /**
-     * @var array $mapperSettings
+     * @var array $mappersSettings
      */
-    protected $mapperSettings = [];
+    protected $mappersSettings = [];
 
     public function addLoader($name, $service)
     {
@@ -30,9 +30,9 @@ class MappingConfigurator
      * @param $settings
      * @return mixed
      */
-    public function setMapperSettings($settings)
+    public function setMappersSettings($settings)
     {
-        return $this->mapperSettings = $settings;
+        return $this->mappersSettings = $settings;
     }
 
     public function configure(MapperAwareInterface $mappingFactory)
@@ -54,11 +54,48 @@ class MappingConfigurator
             } else {
                 $mappers[] = [
                     'loader' => $this->loaders[$loader],
-                    'name' => $settings['name']
+                    'name' => $settings['name'],
+                    'callback' => $this->extractCallback($settings)
                 ];
             }
         }
 
         $mappingFactory->setMappers($mappers);
     }
-} 
+
+    /**
+     * @param $settings
+     * @return array
+     */
+    protected function extractCallback($settings)
+    {
+        if (array_key_exists('callback', $settings)) {
+            $requirements = $settings['callback'];
+        } else {
+            $requirements = [];
+        }
+
+        return $requirements;
+    }
+
+    /**
+     * @param ExporterInterface $exporter
+     * @return string
+     */
+    public function configurePerspectiveExporter(ExporterInterface $exporter)
+    {
+        $mapperName = 'export_perspective_as_json';
+        $this->mappersSettings[] = [
+            'name' => $mapperName,
+            'loader' => 'closure',
+            'callback' => function (Perspective $perspective) use ($exporter) {
+                $exporter->addExportable($perspective);
+                $exporter->export();
+
+                return $perspective;
+            }
+        ];
+
+        return $mapperName;
+    }
+}

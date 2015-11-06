@@ -2,3 +2,6 @@ perspective:
     not_found:          'Sorry, there is no such perspective.'
     button:
         export_perspective: 'Export perspective'
+    export:
+        success:        'All perspectives have been exported successfully.'
+        error:          'Some perspectives could not have been exported.'

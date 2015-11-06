@@ -163,7 +163,7 @@ class PerspectiveController extends ContainerAware
          */
         $translator = $this->container->get('translator');
 
-        if (false === $this->container->get('security.context')->isGranted('ROLE_SUPER_ADMIN')) {
+        if (false === $this->container->get('security.authorization_checker')->isGranted('ROLE_SUPER_ADMIN')) {
             throw new AccessDeniedHttpException();
         }
 
@@ -171,43 +171,15 @@ class PerspectiveController extends ContainerAware
             $query = $this->executeQuery($perspective);
 
             if (is_null($query->error)) {
-                $cipher = new AES();
-                $key = $this->container->getParameter('aes_key');
-                $iv = $this->container->getParameter('aes_iv');
-
-                $cipher->setKey(hex2bin($key));
-                $cipher->setIV(hex2bin($iv));
+                $crypto = $this->container->get('weaving_the_web_dashboard.security.crypto');
                 $jsonEncodedRecords = json_encode($query->records);
-
-                if (isset($manualPadding)) {
-                    $cipher->disablePadding();
-
-                    $blockSize = 32;
-                    $paddedSubject = $jsonEncodedRecords;
-                    $padSize = $blockSize - (strlen($paddedSubject) % $blockSize);
-                    $paddedSubject = $paddedSubject . str_repeat(chr($padSize), $padSize);
-
-                    $missingCharacters = strlen($paddedSubject) % 16;
-                    if ($missingCharacters > 0) {
-                        $padding = str_repeat('0', 16 - $missingCharacters - 1) . '-';
-                        $paddedSubject = $padding . $paddedSubject;
-                        $paddingLength = strlen($padding);
-                    } else {
-                        $paddingLength = 0;
-                    }
-                } else {
-                    $paddingLength = 0;
-                    $paddedSubject = $jsonEncodedRecords;
-                }
-
-                $encryptedRecords = $cipher->encrypt($paddedSubject);
-                $base64EncodedRecords = base64_encode($encryptedRecords);
+                $encryptionResult= $crypto->encrypt($jsonEncodedRecords);
 
                 return new JsonResponse([
-                    'result' => $base64EncodedRecords,
-                    'key' => $key,
-                    'iv' => $iv,
-                    'padding' => $paddingLength,
+                    'result' => $encryptionResult['encrypted_message'],
+                    'key' => $this->container->getParameter('aes_key'),
+                    'iv' => $this->container->getParameter('aes_iv'),
+                    'padding' => $encryptionResult['padding_length'],
                     'type' => 'success'
                 ]);
             } else {

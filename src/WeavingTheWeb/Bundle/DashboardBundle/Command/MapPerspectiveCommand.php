@@ -36,7 +36,7 @@ class MapPerspectiveCommand extends ContainerAwareCommand
         $iterableResult = $this->getIterableResult();
 
         /**
-         * @var $closure \Closure
+         * @var \Closure $closure
          */
         $closure = require($mapper);
 

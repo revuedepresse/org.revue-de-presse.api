@@ -3,6 +3,7 @@
 namespace WeavingTheWeb\Bundle\DashboardBundle\Repository;
 
 use Doctrine\ORM\EntityRepository;
+
 use WeavingTheWeb\Bundle\DashboardBundle\Entity\Perspective;
 
 /**
@@ -97,5 +98,15 @@ class PerspectiveRepository extends EntityRepository
         $query = $queryBuilder->getQuery();
 
         return $query->iterate();
+    }
+
+    /**
+     * @return array
+     */
+    public function findExportablePerspectives()
+    {
+        return $this->findBy([
+            'status' => Perspective::STATUS_EXPORTABLE,
+        ]);
     }
 }
