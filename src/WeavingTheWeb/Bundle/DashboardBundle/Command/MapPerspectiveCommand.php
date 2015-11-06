@@ -8,7 +8,6 @@ use Symfony\Component\Console\Input\InputInterface,
     Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 
 /**
- * Class MapPerspectiveCommand
  * @package WeavingTheWeb\Bundle\DashboardBundle\Command
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
