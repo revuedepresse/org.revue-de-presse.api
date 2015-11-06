@@ -21,7 +21,7 @@ class AuthenticateApplicationCommand extends ContainerAwareCommand
     {
         parent::configure();
 
-        $this->setName('weaving_the_web:twitter:authenticate')
+        $this->setName('weaving-the-web:twitter:authenticate')
             ->addOption(
                 'key',
                 null,

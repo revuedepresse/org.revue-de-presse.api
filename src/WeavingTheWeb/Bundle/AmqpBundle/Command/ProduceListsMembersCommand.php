@@ -16,7 +16,7 @@ class ProduceListsMembersCommand extends AccessorAwareCommand
 {
     public function configure()
     {
-        $this->setName('weaving_the_web:amqp:produce:lists_members')
+        $this->setName('weaving-the-web:amqp:produce:lists-members')
             ->setDescription('Produce a message to get lists members status')
             ->addOption(
             'oauth_token',
