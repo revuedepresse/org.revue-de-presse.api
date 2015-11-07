@@ -31,7 +31,12 @@ class PerspectiveExporter extends AbstractExporter
 
         array_map(function (Perspective $perspective) {
             if ($perspective->isExportable()) {
-                $destinationPath = $this->destinationDirectory . '/' . $perspective->getUuid() . '.json';
+                $destinationPath = sprintf(
+                    '%s/%s_%s.json',
+                    $this->destinationDirectory,
+                    $perspective->getUuid(),
+                    time()
+                );
                 if (file_exists($destinationPath)) {
                     $this->logger->info(sprintf('A perspective has already been exported to "%s"', $destinationPath));
                     return;
