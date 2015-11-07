@@ -4,8 +4,8 @@ namespace WeavingTheWeb\Bundle\ApiBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM,
     Doctrine\Common\Collections\ArrayCollection;
+
 use WTW\UserBundle\Entity\User;
-use WeavingTheWeb\Bundle\ApiBundle\Entity\TokenType;
 
 /**
  * @ORM\Table(name="weaving_access_token")
