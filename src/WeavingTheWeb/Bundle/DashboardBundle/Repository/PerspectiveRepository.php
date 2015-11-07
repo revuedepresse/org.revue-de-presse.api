@@ -129,11 +129,8 @@ class PerspectiveRepository extends EntityRepository
     {
         $jsonPerspectives = [];
 
-        /**
-         * @var \WeavingTheWeb\Bundle\DashboardBundle\Repository\PerspectiveRepository $perspectiveRepository
-         */
-
-        foreach (glob($this->sourceDirectory . '/[!_]*.json') as $file) {
+        /** @var \WeavingTheWeb\Bundle\DashboardBundle\Repository\PerspectiveRepository $perspectiveRepository */
+        foreach (glob($this->sourceDirectory . '/[!_]*_*.json') as $file) {
             $jsonPerspective = $this->makeImportableJsonPerspective();
             $jsonPerspective->setValue($file);
             $jsonPerspectives[] = $jsonPerspective;
