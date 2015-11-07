@@ -22,8 +22,16 @@ class PerspectiveImporter extends AbstractImporter
      * @var \WeavingTheWeb\Bundle\DashboardBundle\DBAL\Connection
      */
     public $connection;
-    
+
+    /**
+     * @var string
+     */
     public $projectRootDir;
+
+    /**
+     * @var string
+     */
+    public $uploadDir;
 
     public function addImportable(ImportableInterface $importable)
     {
@@ -123,6 +131,6 @@ class PerspectiveImporter extends AbstractImporter
      */
     protected function getPerspectiveDestinationPath(Perspective $perspective)
     {
-        return realpath($this->sourceDirectory . '/..') . '/' . substr($perspective->getJsonFilename(), 1);
+        return realpath($this->uploadDir) . '/' . substr($perspective->getJsonFilename(), 1);
     }
 }
