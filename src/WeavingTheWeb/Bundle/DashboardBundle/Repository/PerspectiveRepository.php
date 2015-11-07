@@ -123,8 +123,7 @@ class PerspectiveRepository extends EntityRepository
     }
 
     /**
-     * @return Perspective
-     * @throws \Exception
+     * @return array
      */
     public function findImportableJsonPerspectives()
     {
