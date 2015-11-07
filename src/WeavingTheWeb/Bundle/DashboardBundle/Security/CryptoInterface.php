@@ -9,9 +9,10 @@ interface CryptoInterface
 {
     /**
      * @param $message
+     * @param null $name
      * @return mixed
      */
-    public function encrypt($message);
+    public function encrypt($message, $name = null);
 
     /**
      * @param $encryptedMessage
