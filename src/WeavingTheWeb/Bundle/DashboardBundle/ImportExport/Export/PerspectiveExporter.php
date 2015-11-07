@@ -39,7 +39,7 @@ class PerspectiveExporter extends AbstractExporter
 
                 try {
                     $results = $this->connection->query($perspective->getValue())->getResults();
-                    $encryptedMessage = $this->crypto->encrypt(json_encode($results));
+                    $encryptedMessage = $this->crypto->encrypt(json_encode($results), $perspective->getName());
                     $jsonEncodedEncryptedMessage = json_encode($encryptedMessage);
                     file_put_contents($destinationPath, $jsonEncodedEncryptedMessage);
 

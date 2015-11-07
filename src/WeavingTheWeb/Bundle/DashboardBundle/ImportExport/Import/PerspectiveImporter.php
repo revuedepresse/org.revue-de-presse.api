@@ -70,42 +70,6 @@ class PerspectiveImporter extends AbstractImporter
         $this->importableCollection = [];
     }
 
-
-    /**
-     * @param Perspective $perspective
-     * @param $decodedContent
-     * @param $newFilename
-     * @throws DecryptMessageException
-     * @throws SaveContentException
-     */
-    protected function saveEncryptedMessage(Perspective $perspective, $decodedContent, $newFilename)
-    {
-        if (!array_key_exists('encrypted_message', $decodedContent)) {
-            $errorMessage = sprintf('No encrypted message available for "%s', $newFilename);
-            $this->logger->error($errorMessage);
-        } else {
-            try {
-                $message = $this->crypto->decrypt($decodedContent['encrypted_message']);
-            } catch (\Exception $exception) {
-               throw new DecryptMessageException($exception->getMessage(), $exception->getCode(), $exception);
-            }
-
-            $destinationPath = $this->getPerspectiveDestinationPath($perspective);
-            $success = file_put_contents($destinationPath, $message);
-            if (!$success) {
-                $errorMessage = sprintf('Could not save decrypted message to "%s"', $destinationPath);
-                $this->logger->error($errorMessage);
-                throw new SaveContentException($errorMessage);
-            } else {
-                $relativePath = strtr($this->getPerspectiveDestinationPath($perspective), [
-                    realpath($this->projectRootDir) . '/' => '',
-                    '_' => ''
-                ]);
-                $perspective->setValue($relativePath);
-            }
-        }
-    }
-
     /**
      * @param Perspective $perspective
      * @throws DecodeContentException
@@ -126,11 +90,61 @@ class PerspectiveImporter extends AbstractImporter
 
     /**
      * @param Perspective $perspective
+     * @param $decodedContent
+     * @param $newFilename
+     * @throws DecryptMessageException
+     * @throws SaveContentException
+     */
+    protected function saveEncryptedMessage(Perspective $perspective, $decodedContent, $newFilename)
+    {
+        if (!array_key_exists('encrypted_message', $decodedContent)) {
+            $errorMessage = sprintf('No encrypted message available for "%s', $newFilename);
+            $this->logger->error($errorMessage);
+        } else {
+            $message = $this->decryptSafely($decodedContent['encrypted_message']);
+
+            $destinationPath = $this->getPerspectiveDestinationPath($perspective);
+            $success = file_put_contents($destinationPath, $message);
+            if (!$success) {
+                $errorMessage = sprintf('Could not save decrypted message to "%s"', $destinationPath);
+                $this->logger->error($errorMessage);
+                throw new SaveContentException($errorMessage);
+            } else {
+                $relativePath = strtr($this->getPerspectiveDestinationPath($perspective), [
+                    realpath($this->projectRootDir) . '/' => '',
+                    '_' => ''
+                ]);
+                $perspective->setValue($relativePath);
+            }
+        }
+
+        if (array_key_exists('encrypted_name', $decodedContent)) {
+            $decryptedName = $this->decryptSafely($decodedContent['encrypted_name']);
+            $perspective->setName($decryptedName);
+        }
+    }
+
+    /**
+     * @param Perspective $perspective
      * @return string
      * @throws \Exception
      */
     protected function getPerspectiveDestinationPath(Perspective $perspective)
     {
         return realpath($this->uploadDir) . '/' . substr($perspective->getJsonFilename(), 1);
+    }
+
+    /**
+     * @param $encryptedMessage
+     * @return mixed
+     * @throws DecryptMessageException
+     */
+    protected function decryptSafely($encryptedMessage)
+    {
+        try {
+            return $this->crypto->decrypt($encryptedMessage);
+        } catch (\Exception $exception) {
+            throw new DecryptMessageException($exception->getMessage(), $exception->getCode(), $exception);
+        }
     }
 }
