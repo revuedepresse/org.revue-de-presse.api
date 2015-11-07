@@ -290,6 +290,7 @@ class PerspectiveController extends ContainerAware
             'WeavingTheWebDashboardBundle:Perspective:showPerspective.html.twig',
             array(
                 'active_menu_item' => 'dashboard',
+                'anonymous_visit' => false,
                 'error' => $error,
                 'display_graph' => true,
                 'enabled_search' => true,

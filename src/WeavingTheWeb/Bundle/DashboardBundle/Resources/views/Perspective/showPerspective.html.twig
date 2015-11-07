@@ -10,7 +10,7 @@
 
 {% block javascripts %}
     {{ parent() }}
-    {% if anonymous_visit %}
+    {% if anonymous_visit is defined and anonymous_visit %}
         {% javascripts
             '@WeavingTheWebDashboardBundle/Resources/public/components/jets/jets.min.js'
             '@WeavingTheWebDashboardBundle/Resources/public/js/search.js'
@@ -37,7 +37,7 @@
 
 {% block stylesheets %}
     {{ parent() }}
-    {% if not anonymous_visit %}
+    {% if anonymous_visit is defined and not anonymous_visit %}
         {% stylesheets
         '@WeavingTheWebDashboardBundle/Resources/public/components/metrics-graphics/dist/metricsgraphics.css'
         '@WeavingTheWebDashboardBundle/Resources/public/css/metrics.css'
