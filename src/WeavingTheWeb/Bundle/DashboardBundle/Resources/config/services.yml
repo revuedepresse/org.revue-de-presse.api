@@ -20,6 +20,7 @@ parameters:
     weaving_the_web_dashboard.upload_listener.class:                      WeavingTheWeb\Bundle\DashboardBundle\EventListener\UploadListener
     weaving_the_web_dashboard.resources.perspectives.export:              %kernel.root_dir%/../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/perspectives/export
     weaving_the_web_dashboard.resources.perspectives.import:              %kernel.root_dir%/../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/perspectives/import
+    weaving_the_web_dashboard.resources.perspectives.upload:              %kernel.root_dir%/../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/perspectives/upload
 
 services:
 
@@ -85,9 +86,10 @@ services:
         class:                      %weaving_the_web_dashboard.import_export.perspective_importer.class%
         parent:                     weaving_the_web_dashboard.abstract.import_export
         properties:
+            projectRootDir:         %kernel.root_dir%/..
             repository:             @weaving_the_web_dashboard.repository.perspective
             sourceDirectory:        %weaving_the_web_dashboard.resources.perspectives.import%
-            projectRootDir:         %kernel.root_dir%/..
+            uploadDir:              %weaving_the_web_dashboard.resources.perspectives.upload%
 
     weaving_the_web_dashboard.search_controller:
         class: %weaving_the_web_dashboard.controller.class%
@@ -151,6 +153,7 @@ services:
         class: %weaving_the_web_dashboard.upload_listener.class%
         properties:
             projectRootDir:         %kernel.root_dir%/..
+            uploadDir:              %weaving_the_web_dashboard.resources.perspectives.upload%
             logger:                 @logger
             mapping:                @weaving_the_web_mapping.mapping
             perspectiveRepository:  @weaving_the_web_dashboard.repository.perspective

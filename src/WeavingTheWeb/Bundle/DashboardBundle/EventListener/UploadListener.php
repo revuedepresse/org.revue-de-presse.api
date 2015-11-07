@@ -37,6 +37,8 @@ class UploadListener
 
     public $projectRootDir;
 
+    public $uploadDir;
+
     public function onUpload(PostPersistEvent $event)
     {
         $errors = [];
@@ -47,7 +49,7 @@ class UploadListener
         $uploadedFile = $event->getFile();
         $fileName = $uploadedFile->getFilename();
         $filePath = realpath($uploadedFile->getPath() . '/' . $fileName);
-        $destinationDirectory = realpath(__DIR__ . '/../Resources/perspectives');
+        $destinationDirectory = realpath($this->uploadDir);
         $destinationFilePath = $destinationDirectory . '/' . $fileName;
 
         if (file_exists($filePath)) {
