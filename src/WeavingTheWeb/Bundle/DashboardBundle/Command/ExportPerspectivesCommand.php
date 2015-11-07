@@ -14,6 +14,8 @@ class ExportPerspectivesCommand extends AbstractImportExportCommand
 {
     public function configure()
     {
+        parent::configure();
+
         $this->setName('weaving-the-web:perspective:export')
             ->setDescription('Iterates over perspectives to export those which can be')
             ->addOption('all', null, InputOption::VALUE_NONE,

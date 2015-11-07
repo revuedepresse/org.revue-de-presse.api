@@ -6,8 +6,6 @@ use JMS\DiExtraBundle\Annotation as DI;
 use Doctrine\ORM\EntityRepository;
 
 /**
- * Class ResourceRepository
- *
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  * @package WeavingTheWeb\Bundle\ApiBundle\Repository
  */

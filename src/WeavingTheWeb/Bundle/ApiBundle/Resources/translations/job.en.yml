@@ -1,0 +1,5 @@
+job:
+    run:
+        success:        'All jobs ran successfully.'
+        error:          'One of the jobs could not run successfully.'
+        unauthorized:   'One of the jobs was unauthorized ("{{ command }}") to run.'

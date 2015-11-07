@@ -13,6 +13,10 @@ oauth:
     resource: WeavingTheWeb\Bundle\ApiBundle\Controller\OAuthController
     type:     annotation
 
+perspective:
+    resource: WeavingTheWeb\Bundle\ApiBundle\Controller\PerspectiveController
+    type:     annotation
+
 repository:
     resource: WeavingTheWeb\Bundle\ApiBundle\Controller\GithubController
     type:     rest
