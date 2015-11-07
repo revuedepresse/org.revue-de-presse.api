@@ -112,7 +112,6 @@ class PerspectiveImporter extends AbstractImporter
             } else {
                 $relativePath = strtr($this->getPerspectiveDestinationPath($perspective), [
                     realpath($this->projectRootDir) . '/' => '',
-                    '_' => ''
                 ]);
                 $perspective->setValue($relativePath);
             }
