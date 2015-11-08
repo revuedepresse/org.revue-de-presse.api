@@ -9,5 +9,7 @@ interface ExporterInterface
 {
     public function addExportable(ExportableInterface $exportable);
 
+    public function declareAsExported(ExportableInterface $exportable);
+
     public function export();
 }

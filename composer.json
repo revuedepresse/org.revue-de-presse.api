@@ -83,7 +83,10 @@
         "weaving-the-web/mail-bundle": "dev-master#665ae480291c651a7453c56f302605882ba4f7ac",
         "weaving-the-web/newsfeed-bundle": "dev-master#deacb68",
         "weaving-the-web/search-bundle": "dev-master#6ae925d",
-        "weaving-the-web/supervision-bundle": "dev-master#10da42a"
+        "weaving-the-web/supervision-bundle": "dev-master#10da42a",
+        "ext-openssl": "^0.0.0",
+        "ext-zip": "^1.11",
+        "ramsey/uuid": "3.0.1"
     },
     "require-dev": {
         "behat/behat": "3.0.15",

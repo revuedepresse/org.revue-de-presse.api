@@ -54,13 +54,35 @@ class Job implements JobInterface
      */
     protected $updatedAt;
 
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="job_value", type="text")
+     */
+    private $value;
 
     /**
      * @var string
      *
-     * @ORM\Column(name="jsn_value", type="text")
+     * @ORM\Column(name="job_output", type="text", nullable=true)
      */
-    private $value;
+    private $output;
+
+    /**
+     * @return string
+     */
+    public function getOutput()
+    {
+        return $this->output;
+    }
+
+    /**
+     * @param string $output
+     */
+    public function setOutput($output)
+    {
+        $this->output = $output;
+    }
 
     public function __construct($status = self::STATUS_IDLE, $type = self::TYPE_COMMAND) {
         $this->status = $status;
@@ -120,6 +142,26 @@ class Job implements JobInterface
     public function getStatus()
     {
         return $this->status;
+    }
+
+    public function isIdle()
+    {
+        return $this->status === self::STATUS_IDLE;
+    }
+
+    public function hasFailed()
+    {
+        return $this->status === self::STATUS_FAILED;
+    }
+
+    public function isStarted()
+    {
+        return $this->status === self::STATUS_STARTED;
+    }
+
+    public function hasFinished()
+    {
+        return $this->status === self::STATUS_FINISHED;
     }
 
     /**

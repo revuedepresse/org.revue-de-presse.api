@@ -101,6 +101,32 @@ class Perspective implements ExportableInterface, ImportableInterface
     protected $value;
 
     /**
+     * @var string
+     *
+     * @ORM\Column(name="per_export_destination", type="text", nullable=true)
+     */
+    protected $exportDestination;
+
+    /**
+     * @param $destination
+     * @return $this
+     */
+    public function setExportDestination($destination)
+    {
+        $this->exportDestination = $destination;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getExportDestination()
+    {
+        return $this->exportDestination;
+    }
+
+    /**
      * @var \DateTime
      *
      * @ORM\Column(name="per_date_creation", type="datetime", nullable=true)

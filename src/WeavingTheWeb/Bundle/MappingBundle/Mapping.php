@@ -40,7 +40,7 @@ class Mapping implements \ArrayAccess, \Countable, \Iterator
     }
 
     /**
-     * @param $collection
+     * @param array $collection
      */
     public function walk(array $collection)
     {

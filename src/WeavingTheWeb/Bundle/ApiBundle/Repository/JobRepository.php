@@ -3,8 +3,9 @@
 namespace WeavingTheWeb\Bundle\ApiBundle\Repository;
 
 use Doctrine\ORM\EntityRepository;
-use WeavingTheWeb\Bundle\ApiBundle\Entity\Job;
-use WeavingTheWeb\Bundle\ApiBundle\Entity\JobInterface;
+
+use WeavingTheWeb\Bundle\ApiBundle\Entity\Job,
+    WeavingTheWeb\Bundle\ApiBundle\Entity\JobInterface;
 
 /**
  * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
@@ -68,6 +69,20 @@ class JobRepository extends EntityRepository
             [
                 'type' => Job::TYPE_COMMAND,
                 'status' => Job::STATUS_FAILED
+            ]
+        );
+    }
+
+    /**
+     * @param $id
+     * @return null|Job
+     */
+    public function findStartedCommandJobById($id)
+    {
+        return $this->findOneBy(
+            [
+                'id' => $id,
+                'status' => Job::STATUS_STARTED
             ]
         );
     }

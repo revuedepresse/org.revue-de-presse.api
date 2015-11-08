@@ -6,6 +6,7 @@ parameters:
     weaving_the_web_dashboard.dbal_connection.class:                      WeavingTheWeb\Bundle\DashboardBundle\DBAL\Connection
     weaving_the_web_dashboard.entity.perspective:                         WeavingTheWebDashboardBundle:Perspective
     weaving_the_web_dashboard.error_handler.upload_file.class:            WeavingTheWeb\Bundle\DashboardBundle\ErrorHandler\UploadFile
+    weaving_the_web_dashboard.event.export_perspectives.class:            WeavingTheWeb\Bundle\DashboardBundle\ImportExport\Event\ExportPerspectivesEvent
     weaving_the_web_dashboard.import_export.perspective_exporter.class:   WeavingTheWeb\Bundle\DashboardBundle\ImportExport\Export\PerspectiveExporter
     weaving_the_web_dashboard.import_export.perspective_importer.class:   WeavingTheWeb\Bundle\DashboardBundle\ImportExport\Import\PerspectiveImporter
     weaving_the_web_dashboard.form_type.search.class:                     WeavingTheWeb\Bundle\DashboardBundle\Form\Type\SearchType
@@ -15,9 +16,11 @@ parameters:
     weaving_the_web_dashboard.query_validator.class:                      WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints\QueryValidator
     weaving_the_web_dashboard.router.class:                               WeavingTheWeb\Bundle\DashboardBundle\Routing\Router
     weaving_the_web_dashboard.security.crypto.class:                      WeavingTheWeb\Bundle\DashboardBundle\Security\Crypto
+    weaving_the_web_dashboard.subscriber.export.class:                    WeavingTheWeb\Bundle\DashboardBundle\ImportExport\Event\ExportSubscriber
     weaving_the_web_dashboard.twig.email.class:                           WeavingTheWeb\Bundle\DashboardBundle\Twig\EmailExtension
     weaving_the_web_dashboard.twig.perspective.class:                     WeavingTheWeb\Bundle\DashboardBundle\Twig\PerspectiveExtension
     weaving_the_web_dashboard.upload_listener.class:                      WeavingTheWeb\Bundle\DashboardBundle\EventListener\UploadListener
+    weaving_the_web_dashboard.resources.perspectives.archive:             %kernel.root_dir%/../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/perspectives/archive
     weaving_the_web_dashboard.resources.perspectives.export:              %kernel.root_dir%/../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/perspectives/export
     weaving_the_web_dashboard.resources.perspectives.import:              %kernel.root_dir%/../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/perspectives/import
     weaving_the_web_dashboard.resources.perspectives.upload:              %kernel.root_dir%/../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/perspectives/upload
@@ -36,6 +39,8 @@ services:
             perspectiveRepository:  @weaving_the_web_dashboard.repository.perspective
             translator:             @translator
             logger:                 @logger
+        tags:
+            - { name: weaving_the_web_api.job_aware }
 
     weaving_the_web_dashboard.command.import_perspectives:
         class:  %weaving_the_web_dashboard.command.import_perspectives.class%
@@ -46,6 +51,9 @@ services:
     weaving_the_web_dashboard.command.export_perspectives:
         class: %weaving_the_web_dashboard.command.export_perspectives.class%
         parent: weaving_the_web_dashboard.command.abstract.import_export
+        properties:
+            eventDispatcher:        @event_dispatcher
+            entityManager:          @doctrine.orm.default_entity_manager
         tags:
             - { name: console.command }
 
@@ -67,26 +75,31 @@ services:
     weaving_the_web_dashboard.error_handler.upload_file:
         class: %weaving_the_web_dashboard.error_handler.upload_file.class%
 
+    weaving_the_web_dashboard.event.export_perspectives:
+        class: %weaving_the_web_dashboard.event.export_perspectives.class%
+
     weaving_the_web_dashboard.abstract.import_export:
         abstract:           true
         properties:
             crypto:         @weaving_the_web_dashboard.security.crypto
             entityManager:  @doctrine.orm.entity_manager
             logger:         @logger
+            projectRootDir:         %kernel.root_dir%/..
 
     weaving_the_web_dashboard.import_export.perspective_exporter:
         class:                      %weaving_the_web_dashboard.import_export.perspective_exporter.class%
         parent:                     weaving_the_web_dashboard.abstract.import_export
         properties:
             connection:             @weaving_the_web_dashboard.dbal_connection
+            exportEvent:            @weaving_the_web_dashboard.event.export_perspectives
             repository:             @weaving_the_web_dashboard.repository.perspective
             destinationDirectory:   %weaving_the_web_dashboard.resources.perspectives.export%
+            eventDispatcher:        @event_dispatcher
 
     weaving_the_web_dashboard.import_export.perspective_importer:
         class:                      %weaving_the_web_dashboard.import_export.perspective_importer.class%
         parent:                     weaving_the_web_dashboard.abstract.import_export
         properties:
-            projectRootDir:         %kernel.root_dir%/..
             repository:             @weaving_the_web_dashboard.repository.perspective
             sourceDirectory:        %weaving_the_web_dashboard.resources.perspectives.import%
             uploadDir:              %weaving_the_web_dashboard.resources.perspectives.upload%
@@ -136,6 +149,15 @@ services:
             - %phpseclib.aes.class%
             - %aes_key%
             - %aes_iv%
+
+    weaving_the_web_dashboard.subscriber.export:
+        class: %weaving_the_web_dashboard.subscriber.export.class%
+        properties:
+            archiveDir:     %weaving_the_web_dashboard.resources.perspectives.archive%
+            logger:         @logger
+            projectRootDir: %kernel.root_dir%/..
+        tags:
+            - { name: kernel.event_subscriber }
 
     weaving_the_web_dashboard.twig.email:
         class: %weaving_the_web_dashboard.twig.email.class%

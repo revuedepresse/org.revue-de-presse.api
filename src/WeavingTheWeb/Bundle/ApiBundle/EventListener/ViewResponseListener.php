@@ -22,7 +22,8 @@ class ViewResponseListener extends BaseListener
      * Renders the parameters and template and initializes a new response object with the
      * rendered content.
      *
-     * @param GetResponseForControllerResultEvent $event A GetResponseForControllerResultEvent instance
+     * @param GetResponseForControllerResultEvent $event
+     * @return array|mixed
      */
     public function onKernelView(GetResponseForControllerResultEvent $event)
     {

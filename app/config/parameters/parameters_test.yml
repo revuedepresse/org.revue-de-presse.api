@@ -48,6 +48,7 @@ parameters:
         FOS\UserBundle\Model\UserInterface:                     sha512
         Symfony\Component\Security\Core\User\User:              plaintext
 
+    weaving_the_web_dashboard.resources.perspectives.archive:   %kernel.root_dir%/../src/WeavingTheWeb/Bundle/MappingBundle/Tests/Resources/perspectives/archive
     weaving_the_web_dashboard.resources.perspectives.export:    %kernel.root_dir%/../src/WeavingTheWeb/Bundle/MappingBundle/Tests/Resources/perspectives/export
     weaving_the_web_dashboard.resources.perspectives.import:    %kernel.root_dir%/../src/WeavingTheWeb/Bundle/MappingBundle/Tests/Resources/perspectives/import
     weaving_the_web_dashboard.resources.perspectives.upload:    %kernel.root_dir%/../src/WeavingTheWeb/Bundle/MappingBundle/Tests/Resources/perspectives/upload

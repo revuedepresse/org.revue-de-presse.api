@@ -18,4 +18,9 @@ abstract class AbstractImportExport
      * @var \Psr\Log\LoggerInterface
      */
     public $logger;
+
+    /**
+     * @var string
+     */
+    public $projectRootDir;
 }

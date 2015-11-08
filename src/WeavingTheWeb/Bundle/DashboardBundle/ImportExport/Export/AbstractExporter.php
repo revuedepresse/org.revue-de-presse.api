@@ -2,6 +2,7 @@
 
 namespace WeavingTheWeb\Bundle\DashboardBundle\ImportExport\Export;
 
+use WeavingTheWeb\Bundle\DashboardBundle\Event\ExportEventInterface;
 use WeavingTheWeb\Bundle\DashboardBundle\ImportExport\AbstractImportExport;
 
 /**
@@ -14,9 +15,24 @@ abstract class AbstractExporter extends AbstractImportExport implements Exporter
      */
     protected $exportableCollection = [];
 
+    /**
+     * @var array
+     */
+    protected $exportedCollection = [];
+
+    /**
+     * @var string
+     */
     public $destinationDirectory;
 
+    /**
+     * @var \Symfony\Component\EventDispatcher\EventDispatcher
+     */
+    public $eventDispatcher;
+
     abstract public function addExportable(ExportableInterface $exportable);
+
+    abstract public function declareAsExported(ExportableInterface $exportable);
 
     public function export() {
         $this->validateDestinationDirectory();

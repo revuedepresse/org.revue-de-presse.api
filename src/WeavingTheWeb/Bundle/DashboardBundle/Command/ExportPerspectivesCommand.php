@@ -7,11 +7,24 @@ use Symfony\Component\Console\Input\InputInterface,
 
 use Symfony\Component\Console\Output\OutputInterface;
 
+use WeavingTheWeb\Bundle\DashboardBundle\ImportExport\Event\ExportEvents,
+    WeavingTheWeb\Bundle\DashboardBundle\ImportExport\Event\ExportPerspectivesEvent;
+
 /**
  * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
 class ExportPerspectivesCommand extends AbstractImportExportCommand
 {
+    /**
+     * @var \Symfony\Component\EventDispatcher\EventDispatcher
+     */
+    public $eventDispatcher;
+
+    /**
+     * @var \Doctrine\ORM\EntityManager
+     */
+    public $entityManager;
+
     public function configure()
     {
         parent::configure();
@@ -33,6 +46,11 @@ class ExportPerspectivesCommand extends AbstractImportExportCommand
 
         try {
             $mapping->walk($perspectives);
+
+            if ($this->hasJobOption($input)) {
+                $this->createJobArchive($input);
+            }
+
             $message = $this->translator->trans('perspective.export.success', [], 'perspective');
             $returnCode = 0;
         } catch (\Exception $exception) {
@@ -44,5 +62,35 @@ class ExportPerspectivesCommand extends AbstractImportExportCommand
         $output->writeln($message);
 
         return $returnCode ;
+    }
+
+    /**
+     * @param InputInterface $input
+     * @return bool
+     */
+    protected function hasJobOption(InputInterface $input)
+    {
+        return $input->hasOption(self::OPTION_JOB) && is_numeric($input->getOption(self::OPTION_JOB));
+    }
+
+    /**
+     * @param InputInterface $input
+     */
+    protected function createJobArchive(InputInterface $input)
+    {
+        $jobId = $input->getOption(self::OPTION_JOB);
+        $job = $this->jobRepository->findStartedCommandJobById($jobId);
+
+        if (is_null($job)) {
+            $this->logger->info(sprintf('No job with #%d is started.', $jobId));
+        } else {
+            $exportEvent = new ExportPerspectivesEvent();
+            $exportEvent->setJob($job);
+
+            $this->eventDispatcher->dispatch(ExportEvents::CREATE_ARCHIVE, $exportEvent);
+
+            $this->entityManager->persist($job);
+            $this->entityManager->flush();
+        }
     }
 }
