@@ -4,13 +4,16 @@ namespace WeavingTheWeb\Bundle\ApiBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
 
-use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException,
+    Symfony\Component\HttpFoundation\JsonResponse,
+    Symfony\Component\HttpFoundation\BinaryFileResponse,
+    Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
 use WeavingTheWeb\Bundle\ApiBundle\Entity\JobInterface;
 
 /**
  * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
- * @Extra\Route("/job", service="weaving_the_web_api.controller.job")
+ * @Extra\Route("/api/job", service="weaving_the_web_api.controller.job")
  */
 class JobController
 {
@@ -28,6 +31,11 @@ class JobController
      * @var \Symfony\Component\Translation\Translator
      */
     public $translator;
+
+    /**
+     * @var string
+     */
+    public $archiveDir;
 
     /**
      * @Extra\Route(
@@ -85,5 +93,36 @@ class JobController
     protected function getOutputMessage(JobInterface $job, $status)
     {
         return $this->translator->trans('job.output.' . $status, ['{{ job_id }}' => $job->getId()], 'job');
+    }
+
+    /**
+     * @Extra\Route(
+     *      "/archive/{filename}",
+     *      name="weaving_the_web_api_get_archive",
+     *      requirements={"filename": "[-a-zA-Z0-9]{36,36}"},
+     *      options={"expose"= true}
+     * )
+     * @Extra\Method({"GET"})
+     *
+     * @param $filename
+     * @return BinaryFileResponse
+     */
+    public function getArchiveAction($filename)
+    {
+        $filename = $filename . '.zip';
+        $archivePath = realpath($this->archiveDir) . '/' . $filename;
+        if (!file_exists($archivePath)) {
+            throw new NotFoundHttpException();
+        }
+
+        $response = new BinaryFileResponse($archivePath, 200, [
+            'Content-Type' => 'application/zip'
+        ]);
+        $response->setContentDisposition(
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            $filename . '.zip'
+        );
+
+        return $response;
     }
 }
