@@ -5,6 +5,8 @@ namespace WeavingTheWeb\Bundle\DashboardBundle\ImportExport\Export;
 use WeavingTheWeb\Bundle\DashboardBundle\Entity\Perspective,
     WeavingTheWeb\Bundle\DashboardBundle\Exception\QueryExecutionErrorException;
 
+use WeavingTheWeb\Bundle\DashboardBundle\ImportExport\Event\ExportEvents;
+
 /**
  * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
@@ -20,9 +22,20 @@ class PerspectiveExporter extends AbstractExporter
      */
     public $connection;
 
+    /**
+     * @var \WeavingTheWeb\Bundle\DashboardBundle\ImportExport\Event\ExportEventInterface
+     */
+    public $exportEvent;
+
     public function addExportable(ExportableInterface $perspective)
     {
         $this->exportableCollection[] = $perspective;
+    }
+
+    public function declareAsExported(ExportableInterface $perspective)
+    {
+        $this->exportedCollection[] = $perspective;
+        $this->exportEvent->declareAsExported($perspective);
     }
 
     public function export()
@@ -33,7 +46,7 @@ class PerspectiveExporter extends AbstractExporter
             if ($perspective->isExportable()) {
                 $destinationPath = sprintf(
                     '%s/%s_%s.json',
-                    $this->destinationDirectory,
+                    realpath($this->destinationDirectory),
                     $perspective->getUuid(),
                     time()
                 );
@@ -48,7 +61,11 @@ class PerspectiveExporter extends AbstractExporter
                     $jsonEncodedEncryptedMessage = json_encode($encryptedMessage);
                     file_put_contents($destinationPath, $jsonEncodedEncryptedMessage);
 
+                    $relativeDestinationPath = str_replace(realpath($this->projectRootDir) . '/', '', $destinationPath);
+                    $perspective->setExportDestination($relativeDestinationPath);
                     $perspective->setExportedAt(new \DateTime());
+
+                    $this->declareAsExported($perspective);
                 } catch (QueryExecutionErrorException $exception) {
                     $perspective->markAsHavingInvalidValue();
                 }
@@ -60,5 +77,7 @@ class PerspectiveExporter extends AbstractExporter
 
         // Empty exportable collection
         $this->exportableCollection = [];
+
+        $this->eventDispatcher->dispatch(ExportEvents::POST_EXPORT_COLLECTION, $this->exportEvent);
     }
 }

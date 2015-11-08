@@ -2,6 +2,10 @@ aggregation:
     resource: WeavingTheWeb\Bundle\ApiBundle\Controller\AggregationController
     type:     annotation
 
+job:
+    resource: WeavingTheWeb\Bundle\ApiBundle\Controller\JobController
+    type:     annotation
+
 newsfeed:
     resource: WeavingTheWeb\Bundle\ApiBundle\Controller\FacebookController
     type:     rest

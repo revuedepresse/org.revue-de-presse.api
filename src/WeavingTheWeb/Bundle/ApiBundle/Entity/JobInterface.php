@@ -16,4 +16,12 @@ interface JobInterface
     const STATUS_FAILED = 40;
 
     const TYPE_COMMAND = 0;
+
+    public function isIdle();
+
+    public function hasFailed();
+
+    public function hasFinished();
+
+    public function isStarted();
 }

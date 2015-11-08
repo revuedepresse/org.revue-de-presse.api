@@ -26,11 +26,6 @@ class PerspectiveImporter extends AbstractImporter
     /**
      * @var string
      */
-    public $projectRootDir;
-
-    /**
-     * @var string
-     */
     public $uploadDir;
 
     public function addImportable(ImportableInterface $importable)

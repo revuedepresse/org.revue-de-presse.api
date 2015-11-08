@@ -8,7 +8,8 @@ use Symfony\Component\Console\Command\Command,
 
 use Symfony\Component\Console\Input\ArrayInput;
 
-use WeavingTheWeb\Bundle\ApiBundle\Entity\JobInterface;
+use WeavingTheWeb\Bundle\ApiBundle\Entity\Job,
+    WeavingTheWeb\Bundle\ApiBundle\Entity\JobInterface;
 
 use WeavingTheWeb\Bundle\ApiBundle\Exception\UnauthorizedCommandException,
     WeavingTheWeb\Bundle\ApiBundle\Exception\UnavailableCommandException;
@@ -101,7 +102,12 @@ class RunJobCommand extends Command
                 $this->updateJob($job);
 
                 $command = $this->getApplication()->get($command);
-                $success = $command->run(new ArrayInput(['command' => $command]), $this->output);
+                $success = $command->run(
+                    new ArrayInput([
+                        'command' => $command,
+                        '--job' => $job->getId()
+                    ]), $this->output
+                );
 
                 if (intval($success) === 0) {
                     $job->setStatus(JobInterface::STATUS_FINISHED);
@@ -157,8 +163,9 @@ class RunJobCommand extends Command
     /**
      * @param $job
      */
-    protected function updateJob($job)
+    protected function updateJob(Job $job)
     {
+        $job->setUpdatedAt(new \DateTime());
         $this->entityManager->persist($job);
         $this->entityManager->flush();
     }

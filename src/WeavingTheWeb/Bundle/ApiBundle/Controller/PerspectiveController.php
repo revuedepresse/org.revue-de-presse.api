@@ -39,7 +39,7 @@ class PerspectiveController
     /**
      * @Extra\Route(
      *      "/export",
-     *      name="weaving_the_web_api_perspective_export",
+     *      name="weaving_the_web_api_export_perspective",
      *      options={"expose"=true}
      * )
      * @Extra\Method({"POST"})
@@ -63,6 +63,7 @@ class PerspectiveController
 
             return new JsonResponse([
                 'result' => $message,
+                'data' => ['job_id' => $job->getId()],
                 'type' => 'success'
             ]);
         }

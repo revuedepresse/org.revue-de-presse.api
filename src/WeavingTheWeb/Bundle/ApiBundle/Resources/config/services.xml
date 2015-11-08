@@ -7,6 +7,7 @@
     <parameters>
         <parameter key="weaving_the_web_api.command.create_oauth_client.class">WeavingTheWeb\Bundle\ApiBundle\Command\CreateOAuthClientCommand</parameter>
         <parameter key="weaving_the_web_api.command.run_job.class">WeavingTheWeb\Bundle\ApiBundle\Command\RunJobCommand</parameter>
+        <parameter key="weaving_the_web_api.controller.job.class">WeavingTheWeb\Bundle\ApiBundle\Controller\JobController</parameter>
         <parameter key="weaving_the_web_api.controller.perspective.class">WeavingTheWeb\Bundle\ApiBundle\Controller\PerspectiveController</parameter>
         <parameter key="weaving_the_web.api.data_provider.class">WeavingTheWeb\Bundle\ApiBundle\DataProvider</parameter>
         <parameter key="weaving_the_web.api.endpoint.facebook.feed">%endpoint_facebook_feed%</parameter>
@@ -29,6 +30,11 @@
             <property name="entityManager" type="service" id="doctrine.orm.default_entity_manager" />
             <property name="logger" type="service" id="logger" />
             <property name="repository" type="service" id="weaving_the_web_api.repository.job" />
+            <property name="translator" type="service" id="translator" />
+        </service>
+        <service id="weaving_the_web_api.controller.job" class="%weaving_the_web_api.controller.job.class%">
+            <property name="jobRepository" type="service" id="weaving_the_web_api.repository.job" />
+            <property name="logger" type="service" id="logger" />
             <property name="translator" type="service" id="translator" />
         </service>
         <service id="weaving_the_web_api.controller.perspective" class="%weaving_the_web_api.controller.perspective.class%">
