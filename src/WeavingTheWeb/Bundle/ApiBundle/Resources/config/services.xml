@@ -36,6 +36,7 @@
             <property name="jobRepository" type="service" id="weaving_the_web_api.repository.job" />
             <property name="logger" type="service" id="logger" />
             <property name="translator" type="service" id="translator" />
+            <property name="archiveDir">%weaving_the_web_dashboard.resources.perspectives.archive%</property>
         </service>
         <service id="weaving_the_web_api.controller.perspective" class="%weaving_the_web_api.controller.perspective.class%">
             <property name="entityManager" type="service" id="doctrine.orm.default_entity_manager" />

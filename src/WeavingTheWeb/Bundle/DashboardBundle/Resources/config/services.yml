@@ -156,6 +156,7 @@ services:
             archiveDir:     %weaving_the_web_dashboard.resources.perspectives.archive%
             logger:         @logger
             projectRootDir: %kernel.root_dir%/..
+            router:         @router
         tags:
             - { name: kernel.event_subscriber }
 

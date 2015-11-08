@@ -35,6 +35,11 @@ class ExportSubscriber implements ExportEventSubscriberInterface
      */
     public $logger;
 
+    /**
+     * @var \Symfony\Component\Routing\Router
+     */
+    public $router;
+
     public static function getSubscribedEvents()
     {
         return [
@@ -91,7 +96,15 @@ class ExportSubscriber implements ExportEventSubscriberInterface
              * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Job $job
              */
             $job = $event->getJob();
-            $job->setOutput(str_replace($projectRootDir . '/', '', $archivePath));
+            $archiveFile = new \SplFileObject($archivePath);
+            $filename = str_replace('.zip', '', $archiveFile->getFilename());
+
+            $router = $this->router;
+            $getArchiveUrl = $this->router->generate(
+                'weaving_the_web_api_get_archive',
+                ['filename' => $filename], $router::ABSOLUTE_URL
+            );
+            $job->setOutput($getArchiveUrl);
         }
 
         $this->exportedCollection = [];
