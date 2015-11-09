@@ -60,7 +60,6 @@ class PerspectiveExporter extends AbstractExporter
                     $encryptedMessage = $this->crypto->encrypt(json_encode($results), $perspective->getName());
                     $jsonEncodedEncryptedMessage = json_encode($encryptedMessage);
                     file_put_contents($destinationPath, $jsonEncodedEncryptedMessage);
-
                     $relativeDestinationPath = str_replace(realpath($this->projectRootDir) . '/', '', $destinationPath);
                     $perspective->setExportDestination($relativeDestinationPath);
                     $perspective->setExportedAt(new \DateTime());

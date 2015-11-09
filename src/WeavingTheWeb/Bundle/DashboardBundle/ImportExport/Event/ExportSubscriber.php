@@ -8,6 +8,7 @@ use WeavingTheWeb\Bundle\ApiBundle\Event\JobAwareEventInterface;
 
 use WeavingTheWeb\Bundle\DashboardBundle\Exception\CloseArchiveException,
     WeavingTheWeb\Bundle\DashboardBundle\Exception\OpenArchiveException,
+    WeavingTheWeb\Bundle\DashboardBundle\Exception\UnavailableArchiveException,
     WeavingTheWeb\Bundle\DashboardBundle\ImportExport\Export\ExportableInterface;
 
 /**
@@ -72,6 +73,12 @@ class ExportSubscriber implements ExportEventSubscriberInterface
         }
     }
 
+    /**
+     * @param ExportEventInterface $event
+     * @throws CloseArchiveException
+     * @throws OpenArchiveException
+     * @throws UnavailableArchiveException
+     */
     public function onCreateArchive(ExportEventInterface $event)
     {
         $archiveName = (string)Uuid::uuid1();
@@ -84,17 +91,29 @@ class ExportSubscriber implements ExportEventSubscriberInterface
         foreach ($this->exportedCollection as $exportable) {
             if ($exportable instanceof ExportableInterface) {
                 $exportPath = $projectRootDir . '/' . $exportable->getExportDestination();
-                $exportFile = new \SplFileObject($exportPath);
-                $archive->addFile($exportPath, $exportFile->getFilename());
+
+                if (file_exists($exportPath)) {
+                    $exportFile = new \SplFileObject($exportPath);
+                    $archive->addFile($exportPath, $exportFile->getFilename());
+                } else {
+                    $this->logger->error(sprintf('Could not find export at "%s"', $exportPath));
+                    // TODO Emit ErrorEvent to be handled later on for more robustness
+
+                    continue;
+                }
             }
         }
 
         $this->closeArchive($archive, $archivePath);
 
         if ($event instanceof JobAwareEventInterface) {
-            /**
-             * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Job $job
-             */
+            if (!file_exists($archivePath)) {
+                throw new UnavailableArchiveException(
+                    sprintf('Could not find archive at "%s"', $archivePath)
+                );
+            }
+
+            /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Job $job */
             $job = $event->getJob();
             $archiveFile = new \SplFileObject($archivePath);
             $filename = str_replace('.zip', '', $archiveFile->getFilename());
