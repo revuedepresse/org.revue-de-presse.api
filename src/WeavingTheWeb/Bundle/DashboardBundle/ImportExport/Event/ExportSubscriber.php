@@ -122,7 +122,7 @@ class ExportSubscriber implements ExportEventSubscriberInterface
             $router = $this->router;
             $getArchiveUrl = $this->router->generate(
                 'weaving_the_web_api_get_archive',
-                ['filename' => $filename], $router::ABSOLUTE_URL
+                ['filename' => $filename], $router::ABSOLUTE_PATH
             );
             $job->setOutput($getArchiveUrl);
         }
