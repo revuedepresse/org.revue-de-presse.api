@@ -20,7 +20,9 @@ parameters:
 
     apc_host:                       %apc.host%
 
+    feature_toggling_email:         false
     feature_toggling_search:        false
+    feature_toggling_statuses:      false
     feature_toggling_repositories:  false
 
     locale:                         en

@@ -113,6 +113,7 @@ class MailController extends Controller
         $collapsedMailTitle = $this->get('translator')->trans('title.collapsed_mails', [], 'mail');
 
         return [
+            'active_menu_item' => 'emails',
             'emails' => $messages,
             'title' => $collapsedMailTitle
         ];

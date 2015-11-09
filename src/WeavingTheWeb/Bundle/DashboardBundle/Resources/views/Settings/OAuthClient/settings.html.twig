@@ -1,0 +1,16 @@
+{% extends '::base.html.twig' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block body %}
+
+<div class="container">
+    <div class="col-sm-12">
+        {% block create_oauth_client %}{% endblock %}
+        {% block register_oauth_client %}
+            {% embed 'WeavingTheWebDashboardBundle:Settings/OAuthClient/Register:_form.html.twig' %}{% endembed %}
+        {% endblock %}
+    </div>
+</div>
+
+{% endblock %}

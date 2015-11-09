@@ -1,6 +1,6 @@
 title.authorization:        'Client authorization'
 oauth:
-    request_authorization:  'Would you like to authorize this client to conduct actions on behalf of your Weaver account?'
+    request_authorization:  'Do you allow this client (with id "{{ client_id }}") to conduct actions on behalf of your Weaver account?'
     client:
         creation_success:   'An OAuth client has been created successfully'
         authorization_url:  'The newly created OAuth client can be authorized at "{{ authorizaton_url }}" (client id: "{{ client_id }}", client secret: "{{ client_secret }}").'

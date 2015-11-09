@@ -11,12 +11,14 @@
         <parameter key="weaving_the_web_api.controller.perspective.class">WeavingTheWeb\Bundle\ApiBundle\Controller\PerspectiveController</parameter>
         <parameter key="weaving_the_web.api.data_provider.class">WeavingTheWeb\Bundle\ApiBundle\DataProvider</parameter>
         <parameter key="weaving_the_web.api.endpoint.facebook.feed">%endpoint_facebook_feed%</parameter>
+        <parameter key="weaving_the_web_api.entity.oauth.client.class">WeavingTheWeb\Bundle\ApiBundle\Entity\OAuth\Client</parameter>
         <parameter key="weaving_the_web_api.entity.job.class">WeavingTheWeb\Bundle\ApiBundle\Entity\Job</parameter>
         <parameter key="weaving_the_web_api.entity.token.class">WeavingTheWeb\Bundle\ApiBundle\Entity\Token</parameter>
         <parameter key="weaving_the_web_api.entity.user_stream.class">WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream</parameter>
         <parameter key="weaving_the_web.api.entity.user_status.class">%weaving_the_web_api.entity.user_stream.class%</parameter>
         <parameter key="weaving_the_web.api.query_factory.class">WeavingTheWeb\Bundle\ApiBundle\ORM\QueryFactory</parameter>
         <parameter key="weaving_the_web_api.repository.job.class">WeavingTheWeb\Bundle\ApiBundle\Repository\JobRepository</parameter>
+        <parameter key="weaving_the_web_api.repository.oauth.client.class">WeavingTheWeb\Bundle\ApiBundle\Repository\OAuth\ClientRepository</parameter>
         <parameter key="weaving_the_web_api.repository.token.class">WeavingTheWeb\Bundle\ApiBundle\Repository\TokenRepository</parameter>
         <parameter key="weaving_the_web_api.repository.user_stream.class">WeavingTheWeb\Bundle\ApiBundle\Repository\UserStreamRepository</parameter>
         <parameter key="weaving_the_web.api.search_provider.user_status.class">WeavingTheWeb\Bundle\ApiBundle\Search\UserStatusProvider</parameter>
@@ -25,6 +27,12 @@
     </parameters>
 
     <services>
+        <service id="weaving_the_web_api.command.create_oauth_client" class="%weaving_the_web_api.command.create_oauth_client.class%">
+            <tag name="console.command" />
+            <property name="clientRepository" type="service" id="weaving_the_web_api.repository.oauth.client" />
+            <property name="router" type="service" id="router" />
+            <property name="translator" type="service" id="translator" />
+        </service>
         <service id="weaving_the_web_api.command.run_job" class="%weaving_the_web_api.command.run_job.class%">
             <tag name="console.command" />
             <property name="entityManager" type="service" id="doctrine.orm.default_entity_manager" />
@@ -67,12 +75,19 @@
             <tag name="kernel.event_listener" event="kernel.view" method="onKernelView" priority="-200" />
             <argument type="service" id="service_container" />
         </service>
-        <service id="weaving_the_web_api.repository.token" class="%weaving_the_web_api.repository.token.class%"
-                 factory-service="doctrine.orm.entity_manager" factory-method="getRepository">
+        <service id="weaving_the_web_api.repository.oauth.client"
+                 class="%weaving_the_web_api.repository.oauth.client.class%">
+            <factory service="doctrine.orm.entity_manager" method="getRepository"/>
+            <argument type="string">%weaving_the_web_api.entity.oauth.client.class%</argument>
+            <property name="clientManager" type="service" id="fos_oauth_server.client_manager.default" />
+            <property name="router" type="service" id="router" />
+        </service>
+        <service id="weaving_the_web_api.repository.token" class="%weaving_the_web_api.repository.token.class%">
+            <factory service="doctrine.orm.entity_manager" method="getRepository"/>
             <argument type="string">%weaving_the_web_api.entity.token.class%</argument>
         </service>
-        <service id="weaving_the_web_api.repository.job" class="%weaving_the_web_api.repository.job.class%"
-                 factory-service="doctrine.orm.entity_manager" factory-method="getRepository">
+        <service id="weaving_the_web_api.repository.job" class="%weaving_the_web_api.repository.job.class%">
+            <factory service="doctrine.orm.entity_manager" method="getRepository"/>
             <argument type="string">%weaving_the_web_api.entity.job.class%</argument>
         </service>
     </services>

@@ -4,11 +4,11 @@ namespace WeavingTheWeb\Bundle\DashboardBundle\Form\Type;
 
 use Symfony\Component\Form\AbstractType,
     Symfony\Component\Form\FormBuilderInterface;
+
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 
 /**
- * Class SearchType
- * @package WeavingTheWeb\Bundle\UserBundle\Form\Type
+ * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
 class SearchType extends AbstractType
 {

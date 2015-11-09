@@ -1,0 +1,24 @@
+<h2>{{ 'oauth.create_client.title'|trans({}, 'oauth') }}</h2>
+<div class="row-fluid">
+
+{% for flashMessage in app.session.flashbag.get('creation_info') %}
+<div class="alert alert-info">
+    {{ flashMessage|nl2br }}
+</div>
+{% endfor %}
+
+{% for flashMessage in app.session.flashbag.get('creation_link') %}
+<div contenteditable="true" class="alert alert-info">
+    {{ flashMessage|nl2br }}
+</div>
+{% endfor %}
+
+{% for flashMessage in app.session.flashbag.get('creation_error') %}
+<div class="alert alert-danger">
+    {{ flashMessage|nl2br }}
+</div>
+{% endfor %}
+
+{{ form_start(create_oauth_client_form, { attr: {novalidate: 'novalidate'}}) }}
+{{ form_row(create_oauth_client_form.redirect_uri) }}
+{{ form_end(create_oauth_client_form) }}

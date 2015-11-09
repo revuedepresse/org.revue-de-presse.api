@@ -3,12 +3,13 @@
 namespace WeavingTheWeb\Bundle\DashboardBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as Routing;
+
 use Symfony\Component\DependencyInjection\ContainerAwareInterface,
     Symfony\Component\DependencyInjection\ContainerInterface;
+
 use WeavingTheWeb\Bundle\DashboardBundle\Entity\Search;
 
 /**
- * Class SearchController
  * @package WeavingTheWeb\Bundle\DashboardBundle\Controller
  */
 class SearchController implements ContainerAwareInterface
