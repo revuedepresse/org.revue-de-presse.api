@@ -7,4 +7,5 @@ namespace WeavingTheWeb\Bundle\DashboardBundle\Exception;
  */
 class OpenArchiveException extends \Exception
 {
+    const DEFAULT_CODE = 10;
 }

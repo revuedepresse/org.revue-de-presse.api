@@ -13,6 +13,7 @@ use Psr\Log\LoggerInterface;
 
 use Symfony\Component\Translation\Translator,
     Symfony\Component\Validator\Validator\RecursiveValidator as Validator;
+use WeavingTheWeb\Bundle\DashboardBundle\Exception\QueryExecutionErrorException;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
@@ -399,7 +400,7 @@ QUERY;
     {
         if (!is_null($this->query->error)) {
             if ($this->raiseExceptionOnError) {
-                throw new QueryExecutionErrorException($this->query->error);
+                throw new QueryExecutionErrorException($this->query->error, QueryExecutionErrorException::DEFAULT_CODE);
             }
 
             $this->lastError = $this->query->error;
@@ -521,7 +522,8 @@ QUERY;
         if (count($records) === 0) {
             throw new \Exception(sprintf('There is no primary key for table "%s".', $table));
         } elseif (count($records) > 1) {
-            throw new NotImplementedException('Handling of composite primary keys is not implemented.');
+            throw new NotImplementedException('Handling of composite primary keys is not implemented.',
+                NotImplementedException::DEFAULT_CODE);
         } elseif (!array_key_exists('Column_name', $records[0])) {
             throw new \Exception(sprintf('The primary key can not be identified for table "%s"', $table));
         }
@@ -600,7 +602,8 @@ QUERY;
 
         if (!$validTable || !$validKey || !$validColumn) {
             throw new InvalidQueryParametersException(sprintf('Invalid query parameters (%s)',
-                implode(', ', $invalidQueryParameters)));
+                implode(', ', $invalidQueryParameters)),
+                InvalidQueryParametersException::DEFAULT_CODE);
         } else {
             $primaryKey = $this->getTablePrimaryKey($table);
             $query = sprintf('UPDATE %s SET %s = ? WHERE %s = ?',

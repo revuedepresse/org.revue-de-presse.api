@@ -7,4 +7,5 @@ namespace WeavingTheWeb\Bundle\DashboardBundle\Exception;
  */
 class CloseArchiveException extends \Exception
 {
+    const DEFAULT_CODE = 10;
 }

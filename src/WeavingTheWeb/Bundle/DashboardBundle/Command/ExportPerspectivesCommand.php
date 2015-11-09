@@ -61,7 +61,7 @@ class ExportPerspectivesCommand extends AbstractImportExportCommand
 
         $output->writeln($message);
 
-        return $returnCode ;
+        return $returnCode;
     }
 
     /**

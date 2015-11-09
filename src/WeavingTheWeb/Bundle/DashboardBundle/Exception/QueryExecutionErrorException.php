@@ -7,4 +7,5 @@ namespace WeavingTheWeb\Bundle\DashboardBundle\Exception;
  */
 class QueryExecutionErrorException extends \Exception
 {
+    const DEFAULT_CODE = 10;
 }
