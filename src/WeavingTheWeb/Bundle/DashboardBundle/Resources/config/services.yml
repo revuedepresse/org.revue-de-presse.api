@@ -148,7 +148,9 @@ services:
     weaving_the_web_dashboard.resolver.path:
         class: %weaving_the_web_dashboard.resolver.path.class%
         properties:
-            projectRootDir:         %kernel.root_dir%/..
+            projectRootDir: %kernel.root_dir%/..
+            logger:         @logger
+            logsDir:        %kernel.logs_dir%
 
     weaving_the_web_dashboard.security.crypto:
         class: %weaving_the_web_dashboard.security.crypto.class%
