@@ -97,7 +97,7 @@ class JobController
 
     /**
      * @Extra\Route(
-     *      "/archive/{filename}",
+     *      "/archive/{filename}.zip",
      *      name="weaving_the_web_api_get_archive",
      *      requirements={"filename": "[-a-zA-Z0-9]{36,36}"},
      *      options={"expose"= true}
