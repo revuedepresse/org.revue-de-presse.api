@@ -52,6 +52,7 @@ parameters:
     weaving_the_web_dashboard.resources.perspectives.export:    %kernel.root_dir%/../src/WeavingTheWeb/Bundle/MappingBundle/Tests/Resources/perspectives/export
     weaving_the_web_dashboard.resources.perspectives.import:    %kernel.root_dir%/../src/WeavingTheWeb/Bundle/MappingBundle/Tests/Resources/perspectives/import
     weaving_the_web_dashboard.resources.perspectives.upload:    %kernel.root_dir%/../src/WeavingTheWeb/Bundle/MappingBundle/Tests/Resources/perspectives/upload
+    weaving_the_web_dashboard.resources.fixtures:               %kernel.root_dir%/../src/WeavingTheWeb/Bundle/DashboardBundle/Tests/Resources/fixtures
 
 services:
     weaving_the_web_user.controller.twitter:

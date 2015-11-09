@@ -13,6 +13,7 @@ parameters:
     weaving_the_web_dashboard.map_perspective_command.class:              WeavingTheWeb\Bundle\DashboardBundle\Command\MapPerspectiveCommand
     weaving_the_web_dashboard.perspective_validator.class:                WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints\PerspectiveValidator
     weaving_the_web_dashboard.repository.perspective.class:               WeavingTheWeb\Bundle\DashboardBundle\Repository\PerspectiveRepository
+    weaving_the_web_dashboard.resolver.path.class:                        WeavingTheWeb\Bundle\DashboardBundle\Resolver\PathResolver
     weaving_the_web_dashboard.query_validator.class:                      WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints\QueryValidator
     weaving_the_web_dashboard.router.class:                               WeavingTheWeb\Bundle\DashboardBundle\Routing\Router
     weaving_the_web_dashboard.security.crypto.class:                      WeavingTheWeb\Bundle\DashboardBundle\Security\Crypto
@@ -84,17 +85,18 @@ services:
             crypto:         @weaving_the_web_dashboard.security.crypto
             entityManager:  @doctrine.orm.entity_manager
             logger:         @logger
-            projectRootDir:         %kernel.root_dir%/..
+            projectRootDir: %kernel.root_dir%/..
 
     weaving_the_web_dashboard.import_export.perspective_exporter:
         class:                      %weaving_the_web_dashboard.import_export.perspective_exporter.class%
         parent:                     weaving_the_web_dashboard.abstract.import_export
         properties:
             connection:             @weaving_the_web_dashboard.dbal_connection
-            exportEvent:            @weaving_the_web_dashboard.event.export_perspectives
-            repository:             @weaving_the_web_dashboard.repository.perspective
-            destinationDirectory:   %weaving_the_web_dashboard.resources.perspectives.export%
             eventDispatcher:        @event_dispatcher
+            exportEvent:            @weaving_the_web_dashboard.event.export_perspectives
+            destinationDirectory:   %weaving_the_web_dashboard.resources.perspectives.export%
+            repository:             @weaving_the_web_dashboard.repository.perspective
+            pathResolver:           @weaving_the_web_dashboard.resolver.path
 
     weaving_the_web_dashboard.import_export.perspective_importer:
         class:                      %weaving_the_web_dashboard.import_export.perspective_importer.class%
@@ -142,6 +144,11 @@ services:
         arguments: [%weaving_the_web_dashboard.entity.perspective%]
         properties:
             sourceDirectory: %weaving_the_web_dashboard.resources.perspectives.import%
+
+    weaving_the_web_dashboard.resolver.path:
+        class: %weaving_the_web_dashboard.resolver.path.class%
+        properties:
+            projectRootDir:         %kernel.root_dir%/..
 
     weaving_the_web_dashboard.security.crypto:
         class: %weaving_the_web_dashboard.security.crypto.class%
