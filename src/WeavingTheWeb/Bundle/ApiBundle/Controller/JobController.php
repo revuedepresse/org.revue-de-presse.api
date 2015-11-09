@@ -109,19 +109,21 @@ class JobController
      */
     public function getArchiveAction($filename)
     {
-        $filename = $filename . '.zip';
-        $archivePath = realpath($this->archiveDir) . '/' . $filename;
+        $filenameWithExtension = $filename . '.zip';
+        $archivePath = realpath($this->archiveDir) . '/' . $filenameWithExtension;
         if (!file_exists($archivePath)) {
             throw new NotFoundHttpException();
         }
 
         $response = new BinaryFileResponse($archivePath, 200, [
-            'Content-Type' => 'application/zip'
+            'Content-Type' => 'application/zip, application/octet-stream'
         ]);
+
         $response->setContentDisposition(
             ResponseHeaderBag::DISPOSITION_ATTACHMENT,
-            $filename . '.zip'
+            $filenameWithExtension
         );
+        $response->headers->set('Content-Length', filesize($archivePath));
 
         return $response;
     }
