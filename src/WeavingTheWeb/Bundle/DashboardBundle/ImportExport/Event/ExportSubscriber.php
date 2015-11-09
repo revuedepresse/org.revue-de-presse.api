@@ -109,7 +109,8 @@ class ExportSubscriber implements ExportEventSubscriberInterface
         if ($event instanceof JobAwareEventInterface) {
             if (!file_exists($archivePath)) {
                 throw new UnavailableArchiveException(
-                    sprintf('Could not find archive at "%s"', $archivePath)
+                    sprintf('Could not find archive at "%s"', $archivePath),
+                    UnavailableArchiveException::DEFAULT_CODE
                 );
             }
 
@@ -141,7 +142,7 @@ class ExportSubscriber implements ExportEventSubscriberInterface
         if ($success !== true) {
             $errorMessage = sprintf('Could not open a new archive "%s" (error #%d)', $archivePath, $success);
             $this->logger->error($errorMessage);
-            throw new OpenArchiveException($errorMessage);
+            throw new OpenArchiveException($errorMessage, OpenArchiveException::DEFAULT_CODE);
         }
 
         return $archive;
@@ -158,7 +159,7 @@ class ExportSubscriber implements ExportEventSubscriberInterface
         if ($success !== true) {
             $errorMessage = sprintf('Could not close the archive "%s".', $archivePath);
             $this->logger->error($errorMessage);
-            throw new CloseArchiveException($errorMessage);
+            throw new CloseArchiveException($errorMessage, CloseArchiveException::DEFAULT_CODE);
         }
     }
 }

@@ -77,7 +77,7 @@ class PerspectiveImporter extends AbstractImporter
         if ($lastJsonError !== JSON_ERROR_NONE) {
             $errorMessage = sprintf('Could not json encoded file "%s', $perspective->getValue());
             $this->logger->error($errorMessage);
-            throw new DecodeContentException($errorMessage);
+            throw new DecodeContentException($errorMessage, DecodeContentException::DEFAULT_CODE);
         } else {
             $this->saveEncryptedMessage($perspective, $decodedContent, $perspective->getValue());
         }
@@ -103,7 +103,7 @@ class PerspectiveImporter extends AbstractImporter
             if (!$success) {
                 $errorMessage = sprintf('Could not save decrypted message to "%s"', $destinationPath);
                 $this->logger->error($errorMessage);
-                throw new SaveContentException($errorMessage);
+                throw new SaveContentException($errorMessage, SaveContentException::DEFAULT_CODE);
             } else {
                 $relativePath = strtr($this->getPerspectiveDestinationPath($perspective), [
                     realpath($this->projectRootDir) . '/' => '',
@@ -138,7 +138,11 @@ class PerspectiveImporter extends AbstractImporter
         try {
             return $this->crypto->decrypt($encryptedMessage);
         } catch (\Exception $exception) {
-            throw new DecryptMessageException($exception->getMessage(), $exception->getCode(), $exception);
+            throw new DecryptMessageException(
+                $exception->getMessage(),
+                DecryptMessageException::DEFAULT_CODE,
+                $exception
+            );
         }
     }
 }

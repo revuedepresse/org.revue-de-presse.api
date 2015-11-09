@@ -7,4 +7,5 @@ namespace WeavingTheWeb\Bundle\DashboardBundle\Exception;
  */
 class InvalidQueryParametersException extends \Exception
 {
+    const DEFAULT_CODE = 10;
 }
