@@ -1,0 +1,7 @@
+{% extends 'WeavingTheWebDashboardBundle:Settings/OAuthClient:settings.html.twig' %}
+
+{% block title %}{{ 'oauth.settings.title'|trans({}, 'oauth') }}{% endblock %}
+
+{% block create_oauth_client %}
+    {% embed 'WeavingTheWebDashboardBundle:Settings/OAuthClient/Create:_form.html.twig' %}{% endembed %}
+{% endblock %}

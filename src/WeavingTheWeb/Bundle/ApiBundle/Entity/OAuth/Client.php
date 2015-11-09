@@ -9,7 +9,7 @@ use FOS\OAuthServerBundle\Entity\Client as BaseClient;
 /**
  * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
  *
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="WeavingTheWeb\Bundle\ApiBundle\Repository\OAuth\ClientRepository")
  * @ORM\Table(name="oauth_client")
  */
 class Client extends BaseClient
@@ -21,9 +21,25 @@ class Client extends BaseClient
      */
     protected $id;
 
-    public function __construct()
+    public $authorizationUrl;
+
+    /**
+     * @param $authorizationUrl
+     * @return $this
+     */
+    public function setAuthorizationUrl($authorizationUrl)
     {
-        parent::__construct();
+        $this->authorizationUrl = $authorizationUrl;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getAuthorizationUrl()
+    {
+        return $this->authorizationUrl;
     }
 
     public function __toString()

@@ -21,8 +21,8 @@
                 <argument type="service" id="service_container" />
             </call>
         </service>
-        <service id="wtw_user.repository.user" class="%wtw_user.repository.user.class%"
-                 factory-service="doctrine.orm.entity_manager" factory-method="getRepository">
+        <service id="wtw_user.repository.user" class="%wtw_user.repository.user.class%">
+            <factory service="doctrine.orm.entity_manager" method="getRepository"/>
             <argument type="string">%wtw_user.entity.user.class%</argument>
         </service>
     </services>

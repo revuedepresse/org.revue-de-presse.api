@@ -25,8 +25,8 @@
             </call>
             <configurator service="weaving_the_web_mapping.mapping_configurator" method="configure" />
         </service>
-        <service id="weaving_the_web_mapping.mapping" class="%weaving_the_web_mapping.mapping.class%"
-            factory-service="weaving_the_web_mapping.mapping_factory" factory-method="get">
+        <service id="weaving_the_web_mapping.mapping" class="%weaving_the_web_mapping.mapping.class%">
+            <factory service="weaving_the_web_mapping.mapping_factory" method="get"/>
         </service>
     </services>
 </container>

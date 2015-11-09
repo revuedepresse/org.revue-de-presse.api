@@ -81,6 +81,10 @@ class RegistrationController extends BaseController
         );
     }
 
+    /**
+     * @param Request $request
+     * @return array
+     */
     protected function getLoginFormParameters(Request $request)
     {
         /** @var $session \Symfony\Component\HttpFoundation\Session\Session */

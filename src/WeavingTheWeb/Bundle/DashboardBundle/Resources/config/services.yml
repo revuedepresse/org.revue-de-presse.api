@@ -1,30 +1,36 @@
 parameters:
-    phpseclib.aes.class:                                                  phpseclib\Crypt\AES
-    weaving_the_web_dashboard.command.export_perspectives.class:          WeavingTheWeb\Bundle\DashboardBundle\Command\ExportPerspectivesCommand
-    weaving_the_web_dashboard.command.import_perspectives.class:          WeavingTheWeb\Bundle\DashboardBundle\Command\ImportPerspectivesCommand
-    weaving_the_web_dashboard.controller.class:                           WeavingTheWeb\Bundle\DashboardBundle\Controller\SearchController
-    weaving_the_web_dashboard.dbal_connection.class:                      WeavingTheWeb\Bundle\DashboardBundle\DBAL\Connection
-    weaving_the_web_dashboard.entity.perspective:                         WeavingTheWebDashboardBundle:Perspective
-    weaving_the_web_dashboard.error_handler.upload_file.class:            WeavingTheWeb\Bundle\DashboardBundle\ErrorHandler\UploadFile
-    weaving_the_web_dashboard.event.export_perspectives.class:            WeavingTheWeb\Bundle\DashboardBundle\ImportExport\Event\ExportPerspectivesEvent
-    weaving_the_web_dashboard.import_export.perspective_exporter.class:   WeavingTheWeb\Bundle\DashboardBundle\ImportExport\Export\PerspectiveExporter
-    weaving_the_web_dashboard.import_export.perspective_importer.class:   WeavingTheWeb\Bundle\DashboardBundle\ImportExport\Import\PerspectiveImporter
-    weaving_the_web_dashboard.form_type.search.class:                     WeavingTheWeb\Bundle\DashboardBundle\Form\Type\SearchType
-    weaving_the_web_dashboard.map_perspective_command.class:              WeavingTheWeb\Bundle\DashboardBundle\Command\MapPerspectiveCommand
-    weaving_the_web_dashboard.perspective_validator.class:                WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints\PerspectiveValidator
-    weaving_the_web_dashboard.repository.perspective.class:               WeavingTheWeb\Bundle\DashboardBundle\Repository\PerspectiveRepository
-    weaving_the_web_dashboard.resolver.path.class:                        WeavingTheWeb\Bundle\DashboardBundle\Resolver\PathResolver
-    weaving_the_web_dashboard.query_validator.class:                      WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints\QueryValidator
-    weaving_the_web_dashboard.router.class:                               WeavingTheWeb\Bundle\DashboardBundle\Routing\Router
-    weaving_the_web_dashboard.security.crypto.class:                      WeavingTheWeb\Bundle\DashboardBundle\Security\Crypto
-    weaving_the_web_dashboard.subscriber.export.class:                    WeavingTheWeb\Bundle\DashboardBundle\ImportExport\Event\ExportSubscriber
-    weaving_the_web_dashboard.twig.email.class:                           WeavingTheWeb\Bundle\DashboardBundle\Twig\EmailExtension
-    weaving_the_web_dashboard.twig.perspective.class:                     WeavingTheWeb\Bundle\DashboardBundle\Twig\PerspectiveExtension
-    weaving_the_web_dashboard.upload_listener.class:                      WeavingTheWeb\Bundle\DashboardBundle\EventListener\UploadListener
-    weaving_the_web_dashboard.resources.perspectives.archive:             %kernel.root_dir%/../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/perspectives/archive
-    weaving_the_web_dashboard.resources.perspectives.export:              %kernel.root_dir%/../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/perspectives/export
-    weaving_the_web_dashboard.resources.perspectives.import:              %kernel.root_dir%/../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/perspectives/import
-    weaving_the_web_dashboard.resources.perspectives.upload:              %kernel.root_dir%/../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/perspectives/upload
+    phpseclib.aes.class:                                                phpseclib\Crypt\AES
+    weaving_the_web_dashboard.command.export_perspectives.class:        WeavingTheWeb\Bundle\DashboardBundle\Command\ExportPerspectivesCommand
+    weaving_the_web_dashboard.command.import_perspectives.class:        WeavingTheWeb\Bundle\DashboardBundle\Command\ImportPerspectivesCommand
+    weaving_the_web_dashboard.controller.settings.oauth.class:          WeavingTheWeb\Bundle\DashboardBundle\Controller\Settings\OAuth\OAuthController
+    weaving_the_web_dashboard.controller.search.class:                  WeavingTheWeb\Bundle\DashboardBundle\Controller\SearchController
+    weaving_the_web_dashboard.dbal_connection.class:                    WeavingTheWeb\Bundle\DashboardBundle\DBAL\Connection
+    weaving_the_web_dashboard.entity.oauth.client:                      WeavingTheWebDashboardBundle:OAuth\Client
+    weaving_the_web_dashboard.entity.perspective:                       WeavingTheWebDashboardBundle:Perspective
+    weaving_the_web_dashboard.error_handler.upload_file.class:          WeavingTheWeb\Bundle\DashboardBundle\ErrorHandler\UploadFile
+    weaving_the_web_dashboard.event.export_perspectives.class:          WeavingTheWeb\Bundle\DashboardBundle\ImportExport\Event\ExportPerspectivesEvent
+    weaving_the_web_dashboard.form_type.oauth.create_client.class:      WeavingTheWeb\Bundle\DashboardBundle\Form\Type\OAuth\CreateClientType
+    weaving_the_web_dashboard.form_type.oauth.register_client.class:    WeavingTheWeb\Bundle\DashboardBundle\Form\Type\OAuth\RegisterClientType
+    weaving_the_web_dashboard.form_type.oauth.redirect_uri.class:       WeavingTheWeb\Bundle\DashboardBundle\Form\Type\OAuth\RedirectUriType
+    weaving_the_web_dashboard.form_type.search.class:                   WeavingTheWeb\Bundle\DashboardBundle\Form\Type\SearchType
+    weaving_the_web_dashboard.import_export.perspective_exporter.class: WeavingTheWeb\Bundle\DashboardBundle\ImportExport\Export\PerspectiveExporter
+    weaving_the_web_dashboard.import_export.perspective_importer.class: WeavingTheWeb\Bundle\DashboardBundle\ImportExport\Import\PerspectiveImporter
+    weaving_the_web_dashboard.map_perspective_command.class:            WeavingTheWeb\Bundle\DashboardBundle\Command\MapPerspectiveCommand
+    weaving_the_web_dashboard.perspective_validator.class:              WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints\PerspectiveValidator
+    weaving_the_web_dashboard.repository.oauth.client.class:            WeavingTheWeb\Bundle\DashboardBundle\Repository\OAuth\ClientRepository
+    weaving_the_web_dashboard.repository.perspective.class:             WeavingTheWeb\Bundle\DashboardBundle\Repository\PerspectiveRepository
+    weaving_the_web_dashboard.resolver.path.class:                      WeavingTheWeb\Bundle\DashboardBundle\Resolver\PathResolver
+    weaving_the_web_dashboard.resources.perspectives.archive:           %kernel.root_dir%/../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/perspectives/archive
+    weaving_the_web_dashboard.resources.perspectives.export:            %kernel.root_dir%/../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/perspectives/export
+    weaving_the_web_dashboard.resources.perspectives.import:            %kernel.root_dir%/../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/perspectives/import
+    weaving_the_web_dashboard.resources.perspectives.upload:            %kernel.root_dir%/../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/perspectives/upload
+    weaving_the_web_dashboard.query_validator.class:                    WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints\QueryValidator
+    weaving_the_web_dashboard.router.class:                             WeavingTheWeb\Bundle\DashboardBundle\Routing\Router
+    weaving_the_web_dashboard.security.crypto.class:                    WeavingTheWeb\Bundle\DashboardBundle\Security\Crypto
+    weaving_the_web_dashboard.subscriber.export.class:                  WeavingTheWeb\Bundle\DashboardBundle\ImportExport\Event\ExportSubscriber
+    weaving_the_web_dashboard.twig.email.class:                         WeavingTheWeb\Bundle\DashboardBundle\Twig\EmailExtension
+    weaving_the_web_dashboard.twig.perspective.class:                   WeavingTheWeb\Bundle\DashboardBundle\Twig\PerspectiveExtension
+    weaving_the_web_dashboard.upload_listener.class:                    WeavingTheWeb\Bundle\DashboardBundle\EventListener\UploadListener
 
 services:
 
@@ -57,6 +63,30 @@ services:
             entityManager:          @doctrine.orm.default_entity_manager
         tags:
             - { name: console.command }
+
+    weaving_the_web_dashboard.controller.abstract:
+        abstract:           true
+        properties:
+            logger:         @logger
+            router:         @router
+            session:        @session
+            translator:     @translator
+
+    weaving_the_web_dashboard.controller.search:
+        class: %weaving_the_web_dashboard.controller.search.class%
+        calls:
+            - [ setContainer, [ @service_container ] ]
+
+    weaving_the_web_dashboard.controller.settings.oauth:
+        class:  %weaving_the_web_dashboard.controller.settings.oauth.class%
+        parent: weaving_the_web_dashboard.controller.abstract
+        properties:
+            clientRepository:   @weaving_the_web_api.repository.oauth.client
+            clientRegistry:     @weaving_the_web_dashboard.repository.oauth.client
+            entityManager:      @doctrine.orm.entity_manager
+            formFactory:        @form.factory
+            httpKernel:         @kernel
+            requestStack:       @request_stack
 
     weaving_the_web_dashboard.dbal_connection:
         class:  %weaving_the_web_dashboard.dbal_connection.class%
@@ -106,10 +136,20 @@ services:
             sourceDirectory:        %weaving_the_web_dashboard.resources.perspectives.import%
             uploadDir:              %weaving_the_web_dashboard.resources.perspectives.upload%
 
-    weaving_the_web_dashboard.search_controller:
-        class: %weaving_the_web_dashboard.controller.class%
-        calls:
-            - [ setContainer, [ @service_container ] ]
+    weaving_the_web_dashboard.form_type.oauth.create_client:
+        class: %weaving_the_web_dashboard.form_type.oauth.create_client.class%
+        tags:
+            - { name: form.type, alias: create_oauth_client }
+
+    weaving_the_web_dashboard.form_type.oauth.redirect_uri:
+        class: %weaving_the_web_dashboard.form_type.oauth.redirect_uri.class%
+        tags:
+            - { name: form.type, alias: redirect_uri }
+
+    weaving_the_web_dashboard.form_type.oauth.register_client:
+        class: %weaving_the_web_dashboard.form_type.oauth.register_client.class%
+        tags:
+            - { name: form.type, alias: register_oauth_client }
 
     weaving_the_web_dashboard.form_type.search:
         class: %weaving_the_web_dashboard.form_type.search.class%
@@ -137,11 +177,15 @@ services:
             - [ setRouter, [ @router ] ]
             - [ setEntityManager, [ @doctrine.orm.entity_manager ] ]
 
+    weaving_the_web_dashboard.repository.oauth.client:
+        class: %weaving_the_web_dashboard.repository.oauth.client.class%
+        factory:    [@doctrine.orm.entity_manager, getRepository]
+        arguments:  [%weaving_the_web_dashboard.entity.oauth.client%]
+
     weaving_the_web_dashboard.repository.perspective:
         class: %weaving_the_web_dashboard.repository.perspective.class%
-        factory_service: doctrine.orm.entity_manager
-        factory_method: getRepository
-        arguments: [%weaving_the_web_dashboard.entity.perspective%]
+        factory:    [@doctrine.orm.entity_manager, getRepository]
+        arguments:  [%weaving_the_web_dashboard.entity.perspective%]
         properties:
             sourceDirectory: %weaving_the_web_dashboard.resources.perspectives.import%
 

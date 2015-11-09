@@ -1,0 +1,24 @@
+oauth:
+    label:
+        client_id:      Client id
+        client_secret:  Client secret
+        redirect_uri:   Redirect URI
+        submit:         Submit
+    create_client:
+        title:          Create an OAuth client
+        success:        A new OAuth client has been created successfully.
+        error:          Sorry, a new OAuth client could not have been created.
+        new_client: |
+            Client id: {{ client_id }}
+            Client secret: {{ client_secret }}
+            Authorization URL: {{ authorization_url }}
+    placeholder:
+        client_id:      The client id provided by an OAuth server for this consumer.
+        client_secret:  The client secret provided by an OAuth server for this consumer.
+        redirect_uri:   The redirect URI (or callback URL) provided to an OAuth server
+    register_client:
+        title:          Register an OAuth client
+        success:        An OAuth client has been registered successfully.
+        error:          Sorry, this OAuth client could not have been registered.
+    settings:
+        title:          OAuth settings

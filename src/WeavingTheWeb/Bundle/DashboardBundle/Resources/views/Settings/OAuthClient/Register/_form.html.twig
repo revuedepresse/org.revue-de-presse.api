@@ -1,0 +1,22 @@
+{% if register_oauth_client_form is defined %}
+<h2>{{ 'oauth.register_client.title'|trans({}, 'oauth') }}</h2>
+<div class="row-fluid">
+
+{% for flashMessage in app.session.flashbag.get('registration_info') %}
+<div class="alert alert-info">
+    {{ flashMessage|nl2br }}
+</div>
+{% endfor %}
+
+{% for flashMessage in app.session.flashbag.get('registration_error') %}
+<div class="alert alert-danger">
+    {{ flashMessage|nl2br }}
+</div>
+{% endfor %}
+
+{{ form_start(register_oauth_client_form, { attr: {novalidate: 'novalidate'}}) }}
+{{ form_row(register_oauth_client_form.client_id) }}
+{{ form_row(register_oauth_client_form.client_secret) }}
+{{ form_row(register_oauth_client_form.redirect_uri) }}
+{{ form_end(register_oauth_client_form) }}
+{% endif %}

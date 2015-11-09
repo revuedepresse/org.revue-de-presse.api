@@ -4,7 +4,7 @@
         <body>
             <trans-unit id="title_settings">
                 <source>title_settings</source>
-                <target>Settings</target>
+                <target>Profile Settings</target>
             </trans-unit>
             <trans-unit id="label_disabled">
                 <source>label_disabled</source>

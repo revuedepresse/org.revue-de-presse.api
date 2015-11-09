@@ -4,12 +4,16 @@
         <li{% if active_menu_item == 'dashboard' %} class="active"{% endif %}>
             <a href="{{ path('weaving_the_web_dashboard_show_documents') }}">{{ "menu.dashboard"|trans({}, 'menu') }}</a>
         </li>
+        {% if feature_toggling.emails %}
         <li{% if active_menu_item == 'emails' %} class="active"{% endif %}>
             <a href="{{ path('weaving_the_web_dashboard_mail_show_collapsed_mails') }}">{{ "menu.emails"|trans({}, 'menu') }}</a>
         </li>
+        {% endif %}
+        {% if feature_toggling.statuses %}
         <li{% if active_menu_item == 'tweets' %} class="active"{% endif %}>
             <a href="{{ path('weaving_the_web_dashboard_tweet_github') }}">{{ "menu.tweets"|trans({}, 'menu') }}</a>
         </li>
+        {% endif %}
         {% endif %}
         {% if feature_toggling.repositories and is_granted("ROLE_USER") %}
         <li{% if active_menu_item == 'github_repositories' %} class="active"{% endif %}>
@@ -21,7 +25,12 @@
         <li>
             {% include "::sitemap.html.twig" %}
         </li>
-        <li>
+        {% if is_granted("ROLE_ADMIN") %}
+        <li{% if active_menu_item == 'settings' %} class="active"{% endif %}>
+            <a href="{{ path("weaving_the_web_dashboard_settings_oauth_show_settings") }}">{{ "menu.settings"|trans({}, 'menu') }}</a>
+        </li>
+        {% endif %}
+        <li{% if active_menu_item == 'profile_settings' %} class="active"{% endif %}>
             {% spaceless %}
             {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
             <a class="nav" href="{{ path('weaving_the_web_user_show_settings')  }}">

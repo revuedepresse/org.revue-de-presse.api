@@ -39,9 +39,8 @@
             </call>
         </service>
         <service id="weaving_the_web_user.repository.facebook.access_token"
-                 class="Doctrine\ORM\EntityRepository"
-                 factory-service="doctrine.orm.entity_manager"
-                 factory-method="getRepository">
+                 class="Doctrine\ORM\EntityRepository">
+            <factory service="doctrine.orm.entity_manager" method="getRepository"/>
             <argument type="string">%weaving_the_web_user.entity.facebook.access_token.class%</argument>
         </service>
         <service id="weaving_the_web_user.controller.facebook" class="%weaving_the_web_user.controller.facebook.class%">

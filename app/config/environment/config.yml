@@ -55,8 +55,10 @@ twig:
         analytics_domain:   %analytics_domain%
         analytics_site:     %analytics_site%
         feature_toggling:
+            emails:         %feature_toggling_emails%
             search:         %feature_toggling_search%
             repositories:   %feature_toggling_repositories%
+            statuses:       %feature_toggling_statuses%
 
 sensio_framework_extra:
     view:    { annotations: false }

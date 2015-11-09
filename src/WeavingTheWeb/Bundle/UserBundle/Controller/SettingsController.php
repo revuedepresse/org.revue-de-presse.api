@@ -208,7 +208,10 @@ class SettingsController extends ContainerAware
         $user = $this->getUser();
         $form = $this->getSettingsForm($user);
 
-        return ['form' => $form->createView()];
+        return [
+            'active_menu_item' => 'profile_settings',
+            'form' => $form->createView(),
+        ];
     }
 
     /**
