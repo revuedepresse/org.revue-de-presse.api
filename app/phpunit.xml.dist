@@ -14,13 +14,20 @@
         bootstrap                   = "autoload.php">
 
     <groups>
-        <include>
-            <group>isolated-testing</group>
-        </include>
+        <exclude>
+            <group>authenticate-application</group>
+            <group>produce-list-messages</group>
+            <group>produce-user-messages</group>
+            <group>serialize-status-command</group>
+            <group>tweet</group>
+            <group>twitter-accessor</group>
+            <group>twitter-connect</group>
+            <group>twitter-user-status</group>
+        </exclude>
     </groups>
 
     <testsuites>
-        <testsuite name="WTW Test Suite">
+        <testsuite name="Test suite">
             <directory>../src/*/*/*Bundle/Tests</directory>
             <directory>../src/*/*Bundle/Tests</directory>
             <directory>../src/*/*/*/*Bundle/Tests</directory>
