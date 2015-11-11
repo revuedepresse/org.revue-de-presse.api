@@ -1,0 +1,11 @@
+{% if select_oauth_client_form is defined %}
+<h2>{{ 'oauth.select_client.title'|trans({}, 'oauth') }}</h2>
+<div class="row-fluid">
+    {% embed 'WeavingTheWebDashboardBundle:Settings/OAuthClient:_flash_messages.html.twig'
+        with {'prefix': 'select_client_'} %}{% endembed %}
+
+    {{ form_start(select_oauth_client_form, { attr: {novalidate: 'novalidate'}}) }}
+    {{ form_row(select_oauth_client_form.oauth_clients) }}
+    {{ form_end(select_oauth_client_form) }}
+ </div>
+{% endif %}

@@ -3,8 +3,9 @@ oauth:
         client_id:      Client id
         client_secret:  Client secret
         redirect_uri:   Redirect URI
-        oauth_client:   OAuth client
+        oauth_clients:  OAuth client
         submit:         Submit
+        select:         Select OAuth client
     create_client:
         title:          Create an OAuth client
         success:        A new OAuth client has been created successfully.
@@ -22,5 +23,9 @@ oauth:
         title:          Register an OAuth client
         success:        An OAuth client has been registered successfully.
         error:          Sorry, this OAuth client could not have been registered.
+    select_client:
+        title:          Select a registered OAuth client
+        success:        Thank you for having selected this OAuth client.
+        error:          Sorry, this OAuth client could not have been selected.
     settings:
         title:          OAuth settings
