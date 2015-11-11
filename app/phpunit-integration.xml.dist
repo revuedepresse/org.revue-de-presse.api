@@ -16,7 +16,6 @@
     <groups>
         <exclude>
             <group>isolated-testing</group>
-            <group>messaging-twitter</group>
         </exclude>
     </groups>
 
