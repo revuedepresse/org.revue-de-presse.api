@@ -44,7 +44,7 @@ class CreateClientType extends AbstractType
     {
         $resolver->setDefaults([
             'csrf_protection'       => true,
-            'intention'             => 'oauth',
+            'intention'             => 'create_oauth_client',
             'method'                => 'POST',
             'translation_domain'    => 'oauth',
             'attr'                  => ['id' => 'create-oauth-client']

@@ -8,7 +8,8 @@ use Symfony\Component\Form\FormInterface;
 
 use Symfony\Component\HttpFoundation\RedirectResponse,
     Symfony\Component\HttpFoundation\Request,
-    Symfony\Component\HttpKernel\HttpKernelInterface;
+    Symfony\Component\HttpKernel\HttpKernelInterface,
+    Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
 /**
  * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
@@ -67,6 +68,11 @@ class OAuthController
     public $requestStack;
 
     /**
+     * @var \Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface
+     */
+    public $tokenStorage;
+
+    /**
      * @Extra\Route(
      *      "/",
      *      name="weaving_the_web_dashboard_settings_oauth_show_settings"
@@ -119,25 +125,20 @@ class OAuthController
         );
 
         if ($this->isFormSubmitted($form, $request)) {
-            $flashBag = [
-                'error' => [],
-                'info' => [],
-                'link' => [],
-            ];
-
             if ($form->isValid()) {
                 $data = $form->getData();
                 /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\OAuth\Client $client */
                 $redirectUri = $data['redirect_uri'];
                 $client = $this->clientRepository->make($redirectUri);
 
-                $flashBag['info'][] = $this->translator->trans(
+                $infoMessages = [$this->translator->trans(
                     'oauth.create_client.success',
                     [],
                     'oauth'
-                );
+                )];
+                $this->addFlashMessages($infoMessages, 'create_client_info');
 
-                $flashBag['link'][] = $this->translator->trans(
+                $linkMessages = [$this->translator->trans(
                     'oauth.create_client.new_client',
                     [
                         '{{ authorization_url }}' => $client->getAuthorizationUrl(),
@@ -145,47 +146,33 @@ class OAuthController
                         '{{ client_secret }}' => $client->getSecret(),
                     ],
                     'oauth'
-                );
-
-                $this->addFlashMessages($flashBag['info'], 'creation_info');
-                $this->addFlashMessages($flashBag['link'], 'creation_link');
+                )];
+                $this->addFlashMessages($linkMessages, 'create_client_link');
 
                 return new RedirectResponse($currentRoute);
             } else {
-                $errorMessage = $this->translator->trans('oauth.create_client.error', [], 'oauth');
-                $flashBag['error'][] = $errorMessage;
-
-                $this->addErrorFlashMessages($form, $flashBag, 'creation_error');
+                $this->handleFormErrors($form, 'create_client');
             }
         }
 
-        return ['create_oauth_client_form'  => $form->createView()];
+        return ['create_oauth_client_form' => $form->createView()];
     }
 
     /**
-     * @param array $messages
-     * @param $type
-     */
-    protected function addFlashMessages(array $messages, $type)
-    {
-        if (count($messages) > 0) {
-            $this->session->getFlashBag()->add(
-                $type,
-                implode("\n", $messages)
-            );
-        }
-    }
-
-    /**
-     * @Extra\Route("/client/register", name="weaving_the_web_dashboard_settings_oauth_register_client")
+     * @Extra\Route(
+     *      "/client/register",
+     *      name="weaving_the_web_dashboard_settings_oauth_register_client"
+     * )
      * @Extra\Method({"GET", "POST"})
      * @Extra\Template("WeavingTheWebDashboardBundle:Settings:OAuthClient/Register/_form.html.twig")
      *
      * @param Request $request
-     * @return array
+     * @return array|RedirectResponse
      */
     public function registerOAuthClientAction(Request $request)
     {
+        $user = $this->getUser();
+
         $currentRoute = $this->getCurrentRoute();
 
         $form = $this->formFactory->create(
@@ -195,8 +182,6 @@ class OAuthController
         );
 
         if ($this->isFormSubmitted($form, $request)) {
-            $flashBag = [];
-
             if ($form->isValid()) {
                 $data = $form->getData();
 
@@ -206,23 +191,77 @@ class OAuthController
                     $data['client_secret'],
                     $data['redirect_uri']
                 );
+                $client->setUser($user);
 
                 $this->entityManager->persist($client);
                 $this->entityManager->flush();
 
-                $flashBag['info'][] = $this->translator->trans('oauth.register_client.success', [], 'oauth');
-                $this->addFlashMessages($flashBag['info'], 'registration_info');
+                $flashMessages = [$this->translator->trans('oauth.register_client.success', [], 'oauth')];
+                $this->addFlashMessages($flashMessages, 'register_client_info');
 
                 return new RedirectResponse($currentRoute);
             } else {
-                $errorMessage = $this->translator->trans('oauth.register_client.error', [], 'oauth');
-                $flashBag['error'][] = $errorMessage;
-
-                $this->addErrorFlashMessages($form, $flashBag, 'registration_error');
+                $this->handleFormErrors($form, 'register_client');
             }
         }
 
-        return ['register_oauth_client_form'    => $form->createView()];
+        return ['register_oauth_client_form' => $form->createView()];
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getUser()
+    {
+        if (null === $token = $this->tokenStorage->getToken()) {
+            throw new AccessDeniedHttpException();
+        }
+
+        if (!is_object($user = $token->getUser())) {
+            // e.g. anonymous authentication
+            throw new AccessDeniedHttpException();
+        }
+
+        return $user;
+    }
+
+    /**
+     * @Extra\Route(
+     *      "/client/select",
+     *      name="weaving_the_web_dashboard_settings_oauth_select_client"
+     * )
+     * @Extra\Method({"GET", "POST"})
+     * @Extra\Template("WeavingTheWebDashboardBundle:Settings:OAuthClient/Select/_form.html.twig")
+     *
+     * @param Request $request
+     * @return array
+     */
+    public function selectOAuthClient(Request $request) {
+        $currentRoute = $this->getCurrentRoute();
+
+        $client = $this->clientRegistry->findOneby(['isSelected' => true]);
+        $data = null;
+        if (!is_null($client)) {
+            $data = ['oauth_client' => $client->getId()];
+        }
+
+        $form = $this->formFactory->create(
+            'select_oauth_client',
+            $data,
+            ['action' => $currentRoute]
+        );
+
+        if ($this->isFormSubmitted($form, $request)) {
+            $flashBag = [];
+            if ($form->isValid()) {
+
+            } else {
+                $this->handleFormErrors($form, 'select_client');
+            }
+        }
+
+
+        return ['select_oauth_client_form' => $form->createView()];
     }
 
     /**
@@ -243,19 +282,6 @@ class OAuthController
         return $this->router->generate($request->attributes->get('_route'));
     }
 
-    /**
-     * @param FormInterface $form
-     * @param array $flashBag
-     */
-    protected function addErrorFlashMessages(FormInterface $form, array $flashBag, $type)
-    {
-        $errors = $form->getErrors();
-        foreach ($errors as $error) {
-            $flashBag['error'][] = $error->getMessage();
-        }
-
-        $this->addFlashMessages($flashBag['error'], $type);
-    }
 
     /**
      * @param FormInterface $form
@@ -270,6 +296,46 @@ class OAuthController
             return $form->isSubmitted();
         } else {
             return false;
+        }
+    }
+
+    /**
+     * @param FormInterface $form
+     * @param $action
+     */
+    protected function handleFormErrors(FormInterface $form, $action)
+    {
+        $flashBag = [$this->translator->trans('oauth.' . $action . '.error', [], 'oauth')];
+
+        $this->addErrorFlashMessages($form, $flashBag, $action . '_error');
+    }
+
+    /**
+     * @param FormInterface $form
+     * @param array $flashBag
+     * @param $type
+     */
+    protected function addErrorFlashMessages(FormInterface $form, array $flashBag, $type)
+    {
+        $errors = $form->getErrors();
+        foreach ($errors as $error) {
+            $flashBag['error'][] = $error->getMessage();
+        }
+
+        $this->addFlashMessages($flashBag, $type);
+    }
+
+    /**
+     * @param array $messages
+     * @param $type
+     */
+    protected function addFlashMessages(array $messages, $type)
+    {
+        if (count($messages) > 0) {
+            $this->session->getFlashBag()->add(
+                $type,
+                implode("\n", $messages)
+            );
         }
     }
 }

@@ -28,6 +28,11 @@ abstract class User implements UserInterface, GroupableInterface
     /**
      * @var string
      */
+    protected $username;
+
+    /**
+     * @var string
+     */
     protected $usernameCanonical;
 
     /**
@@ -204,6 +209,7 @@ abstract class User implements UserInterface, GroupableInterface
     public function eraseCredentials()
     {
         $this->plainPassword = null;
+        $this->password = null;
     }
 
     /**

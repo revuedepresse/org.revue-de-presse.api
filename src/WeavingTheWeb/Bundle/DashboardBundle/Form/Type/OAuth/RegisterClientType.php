@@ -25,25 +25,25 @@ class RegisterClientType extends AbstractType
                 'client_id',
                 'text',
                 [
+                    'attr'              => [
+                        'placeholder'   => 'oauth.placeholder.client_id'
+                    ],
                     'constraints'       => [new NotBlank()],
                     'error_bubbling'    => false,
                     'label'             => 'oauth.label.client_id',
                     'required'          => true,
-                    'attr'              => [
-                        'placeholder'   => 'oauth.placeholder.client_id'
-                    ]
                 ]
             )->add(
                 'client_secret',
                 'text',
                 [
+                    'attr'              => [
+                        'placeholder'   => 'oauth.placeholder.client_secret'
+                    ],
                     'constraints'       => [new NotBlank()],
                     'error_bubbling'    => false,
                     'label'             => 'oauth.label.client_secret',
                     'required'          => true,
-                    'attr'              => [
-                        'placeholder'   => 'oauth.placeholder.client_secret'
-                    ]
                 ]
             )
             ->add(
@@ -65,7 +65,7 @@ class RegisterClientType extends AbstractType
     {
         $resolver->setDefaults([
             'csrf_protection'       => true,
-            'intention'             => 'oauth',
+            'intention'             => 'register_oauth_client',
             'method'                => 'POST',
             'translation_domain'    => 'oauth',
             'attr'                  => ['id' => 'register-oauth-client']
