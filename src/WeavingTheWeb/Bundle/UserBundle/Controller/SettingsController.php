@@ -215,7 +215,8 @@ class SettingsController extends ContainerAware
     }
 
     /**
-     * @return \Symfony\Component\Form\Form
+     * @param User $user
+     * @return \Symfony\Component\Form\Form|\Symfony\Component\Form\FormInterface
      */
     protected function getSettingsForm(User $user)
     {

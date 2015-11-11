@@ -13,7 +13,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller,
 use WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream;
 
 /**
- * Class TweetController
  * @package WeavingTheWeb\Bundle\TwitterBundle\Controller
  */
 class TweetController extends Controller
