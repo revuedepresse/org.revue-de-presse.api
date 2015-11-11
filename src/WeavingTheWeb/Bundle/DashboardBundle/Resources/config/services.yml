@@ -10,8 +10,8 @@ parameters:
     weaving_the_web_dashboard.error_handler.upload_file.class:          WeavingTheWeb\Bundle\DashboardBundle\ErrorHandler\UploadFile
     weaving_the_web_dashboard.event.export_perspectives.class:          WeavingTheWeb\Bundle\DashboardBundle\ImportExport\Event\ExportPerspectivesEvent
     weaving_the_web_dashboard.form_type.oauth.create_client.class:      WeavingTheWeb\Bundle\DashboardBundle\Form\Type\OAuth\CreateClientType
-    weaving_the_web_dashboard.form_type.oauth.register_client.class:    WeavingTheWeb\Bundle\DashboardBundle\Form\Type\OAuth\RegisterClientType
     weaving_the_web_dashboard.form_type.oauth.redirect_uri.class:       WeavingTheWeb\Bundle\DashboardBundle\Form\Type\OAuth\RedirectUriType
+    weaving_the_web_dashboard.form_type.oauth.register_client.class:    WeavingTheWeb\Bundle\DashboardBundle\Form\Type\OAuth\RegisterClientType
     weaving_the_web_dashboard.form_type.search.class:                   WeavingTheWeb\Bundle\DashboardBundle\Form\Type\SearchType
     weaving_the_web_dashboard.import_export.perspective_exporter.class: WeavingTheWeb\Bundle\DashboardBundle\ImportExport\Export\PerspectiveExporter
     weaving_the_web_dashboard.import_export.perspective_importer.class: WeavingTheWeb\Bundle\DashboardBundle\ImportExport\Import\PerspectiveImporter
@@ -87,6 +87,7 @@ services:
             formFactory:        @form.factory
             httpKernel:         @kernel
             requestStack:       @request_stack
+            tokenStorage:       @security.token_storage
 
     weaving_the_web_dashboard.dbal_connection:
         class:  %weaving_the_web_dashboard.dbal_connection.class%

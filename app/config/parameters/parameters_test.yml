@@ -73,3 +73,6 @@ services:
             - [ setDatabase, [ %database_name% ] ]
             - [ setEntityManager, [ @doctrine.orm.test_mysql_entity_manager ] ]
             - [ setTranslator, [ @translator ] ]
+
+    weaving_the_web_user.security.user.provider.in_memory:
+        alias: security.user.provider.concrete.in_memory

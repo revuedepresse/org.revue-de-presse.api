@@ -12,7 +12,6 @@ use WeavingTheWeb\Bundle\UserBundle\Entity\Role;
 use WTW\UserBundle\Model\User as BaseUser;
 
 /**
- *
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  *
  * @ORM\Table(
@@ -214,7 +213,12 @@ class User extends BaseUser
     protected $positionInHierarchy;
 
     /**
-     * @ORM\ManyToMany(targetEntity="WeavingTheWeb\Bundle\UserBundle\Entity\Role", inversedBy="users", fetch="EAGER")
+     * @ORM\ManyToMany(
+     *      targetEntity="WeavingTheWeb\Bundle\UserBundle\Entity\Role",
+     *      inversedBy="users",
+     *      fetch="EAGER",
+     *      cascade={"all"}
+     * )
      * @ORM\JoinTable(name="weaving_user_role",
      *      joinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="usr_id")},
      *      inverseJoinColumns={@ORM\JoinColumn(name="role_id", referencedColumnName="id")}
@@ -223,7 +227,11 @@ class User extends BaseUser
     protected $roles;
 
     /**
-     * @ORM\ManyToMany(targetEntity="WeavingTheWeb\Bundle\ApiBundle\Entity\Token", inversedBy="users", fetch="EAGER")
+     * @ORM\ManyToMany(
+     *      targetEntity="WeavingTheWeb\Bundle\ApiBundle\Entity\Token",
+     *      inversedBy="users",
+     *      fetch="EAGER"
+     * )
      * @ORM\JoinTable(name="weaving_user_token",
      *      joinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="usr_id")},
      *      inverseJoinColumns={@ORM\JoinColumn(name="token_id", referencedColumnName="id")}
@@ -815,6 +823,8 @@ class User extends BaseUser
      */
     public function __construct()
     {
+        parent::__construct();
+
         $this->roles = new \Doctrine\Common\Collections\ArrayCollection();
         $this->tokens = new \Doctrine\Common\Collections\ArrayCollection();
     }
