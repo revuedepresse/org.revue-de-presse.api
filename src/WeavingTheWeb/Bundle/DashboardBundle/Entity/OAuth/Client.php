@@ -187,7 +187,7 @@ class Client implements SelectionAwareInterface
     public function setSelected($selected) {
         $this->selected = $selected;
         if ($this->selected) {
-            $this->selected = new \DateTime();
+            $this->selectedAt = new \DateTime();
         }
 
         return $this;

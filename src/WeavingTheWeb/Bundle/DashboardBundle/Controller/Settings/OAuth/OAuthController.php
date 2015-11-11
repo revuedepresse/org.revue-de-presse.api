@@ -11,6 +11,8 @@ use Symfony\Component\HttpFoundation\RedirectResponse,
     Symfony\Component\HttpKernel\HttpKernelInterface,
     Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
+use WeavingTheWeb\Bundle\DashboardBundle\Entity\OAuth\Client;
+
 /**
  * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
  * @Extra\Route("/settings/oauth", service="weaving_the_web_dashboard.controller.settings.oauth")
@@ -248,21 +250,44 @@ class OAuthController
     public function selectOAuthClientAction(Request $request) {
         $currentRoute = $this->getCurrentRoute();
 
+        /** @var \WeavingTheWeb\Bundle\DashboardBundle\Entity\OAuth\Client $client */
         $client = $this->clientRegistry->findOneby(['selected' => true]);
         $data = null;
         if (!is_null($client)) {
-            $data = ['oauth_clients' => $client->getId()];
+            $data = ['oauth_clients' => $client];
         }
         $form = $this->formFactory->create(
             'select_oauth_client',
             $data,
-            ['action' => $currentRoute]
+            [
+                'action' => $currentRoute,
+            ]
         );
 
         if ($this->isFormSubmitted($form, $request)) {
             if ($form->isValid()) {
-                $flashMessages = [$this->translator->trans('oauth.select_client.success', [], 'oauth')];
-                $this->addFlashMessages($flashMessages, 'select_client_info');
+                $selectedOauthClient = $form->get('oauth_clients')->getData();
+                if (is_null($selectedOauthClient)) {
+                    $successMessage = $this->translator->trans('oauth.select_client.empty_selection', [], 'oauth');
+                    if (!is_null($data)) {
+                        $client->unselect();
+                        $this->updateOAuthClientSelection($client);
+                    }
+                } else {
+                    /**
+                     * @var \WeavingTheWeb\Bundle\DashboardBundle\Entity\OAuth\Client $oauthClient
+                     */
+                    $oauthClient = $this->clientRegistry->findOneBy(['id' => $selectedOauthClient]);
+                    if (is_null($oauthClient)) {
+                        throw new \LogicException('The selected OAuth client has not been registered before.');
+                    }
+                    $oauthClient->select();
+                    $this->updateOAuthClientSelection($oauthClient);
+
+                    $successMessage = $this->translator->trans('oauth.select_client.success', [], 'oauth');
+                }
+
+                $this->addFlashMessages([$successMessage], 'select_client_info');
 
                 return new RedirectResponse($currentRoute);
             } else {
@@ -346,5 +371,14 @@ class OAuthController
                 implode("\n", $messages)
             );
         }
+    }
+
+    /**
+     * @param Client $oauthClient
+     */
+    protected function updateOAuthClientSelection(Client $oauthClient)
+    {
+        $this->entityManager->persist($oauthClient);
+        $this->entityManager->flush();
     }
 }
