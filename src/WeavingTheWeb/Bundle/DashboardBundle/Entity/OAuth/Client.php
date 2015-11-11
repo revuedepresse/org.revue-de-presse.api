@@ -79,7 +79,7 @@ class Client implements SelectionAwareInterface
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="selectedAt", type="datetime", nullable=true)
+     * @ORM\Column(name="selected_at", type="datetime", nullable=true)
      */
     private $selectedAt;
 
