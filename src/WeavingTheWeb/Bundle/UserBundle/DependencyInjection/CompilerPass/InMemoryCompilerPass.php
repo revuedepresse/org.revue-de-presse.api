@@ -19,7 +19,12 @@ class InMemoryCompilerPass implements CompilerPassInterface
     public function process(ContainerBuilder $container)
     {
         $inMemoryUserProviderId = 'security.user.provider.concrete.in_memory';
-        if ($container->hasDefinition($inMemoryUserProviderId)) {
+        $environment = $container->getParameter('kernel.environment');
+
+        if (
+            $container->hasDefinition($inMemoryUserProviderId) &&
+            ($environment === 'test' || $environment == 'lightweight' || $environment == 'bdd')
+        ) {
             $inMemoryUserProviderDefinition = $container->getDefinition($inMemoryUserProviderId);
 
             $methodCalls = $inMemoryUserProviderDefinition->getMethodCalls();

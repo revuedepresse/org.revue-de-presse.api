@@ -94,7 +94,16 @@ class OAuthController
             return $oauthClientRegistrationResponse;
         }
 
-        return array_merge($oauthClientResponse, $oauthClientRegistrationResponse);
+        $oauthClientSelectionResponse = $this->selectOAuthClientAction($request);
+        if ($oauthClientSelectionResponse instanceof RedirectResponse) {
+            return $oauthClientSelectionResponse;
+        }
+
+        return array_merge(
+            $oauthClientResponse,
+            $oauthClientRegistrationResponse,
+            $oauthClientSelectionResponse
+        );
     }
 
     public function forward($controller, array $path = [], array $query = []) {
@@ -236,15 +245,14 @@ class OAuthController
      * @param Request $request
      * @return array
      */
-    public function selectOAuthClient(Request $request) {
+    public function selectOAuthClientAction(Request $request) {
         $currentRoute = $this->getCurrentRoute();
 
-        $client = $this->clientRegistry->findOneby(['isSelected' => true]);
+        $client = $this->clientRegistry->findOneby(['selected' => true]);
         $data = null;
         if (!is_null($client)) {
-            $data = ['oauth_client' => $client->getId()];
+            $data = ['oauth_clients' => $client->getId()];
         }
-
         $form = $this->formFactory->create(
             'select_oauth_client',
             $data,
@@ -252,14 +260,15 @@ class OAuthController
         );
 
         if ($this->isFormSubmitted($form, $request)) {
-            $flashBag = [];
             if ($form->isValid()) {
+                $flashMessages = [$this->translator->trans('oauth.select_client.success', [], 'oauth')];
+                $this->addFlashMessages($flashMessages, 'select_client_info');
 
+                return new RedirectResponse($currentRoute);
             } else {
                 $this->handleFormErrors($form, 'select_client');
             }
         }
-
 
         return ['select_oauth_client_form' => $form->createView()];
     }

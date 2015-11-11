@@ -1,0 +1,11 @@
+{% for flashMessage in app.session.flashbag.get(prefix ~ 'info') %}
+<div class="alert alert-info">
+    {{ flashMessage|nl2br }}
+</div>
+{% endfor %}
+
+{% for flashMessage in app.session.flashbag.get(prefix ~ 'error') %}
+<div class="alert alert-danger">
+    {{ flashMessage|nl2br }}
+</div>
+{% endfor %}
