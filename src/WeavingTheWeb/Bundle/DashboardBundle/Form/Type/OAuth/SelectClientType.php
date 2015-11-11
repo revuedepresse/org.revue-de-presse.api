@@ -3,10 +3,9 @@
 namespace WeavingTheWeb\Bundle\DashboardBundle\Form\Type\OAuth;
 
 use Doctrine\ORM\EntityRepository;
+
 use Symfony\Component\Form\AbstractType,
     Symfony\Component\Form\FormBuilderInterface;
-
-use Symfony\Component\Form\CallbackTransformer;
 
 use Symfony\Component\Form\FormInterface,
     Symfony\Component\OptionsResolver\OptionsResolverInterface;
@@ -27,14 +26,12 @@ class SelectClientType extends AbstractType
                 'oauth_clients',
                 'entity',
                 [
-                    'attr'          =>  [
-                        'placeholder' => 'oauth.placeholder.oauth_clients'
-                    ],
                     'class'         =>  'WeavingTheWebDashboardBundle:OAuth\Client',
                     'label'         =>  'oauth.label.oauth_clients',
-                    'required'      =>  true,
+                    'required'      =>  false,
                     'choice_label'  =>  'clientId',
-                    'query_builder' => function (EntityRepository $repository) {
+                    'placeholder'   =>  'oauth.placeholder.empty_selection',
+                    'query_builder' =>  function (EntityRepository $repository) {
                         return $repository->createQueryBuilder('c');
                     }
                 ]
