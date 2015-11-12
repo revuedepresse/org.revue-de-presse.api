@@ -29,12 +29,12 @@ ORDER BY per_id DESC";
             'exportable_perspective' => self::DEFAULT_QUERY
         ];
 
-        $perspectiveDefaultType = Perspective::TYPE_DEFAULT;
+        $perspectiveDefaultType = Perspective::TYPE_QUERY;
 
         $propertiesCollection = [
             [
                 'value' => self::DEFAULT_QUERY,
-                'type' => $perspectiveDefaultType,
+                'type' => Perspective::TYPE_DEFAULT,
                 'hash' => sha1(
                     'status:' . Perspective::STATUS_DEFAULT . ':' .
                     self::DEFAULT_QUERY

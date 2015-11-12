@@ -61,9 +61,9 @@ class Perspective implements ExportableInterface, ImportableInterface
     /**
      * @var integer
      *
-     * @ORM\Column(name="per_type", type="integer", options={"default": 0}))
+     * @ORM\Column(name="per_type", type="integer", options={"default": 1}))
      */
-    protected $type = self::TYPE_DEFAULT;
+    protected $type = self::TYPE_QUERY;
 
     /**
      * @var string
