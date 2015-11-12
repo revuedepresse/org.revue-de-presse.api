@@ -285,11 +285,17 @@ function mountDashboard(reqs) {
 
 if (window.Routing !== undefined) {
     var routing = window.Routing;
+    var notificationCenter;
+
+    if (window.getNotificationCenter) {
+        notificationCenter = window.getNotificationCenter('notification', window.jQuery);
+    }
+
     mountDashboard({
         $: window.jQuery,
         crypto: window.CryptoJS,
         fileSaver: window.saveAs,
-        notificationCenter: window.getNotificationCenter('notification', window.jQuery),
+        notificationCenter: notificationCenter,
         routes: {
             saveQuery: routing.generate('weaving_the_web_dashboard_save_query'),
             showPerspective: function (hash) {

@@ -1,48 +1,67 @@
 <div class="collapse navbar-collapse" id="weaving-the-web-navbar">
     <ul class="nav navbar-nav navbar-left">
         {% if is_granted("ROLE_SUPER_ADMIN") %}
-        <li{% if active_menu_item == 'dashboard' %} class="active"{% endif %}>
-            <a href="{{ path('weaving_the_web_dashboard_show_documents') }}">{{ "menu.dashboard"|trans({}, 'menu') }}</a>
-        </li>
-        {% if feature_toggling.emails %}
-        <li{% if active_menu_item == 'emails' %} class="active"{% endif %}>
-            <a href="{{ path('weaving_the_web_dashboard_mail_show_collapsed_mails') }}">{{ "menu.emails"|trans({}, 'menu') }}</a>
-        </li>
-        {% endif %}
-        {% if feature_toggling.statuses %}
-        <li{% if active_menu_item == 'tweets' %} class="active"{% endif %}>
-            <a href="{{ path('weaving_the_web_dashboard_tweet_github') }}">{{ "menu.tweets"|trans({}, 'menu') }}</a>
-        </li>
-        {% endif %}
+            <li{% if active_menu_item == 'dashboard' %} class="active"{% endif %}>
+                <a href="{{ path('weaving_the_web_dashboard_show_documents') }}">{{ "menu.dashboard"|trans({}, 'menu') }}</a>
+            </li>
+            {% if feature_toggling.emails %}
+                <li{% if active_menu_item == 'emails' %} class="active"{% endif %}>
+                    <a href="{{ path('weaving_the_web_dashboard_mail_show_collapsed_mails') }}">{{ "menu.emails"|trans({}, 'menu') }}</a>
+                </li>
+            {% endif %}
+            {% if feature_toggling.statuses %}
+                <li{% if active_menu_item == 'tweets' %} class="active"{% endif %}>
+                    <a href="{{ path('weaving_the_web_dashboard_tweet_github') }}">{{ "menu.tweets"|trans({}, 'menu') }}</a>
+                </li>
+            {% endif %}
         {% endif %}
         {% if feature_toggling.repositories and is_granted("ROLE_USER") %}
-        <li{% if active_menu_item == 'github_repositories' %} class="active"{% endif %}>
-            <a href="{{ path('weaving_the_web_dashboard_show_repositories') }}">{{ "menu.github_repositories"|trans({}, 'menu') }}</a>
-        </li>
+            <li{% if active_menu_item == 'github_repositories' %} class="active"{% endif %}>
+                <a href="{{ path('weaving_the_web_dashboard_show_repositories') }}">{{ "menu.github_repositories"|trans({}, 'menu') }}</a>
+            </li>
         {% endif %}
     </ul>
     <ul class="nav navbar-nav navbar-right">
-        <li>
-            {% include "::sitemap.html.twig" %}
+        {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+        <li class="dropdown{% if active_menu_item == 'profile_settings' or
+                active_menu_item == 'oauth_settings' %} active{% endif %}">
+            <a class="dropdown-toggle"
+               data-toggle="dropdown"
+               href="#" role="button"
+               aria-haspopup="true"
+               aria-expanded="false">
+               {{ 'menu.settings.parent'|trans({}, 'menu') }}
+               <span class="caret"></span>
+            </a>
+            {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+            <ul class="dropdown-menu">
+                <li{% if active_menu_item == 'profile_settings' %} class="active"{% endif %}>
+                    {% spaceless %}
+                        {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+                            <a href="{{ path('weaving_the_web_user_show_settings') }}">
+                                {{ app.user.username }}
+                            </a>
+                        {% endif %}
+                    {% endspaceless %}
+                </li>
+                {% if is_granted("ROLE_ADMIN") %}
+                    <li{% if active_menu_item == 'oauth_settings' %} class="active"{% endif %}>
+                        <a href="{{ path("weaving_the_web_dashboard_settings_oauth_show_settings") }}">
+                            {{ "menu.settings.oauth"|trans({}, 'menu') }}
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+            {% endif %}
         </li>
-        {% if is_granted("ROLE_ADMIN") %}
-        <li{% if active_menu_item == 'settings' %} class="active"{% endif %}>
-            <a href="{{ path("weaving_the_web_dashboard_settings_oauth_show_settings") }}">{{ "menu.settings"|trans({}, 'menu') }}</a>
+        <li>
+            <a href="{{ path('fos_user_security_logout') }}">
+                {{ 'layout.logout'|trans({}, 'FOSUserBundle') }}
+            </a>
         </li>
         {% endif %}
-        <li{% if active_menu_item == 'profile_settings' %} class="active"{% endif %}>
-            {% spaceless %}
-            {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-            <a class="nav" href="{{ path('weaving_the_web_user_show_settings')  }}">
-                {{ app.user.username }}
-            </a>
-            {% endif %}
-            {% endspaceless %}
-        </li>
         <li>
-            {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-                <a class="nav" href="{{ path('fos_user_security_logout') }}">{{ 'layout.logout'|trans({}, 'FOSUserBundle') }}</a>
-            {% endif %}
+            {% include "::sitemap.html.twig" %}
         </li>
     </ul>
 </div>

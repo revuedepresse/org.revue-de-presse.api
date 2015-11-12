@@ -1,6 +1,8 @@
 menu:
-    dashboard:            Dashboard
-    emails:               Emails
-    github_repositories:  Github Repositories
-    settings:             Settings
-    tweets:               Tweets
+    dashboard:              Dashboard
+    emails:                 Emails
+    github_repositories:    Github Repositories
+    settings:
+        parent:             My Settings
+        oauth:              OAuth
+    tweets:                 Tweets
