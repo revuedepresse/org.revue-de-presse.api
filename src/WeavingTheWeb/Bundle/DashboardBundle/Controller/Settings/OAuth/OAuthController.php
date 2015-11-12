@@ -104,7 +104,8 @@ class OAuthController
         return array_merge(
             $oauthClientResponse,
             $oauthClientRegistrationResponse,
-            $oauthClientSelectionResponse
+            $oauthClientSelectionResponse,
+            ['active_menu_item' => 'oauth_settings']
         );
     }
 
