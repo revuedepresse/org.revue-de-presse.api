@@ -6,8 +6,12 @@ parameters:
 
     aes_key:                                                    0000200000000bc0c280c000A0000000e000c090000000B0c000030A000eDbb0
     aes_iv:                                                     6c300000e0000000B000600A0000f0E0
-     
-    basic_auth_pattern:                                         ^/(settings/oauth|documents|github|user|api|query|content|mail|tweet|oauth/v2/auth|perspective/.*/export)
+
+    admin_pattern:                                              settings/oauth|settings/remote
+    api_pattern:                                                api|github|mail|tweet
+    oauth_pattern:                                              oauth/v2/auth
+    super_admin_pattern:                                        perspective/.*/export
+    basic_auth_pattern:                                         ^/(%admin_pattern%|%super_admin_pattern%|%api_pattern%|%oauth_pattern%|documents|user|query|content)
 
     database_charset:                                           UTF8
     database_driver:                                            pdo_mysql

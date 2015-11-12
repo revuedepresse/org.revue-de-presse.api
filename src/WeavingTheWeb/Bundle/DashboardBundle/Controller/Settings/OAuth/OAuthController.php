@@ -11,13 +11,14 @@ use Symfony\Component\HttpFoundation\RedirectResponse,
     Symfony\Component\HttpKernel\HttpKernelInterface,
     Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 
-use WeavingTheWeb\Bundle\DashboardBundle\Entity\OAuth\Client;
+use WeavingTheWeb\Bundle\DashboardBundle\Controller\AbstractController,
+    WeavingTheWeb\Bundle\DashboardBundle\Entity\OAuth\Client;
 
 /**
  * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
  * @Extra\Route("/settings/oauth", service="weaving_the_web_dashboard.controller.settings.oauth")
  */
-class OAuthController
+class OAuthController extends AbstractController
 {
     /**
      * @var \WeavingTheWeb\Bundle\ApiBundle\Repository\OAuth\ClientRepository
@@ -30,49 +31,14 @@ class OAuthController
     public $clientRegistry;
 
     /**
-     * @var \Doctrine\ORM\EntityManager
-     */
-    public $entityManager;
-
-    /**
-     * @var \Symfony\Component\Form\FormFactory
-     */
-    public $formFactory;
-
-    /**
      * @var \Symfony\Component\HttpKernel\HttpKernel
      */
     public $httpKernel;
 
     /**
-     * @var \Psr\Log\LoggerInterface
+     * @var \WeavingTheWeb\Bundle\DashboardBundle\Form\Type\OAuth\SelectClientType
      */
-    public $logger;
-
-    /**
-     * @var \Symfony\Component\Routing\Router
-     */
-    public $router;
-
-    /**
-     * @var \Symfony\Component\Translation\Translator
-     */
-    public $translator;
-
-    /**
-     * @var \Symfony\Component\HttpFoundation\Session\Session
-     */
-    public $session;
-
-    /**
-     * @var \Symfony\Component\HttpFoundation\RequestStack
-     */
-    public $requestStack;
-
-    /**
-     * @var \Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface
-     */
-    public $tokenStorage;
+    public $selectOAuthClientType;
 
     /**
      * @Extra\Route(
@@ -221,23 +187,6 @@ class OAuthController
     }
 
     /**
-     * @return mixed
-     */
-    public function getUser()
-    {
-        if (null === $token = $this->tokenStorage->getToken()) {
-            throw new AccessDeniedHttpException();
-        }
-
-        if (!is_object($user = $token->getUser())) {
-            // e.g. anonymous authentication
-            throw new AccessDeniedHttpException();
-        }
-
-        return $user;
-    }
-
-    /**
      * @Extra\Route(
      *      "/client/select",
      *      name="weaving_the_web_dashboard_settings_oauth_select_client"
@@ -252,13 +201,15 @@ class OAuthController
         $currentRoute = $this->getCurrentRoute();
 
         /** @var \WeavingTheWeb\Bundle\DashboardBundle\Entity\OAuth\Client $client */
-        $client = $this->clientRegistry->findOneby(['selected' => true]);
+        $client = $this->clientRegistry->findOneby(['selected' => true, 'user' => $this->getUser()]);
+
         $data = null;
         if (!is_null($client)) {
             $data = ['oauth_clients' => $client];
         }
+        $this->selectOAuthClientType->setUser($this->getUser());
         $form = $this->formFactory->create(
-            'select_oauth_client',
+            $this->selectOAuthClientType,
             $data,
             [
                 'action' => $currentRoute,
@@ -305,73 +256,6 @@ class OAuthController
     protected function getDefaultRedirectUri()
     {
         return 'http://localhost' . $this->router->generate('weaving_the_web_api_oauth_callback');
-    }
-
-    /**
-     * @return array
-     */
-    protected function getCurrentRoute()
-    {
-        $request = $this->requestStack->getMasterRequest();
-
-        return $this->router->generate($request->attributes->get('_route'));
-    }
-
-
-    /**
-     * @param FormInterface $form
-     * @param Request $request
-     * @return bool
-     */
-    protected function isFormSubmitted(FormInterface $form, Request $request)
-    {
-        if ($request->isMethod('POST')) {
-            $form->handleRequest($request);
-
-            return $form->isSubmitted();
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * @param FormInterface $form
-     * @param $action
-     */
-    protected function handleFormErrors(FormInterface $form, $action)
-    {
-        $flashBag = [$this->translator->trans('oauth.' . $action . '.error', [], 'oauth')];
-
-        $this->addErrorFlashMessages($form, $flashBag, $action . '_error');
-    }
-
-    /**
-     * @param FormInterface $form
-     * @param array $flashBag
-     * @param $type
-     */
-    protected function addErrorFlashMessages(FormInterface $form, array $flashBag, $type)
-    {
-        $errors = $form->getErrors();
-        foreach ($errors as $error) {
-            $flashBag['error'][] = $error->getMessage();
-        }
-
-        $this->addFlashMessages($flashBag, $type);
-    }
-
-    /**
-     * @param array $messages
-     * @param $type
-     */
-    protected function addFlashMessages(array $messages, $type)
-    {
-        if (count($messages) > 0) {
-            $this->session->getFlashBag()->add(
-                $type,
-                implode("\n", $messages)
-            );
-        }
     }
 
     /**

@@ -2,13 +2,16 @@ parameters:
     phpseclib.aes.class:                                                phpseclib\Crypt\AES
     weaving_the_web_dashboard.command.export_perspectives.class:        WeavingTheWeb\Bundle\DashboardBundle\Command\ExportPerspectivesCommand
     weaving_the_web_dashboard.command.import_perspectives.class:        WeavingTheWeb\Bundle\DashboardBundle\Command\ImportPerspectivesCommand
+    weaving_the_web_dashboard.controller.settings.remote.class:         WeavingTheWeb\Bundle\DashboardBundle\Controller\Settings\RemoteController
     weaving_the_web_dashboard.controller.settings.oauth.class:          WeavingTheWeb\Bundle\DashboardBundle\Controller\Settings\OAuth\OAuthController
     weaving_the_web_dashboard.controller.search.class:                  WeavingTheWeb\Bundle\DashboardBundle\Controller\SearchController
     weaving_the_web_dashboard.dbal_connection.class:                    WeavingTheWeb\Bundle\DashboardBundle\DBAL\Connection
     weaving_the_web_dashboard.entity.oauth.client:                      WeavingTheWebDashboardBundle:OAuth\Client
     weaving_the_web_dashboard.entity.perspective:                       WeavingTheWebDashboardBundle:Perspective
+    weaving_the_web_dashboard.entity.remote:                            WeavingTheWebDashboardBundle:Remote
     weaving_the_web_dashboard.error_handler.upload_file.class:          WeavingTheWeb\Bundle\DashboardBundle\ErrorHandler\UploadFile
     weaving_the_web_dashboard.event.export_perspectives.class:          WeavingTheWeb\Bundle\DashboardBundle\ImportExport\Event\ExportPerspectivesEvent
+    weaving_the_web_dashboard.form_type.remote.add_remote.class:        WeavingTheWeb\Bundle\DashboardBundle\Form\Type\AddRemoteType
     weaving_the_web_dashboard.form_type.oauth.create_client.class:      WeavingTheWeb\Bundle\DashboardBundle\Form\Type\OAuth\CreateClientType
     weaving_the_web_dashboard.form_type.oauth.redirect_uri.class:       WeavingTheWeb\Bundle\DashboardBundle\Form\Type\OAuth\RedirectUriType
     weaving_the_web_dashboard.form_type.oauth.register_client.class:    WeavingTheWeb\Bundle\DashboardBundle\Form\Type\OAuth\RegisterClientType
@@ -20,6 +23,7 @@ parameters:
     weaving_the_web_dashboard.perspective_validator.class:              WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints\PerspectiveValidator
     weaving_the_web_dashboard.repository.oauth.client.class:            WeavingTheWeb\Bundle\DashboardBundle\Repository\OAuth\ClientRepository
     weaving_the_web_dashboard.repository.perspective.class:             WeavingTheWeb\Bundle\DashboardBundle\Repository\PerspectiveRepository
+    weaving_the_web_dashboard.repository.remote.class:                  WeavingTheWeb\Bundle\DashboardBundle\Repository\RemoteRepository
     weaving_the_web_dashboard.resolver.path.class:                      WeavingTheWeb\Bundle\DashboardBundle\Resolver\PathResolver
     weaving_the_web_dashboard.resources.perspectives.archive:           %kernel.root_dir%/../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/perspectives/archive
     weaving_the_web_dashboard.resources.perspectives.export:            %kernel.root_dir%/../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/perspectives/export
@@ -68,10 +72,18 @@ services:
     weaving_the_web_dashboard.controller.abstract:
         abstract:           true
         properties:
+            entityManager:  @doctrine.orm.entity_manager
+            formFactory:    @form.factory
             logger:         @logger
+            requestStack:   @request_stack
             router:         @router
             session:        @session
+            tokenStorage:   @security.token_storage
             translator:     @translator
+
+    weaving_the_web_dashboard.controller.settings.remote:
+        class:  %weaving_the_web_dashboard.controller.settings.remote.class%
+        parent: weaving_the_web_dashboard.controller.abstract
 
     weaving_the_web_dashboard.controller.search:
         class: %weaving_the_web_dashboard.controller.search.class%
@@ -82,13 +94,10 @@ services:
         class:  %weaving_the_web_dashboard.controller.settings.oauth.class%
         parent: weaving_the_web_dashboard.controller.abstract
         properties:
-            clientRepository:   @weaving_the_web_api.repository.oauth.client
-            clientRegistry:     @weaving_the_web_dashboard.repository.oauth.client
-            entityManager:      @doctrine.orm.entity_manager
-            formFactory:        @form.factory
-            httpKernel:         @kernel
-            requestStack:       @request_stack
-            tokenStorage:       @security.token_storage
+            clientRepository:       @weaving_the_web_api.repository.oauth.client
+            clientRegistry:         @weaving_the_web_dashboard.repository.oauth.client
+            httpKernel:             @kernel
+            selectOAuthClientType:  @weaving_the_web_dashboard.form_type.oauth.select_client
 
     weaving_the_web_dashboard.dbal_connection:
         class:  %weaving_the_web_dashboard.dbal_connection.class%
@@ -158,6 +167,11 @@ services:
         tags:
             - { name: form.type, alias: select_oauth_client }
 
+    weaving_the_web_dashboard.form_type.remote.add_remote:
+        class: %weaving_the_web_dashboard.form_type.remote.add_remote.class%
+        tags:
+            - { name: form.type, alias: add_remote }
+
     weaving_the_web_dashboard.form_type.search:
         class: %weaving_the_web_dashboard.form_type.search.class%
         tags:
@@ -195,6 +209,11 @@ services:
         arguments:  [%weaving_the_web_dashboard.entity.perspective%]
         properties:
             sourceDirectory: %weaving_the_web_dashboard.resources.perspectives.import%
+
+    weaving_the_web_dashboard.repository.remote:
+        class: %weaving_the_web_dashboard.repository.remote.class%
+        factory:    [@doctrine.orm.entity_manager, getRepository]
+        arguments:  [%weaving_the_web_dashboard.entity.remote%]
 
     weaving_the_web_dashboard.resolver.path:
         class: %weaving_the_web_dashboard.resolver.path.class%
