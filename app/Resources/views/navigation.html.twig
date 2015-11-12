@@ -45,11 +45,16 @@
                     {% endspaceless %}
                 </li>
                 {% if is_granted("ROLE_ADMIN") %}
-                    <li{% if active_menu_item == 'oauth_settings' %} class="active"{% endif %}>
-                        <a href="{{ path("weaving_the_web_dashboard_settings_oauth_show_settings") }}">
-                            {{ "menu.settings.oauth"|trans({}, 'menu') }}
-                        </a>
-                    </li>
+                <li{% if active_menu_item == 'oauth_settings' %} class="active"{% endif %}>
+                    <a href="{{ path("weaving_the_web_dashboard_settings_oauth_show_settings") }}">
+                        {{ "menu.settings.oauth"|trans({}, 'menu') }}
+                    </a>
+                </li>
+                <li{% if active_menu_item == 'remote_settings' %} class="active"{% endif %}>
+                    <a href="{{ path("weaving_the_web_dashboard_settings_add_remote") }}">
+                        {{ "menu.settings.remotes"|trans({}, 'menu') }}
+                    </a>
+                </li>
                 {% endif %}
             </ul>
             {% endif %}

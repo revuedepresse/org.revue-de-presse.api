@@ -4,16 +4,17 @@ namespace WeavingTheWeb\Bundle\DashboardBundle\Form\Type\OAuth;
 
 use Doctrine\ORM\EntityRepository;
 
-use Symfony\Component\Form\AbstractType,
-    Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\Form\FormBuilderInterface,
+    Symfony\Component\Form\FormInterface;
 
-use Symfony\Component\Form\FormInterface,
-    Symfony\Component\OptionsResolver\OptionsResolverInterface;
+use Symfony\Component\OptionsResolver\OptionsResolverInterface;
+
+use WeavingTheWeb\Bundle\DashboardBundle\Form\Type\AbstractUserAwareType;
 
 /**
  * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
-class SelectClientType extends AbstractType
+class SelectClientType extends AbstractUserAwareType
 {
     /**
      * @param FormBuilderInterface $builder
@@ -32,7 +33,13 @@ class SelectClientType extends AbstractType
                     'choice_label'  =>  'clientId',
                     'placeholder'   =>  'oauth.placeholder.empty_selection',
                     'query_builder' =>  function (EntityRepository $repository) {
-                        return $repository->createQueryBuilder('c');
+                        if (is_null($this->user)) {
+                            throw new \LogicException('An OAuth client should be selected on a per-user basis.');
+                        }
+
+                        return $repository->createQueryBuilder('c')
+                            ->andWhere('c.user = :user')
+                            ->setParameter('user', $this->user);
                     }
                 ]
             )

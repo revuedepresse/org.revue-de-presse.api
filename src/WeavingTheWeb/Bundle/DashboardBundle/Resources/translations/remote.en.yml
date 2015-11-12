@@ -1,0 +1,12 @@
+remote:
+    label:
+        remote:         Remote
+        access_token:   Access token
+        submit:         Add remote
+    placeholder:
+        remote:         A remote host
+        access_token:   An OAuth access token
+    add_remote:
+        error:          Sorry, this remote could not have been added.
+        success:        Thank you for having adding this remote.
+        title:          Add a remote
