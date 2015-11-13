@@ -39,7 +39,7 @@ class PerspectiveController
     /**
      * @Extra\Route(
      *      "/export",
-     *      name="weaving_the_web_api_export_perspective",
+     *      name="weaving_the_web_api_export_perspectives",
      *      options={"expose"=true}
      * )
      * @Extra\Method({"POST"})
@@ -62,8 +62,8 @@ class PerspectiveController
             $message = $this->translator->trans('perspective.job.submitted', [], 'perspective');
 
             return new JsonResponse([
-                'result' => $message,
-                'data' => ['job_id' => $job->getId()],
+                'job' => ['id' => $job->getId()],
+                'status' => $message,
                 'type' => 'success'
             ]);
         }

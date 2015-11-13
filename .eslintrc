@@ -18,7 +18,12 @@
         ]
     },
     "env": {
-        "browser": true
+        "browser": true,
+        "jasmine": true,
+        "jquery": true
+    },
+    "globals": {
+        "RequestMockery": true
     },
     "extends": "eslint:recommended"
 }

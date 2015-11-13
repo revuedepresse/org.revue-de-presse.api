@@ -1,4 +1,6 @@
 job:
     dashboard:
-        title:  Jobs
+        title:                  Jobs
+    label:
+        export_perspectives:    Export perspectives from remote
 
