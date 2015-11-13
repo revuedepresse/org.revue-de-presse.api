@@ -1,0 +1,28 @@
+{% extends "::base.html.twig" %}
+
+{% block title %}{{ 'job.dashboard.title'|trans({}, 'job') }}{% endblock %}
+
+{% block body %}
+<div class="container">
+    <input id="host" type="hidden" value="{{ remote.host }}">
+    <input id="access-token" type="hidden" value="{{ remote.accessToken }}">
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {% javascripts
+        '@WeavingTheWebDashboardBundle/Resources/public/js/job.js'
+        output='js/compiled/show-jobs.js' %}
+        <script src="{{ asset_url }}" type="text/javascript"></script>
+    {% endjavascripts %}
+{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {% stylesheets
+        '@WeavingTheWebDashboardBundle/Resources/public/css/jobs.css'
+        output='css/compiled/show-jobs.css' %}
+        <link rel="stylesheet" type="text/css" href="{{ asset_url }}" />
+    {% endstylesheets %}
+{% endblock %}
