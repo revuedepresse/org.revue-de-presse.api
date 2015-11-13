@@ -4,6 +4,6 @@ menu:
     github_repositories:    Github Repositories
     settings:
         parent:             My Settings
-        oauth:              OAuth clients
+        oauth_clients:      OAuth clients
         remotes:            Remotes
     tweets:                 Tweets
