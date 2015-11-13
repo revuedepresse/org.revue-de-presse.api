@@ -91,7 +91,7 @@ class DocumentController extends Controller
 
         return $this->render(
             'WeavingTheWebDashboardBundle:Document:showDocuments.html.twig', array(
-                'active_menu_item' => 'dashboard',
+                'active_menu_item' => 'dashboard_documents',
                 'error' => $query->error,
                 'default_query' => $query->sql,
                 'records' => $query->records,

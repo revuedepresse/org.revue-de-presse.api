@@ -2,6 +2,7 @@ parameters:
     phpseclib.aes.class:                                                phpseclib\Crypt\AES
     weaving_the_web_dashboard.command.export_perspectives.class:        WeavingTheWeb\Bundle\DashboardBundle\Command\ExportPerspectivesCommand
     weaving_the_web_dashboard.command.import_perspectives.class:        WeavingTheWeb\Bundle\DashboardBundle\Command\ImportPerspectivesCommand
+    weaving_the_web_dashboard.controller.job.class:                     WeavingTheWeb\Bundle\DashboardBundle\Controller\Dashboard\JobController
     weaving_the_web_dashboard.controller.settings.remote.class:         WeavingTheWeb\Bundle\DashboardBundle\Controller\Settings\RemoteController
     weaving_the_web_dashboard.controller.settings.oauth.class:          WeavingTheWeb\Bundle\DashboardBundle\Controller\Settings\OAuth\OAuthController
     weaving_the_web_dashboard.controller.search.class:                  WeavingTheWeb\Bundle\DashboardBundle\Controller\SearchController
@@ -82,12 +83,11 @@ services:
             tokenStorage:   @security.token_storage
             translator:     @translator
 
-    weaving_the_web_dashboard.controller.settings.remote:
-        class:              %weaving_the_web_dashboard.controller.settings.remote.class%
-        parent:             weaving_the_web_dashboard.controller.abstract
+    weaving_the_web_dashboard.controller.job:
+        class:                  %weaving_the_web_dashboard.controller.job.class%
+        parent:                 weaving_the_web_dashboard.controller.abstract
         properties:
             remoteRepository:   @weaving_the_web_dashboard.repository.remote
-            selectRemoteType:   @weaving_the_web_dashboard.form_type.remote.select_remote
 
     weaving_the_web_dashboard.controller.search:
         class: %weaving_the_web_dashboard.controller.search.class%
@@ -102,6 +102,13 @@ services:
             clientRegistry:         @weaving_the_web_dashboard.repository.oauth.client
             httpKernel:             @kernel
             selectOAuthClientType:  @weaving_the_web_dashboard.form_type.oauth.select_client
+
+    weaving_the_web_dashboard.controller.settings.remote:
+        class:              %weaving_the_web_dashboard.controller.settings.remote.class%
+        parent:             weaving_the_web_dashboard.controller.abstract
+        properties:
+            remoteRepository:   @weaving_the_web_dashboard.repository.remote
+            selectRemoteType:   @weaving_the_web_dashboard.form_type.remote.select_remote
 
     weaving_the_web_dashboard.dbal_connection:
         class:  %weaving_the_web_dashboard.dbal_connection.class%
