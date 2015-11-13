@@ -1,9 +1,8 @@
 {% if register_oauth_client_form is defined %}
 <h2>{{ 'oauth.register_client.title'|trans({}, 'oauth') }}</h2>
 <div class="row-fluid">
-    {% embed 'WeavingTheWebDashboardBundle:Settings/OAuthClient:_flash_messages.html.twig'
+    {% embed 'WeavingTheWebDashboardBundle:Settings:_flash_messages.html.twig'
         with {'prefix': 'register_client_'} %}{% endembed %}
-
     {{ form_start(register_oauth_client_form) }}
     {{ form_row(register_oauth_client_form.client_id) }}
     {{ form_row(register_oauth_client_form.client_secret) }}

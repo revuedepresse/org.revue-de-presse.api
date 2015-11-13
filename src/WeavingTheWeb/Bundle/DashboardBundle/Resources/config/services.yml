@@ -12,6 +12,7 @@ parameters:
     weaving_the_web_dashboard.error_handler.upload_file.class:          WeavingTheWeb\Bundle\DashboardBundle\ErrorHandler\UploadFile
     weaving_the_web_dashboard.event.export_perspectives.class:          WeavingTheWeb\Bundle\DashboardBundle\ImportExport\Event\ExportPerspectivesEvent
     weaving_the_web_dashboard.form_type.remote.add_remote.class:        WeavingTheWeb\Bundle\DashboardBundle\Form\Type\AddRemoteType
+    weaving_the_web_dashboard.form_type.remote.select_remote.class:     WeavingTheWeb\Bundle\DashboardBundle\Form\Type\SelectRemoteType
     weaving_the_web_dashboard.form_type.oauth.create_client.class:      WeavingTheWeb\Bundle\DashboardBundle\Form\Type\OAuth\CreateClientType
     weaving_the_web_dashboard.form_type.oauth.redirect_uri.class:       WeavingTheWeb\Bundle\DashboardBundle\Form\Type\OAuth\RedirectUriType
     weaving_the_web_dashboard.form_type.oauth.register_client.class:    WeavingTheWeb\Bundle\DashboardBundle\Form\Type\OAuth\RegisterClientType
@@ -82,8 +83,11 @@ services:
             translator:     @translator
 
     weaving_the_web_dashboard.controller.settings.remote:
-        class:  %weaving_the_web_dashboard.controller.settings.remote.class%
-        parent: weaving_the_web_dashboard.controller.abstract
+        class:              %weaving_the_web_dashboard.controller.settings.remote.class%
+        parent:             weaving_the_web_dashboard.controller.abstract
+        properties:
+            remoteRepository:   @weaving_the_web_dashboard.repository.remote
+            selectRemoteType:   @weaving_the_web_dashboard.form_type.remote.select_remote
 
     weaving_the_web_dashboard.controller.search:
         class: %weaving_the_web_dashboard.controller.search.class%
@@ -171,6 +175,11 @@ services:
         class: %weaving_the_web_dashboard.form_type.remote.add_remote.class%
         tags:
             - { name: form.type, alias: add_remote }
+
+    weaving_the_web_dashboard.form_type.remote.select_remote:
+        class: %weaving_the_web_dashboard.form_type.remote.select_remote.class%
+        tags:
+            - { name: form.type, alias: select_remote }
 
     weaving_the_web_dashboard.form_type.search:
         class: %weaving_the_web_dashboard.form_type.search.class%

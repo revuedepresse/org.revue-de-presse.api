@@ -7,7 +7,8 @@ use Symfony\Component\Form\AbstractType,
 
 use Symfony\Component\OptionsResolver\OptionsResolverInterface;
 
-use Symfony\Component\Validator\Constraints\NotBlank;
+use Symfony\Component\Validator\Constraints\NotBlank,
+    Symfony\Component\Validator\Constraints\Url;
 
 /**
  * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
@@ -25,7 +26,7 @@ class AddRemoteType extends AbstractType
                 'remote',
                 'url', [
                     'label'         => 'remote.label.remote',
-                    'constraints'   => [new NotBlank()],
+                    'constraints'   => [new NotBlank(), new Url()],
                     'attr'          => ['placeholder' => 'remote.placeholder.remote'],
                 ]
             )

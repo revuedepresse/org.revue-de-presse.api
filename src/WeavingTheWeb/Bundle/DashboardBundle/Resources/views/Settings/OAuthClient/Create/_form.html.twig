@@ -1,6 +1,6 @@
 <h2>{{ 'oauth.create_client.title'|trans({}, 'oauth') }}</h2>
 <div class="row-fluid">
-    {% embed 'WeavingTheWebDashboardBundle:Settings/OAuthClient:_flash_messages.html.twig'
+    {% embed 'WeavingTheWebDashboardBundle:Settings:_flash_messages.html.twig'
         with {'prefix': 'create_client_'} %}{% endembed %}
 
     {% for flashMessage in app.session.flashbag.get('create_client_link') %}

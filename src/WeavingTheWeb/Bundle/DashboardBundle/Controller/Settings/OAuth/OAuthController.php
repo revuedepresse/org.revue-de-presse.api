@@ -43,14 +43,14 @@ class OAuthController extends AbstractController
     /**
      * @Extra\Route(
      *      "/",
-     *      name="weaving_the_web_dashboard_settings_oauth_show_settings"
+     *      name="weaving_the_web_dashboard_settings_oauth_show_client_settings"
      * )
      * @Extra\Method({"GET", "POST"})
      * @Extra\Template("WeavingTheWebDashboardBundle:Settings:OAuthClient/Create/_block.html.twig")
      * @param  Request $request
      * @return array
      */
-    public function showSettingsAction(Request $request)
+    public function showClientSettingsAction(Request $request)
     {
         $oauthClientResponse = $this->createOAuthClientAction($request);
         if ($oauthClientResponse instanceof RedirectResponse) {

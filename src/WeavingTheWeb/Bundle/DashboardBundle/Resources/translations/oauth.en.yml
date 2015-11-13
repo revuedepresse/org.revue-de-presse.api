@@ -4,7 +4,7 @@ oauth:
         client_secret:      Client secret
         oauth_clients:      OAuth client
         redirect_uri:       Redirect URI
-        select:             Select OAuth client
+        select:             Select an OAuth client
         submit:             Submit
     create_client:
         error:              Sorry, a new OAuth client could not have been created.
