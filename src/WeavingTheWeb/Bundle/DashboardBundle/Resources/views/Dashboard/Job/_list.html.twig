@@ -4,8 +4,13 @@
 
 {% block body %}
 <div class="container">
-    <input id="host" type="hidden" value="{{ remote.host }}">
-    <input id="access-token" type="hidden" value="{{ remote.accessToken }}">
+    <button class="btn btn-default"
+            data-action="export-perspectives">
+        {{ 'job.label.export_perspectives'|trans({}, 'job') }}
+    </button>
+    <ul data-listen-event="job:created"></ul>
+    <input data-request-prop="scheme-host" type="hidden" value="{{ remote.host }}">
+    <input data-request-prop="header" data-key="Authorization" type="hidden" value="Bearer {{ remote.accessToken }}">
 </div>
 {% endblock %}
 
