@@ -25,12 +25,12 @@
                 </li>
                 {% if is_granted("ROLE_ADMIN") %}
                 <li{% if active_menu_item == 'oauth_settings' %} class="active"{% endif %}>
-                    <a href="{{ path("weaving_the_web_dashboard_settings_oauth_show_settings") }}">
+                    <a href="{{ path("weaving_the_web_dashboard_settings_oauth_show_client_settings") }}">
                         {{ "menu.settings.oauth_clients"|trans({}, 'menu') }}
                     </a>
                 </li>
                 <li{% if active_menu_item == 'remote_settings' %} class="active"{% endif %}>
-                    <a href="{{ path("weaving_the_web_dashboard_settings_add_remote") }}">
+                    <a href="{{ path("weaving_the_web_dashboard_settings_show_remote_settings") }}">
                         {{ "menu.settings.remotes"|trans({}, 'menu') }}
                     </a>
                 </li>

@@ -1,6 +1,6 @@
 <?php
 
-namespace WeavingTheWeb\Bundle\DashboardBundle\Entity;
+namespace WeavingTheWeb\Bundle\DashboardBundle\Entity\Awareness;
 
 /**
  * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>

@@ -6,12 +6,23 @@ use Doctrine\ORM\Mapping as ORM;
 
 use Symfony\Component\Security\Core\User\UserInterface;
 
+use WeavingTheWeb\Bundle\DashboardBundle\Entity\Awareness\CreationAware,
+    WeavingTheWeb\Bundle\DashboardBundle\Entity\Awareness\CreationAwareInterface,
+    WeavingTheWeb\Bundle\DashboardBundle\Entity\Awareness\SelectionAware,
+    WeavingTheWeb\Bundle\DashboardBundle\Entity\Awareness\SelectionAwareInterface,
+    WeavingTheWeb\Bundle\DashboardBundle\Entity\Awareness\UserAware,
+    WeavingTheWeb\Bundle\DashboardBundle\Entity\Awareness\UserAwareInterface;
+
 /**
  * @ORM\Entity(repositoryClass="\WeavingTheWeb\Bundle\DashboardBundle\Repository\RemoteRepository")
  * @ORM\Table(name="weaving_remote")
  */
-class Remote
+class Remote implements SelectionAwareInterface, UserAwareInterface, CreationAwareInterface
 {
+    use CreationAware,
+        SelectionAware,
+        UserAware;
+
     /**
      * @var integer
      *
@@ -38,41 +49,9 @@ class Remote
     /**
      * @var \DateTime
      *
-     * @ORM\Column(name="created_at", type="datetime", nullable=false)
-     */
-    protected $createdAt;
-
-    /**
-     * @var \DateTime
-     *
      * @ORM\Column(name="updated_at", type="datetime", nullable=true)
      */
     protected $updatedAt;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="\WTW\UserBundle\Entity\User", cascade={"all"})
-     * @ORM\JoinColumn(name="user", referencedColumnName="usr_id")
-     */
-    protected $user;
-
-    /**
-     * @return mixed
-     */
-    public function getUser()
-    {
-        return $this->user;
-    }
-
-    /**
-     * @param mixed $user
-     * @return $this
-     */
-    public function setUser(UserInterface $user)
-    {
-        $this->user = $user;
-
-        return $this;
-    }
 
     public function __construct($host, $accessToken)
     {
@@ -123,25 +102,6 @@ class Remote
     public function setAccessToken($accessToken)
     {
         $this->accessToken = $accessToken;
-
-        return $this;
-    }
-
-    /**
-     * @return \DateTime
-     */
-    public function getCreatedAt()
-    {
-        return $this->createdAt;
-    }
-
-    /**
-     * @param \DateTime $createdAt
-     * @return $this
-     */
-    public function setCreatedAt($createdAt)
-    {
-        $this->createdAt = $createdAt;
 
         return $this;
     }

@@ -4,9 +4,12 @@ namespace WeavingTheWeb\Bundle\DashboardBundle\Entity\OAuth;
 
 use Doctrine\ORM\Mapping as ORM;
 
-use WeavingTheWeb\Bundle\DashboardBundle\Entity\SelectionAwareInterface;
-
-use WTW\UserBundle\Entity\User;
+use WeavingTheWeb\Bundle\DashboardBundle\Entity\Awareness\CreationAware,
+    WeavingTheWeb\Bundle\DashboardBundle\Entity\Awareness\CreationAwareInterface,
+    WeavingTheWeb\Bundle\DashboardBundle\Entity\Awareness\SelectionAware,
+    WeavingTheWeb\Bundle\DashboardBundle\Entity\Awareness\SelectionAwareInterface,
+    WeavingTheWeb\Bundle\DashboardBundle\Entity\Awareness\UserAware,
+    WeavingTheWeb\Bundle\DashboardBundle\Entity\Awareness\UserAwareInterface;
 
 /**
  * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
@@ -20,8 +23,12 @@ use WTW\UserBundle\Entity\User;
  *      }
  * )
  */
-class Client implements SelectionAwareInterface
+class Client implements SelectionAwareInterface, UserAwareInterface, CreationAwareInterface
 {
+    use CreationAware,
+        SelectionAware,
+        UserAware;
+
     /**
      * @ORM\Id
      * @ORM\Column(name="id", type="integer", nullable=false)
@@ -43,51 +50,6 @@ class Client implements SelectionAwareInterface
      * @ORM\Column(name="redirect_uri", type="text")
      */
     private $redirectUri;
-
-    /**
-     * @var bool
-     *
-     * @ORM\Column(name="selected", type="boolean", options={"default": false})
-     */
-    private $selected = false;
-
-    /**
-     * @ORM\ManyToOne(targetEntity="\WTW\UserBundle\Entity\User", cascade={"all"})
-     * @ORM\JoinColumn(name="user", referencedColumnName="usr_id")
-     */
-    protected $user;
-
-    /**
-     * @return mixed
-     */
-    public function getUser()
-    {
-        return $this->user;
-    }
-
-    /**
-     * @param mixed $user
-     * @return $this
-     */
-    public function setUser(User $user)
-    {
-        $this->user = $user;
-
-        return $this;
-    }
-
-    /**
-     * @var \DateTime
-     *
-     * @ORM\Column(name="selected_at", type="datetime", nullable=true)
-     */
-    private $selectedAt;
-
-    /**
-     * @var \DateTime
-     * @ORM\Column(name="created_at", type="datetime")
-     */
-    private $createdAt;
 
     /**
      * @param $clientId
@@ -160,74 +122,6 @@ class Client implements SelectionAwareInterface
     public function setRedirectUri($redirectUri)
     {
         $this->redirectUri = $redirectUri;
-
-        return $this;
-    }
-
-    /**
-     * @return \DateTime
-     */
-    public function getCreatedAt()
-    {
-        return $this->createdAt;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function isSelected()
-    {
-        return $this->selected;
-    }
-
-    /**
-     * @param $selected
-     * @return $this
-     */
-    public function setSelected($selected) {
-        $this->selected = $selected;
-        if ($this->selected) {
-            $this->selectedAt = new \DateTime();
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return $this
-     */
-    public function select()
-    {
-        $this->setSelected(true);
-
-        return $this;
-    }
-
-    /**
-     * @return $this
-     */
-    public function unselect()
-    {
-        $this->setSelected(false);
-
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getSelectedAt()
-    {
-        return $this->selectedAt;
-    }
-
-    /**
-     * @param mixed $selectedAt
-     * @return $this
-     */
-    public function setSelectedAt(\DateTime $selectedAt)
-    {
-        $this->selectedAt = $selectedAt;
 
         return $this;
     }
