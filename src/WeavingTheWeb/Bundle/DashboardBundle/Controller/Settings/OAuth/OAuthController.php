@@ -218,27 +218,25 @@ class OAuthController extends AbstractController
 
         if ($this->isFormSubmitted($form, $request)) {
             if ($form->isValid()) {
-                $selectedOauthClient = $form->get('oauth_clients')->getData();
-                if (is_null($selectedOauthClient)) {
-                    $successMessage = $this->translator->trans('oauth.select_client.empty_selection', [], 'oauth');
-                    if (!is_null($data)) {
-                        $client->unselect();
-                        $this->updateOAuthClientSelection($client);
-                    }
-                } else {
-                    /**
-                     * @var \WeavingTheWeb\Bundle\DashboardBundle\Entity\OAuth\Client $oauthClient
-                     */
-                    $oauthClient = $this->clientRegistry->findOneBy(['id' => $selectedOauthClient]);
-                    if (is_null($oauthClient)) {
-                        throw new \LogicException('The selected OAuth client has not been registered before.');
-                    }
-                    $oauthClient->select();
-                    $this->updateOAuthClientSelection($oauthClient);
+                /** @var \WeavingTheWeb\Bundle\DashboardBundle\Entity\OAuth\Client $submittedOAuthClient */
+                $submittedOAuthClient = $form->get('oauth_clients')->getData();
 
-                    $successMessage = $this->translator->trans('oauth.select_client.success', [], 'oauth');
+                // Unselect the previously selected OAuth client
+                if (!is_null($data)) {
+                    $client->unselect();
+                    $this->updateOAuthClientSelection($client);
                 }
 
+                if (is_null($submittedOAuthClient)) {
+                    $messageKey = 'empty_selection';
+                } else {
+                    $submittedOAuthClient->select();
+                    $this->updateOAuthClientSelection($submittedOAuthClient);
+
+                    $messageKey = 'success';
+                }
+
+                $successMessage = $this->translator->trans('oauth.select_client.' . $messageKey, [], 'oauth');
                 $this->addFlashMessages([$successMessage], 'select_client_info');
 
                 return new RedirectResponse($currentRoute);
