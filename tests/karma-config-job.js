@@ -30,6 +30,7 @@ module.exports = function(config) {
         // list of files / patterns to load in the browser
         files: [
             'bower_components/jquery/dist/jquery.js',
+            'bower_components/bind-polyfill/index.js',            
             notificationCenter,
             job,
             'bower_components/jquery-mockjax/dist/jquery.mockjax.js',
@@ -67,7 +68,7 @@ module.exports = function(config) {
         // - Safari (only Mac; has to be installed with `npm install karma-safari-launcher`)
         // - PhantomJS
         // - IE (only Windows; has to be installed with `npm install karma-ie-launcher`)
-        browsers: ['ChromeCanary'],
+        browsers: ['PhantomJS', 'ChromeCanary'],
 
         eslint: {
             stopOnError: false,
@@ -77,7 +78,7 @@ module.exports = function(config) {
         preprocessors: preprocessors,
 
         junitReporter: {
-            outputFile: '../build/job-test-results.xml',
+            outputFile: '../build/karma/job-test-results.xml',
             suite: 'Job'
         },
 

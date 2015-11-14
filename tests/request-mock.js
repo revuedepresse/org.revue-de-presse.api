@@ -4,8 +4,11 @@
  * A factory producing request mocks
  *
  * @param {String} url
+ * @param {Boolean} debug
  */
-var RequestMockery = function (url) {
+var RequestMockery = function (url, debug) {
+    var shouldLogMocking = debug || false;
+
     return (function ($) {
         var mockFunctionNotCalled = 'The "mock" function has to be called ' +
             'before having access to the id of a request mock';
@@ -17,7 +20,7 @@ var RequestMockery = function (url) {
             this.$ = $;
 
             $.mockjaxSettings.throwUnmocked = true;
-            $.mockjaxSettings.logging = false;
+            $.mockjaxSettings.logging = shouldLogMocking;
             $.mockjaxSettings.responseTime = 0;
         };
 
@@ -133,7 +136,13 @@ var RequestMockery = function (url) {
          * @param {Object} headers
          * @returns {RequestMock}
          */
-        RequestMock.prototype.setRequestHeader = function (headers) {
+        RequestMock.prototype.setRequestHeaders = function (headers) {
+            if (
+                headers.constructor &&
+                headers.constructor.toString().indexOf('Object') === -1
+            ) {
+                throw 'Invalid headers (they should be passed as an object)';
+            }
             this.options.headers = headers;
 
             return this;

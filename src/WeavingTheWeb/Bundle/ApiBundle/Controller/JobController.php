@@ -39,6 +39,34 @@ class JobController
 
     /**
      * @Extra\Route(
+     *      "/",
+     *      name="weaving_the_web_api_get_jobs",
+     *      options={"expose"=true}
+     * )
+     * @Extra\Method({"GET"})
+     *
+     * @return JsonResponse
+     */
+    public function getJobsActions()
+    {
+        try {
+            // TODO Find job on a per-user basis
+            $jobs = $this->jobRepository->findBy([], ['createdAt' => 'DESC'], 10);
+            $type = 'success';
+        } catch (\Exception $exception) {
+            $this->logger->error($exception->getMessage());
+            $jobs = [];
+            $type = 'error';
+        }
+
+        return new JsonResponse([
+            'collection' => $jobs,
+            'type' => $type,
+        ]);
+    }
+
+    /**
+     * @Extra\Route(
      *      "/{job}/output",
      *      name="weaving_the_web_api_get_job_output",
      *      requirements={"job": "\d+"},
