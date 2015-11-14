@@ -8,7 +8,7 @@
             data-action="export-perspectives">
         {{ 'job.label.export_perspectives'|trans({}, 'job') }}
     </button>
-    <ul data-listen-event="job:created"></ul>
+    <div class="col-md-6 col-sd-6" data-container="jobs-board"></div>
     <input data-request-prop="scheme-host" type="hidden" value="{{ remote.host }}">
     <input data-request-prop="header" data-key="Authorization" type="hidden" value="Bearer {{ remote.accessToken }}">
 </div>

@@ -78,7 +78,7 @@ module.exports = function(config) {
         preprocessors: preprocessors,
 
         junitReporter: {
-            outputFile: '../build/job-test-results.xml',
+            outputFile: '../build/karma/job-test-results.xml',
             suite: 'Job'
         },
 
