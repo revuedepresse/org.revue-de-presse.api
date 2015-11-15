@@ -13,7 +13,7 @@ describe('Job', function () {
     var eventListeners;
     var jobsBoard;
     var jobsListItems;
-    var jobsListItemsSelectorTemplate = '[data-listen-event="{{ event_type }}"] li';
+    var jobsListItemsSelectorTemplate = '[data-listen-event="{{ event_type }}"] tr';
     var jobsListItemsSelector = jobsListItemsSelectorTemplate
         .replace('{{ event_type }}', createdJobEvent);
     var headers = [
@@ -40,6 +40,7 @@ describe('Job', function () {
 
     afterEach(function () {
         exportPerspectivesButton.remove();
+        container.remove();
     });
 
     it('should list jobs', function (done) {
@@ -84,7 +85,7 @@ describe('Job', function () {
             done();
         }});
 
-        $('body').load();  
+        $('body').load();
 
         mock.destroy();
     });
@@ -113,7 +114,8 @@ describe('Job', function () {
         requestMockery.shouldPost();
         requestMockery.respondWith({
             job: {
-                id: 1
+                id: 1,
+                status: 'A new idle job has been created.'
             },
             result: 'About to export perspectives',
             type: 'success'

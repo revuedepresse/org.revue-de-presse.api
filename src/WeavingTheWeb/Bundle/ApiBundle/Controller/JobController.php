@@ -4,12 +4,17 @@ namespace WeavingTheWeb\Bundle\ApiBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
 
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException,
-    Symfony\Component\HttpFoundation\JsonResponse,
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException,
+    Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+
+use Symfony\Component\HttpFoundation\JsonResponse,
     Symfony\Component\HttpFoundation\BinaryFileResponse,
     Symfony\Component\HttpFoundation\ResponseHeaderBag;
 
-use WeavingTheWeb\Bundle\ApiBundle\Entity\JobInterface;
+use Symfony\Component\Security\Core\User\EquatableInterface;
+
+use WeavingTheWeb\Bundle\ApiBundle\Entity\JobInterface,
+    WeavingTheWeb\Bundle\DashboardBundle\Entity\Awareness\UserAwareInterface;
 
 /**
  * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
@@ -38,6 +43,11 @@ class JobController
     public $archiveDir;
 
     /**
+     * @var \Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage
+     */
+    public $tokenStorage;
+
+    /**
      * @Extra\Route(
      *      "/",
      *      name="weaving_the_web_api_get_jobs",
@@ -50,8 +60,12 @@ class JobController
     public function getJobsActions()
     {
         try {
-            // TODO Find job on a per-user basis
-            $jobs = $this->jobRepository->findBy([], ['createdAt' => 'DESC'], 10);
+            $currentUser = $this->tokenStorage->getToken()->getUser();
+            $jobs = $this->jobRepository->findJobsBy(
+                $currentUser,
+                ['createdAt' => 'DESC'],
+                10
+            );
             $type = 'success';
         } catch (\Exception $exception) {
             $this->logger->error($exception->getMessage());
@@ -83,45 +97,11 @@ class JobController
      */
     public function getOutputAction(JobInterface $job)
     {
-        /**
-         * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Job $job
-         */
-        if ($job->isStarted()) {
-            $content = [
-                'result' => $this->getOutputMessage($job, 'started'),
-                'type' => 'info'
-            ]
-            ;
-        } elseif ($job->hasFailed()) {
-            $content = [
-                'result' => $this->getOutputMessage($job, 'failed'),
-                'type' => 'error'
-            ];
-        } elseif ($job->hasFinished()) {
-            $content = [
-                'result' => $this->getOutputMessage($job, 'finished'),
-                'data' => ['url' => $job->getOutput()],
-                'type' => 'success'
-            ];
-        } else {
-            $content = [
-                'result' => $this->getOutputMessage($job, 'idle'),
-                'type' => 'info'
-            ];
-        }
+        $this->isGrantedJobAccess($job);
 
-        return new JsonResponse($content);
+        return new JsonResponse($this->jobRepository->getOutputResponseContent($job));
     }
 
-    /**
-     * @param JobInterface $job
-     * @param $status
-     * @return string
-     */
-    protected function getOutputMessage(JobInterface $job, $status)
-    {
-        return $this->translator->trans('job.output.' . $status, ['{{ job_id }}' => $job->getId()], 'job');
-    }
 
     /**
      * @Extra\Route(
@@ -154,5 +134,26 @@ class JobController
         $response->headers->set('Content-Length', filesize($archivePath));
 
         return $response;
+    }
+
+    /**
+     * @param JobInterface $job
+     */
+    protected function isGrantedJobAccess(JobInterface $job)
+    {
+        if (!$job instanceof UserAwareInterface) {
+            throw new AccessDeniedHttpException;
+        }
+
+        $jobUser = $job->getUser();
+        $currentUser = $this->tokenStorage->getToken()->getUser();
+
+        if (!$jobUser instanceof EquatableInterface) {
+            throw new AccessDeniedHttpException;
+        }
+
+        if (!$jobUser->isEqualTo($currentUser)) {
+            throw new AccessDeniedHttpException();
+        }
     }
 }

@@ -147,8 +147,9 @@ function getJobsBoard($, eventListeners) {
                         self.logger.error(self.exceptions.noContainerAvailable
                             .replace('{{ event_type }}', eventType));
                     }
-                    var listBox = $('<ul />', {
-                        'data-listen-event': eventType
+                    var listBox = $('<table />', {
+                        'data-listen-event': eventType,
+                        'class': 'table table-condensed'
                     });
                     listener.container.append(listBox);
                     self.logger.info(self.info.appendedListbox
@@ -189,31 +190,44 @@ function getJobsBoard($, eventListeners) {
         return subject && (typeof subject == 'function');
     };
 
+    jobsBoard.prototype.makeRow = function (columns) {
+        var $ = this.$;
+        var row = $('<tr />', {
+            'data-job-id': columns.id
+        });
+
+        if (columns.id !== undefined) {
+            var idColumn = $('<td />', {
+                'text': columns.id
+            });
+        }
+
+        var statusColumn = $('<td />', {
+            'text': columns.status
+        });
+
+        row.append(idColumn);
+        row.append(statusColumn);
+
+        return row;
+    };
+
     jobsBoard.prototype.onJobCreated = function (event) {
         var self = this;
         var $ = self.$;
-        var data = event.data;
-        var item = $('<li />', {
-            'data-job-id': data.job.id,
-            'text': data.status
-        });
+
         $.each(event.target, function (targetIndex, target) {
-            $(target).append(item);
+            $(target).append(self.makeRow(event.data));
         });
     };
 
     jobsBoard.prototype.onJobListed = function (event) {
         var data = event.data;
+        var self = this;
 
         $.each(event.target, function (targetIndex, target) {
-            $.each(data.collection, function (itemIndex, item) {
-                var itemNode = $('<li />', {
-                    'data-job-id': item.id,
-                    'text': 'Job #{{ job_id }} has status {{ status }}'
-                        .replace('{{ job_id }}', item.id)
-                        .replace('{{ status }}', item.status)
-                });
-                $(target).append(itemNode);
+            $.each(data.collection, function (jobIndex, job) {
+                $(target).append(self.makeRow(job));
             });
         });
     };
@@ -451,7 +465,6 @@ if (window.jQuery && window.Routing) {
     }];
 
     var jobsBoard = getJobsBoard($, eventListeners);
-    jobsBoard.enableDebug();
     jobsBoard.mount();
 
     $('body').load();

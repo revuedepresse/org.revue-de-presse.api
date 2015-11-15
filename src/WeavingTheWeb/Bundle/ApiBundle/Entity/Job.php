@@ -4,6 +4,9 @@ namespace WeavingTheWeb\Bundle\ApiBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
+use WeavingTheWeb\Bundle\DashboardBundle\Entity\Awareness\UserAware,
+    WeavingTheWeb\Bundle\DashboardBundle\Entity\Awareness\UserAwareInterface;
+
 /**
  * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
  * @ORM\Entity(repositoryClass="WeavingTheWeb\Bundle\ApiBundle\Repository\JobRepository")
@@ -15,8 +18,10 @@ use Doctrine\ORM\Mapping as ORM;
  *  }
  * )
  */
-class Job implements JobInterface
+class Job implements JobInterface, UserAwareInterface
 {
+    use UserAware;
+
     /**
      * @var integer
      *
