@@ -30,7 +30,10 @@ class JobController extends AbstractController
      */
     public function showJobsAction()
     {
-        $remote = $this->remoteRepository->findOneBy(['user' => $this->getUser()]);
+        $remote = $this->remoteRepository->findOneBy([
+            'user' => $this->getUser(),
+            'selected' => true
+        ]);
 
         return [
             'active_menu_item' => 'dashboard_jobs',
