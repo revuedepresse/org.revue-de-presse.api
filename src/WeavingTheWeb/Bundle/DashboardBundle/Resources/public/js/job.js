@@ -450,6 +450,9 @@ if (window.jQuery && window.Routing) {
         type: listedJobEventType
     }];
 
-    window.jobsBoard = getJobsBoard($, eventListeners);
-    window.jobsBoard.mount();
+    var jobsBoard = getJobsBoard($, eventListeners);
+    jobsBoard.enableDebug();
+    jobsBoard.mount();
+
+    $('body').load();
 }
