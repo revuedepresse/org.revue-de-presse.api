@@ -7,6 +7,8 @@ namespace WeavingTheWeb\Bundle\ApiBundle\Entity;
  */
 interface JobInterface
 {
+    const PREFIX_STATUS = 'STATUS_';
+
     const STATUS_IDLE = 10;
 
     const STATUS_STARTED = 20;

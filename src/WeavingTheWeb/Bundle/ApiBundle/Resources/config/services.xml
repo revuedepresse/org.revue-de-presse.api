@@ -40,16 +40,23 @@
             <property name="repository" type="service" id="weaving_the_web_api.repository.job" />
             <property name="translator" type="service" id="translator" />
         </service>
-        <service id="weaving_the_web_api.controller.job" class="%weaving_the_web_api.controller.job.class%">
+        <service id="weaving_the_web_api.controller.abstract.security" abstract="true">
+            <property name="tokenStorage" type="service" id="security.token_storage" />
+        </service>
+        <service id="weaving_the_web_api.controller.job"
+                 class="%weaving_the_web_api.controller.job.class%"
+                 parent="weaving_the_web_api.controller.abstract.security">
             <property name="jobRepository" type="service" id="weaving_the_web_api.repository.job" />
             <property name="logger" type="service" id="logger" />
             <property name="translator" type="service" id="translator" />
             <property name="archiveDir">%weaving_the_web_dashboard.resources.perspectives.archive%</property>
         </service>
-        <service id="weaving_the_web_api.controller.perspective" class="%weaving_the_web_api.controller.perspective.class%">
+        <service id="weaving_the_web_api.controller.perspective"
+                 class="%weaving_the_web_api.controller.perspective.class%"
+                 parent="weaving_the_web_api.controller.abstract.security">
             <property name="entityManager" type="service" id="doctrine.orm.default_entity_manager" />
-            <property name="jobRepository" type="service" id="weaving_the_web_api.repository.job" />
             <property name="exportPerspectiveCommand" type="service" id="weaving_the_web_dashboard.command.export_perspectives" />
+            <property name="jobRepository" type="service" id="weaving_the_web_api.repository.job" />
             <property name="translator" type="service" id="translator" />
         </service>
         <service id="weaving_the_web.api.data_provider" class="%weaving_the_web.api.data_provider.class%">
@@ -89,6 +96,7 @@
         <service id="weaving_the_web_api.repository.job" class="%weaving_the_web_api.repository.job.class%">
             <factory service="doctrine.orm.entity_manager" method="getRepository"/>
             <argument type="string">%weaving_the_web_api.entity.job.class%</argument>
+            <property name="translator" type="service" id="translator" />
         </service>
     </services>
 </container>

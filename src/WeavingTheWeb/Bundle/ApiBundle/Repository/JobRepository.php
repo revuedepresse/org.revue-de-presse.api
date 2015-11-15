@@ -4,6 +4,8 @@ namespace WeavingTheWeb\Bundle\ApiBundle\Repository;
 
 use Doctrine\ORM\EntityRepository;
 
+use Symfony\Component\Security\Core\User\UserInterface;
+
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Job,
     WeavingTheWeb\Bundle\ApiBundle\Entity\JobInterface;
 
@@ -12,10 +14,21 @@ use WeavingTheWeb\Bundle\ApiBundle\Entity\Job,
  */
 class JobRepository extends EntityRepository
 {
-    public function makeCommandJob($command)
+    /**
+     * @var \Symfony\Component\Translation\Translator
+     */
+    public $translator;
+
+    /**
+     * @param $command
+     * @param UserInterface $user
+     * @return Job
+     */
+    public function makeCommandJob($command, UserInterface $user)
     {
         $job = new Job(JobInterface::STATUS_IDLE, JobInterface::TYPE_COMMAND);
         $job->setValue($command);
+        $job->setUser($user);
 
         return $job;
     }
@@ -85,5 +98,88 @@ class JobRepository extends EntityRepository
                 'status' => Job::STATUS_STARTED
             ]
         );
+    }
+
+    /**
+     * @param UserInterface $user
+     * @param array $orderBy
+     * @param int $limit
+     * @return array
+     */
+    public function findJobsBy(UserInterface $user, array $orderBy, $limit = 10)
+    {
+        $sortingColumns = array_keys($orderBy);
+        $alias = 'j';
+
+        /**
+         * @var \Doctrine\ORM\QueryBuilder $queryBuilder
+         */
+        $queryBuilder = $this->createQueryBuilder($alias);
+        $queryBuilder = $queryBuilder->select('j.id')
+            ->addSelect('j.status')
+            ->addSelect('j.createdAt')
+            ->andWhere('j.user = :user');
+
+        foreach ($sortingColumns as $column) {
+            $queryBuilder->orderBy($alias . '.' . $column, $orderBy[$column]);
+        }
+
+        $queryBuilder->setParameter('user', $user);
+        $queryBuilder->setMaxResults($limit);
+
+        $results = $queryBuilder->getQuery()->getArrayResult();
+        array_walk($results, function (&$job) {
+            $job['status'] = $this->getTranslatedStatusMessage(new Job($job['status']));
+        });
+
+        return $results;
+    }
+
+    /**
+     * @param JobInterface $job
+     * @return array
+     */
+    public function getOutputResponseContent(JobInterface $job)
+    {
+        $content['result'] = $this->getTranslatedStatusMessage($job);
+
+        /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Job $job */
+        if ($job->hasFailed()) {
+            $content['type'] = 'error';
+        } elseif ($job->hasFinished()) {
+            $content['data'] = ['url' => $job->getOutput()];
+            $content['type'] = 'success';
+        } else {
+            $content['type'] = 'info';
+        }
+
+        return $content;
+    }
+
+    /**
+     * @param JobInterface $job
+     * @return string
+     */
+    public function getTranslatedStatusMessage(JobInterface $job)
+    {
+        $statusLabel = $this->getJobStatusLabel($job);
+
+        return $this->translator->trans('job.output.' . $statusLabel, [], 'job');
+    }
+
+    /**
+     * @param JobInterface $job
+     * @return string
+     */
+    protected function getJobStatusLabel(JobInterface $job)
+    {
+        /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Job $job */
+        $status = $job->getStatus();
+        $jobReflection = new \ReflectionClass($job);
+        $constants = $jobReflection->getConstants();
+        $statuses = array_flip($constants);
+        $statusConstantName = $statuses[$status];
+
+        return strtolower(str_replace(Job::PREFIX_STATUS, '', $statusConstantName));
     }
 }

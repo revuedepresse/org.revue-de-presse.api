@@ -4,7 +4,7 @@ job:
         error:          'One of the jobs could not run successfully.'
         unauthorized:   'One of the jobs was unauthorized ("{{ command }}") to run.'
     output:
-        idle:           'The job #{{ job_id }} is idle.'
-        failed:         'The job #{{ job_id }} has failed to complete.'
-        started:        'The job #{{ job_id }} has started but is not complete yet.'
-        finished:       'The job #{{ job_id }} has been successfully completed.'
+        idle:           'The job is idle.'
+        failed:         'The job has failed to complete.'
+        started:        'The job has started but is not complete yet.'
+        finished:       'The job has been successfully completed.'

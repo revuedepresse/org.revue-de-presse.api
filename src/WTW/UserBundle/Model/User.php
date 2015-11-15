@@ -6,9 +6,12 @@ use Doctrine\Common\Collections\Collection,
     Doctrine\Common\Collections\ArrayCollection,
     Doctrine\ORM\Mapping as ORM;
 
-use FOS\UserBundle\Model\UserInterface,
+use FOS\UserBundle\Model\UserInterface as BaseUserInterface,
     FOS\UserBundle\Model\GroupableInterface,
     FOS\UserBundle\Model\GroupInterface;
+
+use Symfony\Component\Security\Core\User\EquatableInterface,
+    Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * Storage agnostic user object
@@ -16,7 +19,7 @@ use FOS\UserBundle\Model\UserInterface,
  * @author Thibault Duplessis <thibault.duplessis@gmail.com>
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
  */
-abstract class User implements UserInterface, GroupableInterface
+abstract class User implements BaseUserInterface, GroupableInterface, EquatableInterface
 {
     protected $id;
 
@@ -601,6 +604,27 @@ abstract class User implements UserInterface, GroupableInterface
         }
 
         return $this;
+    }
+
+    /**
+     * @param UserInterface $user
+     * @return bool
+     */
+    public function isEqualTo(UserInterface $user)
+    {
+        if ($this->password !== $user->getPassword()) {
+            return false;
+        }
+
+        if ($this->salt !== $user->getSalt()) {
+            return false;
+        }
+
+        if ($this->username !== $user->getUsername()) {
+            return false;
+        }
+
+        return true;
     }
 
     public function __toString()
