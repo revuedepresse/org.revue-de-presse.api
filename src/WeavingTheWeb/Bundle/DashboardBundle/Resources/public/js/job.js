@@ -12,23 +12,45 @@ function getJobsBoard($, eventListeners) {
         this.debug = false;
         this.exceptions = {
             noContainerAvailable: 'No container available ' +
-                'for listeners of event "{{ event_type }}".',
+                'for listeners of event "{{ event_type }}".' + '\n' +
+                '=> The event listener "container" property can be defined.',
             noEventEmittedOnSuccess: 'Missing event to be emitted ' +
-                'on successful request for listener "{{ listener }}". ' +
-                'Maybe the "request.emit" property should be defined?' ,
+                'on successful request for "{{ listener }}" listener.' + '\n' +
+                '=> The event listener "request.emit" property can be defined.',
             noCustomEventHandlerAvailable: 'No custom event handler ' +
-                'for event "{{ event_type }}". ' +
-                'Please implement method "{{ method_name }}".',
-            noListenersAvailable: 'No listeners available ' +
-                'for event "{{ event_type }}".',
+                'for "{{ event_type }}" event.' + '\n' +
+                '=> "{{ method_name }}" function could be implemented.',
+            noListenerAvailable: 'No listener available ' +
+                'for "{{ event_type }}" event ' +
+                'handled by "{{ listener }}" listener.' + '\n' +
+                '=> The event listener "listeners" property can be defined.'
+                + '\n' +
+                '=> The event listener "after" property can be defined ' +
+                'to ensure requirements have been met ' +
+                'before attaching this event listener',
+            suggestSelectorCheck: '=>  The "{{ selector }}" selector ' +
+                'should match existing elements.',
+            noRequest: 'Missing request for "{{ listener }}" listener' + '\n' +
+                '=> The event listener "request" property can be defined',
             invalidLoggingLevel: 'An invalid logging level has been set ' +
                 '("{{ logging_level }}").',
+            invalidRequestUrl: 'Invalid request URL for ' +
+                '"{{ event_type }}" event of "{{ listener }}" listener:' + '\n'
+                + '=>  The event listener "request.url" property can be defined.'
+                + '\n' +
+                '=> The target listener "data-url" attribute can be defined.',
             unexpectedNodeName: 'Unexpected node name : "{{ actual }}" ' +
                 '(expected: "{{ expected }}")'
         };
         this.info = {
             appendedListbox: 'Appended a listbox for listeners ' +
-                'of "{{ event_type }}" events'
+                'of "{{ event_type }}" events.',
+            runPostEventHandler: 'About to run post event handler for ' +
+                '"{{ event_type }}" event.',
+            listenersUpdatedFromEvent: 'The "listeners" property ' +
+                'has been updated for "{{ listener }}" event listener.',
+            postEventHandlerUpdated: 'The post event handler has been updated '
+                + 'for "{{ listener }}" event listener.'
         };
         if (!Array.isArray(eventListeners)) {
             throw 'Event listeners should be passed as an array ' +
@@ -37,7 +59,15 @@ function getJobsBoard($, eventListeners) {
                     eventListeners.constructor.toString()
                 );
         }
+
         this.eventListeners = eventListeners;
+        this.onPostEventHandlers = {};
+
+        this.dependencies = {};
+        this.dependees = {};
+        this.eventListenersByName = {};
+        this.checkDependenciesBetweenListeners();
+
         this.logger = {};
 
         this.LOGGING_SEVERITY_LEVEL = LOGGING_SEVERITY_LEVEL;
@@ -50,6 +80,19 @@ function getJobsBoard($, eventListeners) {
         this.injectLogger();
         this.promises = {};
         this.remote = 'http://localhost';
+    };
+
+    jobsBoard.prototype.checkDependenciesBetweenListeners = function () {
+        var self = this;
+        var $ = this.$;
+        $.each(self.eventListeners, function (index, eventListener) {
+            if (eventListener.after !== undefined) {
+                self.dependencies[eventListener.name] = eventListener.after;
+                self.dependees[eventListener.after] = eventListener.name;
+            }
+
+            self.eventListenersByName[eventListener.name] = eventListener;
+        });
     };
 
     jobsBoard.prototype.injectLogger = function () {
@@ -75,6 +118,14 @@ function getJobsBoard($, eventListeners) {
                 }
             }
         }
+    };
+
+    jobsBoard.prototype.logStackUnderCondition = function (condition) {
+        if (condition) {
+            this.logger.debug((new Error).stack);
+        }
+
+        return condition;
     };
 
     jobsBoard.prototype.setRemote = function (remote) {
@@ -140,7 +191,7 @@ function getJobsBoard($, eventListeners) {
         var $ = self.$;
         var invalidRequestMethod;
 
-        if (!request.method) {
+        if (request.method === undefined) {
             throw 'The request method should be explicitly defined.';
         }
 
@@ -149,6 +200,8 @@ function getJobsBoard($, eventListeners) {
                 .replace('{{ method }}', request.method);
             throw invalidRequestMethod;
         }
+
+        return request;
     };
 
     jobsBoard.prototype.ensureBindingHasName = function (binding) {
@@ -161,23 +214,13 @@ function getJobsBoard($, eventListeners) {
         return request && request.success.emit;
     };
 
-    jobsBoard.prototype.validateNativeEventHandling = function (binding) {
-        if (binding.request) {
-            this.validateRequest(binding.request);
-        }
-
-        return binding.request;
-    };
-
-    jobsBoard.prototype.makeXhrPromise = function (binding) {
-        var $ = this.$;
-        var request = this.validateNativeEventHandling(binding);
+    jobsBoard.prototype.updateRequestHeaders = function (request) {
         var headers = {};
         var headerIndex;
         var header;
 
-        if (binding.request.headers) {
-            var bindingHeaders = binding.request.headers;
+        if (request.headers) {
+            var bindingHeaders = request.headers;
             for (
               headerIndex = 0;
               headerIndex < bindingHeaders.length;
@@ -194,15 +237,57 @@ function getJobsBoard($, eventListeners) {
                 headers[header.key] = header.value;
             }
         }
-        var ajaxSettings = {
-            url: request.uri,
-            headers : headers,
-            success: binding.success,
-            type: binding.request.method
-        };
-        this.promises[binding.name] = $.ajax(ajaxSettings);
 
-        return this.promises[binding.name];
+        request.getHeaders = function () {
+            return headers;
+        };
+    };
+
+    jobsBoard.prototype.getPromiseId = function (request) {
+        var requestParent = request.sender.parents('[data-entity]');
+        var promiseId;
+
+        if (requestParent.length > 0) {
+            promiseId = [
+                requestParent.attr('data-entity'),
+                requestParent.attr('data-id'),
+                request.binding.name
+            ].join('-');
+        } else {
+            promiseId = request.binding.name;
+        }
+
+        return promiseId;
+    };
+
+    jobsBoard.prototype.makePromise = function (request) {
+        if (request.binding.promises === undefined) {
+            request.binding.promises = {};
+        }
+        var promiseId = this.getPromiseId(request);
+        request.binding.promises[promiseId] = this.promises[promiseId];
+    };
+
+    jobsBoard.prototype.remindPromise = function (request) {
+        var promiseId = this.getPromiseId(request);
+
+        return request.binding.promises[promiseId];
+    };
+
+    jobsBoard.prototype.makeXhrPromise = function (request) {
+        var $ = this.$;
+        var ajaxSettings = {
+            url: request.getUrl(),
+            headers : request.getHeaders(),
+            success: request.binding.success,
+            type: request.getMethod()
+        };
+
+        var promiseId = this.getPromiseId(request);
+        this.promises[promiseId] = $.ajax(ajaxSettings);
+        this.makePromise(request);
+
+        return this.promises[promiseId];
     };
 
     jobsBoard.prototype.byEventType = function (type) {
@@ -239,16 +324,16 @@ function getJobsBoard($, eventListeners) {
             .replace('{{ event_type }}', eventType);
     };
 
-    jobsBoard.prototype.onOkResponse = function (binding) {
-        var promise = this.promises[binding.name];
-        var request = binding.request;
+    jobsBoard.prototype.onOkResponse = function (request) {
+        var promise = this.remindPromise(request);
         var self = this;
 
         if (this.shouldEmitEvent(request)) {
             promise.done(function (data) {
                 var eventType = request.success.emit;
-                var target = self.getOnSuccessTarget(binding);
+                var target = self.getOnSuccessTarget(request);
                 var event = $.Event(eventType);
+                data.emitter = request.binding.name;
                 target.trigger(event, data);
             });
         }
@@ -340,7 +425,8 @@ function getJobsBoard($, eventListeners) {
             if (subject !== null && subject.length > 0) {
                 var parts = subject.split('/');
                 formattedSubject = $('<a />', {
-                    'data-action': 'download-archive',
+                    'class': 'btn',
+                    'data-action': 'download-job-archive',
                     'data-url': this.remote + subject,
                     text: parts[parts.length - 1]
                 });
@@ -394,7 +480,7 @@ function getJobsBoard($, eventListeners) {
         return row;
     };
 
-    jobsBoard.prototype.onJobCreated = function (event) {
+    jobsBoard.prototype.onJobsCreated = function (event) {
         var self = this;
         var $ = self.$;
 
@@ -403,7 +489,7 @@ function getJobsBoard($, eventListeners) {
         });
     };
 
-    jobsBoard.prototype.onJobListed = function (event) {
+    jobsBoard.prototype.onJobsListed = function (event) {
         var data = event.data;
         var self = this;
 
@@ -432,56 +518,195 @@ function getJobsBoard($, eventListeners) {
         return 'on' + words.join('');
     };
 
+    jobsBoard.prototype.ensureRequestHasMethod = function (request) {
+        if (request.method === undefined) {
+            request.method = 'get';
+        }
+
+        request.getMethod = function () {
+            return request.method;
+        };
+    };
+
+    jobsBoard.prototype.ensureRequestSenderHasUrl = function (request) {
+        var binding = request.binding;
+        var listener = {
+            eventType: binding.type,
+            name: binding.name
+        };
+
+        if (
+            request.url === undefined &&
+            request.sender.attr('data-url') === undefined
+        ) {
+            throw this.exceptions.invalidRequestUrl
+                .replace('{{ event_type }}', listener.eventType)
+                .replace('{{ listener }}', listener.name);
+        }
+    };
+
+    jobsBoard.prototype.ensureRequestHasUrl = function (request) {
+        var getter;
+
+        this.ensureRequestSenderHasUrl(request);
+
+        if (
+          request.url === undefined &&
+          request.sender.attr('data-url') !== undefined
+        ) {
+            getter = function () {
+                return request.sender.attr('data-url');
+            };
+        } else {
+            getter = function () {
+                return request.url;
+            };
+        }
+
+        request.getUrl = getter;
+    };
+
     jobsBoard.prototype.bindNativeEventHandlers = function (binding) {
         var self = this;
-        var onEvent = function (request) {
-            if (request.method === undefined) {
-                request.method = 'get';
+        var onEvent = function () {
+            var request;
+
+            if (binding.request !== undefined) {
+                request = binding.request;
+                self.appendListboxes(request);
+                request.binding = binding;
+            } else {
+                throw new Error(self.exceptions.noRequest
+                    .replace('{{ listener }}', binding.name));
             }
-            self.appendListboxes(binding);
 
             return function () {
-                var promise = self.makeXhrPromise(binding);
-                self.onOkResponse(binding);
+                request.sender = $(this);
+
+                self.ensureRequestHasUrl(request);
+                self.ensureRequestHasMethod(request);
+
+                self.updateRequestHeaders(request);
+
+                request = self.validateRequest(request);
+
+                var promise = self.makeXhrPromise(request);
+                self.onOkResponse(request);
 
                 return promise;
             };
         };
 
-        var eventHandler = self.getNativeEventHandler(binding);
-        // Re-bind the handler to the listeners
-        eventHandler = eventHandler.bind(binding.listeners);
-        eventHandler(onEvent(binding.request));
+        $.each(binding.listeners, function (listenerIndex, listener) {
+            var eventListener = $(listener);
+            var eventSubscriber = self.getEventSubscriber(
+                eventListener,
+                binding.type
+            );
+
+            // Re-bind the event subscriber to the listener
+            eventSubscriber = eventSubscriber.bind(eventListener);
+
+            // Detaches previously attached handler from the listeners
+            eventListener.off(binding.type);
+
+            // Re-bind the handler to the listener
+            onEvent = onEvent.bind(eventListener);
+
+            eventSubscriber(onEvent());
+        });
+
+        self.updateNextBinding(binding);
+        if (binding.then) {
+            binding.then();
+            self.handlePostEvent(binding);
+        }
     };
 
     jobsBoard.prototype.shouldHandlePostEvent = function (binding) {
         return this.isFunction(binding.onPostEventHandler);
     };
 
-    jobsBoard.prototype.bindCustomEventHandlers = function (binding) {
-        var self = this;
-
+    jobsBoard.prototype.updateBindingListeners = function (binding) {
         if (binding.listeners === undefined) {
             var listenersSelector = this.getListenersSelector(binding.type);
             var listeners = $(listenersSelector);
             if (listeners.length === 0) {
-                this.logger.debug(this.exceptions.noListenersAvailable
-                    .replace('{{ event_type }}',  binding.type));
+                this.logger.debug(this.exceptions.noListenerAvailable
+                    .replace('{{ event_type }}', binding.type)
+                    .replace('{{ listener }}', binding.name))
+                    .replace('{{ selector }}', listenersSelector);
+            }
+            this.logger.info(this.info.listenersUpdatedFromEvent
+                .replace('{{ listener }}', binding.name));
+
+            binding.listeners = listeners;
+        }
+    };
+
+    jobsBoard.prototype.updateNextBinding = function (binding, customEvent) {
+        var self = this;
+
+        if (this.hasDependees(binding)) {
+            var willBindEventListener = function () {
+                var dependee = self.getBindingDependees(binding);
+                self.bindEvent(self.eventListenersByName[dependee]);
+            };
+
+            if (customEvent !== undefined) {
+                customEvent.then = willBindEventListener;
+            } else {
+                binding.then = willBindEventListener;
+            }
+        }
+    };
+
+    jobsBoard.prototype.getBindingDependees = function (binding) {
+        return this.dependees[binding.name];
+    };
+
+    jobsBoard.prototype.hasDependees = function (binding) {
+        if (this.dependees[binding.name] === undefined) {
+            return false;
+        }
+        var dependee = this.getBindingDependees(binding);
+
+        return this.eventListenersByName[dependee] !== undefined;
+    };
+
+    jobsBoard.prototype.handlePostEvent = function (binding, customEvent) {
+        if (this.shouldHandlePostEvent(binding)) {
+            if (customEvent === undefined && this.isFunction(binding.then)) {
+                customEvent = {
+                    data: {
+                        emitter: binding.name
+                    },
+                    then: binding.then
+                };
             }
 
-            binding.listeners =  listeners;
+            this.logger.info(this.info.runPostEventHandler
+                .replace('{{ event_type }}', binding.name));
+            binding.onPostEventHandler(customEvent);
+            delete binding.onPostEventHandler;
         }
+    };
+
+    jobsBoard.prototype.bindCustomEventHandlers = function (binding) {
+        var self = this;
+        self.updateBindingListeners(binding);
 
         binding.listeners.on(binding.type, function (event, data) {
-            var handlerName;
-            var handler;
-
             event.stopPropagation();
 
             var customEvent = {
                 data: data,
                 target: binding.listeners
             };
+            self.updateNextBinding(binding, customEvent);
+
+            var handlerName;
+            var handler;
 
             if (!self.isFunction(binding.handler)) {
                 handlerName = self.getHandlerName(binding.type);
@@ -496,9 +721,7 @@ function getJobsBoard($, eventListeners) {
                     );
                 }
 
-                if (self.shouldHandlePostEvent(binding)) {
-                    binding.onPostEventHandler();
-                }
+                self.handlePostEvent(binding, customEvent);
 
                 return;
             }
@@ -511,13 +734,12 @@ function getJobsBoard($, eventListeners) {
         });
     };
 
-    jobsBoard.prototype.getOnSuccessTarget = function (binding) {
+    jobsBoard.prototype.getOnSuccessTarget = function (request) {
         var self = this;
-        var request = binding.request;
         if (self.debug) {
             if (request.success.emit === undefined) {
                 self.logger.debug(self.exceptions.noEventEmittedOnSuccess
-                    .replace('{{ listener }}', binding.name));
+                    .replace('{{ listener }}', request.binding.name));
             }
         }
         var eventType = request.success.emit;
@@ -525,9 +747,8 @@ function getJobsBoard($, eventListeners) {
         return self.$(listenersSelector);
     };
 
-    jobsBoard.prototype.appendListboxes = function (binding) {
-        var target = this.getOnSuccessTarget(binding);
-        var request = binding.request;
+    jobsBoard.prototype.appendListboxes = function (request) {
+        var target = this.getOnSuccessTarget(request);
         if (!target || target.length === 0) {
             var eventType = request.success.emit;
             var appendListToContainer = this.byEventType(eventType)
@@ -536,23 +757,45 @@ function getJobsBoard($, eventListeners) {
         }
     };
 
-    jobsBoard.prototype.getNativeEventHandler = function (binding) {
-        return binding.listeners[binding.type];
+    jobsBoard.prototype.getEventSubscriber = function (listener, eventType) {
+        return listener[eventType];
+    };
+
+    jobsBoard.prototype.getNativeEventSubscriber = function (binding) {
+        return this.getEventSubscriber(binding.listeners, binding.type);
     };
 
     jobsBoard.prototype.areListenersDeclared = function (binding) {
         return binding.listeners && binding.type;
     };
 
+    jobsBoard.prototype.areListenersAvailable = function (binding) {
+        this.refreshListenersSelection(binding);
+        return binding.listeners.length > 0;
+    };
+
+    jobsBoard.prototype.refreshListenersSelection = function (binding) {
+        if (binding.listeners && binding.listeners.selector) {
+            binding.listeners = $(binding.listeners.selector);
+        }
+    };
+
     jobsBoard.prototype.isNativeEvent = function (binding) {
         var isNativeEvent;
         if (this.areListenersDeclared(binding)) {
-            var eventHandler = this.getNativeEventHandler(binding);
-            isNativeEvent = typeof eventHandler === 'function';
+            var eventSubscriber = this.getNativeEventSubscriber(binding);
+            isNativeEvent = typeof eventSubscriber === 'function';
+            if (!this.areListenersAvailable(binding)) {
+                throw new Error(this.exceptions.noListenerAvailable
+                    .replace('{{ event_type }}', binding.type)
+                    .replace('{{ listener }}', binding.name) + '\n' +
+                    this.exceptions.suggestSelectorCheck
+                        .replace('{{ selector }}', binding.listeners.selector));
+            }
         } else {
             isNativeEvent = false;
         }
-        this.logger.info('Event for binding "{{ name }}" is {{ ? }}native.'
+        this.logger.debug('Event for binding "{{ name }}" is {{ ? }}native.'
             .replace('{{ name }}', binding.name)
             .replace('{{ ? }}', isNativeEvent ? '' : 'not '));
 
@@ -564,14 +807,66 @@ function getJobsBoard($, eventListeners) {
         var binding = eventListener;
 
         binding.success = success || function () {};
-        if (self.areListenersDeclared(binding) || binding.container) {
+        var declaredListeners = self.areListenersDeclared(binding);
+        if (declaredListeners || binding.container) {
             var nativeEvent = self.isNativeEvent(binding);
             if (nativeEvent) {
                 self.bindNativeEventHandlers(binding);
             } else {
                 self.bindCustomEventHandlers(binding);
             }
+        } else if (!declaredListeners && binding.container == undefined) {
+            var checkSelector = '';
+            if (declaredListeners) {
+                checkSelector = self.exceptions.suggestSelectorCheck
+                    .replace('{{ selector }}', binding.listeners.selector);
+            }
+
+            throw new Error(self.exceptions.noContainerAvailable
+                .replace('{{ event_type }}', binding.type) + '\n' +
+                self.exceptions.noListenerAvailable
+                .replace('{{ event_type }}', binding.type)
+                .replace('{{ listener }}', binding.name) + checkSelector);
         }
+    };
+
+    jobsBoard.prototype.promisingEmitter = function (emitter) {
+        return this.promises[emitter] !== undefined;
+    };
+
+    jobsBoard.prototype.doNextBinding = function (customEvent) {
+        if (customEvent !== undefined && this.isFunction(customEvent.then)) {
+            var emitter = customEvent.data.emitter;
+            if (emitter !== undefined && this.promisingEmitter(emitter)) {
+                this.promises[emitter].always(customEvent.then);
+            } else {
+                customEvent.then();
+            }
+        }
+    };
+
+    jobsBoard.prototype.updateOnPostEventHandler = function (listener) {
+        var self = this;
+
+        listener.onPostEventHandler = function () {
+            // Ensures post event can be used to manage dependencies
+            // between event listeners by using "after" property
+            if (typeof arguments[0] !== undefined) {
+                self.doNextBinding(arguments[0]);
+            }
+
+            if (
+                self.onPostEventHandlers &&
+                self.onPostEventHandlers[listener.name]
+            ) {
+                self.onPostEventHandlers[listener.name].apply(self);
+            }
+        };
+
+        self.logger.info(
+            self.info.postEventHandlerUpdated
+            .replace('{{ listener }}', listener.name)
+        );
     };
 
     jobsBoard.prototype.mount = function (onPostEventHandlers) {
@@ -580,6 +875,8 @@ function getJobsBoard($, eventListeners) {
         var listenerIndex;
         var listener;
 
+        self.onPostEventHandlers = onPostEventHandlers;
+
         for (
           listenerIndex = 0;
           listenerIndex < totalListeners;
@@ -587,10 +884,10 @@ function getJobsBoard($, eventListeners) {
         ) {
             listener = this.eventListeners[listenerIndex];
             this.ensureBindingHasName(listener);
-            if (onPostEventHandlers && onPostEventHandlers[listener.name]) {
-                listener.onPostEventHandler = onPostEventHandlers[listener.name];
+            this.updateOnPostEventHandler(listener);
+            if (this.dependencies[listener.name] === undefined) {
+                self.bindEvent(listener);
             }
-            self.bindEvent(listener);
         }
     };
 
@@ -598,44 +895,51 @@ function getJobsBoard($, eventListeners) {
 }
 
 if (window.jQuery && window.Routing) {
+    var container = $('[data-container="jobs-board"]');
     var routing = window.Routing;
-    var exportPerspectivesButtons = $('[data-action="export-perspectives"]');
     var schemeHost = $('[data-request-prop="scheme-host"]').val();
     var header = $('[data-request-prop="header"]');
-    var exportPerspectivesUri = schemeHost +
-        routing.generate('weaving_the_web_api_export_perspectives');
-    var listJobsUri = schemeHost +
-        routing.generate('weaving_the_web_api_get_jobs');
     var headers = [{
         key: header.attr('data-key'),
         value: header.val()
     }];
-    var createdJobEventType = 'job:created';
-    var listedJobEventType = 'job:listed';
-    var container = $('[data-container="jobs-board"]');
+
+    var createdJobEventType = 'jobs:created';
+    var exportPerspectivesButtons = $('[data-action="export-perspectives"]');
+    var exportPerspectivesUrl = schemeHost +
+        routing.generate('weaving_the_web_api_export_perspectives');
+
+    var listJobsUrl = schemeHost +
+        routing.generate('weaving_the_web_api_get_jobs');
+    var listedJobEventType = 'jobs:listed';
+
+    var downloadedJobArchiveEvent = 'job:archive:downloaded';
+    var downloadJobArchiveButtons = $('[data-action="download-job-archive"]');
+    var saveJobArchiveButton = $('[data-action="save-job-archive"]');
+
     var eventListeners = [{
-        name: 'export-perspectives',
-        type: 'click',
         listeners: exportPerspectivesButtons,
+        name: 'export-perspectives',
         request: {
-            uri: exportPerspectivesUri,
+            url: exportPerspectivesUrl,
             method: 'post',
             headers: headers,
             success: {
                 emit: createdJobEventType
             }
-        }
+        },
+        type: 'click'
     }, {
-        name: 'list-jobs',
-        type: 'load',
         listeners: $('body'),
+        name: 'list-jobs',
         request: {
-            uri: listJobsUri,
+            url: listJobsUrl,
             headers: headers,
             success: {
                 emit: listedJobEventType
             }
-        }
+        },
+        type: 'load'
     }, {
         container: container,
         name: 'post-job-creation',
@@ -644,9 +948,25 @@ if (window.jQuery && window.Routing) {
         container: container,
         name: 'post-job-listing',
         type: listedJobEventType
+    }, {
+        after: 'post-job-listing',
+        listeners: downloadJobArchiveButtons,
+        name: 'download-job-archive',
+        request: {
+            headers: headers,
+            success: {
+                emit: downloadedJobArchiveEvent
+            }
+        },
+        type: 'click'
+    }, {
+        listeners: saveJobArchiveButton,
+        name: 'post-job-archive-download',
+        type: downloadedJobArchiveEvent
     }];
 
     var jobsBoard = getJobsBoard($, eventListeners);
+    jobsBoard.enableDebug();
     jobsBoard.setRemote(schemeHost);
     jobsBoard.mount();
 

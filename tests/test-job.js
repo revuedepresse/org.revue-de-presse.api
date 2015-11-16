@@ -3,27 +3,85 @@
 describe('Job', function () {
     var authorizationHeaderValue = 'Bearer tok';
     var body = $('body');
+
     var container;
     var containerName = 'jobs-board';
     var containerSelector = '[data-container="' + containerName + '"]';
+
+    var downloadJobArchiveAction = 'download-job-archive';
+    var downloadedJobArchiveEvent = 'job:archive:downloaded';
+    var downloadJobArchiveUrl = '/archive';
+    var downloadJobArchiveSelector = '[data-action="' +
+        downloadJobArchiveAction + '"]';
+
     var exportPerspectivesAction = 'export-perspectives';
     var exportPerspectivesButton;
     var exportPerspectivesSelector;
-    var createdJobEvent = 'job:created';
+
+    var createdJobEvent = 'jobs:created';
+
     var eventListeners;
-    var jobsBoard;
+
     var jobsListItems;
     var jobsListItemsSelectorTemplate = '[data-listen-event="{{ event_type }}"] tr';
     var jobsListItemsSelector = jobsListItemsSelectorTemplate
         .replace('{{ event_type }}', createdJobEvent);
+    var listedJobEvent = 'jobs:listed';
+
+    var remoteUrl = 'http://localhost';
+
+    var saveJobArchiveAction = 'save-job-archive';
+    var saveJobArchiveButton;
+
     var headers = [
         {
             key: 'Authorization',
             value: authorizationHeaderValue
         }
     ];
-    var listedJobEvent = 'job:listed';
+
     var requestMockery;
+
+    function getListJobsEventListener() {
+        return [
+            {
+                name: 'list-jobs',
+                type: 'load',
+                listeners: $('body'),
+                request: {
+                    url: remoteUrl + '/jobs',
+                    headers: headers,
+                    success: {
+                        emit: listedJobEvent
+                    }
+                }
+            }, {
+                container: $(containerSelector),
+                name: 'post-jobs-listing',
+                type: listedJobEvent
+            }
+        ];
+    }
+
+    function mockListJobsEventListenerRequest(url) {
+        requestMockery = RequestMockery(url);
+        requestMockery.respondWith({
+            collection: [{
+                Id: 1,
+                Status: 1,
+                rlk_Output: downloadJobArchiveUrl,
+                id: 1,
+                entity: 'job'
+            }],
+            type: 'success'
+        }).setRequestHandler(function (settings) {
+            expect(settings.headers).not.toBeUndefined();
+            expect(settings.headers.Authorization)
+                .toEqual(authorizationHeaderValue);
+        });
+
+        return requestMockery.mock();
+    }
 
     beforeEach(function () {
         container = $('<div />', {'data-container': containerName});
@@ -36,53 +94,31 @@ describe('Job', function () {
 
         exportPerspectivesSelector = '[data-action="{{ action }}"]'
             .replace('{{ action }}', exportPerspectivesAction);
+
+        saveJobArchiveButton = $('<button />', {
+            'data-action': saveJobArchiveAction,
+            'data-listen-event': downloadedJobArchiveEvent,
+            text: 'Save job archive'
+        });
+        body.append(saveJobArchiveButton);
     });
 
     afterEach(function () {
         exportPerspectivesButton.remove();
         container.remove();
+        saveJobArchiveButton.remove();
     });
 
     it('should list jobs', function (done) {
-        eventListeners = [
-            {
-                name: 'list-jobs',
-                type: 'load',
-                listeners: $('body'),
-                request: {
-                    uri: 'http://localhost/jobs',
-                    headers: headers,
-                    success: {
-                        emit: listedJobEvent
-                    }
-                }
-            }, {
-                container: $(containerSelector),
-                name: 'post-jobs-listing',
-                type: listedJobEvent
-            }
-        ];
-        requestMockery = RequestMockery(eventListeners[0].request.uri);
-        requestMockery.respondWith({
-            collection: [{
-                Id: 1,
-                Status: 1,
-                rlk_Output: '/remote-resource',
-                id: 1,
-                entity: 'job'
-            }],
-            type: 'success'
-        }).setRequestHandler(function (settings) {
-            expect(settings.headers).not.toBeUndefined();
-            expect(settings.headers.Authorization)
-                .toEqual(authorizationHeaderValue);
-        });
-        var mock = requestMockery.mock();
+        eventListeners = getListJobsEventListener();
+        var mock = mockListJobsEventListenerRequest(
+            eventListeners[0].request.url
+        );
 
-        jobsBoard = window.getJobsBoard($, eventListeners);
+        var jobsBoard = window.getJobsBoard($, eventListeners);
         jobsBoard.enableDebug();
         jobsBoard.setLoggingLevel(jobsBoard.LOGGING_LEVEL.WARN);
-        jobsBoard.setRemote('http://localhost');
+        jobsBoard.setRemote(remoteUrl);
         jobsBoard.mount({'post-jobs-listing': function () {
             var jobsListItemsSelector = jobsListItemsSelectorTemplate
                 .replace('{{ event_type }}', listedJobEvent);
@@ -108,7 +144,7 @@ describe('Job', function () {
                 listeners: $(exportPerspectivesSelector),
                 name: 'export-perspectives',
                 request: {
-                    uri: 'http://localhost/perspective/export',
+                    url: remoteUrl + '/perspective/export',
                     method: 'post',
                     headers: headers,
                     success: {
@@ -122,7 +158,7 @@ describe('Job', function () {
                 type: createdJobEvent
             }
         ];
-        requestMockery = RequestMockery(eventListeners[0].request.uri);
+        requestMockery = RequestMockery(eventListeners[0].request.url);
         requestMockery.shouldPost();
         requestMockery.respondWith({
             job: {
@@ -141,7 +177,7 @@ describe('Job', function () {
         });
         var mock = requestMockery.mock();
 
-        jobsBoard = window.getJobsBoard($, eventListeners);
+        var jobsBoard = window.getJobsBoard($, eventListeners);
         jobsBoard.enableDebug();
         jobsBoard.setLoggingLevel(jobsBoard.LOGGING_LEVEL.WARN);
         jobsBoard.mount({'post-job-creation': function () {
@@ -163,5 +199,75 @@ describe('Job', function () {
 
         $(exportPerspectivesSelector).click();
         mock.destroy();
+    });
+
+    it('should download an archive', function (done) {
+        eventListeners = getListJobsEventListener();
+        var listJobsMock = mockListJobsEventListenerRequest(
+            eventListeners[0].request.url
+        );
+        var downloadJobArchiveMock;
+
+        eventListeners.push({
+            after: 'post-jobs-listing',
+            listeners: $(downloadJobArchiveSelector),
+            name: 'download-job-archive',
+            request: {
+                headers: headers,
+                success: {
+                    emit: downloadedJobArchiveEvent
+                }
+            },
+            type: 'click'
+        });
+        eventListeners.push({
+            after: 'download-job-archive',
+            listeners: $(saveJobArchiveButton),
+            name: 'post-job-archive-download',
+            type: downloadedJobArchiveEvent
+        });
+
+        requestMockery = RequestMockery(remoteUrl + downloadJobArchiveUrl);
+        requestMockery.respondWith({
+            content: 'archive content'
+        }).setRequestHandler(function (settings) {
+
+            expect(settings.headers).not.toBeUndefined();
+            expect(settings.headers.Authorization)
+                .toEqual(authorizationHeaderValue);
+        });
+
+        var jobsBoard = window.getJobsBoard($, eventListeners);
+        try {
+            jobsBoard.enableDebug();
+            jobsBoard.setRemote(remoteUrl);
+            jobsBoard.setLoggingLevel(jobsBoard.LOGGING_LEVEL.DEBUG);
+            jobsBoard.mount({
+                'post-jobs-listing': function () {
+                    expect($(downloadJobArchiveSelector).length).toEqual(1);
+                },
+                'download-job-archive': function () {
+                    downloadJobArchiveMock = requestMockery.mock();
+
+                    // Ensures onload body event handler
+                    // previously attached on "jobs:listed" event
+                    // has been detached
+                    expect($(downloadJobArchiveSelector).length).toEqual(1);
+
+                    // (2) Click on download archive button
+                    $(downloadJobArchiveSelector).click();
+                    downloadJobArchiveMock.destroy();
+                },
+                'post-job-archive-download': function () {
+                    done();
+                }
+            });
+        } catch (error) {
+            jobsBoard.logger.error(error.stack);
+        }
+
+        // (1) Get jobs list
+        $('body').load();
+        listJobsMock.destroy();
     });
 });

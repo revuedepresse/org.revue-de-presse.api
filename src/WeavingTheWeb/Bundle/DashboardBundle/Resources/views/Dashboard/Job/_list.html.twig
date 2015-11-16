@@ -4,13 +4,16 @@
 
 {% block body %}
 <div class="container">
-    <button class="btn btn-default"
-            data-action="export-perspectives">
-        {{ 'job.label.export_perspectives'|trans({}, 'job') }}
-    </button>
+    <div class="btn-group">
+        <button class="btn btn-default"
+                data-action="export-perspectives">
+            {{ 'job.label.export_perspectives'|trans({}, 'job') }}
+        </button>
+    </div>
     <div class="col-md-6 col-sd-6" data-container="jobs-board"></div>
     <input data-request-prop="scheme-host" type="hidden" value="{{ remote.host }}">
     <input data-request-prop="header" data-key="Authorization" type="hidden" value="Bearer {{ remote.accessToken }}">
+    <button class="hide" data-action="save-job-archive" data-listen-event="job:archive:downloaded"></button>
 </div>
 {% endblock %}
 
