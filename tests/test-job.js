@@ -67,6 +67,7 @@ describe('Job', function () {
             collection: [{
                 Id: 1,
                 Status: 1,
+                rlk_Output: '/remote-resource',
                 id: 1,
                 entity: 'job'
             }],
@@ -80,12 +81,19 @@ describe('Job', function () {
 
         jobsBoard = window.getJobsBoard($, eventListeners);
         jobsBoard.enableDebug();
-        jobsBoard.setLoggingLevel(jobsBoard.LOGGING_LEVEL.WARN);        
+        jobsBoard.setLoggingLevel(jobsBoard.LOGGING_LEVEL.WARN);
+        jobsBoard.setRemote('http://localhost');
         jobsBoard.mount({'post-jobs-listing': function () {
             var jobsListItemsSelector = jobsListItemsSelectorTemplate
                 .replace('{{ event_type }}', listedJobEvent);
             jobsListItems = $(jobsListItemsSelector);
+
+            // It should create a table head containing a single row
+            // It should create a table body containing a single row
             expect(jobsListItems.length).toEqual(2);
+
+            // It should form columns prefixed with "rlk_"
+            expect($(jobsListItems[1]).find('a')).toBeTruthy();
             done();
         }});
 
@@ -120,7 +128,8 @@ describe('Job', function () {
             job: {
                 Id: 1,
                 Status: 'A new idle job has been created.',
-                entity: 'job'
+                entity: 'job',
+                rlk_Output: null
             },
             result: 'About to export perspectives',
             type: 'success'
@@ -142,6 +151,13 @@ describe('Job', function () {
             // It should append a row containing columns names to the header.
             // It should append a row containing data to the bodies.
             expect(jobsListItems.length).toEqual(2);
+
+            // It should contain a row with a formatted Output column
+
+            var outputColumnSelector = jobsListItemsSelector +
+                ' [data-column-name="Output"]';
+            expect($(outputColumnSelector).length).toEqual(1);
+
             done();
         }});
 

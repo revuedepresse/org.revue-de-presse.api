@@ -118,6 +118,7 @@ class JobRepository extends EntityRepository
         $queryBuilder = $queryBuilder->select('j.id as Id')
             ->addSelect('j.id')
             ->addSelect('j.status as Status')
+            ->addSelect('j.output as rlk_Output')
             ->addSelect('j.createdAt as Date')
             ->andWhere('j.user = :user');
 
@@ -130,7 +131,9 @@ class JobRepository extends EntityRepository
 
         $results = $queryBuilder->getQuery()->getArrayResult();
         array_walk($results, function (&$job) {
-            $job['Date'] = $job['Date']->format('Y-m-d H:i');
+            if ($job['Date'] instanceof \DateTime) {
+                $job['Date'] = $job['Date']->format('Y-m-d H:i');
+            }
             $job['Status'] = $this->getTranslatedStatusMessage(new Job($job['Status']));
             $job['entity'] = 'job';
         });
