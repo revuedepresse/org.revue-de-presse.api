@@ -1,5 +1,13 @@
 function getJobsBoard($, eventListeners) {
     var jobsBoard = function ($, eventListeners) {
+        var LOGGING_SEVERITY_LEVEL = {
+            DEBUG: 10,
+            ERROR: 40,
+            INFO: 20,
+            NONE: 50,
+            WARN: 30
+        };
+
         this.$ = $;
         this.debug = false;
         this.exceptions = {
@@ -12,7 +20,11 @@ function getJobsBoard($, eventListeners) {
                 'for event "{{ event_type }}". ' +
                 'Please implement method "{{ method_name }}".',
             noListenersAvailable: 'No listeners available ' +
-                'for event "{{ event_type }}".'
+                'for event "{{ event_type }}".',
+            invalidLoggingLevel: 'An invalid logging level has been set ' +
+                '("{{ logging_level }}").',
+            unexpectedNodeName: 'Unexpected node name : "{{ actual }}" ' +
+                '(expected: "{{ expected }}")'
         };
         this.info = {
             appendedListbox: 'Appended a listbox for listeners ' +
@@ -27,6 +39,14 @@ function getJobsBoard($, eventListeners) {
         }
         this.eventListeners = eventListeners;
         this.logger = {};
+
+        this.LOGGING_SEVERITY_LEVEL = LOGGING_SEVERITY_LEVEL;
+        this.LOGGING_LEVEL = {};
+        var loggingLevel;
+        for (loggingLevel in this.LOGGING_SEVERITY_LEVEL) {
+            this.LOGGING_LEVEL[loggingLevel] = loggingLevel;
+        }
+        this.loggingLevel = this.LOGGING_LEVEL.INFO;
         this.promises = {};
         this.injectLogger();
     };
@@ -45,8 +65,9 @@ function getJobsBoard($, eventListeners) {
                             for (i = 0; i < arguments.length; i++) {
                                 args.push(arguments[i]);
                             }
-                            if (self.debug) {
-                                nativeLogger[logLevel](args);
+
+                            if (self.isLoggerActive(logLevel)) {
+                                nativeLogger[logLevel].apply(nativeLogger, args);
                             }
                         };
                     })(log);
@@ -55,16 +76,58 @@ function getJobsBoard($, eventListeners) {
         }
     };
 
+    jobsBoard.prototype.isLoggerActive = function (logger) {
+        var logLevelForLogger = logger.toUpperCase();
+        if (this.debug) {
+            return this.getLoggingCriticityLevel(logLevelForLogger) >=
+                this.getLoggingCriticityLevel(this.loggingLevel);
+        }
+    };
+
+    jobsBoard.prototype.validateLoggingLevel = function (level) {
+        if (level !== undefined) {
+            if (this.LOGGING_LEVEL[level] !== undefined) {
+                return level;
+            } else {
+                if (window.console && window.console.debug) {
+                    // Prevent infinite looping
+                    window.console.debug(this.exceptions.invalidLoggingLevel
+                        .replace('{{ logging_level }}', level));
+                }
+            }
+        }
+
+        return this.LOGGING_LEVEL.NONE;
+    };
+
+    jobsBoard.prototype.getLoggingCriticityLevel = function (level) {
+        return this.LOGGING_SEVERITY_LEVEL[
+            this.validateLoggingLevel(level)
+        ];
+    };
+
     jobsBoard.prototype.enableDebug = function () {
         this.debug = true;
+
+        return this;
+    };
+
+    jobsBoard.prototype.setLoggingLevel = function (level) {
+        this.loggingLevel = this.validateLoggingLevel(level);
+
+        return this;
     };
 
     jobsBoard.prototype.disableDebug = function () {
         this.debug = false;
+
+        return this;
     };
 
     jobsBoard.prototype.addEventListener = function (listener) {
         this.eventListeners.push(listener);
+
+        return this;
     };
 
     jobsBoard.prototype.validateRequest = function (request) {
@@ -190,24 +253,96 @@ function getJobsBoard($, eventListeners) {
         return subject && (typeof subject == 'function');
     };
 
-    jobsBoard.prototype.makeRow = function (columns) {
-        var $ = this.$;
-        var row = $('<tr />', {
-            'data-job-id': columns.id
-        });
+    jobsBoard.prototype.isTable = function (node) {
+        return node.nodeName === 'TABLE';
+    };
 
-        if (columns.id !== undefined) {
-            var idColumn = $('<td />', {
-                'text': columns.id
-            });
+    jobsBoard.prototype.prePopulateTable = function (table, columns) {
+        if ($(table).find('thead').length === 0) {
+            var tableHead = $('<thead />');
+            var columnIndex;
+            $(table).append(tableHead);
+
+            if (columns !== undefined) {
+                var headRow = $('<tr />');
+                for (
+                    columnIndex = 0;
+                    columnIndex < columns.length;
+                    columnIndex++
+                ) {
+                    if (!this.isColumnHidden(columns[columnIndex])) {
+                        headRow.append($('<td>', {text: columns[columnIndex]}));
+                    }
+                }
+
+                tableHead.append(headRow);
+            }
         }
 
-        var statusColumn = $('<td />', {
-            'text': columns.status
-        });
+        if ($(table).find('tbody').length === 0) {
+            var tableBody = $('<tbody />');
+            $(table).append(tableBody);
 
-        row.append(idColumn);
-        row.append(statusColumn);
+        }
+
+        return table;
+    };
+
+    jobsBoard.prototype.appendRow = function (target, source) {
+        var row = this.makeRow(source);
+
+        if (this.isTable(target)) {
+            var table = this.prePopulateTable(target, Object.keys(source));
+            $(table).find('tbody').append(row);
+        } else {
+            throw this.exceptions.unexpectedNodeName
+                .replace('{{ actual }}', target.nodeName)
+                .replace('{{ expected }}', 'TABLE');
+        }
+    };
+
+    /**
+     * @see
+     * http://stackoverflow.com/a/2117523/282073
+     * http://tools.ietf.org/html/rfc4122
+     */
+    jobsBoard.prototype.generateUuid = function () {
+        return uuid.v1();
+    };
+
+    jobsBoard.prototype.isColumnHidden = function (name) {
+        return name === 'entity' || name === 'id';
+    };
+
+    jobsBoard.prototype.makeRow = function (columns) {
+        var self = this;
+        var $ = self.$;
+        var entity;
+        var id;
+
+        if (columns.entity !== undefined) {
+            entity = columns.entity;
+        } else {
+            entity = 'generic-entity';
+        }
+
+        if (columns.id !== undefined) {
+            id = columns.id;
+        } else {
+            id = this.generateUuid;
+        }
+        var row = $('<tr />', {
+            'data-entity': entity,
+            'data-id': id
+        });
+        $.each(columns, function (columnName, columnValue) {
+            if (!self.isColumnHidden(columnName)) {
+                row.append($('<td>', {
+                    'data-column': columnName,
+                    text: columnValue
+                }));
+            }
+        });
 
         return row;
     };
@@ -217,7 +352,7 @@ function getJobsBoard($, eventListeners) {
         var $ = self.$;
 
         $.each(event.target, function (targetIndex, target) {
-            $(target).append(self.makeRow(event.data));
+            self.appendRow(target, event.data.job);
         });
     };
 
@@ -227,7 +362,7 @@ function getJobsBoard($, eventListeners) {
 
         $.each(event.target, function (targetIndex, target) {
             $.each(data.collection, function (jobIndex, job) {
-                $(target).append(self.makeRow(job));
+                self.appendRow(target, job);
             });
         });
     };

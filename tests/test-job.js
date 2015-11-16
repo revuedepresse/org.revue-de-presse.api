@@ -65,8 +65,10 @@ describe('Job', function () {
         requestMockery = RequestMockery(eventListeners[0].request.uri);
         requestMockery.respondWith({
             collection: [{
+                Id: 1,
+                Status: 1,
                 id: 1,
-                status: 1
+                entity: 'job'
             }],
             type: 'success'
         }).setRequestHandler(function (settings) {
@@ -77,11 +79,13 @@ describe('Job', function () {
         var mock = requestMockery.mock();
 
         jobsBoard = window.getJobsBoard($, eventListeners);
+        jobsBoard.enableDebug();
+        jobsBoard.setLoggingLevel(jobsBoard.LOGGING_LEVEL.WARN);        
         jobsBoard.mount({'post-jobs-listing': function () {
             var jobsListItemsSelector = jobsListItemsSelectorTemplate
                 .replace('{{ event_type }}', listedJobEvent);
             jobsListItems = $(jobsListItemsSelector);
-            expect(jobsListItems.length).toEqual(1);
+            expect(jobsListItems.length).toEqual(2);
             done();
         }});
 
@@ -114,8 +118,9 @@ describe('Job', function () {
         requestMockery.shouldPost();
         requestMockery.respondWith({
             job: {
-                id: 1,
-                status: 'A new idle job has been created.'
+                Id: 1,
+                Status: 'A new idle job has been created.',
+                entity: 'job'
             },
             result: 'About to export perspectives',
             type: 'success'
@@ -128,9 +133,15 @@ describe('Job', function () {
         var mock = requestMockery.mock();
 
         jobsBoard = window.getJobsBoard($, eventListeners);
+        jobsBoard.enableDebug();
+        jobsBoard.setLoggingLevel(jobsBoard.LOGGING_LEVEL.WARN);
         jobsBoard.mount({'post-job-creation': function () {
             var jobsListItems = $(jobsListItemsSelector);
-            expect(jobsListItems.length).toEqual(1);
+            // It should create the table, its header and its body.
+            // It should receive data asynchronously.
+            // It should append a row containing columns names to the header.
+            // It should append a row containing data to the bodies.
+            expect(jobsListItems.length).toEqual(2);
             done();
         }});
 
