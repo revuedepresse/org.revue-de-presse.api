@@ -76,8 +76,12 @@ class PerspectiveController
 
             return new JsonResponse([
                 'job' => [
+                    'entity' => 'job',
                     'id' => $job->getId(),
-                    'status' => $job->getStatus()
+                    'Id' => $job->getId(),
+                    'Status' => $this->jobRepository->getTranslatedStatusMessage($job),
+                    'rlk_Output' => $job->getOutput(),
+                    'Date' => $job->getCreatedAt()->format('Y-m-d H:i')
                 ],
                 'status' => $message,
                 'type' => 'success'

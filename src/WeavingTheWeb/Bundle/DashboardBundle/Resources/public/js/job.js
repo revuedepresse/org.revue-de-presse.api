@@ -47,8 +47,9 @@ function getJobsBoard($, eventListeners) {
             this.LOGGING_LEVEL[loggingLevel] = loggingLevel;
         }
         this.loggingLevel = this.LOGGING_LEVEL.INFO;
-        this.promises = {};
         this.injectLogger();
+        this.promises = {};
+        this.remote = 'http://localhost';
     };
 
     jobsBoard.prototype.injectLogger = function () {
@@ -74,6 +75,10 @@ function getJobsBoard($, eventListeners) {
                 }
             }
         }
+    };
+
+    jobsBoard.prototype.setRemote = function (remote) {
+        this.remote = remote;
     };
 
     jobsBoard.prototype.isLoggerActive = function (logger) {
@@ -257,6 +262,18 @@ function getJobsBoard($, eventListeners) {
         return node.nodeName === 'TABLE';
     };
 
+    jobsBoard.prototype.shouldFormatColumn = function (name) {
+        return name.indexOf('rlk_') == 0;
+    };
+
+    jobsBoard.prototype.formatColumnName = function (subject) {
+        if (this.shouldFormatColumn(subject)) {
+            return subject.substring(4);
+        } else {
+            return subject;
+        }
+    };
+
     jobsBoard.prototype.prePopulateTable = function (table, columns) {
         if ($(table).find('thead').length === 0) {
             var tableHead = $('<thead />');
@@ -270,8 +287,10 @@ function getJobsBoard($, eventListeners) {
                     columnIndex < columns.length;
                     columnIndex++
                 ) {
-                    if (!this.isColumnHidden(columns[columnIndex])) {
-                        headRow.append($('<td>', {text: columns[columnIndex]}));
+                    var columnName = columns[columnIndex];
+                    if (!this.isColumnHidden(columnName)) {
+                        columnName = this.formatColumnName(columnName);
+                        headRow.append($('<td>', {text: columnName}));
                     }
                 }
 
@@ -314,6 +333,25 @@ function getJobsBoard($, eventListeners) {
         return name === 'entity' || name === 'id';
     };
 
+    jobsBoard.prototype.formatColumnValue = function (subject, columnName) {
+        var formattedSubject = subject;
+
+        if (this.shouldFormatColumn(columnName)) {
+            if (subject !== null && subject.length > 0) {
+                var parts = subject.split('/');
+                formattedSubject = $('<a />', {
+                    'data-action': 'download-archive',
+                    'data-url': this.remote + subject,
+                    text: parts[parts.length - 1]
+                });
+            } else {
+                formattedSubject = '';
+            }
+        }
+
+        return formattedSubject;
+    };
+
     jobsBoard.prototype.makeRow = function (columns) {
         var self = this;
         var $ = self.$;
@@ -337,10 +375,19 @@ function getJobsBoard($, eventListeners) {
         });
         $.each(columns, function (columnName, columnValue) {
             if (!self.isColumnHidden(columnName)) {
-                row.append($('<td>', {
-                    'data-column': columnName,
-                    text: columnValue
-                }));
+                var column = $('<td>', {
+                    'data-column-name': self.formatColumnName(columnName)
+                });
+                var formattedColumnValue = self.formatColumnValue(
+                    columnValue,
+                    columnName
+                );
+                columnValue = formattedColumnValue;
+                if (formattedColumnValue instanceof $) {
+                    columnValue = formattedColumnValue[0];
+                }
+                column.append(columnValue);
+                row.append(column);
             }
         });
 
@@ -600,6 +647,7 @@ if (window.jQuery && window.Routing) {
     }];
 
     var jobsBoard = getJobsBoard($, eventListeners);
+    jobsBoard.setRemote(schemeHost);
     jobsBoard.mount();
 
     $('body').load();
