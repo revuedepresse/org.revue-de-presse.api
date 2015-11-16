@@ -115,9 +115,10 @@ class JobRepository extends EntityRepository
          * @var \Doctrine\ORM\QueryBuilder $queryBuilder
          */
         $queryBuilder = $this->createQueryBuilder($alias);
-        $queryBuilder = $queryBuilder->select('j.id')
-            ->addSelect('j.status')
-            ->addSelect('j.createdAt')
+        $queryBuilder = $queryBuilder->select('j.id as Id')
+            ->addSelect('j.id')
+            ->addSelect('j.status as Status')
+            ->addSelect('j.createdAt as Date')
             ->andWhere('j.user = :user');
 
         foreach ($sortingColumns as $column) {
@@ -129,7 +130,9 @@ class JobRepository extends EntityRepository
 
         $results = $queryBuilder->getQuery()->getArrayResult();
         array_walk($results, function (&$job) {
-            $job['status'] = $this->getTranslatedStatusMessage(new Job($job['status']));
+            $job['Date'] = $job['Date']->format('Y-m-d H:i');
+            $job['Status'] = $this->getTranslatedStatusMessage(new Job($job['Status']));
+            $job['entity'] = 'job';
         });
 
         return $results;

@@ -20,7 +20,8 @@
     "text-encoding": "~0.5.3",
     "clipboard": "~1.5.3",
     "comma-separated-values": "~3.6.4",
-    "jets": "~0.5.0"
+    "jets": "~0.5.0",
+    "node-uuid": "~1.4.7"
   },
   "devDependencies": {
     "jquery-mockjax": "2.0.1"
