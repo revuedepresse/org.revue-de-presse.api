@@ -47,7 +47,7 @@ function getJobsBoard($, eventListeners) {
                 '("{{ logging_level }}").',
             invalidRequest: 'Invalid request for ' +
                 '"{{ event_type }}" event of "{{ listener }}" listener' + '\n'
-                + 'with message "{{ error }}."' + '\n' +
+                + 'with message "{{ error }}."' + '\n'
                 + '=> The expected response code is "2xx".',
             invalidRequestUrl: 'Invalid request URL for ' +
                 '"{{ event_type }}" event of "{{ listener }}" listener:' + '\n'

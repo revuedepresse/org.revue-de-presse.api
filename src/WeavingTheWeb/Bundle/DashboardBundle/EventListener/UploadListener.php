@@ -6,7 +6,9 @@ use Oneup\UploaderBundle\Event\PostPersistEvent;
 
 use Symfony\Component\HttpFoundation\File\Exception\UploadException;
 
-use WeavingTheWeb\Bundle\DashboardBundle\Repository\PerspectiveRepository;
+use WeavingTheWeb\Bundle\DashboardBundle\Exception\CloseArchiveException,
+    WeavingTheWeb\Bundle\DashboardBundle\Exception\OpenArchiveException,
+    WeavingTheWeb\Bundle\DashboardBundle\Repository\PerspectiveRepository;
 
 use WeavingTheWeb\Bundle\MappingBundle\Mapping;
 
@@ -39,6 +41,8 @@ class UploadListener
 
     public $uploadDir;
 
+    public $importDir;
+
     public function onUpload(PostPersistEvent $event)
     {
         $errors = [];
@@ -65,17 +69,73 @@ class UploadListener
             $errors[] = $errorMessage;
         }
 
-        if (count($errors) === 0) {
-            $relativePathStartsAt = strlen(realpath($this->projectRootDir)) + 1;
-            $relativePath = substr($destinationFilePath, $relativePathStartsAt);
-            $perspective = $this->perspectiveRepository->saveFilePerspective($relativePath, $this->mapping);
-
-            $this->entityManager->persist($perspective);
-            $this->entityManager->flush();
+        if ($uploadedFile->getExtension() === 'zip') {
+            try {
+                $this->savePerspectivesInArchive($destinationFilePath);
+            } catch (\Exception $exception) {
+                throw new UploadException(
+                    json_encode(['error' => $exception->getMessage()]),
+                    $exception->getCode(),
+                    $exception
+                );
+            }
         } else {
-            throw new UploadException(json_encode($errors));
+            if (count($errors) === 0) {
+                $this->savePerspective($destinationFilePath);
+            } else {
+                throw new UploadException(json_encode($errors));
+            }
         }
 
         return $event;
+    }
+
+    /**
+     * @param $destinationFilePath
+     */
+    protected function savePerspective($destinationFilePath)
+    {
+        $relativePathStartsAt = strlen(realpath($this->projectRootDir)) + 1;
+        $relativePath = substr($destinationFilePath, $relativePathStartsAt);
+        $perspective = $this->perspectiveRepository->saveFilePerspective($relativePath, $this->mapping);
+
+        $this->entityManager->persist($perspective);
+        $this->entityManager->flush();
+    }
+
+    /**
+     * @param $destinationFilePath
+     * @throws CloseArchiveException
+     * @throws OpenArchiveException
+     */
+    protected function savePerspectivesInArchive($destinationFilePath)
+    {
+        $archive = new \ZipArchive();
+
+        $success = $archive->open($destinationFilePath, \ZipArchive::CHECKCONS);
+        if ($success !== true) {
+            $errorMessage = sprintf(
+                'Could not open existing archive "%s" (error #%d)',
+                $destinationFilePath,
+                $success
+            );
+            $this->logger->error($errorMessage);
+            throw new OpenArchiveException($errorMessage, OpenArchiveException::INVALID_ARCHIVE);
+        }
+
+        $perspectives = [];
+        $destinationDirectory = realpath($this->importDir);
+        for ($fileIndex = 0; $fileIndex < $archive->numFiles; $fileIndex++) {
+            $fileStat = $archive->statIndex($fileIndex);
+            $perspectives[] = $destinationDirectory . '/' . $fileStat['name'];
+        }
+
+        $archive->extractTo($destinationDirectory);
+        $success = $archive->close();
+        if ($success !== true) {
+            $errorMessage = sprintf('Could not close the archive "%s".', $destinationFilePath);
+            $this->logger->error($errorMessage);
+            throw new CloseArchiveException($errorMessage, CloseArchiveException::DEFAULT_CODE);
+        }
     }
 }

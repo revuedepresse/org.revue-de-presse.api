@@ -8,4 +8,6 @@ namespace WeavingTheWeb\Bundle\DashboardBundle\Exception;
 class OpenArchiveException extends \Exception
 {
     const DEFAULT_CODE = 10;
+
+    const INVALID_ARCHIVE = 20;
 }
