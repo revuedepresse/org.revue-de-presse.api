@@ -38,7 +38,11 @@
         </form>
         <div id="file-upload">
             <p>or<p>
-            <form action="{{ oneup_uploader_endpoint('perspective') }}" id="perspective" class="dropzone">
+            <form action="{{ oneup_uploader_endpoint('perspective') }}"
+                  id="perspective"
+                  class="dropzone"
+                  data-action="drag-and-drop"
+                  data-message="Drag and drop your perspectives">
             </form>
         </div>
         {% include 'WeavingTheWebDashboardBundle::perspective.html.twig' %}

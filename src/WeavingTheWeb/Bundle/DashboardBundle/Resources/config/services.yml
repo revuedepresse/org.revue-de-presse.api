@@ -272,6 +272,7 @@ services:
         properties:
             projectRootDir:         %kernel.root_dir%/..
             uploadDir:              %weaving_the_web_dashboard.resources.perspectives.upload%
+            importDir:              %weaving_the_web_dashboard.resources.perspectives.import%
             logger:                 @logger
             mapping:                @weaving_the_web_mapping.mapping
             perspectiveRepository:  @weaving_the_web_dashboard.repository.perspective

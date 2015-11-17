@@ -113,7 +113,12 @@ class PerspectiveImporter extends AbstractImporter
         }
 
         if (array_key_exists('encrypted_name', $decodedContent)) {
-            $decryptedName = $this->decryptSafely($decodedContent['encrypted_name']);
+            if (strlen($decodedContent['encrypted_name']) > 0) {
+                $decryptedName = $this->decryptSafely($decodedContent['encrypted_name']);
+            } else {
+                $decryptedName = '';
+            }
+
             $perspective->setName($decryptedName);
         }
     }
