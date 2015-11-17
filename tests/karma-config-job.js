@@ -7,15 +7,18 @@ module.exports = function(config) {
     var testedComponentsDir = assetsDir + '/js';
     var vendorComponentsDir = assetsDir + '/components';
 
-    var notificationCenter = testedComponentsDir + '/notification-center.js';
     var job = testedComponentsDir + '/job.js';
+
+    var jqueryNativeAjax = vendorComponentsDir +
+        '/jquery-ajax-native/src/jquery-ajax-native.js';
     var uuid = vendorComponentsDir + '/node-uuid/uuid.js';
+
     var preprocessedScripts = [
-        notificationCenter,
         job,
         'request-mock.js',
         'test-job.js'
     ];
+
     var preprocessors = {};
     var i;
     for (i = 0; i < preprocessedScripts.length; i++) {
@@ -34,8 +37,8 @@ module.exports = function(config) {
         files: [
             'bower_components/jquery/dist/jquery.js',
             'bower_components/bind-polyfill/index.js',
+            jqueryNativeAjax,
             uuid,
-            notificationCenter,
             job,
             'bower_components/jquery-mockjax/dist/jquery.mockjax.js',
             'request-mock.js',
@@ -68,7 +71,7 @@ module.exports = function(config) {
         // - PhantomJS
         // - IE (only Windows; has to be installed with `npm install karma-ie-launcher`)
         browsers: ['ChromeCanary'],
-        // 'PhantomJS', 
+        // 'PhantomJS',
         eslint: {
             stopOnError: false,
             stopOnWarning: false
