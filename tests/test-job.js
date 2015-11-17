@@ -242,6 +242,7 @@ describe('Job', function () {
             jobsBoard.enableDebug();
             jobsBoard.setRemote(remoteUrl);
             jobsBoard.setLoggingLevel(jobsBoard.LOGGING_LEVEL.DEBUG);
+            jobsBoard.filterLogByLevel(jobsBoard.LOGGING_LEVEL.INFO);
             jobsBoard.mount({
                 'post-jobs-listing': function () {
                     expect($(downloadJobArchiveSelector).length).toEqual(1);

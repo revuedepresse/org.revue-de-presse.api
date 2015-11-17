@@ -77,6 +77,7 @@ function getJobsBoard($, eventListeners) {
             this.LOGGING_LEVEL[loggingLevel] = loggingLevel;
         }
         this.loggingLevel = this.LOGGING_LEVEL.INFO;
+        this.logFilter;
         this.injectLogger();
         this.promises = {};
         this.remote = 'http://localhost';
@@ -95,6 +96,13 @@ function getJobsBoard($, eventListeners) {
         });
     };
 
+    jobsBoard.prototype.shouldLog = function (logLevel) {
+        return this.isLoggerActive(logLevel) && (
+            this.logFilter === undefined ||
+            this.logFilter === logLevel.toUpperCase()
+        );
+    };
+
     jobsBoard.prototype.injectLogger = function () {
         var nativeLogger = window.console;
         var self = this;
@@ -110,7 +118,7 @@ function getJobsBoard($, eventListeners) {
                                 args.push(arguments[i]);
                             }
 
-                            if (self.isLoggerActive(logLevel)) {
+                            if (self.shouldLog(logLevel)) {
                                 nativeLogger[logLevel].apply(nativeLogger, args);
                             }
                         };
@@ -166,6 +174,10 @@ function getJobsBoard($, eventListeners) {
         this.debug = true;
 
         return this;
+    };
+
+    jobsBoard.prototype.filterLogByLevel = function (level) {
+        this.logFilter = level;
     };
 
     jobsBoard.prototype.setLoggingLevel = function (level) {
