@@ -20,6 +20,8 @@
 {% block javascripts %}
     {{ parent() }}
     {% javascripts
+        '@WeavingTheWebDashboardBundle/Resources/public/components/jquery-ajax-native/src/jquery-ajax-native.js'
+        '@WeavingTheWebDashboardBundle/Resources/public/components/file-saver.js/FileSaver.js'
         '@WeavingTheWebDashboardBundle/Resources/public/js/job.js'
         output='js/compiled/show-jobs.js' %}
         <script src="{{ asset_url }}" type="text/javascript"></script>

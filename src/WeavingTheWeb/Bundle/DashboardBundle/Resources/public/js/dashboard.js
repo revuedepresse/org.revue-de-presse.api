@@ -70,7 +70,7 @@ function mountDashboard(reqs) {
 
     Dashboard.prototype.suggestDownload = function (content, contentType, filename) {
         this.fileSaver(
-            new Blob([content], {type: contentType}),
+            new Blob([content], {type: 'application/zip'}),
             filename
         );
     };

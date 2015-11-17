@@ -14,6 +14,7 @@ function getJobsBoard($, eventListeners) {
             noContainerAvailable: 'No container available ' +
                 'for listeners of event "{{ event_type }}".' + '\n' +
                 '=> The event listener "container" property can be defined.',
+            noContentAvailable: 'No content available.',
             noEventEmittedOnSuccess: 'Missing event to be emitted ' +
                 'on successful request for "{{ listener }}" listener.' + '\n' +
                 '=> The event listener "request.emit" property can be defined.',
@@ -28,12 +29,26 @@ function getJobsBoard($, eventListeners) {
                 '=> The event listener "after" property can be defined ' +
                 'to ensure requirements have been met ' +
                 'before attaching this event listener',
+            notImplemented: 'Not implemented',
+            suggestContentTypeMatch: '=> Consider declaring how ' +
+                '"{{ content_type }}" content type ' + '\n' +
+                'should match with one of the following type of data: ' + '\n' +
+                '{"json", "text", "jsonp", "script", "html". "xml"}.' + '\n' +
+                'See also the description of "dataType" ajax setting ' + '\n' +
+                'for jQuery in ' +
+                'http://api.jquery.com/jquery.ajax/#jQuery-ajax-settings',
+            suggestEmitterCheck: '=>  The "{{ emitter }}" emitter ' +
+                'should send a request to obtain a response with content.',
             suggestSelectorCheck: '=>  The "{{ selector }}" selector ' +
                 'should match existing elements.',
             noRequest: 'Missing request for "{{ listener }}" listener' + '\n' +
                 '=> The event listener "request" property can be defined',
             invalidLoggingLevel: 'An invalid logging level has been set ' +
                 '("{{ logging_level }}").',
+            invalidRequest: 'Invalid request for ' +
+                '"{{ event_type }}" event of "{{ listener }}" listener' + '\n'
+                + 'with message "{{ error }}."' + '\n' +
+                + '=> The expected response code is "2xx".',
             invalidRequestUrl: 'Invalid request URL for ' +
                 '"{{ event_type }}" event of "{{ listener }}" listener:' + '\n'
                 + '=>  The event listener "request.url" property can be defined.'
@@ -62,6 +77,7 @@ function getJobsBoard($, eventListeners) {
 
         this.eventListeners = eventListeners;
         this.onPostEventHandlers = {};
+        this.promises = {};
 
         this.dependencies = {};
         this.dependees = {};
@@ -69,7 +85,6 @@ function getJobsBoard($, eventListeners) {
         this.checkDependenciesBetweenListeners();
 
         this.logger = {};
-
         this.LOGGING_SEVERITY_LEVEL = LOGGING_SEVERITY_LEVEL;
         this.LOGGING_LEVEL = {};
         var loggingLevel;
@@ -78,8 +93,10 @@ function getJobsBoard($, eventListeners) {
         }
         this.loggingLevel = this.LOGGING_LEVEL.INFO;
         this.logFilter;
+
         this.injectLogger();
-        this.promises = {};
+
+        this.fileSaver;
         this.remote = 'http://localhost';
     };
 
@@ -138,6 +155,10 @@ function getJobsBoard($, eventListeners) {
 
     jobsBoard.prototype.setRemote = function (remote) {
         this.remote = remote;
+    };
+
+    jobsBoard.prototype.setFileSaver = function (fileSaver) {
+        this.fileSaver = fileSaver;
     };
 
     jobsBoard.prototype.isLoggerActive = function (logger) {
@@ -292,7 +313,12 @@ function getJobsBoard($, eventListeners) {
             url: request.getUrl(),
             headers : request.getHeaders(),
             success: request.binding.success,
-            type: request.getMethod()
+            type: request.getMethod(),
+            dataType: request.getContentType(),
+            processData: request.shouldProcessData(),
+            xhrFields: {
+                responseType: request.getXhrResponseType()
+            }
         };
 
         var promiseId = this.getPromiseId(request);
@@ -336,6 +362,26 @@ function getJobsBoard($, eventListeners) {
             .replace('{{ event_type }}', eventType);
     };
 
+    jobsBoard.prototype.wrapCustomEventData = function (data, request) {
+        if (data === undefined) {
+            data = {
+                emitter: request.binding.name
+            };
+        } else {
+            if (data.constructor && data.constructor === Object) {
+                data.emitter = request.binding.name;
+            } else {
+                data = {
+                    content: data,
+                    emitter: request.binding.name
+                };
+            }
+        }
+        data.promise = this.remindPromise(request);
+
+        return data;
+    };
+
     jobsBoard.prototype.onOkResponse = function (request) {
         var promise = this.remindPromise(request);
         var self = this;
@@ -345,8 +391,7 @@ function getJobsBoard($, eventListeners) {
                 var eventType = request.success.emit;
                 var target = self.getOnSuccessTarget(request);
                 var event = $.Event(eventType);
-                data.emitter = request.binding.name;
-                target.trigger(event, data);
+                target.trigger(event, self.wrapCustomEventData(data, request));
             });
         }
     };
@@ -492,6 +537,75 @@ function getJobsBoard($, eventListeners) {
         return row;
     };
 
+    jobsBoard.prototype.getResponseHeader = function (promise, header) {
+        var responseHeader;
+        if (this.isFunction(promise.getResponseHeader)) {
+            responseHeader = promise.getResponseHeader(header);
+        }
+
+        return responseHeader;
+    };
+
+    jobsBoard.prototype.getResponseFileName = function (promise) {
+        var fileName = 'download.txt';
+        var contentDisposition = this.getResponseHeader(
+            promise,
+            'Content-Disposition'
+        );
+        if (contentDisposition) {
+            var fileNameMatches = contentDisposition
+                .match(/filename="([^"]+)"/);
+            if (fileNameMatches[1] !== undefined) {
+                fileName = fileNameMatches[1];
+            }
+        }
+
+        return fileName;
+    };
+
+    jobsBoard.prototype.getResponseContentType = function (promise) {
+        var contentType = this.getResponseHeader(promise, 'Content-Type');
+        if (!contentType) {
+            contentType = 'text/plain';
+        }
+
+        return contentType;
+    };
+
+    jobsBoard.prototype.saveAs = function (data) {
+        this.fileSaver(
+            data.content,
+            this.getResponseFileName(data.promise)
+        );
+    };
+
+    jobsBoard.prototype.validateContent = function (data) {
+        if (
+            data === undefined ||
+            data.content === undefined ||
+            data.promise === undefined
+        ) {
+            var suggestEmitterCheck;
+
+            if (data && data.emitter !== undefined)
+                suggestEmitterCheck = this.exceptions.suggestEmitterCheck
+                .replace('{{ emitter }}', data.emitter);
+            else {
+                suggestEmitterCheck = '';
+            }
+
+            throw new Error(this.exceptions.noContentAvailable + '\n' +
+                suggestEmitterCheck);
+        }
+    };
+
+    jobsBoard.prototype.onJobArchiveDownloaded = function (event) {
+        var content = event.data;
+
+        this.validateContent(content);
+        this.saveAs(content);
+    };
+
     jobsBoard.prototype.onJobsCreated = function (event) {
         var self = this;
         var $ = self.$;
@@ -578,6 +692,56 @@ function getJobsBoard($, eventListeners) {
         request.getUrl = getter;
     };
 
+    jobsBoard.prototype.updateRequestContentType = function (request) {
+        var self = this;
+
+        if (request.contentType !== undefined) {
+            request.getContentType = function () {
+                var contentType;
+
+                if (request.contentType === 'application/zip') {
+                    contentType = 'native';
+                } else {
+                    var suggestContentTypeMatch;
+                    if (request.contentType !== undefined) {
+                        suggestContentTypeMatch = '\n' +
+                            self.exceptions.suggestContentTypeMatch
+                            .replace('{{ content_type }}', request.contentType);
+                    } else {
+                        suggestContentTypeMatch = '';
+                    }
+
+                    // Consider the possibility of
+                    // handling other content types in the future
+                    throw new Error(self.exceptions.notImplemented +
+                        suggestContentTypeMatch);
+                }
+
+                return contentType;
+            };
+
+            request.getXhrResponseType = function () {
+                return 'blob';
+            };
+
+            request.shouldProcessData = function () {
+                return false;
+            };
+        } else {
+            request.getContentType = function () {
+                return '*';
+            };
+
+            request.getXhrResponseType = function () {
+                return 'text';
+            };
+
+            request.shouldProcessData = function () {
+                return true;
+            };
+        }
+    };
+
     jobsBoard.prototype.bindNativeEventHandlers = function (binding) {
         var self = this;
         var onEvent = function () {
@@ -599,10 +763,17 @@ function getJobsBoard($, eventListeners) {
                 self.ensureRequestHasMethod(request);
 
                 self.updateRequestHeaders(request);
+                self.updateRequestContentType(request);
 
                 request = self.validateRequest(request);
 
                 var promise = self.makeXhrPromise(request);
+                promise.fail(function (xhr, status, error) {
+                    throw new Error(self.exceptions.invalidRequest
+                        .replace('{{ error }}', error)
+                        .replace('{{ listener }}', request.binding.name)
+                        .replace('{{ event_type }}', request.binding.type));
+                });
                 self.onOkResponse(request);
 
                 return promise;
@@ -921,6 +1092,8 @@ if (window.jQuery && window.Routing) {
     var exportPerspectivesUrl = schemeHost +
         routing.generate('weaving_the_web_api_export_perspectives');
 
+    var fileSaver = window.saveAs;
+
     var listJobsUrl = schemeHost +
         routing.generate('weaving_the_web_api_get_jobs');
     var listedJobEventType = 'jobs:listed';
@@ -965,6 +1138,7 @@ if (window.jQuery && window.Routing) {
         listeners: downloadJobArchiveButtons,
         name: 'download-job-archive',
         request: {
+            contentType: 'application/zip',
             headers: headers,
             success: {
                 emit: downloadedJobArchiveEvent
@@ -979,6 +1153,7 @@ if (window.jQuery && window.Routing) {
 
     var jobsBoard = getJobsBoard($, eventListeners);
     jobsBoard.enableDebug();
+    jobsBoard.setFileSaver(fileSaver);
     jobsBoard.setRemote(schemeHost);
     jobsBoard.mount();
 

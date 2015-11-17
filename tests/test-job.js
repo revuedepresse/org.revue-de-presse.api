@@ -213,6 +213,15 @@ describe('Job', function () {
             listeners: $(downloadJobArchiveSelector),
             name: 'download-job-archive',
             request: {
+                //// This request should have the "contentType" property
+                //// but the "native" data type is not taken care of
+                //// by $.mockjax as we rely on jqueryNativeAjax plugin
+                //// to download zip archives as a native Blob
+                //// See PR https://github.com/jquery/jquery/pull/1525
+                //// Whenever mockjax would be adapted to support "native"
+                //// date type or anything alike, the data type expectation
+                //// below would need to be updated accordingly
+                // contentType: 'application/zip',
                 headers: headers,
                 success: {
                     emit: downloadedJobArchiveEvent
@@ -228,21 +237,27 @@ describe('Job', function () {
         });
 
         requestMockery = RequestMockery(remoteUrl + downloadJobArchiveUrl);
-        requestMockery.respondWith({
-            content: 'archive content'
-        }).setRequestHandler(function (settings) {
-
+        requestMockery.respondWith('binarycontent')
+        .setRequestHandler(function (settings) {
             expect(settings.headers).not.toBeUndefined();
             expect(settings.headers.Authorization)
                 .toEqual(authorizationHeaderValue);
+            expect(settings.dataType).not.toBeUndefined();
+            expect(settings.dataType).toEqual('*');
         });
 
         var jobsBoard = window.getJobsBoard($, eventListeners);
+
         try {
             jobsBoard.enableDebug();
-            jobsBoard.setRemote(remoteUrl);
             jobsBoard.setLoggingLevel(jobsBoard.LOGGING_LEVEL.DEBUG);
-            jobsBoard.filterLogByLevel(jobsBoard.LOGGING_LEVEL.INFO);
+            jobsBoard.filterLogByLevel(jobsBoard.LOGGING_LEVEL.ERROR);
+
+            var fileSaverMock = jasmine.createSpy('saveAs');
+            jobsBoard.setFileSaver(fileSaverMock);
+
+            jobsBoard.setRemote(remoteUrl);
+
             jobsBoard.mount({
                 'post-jobs-listing': function () {
                     expect($(downloadJobArchiveSelector).length).toEqual(1);
@@ -260,6 +275,8 @@ describe('Job', function () {
                     downloadJobArchiveMock.destroy();
                 },
                 'post-job-archive-download': function () {
+                    expect(fileSaverMock).toHaveBeenCalled();
+
                     done();
                 }
             });
