@@ -1,5 +1,12 @@
 'use strict';
 
+var require = this;
+
+var getNotificationCenter = require.getNotificationCenter;
+var mockNotificationCenter = require.mockNotificationCenter;
+var mountEditableContents = require.mountEditableContents;
+var RequestMockery = require.RequestMockery;
+
 describe('Editable Content', function () {
     var editableContentElement;
 
@@ -32,7 +39,10 @@ describe('Editable Content', function () {
         mountEditableContents({
             selector: editableContentsSelector,
             routes: routes,
-            notificationCenter: getNotificationCenter(notificationCenterMock.getNotificationElementId(), $),
+            notificationCenter: getNotificationCenter(
+                notificationCenterMock.getNotificationElementId(),
+                $
+            ),
             $: $
         });
     });

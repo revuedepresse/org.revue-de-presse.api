@@ -23,8 +23,7 @@
         "jquery": true
     },
     "globals": {
-        "RequestMockery": true,
-        "uuid": true
+        "_": true
     },
     "extends": "eslint:recommended"
 }

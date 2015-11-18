@@ -8,12 +8,15 @@
   },
   "scripts": {
     "test": "npm run test-mobile && npm run test-dashboard && npm run test-job && npm run test-perspective",
+    "doc-js": "jsdox tests/karma-configurator.js tests/karma-settings-provider.js --output app/Resources/doc/jsdoc",
     "test-dashboard": "karma start tests/karma-config-dashboard-ci.js",
     "test-job": "karma start tests/karma-config-job-ci.js",
+    "test-logger": "karma start tests/karma-config-logger-ci.js",
     "test-perspective": "karma start tests/karma-config-perspective-ci.js",
     "test-mobile": "karma start tests/karma-config-mobile-ci.js",
     "tdd-dashboard": "karma start tests/karma-config-dashboard.js",
     "tdd-job": "karma start tests/karma-config-job.js",
+    "tdd-logger": "karma start tests/karma-config-logger.js",
     "tdd-mobile": "karma start tests/karma-config-mobile.js",
     "tdd-perspective": "karma start tests/karma-config-perspective.js"
   },
@@ -23,8 +26,12 @@
   },
   "keywords": [
     "dashboard",
-    "twitter",
-    "status"
+    "date-formatter",
+    "editable-content",
+    "jobs-board",
+    "query-params",
+    "status",
+    "twitter"
   ],
   "author": "Thierry Marianne",
   "license": "MIT",
@@ -36,6 +43,7 @@
   "devDependencies": {
     "eslint": "1.7.1",
     "jasmine-core": "2.3.4",
+    "jsdox": "0.4.9",
     "karma": "0.12.16",
     "karma-chrome-launcher": "0.1.4",
     "karma-eslint": "2.0.1",

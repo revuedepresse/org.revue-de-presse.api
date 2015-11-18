@@ -1,5 +1,10 @@
 'use strict';
 
+var require = this;
+var mountDashboard = require.mountDashboard;
+var getNotificationCenter = require.getNotificationCenter;
+var RequestMockery = require.RequestMockery;
+
 describe('Dashboard', function () {
     var dashboard;
 
@@ -26,7 +31,6 @@ describe('Dashboard', function () {
 
     // JSON perspectives
     var jsonPerspectiveContainerElement;
-    var navigationFormId;
     var jsonPerspectiveClass = 'perspective-json';
     var perspectiveHash = 'my-perspective-hash';
 
@@ -43,7 +47,7 @@ describe('Dashboard', function () {
     var saveQueryResult = 'Execution effectuée avec succès';
     var exportQueryExecutionResult = 'Requête effectuée';
 
-    var notificationCenterMock = mockNotificationCenter($);
+    var notificationCenterMock = require.mockNotificationCenter($);
 
     var createContainerElement = function (containerProperties, childProperties, elementReferences) {
         if (!containerProperties.hasOwnProperty('class')) {
@@ -101,7 +105,7 @@ describe('Dashboard', function () {
                 'class': jsonPerspectiveClass
             }, {
                 'class': hashClass,
-                 text: 'my-perspective-hash'
+                text: 'my-perspective-hash'
 
             }, elementReferences
         );
@@ -137,9 +141,11 @@ describe('Dashboard', function () {
         dashboard = mountDashboard({
             $: $,
             routes: routes,
-            notificationCenter: getNotificationCenter(notificationCenterMock.getNotificationElementId(), $)
+            notificationCenter: getNotificationCenter(
+                notificationCenterMock.getNotificationElementId(),
+                $
+            )
         });
-        navigationFormId = dashboard.getNavigationFormId();
     });
 
     afterEach(function () {
@@ -250,13 +256,13 @@ describe('Dashboard', function () {
 
     describe('Execute query', function () {
         it('should fill out a form to submit a query for execution.', function (done) {
-            var query = '# show ' + "\n" +
+            var query = '# show ' + '\n' +
                 'SELECT @id;';
             assertQuerySubmittedForExecution(query, done);
         });
 
         it('should submit a query starting with a compliant comment', function (done) {
-            var query = '# count' + "\n" +
+            var query = '# count' + '\n' +
                 'SELECT @id;';
             assertQuerySubmittedForExecution(query, done);
         });
@@ -286,7 +292,7 @@ describe('Dashboard', function () {
             var query = '# this is not compliant';
             submitQuery(query);
             expect(queryTextAreaElement.value).not.toEqual(query);
-        })
+        });
     });
 
     describe('Export query execution results', function () {
@@ -300,7 +306,7 @@ describe('Dashboard', function () {
 
                 assertErrorNotificationExistsOnRequest(event, mockery);
             }
-        )
+        );
     });
 
     describe('Go to JSON perspective', function () {

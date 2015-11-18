@@ -1,90 +1,46 @@
-// Karma configuration
-// Generated on Mon Feb 03 2014 19:57:02 GMT+0100 (CET)
+'use strict';
 
-module.exports = function(config) {
-    config.set({
+var Configurator = require('./karma-configurator');
 
-        // base path, that will be used to resolve files and exclude
-        basePath: '',
+module.exports = function (karmaConfig) {
+    var assetsDir = '../src/WeavingTheWeb/Bundle/DashboardBundle/' +
+        'Resources/public';
+    var testedComponentsDir = assetsDir + '/js';
+    var vendorComponentsDir = assetsDir + '/components';
 
+    var queryParams = testedComponentsDir + '/get-query-params.js';
+    var logger = testedComponentsDir + '/logger.js';
+    var dateFormatter = testedComponentsDir + '/format-date.js';
+    var metrics = testedComponentsDir + '/metrics.js';
 
-        // frameworks to use
-        frameworks: ['jasmine'],
-
-
-        // list of files / patterns to load in the browser
-        files: [
+    var configurator = Configurator(karmaConfig);
+    configurator
+        .setFiles([
             'bower_components/jquery/dist/jquery.js',
-            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/components/clipboard/dist/clipboard.js',
-            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/components/d3/d3.js',
-            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/components/metrics-graphics/dist/metricsgraphics.js',
-            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/components/file-saver.js/FileSaver.js',
-            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/components/comma-separated-values/csv.min.js'            ,
-            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/get-query-params.js',
-            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/logger.js',
-            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/format-date.js',
-            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/metrics.js',
+            'bower_components/bind-polyfill/index.js',
+            vendorComponentsDir + '/clipboard/dist/clipboard.js',
+            vendorComponentsDir + '/d3/d3.js',
+            vendorComponentsDir + '/metrics-graphics/dist/metricsgraphics.js',
+            vendorComponentsDir + '/file-saver.js/FileSaver.js',
+            vendorComponentsDir + '/comma-separated-values/csv.min.js',
+            queryParams,
+            logger,
+            dateFormatter,
+            metrics,
             'test-format-date.js',
-            'test-get-query-params.js',
-            'test-metrics.js'
-        ],
+            'test-get-query-params.js'
+        ])
+        .preprocessScripts([
+            queryParams,
+            logger,
+            dateFormatter,
+            metrics,
+            'test-format-date.js',
+            'test-get-query-params.js'
+        ])
+        .configure();
 
-
-        // test results reporter to use
-        // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
-        reporters: ['spec'],
-
-
-        // web server port
-        port: 9876,
-
-
-        // enable / disable colors in the output (reporters and logs)
-        colors: true,
-
-
-        // level of logging
-        // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
-        logLevel: config.LOG_INFO,
-
-
-        // enable / disable watching file and executing tests whenever any file changes
-        autoWatch: true,
-
-
-        // Start these browsers, currently available:
-        // - Chrome
-        // - ChromeCanary
-        // - Firefox
-        // - Opera (has to be installed with `npm install karma-opera-launcher`)
-        // - Safari (only Mac; has to be installed with `npm install karma-safari-launcher`)
-        // - PhantomJS
-        // - IE (only Windows; has to be installed with `npm install karma-ie-launcher`)
-        browsers: ['ChromeCanary'],
-
-        eslint: {
-            stopOnError: false,
-            stopOnWarning: true
-        },
-
-        preprocessors: {
-            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/metrics.js':           ['eslint'],
-            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/get-query-params.js':  ['eslint'],
-            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/format-date.js':       ['eslint'],
-            '../src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/js/logger.js':            ['eslint']
-        },
-
-        junitReporter: {
-            outputFile: '../build/test-perspective.xml',
-            suite: 'Perspective'
-        },
-
-        // If browser does not capture in given timeout [ms], kill it
-        captureTimeout: 60000,
-
-
-        // Continuous Integration mode
-        // if true, it capture browsers, run tests and exit
-        singleRun: false
-    });
+    return (function (karmaConfig) {
+        return configurator.setConfig(karmaConfig);
+    })(karmaConfig);
 };

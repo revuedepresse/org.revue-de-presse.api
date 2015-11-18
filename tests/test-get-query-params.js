@@ -1,5 +1,8 @@
 'use strict';
 
+var require = this;
+var getQueryParams = require.getQueryParams;
+
 describe('Query params getter', function () {
     var params;
 
