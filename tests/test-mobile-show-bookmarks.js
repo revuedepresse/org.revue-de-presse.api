@@ -1,5 +1,10 @@
 'use strict';
 
+var require = this;
+var angular = require.angular;
+var inject = require.inject;
+var LocationMockService = require.LocationMockService;
+
 describe('Accessing bookmarks', function () {
     var $controller,
         $routeParams,
@@ -27,15 +32,17 @@ describe('Accessing bookmarks', function () {
         var data,
             $rootScope;
 
-        statusId = "420103690863669249";
+        statusId = '420103690863669249';
         statuses = [
             {
-                "author_avatar": "http://pbs.twimg.com/profile_images/1803355808/377992_203375376416531_100002322093627_443137_1695065966_n_normal.jpg",
-                "text": "@schmittjoh Are those changes pushed to https://t.co/8X8XXLOSnB yet? Can't find anything in the recent commits.",
-                "screen_name": "nikita_ppv",
-                "id": 4366498,
-                "status_id": statusId,
-                "starred": false
+                'author_avatar': 'http://pbs.twimg.com/profile_images/' +
+                    '1803355808/377992_203375376416531_100002322093627_443137_1695065966_n_normal.jpg',
+                'text': '@schmittjoh Are those changes pushed to ' +
+                    'https://t.co/8X8XXLOSnB yet? Can\'t find anything in the recent commits.',
+                'screen_name': 'nikita_ppv',
+                'id': 4366498,
+                'status_id': statusId,
+                'starred': false
             }
         ];
 

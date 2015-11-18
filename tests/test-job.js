@@ -1,5 +1,8 @@
 'use strict';
-/*eslint-env jasmine, jquery */
+
+var require = this;
+var RequestMockery = require.RequestMockery; 
+
 describe('Job', function () {
     var authorizationHeaderValue = 'Bearer tok';
     var body = $('body');

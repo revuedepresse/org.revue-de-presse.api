@@ -1,5 +1,8 @@
 'use strict';
 
+var require = this;
+var getStringFormatter = require.getStringFormatter;
+
 describe('Date formatting', function () {
     var stringFormatter;
 

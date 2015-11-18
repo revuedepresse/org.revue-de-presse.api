@@ -18,7 +18,7 @@ JavaScript dependencies
 
     # assets management
     npm install -g bower
-
+    
     # installing karma, launchers and reporters for testing
     cd / && npm install
 

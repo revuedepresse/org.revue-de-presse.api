@@ -1,14 +1,21 @@
 'use strict';
 
+var require = this;
+var angular = require.angular;
+var inject = require.inject;
+var LocationMockService = require.LocationMockService;
+var logger = require.console;
+
+var statusId = '420103690863669249';
 var statusIds = [
-        "420103690863669249",
-        "420103690863669248",
-        "420103690863669247",
-        "420103690863669246",
-        "420103690863669245",
-        "420103690863669244"
-    ],
-    verbose = 'DEBUG';
+    '420103690863669249',
+    '420103690863669248',
+    '420103690863669247',
+    '420103690863669246',
+    '420103690863669245',
+    '420103690863669244'
+];
+var verbose = 'DEBUG';
 
 describe('Accessing statuses', function () {
     var $controller,
@@ -22,20 +29,20 @@ describe('Accessing statuses', function () {
         statuses;
 
     var responseGetter = function (endpoint, content, log) {
-            var logExpectation = log || false;
+        var logExpectation = log || false;
 
-            if (logExpectation) {
-                console.log('expecting GET ' + endpoint);
+        if (logExpectation) {
+            logger.log('expecting GET ' + endpoint);
+        }
+
+        return function (method, url) {
+            if (verbose === 'DEBUG' && logExpectation) {
+                logger.log(method + ' ' + url);
             }
 
-            return function (method, url) {
-                if (verbose === 'DEBUG' && logExpectation) {
-                    console.log(method + ' ' + url);
-                }
-
-                return [200, content, {}]
-            }
+            return [200, content, {}];
         };
+    };
 
     beforeEach(angular.mock.module('weaverApp'));
 
@@ -60,29 +67,29 @@ describe('Accessing statuses', function () {
         var endpoint,
             $rootScope;
 
-        screenName = "nikita_ppv";
+        screenName = 'nikita_ppv';
         statuses = [
             {
-                "author_avatar": "http://example.com/avatar2.jpg",
-                "text": "third tweet which has been published",
-                "screen_name": screenName,
-                "id": ids[2],
-                "status_id": statusIds[2],
-                "starred": false
+                'author_avatar': 'http://example.com/avatar2.jpg',
+                'text': 'third tweet which has been published',
+                'screen_name': screenName,
+                'id': ids[2],
+                'status_id': statusIds[2],
+                'starred': false
             }, {
-                "author_avatar": "http://pbs.twimg.com/profile_images/1803355808/377992_203375376416531_100002322093627_443137_1695065966_n_normal.jpg",
-                "text": "first tweet which has been published",
-                "screen_name": screenName,
-                "id": ids[0],
-                "status_id": statusIds[0],
-                "starred": false
+                'author_avatar': 'http://pbs.twimg.com/profile_images/1803355808/377992_203375376416531_100002322093627_443137_1695065966_n_normal.jpg',
+                'text': 'first tweet which has been published',
+                'screen_name': screenName,
+                'id': ids[0],
+                'status_id': statusIds[0],
+                'starred': false
             }, {
-                "author_avatar": "http://example.com/avatar2.jpg",
-                "text": "second tweet which has been published",
-                "screen_name": screenName,
-                "id": ids[1],
-                "status_id": statusIds[1],
-                "starred": false
+                'author_avatar': 'http://example.com/avatar2.jpg',
+                'text': 'second tweet which has been published',
+                'screen_name': screenName,
+                'id': ids[1],
+                'status_id': statusIds[1],
+                'starred': false
             }
         ];
 
@@ -167,12 +174,12 @@ describe('Accessing statuses', function () {
 
             olderStatuses = [
                 {
-                    "author_avatar": "http://example.com/avatar.jpg",
-                    "text": "Older tweet.",
-                    "screen_name": "nikita_ppv",
-                    "id": ids[3],
-                    "status_id": statusIds[3],
-                    "starred": false
+                    'author_avatar': 'http://example.com/avatar.jpg',
+                    'text': 'Older tweet.',
+                    'screen_name': 'nikita_ppv',
+                    'id': ids[3],
+                    'status_id': statusIds[3],
+                    'starred': false
                 }
             ];
 
@@ -209,12 +216,12 @@ describe('Accessing statuses', function () {
 
                 olderStatuses = [
                     {
-                        "author_avatar": "http://example.com/avatar.jpg",
-                        "text": "Older tweet.",
-                        "screen_name": otherUserScreenName,
-                        "id": ids[4],
-                        "status_id": statusIds[4],
-                        "starred": false
+                        'author_avatar': 'http://example.com/avatar.jpg',
+                        'text': 'Older tweet.',
+                        'screen_name': otherUserScreenName,
+                        'id': ids[4],
+                        'status_id': statusIds[4],
+                        'starred': false
                     }
                 ];
 
@@ -248,7 +255,6 @@ describe('Accessing statuses', function () {
 describe('Pressing a favorite button', function () {
     var $controller,
         $httpBackend,
-        $log,
         $routeParams,
         $scope,
         cache,
@@ -278,21 +284,24 @@ describe('Pressing a favorite button', function () {
     beforeEach(inject(function ($injector, $angularCacheFactory, offlineCache) {
         var $rootScope;
 
-        screenName = "nikita_ppv";
+        screenName = 'nikita_ppv';
         statuses = [
             {
-                "author_avatar": "http://pbs.twimg.com/profile_images/1803355808/377992_203375376416531_100002322093627_443137_1695065966_n_normal.jpg",
-                "text": "@schmittjoh Are those changes pushed to https://t.co/8X8XXLOSnB yet? Can't find anything in the recent commits.",
-                "screen_name": screenName,
-                "id": 4366498,
-                "status_id": statusId,
-                "starred": false
+                'author_avatar': 'http://pbs.twimg.com/profile_images/' +
+                    '1803355808/377992_203375376416531_100002322093627_443137_1695065966_n_normal.jpg',
+                'text': '@schmittjoh Are those changes pushed to ' +
+                    'https://t.co/8X8XXLOSnB yet? Can\'t find anything in the recent commits.',
+                'screen_name': screenName,
+                'id': 4366498,
+                'status_id': statusId,
+                'starred': false
             }
         ];
 
         // Prepares http backend to respond with a tweet sample when requesting for the lastest ones
         $httpBackend = $injector.get('$httpBackend');
-        $httpBackend.when('GET', 'https://## FILL HOSTNAME ##/api/twitter/tweet/latest?username=weaver').respond(statuses);
+        $httpBackend.when('GET', 'https://## FILL HOSTNAME ##/api/twitter/tweet/latest?username=weaver')
+            .respond(statuses);
 
         $rootScope = $injector.get('$rootScope');
         $scope = $rootScope.$new();
@@ -308,7 +317,8 @@ describe('Pressing a favorite button', function () {
             offlineCache: offlineCache
         });
 
-        // Gets local storage cache to ensure items which have been starred are actually available in local storage
+        // Gets local storage cache to ensure items which have been starred,
+        // are actually available in local storage
         cache = $angularCacheFactory.get('localStorageCache');
         if (cache === undefined) {
             cache = $angularCacheFactory('localStorageCache');
@@ -328,9 +338,10 @@ describe('Pressing a favorite button', function () {
     });
 
     it('should mark statuses in the scope as starred', function () {
-        var endpoint = 'https://## FILL HOSTNAME ##/api/twitter/tweet/star/' + statusId;
+        var endpoint = 'https://## FILL HOSTNAME ##/api/twitter/tweet/star/' +
+            statusId;
         $httpBackend.when('POST', endpoint).respond({
-            "status": statusId
+            'status': statusId
         });
         $scope.star(statusId, screenName, 0);
         $httpBackend.flush();
@@ -339,9 +350,10 @@ describe('Pressing a favorite button', function () {
     });
 
     it('should mark statuses in the scope as unstarred', function () {
-        var endpoint = 'https://## FILL HOSTNAME ##/api/twitter/tweet/unstar/' + statusId;
+        var endpoint = 'https://## FILL HOSTNAME ##/api/twitter/tweet/unstar/' +
+            statusId;
         $httpBackend.when('POST', endpoint).respond({
-            "status": statusId
+            'status': statusId
         });
         $scope.unstar(statusId, screenName, 0);
         $httpBackend.flush();
