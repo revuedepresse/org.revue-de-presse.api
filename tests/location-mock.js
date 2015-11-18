@@ -1,3 +1,4 @@
+'use strict';
 
 (function (exports, require) {
     var jasmine = require.jasmine;
