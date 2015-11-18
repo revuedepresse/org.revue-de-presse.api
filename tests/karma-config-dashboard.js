@@ -6,7 +6,6 @@ module.exports = function(karmaConfig) {
     var assetsDir = '../src/WeavingTheWeb/Bundle/DashboardBundle/' +
         'Resources/public';
     var testedComponentsDir = assetsDir + '/js';
-    var vendorComponentsDir = assetsDir + '/components';
 
     var dashboard = testedComponentsDir + '/dashboard.js';
     var editableContent = testedComponentsDir + '/editable-content.js';
