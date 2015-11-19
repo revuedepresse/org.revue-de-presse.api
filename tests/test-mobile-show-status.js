@@ -361,4 +361,4 @@
             expect($scope.statuses[0].starred).toEqual(false);
         });
     });
-})(this);
+})(window);

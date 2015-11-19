@@ -46,6 +46,7 @@
     "jsdox": "0.4.9",
     "karma": "0.12.16",
     "karma-chrome-launcher": "0.1.4",
+    "karma-configurator": "^0.1.1",
     "karma-eslint": "2.0.1",
     "karma-firefox-launcher": "0.1.3",
     "karma-jasmine": "0.3.6",

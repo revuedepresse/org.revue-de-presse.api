@@ -87,4 +87,4 @@
             expect($scope.statuses).toEqual(statuses);
         });
     });
-})(this);
+})(window);

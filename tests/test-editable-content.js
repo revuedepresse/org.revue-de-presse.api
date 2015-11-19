@@ -77,4 +77,4 @@
             mock.destroy();
         });
     });
-})(this);
+})(window);

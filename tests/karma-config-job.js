@@ -1,6 +1,6 @@
 'use strict';
 
-var Configurator = require('./karma-configurator');
+var Configurator = require('karma-configurator');
 
 module.exports = function (karmaConfig) {
     var testedComponent = 'job';
