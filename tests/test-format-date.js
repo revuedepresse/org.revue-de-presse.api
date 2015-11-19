@@ -20,4 +20,4 @@
             expect(formattedDate).toEqual('2015-10-31');
         });
     });
-})(this);
+})(window);

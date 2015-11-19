@@ -186,4 +186,4 @@
             cache.put(statusId, {'starred': false});
         });
     });
-})(this);
+})(window);

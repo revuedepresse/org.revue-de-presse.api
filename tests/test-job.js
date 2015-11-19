@@ -296,4 +296,4 @@
             listJobsMock.destroy();
         });
     });
-})(this);
+})(window);

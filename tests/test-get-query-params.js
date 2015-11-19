@@ -15,4 +15,4 @@
             expect(queryParams).toEqual({param: 'value'});
         });
     });
-})(this);
+})(window);
