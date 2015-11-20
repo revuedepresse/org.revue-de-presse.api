@@ -69,7 +69,7 @@
             status = JSON.parse(rawDocument);
         } catch (error) {
             if (debug) {
-                logger.log('Could not parse raw document at index {}'.replace('{}', index));
+                logger.error('Could not parse raw document at index {}'.replace('{}', index));
             }
             regExp = /:(\s*)"([^"]*)"([^",]*)"([^"]*)"/g;
             escapedDocument = rawDocument.replace(regExp, ':$1"$2\\\"$3\\\"$4"');
