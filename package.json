@@ -7,8 +7,7 @@
     "test": "tests"
   },
   "scripts": {
-    "test": "npm run test-mobile && npm run test-dashboard && npm run test-job && npm run test-perspective",
-    "doc-js": "jsdox tests/karma-configurator.js tests/karma-settings-provider.js --output app/Resources/doc/jsdoc",
+    "test": "make test",
     "test-dashboard": "karma start tests/karma-config-dashboard-ci.js",
     "test-job": "karma start tests/karma-config-job-ci.js",
     "test-logger": "karma start tests/karma-config-logger-ci.js",

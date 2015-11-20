@@ -31,6 +31,8 @@
             .replace('{{ event_type }}', createdJobEvent);
         var listedJobEvent = 'jobs:listed';
 
+        var logger = require.logger;
+
         var remoteUrl = 'http://localhost';
 
         var saveJobArchiveAction = 'save-job-archive';
@@ -119,8 +121,10 @@
             );
 
             var jobsBoard = window.getJobsBoard($, eventListeners);
-            jobsBoard.enableDebug();
-            jobsBoard.setLoggingLevel(jobsBoard.LOGGING_LEVEL.WARN);
+
+            logger.enableLogging();
+            logger.setLoggingLevel(logger.LOGGING_LEVEL.WARN);
+
             jobsBoard.setRemote(remoteUrl);
             jobsBoard.mount({
                 'post-jobs-listing': function () {
@@ -183,8 +187,10 @@
             var mock = requestMockery.mock();
 
             var jobsBoard = window.getJobsBoard($, eventListeners);
-            jobsBoard.enableDebug();
-            jobsBoard.setLoggingLevel(jobsBoard.LOGGING_LEVEL.WARN);
+
+            logger.enableLogging();
+            logger.setLoggingLevel(logger.LOGGING_LEVEL.WARN);
+
             jobsBoard.mount({
                 'post-job-creation': function () {
                     var jobsListItems = $(jobsListItemsSelector);
@@ -255,11 +261,11 @@
 
             var jobsBoard = window.getJobsBoard($, eventListeners);
 
-            try {
-                jobsBoard.enableDebug();
-                jobsBoard.setLoggingLevel(jobsBoard.LOGGING_LEVEL.DEBUG);
-                jobsBoard.filterLogByLevel(jobsBoard.LOGGING_LEVEL.ERROR);
+            logger.enableLogging();
+            logger.setLoggingLevel(logger.LOGGING_LEVEL.DEBUG);
+            logger.filterLogByLevel(logger.LOGGING_LEVEL.ERROR);
 
+            try {
                 var fileSaverMock = jasmine.createSpy('saveAs');
                 jobsBoard.setFileSaver(fileSaverMock);
 

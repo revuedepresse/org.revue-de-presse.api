@@ -17,9 +17,11 @@
             $queries.unbind('click');
 
             /**
-             * For each perspective, clicking on a button, replace the text area value with a query when
+             * For each perspective, clicking on a button,
+             * replace the text area value with a query when
              *  - the query has a comment starting with `# show` or `# count`
-             *  - the query contains the `select` clause, the `create table` clause or the `drop table` clause
+             *  - the query contains the `select` clause, the `create table`
+             *  clause or the `drop table` clause
              */
             $queries.bind('click', function (event) {
                 var $button = $(event.currentTarget),
@@ -36,7 +38,8 @@
                     $('.container form#edit-query').submit();
                 } else {
                     self.notificationCenter.showNotification({
-                        result: 'Sorry, your query can not be executed as it has been considered to be unsafe.',
+                        result: 'Sorry, your query can not be executed as it ' +
+                            'has been considered to be unsafe.',
                         type: 'danger'
                     });
                 }
@@ -140,13 +143,18 @@
                         data.type = 'danger';
                         errors.push(data.result);
                     } else {
-                        this.suggestDownload(data.result, 'application/octet-stream; charset=utf-8', 'perspective.bin');
+                        this.suggestDownload(
+                            data.result,
+                            'application/octet-stream; charset=utf-8',
+                            'perspective.bin'
+                        );
                         this.prepareSuccessNotification(data);
                     }
                 }
 
                 if (errors.length > 0) {
-                    var errorMessage = 'This perspective ("{}") could not have been exported succesfully.';
+                    var errorMessage = 'This perspective ("{}") could not ' +
+                        'have been exported succesfully.';
                     errors.unshift(errorMessage.replace('{}', data.shouldSaveAs));
                     data.type = 'danger';
                     data.result = errors.join('<br />');
@@ -174,7 +182,9 @@
             });
         };
 
-        Dashboard.prototype.bindExportPerspectiveListeners = function (button, url, hash) {
+        Dashboard.prototype.bindExportPerspectiveListeners = function (
+            button, url, hash
+        ) {
             var $ = this.$;
             var self = this;
 
@@ -187,7 +197,8 @@
                 })
                     .fail(function (error) {
                         self.handleResponse({
-                            result: JSON.parse(error.responseText).error.exception[0].message,
+                            result: JSON.parse(error.responseText)
+                                .error.exception[0].message,
                             type: 'error'
                         });
                     });
@@ -287,28 +298,46 @@
 })(this);
 
 (function (require) {
-    if (require.Routing) {
+    if (
+        require.Routing &&
+        require.jQuery &&
+        require.CryptoJS &&
+        require.saveAs
+    ) {
         var routing = require.Routing;
         var getNotificationCenter = require.getNotificationCenter;
         var mountDashboard = require.mountDashboard;
         var notificationCenter;
 
         if (getNotificationCenter) {
-            notificationCenter = getNotificationCenter('notification', window.jQuery);
+            notificationCenter = getNotificationCenter(
+                'notification',
+                require.jQuery
+            );
         }
 
         mountDashboard({
-            $: window.jQuery,
-            crypto: window.CryptoJS,
-            fileSaver: window.saveAs,
+            $: require.jQuery,
+            crypto: require.CryptoJS,
+            fileSaver: require.saveAs,
             notificationCenter: notificationCenter,
             routes: {
-                saveQuery: routing.generate('weaving_the_web_dashboard_save_query'),
+                saveQuery: routing.generate(
+                    'weaving_the_web_dashboard_save_query'
+                ),
                 showPerspective: function (hash) {
-                    return routing.generate('weaving_the_web_dashboard_show_perspective', {hash: hash});
+                    return routing.generate(
+                        'weaving_the_web_dashboard_show_perspective', {
+                            hash: hash
+                        }
+                    );
                 },
                 exportPerspective: function (hash) {
-                    return routing.generate('weaving_the_web_dashboard_export_perspective', {hash: hash});
+                    return routing.generate(
+                        'weaving_the_web_dashboard_export_perspective', {
+                            hash: hash
+                        }
+                    );
                 }
             }
         });

@@ -1,16 +1,9 @@
 (function (exports, require) {
     var uuid = require.uuid;
+    var logger = require.logger;
 
     exports.getJobsBoard = function ($, eventListeners) {
         var jobsBoard = function ($, eventListeners) {
-            var LOGGING_SEVERITY_LEVEL = {
-                DEBUG: 10,
-                ERROR: 40,
-                INFO: 20,
-                NONE: 50,
-                WARN: 30
-            };
-
             this.$ = $;
             this.debug = false;
             this.exceptions = {
@@ -86,21 +79,9 @@
             this.dependees = {};
             this.eventListenersByName = {};
             this.checkDependenciesBetweenListeners();
-
-            this.logger = {};
-            this.LOGGING_SEVERITY_LEVEL = LOGGING_SEVERITY_LEVEL;
-            this.LOGGING_LEVEL = {};
-            var loggingLevel;
-            for (loggingLevel in this.LOGGING_SEVERITY_LEVEL) {
-                this.LOGGING_LEVEL[loggingLevel] = loggingLevel;
-            }
-            this.loggingLevel = this.LOGGING_LEVEL.INFO;
-            this.logFilter;
-
-            this.injectLogger();
-
             this.fileSaver;
             this.remote = 'http://localhost';
+            this.logger = logger;
         };
 
         jobsBoard.prototype.checkDependenciesBetweenListeners = function () {
@@ -116,104 +97,12 @@
             });
         };
 
-        jobsBoard.prototype.shouldLog = function (logLevel) {
-            return this.isLoggerActive(logLevel) && (
-                this.logFilter === undefined ||
-                this.logFilter === logLevel.toUpperCase()
-            );
-        };
-
-        jobsBoard.prototype.injectLogger = function () {
-            var nativeLogger = window.console;
-            var self = this;
-            if (nativeLogger) {
-                var log;
-                for (log in nativeLogger) {
-                    if (typeof nativeLogger[log].constructor == 'function') {
-                        (function (logLevel) {
-                            self.logger[logLevel] = function () {
-                                var i;
-                                var args = [];
-                                for (i = 0; i < arguments.length; i++) {
-                                    args.push(arguments[i]);
-                                }
-
-                                if (self.shouldLog(logLevel)) {
-                                    nativeLogger[logLevel].apply(nativeLogger, args);
-                                }
-                            };
-                        })(log);
-                    }
-                }
-            }
-        };
-
-        jobsBoard.prototype.logStackUnderCondition = function (condition) {
-            if (condition) {
-                this.logger.debug((new Error).stack);
-            }
-
-            return condition;
-        };
-
         jobsBoard.prototype.setRemote = function (remote) {
             this.remote = remote;
         };
 
         jobsBoard.prototype.setFileSaver = function (fileSaver) {
             this.fileSaver = fileSaver;
-        };
-
-        jobsBoard.prototype.isLoggerActive = function (logger) {
-            var logLevelForLogger = logger.toUpperCase();
-            if (this.debug) {
-                return this.getLoggingCriticityLevel(logLevelForLogger) >=
-                    this.getLoggingCriticityLevel(this.loggingLevel);
-            }
-        };
-
-        jobsBoard.prototype.validateLoggingLevel = function (level) {
-            if (level !== undefined) {
-                if (this.LOGGING_LEVEL[level] !== undefined) {
-                    return level;
-                } else {
-                    if (window.console && window.console.debug) {
-                        // Prevent infinite looping
-                        window.console.debug(this.exceptions.invalidLoggingLevel
-                            .replace('{{ logging_level }}', level));
-                    }
-                }
-            }
-
-            return this.LOGGING_LEVEL.NONE;
-        };
-
-        jobsBoard.prototype.getLoggingCriticityLevel = function (level) {
-            return this.LOGGING_SEVERITY_LEVEL[
-                this.validateLoggingLevel(level)
-            ];
-        };
-
-        jobsBoard.prototype.enableDebug = function () {
-            this.debug = true;
-
-            return this;
-        };
-
-        jobsBoard.prototype.filterLogByLevel = function (level) {
-            this.logFilter = level;
-        };
-
-        jobsBoard.prototype.setLoggingLevel = function (level) {
-            this.loggingLevel = this.validateLoggingLevel(level);
-
-            return this;
-        };
-
-        jobsBoard.prototype.disableDebug = function () {
-            this.debug = false;
-
-            return this;
         };
 
         jobsBoard.prototype.addEventListener = function (listener) {
