@@ -147,13 +147,19 @@ class JobRepository extends EntityRepository
      */
     public function getOutputResponseContent(JobInterface $job)
     {
-        $content['result'] = $this->getTranslatedStatusMessage($job);
-
         /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Job $job */
+        $content = [
+            'entity' => 'job',
+            'id' => $job->getId(),
+            'columns' => [
+                'Status' => $this->getTranslatedStatusMessage($job),
+            ]
+        ];
+
         if ($job->hasFailed()) {
             $content['type'] = 'error';
         } elseif ($job->hasFinished()) {
-            $content['data'] = ['url' => $job->getOutput()];
+            $content['columns']['rlk_Output'] = $job->getOutput();
             $content['type'] = 'success';
         } else {
             $content['type'] = 'info';

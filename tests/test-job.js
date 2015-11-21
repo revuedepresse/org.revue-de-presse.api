@@ -2,6 +2,7 @@
 
 (function (require) {
     var RequestMockery = require.RequestMockery;
+    var getJobsBoard = require.getJobsBoard;
 
     describe('Job', function () {
         var authorizationHeaderValue = 'Bearer tok';
@@ -35,6 +36,18 @@
 
         var remoteUrl = 'http://localhost';
 
+        var job;
+        var pollJobAction = 'poll-job';
+        var polledJobEvent = 'job:polled';
+        var pollJobSelector = '[data-action="{{ action }}"]'
+            .replace('{{ action }}', pollJobAction);
+        var polledJobSelector = '[data-listen-event="{{ event_type }}"]'
+            .replace('{{ event_type }}', polledJobEvent);
+        var getPollJobUrl = function (jobId) {
+            return remoteUrl + '/api/job/{{ job_id }}/output'
+                .replace('{{ job_id }}', jobId);
+        };
+
         var saveJobArchiveAction = 'save-job-archive';
         var saveJobArchiveButton;
 
@@ -45,6 +58,7 @@
             }
         ];
 
+        var jobsBoard;
         var requestMockery;
 
         function getListJobsEventListener() {
@@ -106,12 +120,29 @@
                 text: 'Save job archive'
             });
             body.append(saveJobArchiveButton);
+
+            job = $('<div />', {
+                'data-action': pollJobAction,
+                'data-entity': 'job',
+                'data-id': 1
+            });
+            var statusColumn = $('<span />', {
+                'data-column-name': 'Status'
+            });
+            job.append(statusColumn);
+            var outputColumn = $('<span />', {
+                'data-column-name': 'Output'
+            });
+            job.append(outputColumn);
+
+            body.append(job);
         });
 
         afterEach(function () {
             exportPerspectivesButton.remove();
             container.remove();
             saveJobArchiveButton.remove();
+            job.remove();
         });
 
         it('should list jobs', function (done) {
@@ -120,7 +151,7 @@
                 eventListeners[0].request.url
             );
 
-            var jobsBoard = window.getJobsBoard($, eventListeners);
+            jobsBoard = getJobsBoard($, eventListeners);
 
             logger.enableLogging();
             logger.setLoggingLevel(logger.LOGGING_LEVEL.WARN);
@@ -143,6 +174,90 @@
             });
 
             $('body').load();
+
+            mock.destroy();
+        });
+
+        it('should refresh a job status via polling', function (done) {
+            var output = '/job/1/archive';
+            var status = 'The jobs #1 has successfully finished';
+            var pollJobListener = 'poll-job';
+
+            jasmine.clock().install();
+
+            eventListeners = [
+                {
+                    listeners: $(pollJobSelector),
+                    name: pollJobListener,
+                    request: {
+                        url: getPollJobUrl,
+                        headers: headers,
+                        success: {
+                            emit: polledJobEvent
+                        }
+                    },
+                    type: 'polling'
+                }, {
+                    listeners: $(polledJobSelector),
+                    name: 'post-poll-job',
+                    type: polledJobEvent
+                }
+            ];
+
+            logger.enableLogging();
+            logger.setLoggingLevel(logger.LOGGING_LEVEL.ERROR);
+
+            requestMockery = RequestMockery(getPollJobUrl(1));
+            requestMockery.respondWith({
+                entity: 'job',
+                id: 1,
+                columns: {
+                    rlk_Output: output,
+                    Status: status
+                },
+                type: 'success'
+            });
+            requestMockery.setRequestHandler(function (settings) {
+                expect(settings.headers).not.toBeUndefined();
+                expect(settings.headers.Authorization)
+                    .toEqual(authorizationHeaderValue);
+            });
+            var mock = requestMockery.mock();
+
+            jobsBoard = getJobsBoard($, eventListeners);
+            job.attr('data-listen-event', jobsBoard.events.polledJob);
+            jobsBoard.mount({
+                'post-poll-job': function () {
+                    var attribute = 'data-column-name';
+                    var outputJobColumn = job.find('[{{ attribute }}="Output"]'
+                        .replace('{{ attribute }}', attribute));
+                    expect(outputJobColumn.length)
+                        .not.toEqual(0);
+                    var downloadJobArchiveLink = outputJobColumn.find('a');
+                    expect(downloadJobArchiveLink.length).toEqual(1);
+                    expect(downloadJobArchiveLink.attr('data-url')).toEqual(
+                        jobsBoard.remote + output
+                    );
+
+                    var statusJobColumn = job.find('[{{ attribute }}="Status"]'
+                        .replace('{{ attribute }}', attribute));
+                    expect(statusJobColumn.length)
+                        .not.toEqual(0);
+                    expect(statusJobColumn.text()).toEqual(status);
+
+                    // (2) The repeated action should have been cancelled
+                    // once the targetted changes have been applied
+                    expect(jobsBoard.polling[pollJobListener]).toBeUndefined();
+
+                    done();
+                }
+            });
+
+            // (1) Trigger interval callback
+            jasmine.clock().tick(jobsBoard.DEFAULT_POLLING_INTERVAL_DELAY + 1);
+            expect(jobsBoard.polling[pollJobListener]).toEqual(1);
+
+            jasmine.clock().uninstall();
 
             mock.destroy();
         });
@@ -186,7 +301,7 @@
             });
             var mock = requestMockery.mock();
 
-            var jobsBoard = window.getJobsBoard($, eventListeners);
+            jobsBoard = getJobsBoard($, eventListeners);
 
             logger.enableLogging();
             logger.setLoggingLevel(logger.LOGGING_LEVEL.WARN);
@@ -259,7 +374,7 @@
                     expect(settings.dataType).toEqual('*');
                 });
 
-            var jobsBoard = window.getJobsBoard($, eventListeners);
+            jobsBoard = getJobsBoard($, eventListeners);
 
             logger.enableLogging();
             logger.setLoggingLevel(logger.LOGGING_LEVEL.DEBUG);
