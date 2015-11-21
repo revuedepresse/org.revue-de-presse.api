@@ -4,13 +4,31 @@
 
     exports.getJobsBoard = function ($, eventListeners) {
         var jobsBoard = function ($, eventListeners) {
+            this.DEFAULT_POLLING_INTERVAL_DELAY = 15000;
             this.$ = $;
             this.debug = false;
             this.exceptions = {
+                mismatchingEntity: 'There is a mismatch between ' +
+                    'the "entity" property ("{{ entity }}") of '
+                    + 'the response content '
+                    + 'and the entity ("{{ target_entity }}") targeted ' +
+                    'by "{{ emitter }}" emitter ',
+                noColumnAvailable: 'No "{{ column }}" column ' +
+                    'for "{{ entity }}" target with id #{{ id }}.',
                 noContainerAvailable: 'No container available ' +
                     'for listeners of event "{{ event_type }}".' + '\n' +
                     '=> The event listener "container" property can be defined.',
                 noContentAvailable: 'No content available.',
+                noResponseEntity: 'No entity available in data propagated by ' +
+                    '"{{ emitter }}" emitter.' +
+                    '\n' + '=> An "entity" property is expected ' +
+                    'in the response content.',
+                noTargetEntity: 'No target entity for "{{ emitter }}" emitter.' +
+                    '\n' + '=> the target listener "data-entity" attribute ' +
+                    'can be defined.',
+                noRequest: 'Missing request for "{{ listener }}" listener' +
+                    '\n' +
+                    '=> The event listener "request" property can be defined',
                 noEventEmittedOnSuccess: 'Missing event to be emitted ' +
                     'on successful request for "{{ listener }}" listener.' + '\n' +
                     '=> The event listener "request.emit" property can be defined.',
@@ -19,12 +37,7 @@
                     '=> "{{ method_name }}" function could be implemented.',
                 noListenerAvailable: 'No listener available ' +
                     'for "{{ event_type }}" event ' +
-                    'handled by "{{ listener }}" listener.' + '\n' +
-                    '=> The event listener "listeners" property can be defined.'
-                    + '\n' +
-                    '=> The event listener "after" property can be defined ' +
-                    'to ensure requirements have been met ' +
-                    'before attaching this event listener',
+                    'handled by "{{ listener }}" listener.',
                 notImplemented: 'Not implemented',
                 suggestContentTypeMatch: '=> Consider declaring how ' +
                     '"{{ content_type }}" content type ' + '\n' +
@@ -33,12 +46,23 @@
                     'See also the description of "dataType" ajax setting ' + '\n' +
                     'for jQuery in ' +
                     'http://api.jquery.com/jquery.ajax/#jQuery-ajax-settings',
+                suggestDataColumnNameCheck:
+                    '=> The "data-column-name" attribute ' +
+                    'can be defined for one of the target listener children.',
+                suggestDependencyCheck: '=> The event listener "after" '
+                    + 'property can be defined ' +
+                    'to ensure requirements have been met ' +
+                    'before attaching this event listener.',
+                suggestListenersCheck: '=>  The event listener ' +
+                    '"listeners" property can be defined.',
                 suggestEmitterCheck: '=>  The "{{ emitter }}" emitter ' +
                     'should send a request to obtain a response with content.',
                 suggestSelectorCheck: '=>  The "{{ selector }}" selector ' +
                     'should match existing elements.',
-                noRequest: 'Missing request for "{{ listener }}" listener' + '\n' +
-                    '=> The event listener "request" property can be defined',
+                invalidSenderId: 'Missing identity attribute on request sender '
+                    + 'for "{{ event_type }}" event of ' +
+                    '"{{ listener }}" listener:' + '\n' +
+                    '=> The target listener "data-id" attribute can be defined.',
                 invalidLoggingLevel: 'An invalid logging level has been set ' +
                     '("{{ logging_level }}").',
                 invalidRequest: 'Invalid request for ' +
@@ -50,6 +74,8 @@
                     + '=>  The event listener "request.url" property can be defined.'
                     + '\n' +
                     '=> The target listener "data-url" attribute can be defined.',
+                uncompleteRequest: 'Uncomplete request required to update ' +
+                    '"{{ entity }}" target with id #{{ id }}.',
                 unexpectedNodeName: 'Unexpected node name : "{{ actual }}" ' +
                     '(expected: "{{ expected }}")'
             };
@@ -61,8 +87,29 @@
                 listenersUpdatedFromEvent: 'The "listeners" property ' +
                     'has been updated for "{{ listener }}" event listener.',
                 postEventHandlerUpdated: 'The post event handler has been updated '
-                    + 'for "{{ listener }}" event listener.'
+                    + 'for "{{ listener }}" event listener.',
+                updatedTargetEntityColumn: 'Updated "{{ column }}" column of ' +
+                    '"{{ entity }}" target with id #{{ id }}.'
             };
+            this.actions = {
+                pollJob: 'poll-job'
+            };
+            this.events = {
+                polledJob: 'job:polled'
+            };
+            this.promises = {};
+            this.polling = {};
+
+            this.fileSaver;
+            this.remote = 'http://localhost';
+            this.logger = logger;
+
+            if (eventListeners !== undefined) {
+                this.shouldBindEventListeners(eventListeners);
+            }
+        };
+
+        jobsBoard.prototype.shouldBindEventListeners = function (eventListeners) {
             if (!Array.isArray(eventListeners)) {
                 throw 'Event listeners should be passed as an array ' +
                     '(instance of "{{ type }}" given)'.replace(
@@ -71,17 +118,12 @@
                     );
             }
 
-            this.eventListeners = eventListeners;
+            this.eventListenersByName = {};
             this.onPostEventHandlers = {};
-            this.promises = {};
-
             this.dependencies = {};
             this.dependees = {};
-            this.eventListenersByName = {};
+            this.eventListeners = eventListeners;
             this.checkDependenciesBetweenListeners();
-            this.fileSaver;
-            this.remote = 'http://localhost';
-            this.logger = logger;
         };
 
         jobsBoard.prototype.checkDependenciesBetweenListeners = function () {
@@ -89,8 +131,20 @@
             var $ = this.$;
             $.each(self.eventListeners, function (index, eventListener) {
                 if (eventListener.after !== undefined) {
-                    self.dependencies[eventListener.name] = eventListener.after;
-                    self.dependees[eventListener.after] = eventListener.name;
+                    var dependencies = self.dependencies[eventListener.name];
+                    if (self.isUndefined(dependencies)) {
+                        self.dependencies[eventListener.name] = [];
+                    }
+
+                    var dependees = self.dependees[eventListener.after];
+                    if (self.isUndefined(dependees)) {
+                        self.dependees[eventListener.after] = [];
+                    }
+
+                    self.dependencies[eventListener.name]
+                        .push(eventListener.after);
+                    self.dependees[eventListener.after]
+                        .push(eventListener.name);
                 }
 
                 self.eventListenersByName[eventListener.name] = eventListener;
@@ -169,8 +223,16 @@
         };
 
         jobsBoard.prototype.getPromiseId = function (request) {
-            var requestParent = request.sender.parents('[data-entity]');
+            var requestSender = request.getSender();
+            var requestParent = requestSender.parents('[data-entity]');
             var promiseId;
+
+            if (
+                requestParent.length === 0 &&
+                !this.isUndefined(requestSender.attr('data-entity'))
+            ) {
+                requestParent = requestSender;
+            }
 
             if (requestParent.length > 0) {
                 promiseId = [
@@ -270,6 +332,7 @@
                 }
             }
             data.promise = this.remindPromise(request);
+            data.sender = request.getSender();
 
             return data;
         };
@@ -290,6 +353,10 @@
 
         jobsBoard.prototype.isFunction = function (subject) {
             return subject && (typeof subject == 'function');
+        };
+
+        jobsBoard.prototype.isUndefined = function (subject) {
+            return typeof subject == 'undefined';
         };
 
         jobsBoard.prototype.isTable = function (node) {
@@ -341,8 +408,8 @@
             return table;
         };
 
-        jobsBoard.prototype.appendRow = function (target, source) {
-            var row = this.makeRow(source);
+        jobsBoard.prototype.appendRow = function (target, source, attributes) {
+            var row = this.makeRow(source, attributes);
 
             if (this.isTable(target)) {
                 var table = this.prePopulateTable(target, Object.keys(source));
@@ -387,7 +454,7 @@
             return formattedSubject;
         };
 
-        jobsBoard.prototype.makeRow = function (columns) {
+        jobsBoard.prototype.makeRow = function (columns, attributes) {
             var self = this;
             var $ = self.$;
             var entity;
@@ -408,6 +475,13 @@
                 'data-entity': entity,
                 'data-id': id
             });
+
+            if (attributes !== undefined) {
+                $.each(attributes, function (name, value) {
+                    row.attr(name, value);
+                });
+            }
+
             $.each(columns, function (columnName, columnValue) {
                 if (!self.isColumnHidden(columnName)) {
                     var column = $('<td>', {
@@ -503,7 +577,10 @@
             var $ = self.$;
 
             $.each(event.target, function (targetIndex, target) {
-                self.appendRow(target, event.data.job);
+                self.appendRow(target, event.data.job, {
+                    'data-action': self.actions.pollJob,
+                    'data-listen-event': self.events.polledJob
+                });
             });
         };
 
@@ -516,6 +593,149 @@
                     self.appendRow(target, job);
                 });
             });
+        };
+
+        jobsBoard.prototype.getDataColumnNameCheckSuggestion = function (target)
+        {
+            var suggestDataColumnNameCheck = '';
+            if (target.attr('data-column-name') === undefined) {
+                suggestDataColumnNameCheck = this.exceptions
+                    .suggestDataColumnNameCheck;
+            }
+
+            return suggestDataColumnNameCheck;
+        };
+
+        jobsBoard.prototype.updateTargetColumns = function (
+            target,
+            columns,
+            targetUpdatedOn
+        ) {
+            var updatedTarget = false;
+
+            var self = this;
+            $.each(columns, function (name, value) {
+                var columnName = self.formatColumnName(name);
+                var column = target.find('[data-column-name="{{ column }}"]'
+                    .replace('{{ column }}', columnName));
+                if (column.length === 0) {
+                    self.logger.warn(self.exceptions.noColumnAvailable
+                        .replace('{{ column }}', columnName)
+                        .replace('{{ entity }}', target.attr('data-entity'))
+                        .replace('{{ id }}', target.attr('data-id')) +
+                        '\n' + self.getDataColumnNameCheckSuggestion(target)
+                    );
+                }
+
+                var formattedValue = self.formatColumnValue(value, name);
+                if (formattedValue[0].outerHTML !== column.html()) {
+                    column.html(formattedValue);
+                    self.logger.info(self.info.updatedTargetEntityColumn
+                        .replace('{{ column }}', columnName)
+                        .replace('{{ entity }}', target.attr('data-entity'))
+                        .replace('{{ id }}', target.attr('data-id')));
+
+                    if (columnName == targetUpdatedOn) {
+                        updatedTarget = true;
+                    }
+                }
+            });
+
+            return updatedTarget;
+        };
+
+        jobsBoard.prototype.bindTargetChildrenListeners = function (target) {
+            var self = this;
+            var childrenListeners = target.find('[data-action]');
+            if (childrenListeners.length > 0) {
+                $.each(childrenListeners, function (index, listener) {
+                    var listenerElement = $(listener);
+                    var listenerName = listenerElement.attr('data-action');
+                    var eventListener = self.eventListenersByName[listenerName];
+                    if (eventListener) {
+                        self.bindEvent(eventListener);
+                    }
+                });
+            }
+        };
+
+        jobsBoard.prototype.onJobPolled = function (event) {
+            var self = this;
+            var target = event.target;
+            var eventType = event.type;
+            var data = event.data;
+            var sender = event.data.sender;
+            var jobId = event.data.id;
+
+            if (data.entity === undefined) {
+                throw new Error(this.exceptions.noResponseEntity
+                    .replace('{{ emitter }}', data.emitter));
+            }
+            if (target.attr('data-entity') === undefined) {
+                throw new Error(this.exceptions.noTargetEntity
+                    .replace('{{ emitter }}', data.emitter));
+            }
+            if (target.attr('data-entity') !== data['entity']) {
+                throw new Error(this.exceptions.mismatchingEntity
+                    .replace('{{ entity }}', data['entity'])
+                    .replace('{{ target_entity }}', target.attr('data-entity'))
+                    .replace('{{ emitter }}', data.emitter)
+                );
+            }
+            if (data.promise.readyState !== XMLHttpRequest.DONE) {
+                self.logger.info(this.exceptions.uncompleteRequest
+                    .replace('{{ entity }}', data['entity'])
+                    .replace('{{ id }}', sender.attr('data-id')));
+
+                return;
+            }
+
+            if (data.columns !== undefined) {
+                $.each(target, function (elementIndex, element) {
+                    var expectedEntityId = parseInt(sender.attr('data-id'), 10);
+                    var elementId = parseInt($(element).attr('data-id'), 10);
+                    var affectedRow = false;
+                    var targetChild = $(element);
+                    var pollingId;
+
+                    if (jobId !== elementId) {
+                        return;
+                    }
+
+                    (function (targetChild, columns) {
+                        var updatedTarget = false;
+                        var targetChildId = parseInt(targetChild.attr('data-id'));
+
+                        if (targetChildId === expectedEntityId) {
+                            updatedTarget = self.updateTargetColumns(
+                                targetChild,
+                                columns,
+                                // Mark target as updated when this column is
+                                'Output'
+                            );
+                            if (updatedTarget) {
+                                affectedRow = true;
+                            }
+                        }
+                    })(targetChild, data.columns);
+
+                    pollingId = self.getPollingId(targetChild, data.emitter);
+                    if (
+                        data.promise.status === 200 &&
+                        affectedRow &&
+                        self.polling[pollingId] !== undefined
+                    ) {
+                        clearInterval(self.polling[pollingId]);
+                        delete self.polling[pollingId];
+                        self.bindTargetChildrenListeners(targetChild);
+
+                        targetChild.off(eventType);
+ 
+                        targetChild.removeAttr('data-action');
+                        targetChild.removeAttr('data-listen-event');
+                    }
+                });
+            }
         };
 
         jobsBoard.prototype.getHandlerName = function (eventType) {
@@ -555,7 +775,7 @@
 
             if (
                 request.url === undefined &&
-                request.sender.attr('data-url') === undefined
+                request.getSender().attr('data-url') === undefined
             ) {
                 throw this.exceptions.invalidRequestUrl
                     .replace('{{ event_type }}', listener.eventType)
@@ -565,15 +785,29 @@
 
         jobsBoard.prototype.ensureRequestHasUrl = function (request) {
             var getter;
+            var self = this;
 
             this.ensureRequestSenderHasUrl(request);
 
             if (
               request.url === undefined &&
-              request.sender.attr('data-url') !== undefined
+              request.getSender().attr('data-url') !== undefined
             ) {
                 getter = function () {
-                    return request.sender.attr('data-url');
+                    return request.getSender().attr('data-url');
+                };
+            } else if (typeof request.url === 'function') {
+                getter = function () {
+                    if (
+                        !self.isFunction(request.getSender) ||
+                        !self.isFunction(request.getSender().attr) ||
+                        request.getSender().attr('data-id') === undefined
+                    ) {
+                        throw new Error(self.exceptions.invalidSenderId
+                            .replace('{{ event_type }}', request.binding.type)
+                            .replace('{{ listener }}', request.binding.name));
+                    }
+                    return request.url(request.getSender().attr('data-id'));
                 };
             } else {
                 getter = function () {
@@ -634,9 +868,24 @@
             }
         };
 
-        jobsBoard.prototype.bindNativeEventHandlers = function (binding) {
+        jobsBoard.prototype.getXhrEmitter = function (binding) {
+            var xhrEmitterFactory = this.getXhrEmitterFactory(binding);
+
+            return xhrEmitterFactory();
+        };
+
+        jobsBoard.prototype.ensureRequestHasSender = function (request, sender) {
+            var $ = this.$;
+
+            request.getSender = function () {
+                return $(sender);
+            };
+        };
+
+        jobsBoard.prototype.getXhrEmitterFactory = function (binding) {
             var self = this;
-            var onEvent = function () {
+
+            return function () {
                 var request;
 
                 if (binding.request !== undefined) {
@@ -649,8 +898,7 @@
                 }
 
                 return function () {
-                    request.sender = $(this);
-
+                    self.ensureRequestHasSender(request, this);
                     self.ensureRequestHasUrl(request);
                     self.ensureRequestHasMethod(request);
 
@@ -671,6 +919,11 @@
                     return promise;
                 };
             };
+        };
+
+        jobsBoard.prototype.bindNativeEventHandlers = function (binding) {
+            var self = this;
+            var onEvent = self.getXhrEmitterFactory(binding);
 
             $.each(binding.listeners, function (listenerIndex, listener) {
                 var eventListener = $(listener);
@@ -724,8 +977,10 @@
 
             if (this.hasDependees(binding)) {
                 var willBindEventListener = function () {
-                    var dependee = self.getBindingDependees(binding);
-                    self.bindEvent(self.eventListenersByName[dependee]);
+                    var dependees = self.getBindingDependees(binding);
+                    $.each(dependees, function (dependeeIndex, dependee) {
+                        self.bindEvent(self.eventListenersByName[dependee]);
+                    });
                 };
 
                 if (customEvent !== undefined) {
@@ -744,9 +999,9 @@
             if (this.dependees[binding.name] === undefined) {
                 return false;
             }
-            var dependee = this.getBindingDependees(binding);
+            var dependees = this.getBindingDependees(binding);
 
-            return this.eventListenersByName[dependee] !== undefined;
+            return !this.isUndefined(dependees) && dependees.length > 0;
         };
 
         jobsBoard.prototype.handlePostEvent = function (binding, customEvent) {
@@ -763,7 +1018,6 @@
                 this.logger.info(this.info.runPostEventHandler
                     .replace('{{ event_type }}', binding.name));
                 binding.onPostEventHandler(customEvent);
-                delete binding.onPostEventHandler;
             }
         };
 
@@ -776,7 +1030,8 @@
 
                 var customEvent = {
                     data: data,
-                    target: binding.listeners
+                    target: binding.listeners,
+                    type: binding.type
                 };
                 self.updateNextBinding(binding, customEvent);
 
@@ -807,6 +1062,44 @@
                     binding.handler(customEvent);
                 }
             });
+
+            if (binding.type === 'polling') {
+                if (binding.interval === undefined) {
+                    binding.interval = this.DEFAULT_POLLING_INTERVAL_DELAY;
+                }
+
+                $.each(binding.listeners, function (listenerIndex, listener) {
+                    var pollingId = self.getPollingId(
+                        listener,
+                        binding.name
+                    );
+
+                    self.polling[pollingId] = setInterval(
+                        (function (binding) {
+                            var eventListener = binding;
+
+                            return function () {
+                                var xhrEmitter = self.getXhrEmitter(eventListener);
+
+                                var emitter = xhrEmitter.bind(listener);
+                                emitter();
+                            };
+                        })(binding),
+                        binding.interval
+                    );
+                });
+            }
+        };
+
+        jobsBoard.prototype.getPollingId = function (listener, emitter) {
+            var listenerElement = $(listener);
+            var pollingIdParts = [
+                emitter,
+                listenerElement.attr('data-entity'),
+                listenerElement.attr('data-id')
+            ];
+
+            return pollingIdParts.join('-');
         };
 
         jobsBoard.prototype.getOnSuccessTarget = function (request) {
@@ -855,6 +1148,26 @@
             }
         };
 
+        jobsBoard.prototype.getDependencyCheckSuggestion = function (binding) {
+            var suggestDependencyCheck = '';
+            if (this.isUndefined(binding.after)) {
+                suggestDependencyCheck = this.exceptions
+                    .suggestDependencyCheck + '\n';
+            }
+
+            return suggestDependencyCheck;
+        };
+
+        jobsBoard.prototype.getListenersCheckSuggestion = function (binding) {
+            var suggestListenersCheck = '';
+            if (this.isUndefined(binding.listeners)) {
+                suggestListenersCheck = this.exceptions
+                    .suggestListenersCheck + '\n';
+            }
+
+            return suggestListenersCheck;
+        };
+
         jobsBoard.prototype.isNativeEvent = function (binding) {
             var isNativeEvent;
             if (this.areListenersDeclared(binding)) {
@@ -864,8 +1177,14 @@
                     throw new Error(this.exceptions.noListenerAvailable
                         .replace('{{ event_type }}', binding.type)
                         .replace('{{ listener }}', binding.name) + '\n' +
+                        this.getListenersCheckSuggestion(binding) +
+                        this.getDependencyCheckSuggestion(binding) +
                         this.exceptions.suggestSelectorCheck
-                            .replace('{{ selector }}', binding.listeners.selector));
+                            .replace(
+                                '{{ selector }}',
+                                binding.listeners.selector
+                            )
+                    );
                 }
             } else {
                 isNativeEvent = false;
@@ -901,7 +1220,9 @@
                     .replace('{{ event_type }}', binding.type) + '\n' +
                     self.exceptions.noListenerAvailable
                     .replace('{{ event_type }}', binding.type)
-                    .replace('{{ listener }}', binding.name) + checkSelector);
+                    .replace('{{ listener }}', binding.name) +
+                    self.getDependencyCheckSuggestion(binding) +
+                    checkSelector);
             }
         };
 
@@ -960,7 +1281,10 @@
                 listener = this.eventListeners[listenerIndex];
                 this.ensureBindingHasName(listener);
                 this.updateOnPostEventHandler(listener);
-                if (this.dependencies[listener.name] === undefined) {
+                if (
+                    this.isUndefined(this.dependencies[listener.name]) ||
+                    this.dependencies[listener.name].length === 0
+                ) {
                     self.bindEvent(listener);
                 }
             }
@@ -976,6 +1300,7 @@
     }
 
     var getJobsBoard = require.getJobsBoard;
+    var logger = require.logger;
 
     var container = $('[data-container="jobs-board"]');
     var routing = this.Routing;
@@ -1000,6 +1325,19 @@
     var downloadedJobArchiveEvent = 'job:archive:downloaded';
     var downloadJobArchiveButtons = $('[data-action="download-job-archive"]');
     var saveJobArchiveButton = $('[data-action="save-job-archive"]');
+
+    var jobsBoard = getJobsBoard($);
+
+    var getPollJobUrl = function (jobId) {
+        return schemeHost +
+            routing.generate('weaving_the_web_api_get_job_output', {
+                job: jobId
+            });
+    };
+    var pollJobAction = 'poll-job';
+    var jobRows = $('[data-action="' + pollJobAction + '"]');
+    var polledJobSelector = $('[data-listen-event="{{ event_type }}"]'
+        .replace('{{ event_type }}', jobsBoard.events.polledJob));
 
     var eventListeners = [{
         listeners: exportPerspectivesButtons,
@@ -1048,10 +1386,29 @@
         listeners: saveJobArchiveButton,
         name: 'post-job-archive-download',
         type: downloadedJobArchiveEvent
+    }, {
+        after: 'post-job-creation',
+        listeners: jobRows,
+        name: 'poll-job',
+        request: {
+            url: getPollJobUrl,
+            headers: headers,
+            success: {
+                emit: jobsBoard.events.polledJob
+            }
+        },
+        type: 'polling'
+    }, {
+        after: 'post-job-creation',
+        listeners: $(polledJobSelector),
+        name: 'post-poll-job',
+        type: jobsBoard.events.polledJob
     }];
 
-    var jobsBoard = getJobsBoard($, eventListeners);
-    jobsBoard.enableDebug();
+    logger.enableLogging();
+    logger.setLoggingLevel(logger.LOGGING_LEVEL.DEBUG);
+
+    jobsBoard.shouldBindEventListeners(eventListeners);
     jobsBoard.setFileSaver(fileSaver);
     jobsBoard.setRemote(schemeHost);
     jobsBoard.mount();
