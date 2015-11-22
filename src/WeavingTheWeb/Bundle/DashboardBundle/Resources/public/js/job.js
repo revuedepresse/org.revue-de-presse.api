@@ -730,7 +730,7 @@
                         self.bindTargetChildrenListeners(targetChild);
 
                         targetChild.off(eventType);
- 
+
                         targetChild.removeAttr('data-action');
                         targetChild.removeAttr('data-listen-event');
                     }
@@ -935,7 +935,7 @@
                 // Re-bind the event subscriber to the listener
                 eventSubscriber = eventSubscriber.bind(eventListener);
 
-                // Detaches previously attached handler from the listeners
+                // Detaches previously attached handler from the listener
                 eventListener.off(binding.type);
 
                 // Re-bind the handler to the listener
