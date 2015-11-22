@@ -56,7 +56,7 @@
         "friendsofsymfony/user-bundle": "dev-master",
         "guzzlehttp/guzzle": "6.1.0",
         "incenteev/composer-parameter-handler": "2.1.*",
-        "jms/di-extra-bundle": "1.4.*",
+        "jms/di-extra-bundle": "1.6.*",
         "jms/security-extra-bundle": "1.5.*",
         "jms/serializer-bundle": "dev-master",
         "kertz/twitteroauth": "dev-master",
