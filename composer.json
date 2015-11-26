@@ -1,6 +1,6 @@
 {
     "name": "weaving-the-web/experiments",
-    "description": "Driving experiments for fun's sake",
+    "description": "Sharing experiments for fun's sake",
     "autoload": {
         "psr-0": {
             "": "src/"
