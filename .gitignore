@@ -1,20 +1,10 @@
 # environment
-*.DS_Store
-*.pyc
-*~*
-/.idea/*
-
 /build/*
 !/build/.gitignore
 
-/devops/files/*.tar.gz
-
 # dependencies
 .bowerrc
-/bin/webunit
-/bin/behat
-/bin/phpunit
-/bin/phpspec
+/bin/*
 
 bower_components/
 composer.phar
@@ -28,20 +18,7 @@ composer.phar
 /web/js
 /web/images
 
-provisioning/containers/nginx/env.sh
-provisioning/containers/nginx/env.sh.tpl
-provisioning/containers/nginx/.ssh
-provisioning/containers/php-fpm/dashboard.conf
-provisioning/containers/php-fpm/dashboard.conf.tpl
-
 # legacy
-api/.htaccess
-/api/lib/Smarty/demo
-/api/lib/Smarty/www-data
-/api/twitter/timeline/user_timeline_*
-/api/twitter/favorite/*
-/blog
-/check_wtw.php
 /mobile
 /snapshots
 /unit.testing/*.testing.subversion.log.php

@@ -7,8 +7,6 @@ use Doctrine\Common\Collections\Collection,
 
 use Doctrine\ORM\Mapping as ORM;
 
-use WeavingTheWeb\Bundle\UserBundle\Entity\Role;
-
 use WTW\UserBundle\Model\User as BaseUser;
 
 /**
@@ -21,9 +19,6 @@ use WTW\UserBundle\Model\User as BaseUser;
  *      }
  * )
  * @ORM\Entity
- * @ORM\InheritanceType("SINGLE_TABLE")
- * @ORM\DiscriminatorColumn(name="usr_position_in_hierarchy", type="integer")
- * @ORM\DiscriminatorMap({"1" = "User", "0" = "\WTW\UserBundle\Tests\Security\Core\User\User"})
  */
 class User extends BaseUser
 {
@@ -825,8 +820,8 @@ class User extends BaseUser
     {
         parent::__construct();
 
-        $this->roles = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->tokens = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->roles = new ArrayCollection();
+        $this->tokens = new ArrayCollection();
     }
 
     /**

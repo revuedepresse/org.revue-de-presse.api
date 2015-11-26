@@ -20,8 +20,7 @@
     "tdd-perspective": "karma start tests/karma-config-perspective.js"
   },
   "repository": {
-    "type": "git",
-    "url": "https://## FILL HOSTNAME #### FILL ME ##"
+    "type": "git"
   },
   "keywords": [
     "dashboard",
@@ -37,7 +36,9 @@
   "gitHead": "6ad5836242e22e5cd400b6fb501f9d1011abd8d8",
   "readmeFilename": "README.md",
   "dependencies": {
-    "bootstrap": "3.2.0"
+    "bootstrap": "3.2.0",
+    "uglify-js": "^2.3.6",
+    "uglifycss": "0.0.5"
   },
   "devDependencies": {
     "eslint": "1.7.1",

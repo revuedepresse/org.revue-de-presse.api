@@ -10,10 +10,10 @@ doctrine:
 assetic:
     filters:
         uglifyjs:
-            bin:  %kernel.root_dir%/Resources/node_modules/uglify-js/bin/uglifyjs
+            bin:  %kernel.root_dir%/../node_modules/uglify-js/bin/uglifyjs
             apply_to:  "\.js"
         uglifycss:
-            bin:  %kernel.root_dir%/Resources/node_modules/uglifycss/uglifycss
+            bin:  %kernel.root_dir%/../node_modules/uglifycss/uglifycss
             apply_to:  "\.css"
 
 monolog:
