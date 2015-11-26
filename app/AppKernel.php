@@ -38,9 +38,6 @@ class AppKernel extends Kernel
             new FOS\RestBundle\FOSRestBundle(),
             new FOS\TwitterBundle\FOSTwitterBundle(),
             new WeavingTheWeb\Bundle\ApiBundle\WeavingTheWebApiBundle(),
-            new WeavingTheWeb\Bundle\DataMiningBundle\WeavingTheWebDataMiningBundle(),
-            new WeavingTheWeb\Bundle\MailBundle\WeavingTheWebMailBundle(),
-            new WeavingTheWeb\Bundle\NewsfeedBundle\WeavingTheWebNewsfeedBundle(),
             new WeavingTheWeb\Bundle\TwitterBundle\WeavingTheWebTwitterBundle(),
             // Search
             new FOS\ElasticaBundle\FOSElasticaBundle(),
@@ -56,7 +53,6 @@ class AppKernel extends Kernel
             new Doctrine\Bundle\MigrationsBundle\DoctrineMigrationsBundle(),
             // Documentation in Markdown
             new Knp\Bundle\MarkdownBundle\KnpMarkdownBundle(),
-            new WeavingTheWeb\Bundle\Documentation\MarkdownBundle\WeavingTheWebDocumentationMarkdownBundle(),
             // AMQP consumers / producers
             new OldSound\RabbitMqBundle\OldSoundRabbitMqBundle(),
             new WeavingTheWeb\Bundle\AmqpBundle\WeavingTheWebAmqpBundle(),
@@ -68,12 +64,6 @@ class AppKernel extends Kernel
             new FOS\JsRoutingBundle\FOSJsRoutingBundle(),
             // View helper
             new Liip\UrlAutoConverterBundle\LiipUrlAutoConverterBundle(),
-            // Quality assurance
-            new WTW\CodeGeneration\QualityAssuranceBundle\WTWCodeGenerationQualityAssuranceBundle(),
-            new WeavingTheWeb\Bundle\SupervisionBundle\WeavingTheWebSupervisionBundle(),
-            // Code analysis
-            new WTW\CodeGeneration\AnalysisBundle\WTWCodeGenerationAnalysisBundle(),
-            new WeavingTheWeb\Bundle\Legacy\ProviderBundle\WeavingTheWebLegacyProviderBundle(),
         );
 
         if (in_array($this->getEnvironment(), array('dev', 'test', 'bdd', 'box', 'cache'))) {

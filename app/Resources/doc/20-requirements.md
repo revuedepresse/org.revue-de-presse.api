@@ -22,10 +22,6 @@ JavaScript dependencies
     # installing karma, launchers and reporters for testing
     cd / && npm install
 
-Capistrano dependencies
-
-    bundle install 
-    
 Redis server and redis extension for PHP
 
     # Install Redis

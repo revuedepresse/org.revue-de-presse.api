@@ -16,12 +16,6 @@ class Fixtures20130817210811 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() != "mysql", "Migration can only be executed safely on 'mysql'.");
 
-        $fixtures = file_get_contents(__DIR__ . '/fixtures/fixtures_legacy.sql');
-        $this->addSql($fixtures);
-
-        $fixtures = file_get_contents(__DIR__ . '/fixtures/fixtures_default_perspectives.sql');
-        $this->addSql($fixtures);
-
         $fixtures = file_get_contents(__DIR__ . '/fixtures/fixtures_administration.sql');
         $this->addSql($fixtures);
     }
