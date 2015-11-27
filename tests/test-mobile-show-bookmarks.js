@@ -54,7 +54,7 @@
                 username: $routeParams.username
             };
 
-            httpBackend.whenPOST('https://## FILL HOSTNAME ##/api/twitter/bookmarks', data).respond(statuses);
+            httpBackend.whenPOST('https://weaving-the-web.org/api/twitter/bookmarks', data).respond(statuses);
 
             $rootScope = $injector.get('$rootScope');
             $scope = $rootScope.$new();

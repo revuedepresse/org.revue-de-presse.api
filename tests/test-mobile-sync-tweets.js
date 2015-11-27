@@ -53,7 +53,7 @@
             $httpBackend = $injector.get('$httpBackend');
             httpBackend = $httpBackend;
 
-            $httpBackend.when('GET', 'https://## FILL HOSTNAME ##/api/twitter/tweet/latest?username=weaver').respond(tweets);
+            $httpBackend.when('GET', 'https://weaving-the-web.org/api/twitter/tweet/latest?username=weaver').respond(tweets);
 
             $controller = $injector.get('$controller');
             $controller('ShowStatusesAction', {
@@ -141,7 +141,7 @@
                     'starred': false
                 }
             ];
-            $httpBackend.when('GET', 'https://## FILL HOSTNAME ##/api/twitter/tweet/latest?username=weaver').respond(tweets);
+            $httpBackend.when('GET', 'https://weaving-the-web.org/api/twitter/tweet/latest?username=weaver').respond(tweets);
 
             $controller = $injector.get('$controller');
             $controller('ShowStatusesAction', {
@@ -169,7 +169,7 @@
         it('should sync tweets marked as starred', function () {
             httpBackend.flush();
 
-            var endpoint = 'https://## FILL HOSTNAME ##/api/twitter/tweet/star/' + statusId;
+            var endpoint = 'https://weaving-the-web.org/api/twitter/tweet/star/' + statusId;
             $httpBackend.when('POST', endpoint).respond({
                 'status': statusId
             });
@@ -179,7 +179,7 @@
         it('should sync tweets not marked as starred', function () {
             httpBackend.flush();
 
-            var endpoint = 'https://## FILL HOSTNAME ##/api/twitter/tweet/unstar/' + statusId;
+            var endpoint = 'https://weaving-the-web.org/api/twitter/tweet/unstar/' + statusId;
             $httpBackend.when('POST', endpoint).respond({
                 'status': statusId
             });

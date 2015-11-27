@@ -98,7 +98,7 @@ fos_rest:
         formats:
             json:               true
         mime_types:
-            json:               ['application/json', 'application/x-json', 'application/vnd.## FILL HOSTNAME ##+json']
+            json:               ['application/json', 'application/x-json', 'application/vnd.weaving-the-web.org+json']
         force_redirects:
             html:               true
         view_response_listener: force
