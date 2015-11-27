@@ -96,7 +96,7 @@
             // Prepares http backend to respond with a tweet sample when requesting for the lastest ones
             $httpBackend = $injector.get('$httpBackend');
 
-            endpoint = 'https://## FILL HOSTNAME ##/api/twitter/tweet/latest?username=weaver';
+            endpoint = 'https://weaving-the-web.org/api/twitter/tweet/latest?username=weaver';
             $httpBackend.when('GET', endpoint).respond(responseGetter(endpoint, statuses));
 
             $rootScope = $injector.get('$rootScope');
@@ -183,7 +183,7 @@
                     }
                 ];
 
-                endpoint = 'https://## FILL HOSTNAME ##/api/twitter/tweet/latest?username=weaver&lastId=' + ids[2];
+                endpoint = 'https://weaving-the-web.org/api/twitter/tweet/latest?username=weaver&lastId=' + ids[2];
                 $httpBackend.when('GET', endpoint).respond(responseGetter(endpoint, olderStatuses));
             });
 
@@ -225,7 +225,7 @@
                         }
                     ];
 
-                    endpoint = 'https://## FILL HOSTNAME ##/api/twitter/tweet/latest?username=weaver&lastId=' + ids[3];
+                    endpoint = 'https://weaving-the-web.org/api/twitter/tweet/latest?username=weaver&lastId=' + ids[3];
                     $httpBackend.when('GET', endpoint).respond(responseGetter(endpoint, olderStatuses));
                 });
 
@@ -300,7 +300,7 @@
 
             // Prepares http backend to respond with a tweet sample when requesting for the lastest ones
             $httpBackend = $injector.get('$httpBackend');
-            $httpBackend.when('GET', 'https://## FILL HOSTNAME ##/api/twitter/tweet/latest?username=weaver')
+            $httpBackend.when('GET', 'https://weaving-the-web.org/api/twitter/tweet/latest?username=weaver')
                 .respond(statuses);
 
             $rootScope = $injector.get('$rootScope');
@@ -338,7 +338,7 @@
         });
 
         it('should mark statuses in the scope as starred', function () {
-            var endpoint = 'https://## FILL HOSTNAME ##/api/twitter/tweet/star/' +
+            var endpoint = 'https://weaving-the-web.org/api/twitter/tweet/star/' +
                 statusId;
             $httpBackend.when('POST', endpoint).respond({
                 'status': statusId
@@ -350,7 +350,7 @@
         });
 
         it('should mark statuses in the scope as unstarred', function () {
-            var endpoint = 'https://## FILL HOSTNAME ##/api/twitter/tweet/unstar/' +
+            var endpoint = 'https://weaving-the-web.org/api/twitter/tweet/unstar/' +
                 statusId;
             $httpBackend.when('POST', endpoint).respond({
                 'status': statusId

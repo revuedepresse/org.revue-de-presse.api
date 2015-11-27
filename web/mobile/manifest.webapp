@@ -16,7 +16,7 @@
   },
   "developer": {
     "name": "Thierry Marianne",
-    "url": "http://## FILL HOSTNAME ##"
+    "url": "http://thierry.marianne.weaving-the-web.org"
   },
   "chrome": {
     "navigation": true
@@ -24,8 +24,8 @@
   "default_locale": "en",
   "installs_allowed_from": [
     "https://marketplace.firefox.com",
-    "https://## FILL HOSTNAME ##"
+    "https://start.weaving-the-web.org"
   ],
-  "origin": "app://## FILL HOSTNAME ##",
+  "origin": "app://weaving-the-web.org",
   "type": "web"
 }

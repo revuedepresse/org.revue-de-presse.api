@@ -9,7 +9,7 @@
                 'location',
                 ['host', 'protocol']
             );
-            this.$host = '## FILL HOSTNAME ##';
+            this.$host = 'weaving-the-web.org';
             this.$protocol = 'https';
         };
 
