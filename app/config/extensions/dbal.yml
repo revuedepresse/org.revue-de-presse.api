@@ -1,0 +1,73 @@
+parameters:
+    mapping:
+        FOSOAuthServerBundle: ~
+        WTWUserBundle: ~
+        WeavingTheWebApiBundle: ~
+        WeavingTheWebDashboardBundle: ~
+        WeavingTheWebMappingBundle: ~
+        WeavingTheWebUserBundle: ~
+
+# Doctrine Configuration
+doctrine:
+    dbal:
+        default_connection: default
+        connections:
+            default:
+                charset:  %database_charset%
+                driver:   %database_driver%
+                host:     %database_host%
+                dbname:   %database_name%
+                user:     %database_user%
+                password: %database_password%
+                port:     %database_port%
+            admin:
+                charset:  %database_charset_admin%
+                driver:   %database_driver_admin%
+                host:     %database_host_admin%
+                dbname:   %database_name_admin%
+                user:     %database_user_admin%
+                password: %database_password_admin%
+                port:     %database_port_admin%
+            read:
+                charset:  %database_charset_read%
+                driver:   %database_driver_read%
+                host:     %database_host_read%
+                dbname:   %database_name_read%
+                user:     %database_user_read%
+                password: %database_password_read%
+                port:     %database_port_read%
+            test_mysql:
+                charset:  %database_charset_test%
+                driver:   %database_driver_test%
+                host:     %database_host_test%
+                dbname:   %database_name_test%
+                user:     %database_user_test%
+                password: %database_password_test%
+                port:     %database_port_test%
+            write:
+                charset:  %database_charset_write%
+                driver:   %database_driver_write%
+                host:     %database_host_write%
+                dbname:   %database_name_write%
+                user:     %database_user_write%
+                password: %database_password_write%
+                port:     %database_port_write%
+    orm:
+        default_entity_manager: default
+        entity_managers:
+            default:
+                connection: default
+                mappings: %mapping%
+            admin:
+                connection: admin
+                mappings: %mapping%
+            read:
+                connection: read
+                mappings: %mapping%
+            test_mysql:
+                connection: test_mysql
+                mappings: %mapping%
+            write:
+                connection: write
+                mappings: %mapping%
+        auto_generate_proxy_classes: %kernel.debug%

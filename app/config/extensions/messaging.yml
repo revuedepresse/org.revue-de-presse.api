@@ -1,0 +1,32 @@
+old_sound_rabbit_mq:
+    connections:
+        default:
+            host:      %rabbitmq_host%
+            port:      %rabbitmq_port%
+            user:      %rabbitmq_user%
+            password:  %rabbitmq_password%
+            vhost:     %rabbitmq_vhost%
+        mail:
+            host:      %rabbitmq_host%
+            port:      %rabbitmq_port%
+            user:      %rabbitmq_user%
+            password:  %rabbitmq_password%
+            vhost:     /mail
+    producers:
+        weaving_the_web_amqp.twitter:
+            connection:       default
+            exchange_options: { name: 'twitter', type: topic }
+        weaving_the_web_amqp.twitter.user_status:
+            connection:       default
+            exchange_options: { name: 'get-user-status', type: direct }
+    anon_consumers:
+        weaving_the_web_amqp.twitter:
+            connection:       default
+            exchange_options: { name: 'twitter', type: topic }
+            callback:         weaving_the_web_amqp.twitter
+    consumers:
+        weaving_the_web_amqp.twitter.user_status:
+            callback:         weaving_the_web_amqp.twitter.user_status
+            connection:       default
+            exchange_options: { name: 'get-user-status', type: direct }
+            queue_options:    { name: 'get-user-status' }
