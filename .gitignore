@@ -1,24 +1,22 @@
-# environment
+# Continuous integration reports
 /build/*
 !/build/.gitignore
 
-# dependencies
-.bowerrc
+# PHP dependencies
+composer.phar
+composer.lock
+/vendor
 /bin/*
 
+# JavaScript dependencies
 bower_components/
-composer.phar
-/node_modules
 /src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/components
-/vendor
+.bowerrc
+/node_modules
 
+# Public assets
 /web/assetic
 /web/bundles
 /web/css
 /web/js
 /web/images
-
-# legacy
-/mobile
-/snapshots
-/unit.testing/*.testing.subversion.log.php
