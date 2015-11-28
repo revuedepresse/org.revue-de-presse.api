@@ -1,9 +1,12 @@
 parameters:
+    api_access_token:               %oauth_access_token%
     api_client_id:                  %oauth_client_id%
     api_client_secret:              %oauth_client_secret%
-    api_access_token:               %oauth_access_token%
 
-    app_version:                    0.1
+    api_facebook_app_id:            %api.facebook.app_id%
+    api_facebook_app_secret:        %api.facebook.app_secret%
+
+    app_version:                    TF8
 
     locale:                         en
 
@@ -12,4 +15,4 @@ parameters:
     quality_assurance_password:     ~
 
     test_database_memory:           false
-    test_database_path:             %kernel.cache_dir%/devobs.db
+    test_database_path:             %kernel.cache_devobsboard.db
