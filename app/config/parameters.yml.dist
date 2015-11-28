@@ -1,53 +1,17 @@
 imports:
+    - { resource: parameters/parameters_apc.yml }
+    - { resource: parameters/parameters_app.yml }
+    - { resource: parameters/parameters_analytics.yml }
     - { resource: parameters/parameters_assets.yml }
     - { resource: parameters/parameters_dbal.yml }
     - { resource: parameters/parameters_elasticsearch.yml }
-    - { resource: parameters/parameters_facebook.yml }
+    - { resource: parameters/parameters_feature_toggling.yml }
     - { resource: parameters/parameters_imap.yml }
     - { resource: parameters/parameters_mailer.yml }
+    - { resource: parameters/parameters_newsfeed.yml }
     - { resource: parameters/parameters_oauth.yml }
     - { resource: parameters/parameters_rabbitmq.yml }
     - { resource: parameters/parameters_security.yml }
     - { resource: parameters/parameters_twitter.yml }
     - { resource: parameters/parameters_weaving_the_web.yml }
     - { resource: parameters/parameters_xhprof.yml }
-
-parameters:
-    analytics_domain:               %analytics.host%
-    analytics_site:                 %analytics.site_id%
-
-    app_version:                    0.1
-
-    apc_host:                       %apc.host%
-
-    feature_toggling_emails:        false
-    feature_toggling_search:        false
-    feature_toggling_statuses:      false
-    feature_toggling_repositories:  false
-
-    locale:                         en
-
-    framework_secret:               %framework.secret%
-
-    test_database_memory:           false
-    test_database_path:             %kernel.cache_dir%/wtw_dashboard.db
-
-    php_binary:                     /usr/bin/php
-
-    database_charset:               UTF8
-
-    imap_username:                  ~
-    imap_password:                  ~
-
-    facebook_app_id:                ~
-    facebook_app_secret:            ~
-    facebook_redirect_url:          ~
-    facebook_oauth_token:           ~
-
-    quality_assurance_password:     ~
-
-    api_client_id:                  %oauth_client_id%
-    api_client_secret:              %oauth_client_secret%
-    api_access_token:               %oauth_access_token%
-
-    php_binary:                     /usr/bin/php

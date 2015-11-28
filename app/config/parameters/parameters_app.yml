@@ -1,0 +1,17 @@
+parameters:
+    api_client_id:                  %oauth_client_id%
+    api_client_secret:              %oauth_client_secret%
+    api_access_token:               %oauth_access_token%
+
+    app_version:                    0.1
+
+    database_charset:               UTF8
+
+    locale:                         en
+
+    framework_secret:               %framework.secret%
+
+    quality_assurance_password:     ~
+
+    test_database_memory:           false
+    test_database_path:             %kernel.cache_dir%/devobs.db
