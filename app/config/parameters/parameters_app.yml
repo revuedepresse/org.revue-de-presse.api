@@ -3,9 +3,6 @@ parameters:
     api_client_id:                  %oauth_client_id%
     api_client_secret:              %oauth_client_secret%
 
-    api_facebook_app_id:            %api.facebook.app_id%
-    api_facebook_app_secret:        %api.facebook.app_secret%
-
     app_version:                    TF8
 
     locale:                         en
