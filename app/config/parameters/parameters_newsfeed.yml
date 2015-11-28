@@ -1,4 +1,10 @@
 parameters:
+    api_facebook_app_id:            ~
+    api_facebook_app_secret:        ~
+    api_facebook_host_port:         %api.facebook.protocol%%api.facebook.host_port%
+
+    endpoint_facebook_feed:         %api_facebook_host_port%/api/facebook/api.facebook.get.feed.php
+
     facebook_app_id:                ~
     facebook_app_secret:            ~
     facebook_oauth_token:           ~
