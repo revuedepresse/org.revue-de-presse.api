@@ -78,7 +78,7 @@ RabbiMQ server
     # Delete default user
     rabbitmqadmin delete user name=guest
 
-Elastic Search
+Elastic 
 
     # Downloads .tar.gz archive and extract its content to /usr/share/elasticsearch
 
