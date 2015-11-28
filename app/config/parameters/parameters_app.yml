@@ -5,8 +5,6 @@ parameters:
 
     app_version:                    0.1
 
-    database_charset:               UTF8
-
     locale:                         en
 
     framework_secret:               %framework.secret%
