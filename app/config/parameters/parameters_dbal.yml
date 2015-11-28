@@ -1,4 +1,6 @@
 parameters:
+    database_charset:         UTF8
+
     database_charset_admin:   %database_charset%
     database_driver_admin:    pdo_mysql
     database_host_admin:      %mysql.host%

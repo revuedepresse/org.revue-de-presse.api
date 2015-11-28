@@ -3,6 +3,10 @@ lock '3.4'
 
 set :default_env, {
   'SYMFONY_ENV'                             =>  'prod',
+  'SYMFONY__AES__KEY'                       =>  ENV['SYMFONY__AES__KEY'],
+  'SYMFONY__AES__IV'                        =>  ENV['SYMFONY__AES__IV'],
+  'SYMFONY__ANALYTICS__NODE'                =>  ENV['SYMFONY__ANALYTICS__NODE'],
+  'SYMFONY__ANALYTICS__SITE_ID'             =>  ENV['SYMFONY__ANALYTICS__SITE_ID'],
   'SYMFONY__ASSETIC__NODE'                  =>  ENV['SYMFONY__ASSETIC__NODE'],
   'SYMFONY__ASSETIC__MODULES'               =>  ENV['SYMFONY__ASSETIC__MODULES'],
   'SYMFONY__APC__HOST'                      =>  ENV['SYMFONY__APC__HOST'],
@@ -18,6 +22,7 @@ set :default_env, {
   'SYMFONY__API__TWITTER__VERSION'          =>  ENV['SYMFONY__API__TWITTER__VERSION'],
   'SYMFONY__ELASTICSEARCH__HOST'            =>  ENV['SYMFONY__ELASTICSEARCH__HOST'],
   'SYMFONY__ELASTICSEARCH__PORT'            =>  ENV['SYMFONY__ELASTICSEARCH__PORT'],
+  'SYMFONY__FRAMEWORK__SECRET'              =>  ENV['SYMFONY__FRAMEWORK__SECRET'],
   'SYMFONY__MYSQL__DATABASE'                =>  ENV['SYMFONY__MYSQL__DATABASE'],
   'SYMFONY__MYSQL__USER'                    =>  ENV['SYMFONY__MYSQL__USER'],
   'SYMFONY__MYSQL__PASSWORD'                =>  ENV['SYMFONY__MYSQL__PASSWORD'],
@@ -40,11 +45,12 @@ set :default_env, {
   'SYMFONY__OAUTH__CLIENT_ID'               =>  ENV['SYMFONY__OAUTH__CLIENT_ID'],
   'SYMFONY__OAUTH__CLIENT_SECRET'           =>  ENV['SYMFONY__OAUTH__CLIENT_SECRET'],
   'SYMFONY__OAUTH__ACCESS_TOKEN'            =>  ENV['SYMFONY__OAUTH__ACCESS_TOKEN'],
-  'SYMFONY__AES__KEY'                       =>  ENV['SYMFONY__AES__KEY'],
-  'SYMFONY__AES__IV'                        =>  ENV['SYMFONY__AES__IV'],
+  'SYMFONY__QUALITY_ASSURANCE__PASSWORD'    =>  ENV['SYMFONY__QUALITY_ASSURANCE__PASSWORD'],
   'SYMFONY__RABBITMQ__USER'                 =>  ENV['SYMFONY__RABBITMQ__USER'],
   'SYMFONY__RABBITMQ__PASSWORD'             =>  ENV['SYMFONY__RABBITMQ__PASSWORD']
 }
+
+set :default_env,         { path: "/usr/local/bin:$PATH" }
 
 role :web,                '127.0.0.1'
 
@@ -64,8 +70,6 @@ set :log_level,           :info
 
 set :webserver_user,      'www-data'
 
-set :linked_files,        ['app/config/parameters.yml']
-
 set :app_path,            'app'
 
 set :web_path,            'web'
@@ -75,6 +79,8 @@ set :log_path,            fetch(:app_path) + '/logs'
 set :cache_path,          fetch(:app_path) + '/cache'
 
 set :app_config_path,     fetch(:app_path) + '/config'
+
+set :linked_files,        %w{app/config/parameters.yml}
 
 set :linked_dirs,         [fetch(:log_path), 'app/var/sessions', 'web/uploads',
                           'src/WeavingTheWeb/Bundle/DashboardBundle/Resources/perspectives/archive',
@@ -108,9 +114,7 @@ namespace :deploy do
   after :starting,                  'composer:install_executable'
 end
 
-before 'deploy:check:linked_files', 'parameters_empty'
-
-before 'deploy:symlink:shared',     'parameters'
+before "deploy:check:linked_files", "upload_parameters"
 
 before 'composer:install',          'install_node_modules'
 
