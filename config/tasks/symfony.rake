@@ -54,9 +54,11 @@ task :parameters do
                 end
             else
                 parameters = YAML::load(capture("cat #{release_path}/app/config/parameters.yml.dist"))
-                distParameters['parameters'].each do |k,v|
-                    set :distParameter, ask(k, v)
-                    parameters['parameters'][k] = fetch(:distParameter)
+                if parameters
+                    distParameters['parameters'].each do |k,v|
+                        set :distParameter, ask(k, v)
+                        parameters['parameters'][k] = fetch(:distParameter)
+                    end
                 end
             end
         else
