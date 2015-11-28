@@ -1,0 +1,3 @@
+parameters:
+    analytics_domain:               %analytics.host%
+    analytics_site:                 %analytics.site_id%

@@ -1,7 +1,7 @@
 parameters:
-    facebook_redirect_url:          ~
     facebook_app_id:                ~
     facebook_app_secret:            ~
     facebook_oauth_token:           ~
+    facebook_redirect_url:          ~
 
     php_binary:                     /usr/bin/php
