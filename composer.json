@@ -13,10 +13,6 @@
         },
         {
             "type": "vcs",
-            "url": "git@github.com:thierrymarianne/SpBowerBundle.git"
-        },
-        {
-            "type": "vcs",
             "url": "git@github.com:thierrymarianne/FOSTwitterBundle.git"
         },
         {
@@ -25,6 +21,7 @@
         }
     ],
     "require": {
+        "braincrafted/bootstrap-bundle": "2.0.1",
         "doctrine/common": "2.5.1",
         "doctrine/dbal": "2.5.2",
         "doctrine/inflector": "1.*",
@@ -33,6 +30,8 @@
         "doctrine/doctrine-fixtures-bundle": "2.2.*",
         "doctrine/doctrine-migrations-bundle": "dev-master",
         "elao/web-profiler-extra-bundle": "dev-master",
+        "ext-openssl": "^0.0.0",
+        "ext-zip": "^1.11",
         "facebook/php-sdk-v4": "4.0.*",
         "fabpot/goutte": "3.1.1",
         "friendsofsymfony/elastica-bundle": "~3.1",
@@ -49,12 +48,14 @@
         "kertz/twitteroauth": "dev-master",
         "knplabs/knp-markdown-bundle": "1.3.*",
         "kriswallsmith/assetic": "1.3.1",
+        "liip/url-auto-converter-bundle": "1.0.1",
         "oldsound/rabbitmq-bundle": "dev-master",
         "oneup/uploader-bundle": "1.3.1",
         "ornicar/apc-bundle": "dev-master#c0f7bf5",
         "php": ">=5.4.8",
         "phpseclib/phpseclib": "2.0",
         "predis/predis": "1.0.3",
+        "ramsey/uuid": "3.0.1",
         "snc/redis-bundle": "1.1.9",
         "symfony/assetic-bundle": "2.7.0",
         "symfony/monolog-bundle": "2.6.*",
@@ -62,14 +63,9 @@
         "sensio/distribution-bundle": "3.*",
         "sensio/framework-extra-bundle": "3.*",
         "sensio/generator-bundle": "2.3.*",
-        "sp/bower-bundle": "dev-master#cd2678abaf83ff21d157c6758eaf95a26e83872f",
+        "sp/bower-bundle": "dev-master#9fd50491bbfd244042fdb6e81f80ca2223b393ac",
         "themattharris/tmhOAuth": "dev-master",
-        "twig/extensions": "1.0.*",
-        "braincrafted/bootstrap-bundle": "2.0.1",
-        "liip/url-auto-converter-bundle": "1.0.1",
-        "ext-openssl": "^0.0.0",
-        "ext-zip": "^1.11",
-        "ramsey/uuid": "3.0.1"
+        "twig/extensions": "1.0.*"
     },
     "require-dev": {
         "behat/behat": "3.0.15",
