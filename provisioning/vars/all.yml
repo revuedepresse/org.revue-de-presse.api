@@ -10,7 +10,8 @@ vagrant_local:
 apache:
     install: '1'
     docroot: /var/www/devobs
-    servername: localhost
+    servername: devobs
+    port: 8080
 mysql:
     install: '1'
     root_password: "{{ mysql_root_password }}"
@@ -18,6 +19,10 @@ mysql:
     user: default
     password:  "{{ mysql_default_password }}"
     dump: ''
+    test:
+        database: devobs_test
+        user: tester
+        password: "{{ mysql_test_password }}"
 rabbitmq:
     install: '1'
     user: default
