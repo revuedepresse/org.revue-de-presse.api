@@ -37,8 +37,8 @@
   "readmeFilename": "README.md",
   "dependencies": {
     "bootstrap": "3.2.0",
-    "uglify-js": "^2.3.6",
-    "uglifycss": "0.0.5"
+    "uglify-js": "^2.6.1",
+    "uglifycss": "0.0.19"
   },
   "devDependencies": {
     "eslint": "1.7.1",
