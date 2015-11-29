@@ -1,0 +1,37 @@
+---
+server:
+    install: '1'
+    packages: [git, vim]
+    timezone: Europe/Paris
+    locale: en_US.UTF-8
+vagrant_local:
+    install: '1'
+    vm: { base_box: trusty64, hostname: devobs, ip: 10.9.8.2, memory: '4096', sharedfolder: ./, useVagrantCloud: '1', syncType: nfs }
+apache:
+    install: '1'
+    docroot: /var/www/devobs
+    servername: localhost
+mysql:
+    install: '1'
+    root_password: "{{ mysql_root_password }}"
+    database: devobs_dev
+    user: default
+    password:  "{{ mysql_default_password }}"
+    dump: ''
+rabbitmq:
+    install: '1'
+    user: default
+    password: "\"{{ rabbitmq_password }}\""
+    plugins: [rabbitmq_management]
+elasticsearch:
+    install: '1'
+    port: '9200'
+    version: 1.5.2
+php:
+    install: '1'
+    ppa: php5
+    packages: [php5-cli, php5-intl, php5-mcrypt, php5-curl, php5-fpm, php5-mysql, php5-apcu]
+xdebug:
+    install: '1'
+composer:
+    install: '1'
