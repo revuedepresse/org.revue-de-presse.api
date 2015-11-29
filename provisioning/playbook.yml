@@ -4,6 +4,10 @@
   vars_files:
     - vars/all.yml
   roles:
+    - role: git
+      git_install_from_source: true
+      git_install_path: "/usr"
+      git_version: "2.1.0"
     - server
     - vagrant_local
     - apache
@@ -19,3 +23,4 @@
         user: vagrant
         version: v0.29.0
         node_version: v4.2.2
+    - varnish

@@ -39,5 +39,14 @@ else
     echo "Confirmed symbolic link existed already."
 fi
 
+export LOG_RUN_JOB_ERROR=/var/log/job.run.error.log
+export LOG_RUN_JOB_OUT=/var/log/job.run.out.log
+
+touch $LOG_RUN_JOB_ERROR
+touch $LOG_RUN_JOB_OUT
+
+chown vagrant $LOG_RUN_JOB_ERROR
+chown vagrant $LOG_RUN_JOB_OUT
+
 chown -R vagrant $COMPOSER_FOLDER
 chown -R vagrant $DEPLOY_FOLDER

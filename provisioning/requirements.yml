@@ -1,2 +1,8 @@
 - name: nvm
   src: https://github.com/leonidas/ansible-nvm
+
+- name: varnish
+  src: https://github.com/geerlingguy/ansible-role-varnish
+
+- name: git
+  src: https://github.com/geerlingguy/ansible-role-git

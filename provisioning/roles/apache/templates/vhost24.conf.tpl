@@ -1,6 +1,6 @@
 # Default Apache virtualhost template
 
-<VirtualHost *:80>
+<VirtualHost *:{{ apache.port }}>
     ServerAdmin webmaster@localhost
     DocumentRoot {{ apache.docroot }}
     ServerName {{ apache.servername }}
