@@ -1,8 +1,12 @@
+# Vagrant box
+.vagrant
+
 # Continuous integration reports
 /build/*
 !/build/.gitignore
 
 # PHP dependencies
+auth.json
 composer.phar
 composer.lock
 /vendor
