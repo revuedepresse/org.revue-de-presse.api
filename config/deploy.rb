@@ -1,8 +1,7 @@
-# config valid only for Capistrano 3.1
 lock '3.4'
 
 set :default_env, {
-  'PATH' => '/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/bin',
+  'PATH' => '~/.nvm/versions/node/v4.2.2/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin',
   'SYMFONY_ENV' => 'prod',
   'SYMFONY__AES__KEY' => ENV['SYMFONY__AES__KEY'],
   'SYMFONY__AES__IV' => ENV['SYMFONY__AES__IV'],
@@ -62,6 +61,9 @@ role :web,                '127.0.0.1'
 
 set :application,         'devobs'
 
+set :bundle_gemfile,      -> { release_path.join('MyGemfile') }
+
+
 set :repo_url,            'git@github.com:WeavingTheWeb/devobs.git'
 
 set :tmp_dir,             '/tmp'
@@ -98,6 +100,8 @@ set :parameters_dir,      fetch(:app_path) + '/config'
 
 set :parameters_file,     '/parameters.yml.dist'
 
+set :rvm1_ruby_version,   "2.2.1"
+
 set :keep_releases,       3
 
 set :composer_install_flags, '--no-dev --prefer-dist --no-interaction'
@@ -118,21 +122,27 @@ namespace :deploy do
   after :starting,                  'composer:install_executable'
 end
 
-before "deploy:check:linked_files", "upload_parameters"
-
 before 'composer:install',          'install_node_modules'
+
+before "deploy:check:linked_files", 'upload_parameters'
+
+before "rvm1:install:rvm",          'rvm:update_rvm_key'
+
+before 'symfony:assetic:dump',      'apply_migrations'
 
 before 'symfony:cache:warmup',      'clear_symfony_cache'
 
-before 'symfony:assetic:dump',      'apply_migrations'
+before 'rvm1:install:gems',         'rvm1:install:ruby'
+
+before 'whenever:update_crontab',   'bundler:install'
 
 after  'symfony:cache:warmup',      'install_bower_components'
 
 after  'composer:install',          'install_javascript_routing'
 
-after  'deploy',                    'deploy:cleanup'
-
 after  'deploy',                    'clear_apc_cache'
+
+after  'deploy',                    'deploy:cleanup'
 
 after  'deploy:updated',            'symfony:assets:install'
 
