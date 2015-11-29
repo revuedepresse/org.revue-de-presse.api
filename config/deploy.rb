@@ -61,7 +61,7 @@ role :web,                '127.0.0.1'
 
 set :application,         'devobs'
 
-set :bundle_gemfile,      -> { release_path.join('MyGemfile') }
+set :bundle_gemfile,      -> { release_path.join('Gemfile') }
 
 
 set :repo_url,            'git@github.com:WeavingTheWeb/devobs.git'
@@ -122,23 +122,24 @@ namespace :deploy do
   after :starting,                  'composer:install_executable'
 end
 
+
 before 'composer:install',          'install_node_modules'
 
-before "deploy:check:linked_files", 'upload_parameters'
+after  'composer:install',          'install_javascript_routing'
 
-before "rvm1:install:rvm",          'rvm:update_rvm_key'
+before "deploy:check:linked_files", 'upload_parameters'
 
 before 'symfony:assetic:dump',      'apply_migrations'
 
 before 'symfony:cache:warmup',      'clear_symfony_cache'
 
-before 'rvm1:install:gems',         'rvm1:install:ruby'
+before "rvm1:install:rvm",          'rvm:update_rvm_key'
+
+before 'bundler:install',           'rvm1:install:ruby'
 
 before 'whenever:update_crontab',   'bundler:install'
 
 after  'symfony:cache:warmup',      'install_bower_components'
-
-after  'composer:install',          'install_javascript_routing'
 
 after  'deploy',                    'clear_apc_cache'
 
