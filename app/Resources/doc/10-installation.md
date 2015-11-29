@@ -30,7 +30,7 @@ before any required configuration files and services can be installed.
 
 Install Ruby using [rvm](https://rvm.io/)
 
-Install Capistrano
+Install Capistrano and other dependencies required to deploy the application to the vagrant box
 
 ```
 bundle install --path vendor/bundle
@@ -56,11 +56,20 @@ Fill the "github.com" value in `provisioning/files/auth.json`
 ```
 # Prepare OAuth authorization configuration for composer
 export TOKEN='grab your token from github.com before copying it here'
-sed -e 's/"github.com": ""/"github.com": "'$TOKEN'"/' provisioning/files/auth.json.dist > provisioning/files/auth.json 
+sed -e 's/"github.com": ""/"github.com": "'$TOKEN'"/' provisioning/files/auth.json.dist \
+> provisioning/files/auth.json 
 
 # Copy authorization configuration file to composer directory in vagrant home directory
 COMPOSER_AUTH=provisioning/files/auth.json vagrant provision --provision-with=file
 ```
 
+**Encoutering some issue at provisioning?**
 
+Run the provisioning command manually with ansible
 
+```
+ansible-playbook --user=vagrant --connection=ssh --timeout=30 --limit=all \
+--inventory-file=provisioning/inventories/dev provisioning/playbook.yml \
+--private-key=./.vagrant/machines/default/virtualbox/private_key \
+-vvvv
+```
