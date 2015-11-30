@@ -41,6 +41,7 @@
     "uglifycss": "0.0.19"
   },
   "devDependencies": {
+    "bower": "1.6.5",
     "eslint": "1.7.1",
     "jasmine-core": "2.3.4",
     "jsdox": "0.4.9",
