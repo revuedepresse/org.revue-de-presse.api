@@ -61,7 +61,7 @@ sed -e 's/"github.com": ""/"github.com": "'$TOKEN'"/' provisioning/files/auth.js
 COMPOSER_AUTH=provisioning/files/auth.json vagrant provision --provision-with=file
 ```
 
-**Encoutering some issue at provisioning?**
+**Encountering some issue at provisioning?**
 
 Run the provisioning command manually with ansible
 
