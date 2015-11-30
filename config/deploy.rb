@@ -59,36 +59,27 @@ set :default_env, {
 
 role :web,                '127.0.0.1'
 
+set :app_config_path,     fetch(:app_path) + '/config'
+
+set :app_path,            'app'
+
 set :application,         'devobs'
+
+set :branch,              'deploy'
 
 set :bundle_gemfile,      -> { release_path.join('Gemfile') }
 
+set :cache_path,          fetch(:app_path) + '/cache'
 
-set :repo_url,            'git@github.com:WeavingTheWeb/devobs.git'
-
-set :tmp_dir,             '/tmp'
-
-set :branch,              'deploy'
+set :composer_install_flags, '--no-dev --prefer-dist --no-interaction'
 
 set :deploy_to,           '/var/deploy/devobs'
 
 set :format,              :pretty
 
-set :log_level,           :info
-
-set :webserver_user,      'www-data'
-
-set :app_path,            'app'
-
-set :web_path,            'web'
+set :keep_releases,       3
 
 set :log_path,            fetch(:app_path) + '/logs'
-
-set :cache_path,          fetch(:app_path) + '/cache'
-
-set :app_config_path,     fetch(:app_path) + '/config'
-
-set :linked_files,        %w{app/config/parameters.yml}
 
 set :linked_dirs,         [fetch(:log_path), 'app/var/sessions', 'web/uploads',
                           'src/WeavingTheWeb/Bundle/DashboardBundle/Resources/perspectives/archive',
@@ -96,15 +87,23 @@ set :linked_dirs,         [fetch(:log_path), 'app/var/sessions', 'web/uploads',
                           'src/WeavingTheWeb/Bundle/DashboardBundle/Resources/perspectives/import',
                           'src/WeavingTheWeb/Bundle/DashboardBundle/Resources/perspectives/export']
 
+set :log_level,           :info
+
+set :linked_files,        %w{app/config/parameters.yml}
+
 set :parameters_dir,      fetch(:app_path) + '/config'
 
 set :parameters_file,     '/parameters.yml.dist'
 
+set :repo_url,            'git@github.com:WeavingTheWeb/devobs.git'
+
 set :rvm1_ruby_version,   "2.2.1"
 
-set :keep_releases,       3
+set :tmp_dir,             '/tmp'
 
-set :composer_install_flags, '--no-dev --prefer-dist --no-interaction'
+set :web_path,            'web'
+
+set :webserver_user,      'www-data'
 
 set :whenever_identifier, ->{ "#{fetch(:application)}_#{fetch(:stage)}" }
 
@@ -118,34 +117,34 @@ set :ssh_options, {
 
 SSHKit.config.command_map[:composer] = "php #{shared_path.join('composer.phar')}"
 
-namespace :deploy do
-  after :starting,                  'composer:install_executable'
-end
+before 'composer:install', 'install_node_modules'
 
+after 'composer:install', 'symfony:install_javascript_routing_assets'
 
-before 'composer:install',          'install_node_modules'
+before "deploy:check:linked_files", 'symfony:upload_configuration_parameters'
 
-after  'composer:install',          'install_javascript_routing'
+before 'symfony:assetic:dump', 'symfony:apply_database_migrations'
 
-before "deploy:check:linked_files", 'upload_parameters'
+before 'symfony:cache:warmup', 'symfony:clear_cache'
 
-before 'symfony:assetic:dump',      'apply_migrations'
+before "rvm1:install:rvm", 'rvm:update_rvm_key'
 
-before 'symfony:cache:warmup',      'clear_symfony_cache'
+before 'bundler:install', 'rvm1:install:ruby'
 
-before "rvm1:install:rvm",          'rvm:update_rvm_key'
+before 'whenever:update_crontab', 'bundler:install'
 
-before 'bundler:install',           'rvm1:install:ruby'
+after 'symfony:cache:warmup', 'install_bower_components'
 
-before 'whenever:update_crontab',   'bundler:install'
+after 'deploy', 'deploy:cleanup'
 
-after  'symfony:cache:warmup',      'install_bower_components'
+after 'deploy', 'symfony:clear_accelerator_cache'
 
-after  'deploy',                    'clear_apc_cache'
+after 'deploy:starting', 'composer:install_executable'
 
-after  'deploy',                    'deploy:cleanup'
+after 'deploy:rollback:cleanup', 'symfony:clear_accelerator_cache'
 
-after  'deploy:updated',            'symfony:assets:install'
+after 'deploy:updated', 'symfony:assets:install'
 
-after  'deploy:updated',            'symfony:assetic:dump'
+after 'deploy:updated', 'symfony:assetic:dump'
+
 
