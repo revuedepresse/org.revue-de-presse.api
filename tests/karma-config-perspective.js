@@ -27,8 +27,7 @@ module.exports = function (karmaConfig) {
             logger,
             dateFormatter,
             metrics,
-            // Figure how to update timezone of Travis container-based environment or
-            // use moment.js instead of a component very poorly reinventing the wheel
+            'test-format-date.js',
             'test-get-query-params.js'
         ])
         .preprocessScripts([
@@ -36,6 +35,7 @@ module.exports = function (karmaConfig) {
             logger,
             dateFormatter,
             metrics,
+            'test-format-date.js',
             'test-get-query-params.js'
         ])
         .configure();
