@@ -2,14 +2,11 @@
 
 ## Development environment
 
-Install the latest version of VirtualBox from 
-[https://www.virtualbox.org/](https://www.virtualbox.org/)
+Install the latest version of VirtualBox available from [https://www.virtualbox.org/](https://www.virtualbox.org)
 
-Install the latest version of Ansible from 
-[http://docs.ansible.com/ansible/intro_installation.html](http://docs.ansible.com/ansible/intro_installation.html)
+Install the latest version of Ansible available from [http://docs.ansible.com/ansible/intro_installation.html](http://docs.ansible.com/ansible/intro_installation.html)
 
-Install the latest version of Vagrant from 
-[https://www.vagrantup.com/downloads.html](https://www.vagrantup.com/downloads.html)
+Install the latest version of Vagrant available from [https://www.vagrantup.com/downloads.html](https://www.vagrantup.com/downloads.html)
 
 Install provisioning roles using Ansible galaxy command
 
@@ -28,9 +25,9 @@ before any required configuration files and services can be installed.
 
 ## Application deployment
 
-Install Ruby using [rvm](https://rvm.io/)
+Install Ruby using rvm by following instructions from [https://rvm.io](https://rvm.io)
 
-Install Capistrano and other dependencies required to deploy the application to the vagrant box
+Install Capistrano and other dependencies required to deploy the application to the vagrant box installed before
 
 ```
 bundle install --path vendor/bundle
@@ -48,10 +45,11 @@ The first deployment might take a couple of minutes before npm and composer cach
 
 **Encountering "Could not authenticate against github.com" error message when installing PHP dependencies?**
 
-Follow instructions from [https://getcomposer.org/doc/articles/troubleshooting.md#api-rate-limit-and-oauth-tokens](https://getcomposer.org/doc/articles/troubleshooting.md#api-rate-limit-and-oauth-tokens)
+Follow instructions from `Composer` documentation available at [https://getcomposer.org/doc/articles/troubleshooting.md#api-rate-limit-and-oauth-tokens](https://getcomposer.org/doc/articles/troubleshooting.md#api-rate-limit-and-oauth-tokens)  
+
 These instructions have to be followed from within the vagrant box.
 
-Fill the "github.com" value in `provisioning/files/auth.json`
+Fill the `github.com` value in `provisioning/files/auth.json`
 
 ```
 # Prepare OAuth authorization configuration for composer
