@@ -9,10 +9,6 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "git@github.com:thierrymarianne/ApcBundle.git"
-        },
-        {
-            "type": "vcs",
             "url": "git@github.com:thierrymarianne/FOSTwitterBundle.git"
         },
         {
@@ -63,6 +59,7 @@
         "sensio/distribution-bundle": "3.*",
         "sensio/framework-extra-bundle": "3.*",
         "sensio/generator-bundle": "2.3.*",
+        "smart-core/accelerator-cache-bundle": "1.1.0",
         "sp/bower-bundle": "dev-master#9fd50491bbfd244042fdb6e81f80ca2223b393ac",
         "themattharris/tmhOAuth": "dev-master",
         "twig/extensions": "1.0.*"

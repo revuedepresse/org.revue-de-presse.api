@@ -56,8 +56,8 @@ class AppKernel extends Kernel
             // AMQP consumers / producers
             new OldSound\RabbitMqBundle\OldSoundRabbitMqBundle(),
             new WeavingTheWeb\Bundle\AmqpBundle\WeavingTheWebAmqpBundle(),
-            // APC
-            new Ornicar\ApcBundle\OrnicarApcBundle(),
+            // OPcache / APCu
+            new SmartCore\Bundle\AcceleratorCacheBundle\AcceleratorCacheBundle(),
             // Assets management
             new Sp\BowerBundle\SpBowerBundle(),
             // Routing

@@ -23,10 +23,8 @@ framework:
     translator:               { fallback:     en }
     validation:               { enable_annotations:     true }
 
-ornicar_apc:
+accelerator_cache:
     host: %apc_host%
-    mode: curl
-    web_dir: %kernel.root_dir%/../web
 
 snc_redis:
     clients:
