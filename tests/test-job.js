@@ -4,6 +4,8 @@
     var RequestMockery = require.RequestMockery;
     var getJobsBoard = require.getJobsBoard;
 
+    jasmine.DEFAULT_TIMEOUT_INTERVAL = 15000;
+
     describe('Job', function () {
         var authorizationHeaderValue = 'Bearer tok';
         var body = $('body');
