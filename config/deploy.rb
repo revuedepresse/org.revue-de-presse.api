@@ -141,7 +141,7 @@ after 'deploy', 'symfony:clear_accelerator_cache'
 
 after 'deploy:starting', 'composer:install_executable'
 
-after 'deploy:rollback:cleanup', 'symfony:clear_accelerator_cache'
+after 'deploy:cleanup_rollback', 'symfony:clear_accelerator_cache'
 
 after 'deploy:updated', 'symfony:assets:install'
 
