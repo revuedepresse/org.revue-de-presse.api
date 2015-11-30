@@ -1,5 +1,6 @@
 # Vagrant box
 .vagrant
+.bowerrc
 
 # Continuous integration reports
 /build/*
