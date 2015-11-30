@@ -15,11 +15,24 @@
   sudo: yes
   apt: pkg=php5-fpm state=latest
 
+- name: Remove default php5-fpm pool
+  sudo: yes
+  file: path=/etc/php5/fpm/pool.d/www.conf state=absent
+
 - name: Install PHP Packages
   sudo: yes
   apt: pkg={{ item }} state=latest
   with_items: php.packages
   when: php.packages is defined
+
+- name: Configure devobs pool
+  template: >
+    src="pool.conf.tpl"
+    dest="/etc/php5/fpm/pool.d/{{ item }}.conf"
+    owner="root"
+    group="root"
+    mode=0644
+  with_items: devobs
 
 - include: configure.yml
 - include: pecl.yml

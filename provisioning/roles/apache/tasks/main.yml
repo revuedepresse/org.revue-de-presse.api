@@ -7,15 +7,47 @@
   apache2_module: state=present name={{ item }}
   notify: restart apache
   with_items:
+    - actions
     - rewrite
     - vhost_alias
     - headers
     - expires
     - filter
 
+- name: Disable php5_module
+  apache2_module: state=absent name=php5
+
+- name: Remove php5_module
+  sudo : yes
+  apt:
+    name: libapache2-mod-php5
+    purge: yes
+
+- name: Install FastCGI
+  sudo : yes
+  apt:
+    name: "{{ item }}"
+    state: present
+  with_items:
+    - libapache2-mod-fastcgi
+
 - name: Change default apache2.4 site
   sudo: yes
   template: src=vhost24.conf.tpl dest=/etc/apache2/sites-available/000-default.conf
+  notify: restart apache
+
+- name: Configure PHP fpm
+  sudo: yes
+  template: src=php-fpm.conf.tpl dest=/etc/apache2/conf-available/php-fpm.conf
+
+- name: Enable PHP fpm configuration
+  sudo: yes
+  file:
+    src: /etc/apache2/conf-available/php-fpm.conf
+    dest: /etc/apache2/conf-enabled/php-fpm.conf
+    owner: root
+    group: root
+    state: link
   notify: restart apache
 
 - name: Update ports
