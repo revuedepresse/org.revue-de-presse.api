@@ -1,3 +1,3 @@
 every '*/1 * * * *' do
-  command "/vagrant/config/scripts/run-job.sh"
+  command "source /vagrant/config/scripts/run-job.sh"
 end
