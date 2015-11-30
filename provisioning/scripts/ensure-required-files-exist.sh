@@ -31,7 +31,7 @@ ensure_dir_exists $COMPOSER_FOLDER
 ensure_dir_exists $DEPLOY_FOLDER
 
 echo "Checking if symbolic link exists."
-if [ ! -e $DOCUMENT_ROOT ]
+if [ ! -L $DOCUMENT_ROOT ]
 then
     echo "Creating missing symbolic link."
     ln -s $DEPLOY_FOLDER/current $DOCUMENT_ROOT
