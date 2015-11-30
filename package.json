@@ -8,16 +8,16 @@
   },
   "scripts": {
     "test": "make test",
-    "test-dashboard": "karma start tests/karma-config-dashboard-ci.js",
-    "test-job": "karma start tests/karma-config-job-ci.js",
-    "test-logger": "karma start tests/karma-config-logger-ci.js",
-    "test-perspective": "karma start tests/karma-config-perspective-ci.js",
-    "test-mobile": "karma start tests/karma-config-mobile-ci.js",
-    "tdd-dashboard": "karma start tests/karma-config-dashboard.js",
-    "tdd-job": "karma start tests/karma-config-job.js",
-    "tdd-logger": "karma start tests/karma-config-logger.js",
-    "tdd-mobile": "karma start tests/karma-config-mobile.js",
-    "tdd-perspective": "karma start tests/karma-config-perspective.js"
+    "test-dashboard": "node_modules/.bin/karma start tests/karma-config-dashboard-ci.js",
+    "test-job": "node_modules/.bin/karma start tests/karma-config-job-ci.js",
+    "test-logger": "node_modules/.bin/karma start tests/karma-config-logger-ci.js",
+    "test-perspective": "node_modules/.bin/karma start tests/karma-config-perspective-ci.js",
+    "test-mobile": "node_modules/.bin/karma start tests/karma-config-mobile-ci.js",
+    "tdd-dashboard": "node_modules/.bin/karma start tests/karma-config-dashboard.js",
+    "tdd-job": "node_modules/.bin/karma start tests/karma-config-job.js",
+    "tdd-logger": "node_modules/.bin/karma start tests/karma-config-logger.js",
+    "tdd-mobile": "node_modules/.bin/karma start tests/karma-config-mobile.js",
+    "tdd-perspective": "node_modules/.bin/karma start tests/karma-config-perspective.js"
   },
   "repository": {
     "type": "git"
@@ -46,6 +46,7 @@
     "jsdox": "0.4.9",
     "karma": "0.12.16",
     "karma-chrome-launcher": "0.1.4",
+    "karma-cli": "^0.1.1",
     "karma-configurator": "^0.1.1",
     "karma-eslint": "2.0.1",
     "karma-firefox-launcher": "0.1.3",
