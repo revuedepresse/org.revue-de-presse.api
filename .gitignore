@@ -19,6 +19,9 @@ bower_components/
 .bowerrc
 /node_modules
 
+# Provisioning
+.galaxy_install_info
+
 # Public assets
 /web/assetic
 /web/bundles
