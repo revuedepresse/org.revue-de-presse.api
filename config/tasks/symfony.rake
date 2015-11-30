@@ -1,9 +1,7 @@
 namespace :symfony do
   desc "Clear accelerator cache"
   task :clear_accelerator_cache do
-    capifony_pretty_print "--> Clear accelerator cache"
-    run "#{try_sudo} sh -c 'cd #{latest_release} && #{php_bin} #{symfony_console} cache:accelerator:clear #{console_options}'"
-    capifony_puts_ok
+    invoke 'symfony:console', 'cache:accelerator:clear', '--env=prod'
   end
 
   desc "Clear cache"
