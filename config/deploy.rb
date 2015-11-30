@@ -71,6 +71,8 @@ set :bundle_gemfile,      -> { release_path.join('Gemfile') }
 
 set :cache_path,          fetch(:app_path) + '/cache'
 
+set :composer_install_flags, '--no-dev --prefer-dist --no-interaction'
+
 set :deploy_to,           '/var/deploy/devobs'
 
 set :format,              :pretty
