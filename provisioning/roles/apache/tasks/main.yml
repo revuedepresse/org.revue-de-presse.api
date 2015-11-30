@@ -14,9 +14,6 @@
     - expires
     - filter
 
-- name: Disable php5_module
-  apache2_module: state=absent name=php5
-
 - name: Remove php5_module
   sudo : yes
   apt:
