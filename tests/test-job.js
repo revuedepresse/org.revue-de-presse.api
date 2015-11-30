@@ -105,8 +105,6 @@
         }
 
         beforeEach(function () {
-            jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000;
-
             container = $('<div />', {'data-container': containerName});
             body.append(container);
 
