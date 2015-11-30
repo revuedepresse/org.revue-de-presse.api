@@ -26,15 +26,17 @@ SCRIPT
 export COMPOSER_FOLDER=/home/vagrant/.composer
 export DEPLOY_FOLDER=/var/deploy/devobs
 export DOCUMENT_ROOT=/var/www/devobs
+export LOG_PHP=/var/log/php
 
 ensure_dir_exists $COMPOSER_FOLDER
 ensure_dir_exists $DEPLOY_FOLDER
+ensure_dir_exists $LOG_PHP
 
 echo "Checking if symbolic link exists."
 if [ ! -L $DOCUMENT_ROOT ]
 then
     echo "Creating missing symbolic link."
-    ln -s $DEPLOY_FOLDER/current $DOCUMENT_ROOT
+    ln -s $DEPLOY_FOLDER/current/web $DOCUMENT_ROOT
 else
     echo "Confirmed symbolic link existed already."
 fi
