@@ -13,7 +13,7 @@ machine:
 
 dependencies:
   override:
-    - npm install --dev
+    - npm install
 
 test:
   override:
