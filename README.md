@@ -1,12 +1,12 @@
-Weaving The Web Experiments
-========================
+# DevObs
 
-This a personal dragon project because here be technical dragons  
-and also we might be past the "pet" project threshold somehow.
+[![Build Status](https://travis-ci.org/WeavingTheWeb/devobs.svg)](https://travis-ci.org/WeavingTheWeb/devobs)
 
-# [Installation](app/Resources/doc/10-installation.md)
+Easing observation, selection and reuse of packages in web development by harnessing social networks.
 
-# [Requirements](app/Resources/doc/20-requirements.md)
+## [Installation](app/Resources/doc/10-installation.md)
 
-# [Contribute](app/Resources/doc/70-contribute.md)
+## [Requirements](app/Resources/doc/20-requirements.md)
+
+## [Contribute](app/Resources/doc/70-contribute.md)
 
