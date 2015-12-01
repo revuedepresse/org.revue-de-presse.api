@@ -49,7 +49,7 @@ The first deployment might take a couple of minutes before npm and composer cach
 
 ## Known issues
 
-**Encountering "Could not authenticate against github.com" error message when installing PHP dependencies?**
+**Are you encountering "Could not authenticate against github.com" error message when installing PHP dependencies?**
 
 Follow instructions from `Composer` documentation available at [https://getcomposer.org/doc/articles/troubleshooting.md#api-rate-limit-and-oauth-tokens](https://getcomposer.org/doc/articles/troubleshooting.md#api-rate-limit-and-oauth-tokens)  
 
@@ -67,9 +67,9 @@ sed -e 's/"github.com": ""/"github.com": "'$TOKEN'"/' provisioning/files/auth.js
 COMPOSER_AUTH=provisioning/files/auth.json vagrant provision --provision-with=file
 ```
 
-**Encountering some issue at provisioning?**
+**Are you encountering some issue when provisioning the virtual machine with Ansible?**
 
-Run the provisioning command manually with ansible
+Run the provisioning command manually with Ansible
 
 ```
 ansible-playbook --user=vagrant --connection=ssh --timeout=30 --limit=all \
@@ -92,5 +92,26 @@ Same goes true for connections relying on vagrant port forwarding
 
 ```
 ssh -i ./.vagrant/machines/default/virtualbox/private_key vagrant@127.0.0.1 -p 2222 -o IdentitiesOnly=yes
+```
+
+**Would you like to run manually some provisioning steps again?**
+
+Run shell provisioning
+
+```
+vagrant ssh -c 'test -e ~vagrant/.ensure_required_files_exist && rm -f ~vagrant/.ensure_required_files_exist' 
+vagrant provision --provision-with=shell
+```
+
+Run file provisioning (to replace GitHub OAuth authentication token in composer directory of the virtual machine)
+
+```
+COMPOSER_AUTH=provisioning/files/auth.json vagrant provision --provision-with=file 
+```
+
+Run Ansible provisioning
+
+```
+vagrant provision --provision-with=ansible
 ```
 
