@@ -1,5 +1,13 @@
 #!/bin/bash
 
+REQUIRED_FILES_EXIST=~vagrant/.ensure_required_files_exist
+
+if [ -e $REQUIRED_FILES_EXIST ]
+then
+    echo 'This shell provisioning script (ensuring required files exist) was executed before.'
+    exit 0
+fi
+
 function ensure_dir_exists {
     export SCRIPT=/tmp/ensure-directory-exists
     export FOLDER_PATH=$1
@@ -23,11 +31,13 @@ SCRIPT
     sudo /bin/bash -c "source $SCRIPT"
 }
 
+export APACHE_HOME_DIR=/var/www
 export COMPOSER_FOLDER=/home/vagrant/.composer
 export DEPLOY_FOLDER=/var/deploy/devobs
 export DOCUMENT_ROOT=/var/www/devobs
 export LOG_PHP=/var/log/php
 
+ensure_dir_exists $APACHE_HOME_DIR
 ensure_dir_exists $COMPOSER_FOLDER
 ensure_dir_exists $DEPLOY_FOLDER
 ensure_dir_exists $LOG_PHP
@@ -50,5 +60,8 @@ touch $LOG_RUN_JOB_OUT
 chown vagrant $LOG_RUN_JOB_ERROR
 chown vagrant $LOG_RUN_JOB_OUT
 
+chown -R vagrant $APACHE_HOME_DIR
 chown -R vagrant $COMPOSER_FOLDER
 chown -R vagrant $DEPLOY_FOLDER
+
+touch $REQUIRED_FILES_EXIST
