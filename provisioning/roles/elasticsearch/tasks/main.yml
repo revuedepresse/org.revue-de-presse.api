@@ -52,6 +52,24 @@
     regexp='^#?(http\.port\:).*'
     replace='\1 {{ elasticsearch.port }}'
 
+- name: Disable Multicast
+  lineinfile:
+    dest: /etc/elasticsearch/elasticsearch.yml
+    regexp: '#discovery.zen.ping.multicast.enabled: false'
+    line: 'discovery.zen.ping.multicast.enabled: false'
+
+- name: Rename Cluster
+  lineinfile:
+    dest: /etc/elasticsearch/elasticsearch.yml
+    regexp: '#cluster.name: elasticsearch'
+    line: 'cluster.name: DevObs'
+
+- name: Bind service to localhost
+  lineinfile:
+    dest: /etc/elasticsearch/elasticsearch.yml
+    regexp: '#network.host: 192.168.0.1'
+    line: 'network.host: 127.0.0.1'
+
 - name: Flush handlers to apply config changes
   meta: flush_handlers
 

@@ -66,7 +66,7 @@ class AppKernel extends Kernel
             new Liip\UrlAutoConverterBundle\LiipUrlAutoConverterBundle(),
         );
 
-        if (in_array($this->getEnvironment(), array('dev', 'test', 'bdd', 'box', 'cache'))) {
+        if (in_array($this->getEnvironment(), array('dev', 'test'))) {
             $bundles[] = new Symfony\Bundle\WebProfilerBundle\WebProfilerBundle();
             $bundles[] = new Sensio\Bundle\DistributionBundle\SensioDistributionBundle();
             $bundles[] = new Sensio\Bundle\GeneratorBundle\SensioGeneratorBundle();
@@ -74,30 +74,6 @@ class AppKernel extends Kernel
         }
 
         return $bundles;
-    }
-
-    /**
-     * @return string
-     */
-    public function getCacheDir()
-    {
-        if (in_array($this->environment, array('box'))) {
-            return '/dev/shm/weaving-the-web/cache/' .  $this->environment;
-        }
-
-        return parent::getCacheDir();
-    }
-
-    /**
-     * @return string
-     */
-    public function getLogDir()
-    {
-        if (in_array($this->environment, array('box'))) {
-            return '/dev/shm/weaving-the-web/logs';
-        }
-
-        return parent::getLogDir();
     }
 
     /**

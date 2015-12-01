@@ -65,13 +65,17 @@ set :app_path,            'app'
 
 set :application,         'devobs'
 
-set :branch,              'deploy'
+set :branch,              'master'
 
 set :bundle_gemfile,      -> { release_path.join('Gemfile') }
 
 set :cache_path,          fetch(:app_path) + '/cache'
 
 set :composer_install_flags, '--no-dev --prefer-dist --no-interaction'
+
+set :file_permissions_paths, [fetch(:log_path), fetch(:cache_path)]
+
+set :file_permissions_users, ['www-data']
 
 set :deploy_to,           '/var/deploy/devobs'
 
@@ -125,6 +129,8 @@ before "deploy:check:linked_files", 'symfony:upload_configuration_parameters'
 
 before 'symfony:assetic:dump', 'symfony:apply_database_migrations'
 
+before  'symfony:clear_cache', 'deploy:set_permissions:acl'
+
 before 'symfony:cache:warmup', 'symfony:clear_cache'
 
 before "rvm1:install:rvm", 'rvm:update_rvm_key'
@@ -148,5 +154,3 @@ after 'deploy:cleanup_rollback', 'symfony:clear_accelerator_cache'
 after 'deploy:updated', 'symfony:assets:install'
 
 after 'deploy:updated', 'symfony:assetic:dump'
-
-
