@@ -71,3 +71,20 @@ ansible-playbook --user=vagrant --connection=ssh --timeout=30 --limit=all \
 --private-key=./.vagrant/machines/default/virtualbox/private_key \
 -vvvv
 ```
+
+Have you destroyed a virtual machine before trying again the command above?
+You would need to clean up your `~/.ssh/known_hosts` file still containing a reference 
+to the previously identified virtual machine.
+
+A manual SSH connection would provide you with the exact line which might be incriminated
+
+```
+ssh -i ./.vagrant/machines/default/virtualbox/private_key vagrant@10.9.8.2 -o IdentitiesOnly=yes
+```
+
+Same goes true for connections relying on vagrant port forwarding
+
+```
+ssh -i ./.vagrant/machines/default/virtualbox/private_key vagrant@127.0.0.1 -p 2222 -o IdentitiesOnly=yes
+```
+
