@@ -12,3 +12,6 @@ Install `jsdox` at the system level
 Generate documentation using jsdox
 
     npm run doc-js
+    
+There should be unit tests for each newly added component.
+ESLint should not complain about some rules being violated when running tests.
