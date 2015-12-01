@@ -129,6 +129,8 @@ before 'symfony:cache:warmup', 'symfony:clear_cache'
 
 before "rvm1:install:rvm", 'rvm:update_rvm_key'
 
+before 'rvm1:install:ruby', 'rvm1:install:rvm'
+
 before 'bundler:install', 'rvm1:install:ruby'
 
 before 'whenever:update_crontab', 'bundler:install'

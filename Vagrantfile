@@ -24,7 +24,7 @@ def which(cmd)
     return nil
 end
 
-COMPOSER_AUTH = ENV['COMPOSER_AUTH'] ? ENV['COMPOSER_AUTH'] : 'provisioning/files/auth.json.dist'
+COMPOSER_AUTH = ENV['COMPOSER_AUTH'] ? ENV['COMPOSER_AUTH'] : nil
 
 Vagrant.configure("2") do |config|
     config.ssh.forward_agent = true
@@ -48,7 +48,10 @@ Vagrant.configure("2") do |config|
         s.inline = "sudo sed -i '/tty/!s/mesg n/tty -s \\&\\& mesg n/' /root/.profile"
     end
     config.vm.provision "shell", path: "provisioning/scripts/ensure-required-files-exist.sh"
-    config.vm.provision "file", source: COMPOSER_AUTH, destination: "~/.composer/auth.json"
+
+    if COMPOSER_AUTH
+        config.vm.provision "file", source: COMPOSER_AUTH, destination: "~/.composer/auth.json"
+    end
 
     # If ansible is in your path it will provision from your HOST machine
     # If ansible is not found in the path it will be instaled in the VM and provisioned from there
