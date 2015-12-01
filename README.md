@@ -1,10 +1,7 @@
 # DevObs
 
-[![Build Status](https://travis-ci.org/WeavingTheWeb/devobs.svg)](https://travis-ci.org/WeavingTheWeb/devobs)
-
-[![Circle CI](https://circleci.com/gh/WeavingTheWeb/devobs.svg?style=svg)](https://circleci.com/gh/WeavingTheWeb/devobs)
-
-[![Sauce Test Status](https://saucelabs.com/buildstatus/gordonfreeman)](https://saucelabs.com/u/gordonfreeman)
+[![Build Status](http://j.mp/1QSoTtq)](http://j.mp/1N2kspP) [![Circle CI](http://j.mp/1In2JNb)](http://j.mp/1In2JNb)
+[![Sauce Test Status](http://j.mp/1XETwBM)](http://j.mp/1jxiDbZ)
 
 Easing observation, selection and reuse of packages in web development by harnessing social networks.
 
