@@ -1,12 +1,13 @@
 language: node_js
 node_js:
-  - "4.1"
-  - "4.0"
-  - "0.12"
-  - "0.11"
-  - "0.10"
-  - "iojs"
+  - '4.1'
+  - '0.12'
 before_script:
   - npm install -g bower
   - echo 'Europe/Paris' | sudo tee /etc/timezone
   - sudo dpkg-reconfigure --frontend noninteractive tzdata
+addons:
+  sauce_connect:
+    username: gordonfreeman
+    access_key:
+      secure: nBHfbJnfJRK6WcNeEP3OtwW13dGdXyIu3IQwan8U74Tkt13XqH8/2hz/qeKrewtJAkxkURKQMH5QHR97kV0mipvuTzZdPyyJRmsdquUtCQit9+m8yUt4DQJ2tCVKg3omkLbVMQsoYk+94KOUHC4OB8+jf+xSnpyJFAwgYJO7rSIvxxAO0INyRj8OTGafx3P1MFX+ogkrd7uSkpH/748EFSPWc6tmivIZ7oBiaiunHtRGKAmLuhDU7EP0YXC5zasYIjMIrmIVFO5RJEWQzF3L/XdEx7mgpLEoOpSdv2rZ0gfHbqDqBE/2UrKhbNwKDoU9P82uSoAV1QhbaefB5RiquUHMBNpdBz8FWXr/crGZorwA1wvJTrnEOcLV8RpT7zA544MfQ6woILGfiZiST5hItPULdXm9zk1X+YRQ+Y9X/HSakTiJdaIn3OLmT0UA/l1AuzCjgh3Ovx6sJsOUdOnzjlLzmU/2g712NnSdyH545AkujSTihKxfWH0981IhYwGrMm9+QOWClankE7OPnQDxlGesHqzX26ZhQ3Wz4rn2fbdxRATF4PFzSyMXmJ84xE7JsxqEEGafh/HD1AgAowLZ+n1WZoeoVGbFoYZK7dvYenxKpqRPt3hPaP26bFy2bD4KdY0v/CswodtnDGH0xVodS1HSNNLQ2JuL55nIvBRC9lk=

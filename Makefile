@@ -1,2 +1,4 @@
+.PHONY: test
+	
 test:
-	/bin/bash -c 'source tests/.run-test.sh';
+	/bin/bash -c 'source tests/.run-tests.sh';
