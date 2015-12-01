@@ -8,7 +8,5 @@ Easing observation, selection and reuse of packages in web development by harnes
 
 ## [Installation](app/Resources/doc/10-installation.md)
 
-## [Requirements](app/Resources/doc/20-requirements.md)
-
 ## [Contribute](app/Resources/doc/70-contribute.md)
 
