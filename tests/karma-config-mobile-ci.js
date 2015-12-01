@@ -1,17 +1,19 @@
 'use strict';
 
 var Configurator = require('./karma-config-mobile');
+var getCustomLaunchers = require('./get-custom-launchers');
 
 module.exports = function (karmaConfig) {
     var testedComponent = 'status';
     var testSuite = 'Status';
-    var reportDirectory = '../build/karma';
 
     var configurator = Configurator(karmaConfig);
     configurator
-        .shouldConfigureTestSuiteFor(testedComponent)
-        .setReportDirectory(reportDirectory)
         .setTestSuiteName(testSuite)
-        .setProfile(configurator.PROFILE_CI)
+        .shouldConfigureTestSuiteFor(testedComponent)
+        .setCustomLaunchers(getCustomLaunchers())
+        .setProfile(configurator.PROFILE_SAUCE_LABS)
+        .shouldStartSauceConnect(false)
+        .setUpSauceLabsForTravis()
         .configure();
 };
