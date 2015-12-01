@@ -4,6 +4,8 @@
 
 [![Circle CI](https://circleci.com/gh/WeavingTheWeb/devobs.svg?style=svg)](https://circleci.com/gh/WeavingTheWeb/devobs)
 
+[![Sauce Test Status](https://saucelabs.com/buildstatus/gordonfreeman)](https://saucelabs.com/u/gordonfreeman)
+
 Easing observation, selection and reuse of packages in web development by harnessing social networks.
 
 ## [Installation](app/Resources/doc/10-installation.md)
