@@ -17,7 +17,7 @@ ansible-galaxy install -r provisioning/requirements.yml
 From the root directory of the project, run the following command to set up a development environment
 
 ```
-[COMPOSER_AUTH=provisioning/files/auth.json] vagrant up --provider=virtualbox
+[COMPOSER_AUTH=provisioning/files/auth.json] vagrant up [--provider=virtualbox]
 ```
 
 The execution of the command might take a little while as a pre-packaged virtual machine needs to be downloaded  
@@ -28,6 +28,8 @@ containing the path to an authorization configuration file for `Composer`. When 
 the corresponding file will be uploaded the virtual machine and it will be copied to composer directory.
 When deploying the application with `Capistrano`, `composer` will take benefit of OAuth authentication 
 for accessing GitHub API at PHP dependencies installation. 
+
+The `provider` option might need to be passed when the host machine supports other providers than virtualbox.
 
 ## Application deployment
 
