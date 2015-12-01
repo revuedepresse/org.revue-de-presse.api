@@ -6,3 +6,6 @@
 
 - name: git
   src: https://github.com/geerlingguy/ansible-role-git
+
+- name: redis
+  src: https://github.com/DavidWittman/ansible-redis

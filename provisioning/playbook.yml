@@ -11,16 +11,17 @@
     - server
     - vagrant_local
     - apache
+    - varnish
     - mysql
     - rabbitmq
     - elasticsearch
     - php
     - xdebug
     - composer
-    - app
+    - redis
     - role: nvm
       nvm:
         user: vagrant
         version: v0.29.0
         node_version: v4.2.2
-    - varnish
+    - app
