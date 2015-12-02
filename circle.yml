@@ -68,6 +68,7 @@ dependencies:
   override:
     - npm install
     - npm install -g bower
+    - /bin/bash -c 'source tests/.install-bower-components.sh'
     - composer install --prefer-dist --no-interaction
   post:
     - wget https://saucelabs.com/downloads/sc-latest-linux.tar.gz
