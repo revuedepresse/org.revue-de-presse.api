@@ -4,8 +4,8 @@ machine:
     SYMFONY__AES__IV: '_'
     SYMFONY__ANALYTICS__HOST: '_'
     SYMFONY__ANALYTICS__SITE_ID: '_'
-    SYMFONY__ASSETIC__NODE: ''
-    SYMFONY__ASSETIC__MODULES: ''
+    SYMFONY__ASSETIC__NODE: '/home/ubuntu/nvm/versions/node/v4.2.2/bin/node'
+    SYMFONY__ASSETIC__MODULES: '/home/ubuntu/nvm/versions/node/v4.2.2/lib/node_modules'
     SYMFONY__APC__HOST: "http://127.0.0.1"
     SYMFONY__API__FACEBOOK__APP_ID: "_"
     SYMFONY__API__FACEBOOK__APP_SECRET: "_"
