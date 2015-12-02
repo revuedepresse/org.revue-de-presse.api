@@ -13,6 +13,11 @@ dependencies:
     - wget https://saucelabs.com/downloads/sc-latest-linux.tar.gz
     - tar -xzf sc-latest-linux.tar.gz
 
+dependencies:
+  cache_directories:
+    - src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/components
+    - tests/bower_components
+
 test:
   override:
     - cd sc-*-linux && ./bin/sc -u $SAUCE_USERNAME -k $SAUCE_ACCESS_KEY:
