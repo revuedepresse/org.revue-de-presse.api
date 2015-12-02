@@ -65,7 +65,7 @@ set :app_path,            'app'
 
 set :application,         'devobs'
 
-set :branch,              'master'
+set :branch,              'test-user-fixtures'
 
 set :bundle_gemfile,      -> { release_path.join('Gemfile') }
 
@@ -129,7 +129,7 @@ before "deploy:check:linked_files", 'symfony:upload_configuration_parameters'
 
 before 'symfony:assetic:dump', 'symfony:apply_database_migrations'
 
-before  'symfony:clear_cache', 'deploy:set_permissions:acl'
+before 'symfony:clear_cache', 'deploy:set_permissions:acl'
 
 before 'symfony:cache:warmup', 'symfony:clear_cache'
 
