@@ -27,9 +27,13 @@ end
 COMPOSER_AUTH = ENV['COMPOSER_AUTH'] ? ENV['COMPOSER_AUTH'] : nil
 
 Vagrant.configure("2") do |config|
+    config.push.define "atlas" do |push|
+      push.app = "weaving-the-web/devobs"
+    end
+
     config.ssh.forward_agent = true
 
-    config.vm.box = "ubuntu/trusty64"
+    config.vm.box = "weaving-the-web/devobs"
     config.vm.network "private_network", ip: IP_ADDRESS
     config.vm.provider :virtualbox do |v|
         v.name = "devobs"
