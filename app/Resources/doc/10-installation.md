@@ -49,6 +49,21 @@ source ./config/export-development-environment-variables && cap development depl
 
 The first deployment might take a couple of minutes before npm and composer caches have been populated.  
 
+## First login
+
+You could either sign up and activate your account (newly created accounts are disabled by default).
+
+After signing up, you should see the following message inviting you to wait for account activation:
+
+[![After signing up, activate your account](app/Resources/doc/img/post-sign-up.png)](http://10.9.8.2)
+
+In order to activate an account you've created for trial, run the following command:
+
+```
+export $USERNAME='Your canonical username here' && \
+source bin/activate-user '$USERNAME
+```
+
 ## Known issues
 
 **Are you encountering "Could not authenticate against github.com" error message when installing PHP dependencies?**
