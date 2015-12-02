@@ -51,7 +51,21 @@ The first deployment might take a couple of minutes before npm and composer cach
 
 ## First login
 
-You could either sign up and activate your account (newly created accounts are disabled by default).
+You can either
+
+ 1. login as `tester` by using the following credentials  
+ (user identified as `tester` is loaded into the development database at deployment to the vagrant box)
+
+        # username
+        tester
+
+        # password
+        test
+        
+ or
+
+ 2. sign up to create a new account, activate this account (newly created accounts are disabled by default)
+ and login as the newly created user
 
 After signing up, you should see the following message inviting you to wait for account activation:
 
