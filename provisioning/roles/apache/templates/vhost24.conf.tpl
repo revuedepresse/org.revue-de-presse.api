@@ -1,4 +1,4 @@
-ServerName devobs-development
+ServerName devobs-vagrant
 
 <VirtualHost *:{{ apache.port }}>
     ServerAdmin webmaster@localhost
@@ -13,10 +13,14 @@ ServerName devobs-development
     ErrorLog ${APACHE_LOG_DIR}/error.devobs.log
     CustomLog ${APACHE_LOG_DIR}/access.devobs.log combined
 
-    <Directory {{ apache.docroot }}>
-        Options +FollowSymLinks -Indexes -MultiViews
+    <Directory {{ apache.releases }}>
+        <IfModule mod_negotiation.c>
+            Options -MultiViews
+        </IfModule>
+       
         AddCharset utf-8 .*
         AllowOverride None
+        Options +FollowSymLinks -Indexes
         Require all granted
 
         <IfModule mod_rewrite.c>

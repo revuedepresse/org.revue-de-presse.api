@@ -10,6 +10,7 @@ vagrant_local:
 apache:
     install: '1'
     docroot: /var/www/devobs
+    releases: /var/deploy/devobs/releases/*/web
     servername: devobs
     port: 8080
 mysql:
