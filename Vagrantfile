@@ -28,7 +28,8 @@ COMPOSER_AUTH = ENV['COMPOSER_AUTH'] ? ENV['COMPOSER_AUTH'] : nil
 
 Vagrant.configure("2") do |config|
     config.push.define "atlas" do |push|
-      push.app = "weaving-the-web/devobs"
+        push.app = "weaving-the-web/devobs"
+        push.vcs = true
     end
 
     config.ssh.forward_agent = true
