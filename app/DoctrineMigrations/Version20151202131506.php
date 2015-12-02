@@ -1,16 +1,18 @@
 <?php
 
-
 namespace Application\Migrations;
 
-use Doctrine\DBAL\Migrations\AbstractMigration,
-    Doctrine\DBAL\Schema\Schema;
+use Doctrine\DBAL\Migrations\AbstractMigration;
+use Doctrine\DBAL\Schema\Schema;
 
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-class Fixtures20130817210811 extends AbstractMigration
+class Version20151202131506 extends AbstractMigration
 {
+    /**
+     * @param Schema $schema
+     */
     public function up(Schema $schema)
     {
         // this up() migration is auto-generated, please modify it to your needs
@@ -20,8 +22,10 @@ class Fixtures20130817210811 extends AbstractMigration
         $this->addSql($fixtures);
     }
 
+    /**
+     * @param Schema $schema
+     */
     public function down(Schema $schema)
     {
-        $this->abortIf($this->connection->getDatabasePlatform()->getName() != "mysql", "Migration can only be executed safely on 'mysql'.");
     }
 }
