@@ -68,11 +68,10 @@ dependencies:
   override:
     - npm install
     - npm install -g bower
+    - composer install --prefer-dist --no-interaction
   post:
     - wget https://saucelabs.com/downloads/sc-latest-linux.tar.gz
     - tar -xzf sc-latest-linux.tar.gz
-
-dependencies:
   cache_directories:
     - src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/components
     - tests/bower_components
