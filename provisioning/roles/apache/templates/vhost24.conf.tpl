@@ -17,7 +17,7 @@ ServerName devobs-vagrant
         <IfModule mod_negotiation.c>
             Options -MultiViews
         </IfModule>
-       
+
         AddCharset utf-8 .*
         AllowOverride None
         Options +FollowSymLinks -Indexes
