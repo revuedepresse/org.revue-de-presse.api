@@ -17,6 +17,9 @@ dependencies:
   cache_directories:
     - src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/components
     - tests/bower_components
+  pre:
+    - /bin/bash -c 'test -d ~/.composer || mkdir ~/.composer'
+    - source ./tests/.configure-composer-auth.sh
 
 test:
   override:
