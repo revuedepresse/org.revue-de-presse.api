@@ -6,6 +6,7 @@ before_script:
   - npm install -g bower
   - echo 'Europe/Paris' | sudo tee /etc/timezone
   - sudo dpkg-reconfigure --frontend noninteractive tzdata
+  - /bin/bash -c 'source tests/.install-bower-components.sh'
 addons:
   sauce_connect:
     username: gordonfreeman
