@@ -55,7 +55,7 @@ You could either sign up and activate your account (newly created accounts are d
 
 After signing up, you should see the following message inviting you to wait for account activation:
 
-[![After signing up, activate your account](app/Resources/doc/img/post-sign-up.png)](http://10.9.8.2)
+[![After signing up, activate your account](img/post-sign-up.png)](http://10.9.8.2)
 
 In order to activate an account you've created for trial, run the following command:
 
