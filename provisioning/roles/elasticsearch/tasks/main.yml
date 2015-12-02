@@ -17,25 +17,6 @@
 - name: Install Dependencies
   apt: pkg=oracle-java8-installer state=latest
 
-- name: Disable Multicast
-  lineinfile:
-    dest: /etc/elasticsearch/elasticsearch.yml
-    regexp: '#discovery.zen.ping.multicast.enabled: false'
-    line: 'discovery.zen.ping.multicast.enabled: false'
-
-
-- name: Rename Cluster
-  lineinfile:
-    dest: /etc/elasticsearch/elasticsearch.yml
-    regexp: '#cluster.name: elasticsearch'
-    line: 'cluster.name: DevObs'
-
-- name: Bind service to localhost
-  lineinfile:
-    dest: /etc/elasticsearch/elasticsearch.yml
-    regexp: '#network.host: 192.168.0.1'
-    line: 'network.host: 127.0.0.1'
-
 - name: Download
   get_url: >
     url={{ elasticsearch_url }}
