@@ -146,3 +146,26 @@ Run Ansible provisioning
 vagrant provision --provision-with=ansible
 ```
 
+**How to prevent the provisioning requirements from being installed globally in your development workstation?**
+
+The latest version of `Ansible` can be installed via 
+ * [`pip`](https://pip.pypa.io/en/latest/installing/#install-pip) and
+ * [`virtualenv`](http://virtualenv.readthedocs.org/en/latest/installation.html).
+
+```
+# Create a virtual environment
+virtualenv vendor/devobs
+
+# Activate virtual environment
+source vendor/devobs/bin/activate
+
+# Download dependencies
+pip install -r provisioning/ansible.txt
+
+# Check the installed version of Ansible
+vendor/devobs/bin/ansible --version
+
+# Deactivate the virtual environment
+deactivate
+```
+
