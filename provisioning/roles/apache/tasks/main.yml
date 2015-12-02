@@ -41,6 +41,28 @@
   sudo: yes
   template: src=php-fpm.conf.tpl dest=/etc/apache2/conf-available/php-fpm.conf
 
+- name: Fetch Sven Hoexter PPA key
+  sudo: yes
+  apt_key:
+    keyserver: keyserver.ubuntu.com
+    id: 0E40A6FE2B8B35A62079DBA85359CA145B1AFC7F
+    state: present
+
+- name: Install Sven Hoexter PPA
+  sudo: yes
+  apt_repository:
+    repo: 'ppa:sven-timegate/ppa'
+    state: present
+
+- name : Install realdoc module
+  sudo: yes
+  apt:
+    update_cache: yes
+    cache_valid_time: 3600
+    name: libapache2-mod-realdoc
+    state: present
+  notify: restart apache
+
 - name: Enable PHP fpm configuration
   sudo: yes
   file:
