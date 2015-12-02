@@ -77,3 +77,6 @@
   sudo: yes
   template: src=ports.conf.tpl dest=/etc/apache2/ports.conf
   notify: restart apache
+
+- name: Flush handlers to apply config changes
+  meta: flush_handlers

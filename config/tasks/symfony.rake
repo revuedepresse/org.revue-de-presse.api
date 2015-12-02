@@ -1,7 +1,7 @@
 namespace :symfony do
   desc "Clear accelerator cache"
   task :clear_accelerator_cache do
-    invoke 'symfony:console', 'cache:accelerator:clear', '--opcode', '--env=prod'
+    invoke 'symfony:console', 'cache:accelerator:clear', '--env=prod'
   end
 
   desc "Clear cache"
