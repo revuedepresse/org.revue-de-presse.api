@@ -16,6 +16,9 @@
                 "scripts/vmware.sh",
                 "scripts/vagrant.sh",
                 "scripts/dep.sh",
+                "scripts/clone-project.sh",
+                "scripts/fix-no-tty.sh",
+                "scripts/ensure-required-files-exist.sh",
                 "scripts/cleanup.sh",
                 "scripts/zerodisk.sh"
             ],
@@ -27,6 +30,14 @@
                     "execute_command": "echo 'vagrant'|sudo -S bash '{{.Path}}'"
                 }
             }
+        }, {
+            "extra_arguments": ["--limit=all"],
+            "group_vars": "/home/vagrant/devobs/provisioning/group_vars",
+            "inventory_file": "/home/vagrant/devobs/provisioning/inventories/dev",
+            "playbook_file": "/home/vagrant/devobs/provisioning/playbook.yml",
+            "playbook_dir":  "/home/vagrant/devobs/provisioning",
+            "role_paths": ["/home/vagrant/devobs/provisioning/roles"],
+            "type": "ansible-local"
         }
     ],
     "builders": [
