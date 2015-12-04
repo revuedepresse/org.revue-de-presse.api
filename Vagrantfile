@@ -27,9 +27,14 @@ end
 COMPOSER_AUTH = ENV['COMPOSER_AUTH'] ? ENV['COMPOSER_AUTH'] : nil
 
 Vagrant.configure("2") do |config|
+    config.push.define "atlas" do |push|
+        push.app = "weaving-the-web/devobs-development"
+        push.vcs = true
+    end
+
     config.ssh.forward_agent = true
 
-    config.vm.box = "ubuntu/trusty64"
+    config.vm.box = "weaving-the-web/devobs"
     config.vm.network "private_network", ip: IP_ADDRESS
     config.vm.provider :virtualbox do |v|
         v.name = "devobs"
@@ -45,16 +50,16 @@ Vagrant.configure("2") do |config|
     # See also http://foo-o-rama.com/vagrant--stdin-is-not-a-tty--fix.html
     config.vm.provision "fix-no-tty", type: "shell" do |s|
         s.privileged = false
-        s.inline = "sudo sed -i '/tty/!s/mesg n/tty -s \\&\\& mesg n/' /root/.profile"
+        s.path = "provisioning/packaging/scripts/fix-no-tty.sh"
     end
-    config.vm.provision "shell", path: "provisioning/scripts/ensure-required-files-exist.sh"
+    config.vm.provision "shell", path: "provisioning/packaging/scripts/ensure-required-files-exist.sh"
 
     if COMPOSER_AUTH
         config.vm.provision "file", source: COMPOSER_AUTH, destination: "~/.composer/auth.json"
     end
 
     # If ansible is in your path it will provision from your HOST machine
-    # If ansible is not found in the path it will be instaled in the VM and provisioned from there
+    # If ansible is not found in the path it will be installed in the VM and provisioned from there
     if which('ansible-playbook')
         config.vm.provision "ansible" do |ansible|
             ansible.playbook = "provisioning/playbook.yml"
