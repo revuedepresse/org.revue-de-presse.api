@@ -32,11 +32,11 @@
             }
         }, {
             "extra_arguments": ["--limit=all"],
-            "group_vars": "provisioning/group_vars",
-            "inventory_file": "provisioning/inventories/dev",
-            "playbook_file": "provisioning/playbook.yml",
-            "playbook_dir":  "provisioning",
-            "role_paths": ["provisioning/roles"],
+            "group_vars": "app/provisioning/group_vars",
+            "inventory_file": "app/provisioning/inventories/dev",
+            "playbook_file": "app/provisioning/playbook.yml",
+            "playbook_dir":  "app/provisioning",
+            "role_paths": ["app/provisioning/roles"],
             "type": "ansible-local"
         }
     ],
