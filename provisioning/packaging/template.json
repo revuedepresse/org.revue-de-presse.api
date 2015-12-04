@@ -11,16 +11,16 @@
         {
             "type": "shell",
             "scripts": [
-                "scripts/base.sh",
-                "scripts/virtualbox.sh",
-                "scripts/vmware.sh",
-                "scripts/vagrant.sh",
-                "scripts/dep.sh",
-                "scripts/clone-project.sh",
-                "scripts/fix-no-tty.sh",
-                "scripts/ensure-required-files-exist.sh",
-                "scripts/cleanup.sh",
-                "scripts/zerodisk.sh"
+                "provisioning/scripts/base.sh",
+                "provisioning/scripts/virtualbox.sh",
+                "provisioning/scripts/vmware.sh",
+                "provisioning/scripts/vagrant.sh",
+                "provisioning/scripts/dep.sh",
+                "provisioning/scripts/clone-project.sh",
+                "provisioning/scripts/fix-no-tty.sh",
+                "provisioning/scripts/ensure-required-files-exist.sh",
+                "provisioning/scripts/cleanup.sh",
+                "provisioning/scripts/zerodisk.sh"
             ],
             "override": {
                 "virtualbox-iso": {
@@ -32,11 +32,11 @@
             }
         }, {
             "extra_arguments": ["--limit=all"],
-            "group_vars": "app/provisioning/group_vars",
-            "inventory_file": "app/provisioning/inventories/dev",
-            "playbook_file": "app/provisioning/playbook.yml",
-            "playbook_dir":  "app/provisioning",
-            "role_paths": ["app/provisioning/roles"],
+            "group_vars": "provisioning/group_vars",
+            "inventory_file": "provisioning/inventories/dev",
+            "playbook_file": "provisioning/playbook.yml",
+            "playbook_dir":  "provisioning",
+            "role_paths": ["provisioning/roles"],
             "type": "ansible-local"
         }
     ],
