@@ -25,6 +25,7 @@ def which(cmd)
 end
 
 COMPOSER_AUTH = ENV['COMPOSER_AUTH'] ? ENV['COMPOSER_AUTH'] : nil
+MANUAL_PROVISION = ENV['MANUAL_PROVISION'] ? true : false
 
 Vagrant.configure("2") do |config|
     config.push.define "atlas" do |push|
@@ -34,7 +35,7 @@ Vagrant.configure("2") do |config|
 
     config.ssh.forward_agent = true
 
-    config.vm.box = "weaving-the-web/devobs"
+    config.vm.box = "weaving-the-web/devobs-development"
     config.vm.network "private_network", ip: IP_ADDRESS
     config.vm.provider :virtualbox do |v|
         v.name = "devobs"
@@ -47,26 +48,28 @@ Vagrant.configure("2") do |config|
         ]
     end
 
-    # See also http://foo-o-rama.com/vagrant--stdin-is-not-a-tty--fix.html
-    config.vm.provision "fix-no-tty", type: "shell" do |s|
-        s.privileged = false
-        s.path = "provisioning/packaging/scripts/fix-no-tty.sh"
+    if MANUAL_PROVISION
+        # See also http://foo-o-rama.com/vagrant--stdin-is-not-a-tty--fix.html
+        config.vm.provision "fix-no-tty", type: "shell" do |s|
+            s.privileged = false
+            s.path = "provisioning/packaging/scripts/fix-no-tty.sh"
+        end
+        config.vm.provision "shell", path: "provisioning/packaging/scripts/ensure-required-files-exist.sh"
+
+        # If ansible is in your path it will provision from your HOST machine
+        # If ansible is not found in the path it will be installed in the VM and provisioned from there
+        if which('ansible-playbook')
+            config.vm.provision "ansible" do |ansible|
+                ansible.playbook = "provisioning/playbook.yml"
+                ansible.inventory_path = "provisioning/inventories/dev"
+                ansible.limit = 'all'
+            end
+        else
+            config.vm.provision :shell, path: "provisioning/windows.sh", args: ["devobs"]
+        end
     end
-    config.vm.provision "shell", path: "provisioning/packaging/scripts/ensure-required-files-exist.sh"
 
     if COMPOSER_AUTH
         config.vm.provision "file", source: COMPOSER_AUTH, destination: "~/.composer/auth.json"
-    end
-
-    # If ansible is in your path it will provision from your HOST machine
-    # If ansible is not found in the path it will be installed in the VM and provisioned from there
-    if which('ansible-playbook')
-        config.vm.provision "ansible" do |ansible|
-            ansible.playbook = "provisioning/playbook.yml"
-            ansible.inventory_path = "provisioning/inventories/dev"
-            ansible.limit = 'all'
-        end
-    else
-        config.vm.provision :shell, path: "provisioning/windows.sh", args: ["devobs"]
     end
 end
