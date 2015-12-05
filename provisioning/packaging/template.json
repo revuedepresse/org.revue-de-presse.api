@@ -11,16 +11,16 @@
         {
             "type": "shell",
             "scripts": [
-                "provisioning/scripts/base.sh",
-                "provisioning/scripts/virtualbox.sh",
-                "provisioning/scripts/vmware.sh",
-                "provisioning/scripts/vagrant.sh",
-                "provisioning/scripts/dep.sh",
-                "provisioning/scripts/clone-project.sh",
-                "provisioning/scripts/fix-no-tty.sh",
-                "provisioning/scripts/ensure-required-files-exist.sh",
-                "provisioning/scripts/cleanup.sh",
-                "provisioning/scripts/zerodisk.sh"
+                "provisioning/packaging/scripts/base.sh",
+                "provisioning/packaging/scripts/virtualbox.sh",
+                "provisioning/packaging/scripts/vmware.sh",
+                "provisioning/packaging/scripts/vagrant.sh",
+                "provisioning/packaging/scripts/dep.sh",
+                "provisioning/packaging/scripts/clone-project.sh",
+                "provisioning/packaging/scripts/fix-no-tty.sh",
+                "provisioning/packaging/scripts/ensure-required-files-exist.sh",
+                "provisioning/packaging/scripts/cleanup.sh",
+                "provisioning/packaging/scripts/zerodisk.sh"
             ],
             "override": {
                 "virtualbox-iso": {
