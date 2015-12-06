@@ -50,6 +50,8 @@ INSERT INTO `weaving_user` (`usr_id`,
  NULL,
  NULL);
 
+-- Grant user role to `tester` user
+INSERT weaving_user_role (user_id, role_id) VALUES (1, 1);
 
 --
 -- Constraints for table `weaving_user_role`
