@@ -4,6 +4,7 @@
       "vcs": true
     },
     "variables": {
+        "atlas_application_version": "{{env `ATLAS_BUILD_CONFIGURATION_VERSION`}}",
         "atlas_username": "{{env `ATLAS_USERNAME`}}",
         "atlas_name": "{{env `ATLAS_NAME`}}"
     },
@@ -16,7 +17,6 @@
                 "provisioning/packaging/scripts/vmware.sh",
                 "provisioning/packaging/scripts/vagrant.sh",
                 "provisioning/packaging/scripts/dep.sh",
-                "provisioning/packaging/scripts/clone-project.sh",
                 "provisioning/packaging/scripts/fix-no-tty.sh",
                 "provisioning/packaging/scripts/ensure-required-files-exist.sh",
                 "provisioning/packaging/scripts/cleanup.sh",
@@ -97,29 +97,31 @@
         }
     ],
     "post-processors": [
-        [{
-            "type": "vagrant",
-            "keep_input_artifact": false
-        },
-        {
-            "type": "atlas",
-            "only": ["vmware-iso"],
-            "artifact": "{{user `atlas_username`}}/{{user `atlas_name`}}",
-            "artifact_type": "vagrant.box",
-            "metadata": {
-                "provider": "vmware_desktop",
-                "version": "0.0.1"
+        [
+            {
+                "type": "vagrant",
+                "keep_input_artifact": false
+            },
+            {
+                "type": "atlas",
+                "only": ["vmware-iso"],
+                "artifact": "{{user `atlas_username`}}/{{user `atlas_name`}}",
+                "artifact_type": "vagrant.box",
+                "metadata": {
+                    "provider": "vmware_desktop",
+                    "version": "0.0.{{user `atlas_application_version`}}"
+                }
+            },
+            {
+                "type": "atlas",
+                "only": ["virtualbox-iso"],
+                "artifact": "{{user `atlas_username`}}/{{user `atlas_name`}}",
+                "artifact_type": "vagrant.box",
+                "metadata": {
+                    "provider": "virtualbox",
+                    "version": "0.0.{{user `atlas_application_version`}}"
+                }
             }
-        },
-        {
-            "type": "atlas",
-            "only": ["virtualbox-iso"],
-            "artifact": "{{user `atlas_username`}}/{{user `atlas_name`}}",
-            "artifact_type": "vagrant.box",
-            "metadata": {
-                "provider": "virtualbox",
-                "version": "0.0.1"
-            }
-        }]
+        ]
     ]
 }
