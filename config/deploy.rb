@@ -65,7 +65,7 @@ set :app_path,            'app'
 
 set :application,         'devobs'
 
-set :branch,              'test-user-fixtures'
+set :branch,              'staging'
 
 set :bundle_gemfile,      -> { release_path.join('Gemfile') }
 

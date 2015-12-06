@@ -74,8 +74,8 @@ After signing up, you should see the following message inviting you to wait for 
 In order to activate an account you've created for trial, run the following command:
 
 ```
-export $USERNAME='Your canonical username here' && \
-source bin/activate-user '$USERNAME
+export USER='Your canonical username here' && \
+source bin/activate-user $USER
 ```
 
 ## Known issues
