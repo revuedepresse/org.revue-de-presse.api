@@ -36,7 +36,7 @@
 
 - name: Configure devobs pool
   template: >
-    src="pool.conf.tpl"
+    src="pool{{ lookup('env', 'PHP_FPM_POOL') }}.conf.tpl"
     dest="/etc/php5/fpm/pool.d/{{ item }}.conf"
     owner="root"
     group="root"

@@ -9,6 +9,8 @@ Easing observation, selection and reuse of packages in web development by harnes
 
 ## [User management](app/Resources/doc/15-user-management.md)
 
+## [Connect to Twitter](app/Resources/doc/18-connect-to-twitter.md)
+
 ## [Packaging](app/Resources/doc/20-packaging.md)
 
 ## [Contribute](app/Resources/doc/70-contribute.md)
