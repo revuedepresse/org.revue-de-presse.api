@@ -2,3 +2,4 @@
 
 !activate-user
 !export-config-parameters.sh
+!promote-user-as-super-admin
