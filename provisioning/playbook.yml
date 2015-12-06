@@ -15,7 +15,8 @@
     - mysql
     - rabbitmq
     - elasticsearch
-    - php
+    - role: php
+      tags: php
     - xdebug
     - composer
     - redis

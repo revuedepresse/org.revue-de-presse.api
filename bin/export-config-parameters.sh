@@ -2,6 +2,9 @@
 
 shopt -s extglob
 
+export_env_vars=/var/deploy/devobs/current/config/export-development-environment-variables.sh
+test -e $export_env_vars || cp $export_env_vars{.dist,}
+
 source /var/deploy/devobs/current/config/export-development-environment-variables.sh
 
 for i in `env | grep SYMFONY` ; \
