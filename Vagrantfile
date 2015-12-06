@@ -26,11 +26,14 @@ end
 
 COMPOSER_AUTH = ENV['COMPOSER_AUTH'] ? ENV['COMPOSER_AUTH'] : nil
 MANUAL_PROVISION = ENV['MANUAL_PROVISION'] ? true : false
+MANUAL_PUSH = ENV['MANUAL_PUSH'] ? true : false
 
 Vagrant.configure("2") do |config|
-    config.push.define "atlas" do |push|
-        push.app = "weaving-the-web/devobs-development"
-        push.vcs = true
+    if MANUAL_PUSH
+        config.push.define "atlas" do |push|
+            push.app = "weaving-the-web/devobs-development"
+            push.vcs = true
+        end
     end
 
     config.ssh.forward_agent = true

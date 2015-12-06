@@ -6,13 +6,15 @@ You can either
 
  1. login as `tester` by using the following credentials  
  (user identified as `tester` is loaded into the development database at deployment to the vagrant box)
+ 
+ ```
+ # username
+ tester
 
-        # username
-        tester
-
-        # password
-        test
-        
+ # password
+ test
+ ```     
+ 
  or
 
  2. sign up to create a new account, activate this account (newly created accounts are disabled by default)
