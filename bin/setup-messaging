@@ -1,0 +1,5 @@
+#!/bin/bash
+
+setup_messaging='source /var/deploy/devobs/current/bin/export-config-parameters.sh && \
+/var/deploy/devobs/current/app/console rabbitmq:setup-fabric'
+VAGRANT_LOG=ERROR vagrant ssh -c "/bin/bash -c '"$setup_messaging"'"
