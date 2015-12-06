@@ -49,35 +49,6 @@ source ./config/export-development-environment-variables && cap development depl
 
 The first deployment might take a couple of minutes before npm and composer caches have been populated.  
 
-## First login
-
-You can either
-
- 1. login as `tester` by using the following credentials  
- (user identified as `tester` is loaded into the development database at deployment to the vagrant box)
-
-        # username
-        tester
-
-        # password
-        test
-        
- or
-
- 2. sign up to create a new account, activate this account (newly created accounts are disabled by default)
- and login as the newly created user
-
-After signing up, you should see the following message inviting you to wait for account activation:
-
-[![After signing up, activate your account](img/post-sign-up.png)](http://10.9.8.2)
-
-In order to activate an account you've created for trial, run the following command:
-
-```
-export USER='Your canonical username here' && \
-source bin/activate-user $USER
-```
-
 ## Known issues
 
 **Are you encountering "Could not authenticate against github.com" error message when installing PHP dependencies?**
