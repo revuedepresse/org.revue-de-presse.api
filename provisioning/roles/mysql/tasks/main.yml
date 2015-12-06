@@ -19,7 +19,7 @@
     - ::1
     - localhost
 
-- name: mysql | Create databases
+- name: mysql | Create database
   mysql_db: name={{ mysql.database }} state=present login_user=root login_password={{ mysql.root_password }}
 
 - name: mysql | Import dump
@@ -34,6 +34,9 @@
 
 - name: mysql | Create users
   mysql_user: name={{ mysql.user }} password={{ mysql.password }} priv={{ mysql.database }}.*:ALL state=present login_user=root login_password={{ mysql.root_password }}
+
+- name: mysql | Create test database
+  mysql_db: name={{ mysql.test.database }} state=present login_user=root login_password={{ mysql.root_password }}
 
 - name: mysql | Create test users
   mysql_user:
