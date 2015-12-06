@@ -25,9 +25,18 @@
   with_items: php.packages
   when: php.packages is defined
 
+- name: Configures xdebug
+  sudo: yes
+  template: >
+    src="xdebug.ini.tpl"
+    dest="/etc/php5/mods-available/xdebug.ini"
+    owner="root"
+    group="root"
+    mode=0644
+
 - name: Configure devobs pool
   template: >
-    src="pool.conf.tpl"
+    src="pool{{ lookup('env', 'PHP_FPM_POOL') }}.conf.tpl"
     dest="/etc/php5/fpm/pool.d/{{ item }}.conf"
     owner="root"
     group="root"
