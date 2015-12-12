@@ -5,13 +5,15 @@
 
 Easing observation, selection and reuse of packages in web development by harnessing social networks.
 
-## [Installation](app/Resources/doc/10-installation.md)
+## [Installation](app/Resources/doc/100-installation.md)
 
-## [User management](app/Resources/doc/15-user-management.md)
+## [User management](app/Resources/doc/150-user-management.md)
 
-## [Connect to Twitter](app/Resources/doc/18-connect-to-twitter.md)
+## [Connect to Twitter](app/Resources/doc/180-connect-to-twitter.md)
 
-## [Packaging](app/Resources/doc/20-packaging.md)
+## [API consumption](app/Resources/doc/190-api-consumption.md)
 
-## [Contribute](app/Resources/doc/70-contribute.md)
+## [Packaging](app/Resources/doc/200-packaging.md)
+
+## [Contribute](app/Resources/doc/700-contribute.md)
 

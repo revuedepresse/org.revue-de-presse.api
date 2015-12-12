@@ -44,7 +44,8 @@ bundle install --path vendor/bundle
 Deploy the application in the Vagrant box
 
 ```
-source ./config/export-development-environment-variables && cap development deploy
+# Copy the export environment variables script first
+source ./config/export-development-environment-variables.sh && cap development deploy
 ```
 
 The first deployment might take a couple of minutes before npm and composer caches have been populated.  

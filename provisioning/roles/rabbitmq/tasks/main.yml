@@ -18,7 +18,16 @@
   when: rabbitmq.plugins is defined
 
 - name: add user
-  rabbitmq_user: user={{ rabbitmq.user }} password={{ rabbitmq.password }} node=rabbit@{{ vagrant_local.vm.hostname }} tags=administrator,{{ rabbitmq.user }} vhost=/ configure_priv=.* write_priv=.* read_priv=.* state=present
+  rabbitmq_user:
+    user: "{{ rabbitmq.user }}"
+    password: "{{ rabbitmq.password }}"
+    node: "rabbit@{{ vagrant_local.vm.hostname }}"
+    tags: "administrator,{{ rabbitmq.user }},monitoring,management"
+    vhost: "/"
+    configure_priv: ".*"
+    write_priv: ".*"
+    read_priv: ".*"
+    state: "present"
 
 - name: restart rabbitmq
   service: name=rabbitmq-server state=reloaded

@@ -46,3 +46,7 @@
       state: present
       login_user: root
       login_password: "{{ mysql.root_password }}"
+
+- name: Set up database access
+  sudo: yes
+  template: src=my.cnf.tpl dest=/etc/my.cnf
