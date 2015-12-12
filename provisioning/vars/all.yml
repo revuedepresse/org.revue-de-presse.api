@@ -27,7 +27,7 @@ mysql:
 rabbitmq:
     install: '1'
     user: default
-    password: "\"{{ rabbitmq_password }}\""
+    password: "{{ rabbitmq_password }}"
     plugins: [rabbitmq_management]
 elasticsearch:
     install: '1'

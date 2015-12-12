@@ -1,0 +1,14 @@
+#/bin/bash
+
+MEMORY_LIMIT=64
+MESSAGES=1
+PROJECT_DIR=/var/deploy/devobs/current
+TASK_NAME=consume-user-status
+
+export_configuration_parameters='source '$PROJECT_DIR'/bin/export-config-parameters'
+command=$export_configuration_parameters" && /usr/bin/php $PROJECT_DIR/app/console rabbitmq:consumer \
+-l $MEMORY_LIMIT -w -m $MESSAGES weaving_the_web_amqp.twitter.user_status \
+>> $PROJECT_DIR/app/logs/$TASK_NAME.out.log 2>> $PROJECT_DIR/app/logs/$TASK_NAME.error.log"
+echo -e "[ executing \"$TASK_NAME\" command ]\n"$command
+
+VAGRANT_LOG=ERROR vagrant ssh -c '/bin/bash -c "'$command'"'

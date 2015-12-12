@@ -1,0 +1,2 @@
+[client]
+password = '{{ mysql.password }}'
