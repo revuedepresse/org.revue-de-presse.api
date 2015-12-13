@@ -1,0 +1,19 @@
+#!/bin/bash
+
+if [ 0${MESSAGES//[[:spaces:]]/} -eq 0 ]
+then
+    MESSAGES=1;
+fi
+MEMORY_LIMIT=64
+PROJECT_DIR=/var/deploy/devobs/current
+TASK_NAME=consume-user-status
+
+command=$(cat <<COMMAND
+source $PROJECT_DIR/bin/export-config-parameters &&
+command=$export_configuration_parameters && /usr/bin/php $PROJECT_DIR/app/console rabbitmq:consumer
+-l $MEMORY_LIMIT -w -m $MESSAGES weaving_the_web_amqp.twitter.user_status
+>> $PROJECT_DIR/app/logs/$TASK_NAME.out.log 2>> $PROJECT_DIR/app/logs/$TASK_NAME.error.log
+COMMAND
+)
+
+echo $command

@@ -50,7 +50,7 @@ source ./config/export-development-environment-variables.sh && cap development d
 
 The first deployment might take a couple of minutes before npm and composer caches have been populated.  
 
-## Known issues
+## FAQ
 
 **Are you encountering "Could not authenticate against github.com" error message when installing PHP dependencies?**
 
@@ -140,4 +140,14 @@ vendor/devobs/bin/ansible --version
 # Deactivate the virtual environment
 deactivate
 ```
+
+*How to set up cron tasks manually?*
+
+Execute the following command to set up cron tasks using [Capitrano](http://capistranorb.com) and
+[Whenever](https://github.com/javan/whenever)
+
+```
+source config/export-development-environment-variables.sh && cap development whenever:update_crontab
+```
+
 

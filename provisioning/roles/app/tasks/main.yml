@@ -1,2 +1,37 @@
 ---
-# application tasks to be customized and to run after the main provision
+- name: Update apt
+  sudo: yes
+  apt: update_cache=yes
+
+- name: Install System Packages
+  sudo: yes
+  apt: pkg={{ item }} state=latest
+  with_items:
+    - supervisor
+
+- name: Set user status consumers configuration
+  sudo: yes
+  template:
+    src: consume_user_status_messages.ini.tpl
+    dest: /etc/supervisor/conf.d/consume_user_status_messages.conf
+
+- name: Add consumer script to PATH
+  sudo: yes
+  template:
+    src: consume-user-status-messages.tpl
+    dest: /usr/local/bin/consume-user-status-messages
+
+- name: Set consumer script permissions
+  sudo: yes
+  file:
+    path: /usr/local/bin/consume-user-status-messages
+    owner: vagrant
+    group: vagrant
+    mode: 0700
+
+- name: Start supervised consumers
+  supervisorctl:
+    name: consume_user_status_messages
+    state: restarted
+    config: /etc/supervisor/supervisord.conf
+
