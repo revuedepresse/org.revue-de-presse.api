@@ -1,9 +1,2 @@
-*
-
-!activate-user
-!consume-user-status-messages
-!export-config-parameters
-!export-config-parameters.sh
-!produce-user-status-messages
-!promote-user-as-super-admin
-!setup-messaging
+*php
+vendors
