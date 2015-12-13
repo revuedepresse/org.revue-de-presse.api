@@ -1,0 +1,17 @@
+#!/bin/bash
+
+PROJECT_DIR=$1
+SCREEN_NAME=$2
+TASK_NAME=$3
+
+command=$(cat <<COMMAND
+source $PROJECT_DIR/bin/export-config-parameters &&
+export OAUTH_TOKEN=`/bin/bash -c "source $PROJECT_DIR/bin/select-oauth-token $SCREEN_NAME"` &&
+export OAUTH_SECRET=`/bin/bash -c "source $PROJECT_DIR/bin/select-oauth-secret $SCREEN_NAME"` &&
+$PROJECT_DIR/app/console weaving-the-web:amqp:produce:user-timeline
+--oauth_token=$OAUTH_TOKEN --oauth_secret=$OAUTH_SECRET --screen_name=$SCREEN_NAME
+>> $PROJECT_DIR/app/logs/$TASK_NAME.out.log 2>> $PROJECT_DIR/app/logs/$TASK_NAME.error.log
+COMMAND
+)
+
+echo $command
