@@ -9,6 +9,14 @@
 Vagrant.require_version '>= 1.5'
 
 IP_ADDRESS = '10.9.8.2'
+USE_NFS = false
+USE_RSYNC = false
+
+if ENV.key?('USE_NFS')
+    USE_NFS = ENV['USE_NFS']
+elsif ENV.key?('USE_RSYNC')
+    USE_RSYNC = ENV['USE_RSYNC']
+end
 
 # Check to determine whether we're on a windows or linux/os-x host,
 # later on we use this to launch ansible in the supported way
@@ -27,12 +35,6 @@ end
 COMPOSER_AUTH = ENV['COMPOSER_AUTH'] ? ENV['COMPOSER_AUTH'] : nil
 MANUAL_PROVISION = ENV['MANUAL_PROVISION'] ? true : false
 MANUAL_PUSH = ENV['MANUAL_PUSH'] ? true : false
-
-if ENV.key?('USE_NFS')
-    USE_NFS = ENV['USE_NFS']
-else
-    USE_NFS = false
-end
 
 Vagrant.configure('2') do |config|
     if MANUAL_PUSH
@@ -79,11 +81,14 @@ Vagrant.configure('2') do |config|
     end
 
     if USE_NFS
-        config.vm.synced_folder '.',
-        '/var/deploy/devobs/current/',
-        type: 'nfs',
-        map_uid: Process.uid,
-        map_gid: Process.gid
+        config.vm.synced_folder '.', '/var/deploy/devobs/current',
+            type: 'nfs',
+            map_uid: Process.uid,
+            map_gid: Process.gid
+    elsif USE_RSYNC
+        config.vm.synced_folder '.', '/var/deploy/devobs/current',
+            type: 'rsync',
+            rsync__exclude: ['.git/', 'parameters.yml']
     end
 
     if COMPOSER_AUTH
