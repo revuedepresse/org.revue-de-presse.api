@@ -73,9 +73,6 @@ class ProduceUserFriendListCommand extends AccessorAwareCommand
 
         $this->setUpLogger();
         $this->setupAccessor($tokens);
-        $friends = $this->accessor->showUserFriends($input->getOption('screen_name'));
-
-        $messageBody = $tokens;
 
         /** @var \WTW\UserBundle\Repository\UserRepository $userRepository */
         $userRepository = $this->getContainer()->get('wtw_user.repository.user');
@@ -85,6 +82,21 @@ class ProduceUserFriendListCommand extends AccessorAwareCommand
 
         /** @var \Symfony\Bundle\FrameworkBundle\Translation\Translator $translator */
         $translator = $this->getContainer()->get('translator');
+
+        try {
+            $friends = $this->accessor->showUserFriends($input->getOption('screen_name'));
+        } catch (UnavailableResourceException $exception) {
+            $outputMessage = $translator->trans(
+                'amqp.error.unavailable_host',
+                ['{{ host }}' => $this->accessor->getApiHost()],
+                'messages'
+            );
+            $output->writeln($outputMessage);
+
+            return $exception->getCode();
+        }
+
+        $messageBody = $tokens;
 
         $invalidUsers = 0;
 

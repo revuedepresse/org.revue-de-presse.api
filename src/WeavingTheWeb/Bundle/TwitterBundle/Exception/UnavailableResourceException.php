@@ -8,4 +8,5 @@ namespace WeavingTheWeb\Bundle\TwitterBundle\Exception;
  */
 class UnavailableResourceException extends \Exception
 {
+    const EXCEPTION_CODE_COULD_NOT_RESOLVE_HOST = 6;
 }
