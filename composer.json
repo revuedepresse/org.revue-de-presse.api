@@ -74,7 +74,8 @@
         "jarnaiz/behat-junit-formatter": "1.3.1",
         "phpspec/phpspec": "2.0.*@dev",
         "phpunit/phpunit": "4.3.5",
-        "symfony/phpunit-bridge": "2.7.6"
+        "symfony/phpunit-bridge": "2.7.6",
+        "weaving-the-web/framework-extra-bundle": "dev-master#93d448d97ab8f9946acb489257424f2f572b9c49"
     },
     "scripts": {
         "post-install-cmd": [
@@ -93,6 +94,9 @@
             "Sp\\BowerBundle\\Composer\\ScriptHandler::bowerInstall",
             "Braincrafted\\Bundle\\BootstrapBundle\\Composer\\ScriptHandler::install"
         ]
+    },
+    "config": {
+        "bin-dir": "bin"
     },
     "minimum-stability": "dev",
     "extra": {

@@ -11,7 +11,6 @@ use WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException;
 use WTW\UserBundle\Entity\User;
 
 /**
- * @package WeavingTheWeb\Bundle\AmqpBundle\Command\Twitter
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
 class ProduceUserFriendListCommand extends AccessorAwareCommand

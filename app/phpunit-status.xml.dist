@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- http://www.phpunit.de/manual/current/en/appendixes.configuration.html -->
+<phpunit
+        backupGlobals               = "false"
+        backupStaticAttributes      = "false"
+        colors                      = "true"
+        convertErrorsToExceptions   = "true"
+        convertNoticesToExceptions  = "true"
+        convertWarningsToExceptions = "true"
+        processIsolation            = "true"
+        stopOnFailure               = "true"
+        syntaxCheck                 = "true"
+        bootstrap                   = "autoload.php">
+
+    <groups>
+        <include>
+            <group>authenticate-application</group>
+            <group>produce-list-messages</group>
+            <group>produce-user-messages</group>
+            <group>serialize-status-command</group>
+            <group>tweet</group>
+            <group>twitter-accessor</group>
+            <group>twitter-connect</group>
+            <group>twitter-user-status</group>
+        </include>
+    </groups>
+
+    <testsuites>
+        <testsuite name="Status test suite">
+            <directory>../src/*/*/*/*Bundle/Tests</directory>
+            <directory>../src/*/*/*Bundle/Tests</directory>
+            <directory>../src/*/*Bundle/Tests</directory>
+            <directory>../src/*/Bundle/*Bundle/Tests</directory>
+        </testsuite>
+    </testsuites>
+
+    <php>
+        <server name="KERNEL_DIR" value="app"/>
+    </php>
+
+    <filter>
+        <whitelist>
+            <directory>../src</directory>
+            <exclude>
+                <directory>../src/*/*/*/*Bundle/Resources</directory>
+                <directory>../src/*/*/*/*Bundle/Tests</directory>
+                <directory>../src/*/*/*Bundle/Resources</directory>
+                <directory>../src/*/*/*Bundle/Tests</directory>
+                <directory>../src/*/*Bundle/Resources</directory>
+                <directory>../src/*/*Bundle/Tests</directory>
+                <directory>../src/*/Bundle/*Bundle/Resources</directory>
+                <directory>../src/*/Bundle/*Bundle/Tests</directory>
+            </exclude>
+        </whitelist>
+    </filter>
+
+</phpunit>
