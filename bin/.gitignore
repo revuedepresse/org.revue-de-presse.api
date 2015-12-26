@@ -1,2 +1,4 @@
+behat
+phpspec
+phpunit
 *php
-vendors

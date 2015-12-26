@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<routes xmlns="http://symfony.com/schema/routing"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://symfony.com/schema/routing http://symfony.com/schema/routing/routing-1.0.xsd">
+
+    <route id="weaving_the_web_user_go_to_settings" pattern="/go-to-settings">
+        <default key="_controller">weaving_the_web_user.controller.test.settings:goToSettingsAction</default>
+    </route>
+</routes>

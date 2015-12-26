@@ -12,4 +12,4 @@ parameters:
     quality_assurance_password:     ~
 
     test_database_memory:           false
-    test_database_path:             %kernel.cache_devobsboard.db
+    test_database_path:             %kernel.cache_dir%/devobsboard.db

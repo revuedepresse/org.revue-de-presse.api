@@ -59,8 +59,3 @@ INSERT weaving_user_role (user_id, role_id) VALUES (1, 1);
 ALTER TABLE `weaving_user_role`
   ADD CONSTRAINT `FK_95AD963FD60322AC` FOREIGN KEY (`role_id`) REFERENCES `weaving_role` (`id`),
   ADD CONSTRAINT `FK_95AD963FA76ED395` FOREIGN KEY (`user_id`) REFERENCES `weaving_user` (`usr_id`);
-
-INSERT INTO `weaving_role` (`id`, `name`, `role`) VALUES
-(1, 'Weaver', 'ROLE_USER'),
-(2, 'Super Weaver', 'ROLE_ADMIN'),
-(3, 'Über Weaver', 'ROLE_SUPER_ADMIN');
