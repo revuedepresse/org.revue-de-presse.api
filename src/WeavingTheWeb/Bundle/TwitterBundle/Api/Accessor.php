@@ -47,6 +47,11 @@ class Accessor implements TwitterErrorAwareInterface
      */
     protected $apiHost = 'api.twitter.com';
 
+    public function getApiHost()
+    {
+        return $this->apiHost;
+    }
+
     /**
      * @var \Psr\Log\LoggerInterface;
      */
