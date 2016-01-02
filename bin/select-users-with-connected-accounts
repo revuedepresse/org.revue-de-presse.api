@@ -7,7 +7,10 @@ SELECT u.usr_twitter_username
 FROM weaving_access_token t, weaving_user_token ut, weaving_user u
 WHERE ut.user_id = u.usr_id
 AND ut.token_id = t.id
-AND t.frozen_until IS NULL
+AND (
+    t.frozen_until IS NULL OR
+    t.frozen_until < NOW()
+)
 SELECT_SECRET
 )
 

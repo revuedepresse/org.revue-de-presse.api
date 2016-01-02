@@ -8,8 +8,6 @@ use Symfony\Component\Console\Input\InputOption,
 use WTW\UserBundle\Entity\User;
 
 /**
- * Class ProduceUserListsMembersCommand
- * @package WeavingTheWeb\Bundle\AmqpBundle\Command
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
 class ProduceListsMembersCommand extends AccessorAwareCommand

@@ -14,5 +14,7 @@ Easing observation, selection and reuse of packages in web development by harnes
 
 ## [Packaging](app/Resources/doc/200-packaging.md)
 
+## [Development](app/Resources/doc/210-development.md)
+
 ## [Contribute](app/Resources/doc/700-contribute.md)
 

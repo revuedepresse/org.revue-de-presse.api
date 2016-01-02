@@ -1,9 +1,6 @@
 amqp:
-    production:
-        friendlist:
-            success: '{{ count }} messages have been produced.'
-        list_members:
-            success: '{{ count }} messages have been produced for list {{ list }}.'
+    error:
+        unavailable_host: 'Host "{{ host }}" can not be resolved.'
     info:
         user_persisted: 'User information has been persisted for "{{ user }}".'
         message_published: 'A message has been published for "{{ user }}".'
@@ -11,3 +8,8 @@ amqp:
         unavailable_resource: 'A resource is not available for user "{{ user }}".'
         protected_account: 'The account of user "{{ user }}" is protected.'
         suspended_account: 'The account of user "{{ user }}" is suspended.'
+    production:
+        friendlist:
+            success: '{{ count }} messages have been produced.'
+        list_members:
+            success: '{{ count }} messages have been produced for list {{ list }}.'

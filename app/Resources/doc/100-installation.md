@@ -141,7 +141,7 @@ vendor/devobs/bin/ansible --version
 deactivate
 ```
 
-*How to set up cron tasks manually?*
+**How to set up cron tasks manually?**
 
 Execute the following command to set up cron tasks using [Capitrano](http://capistranorb.com) and
 [Whenever](https://github.com/javan/whenever)

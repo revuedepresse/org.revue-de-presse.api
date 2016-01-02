@@ -13,7 +13,7 @@ parameters:
     super_admin_pattern:                                        perspective/.*/export
     basic_auth_pattern:                                         ^/(%admin_pattern%|%super_admin_pattern%|%api_pattern%|%oauth_pattern%|documents|user|query|content)
 
-    database_charset:                                           %database_charset%
+    database_charset:                                           UTF8
     database_driver:                                            pdo_mysql
     database_host:                                              %database_host_test%
     database_port:                                              %database_port_test%
@@ -40,8 +40,8 @@ parameters:
     fos_twitter.api.class:                                      WeavingTheWeb\Bundle\UserBundle\Tests\TwitterOauth
     fos_twitter.file:                                           %kernel.root_dir%/../src/WeavingTheWeb/Bundle/UserBundle/Tests/TwitterOauth.php
 
-    security.user.provider.in_memory.class:                     WTW\UserBundle\Tests\Security\Core\User\InMemoryUserProvider
-    security.user.provider.in_memory.user.class:                WTW\UserBundle\Tests\Security\Core\User\User
+    security.user.provider.in_memory.class:                     WeavingTheWeb\Bundle\UserBundle\Tests\Security\Core\User\InMemoryUserProvider
+    security.user.provider.in_memory.user.class:                WeavingTheWeb\Bundle\UserBundle\Tests\Security\Core\User\User
     weaving_the_web_user.controller_twitter.class:              WeavingTheWeb\Bundle\UserBundle\Tests\Controller\ControllerMock
 
     mail_index:                                                 mail_test
