@@ -16,14 +16,17 @@ apache:
 mysql:
     install: '1'
     root_password: "{{ mysql_root_password }}"
-    database: devobs_dev
-    user: default
-    password:  "{{ mysql_default_password }}"
     dump: ''
-    test:
-        database: devobs_test
+    users:
+      - database: devobs_dev
+        user: default
+        password:  "{{ mysql_default_password }}"
+      - database: devobs_test
         user: tester
         password: "{{ mysql_test_password }}"
+      - database: phpmyadmin
+        user: phpmyadmin
+        password: "{{ mysql_phpmyadmin_password }}"
 rabbitmq:
     install: '1'
     user: default
