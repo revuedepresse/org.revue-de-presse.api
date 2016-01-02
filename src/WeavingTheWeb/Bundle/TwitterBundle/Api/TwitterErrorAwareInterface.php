@@ -3,9 +3,6 @@
 namespace WeavingTheWeb\Bundle\TwitterBundle\Api;
 
 /**
- * Interface TwitterErrorAwareInterface
- * @package WeavingTheWeb\Bundle\TwitterBundle\Api
- *
  * @see https://dev.twitter.com/docs/error-codes-responses
  *
  * error code   6 => cURL error: Could not resolve host
@@ -76,4 +73,9 @@ interface TwitterErrorAwareInterface
     const ERROR_RETIRED_URL = 251;
 
     const ERROR_UNAUTHORIZED_ACTIONS = 261;
+
+    /**
+     * Return the host of Twitter API
+     */
+    public function getApiHost();
 }

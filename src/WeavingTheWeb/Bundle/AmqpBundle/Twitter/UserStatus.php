@@ -10,7 +10,6 @@ use WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException,
     WeavingTheWeb\Bundle\TwitterBundle\Exception\ProtectedAccountException;
 
 /**
- * @package WeavingTheWeb\Bundle\AmqpBundle\Twitter
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
 class UserStatus implements ConsumerInterface

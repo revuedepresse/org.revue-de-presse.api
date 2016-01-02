@@ -6,8 +6,7 @@ use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand,
     Symfony\Component\Console\Input\InputInterface;
 
 /**
- * Class AccessorAwareCommand
- * @package WeavingTheWeb\Bundle\AmqpBundle\Command
+ * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
 abstract class AccessorAwareCommand extends ContainerAwareCommand
 {
