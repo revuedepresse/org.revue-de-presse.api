@@ -13,6 +13,7 @@
     - apache
     - varnish
     - mysql
+    - phpmyadmin
     - rabbitmq
     - elasticsearch
     - role: php
