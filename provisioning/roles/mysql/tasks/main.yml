@@ -54,5 +54,33 @@
     dest: /etc/mysql/my.cnf
   notify: restart mysql
 
+- name: mysql | Install backup user
+  user:
+    name: backup_devobs
+    groups: mysql
+    createhome: true
+    home: "{{ deployment.root }}/current/provisioning/backup"
+
+- name: mysql | Download Percona release
+  shell: >
+    export PERCONA_RELEASE=https://repo.percona.com/apt/percona-release_0.1-3.`lsb_release -sc`_all.deb;
+    /bin/bash -c '! test -e ~vagrant/.installed_percona && `which wget` '$PERCONA_RELEASE' -O /tmp/percona.deb &&
+    touch ~vagrant/.installed_percona || echo "Percona has already been installed"'
+
+- name: mysql | Install percona release
+  sudo: yes
+  shell: /bin/bash -c 'cd /tmp && sudo dpkg -i percona.deb'
+
+- name: mysql | Update apt
+  sudo: yes
+  apt: update_cache=yes
+
+- name: mysql | Install percona Xtrabackup
+  sudo: yes
+  apt: pkg={{ item }} state=latest
+  with_items:
+    - qpress
+    - percona-xtrabackup
+
 - name: Flush handlers to apply config changes
   meta: flush_handlers
