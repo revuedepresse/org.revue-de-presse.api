@@ -32,11 +32,10 @@ expire_logs_days	= 10
 max_binlog_size     = 100M
 replicate-do-db     = {{ mysql.users[0].database }}
 server-id           = 4
-log-bin = mysql-bin
-server-id = 2
-relay-log = mysql-relay-bin
-log-slave-updates = 1
-read-only = 1
+log-bin             = mysql-bin
+relay-log           = mysql-relay-bin
+log-slave-updates   = 1
+read-only           = 1
 
 [mysqldump]
 quick
