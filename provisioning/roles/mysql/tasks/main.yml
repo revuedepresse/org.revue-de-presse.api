@@ -69,7 +69,7 @@
 
 - name: mysql | Install percona release
   sudo: yes
-  shell: /bin/bash -c 'cd /tmp && sudo dpkg -i percona.deb'
+  shell: /bin/bash -c '(test -e /tmp/percona.dev && cd /tmp && sudo dpkg -i percona.deb) || echo "Percona already installed"'
 
 - name: mysql | Update apt
   sudo: yes
