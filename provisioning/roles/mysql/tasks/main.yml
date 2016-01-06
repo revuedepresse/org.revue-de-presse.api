@@ -19,9 +19,6 @@
     - ::1
     - localhost
 
-- name: mysql | Create database
-  mysql_db: name={{ mysql.database }} state=present login_user=root login_password={{ mysql.root_password }}
-
 - name: mysql | Import dump
   mysql_db: name={{ mysql.database }} state=import login_user=root login_password={{ mysql.root_password }} target=/vagrant/{{ mysql.dump }}
   when: mysql.dump
@@ -32,21 +29,58 @@
     - localhost
     - "{{ current_hostname.stdout | lower }}"
 
+- name: mysql | Create databases
+  mysql_db:
+    name: "{{ item.database }}"
+    state: present
+    login_user: root
+    login_password: "{{ mysql.root_password }}"
+  with_items: "{{ mysql.users }}"
+
 - name: mysql | Create users
-  mysql_user: name={{ mysql.user }} password={{ mysql.password }} priv={{ mysql.database }}.*:ALL state=present login_user=root login_password={{ mysql.root_password }}
-
-- name: mysql | Create test database
-  mysql_db: name={{ mysql.test.database }} state=present login_user=root login_password={{ mysql.root_password }}
-
-- name: mysql | Create test users
   mysql_user:
-      name: "{{ mysql.test.user }}"
-      password: "{{ mysql.test.password }}"
-      priv: "{{ mysql.test.database }}.*:ALL"
-      state: present
-      login_user: root
-      login_password: "{{ mysql.root_password }}"
+    name: "{{ item.user }}"
+    password: "{{ item.password }}"
+    priv: "{{ item.database }}.*:ALL"
+    state: present
+    login_user: root
+    login_password: "{{ mysql.root_password }}"
+  with_items: "{{ mysql.users }}"
 
-- name: Set up database access
+- name: mysql | Set up database access
   sudo: yes
-  template: src=my.cnf.tpl dest=/etc/my.cnf
+  template:
+    src: my.cnf.tpl
+    dest: /etc/mysql/my.cnf
+  notify: restart mysql
+
+- name: mysql | Install backup user
+  user:
+    name: backup_devobs
+    groups: mysql
+    createhome: true
+    home: "{{ deployment.root }}/current/provisioning/backup"
+
+- name: mysql | Download Percona release
+  shell: >
+    export PERCONA_RELEASE=https://repo.percona.com/apt/percona-release_0.1-3.`lsb_release -sc`_all.deb;
+    /bin/bash -c '! test -e ~vagrant/.installed_percona && `which wget` '$PERCONA_RELEASE' -O /tmp/percona.deb &&
+    touch ~vagrant/.installed_percona || echo "Percona has already been installed"'
+
+- name: mysql | Install percona release
+  sudo: yes
+  shell: /bin/bash -c '(test -e /tmp/percona.dev && cd /tmp && sudo dpkg -i percona.deb) || echo "Percona already installed"'
+
+- name: mysql | Update apt
+  sudo: yes
+  apt: update_cache=yes
+
+- name: mysql | Install percona Xtrabackup
+  sudo: yes
+  apt: pkg={{ item }} state=latest
+  with_items:
+    - qpress
+    - percona-xtrabackup
+
+- name: Flush handlers to apply config changes
+  meta: flush_handlers
