@@ -54,7 +54,13 @@
     dest: /etc/mysql/my.cnf
   notify: restart mysql
 
-- name: mysql | Install backup user
+- name: Create backup user home directory
+  sudo: true
+  file:
+    path: "{{ deployment.root }}/current/provisioning/backup"
+    owner: nobody
+    state: directory
+
 - name: Install backup user
   user:
     name: backup_devobs
