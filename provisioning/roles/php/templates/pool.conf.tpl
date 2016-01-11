@@ -69,7 +69,7 @@ listen.group = www-data
 
 php_admin_value[error_log] = /var/log/php/php-fpm-$pool.error.log
 php_admin_value[max_execution_time] = 10
-php_admin_value[memory_limit] = 64M
+php_admin_value[memory_limit] = 256M
 php_admin_flag[log_errors] = on
 
 pm = dynamic
