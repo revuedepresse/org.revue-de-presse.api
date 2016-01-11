@@ -80,15 +80,16 @@ Vagrant.configure('2') do |config|
         end
     end
 
+    synced_folder = '/var/deploy/devobs/releases/master'
     if use_nfs
-        config.vm.synced_folder '.', '/var/deploy/devobs/current',
+        config.vm.synced_folder '.', synced_folder,
             type: 'nfs',
             map_uid: Process.uid,
             map_gid: Process.gid
     elsif use_rsync
-        config.vm.synced_folder '.', '/var/deploy/devobs/current',
+        config.vm.synced_folder '.', synced_folder,
             type: 'rsync',
-            rsync__exclude: ['.git/', 'parameters.yml']
+            rsync__exclude: ['.git/', 'parameters.yml', 'vendor/devobs']
     end
 
     if COMPOSER_AUTH
