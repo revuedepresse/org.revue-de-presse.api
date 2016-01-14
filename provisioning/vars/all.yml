@@ -1,4 +1,6 @@
 ---
+deployment:
+    root: "{{ deployment_root }}"
 server:
     install: '1'
     packages: [git, vim]
@@ -10,20 +12,26 @@ vagrant_local:
 apache:
     install: '1'
     docroot: /var/www/devobs
-    releases: /var/deploy/devobs/releases/*/web
+    releases: "{{ deployment_root }}/releases/*/web"
     servername: devobs
     port: 8080
 mysql:
     install: '1'
     root_password: "{{ mysql_root_password }}"
-    database: devobs_dev
-    user: default
-    password:  "{{ mysql_default_password }}"
     dump: ''
-    test:
-        database: devobs_test
+    users:
+      - database: devobs_dev
+        user: default
+        password:  "{{ mysql_default_password }}"
+      - database: devobs_test
         user: tester
         password: "{{ mysql_test_password }}"
+      - database: phpmyadmin
+        user: phpmyadmin
+        password: "{{ mysql_phpmyadmin_password }}"
+      - database: devobs_replica
+        user: backup
+        password: "{{ mysql_backup_password }}"
 rabbitmq:
     install: '1'
     user: default

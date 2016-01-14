@@ -12,7 +12,9 @@
     - vagrant_local
     - apache
     - varnish
-    - mysql
+    - role: mysql
+      tags: mysql
+    - phpmyadmin
     - rabbitmq
     - elasticsearch
     - role: php
