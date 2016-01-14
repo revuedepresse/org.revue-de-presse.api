@@ -1,5 +1,35 @@
 # Development
 
+## Shared folders
+
+Exporting the `USE_NFS` environment variable with value `true`
+will enable the use of NFS to share the project folder between the Vagrant
+host and guest machines on condition that a NFS server has been
+installed on the host machine first.
+
+```
+export USE_NFS=true && vagrant up # or
+USE_NFS=true vagrant up
+```
+
+For instance, in Ubuntu Linux, installing NFS requirements can be
+achieved by executing the following command:
+
+```
+apt-get install nfs-kernel-server
+```
+
+Whenever a NFS server can not be installed, the project directory is not
+shared between Vagrant host and guest machines. However a fallback
+mechanism exists to let the project directory be shared using `rsync`.  
+Exporting the `USE_RSYNC` environment variable with value `true` will
+enable the use of rsync to share the project folder.
+
+```
+export USE_RSYNC=true && vagrant up # or
+USE_RSYNC=true vagrant up
+```
+
 ## Debugging
 
 To debug a command of the application by running tests with `PHPUnit` and a custom autoloader using `PHPStorm`
