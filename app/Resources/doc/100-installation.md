@@ -150,4 +150,47 @@ Execute the following command to set up cron tasks using [Capitrano](http://capi
 source config/export-development-environment-variables.sh && cap development whenever:update_crontab
 ```
 
+**How to fix "A VirtualBox machine with the name 'devobs' already exists." error?**
 
+Pick target virtual machine id in virtual machines list
+
+```
+machine=devobs
+machine_id=`VboxManage list vms | grep $machine | cut -d  -f2`
+```
+
+Destroy 'devobs' box manually using `VirtualBox` management command
+
+```
+VBoxManage unregistervm $machine_id --delete
+```
+
+**How to fix "Forbidden" Apache error message when accessing `10.9.8.2:8080`?**
+
+One might need to refer to the deployment section when encountering such error.
+The application folder (`/var/www/devobs`) might still be empty.
+
+**How to fix the releases folder creation error?**
+
+While running the command
+
+```
+/usr/bin/env mkdir -p /var/deploy/devobs/releases/20160601102451 as vagrant@127.0.0.1
+```
+
+if the following error is encountered
+
+```
+mkdir stderr: mkdir: cannot create directory
+‘/var/deploy/devobs/releases/20160601102451’: Permission denied
+```
+
+One might want to use rsync in order to share the application folder between host
+and virtual machine.
+
+In order to use rsync instead of NFS, apply the following environment variables export
+
+```
+export USE_NFS=false
+export USE_RSYNC=true
+```
