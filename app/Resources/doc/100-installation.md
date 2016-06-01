@@ -150,4 +150,19 @@ Execute the following command to set up cron tasks using [Capitrano](http://capi
 source config/export-development-environment-variables.sh && cap development whenever:update_crontab
 ```
 
+**How to fix "A VirtualBox machine with the name 'devobs' already exists." error?**
+
+Pick target virtual machine id in virtual machines list
+
+```
+machine=devobs
+machine_id=`VboxManage list vms | grep $machine | cut -d  -f2`
+```
+
+Destroy 'devobs' box manually using `VirtualBox` management command
+
+```
+VBoxManage unregistervm $machine_id --delete
+```
+
 
