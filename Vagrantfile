@@ -22,6 +22,7 @@ box_name='devobs'
 if ENV.key?('BOX_NAME')
     box_name = ENV['BOX_NAME']
 end
+
 # Check to determine whether we're on a windows or linux/os-x host,
 # later on we use this to launch ansible in the supported way
 # source: https://stackoverflow.com/questions/2108727/which-in-ruby-checking-if-program-exists-in-path-from-ruby
@@ -95,6 +96,11 @@ Vagrant.configure('2') do |config|
             type: 'rsync',
             rsync__exclude: ['.git/', 'parameters.yml', 'vendor/devobs']
     end
+
+    config.vm.synced_folder '/Users/labodev/repositories/cepid/ftp/public/www', '/var/deploy/cepid/public/www',
+        type: 'nfs',
+        map_uid: Process.uid,
+        map_gid: Process.gid
 
     if COMPOSER_AUTH
         config.vm.provision 'file', source: COMPOSER_AUTH, destination: '~/.composer/auth.json'
