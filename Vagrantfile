@@ -18,6 +18,10 @@ elsif ENV.key?('USE_RSYNC')
     use_rsync = ENV['USE_RSYNC']
 end
 
+box_name='devobs'
+if ENV.key?('BOX_NAME')
+    box_name = ENV['BOX_NAME']
+end
 # Check to determine whether we're on a windows or linux/os-x host,
 # later on we use this to launch ansible in the supported way
 # source: https://stackoverflow.com/questions/2108727/which-in-ruby-checking-if-program-exists-in-path-from-ruby
@@ -49,10 +53,10 @@ Vagrant.configure('2') do |config|
     config.vm.box = 'weaving-the-web/devobs-development'
     config.vm.network 'private_network', ip: IP_ADDRESS
     config.vm.provider :virtualbox do |v|
-        v.name = 'devobs'
+        v.name = box_name
         v.customize [
             'modifyvm', :id,
-            '--name', 'devobs',
+            '--name', box_name,
             '--memory', 4096,
             '--natdnshostresolver1', 'on',
             '--cpus', 1,
