@@ -165,4 +165,7 @@ Destroy 'devobs' box manually using `VirtualBox` management command
 VBoxManage unregistervm $machine_id --delete
 ```
 
+**How to fix "Forbidden" Apache error message when accessing `10.9.8.2:8080`?**
 
+One might need to refer to the deployment section when encountering such error.
+The application folder (`/var/www/devobs`) might still be empty.
