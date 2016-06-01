@@ -169,3 +169,28 @@ VBoxManage unregistervm $machine_id --delete
 
 One might need to refer to the deployment section when encountering such error.
 The application folder (`/var/www/devobs`) might still be empty.
+
+**How to fix the releases folder creation error?**
+
+While running the command
+
+```
+/usr/bin/env mkdir -p /var/deploy/devobs/releases/20160601102451 as vagrant@127.0.0.1
+```
+
+if the following error is encountered
+
+```
+mkdir stderr: mkdir: cannot create directory
+‘/var/deploy/devobs/releases/20160601102451’: Permission denied
+```
+
+One might want to use rsync in order to share the application folder between host
+and virtual machine.
+
+In order to use rsync instead of NFS, apply the following environment variables export
+
+```
+export USE_NFS=false
+export USE_RSYNC=true
+```
