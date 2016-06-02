@@ -86,7 +86,6 @@
   sudo: yes
   apt: pkg={{ item }} state=latest
   with_items:
-    - qpress
     - percona-xtrabackup
 
 - name: Flush handlers to apply config changes
