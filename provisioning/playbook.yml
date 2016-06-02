@@ -15,7 +15,8 @@
     - role: mysql
       tags: mysql
     - phpmyadmin
-    - rabbitmq
+    - role: rabbitmq
+      tags: rabbitmq
     - elasticsearch
     - role: php
       tags: php
