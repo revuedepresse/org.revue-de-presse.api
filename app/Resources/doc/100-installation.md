@@ -198,6 +198,12 @@ export USE_NFS=false
 export USE_RSYNC=true
 ```
 
+Moreover the `releases` folder permissions can be updated
+
+```
+vagrant ssh -c 'sudo chown vagrant /var/deploy/devobs/releases'
+```
+
 **How to provision MySQL manually?**
 
 ```
