@@ -28,6 +28,7 @@
             <argument type="service" id="fos_user.object_manager" />
             <argument>%weaving_the_web_user.model.user.class%</argument>
         </service>
+        <service id="fos_user.doctrine_registry" alias="doctrine" />
         <service id="weaving_the_web_user.twitter" class="%weaving_the_web_user.twitter.class%">
             <argument type="service" id="session" />
             <call method="setApiAccessor">
