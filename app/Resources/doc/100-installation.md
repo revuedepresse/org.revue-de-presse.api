@@ -194,3 +194,23 @@ In order to use rsync instead of NFS, apply the following environment variables 
 export USE_NFS=false
 export USE_RSYNC=true
 ```
+
+**How to provision MySQL manually?**
+
+```
+ansible-playbook -t mysql \
+--user=vagrant --connection=ssh \
+--timeout=30 --limit=all \
+--inventory-file=provisioning/inventories/dev provisioning/playbook.yml \
+--private-key=./.vagrant/machines/default/virtualbox/private_key
+```
+
+**How to provision RabbimtMQ manually?**
+
+```
+ansible-playbook --tag=rabbitmq \
+--user=vagrant --connection=ssh \
+--timeout=30 --limit=all \
+--inventory-file=provisioning/inventories/dev provisioning/playbook.yml \
+--private-key=./.vagrant/machines/default/virtualbox/private_key
+```
