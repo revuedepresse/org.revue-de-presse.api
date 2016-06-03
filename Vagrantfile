@@ -9,14 +9,6 @@
 Vagrant.require_version '>= 1.5'
 
 IP_ADDRESS = '10.9.8.2'
-use_nfs = false
-use_rsync = true
-
-if ENV.key?('USE_NFS')
-    use_nfs = ENV['USE_NFS']
-elsif ENV.key?('USE_RSYNC')
-    use_rsync = ENV['USE_RSYNC']
-end
 
 box_name='devobs'
 if ENV.key?('BOX_NAME')
@@ -85,7 +77,16 @@ Vagrant.configure('2') do |config|
         end
     end
 
-    synced_folder = '/var/deploy/devobs/releases/master'
+    use_nfs = false
+    use_rsync = true
+
+    if ENV.key?('USE_NFS')
+        use_nfs = ENV['USE_NFS']
+    elsif ENV.key?('USE_RSYNC')
+        use_rsync = ENV['USE_RSYNC']
+    end
+
+    synced_folder = '/var/www/master'
     if use_nfs
         config.vm.synced_folder '.', synced_folder,
             type: 'nfs',
@@ -96,11 +97,6 @@ Vagrant.configure('2') do |config|
             type: 'rsync',
             rsync__exclude: ['.git/', 'parameters.yml', 'vendor/devobs']
     end
-
-    config.vm.synced_folder '/Users/labodev/repositories/cepid/ftp/public/www', '/var/deploy/cepid/public/www',
-        type: 'nfs',
-        map_uid: Process.uid,
-        map_gid: Process.gid
 
     if COMPOSER_AUTH
         config.vm.provision 'file', source: COMPOSER_AUTH, destination: '~/.composer/auth.json'
