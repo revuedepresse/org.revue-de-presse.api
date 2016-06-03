@@ -45,6 +45,9 @@ Deploy the application in the Vagrant box
 
 ```
 # Copy the export environment variables script first
+cp config/export-development-environment-variables.sh{.dist,}
+
+# Deploy the application to the Vagrant box
 source ./config/export-development-environment-variables.sh && cap development deploy
 ```
 
