@@ -223,3 +223,17 @@ ansible-playbook --tag=rabbitmq \
 --inventory-file=provisioning/inventories/dev provisioning/playbook.yml \
 --private-key=./.vagrant/machines/default/virtualbox/private_key
 ```
+
+**How to fix the not writable directory error?**
+
+Whenever encountering the following error
+
+```
+mv stderr: mv: cannot overwrite directory ‘/var/deploy/devobs/current’ with non-directory
+```
+
+One has to erase the `current` directory
+
+```
+vagrant ssh -c "sudo rm -rf /var/deploy/devobs/current"
+```
