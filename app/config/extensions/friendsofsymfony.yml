@@ -70,7 +70,7 @@ fos_oauth_server:
     refresh_token_class:            WeavingTheWeb\Bundle\ApiBundle\Entity\OAuth\RefreshToken
     auth_code_class:                WeavingTheWeb\Bundle\ApiBundle\Entity\OAuth\AuthCode
     service:
-        user_provider:              weaving_the_web_user.user_manager
+        user_provider:              fos_user.user_provider.username
         options:
             access_token_lifetime:  31449600
 
