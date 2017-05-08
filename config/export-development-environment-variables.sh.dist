@@ -4,19 +4,19 @@ export MYSQL_DATABASE_DEV='devobs_dev'
 export MYSQL_DATABASE_TEST='devobs_test'
 
 export MYSQL_ADMIN_USER='root'
-export MYSQL_ADMIN_PASSWORD='ees)~JIGP0iB)3jD9<'
+export MYSQL_ADMIN_PASSWORD='ees\)~JIGP0iB\)3jD9\<'
 
 export MYSQL_DEFAULT_USER='default'
-export MYSQL_DEFAULT_PASSWORD='r>$$#F)D=*NchQVz*@.x'
+export MYSQL_DEFAULT_PASSWORD='r\>\$\$#F\)D=*NchQVz*@.x'
 
 export MYSQL_TEST_USER='tester'
-export MYSQL_TEST_PASSWORD='ly&r{tKh-65Zvi+9S%%d'
+export MYSQL_TEST_PASSWORD='ly\&r{tKh-65Zvi+9S%%d'
 
 export RABBITMQ_USER='default'
 export RABBITMQ_PASSWORD='eyLDwgkwQnoN'
 
-export FRAMEWORK_SECRET='~p^o4O?/vil)tL^oqJkE+DHB~?OE/Or%%J"=|P7fm'
-export QUALITY_ASSURANCE_PASSWORD='gid}hx#wcJ9}@%%An+=F5]Ou>^$Bur'
+export FRAMEWORK_SECRET='~p^o4O?/vil\)tL^oqJkE+DHB~?OE/Or%%J\"=\|P7fm'
+export QUALITY_ASSURANCE_PASSWORD='gid}\hx#wcJ9}@%%An+=F5]Ou\>^\$Bur'
 
 export SYMFONY__AES__KEY='_'
 export SYMFONY__AES__IV='_'
