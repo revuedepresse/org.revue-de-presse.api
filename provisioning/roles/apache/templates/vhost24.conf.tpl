@@ -29,12 +29,12 @@ ServerName devobs-vagrant
             RewriteRule ^(.*) - [E=BASE:%1]
 
             RewriteCond %{ENV:REDIRECT_STATUS} ^$
-            RewriteRule ^app\.php(/(.*)|$) %{ENV:BASE}/$2 [R=301,L]
+            RewriteRule ^app_dev\.php(/(.*)|$) %{ENV:BASE}/$2 [R=301,L]
 
             RewriteCond %{REQUEST_FILENAME} -f
             RewriteRule .? - [L]
 
-            RewriteRule .? %{ENV:BASE}/app.php [L]
+            RewriteRule .? %{ENV:BASE}/app_dev.php [L]
         </IfModule>
     </Directory>
 </VirtualHost>
