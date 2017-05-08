@@ -1,23 +1,38 @@
 ---
+- name: Remove ppa Repository
+  apt_repository:
+    repo: ppa:ondrej/{{ php.deprecated_ppa }}
+    state: absent
+
 - name: Add ppa Repository
-  sudo: yes
-  apt_repository: repo=ppa:ondrej/{{ php.ppa }}
+  apt_repository:
+    repo: ppa:ondrej/{{ php.ppa }}
+    state: present
 
 - name: Update apt
   sudo: yes
   apt: update_cache=yes
 
-- name: Install php5
-  sudo: yes
-  apt: pkg=php5 state=latest
+- name: Remove php5
+  apt:
+    pkg: "{{ item }}"
+    state: absent
+  with_items:
+    - php5-dev
+    - php5-fpm
+    - php5
 
-- name: Install php5-fpm
+- name: Install php5.6
   sudo: yes
-  apt: pkg=php5-fpm state=latest
+  apt: pkg=php5.6 state=latest
+
+- name: Install php5.6-fpm
+  sudo: yes
+  apt: pkg=php5.6-fpm state=latest
 
 - name: Remove default php5-fpm pool
   sudo: yes
-  file: path=/etc/php5/fpm/pool.d/www.conf state=absent
+  file: path=/etc/php/5.6/fpm/pool.d/www.conf state=absent
 
 - name: Install PHP Packages
   sudo: yes
@@ -29,7 +44,7 @@
   sudo: yes
   template: >
     src="xdebug.ini.tpl"
-    dest="/etc/php5/mods-available/xdebug.ini"
+    dest="/etc/php/5.6/mods-available/xdebug.ini"
     owner="root"
     group="root"
     mode=0644
@@ -37,7 +52,7 @@
 - name: Configure devobs pool
   template: >
     src="pool{{ lookup('env', 'PHP_FPM_POOL') }}.conf.tpl"
-    dest="/etc/php5/fpm/pool.d/{{ item }}.conf"
+    dest="/etc/php/5.6/fpm/pool.d/{{ item }}.conf"
     owner="root"
     group="root"
     mode=0644
