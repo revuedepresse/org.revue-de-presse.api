@@ -14,7 +14,8 @@
     - varnish
     - role: mysql
       tags: mysql
-    - phpmyadmin
+    - role: phpmyadmin
+      tags: phpmyadmin
     - role: rabbitmq
       tags: rabbitmq
     - elasticsearch
