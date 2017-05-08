@@ -1,10 +1,18 @@
 ---
-- name: add rabbitmq official apt repository
-  apt_repository: repo='deb http://www.rabbitmq.com/debian/ testing main' state=present
+- name: remove the verification key for the package
+  apt_key:
+    id: 056E8E56
+    state: absent
 
 - name: add the verification key for the package
-  sudo: yes
-  shell: curl http://www.rabbitmq.com/rabbitmq-signing-key-public.asc | sudo apt-key add -
+  apt_key:
+    url: http://www.rabbitmq.com/rabbitmq-release-signing-key.asc
+    state: present
+
+- name: add rabbitmq official apt repository
+  apt_repository:
+    repo: deb http://www.rabbitmq.com/debian/ testing main
+    state: present
 
 - name: update repositories
   apt: update_cache=yes
