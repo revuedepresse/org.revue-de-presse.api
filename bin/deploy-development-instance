@@ -1,0 +1,4 @@
+#!/bin/bash
+
+source ./config/export-development-environment-variables.sh && cap development deploy
+
