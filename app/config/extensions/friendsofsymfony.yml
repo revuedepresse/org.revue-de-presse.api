@@ -82,6 +82,9 @@ fos_user:
         group_class:            WeavingTheWeb\Bundle\UserBundle\Entity\Group
     service:
         user_manager:           weaving_the_web_user.user_manager
+    from_email:
+        address:                gordon.freeman@weaving-the-web.org
+        sender_name:            Gordon Freeman
 
 fos_rest:
     allowed_methods_listener:   true
