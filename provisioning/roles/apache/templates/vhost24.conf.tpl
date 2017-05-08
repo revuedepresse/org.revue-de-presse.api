@@ -5,6 +5,8 @@ ServerName devobs-vagrant
     DocumentRoot {{ apache.docroot }}
     ServerName {{ apache.servername }}
 
+    DirectoryIndex app.php
+
     <IfModule fastcgi_module>
         Alias /fcgi-bin/php5-fpm /fcgi-bin-php5-fpm-devobs
         FastCgiExternalServer /fcgi-bin-php5-fpm-devobs -socket /var/run/php5-fpm-devobs.sock -pass-header Authorization
@@ -25,16 +27,17 @@ ServerName devobs-vagrant
 
         <IfModule mod_rewrite.c>
             RewriteEngine on
+
             RewriteCond %{REQUEST_URI}::$1 ^(/.+)/(.*)::\2$
             RewriteRule ^(.*) - [E=BASE:%1]
 
-            RewriteCond %{ENV:REDIRECT_STATUS} ^$
-            RewriteRule ^app_dev\.php(/(.*)|$) %{ENV:BASE}/$2 [R=301,L]
+            RewriteCond %{HTTP:Authorization} .
+            RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
             RewriteCond %{REQUEST_FILENAME} -f
             RewriteRule .? - [L]
 
-            RewriteRule .? %{ENV:BASE}/app_dev.php [L]
+            RewriteRule .? %{ENV:BASE}/app.php [L]
         </IfModule>
     </Directory>
 </VirtualHost>

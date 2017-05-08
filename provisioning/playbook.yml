@@ -11,7 +11,8 @@
     - role: server
       tags: server
     - vagrant_local
-    - apache
+    - role: apache
+      tags: apache
     - varnish
     - role: mysql
       tags: mysql
