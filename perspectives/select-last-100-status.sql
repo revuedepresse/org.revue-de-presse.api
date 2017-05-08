@@ -1,0 +1,1 @@
+SELECT ust_created_at 'Creation', CONCAT('https://twitter.com/', ust_full_name, '/status/', ust_status_id) as Link, ust_text as Status FROM weaving_dev.weaving_twitter_user_stream ORDER BY ust_id DESC LIMIT 100
