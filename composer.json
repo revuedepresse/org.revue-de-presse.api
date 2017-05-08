@@ -35,7 +35,7 @@
         "friendsofsymfony/oauth-server-bundle": "1.4.2",
         "friendsofsymfony/rest-bundle": "0.*",
         "friendsofsymfony/twitter-bundle": "dev-master#f837424a069425721c1a744bdc60bb2869a8c691",
-        "friendsofsymfony/user-bundle": "~2.0@dev",
+        "friendsofsymfony/user-bundle": "dev-master#d5b28c367d393f9d9fbc48c4138b2a74d51c0c83",
         "guzzlehttp/guzzle": "6.1.0",
         "incenteev/composer-parameter-handler": "2.1.*",
         "jms/di-extra-bundle": "1.6.*",
