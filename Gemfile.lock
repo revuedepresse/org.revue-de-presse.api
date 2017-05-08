@@ -54,6 +54,3 @@ DEPENDENCIES
   rake (= 10.4.2)
   rvm1-capistrano3 (= 1.4.0)
   whenever (= 0.9.4)
-
-BUNDLED WITH
-   1.10.6
