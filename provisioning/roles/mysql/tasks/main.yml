@@ -70,13 +70,15 @@
 
 - name: Download Percona release
   shell: >
-    export PERCONA_RELEASE=https://repo.percona.com/apt/percona-release_0.1-3.`lsb_release -sc`_all.deb;
-    /bin/bash -c '! test -e ~vagrant/.installed_percona && `which wget` '$PERCONA_RELEASE' -O /tmp/percona.deb &&
-    touch ~vagrant/.installed_percona || echo "Percona has already been installed"'
+    export PERCONA_RELEASE=https://repo.percona.com/apt/percona-release_0.1-4.`lsb_release -sc`_all.deb;
+    /bin/bash -c '! test -e ~vagrant/.downloaded_percona && `which wget` '$PERCONA_RELEASE' -O /tmp/percona.deb &&
+    touch ~vagrant/.downloaded_percona || echo "Percona has already been installed"'
 
 - name: Install percona release
   sudo: yes
-  shell: /bin/bash -c '(test -e /tmp/percona.dev && cd /tmp && sudo dpkg -i percona.deb) || echo "Percona already installed"'
+  shell: >
+    /bin/bash -c '(! test -e ~vagrant/.installed_percona test && test -e /tmp/percona.deb && cd /tmp &&
+    sudo dpkg -i percona.deb && echo ~vagrant/.installed_percona) || echo "Percona already installed"'
 
 - name: Update apt
   sudo: yes
