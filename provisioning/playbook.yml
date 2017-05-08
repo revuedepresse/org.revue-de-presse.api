@@ -8,7 +8,8 @@
       git_install_from_source: true
       git_install_path: "/usr"
       git_version: "2.1.0"
-    - server
+    - role: server
+      tags: server
     - vagrant_local
     - apache
     - varnish
