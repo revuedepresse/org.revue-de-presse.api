@@ -53,7 +53,7 @@
             <property name="entityManager" type="service" id="doctrine.orm.default_entity_manager" />
         </service>
         <service id="weaving_the_web_user.controller.settings" class="%weaving_the_web_user.controller.settings.class%"
-                 lazy="true" scope="request">
+                 scope="request">
             <call method="setEntityManager">
                 <argument type="service" id="doctrine.orm.entity_manager" />
             </call>

@@ -3,8 +3,8 @@
 namespace WeavingTheWeb\Bundle\UserBundle\Controller;
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
-use Symfony\Component\DependencyInjection\ContainerAware,
-    Symfony\Component\HttpFoundation\Request,
+
+use Symfony\Component\HttpFoundation\Request,
     Symfony\Component\HttpFoundation\RedirectResponse,
     Symfony\Component\Security\Core\Validator\Constraints\UserPassword,
     Symfony\Component\Form\FormError,
@@ -15,7 +15,7 @@ use WTW\UserBundle\Entity\User;
 /**
  * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
-class SettingsController extends ContainerAware
+class SettingsController
 {
     /**
      * @var \Doctrine\ORM\EntityManager $entityManager
@@ -200,7 +200,8 @@ class SettingsController extends ContainerAware
     }
 
     /**
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return array
+     *
      * @Extra\Template("WeavingTheWebUserBundle:Settings:show.html.twig")
      */
     public function showAction()
