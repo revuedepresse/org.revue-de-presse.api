@@ -23,6 +23,8 @@
         Options +FollowSymLinks -Indexes
         Require all granted
 
+        Include env/devobs.conf
+
         <IfModule mod_rewrite.c>
             RewriteEngine on
 

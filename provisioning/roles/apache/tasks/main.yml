@@ -42,6 +42,22 @@
   template: src=devobs-nfs.conf.tpl dest=/etc/apache2/sites-available/devobs-nfs.conf
   notify: restart apache
 
+- name: Override apache envvars
+  sudo: yes
+  template: src=envvars.tpl dest=/etc/apache2/envvars
+  notify: restart apache
+
+- name: Ensure Apache env dir exists.
+  sudo: yes
+  file:
+    path: "{{ apache.env_dir }}"
+    state: directory
+
+- name: Add devobs-nfs envvars
+  sudo: yes
+  template: src=env.devobs.conf.tpl dest={{ apache.env_dir }}/devobs.conf
+  notify: restart apache
+
 - name: Disable default virtualhost and enable devobs virtualhosts
   sudo: yes
   shell: a2dissite 000-default && a2ensite devobs-nfs devobs
