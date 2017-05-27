@@ -13,7 +13,7 @@ $kernel->loadClassCache();
 
 $request = Request::createFromGlobals();
 
-Request::setTrustedProxies(['dashboard.dev']);
+Request::setTrustedProxies(['127.0.0.1']);
 
 $request->setTrustedHeaderName(Request::HEADER_CLIENT_PROTO, 'X_FORWARDED_PROTO');
 $request->setTrustedHeaderName(Request::HEADER_CLIENT_IP, 'X_FORWARDED_FOR');
