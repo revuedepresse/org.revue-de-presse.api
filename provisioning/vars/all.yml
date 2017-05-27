@@ -17,6 +17,7 @@ vagrant:
         useVagrantCloud: '1'
         syncType: nfs
 apache:
+    env_dir: /etc/apache2/env
     devobs:
         install: '1'
         docroot: /var/www/devobs
