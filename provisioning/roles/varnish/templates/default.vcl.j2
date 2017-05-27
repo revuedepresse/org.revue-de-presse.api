@@ -1,6 +1,5 @@
 vcl 4.0;
 
-
 backend default {
     .host = "127.0.0.1";
     .port = "80";
@@ -130,8 +129,8 @@ sub vcl_recv {
 }
 
 sub vcl_pass {
-    set req.http.X-Forwarded-Port = "443";
-    set req.http.X-Forwarded-Proto = "https";
+    set req.http.X-Forwarded-Port = "80";
+    set req.http.X-Forwarded-Proto = "http";
     if (req.http.Authorization || req.http.Cookie) {
         return (fetch);
     }
