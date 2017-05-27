@@ -6,32 +6,46 @@ server:
     packages: [git, vim]
     timezone: Europe/Paris
     locale: en_US.UTF-8
-vagrant_local:
+vagrant:
     install: '1'
-    vm: { base_box: trusty64, hostname: devobs, ip: 10.9.8.2, memory: '4096', sharedfolder: ./, useVagrantCloud: '1', syncType: nfs }
+    vm:
+        base_box: trusty64
+        hostname: devobs
+        ip: 10.9.8.2
+        memory: '4096'
+        sharedfolder: ./
+        useVagrantCloud: '1'
+        syncType: nfs
 apache:
-    install: '1'
-    docroot: /var/www/devobs
-    releases: "{{ deployment_root }}/releases/*/web"
-    servername: devobs
-    port: 8080
+    devobs:
+        install: '1'
+        docroot: /var/www/devobs
+        releases: "{{ deployment_root }}/releases/*/web"
+        servername: devobs.dev
+        port: 8080
+    devobs_nfs:
+        install: '1'
+        docroot: /var/www/master/web
+        servername: devobs-nfs.dev
+        port: 8081
+        web: "/var/www/master/web"
 mysql:
     install: '1'
     root_password: "{{ mysql_root_password }}"
     dump: ''
     users:
-      - database: devobs_dev
-        user: default
-        password:  "{{ mysql_default_password }}"
-      - database: devobs_test
-        user: tester
-        password: "{{ mysql_test_password }}"
-      - database: phpmyadmin
-        user: phpmyadmin
-        password: "{{ mysql_phpmyadmin_password }}"
-      - database: devobs_replica
-        user: backup
-        password: "{{ mysql_backup_password }}"
+        - database: devobs_dev
+          user: default
+          password:  "{{ mysql_default_password }}"
+        - database: devobs_test
+          user: tester
+          password: "{{ mysql_test_password }}"
+        - database: phpmyadmin
+          user: phpmyadmin
+          password: "{{ mysql_phpmyadmin_password }}"
+        - database: devobs_replica
+          user: backup
+          password: "{{ mysql_backup_password }}"
 rabbitmq:
     install: '1'
     user: default
@@ -46,19 +60,20 @@ php:
     deprecated_ppa: php5
     ppa: php
     packages:
-      - php5.6-apcu
-      - php5.6-cli
-      - php5.6-curl
-      - php5.6-dom
-      - php5.6-imap
-      - php5.6-intl
-      - php5.6-mcrypt
-      - php5.6-fpm
-      - php5.6-mbstring
-      - php5.6-mysql
-      - php5.6-sqlite3
-      - php5.6-zip
-      - php5.6-bcmath
+        - php5.6-apcu
+        - php5.6-cli
+        - php5.6-curl
+        - php5.6-dom
+        - php5.6-imap
+        - php5.6-intl
+        - php5.6-mcrypt
+        - php5.6-fpm
+        - php5.6-mbstring
+        - php5.6-mysql
+        - php5.6-sqlite3
+        - php5.6-zip
+        - php5.6-bcmath
+        - php5.6-xdebug
 xdebug:
     install: '1'
 composer:
