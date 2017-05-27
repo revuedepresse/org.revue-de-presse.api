@@ -1,0 +1,4 @@
+#!/bin/bash
+
+dir=`dirname $0`
+source $dir/provision-ansible-role vagrant
