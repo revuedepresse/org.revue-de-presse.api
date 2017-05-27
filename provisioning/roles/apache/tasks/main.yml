@@ -32,9 +32,19 @@
   apache2_module: state=absent name=php5
   notify: restart apache
 
-- name: Change default apache2.4 site
+- name: Add devobs virtualhost
   sudo: yes
-  template: src=vhost24.conf.tpl dest=/etc/apache2/sites-available/000-default.conf
+  template: src=devobs.conf.tpl dest=/etc/apache2/sites-available/devobs.conf
+  notify: restart apache
+
+- name: Add devobs-nfs virtualhost
+  sudo: yes
+  template: src=devobs-nfs.conf.tpl dest=/etc/apache2/sites-available/devobs-nfs.conf
+  notify: restart apache
+
+- name: Disable default virtualhost and enable devobs virtualhosts
+  sudo: yes
+  shell: a2dissite 000-default && a2ensite devobs-nfs devobs
   notify: restart apache
 
 - name: Configure PHP fpm

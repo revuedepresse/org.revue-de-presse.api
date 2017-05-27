@@ -1,11 +1,7 @@
-ServerName devobs-vagrant
-
-<VirtualHost *:{{ apache.port }}>
+<VirtualHost *:{{ apache.devobs.port }}>
     ServerAdmin webmaster@localhost
-    DocumentRoot {{ apache.docroot }}
-    ServerName {{ apache.servername }}
-
-    DirectoryIndex app.php
+    DocumentRoot {{ apache.devobs.docroot }}
+    ServerName {{ apache.devobs.servername }}
 
     <IfModule fastcgi_module>
         Alias /fcgi-bin/php5-fpm /fcgi-bin-php5-fpm-devobs
@@ -15,10 +11,12 @@ ServerName devobs-vagrant
     ErrorLog ${APACHE_LOG_DIR}/error.devobs.log
     CustomLog ${APACHE_LOG_DIR}/access.devobs.log combined
 
-    <Directory {{ apache.releases }}>
+    <Directory {{ apache.devobs.releases }}>
         <IfModule mod_negotiation.c>
             Options -MultiViews
         </IfModule>
+
+        DirectoryIndex app.php
 
         AddCharset utf-8 .*
         AllowOverride None

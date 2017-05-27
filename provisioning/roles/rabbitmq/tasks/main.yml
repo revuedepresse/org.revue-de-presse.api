@@ -29,7 +29,7 @@
   rabbitmq_user:
     user: "{{ rabbitmq.user }}"
     password: "{{ rabbitmq.password }}"
-    node: "rabbit@{{ vagrant_local.vm.hostname }}"
+    node: "rabbit@{{ vagrant.vm.hostname }}"
     tags: "administrator,{{ rabbitmq.user }},monitoring,management"
     vhost: "/"
     configure_priv: ".*"
