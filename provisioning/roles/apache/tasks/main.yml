@@ -1,7 +1,7 @@
 ---
 - name: Install Apache
   sudo: yes
-  apt: pkg=apache2 state=latest
+  apt: name=apache2 update_cache=yes state=latest
 
 - name: Install Apache Modules
   apache2_module: state=present name={{ item }}
@@ -13,24 +13,25 @@
     - headers
     - expires
     - filter
+    - fastcgi
 
-- name: Remove php5_module
-  sudo : yes
-  apt:
-    name: libapache2-mod-php5
-    purge: yes
-
-- name: Install FastCGI
-  sudo : yes
-  apt:
-    name: "{{ item }}"
-    state: present
-  with_items:
-    - libapache2-mod-fastcgi
-
-- name: Ensure php5 module is absent
-  apache2_module: state=absent name=php5
-  notify: restart apache
+#- name: Remove php5_module
+#  sudo : yes
+#  apt:
+#    name: libapache2-mod-php5
+#    purge: yes
+#
+#- name: Install FastCGI
+#  sudo : yes
+#  apt:
+#    name: "{{ item }}"
+#    state: present
+#  with_items:
+#    - libapache2-mod-fastcgi
+#
+#- name: Ensure php5 module is absent
+#  apache2_module: state=absent name=php5
+#  notify: restart apache
 
 - name: Add devobs virtualhost
   sudo: yes
