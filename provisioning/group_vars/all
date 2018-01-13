@@ -1,7 +1,7 @@
 deployment_root: /var/deploy/devobs
 mysql_root_password: 'ees)~JIGP0iB)3jD9<'
 mysql_backup_password: '0hfM1OfWAOcL'
-mysql_default_password: 'r>$$#F)D=*NchQVz*@.x'
+mysql_default_password: 'TWpwGXKuvf6c8CWapwSK1BxqMdXPEHsJuOqCUyxc'
 mysql_test_password: 'ly&r{tKh-65Zvi+9S%d'
 mysql_phpmyadmin_password: '4ynx9eiqDgt4'
 rabbitmq_password: 'eyLDwgkwQnoN'
