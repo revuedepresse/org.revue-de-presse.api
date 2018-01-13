@@ -6,9 +6,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller,
     Symfony\Component\HttpFoundation\JsonResponse,
-    Symfony\Component\HttpFoundation\Request,
-    Symfony\Component\HttpFoundation\File\Exception\AccessDeniedException,
-    Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+    Symfony\Component\HttpFoundation\Request;
 
 use WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream;
 
@@ -221,6 +219,32 @@ class TweetController extends Controller
     public function unstarAction(UserStream $userStream)
     {
         return $this->toggleStarringStatus($userStream, $starring = false);
+    }
+
+    /**
+     * @Extra\Route("/list/{handle}", name="weaving_the_web_dashboard_list_tweets")
+     *
+     * @return JsonResponse
+     */
+    public function listTweetsAction($handle)
+    {
+        /** @var \WeavingTheWeb\Bundle\DashboardBundle\DBAL\Connection $connection */
+        $connection = $this->container->get('weaving_the_web_dashboard.dbal_connection.read');
+
+        $query = '
+            SELECT ust_text as Tweet, ust_original_id as Id, ust_created_at as CreationDate
+            CONCAT("https://twitter.com/'.$handle.'/status/", us.ust_status_id) as link
+            FROM weaving_twitter_user_stream us
+            LEFT JOIN weaving_status_aggregate sa ON us.ust_id = sa.status_id
+            LEFT JOIN weaving_aggregate a ON a.id = sa.aggregate_id
+            WHERE a.name like "%'.$handle.'%"
+            ORDER BY ust_created_at DESC
+            LIMIT 100
+        ';
+
+        $results = $connection->executeQuery($query);
+
+        return new JsonResponse($results);
     }
 
     /**
