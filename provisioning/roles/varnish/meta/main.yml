@@ -3,21 +3,22 @@ dependencies: []
 
 galaxy_info:
   author: geerlingguy
-  description: Varnish for Linux
+  description: Varnish for Linux.
   company: "Midwestern Mac, LLC"
   license: "license (BSD, MIT)"
-  min_ansible_version: 1.4
+  min_ansible_version: 2.2
   platforms:
-  - name: EL
-    versions:
-    - 6
-    - 7
-  - name: Ubuntu
-    versions:
-    - precise
-    - trusty
-  - name: Debian
-    versions:
-    - all
-  categories:
+    - name: EL
+      versions:
+      - 6
+      - 7
+    - name: Ubuntu
+      versions:
+      - precise
+      - trusty
+      - xenial
+    - name: Debian
+      versions:
+      - all
+  galaxy_tags:
     - web
