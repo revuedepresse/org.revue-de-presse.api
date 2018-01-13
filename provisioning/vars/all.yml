@@ -3,7 +3,6 @@ deployment:
     root: "{{ deployment_root }}"
 server:
     install: '1'
-    packages: [git, vim]
     timezone: Europe/Paris
     locale: en_US.UTF-8
 vagrant:
@@ -61,20 +60,20 @@ php:
     deprecated_ppa: php5
     ppa: php
     packages:
-        - php5.6-apcu
-        - php5.6-cli
-        - php5.6-curl
-        - php5.6-dom
-        - php5.6-imap
-        - php5.6-intl
-        - php5.6-mcrypt
-        - php5.6-fpm
-        - php5.6-mbstring
-        - php5.6-mysql
-        - php5.6-sqlite3
-        - php5.6-zip
-        - php5.6-bcmath
-        - php5.6-xdebug
+      - php5.6-apcu
+      - php5.6-cli
+      - php5.6-curl
+      - php5.6-dom
+      - php5.6-imap
+      - php5.6-intl
+      - php5.6-mcrypt
+      - php5.6-fpm
+      - php5.6-mbstring
+      - php5.6-mysql
+      - php5.6-sqlite3
+      - php5.6-zip
+      - php5.6-bcmath
+      - php5.6-xdebug
 xdebug:
     install: '1'
 composer:

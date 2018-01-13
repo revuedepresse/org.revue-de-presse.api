@@ -22,7 +22,7 @@
 
 - name: enable rabbitmq plugins
   rabbitmq_plugin: names={{ item }} state=enabled
-  with_items: rabbitmq.plugins
+  with_items: "{{ rabbitmq.plugins }}"
   when: rabbitmq.plugins is defined
 
 - name: add user
