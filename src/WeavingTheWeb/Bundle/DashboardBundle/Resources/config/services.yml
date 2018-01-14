@@ -130,6 +130,8 @@ services:
         arguments:
             - @validator
             - @logger
+        properties:
+            registry: @doctrine
         calls:
             - [ setCharset, [ %database_charset_read% ] ]
             - [ setHost, [ %database_host_read% ] ]

@@ -232,7 +232,7 @@ class TweetController extends Controller
         $connection = $this->container->get('weaving_the_web_dashboard.dbal_connection.read');
 
         $query = '
-            SELECT ust_text as Tweet, ust_original_id as Id, ust_created_at as CreationDate
+            SELECT ust_text as Tweet, ust_status_id as Id, ust_created_at as CreationDate,
             CONCAT("https://twitter.com/'.$handle.'/status/", us.ust_status_id) as link
             FROM weaving_twitter_user_stream us
             LEFT JOIN weaving_status_aggregate sa ON us.ust_id = sa.status_id
@@ -242,7 +242,7 @@ class TweetController extends Controller
             LIMIT 100
         ';
 
-        $results = $connection->executeQuery($query);
+        $results = $connection->executeQuery($query, [], 'read');
 
         return new JsonResponse($results);
     }
