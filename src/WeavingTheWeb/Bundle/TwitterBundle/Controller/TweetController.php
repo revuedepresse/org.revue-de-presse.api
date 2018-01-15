@@ -224,15 +224,17 @@ class TweetController extends Controller
     /**
      * @Extra\Route("/list/{handle}", name="weaving_the_web_dashboard_list_tweets")
      *
+     * @param Request $request
+     * @param $handle
+     * @return JsonResponse
+     *
      * @return JsonResponse
      */
-    public function listTweetsAction($handle)
+    public function listTweetsAction(Request $request, $handle)
     {
-        /** @var \WeavingTheWeb\Bundle\DashboardBundle\DBAL\Connection $connection */
-        $connection = $this->container->get('weaving_the_web_dashboard.dbal_connection.read');
-
         $query = '
             SELECT ust_text as Tweet, ust_status_id as Id, ust_created_at as CreationDate,
+            ust_api_document api_document,
             CONCAT("https://twitter.com/'.$handle.'/status/", us.ust_status_id) as link
             FROM weaving_twitter_user_stream us
             LEFT JOIN weaving_status_aggregate sa ON us.ust_id = sa.status_id
@@ -242,9 +244,100 @@ class TweetController extends Controller
             LIMIT 100
         ';
 
+        /** @var \WeavingTheWeb\Bundle\DashboardBundle\DBAL\Connection $connection */
+        $connection = $this->container->get('weaving_the_web_dashboard.dbal_connection.read');
+        $results = $connection->executeQuery($query, [], 'read');
+
+        if (
+            !is_object($results) ||
+            !in_array('records', array_keys(get_object_vars($results))) ||
+            !is_array($results->records)
+        ) {
+            return new JsonResponse([]);
+        }
+
+        $results->records = array_map(function ($row) {
+            $decodedDocument = json_decode($row['api_document'], true);
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                return [];
+            }
+
+            unset($row['api_document']);
+
+            return array_merge(
+                $row,
+                [
+                    'favorites' => $this->countFavourites($decodedDocument),
+                    'retweets' => $this->countRetweets($decodedDocument),
+                ]
+            );
+        }, $results->records);
+
+        if ($request->query->has('sort_by')) {
+            usort($results->records, function ($a, $b) use ($request) {
+                $criteria = $request->query->get('sort_by');
+
+                if ($a[$criteria] > $b[$criteria]) {
+                    return -1;
+                }
+
+                if ($a[$criteria] < $b[$criteria]) {
+                    return 1;
+                }
+
+                return 0;
+            });
+        }
+
+        return new JsonResponse($results);
+    }
+
+    /**
+     * @Extra\Route("/list-aggregates", name="weaving_the_web_dashboard_list_aggregates")
+     *
+     * @return JsonResponse
+     *
+     * @return JsonResponse
+     */
+    public function listAggregatesAction()
+    {
+        $query = '
+            SELECT a.name
+            FROM weaving_aggregate a
+            ORDER BY name
+        ';
+
+        /** @var \WeavingTheWeb\Bundle\DashboardBundle\DBAL\Connection $connection */
+        $connection = $this->container->get('weaving_the_web_dashboard.dbal_connection.read');
         $results = $connection->executeQuery($query, [], 'read');
 
         return new JsonResponse($results);
+    }
+
+    /**
+     * @param $decodedDocument
+     * @return int
+     */
+    private function countFavourites($decodedDocument)
+    {
+        if (array_key_exists('favorite_count', $decodedDocument)) {
+            return $decodedDocument['favorite_count'];
+        }
+
+        return 0;
+    }
+
+    /**
+     * @param $decodedDocument
+     * @return int
+     */
+    private function countRetweets($decodedDocument)
+    {
+        if (array_key_exists('retweet_count', $decodedDocument)) {
+            return $decodedDocument['retweet_count'];
+        }
+
+        return 0;
     }
 
     /**
