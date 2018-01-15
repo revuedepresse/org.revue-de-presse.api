@@ -298,8 +298,6 @@ class TweetController extends Controller
      * @Extra\Route("/list-aggregates", name="weaving_the_web_twitter_list_aggregates")
      *
      * @return JsonResponse
-     *
-     * @return JsonResponse
      */
     public function listAggregatesAction()
     {
@@ -314,6 +312,45 @@ class TweetController extends Controller
         $results = $connection->executeQuery($query, [], 'read');
 
         return new JsonResponse($results);
+    }
+
+    /**
+     * @Extra\Route("/show-user/{identifier}", name="weaving_the_web_twitter_show_user")
+     *
+     * @param $identifier
+     * @return JsonResponse
+     */
+    public function showUserAction($identifier)
+    {
+        $accessor = $this->get('weaving_the_web_twitter.api_accessor');
+
+        return new JsonResponse($accessor->showUser($identifier));
+    }
+
+    /**
+     * @Extra\Route("/show-user-stream/{identifier}", name="weaving_the_web_twitter_show_user_stream")
+     *
+     * @param $identifier
+     * @return JsonResponse
+     *
+     * @see https://developer.twitter.com/en/docs/tweets/timelines/api-reference/get-statuses-user_timeline.html
+     */
+    public function showUserStreamAction(Request $request, $identifier)
+    {
+        $accessor = $this->get('weaving_the_web_twitter.api_accessor');
+
+        $shouldTrimUser = false;
+        if ($request->query->has('trim_user')) {
+            $shouldTrimUser = $request->query->get('trim_user');
+        }
+
+        return new JsonResponse($accessor->fetchTimelineStatuses([
+            'screen_name' => $identifier,
+            'include_rts' => true,
+            'exclude_replies' => false,
+            'count' => 200,
+            'trim_user' => $shouldTrimUser
+        ]));
     }
 
     /**
