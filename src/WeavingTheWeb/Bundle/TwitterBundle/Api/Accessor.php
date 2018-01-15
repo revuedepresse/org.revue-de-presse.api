@@ -332,21 +332,36 @@ class Accessor implements TwitterErrorAwareInterface
         } else {
             $resultsCount = 1;
         }
-        $validatedOptions[] = 'count' . '=' . $resultsCount;
+        $validatedOptions[] = 'count=' . intval($resultsCount);
 
         if (isset($options->{'max_id'})) {
             $maxId = $options->{'max_id'};
-            $validatedOptions[] = 'max_id' . '=' . $maxId;
+            $validatedOptions[] = 'max_id=' . intval($maxId);
         }
 
         if (isset($options->{'screen_name'})) {
             $screenName = $options->{'screen_name'};
-            $validatedOptions[] = 'screen_name' . '=' . $screenName;
+            $validatedOptions[] = 'screen_name=' . $screenName;
         }
 
         if (isset($options->{'since_id'})) {
             $sinceId = $options->{'since_id'};
-            $validatedOptions[] = 'since_id' . '=' . $sinceId;
+            $validatedOptions[] = 'since_id=' . $sinceId;
+        }
+
+        if (isset($options->{'include_rts'})) {
+            $includeRetweets = $options->{'include_rts'};
+            $validatedOptions[] = 'include_rts=' . intval($includeRetweets);
+        }
+
+        if (isset($options->{'exclude_replies'})) {
+            $excludeReplies = $options->{'exclude_replies'};
+            $validatedOptions[] = 'exclude_replies=' . intval($excludeReplies);
+        }
+
+        if (isset($options->{'trim_user'})) {
+            $trimUser = $options->{'trim_user'};
+            $validatedOptions[] = 'trim_user=' . intval($trimUser);
         }
 
         return $validatedOptions;
