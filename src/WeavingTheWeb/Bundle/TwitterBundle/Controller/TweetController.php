@@ -276,7 +276,11 @@ class TweetController extends Controller
         $this->sortRecords($request, $results);
         $results->records = $this->filterRecords($request, $results->records);
 
-        return new JsonResponse($results);
+        $response = new JsonResponse($results);
+        $response->setLastModified(null);
+        $response->setExpires(null);
+
+        return $response;
     }
 
     /**
