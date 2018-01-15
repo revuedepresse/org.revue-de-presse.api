@@ -274,6 +274,7 @@ class TweetController extends Controller
         }, $results->records);
 
         $this->sortRecords($request, $results);
+        $this->filterRecords($request, $results);
 
         return new JsonResponse($results);
     }
@@ -382,4 +383,22 @@ class TweetController extends Controller
         }
     }
 
+    /**
+     * @param Request $request
+     * @param $results
+     */
+    private function filterRecords(Request $request, $results)
+    {
+        if ($request->query->has('contains')) {
+            array_filter($results->records, function ($row) use ($request) {
+                $term = $request->query->get('contains');
+
+                if (false !== strpos(strtolower($row['Tweet']), $term)) {
+                    return true;
+                }
+
+                return false;
+            });
+        }
+    }
 }
