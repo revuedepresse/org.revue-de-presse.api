@@ -32,6 +32,8 @@ interface TwitterErrorAwareInterface
 {
     const ERROR_HOST_RESOLUTION = 6;
 
+    const ERROR_NO_DATA_AVAILABLE_FOR_SPECIFIED_ID = 8;
+
     const ERROR_AUTHENTICATION = 32;
 
     const ERROR_NOT_FOUND = 34;
