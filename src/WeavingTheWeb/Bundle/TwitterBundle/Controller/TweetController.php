@@ -222,7 +222,7 @@ class TweetController extends Controller
     }
 
     /**
-     * @Extra\Route("/list/{handle}", name="weaving_the_web_dashboard_list_tweets")
+     * @Extra\Route("/list/{handle}", name="weaving_the_web_twitter_list_tweets")
      *
      * @param Request $request
      * @param $handle
@@ -281,7 +281,21 @@ class TweetController extends Controller
     }
 
     /**
-     * @Extra\Route("/list-aggregates", name="weaving_the_web_dashboard_list_aggregates")
+     * @Extra\Route("/show-tweet/{tweetId}", name="weaving_the_web_twitter_show_tweet")
+     *
+     * @param string $tweetId
+     *
+     * @return JsonResponse
+     */
+    public function showTweetAction($tweetId)
+    {
+        $accessor = $this->get('weaving_the_web_twitter.api_accessor');
+
+        return new JsonResponse($accessor->getTweet($tweetId));
+    }
+
+    /**
+     * @Extra\Route("/list-aggregates", name="weaving_the_web_twitter_list_aggregates")
      *
      * @return JsonResponse
      *

@@ -17,6 +17,8 @@ use WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException,
  */
 class Accessor implements TwitterErrorAwareInterface
 {
+    private $statusEndpoint = '/statuses/show.json?id={{ tweet_id }}';
+
     /**
      * @var
      */
@@ -414,9 +416,12 @@ class Accessor implements TwitterErrorAwareInterface
             $this->logger->error('[code] ' . $errorCode);
             $this->logger->error('[token] ' . $token->getOauthToken());
 
-
             $reflection = new \ReflectionClass(__NAMESPACE__ . '\TwitterErrorAwareInterface');
             $errorCodes = $reflection->getConstants();
+
+            if ($errorCode === self::ERROR_NO_DATA_AVAILABLE_FOR_SPECIFIED_ID) {
+                return ['error' => $errorMessage];
+            }
 
             if (in_array($errorCode, $errorCodes)) {
                 if ($errorCode == self::ERROR_EXCEEDED_RATE_LIMIT) {
@@ -655,5 +660,26 @@ class Accessor implements TwitterErrorAwareInterface
             isset($response->errors) &&
             is_array($response->errors) &&
             isset($response->errors[0]);
+    }
+
+    /**
+     * @param string $version
+     * @return string
+     */
+    protected function getShowTweetEndpoint($version = '1.1')
+    {
+        return $this->getApiBaseUrl($version).$this->statusEndpoint;
+    }
+
+    /**
+     * @param $id
+     *
+     * @return string
+     */
+    public function getTweet($id)
+    {
+        $showTweetEndpoint = $this->getShowTweetEndpoint();
+
+        return $this->contactEndpoint(strtr($showTweetEndpoint, ['{{ tweet_id }}' => $id]));
     }
 }
