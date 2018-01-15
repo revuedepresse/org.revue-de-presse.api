@@ -263,6 +263,7 @@ class TweetController extends Controller
             }
 
             unset($row['api_document']);
+            $row['Tweet'] = $decodedDocument['text'];
 
             return array_merge(
                 $row,
@@ -276,11 +277,7 @@ class TweetController extends Controller
         $this->sortRecords($request, $results);
         $results->records = $this->filterRecords($request, $results->records);
 
-        $response = new JsonResponse($results);
-        $response->setLastModified(null);
-        $response->setExpires(null);
-
-        return $response;
+        return new JsonResponse($results);
     }
 
     /**
