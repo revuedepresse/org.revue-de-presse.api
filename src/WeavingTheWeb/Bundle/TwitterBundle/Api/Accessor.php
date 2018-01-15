@@ -359,23 +359,10 @@ class Accessor implements TwitterErrorAwareInterface
      */
     public function contactEndpoint($endpoint)
     {
-        $parameters = array();
-        $response = null;
-
         $tokens = $this->getTokens();
         $httpClient = $this->httpClient;
 
-        /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token */
-        $token = $this->tokenRepository->refreshFreezeCondition($tokens['oauth'], $this->logger);
-        if ($token->isFrozen()) {
-            $now = new \DateTime;
-            $this->moderator->waitFor(
-                $token->getFrozenUntil()->getTimestamp() - $now->getTimestamp(),
-                [
-                    '{{ token }}' => substr($token->getOauthToken(), 0, '8'),
-                ]
-            );
-        }
+        $token = $this->beforeMakingContactWithApi($tokens);
 
         try {
             if (is_null($this->authenticationHeader)) {
@@ -387,7 +374,7 @@ class Accessor implements TwitterErrorAwareInterface
                     $tokens['oauth_secret']
                 );
 
-                $content = $connection->get($endpoint, $parameters);
+                $content = $connection->get($endpoint, []);
             } else {
                 $this->setupClient();
 
@@ -407,42 +394,7 @@ class Accessor implements TwitterErrorAwareInterface
             ]]];
         }
 
-        $this->logger->info('[info] ' . $endpoint);
-        if ($this->hasError($content)) {
-            $errorMessage = $content->errors[0]->message;
-            $errorCode = $content->errors[0]->code;
-
-            $this->logger->error('[message] ' . $errorMessage);
-            $this->logger->error('[code] ' . $errorCode);
-            $this->logger->error('[token] ' . $token->getOauthToken());
-
-            $reflection = new \ReflectionClass(__NAMESPACE__ . '\TwitterErrorAwareInterface');
-            $errorCodes = $reflection->getConstants();
-
-            if ($errorCode === self::ERROR_NO_DATA_AVAILABLE_FOR_SPECIFIED_ID) {
-                return ['error' => $errorMessage];
-            }
-
-            if (in_array($errorCode, $errorCodes)) {
-                if ($errorCode == self::ERROR_EXCEEDED_RATE_LIMIT) {
-                    $this->tokenRepository->freezeToken($token->getOauthToken());
-                }
-                $this->throwException($errorMessage, $errorCode);
-            } else {
-                /** Freeze token and wait for 15 minutes before getting back to operation */
-                $this->tokenRepository->freezeToken($token->getOauthToken());
-                $this->moderator->waitFor(
-                    15*60,
-                    [
-                        '{{ token }}' => substr($token->getOauthToken(), 0, '8'),
-                    ]
-                );
-
-                return $this->contactEndpoint($endpoint);
-            }
-        }
-
-        return $content;
+        return $this->afterMakingContactWithApi($endpoint, $content, $token);
     }
 
     /**
@@ -681,5 +633,73 @@ class Accessor implements TwitterErrorAwareInterface
         $showTweetEndpoint = $this->getShowTweetEndpoint();
 
         return $this->contactEndpoint(strtr($showTweetEndpoint, ['{{ tweet_id }}' => $id]));
+    }
+
+    /**
+     * @param $tokens
+     * @return \WeavingTheWeb\Bundle\ApiBundle\Entity\Token
+     */
+    private function beforeMakingContactWithApi($tokens)
+    {
+        /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token */
+        $token = $this->tokenRepository->refreshFreezeCondition($tokens['oauth'], $this->logger);
+        if ($token->isFrozen()) {
+            $now = new \DateTime;
+            $this->moderator->waitFor(
+                $token->getFrozenUntil()->getTimestamp() - $now->getTimestamp(),
+                [
+                    '{{ token }}' => substr($token->getOauthToken(), 0, '8'),
+                ]
+            );
+        }
+
+        return $token;
+    }
+
+    /**
+     * @param $endpoint
+     * @param $content
+     * @param $token
+     * @return \API|array|mixed|object
+     */
+    private function afterMakingContactWithApi($endpoint, $content, $token)
+    {
+        $this->logger->info('[info] ' . $endpoint);
+
+        if (!$this->hasError($content)) {
+            return $content;
+        }
+
+        $errorMessage = $content->errors[0]->message;
+        $errorCode = $content->errors[0]->code;
+
+        $this->logger->error('[message] ' . $errorMessage);
+        $this->logger->error('[code] ' . $errorCode);
+        $this->logger->error('[token] ' . $token->getOauthToken());
+
+        $reflection = new \ReflectionClass(__NAMESPACE__ . '\TwitterErrorAwareInterface');
+        $errorCodes = $reflection->getConstants();
+
+        if ($errorCode === self::ERROR_NO_DATA_AVAILABLE_FOR_SPECIFIED_ID) {
+            return ['error' => $errorMessage];
+        }
+
+        if (in_array($errorCode, $errorCodes)) {
+            if ($errorCode == self::ERROR_EXCEEDED_RATE_LIMIT) {
+                $this->tokenRepository->freezeToken($token->getOauthToken());
+            }
+            $this->throwException($errorMessage, $errorCode);
+        }
+
+        /** Freeze token and wait for 15 minutes before getting back to operation */
+        $this->tokenRepository->freezeToken($token->getOauthToken());
+        $this->moderator->waitFor(
+            15 * 60,
+            [
+                '{{ token }}' => substr($token->getOauthToken(), 0, '8'),
+            ]
+        );
+
+        return $this->contactEndpoint($endpoint);
     }
 }
