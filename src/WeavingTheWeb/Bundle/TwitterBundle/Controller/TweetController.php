@@ -273,21 +273,7 @@ class TweetController extends Controller
             );
         }, $results->records);
 
-        if ($request->query->has('sort_by')) {
-            usort($results->records, function ($a, $b) use ($request) {
-                $criteria = $request->query->get('sort_by');
-
-                if ($a[$criteria] > $b[$criteria]) {
-                    return -1;
-                }
-
-                if ($a[$criteria] < $b[$criteria]) {
-                    return 1;
-                }
-
-                return 0;
-            });
-        }
+        $this->sortRecords($request, $results);
 
         return new JsonResponse($results);
     }
@@ -372,4 +358,28 @@ class TweetController extends Controller
             return $this->getCorsOptionsResponse();
         }
     }
+
+    /**
+     * @param Request $request
+     * @param $results
+     */
+    private function sortRecords(Request $request, $results)
+    {
+        if ($request->query->has('sort_by')) {
+            usort($results->records, function ($a, $b) use ($request) {
+                $criteria = $request->query->get('sort_by');
+
+                if ($a[$criteria] > $b[$criteria]) {
+                    return -1;
+                }
+
+                if ($a[$criteria] < $b[$criteria]) {
+                    return 1;
+                }
+
+                return 0;
+            });
+        }
+    }
+
 }
