@@ -262,21 +262,68 @@ class Accessor implements TwitterErrorAwareInterface
     }
 
     /**
-     * Fetch timeline statuses
+     * Fetch user timeline statuses
      *
      * @param $options
      * @return \API|mixed|object
      * @throws \Exception
      */
     public function fetchTimelineStatuses($options){
+        return $this->fetchTimeline(
+            function () {
+                return $this->getUserTimelineStatusesEndpoint();
+            },
+            $options
+        );
+   	}
+
+   	/**
+     * Fetch home timeline statuses
+     *
+     * @param $options
+     * @return \API|mixed|object
+     * @throws \Exception
+     */
+    public function fetchHomeTimelineStatuses($options){
+        return $this->fetchTimeline(
+            function () {
+                return $this->getHomeTimelineStatusesEndpoint();
+            },
+            $options
+        );
+   	}
+
+    /**
+     * Fetch timeline
+     *
+     * @param callable $endpointGetter
+     * @param array     $options
+     * @return \API|mixed|object
+     * @throws \Exception
+     */
+    public function fetchTimeline(callable $endpointGetter, $options){
    		if (is_null($options) || (!is_object($options) && !is_array($options))) {
             throw new \Exception('Invalid options');
         } else {
             if (is_array($options)) {
                 $options = (object) $options;
             }
+
             $parameters = $this->validateRequestOptions($options);
-            $endpoint = $this->getUserTimelineStatusesEndpoint() . '&' . implode('&', $parameters);
+
+            if (!array_key_exists('trim_user', $parameters)) {
+                $parameters['trim_user'] = 0;
+            }
+
+            if (!array_key_exists('include_entities', $parameters)) {
+                $parameters['include_entities'] = 1;
+            }
+
+            if (!array_key_exists('exclude_replies', $parameters)) {
+                $parameters['exclude_replies'] = 0;
+            }
+
+            $endpoint = $endpointGetter(). '?'.implode('&', $parameters);
 
             return $this->contactEndpoint($endpoint);
         }
@@ -288,8 +335,16 @@ class Accessor implements TwitterErrorAwareInterface
      */
     protected function getUserTimelineStatusesEndpoint($version = '1.1')
     {
-        return $this->getApiBaseUrl($version) . '/statuses/user_timeline.json?' .
-            'include_entities=1&include_rts=1&exclude_replies=0&trim_user=0';
+        return $this->getApiBaseUrl($version) . '/statuses/user_timeline.json';
+    }
+
+    /**
+     * @param string $version
+     * @return string
+     */
+    protected function getHomeTimelineStatusesEndpoint($version = '1.1')
+    {
+        return $this->getApiBaseUrl($version) . '/statuses/home_timeline.json';
     }
 
     /**
