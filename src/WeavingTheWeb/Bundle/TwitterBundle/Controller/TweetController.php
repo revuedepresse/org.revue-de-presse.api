@@ -233,7 +233,7 @@ class TweetController extends Controller
     public function listTweetsAction(Request $request, $handle)
     {
         $query = '
-            SELECT ust_text as Tweet, ust_status_id as Id, ust_created_at as CreationDate,
+            SELECT ust_text as text, ust_status_id as Id, ust_created_at as CreationDate,
             ust_api_document api_document,
             CONCAT("https://twitter.com/'.$handle.'/status/", us.ust_status_id) as link
             FROM weaving_twitter_user_stream us
@@ -263,7 +263,7 @@ class TweetController extends Controller
             }
 
             unset($row['api_document']);
-            $row['Tweet'] = $decodedDocument['text'];
+            $row['text'] = $decodedDocument['text'];
 
             return array_merge(
                 $row,
@@ -274,8 +274,8 @@ class TweetController extends Controller
             );
         }, $results->records);
 
-        $this->sortRecords($request, $results);
-        $results->records = $this->filterRecords($request, $results->records);
+        $results->records = $this->sortStatuses($request, $results->records);
+        $results->records = $this->filterStatuses($request, $results->records);
 
         return new JsonResponse($results);
     }
@@ -354,6 +354,46 @@ class TweetController extends Controller
     }
 
     /**
+     * @Extra\Route("/show-home-stream", name="weaving_the_web_twitter_show_home_stream")
+     *
+     * @return JsonResponse
+     *
+     * @see https://developer.twitter.com/en/docs/tweets/timelines/api-reference/get-statuses-home_timeline
+     */
+    public function showHomeStreamAction(Request $request)
+    {
+        $accessor = $this->get('weaving_the_web_twitter.api_accessor');
+
+        $shouldTrimUser = false;
+        if ($request->query->has('trim_user')) {
+            $shouldTrimUser = $request->query->get('trim_user');
+        }
+
+        $statuses = (array) $accessor->fetchHomeTimelineStatuses([
+            'exclude_replies' => false,
+            'count' => 800,
+            'trim_user' => $shouldTrimUser
+        ]);
+
+        array_walk($statuses, function ($status, $index) use (&$statuses) {
+            $status = (array) $status;
+            $user = (array) $status['user'];
+
+            $statuses[$index] = [
+                'text' => $status['text'],
+                'user' => $user['screen_name'],
+                'created_at' => $status['created_at'],
+                'retweet_count' => $status['retweet_count'],
+                'favorite_count' => $status['favorite_count'],
+            ];
+        });
+        $statuses = $this->sortStatuses($request, $statuses);
+        $statuses = $this->filterStatuses($request, $statuses);
+
+        return new JsonResponse($statuses);
+    }
+
+    /**
      * @param $decodedDocument
      * @return int
      */
@@ -414,12 +454,13 @@ class TweetController extends Controller
 
     /**
      * @param Request $request
-     * @param $results
+     * @param $statuses
+     * @return mixed
      */
-    private function sortRecords(Request $request, $results)
+    private function sortStatuses(Request $request, $statuses)
     {
         if ($request->query->has('sort_by')) {
-            usort($results->records, function ($a, $b) use ($request) {
+            usort($statuses, function ($a, $b) use ($request) {
                 $criteria = $request->query->get('sort_by');
 
                 if ($a[$criteria] > $b[$criteria]) {
@@ -433,6 +474,8 @@ class TweetController extends Controller
                 return 0;
             });
         }
+
+        return $statuses;
     }
 
     /**
@@ -440,13 +483,13 @@ class TweetController extends Controller
      * @param array   $records
      * @return array
      */
-    private function filterRecords(Request $request, $records)
+    private function filterStatuses(Request $request, $records)
     {
         if ($request->query->has('contains')) {
             return array_filter($records, function ($row) use ($request) {
                 $term = $request->query->get('contains');
 
-                if (false !== strpos(strtolower($row['Tweet']), $term)) {
+                if (false !== strpos(strtolower($row['text']), $term)) {
                     return true;
                 }
 
