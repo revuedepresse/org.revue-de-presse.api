@@ -175,6 +175,7 @@ class TweetController extends Controller
                 'Access-Control-Allow-Headers' => implode(
                     ', ',
                     [
+                        'Authorization',
                         'Keep-Alive',
                         'User-Agent',
                         'X-Requested-With',
@@ -328,15 +329,20 @@ class TweetController extends Controller
     }
 
     /**
+     * @see https://developer.twitter.com/en/docs/tweets/timelines/api-reference/get-statuses-user_timeline.html
+     *
      * @Extra\Route("/show-user-stream/{identifier}", name="weaving_the_web_twitter_show_user_stream")
      *
+     * @param Request $request
      * @param $identifier
      * @return JsonResponse
-     *
-     * @see https://developer.twitter.com/en/docs/tweets/timelines/api-reference/get-statuses-user_timeline.html
      */
     public function showUserStreamAction(Request $request, $identifier)
     {
+        if ($request->isMethod('OPTIONS')) {
+            return $this->getCorsOptionsResponse();
+        }
+
         $accessor = $this->get('weaving_the_web_twitter.api_accessor');
 
         $shouldTrimUser = false;
@@ -344,13 +350,17 @@ class TweetController extends Controller
             $shouldTrimUser = $request->query->get('trim_user');
         }
 
-        return new JsonResponse($accessor->fetchTimelineStatuses([
-            'screen_name' => $identifier,
-            'include_rts' => true,
-            'exclude_replies' => false,
-            'count' => 200,
-            'trim_user' => $shouldTrimUser
-        ]));
+        return new JsonResponse(
+            $accessor->fetchTimelineStatuses([
+                'screen_name' => $identifier,
+                'include_rts' => true,
+                'exclude_replies' => false,
+                'count' => 200,
+                'trim_user' => $shouldTrimUser
+            ]),
+            200,
+            ['Access-Control-Allow-Origin' => '*']
+        );
     }
 
     /**
@@ -362,6 +372,10 @@ class TweetController extends Controller
      */
     public function showHomeStreamAction(Request $request)
     {
+        if ($request->isMethod('OPTIONS')) {
+            return $this->getCorsOptionsResponse();
+        }
+
         $accessor = $this->get('weaving_the_web_twitter.api_accessor');
 
         $shouldTrimUser = false;
@@ -390,7 +404,22 @@ class TweetController extends Controller
         $statuses = $this->sortStatuses($request, $statuses);
         $statuses = $this->filterStatuses($request, $statuses);
 
-        return new JsonResponse($statuses);
+        $response = new JsonResponse(
+            $statuses,
+            200,
+            ['Access-Control-Allow-Origin' => '*']
+        );
+
+        $twoDays = 3600 * 24 * 2;
+        $response->setSharedMaxAge($twoDays);
+
+        $date = new \DateTime();
+        $date->modify('+'.$twoDays.' seconds');
+
+        $response->setExpires($date);
+        $response->setPublic();
+
+        return $response;
     }
 
     /**
