@@ -385,6 +385,8 @@ class TweetController extends Controller
             $status->user = $status->user->screen_name;
             $userTimeline[$index] = $status;
         });
+        $userTimeline = $this->sortStatuses($request, $userTimeline);
+        $userTimeline = $this->filterStatuses($request, $userTimeline);
 
         $response = new JsonResponse(
             $userTimeline,
@@ -537,6 +539,11 @@ class TweetController extends Controller
         if ($request->query->has('sort_by')) {
             usort($statuses, function ($a, $b) use ($request) {
                 $criteria = $request->query->get('sort_by');
+
+                if (!is_array($a)) {
+                    $a = (array) $a;
+                    $b = (array) $b;
+                }
 
                 if ($a[$criteria] > $b[$criteria]) {
                     return -1;
