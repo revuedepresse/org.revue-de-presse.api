@@ -443,6 +443,8 @@ class Accessor implements TwitterErrorAwareInterface
                     $tokens['oauth'],
                     $tokens['oauth_secret']
                 );
+                $connection->timeout = 3600;
+                $connection->connecttimeout = 3600;
 
                 $content = $connection->get($endpoint, []);
             } else {
@@ -489,7 +491,7 @@ class Accessor implements TwitterErrorAwareInterface
         $httpClientClass = $this->httpClientClass;
         $httpClient = new $httpClientClass([
             RequestOptions::VERIFY => false,
-            RequestOptions::TIMEOUT => 1800
+            RequestOptions::TIMEOUT => 3600*60
         ]);
 
         $this->httpClient->setClient($httpClient);

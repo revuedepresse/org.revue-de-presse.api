@@ -172,6 +172,7 @@ class TweetController extends Controller
             200,
             [
                 'Access-Control-Allow-Origin' => '*',
+                'Access-Control-Allow-Methods' => 'GET, OPTIONS',
                 'Access-Control-Allow-Headers' => implode(
                     ', ',
                     [
@@ -296,12 +297,16 @@ class TweetController extends Controller
     }
 
     /**
-     * @Extra\Route("/list-aggregates", name="weaving_the_web_twitter_list_aggregates")
+     * @Extra\Route("/show-aggregate-stream", name="weaving_the_web_twitter_list_aggregates")
      *
      * @return JsonResponse
      */
-    public function listAggregatesAction()
+    public function showAggregatesAction(Request $request)
     {
+        if ($request->isMethod('OPTIONS')) {
+            return $this->getCorsOptionsResponse();
+        }
+
         $query = '
             SELECT a.name
             FROM weaving_aggregate a
@@ -312,7 +317,22 @@ class TweetController extends Controller
         $connection = $this->container->get('weaving_the_web_dashboard.dbal_connection.read');
         $results = $connection->executeQuery($query, [], 'read');
 
-        return new JsonResponse($results);
+        $response = new JsonResponse(
+            $results->records,
+            200,
+            ['Access-Control-Allow-Origin' => '*']
+        );
+
+        $twoDays = 3600 * 24 * 2;
+        $response->setSharedMaxAge($twoDays);
+
+        $date = new \DateTime();
+        $date->modify('+'.$twoDays.' seconds');
+
+        $response->setExpires($date);
+        $response->setPublic();
+
+        return $response;;
     }
 
     /**
@@ -337,10 +357,14 @@ class TweetController extends Controller
      * @param $identifier
      * @return JsonResponse
      */
-    public function showUserStreamAction(Request $request, $identifier)
+    public function showUserStreamAction(Request $request, $identifier = null)
     {
         if ($request->isMethod('OPTIONS')) {
             return $this->getCorsOptionsResponse();
+        }
+
+        if (is_null($identifier)) {
+            $identifier = 'thierrymarianne';
         }
 
         $accessor = $this->get('weaving_the_web_twitter.api_accessor');
@@ -350,17 +374,34 @@ class TweetController extends Controller
             $shouldTrimUser = $request->query->get('trim_user');
         }
 
-        return new JsonResponse(
-            $accessor->fetchTimelineStatuses([
-                'screen_name' => $identifier,
-                'include_rts' => true,
-                'exclude_replies' => false,
-                'count' => 200,
-                'trim_user' => $shouldTrimUser
-            ]),
+        $userTimeline = $accessor->fetchTimelineStatuses([
+            'screen_name' => $identifier,
+            'include_rts' => true,
+            'exclude_replies' => false,
+            'count' => 200,
+            'trim_user' => $shouldTrimUser
+        ]);
+        array_walk($userTimeline, function ($status, $index) use (&$userTimeline) {
+            $status->user = $status->user->screen_name;
+            $userTimeline[$index] = $status;
+        });
+
+        $response = new JsonResponse(
+            $userTimeline,
             200,
             ['Access-Control-Allow-Origin' => '*']
         );
+
+        $twoDays = 3600 * 24 * 2;
+        $response->setSharedMaxAge($twoDays);
+
+        $date = new \DateTime();
+        $date->modify('+'.$twoDays.' seconds');
+
+        $response->setExpires($date);
+        $response->setPublic();
+
+        return $response;
     }
 
     /**
@@ -393,9 +434,14 @@ class TweetController extends Controller
             $status = (array) $status;
             $user = (array) $status['user'];
 
+            $screenName = '';
+            if (array_key_exists('screen_name', $user)) {
+                $screenName = $user['screen_name'];
+            }
+
             $statuses[$index] = [
                 'text' => $status['text'],
-                'user' => $user['screen_name'],
+                'user' => $screenName,
                 'created_at' => $status['created_at'],
                 'retweet_count' => $status['retweet_count'],
                 'favorite_count' => $status['favorite_count'],
