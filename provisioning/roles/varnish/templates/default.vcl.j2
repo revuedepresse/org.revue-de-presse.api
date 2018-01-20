@@ -1,38 +1,143 @@
-{% if varnish_version | version_compare('4.0', '>=') %}
-vcl 4.0;
-{% endif %}
-
 # This is a basic VCL configuration file for varnish.  See the vcl(7)
 # man page for details on VCL syntax and semantics.
 #
 # Default backend definition.  Set this to point to your content
 # server.
+#
+vcl 4.0;
+
+
 backend default {
-  .host = "{{ varnish_default_backend_host }}";
-  .port = "{{ varnish_default_backend_port }}";
+    .host = "127.0.0.1";
+    .port = "8080";
 }
 
-{% if varnish_backends is defined %}
-# Other backend servers.
-{% for backend, value in varnish_backends.iteritems() %}
-backend {{ backend }} {
-  .host = "{{ value.host }}";
-  .port = "{{ value.port }}";
+// Acl's can contain IP's, subnets and hostnames
+acl purge {
+    "localhost";
 }
-{% endfor %}
-{% endif %}
 
 sub vcl_recv {
-{% if varnish_vhosts is defined %}
-  # Varnish vhosts.
-{% for vhost, value in varnish_vhosts.iteritems() if varnish_vhosts is defined %}
-  {% if loop.first %}
-  if (req.http.host == "{{ vhost }}" || req.http.host == "www.{{ vhost }}") {
-  {% else %}
-  elseif (req.http.host == "{{ vhost }}" || req.http.host == "www.{{ vhost }}") {
-  {% endif %}
-    set req.backend_hint = {{ value.backend }};
-  }
-{% endfor %}
-{% endif %}
+    set req.http.Surrogate-Capability = "abc=ESI/1.0";
+
+    if (req.http.Accept-Encoding) {
+        if (req.url ~ "\.(jpg|png|gif|gz|tgz|bz2|tbz|mp3|ogg)$") {
+            # No point in compressing these
+            unset req.http.Accept-Encoding;
+        } elsif (req.http.Accept-Encoding ~ "gzip") {
+            set req.http.Accept-Encoding = "gzip";
+        } elsif (req.http.Accept-Encoding ~ "deflate" && req.http.user-agent !~ "MSIE") {
+            set req.http.Accept-Encoding = "deflate";
+        } else {
+            # unkown algorithm
+            unset req.http.Accept-Encoding;
+        }
+    }
+
+    // Match PURGE request to avoid cache bypassing
+    if (req.method == "PURGE") {
+        // Match client IP to the acl
+        if (!client.ip ~ purge) {
+            // Deny access
+            return (synth(405, "Not allowed."));
+        }
+        return(hash);
+    }
 }
+
+sub vcl_backend_response {
+    /*
+    Check for ESI acknowledgement
+    and remove Surrogate-Control header
+    */
+    if (beresp.http.Surrogate-Control ~ "ESI/1.0") {
+        unset beresp.http.Surrogate-Control;
+
+        // For Varnish >= 3.0
+        set beresp.do_esi = true;
+        // For Varnish < 3.0
+        // esi;
+    }
+    /* By default Varnish ignores Cache-Control: nocache
+    (https://www.varnish-cache.org/docs/3.0/tutorial/increasing_your_hitrate.html#cache-control),
+    so in order avoid caching it has to be done explicitly */
+    if (beresp.http.Pragma ~ "no-cache" ||
+        beresp.http.Cache-Control ~ "no-cache" ||
+        beresp.http.Cache-Control ~ "private") {
+        set beresp.uncacheable = true;
+        set beresp.ttl = 120s;
+        return (deliver);
+    }
+}
+
+# Below is a commented-out copy of the default VCL logic.  If you
+# redefine any of these subroutines, the built-in logic will be
+# appended to your code.
+sub vcl_recv {
+    set req.http.X-Forwarded-Port = "80";
+
+    if (req.restarts == 0) {
+        if (req.http.x-forwarded-for) {
+            set req.http.X-Forwarded-For =
+            req.http.X-Forwarded-For + ", " + client.ip;
+        } else {
+            set req.http.X-Forwarded-For = client.ip;
+        }
+    }
+    if (req.method != "GET" &&
+      req.method != "HEAD" &&
+      req.method != "PUT" &&
+      req.method != "POST" &&
+      req.method != "TRACE" &&
+      req.method != "OPTIONS" &&
+      req.method != "DELETE") {
+        /* Non-RFC2616 or CONNECT which is weird. */
+        return (pipe);
+    }
+    if (req.method != "GET" && req.method != "HEAD") {
+        /* We only deal with GET and HEAD by default */
+        return (pass);
+    }
+
+    if (req.http.Cookie) {
+        set req.http.Cookie = ";" + req.http.Cookie;
+        set req.http.Cookie = regsuball(req.http.Cookie, "; +", ";");
+        set req.http.Cookie = regsuball(req.http.Cookie, ";(PHPSESSID)=", "; \1=");
+        set req.http.Cookie = regsuball(req.http.Cookie, ";[^ ][^;]*", "");
+        set req.http.Cookie = regsuball(req.http.Cookie, "^[; ]+|[; ]+$", "");
+
+        set req.http.X-Cookie-Debug = "Request cookie: " + req.http.Cookie;
+
+        if (req.http.Cookie == "") {
+            unset req.http.Cookie;
+        }
+    }
+
+    return (hash);
+}
+
+sub vcl_pass {
+    set req.http.X-Forwarded-Port = "80";
+    set req.http.X-Forwarded-Proto = "http";
+}
+
+sub vcl_hit {
+    // Match PURGE request
+    if (req.method == "PURGE") {
+        // Force object expiration for Varnish < 3.0
+        // set obj.ttl = 0s;
+        // Do an actual purge for Varnish >= 3.0
+        // purge;
+        return (synth(200, "Purged"));
+    }
+}
+
+sub vcl_miss {
+    // Match PURGE request
+    if (req.method == "PURGE") {
+        // Indicate that the object isn't stored in cache
+        return (synth(404, "Not purged"));
+    }
+}
+
+
