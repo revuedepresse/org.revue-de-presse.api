@@ -234,8 +234,12 @@ class TweetController extends Controller
      */
     public function listTweetsAction(Request $request, $handle)
     {
+        if ($request->isMethod('OPTIONS')) {
+            return $this->getCorsOptionsResponse();
+        }
+
         $query = '
-            SELECT ust_text as text, ust_status_id as Id, ust_created_at as CreationDate,
+            SELECT ust_text as text, ust_status_id as Id, ust_created_at as created_at,
             ust_api_document api_document,
             CONCAT("https://twitter.com/'.$handle.'/status/", us.ust_status_id) as link
             FROM weaving_twitter_user_stream us
@@ -266,12 +270,14 @@ class TweetController extends Controller
 
             unset($row['api_document']);
             $row['text'] = $decodedDocument['text'];
+            $row['user'] = $decodedDocument['user']['screen_name'];
+            $row['link'] = 'https://twitter.com/'.$row['user'].'/status/'.$decodedDocument['id_str'];
 
             return array_merge(
                 $row,
                 [
-                    'favorites' => $this->countFavourites($decodedDocument),
-                    'retweets' => $this->countRetweets($decodedDocument),
+                    'favorite_count' => $this->countFavourites($decodedDocument),
+                    'retweet_count' => $this->countRetweets($decodedDocument),
                 ]
             );
         }, $results->records);
@@ -279,7 +285,22 @@ class TweetController extends Controller
         $results->records = $this->sortStatuses($request, $results->records);
         $results->records = $this->filterStatuses($request, $results->records);
 
-        return new JsonResponse($results);
+        $response = new JsonResponse(
+            $results->records,
+            200,
+            ['Access-Control-Allow-Origin' => '*']
+        );
+
+        $twoDays = 3600 * 24 * 2;
+        $response->setSharedMaxAge($twoDays);
+
+        $date = new \DateTime();
+        $date->modify('+'.$twoDays.' seconds');
+
+        $response->setExpires($date);
+        $response->setPublic();
+
+        return $response;
     }
 
     /**
@@ -332,7 +353,7 @@ class TweetController extends Controller
         $response->setExpires($date);
         $response->setPublic();
 
-        return $response;;
+        return $response;
     }
 
     /**
@@ -383,6 +404,7 @@ class TweetController extends Controller
         ]);
         array_walk($userTimeline, function ($status, $index) use (&$userTimeline) {
             $status->user = $status->user->screen_name;
+            $status->link = 'https://twitter.com/'.$status->user.'/status/'.$status->id_str;
             $userTimeline[$index] = $status;
         });
         $userTimeline = $this->sortStatuses($request, $userTimeline);
@@ -447,6 +469,7 @@ class TweetController extends Controller
                 'created_at' => $status['created_at'],
                 'retweet_count' => $status['retweet_count'],
                 'favorite_count' => $status['favorite_count'],
+                'link' => 'https://twitter.com/'.$screenName.'/status/'.$status['id'],
             ];
         });
         $statuses = $this->sortStatuses($request, $statuses);
