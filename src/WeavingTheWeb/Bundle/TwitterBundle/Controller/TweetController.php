@@ -338,19 +338,12 @@ class TweetController extends Controller
         $connection = $this->container->get('weaving_the_web_dashboard.dbal_connection.read');
         $results = $connection->executeQuery($query, [], 'read');
 
+        shuffle($results->records);
         $response = new JsonResponse(
             $results->records,
             200,
             ['Access-Control-Allow-Origin' => '*']
         );
-
-        $twoDays = 3600 * 24 * 2;
-        $response->setSharedMaxAge($twoDays);
-
-        $date = new \DateTime();
-        $date->modify('+'.$twoDays.' seconds');
-
-        $response->setExpires($date);
         $response->setPublic();
 
         return $response;
