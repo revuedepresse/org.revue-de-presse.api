@@ -552,26 +552,42 @@ class TweetController extends Controller
      */
     private function sortStatuses(Request $request, $statuses)
     {
-        if ($request->query->has('sort_by')) {
-            usort($statuses, function ($a, $b) use ($request) {
-                $criteria = $request->query->get('sort_by');
+        $criteria = 'created_at';
+        if ($request->query->has('sort_by') && $request->query->get('sort_by')) {
+            $criteria = $request->query->get('sort_by');
+        }
 
-                if (!is_array($a)) {
-                    $a = (array) $a;
-                    $b = (array) $b;
-                }
+        usort($statuses, function ($a, $b) use ($criteria) {
+            if (!is_array($a)) {
+                $a = (array) $a;
+                $b = (array) $b;
+            }
 
-                if ($a[$criteria] > $b[$criteria]) {
+            if ($criteria === 'created_at') {
+                $aDateTime = \DateTime::createFromFormat('D M j H:i:s P Y', $a[$criteria])->getTimestamp();
+                $bDateTime = \DateTime::createFromFormat('D M j H:i:s P Y', $b[$criteria])->getTimestamp();
+
+                if ($aDateTime > $bDateTime) {
                     return -1;
                 }
 
-                if ($a[$criteria] < $b[$criteria]) {
+                if ($aDateTime < $bDateTime) {
                     return 1;
                 }
 
                 return 0;
-            });
-        }
+            }
+
+            if ($a[$criteria] > $b[$criteria]) {
+                return -1;
+            }
+
+            if ($a[$criteria] < $b[$criteria]) {
+                return 1;
+            }
+
+            return 0;
+        });
 
         return $statuses;
     }
