@@ -76,29 +76,6 @@ class AppKernel extends Kernel
 
         return $bundles;
     }
-    /**
-     * @return string
-     */
-    public function getLogDir()
-    {
-        if (in_array($this->getEnvironment(), array('dev', 'test'))) {
-            return '/dev/shm/tph/logs';
-        }
-
-        return parent::getLogDir();
-    }
-
-    /**
-     * @return string
-     */
-    public function getCacheDir()
-    {
-        if (in_array($this->getEnvironment(), array('dev', 'test'))) {
-            return '/dev/shm/tph/cache';
-        }
-
-        return parent::getCacheDir();
-    }
 
     /**
      * @param LoaderInterface $loader
