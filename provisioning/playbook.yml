@@ -18,8 +18,6 @@
       tags: varnish
     - role: mysql
       tags: mysql
-    - role: phpmyadmin
-      tags: phpmyadmin
     - role: rabbitmq
       tags: rabbitmq
     - elasticsearch
@@ -33,4 +31,5 @@
         user: vagrant
         version: v0.29.0
         node_version: v4.2.2
-    - app
+    - role: app
+      tags: app

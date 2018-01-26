@@ -1,18 +1,15 @@
+# This is a basic VCL configuration file for varnish.  See the vcl(7)
+# man page for details on VCL syntax and semantics.
+#
+# Default backend definition.  Set this to point to your content
+# server.
+#
 vcl 4.0;
+
 
 backend default {
     .host = "127.0.0.1";
-    .port = "80";
-}
-
-backend devobs {
-    .host = "127.0.0.1";
     .port = "8080";
-}
-
-backend devobs_nfs {
-    .host = "127.0.0.1";
-    .port = "8081";
 }
 
 // Acl's can contain IP's, subnets and hostnames
@@ -21,12 +18,6 @@ acl purge {
 }
 
 sub vcl_recv {
-    if (req.http.host ~ "devobs.dev") {
-        set req.backend_hint = devobs;
-    } elseif (req.http.host ~ "devobs-nfs.dev") {
-        set req.backend_hint = devobs_nfs;
-    }
-
     set req.http.Surrogate-Capability = "abc=ESI/1.0";
 
     if (req.http.Accept-Encoding) {
@@ -83,6 +74,8 @@ sub vcl_backend_response {
 # redefine any of these subroutines, the built-in logic will be
 # appended to your code.
 sub vcl_recv {
+    set req.http.X-Forwarded-Port = "80";
+
     if (req.restarts == 0) {
         if (req.http.x-forwarded-for) {
             set req.http.X-Forwarded-For =
@@ -113,16 +106,11 @@ sub vcl_recv {
         set req.http.Cookie = regsuball(req.http.Cookie, ";[^ ][^;]*", "");
         set req.http.Cookie = regsuball(req.http.Cookie, "^[; ]+|[; ]+$", "");
 
-	set req.http.X-Cookie-Debug = "Request cookie: " + req.http.Cookie;
+        set req.http.X-Cookie-Debug = "Request cookie: " + req.http.Cookie;
 
         if (req.http.Cookie == "") {
             unset req.http.Cookie;
         }
-    }
-
-    if (req.http.Authorization || req.http.Cookie) {
-        /* Not cacheable by default */
-        return (pass);
     }
 
     return (hash);
@@ -131,9 +119,6 @@ sub vcl_recv {
 sub vcl_pass {
     set req.http.X-Forwarded-Port = "80";
     set req.http.X-Forwarded-Proto = "http";
-    if (req.http.Authorization || req.http.Cookie) {
-        return (fetch);
-    }
 }
 
 sub vcl_hit {
@@ -154,4 +139,5 @@ sub vcl_miss {
         return (synth(404, "Not purged"));
     }
 }
+
 

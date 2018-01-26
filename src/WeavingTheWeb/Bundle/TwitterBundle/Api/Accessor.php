@@ -17,6 +17,8 @@ use WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException,
  */
 class Accessor implements TwitterErrorAwareInterface
 {
+    private $statusEndpoint = '/statuses/show.json?id={{ tweet_id }}';
+
     /**
      * @var
      */
@@ -260,21 +262,68 @@ class Accessor implements TwitterErrorAwareInterface
     }
 
     /**
-     * Fetch timeline statuses
+     * Fetch user timeline statuses
      *
      * @param $options
      * @return \API|mixed|object
      * @throws \Exception
      */
     public function fetchTimelineStatuses($options){
+        return $this->fetchTimeline(
+            function () {
+                return $this->getUserTimelineStatusesEndpoint();
+            },
+            $options
+        );
+   	}
+
+   	/**
+     * Fetch home timeline statuses
+     *
+     * @param $options
+     * @return \API|mixed|object
+     * @throws \Exception
+     */
+    public function fetchHomeTimelineStatuses($options){
+        return $this->fetchTimeline(
+            function () {
+                return $this->getHomeTimelineStatusesEndpoint();
+            },
+            $options
+        );
+   	}
+
+    /**
+     * Fetch timeline
+     *
+     * @param callable $endpointGetter
+     * @param array     $options
+     * @return \API|mixed|object
+     * @throws \Exception
+     */
+    public function fetchTimeline(callable $endpointGetter, $options){
    		if (is_null($options) || (!is_object($options) && !is_array($options))) {
             throw new \Exception('Invalid options');
         } else {
             if (is_array($options)) {
                 $options = (object) $options;
             }
+
             $parameters = $this->validateRequestOptions($options);
-            $endpoint = $this->getUserTimelineStatusesEndpoint() . '&' . implode('&', $parameters);
+
+            if (!array_key_exists('trim_user', $parameters)) {
+                $parameters['trim_user'] = 0;
+            }
+
+            if (!array_key_exists('include_entities', $parameters)) {
+                $parameters['include_entities'] = 1;
+            }
+
+            if (!array_key_exists('exclude_replies', $parameters)) {
+                $parameters['exclude_replies'] = 0;
+            }
+
+            $endpoint = $endpointGetter(). '?'.implode('&', $parameters);
 
             return $this->contactEndpoint($endpoint);
         }
@@ -286,8 +335,16 @@ class Accessor implements TwitterErrorAwareInterface
      */
     protected function getUserTimelineStatusesEndpoint($version = '1.1')
     {
-        return $this->getApiBaseUrl($version) . '/statuses/user_timeline.json?' .
-            'include_entities=1&include_rts=1&exclude_replies=0&trim_user=0';
+        return $this->getApiBaseUrl($version) . '/statuses/user_timeline.json';
+    }
+
+    /**
+     * @param string $version
+     * @return string
+     */
+    protected function getHomeTimelineStatusesEndpoint($version = '1.1')
+    {
+        return $this->getApiBaseUrl($version) . '/statuses/home_timeline.json';
     }
 
     /**
@@ -330,21 +387,36 @@ class Accessor implements TwitterErrorAwareInterface
         } else {
             $resultsCount = 1;
         }
-        $validatedOptions[] = 'count' . '=' . $resultsCount;
+        $validatedOptions[] = 'count=' . intval($resultsCount);
 
         if (isset($options->{'max_id'})) {
             $maxId = $options->{'max_id'};
-            $validatedOptions[] = 'max_id' . '=' . $maxId;
+            $validatedOptions[] = 'max_id=' . intval($maxId);
         }
 
         if (isset($options->{'screen_name'})) {
             $screenName = $options->{'screen_name'};
-            $validatedOptions[] = 'screen_name' . '=' . $screenName;
+            $validatedOptions[] = 'screen_name=' . $screenName;
         }
 
         if (isset($options->{'since_id'})) {
             $sinceId = $options->{'since_id'};
-            $validatedOptions[] = 'since_id' . '=' . $sinceId;
+            $validatedOptions[] = 'since_id=' . $sinceId;
+        }
+
+        if (isset($options->{'include_rts'})) {
+            $includeRetweets = $options->{'include_rts'};
+            $validatedOptions[] = 'include_rts=' . intval($includeRetweets);
+        }
+
+        if (isset($options->{'exclude_replies'})) {
+            $excludeReplies = $options->{'exclude_replies'};
+            $validatedOptions[] = 'exclude_replies=' . intval($excludeReplies);
+        }
+
+        if (isset($options->{'trim_user'})) {
+            $trimUser = $options->{'trim_user'};
+            $validatedOptions[] = 'trim_user=' . intval($trimUser);
         }
 
         return $validatedOptions;
@@ -357,23 +429,10 @@ class Accessor implements TwitterErrorAwareInterface
      */
     public function contactEndpoint($endpoint)
     {
-        $parameters = array();
-        $response = null;
-
         $tokens = $this->getTokens();
         $httpClient = $this->httpClient;
 
-        /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token */
-        $token = $this->tokenRepository->refreshFreezeCondition($tokens['oauth'], $this->logger);
-        if ($token->isFrozen()) {
-            $now = new \DateTime;
-            $this->moderator->waitFor(
-                $token->getFrozenUntil()->getTimestamp() - $now->getTimestamp(),
-                [
-                    '{{ token }}' => substr($token->getOauthToken(), 0, '8'),
-                ]
-            );
-        }
+        $token = $this->beforeMakingContactWithApi($tokens);
 
         try {
             if (is_null($this->authenticationHeader)) {
@@ -384,8 +443,10 @@ class Accessor implements TwitterErrorAwareInterface
                     $tokens['oauth'],
                     $tokens['oauth_secret']
                 );
+                $connection->timeout = 3600;
+                $connection->connecttimeout = 3600;
 
-                $content = $connection->get($endpoint, $parameters);
+                $content = $connection->get($endpoint, []);
             } else {
                 $this->setupClient();
 
@@ -405,39 +466,7 @@ class Accessor implements TwitterErrorAwareInterface
             ]]];
         }
 
-        $this->logger->info('[info] ' . $endpoint);
-        if ($this->hasError($content)) {
-            $errorMessage = $content->errors[0]->message;
-            $errorCode = $content->errors[0]->code;
-
-            $this->logger->error('[message] ' . $errorMessage);
-            $this->logger->error('[code] ' . $errorCode);
-            $this->logger->error('[token] ' . $token->getOauthToken());
-
-
-            $reflection = new \ReflectionClass(__NAMESPACE__ . '\TwitterErrorAwareInterface');
-            $errorCodes = $reflection->getConstants();
-
-            if (in_array($errorCode, $errorCodes)) {
-                if ($errorCode == self::ERROR_EXCEEDED_RATE_LIMIT) {
-                    $this->tokenRepository->freezeToken($token->getOauthToken());
-                }
-                $this->throwException($errorMessage, $errorCode);
-            } else {
-                /** Freeze token and wait for 15 minutes before getting back to operation */
-                $this->tokenRepository->freezeToken($token->getOauthToken());
-                $this->moderator->waitFor(
-                    15*60,
-                    [
-                        '{{ token }}' => substr($token->getOauthToken(), 0, '8'),
-                    ]
-                );
-
-                return $this->contactEndpoint($endpoint);
-            }
-        }
-
-        return $content;
+        return $this->afterMakingContactWithApi($endpoint, $content, $token);
     }
 
     /**
@@ -462,7 +491,7 @@ class Accessor implements TwitterErrorAwareInterface
         $httpClientClass = $this->httpClientClass;
         $httpClient = new $httpClientClass([
             RequestOptions::VERIFY => false,
-            RequestOptions::TIMEOUT => 1800
+            RequestOptions::TIMEOUT => 3600*60
         ]);
 
         $this->httpClient->setClient($httpClient);
@@ -655,5 +684,94 @@ class Accessor implements TwitterErrorAwareInterface
             isset($response->errors) &&
             is_array($response->errors) &&
             isset($response->errors[0]);
+    }
+
+    /**
+     * @param string $version
+     * @return string
+     */
+    protected function getShowTweetEndpoint($version = '1.1')
+    {
+        return $this->getApiBaseUrl($version).$this->statusEndpoint;
+    }
+
+    /**
+     * @param $id
+     *
+     * @return string
+     */
+    public function getTweet($id)
+    {
+        $showTweetEndpoint = $this->getShowTweetEndpoint();
+
+        return $this->contactEndpoint(strtr($showTweetEndpoint, ['{{ tweet_id }}' => $id]));
+    }
+
+    /**
+     * @param $tokens
+     * @return \WeavingTheWeb\Bundle\ApiBundle\Entity\Token
+     */
+    private function beforeMakingContactWithApi($tokens)
+    {
+        /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token */
+        $token = $this->tokenRepository->refreshFreezeCondition($tokens['oauth'], $this->logger);
+        if ($token->isFrozen()) {
+            $now = new \DateTime;
+            $this->moderator->waitFor(
+                $token->getFrozenUntil()->getTimestamp() - $now->getTimestamp(),
+                [
+                    '{{ token }}' => substr($token->getOauthToken(), 0, '8'),
+                ]
+            );
+        }
+
+        return $token;
+    }
+
+    /**
+     * @param $endpoint
+     * @param $content
+     * @param $token
+     * @return \API|array|mixed|object
+     */
+    private function afterMakingContactWithApi($endpoint, $content, $token)
+    {
+        $this->logger->info('[info] ' . $endpoint);
+
+        if (!$this->hasError($content)) {
+            return $content;
+        }
+
+        $errorMessage = $content->errors[0]->message;
+        $errorCode = $content->errors[0]->code;
+
+        $this->logger->error('[message] ' . $errorMessage);
+        $this->logger->error('[code] ' . $errorCode);
+        $this->logger->error('[token] ' . $token->getOauthToken());
+
+        $reflection = new \ReflectionClass(__NAMESPACE__ . '\TwitterErrorAwareInterface');
+        $errorCodes = $reflection->getConstants();
+
+        if ($errorCode === self::ERROR_NO_DATA_AVAILABLE_FOR_SPECIFIED_ID) {
+            return ['error' => $errorMessage];
+        }
+
+        if (in_array($errorCode, $errorCodes)) {
+            if ($errorCode == self::ERROR_EXCEEDED_RATE_LIMIT) {
+                $this->tokenRepository->freezeToken($token->getOauthToken());
+            }
+            $this->throwException($errorMessage, $errorCode);
+        }
+
+        /** Freeze token and wait for 15 minutes before getting back to operation */
+        $this->tokenRepository->freezeToken($token->getOauthToken());
+        $this->moderator->waitFor(
+            15 * 60,
+            [
+                '{{ token }}' => substr($token->getOauthToken(), 0, '8'),
+            ]
+        );
+
+        return $this->contactEndpoint($endpoint);
     }
 }
