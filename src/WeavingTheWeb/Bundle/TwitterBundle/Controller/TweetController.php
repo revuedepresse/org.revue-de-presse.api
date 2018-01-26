@@ -564,14 +564,22 @@ class TweetController extends Controller
             }
 
             if ($criteria === 'created_at') {
-                $aDateTime = \DateTime::createFromFormat('D M j H:i:s P Y', $a[$criteria])->getTimestamp();
-                $bDateTime = \DateTime::createFromFormat('D M j H:i:s P Y', $b[$criteria])->getTimestamp();
+                if (is_bool(\DateTime::createFromFormat('D M j H:i:s P Y', $a[$criteria]))) {
+                    $aDateTime = \DateTime::createFromFormat('Y-m-d H:i:s', $a[$criteria]);
+                    $bDateTime = \DateTime::createFromFormat('Y-m-d H:i:s', $a[$criteria]);
+                } else {
+                    $aDateTime = \DateTime::createFromFormat('D M j H:i:s P Y', $a[$criteria]);
+                    $bDateTime = \DateTime::createFromFormat('D M j H:i:s P Y', $b[$criteria]);
+                }
 
-                if ($aDateTime > $bDateTime) {
+                $aTimestamp = $aDateTime->getTimestamp();
+                $bTimestamp = $bDateTime->getTimestamp();
+
+                if ($aTimestamp > $bTimestamp) {
                     return -1;
                 }
 
-                if ($aDateTime < $bDateTime) {
+                if ($aTimestamp < $bTimestamp) {
                     return 1;
                 }
 
