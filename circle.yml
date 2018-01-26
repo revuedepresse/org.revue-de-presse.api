@@ -70,8 +70,9 @@ dependencies:
     - npm install -g bower
     - /bin/bash -c 'source tests/.install-bower-components.sh'
   post:
-    - wget https://saucelabs.com/downloads/sc-latest-linux.tar.gz
-    - tar -xzf sc-latest-linux.tar.gz
+    # See https://wiki.saucelabs.com/display/DOCS/2016/05/18/Sauce+Connect+4.3.13+-+Released+January+27%2C+2016
+    - wget --no-check-certificate https://saucelabs.com/downloads/sc-4.3.13-linux.tar.gz
+    - tar -xzf sc-4.3.13-linux.tar.gz
   cache_directories:
     - src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/components
     - tests/bower_components
