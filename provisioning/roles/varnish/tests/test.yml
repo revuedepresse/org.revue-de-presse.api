@@ -1,5 +1,10 @@
----
-- hosts: localhost
-  remote_user: root
+- hosts: all
+
+  pre_tasks:
+    - include: setup.yml
+
   roles:
-    - ansible-role-varnish
+    - role_under_test
+
+  post_tasks:
+    - include: debug.yml

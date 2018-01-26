@@ -7,7 +7,7 @@ export MYSQL_ADMIN_USER='root'
 export MYSQL_ADMIN_PASSWORD='ees\)~JIGP0iB\)3jD9\<'
 
 export MYSQL_DEFAULT_USER='default'
-export MYSQL_DEFAULT_PASSWORD='r\>\$\$#F\)D=*NchQVz*@.x'
+export MYSQL_DEFAULT_PASSWORD='TWpwGXKuvf6c8CWapwSK1BxqMdXPEHsJuOqCUyxc'
 
 export MYSQL_TEST_USER='tester'
 export MYSQL_TEST_PASSWORD='ly\&r{tKh-65Zvi+9S%%d'

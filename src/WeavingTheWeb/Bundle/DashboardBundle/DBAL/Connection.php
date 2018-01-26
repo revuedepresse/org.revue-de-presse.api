@@ -53,6 +53,11 @@ class Connection
     public $entityManager;
 
     /**
+     * @var \Doctrine\Bundle\DoctrineBundle\Registry $registry
+     */
+    public $registry;
+
+    /**
      * @var $translator Translator
      */
     public $translator;
@@ -287,15 +292,20 @@ QUERY;
     }
 
     /**
-     * @param $query
+     * @param string $query
+     * @param string $database
      *
      * @return mixed
      * @throws \Exception
      */
-    public function delegateQueryExecution($query)
+    public function delegateQueryExecution($query, $database = 'default')
     {
         $doctrineConnection = $this->entityManager->getConnection();
-        $stmt               = $doctrineConnection->prepare($query);
+        if ($database !== 'default') {
+            $doctrineConnection = $this->registry->getManager($database)->getConnection();
+        }
+
+        $stmt = $doctrineConnection->prepare($query);
         $stmt->execute();
 
         try {
@@ -308,11 +318,13 @@ QUERY;
     }
 
     /**
-     * @param $sql
-     * @param array $parameters
-     * @return \stdClass
+     * @param string $sql
+     * @param array  $parameters
+     * @param string $database
+     *
+     * @return string
      */
-    public function executeQuery($sql, $parameters = [])
+    public function executeQuery($sql, $parameters = [], $database = 'default')
     {
         $query          = new \stdClass;
         $query->error   = null;
@@ -322,7 +334,7 @@ QUERY;
         if ($this->allowedQuery($query->sql)) {
             try {
                 if ($this->pdoSafe($query->sql)) {
-                    $query->records = $this->delegateQueryExecution($query->sql);
+                    $query->records = $this->delegateQueryExecution($query->sql, $database);
                 } else {
                     $query->records = $this->connect()->execute($query->sql, $parameters)->fetchAll();
                 }

@@ -8,7 +8,7 @@
 START=yes
 
 # Maximum number of open files (for ulimit -n)
-NFILES=131072
+NFILES={{ varnish_limit_nofile }}
 
 # Locked shared memory (for ulimit -l)
 # Default log size is 82MB + header
@@ -26,6 +26,11 @@ NPROCS="unlimited"
 # VARNISH_ADMIN_LISTEN_PORT, VARNISH_SECRET_FILE, or in short,
 # use Alternative 3, Advanced configuration, below
 RELOAD_VCL=1
+
+{% if varnish_pidfile %}
+# Varnish PID file
+PIDFILE="{{ varnish_pidfile }}"
+{% endif %}
 
 # This file contains 4 alternatives, please use only one.
 
@@ -99,7 +104,12 @@ DAEMON_OPTS="-a ${VARNISH_LISTEN_ADDRESS}:${VARNISH_LISTEN_PORT} \
              -p thread_pool_min=${VARNISH_MIN_THREADS} \
              -p thread_pool_max=${VARNISH_MAX_THREADS} \
              -p thread_pool_timeout=${VARNISH_THREAD_TIMEOUT} \
+{% if varnish_version | version_compare('4.1', '<') %}
              -u varnish -g varnish \
+{% endif %}
+{% if varnishd_extra_options %}
+             {{ varnishd_extra_options }}
+{% endif %}
              -S ${VARNISH_SECRET_FILE} \
              -s ${VARNISH_STORAGE}"
 #
