@@ -1,6 +1,0 @@
-title:
-    collapsed_mails:    All mail
-
-body:
-    no_mail_left:       Oh... It looks like there is nothing here.
-    updated:            The body of message {{ message_id }} has been updated successfully.

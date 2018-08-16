@@ -1,71 +1,27 @@
 imports:
-    - { resource: parameters/parameters_apc.yml }
-    - { resource: parameters/parameters_app.yml }
-    - { resource: parameters/parameters_analytics.yml }
     - { resource: parameters/parameters_assets.yml }
     - { resource: parameters/parameters_dbal.yml }
     - { resource: parameters/parameters_elasticsearch.yml }
-    - { resource: parameters/parameters_feature_toggling.yml }
+    - { resource: parameters/parameters_facebook.yml }
     - { resource: parameters/parameters_imap.yml }
     - { resource: parameters/parameters_mailer.yml }
-    - { resource: parameters/parameters_newsfeed.yml }
-    - { resource: parameters/parameters_oauth.yml }
     - { resource: parameters/parameters_rabbitmq.yml }
-    - { resource: parameters/parameters_security.yml }
     - { resource: parameters/parameters_twitter.yml }
     - { resource: parameters/parameters_weaving_the_web.yml }
     - { resource: parameters/parameters_xhprof.yml }
 
 parameters:
-    aes.key:  '_'
-    aes.iv: '_'
-    analytics.host: "_"
-    analytics.site_id: "_"
-    assetic.node: "/home/vagrant/.nvm/versions/node/v4.2.2/bin/node"
-    assetic.modules: "/home/vagrant/.nvm/versions/node/v4.2.2/lib/node_modules"
-    apc.host: "http://127.0.0.1"
-    api.facebook.app_id:  "_"
-    api.facebook.app_secret:  "_"
-    api.facebook.protocol:  "http://"
-    api.facebook.host_port: "127.0.0.1"
-    api.twitter.host_port: start.weaving-the-web.org
-    api.twitter.protocol: https://
-    api.twitter.consumer_key: "_"
-    api.twitter.consumer_secret: "_"
-    api.twitter.callback_url: "http://10.9.8.2/twitter/login_connect"
-    api.twitter.user_token: ""
-    api.twitter.user_secret: "_"
-    api.twitter.version: 1.1
-    elasticsearch.host: "127.0.0.1"
-    elasticsearch.port: "9200"
-    framework.secret: '~p^o4O?/vil\)tL^oqJkE+DHB~?OE/Or%%J\"=\|P7fm'
-    imap.username: "_"
-    imap.password: "_"
-    mysql.database: devobs_dev
-    mysql.user: default
-    mysql.password: 'TWpwGXKuvf6c8CWapwSK1BxqMdXPEHsJuOqCUyxc'
-    mysql.host: "127.0.0.1"
-    mysql.port: "3306"
-    mysql.database_read: devobs_dev
-    mysql.user_read: default
-    mysql.password_read: 'TWpwGXKuvf6c8CWapwSK1BxqMdXPEHsJuOqCUyxc'
-    mysql.host_read: "127.0.0.1"
-    mysql.port_read: "3306"
-    mysql.database_write: devobs_dev
-    mysql.user_write: default
-    mysql.password_write: 'TWpwGXKuvf6c8CWapwSK1BxqMdXPEHsJuOqCUyxc'
-    mysql.host_write: "127.0.0.1"
-    mysql.port_write: "3306"
-    mysql.test_database: devobs_test
-    mysql.test_user: tester
-    mysql.test_password: 'ly\&r{tKh-65Zvi+9S%%d'
-    mysql.admin_user: root
-    mysql.admin_password: 'ees\)~JIGP0iB\)3jD9\<'
-    oauth.client_id: '_'
-    oauth.client_secret: '_'
-    oauth.access_token: '_'
-    quality_assurance.password: 'gid}\hx#wcJ9}@%%An+=F5]Ou\>^\$Bur'
-    rabbitmq.user: default
-    rabbitmq.password: 'eyLDwgkwQnoN'
-    rabbitmq.host: "127.0.0.1"
-    rabbitmq.vhost: "/"
+    app_version:                0.1
+
+    apc_host:                   %apc.host%
+
+    feature_toggling_search:    false
+
+    locale:                     en
+
+    framework_secret:           E04GDc6h5f#3glVUR6pM##VuGG&6hoD8q&WYlOBHg3wKJXfN1LqtDP&Z6pRjeaEh
+
+    test_database_memory:       false
+    test_database_path:         %kernel.cache_dir%/wtw_dashboard.db
+
+    php_binary:                 /usr/bin/php

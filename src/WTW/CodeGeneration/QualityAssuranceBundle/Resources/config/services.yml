@@ -1,0 +1,40 @@
+parameters:
+    wtw.qa.finder.class:              Symfony\Component\Finder\Finder
+    wtw.qa.loader.class:              Symfony\Bridge\Doctrine\DataFixtures\ContainerAwareLoader
+    wtw.qa.executor.class:            Doctrine\Common\DataFixtures\Executor\ORMExecutor
+    wtw.qa.purger.class:              Doctrine\Common\DataFixtures\Purger\ORMPurger
+    wtw.qa.string_input.class:        Symfony\Component\Console\Input\StringInput
+    wtw.qa.stream_output.class:       Symfony\Component\Console\Output\StreamOutput
+    wtw.qa.schema_manipulator.class:  Doctrine\ORM\Tools\SchemaTool
+    wtw.qa.user.username:             User
+    wtw.qa.user.password:             'WN6!e1SfH92#8zbB#nnGKlrxHr*ounQJB^sML!Rb44Cs3I!Q^n'
+    wtw.qa.super.username:            Super
+    wtw.qa.super.password:            'Rb44Cs3I'
+
+services:
+    wtw.qa.fixtures.executor:
+        class: %wtw.qa.executor.class%
+        arguments:
+            - @doctrine.orm.entity_manager
+            - @wtw.qa.fixtures.purger
+    wtw.qa.fixtures.finder:
+        class: %wtw.qa.finder.class%
+    wtw.qa.fixtures.loader:
+        class: %wtw.qa.loader.class%
+        arguments:
+            - @service_container
+    wtw.qa.fixtures.purger:
+        class: %wtw.qa.purger.class%
+    wtw.qa.fixtures.schema_manipulator:
+        class: %wtw.qa.schema_manipulator.class%
+        arguments:
+            - @doctrine.orm.entity_manager
+    wtw.qa.fixtures.test_mysql_executor:
+        class: %wtw.qa.executor.class%
+        arguments:
+            - @doctrine.orm.test_mysql_entity_manager
+            - @wtw.qa.fixtures.purger
+    wtw.qa.fixtures.test_mysql_schema_manipulator:
+        class: %wtw.qa.schema_manipulator.class%
+        arguments:
+            - @doctrine.orm.test_mysql_entity_manager

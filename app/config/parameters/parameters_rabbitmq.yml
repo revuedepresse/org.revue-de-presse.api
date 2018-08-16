@@ -2,5 +2,5 @@ parameters:
     rabbitmq_user:              %rabbitmq.user%
     rabbitmq_password:          %rabbitmq.password%
     rabbitmq_port:              5672
-    rabbitmq_host:              %rabbitmq.host%
-    rabbitmq_vhost:             %rabbitmq.vhost%
+    rabbitmq_host:              vagrant-valhalla
+    rabbitmq_vhost:             'weaving_the_web'

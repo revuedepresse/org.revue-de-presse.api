@@ -4,8 +4,8 @@ namespace WeavingTheWeb\Bundle\ApiBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM,
     Doctrine\Common\Collections\ArrayCollection;
-
 use WTW\UserBundle\Entity\User;
+use WeavingTheWeb\Bundle\ApiBundle\Entity\TokenType;
 
 /**
  * @ORM\Table(name="weaving_access_token")
@@ -43,6 +43,20 @@ class Token
      * @ORM\Column(name="secret", type="string", length=255, nullable=true)
      */
     protected $oauthTokenSecret;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="consumer_key", type="string", length=255, nullable=true)
+     */
+    public $consumerKey;
+
+    /**
+     * @var string
+     *
+     * @ORM\Column(name="consumer_secret", type="string", length=255, nullable=true)
+     */
+    public $consumerSecret;
 
     /**
      * @var \DateTime
@@ -255,9 +269,7 @@ class Token
     }
 
     /**
-     * Get type
-     *
-     * @return \WeavingTheWeb\Bundle\ApiBundle\Entity\TokenType 
+     * @return string
      */
     public function getType()
     {
@@ -276,12 +288,18 @@ class Token
     }
 
     /**
-     * Get type
-     *
-     * @return \WeavingTheWeb\Bundle\ApiBundle\Entity\TokenType
+     * @return bool
      */
     public function isFrozen()
     {
         return $this->frozen;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isNotFrozen()
+    {
+        return !$this->isFrozen();
     }
 }
