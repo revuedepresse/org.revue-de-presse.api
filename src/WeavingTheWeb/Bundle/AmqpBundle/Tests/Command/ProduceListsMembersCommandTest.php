@@ -1,19 +1,17 @@
 <?php
 
-namespace WeavingTheWeb\Bundle\AmqpBundle\Tests\Command;
+namespace WeavingTheWeb\Bundle\AmqpBundle\Command;
 
-use WeavingTheWeb\Bundle\FrameworkExtraBundle\Test\CommandTestCase;
+use Prophecy\Argument;
+use WTW\CodeGeneration\QualityAssuranceBundle\Test\CommandTestCase;
 use Prophecy\Prophet;
 
 /**
  * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
- *
- * @group   isolated-testing
- * @group   messaging-twitter
- * @group   produce-list-messages
  * @group   twitter-lists
+ * @group   messaging-twitter
  */
-class ProduceListsMembersCommandTest extends CommandTestCase
+class ProduceListMembersCommandTest extends CommandTestCase
 {
     /**
      * @var \Symfony\Bundle\FrameworkBundle\Client $client
@@ -25,7 +23,7 @@ class ProduceListsMembersCommandTest extends CommandTestCase
      */
     protected $prophet;
 
-    public function requireSQLiteFixtures()
+    public function requiredFixtures()
     {
         return true;
     }
@@ -39,20 +37,43 @@ class ProduceListsMembersCommandTest extends CommandTestCase
     {
         $this->client = $this->getClient();
 
-        $mockedProducer = $this->prophet->prophesize('\OldSound\RabbitMqBundle\RabbitMq\Producer');
-
         $container = $this->client->getContainer();
 
+        $mockedProducer = $this->prophet->prophesize('\OldSound\RabbitMqBundle\RabbitMq\Producer');
         $container->set('old_sound_rabbit_mq.weaving_the_web_amqp.twitter.user_status_producer', $mockedProducer);
 
+        $mockedAccessor = $this->prophet->prophesize('\WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor');
+        $lists = [
+            (object) [
+                'name' => 'Specific List',
+                'id' => 1
+            ]
+        ];
+        $mockedAccessor->getUserOwnerships(Argument::type('string'))->willReturn((object)['lists' => $lists]);
+        $mockedAccessor->setUserToken(Argument::type('string'))->willReturn(null);
+        $mockedAccessor->setUserSecret(Argument::type('string'))->willReturn(null);
+
+
+        $members = [
+            (object) [
+                'id' => 1,
+                'screen_name' => 'user'
+            ]
+        ];
+
+        $mockedAccessor->getListMembers(Argument::type('integer'))->willReturn((object)['users' => $members]);
+
+
+        $container->set('weaving_the_web_twitter.api_accessor', $mockedAccessor->reveal());
+
         $this->commandClass = $this->getParameter('weaving_the_web_amqp.produce_lists_members_command.class');
-        $this->setUpApplicationCommand();
+        $this->setUpApplication();
 
         $this->commandTester = $this->getCommandTester('wtw:amqp:tw:prd:lm');
         $options = [
             'command' => $this->getCommandName(),
             '--screen_name' => 'Firefox',
-            '--list' => 'Type',
+            '--list' => 'Specific List',
         ];
 
         $this->commandTester->execute($options);

@@ -2,18 +2,28 @@
 
 namespace WeavingTheWeb\Bundle\AmqpBundle\Twitter;
 
+use Doctrine\ORM\EntityRepository;
+
 use OldSound\RabbitMqBundle\RabbitMq\ConsumerInterface;
+
 use PhpAmqpLib\Message\AmqpMessage;
+
 use Psr\Log\LoggerInterface;
+
 use WeavingTheWeb\Bundle\TwitterBundle\Api\TwitterErrorAwareInterface;
-use WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException,
-    WeavingTheWeb\Bundle\TwitterBundle\Exception\ProtectedAccountException;
+
+use WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;
+use WeavingTheWeb\Bundle\TwitterBundle\Exception\ProtectedAccountException;
+
+use WTW\UserBundle\Entity\User;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
 class UserStatus implements ConsumerInterface
 {
+    const ERROR_CODE_USER_NOT_FOUND = 100;
+
     /**
      * @var LoggerInterface
      */
@@ -41,18 +51,39 @@ class UserStatus implements ConsumerInterface
     }
 
     /**
+     * @var \WTW\UserBundle\Repository\UserRepository
+     */
+    protected $userRepository;
+
+    /**
+     * @param EntityRepository $userRepository
+     */
+    public function setUserRepository(EntityRepository $userRepository)
+    {
+        $this->userRepository = $userRepository;
+    }
+
+    /**
      * @param AmqpMessage $message
-     * @return bool
+     * @return bool|mixed
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Exception
      */
     public function execute(AmqpMessage $message)
     {
         try {
             $options = $this->parseMessage($message);
         } catch (\Exception $exception) {
+            $this->logger->critical($exception->getMessage());
+
             return false;
         }
 
         $options = [
+            'aggregate_id' => $this->extractAggregateId($options),
+            'before' => $this->extractBeforeOption($options),
             'oauth' => $options['token'],
             'count' => 200,
             'screen_name' => $options['screen_name'],
@@ -60,9 +91,22 @@ class UserStatus implements ConsumerInterface
 
         try {
             $success = $this->serializer->serialize($options, $greedy = true);
+            if (!$success) {
+                $this->logger->info(sprintf(
+                    'Re-queuing message for %s in aggregate %d',
+                    $options['screen_name'],
+                    $options['aggregate_id']
+                ));
+            }
         } catch (UnavailableResourceException $unavailableResource) {
+            $userNotFound = $unavailableResource->getCode() === TwitterErrorAwareInterface::ERROR_USER_NOT_FOUND;
+            if ($userNotFound) {
+                $this->userRepository->declareUserAsNotFoundByUsername($options['screen_name']);
+            }
+
             if (
                 $unavailableResource instanceof ProtectedAccountException ||
+                $userNotFound ||
                 $unavailableResource->getCode() === TwitterErrorAwareInterface::ERROR_NOT_FOUND ||
                 $unavailableResource->getCode() === TwitterErrorAwareInterface::ERROR_SUSPENDED_USER
             ) {
@@ -82,9 +126,31 @@ class UserStatus implements ConsumerInterface
     }
 
     /**
+     * @param $screenName
+     * @return User
+     * @throws \Exception
+     */
+    public function handleNotFoundUsers($screenName)
+    {
+        $user = $this->userRepository->findOneBy(
+            ['twitter_username' => $screenName]
+        );
+
+        if (is_null($user)) {
+            $message = sprintf(
+                'User with screen name "%s" could not be found via Twitter API not in database',
+                $screenName
+            );
+            throw new \Exception($message, self::ERROR_CODE_USER_NOT_FOUND);
+        }
+
+        return $this->userRepository->declareUserAsNotFound($user);
+    }
+
+    /**
      * @param AmqpMessage $message
      * @return mixed
-     * @throws \InvalidArgumentException
+     * @throws \Exception
      */
     public function parseMessage(AmqpMessage $message)
     {
@@ -99,7 +165,7 @@ class UserStatus implements ConsumerInterface
 
     /**
      * @param $tokens
-     * @throws \InvalidArgumentException
+     * @throws \Exception
      */
     protected function setupCredentials($tokens)
     {
@@ -108,5 +174,35 @@ class UserStatus implements ConsumerInterface
         } else {
             $this->serializer->setupAccessor($tokens);
         }
+    }
+
+    /**
+     * @param $options
+     * @return null
+     */
+    protected function extractAggregateId($options)
+    {
+        if (array_key_exists('aggregate_id', $options)) {
+            $aggregateId = $options['aggregate_id'];
+        } else {
+            $aggregateId = null;
+        }
+
+        return $aggregateId;
+    }
+
+    /**
+     * @param $options
+     * @return null
+     */
+    protected function extractBeforeOption($options)
+    {
+        if (array_key_exists('before', $options)) {
+            $before = $options['before'];
+        } else {
+            $before = null;
+        }
+
+        return $before;
     }
 }

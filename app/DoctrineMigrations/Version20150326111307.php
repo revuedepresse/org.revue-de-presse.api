@@ -53,7 +53,6 @@ class Version20150326111307 extends AbstractMigration
         $this->addSql("DROP INDEX UNIQ_B6BD307FBF396750 ON message");
         $this->addSql("ALTER TABLE message CHANGE id hdr_id INT NOT NULL");
         $this->addSql("ALTER TABLE message ADD CONSTRAINT FK_B6BD307F61E1892C FOREIGN KEY (hdr_id) REFERENCES header (hdr_id)");
-        $this->addSql("CREATE UNIQUE INDEX UNIQ_B6BD307F61E1892C ON message (hdr_id)");
         $this->addSql("ALTER TABLE weaving_github_repositories DROP PRIMARY KEY");
         $this->addSql("ALTER TABLE weaving_json DROP jsn_geolocated, CHANGE jsn_status jsn_status TINYINT(1) DEFAULT '0' NOT NULL, CHANGE jsn_type jsn_type TINYINT(1) NOT NULL");
         $this->addSql("CREATE FULLTEXT INDEX jsn_value ON weaving_json (jsn_value)");

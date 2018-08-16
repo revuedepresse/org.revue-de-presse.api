@@ -1,5 +1,0 @@
-#/bin/bash
-
-PROJECT_DIR=/var/deploy/devobs/current
-VAGRANT_COMMAND="source $PROJECT_DIR/config/scripts/produce-user-status-messages.sh"
-VAGRANT_LOG=ERROR vagrant ssh -c "/bin/bash -c '"$VAGRANT_COMMAND"'"

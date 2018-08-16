@@ -1,9 +1,0 @@
-behat
-phpspec
-phpunit
-*\.php
-doctrine
-doctrine-dbal
-doctrine-migrations
-security-checker
-sql-formatter

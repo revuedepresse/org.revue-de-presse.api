@@ -1,5 +1,0 @@
-parameters:
-    feature_toggling_emails:        false
-    feature_toggling_search:        false
-    feature_toggling_statuses:      false
-    feature_toggling_repositories:  false

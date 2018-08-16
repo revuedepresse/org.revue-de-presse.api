@@ -4,14 +4,7 @@ parameters:
     api_twitter_user_secret:                                    %api_twitter_user_secret_test%
     api_twitter_user_token:                                     %api_twitter_user_token_test%
 
-    aes_key:                                                    0000200000000bc0c280c000A0000000e000c090000000B0c000030A000eDbb0
-    aes_iv:                                                     6c300000e0000000B000600A0000f0E0
-
-    admin_pattern:                                              settings/oauth|settings/remote
-    api_pattern:                                                api|github|mail|tweet
-    oauth_pattern:                                              oauth/v2/auth
-    super_admin_pattern:                                        perspective/.*/export
-    basic_auth_pattern:                                         ^/(%admin_pattern%|%super_admin_pattern%|%api_pattern%|%oauth_pattern%|documents|user|query|content)
+    basic_auth_pattern:                                         ^/(documents|github|user|api|mail|tweet)
 
     database_charset:                                           UTF8
     database_driver:                                            pdo_mysql
@@ -21,7 +14,7 @@ parameters:
     database_user:                                              %database_user_test%
     database_password:                                          %database_password_test%
 
-    database_charset_read:                                      %database_charset%
+    database_charset_read:                                      UTF8
     database_driver_read:                                       pdo_mysql
     database_host_read:                                         %database_host_test%
     database_port_read:                                         %database_port_test%
@@ -29,7 +22,7 @@ parameters:
     database_user_read:                                         %database_user_test%
     database_password_read:                                     %database_password_test%
 
-    database_charset_write:                                     %database_charset%
+    database_charset_write:                                     UTF8
     database_driver_write:                                      pdo_mysql
     database_host_write:                                        %database_host_test%
     database_port_write:                                        %database_port_test%
@@ -40,43 +33,5 @@ parameters:
     fos_twitter.api.class:                                      WeavingTheWeb\Bundle\UserBundle\Tests\TwitterOauth
     fos_twitter.file:                                           %kernel.root_dir%/../src/WeavingTheWeb/Bundle/UserBundle/Tests/TwitterOauth.php
 
-    security.user.provider.in_memory.class:                     WeavingTheWeb\Bundle\UserBundle\Tests\Security\Core\User\InMemoryUserProvider
-    security.user.provider.in_memory.user.class:                WeavingTheWeb\Bundle\UserBundle\Tests\Security\Core\User\User
-    weaving_the_web_user.controller_twitter.class:              WeavingTheWeb\Bundle\UserBundle\Tests\Controller\ControllerMock
-
-    mail_index:                                                 mail_test
-    twitter_search_index:                                       twitter_test
-
-    encoders:
-        WTW\UserBundle\Tests\Security\Core\User\User:           plaintext
-        FOS\UserBundle\Model\UserInterface:                     sha512
-        Symfony\Component\Security\Core\User\User:              plaintext
-
-    weaving_the_web_dashboard.resources.perspectives.archive:   %kernel.root_dir%/../src/WeavingTheWeb/Bundle/MappingBundle/Tests/Resources/perspectives/archive
-    weaving_the_web_dashboard.resources.perspectives.export:    %kernel.root_dir%/../src/WeavingTheWeb/Bundle/MappingBundle/Tests/Resources/perspectives/export
-    weaving_the_web_dashboard.resources.perspectives.import:    %kernel.root_dir%/../src/WeavingTheWeb/Bundle/MappingBundle/Tests/Resources/perspectives/import
-    weaving_the_web_dashboard.resources.perspectives.upload:    %kernel.root_dir%/../src/WeavingTheWeb/Bundle/MappingBundle/Tests/Resources/perspectives/upload
-    weaving_the_web_dashboard.resources.fixtures:               %kernel.root_dir%/../src/WeavingTheWeb/Bundle/DashboardBundle/Tests/Resources/fixtures
-
-services:
-    weaving_the_web_user.controller.twitter:
-        class:                                                  %weaving_the_web_user.controller_twitter.class%
-
-    # Perspective testing requires a MySQL database
-    weaving_the_web_dashboard.dbal_connection:
-        class:  %weaving_the_web_dashboard.dbal_connection.class%
-        arguments:
-            - @validator
-            - @logger
-        calls:
-            - [ setCharset, [ %database_charset% ] ]
-            - [ setHost, [ %database_host% ] ]
-            - [ setUsername, [ %database_user% ] ]
-            - [ setPassword, [ %database_password% ] ]
-            - [ setPort, [ %database_port% ] ]
-            - [ setDatabase, [ %database_name% ] ]
-            - [ setEntityManager, [ @doctrine.orm.test_mysql_entity_manager ] ]
-            - [ setTranslator, [ @translator ] ]
-
-    weaving_the_web_user.security.user.provider.in_memory:
-        alias: security.user.provider.concrete.in_memory
+    security.user.provider.in_memory.class:                     WTW\UserBundle\Tests\Security\Core\User\InMemoryUserProvider
+    security.user.provider.in_memory.user.class:                WTW\UserBundle\Tests\Security\Core\User\User

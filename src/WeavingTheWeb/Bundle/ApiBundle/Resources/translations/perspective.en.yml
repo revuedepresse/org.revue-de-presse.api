@@ -1,4 +1,0 @@
-perspective:
-    job:
-        existing:   'A similar job request has to be completed first in order to process a new one.'
-        submitted:  'A new job has been created to handle your request.'

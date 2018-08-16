@@ -3,12 +3,10 @@
 namespace WeavingTheWeb\Bundle\ApiBundle\EventListener;
 
 use FOS\RestBundle\EventListener\ViewResponseListener as BaseListener;
-
 use JMS\Serializer\SerializationContext;
-
-use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent,
-    Symfony\Bundle\FrameworkBundle\Templating\TemplateReference;
-
+use Symfony\Bundle\FrameworkBundle\Templating\TemplateReference;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
 use WeavingTheWeb\Bundle\ApiBundle\View\View;
 
 /**
@@ -20,8 +18,7 @@ class ViewResponseListener extends BaseListener
      * Renders the parameters and template and initializes a new response object with the
      * rendered content.
      *
-     * @param GetResponseForControllerResultEvent $event
-     * @return array|mixed
+     * @param GetResponseForControllerResultEvent $event A GetResponseForControllerResultEvent instance
      */
     public function onKernelView(GetResponseForControllerResultEvent $event)
     {
@@ -81,24 +78,12 @@ class ViewResponseListener extends BaseListener
 
                 $view->setTemplate($template);
             }
-
-            if (!$view->getTemplate()) {
-                throw new \RuntimeException(
-                    sprintf(
-                        implode("\n", [
-                            'Invalid template for route "%s".',
-                            'You might want to return a response from its controller',
-                            'or to check if its controller has not been defined as a service,',
-                            'and mistakenly made lazy (See https://github.com/symfony/symfony/issues/8707).',
-                        ]),
-                        $request->attributes->all()['_route']
-                    )
-                );
-            }
         }
 
         $response = $viewHandler->handle($view, $request);
 
-        $event->setResponse($response);
+        if ($response instanceof Response) {
+            $event->setResponse($response);
+        }
     }
 }

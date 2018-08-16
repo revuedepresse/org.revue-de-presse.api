@@ -1,9 +1,0 @@
-intent:
-    continue_weaving: Continue weaving
-    discover_perspectives: Discover perspectives
-
-registration:
-    flash:
-        user_created: |
-            Thank you for showing us your interest in Weaving The Web.
-            Your account will be activated as soon as we are ready to welcome new weavers!

@@ -1,4 +1,0 @@
-#/bin/bash
-
-VAGRANT_COMMAND="/usr/local/bin/consume-user-status-messages"
-VAGRANT_LOG=ERROR vagrant ssh -c '/bin/bash -c "'$VAGRANT_COMMAND'"'

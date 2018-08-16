@@ -23,25 +23,27 @@ class ApiLimitModerator
     }
 
     /**
-     * @param $seconds
-     * @param array $parameters
+     * @param integer $seconds
+     * @param array   $parameters
      */
     public function waitFor($seconds, array $parameters = [])
     {
         if (!is_null($this->logger)) {
             if ($seconds < 60) {
-                $humanlyReadableWaitTime = $seconds . ' more seconds';
+                $humanlyReadableWaitTime = $seconds.' more seconds';
             } else {
-                $humanlyReadableWaitTime = floor($seconds / 60) . ' more minutes';
+                $humanlyReadableWaitTime = floor($seconds / 60).' more minutes';
             }
 
-            $message = 'API limit has been reached for token "{{ token }}...' . '", ' .
+            $message = 'API limit has been reached for token "{{ token }}...", '.
                 'operations are currently frozen (waiting for {{ wait_time }} )';
             ;
             $parameters['{{ wait_time }}'] = $humanlyReadableWaitTime;
             $this->logger->info(strtr($message, $parameters));
         }
 
-        sleep($seconds);
+        if ($seconds > 0) {
+            sleep($seconds);
+        }
     }
-} 
+}

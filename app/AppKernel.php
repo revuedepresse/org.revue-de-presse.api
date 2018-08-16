@@ -22,46 +22,29 @@ class AppKernel extends Kernel
             new Symfony\Bundle\SecurityBundle\SecurityBundle(),
             new Symfony\Bundle\TwigBundle\TwigBundle(),
             new Symfony\Bundle\MonologBundle\MonologBundle(),
-            new Symfony\Bundle\AsseticBundle\AsseticBundle(),
             new JMS\AopBundle\JMSAopBundle(),
             new JMS\DiExtraBundle\JMSDiExtraBundle($this),
             new JMS\SecurityExtraBundle\JMSSecurityExtraBundle(),
             new JMS\SerializerBundle\JMSSerializerBundle(),
             new Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle(),
             // User management
-            new FOS\UserBundle\FOSUserBundle(),
-            new Snc\RedisBundle\SncRedisBundle(),
             new WTW\UserBundle\WTWUserBundle(),
             new WeavingTheWeb\Bundle\UserBundle\WeavingTheWebUserBundle(),
             // API
-            new FOS\OAuthServerBundle\FOSOAuthServerBundle(),
             new FOS\RestBundle\FOSRestBundle(),
             new FOS\TwitterBundle\FOSTwitterBundle(),
             new WeavingTheWeb\Bundle\ApiBundle\WeavingTheWebApiBundle(),
+            new WeavingTheWeb\Bundle\DataMiningBundle\WeavingTheWebDataMiningBundle(),
             new WeavingTheWeb\Bundle\TwitterBundle\WeavingTheWebTwitterBundle(),
             // Search
-            new FOS\ElasticaBundle\FOSElasticaBundle(),
-            new WeavingTheWeb\Bundle\MappingBundle\WeavingTheWebMappingBundle(),
             new WeavingTheWeb\Bundle\DashboardBundle\WeavingTheWebDashboardBundle(),
-            // File upload
-            new Oneup\UploaderBundle\OneupUploaderBundle(),
-            // Bootstrap
-            new Braincrafted\Bundle\BootstrapBundle\BraincraftedBootstrapBundle(),
             // ORM
             new Doctrine\Bundle\DoctrineBundle\DoctrineBundle(),
             new Doctrine\Bundle\FixturesBundle\DoctrineFixturesBundle(),
             new Doctrine\Bundle\MigrationsBundle\DoctrineMigrationsBundle(),
-            // Documentation in Markdown
-            new Knp\Bundle\MarkdownBundle\KnpMarkdownBundle(),
             // AMQP consumers / producers
             new OldSound\RabbitMqBundle\OldSoundRabbitMqBundle(),
             new WeavingTheWeb\Bundle\AmqpBundle\WeavingTheWebAmqpBundle(),
-            // OPcache / APCu
-            new SmartCore\Bundle\AcceleratorCacheBundle\AcceleratorCacheBundle(),
-            // Assets management
-            new Sp\BowerBundle\SpBowerBundle(),
-            // Routing
-            new FOS\JsRoutingBundle\FOSJsRoutingBundle(),
             // View helper
             new Liip\UrlAutoConverterBundle\LiipUrlAutoConverterBundle(),
         );
@@ -70,8 +53,7 @@ class AppKernel extends Kernel
             $bundles[] = new Symfony\Bundle\WebProfilerBundle\WebProfilerBundle();
             $bundles[] = new Sensio\Bundle\DistributionBundle\SensioDistributionBundle();
             $bundles[] = new Sensio\Bundle\GeneratorBundle\SensioGeneratorBundle();
-            $bundles[] = new Elao\WebProfilerExtraBundle\WebProfilerExtraBundle();
-            $bundles[] = new WeavingTheWeb\Bundle\FrameworkExtraBundle\WeavingTheWebFrameworkExtraBundle();
+            $bundles[] = new WTW\CodeGeneration\QualityAssuranceBundle\WTWCodeGenerationQualityAssuranceBundle();
         }
 
         return $bundles;
@@ -83,28 +65,5 @@ class AppKernel extends Kernel
     public function registerContainerConfiguration(LoaderInterface $loader)
     {
         $loader->load(__DIR__ . '/config/environment/config_' . $this->getEnvironment() . '.yml');
-    }
-
-    /**
-     * @return string
-     */
-    public function getLogDir()
-    {
-        if (in_array($this->getEnvironment(), array('dev', 'test'))) {
-            return '/dev/shm/devobs/logs';
-        }
-
-        return parent::getLogDir();
-    }
-    /**
-     * @return string
-     */
-    public function getCacheDir()
-    {
-        if (in_array($this->getEnvironment(), array('dev', 'test'))) {
-            return '/dev/shm/devobs/cache';
-        }
-
-        return parent::getCacheDir();
     }
 }

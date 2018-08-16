@@ -1,7 +1,0 @@
-#!/bin/bash
-
-export username=$1
-
-activate_user='source /var/deploy/devobs/current/bin/export-config-parameters.sh && \
-/var/deploy/devobs/current/app/console fos:user:activate '$username
-VAGRANT_LOG=ERROR vagrant ssh -c "/bin/bash -c '"$activate_user"'"

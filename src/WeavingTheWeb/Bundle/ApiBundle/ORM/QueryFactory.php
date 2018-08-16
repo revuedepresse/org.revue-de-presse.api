@@ -185,7 +185,8 @@ class QueryFactory
         $repository,
         array $constraints = array())
     {
-        list($alias, $repository) = each($repository);
+        $alias = key($repository);
+        $repository = current($repository);
 
         $queryBuilder = $this->prepareQueryBuilder($repository, $alias );
         $this->orderBy($constraints, $queryBuilder, $alias);
@@ -327,8 +328,8 @@ class QueryFactory
 
     /**
      * @param array $feeds
-     *
      * @return int
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function serializeFeed(array $feeds = array())
     {
@@ -337,8 +338,8 @@ class QueryFactory
 
     /**
      * @param array $repositories
-     *
      * @return int
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function serializeRepository(array $repositories = array())
     {
@@ -347,19 +348,19 @@ class QueryFactory
 
     /**
      * @param array $repositories
-     *
      * @return int
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function serializeUserStream(array $repositories = array())
     {
-        return $this->serializeResource($repositories, 'makeUserStream');
+        return $this->serializeResource($repositories, 'makeStatus');
     }
 
     /**
      * @param array $collection
      * @param       $maker
-     *
      * @return int
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function serializeResource(array $collection = array(), $maker)
     {
@@ -456,11 +457,11 @@ class QueryFactory
     /**
      * @param $store
      *
-     * @return \WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream
+     * @return \WeavingTheWeb\Bundle\ApiBundle\Entity\Status
      */
-    public function makeUserStream($store)
+    public function makeStatus($store)
     {
-        return $this->makeInstance('WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream', $store);
+        return $this->makeInstance('WeavingTheWeb\Bundle\ApiBundle\Entity\Status', $store);
     }
 
     /**
@@ -495,6 +496,7 @@ class QueryFactory
     /**
      * @param $instance
      * @param $properties
+     * @return mixed
      */
     public function setProperties($instance, $properties)
     {
