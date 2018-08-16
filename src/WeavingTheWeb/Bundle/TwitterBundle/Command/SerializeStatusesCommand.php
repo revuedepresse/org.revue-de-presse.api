@@ -21,7 +21,7 @@ class SerializeStatusesCommand extends ContainerAwareCommand
     {
         parent::configure();
 
-        $this->setName('weaving-the-web:twitter:statuses:serialize')
+        $this->setName('weaving_the_web:twitter:statuses:serialize')
             ->addOption(
                 'oauth_token',
                 null,
@@ -67,6 +67,7 @@ class SerializeStatusesCommand extends ContainerAwareCommand
      * @param InputInterface $input
      * @param OutputInterface $output
      * @return int|null
+     * @throws \Exception
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -103,6 +104,7 @@ class SerializeStatusesCommand extends ContainerAwareCommand
 
     /**
      * @return string
+     * @throws \Exception
      */
     protected function getAuthenticationHeader()
     {
@@ -113,7 +115,7 @@ class SerializeStatusesCommand extends ContainerAwareCommand
             $this->getContainer()->getParameter('weaving_the_web_twitter.consumer_secret')
         );
 
-        return 'Bearer ' . $authenticationResult['access_token'];
+        return 'Bearer '.$authenticationResult['access_token'];
     }
 
     /**

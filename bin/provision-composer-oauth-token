@@ -1,3 +1,0 @@
-#!/bin/bash
-
-COMPOSER_AUTH=provisioning/files/auth.json vagrant provision --provision-with file

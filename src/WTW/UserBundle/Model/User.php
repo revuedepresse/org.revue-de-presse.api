@@ -3,15 +3,8 @@
 namespace WTW\UserBundle\Model;
 
 use Doctrine\Common\Collections\Collection,
-    Doctrine\Common\Collections\ArrayCollection,
-    Doctrine\ORM\Mapping as ORM;
-
-use FOS\UserBundle\Model\UserInterface as BaseUserInterface,
-    FOS\UserBundle\Model\GroupableInterface,
-    FOS\UserBundle\Model\GroupInterface;
-
-use Symfony\Component\Security\Core\User\EquatableInterface,
-    Symfony\Component\Security\Core\User\UserInterface;
+    Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 /**
  * Storage agnostic user object
@@ -19,7 +12,7 @@ use Symfony\Component\Security\Core\User\EquatableInterface,
  * @author Thibault Duplessis <thibault.duplessis@gmail.com>
  * @author Johannes M. Schmitt <schmittjoh@gmail.com>
  */
-abstract class User implements BaseUserInterface, GroupableInterface, EquatableInterface
+abstract class User implements UserInterface
 {
     protected $id;
 
@@ -27,11 +20,6 @@ abstract class User implements BaseUserInterface, GroupableInterface, EquatableI
      * @var string
      */
     protected $emailCanonical;
-
-    /**
-     * @var string
-     */
-    protected $username;
 
     /**
      * @var string
@@ -306,22 +294,13 @@ abstract class User implements BaseUserInterface, GroupableInterface, EquatableI
      *
      *         $securityContext->isGranted('ROLE_USER');
      *
-     * @param string $roleName
+     * @param string $role
      *
      * @return boolean
      */
-    public function hasRole($roleName)
+    public function hasRole($role)
     {
-        $roles = $this->getRoles();
-
-        /** @var \WeavingTheWeb\Bundle\UserBundle\Entity\Role $role */
-        foreach ($roles as $role) {
-            if ($role->getRole() === $roleName) {
-                return true;
-            }
-        }
-
-        return false;
+        return in_array(strtoupper($role), $this->getRoles(), true);
     }
 
     public function isAccountNonExpired()
@@ -380,7 +359,7 @@ abstract class User implements BaseUserInterface, GroupableInterface, EquatableI
         return $this->hasRole(static::ROLE_SUPER_ADMIN);
     }
 
-    public function isUser(UserInterface $user = null)
+    public function isUser($user = null)
     {
         return null !== $user && $this->getId() === $user->getId();
     }
@@ -588,7 +567,7 @@ abstract class User implements BaseUserInterface, GroupableInterface, EquatableI
         return in_array($name, $this->getGroupNames());
     }
 
-    public function addGroup(GroupInterface $group)
+    public function addGroup($group)
     {
         if (!$this->getGroups()->contains($group)) {
             $this->getGroups()->add($group);
@@ -597,34 +576,13 @@ abstract class User implements BaseUserInterface, GroupableInterface, EquatableI
         return $this;
     }
 
-    public function removeGroup(GroupInterface $group)
+    public function removeGroup($group)
     {
         if ($this->getGroups()->contains($group)) {
             $this->getGroups()->removeElement($group);
         }
 
         return $this;
-    }
-
-    /**
-     * @param UserInterface $user
-     * @return bool
-     */
-    public function isEqualTo(UserInterface $user)
-    {
-        if ($this->password !== $user->getPassword()) {
-            return false;
-        }
-
-        if ($this->salt !== $user->getSalt()) {
-            return false;
-        }
-
-        if ($this->username !== $user->getUsername()) {
-            return false;
-        }
-
-        return true;
     }
 
     public function __toString()

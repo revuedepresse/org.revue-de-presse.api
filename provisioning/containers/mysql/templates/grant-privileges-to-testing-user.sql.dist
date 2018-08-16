@@ -1,0 +1,5 @@
+CREATE DATABASE IF NOT EXISTS {database_name_test};
+CREATE USER IF NOT EXISTS '{database_user_test}'@'localhost';
+ALTER USER '{database_user_test}'@'localhost' IDENTIFIED WITH 'mysql_native_password' AS '*CF7CDE64AABB2F2F88B01D53391F7DA0E3A5F8DD' REQUIRE NONE PASSWORD EXPIRE DEFAULT ACCOUNT UNLOCK;
+GRANT ALL PRIVILEGES ON `{database_name_test}`.* TO '{database_user_test}'@'localhost';
+GRANT USAGE ON *.* TO '{database_user_test}'@'localhost';

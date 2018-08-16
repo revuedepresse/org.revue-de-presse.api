@@ -2,15 +2,13 @@
 
 namespace WTW\UserBundle\Entity;
 
-use Doctrine\Common\Collections\Collection,
-    Doctrine\Common\Collections\ArrayCollection;
-
-use Doctrine\ORM\Mapping as ORM;
-
+use Doctrine\Common\Collections\ArrayCollection,
+    Doctrine\ORM\Mapping as ORM;
 use WTW\UserBundle\Model\User as BaseUser;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ * @package WTW\UserBundle\Entity
  *
  * @ORM\Table(
  *      name="weaving_user",
@@ -18,7 +16,10 @@ use WTW\UserBundle\Model\User as BaseUser;
  *          @ORM\UniqueConstraint(name="unique_twitter_id", columns={"usr_twitter_id"}),
  *      }
  * )
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="WTW\UserBundle\Repository\UserRepository")
+ * @ORM\InheritanceType("SINGLE_TABLE")
+ * @ORM\DiscriminatorColumn(name="usr_position_in_hierarchy", type="integer")
+ * @ORM\DiscriminatorMap({"1" = "User", "0" = "\WTW\UserBundle\Tests\Security\Core\User\User"})
  */
 class User extends BaseUser
 {
@@ -208,12 +209,7 @@ class User extends BaseUser
     protected $positionInHierarchy;
 
     /**
-     * @ORM\ManyToMany(
-     *      targetEntity="WeavingTheWeb\Bundle\UserBundle\Entity\Role",
-     *      inversedBy="users",
-     *      fetch="EAGER",
-     *      cascade={"all"}
-     * )
+     * @ORM\ManyToMany(targetEntity="WeavingTheWeb\Bundle\UserBundle\Entity\Role", inversedBy="users")
      * @ORM\JoinTable(name="weaving_user_role",
      *      joinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="usr_id")},
      *      inverseJoinColumns={@ORM\JoinColumn(name="role_id", referencedColumnName="id")}
@@ -222,11 +218,7 @@ class User extends BaseUser
     protected $roles;
 
     /**
-     * @ORM\ManyToMany(
-     *      targetEntity="WeavingTheWeb\Bundle\ApiBundle\Entity\Token",
-     *      inversedBy="users",
-     *      fetch="EAGER"
-     * )
+     * @ORM\ManyToMany(targetEntity="WeavingTheWeb\Bundle\ApiBundle\Entity\Token", inversedBy="users", fetch="EAGER")
      * @ORM\JoinTable(name="weaving_user_token",
      *      joinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="usr_id")},
      *      inverseJoinColumns={@ORM\JoinColumn(name="token_id", referencedColumnName="id")}
@@ -265,29 +257,6 @@ class User extends BaseUser
     public function getGroupId()
     {
         return $this->groupId;
-    }
-
-    /**
-     * Set status
-     *
-     * @param  boolean $status
-     * @return User
-     */
-    public function setStatus($status)
-    {
-        $this->status = $status;
-
-        return $this;
-    }
-
-    /**
-     * Get status
-     *
-     * @return boolean
-     */
-    public function getStatus()
-    {
-        return $this->status;
     }
 
     /**
@@ -473,13 +442,14 @@ class User extends BaseUser
     }
 
     /**
-    * Set twitter_username
-    *
-    * @param string $twitterUsername
-    */
+     * @param $twitterUsername
+     * @return $this
+     */
     public function setTwitterUsername($twitterUsername)
     {
-      $this->twitter_username = $twitterUsername;
+        $this->twitter_username = $twitterUsername;
+
+        return $this;
     }
 
     /**
@@ -813,15 +783,13 @@ class User extends BaseUser
     {
         return $this->credentialsExpireAt;
     }
-    /**
-     * Constructor
-     */
+
     public function __construct()
     {
         parent::__construct();
 
-        $this->roles = new ArrayCollection();
-        $this->tokens = new ArrayCollection();
+        $this->roles = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->tokens = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -853,11 +821,20 @@ class User extends BaseUser
      */
     public function getRoles()
     {
-        if ($this->roles instanceof Collection) {
-            return $this->roles->toArray();
-        } else {
-            return $this->roles;
+        if (is_null($this->roles) || (!$this->roles instanceof ArrayCollection)) {
+            $collection = new ArrayCollection();
+
+            foreach ($this->roles as $role) {
+                $role = (string) $role;
+                if (!$collection->contains($role)) {
+                    $collection->add($role);
+                }
+            }
+
+            $this->roles = $collection;
         }
+
+        return $this->roles->toArray();
     }
 
     /**
@@ -902,4 +879,135 @@ class User extends BaseUser
     {
         return $this->tokens;
     }
+
+    /**
+     * Protected status according to Twitter
+     *
+     * @var boolean
+     * @ORM\Column(name="protected", type="boolean", options={"default": false})
+     */
+    protected $protected = false;
+
+    /**
+     * @param  boolean $protected
+     * @return User
+     */
+    public function setProtected($protected)
+    {
+        $this->protected = $protected;
+
+        return $this;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isProtected()
+    {
+        return $this->protected;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isNotProtected()
+    {
+        return !$this->isProtected();
+    }
+
+    /**
+     * Suspended status according to Twitter
+     *
+     * @var boolean
+     * @ORM\Column(name="suspended", type="boolean", options={"default": false})
+     */
+    protected $suspended = false;
+
+    /**
+     * @param  boolean $suspended
+     * @return User
+     */
+    public function setSuspended($suspended)
+    {
+        $this->suspended = $suspended;
+
+        return $this;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isSuspended()
+    {
+        return $this->suspended;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isNotSuspended()
+    {
+        return !$this->isSuspended();
+    }
+
+    /**
+     * NotFound status according to Twitter
+     *
+     * @var boolean
+     * @ORM\Column(name="not_found", type="boolean", options={"default": false})
+     */
+    protected $notFound = false;
+
+    /**
+     * @param  boolean $notFound
+     * @return User
+     */
+    public function setNotFound($notFound)
+    {
+        $this->notFound = $notFound;
+
+        return $this;
+    }
+
+    /**
+     * @return boolean
+     * @deprecated in favor of ->hasBeenDeclaredAsNotFound
+     */
+    public function isNotFound()
+    {
+        return $this->hasBeenDeclaredAsNotFound();
+    }
+
+    /**
+     * @return boolean
+     */
+    public function hasBeenDeclaredAsNotFound()
+    {
+        return $this->notFound;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function hasNotBeenDeclaredAsNotFound()
+    {
+        return !$this->hasBeenDeclaredAsNotFound();
+    }
+
+    /**
+     * @ORM\Column(name="max_status_id", type="string", length=255, nullable=true)
+     */
+    public $maxStatusId;
+
+    /**
+     * @ORM\Column(name="min_status_id", type="string", length=255, nullable=true)
+     */
+    public $minStatusId;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="total_statuses", type="integer", options={"default": 0})
+     */
+    public $totalStatuses = 0;
 }

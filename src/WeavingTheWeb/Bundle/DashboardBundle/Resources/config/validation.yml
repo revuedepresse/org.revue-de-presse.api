@@ -1,4 +1,0 @@
-WeavingTheWeb\Bundle\DashboardBundle\Entity\Perspective:
-    properties:
-        value:
-            - WeavingTheWeb\Bundle\DashboardBundle\Validator\Constraints\Query: ~
