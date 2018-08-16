@@ -2,23 +2,12 @@ imports:
     - { resource: config_dev.yml }
     - { resource: ../parameters/parameters_test.yml }
 
-doctrine:
-    dbal:
-        driver:           pdo_sqlite
-        charset:          UTF8
-        memory:           %test_database_memory%
-        path:             %test_database_path%
-
 framework:
-    router:         { resource: "%kernel.root_dir%/config/routing/routing_test.yml" }
-    test:           ~
+    router:   { resource: "%kernel.root_dir%/config/routing/routing_test.yml" }
+    test: ~
     session:
         storage_id: session.storage.mock_file
 
 web_profiler:
     toolbar: false
     intercept_redirects: false
-
-snc_redis:
-    session:
-        use_as_default: false

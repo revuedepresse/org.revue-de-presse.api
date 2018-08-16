@@ -61,6 +61,11 @@ class ViewHandler extends ContainerAware implements ViewHandlerInterface
     protected $defaultEngine;
 
     /**
+     * @var \Psr\Log\LoggerInterface
+     */
+    public $logger;
+
+    /**
      * Constructor
      *
      * @param array   $formats              the supported formats as keys and if the given formats uses templating is denoted by a true value
@@ -282,12 +287,9 @@ class ViewHandler extends ContainerAware implements ViewHandlerInterface
     }
 
     /**
-     * Render the view data with the given template
-     *
-     * @param View   $view
+     * @param View $view
      * @param string $format
-     *
-     * @return string
+     * @return string|void
      */
     public function renderTemplate($view, $format)
     {
@@ -303,6 +305,12 @@ class ViewHandler extends ContainerAware implements ViewHandlerInterface
                 $engine = $view->getEngine() ?: $this->defaultEngine;
                 $template->set('engine', $engine);
             }
+        }
+
+        if (is_null($template)) {
+            $this->logger->critical('Invalid template name');
+
+            return;
         }
 
         return $this->getTemplating()->render($template, $data);

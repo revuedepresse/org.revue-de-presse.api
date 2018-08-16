@@ -4,9 +4,10 @@ namespace WeavingTheWeb\Bundle\AmqpBundle\Command;
 
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand,
     Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ * @package WeavingTheWeb\Bundle\AmqpBundle\Command
  */
 abstract class AccessorAwareCommand extends ContainerAwareCommand
 {
@@ -20,33 +21,44 @@ abstract class AccessorAwareCommand extends ContainerAwareCommand
      */
     protected $logger;
 
+    /**
+     * @var InputInterface
+     */
+    protected $input;
+
+    /**
+     * @var OutputInterface
+     */
+    protected $output;
 
     /**
      * @param $oauthTokens
      */
     protected function setupAccessor($oauthTokens)
     {
-        /**
-         * @var \WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor $accessor
-         */
+        /** @var \WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor $accessor */
         $this->accessor = $this->getContainer()->get('weaving_the_web_twitter.api_accessor');
         $this->accessor->setUserToken($oauthTokens['token']);
         $this->accessor->setUserSecret($oauthTokens['secret']);
+
+        if (array_key_exists('consumer_token', $oauthTokens)) {
+            $this->accessor->setConsumerKey($oauthTokens['consumer_token']);
+            $this->accessor->setConsumerSecret($oauthTokens['consumer_secret']);
+        }
     }
 
     /**
-     * @param InputInterface $input
      * @return array
      */
-    protected function getTokens(InputInterface $input)
+    protected function getTokensFromInput()
     {
-        if ($input->hasOption('oauth_secret') && !is_null($input->getOption('oauth_secret'))) {
-            $secret = $input->getOption('oauth_secret');
+        if ($this->input->hasOption('oauth_secret') && !is_null($this->input->getOption('oauth_secret'))) {
+            $secret = $this->input->getOption('oauth_secret');
         } else {
             $secret = $this->getContainer()->getParameter('weaving_the_web_twitter.oauth_secret.default');
         }
-        if ($input->hasOption('oauth_token') && !is_null($input->getOption('oauth_token'))) {
-            $token = $input->getOption('oauth_token');
+        if ($this->input->hasOption('oauth_token') && !is_null($this->input->getOption('oauth_token'))) {
+            $token = $this->input->getOption('oauth_token');
         } else {
             $token = $this->getContainer()->getParameter('weaving_the_web_twitter.oauth_token.default');
         }
@@ -55,6 +67,19 @@ abstract class AccessorAwareCommand extends ContainerAwareCommand
             'secret' => $secret,
             'token' => $token,
         ];
+    }
+
+    /**
+     * @param string $token
+     * @return mixed
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    protected function findTokenOtherThan(string $token)
+    {
+        $tokenRepository = $this->getContainer()->get('weaving_the_web_twitter.repository.token');
+
+        return $tokenRepository->findTokenOtherThan($token);
     }
 
     protected function setUpLogger()

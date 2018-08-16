@@ -3,14 +3,10 @@
 namespace WeavingTheWeb\Bundle\ApiBundle\EventListener;
 
 use FOS\RestBundle\EventListener\ViewResponseListener as BaseListener;
-
 use JMS\Serializer\SerializationContext;
-
-use Symfony\Component\HttpKernel\Event\FilterControllerEvent,
-    Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent,
-    Symfony\Component\DependencyInjection\ContainerInterface,
-    Symfony\Bundle\FrameworkBundle\Templating\TemplateReference;
-
+use Symfony\Bundle\FrameworkBundle\Templating\TemplateReference;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Event\GetResponseForControllerResultEvent;
 use WeavingTheWeb\Bundle\ApiBundle\View\View;
 
 /**
@@ -22,8 +18,7 @@ class ViewResponseListener extends BaseListener
      * Renders the parameters and template and initializes a new response object with the
      * rendered content.
      *
-     * @param GetResponseForControllerResultEvent $event
-     * @return array|mixed
+     * @param GetResponseForControllerResultEvent $event A GetResponseForControllerResultEvent instance
      */
     public function onKernelView(GetResponseForControllerResultEvent $event)
     {
@@ -87,6 +82,8 @@ class ViewResponseListener extends BaseListener
 
         $response = $viewHandler->handle($view, $request);
 
-        $event->setResponse($response);
+        if ($response instanceof Response) {
+            $event->setResponse($response);
+        }
     }
 }

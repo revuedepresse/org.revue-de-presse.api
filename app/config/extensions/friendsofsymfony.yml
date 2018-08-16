@@ -1,106 +1,21 @@
-fos_elastica:
-    clients:
-        default: { host: %elasticsearch_host%, port: %elasticsearch_port% }
-    indexes:
-        %mail_index%:
-            client: default
-            types:
-                # TODO Use dependency injection component to load next block programmatically
-                message:
-                    mappings:
-                        id: ~
-                        textBody: ~
-                        header:
-                            type: "object"
-                            properties:
-                                id: ~
-                                subject: ~
-                                to: ~
-                                from: ~
-                                cc: ~
-                                bcc: ~
-                                date: ~
-                    persistence:
-                        driver: orm
-                        model: WeavingTheWeb\Bundle\MailBundle\Entity\Message
-                        listener:
-                            insert: true
-                            update: true
-                            delete: true
-                        finder: ~
-                        provider:
-                            batch_size: 150
-                            service: weaving_the_web_mail.search_provider.message
-                        identifier: id
-                        elastica_to_model_transformer:
-                            ignore_missing: true
-        %twitter_search_index%:
-            client: default
-            types:
-                user_status:
-                    mappings:
-                        id: ~
-                        statusId: ~
-                        identifier: ~
-                        screenName: ~
-                        name: ~
-                        text: ~
-                        createdAt:
-                            type: date
-                    persistence:
-                        driver: orm
-                        model: WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream
-                        listener:
-                            insert: true
-                            update: true
-                            delete: true
-                        finder: ~
-                        provider:
-                            batch_size: 150
-                            query_builder_method: createRemainingUserStatusQueryBuilder
-                            service: weaving_the_web.api.search_provider.user_status
-                        identifier: statusId
-                        elastica_to_model_transformer:
-                            ignore_missing: true
-
-fos_oauth_server:
-    db_driver:                      orm
-    client_class:                   WeavingTheWeb\Bundle\ApiBundle\Entity\OAuth\Client
-    access_token_class:             WeavingTheWeb\Bundle\ApiBundle\Entity\OAuth\AccessToken
-    refresh_token_class:            WeavingTheWeb\Bundle\ApiBundle\Entity\OAuth\RefreshToken
-    auth_code_class:                WeavingTheWeb\Bundle\ApiBundle\Entity\OAuth\AuthCode
-    service:
-        user_provider:              weaving_the_web_user.user_manager
-        options:
-            access_token_lifetime:  31449600
-
-fos_user:
-    db_driver:                  orm
-    firewall_name:              wtw_connect
-    user_class:                 WTW\UserBundle\Entity\User
-    group:
-        group_class:            WeavingTheWeb\Bundle\UserBundle\Entity\Group
-    service:
-        user_manager:           weaving_the_web_user.user_manager
-
 fos_rest:
-    allowed_methods_listener:   true
+    allowed_methods_listener: true
 
-    param_fetcher_listener:     true
+    param_fetcher_listener:   true
 
     routing_loader:
-        default_format:         json
+        default_format:       json
 
     service:
-        view_handler:           weaving_the_web.api.view_handler
+        view_handler: weaving_the_web.api.view_handler
 
     view:
         formats:
-            json:               true
+            json: true
         mime_types:
-            json:               ['application/json', 'application/x-json', 'application/vnd.weaving-the-web.org+json']
+            json: ['application/json', 'application/x-json', 'application/vnd.weaving-the-web.org+json']
         force_redirects:
-            html:               true
+            html: true
         view_response_listener: force
 
     format_listener:
@@ -108,11 +23,11 @@ fos_rest:
             - json
             - html
             - '*/*'
-        fallback_format:        json
-        prefer_extension:       true
+        fallback_format:      json
+        prefer_extension:     true
 
 fos_twitter:
-    file:                       %kernel.root_dir%/../vendor/kertz/twitteroauth/twitteroauth/twitteroauth.php
-    consumer_key:               %api_twitter_consumer_key%
-    consumer_secret:            %api_twitter_consumer_secret%
-    callback_url:               %api_twitter_callback_url%
+    file:                 %kernel.root_dir%/../vendor/kertz/twitteroauth/twitteroauth/twitteroauth.php
+    consumer_key:         %api_twitter_consumer_key%
+    consumer_secret:      %api_twitter_consumer_secret%
+    callback_url:         %api_twitter_callback_url%

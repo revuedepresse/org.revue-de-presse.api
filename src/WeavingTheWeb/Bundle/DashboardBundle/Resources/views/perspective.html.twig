@@ -1,9 +1,0 @@
-<form>
-{% if display_graph is defined %}
-    {% include 'WeavingTheWebDashboardBundle:Perspective:_graph.html.twig' %}
-{% endif %}
-{% if enabled_search is defined %}
-    {% include 'WeavingTheWebDashboardBundle:Perspective:_search.html.twig' %}
-{% endif %}
-</form>
-{% include 'WeavingTheWebDashboardBundle:Perspective/Table:index.html.twig' %}

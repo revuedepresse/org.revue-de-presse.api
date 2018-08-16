@@ -5,28 +5,14 @@
     xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <parameters>
-        <parameter key="weaving_the_web_user.controller.facebook.class">WeavingTheWeb\Bundle\UserBundle\Controller\FacebookController</parameter>
-        <parameter key="weaving_the_web_user.controller.settings.class">WeavingTheWeb\Bundle\UserBundle\Controller\SettingsController</parameter>
-        <parameter key="weaving_the_web_user.controller.twitter.class">WeavingTheWeb\Bundle\UserBundle\Controller\TwitterController</parameter>
-        <parameter key="weaving_the_web_user.entity.facebook.access_token.class">WeavingTheWeb\Bundle\UserBundle\Entity\AccessToken</parameter>
-        <parameter key="weaving_the_web_user.event_subscriber.filter_controller.class">WeavingTheWeb\Bundle\UserBundle\Doctrine\UserManager</parameter>
         <parameter key="weaving_the_web_user.form_type.user_type.class">WeavingTheWeb\Bundle\UserBundle\Form\Type\UserType</parameter>
         <parameter key="weaving_the_web_user.model.user.class">WTW\UserBundle\Entity\User</parameter>
         <parameter key="weaving_the_web_user.twitter.class">WeavingTheWeb\Bundle\UserBundle\Services\Twitter</parameter>
-        <parameter key="weaving_the_web_user.twitter_user_provider.class">WeavingTheWeb\Bundle\UserBundle\Security\Core\User\TwitterUserProvider</parameter>
-        <parameter key="weaving_the_web_user.user_manager.class">WeavingTheWeb\Bundle\UserBundle\Doctrine\UserManager</parameter>
     </parameters>
 
     <services>
         <service id="weaving_the_web_user_form_type_user" class="%weaving_the_web_user.form_type.user_type.class%">
             <tag name="form.type" alias="user" />
-        </service>
-        <service id="weaving_the_web_user.user_manager" class="%weaving_the_web_user.user_manager.class%">
-            <argument type="service" id="security.encoder_factory" />
-            <argument type="service" id="fos_user.util.username_canonicalizer" />
-            <argument type="service" id="fos_user.util.email_canonicalizer" />
-            <argument type="service" id="fos_user.entity_manager" />
-            <argument>%weaving_the_web_user.model.user.class%</argument>
         </service>
         <service id="weaving_the_web_user.twitter" class="%weaving_the_web_user.twitter.class%">
             <argument type="service" id="session" />
@@ -36,79 +22,6 @@
             <call method="setCallbackRoute">
                 <argument type="service" id="router" />
                 <argument type="string">weaving_the_web_user_save_token</argument>
-            </call>
-        </service>
-        <service id="weaving_the_web_user.repository.facebook.access_token"
-                 class="Doctrine\ORM\EntityRepository">
-            <factory service="doctrine.orm.entity_manager" method="getRepository"/>
-            <argument type="string">%weaving_the_web_user.entity.facebook.access_token.class%</argument>
-        </service>
-        <service id="weaving_the_web_user.controller.facebook" class="%weaving_the_web_user.controller.facebook.class%">
-            <property name="appId">%api_facebook_app_id%</property>
-            <property name="appSecret">%api_facebook_app_secret%</property>
-            <property name="router" type="service" id="router" />
-            <property name="session" type="service" id="session" />
-            <property name="logger" type="service" id="logger" />
-            <property name="accessTokenRepository" type="service" id="weaving_the_web_user.repository.facebook.access_token" />
-            <property name="entityManager" type="service" id="doctrine.orm.default_entity_manager" />
-        </service>
-        <service id="weaving_the_web_user.controller.settings" class="%weaving_the_web_user.controller.settings.class%"
-                 lazy="true" scope="request">
-            <call method="setEntityManager">
-                <argument type="service" id="doctrine.orm.entity_manager" />
-            </call>
-            <call method="setFormFactory">
-                <argument type="service" id="form.factory" />
-            </call>
-            <call method="setKernel">
-                <argument type="service" id="http_kernel" />
-            </call>
-            <call method="setRequest">
-                <argument type="service" id="request" />
-            </call>
-            <call method="setRouter">
-                <argument type="service" id="router" />
-            </call>
-            <call method="setSecurityContext">
-                <argument type="service" id="security.context" />
-            </call>
-            <call method="setSession">
-                <argument type="service" id="session" />
-            </call>
-            <call method="setTranslator">
-                <argument type="service" id="translator" />
-            </call>
-            <call method="setTwitter">
-                <argument type="service" id="weaving_the_web_user.twitter" />
-            </call>
-            <call method="setUserManager">
-                <argument type="service" id="weaving_the_web_user.user_manager" />
-            </call>
-            <call method="setValidator">
-                <argument type="service" id="validator" />
-            </call>
-            <call method="setTokenRepository">
-                <argument type="service" id="weaving_the_web_api.repository.token" />
-            </call>
-        </service>
-        <service id="weaving_the_web_user.controller.twitter" class="%weaving_the_web_user.controller.twitter.class%"
-                 lazy="true" scope="request">
-            <call method="setContainer">
-                <argument type="service" id="service_container" />
-            </call>
-        </service>
-        <service id="weaving_the_web_user.twitter_user_provider" class="%weaving_the_web_user.twitter_user_provider.class%">
-            <call method="setTwitterOauth">
-                <argument type="service" id="fos_twitter.api" />
-            </call>
-            <call method="setUserManager">
-                <argument type="service" id="fos_user.user_manager" />
-            </call>
-            <call method="setSession">
-                <argument type="service" id="session" />
-            </call>
-            <call method="setValidator">
-                <argument type="service" id="validator" />
             </call>
         </service>
     </services>

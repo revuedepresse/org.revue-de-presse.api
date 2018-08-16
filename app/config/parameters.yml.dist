@@ -1,17 +1,27 @@
 imports:
-    - { resource: parameters/parameters_apc.yml }
-    - { resource: parameters/parameters_app.yml }
-    - { resource: parameters/parameters_analytics.yml }
     - { resource: parameters/parameters_assets.yml }
     - { resource: parameters/parameters_dbal.yml }
     - { resource: parameters/parameters_elasticsearch.yml }
-    - { resource: parameters/parameters_feature_toggling.yml }
+    - { resource: parameters/parameters_facebook.yml }
     - { resource: parameters/parameters_imap.yml }
     - { resource: parameters/parameters_mailer.yml }
-    - { resource: parameters/parameters_newsfeed.yml }
-    - { resource: parameters/parameters_oauth.yml }
     - { resource: parameters/parameters_rabbitmq.yml }
-    - { resource: parameters/parameters_security.yml }
     - { resource: parameters/parameters_twitter.yml }
     - { resource: parameters/parameters_weaving_the_web.yml }
     - { resource: parameters/parameters_xhprof.yml }
+
+parameters:
+    app_version:                0.1
+
+    apc_host:                   %apc.host%
+
+    feature_toggling_search:    false
+
+    locale:                     en
+
+    framework_secret:           E04GDc6h5f#3glVUR6pM##VuGG&6hoD8q&WYlOBHg3wKJXfN1LqtDP&Z6pRjeaEh
+
+    test_database_memory:       false
+    test_database_path:         %kernel.cache_dir%/wtw_dashboard.db
+
+    php_binary:                 /usr/bin/php

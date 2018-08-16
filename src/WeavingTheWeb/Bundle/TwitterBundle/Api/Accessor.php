@@ -2,25 +2,41 @@
 
 namespace WeavingTheWeb\Bundle\TwitterBundle\Api;
 
+use App\Accessor\StatusAccessor;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Persistence\ObjectRepository;
 
-use GuzzleHttp\RequestOptions;
-
+use GuzzleHttp\Exception\ConnectException;
 use Psr\Log\LoggerInterface;
 
-use WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException,
-    WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;
+use WeavingTheWeb\Bundle\ApiBundle\Entity\ArchivedStatus;
+use WeavingTheWeb\Bundle\ApiBundle\Entity\Token;
+
+use WeavingTheWeb\Bundle\ApiBundle\Exception\InvalidTokenException;
+use WeavingTheWeb\Bundle\TwitterBundle\Exception\EmptyErrorCodeException;
+use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
+use WeavingTheWeb\Bundle\TwitterBundle\Exception\OverCapacityException;
+use WeavingTheWeb\Bundle\TwitterBundle\Exception\ProtectedAccountException;
+use WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException;
+use WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;
+
+use TwitterOauth;
+use WTW\UserBundle\Entity\User;
+use WTW\UserBundle\Repository\UserRepository;
 
 /**
- * @package WeavingTheWeb\Bundle\TwitterBundle\Api
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
 class Accessor implements TwitterErrorAwareInterface
 {
+    const ERROR_PROTECTED_ACCOUNT = 2048;
+
+    const MAX_RETRIES = 5;
+
     /**
-     * @var
+     * @var StatusAccessor
      */
-    public $userToken;
+    public $statusAccessor;
 
     /**
      * @var \Goutte\Client $httpClient
@@ -47,20 +63,25 @@ class Accessor implements TwitterErrorAwareInterface
      */
     protected $apiHost = 'api.twitter.com';
 
-    public function getApiHost()
-    {
-        return $this->apiHost;
-    }
-
     /**
      * @var \Psr\Log\LoggerInterface;
      */
     protected $logger;
 
     /**
+     * @var \Psr\Log\LoggerInterface;
+     */
+    public $twitterApiLogger;
+
+    /**
      * @var \WeavingTheWeb\Bundle\ApiBundle\Moderator\ApiLimitModerator $moderator
      */
     protected $moderator;
+
+    /**
+     * @var string
+     */
+    public $userToken;
 
     /**
      * @var
@@ -86,6 +107,11 @@ class Accessor implements TwitterErrorAwareInterface
      * @var \WeavingTheWeb\Bundle\ApiBundle\Repository\TokenRepository $tokenRepository
      */
     protected $tokenRepository;
+
+    /**
+     * @var UserRepository
+     */
+    public $userRepository;
 
     /**
      * @var \Symfony\Component\Translation\Translator $translator
@@ -135,8 +161,6 @@ class Accessor implements TwitterErrorAwareInterface
     }
 
     /**
-     * Gets user secret
-     *
      * @return mixed
      */
     public function getUserSecret()
@@ -145,8 +169,6 @@ class Accessor implements TwitterErrorAwareInterface
     }
 
     /**
-     * Gets user token
-     *
      * @return mixed
      */
     public function getUserToken()
@@ -155,7 +177,7 @@ class Accessor implements TwitterErrorAwareInterface
     }
 
     /**
-     * @param $consumerKey
+     * @param string $consumerKey
      * @return $this
      */
     public function setConsumerKey($consumerKey)
@@ -166,7 +188,7 @@ class Accessor implements TwitterErrorAwareInterface
     }
 
     /**
-     * @param $consumerSecret
+     * @param string $consumerSecret
      * @return $this
      */
     public function setConsumerSecret($consumerSecret)
@@ -177,9 +199,7 @@ class Accessor implements TwitterErrorAwareInterface
     }
 
     /**
-     * Sets user secret
-     *
-     * @param $userSecret
+     * @param string $userSecret
      * @return $this
      */
     public function setUserSecret($userSecret)
@@ -190,9 +210,7 @@ class Accessor implements TwitterErrorAwareInterface
     }
 
     /**
-     * Sets user token
-     *
-     * @param $userToken
+     * @param string $userToken
      * @return $this
      */
     public function setUserToken($userToken)
@@ -203,9 +221,7 @@ class Accessor implements TwitterErrorAwareInterface
     }
 
     /**
-     * Sets authentication header
-     *
-     * @param $header
+     * @param string $header
      * @return $this
      */
     public function setAuthenticationHeader($header)
@@ -216,7 +232,7 @@ class Accessor implements TwitterErrorAwareInterface
     }
 
     /**
-     * @param $host
+     * @param string $host
      * @return $this
      */
     public function setApiHost($host)
@@ -227,7 +243,7 @@ class Accessor implements TwitterErrorAwareInterface
     }
 
     /**
-     * @param $clientClass
+     * @param string $clientClass
      * @return $this
      */
     public function setClientClass($clientClass)
@@ -238,7 +254,7 @@ class Accessor implements TwitterErrorAwareInterface
     }
 
     /**
-     * @param $httpClientClass
+     * @param string $httpClientClass
      * @return $this
      */
     public function setHttpClientClass($httpClientClass)
@@ -249,7 +265,7 @@ class Accessor implements TwitterErrorAwareInterface
     }
 
     /**
-     * @param $tokenRepository
+     * @param ObjectRepository $tokenRepository
      * @return $this
      */
     public function setTokenRepository(ObjectRepository $tokenRepository)
@@ -262,23 +278,425 @@ class Accessor implements TwitterErrorAwareInterface
     /**
      * Fetch timeline statuses
      *
-     * @param $options
+     * @param null|array|object $options
      * @return \API|mixed|object
      * @throws \Exception
      */
-    public function fetchTimelineStatuses($options){
-   		if (is_null($options) || (!is_object($options) && !is_array($options))) {
+    public function fetchTimelineStatuses($options)
+    {
+        if (is_null($options) || (!is_object($options) && !is_array($options))) {
             throw new \Exception('Invalid options');
         } else {
             if (is_array($options)) {
-                $options = (object) $options;
+                $options = (object)$options;
             }
             $parameters = $this->validateRequestOptions($options);
             $endpoint = $this->getUserTimelineStatusesEndpoint() . '&' . implode('&', $parameters);
 
             return $this->contactEndpoint($endpoint);
         }
-   	}
+    }
+
+    /**
+     * @param array $options
+     * @param bool  $shouldDiscoverFutureStatuses
+     * @return array
+     */
+    public function guessMaxId(array $options, bool $shouldDiscoverFutureStatuses)
+    {
+        if ($shouldDiscoverFutureStatuses) {
+            $member = $this->userRepository->findOneBy(
+                ['twitter_username' => $options['screen_name']]
+            );
+            if (($member instanceof User) && !is_null($member->maxStatusId)) {
+                $options['since_id'] = $member->maxStatusId + 1;
+
+                return $options;
+            }
+        }
+
+        if (array_key_exists('since_id', $options)) {
+            $options['max_id'] = $options['since_id'] - 2;
+            unset($options['since_id']);
+        } else {
+            $options['max_id'] = INF;
+        }
+
+        return $options;
+    }
+
+    /**
+     * @param $endpoint
+     * @return \API|mixed|object|\stdClass
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Exception
+     */
+    public function contactEndpoint($endpoint)
+    {
+        $response = null;
+
+        $response = $this->statusAccessor->contactEndpoint($endpoint);
+        if (!is_null($response)) {
+            return $response;
+        }
+
+        $fetchContent = function ($endpoint) {
+            try {
+                return $this->fetchContent($endpoint);
+            } catch (ConnectException | \Exception $exception) {
+                $this->logger->error($exception->getMessage(), $exception->getTrace());
+
+                if ($exception instanceof ConnectException) {
+                    throw $exception;
+                }
+
+                return $this->convertExceptionIntoContent($exception);
+            }
+        };
+
+        $content = $this->fetchContentWithRetries($endpoint, $fetchContent);
+
+        if (!$this->hasError($content)) {
+            return $content;
+        }
+
+        $loggedException = $this->logExceptionForToken($content);
+        if ($this->matchWithOneOfTwitterErrorCodes($loggedException)) {
+            return $this->handleTwitterErrorExceptionForToken($endpoint, $loggedException, $fetchContent);
+        }
+
+        return $this->delayUnknownExceptionHandlingOnEndpointForToken($endpoint);
+    }
+
+    /**
+     * @param $endpoint
+     * @param Token|null $token
+     * @return \API|mixed|object
+     * @throws UnavailableResourceException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Exception
+     */
+    public function delayUnknownExceptionHandlingOnEndpointForToken($endpoint, Token $token = null)
+    {
+        $token = $this->maybeGetToken($token);
+
+        /** Freeze token and wait for 15 minutes before getting back to operation */
+        $this->tokenRepository->freezeToken($token->getOauthToken());
+        $this->moderator->waitFor(
+            15 * 60,
+            ['{{ token }}' => $this->takeFirstTokenCharacters($token)]
+        );
+
+        return $this->contactEndpoint($endpoint);
+    }
+
+    /**
+     * @param string                       $endpoint
+     * @param UnavailableResourceException $exception
+     * @param callable                     $fetchContent
+     * @return mixed
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Exception
+     */
+    public function handleTwitterErrorExceptionForToken(
+        string $endpoint,
+        UnavailableResourceException $exception,
+        callable $fetchContent
+    ) {
+        if ($exception->getCode() !== self::ERROR_EXCEEDED_RATE_LIMIT) {
+            $this->throwException($exception);
+        }
+
+        $token = $this->maybeGetToken();
+        $this->tokenRepository->freezeToken($token->getOauthToken());
+
+        if (strpos($endpoint, '/statuses/user_timeline') === false) {
+            $this->throwException($exception);
+        }
+
+        $this->moderator->waitFor(
+            15 * 60,
+            ['{{ token }}' => $this->takeFirstTokenCharacters($token)]
+        );
+
+        return $this->fetchContentWithRetries($endpoint, $fetchContent);
+    }
+
+    /**
+     * @param UnavailableResourceException $exception
+     * @return bool
+     * @throws \ReflectionException
+     */
+    public function matchWithOneOfTwitterErrorCodes(UnavailableResourceException $exception)
+    {
+        return in_array($exception->getCode(), $this->getTwitterErrorCodes());
+    }
+
+    /**
+     * @return array
+     * @throws \ReflectionException
+     */
+    public function getTwitterErrorCodes()
+    {
+        $reflection = new \ReflectionClass(__NAMESPACE__ . '\TwitterErrorAwareInterface');
+
+        return $reflection->getConstants();
+    }
+
+    /**
+     * @param \stdClass $content
+     * @param Token|null $token
+     * @return UnavailableResourceException
+     * @throws \Exception
+     */
+    public function logExceptionForToken(\stdClass $content, Token $token = null)
+    {
+        $exception = $this->extractContentErrorAsException($content);
+
+        $this->twitterApiLogger->info('[message] ' . $exception->getMessage());
+        $this->twitterApiLogger->info('[code] ' . $exception->getCode());
+
+        $token = $this->maybeGetToken($token);
+        $this->twitterApiLogger->info('[token] ' . $token->getOauthToken());
+
+        return $exception;
+    }
+
+    /**
+     * @param \stdClass $content
+     * @return UnavailableResourceException
+     */
+    public function extractContentErrorAsException(\stdClass $content)
+    {
+        $message = $content->errors[0]->message;
+        $code = $content->errors[0]->code;
+
+        return new UnavailableResourceException($message, $code);
+    }
+
+    /**
+     * @param  string $endpoint
+     * @return mixed
+     * @throws \Exception
+     */
+    public function contactEndpointUsingBearerToken($endpoint)
+    {
+        $this->httpClient->setHeader('Authorization', $this->authenticationHeader);
+        $this->httpClient->request('GET', $endpoint);
+
+        /** @var \Symfony\Component\HttpFoundation\Response $response */
+        $response = $this->httpClient->getResponse();
+        $encodedContent = $response->getContent();
+        $decodedContent = json_decode($encodedContent);
+
+        $jsonLastError = json_last_error();
+        if ($jsonLastError !== JSON_ERROR_NONE) {
+            throw new \Exception(sprintf('Could not decode content with error %d', $jsonLastError));
+        }
+
+        return $decodedContent;
+    }
+
+    /**
+     * @param string $endpoint
+     * @param Token $token
+     * @param array $tokens
+     * @return object|\stdClass
+     * @throws \Exception
+     */
+    public function contactEndpointUsingConsumerKey($endpoint, Token $token, array $tokens)
+    {
+        $connection = $this->makeHttpClient($tokens);
+
+        try {
+            $content = $this->connectToEndpoint($connection, $endpoint);
+            $this->checkApiLimit($connection);
+        } catch (\Exception $exception) {
+            $content = $this->handleResponseContentWithEmptyErrorCode($exception, $token);
+        }
+
+        return $content;
+    }
+
+    /**
+     * @param array $tokens
+     * @return mixed
+     */
+    public function makeHttpClient(array $tokens)
+    {
+        $httpClient = $this->httpClient;
+
+        return new $httpClient(
+            $tokens['key'],
+            $tokens['secret'],
+            $tokens['oauth'],
+            $tokens['oauth_secret']
+        );
+    }
+
+    /**
+     * @param TwitterOauth $client
+     * @param string $endpoint
+     * @param array $parameters
+     * @return \stdClass
+     */
+    public function connectToEndpoint(TwitterOAuth $client, $endpoint, $parameters = [])
+    {
+        return $client->get($endpoint, $parameters);
+    }
+
+    /**
+     * @return bool
+     */
+    public function shouldUseBearerToken()
+    {
+        return !is_null($this->authenticationHeader);
+    }
+
+    /**
+     * @param array $tokens
+     * @return Token
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function preEndpointContact(array $tokens)
+    {
+        /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token */
+        $token = $this->tokenRepository->refreshFreezeCondition($tokens['oauth'], $this->logger);
+        if ($token->isFrozen()) {
+            $this->waitUntilTokenUnfrozen($token);
+        }
+
+        return $token;
+    }
+
+    /**
+     * @param \Exception $exception
+     * @param Token $token
+     * @return object
+     * @throws \Exception
+     */
+    public function handleResponseContentWithEmptyErrorCode(\Exception $exception, Token $token)
+    {
+        if ($exception->getCode() === 0) {
+            $emptyErrorCodeMessage = $this->translator->trans(
+                'logs.info.empty_error_code',
+                ['{{ oauth token start }}' => $this->takeFirstTokenCharacters($token)],
+                'logs'
+            );
+            $emptyErrorCodeException = EmptyErrorCodeException::encounteredWhenUsingToken(
+                $emptyErrorCodeMessage,
+                self::getExceededRateLimitErrorCode(),
+                $exception
+            );
+            $this->logger->info($emptyErrorCodeException->getMessage());
+
+            return $this->makeContentOutOfException($emptyErrorCodeException);
+        } else {
+            throw $exception;
+        }
+    }
+
+    /**
+     * @param UnavailableResourceException $exception
+     * @return object
+     */
+    public function makeContentOutOfException(UnavailableResourceException $exception)
+    {
+        return (object)[
+            'errors' => [
+                (object)[
+                    'message' => $exception->getMessage(),
+                    'code' => self::getExceededRateLimitErrorCode(),
+                ],
+            ],
+        ];
+    }
+
+    public function setupClient()
+    {
+        $requesterClass = $this->clientClass;
+        $this->httpClient = new $requesterClass();
+
+        $httpClientClass = $this->httpClientClass;
+        $httpClient = new $httpClientClass();
+        $this->httpClient->setClient($httpClient);
+    }
+
+    /**
+     * @param string $screenName
+     * @return bool
+     */
+    public function shouldSkipSerializationForMemberWithScreenName(string $screenName)
+    {
+        $member = $this->userRepository->findOneBy(['twitter_username' => $screenName]);
+        if (!$member instanceof User) {
+            return false;
+        }
+
+        return $member->isProtected() || $member->hasBeenDeclaredAsNotFound() || $member->isSuspended();
+    }
+
+    /**
+     * @param $identifier
+     * @return \API|mixed|object|\stdClass
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Exception
+     */
+    public function showUser($identifier)
+    {
+        $screenName = null;
+        $userId = null;
+
+        if (is_integer($identifier)) {
+            $userId = $identifier;
+            $option = 'user_id';
+        } else {
+            $screenName = $identifier;
+            $option = 'screen_name';
+
+            $this->guardAgainstSpecialMembers($screenName);
+        }
+
+        $showUserEndpoint = $this->getShowUserEndpoint($version = '1.1', $option);
+        $this->guardAgainstApiLimit($showUserEndpoint);
+
+        try {
+            $twitterUser = $this->contactEndpoint(
+                strtr(
+                    $showUserEndpoint,
+                    [
+                        '{{ screen_name }}' => $screenName,
+                        '{{ user_id }}' => $userId
+                    ]
+                )
+            );
+        } catch (UnavailableResourceException $exception) {
+            if ($exception->getCode() === self::ERROR_SUSPENDED_USER) {
+                $this->userRepository->suspendMember($screenName);
+
+                $suspendedMessageMessage = $this->logSuspendedMemberMessage($screenName);
+                throw new SuspendedAccountException($suspendedMessageMessage, $exception->getCode(), $exception);
+            }
+
+            if ($exception->getCode() === self::ERROR_NOT_FOUND) {
+                $this->userRepository->declareUserAsNotFound($screenName);
+
+                $suspendedMessageMessage = $this->logNotFoundMemberMessage($screenName);
+                throw new NotFoundMemberException($suspendedMessageMessage, $exception->getCode(), $exception);
+            }
+        }
+
+        $this->guardAgainstUnavailableResource($twitterUser);
+
+        return $twitterUser;
+    }
 
     /**
      * @param string $version
@@ -291,14 +709,18 @@ class Accessor implements TwitterErrorAwareInterface
     }
 
     /**
-     * @return mixed
+     * @return \API|mixed|object|\stdClass
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Exception
      */
     public function fetchRateLimitStatus()
     {
         $endpoint = $this->getRateLimitStatusEndpoint();
 
         return $this->contactEndpoint($endpoint);
-   	}
+    }
 
     /**
      * @param string $version
@@ -306,14 +728,15 @@ class Accessor implements TwitterErrorAwareInterface
      */
     protected function getRateLimitStatusEndpoint($version = '1.1')
     {
-        return $this->getApiBaseUrl($version) . '/application/rate_limit_status.json?resources=statuses';
+        return $this->getApiBaseUrl($version) . '/application/rate_limit_status.json?resources=statuses,users,lists';
     }
 
     /**
      * @param string $version
      * @return string
      */
-    protected function getApiBaseUrl($version = '1.1') {
+    protected function getApiBaseUrl($version = '1.1')
+    {
         return 'https://' . $this->apiHost . '/' . $version;
     }
 
@@ -351,121 +774,17 @@ class Accessor implements TwitterErrorAwareInterface
     }
 
     /**
-     * @param $endpoint
-     * @return \API|mixed|object
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
+     * @param UnavailableResourceException $exception
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
      */
-    public function contactEndpoint($endpoint)
+    protected function throwException(UnavailableResourceException $exception)
     {
-        $parameters = array();
-        $response = null;
-
-        $tokens = $this->getTokens();
-        $httpClient = $this->httpClient;
-
-        /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token */
-        $token = $this->tokenRepository->refreshFreezeCondition($tokens['oauth'], $this->logger);
-        if ($token->isFrozen()) {
-            $now = new \DateTime;
-            $this->moderator->waitFor(
-                $token->getFrozenUntil()->getTimestamp() - $now->getTimestamp(),
-                [
-                    '{{ token }}' => substr($token->getOauthToken(), 0, '8'),
-                ]
-            );
-        }
-
-        try {
-            if (is_null($this->authenticationHeader)) {
-                /** @var \TwitterOAuth $connection */
-                $connection = new $httpClient(
-                    $tokens['key'],
-                    $tokens['secret'],
-                    $tokens['oauth'],
-                    $tokens['oauth_secret']
-                );
-
-                $content = $connection->get($endpoint, $parameters);
-            } else {
-                $this->setupClient();
-
-                $httpClient->setHeader('Authorization', $this->authenticationHeader);
-                $httpClient->request('GET', $endpoint);
-
-                /** @var \Symfony\Component\HttpFoundation\Response $response */
-                $response = $httpClient->getResponse();
-                $encodedContent = $response->getContent();
-                $content = json_decode($encodedContent);
-            }
-        } catch (\Exception $exception) {
-            $this->logger->error($exception->getMessage(), $exception->getTrace());
-            $content = (object)['errors' => [(object)[
-                'message' => $exception->getMessage(),
-                'code' => $exception->getCode()
-            ]]];
-        }
-
-        $this->logger->info('[info] ' . $endpoint);
-        if ($this->hasError($content)) {
-            $errorMessage = $content->errors[0]->message;
-            $errorCode = $content->errors[0]->code;
-
-            $this->logger->error('[message] ' . $errorMessage);
-            $this->logger->error('[code] ' . $errorCode);
-            $this->logger->error('[token] ' . $token->getOauthToken());
-
-
-            $reflection = new \ReflectionClass(__NAMESPACE__ . '\TwitterErrorAwareInterface');
-            $errorCodes = $reflection->getConstants();
-
-            if (in_array($errorCode, $errorCodes)) {
-                if ($errorCode == self::ERROR_EXCEEDED_RATE_LIMIT) {
-                    $this->tokenRepository->freezeToken($token->getOauthToken());
-                }
-                $this->throwException($errorMessage, $errorCode);
-            } else {
-                /** Freeze token and wait for 15 minutes before getting back to operation */
-                $this->tokenRepository->freezeToken($token->getOauthToken());
-                $this->moderator->waitFor(
-                    15*60,
-                    [
-                        '{{ token }}' => substr($token->getOauthToken(), 0, '8'),
-                    ]
-                );
-
-                return $this->contactEndpoint($endpoint);
-            }
-        }
-
-        return $content;
-    }
-
-    /**
-     * @param $errorMessage
-     * @param $errorCode
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
-     */
-    protected function throwException($errorMessage, $errorCode)
-    {
-        if ($errorCode === self::ERROR_SUSPENDED_USER) {
-            throw new SuspendedAccountException($errorMessage, $errorCode);
+        if ($exception->getCode() === self::ERROR_SUSPENDED_USER) {
+            throw new SuspendedAccountException($exception->getMessage(), $exception->getCode());
         } else {
-            throw new UnavailableResourceException($errorMessage, $errorCode);
+            throw $exception;
         }
-    }
-
-    public function setupClient()
-    {
-        $clientClass = $this->clientClass;
-        $this->httpClient = new $clientClass();
-
-        $httpClientClass = $this->httpClientClass;
-        $httpClient = new $httpClientClass([
-            RequestOptions::VERIFY => false,
-            RequestOptions::TIMEOUT => 1800
-        ]);
-
-        $this->httpClient->setClient($httpClient);
     }
 
     /**
@@ -479,7 +798,7 @@ class Accessor implements TwitterErrorAwareInterface
                 'oauth' => $this->userToken,
                 'oauth_secret' => $this->userSecret,
                 'key' => $this->consumerKey,
-                'secret' => $this->consumerSecret
+                'secret' => $this->consumerSecret,
             ];
         } else {
             throw new \Exception('Invalid tokens');
@@ -489,26 +808,65 @@ class Accessor implements TwitterErrorAwareInterface
     }
 
     /**
-     * @param $identifier
-     * @return \API|mixed|object
+     * @param $twitterUser
+     * @return bool
+     * @throws ProtectedAccountException
+     * @throws UnavailableResourceException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function showUser($identifier)
+    protected function guardAgainstUnavailableResource($twitterUser)
     {
-        $screenName = null;
-        $userId = null;
+        $validUser = is_object($twitterUser);
 
-        if (is_integer($identifier)) {
-            $userId = $identifier;
-            $option = 'user_id';
-        } else {
-            $screenName = $identifier;
-            $option = 'screen_name';
+        if ($validUser && !isset($twitterUser->errors)) {
+            return $this->guardAgainstProtectedAccount($twitterUser);
         }
-        $showUserEndpoint = $this->getShowUserEndpoint($version = '1.1', $option);
 
-        return $this->contactEndpoint(strtr($showUserEndpoint, [
-            '{{ screen_name }}' => $screenName, '{{ user_id }}' => $userId
-        ]));
+        if ($validUser && isset($twitterUser->errors)) {
+            $errorCode = $twitterUser->errors[0]->code;
+            $errorMessage = $twitterUser->errors[0]->message;
+            $this->logger->error($errorMessage);
+
+            $this->throwUnavailableResourceException($errorMessage, $errorCode);
+        }
+
+        $errorMessage = 'Unavailable user';
+        $this->logger->info($errorMessage);
+
+        $this->throwUnavailableResourceException($errorMessage, 0);
+    }
+
+    /**
+     * @param $twitterUser
+     * @return bool
+     * @throws ProtectedAccountException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    protected function guardAgainstProtectedAccount($twitterUser)
+    {
+        if (!isset($twitterUser->protected) || !$twitterUser->protected) {
+            return true;
+        }
+
+        $this->userRepository->declareUserAsProtected($twitterUser->screen_name);
+
+        $protectedAccount = $this->translator->trans(
+            'logs.info.account_protected',
+            ['{{ user }}' => $twitterUser->screen_name],
+            'logs'
+        );
+
+        throw new ProtectedAccountException($protectedAccount, self::ERROR_PROTECTED_ACCOUNT);
+    }
+
+    /**
+     * @param $errorMessage
+     * @param $errorCode
+     * @throws UnavailableResourceException
+     */
+    protected function throwUnavailableResourceException($errorMessage, $errorCode)
+    {
+        throw new UnavailableResourceException($errorMessage, $errorCode);
     }
 
     /**
@@ -529,7 +887,11 @@ class Accessor implements TwitterErrorAwareInterface
 
     /**
      * @param $screenName
-     * @return \API|mixed|object
+     * @return \API|mixed|object|\stdClass
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Exception
      */
     public function showUserFriends($screenName)
     {
@@ -558,8 +920,11 @@ class Accessor implements TwitterErrorAwareInterface
 
     /**
      * @param $identifier
-     * @return \API|mixed|object
-     * @throws \InvalidArgumentException
+     * @return \API|mixed|object|\stdClass
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Exception
      */
     public function showStatus($identifier)
     {
@@ -573,16 +938,23 @@ class Accessor implements TwitterErrorAwareInterface
 
     /**
      * @param $screenName
-     * @return \API|mixed|object
+     * @return \API|mixed|object|\stdClass
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Exception
      */
     public function getUserLists($screenName)
     {
-        return $this->contactEndpoint(strtr($this->getUserListsEndpoint(),
-            [
-                '{{ screenName }}'  => $screenName,
-                '{{ reverse }}'     => true,
-            ]
-        ));
+        return $this->contactEndpoint(
+            strtr(
+                $this->getUserListsEndpoint(),
+                [
+                    '{{ screenName }}' => $screenName,
+                    '{{ reverse }}' => true,
+                ]
+            )
+        );
     }
 
     /**
@@ -595,12 +967,75 @@ class Accessor implements TwitterErrorAwareInterface
     }
 
     /**
+     * @param     $screenName
+     * @param int $cursor
+     * @return \API|mixed|object|\stdClass
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \Exception
+     * @throws \WeavingTheWeb\Bundle\ApiBundle\Exception\InvalidTokenException
+     */
+    public function getUserOwnerships($screenName, $cursor = -1)
+    {
+        $endpoint = $this->getUserOwnershipsEndpoint();
+        $this->guardAgainstApiLimit($endpoint);
+
+        return $this->contactEndpoint(
+            strtr(
+                $endpoint,
+                [
+                    '{{ screenName }}' => $screenName,
+                    '{{ reverse }}' => true,
+                    '{{ count }}' => 1000,
+                    '{{ cursor }}' => $cursor,
+                ]
+            )
+        );
+    }
+
+    /**
+     * @param string $version
+     * @return string
+     */
+    protected function getUserOwnershipsEndpoint($version = '1.1')
+    {
+        return $this->getApiBaseUrl($version) . '/lists/ownerships.json?reverse={{ reverse }}' .
+            '&screen_name={{ screenName }}' .
+            '&count={{ count }}&cursor={{ cursor }}';
+    }
+
+    /**
      * @param $id
-     * @return \API|mixed|object
+     * @return \API|array|mixed|object|\stdClass
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function getListMembers($id)
     {
-        return $this->contactEndpoint(strtr($this->getListMembersEndpoint(), ['{{ id }}' => $id]));
+        $listMembersEndpoint = $this->getListMembersEndpoint();
+        $this->guardAgainstApiLimit($listMembersEndpoint, $findNextAvailableToken = false);
+
+        $sendRequest = function () use ($listMembersEndpoint, $id) {
+            return $this->contactEndpoint(strtr($listMembersEndpoint, ['{{ id }}' => $id]));
+        };
+
+        $members = [];
+
+        try {
+            $members = $sendRequest();
+        } catch (UnavailableResourceException $exception) {
+            /**
+             * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token
+             */
+            $token = $this->tokenRepository->findOneBy(['oauthToken' => $this->userToken]);
+            $this->waitUntilTokenUnfrozen($token);
+
+            $members = $sendRequest();
+        } finally {
+            return $members;
+        }
     }
 
     /**
@@ -609,7 +1044,7 @@ class Accessor implements TwitterErrorAwareInterface
      */
     protected function getListMembersEndpoint($version = '1.1')
     {
-        return $this->getApiBaseUrl($version) . '/lists/members.json?list_id={{ id }}';
+        return $this->getApiBaseUrl($version) . '/lists/members.json?count=200&list_id={{ id }}';
     }
 
     /**
@@ -627,33 +1062,438 @@ class Accessor implements TwitterErrorAwareInterface
             $this->logger->error($message);
             throw new \Exception($message, $rateLimitStatus->errors[0]->code);
         } else {
-            $leastUpperBound = $rateLimitStatus->resources->statuses->$endpoint->limit;
-            $remainingCalls = $rateLimitStatus->resources->statuses->$endpoint->remaining;
-            $remainingCallsMessage = $this->translator->transChoice(
-                'logs.info.calls_remaining',
-                $remainingCalls,
-                [
-                    '{{ count }}' => $remainingCalls,
-                    '{{ endpoint }}' => $endpoint,
-                    '{{ identifier }}' => substr($this->userToken, 0, '8'),
-                ],
-                'logs'
-            );
-            $this->logger->info($remainingCallsMessage);
+            $token = new Token();
+            $token->setOauthToken($this->userToken);
 
-            return $remainingCalls < floor($leastUpperBound * (1/10));
+            $fullEndpoint = $endpoint;
+            $resourceType = 'statuses';
+
+            if (!isset($rateLimitStatus->resources->$resourceType)) {
+                return false;
+            }
+
+            $availableEndpoints = get_object_vars($rateLimitStatus->resources->$resourceType);
+            if (!array_key_exists($endpoint, $availableEndpoints)) {
+                $endpoint = null;
+
+                if (false !== strpos($fullEndpoint, '/users/show')) {
+                    $endpoint = "/users/show/:id";
+                    $resourceType = 'users';
+                }
+
+                if (false !== strpos($fullEndpoint, '/statuses/user_timeline')) {
+                    $endpoint = "/statuses/user_timeline";
+                }
+
+                if (false !== strpos($fullEndpoint, '/lists/ownerships')) {
+                    $endpoint = "/lists/ownerships";
+                    $resourceType = 'lists';
+                }
+            }
+
+            $this->logger->info(json_encode($rateLimitStatus));
+
+            if (!is_null($endpoint) && isset($rateLimitStatus->resources->$resourceType)) {
+                $limit = $rateLimitStatus->resources->$resourceType->$endpoint->limit;
+                $remainingCalls = $rateLimitStatus->resources->$resourceType->$endpoint->remaining;
+                $remainingCallsMessage = $this->translator->transChoice(
+                    'logs.info.calls_remaining',
+                    $remainingCalls,
+                    [
+                        '{{ count }}' => $remainingCalls,
+                        '{{ endpoint }}' => $endpoint,
+                        '{{ identifier }}' => $this->takeFirstTokenCharacters($token),
+                    ],
+                    'logs'
+                );
+                $this->logger->info($remainingCallsMessage);
+
+                return $this->lessRemainingCallsThanTenPercentOfLimit($remainingCalls, $limit);
+            } else {
+                $this->logger->info(sprintf('Could not compute remaining calls for "%s"', $fullEndpoint));
+
+                return false;
+            }
         }
+    }
+
+    /**
+     * Returns true if there are more remaining calls than 10 % of the limit
+     *
+     * @param $remainingCalls
+     * @param $limit
+     * @return bool
+     */
+    public function lessRemainingCallsThanTenPercentOfLimit($remainingCalls, $limit)
+    {
+        return $remainingCalls < floor($limit * 1 / 10);
     }
 
     /**
      * @param $response
      * @return bool
      */
-    protected function hasError($response)
+    public function hasError($response)
     {
         return is_object($response) &&
             isset($response->errors) &&
             is_array($response->errors) &&
             isset($response->errors[0]);
+    }
+
+    /**
+     * @param $connection
+     */
+    protected function checkApiLimit(\TwitterOAuth $connection)
+    {
+        $this->twitterApiLogger->info(
+            sprintf(
+                '[HTTP code] %s',
+                print_r($connection->http_info['http_code'], true)
+            )
+        );
+        $this->twitterApiLogger->info(
+            sprintf(
+                '[HTTP URL] %s',
+                $connection->http_info['url']
+            )
+        );
+        if (isset($connection->http_header)) {
+            if (array_key_exists('x_rate_limit_limit', $connection->http_header)) {
+                $limit = (int)$connection->http_header['x_rate_limit_limit'];
+                $remainingCalls = (int)$connection->http_header['x_rate_limit_remaining'];
+
+                $this->twitterApiLogger->info(
+                    sprintf(
+                        '[X-Rate-Limit-Remaining] %s',
+                        $connection->http_header['x_rate_limit_remaining']
+                    )
+                );
+
+
+                $this->apiLimitReached = $this->lessRemainingCallsThanTenPercentOfLimit($remainingCalls, $limit);
+            }
+        }
+    }
+
+    /**
+     * @return int
+     */
+    public function getEmptyReplyErrorCode()
+    {
+        return self::ERROR_EMPTY_REPLY;
+    }
+
+    /**
+     * @return int
+     */
+    public function getExceededRateLimitErrorCode()
+    {
+        return self::ERROR_EXCEEDED_RATE_LIMIT;
+    }
+
+    /**
+     * @return int
+     */
+    public function getMemberNotFoundErrorCode()
+    {
+        return self::ERROR_NOT_FOUND;
+    }
+
+    /**
+     * @return int
+     */
+    public function getUserNotFoundErrorCode()
+    {
+        return self::ERROR_USER_NOT_FOUND;
+    }
+
+    /**
+     * @return int
+     */
+    public function getSuspendedUserErrorCode()
+    {
+        return self::ERROR_SUSPENDED_USER;
+    }
+
+    /**
+     * @return int
+     */
+    public function getProtectedAccountErrorCode()
+    {
+        return self::ERROR_PROTECTED_ACCOUNT;
+    }
+
+    /**
+     * @var boolean
+     */
+    protected $apiLimitReached = false;
+
+    public function isApiLimitReached()
+    {
+        return $this->apiLimitReached;
+    }
+
+    /**
+     * @param      $endpoint
+     * @param bool $findNextAvailableToken
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function guardAgainstApiLimit($endpoint, $findNextAvailableToken = true)
+    {
+        $apiLimitReached = $this->isApiLimitReached();
+
+        try {
+            $apiLimitReached = $apiLimitReached || $this->tokenRepository->isOauthTokenFrozen($this->userToken);
+        } catch (InvalidTokenException $exception) {
+            $apiLimitReached = true;
+        }
+
+        if ($apiLimitReached && $findNextAvailableToken) {
+            $token = $this->tokenRepository->findFirstUnfrozenToken();
+            $unfrozenToken = $token !== null;
+
+            while ($apiLimitReached && $unfrozenToken) {
+                $apiLimitReached = !$this->isApiAvailableForToken($endpoint, $token);
+                $token = $this->tokenRepository->findFirstUnfrozenToken();
+                $unfrozenToken = $token !== null;
+            }
+        }
+
+        if ($apiLimitReached) {
+            $message = $this->translator->trans('twitter.error.api_limit_reached.all_tokens', [], 'messages');
+            $this->logger->info($message);
+
+            if (isset($token)) {
+                $this->waitUntilTokenUnfrozen($token);
+            }
+        }
+    }
+
+    /**
+     * @param $endpoint
+     * @param Token $token
+     * @return bool
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    protected function isApiAvailableForToken($endpoint, Token $token)
+    {
+        $this->setUserToken($token->getOauthToken());
+        $this->setUserSecret($token->getOauthTokenSecret());
+        $this->setConsumerKey($token->consumerKey);
+        $this->setConsumerSecret($token->consumerSecret);
+
+        return $this->isApiAvailable($endpoint);
+    }
+
+    /**
+     * @param $endpoint
+     * @return bool
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    protected function isApiAvailable($endpoint)
+    {
+        $availableApi = false;
+
+        try {
+            if (!$this->isApiRateLimitReached($endpoint)) {
+                $availableApi = true;
+            }
+        } catch (\Exception $exception) {
+            if ($exception->getCode() === $this->getEmptyReplyErrorCode()) {
+                $availableApi = true;
+            } else {
+                $this->logger->error($exception->getMessage());
+                $this->tokenRepository->freezeToken($this->userToken);
+            }
+        }
+
+        return $availableApi;
+    }
+
+    /**
+     * @param Token $token
+     */
+    protected function waitUntilTokenUnfrozen(Token $token)
+    {
+        $now = new \DateTime;
+        $this->moderator->waitFor(
+            $token->getFrozenUntil()->getTimestamp() - $now->getTimestamp(),
+            ['{{ token }}' => $this->takeFirstTokenCharacters($token)]
+        );
+    }
+
+    /**
+     * @param Token $token
+     * @return string
+     */
+    protected function takeFirstTokenCharacters(Token $token)
+    {
+        return substr($token->getOauthToken(), 0, '8');
+    }
+
+    /**
+     * @param $exception
+     * @return object
+     */
+    private function convertExceptionIntoContent($exception): object
+    {
+        return (object)[
+            'errors' => [
+                (object)[
+                    'message' => $exception->getMessage(),
+                    'code' => $exception->getCode(),
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @param $endpoint
+     * @return mixed|object|\stdClass
+     * @throws \Exception
+     */
+    private function fetchContent($endpoint)
+    {
+        if ($this->shouldUseBearerToken()) {
+            $this->setupClient();
+
+            return $this->contactEndpointUsingBearerToken($endpoint);
+        }
+
+        $tokens = $this->getTokens();
+        $token = $this->preEndpointContact($tokens);
+
+        return $this->contactEndpointUsingConsumerKey($endpoint, $token, $tokens);
+    }
+
+    /**
+     * @param Token|null $token
+     * @return Token
+     * @throws \Exception
+     */
+    private function maybeGetToken(Token $token = null): Token
+    {
+        if (is_null($token)) {
+            $tokens = $this->getTokens();
+
+            return $this->preEndpointContact($tokens);
+        }
+
+        return $token;
+    }
+
+    /**
+     * @param $screenName
+     * @return string
+     */
+    private function logSuspendedMemberMessage($screenName): string
+    {
+        $suspendedMessageMessage = $this->translator->trans(
+            'amqp.output.suspended_account',
+            ['{{ user }}' => $screenName],
+            'messages'
+        );
+        $this->logger->info($suspendedMessageMessage);
+
+        return $suspendedMessageMessage;
+    }
+
+    /**
+     * @param $screenName
+     * @return string
+     */
+    private function logNotFoundMemberMessage($screenName): string
+    {
+        $notFoundMemberMessage = $this->translator->trans(
+            'amqp.output.not_found_member',
+            ['{{ user }}' => $screenName],
+            'messages'
+        );
+        $this->logger->info($notFoundMemberMessage);
+
+        return $notFoundMemberMessage;
+    }
+
+    /**
+     * @param $screenName
+     * @return string
+     */
+    private function logProtectedMemberMessage($screenName): string
+    {
+        $protectedMemberMessage = $this->translator->trans(
+            'amqp.output.protected_member',
+            ['{{ user }}' => $screenName],
+            'messages'
+        );
+        $this->logger->info($protectedMemberMessage);
+
+        return $protectedMemberMessage;
+    }
+
+    /**
+     * @param $screenName
+     * @throws NotFoundMemberException
+     * @throws SuspendedAccountException
+     */
+    private function guardAgainstSpecialMembers($screenName): void
+    {
+        $member = $this->userRepository->findOneBy(['twitter_username' => $screenName]);
+        if ($member instanceof User) {
+            if ($member->isSuspended()) {
+                $suspendedMessageMessage = $this->logSuspendedMemberMessage($screenName);
+                throw new SuspendedAccountException($suspendedMessageMessage, self::ERROR_SUSPENDED_USER);
+            }
+
+            if ($member->isNotFound()) {
+                $notFoundMemberMessage = $this->logNotFoundMemberMessage($screenName);
+                throw new NotFoundMemberException($notFoundMemberMessage, self::ERROR_NOT_FOUND);
+            }
+
+            if ($member->isProtected()) {
+                $notFoundMemberMessage = $this->logProtectedMemberMessage($screenName);
+                throw new NotFoundMemberException($notFoundMemberMessage, self::ERROR_NOT_FOUND);
+            }
+        }
+    }
+
+    /**
+     * @param string   $endpoint
+     * @param callable $fetchContent
+     * @return null
+     */
+    private function fetchContentWithRetries(string $endpoint, callable $fetchContent)
+    {
+        $content = null;
+
+        $this->logger->info(sprintf('About to fetch content by making contact with endpoint "%s"', $endpoint));
+
+        $retries = 0;
+        while ($retries < self::MAX_RETRIES + 1) {
+            try {
+                $content = $fetchContent($endpoint);
+                if ($this->hasError($content) && $content->errors[0]->code === self::ERROR_OVER_CAPACITY) {
+                    throw new OverCapacityException(
+                        $content->errors[0]->message,
+                        $content->errors[0]->code
+                    );
+                }
+
+                break;
+            } catch (OverCapacityException $exception) {
+                $this->logger->info(sprintf(
+                        'About to retry making contact with endpoint (retry #%d out of %d) "%s"',
+                        $retries + 1,
+                        self::MAX_RETRIES,
+                        $endpoint
+                    )
+                );
+
+                $retries++;
+            }
+        }
+
+        return $content;
     }
 }
