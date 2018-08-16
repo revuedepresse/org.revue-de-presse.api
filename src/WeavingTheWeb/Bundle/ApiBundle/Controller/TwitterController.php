@@ -7,10 +7,9 @@ use FOS\RestBundle\Controller\Annotations as Rest,
 
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Cache;
 
-use Symfony\Component\HttpFoundation\Request,
-    Symfony\Component\HttpFoundation\Response;
-
 /**
+ * @package WeavingTheWeb\Bundle\ApiBundle\Controller
+ *
  * @Rest\NamePrefix("weaving_the_web_api_")
  */
 class TwitterController extends ResourceController

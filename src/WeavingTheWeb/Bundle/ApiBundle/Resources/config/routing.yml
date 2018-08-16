@@ -1,34 +1,4 @@
-aggregation:
-    resource: WeavingTheWeb\Bundle\ApiBundle\Controller\AggregationController
-    type:     annotation
-
-job:
-    resource: WeavingTheWeb\Bundle\ApiBundle\Controller\JobController
-    type:     annotation
-
-newsfeed:
-    resource: WeavingTheWeb\Bundle\ApiBundle\Controller\FacebookController
-    type:     rest
-    prefix:   /api/facebook
-    options:
-        expose: true
-
-oauth:
-    resource: WeavingTheWeb\Bundle\ApiBundle\Controller\OAuthController
-    type:     annotation
-
-perspective:
-    resource: WeavingTheWeb\Bundle\ApiBundle\Controller\PerspectiveController
-    type:     annotation
-
-repository:
-    resource: WeavingTheWeb\Bundle\ApiBundle\Controller\GithubController
-    type:     rest
-    prefix:   /api/github
-    options:
-        expose: true
-
-status:
+user_streams:
     resource: WeavingTheWeb\Bundle\ApiBundle\Controller\TwitterController
     type:     rest
     prefix:   /api/twitter

@@ -1,32 +1,14 @@
-# Vagrant box
-.vagrant
-.bowerrc
-.idea
-# Packer
-packer_*
-
-# Continuous integration reports
-/build/*
-!/build/.gitignore
-
-# PHP dependencies
-auth.json
+app/*.xml
+app/bootstrap.php.cache
+app/cache
+app/config/*.yml
+!app/config/services.yml
+app/logs
+app/SymfonyRequirements.php
+bin/phpunit
+build/*
+!build/.gitignore
 composer.phar
-composer.lock
-/vendor
-
-# JavaScript dependencies
-bower_components/
-/src/WeavingTheWeb/Bundle/DashboardBundle/Resources/public/components
-.bowerrc
-/node_modules
-
-# Provisioning
-.galaxy_install_info
-
-# Public assets
-/web/assetic
-/web/bundles
-/web/css
-/web/js
-/web/images
+provisioning/containers/mysql/templates/mysql/my.cnf
+provisioning/containers/volumes/mysql/*
+vendor

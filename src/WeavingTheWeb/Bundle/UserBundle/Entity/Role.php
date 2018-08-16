@@ -8,10 +8,11 @@ use Doctrine\Common\Collections\ArrayCollection,
 use WTW\UserBundle\Entity\User;
 
 /**
- * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
- *
  * @ORM\Entity
  * @ORM\Table(name="weaving_role")
+ *
+ * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ * @package WeavingTheWeb\Bundle\UserBundle\Entity
  */
 class Role implements RoleInterface
 {

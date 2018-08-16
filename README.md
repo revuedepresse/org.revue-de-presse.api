@@ -1,21 +1,74 @@
 # DevObs
 
-[![Build Status](http://j.mp/1QSoTtq)](http://j.mp/1N2kspP) [![Circle CI](http://j.mp/1In2JNb)](http://j.mp/1TsP1tv)
+Easing observation of Twitter lists
 
-Easing observation, selection and reuse of packages in web development by harnessing social networks.  
-The project is currently under heavy rewrite of the mobile client with added benefit of cross-browser support guaranteed with [Browserstack](http://browserstack.com/)
+## Installation
 
-## [Installation](app/Resources/doc/100-installation.md)
+### Requirements
 
-## [User management](app/Resources/doc/150-user-management.md)
+Install git by following intructions from the [official documentation](https://git-scm.org/).
 
-## [Connect to Twitter](app/Resources/doc/180-connect-to-twitter.md)
+Install Docker by following instructions from the [official documentation](https://docs.docker.com/install/linux/docker-ce/ubuntu/).
 
-## [API consumption](app/Resources/doc/190-api-consumption.md)
+### PHP
 
-## [Packaging](app/Resources/doc/200-packaging.md)
+Build a PHP container image
 
-## [Development](app/Resources/doc/210-development.md)
+```
+make build-php-container
+```
 
-## [Contribute](app/Resources/doc/700-contribute.md)
+### MySQL
+
+Initialize MySQL from `app/config/parameters.yml`
+
+```
+make initialize-mysql-volume
+```
+
+### RabbitMQ
+
+Configure RabbitMQ privileges
+
+```
+make configure-rabbitmq-user-privileges
+```
+
+Set up AMQP fabric
+
+```
+make setup-amqp-fabric
+```
+
+List AMQP messages
+
+```
+make list-amqp-messages
+```
+
+## Usage
+
+Run MySQL container
+
+```
+make run-mysql-container
+```
+
+Run RabbitMQ container
+
+```
+run-rabbitmq-container
+```
+
+Produce messages from lists of members
+
+```
+make produce-amqp-messages-from-members-lists
+```
+
+Consume Twitter API from messages
+
+```
+make consume-twitter-api-messages
+```
 

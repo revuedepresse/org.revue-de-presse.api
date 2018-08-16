@@ -1,9 +1,0 @@
-<tr>
-{% for name, value in columns %}
-    <td>
-    {% if not name|absent_from_header %}
-    {{ name|column_name }}
-    {% endif %}
-    </td>
-{% endfor %}
-</tr>

@@ -1,11 +1,14 @@
 parameters:
     mapping:
-        FOSOAuthServerBundle: ~
         WTWUserBundle: ~
         WeavingTheWebApiBundle: ~
         WeavingTheWebDashboardBundle: ~
-        WeavingTheWebMappingBundle: ~
         WeavingTheWebUserBundle: ~
+        WTWUserBundleTest:
+            dir: '%kernel.root_dir%/../src/WTW/UserBundle/Tests/Security/Core/User'
+            prefix: WTW\UserBundle\Tests\Security\Core\User
+            type: annotation
+            is_bundle: false
 
 # Doctrine Configuration
 doctrine:
@@ -13,61 +16,82 @@ doctrine:
         default_connection: default
         connections:
             default:
-                charset:  %database_charset%
-                driver:   %database_driver%
-                host:     %database_host%
-                dbname:   %database_name%
-                user:     %database_user%
-                password: %database_password%
-                port:     %database_port%
+                charset:        "%database_charset%"
+                driver:         "%database_driver%"
+                host:           "%database_host%"
+                dbname:         "%database_name%"
+                user:           "%database_user%"
+                password:       "%database_password%"
+                port:           "%database_port%"
+                schema_filter:  "%schema_filter%"
+            libran:
+                charset:        "%database_charset_libran%"
+                driver:         "%database_driver_libran%"
+                host:           "%database_host_libran%"
+                dbname:         "%database_name_libran%"
+                user:           "%database_user_libran%"
+                password:       "%database_password_libran%"
+                port:           "%database_port_libran%"
+                schema_filter:  "%schema_filter%"
             admin:
-                charset:  %database_charset_admin%
-                driver:   %database_driver_admin%
-                host:     %database_host_admin%
-                dbname:   %database_name_admin%
-                user:     %database_user_admin%
-                password: %database_password_admin%
-                port:     %database_port_admin%
+                charset:        "%database_charset_admin%"
+                driver:         "%database_driver_admin%"
+                host:           "%database_host_admin%"
+                dbname:         "%database_name_admin%"
+                user:           "%database_user_admin%"
+                password:       "%database_password_admin%"
+                port:           "%database_port_admin%"
+                schema_filter:  "%schema_filter%"
             read:
-                charset:  %database_charset_read%
-                driver:   %database_driver_read%
-                host:     %database_host_read%
-                dbname:   %database_name_read%
-                user:     %database_user_read%
-                password: %database_password_read%
-                port:     %database_port_read%
+                charset:        "%database_charset_read%"
+                driver:         "%database_driver_read%"
+                host:           "%database_host_read%"
+                dbname:         "%database_name_read%"
+                user:           "%database_user_read%"
+                password:       "%database_password_read%"
+                port:           "%database_port_read%"
+                schema_filter:  "%schema_filter%"
             test_mysql:
-                charset:  %database_charset_test%
-                driver:   %database_driver_test%
-                host:     %database_host_test%
-                dbname:   %database_name_test%
-                user:     %database_user_test%
-                password: %database_password_test%
-                port:     %database_port_test%
+                charset:        "%database_charset_test%"
+                driver:         "%database_driver_test%"
+                host:           "%database_host_test%"
+                dbname:         "%database_name_test%"
+                user:           "%database_user_test%"
+                password:       "%database_password_test%"
+                port:           "%database_port_test%"
+                schema_filter:  "%schema_filter%"
             write:
-                charset:  %database_charset_write%
-                driver:   %database_driver_write%
-                host:     %database_host_write%
-                dbname:   %database_name_write%
-                user:     %database_user_write%
-                password: %database_password_write%
-                port:     %database_port_write%
+                charset:        "%database_charset_write%"
+                driver:         "%database_driver_write%"
+                host:           "%database_host_write%"
+                dbname:         "%database_name_write%"
+                user:           "%database_user_write%"
+                password:       "%database_password_write%"
+                port:           "%database_port_write%"
+                schema_filter:  "%schema_filter%"
     orm:
         default_entity_manager: default
         entity_managers:
             default:
                 connection: default
-                mappings: %mapping%
+                mappings: '%mapping%'
+                dql:
+                    datetime_functions:
+                        date: DoctrineExtensions\Query\Mysql\Date
             admin:
                 connection: admin
-                mappings: %mapping%
+                mappings: '%mapping%'
             read:
                 connection: read
-                mappings: %mapping%
+                mappings: '%mapping%'
+            libran:
+                connection: libran
+                mappings: '%mapping%'
             test_mysql:
                 connection: test_mysql
-                mappings: %mapping%
+                mappings: '%mapping%'
             write:
                 connection: write
-                mappings: %mapping%
-        auto_generate_proxy_classes: %kernel.debug%
+                mappings: '%mapping%'
+        auto_generate_proxy_classes: '%kernel.debug%'
+
