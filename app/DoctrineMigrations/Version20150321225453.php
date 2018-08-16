@@ -14,7 +14,12 @@ class Version20150321225453 extends AbstractMigration
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() != "mysql", "Migration can only be executed safely on 'mysql'.");
-        
+
+        $this->addSql("DROP TABLE weaving_facebook_link");
+        $this->addSql("DROP TABLE weaving_facebook_photo");
+        $this->addSql("DROP TABLE weaving_facebook_status");
+        $this->addSql("DROP TABLE weaving_facebook_video");
+
         $this->addSql("CREATE TABLE weaving_facebook_album (id INT AUTO_INCREMENT NOT NULL, native_id VARCHAR(255) NOT NULL, name VARCHAR(255) NOT NULL, link VARCHAR(255) NOT NULL, privacy VARCHAR(255) NOT NULL, count INT NOT NULL, type VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL, can_upload TINYINT(1) NOT NULL, UNIQUE INDEX nativeId (native_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB");
         $this->addSql("CREATE TABLE weaving_facebook_feed_item (id INT AUTO_INCREMENT NOT NULL, native_id VARCHAR(255) NOT NULL, type VARCHAR(255) NOT NULL, created_at DATETIME NOT NULL, updated_at DATETIME NOT NULL, json LONGTEXT NOT NULL, hash VARCHAR(40) NOT NULL, transformed TINYINT(1) DEFAULT '0' NOT NULL, INDEX feed_item_type (type), UNIQUE INDEX hash (hash), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB");
         $this->addSql("CREATE TABLE weaving_facebook_friend_list (id INT AUTO_INCREMENT NOT NULL, name VARCHAR(255) NOT NULL, type VARCHAR(255) NOT NULL, native_id VARCHAR(255) NOT NULL, read_at DATETIME NOT NULL, synced_at DATETIME DEFAULT NULL, UNIQUE INDEX nativeId (native_id), PRIMARY KEY(id)) DEFAULT CHARACTER SET utf8 COLLATE utf8_unicode_ci ENGINE = InnoDB");

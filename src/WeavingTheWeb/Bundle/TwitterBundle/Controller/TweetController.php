@@ -2,15 +2,14 @@
 
 namespace WeavingTheWeb\Bundle\TwitterBundle\Controller;
 
+use Doctrine\DBAL\Exception\ConnectionException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller,
     Symfony\Component\HttpFoundation\JsonResponse,
-    Symfony\Component\HttpFoundation\Request,
-    Symfony\Component\HttpFoundation\File\Exception\AccessDeniedException,
-    Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+    Symfony\Component\HttpFoundation\Request;
 
-use WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream;
+use WeavingTheWeb\Bundle\ApiBundle\Entity\Status;
 
 /**
  * @package WeavingTheWeb\Bundle\TwitterBundle\Controller
@@ -29,27 +28,29 @@ class TweetController extends Controller
     {
         if ($request->isMethod('OPTIONS')) {
             return $this->getCorsOptionsResponse();
-        } else {
-            try {
-                $oauthTokens = $this->parseOAuthTokens($request);
+        }
 
-                /** @var \WeavingTheWeb\Bundle\ApiBundle\Repository\UserStreamRepository $userStreamRepository */
-                $userStreamRepository = $this->get('weaving_the_web_twitter.repository.read.user_stream');
-                $userStreamRepository->setOauthTokens($oauthTokens);
+        try {
+            $oauthTokens = $this->parseOAuthTokens($request);
 
-                $lastId = $request->get('lastId', null);
-                $statuses = $userStreamRepository->findLatest($lastId);
-                $statusCode = 200;
+            /** @var \WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository $userStreamRepository */
+            $userStreamRepository = $this->get('weaving_the_web_twitter.repository.read.status');
+            $userStreamRepository->setOauthTokens($oauthTokens);
 
-                return new JsonResponse($statuses, $statusCode, $this->getAccessControlOriginHeaders());
-            } catch (\PDOException $exception) {
-                return $this->getExceptionResponse(
-                    $exception,
-                    $this->get('translator')->trans('twitter.error.database_connection', [], 'messages')
-                );
-            } catch (\Exception $exception) {
-                return $this->getExceptionResponse($exception);
-            }
+            $lastId = $request->get('lastId', null);
+            $statuses = $userStreamRepository->findLatest($lastId);
+            $statusCode = 200;
+
+            return new JsonResponse($statuses, $statusCode, $this->getAccessControlOriginHeaders());
+        } catch (\PDOException $exception) {
+            return $this->getExceptionResponse(
+                $exception,
+                $this->get('translator')->trans('twitter.error.database_connection', [], 'messages')
+            );
+        } catch (ConnectionException $exception) {
+            $this->get('logger')->critical('Could not connect to the database');
+        } catch (\Exception $exception) {
+            return $this->getExceptionResponse($exception);
         }
     }
 
@@ -65,6 +66,9 @@ class TweetController extends Controller
         } else {
             $data = ['error' => $message];
         }
+
+        $this->get('logger')->critical($data['error']);
+
         $statusCode = 500;
 
         return new JsonResponse($data, $statusCode, $this->getAccessControlOriginHeaders());
@@ -86,8 +90,8 @@ class TweetController extends Controller
             try {
                 $oauthTokens = $this->parseOAuthTokens($request);
 
-                /** @var \WeavingTheWeb\Bundle\ApiBundle\Repository\UserStreamRepository $userStreamRepository */
-                $userStreamRepository = $this->get('weaving_the_web_twitter.repository.read.user_stream');
+                /** @var \WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository $userStreamRepository */
+                $userStreamRepository = $this->get('weaving_the_web_twitter.repository.read.status');
                 $userStreamRepository->setOauthTokens($oauthTokens);
 
                 $statusIds = $request->get('statusIds', array());
@@ -119,7 +123,7 @@ class TweetController extends Controller
      */
     protected function parseOAuthTokens(Request $request)
     {
-        $userManager = $this->get('fos_user.user_manager');
+        $userManager = $this->get('user_manager');
         $username = $request->get('username', null);
 
         if (is_null($username)) {
@@ -136,7 +140,7 @@ class TweetController extends Controller
             }
         } else {
             /** @var \WTW\UserBundle\Entity\User $user */
-            $user = $userManager->findUserBy(['twitter_username' => $username]);
+            $user = $userManager->findOneBy(['twitter_username' => $username]);
 
             if (is_null($user)) {
                 throw new \Exception(sprintf(
@@ -198,10 +202,10 @@ class TweetController extends Controller
      *      options={"entity_manager"="write"}
      * )
      *
-     * @param UserStream $userStream
+     * @param Status $userStream
      * @return JsonResponse
      */
-    public function starAction(UserStream $userStream)
+    public function starAction(Status $userStream)
     {
         return $this->toggleStarringStatus($userStream, $starring = true);
     }
@@ -215,20 +219,20 @@ class TweetController extends Controller
      *      options={"entity_manager"="write"}
      * )
      *
-     * @param UserStream $userStream
+     * @param Status $userStream
      * @return JsonResponse
      */
-    public function unstarAction(UserStream $userStream)
+    public function unstarAction(Status $userStream)
     {
         return $this->toggleStarringStatus($userStream, $starring = false);
     }
 
     /**
-     * @param UserStream $userStream
-     * @param bool $starred
+     * @param Status $userStream
+     * @param bool   $starred
      * @return JsonResponse
      */
-    protected function toggleStarringStatus(UserStream $userStream, $starred = false)
+    protected function toggleStarringStatus(Status $userStream, $starred = false)
     {
         /** @var \Symfony\Component\HttpFoundation\RequestStack $requestStack */
         $requestStack = $this->get('request_stack');

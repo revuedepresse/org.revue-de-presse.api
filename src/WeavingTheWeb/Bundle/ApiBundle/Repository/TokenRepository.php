@@ -2,12 +2,14 @@
 
 namespace WeavingTheWeb\Bundle\ApiBundle\Repository;
 
-use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\EntityRepository,
+    Doctrine\ORM\NoResultException;
 
 use Psr\Log\LoggerInterface;
 
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Token,
-    WeavingTheWeb\Bundle\ApiBundle\Entity\TokenType;
+    WeavingTheWeb\Bundle\ApiBundle\Entity\TokenType,
+    WeavingTheWeb\Bundle\ApiBundle\Exception\InvalidTokenException;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
@@ -41,6 +43,7 @@ class TokenRepository extends EntityRepository
     /**
      * @param $oauthToken
      * @param string $until
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function freezeToken($oauthToken, $until = 'now + 15min')
     {
@@ -58,8 +61,9 @@ class TokenRepository extends EntityRepository
 
     /**
      * @param $oauthToken
-     * @param LoggerInterface $logger
-     * @return bool
+     * @param LoggerInterface|null $logger
+     * @return Token
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function refreshFreezeCondition($oauthToken, LoggerInterface $logger = null)
     {
@@ -76,10 +80,7 @@ class TokenRepository extends EntityRepository
             $entityManager->flush();
 
             $logger->info('[token creation] ' . $token->getOauthToken());
-        } elseif (
-            !is_null($token->getFrozenUntil()) &&
-            $token->getFrozenUntil()->getTimestamp() > (new \DateTime())->getTimestamp()
-        ) {
+        } elseif ($this->isTokenFrozen($token)) {
             /**
              * The token is frozen if the "frozen until" date is in the future
              */
@@ -97,9 +98,36 @@ class TokenRepository extends EntityRepository
     }
 
     /**
+     * @param Token $token
+     * @return bool
+     */
+    protected function isTokenFrozen(Token $token)
+    {
+        return !is_null($token->getFrozenUntil()) &&
+            $token->getFrozenUntil()->getTimestamp() > (new \DateTime())->getTimestamp();
+    }
+
+    /**
+     * @param $oauthToken
+     * @return bool
+     * @throws InvalidTokenException
+     */
+    public function isOauthTokenFrozen($oauthToken)
+    {
+        $token = $this->findOneBy(['oauthToken' => $oauthToken]);
+
+        if ($token instanceof Token) {
+            return $this->isTokenFrozen($token);
+        } else {
+            throw new InvalidTokenException('The token "' . $oauthToken . '" can not be found.');
+        }
+    }
+
+    /**
      * @param $applicationToken
      * @param $accessToken
      * @return Token
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function persistBearerToken($applicationToken, $accessToken)
     {
@@ -120,7 +148,8 @@ class TokenRepository extends EntityRepository
     }
 
     /**
-     * @return array
+     * @return mixed|null
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function findFirstUnfrozenToken()
     {
@@ -136,6 +165,59 @@ class TokenRepository extends EntityRepository
 
         $queryBuilder->andWhere('(t.frozenUntil IS NULL or t.frozenUntil < :now)');
         $queryBuilder->setParameter('now', new \DateTime());
+
+        $queryBuilder->setMaxResults(1);
+
+        try {
+            return $queryBuilder->getQuery()->getSingleResult();
+        } catch (NoResultException $exception) {
+            return null;
+        }
+    }
+
+    /**
+     * @return mixed|null
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function findFirstFrozenToken()
+    {
+        $queryBuilder = $this->createQueryBuilder('t');
+
+        $tokenRepository = $this->getEntityManager()->getRepository('WeavingTheWebApiBundle:TokenType');
+        $tokenType = $tokenRepository->findOneBy(['name' => TokenType::USER]);
+
+        $queryBuilder->andWhere('t.type = :type');
+        $queryBuilder->setParameter('type', $tokenType);
+
+        $queryBuilder->andWhere('t.oauthTokenSecret IS NOT NULL');
+
+        $queryBuilder->andWhere('t.frozenUntil > :now');
+        $queryBuilder->setParameter('now', new \DateTime());
+
+        $queryBuilder->setMaxResults(1);
+        $queryBuilder->orderBy('t.frozenUntil', 'ASC');
+
+        try {
+            return $queryBuilder->getQuery()->getSingleResult();
+        } catch (NoResultException $exception) {
+            return null;
+        }
+    }
+
+    /**
+     * @param string $token
+     * @return mixed
+     * @throws NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function findTokenOtherThan(string $token)
+    {
+        $queryBuilder = $this->createQueryBuilder('t');
+        $queryBuilder->andWhere('t.oauthToken != :token');
+        $queryBuilder->setParameter('token', $token);
+
+        $queryBuilder->andWhere('t.frozenUntil < :now');
+        $queryBuilder->setParameter('now', new \DateTime('now', new \DateTimeZone('UTC')));
 
         $queryBuilder->setMaxResults(1);
 

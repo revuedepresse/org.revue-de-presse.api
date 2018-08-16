@@ -1,7 +1,0 @@
-title:
-    tweet:
-        github:                 'Tweets containing GitHub repositories'
-        time_series:            'Times series'
-
-message.no_result:
-    tweet:                      'Sorry, no tweet containing these keywords have been found.'

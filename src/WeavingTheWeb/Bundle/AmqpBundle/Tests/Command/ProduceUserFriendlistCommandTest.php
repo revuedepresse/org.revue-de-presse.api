@@ -1,22 +1,21 @@
 <?php
 
-namespace WeavingTheWeb\Bundle\AmqpBundle\Command\Tests;
+namespace WeavingTheWeb\Bundle\AmqpBundle\Command;
 
 use Prophecy\Argument,
     Prophecy\Prophet;
 
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException;
 
-use WeavingTheWeb\Bundle\FrameworkExtraBundle\Test\CommandTestCase;
+use WTW\CodeGeneration\QualityAssuranceBundle\Test\CommandTestCase;
 
 /**
- * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
- *
- * @group   cli-twitter
- * @group   isolated-testing
- * @group   produce-user-messages
+ * @package WeavingTheWeb\Bundle\AmqpBundle\Command\Twitter
+ * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ * @group produce-friend-list
+ * @group cli-twitter
  */
-class ProduceUserFriendlistCommandTest extends CommandTestCase
+class ProduceUserFriendListCommandTest extends CommandTestCase
 {
     /** @var \Symfony\Bundle\FrameworkBundle\Client $client */
     protected $client;
@@ -26,7 +25,7 @@ class ProduceUserFriendlistCommandTest extends CommandTestCase
      */
     protected $prophet;
 
-    public function requireSQLiteFixtures()
+    public function requiredFixtures()
     {
         return true;
     }
@@ -34,6 +33,11 @@ class ProduceUserFriendlistCommandTest extends CommandTestCase
     public function setUp()
     {
         $this->prophet = new Prophet();
+    }
+
+    public function tearDown()
+    {
+        $this->prophet->checkPredictions();
     }
 
     /**
@@ -85,10 +89,10 @@ class ProduceUserFriendlistCommandTest extends CommandTestCase
             $this->setupAccessorMock();
             $this->setupUserRepositoryMock($mockingOptions);
         }
-        $this->setupProduceMock();
+        $this->setupProducerMock();
 
         $this->commandClass = $this->getParameter('weaving_the_web_amqp.produce_user_friendlist_command.class');
-        $this->setUpApplicationCommand();
+        $this->setUpApplication();
 
         $this->commandTester = $this->getCommandTester('wtw:amqp:tw:prd:utl');
 
@@ -188,34 +192,28 @@ class ProduceUserFriendlistCommandTest extends CommandTestCase
         ];
     }
 
-    public function setupProduceMock()
+    public function setupProducerMock()
     {
-        $mockBuilder = $this->getMockBuilder('\OldSound\RabbitMqBundle\RabbitMq\Produce')
-            ->disableOriginalConstructor()
-            ->disableAutoload();
-        $mock = $mockBuilder->setMethods(['publish', 'setContentType'])->getMock();
-        $mock->expects($this->any())->method('publish')->will($this->returnValue(null));
-        $mock->expects($this->any())->method('setContentType')->will($this->returnValue(null));
+        $producerMock = $this->prophet->prophesize('\OldSound\RabbitMqBundle\RabbitMq\Producer');
+        $producerMock->publish(Argument::any(), Argument::cetera())->willReturn(null);
+        $producerMock->setContentType(Argument::any())->willReturn(null);
 
         $this->client->getKernel()->getContainer()
-            ->set('old_sound_rabbit_mq.weaving_the_web_amqp.twitter.user_status_producer', $mock);
+            ->set('old_sound_rabbit_mq.weaving_the_web_amqp.twitter.user_status_producer', $producerMock->reveal());
     }
 
     public function setupAccessorMock()
     {
-        $mockBuilder = $this->getMockBuilder('\WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor')
-            ->disableOriginalConstructor()
-            ->disableAutoload();
-        $mock = $mockBuilder->setMethods(['setUserToken', 'setUserSecret', 'showUser', 'showUserFriends'])->getMock();
-        $mock->expects($this->any())->method('showUserFriends')->will($this->returnValue((object)['ids' => ['user1', 'user2']]));
-        $mock->expects($this->any())->method('showUser')->will($this->returnCallback(function ($input) {
-            return (object)['screen_name' => $input];
-        }));
-        $mock->expects($this->any())->method('setUserToken')->will($this->returnValue(null));
-        $mock->expects($this->any())->method('setUserSecret')->will($this->returnValue(null));
+        $accessorMock = $this->prophet->prophesize('\WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor');
+        $accessorMock->showUserFriends(Argument::any())->willReturn((object)['ids' => ['user1', 'user2']]);
+        $accessorMock->showUser(Argument::type('string'))->will(function ($arguments) {
+            return (object)['screen_name' => $arguments[0]];
+        });
+        $accessorMock->setUserToken(Argument::type('string'))->willReturn(null);
+        $accessorMock->setUserSecret(Argument::type('string'))->willReturn(null);
 
         $this->client->getKernel()->getContainer()
-            ->set('weaving_the_web_twitter.api_accessor', $mock);
+            ->set('weaving_the_web_twitter.api_accessor', $accessorMock->reveal());
     }
 
     /**
@@ -235,11 +233,13 @@ class ProduceUserFriendlistCommandTest extends CommandTestCase
             $mockBuilder = $this->getMockBuilder('WTW\UserBundle\Repository\UserRepository')
                 ->disableOriginalConstructor()
                 ->disableAutoload();
+
             $mock = $mockBuilder->setMethods(['findOneBy'])->getMock();
+
             $mock->expects($this->exactly($calls))->method('findOneBy')->will($this->returnCallback($callable));
 
             $this->client->getKernel()->getContainer()
-                ->set('wtw_user.repository.user', $mock);
+                ->set('user_manager', $mock);
         }
     }
 
@@ -267,10 +267,15 @@ class ProduceUserFriendlistCommandTest extends CommandTestCase
      */
     protected function getUserMock()
     {
-        $userMockBuilder = $this->getMockBuilder('WTW\UserBundle\Repository\UserRepository')
+        $userMockBuilder = $this->getMockBuilder('WTW\UserBundle\Entity\User')
             ->disableOriginalConstructor()
             ->disableAutoload();
-        $userMock = $userMockBuilder->setMethods(['getTwitterUsername'])->getMock();
+
+        $userMock = $userMockBuilder->setMethods([
+            'getTwitterUsername',
+            'isProtected'
+        ])->getMock();
+
         $userMock->expects($this->exactly(1))->method('getTwitterUsername')->will(
             $this->returnCallback(
                 function () {
@@ -278,6 +283,7 @@ class ProduceUserFriendlistCommandTest extends CommandTestCase
                 }
             )
         );
+        $userMock->expects($this->exactly(1))->method('isProtected')->will($this->returnValue(false));
 
         return $userMock;
     }
@@ -300,10 +306,5 @@ class ProduceUserFriendlistCommandTest extends CommandTestCase
         }
 
         return array('token' => $oauthToken, 'secret' => $oauthSecret);
-    }
-
-    public function tearDown()
-    {
-        $this->prophet->checkPredictions();
     }
 }

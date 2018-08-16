@@ -7,6 +7,7 @@ use Symfony\Component\Form\AbstractType,
     Symfony\Component\OptionsResolver\OptionsResolverInterface;
 
 /**
+ * Class UserType
  * @package WeavingTheWeb\Bundle\UserBundle\Form\Type
  */
 class UserType extends AbstractType

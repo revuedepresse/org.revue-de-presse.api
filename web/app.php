@@ -20,7 +20,6 @@ Request::setTrustedProxies(['127.0.0.1']);
 $request->setTrustedHeaderName(Request::HEADER_CLIENT_PROTO, 'X-Proxy-Proto');
 $request->setTrustedHeaderName(Request::HEADER_CLIENT_IP, 'X-Proxy-For');
 $request->setTrustedHeaderName(Request::HEADER_CLIENT_HOST, 'X-Proxy-Host');
-$request->setTrustedHeaderName(Request::HEADER_CLIENT_PORT, 'X-Proxy-Port');
 
 $response = $kernel->handle($request);
 $response->send();

@@ -1,30 +1,8 @@
-wtw_registration_land:
-    defaults: { _controller: FOSUserBundle:Registration:land }
-    path:  /
-
-_main:
-    resource: routing_friendsofsymfony.yml
-
 weaving_the_web_api:
     resource:     "@WeavingTheWebApiBundle/Resources/config/routing.yml"
-
-weaving_the_web_dashboard:
-    resource: "@WeavingTheWebDashboardBundle/Controller/"
-    type:     annotation
 
 weaving_the_web_twitter:
     prefix:   /api/twitter
     resource: "@WeavingTheWebTwitterBundle/Controller/"
     type:     annotation
 
-weaving_the_web_user:
-    prefix:   /user
-    resource: "@WeavingTheWebUserBundle/Resources/config/routing.xml"
-
-wtw_user:
-    resource: "@WTWUserBundle/Controller/"
-    type:     annotation
-
-oneup_uploader:
-    resource: .
-    type: uploader
