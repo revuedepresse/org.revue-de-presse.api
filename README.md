@@ -6,7 +6,7 @@ Easing observation of Twitter lists
 
 ### Requirements
 
-Install git by following intructions from the [official documentation](https://git-scm.org/).
+Install git by following instructions from the [official documentation](https://git-scm.org/).
 
 Install Docker by following instructions from the [official documentation](https://docs.docker.com/install/linux/docker-ce/ubuntu/).
 
