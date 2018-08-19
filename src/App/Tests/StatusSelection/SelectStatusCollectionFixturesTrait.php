@@ -1,15 +1,16 @@
 <?php
 
-namespace App\Tests\Selection;
+namespace App\Tests\StatusSelection;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
-use WTW\CodeGeneration\QualityAssuranceBundle\Test\CommandTestCase;
 
-class StatusSelectionTest extends CommandTestCase
+trait SelectStatusCollectionFixturesTrait
 {
     public function setUp()
     {
+        parent::setUp();
+
         $this->client = $this->getClient();
         $this->removeFixtures();
     }
@@ -17,33 +18,50 @@ class StatusSelectionTest extends CommandTestCase
     public function tearDown()
     {
         $this->removeFixtures();
+
+        parent::tearDown();
     }
 
     /**
-     * @test
-     * @group it_should_group_statuses_belonging_to_a_member_published_in_a_time_range
+     * @param $query
+     * @return mixed
      */
-    public function it_should_group_statuses_belonging_to_a_member_published_in_a_time_range()
+    private function logExceptionOnQueryExecution($query)
     {
-        /** @var StatusRepository $statusRepository */
-        $statusRepository = $this->get('weaving_the_web_twitter.repository.status');
+        /** @var \Doctrine\ORM\EntityManager $entityManager */
+        $entityManager = $this->get('doctrine.orm.entity_manager');
 
-        $earliestDate = new \DateTime('2018-08-19 23:00', new \DateTimeZone('UTC'));
-        $latestDate = new \DateTime('2018-08-20 22:59', new \DateTimeZone('UTC'));
+        try {
+            return $entityManager->getConnection()->executeQuery($query);
+        } catch (\Exception $exception) {
+            $this->get('monolog.logger.development')->error(
+                sprintf(
+                    'An error occurred when tearing down the test (message: "%s")',
+                    $exception->getMessage()
+                )
+            );
+        }
+    }
 
-        $this->saveStatuses($earliestDate, $latestDate);
+    private function removeFixtures(): void
+    {
+        // Remove previously inserted records of aggregates
+        $query = <<<QUERY
+            DELETE FROM weaving_aggregate WHERE id in (
+                SELECT aggregate_id FROM weaving_status_aggregate WHERE status_id IN (
+                    SELECT id FROM weaving_status WHERE ust_created_at >= '2018-08-19 22:00'
+                    AND ust_created_at <= '2018-08-20 23:59'
+                )
+            );
+QUERY;
+        $this->logExceptionOnQueryExecution($query);
 
-        $totalStatuses = $statusRepository->selectStatusesBetween(
-            'bob',
-            $earliestDate,
-            $latestDate
-        );
-
-        $this->assertEquals(
-            3,
-            $totalStatuses->count(),
-            'There should be at least one status in the selection'
-        );
+        // Remove previously insert records of statuses
+        $query = <<<QUERY
+            DELETE FROM weaving_status WHERE ust_created_at >= '2018-08-19 22:00'
+            AND ust_created_at <= '2018-08-20 23:59'
+QUERY;
+        $this->logExceptionOnQueryExecution($query);
     }
 
     /**
@@ -120,47 +138,5 @@ class StatusSelectionTest extends CommandTestCase
             $statusBeforeLatestDate,
             $statusAfterLatestDate
         ]));
-    }
-
-    /**
-     * @param $query
-     * @return mixed
-     */
-    private function logExceptionOnQueryExecution($query)
-    {
-        /** @var \Doctrine\ORM\EntityManager $entityManager */
-        $entityManager = $this->get('doctrine.orm.entity_manager');
-
-        try {
-            return $entityManager->getConnection()->executeQuery($query);
-        } catch (\Exception $exception) {
-            $this->get('monolog.logger.development')->error(
-                sprintf(
-                    'An error occurred when tearing down the test (message: "%s")',
-                    $exception->getMessage()
-                )
-            );
-        }
-    }
-
-    private function removeFixtures(): void
-    {
-        // Remove previously inserted records of aggregates
-        $query = <<<QUERY
-            DELETE FROM weaving_aggregate WHERE id in (
-                SELECT aggregate_id FROM weaving_status_aggregate WHERE status_id IN (
-                    SELECT id FROM weaving_status WHERE ust_created_at >= '2018-08-19 22:00'
-                    AND ust_created_at <= '2018-08-20 23:59'
-                )
-            );
-QUERY;
-        $this->logExceptionOnQueryExecution($query);
-
-        // Remove previously insert records of statuses
-        $query = <<<QUERY
-            DELETE FROM weaving_status WHERE ust_created_at >= '2018-08-19 22:00'
-            AND ust_created_at <= '2018-08-20 23:59'
-QUERY;
-        $this->logExceptionOnQueryExecution($query);
     }
 }

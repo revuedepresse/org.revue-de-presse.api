@@ -69,8 +69,12 @@ class ArchivedStatusRepository extends ResourceRepository
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Exception
      */
-    public function saveStatuses($statuses, $identifier, Aggregate $aggregate = null, LoggerInterface $logger = null)
-    {
+    public function saveStatuses(
+        $statuses,
+        $identifier,
+        Aggregate $aggregate = null,
+        LoggerInterface $logger = null
+    ) {
         $this->logger = $logger;
 
         $entityManager = $this->getEntityManager();

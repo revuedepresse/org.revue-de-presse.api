@@ -1,3 +1,7 @@
+imports:
+    - { resource: services/command.yml }
+    - { resource: services/mapping.yml }
+
 parameters:
 
     weaving_the_web_twitter.api_accessor.class:                   'WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor'

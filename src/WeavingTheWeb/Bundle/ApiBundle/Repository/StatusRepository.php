@@ -2,6 +2,7 @@
 
 namespace WeavingTheWeb\Bundle\ApiBundle\Repository;
 
+use App\Status\Mapping\MappingAwareInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\NoResultException;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Status;
@@ -10,6 +11,11 @@ use WTW\UserBundle\Entity\User;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ *
+ * @method Status|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Status|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Status[]    findAll()
+ * @method Status[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class StatusRepository extends ArchivedStatusRepository
 {
@@ -35,6 +41,20 @@ class StatusRepository extends ArchivedStatusRepository
         $status->setIndexed(false);
 
         return $status;
+    }
+
+    /**
+     * @param MappingAwareInterface $service
+     * @param ArrayCollection       $statuses
+     * @return ArrayCollection
+     */
+    public function mapStatusCollectionToService(
+        MappingAwareInterface $service,
+        ArrayCollection $statuses
+    ) {
+        return $statuses->map(function (Status $status) use ($service) {
+            return $service->apply($status);
+        });
     }
 
     /**
@@ -152,13 +172,13 @@ class StatusRepository extends ArchivedStatusRepository
     }
 
     /**
-     * @param string    $authorScreenName
+     * @param string    $memberScreenName
      * @param \DateTime $earliestDate
      * @param \DateTime $latestDate
      * @return ArrayCollection
      */
-    public function selectStatusesBetween(
-        string $authorScreenName,
+    public function selectStatusCollection(
+        string $memberScreenName,
         \DateTime $earliestDate,
         \DateTime $latestDate
     ) {
@@ -171,7 +191,7 @@ class StatusRepository extends ArchivedStatusRepository
         $queryBuilder->setParameter('before', $latestDate);
 
         $queryBuilder->andWhere('s.screenName = :screen_name');
-        $queryBuilder->setParameter('screen_name', $authorScreenName);
+        $queryBuilder->setParameter('screen_name', $memberScreenName);
 
         return new ArrayCollection($queryBuilder->getQuery()->getResult());
     }
