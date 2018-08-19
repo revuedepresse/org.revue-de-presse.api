@@ -166,14 +166,16 @@ function get_project_dir {
 }
 
 function migrate_schema {
-    project_dir="$(get_project_dir)"
+    local project_dir="$(get_project_dir)"
     echo 'php '"${project_dir}"'/app/console doc:mig:mig --em=admin' | make run-php
 }
 
 function install_php_dependencies {
-    project_dir="$(get_project_dir)"
-    echo '/bin/bash -c "source '"${project_dir}"'/bin/install-composer.sh && install_composer && \
-    php '"${project_dir}"'/composer.php install --prefer-dist"' | make run-php
+    local project_dir="$(get_project_dir)"
+    local command=$(echo -n '/bin/bash -c "source '"${project_dir}"'/bin/install-composer.sh && \
+    install_composer && \
+    php '"${project_dir}"'/composer.php install --prefer-dist"')
+    echo ${command} | make run-php
 }
 
 function run_mysql_client {
@@ -321,7 +323,7 @@ function list_amqp_queues() {
 function setup_amqp_queue() {
     local=`pwd`
 
-    project_dir="$(get_project_dir)"
+    local project_dir="$(get_project_dir)"
     echo 'php '"${project_dir}"'/app/console rabbitmq:setup-fabric' | make run-php
 }
 function list_php_extensions() {
