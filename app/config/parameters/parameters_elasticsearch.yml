@@ -1,5 +1,0 @@
-parameters:
-    elasticsearch_host:     %elasticsearch.host%
-    elasticsearch_port:     %elasticsearch.port%
-    mail_index:             mail
-    twitter_search_index:   twitter
