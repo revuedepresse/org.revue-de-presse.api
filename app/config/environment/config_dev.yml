@@ -1,13 +1,9 @@
 imports:
     - { resource: config.yml }
 
-framework:
-    router:   { resource: "%kernel.root_dir%/config/routing/routing_dev.yml" }
-    profiler: { only_exceptions: false }
-
-web_profiler:
-    toolbar:              true
-    intercept_redirects:  false
+parameters:
+    main_log_level:     'debug'
+    sentry_log_level:   'error'
 
 monolog:
     channels:

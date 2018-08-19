@@ -24,3 +24,6 @@ parameters:
     test_database_path:         %kernel.cache_dir%/wtw_dashboard.db
 
     php_binary:                 /usr/bin/php
+
+    # dsn can be found at https://sentry.io/weaving-the-web/press-review/getting-started/php-symfony2/
+    sentry_dsn_php:             ~
