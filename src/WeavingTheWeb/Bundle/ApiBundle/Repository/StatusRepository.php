@@ -2,6 +2,7 @@
 
 namespace WeavingTheWeb\Bundle\ApiBundle\Repository;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\NoResultException;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Status;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\StatusInterface;
@@ -16,6 +17,47 @@ class StatusRepository extends ArchivedStatusRepository
      * @var ArchivedStatusRepository
      */
     public $archivedStatusRepository;
+
+    /**
+     * @param $properties
+     * @return Status
+     */
+    public function fromArray($properties)
+    {
+        $status = new Status();
+
+        $status->setScreenName($properties['screen_name']);
+        $status->setName($properties['name']);
+        $status->setText($properties['text']);
+        $status->setUserAvatar($properties['user_avatar']);
+        $status->setIdentifier($properties['identifier']);
+        $status->setCreatedAt($properties['created_at']);
+        $status->setIndexed(false);
+
+        return $status;
+    }
+
+    /**
+     * @param Status $status
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function save(Status $status)
+    {
+        $this->getEntityManager()->persist($status);
+        $this->getEntityManager()->flush();
+    }
+
+    /**
+     * @param ArrayCollection $statuses
+     */
+    public function saveBatch(ArrayCollection $statuses)
+    {
+        $statuses->map(function ($status) {
+            $this->getEntityManager()->persist($status);
+        });
+
+        $this->getEntityManager()->flush();
+    }
 
     public function setOauthTokens($oauthTokens)
     {
@@ -107,6 +149,31 @@ class StatusRepository extends ArchivedStatusRepository
         $userStream->setIdentifier($extract['identifier']);
 
         return $userStream->setUpdatedAt(new \DateTime('now', new \DateTimeZone('UTC')));
+    }
+
+    /**
+     * @param string    $authorScreenName
+     * @param \DateTime $earliestDate
+     * @param \DateTime $latestDate
+     * @return ArrayCollection
+     */
+    public function selectStatusesBetween(
+        string $authorScreenName,
+        \DateTime $earliestDate,
+        \DateTime $latestDate
+    ) {
+        $queryBuilder = $this->createQueryBuilder('s');
+
+        $queryBuilder->andWhere('s.createdAt >= :after');
+        $queryBuilder->setParameter('after', $earliestDate);
+
+        $queryBuilder->andWhere('s.createdAt <= :before');
+        $queryBuilder->setParameter('before', $latestDate);
+
+        $queryBuilder->andWhere('s.screenName = :screen_name');
+        $queryBuilder->setParameter('screen_name', $authorScreenName);
+
+        return new ArrayCollection($queryBuilder->getQuery()->getResult());
     }
 
     /**

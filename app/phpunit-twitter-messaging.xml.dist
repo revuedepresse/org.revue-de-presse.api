@@ -24,6 +24,7 @@
 
     <testsuites>
         <testsuite name="Messaging Test Suite for Twitter">
+            <directory>../src/App/Tests/**</directory>
             <directory>../src/*/*/*/*Bundle/Tests</directory>
             <directory>../src/*/*/*Bundle/Tests</directory>
             <directory>../src/*/*Bundle/Tests</directory>

@@ -11,4 +11,5 @@ parameters:
         channels:
             - 'twitter_api'
             - 'status'
+            - 'development'
         handler:  main

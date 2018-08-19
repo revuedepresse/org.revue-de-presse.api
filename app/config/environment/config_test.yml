@@ -2,12 +2,11 @@ imports:
     - { resource: config_dev.yml }
     - { resource: ../parameters/parameters_test.yml }
 
+parameters:
+    main_log_level:     'debug'
+    sentry_log_level:   'error'
+
 framework:
-    router:   { resource: "%kernel.root_dir%/config/routing/routing_test.yml" }
-    test: ~
+    test:           ~
     session:
         storage_id: session.storage.mock_file
-
-web_profiler:
-    toolbar: false
-    intercept_redirects: false

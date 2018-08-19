@@ -57,7 +57,7 @@ make run-mysql-container
 Run RabbitMQ container
 
 ```
-run-rabbitmq-container
+make run-rabbitmq-container
 ```
 
 Produce messages from lists of members
@@ -72,3 +72,10 @@ Consume Twitter API from messages
 make consume-twitter-api-messages
 ```
 
+## Testing
+
+Create the test database schema
+
+```
+make create-database-schema-test
+```
