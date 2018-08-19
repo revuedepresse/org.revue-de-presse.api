@@ -172,7 +172,8 @@ function migrate_schema {
 
 function install_php_dependencies {
     project_dir="$(get_project_dir)"
-    echo 'php '"${project_dir}"'/bin/composer.php install --prefer-dist' | make run-php
+    echo '/bin/bash -c "source '"${project_dir}"'/bin/install-composer.sh && install_composer && \
+    php '"${project_dir}"'/composer.php install --prefer-dist"' | make run-php
 }
 
 function run_mysql_client {
