@@ -1,7 +1,0 @@
-parameters:
-    profiling_active:           true
-    profiling_xhprof_dir:       %kernel.root_dir%/../web # xhprof web dir
-    profiling_xhprof_config:    %profiling_xhprof_dir%/xhprof_lib/config.php
-    profiling_xhprof_lib:       %profiling_xhprof_dir%/xhprof_lib/utils/xhprof_lib.php
-    profiling_xhprof_runs:      %profiling_xhprof_dir%/xhprof_lib/utils/xhprof_runs.php
-    profiling_xhprof_web:       http://xhprof.dev
