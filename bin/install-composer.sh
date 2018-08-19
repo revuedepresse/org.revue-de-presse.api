@@ -12,8 +12,11 @@ function install_composer() {
         exit 1
     fi
 
-    php composer-setup.php --quiet
+    php composer-setup.php
     RESULT=$?
     rm composer-setup.php
     exit $RESULT
 }
+
+install_composer
+
