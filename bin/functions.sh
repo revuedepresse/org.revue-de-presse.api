@@ -349,11 +349,11 @@ function run_php_script() {
 
     local suffix='-'"${namespace}""$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 32 2>> /dev/null)"
 
+    export SUFFIX="${suffix}"
     local symfony_environment="$(get_symfony_environment)"
 
-    export SUFFIX="${suffix}"
     local command=$(echo -n 'docker run \
-    -e '"${symfony_environment}"'
+    -e '"${symfony_environment}"' \
     -v '`pwd`'/provisioning/containers/php/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini \
     -v '`pwd`':/var/www/devobs \
     --name=php'"${suffix}"' php /var/www/devobs/'"${script}")
@@ -374,7 +374,10 @@ function run_php() {
     local suffix='-'"$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 32 2>> /dev/null)"
 
     export SUFFIX="${suffix}"
+    local symfony_environment="$(get_symfony_environment)"
+
     local command=$(echo -n 'docker run \
+    -e '"${symfony_environment}"' \
     -v '`pwd`'/provisioning/containers/php/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini \
     -v '`pwd`':/var/www/devobs \
     --name=php'"${suffix}"' '"${arguments}")
@@ -413,7 +416,7 @@ function ensure_log_files_exist() {
 
 function get_symfony_environment() {
     local symfony_env='dev'
-    if [ ! -z SYMFONY_ENV ];
+    if [ ! -z "${SYMFONY_ENV}" ];
     then
         symfony_env="${SYMFONY_ENV}"
     fi
