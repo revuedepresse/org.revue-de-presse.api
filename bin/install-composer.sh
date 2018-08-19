@@ -9,13 +9,13 @@ function install_composer() {
     then
         >&2 echo 'ERROR: Invalid installer signature'
         rm composer-setup.php
-        exit 1
+        return 1
     fi
 
     php composer-setup.php
     RESULT=$?
     rm composer-setup.php
-    exit $RESULT
+    return $RESULT
 }
 
 install_composer
