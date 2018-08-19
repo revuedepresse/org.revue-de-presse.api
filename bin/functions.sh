@@ -88,7 +88,6 @@ function consume_amqp_messages {
     rabbitmq_output_log="${PROJECT_DIR}/${rabbitmq_output_log}"
     rabbitmq_error_log="${PROJECT_DIR}/${rabbitmq_error_log}"
 
-
     export SCRIPT="app/console rabbitmq:consumer -l $MEMORY_LIMIT -w -m $MESSAGES weaving_the_web_amqp.twitter.""${command_suffix}"" -vvv"
 
     local symfony_environment="$(get_symfony_environment)"
