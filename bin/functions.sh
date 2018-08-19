@@ -173,7 +173,7 @@ function migrate_schema {
 function install_php_dependencies {
     local project_dir="$(get_project_dir)"
     local command=$(echo -n 'php /bin/bash -c "source '"${project_dir}"'/bin/install-composer.sh && \
-    php '"${project_dir}"'/composer.php install --prefer-dist"')
+    php '"${project_dir}"'/bin/composer.phar install --prefer-dist"')
     echo ${command} | make run-php
 }
 
