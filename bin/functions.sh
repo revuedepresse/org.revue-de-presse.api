@@ -154,13 +154,25 @@ function grant_privileges {
         -e "$(cat provisioning/containers/mysql/templates/grant-privileges-to-user.sql)"
 }
 
-function migrate_schema {
+function get_project_dir {
+    local project_dir=''
+
     if [ ! -z "${PROJECT_DIR}" ];
     then
         project_dir="${PROJECT_DIR}"
     fi
 
+    echo "${project_dir}"
+}
+
+function migrate_schema {
+    project_dir="$(get_project_dir)"
     echo 'php '"${project_dir}"'/app/console doc:mig:mig --em=admin' | make run-php
+}
+
+function install_php_dependencies {
+    project_dir="$(get_project_dir)"
+    echo 'php '"${project_dir}"'/bin/composer.php install --prefer-dist' | make run-php
 }
 
 function run_mysql_client {
@@ -308,11 +320,7 @@ function list_amqp_queues() {
 function setup_amqp_queue() {
     local=`pwd`
 
-    if [ ! -z "${PROJECT_DIR}" ];
-    then
-        project_dir="${PROJECT_DIR}"
-    fi
-
+    project_dir="$(get_project_dir)"
     echo 'php '"${project_dir}"'/app/console rabbitmq:setup-fabric' | make run-php
 }
 function list_php_extensions() {
