@@ -88,11 +88,14 @@ function consume_amqp_messages {
     rabbitmq_output_log="${PROJECT_DIR}/${rabbitmq_output_log}"
     rabbitmq_error_log="${PROJECT_DIR}/${rabbitmq_error_log}"
 
+
     export SCRIPT="app/console rabbitmq:consumer -l $MEMORY_LIMIT -w -m $MESSAGES weaving_the_web_amqp.twitter.""${command_suffix}"" -vvv"
+
+    local symfony_environment="$(get_symfony_environment)"
 
     if [ -z "${DOCKER_MODE}" ];
     then
-        command="/usr/bin/php $PROJECT_DIR/""${SCRIPT}"
+        command="${symfony_environment} /usr/bin/php $PROJECT_DIR/""${SCRIPT}"
         echo 'Executing command: "'$command'"'
         echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
         echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
@@ -151,13 +154,28 @@ function grant_privileges {
         -e "$(cat provisioning/containers/mysql/templates/grant-privileges-to-user.sql)"
 }
 
-function migrate_schema {
+function get_project_dir {
+    local project_dir=''
+
     if [ ! -z "${PROJECT_DIR}" ];
     then
         project_dir="${PROJECT_DIR}"
     fi
 
+    echo "${project_dir}"
+}
+
+function migrate_schema {
+    local project_dir="$(get_project_dir)"
     echo 'php '"${project_dir}"'/app/console doc:mig:mig --em=admin' | make run-php
+}
+
+function install_php_dependencies {
+    local project_dir="$(get_project_dir)"
+    local command=$(echo -n 'php /bin/bash -c "cd '"${project_dir}"' &&
+    source '"${project_dir}"'/bin/install-composer.sh &&
+    php '"${project_dir}"'/composer.phar install --prefer-dist"')
+    echo ${command} | make run-php
 }
 
 function run_mysql_client {
@@ -305,11 +323,7 @@ function list_amqp_queues() {
 function setup_amqp_queue() {
     local=`pwd`
 
-    if [ ! -z "${PROJECT_DIR}" ];
-    then
-        project_dir="${PROJECT_DIR}"
-    fi
-
+    local project_dir="$(get_project_dir)"
     echo 'php '"${project_dir}"'/app/console rabbitmq:setup-fabric' | make run-php
 }
 function list_php_extensions() {
@@ -336,7 +350,10 @@ function run_php_script() {
     local suffix='-'"${namespace}""$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 32 2>> /dev/null)"
 
     export SUFFIX="${suffix}"
+    local symfony_environment="$(get_symfony_environment)"
+
     local command=$(echo -n 'docker run \
+    -e '"${symfony_environment}"' \
     -v '`pwd`'/provisioning/containers/php/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini \
     -v '`pwd`':/var/www/devobs \
     --name=php'"${suffix}"' php /var/www/devobs/'"${script}")
@@ -357,7 +374,10 @@ function run_php() {
     local suffix='-'"$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 32 2>> /dev/null)"
 
     export SUFFIX="${suffix}"
+    local symfony_environment="$(get_symfony_environment)"
+
     local command=$(echo -n 'docker run \
+    -e '"${symfony_environment}"' \
     -v '`pwd`'/provisioning/containers/php/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini \
     -v '`pwd`':/var/www/devobs \
     --name=php'"${suffix}"' '"${arguments}")
@@ -394,6 +414,16 @@ function ensure_log_files_exist() {
     fi
 }
 
+function get_symfony_environment() {
+    local symfony_env='dev'
+    if [ ! -z "${SYMFONY_ENV}" ];
+    then
+        symfony_env="${SYMFONY_ENV}"
+    fi
+
+    echo 'SYMFONY_ENV='"${symfony_env}"
+}
+
 function produce_amqp_messages_from_members_lists {
     export NAMESPACE="produce_messages_from_members_lists"
     make remove-php-container
@@ -420,9 +450,11 @@ function produce_amqp_messages_from_members_lists {
 
     local php_command='app/console weaving_the_web:amqp:produce:lists_members --screen_name='"${username}"
 
+    local symfony_environment="$(get_symfony_environment)"
+
     if [ -z "${DOCKER_MODE}" ];
     then
-        command="/usr/bin/php $PROJECT_DIR/${php_command}"
+        command="${symfony_environment} /usr/bin/php $PROJECT_DIR/${php_command}"
         echo 'Executing command: "'$command'"'
         echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
         echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
@@ -465,9 +497,11 @@ function produce_amqp_messages_from_member_timeline {
 
     local php_command='app/console weaving_the_web:amqp:produce:user_timeline --screen_name="'"${username}"'" -vvv'
 
+    local symfony_environment="$(get_symfony_environment)"
+
     if [ -z "${DOCKER_MODE}" ];
     then
-        command="/usr/bin/php $PROJECT_DIR/${php_command}"
+        command="${symfony_environment} /usr/bin/php $PROJECT_DIR/${php_command}"
         echo 'Executing command: "'$command'"'
         echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
         echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
@@ -517,9 +551,11 @@ function produce_amqp_messages_for_news_list {
 
     local php_command='app/console weaving_the_web:amqp:produce:lists_members --screen_name='"${username}"' --list="'"${list_name}"'"'
 
+    local symfony_environment="$(get_symfony_environment)"
+
     if [ -z "${DOCKER_MODE}" ];
     then
-        command="/usr/bin/php $PROJECT_DIR/${php_command}"
+        command="${symfony_environment} /usr/bin/php $PROJECT_DIR/${php_command}"
         echo 'Executing command: "'$command'"'
         echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
         echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"

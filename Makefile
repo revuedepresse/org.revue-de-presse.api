@@ -34,6 +34,9 @@ remove-php-container: ## Remove PHP container
 run-php-script: ## Run PHP script
 		@/bin/bash -c 'source ./bin/functions.sh && run_php_script ${1}'
 
+install-php-dependencies: ## Install PHP dependencies
+		@/bin/bash -c 'source ./bin/functions.sh && install_php_dependencies'
+
 run-php: ## Run PHP with arguments
 		@/bin/bash -c 'source ./bin/functions.sh && run_php'
 

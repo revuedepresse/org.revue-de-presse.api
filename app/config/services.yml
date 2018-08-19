@@ -142,7 +142,7 @@ services:
         class:  '%weaving_the_web_twitter.serializer.user_status.class%'
         calls:
             - [ 'setAccessor', [ '@weaving_the_web_twitter.api_accessor' ] ]
-            - [ 'setLogger', [ '@logger' ] ]
+            - [ 'setLogger', [ '@monolog.logger.status' ] ]
             - [ 'setModerator', [ '@weaving_the_web_twitter.moderator.api_limit' ] ]
             - [ 'setUserStreamRepository', [ '@weaving_the_web_twitter.repository.status' ] ]
             - [ 'setWhispererRepository', [ '@weaving_the_web_api.repository.whisperer' ] ]
