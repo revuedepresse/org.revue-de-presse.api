@@ -36,6 +36,8 @@ class AppKernel extends Kernel
             new WeavingTheWeb\Bundle\ApiBundle\WeavingTheWebApiBundle(),
             new WeavingTheWeb\Bundle\DataMiningBundle\WeavingTheWebDataMiningBundle(),
             new WeavingTheWeb\Bundle\TwitterBundle\WeavingTheWebTwitterBundle(),
+            // Sending logs to Sentry
+            new Sentry\SentryBundle\SentryBundle(),
             // Search
             new WeavingTheWeb\Bundle\DashboardBundle\WeavingTheWebDashboardBundle(),
             // ORM

@@ -1,0 +1,14 @@
+parameters:
+    monolog_main_logging_handler:
+        type:     stream
+        path:     "%kernel.logs_dir%/%kernel.environment%.log"
+        level:    debug
+
+    monolog_sentry_logging_handler:
+        type:     raven
+        dsn:      "%sentry_dsn_php%"
+        level:    info
+        channels:
+            - 'twitter_api'
+            - 'status'
+        handler:  main
