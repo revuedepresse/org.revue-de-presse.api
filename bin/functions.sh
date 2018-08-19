@@ -165,6 +165,11 @@ function get_project_dir {
     echo "${project_dir}"
 }
 
+function create_database_test_schema {
+    local project_dir="$(get_project_dir)"
+    echo 'php /var/www/devobs/app/console doctrine:schema:create -e test' | make run-php
+}
+
 function migrate_schema {
     local project_dir="$(get_project_dir)"
     echo 'php '"${project_dir}"'/app/console doc:mig:mig --em=admin' | make run-php

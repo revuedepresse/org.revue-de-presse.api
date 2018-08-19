@@ -40,6 +40,9 @@ install-php-dependencies: ## Install PHP dependencies
 run-php: ## Run PHP with arguments
 		@/bin/bash -c 'source ./bin/functions.sh && run_php'
 
+create-database-schema-test: # Create database schema in test environment
+		@/bin/bash -c 'source ./bin/functions.sh && create_database_test_schema'
+
 diff-schema: ## Generate schema migrations scripts
 		@/bin/bash -c "export PROJECT_DIR=`pwd`; echo 'php /var/www/devobs/app/console doc:mig:diff' | make run-php"
 
