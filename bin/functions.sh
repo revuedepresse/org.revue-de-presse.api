@@ -88,8 +88,8 @@ function consume_amqp_messages {
     rabbitmq_output_log="${PROJECT_DIR}/${rabbitmq_output_log}"
     rabbitmq_error_log="${PROJECT_DIR}/${rabbitmq_error_log}"
 
-
-    export SCRIPT="app/console rabbitmq:consumer -l $MEMORY_LIMIT -w -m $MESSAGES weaving_the_web_amqp.twitter.""${command_suffix}"" -vvv"
+    env_option="$(get_environment_option)"
+    export SCRIPT="app/console rabbitmq:consumer -l $MEMORY_LIMIT -w -m $MESSAGES weaving_the_web_amqp.twitter.""${command_suffix}""$env_option -vvv"
 
     local symfony_environment="$(get_symfony_environment)"
 
@@ -422,6 +422,16 @@ function get_symfony_environment() {
     fi
 
     echo 'SYMFONY_ENV='"${symfony_env}"
+}
+
+function get_environment_option() {
+    local symfony_env='dev'
+    if [ ! -z "${SYMFONY_ENV}" ];
+    then
+        symfony_env="${SYMFONY_ENV}"
+    fi
+
+    echo ' --env='"${symfony_env}"
 }
 
 function produce_amqp_messages_from_members_lists {
