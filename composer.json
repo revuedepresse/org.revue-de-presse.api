@@ -41,6 +41,7 @@
         "sensio/distribution-bundle": "~4.0",
         "sensio/framework-extra-bundle": "3.*",
         "sensio/generator-bundle": "2.3.*",
+        "sentry/sentry-symfony": "1.0.3",
         "symfony/monolog-bundle": "^3.0.2",
         "symfony/symfony": "2.7.46",
         "themattharris/tmhOAuth": "dev-master",
@@ -70,7 +71,7 @@
         },
         "sort-packages": true,
         "github-oauth": {
-            "github.com": "06e5a6fa32f961cddbb70528a9f610aa1fe9537f"
+
         }
     },
     "minimum-stability": "dev",

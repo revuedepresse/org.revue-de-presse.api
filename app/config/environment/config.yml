@@ -31,10 +31,8 @@ sensio_framework_extra:
     view:    { annotations: false }
     router:  { annotations: true }
 
-monolog:
-    channels:
-        - 'twitter_api'
-        - 'status'
+sentry:
+    dsn: "%sentry_dsn_php%"
 
 parameters:
     basic_auth_pattern: /this-route-is-undefined-in-production

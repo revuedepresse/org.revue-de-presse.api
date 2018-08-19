@@ -87,6 +87,6 @@ abstract class AccessorAwareCommand extends ContainerAwareCommand
         /**
          * @var \Psr\Log\LoggerInterface $logger
          */
-        $this->logger = $this->getContainer()->get('logger');
+        $this->logger = $this->getContainer()->get('monolog.logger.status');
     }
 }

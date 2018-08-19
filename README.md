@@ -1,4 +1,4 @@
-# DevObs
+# Twitter status review
 
 Easing observation of Twitter lists
 

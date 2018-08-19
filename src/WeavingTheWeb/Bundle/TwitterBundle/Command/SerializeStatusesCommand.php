@@ -92,7 +92,7 @@ class SerializeStatusesCommand extends ContainerAwareCommand
             $success = $serializer->serialize($options, $greedy);
         } catch (UnavailableResourceException $unavailableResource) {
             $success = false;
-            $this->getContainer()->get('logger')->error($unavailableResource->getMessage());
+            $this->getContainer()->get('monolog.logger.status')->error($unavailableResource->getMessage());
         }
 
         /** @var \Symfony\Component\Translation\Translator $translator */
