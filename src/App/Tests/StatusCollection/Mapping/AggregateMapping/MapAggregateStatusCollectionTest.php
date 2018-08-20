@@ -1,19 +1,20 @@
 <?php
 
-namespace App\Tests\StatusCollection;
+namespace App\Tests\StatusCollection\Mapping\AggregateMapping;
 
+use App\Tests\StatusCollection\SelectStatusCollectionFixturesTrait;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
 use WTW\CodeGeneration\QualityAssuranceBundle\Test\CommandTestCase;
 
-class MapSelectionCommandTest extends CommandTestCase
+class MapAggregateStatusCollectionTest extends CommandTestCase
 {
     use SelectStatusCollectionFixturesTrait;
 
     /**
      * @test
-     * @group it_should_map_a_service_to_a_selection_of_statuses
+     * @group it_should_map_a_service_to_a_collection_of_aggregate_statuses
      */
-    public function it_should_map_a_service_to_a_selection_of_statuses()
+    public function it_should_map_a_service_to_a_collection_of_aggregate_statuses()
     {
         /** @var StatusRepository $statusRepository */
         $statusRepository = $this->get('weaving_the_web_twitter.repository.status');
@@ -25,19 +26,19 @@ class MapSelectionCommandTest extends CommandTestCase
 
         $refreshStatus = $this->get('mapping.identity');
 
-        $statusCollection = $statusRepository->selectStatusCollection(
-            'bob',
+        $aggregateStatusCollection = $statusRepository->selectAggregateStatusCollection(
+            'news :: France',
             $earliestDate,
             $latestDate
         );
 
         $totalStatusesMappedToAService = $statusRepository->mapStatusCollectionToService(
             $refreshStatus,
-            $statusCollection
+            $aggregateStatusCollection
         );
 
         $this->assertEquals(
-            3,
+            2,
             $totalStatusesMappedToAService->count(),
             'There should be three statuses mapped to a service'
         );

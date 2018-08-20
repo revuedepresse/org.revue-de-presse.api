@@ -1,10 +1,10 @@
 <?php
 
 
-namespace App\Status\Mapping\Command;
+namespace App\StatusCollection\Mapping\Command;
 
 
-use App\Status\Mapping\RefreshStatusMapping;
+use App\StatusCollection\Mapping\RefreshStatusMapping;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -109,7 +109,7 @@ class MapStatusCollectionCommand extends Command
         $tokens = $this->getTokensFromInput();
         $this->refreshStatusMapping->setOAuthTokens($tokens);
 
-        $totalStatuses = $this->statusRepository->selectStatusCollection(
+        $statusCollection = $this->statusRepository->selectStatusCollection(
             $this->input->getOption(self::OPTION_SCREEN_NAME),
             new \DateTime($this->input->getOption(self::OPTION_EARLIEST_DATE)),
             new \DateTime($this->input->getOption(self::OPTION_LATEST_DATE))
@@ -117,7 +117,7 @@ class MapStatusCollectionCommand extends Command
 
         $mappedStatuses = $this->statusRepository->mapStatusCollectionToService(
             $this->refreshStatusMapping,
-            $totalStatuses
+            $statusCollection
         );
 
         $this->output->writeln($this->getSuccessMessage($mappedStatuses));

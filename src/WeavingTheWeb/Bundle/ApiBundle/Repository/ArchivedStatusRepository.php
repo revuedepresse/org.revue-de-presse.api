@@ -459,7 +459,7 @@ class ArchivedStatusRepository extends ResourceRepository
         $memberStatus->setIdentifier($extract['identifier']);
 
         if (!is_null($aggregate)) {
-            $memberStatus->addToAggregate($aggregate);
+            $memberStatus->addToAggregates($aggregate);
         }
 
         return $memberStatus;
@@ -539,7 +539,7 @@ class ArchivedStatusRepository extends ResourceRepository
 
         if (!$memberStatus->getAggregates()->isEmpty()) {
             $memberStatus->getAggregates()->map(function (Aggregate $aggregate) use ($status) {
-                $status->addToAggregate($aggregate);
+                $status->addToAggregates($aggregate);
             });
         }
 

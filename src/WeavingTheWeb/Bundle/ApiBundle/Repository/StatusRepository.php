@@ -2,9 +2,10 @@
 
 namespace WeavingTheWeb\Bundle\ApiBundle\Repository;
 
-use App\Status\Mapping\MappingAwareInterface;
+use App\StatusCollection\Mapping\MappingAwareInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\QueryBuilder;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Status;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\StatusInterface;
 use WTW\UserBundle\Entity\User;
@@ -39,6 +40,10 @@ class StatusRepository extends ArchivedStatusRepository
         $status->setIdentifier($properties['identifier']);
         $status->setCreatedAt($properties['created_at']);
         $status->setIndexed(false);
+
+        if (array_key_exists('aggregate', $properties)) {
+            $status->addToAggregates($properties['aggregate']);
+        }
 
         return $status;
     }
@@ -184,14 +189,52 @@ class StatusRepository extends ArchivedStatusRepository
     ) {
         $queryBuilder = $this->createQueryBuilder('s');
 
+        $this->between($queryBuilder, $earliestDate, $latestDate);
+
+        $queryBuilder->andWhere('s.screenName = :screen_name');
+        $queryBuilder->setParameter('screen_name', $memberScreenName);
+
+        return new ArrayCollection($queryBuilder->getQuery()->getResult());
+    }
+
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @param \DateTime    $earliestDate
+     * @param \DateTime    $latestDate
+     */
+    private function between(
+        QueryBuilder $queryBuilder,
+        \DateTime $earliestDate,
+        \DateTime $latestDate
+    ): void {
         $queryBuilder->andWhere('s.createdAt >= :after');
         $queryBuilder->setParameter('after', $earliestDate);
 
         $queryBuilder->andWhere('s.createdAt <= :before');
         $queryBuilder->setParameter('before', $latestDate);
+    }
 
-        $queryBuilder->andWhere('s.screenName = :screen_name');
-        $queryBuilder->setParameter('screen_name', $memberScreenName);
+    /**
+     * @param string    $aggregateName
+     * @param \DateTime $earliestDate
+     * @param \DateTime $latestDate
+     * @return ArrayCollection
+     */
+    public function selectAggregateStatusCollection(
+        string $aggregateName,
+        \DateTime $earliestDate,
+        \DateTime $latestDate
+    ) {
+        $queryBuilder = $this->createQueryBuilder('s');
+
+        $this->between($queryBuilder, $earliestDate, $latestDate);
+
+        $queryBuilder->join(
+            's.aggregates',
+            'a'
+        );
+        $queryBuilder->andWhere('a.name = :aggregate_name');
+        $queryBuilder->setParameter('aggregate_name', $aggregateName);
 
         return new ArrayCollection($queryBuilder->getQuery()->getResult());
     }

@@ -1,27 +1,28 @@
 <?php
 
-namespace App\Tests\StatusCollection;
+namespace App\Tests\StatusCollection\AggregateMapping;
 
-use App\Status\Mapping\Command\MapStatusCollectionCommand;
-use App\Status\Mapping\RefreshStatusMapping;
+use App\StatusCollection\Mapping\RefreshStatusMapping;
+use App\StatusCollection\Mapping\Command\MapAggregateStatusCollectionCommand;
+use App\Tests\StatusCollection\SelectStatusCollectionFixturesTrait;
 use Prophecy\Argument;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Status;
 use WTW\CodeGeneration\QualityAssuranceBundle\Test\CommandTestCase;
 
-class MapStatusesCommandTest extends CommandTestCase
+class MapAggregateStatusCollectionCommandTest extends CommandTestCase
 {
     use SelectStatusCollectionFixturesTrait;
 
     /**
      * @test
-     * @group it_should_execute_a_command_mapping_a_service_to_a_selection_of_statuses
+     * @group it_should_execute_a_command_mapping_a_service_to_a_collection_of_aggregate_statuses
      */
-    public function it_should_execute_a_command_mapping_a_service_to_a_selection_of_statuses()
+    public function it_should_execute_a_command_mapping_a_service_to_a_collection_of_aggregate_statuses()
     {
-        $this->commandClass = $this->getParameter('command.map_status_collection.class');
+        $this->commandClass = $this->getParameter('command.map_aggregate_status_collection.class');
         $this->setUpApplication();
 
-        $this->commandTester = $this->getCommandTester('press-review:map-status-collection');
+        $this->commandTester = $this->getCommandTester('press-review:map-aggregate-status-collection');
 
         $earliestDate = '2018-08-19 23:00';
         $latestDate = '2018-08-20 22:59';
@@ -35,15 +36,15 @@ class MapStatusesCommandTest extends CommandTestCase
         });
         $refreshStatusMock = $refreshStatusProphecy->reveal();
 
-        /** @var MapStatusCollectionCommand $command */
+        /** @var MapAggregateStatusCollectionCommand $command */
         $command = $this->getCommand();
-        $command->statusRepository = $this->get('command.map_status_collection')->statusRepository;
+        $command->statusRepository = $this->get('command.map_aggregate_status_collection')->statusRepository;
         $command->refreshStatusMapping = $refreshStatusMock;
 
         $options = [
             'command' => $this->getCommandName(),
             '--mapping' => 'mapping.refresh_status',
-            '--screen-name' => 'bob',
+            '--aggregate-name' => 'news :: France',
             '--earliest-date' => $earliestDate,
             '--latest-date' => $latestDate,
         ];
@@ -52,8 +53,8 @@ class MapStatusesCommandTest extends CommandTestCase
 
         $this->assertContains(
             sprintf(
-                '3 statuses of "%s" member between %s and %s have been mapped to "mapping.refresh_status".',
-                'bob',
+                '2 statuses of "%s" aggregate between %s and %s have been mapped to "mapping.refresh_status".',
+                'news :: France',
                 $earliestDate,
                 $latestDate
             ),

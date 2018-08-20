@@ -1,9 +1,9 @@
 services:
     mapping.identity:
-        class: 'App\Status\Mapping\IdentityMapping'
+        class: 'App\StatusCollection\Mapping\IdentityMapping'
 
     mapping.refresh_status:
-        class: 'App\Status\Mapping\RefreshStatusMapping'
+        class: 'App\StatusCollection\Mapping\RefreshStatusMapping'
         arguments:
             - '@weaving_the_web_twitter.api_accessor'
         properties:
