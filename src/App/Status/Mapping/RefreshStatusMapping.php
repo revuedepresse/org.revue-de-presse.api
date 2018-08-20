@@ -62,6 +62,9 @@ class RefreshStatusMapping implements MappingAwareInterface
      */
     public function apply(Status $status): Status {
         $apiDocument = $this->accessor->showStatus($status->getStatusId());
+
+        $reachBeforeRefresh = $this->statusRepository->extractReachOfStatus($status);
+
         $this->statusRepository->saveStatuses(
             [$apiDocument],
             $status->getIdentifier(),
@@ -69,6 +72,22 @@ class RefreshStatusMapping implements MappingAwareInterface
             $this->logger
         );
 
-        return $this->statusRepository->findOneBy(['id' => $status->getId()]);
+        $refreshedStatus = $this->statusRepository->findOneBy(['id' => $status->getId()]);
+        $reachAfterRefresh = $this->statusRepository->extractReachOfStatus($refreshedStatus);
+
+        $this->logger->info(sprintf(
+            'Status with id %s had retweet count going from %d to %d',
+            $status->getStatusId(),
+            $reachBeforeRefresh['retweet_count'],
+            $reachAfterRefresh['retweet_count']
+        ));
+        $this->logger->info(sprintf(
+            'Status with id %s had favorite copunt going from %d to %d',
+            $status->getStatusId(),
+            $reachBeforeRefresh['favorite_count'],
+            $reachAfterRefresh['favorite_count']
+        ));
+
+        return $refreshedStatus;
     }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\StatusSelection;
+namespace App\Tests\StatusCollection;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;

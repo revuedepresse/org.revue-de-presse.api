@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\StatusSelection;
+namespace App\Tests\StatusCollection;
 
 use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
 use WTW\CodeGeneration\QualityAssuranceBundle\Test\CommandTestCase;

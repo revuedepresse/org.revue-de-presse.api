@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\StatusSelection;
+namespace App\Tests\StatusCollection;
 
 use WTW\CodeGeneration\QualityAssuranceBundle\Test\CommandTestCase;
 

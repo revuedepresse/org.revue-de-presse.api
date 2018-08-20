@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\StatusSelection;
+namespace App\Tests\StatusCollection;
 
 use App\Status\Mapping\Command\MapStatusCollectionCommand;
 use App\Status\Mapping\RefreshStatusMapping;
@@ -35,9 +35,7 @@ class MapStatusesCommandTest extends CommandTestCase
         });
         $refreshStatusMock = $refreshStatusProphecy->reveal();
 
-        /**
-         * @var MapStatusCollectionCommand $command
-         */
+        /** @var MapStatusCollectionCommand $command */
         $command = $this->getCommand();
         $command->statusRepository = $this->get('command.map_status_collection')->statusRepository;
         $command->refreshStatusMapping = $refreshStatusMock;
