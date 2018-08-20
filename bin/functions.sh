@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+function create_network() {
+    local network=`get_docker_network`
+    /bin/bash -c 'docker network create '"${network}"
+}
+
 function kill_existing_consumers {
     local pids=(`ps ux | grep "rabbitmq:consumer" | grep -v '/bash' | grep -v grep | cut -d ' ' -f 2-3`)
     local totalProcesses=`ps ux | grep "rabbitmq:consumer" | grep -v grep | grep -c ''`
@@ -262,12 +267,15 @@ function run_rabbitmq_container {
 
     local gateway=`ifconfig | grep docker0 -A1 | tail -n1 | awk '{print $2}' | sed -e 's/addr://'`
 
-    command="docker run -d -p"${gateway}":5672:5672 --name rabbitmq \
-        -e RABBITMQ_DEFAULT_USER=${rabbitmq_user} \
-        -e RABBITMQ_DEFAULT_PASS='""$(cat <(/bin/bash -c "${rabbitmq_password}"))""' \
-        -e RABBITMQ_DEFAULT_VHOST="${rabbitmq_vhost}" \
-        -v `pwd`/../../volumes/rabbitmq:/var/lib/rabbitmq \
-        rabbitmq:3.7-management"
+    command="docker run -d -p"${gateway}":5672:5672 \
+    --name rabbitmq \
+    --hostname rabbitmq \
+    --network "$(get_docker_network)" \
+    -e RABBITMQ_DEFAULT_USER=${rabbitmq_user} \
+    -e RABBITMQ_DEFAULT_PASS='""$(cat <(/bin/bash -c "${rabbitmq_password}"))""' \
+    -e RABBITMQ_DEFAULT_VHOST="${rabbitmq_vhost}" \
+    -v `pwd`/../../volumes/rabbitmq:/var/lib/rabbitmq \
+    rabbitmq:3.7-management"
     echo "${command}"
 
     /bin/bash -c "${command}"
@@ -336,6 +344,10 @@ function list_php_extensions() {
     docker run --name php php -m
 }
 
+function get_docker_network() {
+    echo 'press-review-network'
+}
+
 function run_php_script() {
     local script="${1}"
 
@@ -358,6 +370,7 @@ function run_php_script() {
     local symfony_environment="$(get_symfony_environment)"
 
     local command=$(echo -n 'docker run \
+    --network '`get_docker_network`' \
     -e '"${symfony_environment}"' \
     -v '`pwd`'/provisioning/containers/php/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini \
     -v '`pwd`':/var/www/devobs \
@@ -382,6 +395,7 @@ function run_php() {
     local symfony_environment="$(get_symfony_environment)"
 
     local command=$(echo -n 'docker run \
+    --network '`get_docker_network`' \
     -e '"${symfony_environment}"' \
     -v '`pwd`'/provisioning/containers/php/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini \
     -v '`pwd`':/var/www/devobs \
