@@ -3,6 +3,7 @@
 namespace WeavingTheWeb\Bundle\TwitterBundle\Serializer;
 
 use App\Aggregate\Exception\LockedAggregateException;
+use App\Operation\OperationClock;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Translation\TranslatorInterface;
 
@@ -23,6 +24,11 @@ class UserStatus
     const MAX_AVAILABLE_TWEETS_PER_USER = 3200;
 
     const MAX_BATCH_SIZE = 200;
+
+    /**
+     * @var OperationClock
+     */
+    public $operationClock;
 
     /**
      * @var \Symfony\Component\Translation\Translator $translator
@@ -190,6 +196,10 @@ class UserStatus
      */
     public function serialize($options, $greedy = false, $discoverPastTweets = true)
     {
+        if ($this->operationClock->shouldSkipOperation()) {
+            return true;
+        }
+
         try {
             if ($this->shouldSkipSerialization($options)) {
                 return true;

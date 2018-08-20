@@ -2,6 +2,7 @@
 
 namespace App\StatusCollection\Command;
 
+use App\Console\CommandReturnCodeAwareInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -9,10 +10,8 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
 
-class SelectStatusCollectionCommand extends Command
+class SelectStatusCollectionCommand extends Command implements CommandReturnCodeAwareInterface
 {
-    const RETURN_STATUS_SUCCESS = 0;
-
     const OPTION_SCREEN_NAME = 'screen-name';
 
     const OPTION_EARLIEST_DATE = 'earliest-date';

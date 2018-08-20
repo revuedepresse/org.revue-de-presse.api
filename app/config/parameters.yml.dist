@@ -24,3 +24,6 @@ parameters:
 
     # dsn can be found at https://sentry.io/weaving-the-web/press-review/getting-started/php-symfony2/
     sentry_dsn_php:             ~
+
+    operations_skipped_after:   09:50
+    operations_skipped_before:  10:30

@@ -1,7 +1,9 @@
 parameters:
-    command.map_aggregate_status_collection.class:  'App\StatusCollection\Mapping\Command\MapAggregateStatusCollectionCommand'
-    command.map_status_collection.class:            'App\StatusCollection\Mapping\Command\MapStatusCollectionCommand'
-    command.select_status_collection.class:         'App\StatusCollection\Command\SelectStatusCollectionCommand'
+    command.map_aggregate_status_collection.class:              'App\StatusCollection\Mapping\Command\MapAggregateStatusCollectionCommand'
+    command.map_status_collection.class:                        'App\StatusCollection\Mapping\Command\MapStatusCollectionCommand'
+    command.select_status_collection.class:                     'App\StatusCollection\Command\SelectStatusCollectionCommand'
+    weaving_the_web_amqp.produce_lists_members_command.class:   'WeavingTheWeb\Bundle\AmqpBundle\Command\ProduceListsMembersCommand'
+    weaving_the_web_amqp.twitter.user_status.class:             'WeavingTheWeb\Bundle\AmqpBundle\Twitter\UserStatus'
 
 services:
     command.select_status_collection:
@@ -30,3 +32,19 @@ services:
             oauthSecret:            "%weaving_the_web_twitter.oauth_secret.default%"
         tags:
             - { name: 'console.command' }
+
+    weaving_the_web_amqp.twitter.lists_member_status:
+        class:                       "%weaving_the_web_amqp.produce_lists_members_command.class%"
+        properties:
+            operationClock:          "@operation.clock"
+        tags:
+            - { name: 'console.command' }
+
+    weaving_the_web_amqp.twitter.user_status:
+        class: "%weaving_the_web_amqp.twitter.user_status.class%"
+        calls:
+            - [ 'setSerializer',        [ '@weaving_the_web_twitter.serializer.user_status'] ]
+            - [ 'setLogger',            [ '@monolog.logger.status'] ]
+            - [ 'setUserRepository',    [ '@user_manager'] ]
+        properties:
+            operationClock:             "@operation.clock"

@@ -1,6 +1,7 @@
 imports:
     - { resource: services/command.yml }
     - { resource: services/mapping.yml }
+    - { resource: services/operation.yml }
 
 parameters:
 
@@ -154,4 +155,5 @@ services:
             - [ 'setAggregateRepository', [ '@weaving_the_web_twitter.repository.aggregate' ] ]
             - [ 'setTranslator', [ '@translator' ] ]
         properties:
-            twitterApiLogger:     '@monolog.logger.twitter_api'
+            twitterApiLogger:  '@monolog.logger.twitter_api'
+            operationClock:    '@operation.clock'

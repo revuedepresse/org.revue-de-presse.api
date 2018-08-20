@@ -5,6 +5,16 @@ function create_network() {
     /bin/bash -c 'docker network create '"${network}"
 }
 
+function get_network_option() {
+    network='--network "$(get_docker_network)" '
+    if [ ! -z "${NO_DOCKER_NETWORK}" ];
+    then
+        network=''
+    fi
+
+    echo "${network}";
+}
+
 function kill_existing_consumers {
     local pids=(`ps ux | grep "rabbitmq:consumer" | grep -v '/bash' | grep -v grep | cut -d ' ' -f 2-3`)
     local totalProcesses=`ps ux | grep "rabbitmq:consumer" | grep -v grep | grep -c ''`
@@ -267,10 +277,10 @@ function run_rabbitmq_container {
 
     local gateway=`ifconfig | grep docker0 -A1 | tail -n1 | awk '{print $2}' | sed -e 's/addr://'`
 
+    local network=`get_network_option`
     command="docker run -d -p"${gateway}":5672:5672 \
     --name rabbitmq \
-    --hostname rabbitmq \
-    --network "$(get_docker_network)" \
+    --hostname rabbitmq ${network}\
     -e RABBITMQ_DEFAULT_USER=${rabbitmq_user} \
     -e RABBITMQ_DEFAULT_PASS='""$(cat <(/bin/bash -c "${rabbitmq_password}"))""' \
     -e RABBITMQ_DEFAULT_VHOST="${rabbitmq_vhost}" \
@@ -369,8 +379,8 @@ function run_php_script() {
     export SUFFIX="${suffix}"
     local symfony_environment="$(get_symfony_environment)"
 
-    local command=$(echo -n 'docker run \
-    --network '`get_docker_network`' \
+    local network=`get_network_option`
+    local command=$(echo -n 'docker run '"${network}"'\
     -e '"${symfony_environment}"' \
     -v '`pwd`'/provisioning/containers/php/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini \
     -v '`pwd`':/var/www/devobs \
@@ -394,8 +404,8 @@ function run_php() {
     export SUFFIX="${suffix}"
     local symfony_environment="$(get_symfony_environment)"
 
-    local command=$(echo -n 'docker run \
-    --network '`get_docker_network`' \
+    local network=`get_network_option`
+    local command=$(echo -n 'docker run '"${network}"'\
     -e '"${symfony_environment}"' \
     -v '`pwd`'/provisioning/containers/php/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini \
     -v '`pwd`':/var/www/devobs \
