@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Status\Mapping;
+namespace App\StatusCollection\Mapping;
 
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Status;
 

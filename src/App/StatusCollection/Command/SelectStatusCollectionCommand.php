@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Status\StatusCollection\Command;
+namespace App\StatusCollection\Command;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Console\Command\Command;
@@ -67,26 +67,26 @@ class SelectStatusCollectionCommand extends Command
         $this->input = $input;
         $this->output = $output;
 
-        $totalStatuses = $this->statusRepository->selectStatusCollection(
+        $statusCollection = $this->statusRepository->selectStatusCollection(
             $this->input->getOption(self::OPTION_SCREEN_NAME),
             new \DateTime($this->input->getOption(self::OPTION_EARLIEST_DATE)),
             new \DateTime($this->input->getOption(self::OPTION_LATEST_DATE))
         );
 
-        $this->output->writeln($this->getSuccessMessage($totalStatuses));
+        $this->output->writeln($this->getSuccessMessage($statusCollection));
 
         return self::RETURN_STATUS_SUCCESS;
     }
 
     /**
-     * @param ArrayCollection $statuses
+     * @param ArrayCollection $statusCollection
      * @return string
      */
-    private function getSuccessMessage(ArrayCollection $statuses): string
+    private function getSuccessMessage(ArrayCollection $statusCollection): string
     {
         return sprintf(
             '%d statuses of "%s" member between %s and %s have been found.',
-            $statuses->count(),
+            $statusCollection->count(),
             $this->input->getOption(self::OPTION_SCREEN_NAME),
             $this->input->getOption(self::OPTION_EARLIEST_DATE),
             $this->input->getOption(self::OPTION_LATEST_DATE)
