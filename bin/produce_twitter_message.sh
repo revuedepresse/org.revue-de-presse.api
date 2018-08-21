@@ -21,8 +21,8 @@ then
 else
     if [ 0${SCREEN_NAME//[[:spaces:]]/} -eq 0 ]
     then
-         SCREEN_NAME=sylvaineg
-         TOKENS="--oauth_token=605236481-sfJzC1Kn8B4vDDfbuaat0QS3T1fAfIeEXJmGzoKK --oauth_secret=MsZA0A3DVKqqIe0t8AxttxRIBXI2EPKpOH9Lac5XzA"
+         SCREEN_NAME=jack
+         TOKENS="--oauth_token='' --oauth_secret=''"
          echo '[default memory limit] '$SCREEN_NAME
          echo '[tokens] '$TOKENS
     fi
