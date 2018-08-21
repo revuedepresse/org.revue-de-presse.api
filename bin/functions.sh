@@ -1,5 +1,9 @@
 #!/usr/bin/env bash
 
+function get_docker_network() {
+    echo 'press-review-network'
+}
+
 function create_network() {
     local network=`get_docker_network`
     /bin/bash -c 'docker network create '"${network}"
@@ -351,10 +355,6 @@ function setup_amqp_queue() {
 function list_php_extensions() {
     remove_php_container
     docker run --name php php -m
-}
-
-function get_docker_network() {
-    echo 'press-review-network'
 }
 
 function run_php_script() {
