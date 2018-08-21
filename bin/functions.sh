@@ -10,7 +10,7 @@ function create_network() {
 }
 
 function get_network_option() {
-    network='--network "$(get_docker_network)" '
+    network='--network '`get_docker_network`' '
     if [ ! -z "${NO_DOCKER_NETWORK}" ];
     then
         network=''
