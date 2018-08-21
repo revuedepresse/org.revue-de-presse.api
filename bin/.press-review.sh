@@ -26,7 +26,7 @@ function produce_amqp_messages_from_news_list {
 }
 alias produce-amqp-messages-from-news-lists='produce_amqp_messages_from_news_list'
 
-function refresh_statuses{
+function refresh_statuses {
     local aggregate_name='my_list'
     cd /var/www/devobs && \
     sudo -uwww-data /bin/bash -c "export SYMFONY_ENV='prod' PROJECT_DIR=`pwd` DOCKER_MODE=1 aggregate_name='"${aggregate_name}"' && make refresh-statuses"
