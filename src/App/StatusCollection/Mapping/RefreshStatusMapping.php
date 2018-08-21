@@ -61,7 +61,11 @@ class RefreshStatusMapping implements MappingAwareInterface
      * @return Status
      */
     public function apply(Status $status): Status {
-        $apiDocument = $this->accessor->showStatus($status->getStatusId());
+        try {
+            $apiDocument = $this->accessor->showStatus($status->getStatusId());
+        } catch (\Exception $exception) {
+            $this->logger->error($exception->getMessage());
+        }
 
         $reachBeforeRefresh = $this->statusRepository->extractReachOfStatus($status);
 
