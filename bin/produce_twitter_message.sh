@@ -1,6 +1,6 @@
 #!/bin/zsh
 
-## sudo -E crontab -e -u weaver
+## export PRESS_REVIEW_USER='' && sudo -E crontab -e -u $PRESS_REVIEW_USER
 #  15 */2 * * * /opt/local/bin/produce_twitter_messages.sh wtw:amqp:tw:prd:utl thierrymarianne 2>> /var/log/cron.error.log >> /var/log/cron.out.log &
 #  15 */2 * * * /opt/local/bin/produce_twitter_messages.sh wtw:amqp:tw:prd:lm thierrymarianne 2>> /var/log/cron.error.log >> /var/log/cron.out.log &
 
