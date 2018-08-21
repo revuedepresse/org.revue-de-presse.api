@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # To be sourced by user producing AMQP messages
-# after having member screen name placeholder ("jack")
+# after having replaced member screen name placeholder ("jack")
+# and having replaced list name placeholder ("jack")
 
 function produce_amqp_messages_from_member_timeline {
     local member='jack'
@@ -24,6 +25,13 @@ function produce_amqp_messages_from_news_list {
     sudo -uwww-data /bin/bash -c "export SYMFONY_ENV='prod' PROJECT_DIR=`pwd` DOCKER_MODE=1 username='"${member}"' list_name='"${list_name}"' && make produce-amqp-messages-from-news-lists"
 }
 alias produce-amqp-messages-from-news-lists='produce_amqp_messages_from_news_list'
+
+function refresh_statuses{
+    local aggregate_name='my_list'
+    cd /var/www/devobs && \
+    sudo -uwww-data /bin/bash -c "export SYMFONY_ENV='prod' PROJECT_DIR=`pwd` DOCKER_MODE=1 aggregate_name='"${aggregate_name}"' && make refresh-statuses"
+}
+alias refresh-statuses='refresh_statuses'
 
 ### Example of cron tab for user producing AMQP messages from Twitter API
 #
