@@ -31,6 +31,7 @@ alias produce-amqp-messages-from-news-lists='produce_amqp_messages_from_news_lis
 # DOCKER_MODE=1
 # username=jack
 # list_mame=jack
+# aggregate_mame=jack
 #
 #  0 */7 * * *   /bin/bash -c "cd ${PROJECT_DIR} && make produce-amqp-messages-from-members-lists"
 #  */20 * * * *  /bin/bash -c "cd ${PROJECT_DIR} && export list_name=${list_mame} && make produce-amqp-messages-from-news-lists"
