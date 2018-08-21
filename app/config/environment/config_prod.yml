@@ -2,5 +2,5 @@ imports:
     - { resource: config_dev.yml }
 
 parameters:
-    main_log_level:     'error'
+    main_log_level:     'info'
     sentry_log_level:   'error'
