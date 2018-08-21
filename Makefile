@@ -82,6 +82,9 @@ produce-amqp-messages-from-news-lists: ## Produce messages from news list
 produce-amqp-messages-from-member-timeline: ## Produce messages from member timeline
 		@/bin/bash -c 'source ./bin/functions.sh && produce_amqp_messages_from_member_timeline'
 
+refresh-statuses: ## Refresh statuses
+		@/bin/bash -c 'source ./bin/functions.sh && refresh_statuses'
+
 keep-php-container-running: ## Keep a running container having PHP
 		@/bin/bash -c 'source ./bin/functions.sh && keep_php_container_running'
 

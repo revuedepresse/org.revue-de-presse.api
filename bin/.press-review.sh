@@ -35,4 +35,5 @@ alias produce-amqp-messages-from-news-lists='produce_amqp_messages_from_news_lis
 #  0 */7 * * *   /bin/bash -c "cd ${PROJECT_DIR} && make produce-amqp-messages-from-members-lists"
 #  */20 * * * *  /bin/bash -c "cd ${PROJECT_DIR} && export list_name=${list_mame} && make produce-amqp-messages-from-news-lists"
 #  0 */7 * * *   /bin/bash -c "cd ${PROJECT_DIR} && make produce-amqp-messages-from-member-timeline"
+#  0 23 * * *    /bin/bash -c "cd ${PROJECT_DIR} && make refresh-statuses"
 #
