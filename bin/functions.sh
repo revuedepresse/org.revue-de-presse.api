@@ -19,7 +19,6 @@ function kill_existing_consumers {
     local pids=(`ps ux | grep "rabbitmq:consumer" | grep -v '/bash' | grep -v grep | cut -d ' ' -f 2-3`)
     local totalProcesses=`ps ux | grep "rabbitmq:consumer" | grep -v grep | grep -c ''`
 
-
     if [ ! -z "${DOCKER_MODE}" ];
     then
         remove_exited_containers
@@ -611,10 +610,57 @@ function produce_amqp_messages_for_news_list {
     execute_command "${rabbitmq_output_log}" "${rabbitmq_error_log}"
 }
 
-function today_statuses {
+function refresh_statuses() {
+    export NAMESPACE="refresh_statuses"
+    make remove-php-container
+
+    export XDEBUG_CONFIG="idekey='phpstorm-xdebug'"
+
+    if [ -z "${PROJECT_DIR}" ];
+    then
+        export PROJECT_DIR='/var/www/devobs'
+    fi
+
+    local rabbitmq_output_log="app/logs/rabbitmq."${NAMESPACE}".out.log"
+    local rabbitmq_error_log="app/logs/rabbitmq."${NAMESPACE}".error.log"
+    ensure_log_files_exist "${rabbitmq_output_log}" "${rabbitmq_error_log}"
+    rabbitmq_output_log="${PROJECT_DIR}/${rabbitmq_output_log}"
+    rabbitmq_error_log="${PROJECT_DIR}/${rabbitmq_error_log}"
+
+    if [ -z "${aggregate_name}" ];
+    then
+        echo 'Please export a valid aggregate name: export aggregate_name="news"'
+
+        return
+    fi
+
+    local php_command='app/console press-review:map-aggregate-status-collection --aggregate-name="'"${aggregate_name}"'" -vvv'
+
+    local symfony_environment="$(get_symfony_environment)"
+
+    if [ -z "${DOCKER_MODE}" ];
+    then
+        command="${symfony_environment} /usr/bin/php $PROJECT_DIR/${php_command}"
+        echo 'Executing command: "'$command'"'
+        echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
+        echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
+        /bin/bash -c "$command >> ${rabbitmq_output_log} 2>> ${rabbitmq_error_log}"
+
+        return
+    fi
+
+    export SCRIPT="${php_command}"
+
+    echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
+    echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
+
+    execute_command "${rabbitmq_output_log}" "${rabbitmq_error_log}"
+}
+
+function today_statuses() {
     cat app/logs/dev.log | awk '{$1=$2=$3="";print $0}' | sed -e 's/^\s\+//' | grep `date -I` | awk '{$1=$2="";print $0}'
 }
 
-function follow_today_statuses {
+function follow_today_statuses() {
     tail -f app/logs/dev.log | awk '{$1=$2=$3="";print $0}' | sed -e 's/^\s\+//' | grep `date -I` | awk '{$1=$2="";print $0}'
 }

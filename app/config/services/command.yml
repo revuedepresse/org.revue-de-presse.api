@@ -26,10 +26,13 @@ services:
     command.map_aggregate_status_collection:
         class:                      "%command.map_aggregate_status_collection.class%"
         properties:
-            statusRepository:       "@weaving_the_web_twitter.repository.status"
-            refreshStatusMapping:   "@mapping.refresh_status"
-            oauthToken:             "%weaving_the_web_twitter.oauth_token.default%"
-            oauthSecret:            "%weaving_the_web_twitter.oauth_secret.default%"
+            logger:                             "@monolog.logger.status"
+            statusRepository:                   "@weaving_the_web_twitter.repository.status"
+            refreshStatusMapping:               "@mapping.refresh_status"
+            oauthToken:                         "%weaving_the_web_twitter.oauth_token.default%"
+            oauthSecret:                        "%weaving_the_web_twitter.oauth_secret.default%"
+            timeAfterWhichOperationIsSkipped:   '%operations_skipped_after%'
+            timeBeforeWhichOperationIsSkipped:  '%operations_skipped_before%'
         tags:
             - { name: 'console.command' }
 

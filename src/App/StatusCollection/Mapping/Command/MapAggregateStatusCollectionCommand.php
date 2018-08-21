@@ -1,21 +1,19 @@
 <?php
 
-
 namespace App\StatusCollection\Mapping\Command;
 
-
+use App\Console\CommandReturnCodeAwareInterface;
 use App\StatusCollection\Mapping\RefreshStatusMapping;
 use Doctrine\Common\Collections\ArrayCollection;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
 
-class MapAggregateStatusCollectionCommand extends Command
+class MapAggregateStatusCollectionCommand extends Command implements CommandReturnCodeAwareInterface
 {
-    const RETURN_STATUS_SUCCESS = 0;
-
     const OPTION_AGGREGATE = 'aggregate-name';
 
     const OPTION_EARLIEST_DATE = 'earliest-date';
@@ -27,6 +25,11 @@ class MapAggregateStatusCollectionCommand extends Command
     const OPTION_OAUTH_TOKEN = 'oauth-token';
 
     const OPTION_OAUTH_SECRET = 'oauth-secret';
+
+    /**
+     * @var LoggerInterface
+     */
+    public $logger;
 
     /**
      * @var InputInterface
@@ -58,6 +61,26 @@ class MapAggregateStatusCollectionCommand extends Command
      */
     public $oauthSecret;
 
+    /**
+     * @var string
+     */
+    public $timeAfterWhichOperationIsSkipped;
+
+    /**
+     * @var string
+     */
+    public $timeBeforeWhichOperationIsSkipped;
+
+    /**
+     * @var \DateTime
+     */
+    private $earliestDate;
+
+    /**
+     * @var \DateTime
+     */
+    private $latestDate;
+
     public function configure()
     {
         $this->setName('press-review:map-aggregate-status-collection')
@@ -66,7 +89,8 @@ class MapAggregateStatusCollectionCommand extends Command
                 self::OPTION_MAPPING,
                 null,
                 InputOption::VALUE_REQUIRED,
-                'A service name'
+                'A service name',
+                'mapping.refresh_status'
             )->addOption(
                 self::OPTION_AGGREGATE,
                 null,
@@ -75,12 +99,12 @@ class MapAggregateStatusCollectionCommand extends Command
             )->addOption(
                 self::OPTION_EARLIEST_DATE,
                 null,
-                InputOption::VALUE_REQUIRED,
+                InputOption::VALUE_OPTIONAL,
                 'The earliest date'
             )->addOption(
                 self::OPTION_LATEST_DATE,
                 null,
-                InputOption::VALUE_REQUIRED,
+                InputOption::VALUE_OPTIONAL,
                 'The latest date'
             )->addOption(
                 self::OPTION_OAUTH_TOKEN,
@@ -109,10 +133,23 @@ class MapAggregateStatusCollectionCommand extends Command
         $tokens = $this->getTokensFromInput();
         $this->refreshStatusMapping->setOAuthTokens($tokens);
 
+        try {
+            $this->guardAgainstInconsistentDates();
+            $setDatesFromOptions = $this->setDatesFromOptions();
+        } catch (\Exception $exception) {
+            $this->output->writeln(sprintf('<error>%s<error>', $exception->getMessage()));
+            $this->logger->error($exception->getMessage());
+            return self::RETURN_STATUS_FAILURE;
+        }
+
+        if (!$setDatesFromOptions) {
+            $this->setDatesFromConfiguration();
+        }
+
         $statusCollection = $this->statusRepository->selectAggregateStatusCollection(
             $this->input->getOption(self::OPTION_AGGREGATE),
-            new \DateTime($this->input->getOption(self::OPTION_EARLIEST_DATE)),
-            new \DateTime($this->input->getOption(self::OPTION_LATEST_DATE))
+            $this->earliestDate,
+            $this->latestDate
         );
 
         $mappedStatuses = $this->statusRepository->mapStatusCollectionToService(
@@ -162,5 +199,83 @@ class MapAggregateStatusCollectionCommand extends Command
             $this->input->getOption(self::OPTION_LATEST_DATE),
             $this->input->getOption(self::OPTION_MAPPING)
         );
+    }
+
+    private function guardAgainstInconsistentDates(): void
+    {
+        if ($this->bothDatesHaveBeenPassed() || $this->noDateOptionHasBeenPassed()) {
+            return;
+        }
+
+        throw new \LogicException('Both earliest date and latest date should be declared or not at all');
+    }
+
+    /**
+     * @return bool
+     */
+    private function bothDatesHaveBeenPassed(): bool
+    {
+        return $this->input->hasOption(self::OPTION_EARLIEST_DATE) &&
+            $this->input->hasOption(self::OPTION_LATEST_DATE);
+    }
+
+    /**
+     * @return bool
+     */
+    private function noDateOptionHasBeenPassed(): bool
+    {
+        return !$this->input->hasOption(self::OPTION_EARLIEST_DATE) &&
+            !$this->input->hasOption(self::OPTION_LATEST_DATE);
+    }
+
+    /**
+     * @return bool
+     */
+    private function setDatesFromOptions()
+    {
+        $timezone = new \DateTimeZone('UTC');
+
+        if ($this->input->hasOption(self::OPTION_EARLIEST_DATE) &&
+            !empty($this->input->getOption(self::OPTION_EARLIEST_DATE))
+        ) {
+            $this->earliestDate = new \DateTime(
+                $this->input->getOption(self::OPTION_EARLIEST_DATE),
+                $timezone
+            );
+        }
+
+        if ($this->input->hasOption(self::OPTION_LATEST_DATE) &&
+            !empty($this->input->getOption(self::OPTION_LATEST_DATE))
+        ) {
+            $this->latestDate = new \DateTime(
+                $this->input->getOption(self::OPTION_LATEST_DATE),
+                $timezone
+            );
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private function setDatesFromConfiguration(): void
+    {
+        $timezone = new \DateTimeZone('UTC');
+
+        $today = new \DateTime('now', $timezone);
+
+        $yesterday = (clone $today)->modify('-1 day');
+        $startDate = (new \DateTime(
+            $yesterday->format('Y-m-d ' . $this->timeBeforeWhichOperationIsSkipped),
+            $timezone
+        ))->modify('-1 min');
+
+        $endDate = (new \DateTime(
+            $today->format('Y-m-d ' . $this->timeAfterWhichOperationIsSkipped),
+            $timezone
+        ))->modify('+1 min');
+
+        $this->earliestDate = $startDate;
+        $this->latestDate = $endDate;
     }
 }
