@@ -30,7 +30,7 @@ class OperationClock
         $today = $now->format('Y-m-d');
         $operationSkippedAfter = (new \DateTime(
             $today.' '.$this->timeAfterWhichOperationIsSkipped
-        ))->modify('-1 day');
+        ));
         $operationSkippedBefore = new \DateTime(
             $today.' '.$this->timeBeforeWhichOperationIsSkipped
         );
