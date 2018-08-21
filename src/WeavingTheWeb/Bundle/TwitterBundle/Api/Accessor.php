@@ -1146,6 +1146,16 @@ class Accessor implements TwitterErrorAwareInterface
      */
     protected function checkApiLimit(\TwitterOAuth $connection)
     {
+        if ($connection->http_info['http_code'] == 404) {
+            $this->twitterApiLogger->error(
+                sprintf(
+                    'A status has been removed (%s)',
+                    $connection->http_info['url']
+                )
+            );
+            return;
+        }
+
         $this->twitterApiLogger->info(
             sprintf(
                 '[HTTP code] %s',
