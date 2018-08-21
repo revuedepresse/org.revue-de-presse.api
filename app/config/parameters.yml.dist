@@ -27,3 +27,5 @@ parameters:
 
     operations_skipped_after:   21:00
     operations_skipped_before:  22:30
+
+    production_main_level:      error
