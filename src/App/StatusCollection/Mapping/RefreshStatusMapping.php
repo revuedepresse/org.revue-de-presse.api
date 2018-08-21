@@ -2,6 +2,7 @@
 
 namespace App\StatusCollection\Mapping;
 
+use App\Accessor\Exception\NotFoundStatusException;
 use Psr\Log\LoggerInterface;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Status;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
@@ -47,6 +48,8 @@ class RefreshStatusMapping implements MappingAwareInterface
      */
     protected function setupAccessor($oauthTokens)
     {
+        $this->accessor->propagateNotFoundStatuses = true;
+
         $this->accessor->setUserToken($oauthTokens['token']);
         $this->accessor->setUserSecret($oauthTokens['secret']);
 
@@ -63,6 +66,8 @@ class RefreshStatusMapping implements MappingAwareInterface
     public function apply(Status $status): Status {
         try {
             $apiDocument = $this->accessor->showStatus($status->getStatusId());
+        } catch (NotFoundStatusException $exception) {
+            return $status;
         } catch (\Exception $exception) {
             $this->logger->error($exception->getMessage());
         }
