@@ -4,10 +4,9 @@ namespace WeavingTheWeb\Bundle\ApiBundle\DataFixtures\ORM;
 
 use Doctrine\Common\DataFixtures\FixtureInterface,
     Doctrine\Common\Persistence\ObjectManager;
-use Doctrine\Common\Inflector\Inflector;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Status;
 
-class UserStreamData implements FixtureInterface
+class StatusData implements FixtureInterface
 {
     /**
      * {@inheritDoc}
@@ -30,7 +29,14 @@ class UserStreamData implements FixtureInterface
         $manager->persist($userStatus);
 
         $encodedUserStream = file_get_contents(__DIR__ . '/../../Tests/Resources/fixtures/user-stream.base64');
-        $userStatusCollection = unserialize(base64_decode($encodedUserStream));
+        $serializedEntitiesWhichHaveBeenMoved = strtr(
+            base64_decode($encodedUserStream),
+            [
+                '\UserStream' => '\Status',
+                '48:' => '44:',
+            ]
+        );
+        $userStatusCollection = unserialize($serializedEntitiesWhichHaveBeenMoved);
 
         foreach ($userStatusCollection as $userStatus) {
             $manager->persist($userStatus);

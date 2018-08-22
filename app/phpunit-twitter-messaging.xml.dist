@@ -16,6 +16,7 @@
     <groups>
         <include>
             <group>messaging-twitter</group>
+            <group>status-serialization</group>
         </include>
         <exclude>
             <group>serialize-status-command</group>

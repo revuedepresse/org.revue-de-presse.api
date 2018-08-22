@@ -7,6 +7,7 @@ use Prophecy\Argument,
 
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
 
+use WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor;
 use WTW\CodeGeneration\QualityAssuranceBundle\Test\WebTestCase;
 
 /**
@@ -24,6 +25,11 @@ class UserStatusTest extends WebTestCase
     protected $serializer;
 
     /**
+     * @var Accessor
+     */
+    protected $accessor;
+
+    /**
      * @var Prophet
      */
     private $prophet;
@@ -35,12 +41,13 @@ class UserStatusTest extends WebTestCase
         $this->client = $this->getClient();
         $this->prophet = new Prophet();
 
+        $this->serializer = $this->get('weaving_the_web_twitter.serializer.user_status');
+        $this->accessor = $this->get('weaving_the_web_twitter.api_accessor');
+
         $this->mockTokenRepository();
         $this->mockAggregateRepository();
         $this->mockAccessor();
         $this->mockEntityManager();
-
-        $this->serializer = $this->get('weaving_the_web_twitter.serializer.user_status');
     }
 
     public function tearDown()
@@ -50,21 +57,36 @@ class UserStatusTest extends WebTestCase
         parent::tearDown();
     }
 
-    public function testGuessMaxId() {
+    /**
+     * @test
+     * @group it_should_guess_max_id
+     */
+    public function it_should_guess_max_id() {
         $options = [
             'since_id' => 4
         ];
 
-        $options = $this->serializer->guessMaxId($options);
+        $options = $this->accessor->guessMaxId($options, false);
 
         $this->assertArrayHasKey('max_id', $options, 'It should return options containing a max id value');
         $this->assertEquals(2, $options['max_id'], 'The max id should be smaller than since id');
 
-        $options = $this->serializer->guessMaxId([]);
+        $options = $this->accessor->guessMaxId([], false);
         $this->assertEquals(INF, $options['max_id'], 'The max id should be equal to infinity');
     }
 
-    public function testSerialize()
+    /**
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\ProtectedAccountException
+     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
+     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
+     *
+     * @test
+     * @group it_should_serialize_a_status
+     */
+    public function it_should_serialize_a_status()
     {
         $success = $this->serializer->serialize([
             'oauth' => '',
@@ -77,6 +99,8 @@ class UserStatusTest extends WebTestCase
     protected function mockAccessor()
     {
         $accessorMock = $this->prophet->prophesize('WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor');
+
+        $accessorMock->userToken = '';
         $accessorMock->showUser(Argument::type('string'))->willReturn(
             (object)[
                 'screen_name' => 'user',
@@ -84,6 +108,9 @@ class UserStatusTest extends WebTestCase
                 'statuses_count' => 1
             ]
         );
+        $accessorMock->getUserToken()->willReturn('tok');
+        $accessorMock->shouldSkipSerializationForMemberWithScreenName(Argument::any())->willReturn(false);
+        $accessorMock->isApiLimitReached()->willReturn(false);
         $accessorMock->isApiRateLimitReached(Argument::type('string'))->willReturn(false);
         $accessorMock->fetchTimelineStatuses(Argument::type('array'))->willReturn([
             (object) [
@@ -99,7 +126,7 @@ class UserStatusTest extends WebTestCase
             ]
         ]);
 
-        $this->getContainer()->set('weaving_the_web_twitter.api_accessor', $accessorMock->reveal());
+        $this->serializer->setAccessor($accessorMock->reveal());
     }
 
     protected function mockTokenRepository()
@@ -129,7 +156,7 @@ class UserStatusTest extends WebTestCase
     {
         $aggregateRepositoryMock = $this->prophet->prophesize('WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository');
 
-        $aggregate = new Aggregate('test_aggregate');
+        $aggregate = new Aggregate('test_aggregate', 'My List');
 
         $aggregateRepositoryMock->find(Argument::type('integer'))
             ->willReturn($aggregate);
@@ -147,6 +174,7 @@ class UserStatusTest extends WebTestCase
 
     /**
      * @test
+     * @group it_should_tell_if_serialization_limit_has_been_hit
      */
     public function it_should_tell_if_serialization_limit_has_been_hit()
     {
@@ -163,6 +191,7 @@ class UserStatusTest extends WebTestCase
 
     /**
      * @test
+     * @group it_should_tell_if_statuses_have_been_serialized
      */
     public function it_should_tell_if_statuses_have_been_serialized()
     {
@@ -177,6 +206,7 @@ class UserStatusTest extends WebTestCase
 
     /**
      * @test
+     * @group it_should_tell_if_all_available_statuses_have_been_serialized
      */
     public function it_should_tell_if_all_available_statuses_have_been_serialized()
     {
@@ -197,6 +227,7 @@ class UserStatusTest extends WebTestCase
 
     /**
      * @test
+     * @group it_should_declare_members_as_whisperer_after_all_their_statuses_have_been_collected
      */
     public function it_should_declare_members_as_whisperer_after_all_their_statuses_have_been_collected()
     {
