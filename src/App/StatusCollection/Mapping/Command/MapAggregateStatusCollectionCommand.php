@@ -195,8 +195,8 @@ class MapAggregateStatusCollectionCommand extends Command implements CommandRetu
             '%d statuses of "%s" aggregate between %s and %s have been mapped to "%s".',
             $statuses->count(),
             $this->input->getOption(self::OPTION_AGGREGATE),
-            $this->input->getOption(self::OPTION_EARLIEST_DATE),
-            $this->input->getOption(self::OPTION_LATEST_DATE),
+            $this->earliestDate,
+            $this->latestDate,
             $this->input->getOption(self::OPTION_MAPPING)
         );
     }
