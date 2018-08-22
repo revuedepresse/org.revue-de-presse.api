@@ -13,15 +13,6 @@ class JsonData implements FixtureInterface
      */
     public function load(ObjectManager $manager)
     {
-        $githubRepository = file_get_contents(__DIR__ . '/../../Resources/json/fixtures/github_repositories.json');
-
-        $json = new Json();
-        $json->setValue($githubRepository);
-        $json->setHash($hash = md5($githubRepository));
-        $json->setStatus(1);
-        $json->setType(3);
-        $manager->persist($json);
-
         $userStream = file_get_contents(__DIR__ . '/../../Resources/json/fixtures/twitter_user_stream.json');
         $json = new Json();
         $json->setValue($userStream);
