@@ -91,7 +91,7 @@ class RefreshStatusMapping implements MappingAwareInterface
             $reachAfterRefresh['retweet_count']
         ));
         $this->logger->info(sprintf(
-            'Status with id %s had favorite copunt going from %d to %d',
+            'Status with id %s had favorite count going from %d to %d',
             $status->getStatusId(),
             $reachBeforeRefresh['favorite_count'],
             $reachAfterRefresh['favorite_count']
