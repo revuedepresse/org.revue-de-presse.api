@@ -36,15 +36,22 @@ services:
         tags:
             - { name: 'console.command' }
 
+    weaving_the_web_amqp.twitter:
+        class:                       "%weaving_the_web_amqp.twitter.user_status.class%"
+        properties:
+            operationClock:          "@operation.clock"
+        calls:
+            - [ 'setLogger',            [ '@monolog.logger.status'] ]
+
     weaving_the_web_amqp.twitter.lists_member_status:
         class:                       "%weaving_the_web_amqp.produce_lists_members_command.class%"
         properties:
             operationClock:          "@operation.clock"
         tags:
-            - { name: 'console.command' }
+        - { name: 'console.command' }
 
     weaving_the_web_amqp.twitter.user_status:
-        class: "%weaving_the_web_amqp.twitter.user_status.class%"
+        class:                        "%weaving_the_web_amqp.twitter.user_status.class%"
         calls:
             - [ 'setSerializer',        [ '@weaving_the_web_twitter.serializer.user_status'] ]
             - [ 'setLogger',            [ '@monolog.logger.status'] ]
