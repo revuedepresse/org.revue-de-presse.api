@@ -157,11 +157,6 @@ class UserStatus
     public function setupAccessor($oauthTokens)
     {
         if (!array_key_exists('authentication_header', $oauthTokens)) {
-            if ($oauthTokens['token'] == '15123426-jyEv8oRSUe6pesnzeS6ghpocfbrdYsYiA0RtuxZyc') {
-                $oauthTokens['token'] = '15123426-qyJmRf7Ihy2nE1Xvn36Vtb8IU9113uFuW8uIx7pgd';
-                $oauthTokens['secret'] = 'Yi6KNEmuoINbLO7OUHcS5TiIjaE7s6XkZCsnGTHZy0z7j';
-            }
-
             $this->accessor->setUserToken($oauthTokens['token']);
             $this->accessor->setUserSecret($oauthTokens['secret']);
 
