@@ -130,14 +130,6 @@ services:
         factory: 'doctrine.orm.read_entity_manager:getRepository'
         arguments: [ '%weaving_the_web_twitter.entity.token.class%' ]
 
-    weaving_the_web_twitter.miner:
-        class:  '%weaving_the_web_data_mining.miner.class%'
-        arguments:
-            - '%weaving_the_web_twitter.endpoint.feed%'
-        calls:
-            - [ 'setHttpClientClass', [ '%weaving_the_web_twitter.http_client.class%' ] ]
-            - [ 'setClientClass', [ '\Goutte\Client' ] ]
-
     weaving_the_web_twitter.moderator.api_limit:
         class:  '%weaving_the_web_twitter.moderator.api_limit.class%'
         arguments:
