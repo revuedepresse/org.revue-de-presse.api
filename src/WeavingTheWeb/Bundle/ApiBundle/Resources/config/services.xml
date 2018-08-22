@@ -6,7 +6,6 @@
 
     <parameters>
         <parameter key="weaving_the_web.api.data_provider.class">WeavingTheWeb\Bundle\ApiBundle\DataProvider</parameter>
-        <parameter key="weaving_the_web.api.endpoint.facebook.feed">%endpoint_facebook_feed%</parameter>
         <parameter key="weaving_the_web_api.entity.aggregate.class">WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate</parameter>
         <parameter key="weaving_the_web_api.entity.token.class">WeavingTheWeb\Bundle\ApiBundle\Entity\Token</parameter>
         <parameter key="weaving_the_web_api.entity.status.class">WeavingTheWeb\Bundle\ApiBundle\Entity\Status</parameter>

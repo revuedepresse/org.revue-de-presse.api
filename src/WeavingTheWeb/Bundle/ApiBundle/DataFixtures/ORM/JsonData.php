@@ -21,18 +21,6 @@ class JsonData implements FixtureInterface
         $json->setType(2);
         $manager->persist($json);
 
-        $feed = file_get_contents(__DIR__ . '/../../Resources/json/fixtures/facebook_feed.json');
-        $json = new Json();
-
-        $decodedDocuments = json_decode($feed, true)['data'][0]['value'];
-        $documents = json_encode($decodedDocuments, true);
-
-        $json->setValue($documents);
-        $json->setHash($hash = md5($feed));
-        $json->setStatus(1);
-        $json->setType(0);
-        $manager->persist($json);
-
         $manager->flush();
     }
 }
