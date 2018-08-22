@@ -47,20 +47,19 @@ class UserStreamData implements FixtureInterface
      */
     protected function makeUserStatus(array $properties)
     {
-        /** TODO Rename user stream to user status */
-        $userStream = new Status();
+        $status = new Status();
 
-        $userStream->setText($properties['text']);
-        $userStream->setApiDocument($properties['api_document']);
-        $userStream->setUserAvatar($properties['user_avatar']);
-        $userStream->setName($properties['name']);
-        $userStream->setScreenName($properties['screen_name']);
-        $userStream->setIdentifier($properties['identifier']);
-        $userStream->setIndexed($properties['indexed']);
-        $userStream->setStatusId($properties['status_id']);
-        $userStream->setCreatedAt(new \DateTime());
-        $userStream->setUpdatedAt(new \DateTime());
+        $status->setText($properties['text']);
+        $status->setApiDocument($properties['api_document']);
+        $status->setUserAvatar($properties['user_avatar']);
+        $status->setName($properties['name']);
+        $status->setScreenName($properties['screen_name']);
+        $status->setIdentifier($properties['identifier']);
+        $status->setIndexed($properties['indexed']);
+        $status->setStatusId($properties['status_id']);
+        $status->setCreatedAt(new \DateTime());
+        $status->setUpdatedAt(new \DateTime());
 
-        return $userStream;
+        return $status;
     }
 }
