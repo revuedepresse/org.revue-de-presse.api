@@ -8,7 +8,6 @@ use WeavingTheWeb\Bundle\ApiBundle\Entity\ArchivedStatus;
 
 class StatusAccessor
 {
-
     /**
      * @var bool
      */
