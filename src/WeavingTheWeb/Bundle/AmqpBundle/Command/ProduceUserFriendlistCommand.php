@@ -2,6 +2,8 @@
 
 namespace WeavingTheWeb\Bundle\AmqpBundle\Command;
 
+use App\Operation\OperationClock;
+
 use Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Input\InputOption,
     Symfony\Component\Console\Output\OutputInterface;
@@ -35,6 +37,11 @@ class ProduceUserFriendListCommand extends AggregateAwareCommand
      * @var TranslatorInterface
      */
     private $translator;
+
+    /**
+     * @var OperationClock
+     */
+    public $operationClock;
 
     public function configure()
     {
@@ -82,6 +89,10 @@ class ProduceUserFriendListCommand extends AggregateAwareCommand
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
+        if ($this->getContainer()->get('operation.clock')->shouldSkipOperation()) {
+            return self::RETURN_STATUS_SUCCESS;
+        }
+
         $this->input = $input;
         $this->output = $output;
 

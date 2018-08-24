@@ -1,6 +1,8 @@
-# Twitter status review
+# Press review
 
-Easing observation of Twitter lists
+[![Build Status](https://travis-ci.org/thierrymarianne/daily-press-review.svg?branch=master)](https://travis-ci.org/thierrymarianne/daily-press-review)
+
+Easing observation of Twitter lists to publish a daily press review
 
 ## Installation
 
@@ -57,7 +59,7 @@ make run-mysql-container
 Run RabbitMQ container
 
 ```
-run-rabbitmq-container
+make run-rabbitmq-container
 ```
 
 Produce messages from lists of members
@@ -72,3 +74,10 @@ Consume Twitter API from messages
 make consume-twitter-api-messages
 ```
 
+## Testing
+
+Create the test database schema
+
+```
+make create-database-schema-test
+```

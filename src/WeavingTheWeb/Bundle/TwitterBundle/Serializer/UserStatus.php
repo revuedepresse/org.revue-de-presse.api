@@ -3,6 +3,7 @@
 namespace WeavingTheWeb\Bundle\TwitterBundle\Serializer;
 
 use App\Aggregate\Exception\LockedAggregateException;
+use App\Operation\OperationClock;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Translation\TranslatorInterface;
 
@@ -23,6 +24,11 @@ class UserStatus
     const MAX_AVAILABLE_TWEETS_PER_USER = 3200;
 
     const MAX_BATCH_SIZE = 200;
+
+    /**
+     * @var OperationClock
+     */
+    public $operationClock;
 
     /**
      * @var \Symfony\Component\Translation\Translator $translator
@@ -151,11 +157,6 @@ class UserStatus
     public function setupAccessor($oauthTokens)
     {
         if (!array_key_exists('authentication_header', $oauthTokens)) {
-            if ($oauthTokens['token'] == '15123426-jyEv8oRSUe6pesnzeS6ghpocfbrdYsYiA0RtuxZyc') {
-                $oauthTokens['token'] = '15123426-qyJmRf7Ihy2nE1Xvn36Vtb8IU9113uFuW8uIx7pgd';
-                $oauthTokens['secret'] = 'Yi6KNEmuoINbLO7OUHcS5TiIjaE7s6XkZCsnGTHZy0z7j';
-            }
-
             $this->accessor->setUserToken($oauthTokens['token']);
             $this->accessor->setUserSecret($oauthTokens['secret']);
 
@@ -190,6 +191,10 @@ class UserStatus
      */
     public function serialize($options, $greedy = false, $discoverPastTweets = true)
     {
+        if ($this->operationClock->shouldSkipOperation()) {
+            return true;
+        }
+
         try {
             if ($this->shouldSkipSerialization($options)) {
                 return true;
@@ -312,9 +317,13 @@ class UserStatus
             return true;
         }
 
-        $aggregate = $this->aggregateRepository->findOneBy(
-            ['id' => $this->serializationOptions['aggregate_id']]
-        );
+        $aggregate = null;
+        if (array_key_exists('aggregate_id', $this->serializationOptions)) {
+            $aggregate = $this->aggregateRepository->findOneBy(
+                ['id' => $this->serializationOptions['aggregate_id']]
+            );
+        }
+
         if (($aggregate instanceof Aggregate) && $aggregate->isLocked()) {
             $message = sprintf(
                 'Will skip message consumption for locked aggregate #%d',

@@ -1,5 +1,4 @@
 imports:
-    - { resource: parameters/parameters_assets.yml }
     - { resource: parameters/parameters_dbal.yml }
     - { resource: parameters/parameters_maintenance.yml }
     - { resource: parameters/parameters_rabbitmq.yml }
@@ -8,8 +7,6 @@ imports:
 
 parameters:
     app_version:                0.1
-
-    apc_host:                   %apc.host%
 
     feature_toggling_search:    false
 
@@ -24,3 +21,8 @@ parameters:
 
     # dsn can be found at https://sentry.io/weaving-the-web/press-review/getting-started/php-symfony2/
     sentry_dsn_php:             ~
+
+    operations_skipped_after:   21:00
+    operations_skipped_before:  22:30
+
+    production_main_level:      error

@@ -1,3 +1,8 @@
+imports:
+    - { resource: services/command.yml }
+    - { resource: services/mapping.yml }
+    - { resource: services/operation.yml }
+
 parameters:
 
     weaving_the_web_twitter.api_accessor.class:                   'WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor'
@@ -63,15 +68,13 @@ services:
             environment:          '%kernel.environment%'
             httpClient:           '%weaving_the_web_twitter.oauth_client.class%'
             twitterApiLogger:     '@monolog.logger.twitter_api'
-            libranEntityManager:  '@doctrine.orm.libran_entity_manager'
             statusAccessor:       '@weaving_the_web.accessor.status'
             userRepository:       '@user_manager'
 
     weaving_the_web.accessor.status:
         class: 'App\Accessor\StatusAccessor'
         properties:
-            entityManager:  '@doctrine.orm.libran_entity_manager'
-            accessingLibran: '%accessing_libran%'
+            entityManager:  '@doctrine.orm.entity_manager'
 
     weaving_the_web_twitter.repository.aggregate:
         class: '%weaving_the_web_twitter.repository.aggregate.class%'
@@ -125,14 +128,6 @@ services:
         factory: 'doctrine.orm.read_entity_manager:getRepository'
         arguments: [ '%weaving_the_web_twitter.entity.token.class%' ]
 
-    weaving_the_web_twitter.miner:
-        class:  '%weaving_the_web_data_mining.miner.class%'
-        arguments:
-            - '%weaving_the_web_twitter.endpoint.feed%'
-        calls:
-            - [ 'setHttpClientClass', [ '%weaving_the_web_twitter.http_client.class%' ] ]
-            - [ 'setClientClass', [ '\Goutte\Client' ] ]
-
     weaving_the_web_twitter.moderator.api_limit:
         class:  '%weaving_the_web_twitter.moderator.api_limit.class%'
         arguments:
@@ -150,4 +145,5 @@ services:
             - [ 'setAggregateRepository', [ '@weaving_the_web_twitter.repository.aggregate' ] ]
             - [ 'setTranslator', [ '@translator' ] ]
         properties:
-            twitterApiLogger:     '@monolog.logger.twitter_api'
+            twitterApiLogger:  '@monolog.logger.twitter_api'
+            operationClock:    '@operation.clock'
