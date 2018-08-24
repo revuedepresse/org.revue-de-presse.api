@@ -8,12 +8,6 @@ use WeavingTheWeb\Bundle\ApiBundle\Entity\ArchivedStatus;
 
 class StatusAccessor
 {
-
-    /**
-     * @var bool
-     */
-    public $accessingLibran;
-
     /**
      * @var EntityManager
      */
@@ -25,10 +19,6 @@ class StatusAccessor
      */
     public function contactEndpoint($endpoint)
     {
-        if (!$this->accessingLibran) {
-            return null;
-        }
-
         if (strpos($endpoint, '/users/show.json') !== false) {
             $screenName = explode('=', parse_url($endpoint)['query'])[1];
 

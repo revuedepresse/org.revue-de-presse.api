@@ -363,7 +363,7 @@ class Status implements StatusInterface
         $this->aggregates = new ArrayCollection();
     }
 
-    public function addToAggregate(Aggregate $aggregate)
+    public function addToAggregates(Aggregate $aggregate)
     {
         $this->aggregates->add($aggregate);
     }

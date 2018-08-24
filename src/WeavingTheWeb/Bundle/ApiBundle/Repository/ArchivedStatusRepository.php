@@ -69,8 +69,12 @@ class ArchivedStatusRepository extends ResourceRepository
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Exception
      */
-    public function saveStatuses($statuses, $identifier, Aggregate $aggregate = null, LoggerInterface $logger = null)
-    {
+    public function saveStatuses(
+        $statuses,
+        $identifier,
+        Aggregate $aggregate = null,
+        LoggerInterface $logger = null
+    ) {
         $this->logger = $logger;
 
         $entityManager = $this->getEntityManager();
@@ -96,6 +100,15 @@ class ArchivedStatusRepository extends ResourceRepository
             }
 
             try {
+                if ($memberStatus->getId()) {
+                    $memberStatus->setUpdatedAt(
+                        new \DateTime(
+                            'now',
+                            new \DateTimeZone('UTC')
+                        )
+                    );
+                }
+
                 $entityManager->persist($memberStatus);
             } catch (ORMException $exception) {
                 if ($exception->getMessage() === ORMException::entityManagerClosed()->getMessage()) {
@@ -446,7 +459,7 @@ class ArchivedStatusRepository extends ResourceRepository
         $memberStatus->setIdentifier($extract['identifier']);
 
         if (!is_null($aggregate)) {
-            $memberStatus->addToAggregate($aggregate);
+            $memberStatus->addToAggregates($aggregate);
         }
 
         return $memberStatus;
@@ -457,18 +470,10 @@ class ArchivedStatusRepository extends ResourceRepository
      */
     private function logStatus(StatusInterface $memberStatus): void
     {
-        $decodedApiResponse = json_decode($memberStatus->getApiDocument(), true);
-        $favoriteCount = 0;
-        $retweetCount = 0;
-        if (json_last_error() === JSON_ERROR_NONE) {
-            if (array_key_exists('favorite_count', $decodedApiResponse)) {
-                $favoriteCount = $decodedApiResponse['favorite_count'];
-            }
+        $reach = $this->extractReachOfStatus($memberStatus);
 
-            if (array_key_exists('retweet_count', $decodedApiResponse)) {
-                $retweetCount = $decodedApiResponse['retweet_count'];
-            }
-        }
+        $favoriteCount = $reach['favorite_count'];
+        $retweetCount = $reach['retweet_count'];
 
         $this->statusLogger->info(
             sprintf(
@@ -534,7 +539,7 @@ class ArchivedStatusRepository extends ResourceRepository
 
         if (!$memberStatus->getAggregates()->isEmpty()) {
             $memberStatus->getAggregates()->map(function (Aggregate $aggregate) use ($status) {
-                $status->addToAggregate($aggregate);
+                $status->addToAggregates($aggregate);
             });
         }
 
@@ -559,5 +564,31 @@ class ArchivedStatusRepository extends ResourceRepository
             }
         }
         return $aggregateName;
+    }
+
+    /**
+     * @param StatusInterface $memberStatus
+     * @return array
+     */
+    public function extractReachOfStatus(StatusInterface $memberStatus): array
+    {
+        $decodedApiResponse = json_decode($memberStatus->getApiDocument(), true);
+
+        $favoriteCount = 0;
+        $retweetCount = 0;
+        if (json_last_error() === JSON_ERROR_NONE) {
+            if (array_key_exists('favorite_count', $decodedApiResponse)) {
+                $favoriteCount = $decodedApiResponse['favorite_count'];
+            }
+
+            if (array_key_exists('retweet_count', $decodedApiResponse)) {
+                $retweetCount = $decodedApiResponse['retweet_count'];
+            }
+        }
+
+        return [
+            'favorite_count' => $favoriteCount,
+            'retweet_count' => $retweetCount
+        ];
     }
 }

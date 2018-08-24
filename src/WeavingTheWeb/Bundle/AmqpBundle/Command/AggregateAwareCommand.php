@@ -2,10 +2,12 @@
 
 namespace WeavingTheWeb\Bundle\AmqpBundle\Command;
 
+use App\Console\CommandReturnCodeAwareInterface;
+
 /**
  * @package WeavingTheWeb\Bundle\AmqpBundle\Command
  */
-abstract class AggregateAwareCommand extends AccessorAwareCommand
+abstract class AggregateAwareCommand extends AccessorAwareCommand implements CommandReturnCodeAwareInterface
 {
     /**
      * @var \WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository

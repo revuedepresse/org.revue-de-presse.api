@@ -2,14 +2,20 @@
 
 namespace WeavingTheWeb\Bundle\AmqpBundle\Command;
 
+use App\Operation\OperationClock;
+
 use Symfony\Component\Console\Input\InputOption,
     Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Output\OutputInterface;
 
 use Symfony\Component\Translation\TranslatorInterface;
+
 use WeavingTheWeb\Bundle\AmqpBundle\Exception\InvalidListNameException;
+
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Token;
+
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;
+
 use WTW\UserBundle\Entity\User;
 
 /**
@@ -54,6 +60,11 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
      */
     private $before = null;
 
+    /**
+     * @var OperationClock
+     */
+    public $operationClock;
+
     public function configure()
     {
         $this->setName('weaving_the_web:amqp:produce:lists_members')
@@ -89,11 +100,21 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
     /**
      * @param InputInterface  $input
      * @param OutputInterface $output
-     * @return int|null|void
-     * @throws \Exception
+     * @return int|null
+     * @throws InvalidListNameException
+     * @throws UnavailableResourceException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \WeavingTheWeb\Bundle\ApiBundle\Exception\InvalidTokenException
+     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
+        if ($this->operationClock->shouldSkipOperation()) {
+            return self::RETURN_STATUS_SUCCESS;
+        }
+
         $this->input = $input;
         $this->output = $output;
 

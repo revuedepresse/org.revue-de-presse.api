@@ -295,14 +295,6 @@ class QueryFactory
     /**
      * @return string
      */
-    public function getGithubRepositoriesAlias()
-    {
-        return 'g';
-    }
-
-    /**
-     * @return string
-     */
     public function getJsonAlias()
     {
         return 'j';
@@ -324,26 +316,6 @@ class QueryFactory
             array_merge(array(
                 'limit' => $limit,
                 'offset' => $offset), $constraints));
-    }
-
-    /**
-     * @param array $feeds
-     * @return int
-     * @throws \Doctrine\ORM\OptimisticLockException
-     */
-    public function serializeFeed(array $feeds = array())
-    {
-        return $this->serializeResource($feeds, 'makeFeed');
-    }
-
-    /**
-     * @param array $repositories
-     * @return int
-     * @throws \Doctrine\ORM\OptimisticLockException
-     */
-    public function serializeRepository(array $repositories = array())
-    {
-        return $this->serializeResource($repositories, 'makeGithubRepository');
     }
 
     /**
@@ -428,30 +400,6 @@ class QueryFactory
     public function getDelimiter()
     {
         return '$_$_$';
-    }
-
-    /**
-     * @param $store
-     *
-     * @return \WeavingTheWeb\Bundle\ApiBundle\Entity\GithubRepository
-     */
-    public function makeGithubRepository($store)
-    {
-        $properties = [
-            'github_id'   => $store['id'],
-            'forks'       => $store['forks'],
-            'watchers'    => $store['watchers'],
-            'clone_url'   => $store['clone_url'],
-            'avatar_url'  => $store['owner']['avatar_url'],
-            'description' => $store['description'],
-            'name'        => $store['name'],
-            'owner'       => $store['identifier'],
-            'owner_id'    => $store['owner']['id'],
-            'language'    => $store['language'],
-            'status'      => 0
-        ];
-
-        return $this->makeInstance('WeavingTheWeb\Bundle\ApiBundle\GithubRepository', $properties);
     }
 
     /**

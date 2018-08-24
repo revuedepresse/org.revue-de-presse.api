@@ -8,10 +8,6 @@ use Symfony\Component\Security\Core\Exception\UsernameNotFoundException,
     Symfony\Component\Security\Core\User\UserProviderInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-/**
- * Class InMemoryUserProvider
- * @package WTW\UserBundle\Tests\Security\Core
- */
 class InMemoryUserProvider implements UserProviderInterface
 {
     protected $users;

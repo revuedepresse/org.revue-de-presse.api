@@ -6,6 +6,9 @@ use Doctrine\Common\Persistence\Mapping\Driver\MappingDriverChain,
     Doctrine\DBAL\Schema\SchemaException,
     Doctrine\ORM\Configuration;
 
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception\ConnectionException;
+use Doctrine\DBAL\Driver\PDOException;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 
 /**
@@ -104,8 +107,29 @@ abstract class TestCase extends WebTestCase implements TestCaseInterface, DataFi
      */
     public function regenerateSchema()
     {
-        $this->dropDatabase();
-        $this->createSchema();
+        /** @var Connection $connection */
+        $connection = $this->getService('doctrine.dbal.test_mysql_connection');
+        $name = $connection->getDatabase();
+
+        if (strpos($name, 'test') === false) {
+            throw new \Exception(
+                'Can not regenerate a schema for a database with a name not containing "test"'
+            );
+        }
+
+        if ($this->dropOrCreateDatabase($connection, $name) &&
+            $this->shouldSkipSchemaCreation()
+        ) {
+            return;
+        }
+
+        try {
+            $connection->executeQuery('use '.$name);
+            $this->createSchema();
+        } catch (\Exception $exception) {
+            $this->dropOrCreateDatabase($connection, $name);
+            $this->createSchema();
+        }
     }
 
     /**
@@ -113,6 +137,10 @@ abstract class TestCase extends WebTestCase implements TestCaseInterface, DataFi
      */
     public function createSchema()
     {
+        if ($this->shouldSkipSchemaCreation()) {
+            return;
+        }
+
         $metadata = $this->getSchemaMetadata();
 
         if (!empty($metadata)) {
@@ -381,5 +409,58 @@ abstract class TestCase extends WebTestCase implements TestCaseInterface, DataFi
 
         static::$kernel = static::createKernel($options);
         static::$kernel->boot();
+    }
+
+    /**
+     * @param $connection
+     * @param $name
+     * @return bool
+     * @throws ConnectionException
+     */
+    private function dropOrCreateDatabase($connection, $name): bool
+    {
+        $databaseAlreadyExisted = false;
+
+        try {
+            $statement = $connection->executeQuery('SHOW DATABASES');
+            $results = $statement->fetchAll();
+            $databaseAlreadyExisted = count(array_filter(
+                $results,
+                function ($database) use ($name) {
+                    return $database['Database'] === $name;
+                }
+            )) === 1;
+
+        } catch (ConnectionException $exception) {
+            // Unknown database, which might mean it has been dropped in the past
+            if (!($exception->getPrevious() instanceof PDOException)
+                || $exception->getPrevious()->getCode() !== 1049
+            ) {
+                throw $exception;
+            }
+
+            $this->createDatabase($name);
+        }
+
+        return $databaseAlreadyExisted;
+    }
+
+    /**
+     * @return bool
+     */
+    private function shouldSkipSchemaCreation(): bool
+    {
+        return !$this->shouldNotSkipSchemaCreation();
+    }
+
+    /**
+     * @return bool
+     */
+    private function shouldNotSkipSchemaCreation(): bool
+    {
+        $connection = $this->get('doctrine.dbal.test_mysql_connection');
+        $statement = $connection->executeQuery('SHOW TABLES');
+
+        return count($statement->fetchAll()) === 0;
     }
 }

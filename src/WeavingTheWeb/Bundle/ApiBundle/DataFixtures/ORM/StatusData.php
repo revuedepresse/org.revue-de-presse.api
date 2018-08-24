@@ -4,10 +4,9 @@ namespace WeavingTheWeb\Bundle\ApiBundle\DataFixtures\ORM;
 
 use Doctrine\Common\DataFixtures\FixtureInterface,
     Doctrine\Common\Persistence\ObjectManager;
-use Doctrine\Common\Inflector\Inflector;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Status;
 
-class UserStreamData implements FixtureInterface
+class StatusData implements FixtureInterface
 {
     /**
      * {@inheritDoc}
@@ -30,7 +29,14 @@ class UserStreamData implements FixtureInterface
         $manager->persist($userStatus);
 
         $encodedUserStream = file_get_contents(__DIR__ . '/../../Tests/Resources/fixtures/user-stream.base64');
-        $userStatusCollection = unserialize(base64_decode($encodedUserStream));
+        $serializedEntitiesWhichHaveBeenMoved = strtr(
+            base64_decode($encodedUserStream),
+            [
+                '\UserStream' => '\Status',
+                '48:' => '44:',
+            ]
+        );
+        $userStatusCollection = unserialize($serializedEntitiesWhichHaveBeenMoved);
 
         foreach ($userStatusCollection as $userStatus) {
             $manager->persist($userStatus);
@@ -47,20 +53,19 @@ class UserStreamData implements FixtureInterface
      */
     protected function makeUserStatus(array $properties)
     {
-        /** TODO Rename user stream to user status */
-        $userStream = new Status();
+        $status = new Status();
 
-        $userStream->setText($properties['text']);
-        $userStream->setApiDocument($properties['api_document']);
-        $userStream->setUserAvatar($properties['user_avatar']);
-        $userStream->setName($properties['name']);
-        $userStream->setScreenName($properties['screen_name']);
-        $userStream->setIdentifier($properties['identifier']);
-        $userStream->setIndexed($properties['indexed']);
-        $userStream->setStatusId($properties['status_id']);
-        $userStream->setCreatedAt(new \DateTime());
-        $userStream->setUpdatedAt(new \DateTime());
+        $status->setText($properties['text']);
+        $status->setApiDocument($properties['api_document']);
+        $status->setUserAvatar($properties['user_avatar']);
+        $status->setName($properties['name']);
+        $status->setScreenName($properties['screen_name']);
+        $status->setIdentifier($properties['identifier']);
+        $status->setIndexed($properties['indexed']);
+        $status->setStatusId($properties['status_id']);
+        $status->setCreatedAt(new \DateTime());
+        $status->setUpdatedAt(new \DateTime());
 
-        return $userStream;
+        return $status;
     }
 }

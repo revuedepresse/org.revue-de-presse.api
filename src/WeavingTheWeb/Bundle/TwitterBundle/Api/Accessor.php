@@ -2,6 +2,7 @@
 
 namespace WeavingTheWeb\Bundle\TwitterBundle\Api;
 
+use App\Accessor\Exception\NotFoundStatusException;
 use App\Accessor\StatusAccessor;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Persistence\ObjectRepository;
@@ -117,6 +118,11 @@ class Accessor implements TwitterErrorAwareInterface
      * @var \Symfony\Component\Translation\Translator $translator
      */
     protected $translator;
+
+    /**
+     * @var bool
+     */
+    public $propagateNotFoundStatuses = false;
 
     /**
      * @param \Symfony\Component\Translation\Translator $translator
@@ -349,6 +355,11 @@ class Accessor implements TwitterErrorAwareInterface
                 $this->logger->error($exception->getMessage(), $exception->getTrace());
 
                 if ($exception instanceof ConnectException) {
+                    throw $exception;
+                }
+
+                if ($this->propagateNotFoundStatuses &&
+                    ($exception instanceof NotFoundStatusException)) {
                     throw $exception;
                 }
 
@@ -1146,6 +1157,15 @@ class Accessor implements TwitterErrorAwareInterface
      */
     protected function checkApiLimit(\TwitterOAuth $connection)
     {
+        if ($connection->http_info['http_code'] == 404) {
+            $message = sprintf(
+                'A status has been removed (%s)',
+                $connection->http_info['url']
+            );
+            $this->twitterApiLogger->info($message);
+            throw new NotFoundStatusException($message, self::ERROR_NOT_FOUND);
+        }
+
         $this->twitterApiLogger->info(
             sprintf(
                 '[HTTP code] %s',

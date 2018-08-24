@@ -2,13 +2,21 @@
 
 namespace WeavingTheWeb\Bundle\ApiBundle\Repository;
 
+use App\StatusCollection\Mapping\MappingAwareInterface;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\QueryBuilder;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Status;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\StatusInterface;
 use WTW\UserBundle\Entity\User;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ *
+ * @method Status|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Status|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Status[]    findAll()
+ * @method Status[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class StatusRepository extends ArchivedStatusRepository
 {
@@ -16,6 +24,65 @@ class StatusRepository extends ArchivedStatusRepository
      * @var ArchivedStatusRepository
      */
     public $archivedStatusRepository;
+
+    /**
+     * @param $properties
+     * @return Status
+     */
+    public function fromArray($properties)
+    {
+        $status = new Status();
+
+        $status->setScreenName($properties['screen_name']);
+        $status->setName($properties['name']);
+        $status->setText($properties['text']);
+        $status->setUserAvatar($properties['user_avatar']);
+        $status->setIdentifier($properties['identifier']);
+        $status->setCreatedAt($properties['created_at']);
+        $status->setIndexed(false);
+
+        if (array_key_exists('aggregate', $properties)) {
+            $status->addToAggregates($properties['aggregate']);
+        }
+
+        return $status;
+    }
+
+    /**
+     * @param MappingAwareInterface $service
+     * @param ArrayCollection       $statuses
+     * @return ArrayCollection
+     */
+    public function mapStatusCollectionToService(
+        MappingAwareInterface $service,
+        ArrayCollection $statuses
+    ) {
+        return $statuses->map(function (Status $status) use ($service) {
+            return $service->apply($status);
+        });
+    }
+
+    /**
+     * @param Status $status
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function save(Status $status)
+    {
+        $this->getEntityManager()->persist($status);
+        $this->getEntityManager()->flush();
+    }
+
+    /**
+     * @param ArrayCollection $statuses
+     */
+    public function saveBatch(ArrayCollection $statuses)
+    {
+        $statuses->map(function ($status) {
+            $this->getEntityManager()->persist($status);
+        });
+
+        $this->getEntityManager()->flush();
+    }
 
     public function setOauthTokens($oauthTokens)
     {
@@ -107,6 +174,69 @@ class StatusRepository extends ArchivedStatusRepository
         $userStream->setIdentifier($extract['identifier']);
 
         return $userStream->setUpdatedAt(new \DateTime('now', new \DateTimeZone('UTC')));
+    }
+
+    /**
+     * @param string    $memberScreenName
+     * @param \DateTime $earliestDate
+     * @param \DateTime $latestDate
+     * @return ArrayCollection
+     */
+    public function selectStatusCollection(
+        string $memberScreenName,
+        \DateTime $earliestDate,
+        \DateTime $latestDate
+    ) {
+        $queryBuilder = $this->createQueryBuilder('s');
+
+        $this->between($queryBuilder, $earliestDate, $latestDate);
+
+        $queryBuilder->andWhere('s.screenName = :screen_name');
+        $queryBuilder->setParameter('screen_name', $memberScreenName);
+
+        return new ArrayCollection($queryBuilder->getQuery()->getResult());
+    }
+
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @param \DateTime    $earliestDate
+     * @param \DateTime    $latestDate
+     */
+    private function between(
+        QueryBuilder $queryBuilder,
+        \DateTime $earliestDate,
+        \DateTime $latestDate
+    ): void {
+        $queryBuilder->andWhere('s.createdAt >= :after');
+        $queryBuilder->setParameter('after', $earliestDate);
+
+        $queryBuilder->andWhere('s.createdAt <= :before');
+        $queryBuilder->setParameter('before', $latestDate);
+    }
+
+    /**
+     * @param string    $aggregateName
+     * @param \DateTime $earliestDate
+     * @param \DateTime $latestDate
+     * @return ArrayCollection
+     */
+    public function selectAggregateStatusCollection(
+        string $aggregateName,
+        \DateTime $earliestDate,
+        \DateTime $latestDate
+    ) {
+        $queryBuilder = $this->createQueryBuilder('s');
+
+        $this->between($queryBuilder, $earliestDate, $latestDate);
+
+        $queryBuilder->join(
+            's.aggregates',
+            'a'
+        );
+        $queryBuilder->andWhere('a.name = :aggregate_name');
+        $queryBuilder->setParameter('aggregate_name', $aggregateName);
+
+        return new ArrayCollection($queryBuilder->getQuery()->getResult());
     }
 
     /**

@@ -73,7 +73,7 @@ class TokenRepository extends EntityRepository
         $token = $this->findOneBy(['oauthToken' => $oauthToken]);
 
         if (is_null($token)) {
-            $token = $this->makeToken(['oauth_token' => $oauthToken, 'oauth_token_secret' => null]);
+            $token = $this->makeToken(['oauth_token' => $oauthToken, 'oauth_token_secret' => '']);
 
             $entityManager = $this->getEntityManager();
             $entityManager->persist($token);

@@ -9,6 +9,7 @@ monolog:
     channels:
         - 'twitter_api'
         - 'status'
+        - 'development'
     handlers:
         sentry: "%monolog_sentry_logging_handler%"
         main:   "%monolog_main_logging_handler%"

@@ -2,6 +2,7 @@
 
 namespace WeavingTheWeb\Bundle\AmqpBundle\Twitter;
 
+use App\Operation\OperationClock;
 use Doctrine\ORM\EntityRepository;
 
 use OldSound\RabbitMqBundle\RabbitMq\ConsumerInterface;
@@ -23,6 +24,11 @@ use WTW\UserBundle\Entity\User;
 class UserStatus implements ConsumerInterface
 {
     const ERROR_CODE_USER_NOT_FOUND = 100;
+
+    /**
+     * @var OperationClock
+     */
+    public $operationClock;
 
     /**
      * @var LoggerInterface
@@ -73,6 +79,10 @@ class UserStatus implements ConsumerInterface
      */
     public function execute(AmqpMessage $message)
     {
+        if ($this->operationClock->shouldSkipOperation()) {
+            return true;
+        }
+
         try {
             $options = $this->parseMessage($message);
         } catch (\Exception $exception) {

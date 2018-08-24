@@ -9,8 +9,8 @@ use Symfony\Component\Console\Tester\CommandTester;
 
 /**
  * Base class for testing the CLI tools.
- *
- * @author Alexandre Salomé <alexandre.salome@gmail.com>
+ * Inspired by the work of Alexandre Salomé
+ * @see http://alexandre-salome.fr/blog/Test-your-commands-in-Symfony2
  */
 abstract class CommandTestCase extends TestCase
 {
