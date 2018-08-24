@@ -1162,7 +1162,7 @@ class Accessor implements TwitterErrorAwareInterface
                 'A status has been removed (%s)',
                 $connection->http_info['url']
             );
-            $this->twitterApiLogger->error($message);
+            $this->twitterApiLogger->info($message);
             throw new NotFoundStatusException($message, self::ERROR_NOT_FOUND);
         }
 
