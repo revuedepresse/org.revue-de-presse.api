@@ -317,9 +317,13 @@ class UserStatus
             return true;
         }
 
-        $aggregate = $this->aggregateRepository->findOneBy(
-            ['id' => $this->serializationOptions['aggregate_id']]
-        );
+        $aggregate = null;
+        if (array_key_exists('aggregate_id', $this->serializationOptions)) {
+            $aggregate = $this->aggregateRepository->findOneBy(
+                ['id' => $this->serializationOptions['aggregate_id']]
+            );
+        }
+
         if (($aggregate instanceof Aggregate) && $aggregate->isLocked()) {
             $message = sprintf(
                 'Will skip message consumption for locked aggregate #%d',
