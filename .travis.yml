@@ -18,6 +18,7 @@ install:
     - php composer.phar install --prefer-dist --no-scripts
     - php composer.phar run-script build-bootstrap
     - php app/console doctrine:schema:create -n -e test
+script:
     - bin/phpunit -c ./app/phpunit-twitter-messaging.xml.dist --verbose --debug
 cache:
     directories:
