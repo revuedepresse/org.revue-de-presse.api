@@ -8,6 +8,8 @@ php:
 services:
     - mysql
     - rabbitmq
+before_install:
+    - mysql -e 'CREATE DATABASE test;'
 install:
     - cp provisioning/continuous-integration/parameters_test.yml.dist app/config/parameters_test.yml
     - /bin/bash -c 'cp app/config/parameters.yml{.dist,}'
