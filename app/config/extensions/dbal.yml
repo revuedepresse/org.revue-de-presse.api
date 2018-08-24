@@ -24,15 +24,6 @@ doctrine:
                 password:       "%database_password%"
                 port:           "%database_port%"
                 schema_filter:  "%schema_filter%"
-            libran:
-                charset:        "%database_charset_libran%"
-                driver:         "%database_driver_libran%"
-                host:           "%database_host_libran%"
-                dbname:         "%database_name_libran%"
-                user:           "%database_user_libran%"
-                password:       "%database_password_libran%"
-                port:           "%database_port_libran%"
-                schema_filter:  "%schema_filter%"
             admin:
                 charset:        "%database_charset_admin%"
                 driver:         "%database_driver_admin%"
@@ -83,9 +74,6 @@ doctrine:
                 mappings: '%mapping%'
             read:
                 connection: read
-                mappings: '%mapping%'
-            libran:
-                connection: libran
                 mappings: '%mapping%'
             test_mysql:
                 connection: test_mysql
