@@ -1,6 +1,8 @@
-# Twitter status review
+# Press review
 
-Easing observation of Twitter lists
+[![Build Status](https://travis-ci.org/thierrymarianne/daily-press-review.svg?branch=master)](https://travis-ci.org/thierrymarianne/daily-press-review)
+
+Easing observation of Twitter lists to publish a daily press review
 
 ## Installation
 
