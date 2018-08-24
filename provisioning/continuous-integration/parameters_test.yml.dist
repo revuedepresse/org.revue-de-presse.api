@@ -1,0 +1,68 @@
+imports:
+    - { resource: parameters/parameters_dbal.yml }
+    - { resource: parameters/parameters_maintenance.yml }
+    - { resource: parameters/parameters_rabbitmq.yml }
+    - { resource: parameters/parameters_test.yml }
+    - { resource: parameters/parameters_twitter.yml }
+    - { resource: parameters/parameters_weaving_the_web.yml }
+
+parameters:
+    app_version:                0.1
+
+    feature_toggling_search:    false
+
+    locale:                     en
+
+    framework_secret:           AN3wKindofS3cr3tf0rmyT3sts
+
+    test_database_memory:       false
+    test_database_path:         %kernel.cache_dir%/wtw_dashboard.db
+
+    php_binary:                 /usr/bin/php
+
+    # dsn can be found at https://sentry.io/weaving-the-web/press-review/getting-started/php-symfony2/
+    sentry_dsn_php:             ~
+
+    operations_skipped_after:   21:00
+    operations_skipped_before:  22:30
+
+    production_main_level:      error
+
+    api.twitter.protocol:        ''
+    api.twitter.host_port:       ''
+
+    api.twitter.callback_url:    ''
+
+    api.twitter.consumer_key:    '_'
+    api.twitter.consumer_secret: '_'
+    api.twitter.user_secret:     ''
+    api.twitter.user_token:      ''
+
+    mysql.host:                   '127.0.0.1'
+    mysql.port:                   '3306'
+    mysql.database:               'test'
+    mysql.user:                   'root'
+    mysql.password:               ''
+
+    mysql.admin_password:         ''
+
+    mysql.test_database:          'test'
+    mysql.test_user:              'root'
+    mysql.test_password:          ''
+
+    mysql.host_read:              '127.0.0.1'
+    mysql.port_read:              '3306'
+    mysql.database_read:          'test'
+    mysql.user_read:              'root'
+    mysql.password_read:          ''
+
+    mysql.host_write:             '127.0.0.1'
+    mysql.port_write:             '3306'
+    mysql.database_write:         'test'
+    mysql.user_write:             'root'
+    mysql.password_write:         ''
+
+    rabbitmq.host:                127.0.0.1
+    rabbitmq.vhost:               /
+    rabbitmq.user:                guest
+    rabbitmq.password:            guest

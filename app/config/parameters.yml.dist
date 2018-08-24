@@ -1,5 +1,4 @@
 imports:
-    - { resource: parameters/parameters_assets.yml }
     - { resource: parameters/parameters_dbal.yml }
     - { resource: parameters/parameters_maintenance.yml }
     - { resource: parameters/parameters_rabbitmq.yml }
@@ -8,8 +7,6 @@ imports:
 
 parameters:
     app_version:                0.1
-
-    apc_host:                   %apc.host%
 
     feature_toggling_search:    false
 

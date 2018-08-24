@@ -63,6 +63,9 @@
         ],
         "post-update-cmd": [
             "@symfony-scripts"
+        ],
+        "build-bootstrap": [
+            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::buildBootstrap"
         ]
     },
     "config": {

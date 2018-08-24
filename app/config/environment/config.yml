@@ -36,3 +36,6 @@ sentry:
 
 parameters:
     basic_auth_pattern: /this-route-is-undefined-in-production
+    rabbitmq.host:      vagrant-valhalla
+    rabbitmq.port:      5672
+    rabbitmq.vhost:     weaving_the_web
