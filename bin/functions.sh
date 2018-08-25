@@ -378,11 +378,23 @@ function get_apache_container_interactive_shell() {
 function run_apache() {
     remove_apache_container
 
+    local port=80
+    if [ ! -z "${PRESS_REVIEW_APACHE_PORT}" ];
+    then
+        port="${PRESS_REVIEW_APACHE_PORT}"
+    fi
+
+    host host=''
+    if [ ! -z "${PRESS_REVIEW_APACHE_HOST}" ];
+    then
+        host="${PRESS_REVIEW_APACHE_HOST}"':'
+    fi
+
     local symfony_environment="$(get_symfony_environment)"
 
     local network=`get_network_option`
     local command=$(echo -n 'docker run '"${network}"' \
--d -p 80:80 \
+-d -p '${host}''${port}':80 \
 -e '"${symfony_environment}"' \
 -v '`pwd`'/provisioning/containers/apache/templates:/templates \
 -v '`pwd`'/provisioning/containers/apache/tasks:/tasks \
