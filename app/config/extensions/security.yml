@@ -26,20 +26,7 @@ security:
                         password: '%api_wtw_repositories_password%'
                         roles: [ROLE_SUPER_ADMIN]
 
-    firewalls:
-        basic_connect:
-            context:              weaving_the_web
-            pattern:              '%basic_auth_pattern%'
-            http_basic:
-                realm:            "Please enter your login information for Weaving the Web"
-                provider:         chain_provider
-            anonymous:            false
-            logout:
-                path:             /basic/logout
-                target:           /
-        dev:
-            pattern:              ^/(_(profiler|wdt)|css|images|js)/
-            security:             false
+    firewalls: ~
 
     access_control:
         - { path: ^/api,          role: ROLE_USER }
