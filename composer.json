@@ -42,7 +42,6 @@
         "ramsey/uuid-doctrine": "dev-master",
         "sensio/distribution-bundle": "~4.0",
         "sensio/framework-extra-bundle": "3.*",
-        "sensio/generator-bundle": "2.3.*",
         "sentry/sentry-symfony": "1.0.3",
         "symfony/monolog-bundle": "^3.0.2",
         "symfony/symfony": "2.8.44",
