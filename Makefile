@@ -99,3 +99,6 @@ today-statuses: ## Filter the statuses for today from the log file
 
 follow-today-statuses: ## Filter the statuses for today from the log file
 		@/bin/bash -c 'source ./bin/functions.sh && follow_today_statuses'
+
+run-php-unit-tests: ## Run unit tests with PHPUnit
+		@/bin/bash -c 'source ./bin/functions.sh && run_php_unit_tests'
