@@ -5,10 +5,16 @@ parameters:
         WeavingTheWebDashboardBundle: ~
         WeavingTheWebUserBundle: ~
         WTWUserBundleTest:
-            dir: '%kernel.root_dir%/../src/WTW/UserBundle/Tests/Security/Core/User'
-            prefix: WTW\UserBundle\Tests\Security\Core\User
-            type: annotation
-            is_bundle: false
+            dir:        '%kernel.root_dir%/../src/WTW/UserBundle/Tests/Security/Core/User'
+            prefix:     WTW\UserBundle\Tests\Security\Core\User
+            type:       annotation
+            is_bundle:  false
+        Status:
+            alias:      'Status'
+            dir:        '%kernel.root_dir%/config/model'
+            is_bundle:  false
+            prefix:     App\Status\Entity
+            type:       xml
 
 # Doctrine Configuration
 doctrine:
@@ -60,6 +66,8 @@ doctrine:
                 password:       "%database_password_write%"
                 port:           "%database_port_write%"
                 schema_filter:  "%schema_filter%"
+        types:
+            uuid:  Ramsey\Uuid\Doctrine\UuidType
     orm:
         default_entity_manager: default
         entity_managers:
