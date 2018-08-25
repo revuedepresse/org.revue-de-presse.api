@@ -30,7 +30,15 @@ security:
                 class:               WTWUserBundle:User
                 property:            apiKey
 
-    firewalls: ~
+    firewalls:
+        main:
+            anonymous: ~
+
+            logout: ~
+
+            guard:
+                authenticators:
+                    - app.token_authenticator
 
     access_control:
-        - { path: ^/api,          role: ROLE_API }
+        - { path: ^/api,          role: ROLE_USER }
