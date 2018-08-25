@@ -944,7 +944,13 @@ class Accessor implements TwitterErrorAwareInterface
         }
         $showStatusEndpoint = $this->getShowStatusEndpoint($version = '1.1');
 
-        return $this->contactEndpoint(strtr($showStatusEndpoint, ['{{ id }}' => $identifier]));
+        try {
+            return $this->contactEndpoint(strtr($showStatusEndpoint, ['{{ id }}' => $identifier]));
+        } catch (NotFoundStatusException $exception) {
+            $this->statusAccessor->declareStatusNotFoundByIdentifier($identifier);
+
+            throw $exception;
+        }
     }
 
     /**

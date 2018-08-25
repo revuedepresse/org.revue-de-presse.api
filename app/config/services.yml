@@ -75,7 +75,10 @@ services:
     weaving_the_web.accessor.status:
         class: 'App\Accessor\StatusAccessor'
         properties:
-            entityManager:  '@doctrine.orm.entity_manager'
+            entityManager:              '@doctrine.orm.entity_manager'
+            statusRepository:           '@weaving_the_web_twitter.repository.status'
+            archivedStatusRepository:   '@weaving_the_web_twitter.repository.archived_status'
+            notFoundStatusRepository:   '@repository.not_found_status'
 
     weaving_the_web_twitter.repository.aggregate:
         class: '%weaving_the_web_twitter.repository.aggregate.class%'

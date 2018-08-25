@@ -5,6 +5,12 @@ parameters:
 
 services:
 
+    repository.not_found_status:
+        factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
+        class: 'App\Status\Entity\NotFoundStatus'
+        arguments:
+            - 'App\Status\Entity\NotFoundStatus'
+
     weaving_the_web_api.repository.token:
         factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
         class: '%weaving_the_web_api.repository.token.class%'

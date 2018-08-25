@@ -19,7 +19,6 @@ use WTW\CodeGeneration\QualityAssuranceBundle\Test\WebTestCase;
  */
 class AccessorTest extends WebTestCase
 {
-
     /**
      * @var $accessor \WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor
      */
