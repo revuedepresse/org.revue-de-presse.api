@@ -22,7 +22,7 @@
         </one-to-one>
         <one-to-one
                 field="archivedStatus"
-                target-entity="WeavingTheWeb\Bundle\ApiBundle\Entity\Status">
+                target-entity="WeavingTheWeb\Bundle\ApiBundle\Entity\ArchivedStatus">
             <join-column
                 name="archived_status_id"
                 referenced-column-name="ust_id"
