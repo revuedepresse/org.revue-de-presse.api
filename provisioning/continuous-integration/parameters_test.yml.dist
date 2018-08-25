@@ -33,10 +33,11 @@ parameters:
 
     api.twitter.callback_url:    ''
 
-    api.twitter.consumer_key:    '_'
-    api.twitter.consumer_secret: '_'
-    api.twitter.user_secret:     ''
-    api.twitter.user_token:      ''
+    # Can be declared as environment variables
+    #api.twitter.consumer_key:    '_'
+    #api.twitter.consumer_secret: '_'
+    #api.twitter.user_secret:     ''
+    #api.twitter.user_token:      ''
 
     mysql.host:                   '127.0.0.1'
     mysql.port:                   '3306'
