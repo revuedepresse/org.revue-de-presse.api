@@ -227,6 +227,16 @@ class User extends BaseUser
     protected $tokens;
 
     /**
+     * @ORM\Column(name="usr_api_key", type="string", nullable=true)
+     */
+    private $apiKey;
+
+    public function getApiKey()
+    {
+        return $this->apiKey;
+    }
+
+    /**
      * Get id
      *
      * @return integer
