@@ -25,25 +25,20 @@ security:
                     %api_wtw_repositories_user_name_super%:
                         password: '%api_wtw_repositories_password%'
                         roles: [ROLE_SUPER_ADMIN]
+        user_provider:
+            entity:
+                class:               WTWUserBundle:User
+                property:            apiKey
 
     firewalls:
-        basic_connect:
-            context:              weaving_the_web
-            pattern:              '%basic_auth_pattern%'
-            http_basic:
-                realm:            "Please enter your login information for Weaving the Web"
-                provider:         chain_provider
-            anonymous:            false
-            logout:
-                path:             /basic/logout
-                target:           /
-        dev:
-            pattern:              ^/(_(profiler|wdt)|css|images|js)/
-            security:             false
+        main:
+            anonymous: ~
+
+            logout: ~
+
+            guard:
+                authenticators:
+                    - app.token_authenticator
 
     access_control:
         - { path: ^/api,          role: ROLE_USER }
-        - { path: ^/tweet,        role: ROLE_SUPER_ADMIN }
-        - { path: ^/,             role: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/login$,       role: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/basic/logout, role: IS_AUTHENTICATED_ANONYMOUSLY }
