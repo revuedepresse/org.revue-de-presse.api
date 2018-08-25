@@ -4,7 +4,7 @@ parameters:
     database_host_admin:      "%mysql.host%"
     database_port_admin:      "%mysql.port%"
     database_name_admin:      "%mysql.database%"
-    database_user_admin:      "super_weaver"
+    database_user_admin:      "%mysql.admin_user%"
     database_password_admin:  "%mysql.admin_password%"
 
     database_charset:         "utf8mb4"
