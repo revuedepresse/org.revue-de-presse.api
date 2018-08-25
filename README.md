@@ -80,4 +80,10 @@ Create the test database schema
 
 ```
 make create-database-schema-test
+``` 
+
+Run unit tests with PHPUnit 
+
+```
+make run-php-unit-tests
 ```

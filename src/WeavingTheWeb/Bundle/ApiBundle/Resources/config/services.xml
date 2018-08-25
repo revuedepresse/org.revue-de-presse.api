@@ -7,9 +7,7 @@
     <parameters>
         <parameter key="weaving_the_web.api.data_provider.class">WeavingTheWeb\Bundle\ApiBundle\DataProvider</parameter>
         <parameter key="weaving_the_web_api.entity.aggregate.class">WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate</parameter>
-        <parameter key="weaving_the_web_api.entity.token.class">WeavingTheWeb\Bundle\ApiBundle\Entity\Token</parameter>
         <parameter key="weaving_the_web_api.entity.status.class">WeavingTheWeb\Bundle\ApiBundle\Entity\Status</parameter>
-        <parameter key="weaving_the_web_api.entity.whisperer.class">WeavingTheWeb\Bundle\ApiBundle\Entity\Whisperer</parameter>
         <parameter key="weaving_the_web.api.query_factory.class">WeavingTheWeb\Bundle\ApiBundle\ORM\QueryFactory</parameter>
         <parameter key="weaving_the_web_api.repository.aggregate.class">WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository</parameter>
         <parameter key="weaving_the_web_api.repository.token.class">WeavingTheWeb\Bundle\ApiBundle\Repository\TokenRepository</parameter>
@@ -49,16 +47,6 @@
             <tag name="kernel.event_listener" event="kernel.controller" method="onKernelController" />
             <tag name="kernel.event_listener" event="kernel.view" method="onKernelView" priority="-200" />
             <argument type="service" id="service_container" />
-        </service>
-
-        <service id="weaving_the_web_api.repository.token" class="%weaving_the_web_api.repository.token.class%"
-                 factory-service="doctrine.orm.entity_manager" factory-method="getRepository">
-            <argument type="string">%weaving_the_web_api.entity.token.class%</argument>
-        </service>
-
-        <service id="weaving_the_web_api.repository.whisperer" class="%weaving_the_web_api.repository.whisperer.class%"
-                 factory-service="doctrine.orm.entity_manager" factory-method="getRepository">
-            <argument type="string">%weaving_the_web_api.entity.whisperer.class%</argument>
         </service>
 
     </services>

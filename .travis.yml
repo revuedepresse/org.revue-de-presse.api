@@ -18,8 +18,9 @@ install:
     - php composer.phar install --prefer-dist --no-scripts
     - php composer.phar run-script build-bootstrap
     - php app/console doctrine:schema:create -n -e test
+    - /bin/bash -c 'php -i | grep reporting'
 script:
-    - bin/phpunit -c ./app/phpunit-twitter-messaging.xml.dist --verbose --debug
+    - make run-php-unit-tests
 cache:
     directories:
         - $HOME/.composer

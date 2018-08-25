@@ -657,6 +657,16 @@ function refresh_statuses() {
     execute_command "${rabbitmq_output_log}" "${rabbitmq_error_log}"
 }
 
+function run_php_unit_tests() {
+    if [ -z ${DEBUG} ];
+    then
+        bin/phpunit -c ./app/phpunit-twitter-messaging.xml.dist --process-isolation
+        return
+    fi
+
+    bin/phpunit -c ./app/phpunit-twitter-messaging.xml.dist --verbose --debug
+}
+
 function today_statuses() {
     cat app/logs/dev.log | awk '{$1=$2=$3="";print $0}' | sed -e 's/^\s\+//' | grep `date -I` | awk '{$1=$2="";print $0}'
 }
