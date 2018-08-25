@@ -31,15 +31,61 @@ class TweetController extends Controller
         }
 
         try {
-            $oauthTokens = $this->parseOAuthTokens($request);
-
             /** @var \WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository $userStreamRepository */
             $userStreamRepository = $this->get('weaving_the_web_twitter.repository.read.status');
-            $userStreamRepository->setOauthTokens($oauthTokens);
+            // Look for statuses collected by any given access token
+            // (there is no restriction at this point of the implementation)
+            $userStreamRepository->setOauthTokens([]);
 
             $lastId = $request->get('lastId', null);
             $statuses = $userStreamRepository->findLatest($lastId);
             $statusCode = 200;
+
+            $statuses = array_map(
+                function ($status) {
+                    $defaultStatus =  [
+                        'status_id' => $status['status_id'],
+                        'text' => $status['text'],
+                        'url' => 'https://twitter.com/'.$status['screen_name'].'/status/'.$status['status_id'],
+                        'retweets_count' => 'N/A',
+                        'favorite_count' => 'N/A',
+                        'username' => $status['screen_name'],
+                        'published_at' => 'N/A',
+                    ];
+
+                    if (!array_key_exists('original_document', $status)) {
+                        return $defaultStatus;
+                    }
+
+                    $decodedDocument = json_decode($status['original_document'], $asAssociativeArray = true);
+                    if (json_last_error() !== JSON_ERROR_NONE) {
+                        return $defaultStatus;
+                    }
+
+                    $statusUpdatedFromDecodedDocument = $defaultStatus;
+
+                    if (array_key_exists('screen_name', $decodedDocument)) {
+                        $statusUpdatedFromDecodedDocument['screen_name'] = $decodedDocument['screen_name'];
+                    }
+
+                    if (array_key_exists('retweet_count', $decodedDocument)) {
+                        $statusUpdatedFromDecodedDocument['retweet_count'] = $decodedDocument['retweet_count'];
+                    }
+
+                    if (array_key_exists('favorite_count', $decodedDocument)) {
+                        $statusUpdatedFromDecodedDocument['favorite_count'] = $decodedDocument['favorite_count'];
+                    }
+
+                    if (array_key_exists('created_at', $decodedDocument)) {
+                        $statusUpdatedFromDecodedDocument['created_at'] = $decodedDocument['created_at'];
+                    }
+
+
+                    return $statusUpdatedFromDecodedDocument;
+
+                },
+                $statuses
+            );
 
             return new JsonResponse($statuses, $statusCode, $this->getAccessControlOriginHeaders());
         } catch (\PDOException $exception) {
