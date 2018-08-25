@@ -371,6 +371,10 @@ function remove_apache_container {
     docker ps -a | grep apache | awk '{print $1}' | xargs docker rm -f
 }
 
+function get_apache_container_interactive_shell() {
+    docker exec -ti apache bash
+}
+
 function run_apache() {
     remove_apache_container
 
@@ -384,7 +388,7 @@ function run_apache() {
 -v '`pwd`'/provisioning/containers/apache/tasks:/tasks \
 -v '`pwd`'/provisioning/containers/php/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini \
 -v '`pwd`':/var/www/devobs \
---name=apache apache /bin/bash -c "tail -f /dev/null"'
+--name=apache apache /bin/bash -c "cd /tasks && source setup-virtual-host.sh && tail -f /dev/null"'
 )
 
     echo 'About to execute "'"${command}"'"'

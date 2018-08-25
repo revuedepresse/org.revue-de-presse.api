@@ -16,6 +16,9 @@ remove-mysql-container: ## Remove MySQL container
 build-apache-container: ## Build Apache image
 		@/bin/bash -c 'source ./bin/functions.sh && build_apache_container'
 
+get-apache-interactive-shell: ## Get Apache interactive shell
+		@/bin/bash -c 'source ./bin/functions.sh && get_apache_container_interactive_shell'
+
 remove-apache-container: ## Remove Apache container
 		@/bin/bash -c 'source ./bin/functions.sh && remove_apache_container'
 
