@@ -23,6 +23,7 @@ class TweetController extends Controller
      *
      * @Extra\Route("/tweet/latest", name="weaving_the_web_twitter_tweet_latest")
      * @Extra\Method({"GET", "OPTIONS"})
+     * @Extra\Cache(public=true)
      */
     public function latestAction(Request $request)
     {
@@ -31,17 +32,78 @@ class TweetController extends Controller
         }
 
         try {
-            $oauthTokens = $this->parseOAuthTokens($request);
-
             /** @var \WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository $userStreamRepository */
             $userStreamRepository = $this->get('weaving_the_web_twitter.repository.read.status');
-            $userStreamRepository->setOauthTokens($oauthTokens);
+            // Look for statuses collected by any given access token
+            // (there is no restriction at this point of the implementation)
+            $userStreamRepository->setOauthTokens([]);
 
             $lastId = $request->get('lastId', null);
             $statuses = $userStreamRepository->findLatest($lastId);
             $statusCode = 200;
 
-            return new JsonResponse($statuses, $statusCode, $this->getAccessControlOriginHeaders());
+            $statuses = array_map(
+                function ($status) {
+                    $defaultStatus =  [
+                        'status_id' => $status['status_id'],
+                        'text' => $status['text'],
+                        'url' => 'https://twitter.com/'.$status['screen_name'].'/status/'.$status['status_id'],
+                        'retweets_count' => 'N/A',
+                        'favorite_count' => 'N/A',
+                        'username' => $status['screen_name'],
+                        'published_at' => 'N/A',
+                    ];
+
+                    if (!array_key_exists('original_document', $status)) {
+                        return $defaultStatus;
+                    }
+
+                    $decodedDocument = json_decode($status['original_document'], $asAssociativeArray = true);
+                    if (json_last_error() !== JSON_ERROR_NONE) {
+                        return $defaultStatus;
+                    }
+
+                    $statusUpdatedFromDecodedDocument = $defaultStatus;
+
+                    if (array_key_exists('screen_name', $decodedDocument)) {
+                        $statusUpdatedFromDecodedDocument['screen_name'] = $decodedDocument['screen_name'];
+                    }
+
+                    if (array_key_exists('retweet_count', $decodedDocument)) {
+                        $statusUpdatedFromDecodedDocument['retweet_count'] = $decodedDocument['retweet_count'];
+                    }
+
+                    if (array_key_exists('favorite_count', $decodedDocument)) {
+                        $statusUpdatedFromDecodedDocument['favorite_count'] = $decodedDocument['favorite_count'];
+                    }
+
+                    if (array_key_exists('created_at', $decodedDocument)) {
+                        $statusUpdatedFromDecodedDocument['created_at'] = $decodedDocument['created_at'];
+                    }
+
+
+                    return $statusUpdatedFromDecodedDocument;
+
+                },
+                $statuses
+            );
+
+            $response = new JsonResponse($statuses, $statusCode, $this->getAccessControlOriginHeaders());
+            $response->setCache([
+                'public' => true,
+                'max_age' =>  3600*7*24,
+                's_maxage' =>  3600*7*24,
+                'last_modified' => new \DateTime(
+                    // last week at the same hour, for about an hour
+                    (new \DateTime(
+                        'now',
+                        new \DateTimeZone('UTC'))
+                    )->modify('-1 week')->format('Y-m-d H:0'),
+                    new \DateTimeZone('UTC')
+                )
+            ]);
+
+            return $response;
         } catch (\PDOException $exception) {
             return $this->getExceptionResponse(
                 $exception,

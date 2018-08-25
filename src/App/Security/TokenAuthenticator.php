@@ -10,6 +10,7 @@ use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
+use WTW\UserBundle\Model\User;
 
 class TokenAuthenticator extends AbstractGuardAuthenticator
 {
@@ -29,18 +30,22 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
     /**
      * @param mixed                 $credentials
      * @param UserProviderInterface $userProvider
-     * @return null|UserInterface|void
+     * @return null|User|UserInterface
      */
     public function getUser($credentials, UserProviderInterface $userProvider)
     {
         $apiKey = $credentials['token'];
 
         if (null === $apiKey) {
-            return;
+            return null;
         }
 
-        // if a User object, checkCredentials() is called
-        return $userProvider->loadUserByUsername($apiKey);
+        /** @var $member User */
+        $member = $userProvider->loadUserByUsername($apiKey);
+
+        if ($member instanceof UserInterface) {
+            return $member;
+        }
     }
 
     /**

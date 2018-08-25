@@ -342,7 +342,7 @@ class ArchivedStatusRepository extends ResourceRepository
      * @param bool $lastWeek
      * @return \Doctrine\ORM\QueryBuilder
      */
-    protected function selectStatuses($lastWeek = false)
+    protected function selectStatuses($lastWeek = true)
     {
         $queryBuilder = $this->createQueryBuilder('t');
         $queryBuilder->select(
@@ -356,17 +356,19 @@ class ArchivedStatusRepository extends ResourceRepository
                 't.apiDocument original_document'
             ]
         )
-            ->andWhere('t.identifier IN (:identifier)')
-            ->orderBy('t.id', 'desc')
+            ->orderBy('t.createdAt', 'desc')
             ->setMaxResults(300)
         ;
-        $queryBuilder->setParameter('identifier', $this->oauthTokens);
 
+        if (!empty($this->oauthTokens)) {
+            $queryBuilder->andWhere('t.identifier IN (:identifier)');
+            $queryBuilder->setParameter('identifier', $this->oauthTokens);
+        }
 
         if ($lastWeek) {
-            $queryBuilder->andWhere('ts.createdAt > :lastWeek');
+            $queryBuilder->andWhere('t.createdAt > :lastWeek');
 
-            $now = new \DateTime();
+            $now = new \DateTime('now', new \DateTimeZone('UTC'));
             $lastWeek = $now->setTimestamp(strtotime('last week'));
             $queryBuilder->setParameter('lastWeek', $lastWeek);
         }
