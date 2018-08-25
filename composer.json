@@ -39,6 +39,7 @@
         "kertz/twitteroauth": "dev-master",
         "liip/url-auto-converter-bundle": "1.0.1",
         "php-amqplib/rabbitmq-bundle": "^1.14",
+        "ramsey/uuid-doctrine": "dev-master",
         "sensio/distribution-bundle": "~4.0",
         "sensio/framework-extra-bundle": "3.*",
         "sensio/generator-bundle": "2.3.*",
