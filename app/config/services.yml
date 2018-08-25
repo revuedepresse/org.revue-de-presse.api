@@ -3,6 +3,7 @@ imports:
     - { resource: services/mapping.yml }
     - { resource: services/operation.yml }
     - { resource: services/repository.yml }
+    - { resource: services/security.yml }
 
 parameters:
 
