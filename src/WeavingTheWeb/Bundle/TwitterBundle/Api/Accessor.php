@@ -122,7 +122,7 @@ class Accessor implements TwitterErrorAwareInterface
     /**
      * @var bool
      */
-    public $propagateNotFoundStatuses = false;
+    public $propagateNotFoundStatuses = true;
 
     /**
      * @param \Symfony\Component\Translation\Translator $translator
@@ -342,11 +342,6 @@ class Accessor implements TwitterErrorAwareInterface
     public function contactEndpoint($endpoint)
     {
         $response = null;
-
-        $response = $this->statusAccessor->contactEndpoint($endpoint);
-        if (!is_null($response)) {
-            return $response;
-        }
 
         $fetchContent = function ($endpoint) {
             try {

@@ -70,6 +70,7 @@ class RefreshStatusMapping implements MappingAwareInterface
             return $status;
         } catch (\Exception $exception) {
             $this->logger->error($exception->getMessage());
+            return $status;
         }
 
         $reachBeforeRefresh = $this->statusRepository->extractReachOfStatus($status);
