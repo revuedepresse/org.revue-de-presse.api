@@ -33,8 +33,4 @@ security:
     firewalls: ~
 
     access_control:
-        - { path: ^/api,          role: ROLE_USER }
-        - { path: ^/tweet,        role: ROLE_SUPER_ADMIN }
-        - { path: ^/,             role: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/login$,       role: IS_AUTHENTICATED_ANONYMOUSLY }
-        - { path: ^/basic/logout, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/api,          role: ROLE_API }
