@@ -52,9 +52,13 @@ class TweetControllerTest extends WebTestCase
         return $decodedJson;
     }
 
-    protected function assertValidStatusContent($message = '')
+    /**
+     * @param string $message
+     */
+    protected function assertValidStatusContent($message)
     {
-        $response = $this->assertResponseStatusCodeEquals(200, $message);
+        $expectedHttpStatusCode = 200;
+        $response = $this->assertResponseStatusCodeEquals($expectedHttpStatusCode, $message);
 
         $decodedJson = $this->decodeJsonResponseContent($response);
         $this->assertArrayHasKey(0, $decodedJson, 'The decoded json array should contain one status');
@@ -190,7 +194,12 @@ class TweetControllerTest extends WebTestCase
         $requestParameters = ['username' => 'user'];
         $this->client->request('GET', $latestTweetUrl, $requestParameters);
 
-        $this->assertValidStatusContent();
+        $this->assertValidStatusContent($message = 'It should respond with the latest tweets ');
+
+        $this->assertTrue(
+            $this->client->getResponse()->isCacheable(),
+            'It should be possible to cache the latest statuses.'
+        );
 
         $this->tearDown();
     }

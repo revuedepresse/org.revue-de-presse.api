@@ -23,6 +23,7 @@ class TweetController extends Controller
      *
      * @Extra\Route("/tweet/latest", name="weaving_the_web_twitter_tweet_latest")
      * @Extra\Method({"GET", "OPTIONS"})
+     * @Extra\Cache(public=true)
      */
     public function latestAction(Request $request)
     {
@@ -87,7 +88,22 @@ class TweetController extends Controller
                 $statuses
             );
 
-            return new JsonResponse($statuses, $statusCode, $this->getAccessControlOriginHeaders());
+            $response = new JsonResponse($statuses, $statusCode, $this->getAccessControlOriginHeaders());
+            $response->setCache([
+                'public' => true,
+                'max_age' =>  3600*7*24,
+                's_maxage' =>  3600*7*24,
+                'last_modified' => new \DateTime(
+                    // last week at the same hour, for about an hour
+                    (new \DateTime(
+                        'now',
+                        new \DateTimeZone('UTC'))
+                    )->modify('-1 week')->format('Y-m-d H:0'),
+                    new \DateTimeZone('UTC')
+                )
+            ]);
+
+            return $response;
         } catch (\PDOException $exception) {
             return $this->getExceptionResponse(
                 $exception,
