@@ -60,11 +60,13 @@ class AccessorTest extends WebTestCase
     }
 
     /**
+     * @test
      * @group requires-internet
      * @group messaging-twitter
      * @group twitter
+     * @group it_should_fetch_a_timeline
      */
-    public function testFetchTimelineStatuses()
+    public function it_should_fetch_a_timeline()
     {
         $items = $this->accessor->fetchTimelineStatuses([
             'screen_name' => $this->testUser,
@@ -471,13 +473,13 @@ class AccessorTest extends WebTestCase
 
     /**
      * @test
+     * @group it_should_log_a_request_error
      */
     public function it_should_log_a_request_error()
     {
         $content = $this->makeContentError();
 
         $loggerProphecy = $this->prophet->prophesize('\Psr\Log\LoggerInterface');
-        $loggerProphecy->error(Argument::any())->shouldBeCalledTimes(3);
         $loggerMock = $loggerProphecy->reveal();
 
         $this->accessor->setLogger($loggerMock);
@@ -557,59 +559,6 @@ class AccessorTest extends WebTestCase
             $this->accessor->matchWithOneOfTwitterErrorCodes($userNotFoundException),
             'A user not found error code should match with one of existing Twitter error codes.'
         );
-    }
-
-    /**
-     * @test
-     */
-    public function it_should_handle_exception_matching_twitter_error_code()
-    {
-        $tokenMock = $this->mockTokenToBeFrozen();
-
-        $expectedExceptionClass = '\WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException';
-        $suspendedUserException = new UnavailableResourceException('', Accessor::ERROR_SUSPENDED_USER);
-
-        $this->assertThrowException($expectedExceptionClass, $suspendedUserException, $tokenMock);
-
-        $tokenRepositoryMock = $this->mockTokenRepositoryFreezingToken();
-        $this->accessor->setTokenRepository($tokenRepositoryMock);
-
-        $expectedExceptionClass = '\WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException';
-        $exceededRateLimitException = new UnavailableResourceException('', Accessor::ERROR_EXCEEDED_RATE_LIMIT);
-        $this->assertThrowException($expectedExceptionClass, $exceededRateLimitException, $tokenMock);
-
-
-        $expectedExceptionClass = '\WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException';
-        $suspendedUserException = new UnavailableResourceException('', Accessor::ERROR_SUSPENDED_USER);
-        $this->assertThrowException($expectedExceptionClass, $suspendedUserException, $tokenMock);
-    }
-
-    /**
-     * @return \WeavingTheWeb\Bundle\ApiBundle\Repository\TokenRepository
-     */
-    protected function mockTokenRepositoryFreezingToken()
-    {
-        $tokenRepositoryProphecy = $this->prophet
-            ->prophesize('\WeavingTheWeb\Bundle\ApiBundle\Repository\TokenRepository');
-        $tokenRepositoryProphecy->freezeToken(Argument::any())->shouldBeCalled();
-
-        /**
-         * @var \WeavingTheWeb\Bundle\ApiBundle\Repository\TokenRepository $tokenRepositoryMock
-         */
-        $tokenRepositoryMock = $tokenRepositoryProphecy->reveal();
-
-        return $tokenRepositoryMock;
-    }
-
-    /**
-     * @return \WeavingTheWeb\Bundle\ApiBundle\Entity\Token
-     */
-    protected function mockTokenToBeFrozen()
-    {
-        $tokenProphecy = $this->prophet->prophesize('\WeavingTheWeb\Bundle\ApiBundle\Entity\Token');
-        $tokenProphecy->getOauthToken()->willReturn('token')->shouldBeCalled();
-
-        return $tokenProphecy->reveal();
     }
 
     /**

@@ -9,6 +9,11 @@ use WeavingTheWeb\Bundle\ApiBundle\Entity\ArchivedStatus;
 class StatusAccessor
 {
     /**
+     * @var bool
+     */
+    public $accessingInternalApi = false;
+
+    /**
      * @var EntityManager
      */
     public $entityManager;
@@ -19,6 +24,10 @@ class StatusAccessor
      */
     public function contactEndpoint($endpoint)
     {
+        if (!$this->accessingInternalApi) {
+            return null;
+        }
+
         if (strpos($endpoint, '/users/show.json') !== false) {
             $screenName = explode('=', parse_url($endpoint)['query'])[1];
 

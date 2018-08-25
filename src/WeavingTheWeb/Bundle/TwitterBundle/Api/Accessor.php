@@ -1355,11 +1355,11 @@ class Accessor implements TwitterErrorAwareInterface
 
     /**
      * @param $exception
-     * @return object
+     * @return \stdClass
      */
-    private function convertExceptionIntoContent($exception): object
+    private function convertExceptionIntoContent($exception): \stdClass
     {
-        return (object)[
+        return (object) [
             'errors' => [
                 (object)[
                     'message' => $exception->getMessage(),

@@ -8,12 +8,13 @@
         convertErrorsToExceptions   = "true"
         convertNoticesToExceptions  = "true"
         convertWarningsToExceptions = "true"
-        processIsolation            = "true"
+        processIsolation            = "false"
         stopOnFailure               = "true"
         bootstrap                   = "autoload.php">
 
     <groups>
         <include>
+            <group>twitter-accessor</group>
             <group>it_should_guess_max_id</group>
             <group>it_should_serialize_a_status</group>
             <group>it_should_tell_if_serialization_limit_has_been_hit</group>

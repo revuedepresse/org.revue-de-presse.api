@@ -1,0 +1,18 @@
+parameters:
+
+    weaving_the_web_api.entity.token.class:         'WeavingTheWeb\Bundle\ApiBundle\Entity\Token'
+    weaving_the_web_api.entity.whisperer.class:     'WeavingTheWeb\Bundle\ApiBundle\Entity\Whisperer'
+
+services:
+
+    weaving_the_web_api.repository.token:
+        factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
+        class: '%weaving_the_web_api.repository.token.class%'
+        arguments:
+            - '%weaving_the_web_api.entity.token.class%'
+
+    weaving_the_web_api.repository.whisperer:
+        factory: ['@doctrine.orm.entity_manager', 'getRepository' ]
+        class: '%weaving_the_web_api.repository.whisperer.class%'
+        arguments:
+            - '%weaving_the_web_api.entity.whisperer.class%'
