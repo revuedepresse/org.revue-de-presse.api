@@ -45,6 +45,7 @@ parameters:
     mysql.user:                   'root'
     mysql.password:               ''
 
+    mysql.admin_user:             'root'
     mysql.admin_password:         ''
 
     mysql.test_database:          'test'
