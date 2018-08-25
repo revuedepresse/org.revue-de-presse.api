@@ -10,3 +10,10 @@ framework:
     test:           ~
     session:
         storage_id: session.storage.mock_file
+
+services:
+    test.security.authentication.listener.guard:
+        alias: security.authentication.listener.guard
+
+    test.security.authentication.manager:
+        alias: security.authentication.manager
