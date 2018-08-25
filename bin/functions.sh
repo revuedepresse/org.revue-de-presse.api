@@ -357,6 +357,41 @@ function list_php_extensions() {
     docker run --name php php -m
 }
 
+function build_apache_container() {
+    cd provisioning/containers/apache
+    docker build -t apache .
+}
+
+function remove_apache_container {
+    if [ `docker ps -a | grep apache -c` -eq 0 ]
+    then
+        return;
+    fi
+
+    docker ps -a | grep apache | awk '{print $1}' | xargs docker rm -f
+}
+
+function run_apache() {
+    remove_apache_container
+
+    local symfony_environment="$(get_symfony_environment)"
+
+    local network=`get_network_option`
+    local command=$(echo -n 'docker run '"${network}"' \
+-d -p 80:80 \
+-e '"${symfony_environment}"' \
+-v '`pwd`'/provisioning/containers/apache/templates:/templates \
+-v '`pwd`'/provisioning/containers/apache/tasks:/tasks \
+-v '`pwd`'/provisioning/containers/php/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini \
+-v '`pwd`':/var/www/devobs \
+--name=apache apache /bin/bash -c "tail -f /dev/null"'
+)
+
+    echo 'About to execute "'"${command}"'"'
+
+    /bin/bash -c "${command}"
+}
+
 function run_php_script() {
     local script="${1}"
 

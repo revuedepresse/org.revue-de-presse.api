@@ -13,6 +13,15 @@ create-network: ## Create Docker network
 remove-mysql-container: ## Remove MySQL container
 		@/bin/bash -c 'source ./bin/functions.sh && remove_mysql_container'
 
+build-apache-container: ## Build Apache image
+		@/bin/bash -c 'source ./bin/functions.sh && build_apache_container'
+
+remove-apache-container: ## Remove Apache container
+		@/bin/bash -c 'source ./bin/functions.sh && remove_apache_container'
+
+run-apache-container: ## Run Apache container
+		@/bin/bash -c 'source ./bin/functions.sh && run_apache'
+
 run-mysql-container: ## Run MySQL container (https://hub.docker.com/_/mysql/)
 		@/bin/bash -c 'source ./bin/functions.sh && run_mysql_container'
 
@@ -25,7 +34,7 @@ initialize-mysql-volume: ## Set up MySQL container
 grant-privileges: ## Grant privileges
 		@/bin/bash -c 'source ./bin/functions.sh && grant_privileges'
 
-build-php-container: ## Build PHP container
+build-php-container: ## Build PHP image
 		@/bin/bash -c 'source ./bin/functions.sh && build_php_container'
 
 list-php-extensions: ## List PHP extensions
