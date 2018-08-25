@@ -45,7 +45,7 @@
         "sensio/generator-bundle": "2.3.*",
         "sentry/sentry-symfony": "1.0.3",
         "symfony/monolog-bundle": "^3.0.2",
-        "symfony/symfony": "2.7.46",
+        "symfony/symfony": "2.8.44",
         "themattharris/tmhOAuth": "dev-master",
         "twig/extensions": "1.0.*"
     },
