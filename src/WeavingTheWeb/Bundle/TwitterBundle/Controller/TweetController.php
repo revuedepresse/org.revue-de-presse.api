@@ -89,6 +89,7 @@ class TweetController extends Controller
             );
 
             $response = new JsonResponse($statuses, $statusCode, $this->getAccessControlOriginHeaders());
+
             $response->setCache([
                 'public' => true,
                 'max_age' =>  3600*7*24,
@@ -248,7 +249,8 @@ class TweetController extends Controller
                         'X-Requested-With',
                         'If-Modified-Since',
                         'Cache-Control',
-                        'Content-Type'
+                        'Content-Type',
+                        'x-auth-token'
                     ]
                 )
             ]
