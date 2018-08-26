@@ -92,11 +92,14 @@ class TweetControllerTest extends WebTestCase
         /**
          * @var \WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository $mock
          */
-        $mock = $this->prophesize('\WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository');
-        $mock->findLatest(Argument::any())->willThrow(new \PDOException('No socket available.'));
-        $mock->setOauthTokens(Argument::any())->willReturn(null);
+        $prophecy = $this->prophesize('\WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository');
+        $prophecy->findLatest(
+            Argument::any(),
+            Argument::cetera()
+        )->willThrow(new \PDOException('No socket available.'));
+        $prophecy->setOauthTokens(Argument::any())->willReturn(null);
 
-        return $mock->reveal();
+        return $prophecy->reveal();
     }
 
     public function testBookmarksAction()

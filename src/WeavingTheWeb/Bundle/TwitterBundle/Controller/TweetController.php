@@ -22,7 +22,9 @@ class TweetController extends Controller
      * @throws \Exception
      *
      * @Extra\Route("/tweet/latest", name="weaving_the_web_twitter_tweet_latest")
+     *
      * @Extra\Method({"GET", "OPTIONS"})
+     *
      * @Extra\Cache(public=true)
      */
     public function latestAction(Request $request)
@@ -39,16 +41,26 @@ class TweetController extends Controller
             $userStreamRepository->setOauthTokens([]);
 
             $lastId = $request->get('lastId', null);
-            $statuses = $userStreamRepository->findLatest($lastId);
+            $aggregateName = $request->attributes->get('aggregate_name', null);
+
+            $rawSql = false;
+
+            if (!is_null($aggregateName)) {
+                $aggregateName = str_replace('__', ' :: ', $aggregateName);
+                $rawSql = true;
+            }
+
+            $statuses = $userStreamRepository->findLatest($lastId, $aggregateName, $rawSql);
             $statusCode = 200;
 
             $statuses = array_map(
                 function ($status) {
                     $defaultStatus =  [
                         'status_id' => $status['status_id'],
+                        'avatar_url' => 'N/A',
                         'text' => $status['text'],
                         'url' => 'https://twitter.com/'.$status['screen_name'].'/status/'.$status['status_id'],
-                        'retweets_count' => 'N/A',
+                        'retweet_count' => 'N/A',
                         'favorite_count' => 'N/A',
                         'username' => $status['screen_name'],
                         'published_at' => 'N/A',
@@ -65,8 +77,13 @@ class TweetController extends Controller
 
                     $statusUpdatedFromDecodedDocument = $defaultStatus;
 
-                    if (array_key_exists('screen_name', $decodedDocument)) {
-                        $statusUpdatedFromDecodedDocument['screen_name'] = $decodedDocument['screen_name'];
+                    if (array_key_exists('avatar_url', $decodedDocument)) {
+                        $statusUpdatedFromDecodedDocument['avatar_url'] = $decodedDocument['avatar_url'];
+                    }
+
+                    if (array_key_exists('user', $decodedDocument) &&
+                        array_key_exists('profile_image_url_https', $decodedDocument['user'])) {
+                        $statusUpdatedFromDecodedDocument['avatar_url'] = $decodedDocument['user']['profile_image_url_https'];
                     }
 
                     if (array_key_exists('retweet_count', $decodedDocument)) {
@@ -78,7 +95,7 @@ class TweetController extends Controller
                     }
 
                     if (array_key_exists('created_at', $decodedDocument)) {
-                        $statusUpdatedFromDecodedDocument['created_at'] = $decodedDocument['created_at'];
+                        $statusUpdatedFromDecodedDocument['published_at'] = $decodedDocument['created_at'];
                     }
 
 
@@ -115,6 +132,26 @@ class TweetController extends Controller
         } catch (\Exception $exception) {
             return $this->getExceptionResponse($exception);
         }
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws \Exception
+     *
+     * @Extra\Route(
+     *     "/tweet/latest/{aggregate_name}",
+     *     name="weaving_the_web_twitter_tweet_latest_for_aggregate",
+     *     requirements={"aggregate_name"="\S+"}
+     * )
+     *
+     * @Extra\Method({"GET", "OPTIONS"})
+     *
+     * @Extra\Cache(public=true)
+     */
+    public function latestStatusesForAggregates(Request $request)
+    {
+        return $this->latestAction($request);
     }
 
     /**
