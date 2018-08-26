@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install wget unzip && \
 
 VOLUME /etc/apache2/sites-available
 
-WORKDIR /etc/apache2/sites-available
+WORKDIR /var/www/devobs
 
 CMD ["apache2-foreground"]
 

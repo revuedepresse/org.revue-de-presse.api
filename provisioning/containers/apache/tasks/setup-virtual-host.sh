@@ -1,5 +1,7 @@
 #!/bin/bash
 
+cd /etc/apache2
+
 ln -s /templates/sites-enabled/press-review.conf /etc/apache2/sites-available
 
 # Disable default virtual host
