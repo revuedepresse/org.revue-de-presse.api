@@ -47,6 +47,7 @@ class TweetController extends Controller
 
             if (!is_null($aggregateName)) {
                 $aggregateName = str_replace('__', ' :: ', $aggregateName);
+                $aggregateName = str_replace('_', ' _ ', $aggregateName);
                 $rawSql = true;
             }
 
@@ -109,14 +110,14 @@ class TweetController extends Controller
 
             $response->setCache([
                 'public' => true,
-                'max_age' =>  3600*7*24,
-                's_maxage' =>  3600*7*24,
+                'max_age' =>  3600,
+                's_maxage' =>  3600,
                 'last_modified' => new \DateTime(
-                    // last week at the same hour, for about an hour
+                    // last hour
                     (new \DateTime(
                         'now',
                         new \DateTimeZone('UTC'))
-                    )->modify('-1 week')->format('Y-m-d H:0'),
+                    )->modify('-1 hour')->format('Y-m-d H:0'),
                     new \DateTimeZone('UTC')
                 )
             ]);
