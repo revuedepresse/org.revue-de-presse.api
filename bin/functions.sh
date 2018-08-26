@@ -355,6 +355,12 @@ function list_php_extensions() {
     docker run --name php php -m
 }
 
+function set_permissions_in_apache_container() {
+    docker exec -ti apache php app/console cache:clear -e prod
+    local project_dir="$(get_project_dir)"
+    sudo chown -R www-data "${project_dir}"/app/cache "${project_dir}"/app/logs "${project_dir}"/app/var
+}
+
 function build_apache_container() {
     cd provisioning/containers/apache
     docker build -t apache .
