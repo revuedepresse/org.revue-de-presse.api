@@ -378,6 +378,7 @@ class ArchivedStatusRepository extends ResourceRepository
                        aggregate.id = status_aggregate.aggregate_id AND  aggregate.screen_name IS NOT NULL
                        AND COALESCE(aggregate.name, '') = ':aggregate'
                     )
+                    ORDER BY status_aggregate.status_id DESC
                 )
                 ORDER BY `status`.ust_created_at DESC
                 LIMIT :max_results
