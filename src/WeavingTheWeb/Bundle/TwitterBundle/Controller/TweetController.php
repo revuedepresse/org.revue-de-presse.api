@@ -278,7 +278,9 @@ class TweetController extends Controller
             [],
             200,
             [
-                'Access-Control-Allow-Origin' => '*',
+                // TODO Enable this header in development only
+                // Set its value depending on the kernel environment
+                // 'Access-Control-Allow-Origin' => '*',
                 'Access-Control-Allow-Headers' => implode(
                     ', ',
                     [
