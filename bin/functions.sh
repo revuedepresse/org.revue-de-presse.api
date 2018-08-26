@@ -347,8 +347,6 @@ function list_amqp_queues() {
 }
 
 function setup_amqp_queue() {
-    local=`pwd`
-
     local project_dir="$(get_project_dir)"
     echo 'php '"${project_dir}"'/app/console rabbitmq:setup-fabric' | make run-php
 }
@@ -398,7 +396,7 @@ function run_apache() {
 -e '"${symfony_environment}"' \
 -v '`pwd`'/provisioning/containers/apache/templates:/templates \
 -v '`pwd`'/provisioning/containers/apache/tasks:/tasks \
--v '`pwd`'/provisioning/containers/php/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini \
+-v '`pwd`'/provisioning/containers/apache/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini \
 -v '`pwd`':/var/www/devobs \
 --name=apache apache /bin/bash -c "cd /tasks && source setup-virtual-host.sh && tail -f /dev/null"'
 )
