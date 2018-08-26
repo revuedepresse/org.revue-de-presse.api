@@ -1,3 +1,5 @@
 services:
     app.token_authenticator:
         class:              'App\Security\TokenAuthenticator'
+        properties:
+            userRepository: '@user_manager'

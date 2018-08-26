@@ -11,15 +11,29 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use WTW\UserBundle\Model\User;
+use WTW\UserBundle\Repository\UserRepository;
 
 class TokenAuthenticator extends AbstractGuardAuthenticator
 {
+    /**
+     * @var UserRepository
+     */
+    public $userRepository;
+
     /**
      * @param Request $request
      * @return array|mixed|null
      */
     public function getCredentials(Request $request)
     {
+        if ($request->isMethod('OPTIONS')) {
+            $queryBuilder = $this->userRepository->createQueryBuilder('u');
+            $queryBuilder->andWhere('u.apiKey is not null');
+            $member = $queryBuilder->getQuery()->getSingleResult();
+
+            return ['token' => $member->getApiKey()];
+        }
+
         if (!$token = $request->headers->get('x-auth-token')) {
             $token = null;
         }
