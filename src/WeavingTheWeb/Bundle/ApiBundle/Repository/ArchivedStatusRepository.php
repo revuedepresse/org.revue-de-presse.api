@@ -391,7 +391,7 @@ QUERY
             $queryTemplate,
             [
                 ':aggregate' => $aggregateName,
-                ':max_results' => 100,
+                ':max_results' => 10,
                 ':status_table' => 'weaving_status',
                 ':status_aggregate_table' => 'weaving_status_aggregate',
                 ':aggregate_table' => 'weaving_aggregate'
