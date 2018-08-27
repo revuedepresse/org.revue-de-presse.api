@@ -214,6 +214,10 @@ class TweetController extends Controller
      */
     protected function getAccessControlOriginHeaders()
     {
+        if ($this->get('service_container')->getParameter('kernel.environment') === 'prod') {
+            return [];
+        }
+
         return ['Access-Control-Allow-Origin' => '*'];
     }
 
@@ -274,26 +278,29 @@ class TweetController extends Controller
      */
     protected function getCorsOptionsResponse()
     {
+        $headers = [
+            'Access-Control-Allow-Origin' => '*',
+            'Access-Control-Allow-Headers' => implode(
+                ', ',
+                [
+                    'Keep-Alive',
+                    'User-Agent',
+                    'X-Requested-With',
+                    'If-Modified-Since',
+                    'Cache-Control',
+                    'Content-Type',
+                    'x-auth-token'
+                ]
+            )
+        ];
+        if ($this->get('service_container')->getParameter('kernel.environment') === 'prod') {
+            $headers = [];
+        }
+
         return new JsonResponse(
             [],
             200,
-            [
-                // TODO Enable this header in development only
-                // Set its value depending on the kernel environment
-                'Access-Control-Allow-Origin' => '*',
-                'Access-Control-Allow-Headers' => implode(
-                    ', ',
-                    [
-                        'Keep-Alive',
-                        'User-Agent',
-                        'X-Requested-With',
-                        'If-Modified-Since',
-                        'Cache-Control',
-                        'Content-Type',
-                        'x-auth-token'
-                    ]
-                )
-            ]
+            $headers
         );
     }
 
