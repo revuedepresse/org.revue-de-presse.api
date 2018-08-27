@@ -215,7 +215,9 @@ class TweetController extends Controller
     protected function getAccessControlOriginHeaders()
     {
         if ($this->get('service_container')->getParameter('kernel.environment') === 'prod') {
-            return ['Access-Control-Allow-Origin' => 'https://revue-de-presse.weaving-the-web.org'];
+            $allowedOrigin = $this->get('service_container')->getParameter('allowed.origin');
+
+            return ['Access-Control-Allow-Origin' => $allowedOrigin];
         }
 
         return ['Access-Control-Allow-Origin' => '*'];
@@ -294,8 +296,9 @@ class TweetController extends Controller
             )
         ];
         if ($this->get('service_container')->getParameter('kernel.environment') === 'prod') {
+            $allowedOrigin = $this->get('service_container')->getParameter('allowed.origin');
             $headers = [
-                'Access-Control-Allow-Origin' => 'https://revue-de-presse.weaving-the-web.org',
+                'Access-Control-Allow-Origin' => $allowedOrigin,
                 'Access-Control-Allow-Headers' => implode(
                     ', ',
                     [
