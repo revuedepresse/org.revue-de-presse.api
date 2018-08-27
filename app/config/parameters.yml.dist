@@ -26,3 +26,5 @@ parameters:
     operations_skipped_before:  22:30
 
     production_main_level:      error
+
+    allowed.origin:             '*'

@@ -16,6 +16,9 @@ remove-mysql-container: ## Remove MySQL container
 build-apache-container: ## Build Apache image
 		@/bin/bash -c 'source ./bin/functions.sh && build_apache_container'
 
+set-permissions-in-apache-container: # Set permissions in Apache container
+		@/bin/bash -c 'source ./bin/functions.sh && set_permissions_in_apache_container'
+
 get-apache-interactive-shell: ## Get Apache interactive shell
 		@/bin/bash -c 'source ./bin/functions.sh && get_apache_container_interactive_shell'
 

@@ -243,4 +243,17 @@ class UserRepository extends EntityRepository
 
         return $member;
     }
+
+    /**
+     * @return mixed
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function getMemberHavingApiKey()
+    {
+        $queryBuilder = $this->createQueryBuilder('u');
+        $queryBuilder->andWhere('u.apiKey is not null');
+
+        return $queryBuilder->getQuery()->getSingleResult();
+    }
 }

@@ -347,14 +347,20 @@ function list_amqp_queues() {
 }
 
 function setup_amqp_queue() {
-    local=`pwd`
-
     local project_dir="$(get_project_dir)"
     echo 'php '"${project_dir}"'/app/console rabbitmq:setup-fabric' | make run-php
 }
 function list_php_extensions() {
     remove_php_container
     docker run --name php php -m
+}
+
+function set_permissions_in_apache_container() {
+    docker exec -ti apache php app/console cache:clear -e prod
+    local project_dir="$(get_project_dir)"
+    sudo rm -rf "${project_dir}"/app/cache
+    sudo mkdir "${project_dir}"/app/cache
+    sudo chown -R www-data "${project_dir}"/app/cache "${project_dir}"/app/logs "${project_dir}"/app/var
 }
 
 function build_apache_container() {
@@ -398,7 +404,7 @@ function run_apache() {
 -e '"${symfony_environment}"' \
 -v '`pwd`'/provisioning/containers/apache/templates:/templates \
 -v '`pwd`'/provisioning/containers/apache/tasks:/tasks \
--v '`pwd`'/provisioning/containers/php/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini \
+-v '`pwd`'/provisioning/containers/apache/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini \
 -v '`pwd`':/var/www/devobs \
 --name=apache apache /bin/bash -c "cd /tasks && source setup-virtual-host.sh && tail -f /dev/null"'
 )
