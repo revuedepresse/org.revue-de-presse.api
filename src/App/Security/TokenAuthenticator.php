@@ -27,9 +27,7 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
     public function getCredentials(Request $request)
     {
         if ($request->isMethod('OPTIONS')) {
-            $queryBuilder = $this->userRepository->createQueryBuilder('u');
-            $queryBuilder->andWhere('u.apiKey is not null');
-            $member = $queryBuilder->getQuery()->getSingleResult();
+            $member = $this->userRepository->getMemberHavingApiKey();
 
             return ['token' => $member->getApiKey()];
         }
