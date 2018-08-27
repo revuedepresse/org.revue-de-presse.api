@@ -56,6 +56,7 @@ class UserData extends AbstractFixture implements OrderedFixtureInterface,  Cont
                 'credentials_non_expired' => true,
                 'twitter_id' => 1,
                 'twitter_username' => 'user',
+                'api_key' => sha1('user'.'secret'),
                 'roles' => [],
             ], [
                 'username' => $this->container->getParameter('wtw.qa.super.username'),
@@ -80,6 +81,10 @@ class UserData extends AbstractFixture implements OrderedFixtureInterface,  Cont
                 $userProperties['user_non_expired'],
                 $userProperties['credentials_non_expired']
             );
+
+            if (array_key_exists('api_key', $userProperties)) {
+                $user->apiKey = $userProperties['api_key'];
+            }
 
             $user->setTwitterID($userProperties['twitter_id']);
 

@@ -9,6 +9,7 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\ORMException;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Query\Expr\Join;
 use Psr\Log\LoggerInterface;
 
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
@@ -321,19 +322,87 @@ class ArchivedStatusRepository extends ResourceRepository
     }
 
     /**
-     * @param $lastId
-     * @return array
+     * @param null $lastId
+     * @param null $aggregateName
+     * @param bool $rawSql
+     * @return mixed
      */
-    public function findLatest($lastId = null)
+    public function findLatest($lastId = null, $aggregateName = null, $rawSql = false)
     {
-        $queryBuilder = $this->selectStatuses();
+        if ($rawSql) {
+            return $this->findLatestForAggregate($aggregateName);
+        }
+
+        $queryBuilder = $this->selectStatuses($lastWeek = true);
 
         if (!is_null($lastId)) {
             $queryBuilder->andWhere('t.id < :lastId');
             $queryBuilder->setParameter('lastId', $lastId);
         }
 
+        if (!is_null($aggregateName)) {
+            $queryBuilder->join(
+                't.aggregates',
+                'a'
+            );
+            $queryBuilder->andWhere('a.name = :aggregate_name');
+            $queryBuilder->andWhere('a.screenName IS NOT NULL');
+            $queryBuilder->setParameter('aggregate_name', $aggregateName);
+        }
+
         $statuses = $queryBuilder->getQuery()->getResult();
+
+        return $this->highlightRetweets($statuses);
+    }
+
+    public function findLatestForAggregate($aggregateName = null)
+    {
+        $queryTemplate = <<<QUERY
+            SELECT
+            ust_avatar AS author_avatar,
+            ust_text AS text,
+            ust_full_name AS screen_name,
+            ust_id AS id,
+            ust_status_id AS status_id, 
+            ust_starred AS starred,
+            ust_api_document AS original_document,
+            ust_created_at AS publication_date
+            FROM (
+                SELECT `status`.*
+                FROM :status_table `status`
+                WHERE ust_id IN (
+                    SELECT
+                    status_aggregate.status_id
+                    FROM :status_aggregate_table status_aggregate
+                    INNER JOIN :aggregate_table aggregate ON (
+                       aggregate.id = status_aggregate.aggregate_id AND  aggregate.screen_name IS NOT NULL
+                       AND COALESCE(aggregate.name, '') = ':aggregate'
+                    )
+                    ORDER BY status_aggregate.status_id DESC
+                )
+                ORDER BY `status`.ust_created_at DESC
+                LIMIT :max_results
+            ) aggregated_statuses
+            ORDER BY ust_created_at DESC
+QUERY
+;
+
+        $query = strtr(
+            $queryTemplate,
+            [
+                ':aggregate' => $aggregateName,
+                ':max_results' => 100,
+                ':status_table' => 'weaving_status',
+                ':status_aggregate_table' => 'weaving_status_aggregate',
+                ':aggregate_table' => 'weaving_aggregate'
+            ]
+        );
+
+        $statement = $this->createQueryBuilder('t')
+            ->getEntityManager()
+            ->getConnection()->executeQuery($query);
+
+        $statuses = $statement->fetchAll();
 
         return $this->highlightRetweets($statuses);
     }

@@ -22,7 +22,9 @@ class TweetController extends Controller
      * @throws \Exception
      *
      * @Extra\Route("/tweet/latest", name="weaving_the_web_twitter_tweet_latest")
+     *
      * @Extra\Method({"GET", "OPTIONS"})
+     *
      * @Extra\Cache(public=true)
      */
     public function latestAction(Request $request)
@@ -39,16 +41,27 @@ class TweetController extends Controller
             $userStreamRepository->setOauthTokens([]);
 
             $lastId = $request->get('lastId', null);
-            $statuses = $userStreamRepository->findLatest($lastId);
+            $aggregateName = $request->attributes->get('aggregate_name', null);
+
+            $rawSql = false;
+
+            if (!is_null($aggregateName)) {
+                $aggregateName = str_replace('__', ' :: ', $aggregateName);
+                $aggregateName = str_replace('_', ' _ ', $aggregateName);
+                $rawSql = true;
+            }
+
+            $statuses = $userStreamRepository->findLatest($lastId, $aggregateName, $rawSql);
             $statusCode = 200;
 
             $statuses = array_map(
                 function ($status) {
                     $defaultStatus =  [
                         'status_id' => $status['status_id'],
+                        'avatar_url' => 'N/A',
                         'text' => $status['text'],
                         'url' => 'https://twitter.com/'.$status['screen_name'].'/status/'.$status['status_id'],
-                        'retweets_count' => 'N/A',
+                        'retweet_count' => 'N/A',
                         'favorite_count' => 'N/A',
                         'username' => $status['screen_name'],
                         'published_at' => 'N/A',
@@ -65,8 +78,13 @@ class TweetController extends Controller
 
                     $statusUpdatedFromDecodedDocument = $defaultStatus;
 
-                    if (array_key_exists('screen_name', $decodedDocument)) {
-                        $statusUpdatedFromDecodedDocument['screen_name'] = $decodedDocument['screen_name'];
+                    if (array_key_exists('avatar_url', $decodedDocument)) {
+                        $statusUpdatedFromDecodedDocument['avatar_url'] = $decodedDocument['avatar_url'];
+                    }
+
+                    if (array_key_exists('user', $decodedDocument) &&
+                        array_key_exists('profile_image_url_https', $decodedDocument['user'])) {
+                        $statusUpdatedFromDecodedDocument['avatar_url'] = $decodedDocument['user']['profile_image_url_https'];
                     }
 
                     if (array_key_exists('retweet_count', $decodedDocument)) {
@@ -78,7 +96,7 @@ class TweetController extends Controller
                     }
 
                     if (array_key_exists('created_at', $decodedDocument)) {
-                        $statusUpdatedFromDecodedDocument['created_at'] = $decodedDocument['created_at'];
+                        $statusUpdatedFromDecodedDocument['published_at'] = $decodedDocument['created_at'];
                     }
 
 
@@ -89,16 +107,17 @@ class TweetController extends Controller
             );
 
             $response = new JsonResponse($statuses, $statusCode, $this->getAccessControlOriginHeaders());
+
             $response->setCache([
                 'public' => true,
-                'max_age' =>  3600*7*24,
-                's_maxage' =>  3600*7*24,
+                'max_age' =>  3600,
+                's_maxage' =>  3600,
                 'last_modified' => new \DateTime(
-                    // last week at the same hour, for about an hour
+                    // last hour
                     (new \DateTime(
                         'now',
                         new \DateTimeZone('UTC'))
-                    )->modify('-1 week')->format('Y-m-d H:0'),
+                    )->modify('-1 hour')->format('Y-m-d H:0'),
                     new \DateTimeZone('UTC')
                 )
             ]);
@@ -114,6 +133,26 @@ class TweetController extends Controller
         } catch (\Exception $exception) {
             return $this->getExceptionResponse($exception);
         }
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws \Exception
+     *
+     * @Extra\Route(
+     *     "/tweet/latest/{aggregate_name}",
+     *     name="weaving_the_web_twitter_tweet_latest_for_aggregate",
+     *     requirements={"aggregate_name"="\S+"}
+     * )
+     *
+     * @Extra\Method({"GET", "OPTIONS"})
+     *
+     * @Extra\Cache(public=true)
+     */
+    public function latestStatusesForAggregates(Request $request)
+    {
+        return $this->latestAction($request);
     }
 
     /**
@@ -175,6 +214,12 @@ class TweetController extends Controller
      */
     protected function getAccessControlOriginHeaders()
     {
+        if ($this->get('service_container')->getParameter('kernel.environment') === 'prod') {
+            $allowedOrigin = $this->get('service_container')->getParameter('allowed.origin');
+
+            return ['Access-Control-Allow-Origin' => $allowedOrigin];
+        }
+
         return ['Access-Control-Allow-Origin' => '*'];
     }
 
@@ -235,11 +280,25 @@ class TweetController extends Controller
      */
     protected function getCorsOptionsResponse()
     {
-        return new JsonResponse(
-            [],
-            200,
-            [
-                'Access-Control-Allow-Origin' => '*',
+        $headers = [
+            'Access-Control-Allow-Origin' => '*',
+            'Access-Control-Allow-Headers' => implode(
+                ', ',
+                [
+                    'Keep-Alive',
+                    'User-Agent',
+                    'X-Requested-With',
+                    'If-Modified-Since',
+                    'Cache-Control',
+                    'Content-Type',
+                    'x-auth-token'
+                ]
+            )
+        ];
+        if ($this->get('service_container')->getParameter('kernel.environment') === 'prod') {
+            $allowedOrigin = $this->get('service_container')->getParameter('allowed.origin');
+            $headers = [
+                'Access-Control-Allow-Origin' => $allowedOrigin,
                 'Access-Control-Allow-Headers' => implode(
                     ', ',
                     [
@@ -248,10 +307,17 @@ class TweetController extends Controller
                         'X-Requested-With',
                         'If-Modified-Since',
                         'Cache-Control',
-                        'Content-Type'
+                        'Content-Type',
+                        'x-auth-token'
                     ]
-                )
-            ]
+                ),
+            ];
+        }
+
+        return new JsonResponse(
+            [],
+            200,
+            $headers
         );
     }
 

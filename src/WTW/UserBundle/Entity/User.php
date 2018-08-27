@@ -229,7 +229,7 @@ class User extends BaseUser
     /**
      * @ORM\Column(name="usr_api_key", type="string", nullable=true)
      */
-    private $apiKey;
+    public $apiKey;
 
     public function getApiKey()
     {
