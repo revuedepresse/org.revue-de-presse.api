@@ -356,11 +356,11 @@ function list_php_extensions() {
 }
 
 function set_permissions_in_apache_container() {
-    docker exec -ti apache php app/console cache:clear -e prod
     local project_dir="$(get_project_dir)"
     sudo rm -rf "${project_dir}"/app/cache
     sudo mkdir "${project_dir}"/app/cache
-    sudo chown -R www-data "${project_dir}"/app/cache "${project_dir}"/app/logs "${project_dir}"/app/var
+    sudo chown -R www-data "${project_dir}"/app/logs "${project_dir}"/app/var
+    docker exec -ti apache php app/console cache:clear -e prod --no-warmup
 }
 
 function build_apache_container() {
