@@ -372,7 +372,7 @@ class ArchivedStatusRepository extends ResourceRepository
               SELECT aggregate.screen_name
               FROM :aggregate_table aggregate
               WHERE 1
-              AND aggregate.screen_name IS NOT NULL
+              AND COALESCE(aggregate.screen_name, 0) = 0
               AND COALESCE(aggregate.name, '') = ':aggregate'
             ) aggregates_ ON (`status`.ust_full_name = aggregates_.screen_name)
             AND DATE_ADD(ust_created_at, INTERVAL 30 DAY) < NOW()
