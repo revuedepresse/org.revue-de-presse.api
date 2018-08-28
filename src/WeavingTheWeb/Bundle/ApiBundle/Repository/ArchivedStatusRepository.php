@@ -359,33 +359,25 @@ class ArchivedStatusRepository extends ResourceRepository
     {
         $queryTemplate = <<<QUERY
             SELECT
-            ust_avatar AS author_avatar,
-            ust_text AS text,
-            ust_full_name AS screen_name,
-            ust_id AS id,
-            ust_status_id AS status_id, 
-            ust_starred AS starred,
-            ust_api_document AS original_document,
-            ust_created_at AS publication_date
-            FROM (
-                SELECT `status`.*
-                FROM :status_table `status`
-                WHERE ust_id IN (
-                    SELECT status_aggregate.status_id
-                    FROM :status_aggregate_table status_aggregate
-                    INNER JOIN (
-                        SELECT id
-                        FROM :aggregate_table aggregate
-                        WHERE 1
-                        AND aggregate.screen_name IS NOT NULL
-                        AND COALESCE(aggregate.name, '') = ':aggregate'
-                        ORDER BY id DESC
-                        LIMIT :inner_max_results
-                    ) select_ ON (select_.id = status_aggregate.aggregate_id)
-                )
-                ORDER BY `status`.ust_created_at DESC
-                LIMIT :max_results
-            ) aggregated_statuses
+            `status`.ust_avatar AS author_avatar,
+            `status`.ust_text AS text,
+            `status`.ust_full_name AS screen_name,
+            `status`.ust_id AS id,
+            `status`.ust_status_id AS status_id,
+            `status`.ust_starred AS starred,
+            `status`.ust_api_document AS original_document,
+            `status`.ust_created_at AS publication_date
+            FROM :status_table `status`
+            INNER JOIN (
+              SELECT aggregate.screen_name
+              FROM :aggregate_table aggregate
+              WHERE 1
+              AND aggregate.screen_name IS NOT NULL
+              AND COALESCE(aggregate.name, '') = ':aggregate'
+            ) aggregates_ ON (`status`.ust_full_name = aggregates_.screen_name)
+            AND DATE_ADD(ust_created_at, INTERVAL 30 DAY) < NOW()
+            ORDER BY `status`.ust_id DESC
+            LIMIT :max_results
 QUERY
 ;
 
@@ -393,11 +385,9 @@ QUERY
             $queryTemplate,
             [
                 ':aggregate' => $aggregateName,
-                ':inner_max_results' => 100000,
                 ':max_results' => 100,
                 ':status_table' => 'weaving_status',
-                ':status_aggregate_table' => 'weaving_status_aggregate',
-                ':aggregate_table' => 'weaving_aggregate'
+                ':aggregate_table' => 'weaving_aggregate',
             ]
         );
 
