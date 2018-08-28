@@ -122,7 +122,7 @@ class Accessor implements TwitterErrorAwareInterface
     /**
      * @var bool
      */
-    public $propagateNotFoundStatuses = true;
+    public $propagateNotFoundStatuses = false;
 
     /**
      * @param \Symfony\Component\Translation\Translator $translator
@@ -1158,7 +1158,7 @@ class Accessor implements TwitterErrorAwareInterface
      */
     protected function checkApiLimit(\TwitterOAuth $connection)
     {
-        if ($connection->http_info['http_code'] == 404) {
+        if (($connection->http_info['http_code'] == 404) && $this->propagateNotFoundStatuses) {
             $message = sprintf(
                 'A status has been removed (%s)',
                 $connection->http_info['url']

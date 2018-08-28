@@ -371,19 +371,21 @@ class ArchivedStatusRepository extends ResourceRepository
                 SELECT `status`.*
                 FROM :status_table `status`
                 WHERE ust_id IN (
-                    SELECT
-                    status_aggregate.status_id
+                    SELECT status_aggregate.status_id
                     FROM :status_aggregate_table status_aggregate
-                    INNER JOIN :aggregate_table aggregate ON (
-                       aggregate.id = status_aggregate.aggregate_id AND  aggregate.screen_name IS NOT NULL
-                       AND COALESCE(aggregate.name, '') = ':aggregate'
-                    )
-                    ORDER BY status_aggregate.status_id DESC
+                    INNER JOIN (
+                        SELECT id
+                        FROM :aggregate_table aggregate
+                        WHERE 1
+                        AND aggregate.screen_name IS NOT NULL
+                        AND COALESCE(aggregate.name, '') = ':aggregate'
+                        ORDER BY id DESC
+                        LIMIT :inner_max_results
+                    ) select_ ON (select_.id = status_aggregate.aggregate_id)
                 )
                 ORDER BY `status`.ust_created_at DESC
                 LIMIT :max_results
             ) aggregated_statuses
-            ORDER BY ust_created_at DESC
 QUERY
 ;
 
@@ -391,7 +393,8 @@ QUERY
             $queryTemplate,
             [
                 ':aggregate' => $aggregateName,
-                ':max_results' => 10,
+                ':inner_max_results' => 100000,
+                ':max_results' => 100,
                 ':status_table' => 'weaving_status',
                 ':status_aggregate_table' => 'weaving_status_aggregate',
                 ':aggregate_table' => 'weaving_aggregate'
