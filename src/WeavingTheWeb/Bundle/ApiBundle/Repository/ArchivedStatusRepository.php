@@ -359,6 +359,7 @@ class ArchivedStatusRepository extends ResourceRepository
     {
         $queryTemplate = <<<QUERY
             SELECT
+            SQL_NO_CACHE
             `status`.ust_avatar AS author_avatar,
             `status`.ust_text AS text,
             `status`.ust_full_name AS screen_name,
@@ -369,15 +370,23 @@ class ArchivedStatusRepository extends ResourceRepository
             `status`.ust_created_at AS publication_date
             FROM :status_table `status`
             INNER JOIN (
-              SELECT aggregate.screen_name
-              FROM :aggregate_table aggregate
-              WHERE 1
-              AND COALESCE(aggregate.screen_name, 0) = 0
-              AND COALESCE(aggregate.name, '') = ':aggregate'
-            ) aggregates_ ON (`status`.ust_full_name = aggregates_.screen_name)
-            AND DATE_ADD(ust_created_at, INTERVAL 30 DAY) < NOW()
-            ORDER BY `status`.ust_id DESC
-            LIMIT :max_results
+              SELECT status_id
+              FROM (
+                    SELECT sa.status_id
+                    FROM :aggregate_table aggregate
+                    LEFT JOIN weaving_status_aggregate sa ON (sa.aggregate_id = aggregate.id)
+                    WHERE 1
+                    AND NOT ISNULL(aggregate.screen_name)
+                    AND NOT ISNULL(aggregate.name)
+                    AND aggregate.name = ':aggregate'
+                    ORDER BY sa.status_id DESC
+              ) from_
+              ORDER BY from_.status_id DESC
+              LIMIT :max_results
+            ) aggregates_ ON (`status`.ust_id = aggregates_.status_id)
+            AND `status`.ust_created_at BETWEEN DATE_SUB(NOW(), INTERVAL 1 DAY) AND NOW()
+            ORDER BY ust_created_at DESC
+            LIMIT :max_results;
 QUERY
 ;
 

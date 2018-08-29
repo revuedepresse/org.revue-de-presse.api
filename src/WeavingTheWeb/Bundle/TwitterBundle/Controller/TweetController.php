@@ -46,6 +46,7 @@ class TweetController extends Controller
             $rawSql = false;
 
             if (!is_null($aggregateName)) {
+                $aggregateName = str_replace('____', ' ', $aggregateName);
                 $aggregateName = str_replace('__', ' :: ', $aggregateName);
                 $aggregateName = str_replace('_', ' _ ', $aggregateName);
                 $rawSql = true;
