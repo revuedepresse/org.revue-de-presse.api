@@ -107,7 +107,20 @@ class TweetController extends Controller
                 $statuses
             );
 
-            $response = new JsonResponse($statuses, $statusCode, $this->getAccessControlOriginHeaders());
+            $encodedStatuses = json_encode($statuses);
+            $response = new JsonResponse(
+                $statuses,
+                $statusCode,
+                $this->getAccessControlOriginHeaders()
+            );
+
+            $contentLength = strlen($encodedStatuses);
+            $response->headers->add([
+                'Content-Length' => $contentLength,
+                'x-decompressed-content-length' => $contentLength,
+                // @see https://stackoverflow.com/a/37931084/282073
+                'Access-Control-Expose-Headers' => 'Content-Length, x-decompressed-content-length'
+            ]);
 
             $response->setCache([
                 'public' => true,
@@ -281,37 +294,29 @@ class TweetController extends Controller
      */
     protected function getCorsOptionsResponse()
     {
+        $allowedHeaders = implode(
+            ', ',
+            [
+                'Keep-Alive',
+                'User-Agent',
+                'X-Requested-With',
+                'If-Modified-Since',
+                'Cache-Control',
+                'Content-Type',
+                'x-auth-token',
+                'x-decompressed-content-length'
+            ]
+        );
+
         $headers = [
             'Access-Control-Allow-Origin' => '*',
-            'Access-Control-Allow-Headers' => implode(
-                ', ',
-                [
-                    'Keep-Alive',
-                    'User-Agent',
-                    'X-Requested-With',
-                    'If-Modified-Since',
-                    'Cache-Control',
-                    'Content-Type',
-                    'x-auth-token'
-                ]
-            )
+            'Access-Control-Allow-Headers' => $allowedHeaders,
         ];
         if ($this->get('service_container')->getParameter('kernel.environment') === 'prod') {
             $allowedOrigin = $this->get('service_container')->getParameter('allowed.origin');
             $headers = [
                 'Access-Control-Allow-Origin' => $allowedOrigin,
-                'Access-Control-Allow-Headers' => implode(
-                    ', ',
-                    [
-                        'Keep-Alive',
-                        'User-Agent',
-                        'X-Requested-With',
-                        'If-Modified-Since',
-                        'Cache-Control',
-                        'Content-Type',
-                        'x-auth-token'
-                    ]
-                ),
+                'Access-Control-Allow-Headers' => $allowedHeaders,
             ];
         }
 
