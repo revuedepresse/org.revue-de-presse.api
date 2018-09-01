@@ -79,29 +79,24 @@ class TweetController extends Controller
 
                     $statusUpdatedFromDecodedDocument = $defaultStatus;
 
-                    if (array_key_exists('avatar_url', $decodedDocument)) {
-                        $statusUpdatedFromDecodedDocument['avatar_url'] = $decodedDocument['avatar_url'];
+                    if (array_key_exists('retweeted_status', $decodedDocument)) {
+                        $updatedStatus = $this->updateFromDecodedDocument(
+                            $statusUpdatedFromDecodedDocument,
+                            $decodedDocument['retweeted_status']
+                        );
+                        $updatedStatus['username'] = $decodedDocument['retweeted_status']['user']['screen_name'];
+                        $updatedStatus['username_of_retweeting_member'] = $defaultStatus['username'];
+                        $updatedStatus['retweet'] = true;
+
+                        return $updatedStatus;
                     }
 
-                    if (array_key_exists('user', $decodedDocument) &&
-                        array_key_exists('profile_image_url_https', $decodedDocument['user'])) {
-                        $statusUpdatedFromDecodedDocument['avatar_url'] = $decodedDocument['user']['profile_image_url_https'];
-                    }
+                    $updatedStatus = $this->updateFromDecodedDocument(
+                        $statusUpdatedFromDecodedDocument,
+                        $decodedDocument);
+                    $updatedStatus['retweet'] = false;
 
-                    if (array_key_exists('retweet_count', $decodedDocument)) {
-                        $statusUpdatedFromDecodedDocument['retweet_count'] = $decodedDocument['retweet_count'];
-                    }
-
-                    if (array_key_exists('favorite_count', $decodedDocument)) {
-                        $statusUpdatedFromDecodedDocument['favorite_count'] = $decodedDocument['favorite_count'];
-                    }
-
-                    if (array_key_exists('created_at', $decodedDocument)) {
-                        $statusUpdatedFromDecodedDocument['published_at'] = $decodedDocument['created_at'];
-                    }
-
-
-                    return $statusUpdatedFromDecodedDocument;
+                    return $updatedStatus;
 
                 },
                 $statuses
@@ -147,6 +142,37 @@ class TweetController extends Controller
         } catch (\Exception $exception) {
             return $this->getExceptionResponse($exception);
         }
+    }
+
+    /**
+     * @param $status
+     * @param $decodedDocument
+     * @return mixed
+     */
+    public function updateFromDecodedDocument($status, $decodedDocument)
+    {
+        if (array_key_exists('avatar_url', $decodedDocument)) {
+            $status['avatar_url'] = $decodedDocument['avatar_url'];
+        }
+
+        if (array_key_exists('user', $decodedDocument) &&
+            array_key_exists('profile_image_url_https', $decodedDocument['user'])) {
+            $status['avatar_url'] = $decodedDocument['user']['profile_image_url_https'];
+        }
+
+        if (array_key_exists('retweet_count', $decodedDocument)) {
+            $status['retweet_count'] = $decodedDocument['retweet_count'];
+        }
+
+        if (array_key_exists('favorite_count', $decodedDocument)) {
+            $status['favorite_count'] = $decodedDocument['favorite_count'];
+        }
+
+        if (array_key_exists('created_at', $decodedDocument)) {
+            $status['published_at'] = $decodedDocument['created_at'];
+        }
+
+        return $status;
     }
 
     /**
