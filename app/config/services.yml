@@ -76,7 +76,9 @@ services:
     weaving_the_web.accessor.status:
         class: 'App\Accessor\StatusAccessor'
         properties:
+            accessor:                   '@weaving_the_web_twitter.api_accessor'
             entityManager:              '@doctrine.orm.entity_manager'
+            logger:                     '@monolog.logger.status'
             statusRepository:           '@weaving_the_web_twitter.repository.status'
             archivedStatusRepository:   '@weaving_the_web_twitter.repository.archived_status'
             notFoundStatusRepository:   '@repository.not_found_status'
@@ -98,28 +100,28 @@ services:
             tokenRepository:    '@weaving_the_web_twitter.repository.token'
 
     weaving_the_web_twitter.repository.status:
-        class: '%weaving_the_web_api.repository.status.class%'
-        factory: 'doctrine.orm.entity_manager:getRepository'
-        arguments: [ '%weaving_the_web_twitter.entity.status.class%' ]
+        class:                        '%weaving_the_web_api.repository.status.class%'
+        factory:                      'doctrine.orm.entity_manager:getRepository'
+        arguments:                    [ '%weaving_the_web_twitter.entity.status.class%' ]
         properties:
-            registry: '@doctrine'
             archivedStatusRepository: '@weaving_the_web_twitter.repository.archived_status'
-            statusLogger: '@monolog.logger.status'
-            memberManager: '@user_manager'
+            memberManager:            '@user_manager'
+            registry:                 '@doctrine'
+            statusLogger:             '@monolog.logger.status'
 
     weaving_the_web_twitter.repository.archived_status:
-        class: '%weaving_the_web_api.repository.archived_status.class%'
-        factory: 'doctrine.orm.entity_manager:getRepository'
-        arguments: [ '%weaving_the_web_twitter.entity.archived_status.class%' ]
+        class:               '%weaving_the_web_api.repository.archived_status.class%'
+        factory:             'doctrine.orm.entity_manager:getRepository'
+        arguments:           [ '%weaving_the_web_twitter.entity.archived_status.class%' ]
         properties:
-            registry: '@doctrine'
-            memberManager: '@user_manager'
-            statusLogger: '@monolog.logger.status'
+            memberManager:   '@user_manager'
+            registry:        '@doctrine'
+            statusLogger:    '@monolog.logger.status'
 
     weaving_the_web_twitter.repository.read.status:
-        class: '%weaving_the_web_api.repository.status.class%'
-        factory: 'doctrine.orm.read_entity_manager:getRepository'
-        arguments: [ '%weaving_the_web_twitter.entity.status.class%' ]
+        class:              '%weaving_the_web_api.repository.status.class%'
+        factory:            'doctrine.orm.read_entity_manager:getRepository'
+        arguments:          [ '%weaving_the_web_twitter.entity.status.class%' ]
         calls:
             - [ 'setOauthTokens', [ [ '%weaving_the_web_twitter.oauth_token.default%' ] ] ]
 

@@ -2,12 +2,15 @@
 
 namespace App\Accessor;
 
+use App\Status\Entity\NullStatus;
 use App\Status\Repository\NotFoundStatusRepository;
 use Doctrine\ORM\EntityManager;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\ArchivedStatus;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Status;
+use WeavingTheWeb\Bundle\ApiBundle\Entity\StatusInterface;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\ArchivedStatusRepository;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
+use WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor;
 
 class StatusAccessor
 {
@@ -27,6 +30,11 @@ class StatusAccessor
     public $entityManager;
 
     /**
+     * @var \Psr\Log\LoggerInterface
+     */
+    public $logger;
+
+    /**
      * @var NotFoundStatusRepository
      */
     public $notFoundStatusRepository;
@@ -35,6 +43,11 @@ class StatusAccessor
      * @var StatusRepository
      */
     public $statusRepository;
+
+    /**
+     * @var Accessor
+     */
+    public $accessor;
 
     /**
      * @param string $identifier
@@ -65,5 +78,44 @@ class StatusAccessor
 
         $this->entityManager->persist($notFoundStatus);
         $this->entityManager->flush();
+    }
+
+    /**
+     * @param int $identifier
+     * @return \API|NullStatus|array|mixed|object|\stdClass
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
+     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
+     */
+    public function refreshStatusByIdentifier(string $identifier)
+    {
+        $status = $this->statusRepository->findStatusIdentifiedBy($identifier);
+
+        if (!is_null($status)) {
+            return $status;
+        }
+
+        $status = $this->accessor->showStatus($identifier);
+
+        $this->entityManager->clear();
+
+        try {
+            $this->statusRepository->saveStatuses(
+                [$status],
+                $this->accessor->userToken,
+                null,
+                $this->logger
+            );
+        } catch (\Exception $exception) {
+            $this->logger->info($exception->getMessage());
+        }
+
+        $status = $this->statusRepository->findStatusIdentifiedBy($identifier);
+
+        if (is_null($status)) {
+            return new NullStatus();
+        }
+
+        return $status;
     }
 }

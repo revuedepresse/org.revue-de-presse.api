@@ -2,20 +2,28 @@
 
 namespace WeavingTheWeb\Bundle\TwitterBundle\Controller;
 
+use App\Accessor\StatusAccessor;
 use Doctrine\DBAL\Exception\ConnectionException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller,
     Symfony\Component\HttpFoundation\JsonResponse,
     Symfony\Component\HttpFoundation\Request;
-
-use WeavingTheWeb\Bundle\ApiBundle\Entity\Status;
+use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
 
 /**
  * @package WeavingTheWeb\Bundle\TwitterBundle\Controller
  */
 class TweetController extends Controller
 {
+    /** @var StatusRepository */
+    private $statusRepository;
+
+    /**
+     * @var StatusAccessor
+     */
+    private $statusAccessor;
+
     /**
      * @param Request $request
      * @return JsonResponse
@@ -27,18 +35,17 @@ class TweetController extends Controller
      *
      * @Extra\Cache(public=true)
      */
-    public function latestAction(Request $request)
+    public function getStatusesAction(Request $request)
     {
         if ($request->isMethod('OPTIONS')) {
             return $this->getCorsOptionsResponse();
         }
 
         try {
-            /** @var \WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository $userStreamRepository */
-            $userStreamRepository = $this->get('weaving_the_web_twitter.repository.read.status');
+            $this->statusRepository = $this->get('weaving_the_web_twitter.repository.read.status');
             // Look for statuses collected by any given access token
             // (there is no restriction at this point of the implementation)
-            $userStreamRepository->setOauthTokens([]);
+            $this->statusRepository->setOauthTokens([]);
 
             $lastId = $request->get('lastId', null);
             $aggregateName = $request->attributes->get('aggregate_name', null);
@@ -52,55 +59,85 @@ class TweetController extends Controller
                 $rawSql = true;
             }
 
-            $statuses = $userStreamRepository->findLatest($lastId, $aggregateName, $rawSql);
+            $statuses = $this->statusRepository->findLatest($lastId, $aggregateName, $rawSql);
             $statusCode = 200;
 
-            $statuses = array_map(
-                function ($status) {
-                    $defaultStatus =  [
-                        'status_id' => $status['status_id'],
-                        'avatar_url' => 'N/A',
-                        'text' => $status['text'],
-                        'url' => 'https://twitter.com/'.$status['screen_name'].'/status/'.$status['status_id'],
-                        'retweet_count' => 'N/A',
-                        'favorite_count' => 'N/A',
-                        'username' => $status['screen_name'],
-                        'published_at' => 'N/A',
-                    ];
+            $statuses = $this->extractStatusProperties($statuses);
 
-                    if (!array_key_exists('original_document', $status)) {
-                        return $defaultStatus;
-                    }
-
-                    $decodedDocument = json_decode($status['original_document'], $asAssociativeArray = true);
-                    if (json_last_error() !== JSON_ERROR_NONE) {
-                        return $defaultStatus;
-                    }
-
-                    $statusUpdatedFromDecodedDocument = $defaultStatus;
-
-                    if (array_key_exists('retweeted_status', $decodedDocument)) {
-                        $updatedStatus = $this->updateFromDecodedDocument(
-                            $statusUpdatedFromDecodedDocument,
-                            $decodedDocument['retweeted_status']
-                        );
-                        $updatedStatus['username'] = $decodedDocument['retweeted_status']['user']['screen_name'];
-                        $updatedStatus['username_of_retweeting_member'] = $defaultStatus['username'];
-                        $updatedStatus['retweet'] = true;
-
-                        return $updatedStatus;
-                    }
-
-                    $updatedStatus = $this->updateFromDecodedDocument(
-                        $statusUpdatedFromDecodedDocument,
-                        $decodedDocument);
-                    $updatedStatus['retweet'] = false;
-
-                    return $updatedStatus;
-
-                },
-                $statuses
+            $encodedStatuses = json_encode($statuses);
+            $response = new JsonResponse(
+                $statuses,
+                $statusCode,
+                $this->getAccessControlOriginHeaders()
             );
+
+            $contentLength = strlen($encodedStatuses);
+            $response->headers->add([
+                'Content-Length' => $contentLength,
+                'x-decompressed-content-length' => $contentLength,
+                // @see https://stackoverflow.com/a/37931084/282073
+                'Access-Control-Expose-Headers' => 'Content-Length, x-decompressed-content-length'
+            ]);
+
+            $response->setCache([
+                'public' => true,
+                'max_age' =>  3600,
+                's_maxage' =>  3600,
+                'last_modified' => new \DateTime(
+                    // last hour
+                    (new \DateTime(
+                        'now',
+                        new \DateTimeZone('UTC'))
+                    )->modify('-1 hour')->format('Y-m-d H:0'),
+                    new \DateTimeZone('UTC')
+                )
+            ]);
+
+            return $response;
+        } catch (\PDOException $exception) {
+            return $this->getExceptionResponse(
+                $exception,
+                $this->get('translator')->trans('twitter.error.database_connection', [], 'messages')
+            );
+        } catch (ConnectionException $exception) {
+            $this->get('logger')->critical('Could not connect to the database');
+        } catch (\Exception $exception) {
+            return $this->getExceptionResponse($exception);
+        }
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws \Exception
+     *
+     * @Extra\Route(
+     *     "/status/{id}",
+     *     name="weaving_the_web_twitter_status",
+     *     requirements={"id"="\S+"}
+     * )
+     *
+     * @Extra\Method({"GET", "OPTIONS"})
+     *
+     * @Extra\Cache(public=true)
+     */
+    public function getStatusAction(Request $request)
+    {
+        if ($request->isMethod('OPTIONS')) {
+            return $this->getCorsOptionsResponse();
+        }
+
+        try {
+            $this->statusRepository = $this->get('weaving_the_web_twitter.repository.read.status');
+            $status = $this->statusRepository->findStatusIdentifiedBy($request->attributes->get('id'));
+            $statusCode = 200;
+
+            $statuses = [$status];
+            if (is_null($status)) {
+                $statuses = [];
+            }
+
+            $statuses = $this->extractStatusProperties($statuses);
 
             $encodedStatuses = json_encode($statuses);
             $response = new JsonResponse(
@@ -172,7 +209,10 @@ class TweetController extends Controller
             $status['published_at'] = $decodedDocument['created_at'];
         }
 
-        return $status;
+        return $this->extractConversationProperties(
+            $status,
+            $decodedDocument
+        );
     }
 
     /**
@@ -190,9 +230,9 @@ class TweetController extends Controller
      *
      * @Extra\Cache(public=true)
      */
-    public function latestStatusesForAggregates(Request $request)
+    public function getLatestStatusesForAggregate(Request $request)
     {
-        return $this->latestAction($request);
+        return $this->getStatusesAction($request);
     }
 
     /**
@@ -213,40 +253,6 @@ class TweetController extends Controller
         $statusCode = 500;
 
         return new JsonResponse($data, $statusCode, $this->getAccessControlOriginHeaders());
-    }
-
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     * @throws \Exception
-     *
-     * @Extra\Route("/bookmarks", name="weaving_the_web_twitter_tweet_sync_bookmarks")
-     * @Extra\Method({"POST", "OPTIONS"})
-     */
-    public function syncBookmarksAction(Request $request)
-    {
-        if ($request->isMethod('OPTIONS')) {
-            return $this->getCorsOptionsResponse();
-        } else {
-            try {
-                $oauthTokens = $this->parseOAuthTokens($request);
-
-                /** @var \WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository $userStreamRepository */
-                $userStreamRepository = $this->get('weaving_the_web_twitter.repository.read.status');
-                $userStreamRepository->setOauthTokens($oauthTokens);
-
-                $statusIds = $request->get('statusIds', array());
-                $statuses = $userStreamRepository->findBookmarks($statusIds);
-
-                // TODO Mark statuses as starred before returning them
-
-                $statusCode = 200;
-
-                return new JsonResponse($statuses, $statusCode, $this->getAccessControlOriginHeaders());
-            } catch (\Exception $exception) {
-                return $this->getExceptionResponse($exception);
-            }
-        }
     }
 
     /**
@@ -354,69 +360,89 @@ class TweetController extends Controller
     }
 
     /**
-     * @Extra\Route("/tweet/star/{statusId}", name="weaving_the_web_twitter_tweet_star")
-     * @Extra\Method({"POST", "OPTIONS"})
-     * @Extra\ParamConverter(
-     *      "userStream",
-     *      class="WeavingTheWebApiBundle:UserStream",
-     *      options={"entity_manager"="write"}
-     * )
-     *
-     * @param Status $userStream
-     * @return JsonResponse
+     * @param array $statuses
+     * @return array
      */
-    public function starAction(Status $userStream)
+    private function extractStatusProperties(array $statuses): array
     {
-        return $this->toggleStarringStatus($userStream, $starring = true);
+        return array_map(
+            function ($status) {
+                $defaultStatus = [
+                    'status_id' => $status['status_id'],
+                    'avatar_url' => 'N/A',
+                    'text' => $status['text'],
+                    'url' => 'https://twitter.com/' . $status['screen_name'] . '/status/' . $status['status_id'],
+                    'retweet_count' => 'N/A',
+                    'favorite_count' => 'N/A',
+                    'username' => $status['screen_name'],
+                    'published_at' => 'N/A',
+                ];
+
+                $hasDocumentFromApi = array_key_exists('api_document', $status);
+
+                if (!array_key_exists('original_document', $status) &&
+                !$hasDocumentFromApi) {
+                    return $defaultStatus;
+                }
+
+                if ($hasDocumentFromApi) {
+                    $status['original_document'] = $status['api_document'];
+                    unset($status['api_document']);
+                }
+
+                $decodedDocument = json_decode($status['original_document'], $asAssociativeArray = true);
+                if (json_last_error() !== JSON_ERROR_NONE) {
+                    return $defaultStatus;
+                }
+
+                if (array_key_exists('retweeted_status', $decodedDocument)) {
+                    $updatedStatus = $this->updateFromDecodedDocument(
+                        $defaultStatus,
+                        $decodedDocument['retweeted_status']
+                    );
+                    $updatedStatus['username'] = $decodedDocument['retweeted_status']['user']['screen_name'];
+                    $updatedStatus['username_of_retweeting_member'] = $defaultStatus['username'];
+                    $updatedStatus['retweet'] = true;
+
+                    return $updatedStatus;
+                }
+
+                $statusUpdatedFromDecodedDocument = $defaultStatus;
+                $updatedStatus = $this->updateFromDecodedDocument(
+                    $statusUpdatedFromDecodedDocument,
+                    $decodedDocument
+                );
+                $updatedStatus['retweet'] = false;
+
+                return $updatedStatus;
+
+            },
+            $statuses
+        );
     }
 
     /**
-     * @Extra\Route("/tweet/unstar/{statusId}", name="weaving_the_web_twitter_tweet_unstar")
-     * @Extra\Method({"POST", "OPTIONS"})
-     * @Extra\ParamConverter(
-     *      "userStream",
-     *      class="WeavingTheWebApiBundle:UserStream",
-     *      options={"entity_manager"="write"}
-     * )
-     *
-     * @param Status $userStream
-     * @return JsonResponse
+     * @param array $updatedStatus
+     * @param array $decodedDocument
+     * @return array
      */
-    public function unstarAction(Status $userStream)
+    private function extractConversationProperties(array $updatedStatus, array $decodedDocument): array
     {
-        return $this->toggleStarringStatus($userStream, $starring = false);
-    }
+        $updatedStatus['in_conversation'] = null;
+        if (array_key_exists('in_reply_to_status_id_str', $decodedDocument) &&
+        !is_null($decodedDocument['in_reply_to_status_id_str'])) {
+            $updatedStatus['id_of_status_replied_to'] = $decodedDocument['in_reply_to_status_id_str'];
+            $updatedStatus['username_of_member_replied_to'] = $decodedDocument['in_reply_to_screen_name'];
+            $updatedStatus['in_conversation'] = true;
 
-    /**
-     * @param Status $userStream
-     * @param bool   $starred
-     * @return JsonResponse
-     */
-    protected function toggleStarringStatus(Status $userStream, $starred = false)
-    {
-        /** @var \Symfony\Component\HttpFoundation\RequestStack $requestStack */
-        $requestStack = $this->get('request_stack');
-        $request = $requestStack->getMasterRequest();
-
-        if ($request->isMethod('POST')) {
-            $userStream->setStarred($starred);
-
-            $clonedUserStream = clone $userStream;
-            $clonedUserStream->setUpdatedAt(new \DateTime());
-
-            $entityManager = $this->getDoctrine()->getManager('write');
-
-            $entityManager->remove($userStream);
-            $entityManager->flush();
-
-            $entityManager->persist($clonedUserStream);
-            $entityManager->flush();
-
-            return new JsonResponse([
-                'status' => $userStream->getStatusId()
-            ], 200, ['Access-Control-Allow-Origin' => '*']);
-        } else {
-            return $this->getCorsOptionsResponse();
+            $this->statusAccessor = $this->get('weaving_the_web.accessor.status');
+            $repliedToStatus = $this->statusAccessor->refreshStatusByIdentifier(
+                $updatedStatus['id_of_status_replied_to']
+            );
+            $repliedToStatus = $this->extractStatusProperties([$repliedToStatus]);
+            $updatedStatus['status_replied_to'] = $repliedToStatus[0];
         }
+
+        return $updatedStatus;
     }
 }
