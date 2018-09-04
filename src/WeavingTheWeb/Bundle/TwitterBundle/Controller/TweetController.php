@@ -10,6 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller,
     Symfony\Component\HttpFoundation\JsonResponse,
     Symfony\Component\HttpFoundation\Request;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
+use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
 
 /**
  * @package WeavingTheWeb\Bundle\TwitterBundle\Controller
@@ -62,7 +63,7 @@ class TweetController extends Controller
             $statuses = $this->statusRepository->findLatest($lastId, $aggregateName, $rawSql);
             $statusCode = 200;
 
-            $statuses = $this->extractStatusProperties($statuses);
+            $statuses = $this->extractStatusProperties($statuses, $includeRepliedToStatuses = false);
 
             $encodedStatuses = json_encode($statuses);
             $response = new JsonResponse(
@@ -137,7 +138,7 @@ class TweetController extends Controller
                 $statuses = [];
             }
 
-            $statuses = $this->extractStatusProperties($statuses);
+            $statuses = $this->extractStatusProperties($statuses, $includeRepliedToStatuses = true);
 
             $encodedStatuses = json_encode($statuses);
             $response = new JsonResponse(
@@ -182,12 +183,19 @@ class TweetController extends Controller
     }
 
     /**
-     * @param $status
-     * @param $decodedDocument
-     * @return mixed
+     * @param array $status
+     * @param array $decodedDocument
+     * @param bool  $includeRepliedToStatuses
+     * @return array
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
+     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
      */
-    public function updateFromDecodedDocument($status, $decodedDocument)
-    {
+    public function updateFromDecodedDocument(
+        array $status,
+        array $decodedDocument,
+        bool $includeRepliedToStatuses = false
+    ): array {
         if (array_key_exists('avatar_url', $decodedDocument)) {
             $status['avatar_url'] = $decodedDocument['avatar_url'];
         }
@@ -211,7 +219,8 @@ class TweetController extends Controller
 
         return $this->extractConversationProperties(
             $status,
-            $decodedDocument
+            $decodedDocument,
+            $includeRepliedToStatuses
         );
     }
 
@@ -361,12 +370,13 @@ class TweetController extends Controller
 
     /**
      * @param array $statuses
+     * @param bool  $includeRepliedToStatuses
      * @return array
      */
-    private function extractStatusProperties(array $statuses): array
+    private function extractStatusProperties(array $statuses, bool $includeRepliedToStatuses = false): array
     {
         return array_map(
-            function ($status) {
+            function ($status) use ($includeRepliedToStatuses) {
                 $defaultStatus = [
                     'status_id' => $status['status_id'],
                     'avatar_url' => 'N/A',
@@ -398,7 +408,8 @@ class TweetController extends Controller
                 if (array_key_exists('retweeted_status', $decodedDocument)) {
                     $updatedStatus = $this->updateFromDecodedDocument(
                         $defaultStatus,
-                        $decodedDocument['retweeted_status']
+                        $decodedDocument['retweeted_status'],
+                        $includeRepliedToStatuses
                     );
                     $updatedStatus['username'] = $decodedDocument['retweeted_status']['user']['screen_name'];
                     $updatedStatus['username_of_retweeting_member'] = $defaultStatus['username'];
@@ -410,7 +421,8 @@ class TweetController extends Controller
                 $statusUpdatedFromDecodedDocument = $defaultStatus;
                 $updatedStatus = $this->updateFromDecodedDocument(
                     $statusUpdatedFromDecodedDocument,
-                    $decodedDocument
+                    $decodedDocument,
+                    $includeRepliedToStatuses
                 );
                 $updatedStatus['retweet'] = false;
 
@@ -424,22 +436,38 @@ class TweetController extends Controller
     /**
      * @param array $updatedStatus
      * @param array $decodedDocument
+     * @param bool  $includeRepliedToStatuses
      * @return array
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
+     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
      */
-    private function extractConversationProperties(array $updatedStatus, array $decodedDocument): array
-    {
+    private function extractConversationProperties(
+        array $updatedStatus,
+        array $decodedDocument,
+        bool $includeRepliedToStatuses = false
+    ): array {
         $updatedStatus['in_conversation'] = null;
-        if (array_key_exists('in_reply_to_status_id_str', $decodedDocument) &&
+        if ($includeRepliedToStatuses && array_key_exists('in_reply_to_status_id_str', $decodedDocument) &&
         !is_null($decodedDocument['in_reply_to_status_id_str'])) {
             $updatedStatus['id_of_status_replied_to'] = $decodedDocument['in_reply_to_status_id_str'];
             $updatedStatus['username_of_member_replied_to'] = $decodedDocument['in_reply_to_screen_name'];
             $updatedStatus['in_conversation'] = true;
 
             $this->statusAccessor = $this->get('weaving_the_web.accessor.status');
-            $repliedToStatus = $this->statusAccessor->refreshStatusByIdentifier(
-                $updatedStatus['id_of_status_replied_to']
-            );
-            $repliedToStatus = $this->extractStatusProperties([$repliedToStatus]);
+
+            try {
+                $repliedToStatus = $this->statusAccessor->refreshStatusByIdentifier(
+                    $updatedStatus['id_of_status_replied_to']
+                );
+            } catch (NotFoundMemberException $notFoundMemberException) {
+                $this->statusAccessor->ensureMemberHavingScreenNameExists($notFoundMemberException->screenName);
+                $repliedToStatus = $this->statusAccessor->refreshStatusByIdentifier(
+                    $updatedStatus['id_of_status_replied_to']
+                );
+            }
+
+            $repliedToStatus = $this->extractStatusProperties([$repliedToStatus], $includeRepliedToStatuses = true);
             $updatedStatus['status_replied_to'] = $repliedToStatus[0];
         }
 

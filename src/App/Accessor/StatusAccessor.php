@@ -7,10 +7,11 @@ use App\Status\Repository\NotFoundStatusRepository;
 use Doctrine\ORM\EntityManager;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\ArchivedStatus;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Status;
-use WeavingTheWeb\Bundle\ApiBundle\Entity\StatusInterface;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\ArchivedStatusRepository;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
 use WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor;
+use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
+use WTW\UserBundle\Repository\UserRepository;
 
 class StatusAccessor
 {
@@ -43,6 +44,11 @@ class StatusAccessor
      * @var StatusRepository
      */
     public $statusRepository;
+
+    /**
+     * @var UserRepository
+     */
+    public $userManager;
 
     /**
      * @var Accessor
@@ -91,7 +97,7 @@ class StatusAccessor
     {
         $status = $this->statusRepository->findStatusIdentifiedBy($identifier);
 
-        if (!is_null($status)) {
+        if (!is_null($status) && !empty($status)) {
             return $status;
         }
 
@@ -106,6 +112,8 @@ class StatusAccessor
                 null,
                 $this->logger
             );
+        } catch (NotFoundMemberException $notFoundMemberException) {
+            throw $notFoundMemberException;
         } catch (\Exception $exception) {
             $this->logger->info($exception->getMessage());
         }
@@ -117,5 +125,14 @@ class StatusAccessor
         }
 
         return $status;
+    }
+
+    /**
+     * @param string $screenName
+     */
+    public function ensureMemberHavingScreenNameExists(string $screenName)
+    {
+        $member = $this->accessor->showUser($screenName);
+        $this->userManager->make($member->id, $member->screen_name);
     }
 }

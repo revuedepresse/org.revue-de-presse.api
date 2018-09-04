@@ -77,11 +77,12 @@ services:
         class: 'App\Accessor\StatusAccessor'
         properties:
             accessor:                   '@weaving_the_web_twitter.api_accessor'
+            archivedStatusRepository:   '@weaving_the_web_twitter.repository.archived_status'
             entityManager:              '@doctrine.orm.entity_manager'
             logger:                     '@monolog.logger.status'
-            statusRepository:           '@weaving_the_web_twitter.repository.status'
-            archivedStatusRepository:   '@weaving_the_web_twitter.repository.archived_status'
             notFoundStatusRepository:   '@repository.not_found_status'
+            statusRepository:           '@weaving_the_web_twitter.repository.status'
+            userManager:                '@user_manager'
 
     weaving_the_web_twitter.repository.aggregate:
         class: '%weaving_the_web_twitter.repository.aggregate.class%'

@@ -232,10 +232,7 @@ class UserRepository extends EntityRepository
     public function incrementTotalStatusesOfMemberWithScreenName(int $statusesToBeAdded, string $screenName) {
         $member = $this->findOneBy(['twitter_username' => $screenName]);
         if (!$member instanceof User) {
-            throw new NotFoundMemberException(
-                'Could not find member with screen name "%s"',
-                $screenName
-            );
+            NotFoundMemberException::raiseExceptionAboutNotFoundMemberHavingScreenName($screenName);
         }
 
         $member->totalStatuses = $member->totalStatuses + $statusesToBeAdded;
