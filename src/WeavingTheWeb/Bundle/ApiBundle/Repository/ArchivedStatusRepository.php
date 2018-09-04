@@ -9,7 +9,6 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\ORMException;
 
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Query\Expr\Join;
 use Psr\Log\LoggerInterface;
 
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
@@ -135,6 +134,22 @@ class ArchivedStatusRepository extends ResourceRepository
         }
 
         return $extracts;
+    }
+
+    /**
+     * @param int $id
+     * @return array
+     */
+    public function findStatusIdentifiedBy(int $id): array
+    {
+        $status = $this->findOneBy(['statusId' => $id]);
+        if (!($status instanceof StatusInterface)) {
+            return [];
+        }
+
+        $statusDocument = json_decode($status->getApiDocument());
+
+        return $this->extractProperties([$statusDocument], function ($properties) { return $properties; })[0];
     }
 
     /**
