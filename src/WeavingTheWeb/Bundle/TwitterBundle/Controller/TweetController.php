@@ -196,6 +196,23 @@ class TweetController extends Controller
         array $decodedDocument,
         bool $includeRepliedToStatuses = false
     ): array {
+        $status['media'] = [];
+        if (array_key_exists('entities', $decodedDocument) &&
+            array_key_exists('media', $decodedDocument['entities'])
+        ) {
+            $status['media'] = array_map(
+                function ($media) {
+                    if (array_key_exists('media_url_https', $media)) {
+                        return [
+                            'sizes' => $media['sizes'],
+                            'url' => $media['media_url_https'],
+                        ];
+                    }
+                },
+                $decodedDocument['entities']['media']
+            );
+        }
+
         if (array_key_exists('avatar_url', $decodedDocument)) {
             $status['avatar_url'] = $decodedDocument['avatar_url'];
         }
