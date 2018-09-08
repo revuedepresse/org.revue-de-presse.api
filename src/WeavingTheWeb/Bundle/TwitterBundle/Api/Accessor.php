@@ -3,14 +3,15 @@
 namespace WeavingTheWeb\Bundle\TwitterBundle\Api;
 
 use App\Accessor\Exception\NotFoundStatusException;
+use App\Accessor\Exception\UnexpectedApiResponseException;
 use App\Accessor\StatusAccessor;
-use Doctrine\Common\Collections\ArrayCollection;
+use App\Accessor\Exception\ApiRateLimitingException;
+
 use Doctrine\Common\Persistence\ObjectRepository;
 
 use GuzzleHttp\Exception\ConnectException;
 use Psr\Log\LoggerInterface;
 
-use WeavingTheWeb\Bundle\ApiBundle\Entity\ArchivedStatus;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Token;
 
 use WeavingTheWeb\Bundle\ApiBundle\Exception\InvalidTokenException;
@@ -123,6 +124,11 @@ class Accessor implements TwitterErrorAwareInterface
      * @var bool
      */
     public $propagateNotFoundStatuses = false;
+
+    /**
+     * @var bool
+     */
+    public $shouldRaiseExceptionOnApiLimit = false;
 
     /**
      * @param \Symfony\Component\Translation\Translator $translator
@@ -368,7 +374,7 @@ class Accessor implements TwitterErrorAwareInterface
             return $content;
         }
 
-        $loggedException = $this->logExceptionForToken($content);
+        $loggedException = $this->logExceptionForToken($endpoint, $content);
         if ($this->matchWithOneOfTwitterErrorCodes($loggedException)) {
             return $this->handleTwitterErrorExceptionForToken($endpoint, $loggedException, $fetchContent);
         }
@@ -386,7 +392,13 @@ class Accessor implements TwitterErrorAwareInterface
      */
     public function delayUnknownExceptionHandlingOnEndpointForToken($endpoint, Token $token = null)
     {
-        $token = $this->maybeGetToken($token);
+        if ($this->shouldRaiseExceptionOnApiLimit) {
+            throw new UnexpectedApiResponseException(
+                sprintf('Could not access "%s" for an unknown reason.', $endpoint)
+            );
+        }
+
+        $token = $this->maybeGetToken($endpoint, $token);
 
         /** Freeze token and wait for 15 minutes before getting back to operation */
         $this->tokenRepository->freezeToken($token->getOauthToken());
@@ -417,7 +429,7 @@ class Accessor implements TwitterErrorAwareInterface
             $this->throwException($exception);
         }
 
-        $token = $this->maybeGetToken();
+        $token = $this->maybeGetToken($endpoint);
         $this->tokenRepository->freezeToken($token->getOauthToken());
 
         if (strpos($endpoint, '/statuses/user_timeline') === false) {
@@ -454,19 +466,21 @@ class Accessor implements TwitterErrorAwareInterface
     }
 
     /**
-     * @param \stdClass $content
+     * @param string     $endpoint
+     * @param \stdClass  $content
      * @param Token|null $token
      * @return UnavailableResourceException
-     * @throws \Exception
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function logExceptionForToken(\stdClass $content, Token $token = null)
+    public function logExceptionForToken(string $endpoint, \stdClass $content, Token $token = null)
     {
         $exception = $this->extractContentErrorAsException($content);
 
         $this->twitterApiLogger->info('[message] ' . $exception->getMessage());
         $this->twitterApiLogger->info('[code] ' . $exception->getCode());
 
-        $token = $this->maybeGetToken($token);
+        $token = $this->maybeGetToken($endpoint, $token);
         $this->twitterApiLogger->info('[token] ' . $token->getOauthToken());
 
         return $exception;
@@ -565,18 +579,21 @@ class Accessor implements TwitterErrorAwareInterface
 
     /**
      * @param array $tokens
+     * @param       $endpoint
      * @return Token
+     * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function preEndpointContact(array $tokens)
+    public function preEndpointContact(array $tokens, $endpoint)
     {
         /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token */
         $token = $this->tokenRepository->refreshFreezeCondition($tokens['oauth'], $this->logger);
-        if ($token->isFrozen()) {
-            $this->waitUntilTokenUnfrozen($token);
+
+        if (!$token->isFrozen()) {
+            return $token;
         }
 
-        return $token;
+        return $this->guardAgainstApiLimit($endpoint);
     }
 
     /**
@@ -1258,12 +1275,14 @@ class Accessor implements TwitterErrorAwareInterface
     /**
      * @param      $endpoint
      * @param bool $findNextAvailableToken
+     * @return mixed|null
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function guardAgainstApiLimit($endpoint, $findNextAvailableToken = true)
     {
         $apiLimitReached = $this->isApiLimitReached();
+        $token = null;
 
         try {
             $apiLimitReached = $apiLimitReached || $this->tokenRepository->isOauthTokenFrozen($this->userToken);
@@ -1290,6 +1309,8 @@ class Accessor implements TwitterErrorAwareInterface
                 $this->waitUntilTokenUnfrozen($token);
             }
         }
+
+        return $token;
     }
 
     /**
@@ -1338,6 +1359,10 @@ class Accessor implements TwitterErrorAwareInterface
      */
     protected function waitUntilTokenUnfrozen(Token $token)
     {
+        if ($this->shouldRaiseExceptionOnApiLimit) {
+            throw new ApiRateLimitingException('Impossible to access the source API at the moment');
+        }
+
         $now = new \DateTime;
         $this->moderator->waitFor(
             $token->getFrozenUntil()->getTimestamp() - $now->getTimestamp(),
@@ -1384,22 +1409,24 @@ class Accessor implements TwitterErrorAwareInterface
         }
 
         $tokens = $this->getTokens();
-        $token = $this->preEndpointContact($tokens);
+        $token = $this->preEndpointContact($tokens, $endpoint);
 
         return $this->contactEndpointUsingConsumerKey($endpoint, $token, $tokens);
     }
 
     /**
+     * @param            $endpoint
      * @param Token|null $token
      * @return Token
-     * @throws \Exception
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
-    private function maybeGetToken(Token $token = null): Token
+    private function maybeGetToken($endpoint, Token $token = null): Token
     {
         if (is_null($token)) {
             $tokens = $this->getTokens();
 
-            return $this->preEndpointContact($tokens);
+            return $this->preEndpointContact($tokens, $endpoint);
         }
 
         return $token;
@@ -1494,12 +1521,7 @@ class Accessor implements TwitterErrorAwareInterface
         while ($retries < self::MAX_RETRIES + 1) {
             try {
                 $content = $fetchContent($endpoint);
-                if ($this->hasError($content) && $content->errors[0]->code === self::ERROR_OVER_CAPACITY) {
-                    throw new OverCapacityException(
-                        $content->errors[0]->message,
-                        $content->errors[0]->code
-                    );
-                }
+                $this->guardAgainstContentFetchingException($content);
 
                 break;
             } catch (OverCapacityException $exception) {
@@ -1516,5 +1538,31 @@ class Accessor implements TwitterErrorAwareInterface
         }
 
         return $content;
+    }
+
+    /**
+     * @param $content
+     * @throws NotFoundStatusException
+     * @throws OverCapacityException
+     */
+    private function guardAgainstContentFetchingException($content): void
+    {
+        if ($this->hasError($content)) {
+            $errorCode = $content->errors[0]->code;
+
+            if ($errorCode === self::ERROR_OVER_CAPACITY) {
+                throw new OverCapacityException(
+                    $content->errors[0]->message,
+                    $content->errors[0]->code
+                );
+            }
+
+            if ($errorCode === self::ERROR_NO_STATUS_FOUND_WITH_THAT_ID) {
+                throw new NotFoundStatusException(
+                    $content->errors[0]->message,
+                    $content->errors[0]->code
+                );
+            }
+        }
     }
 }

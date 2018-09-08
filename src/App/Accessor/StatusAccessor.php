@@ -80,6 +80,10 @@ class StatusAccessor
             return;
         }
 
+        if (is_null($status)) {
+            return;
+        }
+
         $notFoundStatus = $this->notFoundStatusRepository->markStatusAsNotFound($status);
 
         $this->entityManager->persist($notFoundStatus);
@@ -101,6 +105,7 @@ class StatusAccessor
             return $status;
         }
 
+        $this->accessor->shouldRaiseExceptionOnApiLimit = true;
         $status = $this->accessor->showStatus($identifier);
 
         $this->entityManager->clear();
