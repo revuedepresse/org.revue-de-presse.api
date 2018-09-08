@@ -61,6 +61,8 @@ interface TwitterErrorAwareInterface
 
     const ERROR_AUTHENTICATION_OAUTH = 135;
 
+    const ERROR_NO_STATUS_FOUND_WITH_THAT_ID  = 144;
+
     const ERROR_LIMITED_FOLLOWING = 161;
 
     const ERROR_PROTECTED_TWEET = 179;

@@ -3,14 +3,15 @@
 namespace WeavingTheWeb\Bundle\TwitterBundle\Api;
 
 use App\Accessor\Exception\NotFoundStatusException;
+use App\Accessor\Exception\UnexpectedApiResponseException;
 use App\Accessor\StatusAccessor;
-use Doctrine\Common\Collections\ArrayCollection;
+use App\Accessor\Exception\ApiRateLimitingException;
+
 use Doctrine\Common\Persistence\ObjectRepository;
 
 use GuzzleHttp\Exception\ConnectException;
 use Psr\Log\LoggerInterface;
 
-use WeavingTheWeb\Bundle\ApiBundle\Entity\ArchivedStatus;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Token;
 
 use WeavingTheWeb\Bundle\ApiBundle\Exception\InvalidTokenException;
@@ -123,6 +124,11 @@ class Accessor implements TwitterErrorAwareInterface
      * @var bool
      */
     public $propagateNotFoundStatuses = false;
+
+    /**
+     * @var bool
+     */
+    public $shouldRaiseExceptionOnApiLimit = false;
 
     /**
      * @param \Symfony\Component\Translation\Translator $translator
@@ -386,6 +392,12 @@ class Accessor implements TwitterErrorAwareInterface
      */
     public function delayUnknownExceptionHandlingOnEndpointForToken($endpoint, Token $token = null)
     {
+        if ($this->shouldRaiseExceptionOnApiLimit) {
+            throw new UnexpectedApiResponseException(
+                sprintf('Could not access "%s" for an unknown reason.', $endpoint)
+            );
+        }
+
         $token = $this->maybeGetToken($endpoint, $token);
 
         /** Freeze token and wait for 15 minutes before getting back to operation */
@@ -1347,6 +1359,10 @@ class Accessor implements TwitterErrorAwareInterface
      */
     protected function waitUntilTokenUnfrozen(Token $token)
     {
+        if ($this->shouldRaiseExceptionOnApiLimit) {
+            throw new ApiRateLimitingException('Impossible to access the source API at the moment');
+        }
+
         $now = new \DateTime;
         $this->moderator->waitFor(
             $token->getFrozenUntil()->getTimestamp() - $now->getTimestamp(),
@@ -1505,12 +1521,7 @@ class Accessor implements TwitterErrorAwareInterface
         while ($retries < self::MAX_RETRIES + 1) {
             try {
                 $content = $fetchContent($endpoint);
-                if ($this->hasError($content) && $content->errors[0]->code === self::ERROR_OVER_CAPACITY) {
-                    throw new OverCapacityException(
-                        $content->errors[0]->message,
-                        $content->errors[0]->code
-                    );
-                }
+                $this->guardAgainstContentFetchingException($content);
 
                 break;
             } catch (OverCapacityException $exception) {
@@ -1527,5 +1538,31 @@ class Accessor implements TwitterErrorAwareInterface
         }
 
         return $content;
+    }
+
+    /**
+     * @param $content
+     * @throws NotFoundStatusException
+     * @throws OverCapacityException
+     */
+    private function guardAgainstContentFetchingException($content): void
+    {
+        if ($this->hasError($content)) {
+            $errorCode = $content->errors[0]->code;
+
+            if ($errorCode === self::ERROR_OVER_CAPACITY) {
+                throw new OverCapacityException(
+                    $content->errors[0]->message,
+                    $content->errors[0]->code
+                );
+            }
+
+            if ($errorCode === self::ERROR_NO_STATUS_FOUND_WITH_THAT_ID) {
+                throw new NotFoundStatusException(
+                    $content->errors[0]->message,
+                    $content->errors[0]->code
+                );
+            }
+        }
     }
 }
