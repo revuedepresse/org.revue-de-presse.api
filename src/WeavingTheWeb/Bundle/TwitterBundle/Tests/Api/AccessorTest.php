@@ -337,7 +337,7 @@ class AccessorTest extends WebTestCase
         $tokenRepositoryMock = $tokenRepositoryProphecy->reveal();
 
         $this->accessor->setTokenRepository($tokenRepositoryMock);
-        $token = $this->accessor->preEndpointContact(['oauth' => '']);
+        $token = $this->accessor->preEndpointContact(['oauth' => ''], '/' );
 
         $this->assertInstanceOf(
             '\WeavingTheWeb\Bundle\ApiBundle\Entity\Token',
@@ -485,12 +485,10 @@ class AccessorTest extends WebTestCase
 
         $tokenProphecy = $this->prophet->prophesize('\WeavingTheWeb\Bundle\ApiBundle\Entity\Token');
 
-        /**
-         * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $tokenMock
-         */
+        /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $tokenMock */
         $tokenMock = $tokenProphecy->reveal();
 
-        $exception = $this->accessor->logExceptionForToken($content, $tokenMock);
+        $exception = $this->accessor->logExceptionForToken('/', $content, $tokenMock);
 
         $this->assertInternalType('object', $exception, 'It should return an object');
         $this->assertInstanceOf(

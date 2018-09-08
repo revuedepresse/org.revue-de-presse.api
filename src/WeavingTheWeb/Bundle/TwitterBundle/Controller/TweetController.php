@@ -2,6 +2,7 @@
 
 namespace WeavingTheWeb\Bundle\TwitterBundle\Controller;
 
+use App\Accessor\Exception\NotFoundStatusException;
 use App\Accessor\StatusAccessor;
 use Doctrine\DBAL\Exception\ConnectionException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
@@ -9,6 +10,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller,
     Symfony\Component\HttpFoundation\JsonResponse,
     Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
 
@@ -65,36 +67,16 @@ class TweetController extends Controller
 
             $statuses = $this->extractStatusProperties($statuses, $includeRepliedToStatuses = false);
 
-            $encodedStatuses = json_encode($statuses);
             $response = new JsonResponse(
                 $statuses,
                 $statusCode,
                 $this->getAccessControlOriginHeaders()
             );
 
-            $contentLength = strlen($encodedStatuses);
-            $response->headers->add([
-                'Content-Length' => $contentLength,
-                'x-decompressed-content-length' => $contentLength,
-                // @see https://stackoverflow.com/a/37931084/282073
-                'Access-Control-Expose-Headers' => 'Content-Length, x-decompressed-content-length'
-            ]);
+            $encodedStatuses = json_encode($statuses);
+            $this->setContentLengthHeader($response, $encodedStatuses);
 
-            $response->setCache([
-                'public' => true,
-                'max_age' =>  3600,
-                's_maxage' =>  3600,
-                'last_modified' => new \DateTime(
-                    // last hour
-                    (new \DateTime(
-                        'now',
-                        new \DateTimeZone('UTC'))
-                    )->modify('-1 hour')->format('Y-m-d H:0'),
-                    new \DateTimeZone('UTC')
-                )
-            ]);
-
-            return $response;
+            return $this->setCacheHeaders($response);
         } catch (\PDOException $exception) {
             return $this->getExceptionResponse(
                 $exception,
@@ -130,7 +112,8 @@ class TweetController extends Controller
 
         try {
             $this->statusRepository = $this->get('weaving_the_web_twitter.repository.read.status');
-            $status = $this->statusRepository->findStatusIdentifiedBy($request->attributes->get('id'));
+            $statusId = $request->attributes->get('id');
+            $status = $this->statusRepository->findStatusIdentifiedBy($statusId);
             $statusCode = 200;
 
             $statuses = [$status];
@@ -140,34 +123,15 @@ class TweetController extends Controller
 
             $statuses = $this->extractStatusProperties($statuses, $includeRepliedToStatuses = true);
 
-            $encodedStatuses = json_encode($statuses);
             $response = new JsonResponse(
                 $statuses,
                 $statusCode,
                 $this->getAccessControlOriginHeaders()
             );
 
-            $contentLength = strlen($encodedStatuses);
-            $response->headers->add([
-                'Content-Length' => $contentLength,
-                'x-decompressed-content-length' => $contentLength,
-                // @see https://stackoverflow.com/a/37931084/282073
-                'Access-Control-Expose-Headers' => 'Content-Length, x-decompressed-content-length'
-            ]);
-
-            $response->setCache([
-                'public' => true,
-                'max_age' =>  3600,
-                's_maxage' =>  3600,
-                'last_modified' => new \DateTime(
-                    // last hour
-                    (new \DateTime(
-                        'now',
-                        new \DateTimeZone('UTC'))
-                    )->modify('-1 hour')->format('Y-m-d H:0'),
-                    new \DateTimeZone('UTC')
-                )
-            ]);
+            $encodedStatuses = json_encode($statuses);
+            $this->setContentLengthHeader($response, $encodedStatuses);
+            $this->setCacheHeaders($response);
 
             return $response;
         } catch (\PDOException $exception) {
@@ -177,6 +141,15 @@ class TweetController extends Controller
             );
         } catch (ConnectionException $exception) {
             $this->get('logger')->critical('Could not connect to the database');
+        } catch (NotFoundStatusException $exception) {
+            $errorMessage = sprintf("Could not find status with id '%s'", $statusId);
+            $this->get('logger')->info($errorMessage);
+
+            return $this->setCacheHeaders(new JsonResponse(
+                ['error' => $errorMessage],
+                404,
+                $this->getAccessControlOriginHeaders()
+            ));
         } catch (\Exception $exception) {
             return $this->getExceptionResponse($exception);
         }
@@ -489,5 +462,46 @@ class TweetController extends Controller
         }
 
         return $updatedStatus;
+    }
+
+    /**
+     * @param JsonResponse $response
+     * @return JsonResponse
+     */
+    private function setCacheHeaders(JsonResponse $response)
+    {
+        $response->setCache([
+            'public' => true,
+            'max_age' => 3600,
+            's_maxage' => 3600,
+            'last_modified' => new \DateTime(
+            // last hour
+                (new \DateTime(
+                    'now',
+                    new \DateTimeZone('UTC'))
+                )->modify('-1 hour')->format('Y-m-d H:0'),
+                new \DateTimeZone('UTC')
+            )
+        ]);
+
+        return $response;
+    }
+
+    /**
+     * @param JsonResponse $response
+     * @param              $encodedStatuses
+     * @return JsonResponse
+     */
+    private function setContentLengthHeader(JsonResponse $response, $encodedStatuses)
+    {
+        $contentLength = strlen($encodedStatuses);
+        $response->headers->add([
+            'Content-Length' => $contentLength,
+            'x-decompressed-content-length' => $contentLength,
+            // @see https://stackoverflow.com/a/37931084/282073
+            'Access-Control-Expose-Headers' => 'Content-Length, x-decompressed-content-length'
+        ]);
+
+        return $response;
     }
 }
