@@ -1270,6 +1270,7 @@ class Accessor implements TwitterErrorAwareInterface
     public function guardAgainstApiLimit($endpoint, $findNextAvailableToken = true)
     {
         $apiLimitReached = $this->isApiLimitReached();
+        $token = null;
 
         try {
             $apiLimitReached = $apiLimitReached || $this->tokenRepository->isOauthTokenFrozen($this->userToken);
