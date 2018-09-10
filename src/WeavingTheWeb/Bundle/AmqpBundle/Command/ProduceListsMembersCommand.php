@@ -4,6 +4,7 @@ namespace WeavingTheWeb\Bundle\AmqpBundle\Command;
 
 use App\Operation\OperationClock;
 
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption,
     Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Output\OutputInterface;
@@ -56,6 +57,11 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
     private $screenName;
 
     /**
+     * @var bool
+     */
+    private $givePriorityToAggregate = false;
+
+    /**
      * @var string
      */
     private $before = null;
@@ -89,6 +95,11 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
             null,
             InputOption::VALUE_OPTIONAL,
             'A list to which production is restricted to'
+        )->addOption(
+            'priority_to_aggregates',
+            'pa',
+            InputOption::VALUE_NONE,
+            'Publish messages the priority queue for visible aggregates'
         )->addOption(
             'before',
             null,
@@ -439,8 +450,13 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
         $this->setUpLogger();
 
         $this->producer = $this->getContainer()->get('old_sound_rabbit_mq.weaving_the_web_amqp.twitter.user_status_producer');
+
         if (!is_null($this->listRestriction) && $this->listRestriction == 'news :: France') {
             $this->producer = $this->getContainer()->get('old_sound_rabbit_mq.weaving_the_web_amqp.twitter.news_status_producer');
+        }
+
+        if (!is_null($this->listRestriction) && $this->givePriorityToAggregate) {
+            $this->producer = $this->getContainer()->get('old_sound_rabbit_mq.weaving_the_web_amqp.twitter.aggregates_status_producer');
         }
 
         $this->translator = $this->getContainer()->get('translator');
@@ -515,6 +531,11 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
 
         if ($this->input->hasOption('before') && !is_null($this->input->getOption('before'))) {
             $this->before = $this->input->getOption('before');
+        }
+
+        if ($this->input->hasOption('priority_to_aggregates') &&
+            !is_null($this->input->getOption('priority_to_aggregates'))) {
+            $this->givePriorityToAggregate = true;
         }
     }
 
