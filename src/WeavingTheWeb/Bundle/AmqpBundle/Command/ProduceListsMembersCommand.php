@@ -140,9 +140,18 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
             if ($doNotApplyListRestriction || $list->name === $this->listRestriction) {
                 $members = $this->accessor->getListMembers($list->id);
 
-                if (!is_object($members) || !isset($members->users)) {
+                if (!is_object($members) || !isset($members->users) || count($members->users) === 0) {
                     $this->logger->info(sprintf('List "%s" has no members', $list->name));
                     continue;
+                }
+
+                if (count($members->users) > 0) {
+                    $this->logger->info(
+                        sprintf(
+                        'About to publish messages for members in list "%s"',
+                            $list->name
+                        )
+                    );
                 }
 
                 $publishedMessages = $this->publishMembersScreenNames($members, $messageBody, $list);
