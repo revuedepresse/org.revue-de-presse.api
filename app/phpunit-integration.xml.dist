@@ -20,6 +20,7 @@
         <exclude>
             <group>isolated-testing</group>
             <group>messaging-twitter</group>
+            <group>it_should_serialize_a_status</group>
         </exclude>
     </groups>
 
