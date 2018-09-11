@@ -172,6 +172,7 @@ class StatusRepository extends ArchivedStatusRepository
 
         $userStream->setApiDocument($extract['api_document']);
         $userStream->setIdentifier($extract['identifier']);
+        $userStream->setText($extract['text']);
 
         return $userStream->setUpdatedAt(new \DateTime('now', new \DateTimeZone('UTC')));
     }
