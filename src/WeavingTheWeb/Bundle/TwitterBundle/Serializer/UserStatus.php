@@ -518,7 +518,7 @@ class UserStatus
      */
     protected function updateExtremum($options, $discoverPastTweets = true)
     {
-        if ($this->serializationOptions['before']) {
+        if (array_key_exists('before', $this->serializationOptions) && $this->serializationOptions['before']) {
             $discoverPastTweets = true;
         }
 
