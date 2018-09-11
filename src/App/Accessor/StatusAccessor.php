@@ -123,18 +123,12 @@ class StatusAccessor
                 $this->logger
             );
         } catch (NotFoundMemberException $notFoundMemberException) {
-            throw $notFoundMemberException;
+            return $this->findStatusIdentifiedBy($identifier);
         } catch (\Exception $exception) {
             $this->logger->info($exception->getMessage());
         }
 
-        $status = $this->statusRepository->findStatusIdentifiedBy($identifier);
-
-        if (is_null($status)) {
-            return new NullStatus();
-        }
-
-        return $status;
+        return $this->findStatusIdentifiedBy($identifier);
     }
 
     /**
@@ -144,5 +138,20 @@ class StatusAccessor
     {
         $member = $this->accessor->showUser($screenName);
         $this->userManager->make($member->id, $member->screen_name);
+    }
+
+    /**
+     * @param string $identifier
+     * @return NullStatus|array
+     */
+    private function findStatusIdentifiedBy(string $identifier)
+    {
+        $status = $this->statusRepository->findStatusIdentifiedBy($identifier);
+
+        if (is_null($status)) {
+            return new NullStatus();
+        }
+
+        return $status;
     }
 }
