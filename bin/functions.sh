@@ -136,6 +136,10 @@ function consume_amqp_messages_for_news_status {
     consume_amqp_messages 'news_status'
 }
 
+function consume_amqp_messages_for_aggregate_status {
+    consume_amqp_messages 'aggregates_status'
+}
+
 function execute_command () {
     local output_log="${1}"
     local error_log="${2}"
