@@ -91,15 +91,20 @@ class StatusAccessor
     }
 
     /**
-     * @param int $identifier
-     * @return \API|NullStatus|array|mixed|object|\stdClass
+     * @param string $identifier
+     * @param bool   $skipExistingStatus
+     * @return \API|NullStatus|array|mixed|null|object|\stdClass
+     * @throws NotFoundMemberException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
      * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
      */
-    public function refreshStatusByIdentifier(string $identifier)
+    public function refreshStatusByIdentifier(string $identifier, bool $skipExistingStatus = false)
     {
-        $status = $this->statusRepository->findStatusIdentifiedBy($identifier);
+        $status = null;
+        if (!$skipExistingStatus) {
+            $status = $this->statusRepository->findStatusIdentifiedBy($identifier);
+        }
 
         if (!is_null($status) && !empty($status)) {
             return $status;

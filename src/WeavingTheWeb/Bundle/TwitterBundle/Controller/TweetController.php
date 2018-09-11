@@ -10,7 +10,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller,
     Symfony\Component\HttpFoundation\JsonResponse,
     Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+
 use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
 
@@ -113,7 +113,8 @@ class TweetController extends Controller
         try {
             $this->statusRepository = $this->get('weaving_the_web_twitter.repository.read.status');
             $statusId = $request->attributes->get('id');
-            $status = $this->statusRepository->findStatusIdentifiedBy($statusId);
+
+            $status = $this->findStatusOrFetchItByIdentifier($statusId, $shouldRefreshStatus = $request->query->has('refresh'));
             $statusCode = 200;
 
             $statuses = [$status];
@@ -503,5 +504,24 @@ class TweetController extends Controller
         ]);
 
         return $response;
+    }
+
+    /**
+     * @param $statusId
+     * @param $shouldRefreshStatus
+     * @return \API|\App\Status\Entity\NullStatus|array|mixed|null|object|\stdClass
+     * @throws NotFoundMemberException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
+     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
+     */
+    private function findStatusOrFetchItByIdentifier($statusId, $shouldRefreshStatus)
+    {
+        if ($shouldRefreshStatus) {
+            $this->statusAccessor = $this->get('weaving_the_web.accessor.status');
+            return $this->statusAccessor->refreshStatusByIdentifier($statusId, $skipExistingStatus = true);
+        }
+
+        return $this->statusRepository->findStatusIdentifiedBy($statusId);
     }
 }

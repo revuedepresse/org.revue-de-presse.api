@@ -728,7 +728,7 @@ class Accessor implements TwitterErrorAwareInterface
     protected function getUserTimelineStatusesEndpoint($version = '1.1')
     {
         return $this->getApiBaseUrl($version) . '/statuses/user_timeline.json?' .
-            'include_entities=1&include_rts=1&exclude_replies=0&trim_user=0';
+            'tweet_mode=extended&include_entities=1&include_rts=1&exclude_replies=0&trim_user=0';
     }
 
     /**
@@ -938,7 +938,7 @@ class Accessor implements TwitterErrorAwareInterface
      */
     protected function getShowStatusEndpoint($version = '1.1')
     {
-        return $this->getApiBaseUrl($version) . '/statuses/show.json?id={{ id }}';
+        return $this->getApiBaseUrl($version) . '/statuses/show.json?id={{ id }}&tweet_mode=extended';
     }
 
     /**

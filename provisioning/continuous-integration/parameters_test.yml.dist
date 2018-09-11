@@ -68,3 +68,6 @@ parameters:
     rabbitmq.vhost:               /
     rabbitmq.user:                guest
     rabbitmq.password:            guest
+
+    operations_skipped_after:   12:00
+    operations_skipped_before:  12:01

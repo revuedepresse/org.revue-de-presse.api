@@ -533,7 +533,9 @@ class UserStatus
             $updateMethod = 'findNextMininum';
         }
 
-        if ($this->serializationOptions['before']) {
+        if (array_key_exists('before', $this->serializationOptions)
+            && $this->serializationOptions['before']
+        ) {
             $status = $this->userStreamRepository->findLocalMaximum(
                 $options['screen_name'],
                 $this->serializationOptions['before']

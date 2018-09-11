@@ -162,10 +162,10 @@ class ArchivedStatusRepository extends ResourceRepository
         $extracts = [];
 
         foreach ($statuses as $status) {
-            if (property_exists($status, 'text')) {
+            if (property_exists($status, 'text') || property_exists($status, 'full_text')) {
                 $extract = [
                     'hash' => sha1($status->text . $status->id_str),
-                    'text' => $status->text,
+                    'text' => $status->full_text ? $status->full_text : $status->text,
                     'screen_name' => $status->user->screen_name,
                     'name' => $status->user->name,
                     'user_avatar' => $status->user->profile_image_url,
