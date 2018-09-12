@@ -562,7 +562,7 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
         }
 
         if ($this->input->hasOption('priority_to_aggregates') &&
-            !is_null($this->input->getOption('priority_to_aggregates'))) {
+            $this->input->getOption('priority_to_aggregates')) {
             $this->givePriorityToAggregate = true;
         }
     }
