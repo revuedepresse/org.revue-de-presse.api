@@ -91,6 +91,9 @@ list-rabbitmq-messages: ## List messages accumulated with RabbitMQ
 produce-amqp-messages-from-members-lists: ## Produce messages from members lists
 		@/bin/bash -c 'source ./bin/functions.sh && produce_amqp_messages_from_members_lists'
 
+produce-amqp-messages-from-aggregates-lists: ## Produce messages from aggregates list
+		@/bin/bash -c 'source ./bin/functions.sh && produce_amqp_messages_for_aggregates_list'
+
 produce-amqp-messages-from-news-lists: ## Produce messages from news list
 		@/bin/bash -c 'source ./bin/functions.sh && produce_amqp_messages_for_news_list'
 

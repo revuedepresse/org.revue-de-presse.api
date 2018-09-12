@@ -26,6 +26,14 @@ function produce_amqp_messages_from_news_list {
 }
 alias produce-amqp-messages-from-news-lists='produce_amqp_messages_from_news_list'
 
+function produce_amqp_messages_from_aggregates_list {
+    local member='jack'
+    local list_names='my_list,my_second_list'
+    cd /var/www/devobs && \
+    sudo -uwww-data /bin/bash -c "export SYMFONY_ENV='prod' PROJECT_DIR=`pwd` DOCKER_MODE=1 username='"${member}"' in_priority=1 multiple_lists='"${list_names}"' && make produce-amqp-messages-from-aggregate-lists"
+}
+alias produce-amqp-messages-from-aggregate-lists='produce_amqp_aggregates_from_news_list'
+
 function refresh_statuses {
     local aggregate_name='my_list'
     cd /var/www/devobs && \
@@ -44,5 +52,6 @@ alias refresh-statuses='refresh_statuses'
 #  0 */7 * * *   /bin/bash -c "cd ${PROJECT_DIR} && make produce-amqp-messages-from-members-lists"
 #  */20 * * * *  /bin/bash -c "cd ${PROJECT_DIR} && export list_name=${list_mame} && make produce-amqp-messages-from-news-lists"
 #  0 */7 * * *   /bin/bash -c "cd ${PROJECT_DIR} && make produce-amqp-messages-from-member-timeline"
+#  0 */7 * * *   /bin/bash -c "cd ${PROJECT_DIR} && make produce-amqp-messages-from-aggregates-lists"
 #  0 23 * * *    /bin/bash -c "cd ${PROJECT_DIR} && make refresh-statuses"
 #
