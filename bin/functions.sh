@@ -136,7 +136,7 @@ function consume_amqp_messages_for_news_status {
     consume_amqp_messages 'news_status'
 }
 
-function consume_amqp_messages_for_aggregate_status {
+function consume_amqp_messages_for_aggregates_status {
     consume_amqp_messages 'aggregates_status'
 }
 
@@ -617,6 +617,11 @@ function produce_amqp_messages_from_member_timeline {
     execute_command "${rabbitmq_output_log}" "${rabbitmq_error_log}"
 }
 
+function produce_amqp_messages_for_aggregates_list {
+    export in_priority=1
+    produce_amqp_messages_for_news_list
+}
+
 function produce_amqp_messages_for_news_list {
     export NAMESPACE="produce_news_messages"
     make remove-php-container
@@ -648,7 +653,19 @@ function produce_amqp_messages_for_news_list {
         return
     fi
 
-    local php_command='app/console weaving_the_web:amqp:produce:lists_members --screen_name='"${username}"' --list="'"${list_name}"'"'
+    local priority_option=''
+    if [ ! -z "${in_priority}" ];
+    then
+        priority_option='--priority_to_aggregates'
+    fi
+
+    local list_option='--list="'"${list_name}"
+    if [ ! -z "${multiple_lists}" ];
+    then
+        list_option='--lists='"${multiple_lists}"
+    fi
+
+    local php_command='app/console weaving_the_web:amqp:produce:lists_members '"${priority_option}"'--screen_name='"${username}"' '"${list_option}"
 
     local symfony_environment="$(get_symfony_environment)"
 
