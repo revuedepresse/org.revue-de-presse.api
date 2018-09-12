@@ -619,11 +619,16 @@ function produce_amqp_messages_from_member_timeline {
 
 function produce_amqp_messages_for_aggregates_list {
     export in_priority=1
+    export NAMESPACE="produce_aggregates_messages"
     produce_amqp_messages_for_news_list
 }
 
 function produce_amqp_messages_for_news_list {
-    export NAMESPACE="produce_news_messages"
+    if [ -z ${NAMESPACE} ];
+    then
+        export NAMESPACE="produce_news_messages"
+    fi
+
     make remove-php-container
 
     export XDEBUG_CONFIG="idekey='phpstorm-xdebug'"
@@ -656,13 +661,13 @@ function produce_amqp_messages_for_news_list {
     local priority_option=''
     if [ ! -z "${in_priority}" ];
     then
-        priority_option='--priority_to_aggregates'
+        priority_option='--priority_to_aggregates '
     fi
 
-    local list_option='--list="'"${list_name}"
+    local list_option='--list='"${list_name}"
     if [ ! -z "${multiple_lists}" ];
     then
-        list_option='--lists='"${multiple_lists}"
+        list_option='--lists='"'${multiple_lists}'"
     fi
 
     local php_command='app/console weaving_the_web:amqp:produce:lists_members '"${priority_option}"'--screen_name='"${username}"' '"${list_option}"
