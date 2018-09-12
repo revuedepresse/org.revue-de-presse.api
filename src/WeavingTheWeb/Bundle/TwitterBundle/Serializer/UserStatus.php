@@ -195,6 +195,8 @@ class UserStatus
             return true;
         }
 
+        $successfulSerializationOptionSetup = $this->setUpSerializationOptions($options);
+
         try {
             if ($this->shouldSkipSerialization($options)) {
                 return true;
@@ -212,7 +214,7 @@ class UserStatus
             return false;
         }
 
-        if ($this->setUpSerializationOptions($options)) {
+        if ($successfulSerializationOptionSetup) {
             // Remove serialization options when found
             $options = $this->removeSerializationOptions($options);
 
