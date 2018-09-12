@@ -29,8 +29,7 @@ alias produce-amqp-messages-from-news-lists='produce_amqp_messages_from_news_lis
 function produce_amqp_messages_from_aggregates_list {
     local member='jack'
     local list_names='my_list,my_second_list'
-    cd /var/www/devobs && \
-    sudo -uwww-data /bin/bash -c "export SYMFONY_ENV='prod' PROJECT_DIR=`pwd` DOCKER_MODE=1 username='"${member}"' in_priority=1 multiple_lists='"${list_names}"' && make produce-amqp-messages-from-aggregate-lists"
+    sudo -uwww-data /bin/bash -c "export SYMFONY_ENV='prod' PROJECT_DIR=`pwd` DOCKER_MODE=1 username='"${member}"' list_name='_' multiple_lists='"${list_names}"' && make produce-amqp-messages-from-aggregate-lists"
 }
 alias produce-amqp-messages-from-aggregate-lists='produce_amqp_aggregates_from_news_list'
 
