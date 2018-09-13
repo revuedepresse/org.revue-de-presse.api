@@ -240,7 +240,7 @@ function run_mysql_container {
 
     local gateway=`ip -f inet addr  | grep docker0 -A1 | cut -d '/' -f 1 | grep inet | sed -e 's/inet//' -e 's/\s*//g'`
 
-    command="docker run -d -p"${gateway}":3306:3306 --name mysql -e MYSQL_DATABASE=${database_name} \
+    command="docker run --restart=always -d -p"${gateway}":3306:3306 --name mysql -e MYSQL_DATABASE=${database_name} \
         -e MYSQL_ROOT_PASSWORD="$(cat <(/bin/bash -c "${database_password}"))" \
         "${configuration_volume}"-v `pwd`/../../volumes/mysql:/var/lib/mysql \
         mysql:5.7"
@@ -287,6 +287,7 @@ function run_rabbitmq_container {
     local network=`get_network_option`
     command="docker run -d -p"${gateway}":5672:5672 \
     --name rabbitmq \
+    --restart=always \
     --hostname rabbitmq ${network}\
     -e RABBITMQ_DEFAULT_USER=${rabbitmq_user} \
     -e RABBITMQ_DEFAULT_PASS='""$(cat <(/bin/bash -c "${rabbitmq_password}"))""' \
@@ -404,6 +405,7 @@ function run_apache() {
 
     local network=`get_network_option`
     local command=$(echo -n 'docker run '"${network}"' \
+--restart=always \
 -d -p '${host}''${port}':80 \
 -e '"${symfony_environment}"' \
 -v '`pwd`'/provisioning/containers/apache/templates:/templates \
