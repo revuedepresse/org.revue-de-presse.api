@@ -392,9 +392,18 @@ class TweetController extends Controller
                 }
 
                 $decodedDocument = json_decode($status['original_document'], $asAssociativeArray = true);
+
                 if (json_last_error() !== JSON_ERROR_NONE) {
                     return $defaultStatus;
                 }
+
+
+                if (array_key_exists('full_text', $decodedDocument) &&
+                    $defaultStatus['text'] !== $decodedDocument['full_text']
+                ) {
+                    $defaultStatus['text'] = $decodedDocument['full_text'];
+                }
+
 
                 if (array_key_exists('retweeted_status', $decodedDocument)) {
                     $updatedStatus = $this->updateFromDecodedDocument(
