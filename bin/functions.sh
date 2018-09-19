@@ -666,7 +666,7 @@ function produce_amqp_messages_for_news_list {
         priority_option='--priority_to_aggregates '
     fi
 
-    local list_option='--list='"${list_name}"
+    local list_option='--list='"'${list_name}'"
     if [ ! -z "${multiple_lists}" ];
     then
         list_option='--lists='"'${multiple_lists}'"
