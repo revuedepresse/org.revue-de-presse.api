@@ -414,6 +414,7 @@ class TweetController extends Controller
                     $updatedStatus['username'] = $decodedDocument['retweeted_status']['user']['screen_name'];
                     $updatedStatus['username_of_retweeting_member'] = $defaultStatus['username'];
                     $updatedStatus['retweet'] = true;
+                    $updatedStatus['text'] = $decodedDocument['retweeted_status']['full_text'];
 
                     return $updatedStatus;
                 }
