@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Conversation\Command ;
+namespace App\Conversation\Producer;
 
 use App\Operation\OperationClock;
 use Symfony\Component\Console\Input\InputInterface,
@@ -56,11 +56,17 @@ class ProduceConversationMessagesCommand extends AggregateAwareCommand
             'The screen name of a user'
         )
         ->addOption(
+            'aggregate_name',
+            null,
+            InputOption::VALUE_REQUIRED,
+            'The name of an aggregate to attache statuses to'
+        )
+        ->addOption(
             'producer',
             null,
             InputOption::VALUE_OPTIONAL,
             'A producer key',
-            'twitter.conversation_status'
+            'producer.conversation_status'
         )->setAliases(array('wtw:amqp:prd:cnv'));
     }
 
@@ -82,9 +88,9 @@ class ProduceConversationMessagesCommand extends AggregateAwareCommand
         $this->input = $input;
         $this->output = $output;
 
-
         $this->setUpDependencies();
         $onBehalfOf = $this->input->getOption('screen_name');
+        $toBeSavedForAggregate = $this->input->getOption('aggregate_name');
 
         $statusIdsExist = $this->filesystem->exists($this->statusDirectory.'/status-ids');
 
@@ -102,10 +108,15 @@ class ProduceConversationMessagesCommand extends AggregateAwareCommand
                 $statusIds = explode(PHP_EOL, $contents);
 
                 array_map(
-                    function ($statusId) use ($counter, $onBehalfOf) {
+                    function ($statusId) use (
+                        $counter,
+                        $onBehalfOf,
+                        $toBeSavedForAggregate
+                    ) {
                         $messageBody = [
-                            'status_id' => $statusId,
-                            'screen_name' => $onBehalfOf
+                            'status_id' => intval(trim($statusId)),
+                            'screen_name' => $onBehalfOf,
+                            'aggregate_name' => $toBeSavedForAggregate
                         ];
                         $this->producer->publish(serialize(json_encode($messageBody)));
 
@@ -154,25 +165,11 @@ class ProduceConversationMessagesCommand extends AggregateAwareCommand
         ));
     }
 
-    /**
-     * @return array
-     */
-    protected function setUpTokens()
-    {
-        return [
-            'secret' => $this->getContainer()->getParameter('weaving_the_web_twitter.oauth_secret.default'),
-            'token' => $this->getContainer()->getParameter('weaving_the_web_twitter.oauth_token.default'),
-        ];
-    }
-
     private function setUpDependencies()
     {
         $this->setProducer();
 
-        $tokens = $this->setUpTokens();
-
         $this->setUpLogger();
-        $this->setupAccessor($tokens);
         $this->setupAggregateRepository();
 
         $this->translator = $this->getContainer()->get('translator');

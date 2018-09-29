@@ -1,10 +1,11 @@
 parameters:
-    command.map_aggregate_status_collection.class:                      'App\StatusCollection\Mapping\Command\MapAggregateStatusCollectionCommand'
-    command.map_status_collection.class:                                'App\StatusCollection\Mapping\Command\MapStatusCollectionCommand'
-    command.select_status_collection.class:                             'App\StatusCollection\Command\SelectStatusCollectionCommand'
-    weaving_the_web_amqp.produce_conversation_messages_command.class:   'App\Conversation\Command\ProduceConversationMessagesCommand'
-    weaving_the_web_amqp.produce_lists_members_command.class:           'WeavingTheWeb\Bundle\AmqpBundle\Command\ProduceListsMembersCommand'
-    weaving_the_web_amqp.twitter.user_status.class:                     'WeavingTheWeb\Bundle\AmqpBundle\Twitter\UserStatus'
+    command.map_aggregate_status_collection.class:                              'App\StatusCollection\Mapping\Command\MapAggregateStatusCollectionCommand'
+    command.map_status_collection.class:                                        'App\StatusCollection\Mapping\Command\MapStatusCollectionCommand'
+    command.select_status_collection.class:                                     'App\StatusCollection\Command\SelectStatusCollectionCommand'
+    weaving_the_web_amqp.consumer.conversation_status.class:                    'App\Conversation\Consumer\ConversationStatusConsumer'
+    weaving_the_web_amqp.producer.produce_conversation_messages_command.class:  'App\Conversation\Producer\ProduceConversationMessagesCommand'
+    weaving_the_web_amqp.produce_lists_members_command.class:                   'WeavingTheWeb\Bundle\AmqpBundle\Command\ProduceListsMembersCommand'
+    weaving_the_web_amqp.twitter.user_status.class:                             'WeavingTheWeb\Bundle\AmqpBundle\Twitter\UserStatus'
 
 services:
     command.select_status_collection:
@@ -37,6 +38,18 @@ services:
         tags:
             - { name: 'console.command' }
 
+    weaving_the_web_amqp.consumer.conversation_status:
+        class:                        "%weaving_the_web_amqp.consumer.conversation_status.class%"
+        calls:
+            - [ 'setLogger',            [ '@monolog.logger.status'] ]
+            - [ 'setUserRepository',    [ '@user_manager'] ]
+        properties:
+            aggregateRepository:    "@weaving_the_web_twitter.repository.aggregate"
+            entityManager:          "@doctrine.orm.entity_manager"
+            operationClock:         "@operation.clock"
+            statusAccessor:         "@weaving_the_web.accessor.status"
+            statusRepository:       "@weaving_the_web_twitter.repository.status"
+
     weaving_the_web_amqp.twitter:
         class:                       "%weaving_the_web_amqp.twitter.user_status.class%"
         properties:
@@ -60,11 +73,11 @@ services:
         properties:
             operationClock:             "@operation.clock"
 
-    weaving_the_web_amqp.twitter.conversation_status:
-        class:                       "%weaving_the_web_amqp.produce_conversation_messages_command.class%"
+    weaving_the_web_amqp.producer.conversation_status:
+        class:               "%weaving_the_web_amqp.producer.produce_conversation_messages_command.class%"
         properties:
-            operationClock:     "@operation.clock"
-            filesystem:         "@filesystem"
-            statusDirectory:    "%kernel.root_dir%/../src/App/Resources/statuses"
+            operationClock:  "@operation.clock"
+            filesystem:      "@filesystem"
+            statusDirectory: "%kernel.root_dir%/../src/App/Resources/statuses"
         tags:
             - { name: 'console.command' }
