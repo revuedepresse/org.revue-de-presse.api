@@ -93,14 +93,19 @@ class StatusAccessor
     /**
      * @param string $identifier
      * @param bool   $skipExistingStatus
+     * @param bool   $extraProperties
      * @return \API|NullStatus|array|mixed|null|object|\stdClass
-     * @throws NotFoundMemberException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
      * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
      */
-    public function refreshStatusByIdentifier(string $identifier, bool $skipExistingStatus = false)
-    {
+    public function refreshStatusByIdentifier(
+        string $identifier,
+        bool $skipExistingStatus = false,
+        bool $extractProperties = true
+    ) {
+        $this->statusRepository->shouldExtractProperties = $extractProperties;
+
         $status = null;
         if (!$skipExistingStatus) {
             $status = $this->statusRepository->findStatusIdentifiedBy($identifier);
@@ -133,15 +138,22 @@ class StatusAccessor
 
     /**
      * @param string $screenName
+     * @return \WTW\UserBundle\Entity\User
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
+     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
      */
     public function ensureMemberHavingScreenNameExists(string $screenName)
     {
         $member = $this->accessor->showUser($screenName);
-        $this->userManager->make($member->id, $member->screen_name);
+
+        return $this->userManager->make($member->id, $member->screen_name);
     }
 
     /**
      * @param string $identifier
+     * @param bool   $extractProperties
      * @return NullStatus|array
      */
     private function findStatusIdentifiedBy(string $identifier)

@@ -47,6 +47,12 @@ class ArchivedStatusRepository extends ResourceRepository
      */
     public $memberManager;
 
+    /**
+     * @var bool
+     */
+    public $shouldExtractProperties;
+
+
     public function setOauthTokens($oauthTokens)
     {
         $this->oauthTokens = $oauthTokens;
@@ -138,13 +144,17 @@ class ArchivedStatusRepository extends ResourceRepository
 
     /**
      * @param int $id
-     * @return array
+     * @return array|StatusInterface
      */
-    public function findStatusIdentifiedBy(int $id): array
+    public function findStatusIdentifiedBy(int $id)
     {
         $status = $this->findOneBy(['statusId' => $id]);
         if (!($status instanceof StatusInterface)) {
             return [];
+        }
+
+        if (!$this->shouldExtractProperties) {
+            return $status;
         }
 
         $statusDocument = json_decode($status->getApiDocument());

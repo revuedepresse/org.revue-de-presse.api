@@ -77,7 +77,7 @@ list-amqp-messages: ## List AMQP messags
 		@/bin/bash -c 'source ./bin/functions.sh && list_amqp_queues'
 
 purge-amqp-queue: ## Purge queue
-		@/bin/bash -c 'docker exec -ti rabbitmq rabbitmqctl purge_queue get-user-status -p /weaving_the_web'
+		@/bin/bash -c 'source ./bin/functions.sh && purge_queues'
 
 run-rabbitmq-container: ## Run RabbitMQ container (https://hub.docker.com/_/rabbitmq/)
 		@/bin/bash -c 'source ./bin/functions.sh && run_rabbitmq_container'

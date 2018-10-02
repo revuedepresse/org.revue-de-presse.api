@@ -714,6 +714,8 @@ class Accessor implements TwitterErrorAwareInterface
                 $suspendedMessageMessage = $this->logNotFoundMemberMessage($screenName);
                 throw new NotFoundMemberException($suspendedMessageMessage, $exception->getCode(), $exception);
             }
+
+            throw $exception;
         }
 
         $this->guardAgainstUnavailableResource($twitterUser);

@@ -128,7 +128,7 @@ class UserRepository extends EntityRepository
      * @return User
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    protected function saveMember(User $member)
+    public function saveMember(User $member)
     {
         $entityManager = $this->getEntityManager();
 
