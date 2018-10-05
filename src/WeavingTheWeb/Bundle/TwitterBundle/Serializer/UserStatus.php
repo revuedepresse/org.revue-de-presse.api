@@ -648,6 +648,13 @@ class UserStatus
         }
 
         $statuses = $this->accessor->fetchTimelineStatuses($options);
+        if ($statuses instanceof \stdClass && isset($statuses->error)) {
+            throw new ProtectedAccountException(
+                $statuses->error,
+                $this->accessor::ERROR_PROTECTED_ACCOUNT
+            );
+        }
+
         $this->declareExtremumIdForMember(
             $statuses,
             $lookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow
