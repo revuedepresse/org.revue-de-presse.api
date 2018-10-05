@@ -289,4 +289,50 @@ class StatusRepository extends ArchivedStatusRepository
             return [];
         }
     }
+
+    /**
+     * @param $status
+     * @return User
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException
+     */
+    public function declareMaximumStatusId($status)
+    {
+        $maxStatus = $status->id_str;
+
+        return $this->memberManager->declareMaxStatusIdForMemberWithScreenName(
+            $maxStatus,
+            $status->user->screen_name
+        );
+    }
+
+    /**
+     * @param $status
+     * @return User
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException
+     */
+    public function declareMinimumStatusId($status)
+    {
+        $minStatus = $status->id_str;
+
+        return $this->memberManager->declareMinStatusIdForMemberWithScreenName(
+            $minStatus,
+            $status->user->screen_name
+        );
+    }
+
+    /**
+     * @param $screenName
+     * @return mixed
+     */
+    public function getIdsOfExtremeStatusesSavedForMemberHavingScreenName(string $screenName)
+    {
+        $member = $this->memberManager->findOneBy(['twitter_username' => $screenName]);
+
+        return [
+            'min_status_id' => $member->minStatusId,
+            'max_status_id' => $member->maxStatusId
+        ];
+    }
 }

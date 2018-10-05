@@ -15,6 +15,7 @@ use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\ArchivedStatus;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Status;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\StatusInterface;
+use WTW\UserBundle\Entity\User;
 use WTW\UserBundle\Repository\UserRepository;
 
 /**
@@ -292,6 +293,17 @@ class ArchivedStatusRepository extends ResourceRepository
      */
     protected function findNextExtremum($screenName, $direction = 'asc', $before = null)
     {
+        $member = $this->memberManager->findOneBy(['twitter_username' => $screenName]);
+        if ($member instanceof User) {
+            if ($direction = 'desc' && !is_null($member->maxStatusId)) {
+                return ['statusId' => $member->maxStatusId];
+            }
+
+            if ($direction = 'asc' && !is_null($member->minStatusId)) {
+                return ['statusId' => $member->minStatusId];
+            }
+        }
+
         $queryBuilder = $this->createQueryBuilder('s');
         $queryBuilder->select('s.statusId')
             ->andWhere('s.screenName = :screenName')
