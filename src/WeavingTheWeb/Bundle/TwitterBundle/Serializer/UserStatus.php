@@ -63,17 +63,17 @@ class UserStatus
     }
 
     /**
-     * @var \WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository $userStreamRepository
+     * @var \WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository $statusRepository
      */
-    protected $userStreamRepository;
+    protected $statusRepository;
 
     /**
-     * @param $userStreamRepository
+     * @param $statusRepository
      * @return $this
      */
-    public function setUserStreamRepository($userStreamRepository)
+    public function setStatusRepository($statusRepository)
     {
-        $this->userStreamRepository = $userStreamRepository;
+        $this->statusRepository = $statusRepository;
 
         return $this;
     }
@@ -344,7 +344,7 @@ class UserStatus
         $member = $this->accessor->showUser($options['screen_name']);
         $whispers = intval($member->statuses_count);
 
-        $storedWhispers = $this->userStreamRepository->countHowManyStatusesFor($options['screen_name']);
+        $storedWhispers = $this->statusRepository->countHowManyStatusesFor($options['screen_name']);
 
         if ($storedWhispers === $whispers) {
             return true;
@@ -538,13 +538,13 @@ class UserStatus
         if (array_key_exists('before', $this->serializationOptions)
             && $this->serializationOptions['before']
         ) {
-            $status = $this->userStreamRepository->findLocalMaximum(
+            $status = $this->statusRepository->findLocalMaximum(
                 $options['screen_name'],
                 $this->serializationOptions['before']
             );
             $logPrefix = 'local ';
         } else {
-            $status = $this->userStreamRepository->$updateMethod($options['screen_name']);
+            $status = $this->statusRepository->$updateMethod($options['screen_name']);
             $logPrefix = '';
         }
 
@@ -577,7 +577,7 @@ class UserStatus
      */
     protected function remainingStatuses($options)
     {
-        $serializedStatusCount = $this->userStreamRepository->countHowManyStatusesFor($options['screen_name']);
+        $serializedStatusCount = $this->statusRepository->countHowManyStatusesFor($options['screen_name']);
         $existingStatus = $this->translator->transChoice(
             'logs.info.status_existing',
             $serializedStatusCount,
@@ -625,20 +625,49 @@ class UserStatus
     }
 
     /**
-     * @param $options
+     * @param      $options
      * @param null $aggregateId
      * @return int|null
-     * @throws \Exception
+     * @throws NotFoundMemberException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     protected function saveStatusesMatchingCriteria($options, $aggregateId = null)
     {
+        $statusesIds = $this->statusRepository->getIdsOfExtremeStatusesSavedForMemberHavingScreenName(
+            $options['screen_name']
+        );
+        $firstStatusId = $statusesIds['min_status_id'];
+        $lastStatusId = $statusesIds['max_status_id'];
+
+        $lookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow = false;
         if (array_key_exists('max_id', $options) && is_infinite($options['max_id'])) {
-           unset($options['max_id']);
+            unset($options['max_id']);
+            $lookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow = true;
         }
 
         $statuses = $this->accessor->fetchTimelineStatuses($options);
+        $this->declareExtremumIdForMember(
+            $statuses,
+            $lookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow
+        );
 
-        return $this->saveStatusesForScreenName($statuses, $options['screen_name'], $aggregateId);
+        if (!$lookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow &&
+            !is_null($firstStatusId) &&
+            !is_null($lastStatusId) &&
+            count($statuses) > 0 &&
+            ($statuses[count($statuses) - 1]->id >= intval($firstStatusId)) &&
+            ($statuses[count($statuses) - 1]->id <= intval($lastStatusId))
+        ) {
+            return 0;
+        }
+
+        return $this->saveStatusesForScreenName(
+            $statuses,
+            $options['screen_name'],
+            $aggregateId
+        );
     }
 
     /**
@@ -689,7 +718,7 @@ class UserStatus
      */
     protected function logTotalStatuses($options)
     {
-        $totalStatuses = $this->userStreamRepository->countOlderStatuses(
+        $totalStatuses = $this->statusRepository->countOlderStatuses(
             $options['screen_name'],
             $options['max_id']
         );
@@ -813,7 +842,7 @@ class UserStatus
 
             $this->logger->info(sprintf('Fetched "%d" statuses for "%s"', count($statuses), $screenName));
 
-            $statuses = $this->userStreamRepository->saveStatuses(
+            $statuses = $this->statusRepository->saveStatuses(
                 $statuses,
                 $this->accessor->getUserToken(),
                 $aggregate,
@@ -973,7 +1002,33 @@ class UserStatus
      */
     private function shouldLookUpFutureStatuses(string $screenName): bool
     {
-        return $this->userStreamRepository->countHowManyStatusesFor($screenName)
+        return $this->statusRepository->countHowManyStatusesFor($screenName)
             > self::MAX_AVAILABLE_TWEETS_PER_USER;
+    }
+
+    /**
+     * @param array $statuses
+     * @param       $lookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow
+     * @return \WTW\UserBundle\Entity\User
+     * @throws NotFoundMemberException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    private function declareExtremumIdForMember(
+        array $statuses,
+        $lookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow
+    ) {
+        if (count($statuses) > 0) {
+            if ($lookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow) {
+                $lastStatusFetched = $statuses[0];
+
+                return $this->statusRepository->declareMaximumStatusId($lastStatusFetched);
+            }
+
+            if (!$lookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow) {
+                $firstStatusFetched = $statuses[count($statuses) - 1];
+
+                return $this->statusRepository->declareMinimumStatusId($firstStatusFetched);
+            }
+        }
     }
 }

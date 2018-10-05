@@ -10,4 +10,4 @@ xdebug.overload_var_dump=1
 xdebug.trace_format=1
 xdebug.show_exception_trace=0
 xdebug.default_enable=1
-xdebug.max_nesting_level=250
+xdebug.max_nesting_level=2500

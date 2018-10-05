@@ -1020,4 +1020,9 @@ class User extends BaseUser
      * @ORM\Column(name="total_statuses", type="integer", options={"default": 0})
      */
     public $totalStatuses = 0;
+
+    /**
+     * @ORM\Column(name="description", type="text", nullable=true)
+     */
+    public $description = '';
 }
