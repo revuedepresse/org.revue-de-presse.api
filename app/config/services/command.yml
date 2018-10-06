@@ -4,6 +4,7 @@ parameters:
     command.select_status_collection.class:                                     'App\StatusCollection\Command\SelectStatusCollectionCommand'
     weaving_the_web_amqp.consumer.conversation_status.class:                    'App\Conversation\Consumer\ConversationStatusConsumer'
     weaving_the_web_amqp.producer.produce_conversation_messages_command.class:  'App\Conversation\Producer\ProduceConversationMessagesCommand'
+    weaving_the_web_amqp.producer.produce_member_messages_command.class:        'App\Conversation\Producer\ProduceMemberMessagesCommand'
     weaving_the_web_amqp.produce_lists_members_command.class:                   'WeavingTheWeb\Bundle\AmqpBundle\Command\ProduceListsMembersCommand'
     weaving_the_web_amqp.twitter.user_status.class:                             'WeavingTheWeb\Bundle\AmqpBundle\Twitter\UserStatus'
 
@@ -75,6 +76,15 @@ services:
 
     weaving_the_web_amqp.producer.conversation_status:
         class:               "%weaving_the_web_amqp.producer.produce_conversation_messages_command.class%"
+        properties:
+            operationClock:  "@operation.clock"
+            filesystem:      "@filesystem"
+            statusDirectory: "%kernel.root_dir%/../src/App/Resources/statuses"
+        tags:
+            - { name: 'console.command' }
+
+    weaving_the_web_amqp.producer.member_status:
+        class:               "%weaving_the_web_amqp.producer.produce_member_messages_command.class%"
         properties:
             operationClock:  "@operation.clock"
             filesystem:      "@filesystem"
