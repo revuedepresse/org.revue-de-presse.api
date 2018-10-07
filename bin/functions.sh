@@ -589,6 +589,46 @@ function produce_amqp_messages_from_members_lists {
     execute_command "${rabbitmq_output_log}" "${rabbitmq_error_log}"
 }
 
+function produce_amqp_messages_for_timely_statuses {
+    export NAMESPACE="produce_messages_for_timely_statuses"
+    make remove-php-container
+
+    export XDEBUG_CONFIG="idekey='phpstorm-xdebug'"
+
+    if [ -z "${PROJECT_DIR}" ];
+    then
+        export PROJECT_DIR='/var/www/devobs'
+    fi
+
+    local rabbitmq_output_log="app/logs/rabbitmq."${NAMESPACE}".out.log"
+    local rabbitmq_error_log="app/logs/rabbitmq."${NAMESPACE}".error.log"
+    ensure_log_files_exist "${rabbitmq_output_log}" "${rabbitmq_error_log}"
+    rabbitmq_output_log="${PROJECT_DIR}/${rabbitmq_output_log}"
+    rabbitmq_error_log="${PROJECT_DIR}/${rabbitmq_error_log}"
+
+    local php_command='app/console weaving_the_web:amqp:produce:timely_statuses'
+
+    local symfony_environment="$(get_symfony_environment)"
+
+    if [ -z "${DOCKER_MODE}" ];
+    then
+        command="${symfony_environment} /usr/bin/php $PROJECT_DIR/${php_command}"
+        echo 'Executing command: "'$command'"'
+        echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
+        echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
+        /bin/bash -c "$command >> ${rabbitmq_output_log} 2>> ${rabbitmq_error_log}"
+
+        return
+    fi
+
+    export SCRIPT="${php_command}"
+
+    echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
+    echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
+
+    execute_command "${rabbitmq_output_log}" "${rabbitmq_error_log}"
+}
+
 function produce_amqp_messages_from_member_timeline {
     export NAMESPACE="produce_messages_from_member_timeline"
     make remove-php-container
