@@ -147,7 +147,7 @@ function consume_amqp_messages_for_aggregates_status {
 }
 
 function consume_amqp_lively_status_messages {
-    consume_amqp_messages 'lively_status' 'consumer'
+    consume_amqp_messages 'timely_status' 'consumer'
 }
 
 function purge_queues() {
