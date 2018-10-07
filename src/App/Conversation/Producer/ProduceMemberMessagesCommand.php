@@ -35,11 +35,6 @@ class ProduceMemberMessagesCommand extends AggregateAwareCommand
      */
     public $operationClock;
 
-    /**
-     * @var Filesystem
-     */
-    public $filesystem;
-
     public function configure()
     {
         $this->setName('weaving_the_web:amqp:produce:member_messages')

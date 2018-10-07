@@ -5,6 +5,7 @@ namespace App\Conversation\Consumer;
 use App\Accessor\Exception\NotFoundStatusException;
 use App\Accessor\StatusAccessor;
 use App\Aggregate\AggregateAwareTrait;
+use App\Amqp\AmqpMessageAwareTrait;
 use App\Conversation\ConversationAwareTrait;
 use App\Operation\OperationClock;
 use Doctrine\ORM\EntityManager;
@@ -27,6 +28,7 @@ class ConversationStatusConsumer implements ConsumerInterface
 {
     use AggregateAwareTrait;
     use ConversationAwareTrait;
+    use AmqpMessageAwareTrait;
 
     const ERROR_CODE_USER_NOT_FOUND = 100;
 
@@ -165,21 +167,6 @@ class ConversationStatusConsumer implements ConsumerInterface
 
 
         return $status instanceof Status;
-    }
-
-    /**
-     * @param AmqpMessage $message
-     * @return mixed
-     * @throws \Exception
-     */
-    public function parseMessage(AMQPMessage $message)
-    {
-        $options = json_decode(unserialize($message->body), true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new \InvalidArgumentException('Valid credentials are required');
-        }
-
-        return $options;
     }
 
     /**

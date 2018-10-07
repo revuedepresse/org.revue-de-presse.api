@@ -7,7 +7,15 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass="WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository")
- * @ORM\Table(name="weaving_aggregate")
+ * @ORM\Table(
+ *     name="weaving_aggregate",
+ *     indexes={
+ *         @ORM\Index(
+ *             name="name",
+ *             columns={"name"}
+ *         )
+ *     }
+ * )
  */
 class Aggregate
 {
