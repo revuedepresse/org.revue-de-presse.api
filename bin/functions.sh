@@ -76,6 +76,12 @@ function kill_existing_consumers {
 
 function consume_amqp_messages {
     local command_suffix="${1}"
+    local namespace="${2}"
+
+    if [ -z "${namespace}" ];
+    then
+        namespace='twitter'
+    fi
 
     export NAMESPACE="consume_amqp_messages"
 
@@ -107,7 +113,7 @@ function consume_amqp_messages {
     rabbitmq_error_log="${PROJECT_DIR}/${rabbitmq_error_log}"
 
     env_option="$(get_environment_option)"
-    export SCRIPT="app/console rabbitmq:consumer -l $MEMORY_LIMIT -w -m $MESSAGES weaving_the_web_amqp.twitter.""${command_suffix}""$env_option -vvv"
+    export SCRIPT="app/console rabbitmq:consumer -l $MEMORY_LIMIT -w -m $MESSAGES weaving_the_web_amqp.""${namespace}"".""${command_suffix}""$env_option -vvv"
 
     local symfony_environment="$(get_symfony_environment)"
 
@@ -141,7 +147,7 @@ function consume_amqp_messages_for_aggregates_status {
 }
 
 function consume_amqp_lively_status_messages {
-    consume_amqp_messages 'lively_status'
+    consume_amqp_messages 'lively_status' 'consumer'
 }
 
 function purge_queues() {
