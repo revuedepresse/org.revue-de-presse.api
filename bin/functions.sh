@@ -140,6 +140,10 @@ function consume_amqp_messages_for_aggregates_status {
     consume_amqp_messages 'aggregates_status'
 }
 
+function consume_amqp_lively_status_messages {
+    consume_amqp_messages 'lively_status'
+}
+
 function purge_queues() {
     docker exec -ti rabbitmq rabbitmqctl purge_queue get-user-status -p /weaving_the_web
     docker exec -ti rabbitmq rabbitmqctl purge_queue get-conversation-status -p /weaving_the_web
