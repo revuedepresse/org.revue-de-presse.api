@@ -11,9 +11,15 @@ parameters:
             is_bundle:  false
         Status:
             alias:      'Status'
-            dir:        '%kernel.root_dir%/config/model'
+            dir:        '%kernel.root_dir%/config/model/status'
             is_bundle:  false
             prefix:     App\Status\Entity
+            type:       xml
+        Aggregate:
+            alias:      'Aggregate'
+            dir:        '%kernel.root_dir%/config/model/aggregate'
+            is_bundle:  false
+            prefix:     App\Aggregate\Entity
             type:       xml
 
 # Doctrine Configuration

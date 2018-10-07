@@ -11,6 +11,15 @@ services:
         arguments:
             - 'App\Status\Entity\NotFoundStatus'
 
+    repository.timely_status:
+        factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
+        class: 'App\Aggregate\Entity\TimelyStatus'
+        arguments:
+            - 'App\Aggregate\Entity\TimelyStatus'
+        properties:
+            statusRepository:       "@weaving_the_web_twitter.repository.status"
+            aggregateRepository:    "@weaving_the_web_twitter.repository.aggregate"
+
     weaving_the_web_api.repository.token:
         factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
         class: '%weaving_the_web_api.repository.token.class%'

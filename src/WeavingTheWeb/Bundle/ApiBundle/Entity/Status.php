@@ -350,10 +350,24 @@ class Status implements StatusInterface
     }
 
     /**
-     * @ORM\ManyToMany(targetEntity="Aggregate", inversedBy="userStreams", cascade={"persist"})
+     * @ORM\ManyToMany(
+     *     targetEntity="Aggregate",
+     *     inversedBy="userStreams",
+     *     cascade={"persist"}
+     * )
      * @ORM\JoinTable(name="weaving_status_aggregate",
-     *      joinColumns={@ORM\JoinColumn(name="status_id", referencedColumnName="ust_id")},
-     *      inverseJoinColumns={@ORM\JoinColumn(name="aggregate_id", referencedColumnName="id")}
+     *      joinColumns={
+     *          @ORM\JoinColumn(
+     *              name="status_id",
+     *              referencedColumnName="ust_id"
+     *          )
+     *      },
+     *      inverseJoinColumns={
+     *          @ORM\JoinColumn(
+     *              name="aggregate_id",
+     *              referencedColumnName="id"
+     *          )
+     *      }
      * )
      */
     protected $aggregates;

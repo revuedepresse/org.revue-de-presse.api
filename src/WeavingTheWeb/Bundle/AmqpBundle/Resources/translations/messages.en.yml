@@ -6,6 +6,8 @@ amqp:
             success: '{{ count }} messages have been produced for list "{{ list }}".'
         conversations:
             success: '{{ count }} messages have been produced to collect conversations.'
+        member_messages:
+            success: '{{ count }} messages have been produced to collect member statuses.'
     info:
         user_persisted: 'User information has been persisted for "{{ user }}".'
         message_published: 'A message has been published for "{{ user }}".'
