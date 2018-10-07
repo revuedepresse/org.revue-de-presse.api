@@ -83,7 +83,7 @@ function consume_amqp_messages {
         namespace='twitter'
     fi
 
-    export NAMESPACE="consume_amqp_messages"
+    export NAMESPACE="consume_amqp_messages_${command_suffix}_${namespace}"
 
     export XDEBUG_CONFIG="idekey='phpstorm-xdebug'"
 
