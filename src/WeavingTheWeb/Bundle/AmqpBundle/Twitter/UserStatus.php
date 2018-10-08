@@ -79,10 +79,6 @@ class UserStatus implements ConsumerInterface
      */
     public function execute(AmqpMessage $message)
     {
-        if ($this->operationClock->shouldSkipOperation()) {
-            return true;
-        }
-
         try {
             $options = $this->parseMessage($message);
         } catch (\Exception $exception) {

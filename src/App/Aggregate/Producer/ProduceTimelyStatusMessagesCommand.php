@@ -28,11 +28,6 @@ class ProduceTimelyStatusMessagesCommand extends AggregateAwareCommand
     private $translator;
 
     /**
-     * @var OperationClock
-     */
-    public $operationClock;
-
-    /**
      * @var string
      */
     public $statusDirectory;
@@ -55,10 +50,6 @@ class ProduceTimelyStatusMessagesCommand extends AggregateAwareCommand
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        if ($this->operationClock->shouldSkipOperation()) {
-            return self::RETURN_STATUS_SUCCESS;
-        }
-
         $this->input = $input;
         $this->output = $output;
 

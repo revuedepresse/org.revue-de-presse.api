@@ -61,7 +61,6 @@ services:
         properties:
             aggregateRepository:    "@weaving_the_web_twitter.repository.aggregate"
             entityManager:          "@doctrine.orm.entity_manager"
-            operationClock:         "@operation.clock"
             statusAccessor:         "@weaving_the_web.accessor.status"
             timelyStatusRepository:   "@repository.timely_status"
 
@@ -100,7 +99,6 @@ services:
     weaving_the_web_amqp.producer.timely_status:
         class:               "%weaving_the_web_amqp.producer.produce_timely_status_messages_command.class%"
         properties:
-            operationClock:  "@operation.clock"
             statusDirectory: "%kernel.root_dir%/../src/App/Resources/statuses"
         tags:
             - { name: 'console.command' }

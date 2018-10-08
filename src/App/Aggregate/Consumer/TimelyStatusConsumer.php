@@ -25,11 +25,6 @@ class TimelyStatusConsumer implements ConsumerInterface
     const ERROR_CODE_USER_NOT_FOUND = 100;
 
     /**
-     * @var OperationClock
-     */
-    public $operationClock;
-
-    /**
      * @var EntityManager
      */
     public $entityManager;
@@ -85,10 +80,6 @@ class TimelyStatusConsumer implements ConsumerInterface
      */
     public function execute(AMQPMessage $message)
     {
-        if ($this->operationClock->shouldSkipOperation()) {
-            return true;
-        }
-
         $timelyStatus = null;
 
         try {
