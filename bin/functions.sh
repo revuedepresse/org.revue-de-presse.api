@@ -445,6 +445,12 @@ function run_php_script() {
         script="${SCRIPT}"
     fi
 
+    local memory=''
+    if [ ! -z "${MEMORY_LIMIT}" ];
+    then
+        memory="${MEMORY_LIMIT}-"
+    fi
+
     local namespace=''
     if [ ! -z "${NAMESPACE}" ];
     then
@@ -463,7 +469,7 @@ function run_php_script() {
     -e '"${symfony_environment}"' \
     -v '`pwd`'/provisioning/containers/php/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini \
     -v '`pwd`':/var/www/devobs \
-    --name=php'"${suffix}"' php /var/www/devobs/'"${script}")
+    --name=php'"${suffix}"' php'"${memory}"' /var/www/devobs/'"${script}")
 
     echo 'About to execute "'"${command}"'"'
 
@@ -622,6 +628,7 @@ function produce_amqp_messages_for_timely_statuses {
     fi
 
     export SCRIPT="${php_command}"
+    export MEMORY_LIMIT=' -d memory_limit=4G'
 
     echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
     echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
