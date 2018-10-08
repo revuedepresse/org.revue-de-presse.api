@@ -5,7 +5,6 @@ namespace WeavingTheWeb\Bundle\AmqpBundle\Command;
 use App\Conversation\Producer\MemberAwareTrait;
 use App\Operation\OperationClock;
 
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption,
     Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Output\OutputInterface;
@@ -124,14 +123,15 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        if ($this->operationClock->shouldSkipOperation()) {
-            return self::RETURN_STATUS_SUCCESS;
-        }
-
         $this->input = $input;
         $this->output = $output;
 
         $this->setOptionsFromInput();
+
+        if ($this->operationClock->shouldSkipOperation() && !$this->givePriorityToAggregate) {
+            return self::RETURN_STATUS_SUCCESS;
+        }
+
         $this->setUpDependencies();
 
         try {
