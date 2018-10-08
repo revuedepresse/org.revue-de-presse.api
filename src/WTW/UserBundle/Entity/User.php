@@ -1025,4 +1025,20 @@ class User extends BaseUser
      * @ORM\Column(name="description", type="text", nullable=true)
      */
     public $description = '';
+
+    /**
+     * @var \DateTime
+     *
+     * @ORM\Column(name="last_status_publication_date", type="datetime", nullable=true)
+     */
+    public $lastStatusPublicationDate = null;
+
+    public function isAWhisperer()
+    {
+        $oneMonthAgo = new \DateTime('now', new \DateTimeZone('UTC'));
+        $oneMonthAgo->modify('-1 month');
+
+        return !is_null($this->lastStatusPublicationDate) &&
+            ($this->lastStatusPublicationDate < $oneMonthAgo);
+    }
 }
