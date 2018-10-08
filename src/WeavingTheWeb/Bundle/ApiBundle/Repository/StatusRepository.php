@@ -2,6 +2,7 @@
 
 namespace WeavingTheWeb\Bundle\ApiBundle\Repository;
 
+use App\Accessor\Exception\NotFoundStatusException;
 use App\StatusCollection\Mapping\MappingAwareInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\NoResultException;
@@ -173,6 +174,13 @@ class StatusRepository extends ArchivedStatusRepository
         $lastStatus = $this->findOneBy([
             'screenName' => $screenName
         ], ['createdAt' => 'DESC']);
+
+        if (!$lastStatus instanceof StatusInterface) {
+            throw new NotFoundStatusException(sprintf(
+                'No status has been collected for member with screen name "%s"',
+                $screenName
+            ));
+        }
 
         $member->lastStatusPublicationDate = $lastStatus->getCreatedAt();
 
