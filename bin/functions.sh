@@ -448,7 +448,7 @@ function run_php_script() {
     local memory=''
     if [ ! -z "${MEMORY_LIMIT}" ];
     then
-        memory="${MEMORY_LIMIT}-"
+        memory="${MEMORY_LIMIT}"
     fi
 
     local namespace=''
