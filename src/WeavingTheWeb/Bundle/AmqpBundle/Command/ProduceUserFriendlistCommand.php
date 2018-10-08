@@ -139,7 +139,7 @@ class ProduceUserFriendListCommand extends AggregateAwareCommand
 
             if (isset($member)) {
                 try {
-                    $this->handlePreExistingMember($member, $assumedScreenName, $messageBody);
+                    $this->handlePreExistingMember($member, $member->getTwitterUsername(), $messageBody);
                 } catch (SkippableMemberException $exception) {
                     continue;
                 }
@@ -210,25 +210,7 @@ class ProduceUserFriendListCommand extends AggregateAwareCommand
     {
         $twitterUsername = $member->getTwitterUsername();
 
-        if ($member->isProtected()) {
-            $protectedAccount = $this->translator->trans(
-                'amqp.info.skipped_protected_account',
-                ['{{ user }}' => $assumedScreenName],
-                'messages'
-            );
-            $this->logger->info($protectedAccount);
-
-            throw new SkippableMemberException($protectedAccount);
-        } else if ($member->isSuspended()) {
-            $suspendedAccount = $this->translator->trans(
-                'amqp.info.skipped_suspended_account',
-                ['{{ user }}' => $assumedScreenName],
-                'messages'
-            );
-            $this->logger->info($suspendedAccount);
-
-            throw new SkippableMemberException($suspendedAccount);
-        }
+        $this->guardAgainstMembersWhichShouldBeSkipped($member, $assumedScreenName);
 
         $aggregate = $this->getListAggregateByName($twitterUsername, 'user :: ' . $twitterUsername);
 
@@ -352,5 +334,46 @@ class ProduceUserFriendListCommand extends AggregateAwareCommand
         }
 
         return $member;
+    }
+
+    /**
+     * @param User $member
+     * @param      $assumedScreenName
+     * @throws SkippableMemberException
+     */
+    private function guardAgainstMembersWhichShouldBeSkipped(User $member, $assumedScreenName): void
+    {
+        if ($member->isAWhisperer()) {
+            $skippedWhispererMessage = $this->translator->trans(
+                'amqp.info.skipped_whisperer',
+                ['{{ user }}' => $assumedScreenName],
+                'messages'
+            );
+            $this->logger->info($skippedWhispererMessage);
+
+            throw new SkippableMemberException($skippedWhispererMessage);
+        }
+
+        if ($member->isProtected()) {
+            $protectedAccount = $this->translator->trans(
+                'amqp.info.skipped_protected_account',
+                ['{{ user }}' => $assumedScreenName],
+                'messages'
+            );
+            $this->logger->info($protectedAccount);
+
+            throw new SkippableMemberException($protectedAccount);
+        }
+
+        if ($member->isSuspended()) {
+            $suspendedAccount = $this->translator->trans(
+                'amqp.info.skipped_suspended_account',
+                ['{{ user }}' => $assumedScreenName],
+                'messages'
+            );
+            $this->logger->info($suspendedAccount);
+
+            throw new SkippableMemberException($suspendedAccount);
+        }
     }
 }

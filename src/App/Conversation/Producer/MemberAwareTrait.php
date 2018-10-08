@@ -8,12 +8,13 @@ use WTW\UserBundle\Entity\User;
 trait MemberAwareTrait
 {
     /**
-     * @param $friend
-     * @return mixed
+     * @param \stdClass $friend
+     * @return User
      * @throws \Exception
      */
     private function getMessageUser(\stdClass $friend)
     {
+        /** @var User $member */
         $member = $this->userRepository->findOneBy(['twitterID' => $friend->id]);
         $preExistingMember = $member instanceof User;
 
