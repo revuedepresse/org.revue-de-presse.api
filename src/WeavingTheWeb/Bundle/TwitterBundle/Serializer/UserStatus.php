@@ -2,6 +2,7 @@
 
 namespace WeavingTheWeb\Bundle\TwitterBundle\Serializer;
 
+use App\Accessor\Exception\NotFoundStatusException;
 use App\Aggregate\Exception\LockedAggregateException;
 use App\Operation\OperationClock;
 use Psr\Log\LoggerInterface;
@@ -368,7 +369,11 @@ class UserStatus
             return false;
         }
 
-        $this->statusRepository->updateLastStatusPublicationDate($options['screen_name']);
+        try {
+            $this->statusRepository->updateLastStatusPublicationDate($options['screen_name']);
+        } catch (NotFoundStatusException $exception) {
+            $this->logger->info($exception->getMessage());
+        }
 
         if ($whisperer->getExpectedWhispers() === 0) {
             $this->whispererRepository->declareWhisperer($whisperer->setExpectedWhispers($member->statuses_count));

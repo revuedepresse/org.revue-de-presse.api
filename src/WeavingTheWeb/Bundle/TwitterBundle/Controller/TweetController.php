@@ -13,7 +13,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller,
     Symfony\Component\HttpFoundation\Request;
 
 use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
-use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
 
 /**
  * @package WeavingTheWeb\Bundle\TwitterBundle\Controller
