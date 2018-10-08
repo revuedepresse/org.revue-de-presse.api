@@ -660,7 +660,11 @@ class Accessor implements TwitterErrorAwareInterface
             return false;
         }
 
-        return $member->isProtected() || $member->hasBeenDeclaredAsNotFound() || $member->isSuspended();
+        return $member->isProtected() ||
+            $member->hasBeenDeclaredAsNotFound() ||
+            $member->isSuspended() ||
+            $member->isAWhisperer()
+        ;
     }
 
     /**

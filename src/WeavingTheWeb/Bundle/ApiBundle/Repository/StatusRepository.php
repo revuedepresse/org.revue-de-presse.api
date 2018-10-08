@@ -158,6 +158,28 @@ class StatusRepository extends ArchivedStatusRepository
     }
 
     /**
+     * @param $screenName
+     * @return int|mixed
+     * @throws NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException
+     */
+    public function updateLastStatusPublicationDate($screenName)
+    {
+        /** @var User $member */
+        $member = $this->memberManager->findOneBy(['twitter_username' => $screenName]);
+
+        $lastStatus = $this->findOneBy([
+            'screenName' => $screenName
+        ], ['createdAt' => 'DESC']);
+
+        $member->lastStatusPublicationDate = $lastStatus->getCreatedAt();
+
+        return $this->memberManager->saveMember($member);
+    }
+
+    /**
      * @param array $extract
      * @return \WeavingTheWeb\Bundle\ApiBundle\Entity\Status
      */

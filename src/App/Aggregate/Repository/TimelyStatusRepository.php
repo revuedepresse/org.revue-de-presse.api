@@ -4,6 +4,8 @@ namespace App\Aggregate\Repository;
 
 use App\Aggregate\Entity\TimelyStatus;
 use Doctrine\ORM\EntityRepository;
+use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
+use WeavingTheWeb\Bundle\ApiBundle\Entity\StatusInterface;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
 
@@ -38,6 +40,31 @@ class TimelyStatusRepository extends EntityRepository
             'id' => $properties['aggregate_id'],
             'screenName' => $properties['member_name']
         ]);
+
+        return new TimelyStatus(
+            $status,
+            $aggregate,
+            $status->getCreatedAt()
+        );
+    }
+
+    /**
+     * @param StatusInterface $status
+     * @param Aggregate|null  $aggregate
+     * @return TimelyStatus
+     * @throws \Exception
+     */
+    public function fromAggregatedStatus(
+        StatusInterface $status,
+        Aggregate $aggregate = null
+    ): TimelyStatus {
+        $timelyStatus = $this->findOneBy([
+            'status' => $status
+        ]);
+
+        if ($timelyStatus instanceof TimelyStatus) {
+            return $timelyStatus->updateTimeRange();
+        }
 
         return new TimelyStatus(
             $status,

@@ -109,15 +109,17 @@ services:
             memberManager:            '@user_manager'
             registry:                 '@doctrine'
             statusLogger:             '@monolog.logger.status'
+            timelyStatusRepository: '@repository.timely_status'
 
     weaving_the_web_twitter.repository.archived_status:
         class:               '%weaving_the_web_api.repository.archived_status.class%'
         factory:             'doctrine.orm.entity_manager:getRepository'
         arguments:           [ '%weaving_the_web_twitter.entity.archived_status.class%' ]
         properties:
-            memberManager:   '@user_manager'
-            registry:        '@doctrine'
-            statusLogger:    '@monolog.logger.status'
+            memberManager:          '@user_manager'
+            registry:               '@doctrine'
+            statusLogger:           '@monolog.logger.status'
+            timelyStatusRepository: '@repository.timely_status'
 
     weaving_the_web_twitter.repository.read.status:
         class:              '%weaving_the_web_api.repository.status.class%'

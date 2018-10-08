@@ -4,6 +4,7 @@ namespace App\Aggregate\Entity;
 
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Status;
+use WeavingTheWeb\Bundle\ApiBundle\Entity\StatusInterface;
 
 class TimelyStatus
 {
@@ -55,7 +56,7 @@ class TimelyStatus
     private $memberName;
 
     public function __construct(
-        Status $status,
+        StatusInterface $status,
         Aggregate $aggregate,
         \DateTime $publicationDateTime
     ) {

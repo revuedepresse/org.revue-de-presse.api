@@ -368,6 +368,8 @@ class UserStatus
             return false;
         }
 
+        $this->statusRepository->updateLastStatusPublicationDate($options['screen_name']);
+
         if ($whisperer->getExpectedWhispers() === 0) {
             $this->whispererRepository->declareWhisperer($whisperer->setExpectedWhispers($member->statuses_count));
         }
