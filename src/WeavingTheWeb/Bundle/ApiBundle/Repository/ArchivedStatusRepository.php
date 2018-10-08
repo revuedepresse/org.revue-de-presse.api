@@ -2,6 +2,7 @@
 
 namespace WeavingTheWeb\Bundle\ApiBundle\Repository;
 
+use App\Aggregate\Repository\TimelyStatusRepository;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\NoResultException;
@@ -53,6 +54,10 @@ class ArchivedStatusRepository extends ResourceRepository
      */
     public $shouldExtractProperties;
 
+    /**
+     * @var TimelyStatusRepository
+     */
+    public $timelyStatusRepository;
 
     public function setOauthTokens($oauthTokens)
     {
@@ -116,6 +121,9 @@ class ArchivedStatusRepository extends ResourceRepository
                     );
                 }
 
+                $timelyStatus = $this->timelyStatusRepository->fromAggregatedStatus($memberStatus, $aggregate);
+
+                $entityManager->persist($timelyStatus);
                 $entityManager->persist($memberStatus);
             } catch (ORMException $exception) {
                 if ($exception->getMessage() === ORMException::entityManagerClosed()->getMessage()) {
