@@ -200,6 +200,13 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
             try {
                 $member = $this->getMessageUser($friend);
 
+                if ($member->isAWhisperer()) {
+                    $message = sprintf('Ignoring whisperer with screen name "%s"', $friend->screen_name);
+                    $this->logger->info($message);
+
+                    continue;
+                }
+
                 if ($member->isProtected()) {
                     $message = sprintf('Ignoring protected member with screen name "%s"', $friend->screen_name);
                     $this->logger->info($message);
