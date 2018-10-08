@@ -5,7 +5,6 @@ namespace WeavingTheWeb\Bundle\AmqpBundle\Command;
 use App\Conversation\Producer\MemberAwareTrait;
 use App\Operation\OperationClock;
 
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption,
     Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Output\OutputInterface;
