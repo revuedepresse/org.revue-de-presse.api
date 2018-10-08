@@ -123,14 +123,15 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        if ($this->operationClock->shouldSkipOperation()) {
-            return self::RETURN_STATUS_SUCCESS;
-        }
-
         $this->input = $input;
         $this->output = $output;
 
         $this->setOptionsFromInput();
+
+        if ($this->operationClock->shouldSkipOperation() && !$this->givePriorityToAggregate) {
+            return self::RETURN_STATUS_SUCCESS;
+        }
+
         $this->setUpDependencies();
 
         try {
