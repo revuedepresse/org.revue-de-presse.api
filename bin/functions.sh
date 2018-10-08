@@ -463,7 +463,7 @@ function run_php_script() {
     -e '"${symfony_environment}"' \
     -v '`pwd`'/provisioning/containers/php/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini \
     -v '`pwd`':/var/www/devobs \
-    --name=php'"${suffix}"' php /var/www/devobs/'"${script}")
+    --name=php'"${suffix}"' php -d memory_limit=-1 /var/www/devobs/'"${script}")
 
     echo 'About to execute "'"${command}"'"'
 
