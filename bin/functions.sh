@@ -446,9 +446,9 @@ function run_php_script() {
     fi
 
     local memory=''
-    if [ ! -z "${MEMORY_LIMIT}" ];
+    if [ ! -z "${PHP_MEMORY_LIMIT}" ];
     then
-        memory="${MEMORY_LIMIT}"
+        memory="${PHP_MEMORY_LIMIT}"
     fi
 
     local namespace=''
@@ -628,7 +628,7 @@ function produce_amqp_messages_for_timely_statuses {
     fi
 
     export SCRIPT="${php_command}"
-    export MEMORY_LIMIT=' -d memory_limit=4G'
+    export PHP_MEMORY_LIMIT=' -d memory_limit=4G'
 
     echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
     echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
