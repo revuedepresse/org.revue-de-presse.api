@@ -593,7 +593,7 @@ QUERY
                 str_pad($this->getStatusRelevance($retweetCount, $favoriteCount), 4, ' '),
                 $this->getStatusAggregate($memberStatus),
                 $memberStatus->getScreenName(),
-                $memberStatus->getTaext(),
+                $memberStatus->getText(),
                 'https://twitter.com/'.$memberStatus->getScreenName().'/status/'.$memberStatus->getStatusId()
             )
         );
