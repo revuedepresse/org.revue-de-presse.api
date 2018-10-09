@@ -109,7 +109,8 @@ services:
             memberManager:            '@user_manager'
             registry:                 '@doctrine'
             statusLogger:             '@monolog.logger.status'
-            timelyStatusRepository: '@repository.timely_status'
+            timelyStatusRepository:   '@repository.timely_status'
+            connection:               '@doctrine.dbal.read_connection'
 
     weaving_the_web_twitter.repository.archived_status:
         class:               '%weaving_the_web_api.repository.archived_status.class%'
@@ -120,6 +121,7 @@ services:
             registry:               '@doctrine'
             statusLogger:           '@monolog.logger.status'
             timelyStatusRepository: '@repository.timely_status'
+            connection:             '@doctrine.dbal.read_connection'
 
     weaving_the_web_twitter.repository.read.status:
         class:              '%weaving_the_web_api.repository.status.class%'
@@ -127,6 +129,8 @@ services:
         arguments:          [ '%weaving_the_web_twitter.entity.status.class%' ]
         calls:
             - [ 'setOauthTokens', [ [ '%weaving_the_web_twitter.oauth_token.default%' ] ] ]
+        properties:
+            connection:     '@doctrine.dbal.read_connection'
 
     weaving_the_web_twitter.repository.token:
         class: '%weaving_the_web_twitter.repository.token.class%'

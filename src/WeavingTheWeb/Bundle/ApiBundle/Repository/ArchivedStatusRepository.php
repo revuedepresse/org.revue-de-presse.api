@@ -4,6 +4,7 @@ namespace WeavingTheWeb\Bundle\ApiBundle\Repository;
 
 use App\Aggregate\Repository\TimelyStatusRepository;
 use Doctrine\Bundle\DoctrineBundle\Registry;
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\NoResultException;
 
@@ -58,6 +59,11 @@ class ArchivedStatusRepository extends ResourceRepository
      * @var TimelyStatusRepository
      */
     public $timelyStatusRepository;
+
+    /**
+     * @var Connection
+     */
+    public $connection;
 
     public function setOauthTokens($oauthTokens)
     {
@@ -434,9 +440,7 @@ QUERY
             ]
         );
 
-        $statement = $this->createQueryBuilder('t')
-            ->getEntityManager()
-            ->getConnection()->executeQuery($query);
+        $statement = $this->connection->executeQuery($query);
 
         $statuses = $statement->fetchAll();
 
@@ -589,7 +593,7 @@ QUERY
                 str_pad($this->getStatusRelevance($retweetCount, $favoriteCount), 4, ' '),
                 $this->getStatusAggregate($memberStatus),
                 $memberStatus->getScreenName(),
-                $memberStatus->getText(),
+                $memberStatus->getTaext(),
                 'https://twitter.com/'.$memberStatus->getScreenName().'/status/'.$memberStatus->getStatusId()
             )
         );
