@@ -9,11 +9,14 @@ RUN apt-get update && apt-get install wget unzip && \
     phpize . && ./configure --with-php-config=`which php-config` && \
     make && make install && \
     pecl install apcu-5.1.12 && \
-    docker-php-ext-enable apcu
+    docker-php-ext-enable apcu && \
+    apt install -y gnupg2 && wget -q -O - https://packagecloud.io/gpg.key | apt-key add - && \
+    echo "deb http://packages.blackfire.io/debian any main" | tee /etc/apt/sources.list.d/blackfire.list && \
+    apt-get update && apt install blackfire-agent blackfire-agent blackfire-php
 
 VOLUME /etc/apache2/sites-available
 
 WORKDIR /var/www/devobs
 
-CMD ["apache2-foreground"]
+CMD ["/etc/init.d/blackfire-agent restart && apache2-foreground"]
 

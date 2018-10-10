@@ -428,6 +428,9 @@ function run_apache() {
 -v '`pwd`'/provisioning/containers/apache/templates:/templates \
 -v '`pwd`'/provisioning/containers/apache/tasks:/tasks \
 -v '`pwd`'/provisioning/containers/apache/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini \
+-v '`pwd`'/provisioning/containers/apache/templates/blackfire/zz-blackfire.ini:/usr/local/etc/php/conf.d/zz-blackfire.ini \
+-v '`pwd`'/provisioning/containers/apache/templates/blackfire/.blackfire.ini:/root/.blackfire.ini \
+-v '`pwd`'/provisioning/containers/apache/templates/blackfire/agent:/etc/blackfire/agent \
 -v '`pwd`':/var/www/devobs \
 --name=apache apache /bin/bash -c "cd /tasks && source setup-virtual-host.sh && tail -f /dev/null"'
 )
