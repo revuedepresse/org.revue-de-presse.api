@@ -428,6 +428,9 @@ function run_apache() {
 -v '`pwd`'/provisioning/containers/apache/templates:/templates \
 -v '`pwd`'/provisioning/containers/apache/tasks:/tasks \
 -v '`pwd`'/provisioning/containers/apache/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini \
+-v '`pwd`'/provisioning/containers/apache/templates/blackfire/zz-blackfire.ini:/usr/local/etc/php/conf.d/zz-blackfire.ini \
+-v '`pwd`'/provisioning/containers/apache/templates/blackfire/.blackfire.ini:/root/.blackfire.ini \
+-v '`pwd`'/provisioning/containers/apache/templates/blackfire/agent:/etc/blackfire/agent \
 -v '`pwd`':/var/www/devobs \
 --name=apache apache /bin/bash -c "cd /tasks && source setup-virtual-host.sh && tail -f /dev/null"'
 )
@@ -435,6 +438,56 @@ function run_apache() {
     echo 'About to execute "'"${command}"'"'
 
     /bin/bash -c "${command}"
+}
+
+function build_php_fpm_container() {
+    cd provisioning/containers/php-fpm
+    docker build -t php-fpm .
+}
+
+function run_php_fpm() {
+    remove_php_fpm_container
+
+    local port=80
+    if [ ! -z "${PRESS_REVIEW_PHP_FPM_PORT}" ];
+    then
+        port="${PRESS_REVIEW_PHP_FPM_PORT}"
+    fi
+
+    host host=''
+    if [ ! -z "${PRESS_REVIEW_PHP_FPM_HOST}" ];
+    then
+        host="${PRESS_REVIEW_PHP_FPM_HOST}"':'
+    fi
+
+    local symfony_environment="$(get_symfony_environment)"
+
+    local network=`get_network_option`
+    local command=$(echo -n 'docker run '"${network}"' \
+--restart=always \
+-d -p '${host}''${port}':9000 \
+-e '"${symfony_environment}"' \
+-v '`pwd`'/provisioning/containers/php-fpm/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini \
+-v '`pwd`'/provisioning/containers/php-fpm/templates/www.conf:/usr/local/etc/php-fpm.d/www.conf \
+-v '`pwd`'/provisioning/containers/apache/templates/blackfire/zz-blackfire.ini:/usr/local/etc/php/conf.d/zz-blackfire.ini \
+-v '`pwd`'/provisioning/containers/apache/templates/blackfire/.blackfire.ini:/root/.blackfire.ini \
+-v '`pwd`'/provisioning/containers/apache/templates/blackfire/agent:/etc/blackfire/agent \
+-v '`pwd`':/var/www/devobs \
+--name=php-fpm php-fpm php-fpm'
+)
+
+    echo 'About to execute "'"${command}"'"'
+
+    /bin/bash -c "${command}"
+}
+
+function remove_php_fpm_container {
+    if [ `docker ps -a | grep fpm -c` -eq 0 ]
+    then
+        return;
+    fi
+
+    docker ps -a | grep fpm | awk '{print $1}' | xargs docker rm -f
 }
 
 function run_php_script() {

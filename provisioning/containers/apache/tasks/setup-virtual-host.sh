@@ -22,4 +22,6 @@ ln -s `pwd`/sites-available/press-review.conf `pwd`/sites-enabled
 rm `pwd`/mods-enabled/deflate.conf
 ln -s /templates/mods-enabled/deflate.conf `pwd`/mods-enabled
 
+/etc/init.d/blackfire-agent restart
+
 apache2-foreground &

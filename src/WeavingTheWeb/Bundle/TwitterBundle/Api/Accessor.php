@@ -712,11 +712,14 @@ class Accessor implements TwitterErrorAwareInterface
                 throw new SuspendedAccountException($suspendedMessageMessage, $exception->getCode(), $exception);
             }
 
-            if ($exception->getCode() === self::ERROR_NOT_FOUND) {
-                $this->userRepository->declareUserAsNotFound($screenName);
+            if ($exception->getCode() === self::ERROR_NOT_FOUND || $exception->getCode() === self::ERROR_USER_NOT_FOUND) {
+                $member = $this->userRepository->findOneBy(['twitter_username' => $screenName]);
+                if ($member instanceof User) {
+                    $this->userRepository->declareUserAsNotFound($member);
+                }
 
-                $suspendedMessageMessage = $this->logNotFoundMemberMessage($screenName);
-                throw new NotFoundMemberException($suspendedMessageMessage, $exception->getCode(), $exception);
+                $memberNotFoundMessage = $this->logNotFoundMemberMessage($screenName);
+                throw new NotFoundMemberException($memberNotFounMessaged, $exception->getCode(), $exception);
             }
 
             throw $exception;
@@ -811,9 +814,13 @@ class Accessor implements TwitterErrorAwareInterface
     {
         if ($exception->getCode() === self::ERROR_SUSPENDED_USER) {
             throw new SuspendedAccountException($exception->getMessage(), $exception->getCode());
-        } else {
-            throw $exception;
         }
+
+        if ($exception->getCode() === self::ERROR_USER_NOT_FOUND) {
+            throw new NotFoundMemberException($exception->getMessage(), $exception->getCode());
+        }
+
+        throw $exception;
     }
 
     /**
