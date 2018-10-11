@@ -11,8 +11,6 @@ RUN apt-get update && apt-get install wget unzip && \
     echo "deb http://packages.blackfire.io/debian any main" | tee /etc/apt/sources.list.d/blackfire.list && \
     apt-get update && apt install blackfire-agent blackfire-agent blackfire-php
 
-RUN useradd -s /bin/bash -u 1001 -g root -G www-data jenkins
-
 ADD templates/20-xdebug.ini.dist /usr/local/etc/php/conf.d/20-xdebug.ini
 
 CMD ["php", "-a"]
