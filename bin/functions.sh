@@ -460,6 +460,12 @@ function run_php_fpm() {
         host="${PRESS_REVIEW_PHP_FPM_HOST}"':'
     fi
 
+    host mount=''
+    if [ ! -z "${PRESS_REVIEW_PHP_FPM_MOUNT}" ];
+    then
+        mount="${PRESS_REVIEW_PHP_FPM_MOUNT}"
+    fi
+
     local symfony_environment="$(get_symfony_environment)"
 
     local network=`get_network_option`
@@ -474,6 +480,7 @@ function run_php_fpm() {
 -v '`pwd`'/provisioning/containers/apache/templates/blackfire/zz-blackfire.ini:/usr/local/etc/php/conf.d/zz-blackfire.ini \
 -v '`pwd`'/provisioning/containers/apache/templates/blackfire/.blackfire.ini:/root/.blackfire.ini \
 -v '`pwd`'/provisioning/containers/apache/templates/blackfire/agent:/etc/blackfire/agent \
+'"${mount}"' \
 -v '`pwd`':/var/www/devobs \
 --name=php-fpm php-fpm php-fpm'
 )
