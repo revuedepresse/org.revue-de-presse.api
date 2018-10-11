@@ -11,6 +11,7 @@
 
         <indexes>
             <index name="publication_idx" columns="publication_date_time"/>
+            <index name="status_idx" columns="status_id,publication_date_time,time_range,status_id,aggregate_id,aggregate_name"/>
             <index name="aggregate_name" columns="aggregate_name"/>
             <index name="member_name" columns="member_name"/>
         </indexes>

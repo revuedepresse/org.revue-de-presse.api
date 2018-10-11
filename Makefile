@@ -58,6 +58,15 @@ install-php-dependencies: ## Install PHP dependencies
 run-php: ## Run PHP with arguments
 		@/bin/bash -c 'source ./bin/functions.sh && run_php'
 
+build-php-fpm-container: ## Build PHP-FPM image
+		@/bin/bash -c 'source ./bin/functions.sh && build_php_fpm_container'
+
+run-php-fpm: ## Run PHP-FPM worker
+		@/bin/bash -c 'source ./bin/functions.sh && run_php_fpm'
+
+remove-php-fpm-container: ## Remove PHP-FPM container
+		@/bin/bash -c 'source ./bin/functions.sh && remove_php_fpm_container'
+
 create-database-schema-test: # Create database schema in test environment
 		@/bin/bash -c 'source ./bin/functions.sh && create_database_test_schema'
 

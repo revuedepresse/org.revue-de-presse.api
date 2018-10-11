@@ -192,7 +192,7 @@ class UserStatus
             if ($this->shouldSkipSerialization($options)) {
                 return true;
             }
-        } catch (SuspendedAccountException|NotFoundMemberException|ProtectedAccountException $exception) {
+        } catch (UnavailableResourceException|SuspendedAccountException|NotFoundMemberException|ProtectedAccountException $exception) {
             $this->handleUnavailableMemberException($exception, $options);
         } catch (\Exception $exception) {
             $this->logger->error(
