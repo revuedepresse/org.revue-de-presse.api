@@ -20,9 +20,6 @@ parameters:
 
     php_binary:                 /usr/bin/php
 
-    # dsn can be found at https://sentry.io/weaving-the-web/press-review/getting-started/php-symfony2/
-    sentry_dsn_php:             ~
-
     operations_skipped_after:   12:00
     operations_skipped_before:  12:01
 
