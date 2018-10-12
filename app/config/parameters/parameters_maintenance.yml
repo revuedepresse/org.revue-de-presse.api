@@ -3,13 +3,3 @@ parameters:
         type:     stream
         path:     "%kernel.logs_dir%/%kernel.environment%.log"
         level:    "%main_log_level%"
-
-    monolog_sentry_logging_handler:
-        type:     raven
-        dsn:      "%sentry_dsn_php%"
-        level:    "%sentry_log_level%"
-        channels:
-            - 'twitter_api'
-            - 'status'
-            - 'development'
-        handler:  main
