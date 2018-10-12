@@ -12,38 +12,27 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "git@github.com:thierrymarianne/FOSTwitterBundle.git"
-        },
-        {
-            "type": "vcs",
             "url": "git@github.com:thierrymarianne/twitteroauth.git"
         }
     ],
     "require": {
         "php": ">=7.2.5",
-        "ext-pdo": "*",
         "ext-json": "*",
+        "ext-pdo": "*",
         "beberlei/DoctrineExtensions": "1.0.5",
         "doctrine/doctrine-bundle": "~1.4",
         "doctrine/doctrine-fixtures-bundle": "*",
-        "doctrine/doctrine-migrations-bundle": "*",
+        "doctrine/doctrine-migrations-bundle": "^1.0",
         "doctrine/inflector": "*",
         "doctrine/orm": "^2.4.8",
         "fabpot/goutte": "3.2.2",
-        "friendsofsymfony/rest-bundle": "0.*",
-        "friendsofsymfony/twitter-bundle": "dev-master#f837424a069425721c1a744bdc60bb2869a8c691",
         "guzzle/guzzle": "3.3.1",
         "incenteev/composer-parameter-handler": "~2.0",
-        "jms/di-extra-bundle": "1.4.*",
-        "jms/security-extra-bundle": "1.5.*",
-        "jms/serializer-bundle": "dev-master",
         "kertz/twitteroauth": "dev-master",
-        "liip/url-auto-converter-bundle": "1.0.1",
         "php-amqplib/rabbitmq-bundle": "^1.14",
         "ramsey/uuid-doctrine": "dev-master",
         "sensio/distribution-bundle": "~4.0",
         "sensio/framework-extra-bundle": "3.*",
-        "sentry/sentry-symfony": "1.0.3",
         "symfony/monolog-bundle": "^3.0.2",
         "symfony/symfony": "2.8.44",
         "themattharris/tmhOAuth": "dev-master",
