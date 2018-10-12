@@ -520,7 +520,7 @@ QUERY
                     if (JSON_ERROR_NONE === $lastJsonError) {
                         if (array_key_exists('retweeted_status', $decodedValue)) {
                             $status['text'] = 'RT @' . $decodedValue['retweeted_status']['user']['screen_name'] . ': ' .
-                                $decodedValue['retweeted_status']['text'];
+                                $decodedValue['retweeted_status']['full_text'];
                         }
                     } else {
                         throw new \Exception(sprintf($lastJsonError . ' affecting ' . $target));
