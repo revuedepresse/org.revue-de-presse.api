@@ -23,10 +23,6 @@ framework:
     translator:               { fallback:     en }
     validation:               { enable_annotations:     true }
 
-twig:
-    debug:            "%kernel.debug%"
-    strict_variables: "%kernel.debug%"
-
 sensio_framework_extra:
     view:    { annotations: false }
     router:  { annotations: true }
