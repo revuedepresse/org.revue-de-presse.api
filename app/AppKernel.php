@@ -36,8 +36,6 @@ class AppKernel extends Kernel
             // AMQP consumers / producers
             new OldSound\RabbitMqBundle\OldSoundRabbitMqBundle(),
             new WeavingTheWeb\Bundle\AmqpBundle\WeavingTheWebAmqpBundle(),
-            // View helper
-            new Liip\UrlAutoConverterBundle\LiipUrlAutoConverterBundle(),
         );
 
         if (in_array($this->getEnvironment(), array('dev', 'test'))) {
