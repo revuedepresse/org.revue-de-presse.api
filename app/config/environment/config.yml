@@ -23,9 +23,6 @@ framework:
     translator:               { fallback:     en }
     validation:               { enable_annotations:     true }
 
-sentry:
-    dsn: "%sentry_dsn_php%"
-
 parameters:
     basic_auth_pattern: /this-route-is-undefined-in-production
     rabbitmq.host:      vagrant-valhalla

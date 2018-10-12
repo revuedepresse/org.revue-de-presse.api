@@ -33,8 +33,6 @@ class AppKernel extends Kernel
             new FOS\TwitterBundle\FOSTwitterBundle(),
             new WeavingTheWeb\Bundle\ApiBundle\WeavingTheWebApiBundle(),
             new WeavingTheWeb\Bundle\TwitterBundle\WeavingTheWebTwitterBundle(),
-            // Sending logs to Sentry
-            new Sentry\SentryBundle\SentryBundle(),
             // Search
             new WeavingTheWeb\Bundle\DashboardBundle\WeavingTheWebDashboardBundle(),
             // ORM
