@@ -111,6 +111,7 @@ services:
             statusLogger:             '@monolog.logger.status'
             timelyStatusRepository:   '@repository.timely_status'
             connection:               '@doctrine.dbal.read_connection'
+            queryFactory:             '@weaving_the_web.api.query_factory'
 
     weaving_the_web_twitter.repository.archived_status:
         class:               '%weaving_the_web_api.repository.archived_status.class%'
@@ -122,6 +123,7 @@ services:
             statusLogger:           '@monolog.logger.status'
             timelyStatusRepository: '@repository.timely_status'
             connection:             '@doctrine.dbal.read_connection'
+            queryFactory:           '@weaving_the_web.api.query_factory'
 
     weaving_the_web_twitter.repository.read.status:
         class:              '%weaving_the_web_api.repository.status.class%'
