@@ -19,8 +19,9 @@ class AppKernel extends Kernel
         $bundles = array(
             // Standard edition framework
             new Symfony\Bundle\FrameworkBundle\FrameworkBundle(),
-            new Symfony\Bundle\SecurityBundle\SecurityBundle(),
             new Symfony\Bundle\MonologBundle\MonologBundle(),
+            new Symfony\Bundle\SecurityBundle\SecurityBundle(),
+            new Symfony\Bundle\TwigBundle\TwigBundle(),
             // User management
             new WTW\UserBundle\WTWUserBundle(),
             new WeavingTheWeb\Bundle\UserBundle\WeavingTheWebUserBundle(),
