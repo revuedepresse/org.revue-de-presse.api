@@ -22,6 +22,10 @@ framework:
     translator:               { fallback:     en }
     validation:               { enable_annotations:     true }
 
+sensio_framework_extra:
+    view:    { annotations: false }
+    router:  { annotations: true }
+
 parameters:
     basic_auth_pattern: /this-route-is-undefined-in-production
     rabbitmq.host:      vagrant-valhalla
