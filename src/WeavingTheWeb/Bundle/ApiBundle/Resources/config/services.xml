@@ -14,7 +14,6 @@
         <parameter key="weaving_the_web_api.repository.status.class">WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository</parameter>
         <parameter key="weaving_the_web_api.repository.archived_status.class">WeavingTheWeb\Bundle\ApiBundle\Repository\ArchivedStatusRepository</parameter>
         <parameter key="weaving_the_web_api.repository.whisperer.class">WeavingTheWeb\Bundle\ApiBundle\Repository\WhispererRepository</parameter>
-        <parameter key="weaving_the_web.api.view_handler.class">WeavingTheWeb\Bundle\ApiBundle\View\ViewHandler</parameter>
         <parameter key="weaving_the_web.api.view_response_listener.class">WeavingTheWeb\Bundle\ApiBundle\EventListener\ViewResponseListener</parameter>
         <parameter key="weaving_the_web.api.user_status">WeavingTheWeb\Bundle\ApiBundle\Entity\UserStream</parameter>
     </parameters>
@@ -28,19 +27,6 @@
         <service id="weaving_the_web.api.query_factory" class="%weaving_the_web.api.query_factory.class%">
             <argument type="service" id="doctrine.orm.entity_manager" />
             <argument type="service" id="logger" />
-        </service>
-
-        <service id="weaving_the_web.api.view_handler" class="%weaving_the_web.api.view_handler.class%" public="false">
-            <argument>%fos_rest.formats%</argument>
-            <argument>%fos_rest.failed_validation%</argument>
-            <argument>%fos_rest.empty_content%</argument>
-            <argument>%fos_rest.serialize_null%</argument>
-            <argument>%fos_rest.force_redirects%</argument>
-            <argument>%fos_rest.default_engine%</argument>
-            <call method="setContainer">
-                <argument type="service" id="service_container" />
-            </call>
-            <property id="logger" type="service" name="logger" />
         </service>
 
         <service id="fos_rest.view_response_listener" class="%weaving_the_web.api.view_response_listener.class%">
