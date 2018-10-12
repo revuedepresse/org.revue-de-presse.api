@@ -17,10 +17,14 @@ framework:
         strict_requirements:  "%kernel.debug%"
     session:    
         save_path:            "%kernel.root_dir%/var/sessions"
-    #templating:               { engines:     ['twig'] }
+    templating:               { engines:     ['twig'] }
     trusted_proxies:          [127.0.0.1]
     translator:               { fallback:     en }
     validation:               { enable_annotations:     true }
+
+sensio_framework_extra:
+    view:    { annotations: false }
+    router:  { annotations: true }
 
 parameters:
     basic_auth_pattern: /this-route-is-undefined-in-production

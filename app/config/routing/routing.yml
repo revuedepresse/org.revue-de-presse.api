@@ -1,6 +1,3 @@
-weaving_the_web_api:
-    resource:     "@WeavingTheWebApiBundle/Resources/config/routing.yml"
-
 weaving_the_web_twitter:
     prefix:   /api/twitter
     resource: "@WeavingTheWebTwitterBundle/Controller/"
