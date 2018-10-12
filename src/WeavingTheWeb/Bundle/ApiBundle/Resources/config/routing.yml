@@ -1,6 +1,0 @@
-user_streams:
-    resource: WeavingTheWeb\Bundle\ApiBundle\Controller\TwitterController
-    type:     rest
-    prefix:   /api/twitter
-    options:
-        expose: true

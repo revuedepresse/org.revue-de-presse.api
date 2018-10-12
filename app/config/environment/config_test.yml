@@ -4,7 +4,6 @@ imports:
 
 parameters:
     main_log_level:     'debug'
-    sentry_log_level:   'error'
 
 framework:
     test:           ~

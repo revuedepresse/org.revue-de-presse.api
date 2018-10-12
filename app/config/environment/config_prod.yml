@@ -3,4 +3,3 @@ imports:
 
 parameters:
     main_log_level:     "%production_main_level%"
-    sentry_log_level:   'error'
