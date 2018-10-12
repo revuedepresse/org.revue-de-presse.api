@@ -5,7 +5,9 @@ namespace WeavingTheWeb\Bundle\TwitterBundle\Controller;
 use App\Accessor\Exception\NotFoundStatusException;
 use App\Accessor\StatusAccessor;
 use App\Conversation\ConversationAwareTrait;
+use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Exception\ConnectionException;
+use Doctrine\DBAL\Exception\DriverException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
 
 use Symfony\Bundle\FrameworkBundle\Controller\Controller,
@@ -80,6 +82,9 @@ class TweetController extends Controller
             $this->setContentLengthHeader($response, $encodedStatuses);
 
             return $this->setCacheHeaders($response);
+        } catch (DriverException|DBALException $driverException) {
+            $this->get('logger')->critical($driverException->getMessage());
+            return new JsonResponse(['error' => 'Too many connections'], 503);
         } catch (\PDOException $exception) {
             return $this->getExceptionResponse(
                 $exception,
