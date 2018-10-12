@@ -14,17 +14,7 @@ abstract class ResourceRepository extends EntityRepository
     /**
      * @var \WeavingTheWeb\Bundle\ApiBundle\ORM\QueryFactory
      */
-    protected $queryFactory;
-
-    /**
-     *  @DI\InjectParams({
-     *     "queryFactory" = @DI\Inject("weaving_the_web.api.query_factory")
-     * })
-     */
-    public function setQueryFactory($queryFactory)
-    {
-        $this->queryFactory = $queryFactory;
-    }
+    public $queryFactory;
 
     public function getSelectQueryBuilder(array $constraints = [])
     {
