@@ -690,7 +690,7 @@ function produce_amqp_messages_for_timely_statuses {
     fi
 
     export SCRIPT="${php_command}"
-    export PHP_MEMORY_LIMIT=' -d memory_limit=4G'
+    export PHP_MEMORY_LIMIT=' -d memory_limit=2G'
 
     echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
     echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
