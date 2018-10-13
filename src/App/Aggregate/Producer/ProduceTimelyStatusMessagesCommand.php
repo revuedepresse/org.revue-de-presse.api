@@ -75,7 +75,7 @@ class ProduceTimelyStatusMessagesCommand extends AggregateAwareCommand
             weaving_status s 
             WHERE sa.aggregate_id = a.id
             AND s.ust_id = sa.status_id
-            AND ust_created_at > DATE_SUB(now(), INTERVAL 1 WEEK )
+            AND ust_created_at > DATE_SUB(now(), INTERVAL 3 WEEK )
 QUERY
 ;
 
