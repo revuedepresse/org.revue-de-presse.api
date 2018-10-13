@@ -334,7 +334,7 @@ function remove_php_container() {
 
     remove_exited_containers
 
-    local running_containers_matching_namespace="docker ps -a | grep php""${namespace}"
+    local running_containers_matching_namespace="docker ps -a | grep hours | grep php-""${namespace}"
 
     local running_containers=`/bin/bash -c "${running_containers_matching_namespace} | grep -c ''"`
     if [ "${running_containers}" -eq 0 ];
