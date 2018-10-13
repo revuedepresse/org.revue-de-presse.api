@@ -127,9 +127,11 @@ class ArchivedStatusRepository extends ResourceRepository
                     );
                 }
 
-                $timelyStatus = $this->timelyStatusRepository->fromAggregatedStatus($memberStatus, $aggregate);
+                if ($aggregate instanceof Aggregate) {
+                    $timelyStatus = $this->timelyStatusRepository->fromAggregatedStatus($memberStatus, $aggregate);
+                    $entityManager->persist($timelyStatus);
+                }
 
-                $entityManager->persist($timelyStatus);
                 $entityManager->persist($memberStatus);
             } catch (ORMException $exception) {
                 if ($exception->getMessage() === ORMException::entityManagerClosed()->getMessage()) {
