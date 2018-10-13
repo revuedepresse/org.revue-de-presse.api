@@ -386,7 +386,7 @@ class ArchivedStatusRepository extends ResourceRepository
             return $this->findLatestForAggregate($aggregateName);
         }
 
-        $queryBuilder = $this->selectStatuses($lastWeek = true);
+        $queryBuilder = $this->selectStatuses();
 
         if (!is_null($lastId)) {
             $queryBuilder->andWhere('t.id < :lastId');
@@ -451,35 +451,13 @@ QUERY
      * @param bool $lastWeek
      * @return \Doctrine\ORM\QueryBuilder
      */
-    protected function selectStatuses($lastWeek = true)
+    protected function selectStatuses()
     {
-        $queryBuilder = $this->createQueryBuilder('t');
-        $queryBuilder->select(
-            [
-                't.userAvatar as author_avatar',
-                't.text',
-                't.screenName as screen_name',
-                't.id',
-                't.statusId as status_id',
-                't.starred',
-                't.apiDocument original_document'
-            ]
-        )
-            ->orderBy('t.createdAt', 'desc')
-            ->setMaxResults(300)
-        ;
+        $queryBuilder = $this->timelyStatusRepository->selectStatuses();
 
         if (!empty($this->oauthTokens)) {
-            $queryBuilder->andWhere('t.identifier IN (:identifier)');
+            $queryBuilder->andWhere('s.identifier IN (:identifier)');
             $queryBuilder->setParameter('identifier', $this->oauthTokens);
-        }
-
-        if ($lastWeek) {
-            $queryBuilder->andWhere('t.createdAt > :lastWeek');
-
-            $now = new \DateTime('now', new \DateTimeZone('UTC'));
-            $lastWeek = $now->setTimestamp(strtotime('last week'));
-            $queryBuilder->setParameter('lastWeek', $lastWeek);
         }
 
         return $queryBuilder;

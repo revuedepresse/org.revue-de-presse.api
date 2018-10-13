@@ -49,6 +49,32 @@ class TimelyStatusRepository extends EntityRepository
     }
 
     /**
+     * @return \Doctrine\ORM\QueryBuilder
+     */
+    public function selectStatuses()
+    {
+        $queryBuilder = $this->createQueryBuilder('t');
+        $queryBuilder->select(
+            [
+                's.userAvatar as author_avatar',
+                's.text',
+                's.screenName as screen_name',
+                's.id',
+                's.statusId as status_id',
+                's.starred',
+                's.apiDocument original_document'
+            ]
+        )
+            ->leftJoin('t.status', 's')
+            ->orderBy('t.timeRange', 'asc')
+            ->orderBy('t.publicationDateTime', 'desc')
+            ->setMaxResults(50)
+        ;
+
+        return $queryBuilder;
+    }
+
+    /**
      * @param StatusInterface $status
      * @param Aggregate|null  $aggregate
      * @return TimelyStatus
