@@ -27,6 +27,18 @@ trait SelectStatusCollectionFixturesTrait
 
     private function removeFixtures(): void
     {
+        $timelyStatusRepository = $this->get('repository.timely_status');
+        $timelyStatuses = $timelyStatusRepository->findBy([]);
+
+        /** @var EntityManager $entityManager */
+        $entityManager = $this->get('doctrine.orm.entity_manager');
+
+        (new ArrayCollection($timelyStatuses))->map(function ($timelyStatus) use ($entityManager) {
+            $entityManager->remove($timelyStatus);
+        });
+
+        $entityManager->flush();
+
         /** @var StatusRepository $statusRepository */
         $statusRepository = $this->get('weaving_the_web_twitter.repository.status');
         $statuses = $statusRepository->findBy([]);

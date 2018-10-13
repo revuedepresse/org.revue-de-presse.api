@@ -2,8 +2,10 @@
 
 namespace WeavingTheWeb\Bundle\ApiBundle\DataFixtures\ORM;
 
+use App\Aggregate\Entity\TimelyStatus;
 use Doctrine\Common\DataFixtures\FixtureInterface,
     Doctrine\Common\Persistence\ObjectManager;
+use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Status;
 
 class StatusData implements FixtureInterface
@@ -37,6 +39,20 @@ class StatusData implements FixtureInterface
             ]
         );
         $userStatusCollection = unserialize($serializedEntitiesWhichHaveBeenMoved);
+
+        $aggregate = new Aggregate(
+            'thierrymarianne',
+            'press'
+        );
+        $manager->persist($aggregate);
+
+        $timelyStatus = new TimelyStatus(
+            $userStatus,
+            $aggregate,
+            new \DateTime('now', new \DateTimeZone('UTC'))
+        );
+
+        $manager->persist($timelyStatus);
 
         foreach ($userStatusCollection as $userStatus) {
             $manager->persist($userStatus);
