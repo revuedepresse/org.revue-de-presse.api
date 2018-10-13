@@ -2,6 +2,7 @@
 
 namespace App\Conversation;
 
+use WeavingTheWeb\Bundle\ApiBundle\Entity\StatusInterface;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
 
 trait ConversationAwareTrait
@@ -33,6 +34,15 @@ trait ConversationAwareTrait
     {
         return array_map(
             function ($status) use ($includeRepliedToStatuses) {
+                if ($status instanceof StatusInterface) {
+                    $status = [
+                        'screen_name' => $status->getScreenName(),
+                        'status_id' => $status->getStatusId(),
+                        'text' => $status->getText(),
+                        'original_document' => $status->getApiDocument(),
+                    ];
+                }
+
                 $defaultStatus = [
                     'status_id' => $status['status_id'],
                     'avatar_url' => 'N/A',
