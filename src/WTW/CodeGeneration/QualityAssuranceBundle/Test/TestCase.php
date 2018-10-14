@@ -83,18 +83,18 @@ abstract class TestCase extends WebTestCase implements TestCaseInterface, DataFi
     {
         if ($this->requiredMySQLDatabase()) {
             $entityManager = $this->getService('doctrine.orm.test_mysql_entity_manager');
-            $executor = $this->getService('wtw.qa.fixtures.test_mysql_executor');
-            $schemaManipulator = $this->getService('wtw.qa.fixtures.test_mysql_schema_manipulator');
+            $executor = $this->getService('weaving_the_web.quality_assurance.fixtures.test_mysql_executor');
+            $schemaManipulator = $this->getService('weaving_the_web.quality_assurance.fixtures.test_mysql_schema_manipulator');
         } else {
             $entityManager = $this->getService('doctrine.orm.entity_manager');
-            $executor = $this->getService('wtw.qa.fixtures.executor');
-            $schemaManipulator = $this->getService('wtw.qa.fixtures.schema_manipulator');
+            $executor = $this->getService('weaving_the_web.quality_assurance.fixtures.executor');
+            $schemaManipulator = $this->getService('weaving_the_web.quality_assurance.fixtures.schema_manipulator');
         }
 
         $this->entityManager = $entityManager;
         $this->executor = $executor;
-        $this->finder = $this->getService('wtw.qa.fixtures.finder');
-        $this->loader = $this->getService('wtw.qa.fixtures.loader');
+        $this->finder = $this->getService('weaving_the_web.quality_assurance.fixtures.finder');
+        $this->loader = $this->getService('weaving_the_web.quality_assurance.fixtures.loader');
         $this->schemaManipulator = $schemaManipulator;
     }
 
@@ -229,7 +229,7 @@ abstract class TestCase extends WebTestCase implements TestCaseInterface, DataFi
 
             $credentials = $this->getCredentials($superAdmin);
         } else {
-            if (false !== strpos($options['user']['user_name'], 'wtw.qa')) {
+            if (false !== strpos($options['user']['user_name'], 'weaving_the_web.quality_assurance')) {
                 $credentials = [
                     'username' => $this->getParameter($options['user']['user_name']),
                     'password' => $this->getParameter($options['user']['password'])
