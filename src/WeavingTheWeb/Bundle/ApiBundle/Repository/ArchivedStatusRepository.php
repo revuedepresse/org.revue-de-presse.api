@@ -148,7 +148,8 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
                 $likedStatuses[] = $this->likedStatusRepository->ensureMemberStatusHasBeenMarkedAsLikedBy(
                     $member,
                     $memberStatus,
-                    $likedBy
+                    $likedBy,
+                    $aggregate
                 );
 
                 $entityManager->persist($memberStatus);
