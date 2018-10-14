@@ -1169,7 +1169,9 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             throw $exception;
         }
 
-        $this->logger->error(sprintf($message, $options['screen_name']));
+        $message = sprintf($message, $options['screen_name']);
+        $this->logger->error($message);
+
         throw new UnavailableResourceException($message, $exception->getCode(), $exception);
     }
 

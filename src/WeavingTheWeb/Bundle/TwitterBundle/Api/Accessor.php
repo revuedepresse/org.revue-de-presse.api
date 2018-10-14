@@ -479,7 +479,9 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
         $token = $this->maybeGetToken($endpoint);
         $this->tokenRepository->freezeToken($token->getOauthToken());
 
-        if (strpos($endpoint, '/statuses/user_timeline') === false) {
+        if (strpos($endpoint, '/statuses/user_timeline') === false &&
+            strpos($endpoint, '/favorites/list') === false
+        ) {
             $this->throwException($exception);
         }
 
