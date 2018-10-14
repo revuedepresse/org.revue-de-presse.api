@@ -67,7 +67,7 @@ class AccessorTest extends WebTestCase
      */
     public function it_should_fetch_a_timeline()
     {
-        $items = $this->accessor->fetchTimelineStatuses([
+        $items = $this->accessor->fetchStatuses([
             'screen_name' => $this->testUser,
             'count' => 15,
             'page' => 1

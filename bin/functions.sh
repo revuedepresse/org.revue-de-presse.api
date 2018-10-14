@@ -134,20 +134,24 @@ function consume_amqp_messages {
     execute_command "${rabbitmq_output_log}" "${rabbitmq_error_log}"
 }
 
-function consume_amqp_messages_for_member_status {
-    consume_amqp_messages 'user_status'
+function consume_amqp_lively_status_messages {
+    consume_amqp_messages 'timely_status' 'consumer'
 }
 
-function consume_amqp_messages_for_news_status {
-    consume_amqp_messages 'news_status'
+function consume_amqp_messages_for_aggregates_likes {
+    consume_amqp_messages 'aggregates_likes' 'consumer'
 }
 
 function consume_amqp_messages_for_aggregates_status {
     consume_amqp_messages 'aggregates_status'
 }
 
-function consume_amqp_lively_status_messages {
-    consume_amqp_messages 'timely_status' 'consumer'
+function consume_amqp_messages_for_member_status {
+    consume_amqp_messages 'user_status'
+}
+
+function consume_amqp_messages_for_news_status {
+    consume_amqp_messages 'news_status'
 }
 
 function purge_queues() {

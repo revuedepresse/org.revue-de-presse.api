@@ -8,7 +8,6 @@ use App\Aggregate\Entity\TimelyStatus;
 use App\Aggregate\Repository\TimelyStatusRepository;
 use App\Amqp\AmqpMessageAwareTrait;
 use App\Conversation\ConversationAwareTrait;
-use App\Operation\OperationClock;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use OldSound\RabbitMqBundle\RabbitMq\ConsumerInterface;

@@ -7,18 +7,27 @@ services:
 
     repository.not_found_status:
         factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
-        class: 'App\Status\Entity\NotFoundStatus'
+        class: 'App\Status\Repository\NotFoundStatusRepository'
         arguments:
             - 'App\Status\Entity\NotFoundStatus'
 
     repository.timely_status:
         factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
-        class: 'App\Aggregate\Entity\TimelyStatus'
+        class: 'App\Aggregate\Repository\TimelyStatusRepository'
         arguments:
             - 'App\Aggregate\Entity\TimelyStatus'
         properties:
             statusRepository:       "@weaving_the_web_twitter.repository.status"
             aggregateRepository:    "@weaving_the_web_twitter.repository.aggregate"
+
+    repository.liked_status:
+        factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
+        class: 'App\Status\Repository\LikedStatusRepository'
+        arguments:
+            - 'App\Status\Entity\LikedStatus'
+        properties:
+            memberRepository:  "@user_manager"
+            statusRepository:  "@weaving_the_web_twitter.repository.status"
 
     weaving_the_web_api.repository.token:
         factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]

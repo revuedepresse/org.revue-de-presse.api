@@ -194,7 +194,7 @@ trait ConversationAwareTrait
                     $updatedStatus['id_of_status_replied_to']
                 );
             } catch (NotFoundMemberException $notFoundMemberException) {
-                $this->statusAccessor->ensureMemberHavingScreenNameExists($notFoundMemberException->screenName);
+                $this->statusAccessor->ensureMemberHavingNameExists($notFoundMemberException->screenName);
                 $repliedToStatus = $this->statusAccessor->refreshStatusByIdentifier(
                     $updatedStatus['id_of_status_replied_to']
                 );

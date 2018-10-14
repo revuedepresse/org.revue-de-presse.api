@@ -5,6 +5,8 @@ namespace WeavingTheWeb\Bundle\AmqpBundle\Command;
 use App\Conversation\Producer\MemberAwareTrait;
 use App\Operation\OperationClock;
 
+use App\Status\LikedStatusCollectionAwareInterface;
+use OldSound\RabbitMqBundle\RabbitMq\Producer;
 use Symfony\Component\Console\Input\InputOption,
     Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Output\OutputInterface;
@@ -30,6 +32,11 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
      * @var \OldSound\RabbitMqBundle\RabbitMq\Producer
      */
     private $producer;
+
+    /**
+     * @var \OldSound\RabbitMqBundle\RabbitMq\Producer
+     */
+    private $likesMessagesProducer;
 
     /**
      * @var TranslatorInterface
@@ -144,7 +151,8 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
 
         $ownerships = $this->guardAgainstInvalidListName($ownerships);
 
-        $doNotApplyListRestriction = is_null($this->listRestriction) && count($this->listCollectionRestriction) === 0;
+        $doNotApplyListRestriction = is_null($this->listRestriction) &&
+            count($this->listCollectionRestriction) === 0;
         if ($doNotApplyListRestriction && count($ownerships->lists) === 0) {
             $ownerships = $this->guardAgainstInvalidToken($ownerships);
         }
@@ -232,6 +240,13 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
 
                 $this->producer->setContentType('application/json');
                 $this->producer->publish(serialize(json_encode($messageBody)));
+
+                if ($this->likesMessagesProducer instanceof Producer) {
+                    $this->likesMessagesProducer->setContentType('application/json');
+                    $messageBody[LikedStatusCollectionAwareInterface::INTENT_TO_FETCH_LIKES] = true;
+                    $this->likesMessagesProducer->publish(serialize(json_encode($messageBody)));
+                    $messageBody[LikedStatusCollectionAwareInterface::INTENT_TO_FETCH_LIKES] = false;
+                }
 
                 $publishedMessages++;
             } catch (\Exception $exception) {
@@ -348,14 +363,22 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
         $this->setupAggregateRepository();
         $this->setUpLogger();
 
-        $this->producer = $this->getContainer()->get('old_sound_rabbit_mq.weaving_the_web_amqp.twitter.user_status_producer');
+        $this->producer = $this->getContainer()
+            ->get('old_sound_rabbit_mq.weaving_the_web_amqp.twitter.user_status_producer');
 
         if (!is_null($this->listRestriction) && $this->listRestriction == 'news :: France') {
-            $this->producer = $this->getContainer()->get('old_sound_rabbit_mq.weaving_the_web_amqp.twitter.news_status_producer');
+            $this->producer = $this->getContainer()
+                ->get('old_sound_rabbit_mq.weaving_the_web_amqp.twitter.news_status_producer');
         }
 
-        if ((!is_null($this->listRestriction) || !is_null($this->listCollectionRestriction)) && $this->givePriorityToAggregate) {
-            $this->producer = $this->getContainer()->get('old_sound_rabbit_mq.weaving_the_web_amqp.twitter.aggregates_status_producer');
+        if ((!is_null($this->listRestriction) || !is_null($this->listCollectionRestriction)) &&
+            $this->givePriorityToAggregate
+        ) {
+            $this->producer = $this->getContainer()
+                ->get('old_sound_rabbit_mq.weaving_the_web_amqp.twitter.aggregates_status_producer');
+
+            $this->likesMessagesProducer = $this->getContainer()
+                ->get('old_sound_rabbit_mq.weaving_the_web_amqp.producer.aggregates_likes_producer');
         }
 
         $this->translator = $this->getContainer()->get('translator');

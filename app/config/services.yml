@@ -106,6 +106,7 @@ services:
         arguments:                    [ '%weaving_the_web_twitter.entity.status.class%' ]
         properties:
             archivedStatusRepository: '@weaving_the_web_twitter.repository.archived_status'
+            likedStatusRepository:    '@repository.liked_status'
             memberManager:            '@user_manager'
             registry:                 '@doctrine'
             statusLogger:             '@monolog.logger.status'
@@ -118,6 +119,7 @@ services:
         factory:             'doctrine.orm.entity_manager:getRepository'
         arguments:           [ '%weaving_the_web_twitter.entity.archived_status.class%' ]
         properties:
+            likedStatusRepository:  '@repository.liked_status'
             memberManager:          '@user_manager'
             registry:               '@doctrine'
             statusLogger:           '@monolog.logger.status'
@@ -132,6 +134,7 @@ services:
         calls:
             - [ 'setOauthTokens', [ [ '%weaving_the_web_twitter.oauth_token.default%' ] ] ]
         properties:
+            likedStatusRepository:  '@repository.liked_status'
             memberManager:          '@user_manager'
             registry:               '@doctrine'
             statusLogger:           '@monolog.logger.status'
@@ -166,4 +169,5 @@ services:
             - [ 'setAggregateRepository', [ '@weaving_the_web_twitter.repository.aggregate' ] ]
             - [ 'setTranslator', [ '@translator' ] ]
         properties:
-            twitterApiLogger:  '@monolog.logger.twitter_api'
+            twitterApiLogger:       '@monolog.logger.twitter_api'
+            likedStatusRepository:  '@repository.liked_status'

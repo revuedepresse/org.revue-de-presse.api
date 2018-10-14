@@ -2,6 +2,7 @@
 
 namespace App\Accessor;
 
+use App\Member\MemberInterface;
 use App\Status\Entity\NullStatus;
 use App\Status\Repository\NotFoundStatusRepository;
 use Doctrine\ORM\EntityManager;
@@ -137,18 +138,33 @@ class StatusAccessor
     }
 
     /**
-     * @param string $screenName
-     * @return \WTW\UserBundle\Entity\User
+     * @param string   $memberName
+     * @param int|null $memberId
+     * @return \API|MemberInterface|mixed|null|object|\stdClass
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
      * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
      */
-    public function ensureMemberHavingScreenNameExists(string $screenName)
+    public function ensureMemberHavingNameExists(string $memberName)
     {
-        $member = $this->accessor->showUser($screenName);
+        $member = $this->userManager->findOneBy(['twitter_username' => $memberName]);
+        if ($member instanceof MemberInterface) {
+            return $member;
+        }
 
-        return $this->userManager->make($member->id, $member->screen_name);
+        $fetchedMember = $this->accessor->showUser($memberName);
+        $member = $this->userManager->findOneBy(['twitterID' => $fetchedMember->id]);
+        if ($member instanceof MemberInterface) {
+            return $member;
+        }
+
+        return $this->userManager->saveMember(
+            $this->userManager->make(
+                $fetchedMember->id,
+                $memberName
+            )
+        );
     }
 
     /**
