@@ -326,7 +326,7 @@ class StatusRepository extends ArchivedStatusRepository
 
     /**
      * @param $status
-     * @return User
+     * @return \App\Member\MemberInterface
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException
      */
@@ -342,7 +342,7 @@ class StatusRepository extends ArchivedStatusRepository
 
     /**
      * @param $status
-     * @return User
+     * @return \App\Member\MemberInterface
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException
      */
