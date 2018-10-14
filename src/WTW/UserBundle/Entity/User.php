@@ -437,7 +437,7 @@ class User extends BaseUser implements MemberInterface
      * @param string $twitterId
      * @return MemberInterface
      */
-    public function setTwitterID($twitterId): MemberInterface
+    public function setTwitterID(string $twitterId): MemberInterface
     {
       $this->twitterID = $twitterId;
       $this->salt = '';
