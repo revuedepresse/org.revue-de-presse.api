@@ -10,7 +10,7 @@
             table="liked_status">
 
         <indexes>
-            <index name="status_idx" columns="member_name,liked_by_member_name,liked_by,is_archived_status,status_id,archived_status_id,publication_date_time,time_range"/>
+            <index name="status_idx" columns="member_name,aggregate_name,aggregate_id,liked_by_member_name,liked_by,is_archived_status,status_id,archived_status_id,publication_date_time,time_range"/>
         </indexes>
 
         <id name="id" column="id" type="uuid">
@@ -51,28 +51,45 @@
             />
         </many-to-one>
 
+        <many-to-one
+                target-entity="WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate"
+                field="aggregate"
+                inversed-by="timelyStatuses"
+        />
+
         <field
             name="isArchivedStatus"
             column="is_archived_status"
             type="boolean"
         />
+
+        <field
+                name="aggregateName"
+                column="aggregate_name"
+                type="string"
+                length="100"
+        />
+
         <field
             name="memberName"
             column="member_name"
             type="string"
             length="100"
         />
+
         <field
             name="likedByMemberName"
             column="liked_by_member_name"
             type="string"
             length="100"
         />
+
         <field
             name="publicationDateTime"
             column="publication_date_time"
             type="datetime"
         />
+
         <field
             name="timeRange"
             column="time_range"

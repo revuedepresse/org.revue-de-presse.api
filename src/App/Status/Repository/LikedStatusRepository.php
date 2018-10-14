@@ -6,6 +6,7 @@ use App\Member\MemberInterface;
 use App\Status\Entity\LikedStatus;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
+use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\StatusInterface;
 use WTW\UserBundle\Repository\UserRepository;
 
@@ -282,28 +283,41 @@ class LikedStatusRepository extends EntityRepository implements ExtremumAwareInt
 
     /**
      * @param MemberInterface $member
-     * @param StatusInterface $memberStatus
+     * @param StatusInterface $status
      * @param MemberInterface $likedBy
+     * @param Aggregate       $aggregate
      * @return LikedStatus
      */
     public function ensureMemberStatusHasBeenMarkedAsLikedBy(
         MemberInterface $member,
         StatusInterface $status,
-        MemberInterface $likedBy
+        MemberInterface $likedBy,
+        Aggregate $aggregate
     ): LikedStatus {
+        $likedStatus = $this->findOneBy([
+            'status' => $status,
+            'likedBy' => $likedBy,
+            'member' => $member,
+            'aggregate' => $aggregate
+        ]);
+        if ($likedStatus instanceof LikedStatus) {
+            return $likedStatus;
+        }
+
         $likedStatus = $this->findOneBy([
             'status' => $status,
             'likedBy' => $likedBy,
             'member' => $member
         ]);
         if ($likedStatus instanceof LikedStatus) {
-            return $likedStatus;
+            return $likedStatus->setAggregate($aggregate);
         }
 
         return $this->fromMemberStatus(
             $status,
             $likedBy,
-            $member
+            $member,
+            $aggregate
         );
     }
 
@@ -311,14 +325,16 @@ class LikedStatusRepository extends EntityRepository implements ExtremumAwareInt
      * @param StatusInterface $memberStatus
      * @param MemberInterface $likedBy
      * @param MemberInterface $member
+     * @param Aggregate       $aggregate
      * @return LikedStatus
      */
     private function fromMemberStatus(
         StatusInterface $memberStatus,
         MemberInterface $likedBy,
-        MemberInterface $member
+        MemberInterface $member,
+        Aggregate $aggregate
     ) {
-        return new LikedStatus($memberStatus, $likedBy, $member);
+        return new LikedStatus($memberStatus, $likedBy, $aggregate, $member);
     }
 
     /**

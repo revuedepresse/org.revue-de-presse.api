@@ -5,10 +5,10 @@ namespace App\Status\Entity;
 use App\Member\MemberInterface;
 use App\TimeRange\TimeRangeAwareTrait;
 use App\TimeRange\TimeRangeAwareInterface;
+use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\ArchivedStatus;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Status;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\StatusInterface;
-use WTW\UserBundle\Entity\User;
 
 class LikedStatus implements TimeRangeAwareInterface
 {
@@ -38,6 +38,28 @@ class LikedStatus implements TimeRangeAwareInterface
      * @var bool
      */
     private $isArchivedStatus = false;
+
+    /**
+     * @var Aggregate
+     */
+    private $aggregate;
+
+    /**
+     * @var string
+     */
+    private $aggregateName;
+
+    /**
+     * @param Aggregate $aggregate
+     * @return $this
+     */
+    public function setAggregate(Aggregate $aggregate): self
+    {
+        $this->aggregate = $aggregate;
+        $this->aggregateName = $aggregate->getName();
+
+        return $this;
+    }
 
     /**
      * @var MemberInterface
@@ -75,6 +97,7 @@ class LikedStatus implements TimeRangeAwareInterface
     public function __construct(
         StatusInterface $status,
         MemberInterface $likedBy,
+        Aggregate $aggregate,
         MemberInterface $member
     ) {
         if ($status instanceof Status) {
@@ -85,6 +108,8 @@ class LikedStatus implements TimeRangeAwareInterface
             $this->archivedStatus = $status;
             $this->isArchivedStatus = true;
         }
+
+        $this->setAggregate($aggregate);
 
         $this->member = $member;
         $this->memberName = $status->getScreenName();

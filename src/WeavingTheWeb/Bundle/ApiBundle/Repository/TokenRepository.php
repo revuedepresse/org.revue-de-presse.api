@@ -192,7 +192,10 @@ class TokenRepository extends EntityRepository
         $queryBuilder->andWhere('t.oauthTokenSecret IS NOT NULL');
 
         $queryBuilder->andWhere('t.frozenUntil > :now');
-        $queryBuilder->setParameter('now', new \DateTime());
+        $queryBuilder->setParameter(
+            'now',
+            new \DateTime('now', new \DateTimeZone('UTC'))
+        );
 
         $queryBuilder->setMaxResults(1);
         $queryBuilder->orderBy('t.frozenUntil', 'ASC');
