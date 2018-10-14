@@ -819,7 +819,7 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
      */
     protected function getRateLimitStatusEndpoint($version = '1.1')
     {
-        return $this->getApiBaseUrl($version) . '/application/rate_limit_status.json?resources=statuses,users,lists';
+        return $this->getApiBaseUrl($version) . '/application/rate_limit_status.json?resources=favorites,statuses,users,lists';
     }
 
     /**
@@ -1189,6 +1189,11 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
                 if (false !== strpos($fullEndpoint, '/lists/ownerships')) {
                     $endpoint = "/lists/ownerships";
                     $resourceType = 'lists';
+                }
+
+                if (false !== strpos($fullEndpoint, '/favorites/list')) {
+                    $endpoint = "/favorites/list";
+                    $resourceType = 'favorites';
                 }
             }
 
@@ -1633,6 +1638,13 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
 
             if ($errorCode === self::ERROR_NO_STATUS_FOUND_WITH_THAT_ID) {
                 throw new NotFoundStatusException(
+                    $content->errors[0]->message,
+                    $content->errors[0]->code
+                );
+            }
+
+            if ($errorCode === self::ERROR_EXCEEDED_RATE_LIMIT) {
+                throw new ApiRateLimitingException(
                     $content->errors[0]->message,
                     $content->errors[0]->code
                 );

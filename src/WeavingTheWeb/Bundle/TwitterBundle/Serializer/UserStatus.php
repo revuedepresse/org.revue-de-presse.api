@@ -708,18 +708,10 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         $lookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow =
             $this->isLookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow($options);
 
-        try {
-            $this->declareExtremumIdForMember(
-                $statuses,
-                $lookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow
-            );
-        } catch (NotFoundMemberException $exception) {
-            $this->accessor->ensureMemberHavingNameExists($exception->screenName);
-            $this->declareExtremumIdForMember(
-                $statuses,
-                $lookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow
-            );
-        }
+        $this->safelyDeclareExtremum(
+            $statuses,
+            $lookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow
+        );
 
         $statusesIds = $this->getExtremeStatusesIdsFor($options);
         $firstStatusId = $statusesIds['min_id'];
@@ -784,8 +776,8 @@ class UserStatus implements LikedStatusCollectionAwareInterface
 
     /**
      * @param array $statuses
-     * @param       $shouldDeclareMaximumStatusId
-     * @return \WTW\UserBundle\Entity\User
+     * @param bool  $shouldDeclareMaximumStatusId
+     * @return MemberInterface
      * @throws NotFoundMemberException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
@@ -1484,5 +1476,39 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         return $this->statusRepository->getIdsOfExtremeStatusesSavedForMemberHavingScreenName(
             $options['screen_name']
         );
+    }
+
+    /**
+     * @param $statuses
+     * @param $shouldDeclareMaximumStatusId
+     * @throws NotFoundMemberException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    private function safelyDeclareExtremum($statuses, $shouldDeclareMaximumStatusId): void
+    {
+        try {
+            $this->declareExtremumIdForMember(
+                $statuses,
+                $shouldDeclareMaximumStatusId
+            );
+        } catch (NotFoundMemberException $exception) {
+            $this->accessor->ensureMemberHavingNameExists($exception->screenName);
+
+            try {
+                $this->declareExtremumIdForMember(
+                    $statuses,
+                    $shouldDeclareMaximumStatusId
+                );
+            } catch (NotFoundMemberException $exception) {
+                $this->accessor->ensureMemberHavingNameExists($exception->screenName);
+                $this->declareExtremumIdForMember(
+                    $statuses,
+                    $shouldDeclareMaximumStatusId
+                );
+            }
+        }
     }
 }
