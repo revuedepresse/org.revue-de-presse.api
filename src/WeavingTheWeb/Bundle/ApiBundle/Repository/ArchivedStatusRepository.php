@@ -553,6 +553,46 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
         return $this->highlightRetweets($statuses);
     }
 
+    public function findLikedStatuses($aggregateName = null)
+    {
+        $queryTemplate = <<<QUERY
+            SELECT
+            `status`.ust_avatar AS author_avatar,
+            `status`.ust_text AS text,
+            `status`.ust_full_name AS screen_name,
+            `status`.ust_id AS id,
+            `status`.ust_status_id AS status_id,
+            `status`.ust_starred AS starred,
+            `status`.ust_api_document AS original_document,
+            `status`.ust_created_at AS publication_date,
+            `liked_status`.liked_by_member_name AS liked_by
+            FROM :liked_status `liked_status`, :status_table `status`
+            WHERE `liked_status`.status_id = `status`.ust_id
+            ORDER BY `liked_status`.time_range ASC, `liked_status`.publication_date_time DESC
+            LIMIT :max_results
+        ;
+QUERY
+;
+
+        $query = strtr(
+            $queryTemplate,
+            [
+                ':aggregate' => $aggregateName,
+                ':max_results' => 50,
+                ':status_table' => 'weaving_status',
+                ':liked_status' => 'liked_status',
+                ':aggregate_table' => 'weaving_aggregate',
+            ]
+        );
+
+        $statement = $this->connection->executeQuery($query);
+
+        $statuses = $statement->fetchAll();
+
+        return $this->highlightRetweets($statuses);
+    }
+
+
     public function findLatestForAggregate($aggregateName = null)
     {
         $queryTemplate = <<<QUERY
