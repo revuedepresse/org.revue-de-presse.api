@@ -2,6 +2,7 @@
 
 namespace WeavingTheWeb\Bundle\TwitterBundle\Serializer;
 
+use App\Accessor\Exception\ApiRateLimitingException;
 use App\Amqp\Exception\SkippableMessageException;
 use App\Member\MemberInterface;
 use App\Status\LikedStatusCollectionAwareInterface;
@@ -208,6 +209,10 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             |ProtectedAccountException $exception
         ) {
             $this->handleUnavailableMemberException($exception, $options);
+        } catch (ApiRateLimitingException $exception) {
+            $this->delayingConsumption();
+
+            return false;
         } catch (\Exception $exception) {
             $this->logger->error(
                 sprintf(
@@ -963,9 +968,11 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     private function delayingConsumption(): bool
     {
         $token = $this->tokenRepository->findFirstFrozenToken();
-        $now = new \DateTime();
 
+        /** @var \DateTime $frozenUntil */
         $frozenUntil = $token->getFrozenUntil();
+        $now = new \DateTime('now', $frozenUntil->getTimezone());
+
         $timeout = $frozenUntil->getTimestamp() - $now->getTimestamp();
 
         $this->logger->info('The API is not available right now.');
