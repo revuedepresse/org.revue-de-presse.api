@@ -864,14 +864,18 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     {
         $subjectInSingularForm = 'status';
         $subjectInPluralForm = 'statuses';
-        $method = 'countCollectedStatuses';
+        $countCollectedItems = function ($memberName, $maxId) {
+            return $this->statusRepository->countCollectedStatuses($memberName, $maxId);
+        };
         if ($this->isAboutToCollectLikesFromCriteria($options)) {
             $subjectInSingularForm = 'like';
             $subjectInPluralForm = 'likes';
-            $method = 'countCollectedLikes';
+            $countCollectedItems = function ($memberName, $maxId) {
+                return $this->likedStatusRepository->countCollectedLikes($memberName, $maxId);
+            };
         }
 
-        $totalStatuses = $this->statusRepository->$method(
+        $totalStatuses = $countCollectedItems(
             $options['screen_name'],
             $options['max_id']
         );
