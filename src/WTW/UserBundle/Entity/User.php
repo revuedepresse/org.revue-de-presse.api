@@ -275,7 +275,7 @@ class User extends BaseUser implements MemberInterface
      *
      * @return string
      */
-    public function getUsername(): string
+    public function getUsername()
     {
         return $this->username;
     }

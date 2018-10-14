@@ -103,6 +103,59 @@ class TweetController extends Controller
      * @throws \Exception
      *
      * @Extra\Route(
+     *     "/likes",
+     *     name="weaving_the_web_liked_statuses"
+     * )
+     *
+     * @Extra\Method({"GET", "OPTIONS"})
+     *
+     * @Extra\Cache(public=true)
+     */
+    public function getLikedStatusesAction(Request $request)
+    {
+        if ($request->isMethod('OPTIONS')) {
+            return $this->getCorsOptionsResponse();
+        }
+
+        try {
+            $this->statusRepository = $this->get('weaving_the_web_twitter.repository.read.status');
+            // Look for statuses collected by any given access token
+            // (there is no restriction at this point of the implementation)
+            $this->statusRepository->setOauthTokens([]);
+
+            $likedStatuses = $this->statusRepository->findLikedStatuses();
+            $statusCode = 200;
+
+            $likedStatuses = $this->extractStatusProperties($likedStatuses, $includeRepliedToStatuses = false);
+
+            $response = new JsonResponse(
+                $likedStatuses,
+                $statusCode,
+                $this->getAccessControlOriginHeaders()
+            );
+
+            $encodedStatuses = json_encode($likedStatuses);
+            $this->setContentLengthHeader($response, $encodedStatuses);
+
+            return $this->setCacheHeaders($response);
+        } catch (\PDOException $exception) {
+            return $this->getExceptionResponse(
+                $exception,
+                $this->get('translator')->trans('twitter.error.database_connection', [], 'messages')
+            );
+        } catch (ConnectionException $exception) {
+            $this->get('logger')->critical('Could not connect to the database');
+        } catch (\Exception $exception) {
+            return $this->getExceptionResponse($exception);
+        }
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws \Exception
+     *
+     * @Extra\Route(
      *     "/status/{id}",
      *     name="weaving_the_web_twitter_status",
      *     requirements={"id"="\S+"}
