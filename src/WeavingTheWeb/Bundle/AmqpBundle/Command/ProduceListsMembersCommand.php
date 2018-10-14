@@ -238,6 +238,8 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
 
                 $this->producer->setContentType('application/json');
                 $this->producer->publish(serialize(json_encode($messageBody)));
+
+                $messageBody['likes'] = true;
                 $this->likesMessagesProducer->publish(serialize(json_encode($messageBody)));
 
                 $publishedMessages++;
