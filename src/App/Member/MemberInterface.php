@@ -23,7 +23,7 @@ interface MemberInterface
     /**
      * @return string
      */
-    public function getUsername(): string;
+    public function getUsername();
 
     /**
      * @param string $firstName

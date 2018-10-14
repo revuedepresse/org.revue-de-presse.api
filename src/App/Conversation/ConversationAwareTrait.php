@@ -30,8 +30,10 @@ trait ConversationAwareTrait
      * @param bool  $includeRepliedToStatuses
      * @return array
      */
-    private function extractStatusProperties(array $statuses, bool $includeRepliedToStatuses = false): array
-    {
+    private function extractStatusProperties(
+        array $statuses,
+        bool $includeRepliedToStatuses = false
+    ): array {
         return array_map(
             function ($status) use ($includeRepliedToStatuses) {
                 if ($status instanceof StatusInterface) {
@@ -79,6 +81,10 @@ trait ConversationAwareTrait
                     $defaultStatus['text'] = $decodedDocument['full_text'];
                 }
 
+                $likedBy = null;
+                if (array_key_exists('liked_by', $status)) {
+                    $likedBy = $status['liked_by'];
+                }
 
                 if (array_key_exists('retweeted_status', $decodedDocument)) {
                     $updatedStatus = $this->updateFromDecodedDocument(
@@ -90,6 +96,9 @@ trait ConversationAwareTrait
                     $updatedStatus['username_of_retweeting_member'] = $defaultStatus['username'];
                     $updatedStatus['retweet'] = true;
                     $updatedStatus['text'] = $decodedDocument['retweeted_status']['full_text'];
+                    if (!is_null($likedBy)) {
+                        $updatedStatus['liked_by'] = $likedBy;
+                    }
 
                     return $updatedStatus;
                 }
@@ -101,6 +110,9 @@ trait ConversationAwareTrait
                     $includeRepliedToStatuses
                 );
                 $updatedStatus['retweet'] = false;
+                if (!is_null($likedBy)) {
+                    $updatedStatus['liked_by'] = $likedBy;
+                }
 
                 return $updatedStatus;
 
