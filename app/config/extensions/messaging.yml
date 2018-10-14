@@ -19,6 +19,9 @@ old_sound_rabbit_mq:
         weaving_the_web_amqp.twitter.aggregates_status:
             connection:       default
             exchange_options: { name: 'get-aggregates-status', type: direct }
+        weaving_the_web_amqp.twitter.aggregates_likes:
+            connection:       default
+            exchange_options: { name: 'get-aggregates-likes', type: direct }
         weaving_the_web_amqp.producer.conversation_status:
             connection:       default
             exchange_options: { name: 'get-conversation-status', type: direct }
@@ -51,6 +54,12 @@ old_sound_rabbit_mq:
             connection:       default
             exchange_options: { name: 'get-aggregates-status', type: direct }
             queue_options:    { name: 'get-aggregates-status' }
+            qos_options:      { prefetch_size: 0, prefetch_count: 1, global: false }
+        weaving_the_web_amqp.twitter.aggregates_likes:
+            callback:         weaving_the_web_amqp.twitter.user_status
+            connection:       default
+            exchange_options: { name: 'get-aggregates-likes', type: direct }
+            queue_options:    { name: 'get-aggregates-likes' }
             qos_options:      { prefetch_size: 0, prefetch_count: 1, global: false }
         weaving_the_web_amqp.consumer.conversation_status:
             callback:         weaving_the_web_amqp.consumer.conversation_status

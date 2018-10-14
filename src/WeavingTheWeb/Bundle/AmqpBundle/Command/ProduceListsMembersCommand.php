@@ -32,6 +32,11 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
     private $producer;
 
     /**
+     * @var \OldSound\RabbitMqBundle\RabbitMq\Producer
+     */
+    private $likesMessagesProducer;
+
+    /**
      * @var TranslatorInterface
      */
     private $translator;
@@ -144,7 +149,8 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
 
         $ownerships = $this->guardAgainstInvalidListName($ownerships);
 
-        $doNotApplyListRestriction = is_null($this->listRestriction) && count($this->listCollectionRestriction) === 0;
+        $doNotApplyListRestriction = is_null($this->listRestriction) &&
+            count($this->listCollectionRestriction) === 0;
         if ($doNotApplyListRestriction && count($ownerships->lists) === 0) {
             $ownerships = $this->guardAgainstInvalidToken($ownerships);
         }
@@ -232,6 +238,7 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
 
                 $this->producer->setContentType('application/json');
                 $this->producer->publish(serialize(json_encode($messageBody)));
+                $this->likesMessagesProducer->publish(serialize(json_encode($messageBody)));
 
                 $publishedMessages++;
             } catch (\Exception $exception) {
@@ -348,14 +355,22 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
         $this->setupAggregateRepository();
         $this->setUpLogger();
 
-        $this->producer = $this->getContainer()->get('old_sound_rabbit_mq.weaving_the_web_amqp.twitter.user_status_producer');
+        $this->producer = $this->getContainer()
+            ->get('old_sound_rabbit_mq.weaving_the_web_amqp.twitter.user_status_producer');
 
         if (!is_null($this->listRestriction) && $this->listRestriction == 'news :: France') {
-            $this->producer = $this->getContainer()->get('old_sound_rabbit_mq.weaving_the_web_amqp.twitter.news_status_producer');
+            $this->producer = $this->getContainer()
+                ->get('old_sound_rabbit_mq.weaving_the_web_amqp.twitter.news_status_producer');
         }
 
-        if ((!is_null($this->listRestriction) || !is_null($this->listCollectionRestriction)) && $this->givePriorityToAggregate) {
-            $this->producer = $this->getContainer()->get('old_sound_rabbit_mq.weaving_the_web_amqp.twitter.aggregates_status_producer');
+        if ((!is_null($this->listRestriction) || !is_null($this->listCollectionRestriction)) &&
+            $this->givePriorityToAggregate
+        ) {
+            $this->producer = $this->getContainer()
+                ->get('old_sound_rabbit_mq.weaving_the_web_amqp.twitter.aggregates_status_producer');
+
+            $this->likesMessagesProducer = $this->getContainer()
+                ->get('old_sound_rabbit_mq.weaving_the_web_amqp.twitter.aggregates_likes_producer');
         }
 
         $this->translator = $this->getContainer()->get('translator');
