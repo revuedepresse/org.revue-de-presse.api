@@ -14,14 +14,20 @@ use WTW\UserBundle\Entity\User;
 class UserRepository extends EntityRepository
 {
     /**
-     * @param $twitterId
-     * @param $screenName
-     * @param bool|false $protected
-     * @param bool|false $suspended
-     * @return MemberInterface
+     * @param      $twitterId
+     * @param      $screenName
+     * @param bool $protected
+     * @param bool $suspended
+     * @param null $description
+     * @return User
      */
-    public function make($twitterId, $screenName, $protected = false, $suspended = false)
-    {
+    public function make(
+        $twitterId,
+        $screenName,
+        $protected = false,
+        $suspended = false,
+        $description = null
+    ) {
         $member = new User();
         $member->setTwitterUsername($screenName);
         $member->setTwitterID($twitterId);
@@ -31,6 +37,10 @@ class UserRepository extends EntityRepository
         $member->setEnabled(0);
         $member->setProtected($protected);
         $member->setSuspended($suspended);
+
+        if (!is_null($description)) {
+            $member->description = $description;
+        }
 
         return $member;
     }

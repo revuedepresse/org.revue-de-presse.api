@@ -150,19 +150,26 @@ class StatusAccessor
     {
         $member = $this->userManager->findOneBy(['twitter_username' => $memberName]);
         if ($member instanceof MemberInterface) {
+            $this->ensureMemberHasDescription($member, $memberName);
+
             return $member;
         }
 
         $fetchedMember = $this->accessor->showUser($memberName);
         $member = $this->userManager->findOneBy(['twitterID' => $fetchedMember->id]);
         if ($member instanceof MemberInterface) {
+            $this->ensureMemberHasDescription($member, $memberName);
+
             return $member;
         }
 
         return $this->userManager->saveMember(
             $this->userManager->make(
                 $fetchedMember->id,
-                $memberName
+                $memberName,
+                $protected = false,
+                $suspended = false,
+                $fetchedMember->description
             )
         );
     }
@@ -181,5 +188,25 @@ class StatusAccessor
         }
 
         return $status;
+    }
+
+    /**
+     * @param MemberInterface $member
+     * @param string          $memberName
+     * @return MemberInterface
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
+     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
+     */
+    private function ensureMemberHasDescription(MemberInterface $member, string $memberName): MemberInterface
+    {
+        if (!$member->description) {
+            $fetchedMember = $this->accessor->showUser($memberName);
+            $member->description = $fetchedMember->description;
+            $this->userManager->saveMember($member);
+        }
+
+        return $member;
     }
 }
