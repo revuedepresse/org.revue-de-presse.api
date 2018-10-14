@@ -1375,9 +1375,11 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
             $message = $this->translator->trans('twitter.error.api_limit_reached.all_tokens', [], 'messages');
             $this->logger->info($message);
 
-            if (isset($token)) {
-                $this->waitUntilTokenUnfrozen($token);
+            if (!isset($token)) {
+                $token = $this->tokenRepository->findFirstFrozenToken();
             }
+
+            $this->waitUntilTokenUnfrozen($token);
         }
 
         return $token;
