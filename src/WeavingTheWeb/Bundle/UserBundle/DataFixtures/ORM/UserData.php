@@ -47,8 +47,8 @@ class UserData extends AbstractFixture implements OrderedFixtureInterface,  Cont
 
         $users = [
             [
-                'username' => $this->container->getParameter('wtw.qa.user.username'),
-                'password' => $this->container->getParameter('wtw.qa.user.password'),
+                'username' => $this->container->getParameter('weaving_the_web.quality_assurance.user.username'),
+                'password' => $this->container->getParameter('weaving_the_web.quality_assurance.user.password'),
                 'email' => 'user@weaving-the-web.org',
                 'enabled' => true,
                 'username_canonical' => 'user',
@@ -59,8 +59,8 @@ class UserData extends AbstractFixture implements OrderedFixtureInterface,  Cont
                 'api_key' => sha1('user'.'secret'),
                 'roles' => [],
             ], [
-                'username' => $this->container->getParameter('wtw.qa.super.username'),
-                'password' => $this->container->getParameter('wtw.qa.super.password'),
+                'username' => $this->container->getParameter('weaving_the_web.quality_assurance.super.username'),
+                'password' => $this->container->getParameter('weaving_the_web.quality_assurance.super.password'),
                 'email' => 'super@weaving-the-web.org',
                 'enabled' => true,
                 'username_canonical' => 'super',
