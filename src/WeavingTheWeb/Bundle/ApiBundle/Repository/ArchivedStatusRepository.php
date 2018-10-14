@@ -578,7 +578,7 @@ QUERY
             $queryTemplate,
             [
                 ':aggregate' => $aggregateName,
-                ':max_results' => 50,
+                ':max_results' => 500,
                 ':status_table' => 'weaving_status',
                 ':liked_status' => 'liked_status',
                 ':aggregate_table' => 'weaving_aggregate',
