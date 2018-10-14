@@ -2,6 +2,8 @@
 
 namespace WTW\UserBundle\Entity;
 
+use App\Member\MemberInterface;
+
 use Doctrine\Common\Collections\ArrayCollection,
     Doctrine\ORM\Mapping as ORM;
 use WTW\UserBundle\Model\User as BaseUser;
@@ -21,7 +23,7 @@ use WTW\UserBundle\Model\User as BaseUser;
  * @ORM\DiscriminatorColumn(name="usr_position_in_hierarchy", type="integer")
  * @ORM\DiscriminatorMap({"1" = "User", "0" = "\WTW\UserBundle\Tests\Security\Core\User\User"})
  */
-class User extends BaseUser
+class User extends BaseUser implements MemberInterface
 {
     /**
      * @var integer
@@ -231,28 +233,27 @@ class User extends BaseUser
      */
     public $apiKey;
 
-    public function getApiKey()
+    /**
+     * @return string
+     */
+    public function getApiKey(): string
     {
         return $this->apiKey;
     }
 
     /**
-     * Get id
-     *
      * @return integer
      */
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
 
     /**
-     * Set groupId
-     *
      * @param  integer $groupId
      * @return User
      */
-    public function setGroupId($groupId)
+    public function setGroupId(int $groupId): MemberInterface
     {
         $this->groupId = $groupId;
 
@@ -274,7 +275,7 @@ class User extends BaseUser
      *
      * @return string
      */
-    public function getUsername()
+    public function getUsername(): string
     {
         return $this->username;
     }
@@ -303,12 +304,10 @@ class User extends BaseUser
     }
 
     /**
-     * Set firstName
-     *
-     * @param  string $firstName
-     * @return User
+     * @param string $firstName
+     * @return MemberInterface
      */
-    public function setFirstName($firstName)
+    public function setFirstName(string $firstName): MemberInterface
     {
         $this->firstName = $firstName;
 
@@ -316,22 +315,18 @@ class User extends BaseUser
     }
 
     /**
-     * Get firstName
-     *
      * @return string
      */
-    public function getFirstName()
+    public function getFirstName(): string
     {
         return $this->firstName;
     }
 
     /**
-     * Set lastName
-     *
-     * @param  string $lastName
-     * @return User
+     * @param string $lastName
+     * @return MemberInterface
      */
-    public function setLastName($lastName)
+    public function setLastName(string $lastName): MemberInterface
     {
         $this->lastName = $lastName;
 
@@ -339,11 +334,9 @@ class User extends BaseUser
     }
 
     /**
-     * Get lastName
-     *
-     * @return string
+     * @return strirng
      */
-    public function getLastName()
+    public function getLastName(): string
     {
         return $this->lastName;
     }
@@ -441,21 +434,22 @@ class User extends BaseUser
     }
 
     /**
-     * Set twitterID
-     *
-     * @param $twitterId
+     * @param string $twitterId
+     * @return MemberInterface
      */
-    public function setTwitterID($twitterId)
+    public function setTwitterID($twitterId): MemberInterface
     {
       $this->twitterID = $twitterId;
       $this->salt = '';
+
+      return $this;
     }
 
     /**
      * @param $twitterUsername
      * @return $this
      */
-    public function setTwitterUsername($twitterUsername)
+    public function setTwitterUsername(string $twitterUsername): MemberInterface
     {
         $this->twitter_username = $twitterUsername;
 
@@ -467,17 +461,15 @@ class User extends BaseUser
     *
     * @return string
     */
-    public function getTwitterUsername()
+    public function getTwitterUsername(): string
     {
       return $this->twitter_username;
     }
 
     /**
-     * Get twitterID
-     *
      * @return string
      */
-    public function getTwitterID()
+    public function getTwitterID(): string
     {
         return $this->twitterID;
     }
@@ -506,12 +498,10 @@ class User extends BaseUser
     }
 
     /**
-     * Set fullName
-     *
-     * @param  string $fullName
-     * @return User
+     * @param string $fullName
+     * @return MemberInterface
      */
-    public function setFullName($fullName)
+    public function setFullName(string $fullName): MemberInterface
     {
         $this->fullName = $fullName;
 
@@ -519,11 +509,9 @@ class User extends BaseUser
     }
 
     /**
-     * Get fullName
-     *
      * @return string
      */
-    public function getFullName()
+    public function getFullName(): string
     {
         return $this->fullName;
     }
@@ -672,7 +660,7 @@ class User extends BaseUser
      * @param  string $username
      * @return User
      */
-    public function setUsername($username)
+    public function setUsername($username): MemberInterface
     {
         $this->username = $username;
 
@@ -902,7 +890,7 @@ class User extends BaseUser
      * @param  boolean $protected
      * @return User
      */
-    public function setProtected($protected)
+    public function setProtected(bool $protected): MemberInterface
     {
         $this->protected = $protected;
 
@@ -912,7 +900,7 @@ class User extends BaseUser
     /**
      * @return boolean
      */
-    public function isProtected()
+    public function isProtected(): bool
     {
         return $this->protected;
     }
@@ -920,7 +908,7 @@ class User extends BaseUser
     /**
      * @return boolean
      */
-    public function isNotProtected()
+    public function isNotProtected(): bool
     {
         return !$this->isProtected();
     }
@@ -934,10 +922,10 @@ class User extends BaseUser
     protected $suspended = false;
 
     /**
-     * @param  boolean $suspended
-     * @return User
+     * @param bool $suspended
+     * @return MemberInterface
      */
-    public function setSuspended($suspended)
+    public function setSuspended(bool $suspended): MemberInterface
     {
         $this->suspended = $suspended;
 
@@ -947,7 +935,7 @@ class User extends BaseUser
     /**
      * @return boolean
      */
-    public function isSuspended()
+    public function isSuspended(): bool
     {
         return $this->suspended;
     }
@@ -955,7 +943,7 @@ class User extends BaseUser
     /**
      * @return boolean
      */
-    public function isNotSuspended()
+    public function isNotSuspended(): bool
     {
         return !$this->isSuspended();
     }
@@ -969,10 +957,10 @@ class User extends BaseUser
     protected $notFound = false;
 
     /**
-     * @param  boolean $notFound
-     * @return User
+     * @param bool $notFound
+     * @return MemberInterface
      */
-    public function setNotFound($notFound)
+    public function setNotFound(bool $notFound): MemberInterface
     {
         $this->notFound = $notFound;
 
@@ -983,7 +971,7 @@ class User extends BaseUser
      * @return boolean
      * @deprecated in favor of ->hasBeenDeclaredAsNotFound
      */
-    public function isNotFound()
+    public function isNotFound(): bool
     {
         return $this->hasBeenDeclaredAsNotFound();
     }
@@ -991,7 +979,7 @@ class User extends BaseUser
     /**
      * @return boolean
      */
-    public function hasBeenDeclaredAsNotFound()
+    public function hasBeenDeclaredAsNotFound(): bool
     {
         return $this->notFound;
     }
@@ -999,7 +987,7 @@ class User extends BaseUser
     /**
      * @return boolean
      */
-    public function hasNotBeenDeclaredAsNotFound()
+    public function hasNotBeenDeclaredAsNotFound(): bool
     {
         return !$this->hasBeenDeclaredAsNotFound();
     }
@@ -1015,11 +1003,28 @@ class User extends BaseUser
     public $minStatusId;
 
     /**
+     * @ORM\Column(name="max_like_id", type="string", length=255, nullable=true)
+     */
+    public $maxLikeId;
+
+    /**
+     * @ORM\Column(name="min_like_id", type="string", length=255, nullable=true)
+     */
+    public $minLikeId;
+
+    /**
      * @var integer
      *
      * @ORM\Column(name="total_statuses", type="integer", options={"default": 0})
      */
     public $totalStatuses = 0;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="total_likes", type="integer", options={"default": 0})
+     */
+    public $totalLikes = 0;
 
     /**
      * @ORM\Column(name="description", type="text", nullable=true)
@@ -1033,7 +1038,10 @@ class User extends BaseUser
      */
     public $lastStatusPublicationDate = null;
 
-    public function isAWhisperer()
+    /**
+     * @return bool
+     */
+    public function isAWhisperer(): bool
     {
         $oneMonthAgo = new \DateTime('now', new \DateTimeZone('UTC'));
         $oneMonthAgo->modify('-1 month');

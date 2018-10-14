@@ -114,7 +114,7 @@ class StatusRepository extends ArchivedStatusRepository
             ->andWhere('s.hash = :hash');
 
         $queryBuilder->setParameter('hash', $hash);
-        $count = $queryBuilder->getQuery()->getSingleScalarResult();
+        $count = intval($queryBuilder->getQuery()->getSingleScalarResult());
 
         if ($this->logger) {
             $this->logger->info(
@@ -153,7 +153,7 @@ class StatusRepository extends ArchivedStatusRepository
         $totalStatuses = $queryBuilder->getQuery()->getSingleScalarResult();
         $totalStatuses = intval($totalStatuses) + $this->archivedStatusRepository->countHowManyStatusesFor($screenName);
 
-        $this->memberManager->declareTotalStatusesOfMemberWithScreenName($totalStatuses, $screenName);
+        $this->memberManager->declareTotalStatusesOfMemberWithName($totalStatuses, $screenName);
 
         return $totalStatuses;
     }
@@ -271,15 +271,15 @@ class StatusRepository extends ArchivedStatusRepository
     }
 
     /**
-     * @param        $screenName
-     * @param string $direction
-     * @param null   $before
-     * @return array|mixed|StatusInterface
+     * @param string         $screenName
+     * @param string         $direction
+     * @param \DateTime|null $before
+     * @return array
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException
      */
-    protected function findNextExtremum($screenName, $direction = 'asc', $before = null): array
+    public function findNextExtremum(string $screenName, string $direction = 'asc', \DateTime $before = null): array
     {
         $nextExtremum = $this->archivedStatusRepository->findNextExtremum($screenName, $direction, $before);
 
@@ -294,7 +294,11 @@ class StatusRepository extends ArchivedStatusRepository
 
         if ($before) {
             $queryBuilder->andWhere('DATE(s.createdAt) = :date');
-            $queryBuilder->setParameter('date', (new \DateTime($before))->format('Y-m-d'));
+            $queryBuilder->setParameter(
+                'date',
+                (new \DateTime($before, new \DateTimeZone('UTC')))
+                    ->format('Y-m-d')
+            );
         }
 
         try {
@@ -350,19 +354,5 @@ class StatusRepository extends ArchivedStatusRepository
             $minStatus,
             $status->user->screen_name
         );
-    }
-
-    /**
-     * @param $screenName
-     * @return mixed
-     */
-    public function getIdsOfExtremeStatusesSavedForMemberHavingScreenName(string $screenName)
-    {
-        $member = $this->memberManager->findOneBy(['twitter_username' => $screenName]);
-
-        return [
-            'min_status_id' => $member->minStatusId,
-            'max_status_id' => $member->maxStatusId
-        ];
     }
 }

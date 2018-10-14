@@ -5,6 +5,8 @@ namespace WeavingTheWeb\Bundle\AmqpBundle\Command;
 use App\Conversation\Producer\MemberAwareTrait;
 use App\Operation\OperationClock;
 
+use App\Status\LikedStatusCollectionAwareInterface;
+use OldSound\RabbitMqBundle\RabbitMq\Producer;
 use Symfony\Component\Console\Input\InputOption,
     Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Output\OutputInterface;
@@ -239,8 +241,12 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
                 $this->producer->setContentType('application/json');
                 $this->producer->publish(serialize(json_encode($messageBody)));
 
-                $messageBody['likes'] = true;
-                $this->likesMessagesProducer->publish(serialize(json_encode($messageBody)));
+                if ($this->likesMessagesProducer instanceof Producer) {
+                    $this->likesMessagesProducer->setContentType('application/json');
+                    $messageBody[LikedStatusCollectionAwareInterface::INTENT_TO_FETCH_LIKES] = true;
+                    $this->likesMessagesProducer->publish(serialize(json_encode($messageBody)));
+                    $messageBody[LikedStatusCollectionAwareInterface::INTENT_TO_FETCH_LIKES] = false;
+                }
 
                 $publishedMessages++;
             } catch (\Exception $exception) {
@@ -372,7 +378,7 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
                 ->get('old_sound_rabbit_mq.weaving_the_web_amqp.twitter.aggregates_status_producer');
 
             $this->likesMessagesProducer = $this->getContainer()
-                ->get('old_sound_rabbit_mq.weaving_the_web_amqp.twitter.aggregates_likes_producer');
+                ->get('old_sound_rabbit_mq.weaving_the_web_amqp.producer.aggregates_likes_producer');
         }
 
         $this->translator = $this->getContainer()->get('translator');

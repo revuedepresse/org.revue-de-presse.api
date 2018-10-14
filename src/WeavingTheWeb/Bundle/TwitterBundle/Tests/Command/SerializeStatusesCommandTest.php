@@ -73,7 +73,7 @@ class SerializeStatusesCommandTest extends CommandTestCase
         $accessorMock->setAuthenticationHeader(Argument::type('string'))->willReturn(null);
 
         $statusText = 'status content';
-        $accessorMock->fetchTimelineStatuses(Argument::type('array'))->willReturn(
+        $accessorMock->fetchStatuses(Argument::type('array'))->willReturn(
             [
                 (object)[
                     'hash' => sha1(1),

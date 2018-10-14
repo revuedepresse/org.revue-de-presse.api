@@ -7,6 +7,8 @@ use App\Accessor\Exception\UnexpectedApiResponseException;
 use App\Accessor\StatusAccessor;
 use App\Accessor\Exception\ApiRateLimitingException;
 
+use App\Member\MemberInterface;
+use App\Status\LikedStatusCollectionAwareInterface;
 use Doctrine\Common\Persistence\ObjectRepository;
 
 use GuzzleHttp\Exception\ConnectException;
@@ -29,7 +31,7 @@ use WTW\UserBundle\Repository\UserRepository;
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
-class Accessor implements TwitterErrorAwareInterface
+class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAwareInterface
 {
     const ERROR_PROTECTED_ACCOUNT = 2048;
 
@@ -288,25 +290,70 @@ class Accessor implements TwitterErrorAwareInterface
     }
 
     /**
+     * @param array $criteria
+     * @return bool
+     */
+    public function isAboutToCollectLikesFromCriteria(array $criteria): bool
+    {
+        if (!array_key_exists(self::INTENT_TO_FETCH_LIKES, $criteria)) {
+            return false;
+        }
+
+        return $criteria[self::INTENT_TO_FETCH_LIKES];
+    }
+
+    /**
      * Fetch timeline statuses
      *
      * @param null|array|object $options
      * @return \API|mixed|object
      * @throws \Exception
      */
-    public function fetchTimelineStatuses($options)
+    public function fetchStatuses(array $options)
     {
         if (is_null($options) || (!is_object($options) && !is_array($options))) {
             throw new \Exception('Invalid options');
-        } else {
-            if (is_array($options)) {
-                $options = (object)$options;
-            }
-            $parameters = $this->validateRequestOptions($options);
-            $endpoint = $this->getUserTimelineStatusesEndpoint() . '&' . implode('&', $parameters);
-
-            return $this->contactEndpoint($endpoint);
         }
+
+        if (is_array($options)) {
+            $options = (object)$options;
+        }
+
+        $parameters = $this->validateRequestOptions($options);
+
+        if ($this->isAboutToCollectLikesFromCriteria((array)$options)) {
+            return $this->fetchLikes($parameters);
+        }
+
+        return $this->fetchTimelineStatuses($parameters);
+    }
+
+    /**
+     * @param array $parameters
+     * @return \API|mixed|object|\stdClass
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function fetchTimelineStatuses(array $parameters)
+    {
+        $endpoint = $this->getUserTimelineStatusesEndpoint() . '&' . implode('&', $parameters);
+
+        return $this->contactEndpoint($endpoint);
+    }
+
+    /**
+     * @param array $parameters
+     * @return \API|mixed|object|\stdClass
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function fetchLikes(array $parameters)
+    {
+        $endpoint = $this->getLikesEndpoint() . '&' . implode('&', $parameters);
+
+        return $this->contactEndpoint($endpoint);
     }
 
     /**
@@ -656,7 +703,7 @@ class Accessor implements TwitterErrorAwareInterface
     public function shouldSkipSerializationForMemberWithScreenName(string $screenName)
     {
         $member = $this->userRepository->findOneBy(['twitter_username' => $screenName]);
-        if (!$member instanceof User) {
+        if (!$member instanceof MemberInterface) {
             return false;
         }
 
@@ -719,7 +766,7 @@ class Accessor implements TwitterErrorAwareInterface
                 }
 
                 $memberNotFoundMessage = $this->logNotFoundMemberMessage($screenName);
-                throw new NotFoundMemberException($memberNotFounMessaged, $exception->getCode(), $exception);
+                throw new NotFoundMemberException($memberNotFoundMessage, $exception->getCode(), $exception);
             }
 
             throw $exception;
@@ -737,6 +784,16 @@ class Accessor implements TwitterErrorAwareInterface
     protected function getUserTimelineStatusesEndpoint($version = '1.1')
     {
         return $this->getApiBaseUrl($version) . '/statuses/user_timeline.json?' .
+            'tweet_mode=extended&include_entities=1&include_rts=1&exclude_replies=0&trim_user=0';
+    }
+
+    /**
+     * @param string $version
+     * @return string
+     */
+    protected function getLikesEndpoint($version = '1.1')
+    {
+        return $this->getApiBaseUrl($version) . '/favorites/list.json?' .
             'tweet_mode=extended&include_entities=1&include_rts=1&exclude_replies=0&trim_user=0';
     }
 
@@ -1577,5 +1634,18 @@ class Accessor implements TwitterErrorAwareInterface
                 );
             }
         }
+    }
+
+    /**
+     * @param string $memberName
+     * @return \API|mixed|null|object|\stdClass|User
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function ensureMemberHavingNameExists(string $memberName)
+    {
+        return $this->statusAccessor->ensureMemberHavingNameExists($memberName);
     }
 }

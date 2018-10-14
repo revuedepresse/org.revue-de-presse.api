@@ -3,6 +3,7 @@
 namespace WeavingTheWeb\Bundle\ApiBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use MyProject\Proxies\__CG__\stdClass;
 
 /**
  * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
@@ -167,4 +168,9 @@ class Whisperer
     {
        return $this->updatedAt;
     }
+
+    /**
+     * @var stdClass
+     */
+    public $member;
 }

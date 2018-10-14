@@ -3,6 +3,7 @@
 namespace WeavingTheWeb\Bundle\AmqpBundle\Twitter;
 
 use App\Operation\OperationClock;
+use App\Status\LikedStatusCollectionAwareInterface;
 use Doctrine\ORM\EntityRepository;
 
 use OldSound\RabbitMqBundle\RabbitMq\ConsumerInterface;
@@ -88,10 +89,11 @@ class UserStatus implements ConsumerInterface
         }
 
         $options = [
+            LikedStatusCollectionAwareInterface::INTENT_TO_FETCH_LIKES => $this->extractIntentToCollectLikes($options),
             'aggregate_id' => $this->extractAggregateId($options),
             'before' => $this->extractBeforeOption($options),
-            'oauth' => $options['token'],
             'count' => 200,
+            'oauth' => $options['token'],
             'screen_name' => $options['screen_name'],
         ];
 
@@ -175,7 +177,9 @@ class UserStatus implements ConsumerInterface
      */
     protected function setupCredentials($tokens)
     {
-        if ((!array_key_exists('token', $tokens) || !array_key_exists('secret', $tokens)) && !array_key_exists('bearer', $tokens)) {
+        if ((!array_key_exists('token', $tokens) ||
+            !array_key_exists('secret', $tokens)) &&
+            !array_key_exists('bearer', $tokens)) {
             throw new \InvalidArgumentException('Valid token and secret are required');
         } else {
             $this->serializer->setupAccessor($tokens);
@@ -195,6 +199,19 @@ class UserStatus implements ConsumerInterface
         }
 
         return $aggregateId;
+    }
+
+    /**
+     * @param array $options
+     * @return bool
+     */
+    protected function extractIntentToCollectLikes(array $options): bool
+    {
+        if (!array_key_exists(LikedStatusCollectionAwareInterface::INTENT_TO_FETCH_LIKES, $options)) {
+            return false;
+        }
+
+        return $options[LikedStatusCollectionAwareInterface::INTENT_TO_FETCH_LIKES];
     }
 
     /**

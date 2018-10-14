@@ -195,7 +195,7 @@ class ConversationStatusConsumer implements ConsumerInterface
      */
     private function handleMemberNotFoundException($notFoundMemberException, $options): array
     {
-        $member = $this->statusAccessor->ensureMemberHavingScreenNameExists($notFoundMemberException->screenName);
+        $member = $this->statusAccessor->ensureMemberHavingNameExists($notFoundMemberException->screenName);
         $aggregate = $this->getListAggregateByName($member->getTwitterUsername(), $options['aggregate_name']);
         $status = $this->statusAccessor->refreshStatusByIdentifier(
             $options['status_id'],
@@ -242,7 +242,7 @@ class ConversationStatusConsumer implements ConsumerInterface
     {
         $member = $this->userRepository->findOneBy(['twitter_username' => $status->getScreenName()]);
         if (!$member instanceof User) {
-            $member = $this->statusAccessor->ensureMemberHavingScreenNameExists($status->getScreenName());
+            $member = $this->statusAccessor->ensureMemberHavingNameExists($status->getScreenName());
             $existingMember = $this->userRepository->findOneBy(['twitterID' => $member->getTwitterID()]);
 
             if ($existingMember) {
