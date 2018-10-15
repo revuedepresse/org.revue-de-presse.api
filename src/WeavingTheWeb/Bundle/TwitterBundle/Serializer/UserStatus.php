@@ -373,29 +373,57 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             }
         }
 
-        if (count($statuses) > 0 &&
-            $this->isAboutToCollectLikesFromCriteria($this->serializationOptions)
-        ) {
-            // At this point, it should not skip further consumption
-            // for matching liked statuses
-            $this->saveStatusesForScreenName(
-                $statuses,
-                $options['screen_name'],
-                $options['aggregate_id']
-            );
+        if ($this->isAboutToCollectLikesFromCriteria($this->serializationOptions)) {
+            if (count($statuses) > 0 ) {
+                // At this point, it should not skip further consumption
+                // for matching liked statuses
+                $this->saveStatusesForScreenName(
+                    $statuses,
+                    $options['screen_name'],
+                    $options['aggregate_id']
+                );
 
-            $this->statusRepository->declareMinimumLikedStatusId(
-                $statuses[count($statuses) - 1],
-                $options['screen_name']
-            );
+                $this->statusRepository->declareMinimumLikedStatusId(
+                    $statuses[count($statuses) - 1],
+                    $options['screen_name']
+                );
+            }
+
+            if (count($statuses) === 0) {
+                $statuses = $this->fetchLatestStatuses($options, $discoverPastTweets = false);
+                if (count($statuses) > 0 ) {
+                    if ($this->statusRepository->hasBeenSavedBefore(
+                        [$this->statusRepository->$statuses[0]]
+                    )) {
+                        return true;
+                    }
+
+                    // At this point, it should not skip further consumption
+                    // for matching liked statuses
+                    $this->saveStatusesForScreenName(
+                        $statuses,
+                        $options['screen_name'],
+                        $options['aggregate_id']
+                    );
+
+                    $this->statusRepository->declareMaximumLikedStatusId(
+                        $statuses[0],
+                        $options['screen_name']
+                    );
+                }
+
+                return true;
+            }
 
             return false;
         }
 
-        try {
-            $this->statusRepository->updateLastStatusPublicationDate($options['screen_name']);
-        } catch (NotFoundStatusException $exception) {
-            $this->logger->info($exception->getMessage());
+        if (!$this->isAboutToCollectLikesFromCriteria($this->serializationOptions)) {
+            try {
+                $this->statusRepository->updateLastStatusPublicationDate($options['screen_name']);
+            } catch (NotFoundStatusException $exception) {
+                $this->logger->info($exception->getMessage());
+            }
         }
 
         if ($whisperer instanceof Whisperer) {
@@ -1106,16 +1134,16 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     }
 
     /**
-     * @param $options
+     * @param      $options
+     * @param bool $discoverPastTweets
      * @return array
      * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Exception
      */
-    protected function fetchLatestStatuses($options): array
+    protected function fetchLatestStatuses($options, $discoverPastTweets = true): array
     {
         $options[self::INTENT_TO_FETCH_LIKES] = $this->isAboutToCollectLikesFromCriteria($this->serializationOptions);
         $options = $this->removeSerializationOptions($options);
-        $options = $this->updateExtremum($options, true);
+        $options = $this->updateExtremum($options, $discoverPastTweets);
 
         if (array_key_exists('max_id', $options) &&
             array_key_exists('before', $options) // Looking into the past
