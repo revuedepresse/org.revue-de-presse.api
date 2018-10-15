@@ -393,7 +393,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
                 $statuses = $this->fetchLatestStatuses($options, $discoverPastTweets = false);
                 if (count($statuses) > 0 ) {
                     if ($this->statusRepository->hasBeenSavedBefore(
-                        [$this->statusRepository->$statuses[0]]
+                        [$statuses[0]]
                     )) {
                         return true;
                     }
