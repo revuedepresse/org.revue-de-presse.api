@@ -1600,7 +1600,7 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
         while ($retries < self::MAX_RETRIES + 1) {
             try {
                 $content = $fetchContent($endpoint);
-                $this->guardAgainstContentFetchingException($content);
+                $this->guardAgainstContentFetchingException($content, $endpoint);
 
                 break;
             } catch (OverCapacityException $exception) {
@@ -1621,10 +1621,12 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
 
     /**
      * @param $content
+     * @param $endpoint
+     * @throws ApiRateLimitingException
      * @throws NotFoundStatusException
      * @throws OverCapacityException
      */
-    private function guardAgainstContentFetchingException($content): void
+    private function guardAgainstContentFetchingException($content, $endpoint): void
     {
         if ($this->hasError($content)) {
             $errorCode = $content->errors[0]->code;
@@ -1644,6 +1646,7 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
             }
 
             if ($errorCode === self::ERROR_EXCEEDED_RATE_LIMIT) {
+                $this->delayUnknownExceptionHandlingOnEndpointForToken($endpoint);
                 throw new ApiRateLimitingException(
                     $content->errors[0]->message,
                     $content->errors[0]->code
