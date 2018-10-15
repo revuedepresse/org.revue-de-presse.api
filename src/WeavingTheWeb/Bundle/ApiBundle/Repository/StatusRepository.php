@@ -355,4 +355,38 @@ class StatusRepository extends ArchivedStatusRepository
             $status->user->screen_name
         );
     }
+
+    /**
+     * @param        $status
+     * @param string $memberName
+     * @return \App\Member\MemberInterface
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException
+     */
+    public function declareMaximumLikedStatusId($status, string $memberName)
+    {
+        $maxStatus = $status->id_str;
+
+        return $this->memberManager->declareMaxLikeIdForMemberWithScreenName(
+            $maxStatus,
+            $memberName
+        );
+    }
+
+    /**
+     * @param        $status
+     * @param string $memberName
+     * @return \App\Member\MemberInterface
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException
+     */
+    public function declareMinimumLikedStatusId($status, string $memberName)
+    {
+        $minStatus = $status->id_str;
+
+        return $this->memberManager->declareMinLikeIdForMemberWithScreenName(
+            $minStatus,
+            $memberName
+        );
+    }
 }

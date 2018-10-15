@@ -157,12 +157,20 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
             $ownerships = $this->guardAgainstInvalidToken($ownerships);
         }
 
+        $shouldIncludeOwner = true;
+
         foreach ($ownerships->lists as $list) {
             if ($doNotApplyListRestriction ||
                 $list->name === $this->listRestriction ||
                 array_key_exists($list->name, $this->listCollectionRestriction)
             ) {
                 $members = $this->accessor->getListMembers($list->id);
+
+                if ($shouldIncludeOwner) {
+                    $additionalMember = $this->accessor->showUser($this->screenName);
+                    array_unshift($members->users, $additionalMember);
+                    $shouldIncludeOwner = false;
+                }
 
                 if (!is_object($members) || !isset($members->users) || count($members->users) === 0) {
                     $this->logger->info(sprintf('List "%s" has no members', $list->name));

@@ -341,7 +341,10 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             );
         }
 
-        if (($aggregate instanceof Aggregate) && $aggregate->isLocked()) {
+        if (($aggregate instanceof Aggregate) &&
+            $aggregate->isLocked() &&
+            !array_key_exists('before', $options)
+        ) {
             $message = sprintf(
                 'Will skip message consumption for locked aggregate #%d',
                 $aggregate->getId()
@@ -370,9 +373,22 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             }
         }
 
-        if (count($statuses) > 0) {
+        if (count($statuses) > 0 &&
+            $this->isAboutToCollectLikesFromCriteria($this->serializationOptions)
+        ) {
             // At this point, it should not skip further consumption
             // for matching liked statuses
+            $this->saveStatusesForScreenName(
+                $statuses,
+                $options['screen_name'],
+                $options['aggregate_id']
+            );
+
+            $this->statusRepository->declareMinimumLikedStatusId(
+                $statuses[count($statuses) - 1],
+                $options['screen_name']
+            );
+
             return false;
         }
 
@@ -529,7 +545,9 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      */
     protected function updateExtremum($options, $discoverPastTweets = true)
     {
-        if (array_key_exists('before', $this->serializationOptions) && $this->serializationOptions['before']) {
+        if (array_key_exists('before', $this->serializationOptions) &&
+            $this->serializationOptions['before']
+        ) {
             $discoverPastTweets = true;
         }
 
@@ -713,10 +731,13 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         $lookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow =
             $this->isLookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow($options);
 
-        $this->safelyDeclareExtremum(
-            $statuses,
-            $lookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow
-        );
+        if (count($statuses) > 0) {
+            $this->safelyDeclareExtremum(
+                $statuses,
+                $lookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow,
+                $options['screen_name']
+            );
+        }
 
         $statusesIds = $this->getExtremeStatusesIdsFor($options);
         $firstStatusId = $statusesIds['min_id'];
@@ -780,29 +801,49 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     }
 
     /**
-     * @param array $statuses
-     * @param bool  $shouldDeclareMaximumStatusId
+     * @param array  $statuses
+     * @param bool   $shouldDeclareMaximumStatusId
+     * @param string $memberName
      * @return MemberInterface
      * @throws NotFoundMemberException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
     private function declareExtremumIdForMember(
         array $statuses,
-        bool $shouldDeclareMaximumStatusId
+        bool $shouldDeclareMaximumStatusId,
+        string $memberName
     ) {
-        if (count($statuses) > 0) {
+        if (count($statuses) === 0) {
+            throw new \LogicException('There should be at least one status');
+        }
+
+        if ($this->isAboutToCollectLikesFromCriteria($this->serializationOptions)) {
             if ($shouldDeclareMaximumStatusId) {
                 $lastStatusFetched = $statuses[0];
 
-                return $this->statusRepository->declareMaximumStatusId($lastStatusFetched);
+                return $this->statusRepository->declareMaximumLikedStatusId(
+                    $lastStatusFetched,
+                    $memberName
+                );
             }
 
-            if (!$shouldDeclareMaximumStatusId) {
-                $firstStatusFetched = $statuses[count($statuses) - 1];
+            $firstStatusFetched = $statuses[count($statuses) - 1];
 
-                return $this->statusRepository->declareMinimumStatusId($firstStatusFetched);
-            }
+            return $this->statusRepository->declareMinimumLikedStatusId(
+                $firstStatusFetched,
+                $memberName
+            );
         }
+
+        if ($shouldDeclareMaximumStatusId) {
+            $lastStatusFetched = $statuses[0];
+
+            return $this->statusRepository->declareMaximumStatusId($lastStatusFetched);
+        }
+
+        $firstStatusFetched = $statuses[count($statuses) - 1];
+
+        return $this->statusRepository->declareMinimumStatusId($firstStatusFetched);
     }
 
     /**
@@ -1074,8 +1115,11 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     {
         $options[self::INTENT_TO_FETCH_LIKES] = $this->isAboutToCollectLikesFromCriteria($this->serializationOptions);
         $options = $this->removeSerializationOptions($options);
-        $options = $this->updateExtremum($options, false);
-        if (array_key_exists('max_id', $options)) {
+        $options = $this->updateExtremum($options, true);
+
+        if (array_key_exists('max_id', $options) &&
+            array_key_exists('before', $options) // Looking into the past
+        ) {
             unset($options['max_id']);
         }
 
@@ -1486,20 +1530,25 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     }
 
     /**
-     * @param $statuses
-     * @param $shouldDeclareMaximumStatusId
+     * @param        $statuses
+     * @param        $shouldDeclareMaximumStatusId
+     * @param string $memberName
      * @throws NotFoundMemberException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    private function safelyDeclareExtremum($statuses, $shouldDeclareMaximumStatusId): void
-    {
+    private function safelyDeclareExtremum(
+        $statuses,
+        $shouldDeclareMaximumStatusId,
+        string $memberName
+    ): void {
         try {
             $this->declareExtremumIdForMember(
                 $statuses,
-                $shouldDeclareMaximumStatusId
+                $shouldDeclareMaximumStatusId,
+                $memberName
             );
         } catch (NotFoundMemberException $exception) {
             $this->accessor->ensureMemberHavingNameExists($exception->screenName);
@@ -1507,13 +1556,15 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             try {
                 $this->declareExtremumIdForMember(
                     $statuses,
-                    $shouldDeclareMaximumStatusId
+                    $shouldDeclareMaximumStatusId,
+                    $memberName
                 );
             } catch (NotFoundMemberException $exception) {
                 $this->accessor->ensureMemberHavingNameExists($exception->screenName);
                 $this->declareExtremumIdForMember(
                     $statuses,
-                    $shouldDeclareMaximumStatusId
+                    $shouldDeclareMaximumStatusId,
+                    $memberName
                 );
             }
         }

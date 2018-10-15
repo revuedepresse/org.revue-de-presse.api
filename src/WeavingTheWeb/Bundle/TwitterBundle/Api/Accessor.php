@@ -1241,10 +1241,11 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
      */
     public function hasError($response)
     {
-        return is_object($response) &&
+        return is_object($response) && (
             isset($response->errors) &&
             is_array($response->errors) &&
-            isset($response->errors[0]);
+            isset($response->errors[0])
+        || isset($response->error));
     }
 
     /**
@@ -1650,6 +1651,27 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
                 throw new ApiRateLimitingException(
                     $content->errors[0]->message,
                     $content->errors[0]->code
+                );
+            }
+
+            if ($errorCode === self::ERROR_USER_NOT_FOUND) {
+                throw new NotFoundMemberException(
+                    $content->errors[0]->message,
+                    $content->errors[0]->code
+                );
+            }
+
+            if ($errorCode === self::ERROR_SUSPENDED_USER) {
+                throw new SuspendedAccountException(
+                    $content->errors[0]->message,
+                    $content->errors[0]->code
+                );
+            }
+
+            if (isset($content->error) && ($content->error === 'Not authorized.')) {
+                throw new ProtectedAccountException(
+                    $content->error,
+                    self::ERROR_PROTECTED_TWEET
                 );
             }
         }
