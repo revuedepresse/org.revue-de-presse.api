@@ -55,7 +55,7 @@ class LikedStatusRepository extends EntityRepository implements ExtremumAwareInt
         $archiveStatusQueryBuilder = $this->createQueryBuilder('l');
         $archiveStatusQueryBuilder->select('COUNT(DISTINCT archivedStatus.hash) as count_')
             ->join('l.archivedStatus', 'archivedStatus')
-            ->andWhere('l.memberName = :memberName');
+            ->andWhere('l.likedByMemberName = :memberName');
         $archiveStatusQueryBuilder->setParameter('memberName', $memberName);
 
         if ($maxId < INF) {
@@ -96,7 +96,7 @@ class LikedStatusRepository extends EntityRepository implements ExtremumAwareInt
 
         $statusQueryBuilder->select('COUNT(DISTINCT status.hash) as count_')
             ->join('l.'.$joinColumn, 'status')
-            ->andWhere('l.memberName = :memberName');
+            ->andWhere('l.likedByMemberName = :memberName');
         $statusQueryBuilder->setParameter('memberName', $memberName);
 
         if ($maxId < INF) {
@@ -173,7 +173,7 @@ class LikedStatusRepository extends EntityRepository implements ExtremumAwareInt
         $queryBuilder = $this->createQueryBuilder('l');
         $queryBuilder->select('s.statusId')
             ->join('l.status', 's')
-            ->andWhere('l.memberName = :memberName')
+            ->andWhere('l.likedByMemberName = :memberName')
             ->orderBy('s.statusId + 0', $direction)
             ->setMaxResults(1);
 
@@ -241,7 +241,7 @@ class LikedStatusRepository extends EntityRepository implements ExtremumAwareInt
         $queryBuilder = $this->createQueryBuilder('l');
         $queryBuilder->select('s.statusId')
             ->join('l.archivedStatus', 's')
-            ->andWhere('l.memberName = :memberName')
+            ->andWhere('l.likedByMemberName = :memberName')
             ->orderBy('s.statusId + 0', $direction)
             ->setMaxResults(1);
 
