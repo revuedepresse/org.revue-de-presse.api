@@ -374,7 +374,17 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         }
 
         if ($this->isAboutToCollectLikesFromCriteria($this->serializationOptions)) {
-            if (count($statuses) > 0 ) {
+            $hasLikedStatusBeenSavedBefore = false;
+            if ($aggregate instanceof Aggregate) {
+                $hasLikedStatusBeenSavedBefore = $this->likedStatusRepository->hasBeenSavedBefore(
+                    $statuses[0],
+                    $aggregate->getName(),
+                    $options['screen_name'],
+                    $statuses[0]->user->screen_name
+                );
+            }
+
+            if (count($statuses) > 0 && !$hasLikedStatusBeenSavedBefore) {
                 // At this point, it should not skip further consumption
                 // for matching liked statuses
                 $this->saveStatusesForScreenName(
@@ -389,7 +399,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
                 );
             }
 
-            if (count($statuses) === 0) {
+            if (count($statuses) === 0 || $hasLikedStatusBeenSavedBefore) {
                 $statuses = $this->fetchLatestStatuses($options, $discoverPastTweets = false);
                 if (count($statuses) > 0 ) {
                     if ($this->statusRepository->hasBeenSavedBefore(
