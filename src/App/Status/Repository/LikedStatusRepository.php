@@ -349,4 +349,49 @@ class LikedStatusRepository extends EntityRepository implements ExtremumAwareInt
 
         return $likedStatus;
     }
+
+    /**
+     * @param \stdClass $status
+     * @param string    $aggregateName
+     * @param string    $likedByMemberName
+     * @param string    $memberName
+     * @return bool
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function hasBeenSavedBefore(
+        \stdClass $status,
+        string $aggregateName,
+        string $likedByMemberName,
+        string $memberName
+    ): bool
+    {
+        $query = <<<QUERY
+            SELECT (count(*) > 0) status_has_been_saved_before
+            FROM liked_status
+            INNER JOIN weaving_status status
+            WHERE ust_status_id = :status_id
+            AND liked_status.status_id = status.ust_id
+            AND liked_by_member_name = :liked_by_member_name
+            AND aggregate_name = :aggregate_name
+            AND member_name = :member_name
+QUERY
+;
+
+        $connection = $this->getEntityManager()->getConnection();
+        $statement = $connection->executeQuery(
+            strtr(
+                $query,
+                [
+                    ':status_id' => intval($status->id_str),
+                    ':aggregate_name' => $connection->quote($aggregateName),
+                    ':liked_by_member_name' => $connection->quote($likedByMemberName),
+                    ':member_name' => $connection->quote($memberName),
+                ]
+            )
+        );
+        $results = $statement->fetchAll()[0];
+
+        return boolval($results['status_has_been_saved_before']);
+    }
+
 }

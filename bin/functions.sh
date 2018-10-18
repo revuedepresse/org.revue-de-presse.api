@@ -158,6 +158,7 @@ function purge_queues() {
     docker exec -ti rabbitmq rabbitmqctl purge_queue get-user-status -p /weaving_the_web
     docker exec -ti rabbitmq rabbitmqctl purge_queue get-conversation-status -p /weaving_the_web
     docker exec -ti rabbitmq rabbitmqctl purge_queue get-aggregates-status -p /weaving_the_web
+    docker exec -ti rabbitmq rabbitmqctl purge_queue get-aggregates-likes -p /weaving_the_web
     docker exec -ti rabbitmq rabbitmqctl purge_queue get-news-status -p /weaving_the_web
 }
 
