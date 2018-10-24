@@ -5,9 +5,9 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="App\Aggregate\Entity\TimelyStatus"
-            repository-class="App\Aggregate\Repository\TimelyStatusRepository"
-            table="timely_status">
+    <entity name="App\Aggregate\Entity\SearchMatchingStatus"
+            repository-class="App\Aggregate\Repository\SearchMatchingStatusRepository"
+            table="search_matching_status">
 
         <indexes>
             <index name="status_idx" columns="status_id,publication_date_time,time_range,member_name"/>
@@ -26,30 +26,35 @@
                 referenced-column-name="ust_id"
             />
         </one-to-one>
+
         <many-to-one
-                field="search"
+                field="savedSearch"
                 target-entity="App\Aggregate\Entity\SavedSearch">
             <join-column
-                name="search_id"
+                name="saved_search_id"
                 referenced-column-name="id"
             />
         </many-to-one>
+
         <field
             name="publicationDateTime"
             column="publication_date_time"
             type="datetime"
         />
+
         <field
             name="memberName"
             column="member_name"
             type="string"
             length="100"
         />
+
         <field
             name="timeRange"
             column="time_range"
             type="integer"
         />
+
     </entity>
 
 </doctrine-mapping>

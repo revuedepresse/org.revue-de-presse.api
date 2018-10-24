@@ -10,15 +10,39 @@ class SavedSearch
     private $id;
 
     /**
-     * @var string
+     * @var \DateTime
      */
-    private $query;
+    private $createdAt;
 
     /**
-     * @param string $query
+     * @var string
      */
-    public function __construct(string $query)
-    {
-        $this->query = $query;
+    private $searchId;
+
+    /**
+     * @var string
+     */
+    private $name;
+    /**
+     * @var string
+     */
+    public $searchQuery;
+
+    /**
+     * @param string    $searchQuery
+     * @param string    $name
+     * @param string    $searchId
+     * @param \DateTime $createdAt
+     */
+    public function __construct(
+        string $searchQuery,
+        string $name,
+        string $searchId,
+        \DateTime $createdAt
+    ) {
+        $this->searchQuery = $searchQuery;
+        $this->createdAt = $createdAt;
+        $this->name = $name;
+        $this->searchId = $searchId;
     }
 }

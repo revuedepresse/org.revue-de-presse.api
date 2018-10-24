@@ -62,7 +62,7 @@ services:
             aggregateRepository:    "@weaving_the_web_twitter.repository.aggregate"
             entityManager:          "@doctrine.orm.entity_manager"
             statusAccessor:         "@weaving_the_web.accessor.status"
-            timelyStatusRepository:   "@repository.timely_status"
+            timelyStatusRepository: "@repository.timely_status"
 
     weaving_the_web_amqp.twitter:
         class:                       "%weaving_the_web_amqp.consumer.status.class%"
@@ -72,9 +72,11 @@ services:
             - [ 'setLogger',            [ '@monolog.logger.status'] ]
 
     weaving_the_web_amqp.twitter.lists_member_status:
-        class:                       "%weaving_the_web_amqp.produce_lists_members_command.class%"
+        class:                              "%weaving_the_web_amqp.produce_lists_members_command.class%"
         properties:
-            operationClock:          "@operation.clock"
+            operationClock:                 "@operation.clock"
+            savedSearchRepository:          "@repository.saved_search"
+            searchMatchingStatusRepository: "@repository.search_matching_status"
         tags:
             - { name: 'console.command' }
 

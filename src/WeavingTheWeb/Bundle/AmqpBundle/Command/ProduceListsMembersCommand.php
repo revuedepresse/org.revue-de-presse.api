@@ -2,6 +2,9 @@
 
 namespace WeavingTheWeb\Bundle\AmqpBundle\Command;
 
+use App\Aggregate\Entity\SavedSearch;
+use App\Aggregate\Repository\SavedSearchRepository;
+use App\Aggregate\Repository\SearchMatchingStatusRepository;
 use App\Conversation\Producer\MemberAwareTrait;
 use App\Operation\OperationClock;
 
@@ -78,6 +81,16 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
      */
     public $operationClock;
 
+    /**
+     * @var SavedSearchRepository
+     */
+    public $savedSearchRepository;
+
+    /**
+     * @var SearchMatchingStatusRepository
+     */
+    public $searchMatchingStatusRepository;
+
     public function configure()
     {
         $this->setName('weaving_the_web:amqp:produce:lists_members')
@@ -116,7 +129,7 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
         )
         ->addOption(
             'query_restriction',
-            'q',
+            'qr',
             InputOption::VALUE_OPTIONAL,
             'Query to search statuses against'
         )->addOption(
@@ -146,70 +159,22 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
 
         $this->setOptionsFromInput();
 
-        if ($this->operationClock->shouldSkipOperation() && !$this->givePriorityToAggregate) {
+        if ($this->operationClock->shouldSkipOperation()
+            && !$this->givePriorityToAggregate
+            && !$this->queryRestriction
+        ) {
             return self::RETURN_STATUS_SUCCESS;
         }
 
         $this->setUpDependencies();
 
-        try {
-            $ownerships = $this->accessor->getUserOwnerships($this->screenName);
-            $messageBody = $this->getTokensFromInput();
-        } catch (UnavailableResourceException $exception) {
-            $messageBody = $this->updateAccessToken();
-            $ownerships = $this->accessor->getUserOwnerships($this->screenName);
+        if ($this->queryRestriction) {
+            $this->productSearchStatusesMessages();
+
+            return self::RETURN_STATUS_SUCCESS;
         }
 
-        $ownerships = $this->guardAgainstInvalidListName($ownerships);
-
-        $doNotApplyListRestriction = is_null($this->listRestriction) &&
-            count($this->listCollectionRestriction) === 0;
-        if ($doNotApplyListRestriction && count($ownerships->lists) === 0) {
-            $ownerships = $this->guardAgainstInvalidToken($ownerships);
-        }
-
-        $shouldIncludeOwner = true;
-
-        foreach ($ownerships->lists as $list) {
-            if ($doNotApplyListRestriction ||
-                $list->name === $this->listRestriction ||
-                array_key_exists($list->name, $this->listCollectionRestriction)
-            ) {
-                $members = $this->accessor->getListMembers($list->id);
-
-                if ($shouldIncludeOwner) {
-                    $additionalMember = $this->accessor->showUser($this->screenName);
-                    array_unshift($members->users, $additionalMember);
-                    $shouldIncludeOwner = false;
-                }
-
-                if (!is_object($members) || !isset($members->users) || count($members->users) === 0) {
-                    $this->logger->info(sprintf('List "%s" has no members', $list->name));
-                    continue;
-                }
-
-                if (count($members->users) > 0) {
-                    $this->logger->info(
-                        sprintf(
-                        'About to publish messages for members in list "%s"',
-                            $list->name
-                        )
-                    );
-                }
-
-                $publishedMessages = $this->publishMembersScreenNames($members, $messageBody, $list);
-
-                // Reset accessor tokens in case they've been updated to find member usernames with alternative tokens
-                // Members lists can only be accessed by authenticated users owning the lists
-                // See also https://dev.twitter.com/rest/reference/get/lists/ownerships
-                $this->updateAccessToken();
-
-                $output->writeln($this->translator->trans('amqp.production.list_members.success', [
-                    '{{ count }}' => $publishedMessages,
-                    '{{ list }}' => $list->name,
-                ]));
-            }
-        }
+        return $this->productListsMessages();
     }
 
     /**
@@ -400,6 +365,11 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
                 ->get('old_sound_rabbit_mq.weaving_the_web_amqp.producer.aggregates_likes_producer');
         }
 
+        if ($this->queryRestriction) {
+            $this->producer = $this->getContainer()
+                ->get('old_sound_rabbit_mq.weaving_the_web_amqp.producer.search_matching_statuses_producer');
+        }
+
         $this->translator = $this->getContainer()->get('translator');
     }
 
@@ -492,6 +462,11 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
             $this->input->getOption('priority_to_aggregates')) {
             $this->givePriorityToAggregate = true;
         }
+
+        if ($this->input->hasOption('query_restriction') &&
+            $this->input->getOption('query_restriction')) {
+            $this->queryRestriction = $this->input->getOption('query_restriction');
+        }
     }
 
     /**
@@ -513,4 +488,104 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
         return $this->findNextBatchOfListOwnerships($ownerships);
     }
 
+    /**
+     * @return int
+     * @throws InvalidListNameException
+     * @throws UnavailableResourceException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \WeavingTheWeb\Bundle\ApiBundle\Exception\InvalidTokenException
+     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
+     */
+    private function productListsMessages()
+    {
+        try {
+            $ownerships = $this->accessor->getUserOwnerships($this->screenName);
+            $messageBody = $this->getTokensFromInput();
+        } catch (UnavailableResourceException $exception) {
+            $messageBody = $this->updateAccessToken();
+            $ownerships = $this->accessor->getUserOwnerships($this->screenName);
+        }
+
+        $ownerships = $this->guardAgainstInvalidListName($ownerships);
+
+        $doNotApplyListRestriction = is_null($this->listRestriction) &&
+            count($this->listCollectionRestriction) === 0;
+        if ($doNotApplyListRestriction && count($ownerships->lists) === 0) {
+            $ownerships = $this->guardAgainstInvalidToken($ownerships);
+        }
+
+        $shouldIncludeOwner = true;
+
+        foreach ($ownerships->lists as $list) {
+            if ($doNotApplyListRestriction ||
+                $list->name === $this->listRestriction ||
+                array_key_exists($list->name, $this->listCollectionRestriction)
+            ) {
+                $members = $this->accessor->getListMembers($list->id);
+
+                if ($shouldIncludeOwner) {
+                    $additionalMember = $this->accessor->showUser($this->screenName);
+                    array_unshift($members->users, $additionalMember);
+                    $shouldIncludeOwner = false;
+                }
+
+                if (!is_object($members) || !isset($members->users) || count($members->users) === 0) {
+                    $this->logger->info(sprintf('List "%s" has no members', $list->name));
+                    continue;
+                }
+
+                if (count($members->users) > 0) {
+                    $this->logger->info(
+                        sprintf(
+                            'About to publish messages for members in list "%s"',
+                            $list->name
+                        )
+                    );
+                }
+
+                $publishedMessages = $this->publishMembersScreenNames($members, $messageBody, $list);
+
+                // Reset accessor tokens in case they've been updated to find member usernames with alternative tokens
+                // Members lists can only be accessed by authenticated users owning the lists
+                // See also https://dev.twitter.com/rest/reference/get/lists/ownerships
+                $this->updateAccessToken();
+
+                $this->output->writeln($this->translator->trans('amqp.production.list_members.success', [
+                    '{{ count }}' => $publishedMessages,
+                    '{{ list }}' => $list->name,
+                ]));
+            }
+        }
+
+        return self::RETURN_STATUS_SUCCESS;
+    }
+
+    /**
+     * @throws UnavailableResourceException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
+     */
+    private function productSearchStatusesMessages()
+    {
+        $savedSearch = $this->savedSearchRepository
+            ->findOneBy(['searchQuery' => $this->queryRestriction]);
+
+        if (!($savedSearch instanceof SavedSearch)) {
+            $response = $this->accessor->saveSearch($this->queryRestriction);
+            $savedSearch = $this->savedSearchRepository->make($response);
+            $this->savedSearchRepository->save($savedSearch);
+        }
+
+        $results = $this->accessor->search($savedSearch->searchQuery);
+
+        $this->searchMatchingStatusRepository->saveSearchMatchingStatus(
+            $savedSearch,
+            $results->statuses,
+            $this->accessor->userToken
+        );
+    }
 }

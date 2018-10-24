@@ -10,7 +10,7 @@
             table="saved_search">
 
         <indexes>
-            <index name="saved_search_idx" columns="id,query"/>
+            <index name="saved_search_idx" columns="id,search_query"/>
         </indexes>
 
         <id name="id" column="id" type="uuid">
@@ -19,9 +19,30 @@
         </id>
 
         <field
-            name="query"
-            column="query"
-            type="text"
+            name="searchQuery"
+            column="search_query"
+            type="string"
+            length="255"
+        />
+
+        <field
+            name="name"
+            column="name"
+            type="string"
+            length="255"
+        />
+
+        <field
+            name="searchId"
+            column="search_id"
+            type="string"
+            length="255"
+        />
+
+        <field
+            name="createdAt"
+            column="created_at"
+            type="datetime"
         />
     </entity>
 
