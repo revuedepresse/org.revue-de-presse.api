@@ -20,6 +20,21 @@ services:
             statusRepository:       "@weaving_the_web_twitter.repository.status"
             aggregateRepository:    "@weaving_the_web_twitter.repository.aggregate"
 
+    repository.saved_search:
+        factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
+        class: 'App\Aggregate\Repository\SavedSearchRepository'
+        arguments:
+            - 'App\Aggregate\Entity\SavedSearch'
+
+    repository.search_matching_status:
+        factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
+        class: 'App\Aggregate\Repository\SearchMatchingStatusRepository'
+        arguments:
+            - 'App\Aggregate\Entity\SearchMatchingStatus'
+        properties:
+            statusRepository:  "@weaving_the_web_twitter.repository.status"
+            logger:            "@logger"
+
     repository.liked_status:
         factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
         class: 'App\Status\Repository\LikedStatusRepository'

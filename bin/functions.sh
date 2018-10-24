@@ -756,6 +756,11 @@ function produce_amqp_messages_for_aggregates_list {
     produce_amqp_messages_for_news_list
 }
 
+function produce_amqp_messages_for_search_query {
+    export NAMESPACE="produce_search_query"
+    produce_amqp_messages_for_news_list
+}
+
 function produce_amqp_messages_for_news_list {
     if [ -z ${NAMESPACE} ];
     then
@@ -797,13 +802,20 @@ function produce_amqp_messages_for_news_list {
         priority_option='--priority_to_aggregates '
     fi
 
+    local query_restriction=''
+    if [ ! -z "${QUERY_RESTRICTION}" ];
+    then
+        query_restriction='--query_restriction='"${QUERY_RESTRICTION}"
+    fi
+
     local list_option='--list='"'${list_name}'"
     if [ ! -z "${multiple_lists}" ];
     then
         list_option='--lists='"'${multiple_lists}'"
     fi
 
-    local php_command='app/console weaving_the_web:amqp:produce:lists_members '"${priority_option}"'--screen_name='"${username}"' '"${list_option}"
+    local arguments="${priority_option}"'--screen_name='"${username}"' '"${list_option}"' '"${query_restriction}"
+    local php_command='app/console weaving_the_web:amqp:produce:lists_members '${arguments}
 
     local symfony_environment="$(get_symfony_environment)"
 

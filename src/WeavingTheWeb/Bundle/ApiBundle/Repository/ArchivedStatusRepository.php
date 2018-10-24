@@ -192,63 +192,14 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
         Aggregate $aggregate = null,
         LoggerInterface $logger = null
     ) {
-        $this->logger = $logger;
-
-        $entityManager = $this->getEntityManager();
-        $extracts = $this->extractProperties($statuses, function ($extract) use ($identifier) {
-            $extract['identifier'] = $identifier;
-
-            return $extract;
-        });
-
-        foreach ($extracts as $key => $extract) {
-            $memberStatus = $this->makeStatusFromApiResponseForAggregate($extract, $aggregate);
-
-            if ($memberStatus->getId() === null) {
-                $this->logStatus($memberStatus);
-            }
-
-            if ($memberStatus->getId()) {
-                unset($extracts[$key]);
-            }
-
-            if ($memberStatus instanceof ArchivedStatus) {
-                $memberStatus = $this->unarchiveStatus($memberStatus, $entityManager);
-            }
-
-            try {
-                if ($memberStatus->getId()) {
-                    $memberStatus->setUpdatedAt(
-                        new \DateTime(
-                            'now',
-                            new \DateTimeZone('UTC')
-                        )
-                    );
-                }
-
-                if ($aggregate instanceof Aggregate) {
-                    $timelyStatus = $this->timelyStatusRepository->fromAggregatedStatus(
-                        $memberStatus,
-                        $aggregate
-                    );
-                    $entityManager->persist($timelyStatus);
-                }
-
-                $entityManager->persist($memberStatus);
-            } catch (ORMException $exception) {
-                if ($exception->getMessage() === ORMException::entityManagerClosed()->getMessage()) {
-                    $entityManager = $this->registry->resetManager('default');
-                    $entityManager->persist($memberStatus);
-                }
-            }
-        }
-
-        $this->flushStatuses($entityManager);
+        $result = $this->iterateOverStatuses($statuses, $identifier, $aggregate, $logger);
+        $extracts = $result['extracts'];
+        $screenName = $result['screen_name'];
 
         if (count($extracts) > 0) {
             $this->memberManager->incrementTotalStatusesOfMemberWithName(
                 count($extracts),
-                $extract['screen_name']
+                $screenName
             );
         }
 
@@ -891,5 +842,85 @@ QUERY
             $this->getEntityManager()->persist($likedStatus);
         });
         $this->getEntityManager()->flush();
+    }
+
+    /**
+     * @param                 $statuses
+     * @param                 $identifier
+     * @param Aggregate       $aggregate
+     * @param LoggerInterface $logger
+     * @return array
+     * @throws NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function iterateOverStatuses(
+        $statuses,
+        $identifier,
+        Aggregate $aggregate = null,
+        LoggerInterface $logger = null
+    ): array {
+        $this->logger = $logger;
+
+        $entityManager = $this->getEntityManager();
+        $extracts = $this->extractProperties($statuses, function ($extract) use ($identifier) {
+            $extract['identifier'] = $identifier;
+
+            return $extract;
+        });
+
+        $statuses = [];
+
+        foreach ($extracts as $key => $extract) {
+            $memberStatus = $this->makeStatusFromApiResponseForAggregate($extract, $aggregate);
+
+            if ($memberStatus->getId() === null) {
+                $this->logStatus($memberStatus);
+            }
+
+            if ($memberStatus->getId()) {
+                unset($extracts[$key]);
+            }
+
+            if ($memberStatus instanceof ArchivedStatus) {
+                $memberStatus = $this->unarchiveStatus($memberStatus, $entityManager);
+            }
+
+            try {
+                if ($memberStatus->getId()) {
+                    $memberStatus->setUpdatedAt(
+                        new \DateTime(
+                            'now',
+                            new \DateTimeZone('UTC')
+                        )
+                    );
+                }
+
+                if ($aggregate instanceof Aggregate) {
+                    $timelyStatus = $this->timelyStatusRepository->fromAggregatedStatus(
+                        $memberStatus,
+                        $aggregate
+                    );
+                    $entityManager->persist($timelyStatus);
+                }
+
+                $entityManager->persist($memberStatus);
+
+                $statuses[] = $memberStatus;
+            } catch (ORMException $exception) {
+                if ($exception->getMessage() === ORMException::entityManagerClosed()->getMessage()) {
+                    $entityManager = $this->registry->resetManager('default');
+                    $entityManager->persist($memberStatus);
+                }
+            }
+        }
+
+        $this->flushStatuses($entityManager);
+
+        return [
+            'extracts' => $extracts,
+            'screen_name' => $extract['screen_name'],
+            'statuses' => $statuses
+        ];
     }
 }
