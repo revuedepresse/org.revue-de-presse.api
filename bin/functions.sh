@@ -789,9 +789,10 @@ function produce_amqp_messages_for_news_list {
         return
     fi
 
-    if [ -z "${list_name}" ];
+    if [ -z "${list_name}" ] && [ -z "${QUERY_RESTRICTION}" ];
     then
         echo 'Please export a valid list_name: export list_name="news :: France"'
+        echo 'Otherwise export a restriction query : export QUERY_RESTRICTION="Topic"'
 
         return
     fi
