@@ -10,9 +10,7 @@
             table="timely_status">
 
         <indexes>
-            <index name="publication_idx" columns="publication_date_time"/>
-            <index name="status_idx" columns="status_id,publication_date_time,time_range,aggregate_id,aggregate_name"/>
-            <index name="member_name" columns="member_name"/>
+            <index name="status_idx" columns="status_id,publication_date_time,time_range,member_name"/>
         </indexes>
 
         <id name="id" column="id" type="uuid">
@@ -29,20 +27,17 @@
             />
         </one-to-one>
         <many-to-one
-            target-entity="WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate"
-            field="aggregate"
-            inversed-by="timelyStatuses"
-        />
+                field="search"
+                target-entity="App\Aggregate\Entity\SavedSearch">
+            <join-column
+                name="search_id"
+                referenced-column-name="id"
+            />
+        </many-to-one>
         <field
             name="publicationDateTime"
             column="publication_date_time"
             type="datetime"
-        />
-        <field
-            name="aggregateName"
-            column="aggregate_name"
-            type="string"
-            length="100"
         />
         <field
             name="memberName"

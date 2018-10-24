@@ -22,6 +22,9 @@ old_sound_rabbit_mq:
         weaving_the_web_amqp.producer.aggregates_likes:
             connection:       default
             exchange_options: { name: 'get-aggregates-likes', type: direct }
+        weaving_the_web_amqp.producer.search_matching_status:
+            connection:       default
+            exchange_options: { name: 'get-search-matching-statuses', type: direct }
         weaving_the_web_amqp.producer.conversation_status:
             connection:       default
             exchange_options: { name: 'get-conversation-status', type: direct }

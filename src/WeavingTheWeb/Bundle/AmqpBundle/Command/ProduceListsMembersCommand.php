@@ -49,6 +49,11 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
     private $listRestriction;
 
     /**
+     * @var string
+     */
+    private $queryRestriction;
+
+    /**
      * @var array[string]
      */
     private $listCollectionRestriction;
@@ -108,6 +113,12 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
             'pa',
             InputOption::VALUE_NONE,
             'Publish messages the priority queue for visible aggregates'
+        )
+        ->addOption(
+            'query_restriction',
+            'q',
+            InputOption::VALUE_OPTIONAL,
+            'Query to search statuses against'
         )->addOption(
             'before',
             null,
