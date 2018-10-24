@@ -103,6 +103,9 @@ produce-amqp-messages-from-members-lists: ## Produce messages from members lists
 produce-amqp-messages-from-aggregates-lists: ## Produce messages from aggregates list
 		@/bin/bash -c 'source ./bin/functions.sh && produce_amqp_messages_for_aggregates_list'
 
+produce-amqp-messages-from-search-query: ## Produce messages from search query
+		@/bin/bash -c 'source ./bin/functions.sh && produce_amqp_messages_for_search_query'
+
 produce-amqp-messages-for-timely-statuses: ## Produce messages for timely statuses
 		@/bin/bash -c 'source ./bin/functions.sh && produce_amqp_messages_for_timely_statuses'
 
