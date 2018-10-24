@@ -357,6 +357,34 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     }
 
     /**
+     * @param string $query
+     * @return \API|mixed|object|\stdClass
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function saveSearch(string $query)
+    {
+        $endpoint = $this->getCreateSavedSearchEndpoint()."query=$query";
+
+        return $this->contactEndpoint($endpoint);
+    }
+
+    /**
+     * @param string $query
+     * @return \API|mixed|object|\stdClass
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function search(string $query)
+    {
+        $endpoint = $this->getSearchEndpoint()."q=$query&count=100";
+
+        return $this->contactEndpoint($endpoint);
+    }
+
+    /**
      * @param array $options
      * @param bool  $shouldDiscoverFutureStatuses
      * @return array
@@ -615,6 +643,10 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
      */
     public function connectToEndpoint(TwitterOAuth $client, $endpoint, $parameters = [])
     {
+        if (strpos($endpoint, 'create.json') !== false) {
+            return $client->post($endpoint, $parameters);
+        }
+
         return $client->get($endpoint, $parameters);
     }
 
@@ -797,6 +829,24 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     {
         return $this->getApiBaseUrl($version) . '/favorites/list.json?' .
             'tweet_mode=extended&include_entities=1&include_rts=1&exclude_replies=0&trim_user=0';
+    }
+
+    /**
+     * @param string $version
+     * @return string
+     */
+    protected function getCreateSavedSearchEndpoint($version = '1.1')
+    {
+        return $this->getApiBaseUrl($version) . '/saved_searches/create.json?';
+    }
+
+    /**
+     * @param string $version
+     * @return string
+     */
+    protected function getSearchEndpoint($version = '1.1')
+    {
+        return $this->getApiBaseUrl($version) . '/search/tweets.json?';
     }
 
     /**
