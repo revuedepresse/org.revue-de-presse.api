@@ -169,7 +169,41 @@ class StatusAccessor
                 $memberName,
                 $protected = false,
                 $suspended = false,
-                $fetchedMember->description
+                $fetchedMember->description,
+                $fetchedMember->friends_count,
+                $fetchedMember->followers_count
+            )
+        );
+    }
+
+    /**
+     * @param int $id
+     * @return MemberInterface|null|object
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
+     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
+     */
+    public function ensureMemberHavingIdExists(int $id)
+    {
+        $member = $this->userManager->findOneBy(['twitterID' => $id]);
+        if ($member instanceof MemberInterface) {
+            $this->ensureMemberHasDescription($member, $member->getTwitterUsername());
+
+            return $member;
+        }
+
+        $member = $this->accessor->showUser($id);
+
+        return $this->userManager->saveMember(
+            $this->userManager->make(
+                $id,
+                $member->screen_name,
+                $protected = false,
+                $suspended = false,
+                $member->description,
+                $member->friends_count,
+                $member->followers_count
             )
         );
     }

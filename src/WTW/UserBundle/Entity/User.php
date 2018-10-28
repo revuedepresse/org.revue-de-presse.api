@@ -1039,6 +1039,18 @@ class User extends BaseUser implements MemberInterface
     public $lastStatusPublicationDate = null;
 
     /**
+     * @var integer
+     * @ORM\Column(name="total_subscribees", type="integer", options={"default": 0})
+     */
+    public $totalSubscribees;
+
+    /**
+     * @var integer
+     * @ORM\Column(name="total_subscriptions", type="integer", options={"default": 0})
+     */
+    public $totalSubscriptions;
+
+    /**
      * @return bool
      */
     public function isAWhisperer(): bool

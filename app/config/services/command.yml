@@ -3,6 +3,7 @@ parameters:
     command.map_status_collection.class:                                        'App\StatusCollection\Mapping\Command\MapStatusCollectionCommand'
     command.select_status_collection.class:                                     'App\StatusCollection\Command\SelectStatusCollectionCommand'
     command.add_members_to_aggregate.class:                                     'App\Member\Command\AddMemberToAggregateCommand'
+    command.import_network.class:                                               'App\Member\Command\ImportNetworkCommand'
     weaving_the_web_amqp.consumer.conversation_status.class:                    'App\Conversation\Consumer\ConversationStatusConsumer'
     weaving_the_web_amqp.producer.produce_conversation_messages_command.class:  'App\Conversation\Producer\ProduceConversationMessagesCommand'
     weaving_the_web_amqp.producer.produce_timely_status_messages_command.class: 'App\Aggregate\Producer\ProduceTimelyStatusMessagesCommand'
@@ -22,9 +23,19 @@ services:
     command.add_members_to_aggregate:
         class:                      "%command.add_members_to_aggregate.class%"
         properties:
-            aggregateRepository:  "@weaving_the_web_twitter.repository.aggregate"
-            accessor:             "@weaving_the_web_twitter.api_accessor"
-            userRepository:       "@user_manager"
+            aggregateRepository:    "@weaving_the_web_twitter.repository.aggregate"
+            accessor:               "@weaving_the_web_twitter.api_accessor"
+            userRepository:         "@user_manager"
+        tags:
+            - { name: 'console.command' }
+
+    command.import_network:
+        class:                            "%command.import_network.class%"
+        properties:
+            accessor:                     "@weaving_the_web_twitter.api_accessor"
+            logger:                       "@logger"
+            memberSubscribeeRepository:   "@repository.member_subscribee"
+            memberSubscriptionRepository: "@repository.member_subscription"
         tags:
             - { name: 'console.command' }
 

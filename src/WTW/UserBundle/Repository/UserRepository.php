@@ -19,6 +19,8 @@ class UserRepository extends EntityRepository
      * @param bool $protected
      * @param bool $suspended
      * @param null $description
+     * @param int  $totalSubscriptions
+     * @param int  $totalSubscribees
      * @return User
      */
     public function make(
@@ -26,7 +28,9 @@ class UserRepository extends EntityRepository
         $screenName,
         $protected = false,
         $suspended = false,
-        $description = null
+        $description = null,
+        $totalSubscriptions = 0,
+        $totalSubscribees = 0
     ) {
         $member = new User();
         $member->setTwitterUsername($screenName);
@@ -41,6 +45,9 @@ class UserRepository extends EntityRepository
         if (!is_null($description)) {
             $member->description = $description;
         }
+
+        $member->totalSubscribees = $totalSubscribees;
+        $member->totalSubscriptions = $totalSubscriptions;
 
         return $member;
     }

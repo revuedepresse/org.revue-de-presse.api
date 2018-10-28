@@ -17,8 +17,8 @@ services:
         arguments:
             - 'App\Aggregate\Entity\TimelyStatus'
         properties:
-            statusRepository:       "@weaving_the_web_twitter.repository.status"
-            aggregateRepository:    "@weaving_the_web_twitter.repository.aggregate"
+            statusRepository:    "@weaving_the_web_twitter.repository.status"
+            aggregateRepository: "@weaving_the_web_twitter.repository.aggregate"
 
     repository.saved_search:
         factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
@@ -32,8 +32,8 @@ services:
         arguments:
             - 'App\Aggregate\Entity\SearchMatchingStatus'
         properties:
-            statusRepository:  "@weaving_the_web_twitter.repository.status"
-            logger:            "@logger"
+            statusRepository: "@weaving_the_web_twitter.repository.status"
+            logger:           "@logger"
 
     repository.liked_status:
         factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
@@ -41,8 +41,24 @@ services:
         arguments:
             - 'App\Status\Entity\LikedStatus'
         properties:
-            memberRepository:  "@user_manager"
-            statusRepository:  "@weaving_the_web_twitter.repository.status"
+            memberRepository: "@user_manager"
+            statusRepository: "@weaving_the_web_twitter.repository.status"
+
+    repository.member_subscription:
+        factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
+        class: 'App\Member\Repository\MemberSubscriptionRepository'
+        arguments:
+            - 'App\Member\Entity\MemberSubscription'
+        properties:
+            memberRepository: "@user_manager"
+
+    repository.member_subscribee:
+        factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
+        class: 'App\Member\Repository\MemberSubscribeeRepository'
+        arguments:
+            - 'App\Member\Entity\MemberSubscribee'
+        properties:
+            memberRepository: "@user_manager"
 
     weaving_the_web_api.repository.token:
         factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
