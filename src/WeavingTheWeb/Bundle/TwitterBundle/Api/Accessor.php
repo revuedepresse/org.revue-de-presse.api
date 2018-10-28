@@ -1056,18 +1056,38 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     }
 
     /**
-     * @param $screenName
+     * @param string $screenName
      * @return \API|mixed|object|\stdClass
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
      * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \Exception
      */
-    public function showUserFriends($screenName)
+    public function showUserFriends(string $screenName)
     {
         $showUserFriendEndpoint = $this->getShowUserFriendsEndpoint();
 
         return $this->contactEndpoint(str_replace('{{ screen_name }}', $screenName, $showUserFriendEndpoint));
+    }
+
+
+    /**
+     * @param string $screenName
+     * @param int    $cursor
+     * @return string
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function showMemberSubscribees(string $screenName, int $cursor = -1)
+    {
+        $showUserFriendEndpoint = $this->getShowMemberSubscribeesEndpoint();
+
+        return $this->contactEndpoint(
+            str_replace('{{ screen_name }}',
+                $screenName,
+                $showUserFriendEndpoint
+            ).'&cursor='.$cursor
+        );
     }
 
     /**
@@ -1076,7 +1096,16 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
      */
     protected function getShowUserFriendsEndpoint($version = '1.1')
     {
-        return $this->getApiBaseUrl($version) . '/friends/ids.json?screen_name={{ screen_name }}';
+        return $this->getApiBaseUrl($version) . '/friends/ids.json?count=5000&screen_name={{ screen_name }}';
+    }
+
+    /**
+     * @param string $version
+     * @return string
+     */
+    protected function getShowMemberSubscribeesEndpoint($version = '1.1')
+    {
+        return $this->getApiBaseUrl($version) . '/followers/ids.json?count=5000&screen_name={{ screen_name }}';
     }
 
     /**
@@ -1773,5 +1802,18 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     public function ensureMemberHavingNameExists(string $memberName)
     {
         return $this->statusAccessor->ensureMemberHavingNameExists($memberName);
+    }
+
+    /**
+     * @param int $memberId
+     * @return MemberInterface|null|object
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function ensureMemberHavingIdExists(int $memberId)
+    {
+        return $this->statusAccessor->ensureMemberHavingIdExists($memberId);
     }
 }
