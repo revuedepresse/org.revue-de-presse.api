@@ -142,6 +142,10 @@ function consume_amqp_messages_for_aggregates_likes {
     consume_amqp_messages 'aggregates_likes' 'consumer'
 }
 
+function consume_amqp_messages_for_networks {
+    consume_amqp_messages 'network' 'consumer'
+}
+
 function consume_amqp_messages_for_aggregates_status {
     consume_amqp_messages 'aggregates_status'
 }
@@ -160,6 +164,7 @@ function purge_queues() {
     docker exec -ti rabbitmq rabbitmqctl purge_queue get-aggregates-status -p /weaving_the_web
     docker exec -ti rabbitmq rabbitmqctl purge_queue get-aggregates-likes -p /weaving_the_web
     docker exec -ti rabbitmq rabbitmqctl purge_queue get-news-status -p /weaving_the_web
+    docker exec -ti rabbitmq rabbitmqctl purge_queue get-network -p /weaving_the_web
 }
 
 function execute_command () {
@@ -617,20 +622,7 @@ function get_environment_option() {
 
 function produce_amqp_messages_from_members_lists {
     export NAMESPACE="produce_messages_from_members_lists"
-    make remove-php-container
-
-    export XDEBUG_CONFIG="idekey='phpstorm-xdebug'"
-
-    if [ -z "${PROJECT_DIR}" ];
-    then
-        export PROJECT_DIR='/var/www/devobs'
-    fi
-
-    local rabbitmq_output_log="app/logs/rabbitmq."${NAMESPACE}".out.log"
-    local rabbitmq_error_log="app/logs/rabbitmq."${NAMESPACE}".error.log"
-    ensure_log_files_exist "${rabbitmq_output_log}" "${rabbitmq_error_log}"
-    rabbitmq_output_log="${PROJECT_DIR}/${rabbitmq_output_log}"
-    rabbitmq_error_log="${PROJECT_DIR}/${rabbitmq_error_log}"
+    before_running_command
 
     if [ -z "${username}" ];
     then
@@ -639,87 +631,34 @@ function produce_amqp_messages_from_members_lists {
         return
     fi
 
-    local php_command='app/console weaving_the_web:amqp:produce:lists_members --screen_name='"${username}"
+    run_command 'app/console weaving_the_web:amqp:produce:lists_members --screen_name='"${username}"
+}
 
-    local symfony_environment="$(get_symfony_environment)"
+function produce_amqp_messages_for_networks {
+    export NAMESPACE="produce_messages_for_networks"
+    before_running_command
 
-    if [ -z "${DOCKER_MODE}" ];
+    if [ -z "${MEMBER_LIST}" ];
     then
-        command="${symfony_environment} /usr/bin/php $PROJECT_DIR/${php_command}"
-        echo 'Executing command: "'$command'"'
-        echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
-        echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
-        /bin/bash -c "$command >> ${rabbitmq_output_log} 2>> ${rabbitmq_error_log}"
+        echo 'Please export a valid member list: export MEMBER_LIST="bob,alice"'
 
         return
     fi
 
-    export SCRIPT="${php_command}"
-
-    echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
-    echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
-
-    execute_command "${rabbitmq_output_log}" "${rabbitmq_error_log}"
+    run_command 'app/console import-network --member-list="'${MEMBER_LIST}'"'
 }
 
 function produce_amqp_messages_for_timely_statuses {
     export NAMESPACE="produce_messages_for_timely_statuses"
-    make remove-php-container
+    before_running_command
 
-    export XDEBUG_CONFIG="idekey='phpstorm-xdebug'"
-
-    if [ -z "${PROJECT_DIR}" ];
-    then
-        export PROJECT_DIR='/var/www/devobs'
-    fi
-
-    local rabbitmq_output_log="app/logs/rabbitmq."${NAMESPACE}".out.log"
-    local rabbitmq_error_log="app/logs/rabbitmq."${NAMESPACE}".error.log"
-    ensure_log_files_exist "${rabbitmq_output_log}" "${rabbitmq_error_log}"
-    rabbitmq_output_log="${PROJECT_DIR}/${rabbitmq_output_log}"
-    rabbitmq_error_log="${PROJECT_DIR}/${rabbitmq_error_log}"
-
-    local php_command='app/console weaving_the_web:amqp:produce:timely_statuses'
-
-    local symfony_environment="$(get_symfony_environment)"
-
-    if [ -z "${DOCKER_MODE}" ];
-    then
-        command="${symfony_environment} /usr/bin/php $PROJECT_DIR/${php_command}"
-        echo 'Executing command: "'$command'"'
-        echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
-        echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
-        /bin/bash -c "$command >> ${rabbitmq_output_log} 2>> ${rabbitmq_error_log}"
-
-        return
-    fi
-
-    export SCRIPT="${php_command}"
-    export PHP_MEMORY_LIMIT=' -d memory_limit=2G'
-
-    echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
-    echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
-
-    execute_command "${rabbitmq_output_log}" "${rabbitmq_error_log}"
+    run_command 'app/console weaving_the_web:amqp:produce:timely_statuses' "2G"
 }
 
 function produce_amqp_messages_from_member_timeline {
     export NAMESPACE="produce_messages_from_member_timeline"
-    make remove-php-container
 
-    export XDEBUG_CONFIG="idekey='phpstorm-xdebug'"
-
-    if [ -z "${PROJECT_DIR}" ];
-    then
-        export PROJECT_DIR='/var/www/devobs'
-    fi
-
-    local rabbitmq_output_log="app/logs/rabbitmq."${NAMESPACE}".out.log"
-    local rabbitmq_error_log="app/logs/rabbitmq."${NAMESPACE}".error.log"
-    ensure_log_files_exist "${rabbitmq_output_log}" "${rabbitmq_error_log}"
-    rabbitmq_output_log="${PROJECT_DIR}/${rabbitmq_output_log}"
-    rabbitmq_error_log="${PROJECT_DIR}/${rabbitmq_error_log}"
-
+    before_running_command
     if [ -z "${username}" ];
     then
         echo 'Please export a valid username: export username="bob"'
@@ -727,7 +666,29 @@ function produce_amqp_messages_from_member_timeline {
         return
     fi
 
-    local php_command='app/console weaving_the_web:amqp:produce:user_timeline --screen_name="'"${username}"'" -vvv'
+    run_command 'app/console weaving_the_web:amqp:produce:user_timeline --screen_name="'"${username}"'" -vvv'
+}
+
+function before_running_command() {
+    make remove-php-container
+
+    export XDEBUG_CONFIG="idekey='phpstorm-xdebug'"
+
+    if [ -z "${PROJECT_DIR}" ];
+    then
+        export PROJECT_DIR='/var/www/devobs'
+    fi
+}
+
+function run_command {
+    local php_command=${1}
+    local memory_limit=${2}
+
+    local rabbitmq_output_log="app/logs/rabbitmq."${NAMESPACE}".out.log"
+    local rabbitmq_error_log="app/logs/rabbitmq."${NAMESPACE}".error.log"
+    ensure_log_files_exist "${rabbitmq_output_log}" "${rabbitmq_error_log}"
+    rabbitmq_output_log="${PROJECT_DIR}/${rabbitmq_output_log}"
+    rabbitmq_error_log="${PROJECT_DIR}/${rabbitmq_error_log}"
 
     local symfony_environment="$(get_symfony_environment)"
 
@@ -743,6 +704,11 @@ function produce_amqp_messages_from_member_timeline {
     fi
 
     export SCRIPT="${php_command}"
+
+    if [ ! -z "${memory_limit}" ];
+    then
+        export PHP_MEMORY_LIMIT=' -d memory_limit='"${memory_limit}"
+    fi
 
     echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
     echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
@@ -767,20 +733,7 @@ function produce_amqp_messages_for_news_list {
         export NAMESPACE="produce_news_messages"
     fi
 
-    make remove-php-container
-
-    export XDEBUG_CONFIG="idekey='phpstorm-xdebug'"
-
-    if [ -z "${PROJECT_DIR}" ];
-    then
-        export PROJECT_DIR='/var/www/devobs'
-    fi
-
-    local rabbitmq_output_log="app/logs/rabbitmq."${NAMESPACE}".out.log"
-    local rabbitmq_error_log="app/logs/rabbitmq."${NAMESPACE}".error.log"
-    ensure_log_files_exist "${rabbitmq_output_log}" "${rabbitmq_error_log}"
-    rabbitmq_output_log="${PROJECT_DIR}/${rabbitmq_output_log}"
-    rabbitmq_error_log="${PROJECT_DIR}/${rabbitmq_error_log}"
+    before_running_command
 
     if [ -z "${username}" ];
     then
@@ -816,27 +769,7 @@ function produce_amqp_messages_for_news_list {
     fi
 
     local arguments="${priority_option}"'--screen_name='"${username}"' '"${list_option}"' '"${query_restriction}"
-    local php_command='app/console weaving_the_web:amqp:produce:lists_members '${arguments}
-
-    local symfony_environment="$(get_symfony_environment)"
-
-    if [ -z "${DOCKER_MODE}" ];
-    then
-        command="${symfony_environment} /usr/bin/php $PROJECT_DIR/${php_command}"
-        echo 'Executing command: "'$command'"'
-        echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
-        echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
-        /bin/bash -c "$command >> ${rabbitmq_output_log} 2>> ${rabbitmq_error_log}"
-
-        return
-    fi
-
-    export SCRIPT="${php_command}"
-
-    echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
-    echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
-
-    execute_command "${rabbitmq_output_log}" "${rabbitmq_error_log}"
+    run_command 'app/console weaving_the_web:amqp:produce:lists_members '${arguments}
 }
 
 function refresh_statuses() {
