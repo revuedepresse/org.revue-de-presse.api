@@ -20,6 +20,14 @@ services:
             statusRepository:    "@weaving_the_web_twitter.repository.status"
             aggregateRepository: "@weaving_the_web_twitter.repository.aggregate"
 
+    repository.network:
+        class:                            'App\Member\Repository\NetworkRepository'
+        properties:
+            accessor:                     "@weaving_the_web_twitter.api_accessor"
+            logger:                       "@logger"
+            memberSubscribeeRepository:   "@repository.member_subscribee"
+            memberSubscriptionRepository: "@repository.member_subscription"
+
     repository.saved_search:
         factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
         class: 'App\Aggregate\Repository\SavedSearchRepository'

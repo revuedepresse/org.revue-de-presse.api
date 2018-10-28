@@ -109,6 +109,9 @@ produce-amqp-messages-from-search-query: ## Produce messages from search query
 produce-amqp-messages-for-timely-statuses: ## Produce messages for timely statuses
 		@/bin/bash -c 'source ./bin/functions.sh && produce_amqp_messages_for_timely_statuses'
 
+produce-amqp-messages-for-networks: ## Produce messages for networks
+		@/bin/bash -c 'source ./bin/functions.sh && produce_amqp_messages_for_networks'
+
 produce-amqp-messages-from-news-lists: ## Produce messages from news list
 		@/bin/bash -c 'source ./bin/functions.sh && produce_amqp_messages_for_news_list'
 
