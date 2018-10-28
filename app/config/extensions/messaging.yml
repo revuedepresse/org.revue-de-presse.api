@@ -31,6 +31,9 @@ old_sound_rabbit_mq:
         weaving_the_web_amqp.producer.member_status:
             connection:       default
             exchange_options: { name: 'get-member-status', type: direct }
+        weaving_the_web_amqp.producer.network:
+            connection:       default
+            exchange_options: { name: 'get-network', type: direct }
         weaving_the_web_amqp.producer.timely_status:
             connection:       default
             exchange_options: { name: 'get-timely-status', type: direct }
@@ -63,6 +66,12 @@ old_sound_rabbit_mq:
             connection:       default
             exchange_options: { name: 'get-timely-status', type: direct }
             queue_options:    { name: 'get-timely-status' }
+            qos_options:      { prefetch_size: 0, prefetch_count: 1, global: false }
+        weaving_the_web_amqp.consumer.network:
+            callback:         weaving_the_web_amqp.consumer.network
+            connection:       default
+            exchange_options: { name: 'get-network', type: direct }
+            queue_options:    { name: 'get-network' }
             qos_options:      { prefetch_size: 0, prefetch_count: 1, global: false }
         weaving_the_web_amqp.twitter.user_status:
             callback:         weaving_the_web_amqp.consumer.status

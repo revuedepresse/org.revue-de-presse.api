@@ -10,6 +10,7 @@ parameters:
     weaving_the_web_amqp.producer.produce_member_messages_command.class:        'App\Conversation\Producer\ProduceMemberMessagesCommand'
     weaving_the_web_amqp.consumer.status.class:                                 'WeavingTheWeb\Bundle\AmqpBundle\Twitter\UserStatus'
     weaving_the_web_amqp.consumer.timely_status.class:                          'App\Aggregate\Consumer\TimelyStatusConsumer'
+    weaving_the_web_amqp.consumer.network.class:                                'App\Member\Consumer\NetworkConsumer'
     weaving_the_web_amqp.produce_lists_members_command.class:                   'WeavingTheWeb\Bundle\AmqpBundle\Command\ProduceListsMembersCommand'
 
 services:
@@ -30,12 +31,10 @@ services:
             - { name: 'console.command' }
 
     command.import_network:
-        class:                            "%command.import_network.class%"
+        class:                 "%command.import_network.class%"
         properties:
-            accessor:                     "@weaving_the_web_twitter.api_accessor"
-            logger:                       "@logger"
-            memberSubscribeeRepository:   "@repository.member_subscribee"
-            memberSubscriptionRepository: "@repository.member_subscription"
+            networkRepository: '@repository.network'
+            producer:          '@old_sound_rabbit_mq.weaving_the_web_amqp.producer.network_producer'
         tags:
             - { name: 'console.command' }
 
@@ -85,6 +84,12 @@ services:
             entityManager:          "@doctrine.orm.entity_manager"
             statusAccessor:         "@weaving_the_web.accessor.status"
             timelyStatusRepository: "@repository.timely_status"
+
+    weaving_the_web_amqp.consumer.network:
+        class:                      "%weaving_the_web_amqp.consumer.network.class%"
+        properties:
+            networkRepository:      "@repository.network"
+            logger:                 "@logger"
 
     weaving_the_web_amqp.twitter:
         class:                       "%weaving_the_web_amqp.consumer.status.class%"
