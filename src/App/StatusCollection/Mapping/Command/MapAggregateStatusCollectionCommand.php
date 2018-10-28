@@ -2,6 +2,8 @@
 
 namespace App\StatusCollection\Mapping\Command;
 
+use App\Aggregate\Entity\SearchMatchingStatus;
+use App\Aggregate\Repository\SearchMatchingStatusRepository;
 use App\Console\CommandReturnCodeAwareInterface;
 use App\StatusCollection\Mapping\RefreshStatusMapping;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -26,6 +28,8 @@ class MapAggregateStatusCollectionCommand extends Command implements CommandRetu
 
     const OPTION_OAUTH_SECRET = 'oauth-secret';
 
+    const OPTION_IS_SEARCH = 'is-search';
+
     /**
      * @var LoggerInterface
      */
@@ -45,6 +49,11 @@ class MapAggregateStatusCollectionCommand extends Command implements CommandRetu
      * @var StatusRepository
      */
     public $statusRepository;
+
+    /**
+     * @var SearchMatchingStatusRepository
+     */
+    public $searchMatchingStatusRepository;
 
     /**
      * @var RefreshStatusMapping
@@ -97,6 +106,12 @@ class MapAggregateStatusCollectionCommand extends Command implements CommandRetu
                 InputOption::VALUE_REQUIRED,
                 'A list name'
             )->addOption(
+                self::OPTION_IS_SEARCH,
+                null,
+                InputOption::VALUE_NONE,
+                'Should find the statuses resulting from a search'
+            )
+            ->addOption(
                 self::OPTION_EARLIEST_DATE,
                 null,
                 InputOption::VALUE_OPTIONAL,
@@ -146,11 +161,7 @@ class MapAggregateStatusCollectionCommand extends Command implements CommandRetu
             $this->setDatesFromConfiguration();
         }
 
-        $statusCollection = $this->statusRepository->selectAggregateStatusCollection(
-            $this->input->getOption(self::OPTION_AGGREGATE),
-            $this->earliestDate,
-            $this->latestDate
-        );
+        $statusCollection = $this->selectStatusCollection();
 
         $mappedStatuses = $this->statusRepository->mapStatusCollectionToService(
             $this->refreshStatusMapping,
@@ -277,5 +288,25 @@ class MapAggregateStatusCollectionCommand extends Command implements CommandRetu
 
         $this->earliestDate = $startDate;
         $this->latestDate = $endDate;
+    }
+
+    /**
+     * @return ArrayCollection
+     */
+    private function selectStatusCollection(): ArrayCollection
+    {
+        if ($this->input->getOption(self::OPTION_IS_SEARCH)) {
+            return $this->searchMatchingStatusRepository->selectSearchMatchingStatusCollection(
+                $this->input->getOption(self::OPTION_AGGREGATE)
+            )->map(function (SearchMatchingStatus $searchMatchingStatus) {
+                return $searchMatchingStatus->status;
+            });
+        }
+
+        return $this->statusRepository->selectAggregateStatusCollection(
+            $this->input->getOption(self::OPTION_AGGREGATE),
+            $this->earliestDate,
+            $this->latestDate
+        );
     }
 }

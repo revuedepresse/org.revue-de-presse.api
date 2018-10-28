@@ -36,6 +36,7 @@ services:
             refreshStatusMapping:               "@mapping.refresh_status"
             oauthToken:                         "%weaving_the_web_twitter.oauth_token.default%"
             oauthSecret:                        "%weaving_the_web_twitter.oauth_secret.default%"
+            searchMatchingStatusRepository:     '@repository.search_matching_status'
             timeAfterWhichOperationIsSkipped:   '%operations_skipped_after%'
             timeBeforeWhichOperationIsSkipped:  '%operations_skipped_before%'
         tags:

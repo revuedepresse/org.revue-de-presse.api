@@ -4,9 +4,11 @@ namespace App\StatusCollection\Mapping;
 
 use App\Accessor\Exception\NotFoundStatusException;
 use Psr\Log\LoggerInterface;
+use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Status;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
 use WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor;
+use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
 
 class RefreshStatusMapping implements MappingAwareInterface
 {
@@ -75,12 +77,27 @@ class RefreshStatusMapping implements MappingAwareInterface
 
         $reachBeforeRefresh = $this->statusRepository->extractReachOfStatus($status);
 
-        $this->statusRepository->saveStatuses(
-            [$apiDocument],
-            $status->getIdentifier(),
-            $status->getAggregates()->first(),
-            $this->logger
-        );
+        $aggregate = $status->getAggregates()->first();
+        if (!($aggregate instanceof Aggregate)) {
+            $aggregate = null;
+        }
+
+        try {
+            $this->statusRepository->saveStatuses(
+                [$apiDocument],
+                $status->getIdentifier(),
+                $aggregate,
+                $this->logger
+            );
+        } catch (NotFoundMemberException $exception) {
+            $this->accessor->ensureMemberHavingNameExists($exception->screenName);
+            $this->statusRepository->saveStatuses(
+                [$apiDocument],
+                $status->getIdentifier(),
+                $aggregate,
+                $this->logger
+            );
+        }
 
         $refreshedStatus = $this->statusRepository->findOneBy(['id' => $status->getId()]);
         $reachAfterRefresh = $this->statusRepository->extractReachOfStatus($refreshedStatus);

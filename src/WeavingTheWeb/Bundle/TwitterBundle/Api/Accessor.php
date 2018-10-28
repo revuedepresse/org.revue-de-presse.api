@@ -372,14 +372,15 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
 
     /**
      * @param string $query
+     * @param string $params
      * @return \API|mixed|object|\stdClass
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function search(string $query)
+    public function search(string $query, $params = '')
     {
-        $endpoint = $this->getSearchEndpoint()."q=$query&count=100";
+        $endpoint = $this->getSearchEndpoint()."q=$query&count=100".$params;
 
         return $this->contactEndpoint($endpoint);
     }
@@ -846,7 +847,7 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
      */
     protected function getSearchEndpoint($version = '1.1')
     {
-        return $this->getApiBaseUrl($version) . '/search/tweets.json?';
+        return $this->getApiBaseUrl($version) . '/search/tweets.json?tweet_mode=extended&';
     }
 
     /**
