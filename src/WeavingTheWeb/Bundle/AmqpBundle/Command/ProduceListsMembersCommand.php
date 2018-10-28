@@ -215,7 +215,11 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
 
                 $messageBody['screen_name'] = $member->getTwitterUsername();
 
-                $aggregate = $this->getListAggregateByName($messageBody['screen_name'], $list->name);
+                $aggregate = $this->getListAggregateByName(
+                    $messageBody['screen_name'],
+                    $list->name,
+                    $list->id_str
+                );
                 $messageBody['aggregate_id'] = $aggregate->getId();
 
                 if ($this->before) {
@@ -519,44 +523,12 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
         $shouldIncludeOwner = true;
 
         foreach ($ownerships->lists as $list) {
-            if ($doNotApplyListRestriction ||
-                $list->name === $this->listRestriction ||
-                array_key_exists($list->name, $this->listCollectionRestriction)
-            ) {
-                $members = $this->accessor->getListMembers($list->id);
-
-                if ($shouldIncludeOwner) {
-                    $additionalMember = $this->accessor->showUser($this->screenName);
-                    array_unshift($members->users, $additionalMember);
-                    $shouldIncludeOwner = false;
-                }
-
-                if (!is_object($members) || !isset($members->users) || count($members->users) === 0) {
-                    $this->logger->info(sprintf('List "%s" has no members', $list->name));
-                    continue;
-                }
-
-                if (count($members->users) > 0) {
-                    $this->logger->info(
-                        sprintf(
-                            'About to publish messages for members in list "%s"',
-                            $list->name
-                        )
-                    );
-                }
-
-                $publishedMessages = $this->publishMembersScreenNames($members, $messageBody, $list);
-
-                // Reset accessor tokens in case they've been updated to find member usernames with alternative tokens
-                // Members lists can only be accessed by authenticated users owning the lists
-                // See also https://dev.twitter.com/rest/reference/get/lists/ownerships
-                $this->updateAccessToken();
-
-                $this->output->writeln($this->translator->trans('amqp.production.list_members.success', [
-                    '{{ count }}' => $publishedMessages,
-                    '{{ list }}' => $list->name,
-                ]));
-            }
+            $shouldIncludeOwner = $this->processMemberList(
+                $doNotApplyListRestriction,
+                $list,
+                $shouldIncludeOwner,
+                $messageBody
+            );
         }
 
         return self::RETURN_STATUS_SUCCESS;
@@ -587,5 +559,66 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
             $results->statuses,
             $this->accessor->userToken
         );
+    }
+
+    /**
+     * @param $doNotApplyListRestriction
+     * @param $list
+     * @param $shouldIncludeOwner
+     * @param $messageBody
+     * @return bool
+     * @throws UnavailableResourceException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
+     */
+    private function processMemberList(
+        $doNotApplyListRestriction,
+        $list,
+        $shouldIncludeOwner,
+        $messageBody
+    ) {
+        if ($doNotApplyListRestriction ||
+            $list->name === $this->listRestriction ||
+            array_key_exists($list->name, $this->listCollectionRestriction)
+        ) {
+            $members = $this->accessor->getListMembers($list->id);
+
+            if ($shouldIncludeOwner) {
+                $additionalMember = $this->accessor->showUser($this->screenName);
+                array_unshift($members->users, $additionalMember);
+                $shouldIncludeOwner = false;
+            }
+
+            if (!is_object($members) || !isset($members->users) || count($members->users) === 0) {
+                $this->logger->info(sprintf('List "%s" has no members', $list->name));
+
+                return $shouldIncludeOwner;
+            }
+
+            if (count($members->users) > 0) {
+                $this->logger->info(
+                    sprintf(
+                        'About to publish messages for members in list "%s"',
+                        $list->name
+                    )
+                );
+            }
+
+            $publishedMessages = $this->publishMembersScreenNames($members, $messageBody, $list);
+
+            // Reset accessor tokens in case they've been updated to find member usernames with alternative tokens
+            // Members lists can only be accessed by authenticated users owning the lists
+            // See also https://dev.twitter.com/rest/reference/get/lists/ownerships
+            $this->updateAccessToken();
+
+            $this->output->writeln($this->translator->trans('amqp.production.list_members.success', [
+                '{{ count }}' => $publishedMessages,
+                '{{ list }}' => $list->name,
+            ]));
+        }
+
+        return $shouldIncludeOwner;
     }
 }

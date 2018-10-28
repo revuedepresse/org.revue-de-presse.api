@@ -371,6 +371,28 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     }
 
     /**
+     * @param array $members
+     * @param int   $listId
+     * @return \API|mixed|object|\stdClass
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function addMembersToList(array $members, int $listId)
+    {
+        if (count($members) > 100) {
+            throw new \LogicException('No more than 100 members can be added to a list at once');
+        }
+
+        $endpoint = $this->getAddMembersToListEndpoint().
+            "screen_name=".implode(',', $members).
+            '&list_id='.$listId
+        ;
+
+        return $this->contactEndpoint($endpoint);
+    }
+
+    /**
      * @param string $query
      * @param string $params
      * @return \API|mixed|object|\stdClass
@@ -644,7 +666,9 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
      */
     public function connectToEndpoint(TwitterOAuth $client, $endpoint, $parameters = [])
     {
-        if (strpos($endpoint, 'create.json') !== false) {
+        if (strpos($endpoint, 'create.json') !== false
+        || strpos($endpoint, 'create_all.json') !== false
+        ) {
             return $client->post($endpoint, $parameters);
         }
 
@@ -1156,6 +1180,16 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
         return $this->getApiBaseUrl($version) . '/lists/ownerships.json?reverse={{ reverse }}' .
             '&screen_name={{ screenName }}' .
             '&count={{ count }}&cursor={{ cursor }}';
+    }
+
+    /**
+     * @param string $version
+     * @return string
+     */
+    protected function getAddMembersToListEndpoint($version = '1.1')
+    {
+        return $this->getApiBaseUrl($version) . '/lists/members/create_all.json' .
+            '?';
     }
 
     /**

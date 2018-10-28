@@ -2,6 +2,7 @@ parameters:
     command.map_aggregate_status_collection.class:                              'App\StatusCollection\Mapping\Command\MapAggregateStatusCollectionCommand'
     command.map_status_collection.class:                                        'App\StatusCollection\Mapping\Command\MapStatusCollectionCommand'
     command.select_status_collection.class:                                     'App\StatusCollection\Command\SelectStatusCollectionCommand'
+    command.add_members_to_aggregate.class:                                     'App\Member\Command\AddMemberToAggregateCommand'
     weaving_the_web_amqp.consumer.conversation_status.class:                    'App\Conversation\Consumer\ConversationStatusConsumer'
     weaving_the_web_amqp.producer.produce_conversation_messages_command.class:  'App\Conversation\Producer\ProduceConversationMessagesCommand'
     weaving_the_web_amqp.producer.produce_timely_status_messages_command.class: 'App\Aggregate\Producer\ProduceTimelyStatusMessagesCommand'
@@ -12,9 +13,18 @@ parameters:
 
 services:
     command.select_status_collection:
-        class:                       "%command.select_status_collection.class%"
+        class:                      "%command.select_status_collection.class%"
         properties:
             statusRepository:       "@weaving_the_web_twitter.repository.status"
+        tags:
+            - { name: 'console.command' }
+
+    command.add_members_to_aggregate:
+        class:                      "%command.add_members_to_aggregate.class%"
+        properties:
+            aggregateRepository:  "@weaving_the_web_twitter.repository.aggregate"
+            accessor:             "@weaving_the_web_twitter.api_accessor"
+            userRepository:       "@user_manager"
         tags:
             - { name: 'console.command' }
 
