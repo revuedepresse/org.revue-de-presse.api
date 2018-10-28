@@ -29,7 +29,7 @@ class SearchMatchingStatus implements TimeRangeAwareInterface
     /**
      * @var Status
      */
-    private $status;
+    public $status;
 
     /**
      * @var SavedSearch
