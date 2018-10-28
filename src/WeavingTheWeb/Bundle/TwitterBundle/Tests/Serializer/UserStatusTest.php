@@ -112,7 +112,8 @@ class UserStatusTest extends WebTestCase
         $accessorMock->shouldSkipSerializationForMemberWithScreenName(Argument::any())->willReturn(false);
         $accessorMock->isApiLimitReached()->willReturn(false);
         $accessorMock->isApiRateLimitReached(Argument::type('string'))->willReturn(false);
-        $accessorMock->fetchTimelineStatuses(Argument::type('array'))->willReturn([
+
+        $statuses = [
             (object) [
                 'text' => 'This is a test.',
                 'user' => (object) [
@@ -124,7 +125,9 @@ class UserStatusTest extends WebTestCase
                 'created_at' => (new \DateTime())->format('Y-m-d'),
                 'api_document' => '{}',
             ]
-        ]);
+        ];
+        $accessorMock->fetchStatuses(Argument::any())->willReturn($statuses);
+        $accessorMock->fetchTimelineStatuses(Argument::type('array'))->willReturn($statuses);
 
         $this->serializer->setAccessor($accessorMock->reveal());
     }
