@@ -3,17 +3,13 @@
 namespace App\Member\Command;
 
 use App\Console\CommandReturnCodeAwareInterface;
-use App\Member\Entity\NotFoundMember;
-use App\Member\MemberInterface;
-use App\Member\Repository\MemberSubscribeeRepository;
-use App\Member\Repository\MemberSubscriptionRepository;
+use App\Member\Repository\NetworkRepository;
+use OldSound\RabbitMqBundle\RabbitMq\ProducerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor;
-use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
-use WeavingTheWeb\Bundle\TwitterBundle\Exception\ProtectedAccountException;
+
 
 class ImportNetworkCommand extends Command implements CommandReturnCodeAwareInterface
 {
@@ -32,24 +28,14 @@ class ImportNetworkCommand extends Command implements CommandReturnCodeAwareInte
     private $output;
 
     /**
-     * @var Accessor
+     * @var NetworkRepository
      */
-    public $accessor;
+    public $networkRepository;
 
     /**
-     * @var MemberSubscribeeRepository
+     * @var ProducerInterface
      */
-    public $memberSubscribeeRepository;
-
-    /**
-     * @var MemberSubscriptionRepository
-     */
-    public $memberSubscriptionRepository;
-
-    /**
-     * @var \Psr\Log\LoggerInterface
-     */
-    public $logger;
+    public $producer;
 
     public function configure()
     {
@@ -82,7 +68,7 @@ class ImportNetworkCommand extends Command implements CommandReturnCodeAwareInte
 
         $memberList = $this->input->getOption(self::OPTION_MEMBER_LIST);
         $memberName = $this->input->getOption(self::OPTION_MEMBER_NAME);
-
+        
         $validMemberList = strlen(trim($memberList)) > 0;
 
         if (!$validMemberList && strlen(trim($memberName)) === 0) {
@@ -94,101 +80,22 @@ class ImportNetworkCommand extends Command implements CommandReturnCodeAwareInte
         if ($validMemberList) {
             $members = explode(',', $memberList);
 
-            return $this->saveNetwork($members);
+            array_walk(
+                $members,
+                function (string $member) {
+                    $messageBody = [$member];
+
+                    $this->producer->setContentType('application/json');
+                    $this->producer->publish(serialize(json_encode($messageBody)));
+                }
+            );
+
+            return self::RETURN_STATUS_SUCCESS;
         }
 
-        return $this->saveNetwork([$memberName]);
-    }
-
-    /**
-     * @param MemberInterface $member
-     * @param array           $subscriptions
-     * @return array
-     */
-    function saveMemberSubscriptions(MemberInterface $member, array $subscriptions)
-    {
-        return array_map(
-            function (string $subscription) use ($member) {
-                try {
-                    $subscriptionMember = $this->accessor->ensureMemberHavingIdExists(intval($subscription));
-                } catch (NotFoundMemberException $exception) {
-                    return new NotFoundMember();
-                } catch (ProtectedAccountException $exception) {
-                    return new ProtectedAccountException();
-                } catch (\Exception $exception) {
-                    $this->logger->critical($exception->getMessage());
-
-                    return;
-                }
-
-                $this->logger->info(sprintf(
-                    'About to save subscription of member "%s" for member "%s"',
-                    $member->getTwitterUsername(),
-                    $subscriptionMember->getTwitterUsername()
-                ));
-
-                return $this->memberSubscriptionRepository->saveMemberSubscription($member, $subscriptionMember);
-            },
-            $subscriptions
-        );
-    }
-
-    /**
-     * @param MemberInterface $member
-     * @param array           $subscribees
-     * @return array
-     */
-    function saveMemberSubscribees(MemberInterface $member, array $subscribees)
-    {
-        return array_map(
-            function (string $subscribee) use ($member) {
-                try {
-                    $subscribeeMember = $this->accessor->ensureMemberHavingIdExists(intval($subscribee));
-                } catch (NotFoundMemberException $exception) {
-                    return new NotFoundMember();
-                } catch (ProtectedAccountException $exception) {
-                    return new ProtectedAccountException();
-                } catch (\Exception $exception) {
-                    $this->logger->critical($exception->getMessage());
-
-                    return;
-                }
-
-                $this->logger->info(sprintf(
-                    'About to save subscribees of member "%s" for member "%s"',
-                    $member->getTwitterUsername(),
-                    $subscribeeMember->getTwitterUsername()
-                ));
-
-                return $this->memberSubscribeeRepository->saveMemberSubscribee($member, $subscribeeMember);
-            },
-            $subscribees
-        );
-    }
-
-    /**
-     * @param $members
-     * @return int
-     */
-    private function saveNetwork($members): int
-    {
-        array_walk(
-            $members,
-            function (string $member) {
-                $member = $this->accessor->ensureMemberHavingNameExists($member);
-
-                $friends = $this->accessor->showUserFriends($member->getTwitterUsername());
-                if ($member instanceof MemberInterface) {
-                    $this->saveMemberSubscriptions($member, $friends->ids);
-                }
-
-                $subscribees = $this->accessor->showMemberSubscribees($member->getTwitterUsername());
-                if ($member instanceof MemberInterface) {
-                    $this->saveMemberSubscribees($member, $subscribees->ids);
-                }
-            }
-        );
+        $this->networkRepository->saveNetwork([$memberName]);
 
         return self::RETURN_STATUS_SUCCESS;
     }
+
 }
