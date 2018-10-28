@@ -58,6 +58,8 @@ class UserData extends AbstractFixture implements OrderedFixtureInterface,  Cont
                 'twitter_username' => 'user',
                 'api_key' => sha1('user'.'secret'),
                 'roles' => [],
+                'total_subscribees' => 0,
+                'total_subscriptions' => 0,
             ], [
                 'username' => $this->container->getParameter('weaving_the_web.quality_assurance.super.username'),
                 'password' => $this->container->getParameter('weaving_the_web.quality_assurance.super.password'),
@@ -69,6 +71,8 @@ class UserData extends AbstractFixture implements OrderedFixtureInterface,  Cont
                 'twitter_id' => 2,
                 'twitter_username' => 'super',
                 'roles' => ['super_admin'],
+                'total_subscribees' => 0,
+                'total_subscriptions' => 0,
             ]
         ];
 
@@ -103,6 +107,9 @@ class UserData extends AbstractFixture implements OrderedFixtureInterface,  Cont
             $user->addToken($secondToken);
 
             $this->addReference($userProperties['username_canonical'], $user);
+
+            $user->totalSubscriptions = $userProperties['total_subscriptions'];
+            $user->totalSubscribees = $userProperties['total_subscribees'];
 
             $manager->persist($user);
         }
