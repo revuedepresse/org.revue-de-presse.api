@@ -13,6 +13,10 @@
             <index name="status_idx" columns="status_id,publication_date_time,time_range,member_name"/>
         </indexes>
 
+        <unique-constraints>
+            <unique-constraint columns="status_id,saved_search_id" name="unique_status" />
+        </unique-constraints>
+
         <id name="id" column="id" type="uuid">
             <generator strategy="CUSTOM"/>
             <custom-id-generator class="Ramsey\Uuid\Doctrine\UuidGenerator"/>
