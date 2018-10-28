@@ -5,21 +5,35 @@ namespace App\Aggregate;
 trait AggregateAwareTrait
 {
     /**
-     * @param $screenName
-     * @param $listName
-     * @return null|object|\WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @param string      $screenName
+     * @param string      $listName
+     * @param string|null $listId
+     * @return mixed
      */
-    protected function getListAggregateByName($screenName, $listName)
-    {
-        $aggregate = $this->aggregateRepository->findOneBy(['name' => $listName, 'screenName' => $screenName]);
+    protected function getListAggregateByName(
+        string $screenName,
+        string $listName,
+        string $listId = null
+    ) {
+        $aggregate = $this->aggregateRepository->findOneBy([
+            'name' => $listName,
+            'screenName' => $screenName
+        ]);
 
         if (!$aggregate) {
-            $aggregate = $this->aggregateRepository->make($screenName, $listName);
+            $aggregate = $this->aggregateRepository->make(
+                $screenName,
+                $listName
+            );
 
             $this->entityManager->persist($aggregate);
-            $this->entityManager->flush();
         }
+
+        if (!is_null($listId)) {
+            $aggregate->listId = $listId;
+        }
+
+        $this->entityManager->flush();
 
         return $aggregate;
     }

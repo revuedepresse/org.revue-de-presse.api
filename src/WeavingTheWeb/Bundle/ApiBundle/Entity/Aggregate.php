@@ -68,6 +68,13 @@ class Aggregate
      */
     public $unlockedAt;
 
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="list_id", type="string", nullable=true)
+     */
+    public $listId;
+
     public function lock()
     {
         $this->locked = true;
