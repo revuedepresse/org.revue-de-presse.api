@@ -235,7 +235,12 @@ class StatusAccessor
      */
     private function ensureMemberHasDescription(MemberInterface $member, string $memberName): MemberInterface
     {
-        if (!$member->description) {
+        $memberDescriptionIsAvailable = $member->isNotSuspended() &&
+            $member->isNotProtected() &&
+            $member->hasNotBeenDeclaredAsNotFound()
+        ;
+
+        if (is_null($member->description) && $memberDescriptionIsAvailable) {
             $fetchedMember = $this->accessor->showUser($memberName);
             $member->description = $fetchedMember->description;
             $this->userManager->saveMember($member);
