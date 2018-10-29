@@ -1042,13 +1042,13 @@ class User extends BaseUser implements MemberInterface
      * @var integer
      * @ORM\Column(name="total_subscribees", type="integer", options={"default": 0})
      */
-    public $totalSubscribees;
+    public $totalSubscribees = 0;
 
     /**
      * @var integer
      * @ORM\Column(name="total_subscriptions", type="integer", options={"default": 0})
      */
-    public $totalSubscriptions;
+    public $totalSubscriptions = 0;
 
     /**
      * @return bool

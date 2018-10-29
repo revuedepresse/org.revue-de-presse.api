@@ -5,15 +5,15 @@ namespace App\Member\Entity;
 use App\Member\MemberInterface;
 use WTW\UserBundle\Entity\User;
 
-class NotFoundMember implements MemberInterface
+class SuspendedMember implements MemberInterface
 {
     use MemberTrait;
 
     /**
-     * @param $notFound
+     * @param bool $protected
      * @return MemberInterface
      */
-    public function setNotFound(bool $notFound): MemberInterface
+    public function setSuspended(bool $protected): MemberInterface
     {
         return $this;
     }
@@ -21,21 +21,21 @@ class NotFoundMember implements MemberInterface
     /**
      * @return boolean
      */
-    public function hasBeenDeclaredAsNotFound(): bool
+    public function isSuspended(): bool
     {
         return true;
     }
 
     /**
-     * @return bool
+     * @return boolean
      */
-    public function hasNotBeenDeclaredAsNotFound(): bool
+    public function isNotSuspended(): bool
     {
         return false;
     }
 
     /**
-     * @param string $screenName
+     * @param int $screenName
      * @return MemberInterface
      */
     public function make(string $screenName): MemberInterface
@@ -43,7 +43,7 @@ class NotFoundMember implements MemberInterface
         $member = new User();
         $member->setTwitterUsername($screenName);
         $member->setEmail('@'.$screenName);
-        $member->setNotFound(true);
+        $member->setSuspended(true);
 
         return $member;
     }

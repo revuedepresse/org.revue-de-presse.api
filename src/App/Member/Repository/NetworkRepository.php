@@ -2,11 +2,16 @@
 
 namespace App\Member\Repository;
 
+use App\Member\Entity\ExceptionalMember;
 use App\Member\Entity\NotFoundMember;
+use App\Member\Entity\ProtectedMember;
+use App\Member\Entity\SuspendedMember;
 use App\Member\MemberInterface;
 use WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\ProtectedAccountException;
+use WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException;
+use WTW\UserBundle\Repository\UserRepository;
 
 class NetworkRepository
 {
@@ -20,6 +25,11 @@ class NetworkRepository
      * @var MemberSubscriptionRepository
      */
     public $memberSubscriptionRepository;
+
+    /**
+     * @var UserRepository
+     */
+    public $memberRepository;
 
     /**
      * @var Accessor
@@ -40,17 +50,7 @@ class NetworkRepository
     {
         return array_map(
             function (string $subscription) use ($member) {
-                try {
-                    $subscriptionMember = $this->accessor->ensureMemberHavingIdExists(intval($subscription));
-                } catch (NotFoundMemberException $exception) {
-                    return new NotFoundMember();
-                } catch (ProtectedAccountException $exception) {
-                    return new ProtectedAccountException();
-                } catch (\Exception $exception) {
-                    $this->logger->critical($exception->getMessage());
-
-                    return;
-                }
+                $subscriptionMember = $this->ensureMemberExists($subscription);
 
                 $this->logger->info(sprintf(
                     'About to save subscription of member "%s" for member "%s"',
@@ -73,17 +73,7 @@ class NetworkRepository
     {
         return array_map(
             function (string $subscribee) use ($member) {
-                try {
-                    $subscribeeMember = $this->accessor->ensureMemberHavingIdExists(intval($subscribee));
-                } catch (NotFoundMemberException $exception) {
-                    return new NotFoundMember();
-                } catch (ProtectedAccountException $exception) {
-                    return new ProtectedAccountException();
-                } catch (\Exception $exception) {
-                    $this->logger->critical($exception->getMessage());
-
-                    return;
-                }
+                $subscribeeMember = $this->ensureMemberExists($subscribee);
 
                 $this->logger->info(sprintf(
                     'About to save subscribees of member "%s" for member "%s"',
@@ -95,6 +85,44 @@ class NetworkRepository
             },
             $subscribees
         );
+    }
+
+    /**
+     * @param string $subscription
+     * @return ExceptionalMember|MemberInterface|null|object
+     */
+    public function ensureMemberExists(string $subscription)
+    {
+        try {
+            $subscriptionMember = $this->accessor->ensureMemberHavingIdExists(intval($subscription));
+        } catch (NotFoundMemberException $exception) {
+            $notFoundMember = new NotFoundMember();
+            $this->logger->info($exception->getMessage());
+
+            $subscriptionMember = $notFoundMember->make($exception->screenName);
+        } catch (ProtectedAccountException $exception) {
+            $protectedMember = new ProtectedMember();
+            $this->logger->info($exception->getMessage());
+
+            $subscriptionMember = $protectedMember->make($exception->screenName);
+        } catch (SuspendedAccountException $exception) {
+            $suspendedMember = new SuspendedMember();
+            $this->logger->info($exception->getMessage());
+
+            $subscriptionMember = $suspendedMember->make($exception->screenName);
+        } catch (\Exception $exception) {
+            $subscriptionMember = new ExceptionalMember();
+            $this->logger->critical($exception->getMessage());
+        } finally {
+            if (isset($exception)) {
+                $existingMember = $this->memberRepository->findOneBy(['twitter_username' => $subscription]);
+                if (!($existingMember instanceof MemberInterface)) {
+                    $this->memberRepository->saveMember($subscriptionMember);
+                }
+            }
+        }
+
+        return $subscriptionMember;
     }
 
     /**

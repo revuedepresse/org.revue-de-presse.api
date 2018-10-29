@@ -1020,13 +1020,10 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
 
         $this->userRepository->declareUserAsProtected($twitterUser->screen_name);
 
-        $protectedAccount = $this->translator->trans(
-            'logs.info.account_protected',
-            ['{{ user }}' => $twitterUser->screen_name],
-            'logs'
+        ProtectedAccountException::raiseExceptionAboutProtectedMemberHavingScreenName(
+            $twitterUser->screen_name,
+            self::ERROR_PROTECTED_ACCOUNT
         );
-
-        throw new ProtectedAccountException($protectedAccount, self::ERROR_PROTECTED_ACCOUNT);
     }
 
     /**
@@ -1684,18 +1681,27 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
         $member = $this->userRepository->findOneBy(['twitter_username' => $screenName]);
         if ($member instanceof User) {
             if ($member->isSuspended()) {
-                $suspendedMessageMessage = $this->logSuspendedMemberMessage($screenName);
-                throw new SuspendedAccountException($suspendedMessageMessage, self::ERROR_SUSPENDED_USER);
+                $this->logSuspendedMemberMessage($screenName);
+                SuspendedAccountException::raiseExceptionAboutSuspendedMemberHavingScreenName(
+                    $screenName,
+                    self::ERROR_SUSPENDED_ACCOUNT
+                );
             }
 
             if ($member->isNotFound()) {
-                $notFoundMemberMessage = $this->logNotFoundMemberMessage($screenName);
-                throw new NotFoundMemberException($notFoundMemberMessage, self::ERROR_NOT_FOUND);
+                $this->logNotFoundMemberMessage($screenName);
+                NotFoundMemberException::raiseExceptionAboutNotFoundMemberHavingScreenName(
+                    $screenName,
+                    self::ERROR_NOT_FOUND
+                );
             }
 
             if ($member->isProtected()) {
-                $notFoundMemberMessage = $this->logProtectedMemberMessage($screenName);
-                throw new NotFoundMemberException($notFoundMemberMessage, self::ERROR_NOT_FOUND);
+                $this->logProtectedMemberMessage($screenName);
+                ProtectedAccountException::raiseExceptionAboutProtectedMemberHavingScreenName(
+                    $screenName,
+                    self::ERROR_PROTECTED_ACCOUNT
+                );
             }
         }
     }
