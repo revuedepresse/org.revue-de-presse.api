@@ -894,7 +894,8 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
      */
     protected function getRateLimitStatusEndpoint($version = '1.1')
     {
-        return $this->getApiBaseUrl($version) . '/application/rate_limit_status.json?resources=favorites,statuses,users,lists';
+        return $this->getApiBaseUrl($version) . '/application/rate_limit_status.json?'.
+            'resources=favorites,statuses,users,lists,friends,followers';
     }
 
     /**
@@ -1305,6 +1306,16 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
                 if (false !== strpos($fullEndpoint, '/favorites/list')) {
                     $endpoint = "/favorites/list";
                     $resourceType = 'favorites';
+                }
+
+                if (false !== strpos($fullEndpoint, '/friends/ids')) {
+                    $endpoint = "/friends/ids";
+                    $resourceType = 'friends';
+                }
+
+                if (false !== strpos($fullEndpoint, '/followers/ids')) {
+                    $endpoint = "/followers/ids";
+                    $resourceType = 'followers';
                 }
             }
 
