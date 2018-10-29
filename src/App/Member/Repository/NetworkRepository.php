@@ -107,17 +107,26 @@ class NetworkRepository
             $notFoundMember = new NotFoundMember();
             $this->logger->info($exception->getMessage());
 
-            $subscriptionMember = $notFoundMember->make($exception->screenName);
+            $subscriptionMember = $notFoundMember->make(
+                $exception->screenName,
+                intval($subscription)
+            );
         } catch (ProtectedAccountException $exception) {
             $protectedMember = new ProtectedMember();
             $this->logger->info($exception->getMessage());
 
-            $subscriptionMember = $protectedMember->make($exception->screenName);
+            $subscriptionMember = $protectedMember->make(
+                $exception->screenName,
+                intval($subscription)
+            );
         } catch (SuspendedAccountException $exception) {
             $suspendedMember = new SuspendedMember();
             $this->logger->info($exception->getMessage());
 
-            $subscriptionMember = $suspendedMember->make($exception->screenName);
+            $subscriptionMember = $suspendedMember->make(
+                $exception->screenName,
+                intval($subscription)
+            );
         } catch (\Exception $exception) {
             $subscriptionMember = new ExceptionalMember();
             $this->logger->critical($exception->getMessage());
