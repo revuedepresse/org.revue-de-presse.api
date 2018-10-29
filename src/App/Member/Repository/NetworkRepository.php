@@ -48,7 +48,8 @@ class NetworkRepository
      */
     private function saveMemberSubscriptions(MemberInterface $member, array $subscriptions)
     {
-        return array_map(
+        return array_walk(
+            $subscriptions,
             function (string $subscription) use ($member) {
                 try {
                     $subscriptionMember = $this->ensureMemberExists($subscription);
@@ -63,8 +64,7 @@ class NetworkRepository
                 ));
 
                 return $this->memberSubscriptionRepository->saveMemberSubscription($member, $subscriptionMember);
-            },
-            $subscriptions
+            }
         );
     }
 
@@ -75,7 +75,8 @@ class NetworkRepository
      */
     private function saveMemberSubscribees(MemberInterface $member, array $subscribees)
     {
-        return array_map(
+        return array_walk(
+            $subscribees,
             function (string $subscribee) use ($member) {
                 try {
                     $subscribeeMember = $this->ensureMemberExists($subscribee);
@@ -90,8 +91,7 @@ class NetworkRepository
                 ));
 
                 return $this->memberSubscribeeRepository->saveMemberSubscribee($member, $subscribeeMember);
-            },
-            $subscribees
+            }
         );
     }
 
