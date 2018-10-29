@@ -50,7 +50,11 @@ class NetworkRepository
     {
         return array_map(
             function (string $subscription) use ($member) {
-                $subscriptionMember = $this->ensureMemberExists($subscription);
+                try {
+                    $subscriptionMember = $this->ensureMemberExists($subscription);
+                } catch (\Exception $exception) {
+                    return;
+                }
 
                 $this->logger->info(sprintf(
                     'About to save subscription of member "%s" for member "%s"',
@@ -73,7 +77,11 @@ class NetworkRepository
     {
         return array_map(
             function (string $subscribee) use ($member) {
-                $subscribeeMember = $this->ensureMemberExists($subscribee);
+                try {
+                    $subscribeeMember = $this->ensureMemberExists($subscribee);
+                } catch (\Exception $exception) {
+                    return;
+                }
 
                 $this->logger->info(sprintf(
                     'About to save subscribees of member "%s" for member "%s"',
@@ -113,12 +121,16 @@ class NetworkRepository
         } catch (\Exception $exception) {
             $subscriptionMember = new ExceptionalMember();
             $this->logger->critical($exception->getMessage());
+
+            throw $exception;
         } finally {
             if (isset($exception)) {
                 $existingMember = $this->memberRepository->findOneBy(['twitter_username' => $exception->screenName]);
-                if (!($existingMember instanceof MemberInterface)) {
-                    $this->memberRepository->saveMember($subscriptionMember);
+                if ($existingMember instanceof MemberInterface) {
+                    return $existingMember;
                 }
+
+                return $this->memberRepository->saveMember($subscriptionMember);
             }
         }
 
