@@ -25,6 +25,7 @@ services:
         properties:
             accessor:                     "@weaving_the_web_twitter.api_accessor"
             logger:                       "@logger"
+            memberRepository:             "@user_manager"
             memberSubscribeeRepository:   "@repository.member_subscribee"
             memberSubscriptionRepository: "@repository.member_subscription"
 
