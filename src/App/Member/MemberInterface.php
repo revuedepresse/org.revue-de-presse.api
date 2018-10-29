@@ -67,7 +67,7 @@ interface MemberInterface
     /**
      * @return string
      */
-    public function getTwitterID(): string;
+    public function getTwitterID(): ?string;
 
     /**
      * @param string $fullName
