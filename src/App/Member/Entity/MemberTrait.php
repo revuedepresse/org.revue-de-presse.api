@@ -98,7 +98,7 @@ trait MemberTrait
     /**
      * @return string
      */
-    public function getTwitterID(): string
+    public function getTwitterID(): ?string
     {
         return '';
     }

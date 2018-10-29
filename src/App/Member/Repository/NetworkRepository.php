@@ -48,7 +48,8 @@ class NetworkRepository
      */
     private function saveMemberSubscriptions(MemberInterface $member, array $subscriptions)
     {
-        return array_map(
+        return array_walk(
+            $subscriptions,
             function (string $subscription) use ($member) {
                 try {
                     $subscriptionMember = $this->ensureMemberExists($subscription);
@@ -63,8 +64,7 @@ class NetworkRepository
                 ));
 
                 return $this->memberSubscriptionRepository->saveMemberSubscription($member, $subscriptionMember);
-            },
-            $subscriptions
+            }
         );
     }
 
@@ -75,7 +75,8 @@ class NetworkRepository
      */
     private function saveMemberSubscribees(MemberInterface $member, array $subscribees)
     {
-        return array_map(
+        return array_walk(
+            $subscribees,
             function (string $subscribee) use ($member) {
                 try {
                     $subscribeeMember = $this->ensureMemberExists($subscribee);
@@ -90,45 +91,44 @@ class NetworkRepository
                 ));
 
                 return $this->memberSubscribeeRepository->saveMemberSubscribee($member, $subscribeeMember);
-            },
-            $subscribees
+            }
         );
     }
 
     /**
-     * @param string $subscription
+     * @param string $memberId
      * @return ExceptionalMember|MemberInterface|null|object
      */
-    public function ensureMemberExists(string $subscription)
+    public function ensureMemberExists(string $memberId)
     {
         try {
-            $subscriptionMember = $this->accessor->ensureMemberHavingIdExists(intval($subscription));
+            $member = $this->accessor->ensureMemberHavingIdExists(intval($memberId));
         } catch (NotFoundMemberException $exception) {
             $notFoundMember = new NotFoundMember();
             $this->logger->info($exception->getMessage());
 
-            $subscriptionMember = $notFoundMember->make(
+            $member = $notFoundMember->make(
                 $exception->screenName,
-                intval($subscription)
+                intval($memberId)
             );
         } catch (ProtectedAccountException $exception) {
             $protectedMember = new ProtectedMember();
             $this->logger->info($exception->getMessage());
 
-            $subscriptionMember = $protectedMember->make(
+            $member = $protectedMember->make(
                 $exception->screenName,
-                intval($subscription)
+                intval($memberId)
             );
         } catch (SuspendedAccountException $exception) {
             $suspendedMember = new SuspendedMember();
             $this->logger->info($exception->getMessage());
 
-            $subscriptionMember = $suspendedMember->make(
+            $member = $suspendedMember->make(
                 $exception->screenName,
-                intval($subscription)
+                intval($memberId)
             );
         } catch (\Exception $exception) {
-            $subscriptionMember = new ExceptionalMember();
+            $member = new ExceptionalMember();
             $this->logger->critical($exception->getMessage());
 
             throw $exception;
@@ -136,14 +136,22 @@ class NetworkRepository
             if (isset($exception)) {
                 $existingMember = $this->memberRepository->findOneBy(['twitter_username' => $exception->screenName]);
                 if ($existingMember instanceof MemberInterface) {
+                    if ($existingMember->getTwitterID() !== $member->getTwitterID() &&
+                    $member->getTwitterID() !== null) {
+                        $existingMember->setTwitterID($member->getTwitterID());
+
+                        return $this->memberRepository->saveMember($existingMember);
+                    }
+
+
                     return $existingMember;
                 }
 
-                return $this->memberRepository->saveMember($subscriptionMember);
+                return $this->memberRepository->saveMember($member);
             }
         }
 
-        return $subscriptionMember;
+        return $member;
     }
 
     /**

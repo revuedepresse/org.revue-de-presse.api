@@ -469,7 +469,7 @@ class User extends BaseUser implements MemberInterface
     /**
      * @return string
      */
-    public function getTwitterID(): string
+    public function getTwitterID(): ?string
     {
         return $this->twitterID;
     }
