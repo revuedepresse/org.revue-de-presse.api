@@ -115,7 +115,7 @@ class NetworkRepository
             $this->logger->critical($exception->getMessage());
         } finally {
             if (isset($exception)) {
-                $existingMember = $this->memberRepository->findOneBy(['twitter_username' => $subscription]);
+                $existingMember = $this->memberRepository->findOneBy(['twitter_username' => $exception->screenName]);
                 if (!($existingMember instanceof MemberInterface)) {
                     $this->memberRepository->saveMember($subscriptionMember);
                 }
