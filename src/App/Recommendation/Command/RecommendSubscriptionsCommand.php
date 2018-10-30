@@ -19,9 +19,29 @@ class RecommendSubscriptionsCommand extends Command implements CommandReturnCode
     private $allSubscriptions;
 
     /**
+     * @var array
+     */
+    private $memberSubscriptionVectors;
+
+    /**
+     * @var array
+     */
+    private $referenceVector;
+
+    /**
+     * @var int
+     */
+    private $totalSignificantSubscriptions;
+
+    /**
      * @var InputInterface
      */
     private $input;
+
+    /**
+     * @var OutputInterface
+     */
+    private $output;
 
     /**
      * @var EntityManager
@@ -42,7 +62,50 @@ class RecommendSubscriptionsCommand extends Command implements CommandReturnCode
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $this->input = $input;
+        $this->output = $output;
 
+        $results = $this->findAllDistinctSubscriptions()
+            ->buildReferenceVector()
+            ->findClosestVectors()
+        ;
+
+        $distances = $this->computeDistancesBetweenVectors();
+        $sortedDistances = $this->sortDistances($results, $distances);
+
+        array_walk(
+            $sortedDistances,
+            function ($distance) {
+                $this->output->writeln($distance['member']);
+            }
+        );
+    }
+
+    /**
+     * @param $initialVector
+     * @return int|mixed
+     */
+    private function reduceMemberVector($initialVector)
+    {
+        $positions = array_values(explode(',', $initialVector));
+        $positions = array_map('intval', $positions);
+        $flippedPositions = array_flip($positions);
+
+        return array_map(function ($subscription, $index) use ($flippedPositions) {
+            if (array_key_exists($index, $flippedPositions)) {
+                // Normalization
+                return $subscription / $subscription;
+            }
+
+            return null;
+        }, $this->allSubscriptions, array_keys($this->allSubscriptions));
+    }
+
+    /**
+     * @return RecommendSubscriptionsCommand
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    private function findAllDistinctSubscriptions(): self
+    {
         $allSubscriptions = $this->entityManager->getConnection()->executeQuery('
             SELECT GROUP_CONCAT(distinct subscription_id) all_subscription_ids FROM member_subscription
         ')->fetchAll()[0]['all_subscription_ids'];
@@ -58,6 +121,15 @@ class RecommendSubscriptionsCommand extends Command implements CommandReturnCode
 
         $this->allSubscriptions = $allSubscriptions;
 
+        return $this;
+    }
+
+    /**
+     * @return $this
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    private function buildReferenceVector()
+    {
         $query = <<<QUERY
             SELECT member_id,
             GROUP_CONCAT(
@@ -86,10 +158,20 @@ QUERY;
             throw new \LogicException('There should be subscriptions for the reference member');
         }
 
-        $initialVector = $results[0]['subscription_ids'];
-        $totalSignificantReferenceSubscriptions = count(explode(',', $initialVector));
-        $initialVector = $this->reduceMemberVector($initialVector);
+        $referenceVector = $results[0]['subscription_ids'];
+        $this->totalSignificantSubscriptions = count(explode(',', $referenceVector));
 
+        $this->referenceVector = $this->reduceMemberVector($referenceVector);
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    private function findClosestVectors(): array
+    {
         $query = <<<QUERY
             SELECT 
             u.usr_twitter_username identifier, 
@@ -113,8 +195,8 @@ QUERY;
                 strtr(
                     $query,
                     [
-                        ':min' => $totalSignificantReferenceSubscriptions * 0.75,
-                        ':max' => $totalSignificantReferenceSubscriptions * 1.25
+                        ':min' => $this->totalSignificantSubscriptions * 0.75,
+                        ':max' => $this->totalSignificantSubscriptions * 1.25
                     ]
                 )
             );
@@ -124,10 +206,18 @@ QUERY;
             return $this->reduceMemberVector($record['subscription_ids']);
         }, $results);
 
-        array_unshift($memberVectors, $initialVector);
+        $this->memberSubscriptionVectors = $memberVectors;
 
-        $distances = array_map(
-            function ($memberVector, $index) use ($initialVector) {
+        return $results;
+    }
+
+    /**
+     * @return array
+     */
+    private function computeDistancesBetweenVectors(): array
+    {
+        return array_map(
+            function ($memberVector, $index) {
                 $powers = array_map(
                     function ($initialVectorCoordinate, $memberVectorCoordinate) {
                         if (is_null($initialVectorCoordinate)) {
@@ -141,7 +231,7 @@ QUERY;
                         return pow($initialVectorCoordinate - $memberVectorCoordinate, 2);
                     },
                     $memberVector,
-                    $initialVector
+                    $this->referenceVector
                 );
 
                 return [
@@ -150,25 +240,31 @@ QUERY;
                     'vector_index' => $index,
                 ];
             },
-            $memberVectors,
-            array_keys($memberVectors)
+            $this->memberSubscriptionVectors,
+            array_keys($this->memberSubscriptionVectors)
         );
+    }
 
+    /**
+     * @param $results
+     * @param $distances
+     * @return array
+     */
+    private function sortDistances($results, $distances): array
+    {
         usort($distances, function ($vectorA, $vectorB) {
             if ($vectorA['distance'] === $vectorB['distance']) {
                 return 0;
             }
 
-            if ($vectorA['distance'] > $vectorB['distance']) {
+            if ($vectorA['distance'] < $vectorB['distance']) {
                 return -1;
             }
 
             return 1;
         });
 
-        array_unshift($results, ['identifier' => 'ref']);
-
-        $sortedDistances = array_map(
+        return array_map(
             function ($distance) use ($results) {
                 $distance['member'] = $results[$distance['vector_index']]['identifier'];
 
@@ -176,27 +272,5 @@ QUERY;
             },
             $distances
         );
-
-        return $sortedDistances;
-    }
-
-    /**
-     * @param $initialVector
-     * @return int|mixed
-     */
-    private function reduceMemberVector($initialVector)
-    {
-        $positions = array_values(explode(',', $initialVector));
-        $positions = array_map('intval', $positions);
-        $flippedPositions = array_flip($positions);
-
-        return array_map(function ($subscription, $index) use ($flippedPositions) {
-            if (array_key_exists($index, $flippedPositions)) {
-                // Normalization
-                return $subscription / $subscription;
-            }
-
-            return null;
-        }, $this->allSubscriptions, array_keys($this->allSubscriptions));
     }
 }
