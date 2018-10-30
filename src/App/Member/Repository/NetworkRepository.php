@@ -7,6 +7,7 @@ use App\Member\Entity\NotFoundMember;
 use App\Member\Entity\ProtectedMember;
 use App\Member\Entity\SuspendedMember;
 use App\Member\MemberInterface;
+use Doctrine\ORM\EntityManager;
 use WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\ProtectedAccountException;
@@ -32,6 +33,11 @@ class NetworkRepository
     public $memberRepository;
 
     /**
+     * @var EntityManager
+     */
+    public $entityManager;
+
+    /**
      * @var Accessor
      */
     public $accessor;
@@ -48,6 +54,8 @@ class NetworkRepository
      */
     private function saveMemberSubscriptions(MemberInterface $member, array $subscriptions)
     {
+        $subscriptions = $this->memberSubscriptionRepository->findMissingSubscriptions($member, $subscriptions);
+
         return array_walk(
             $subscriptions,
             function (string $subscription) use ($member) {
@@ -63,7 +71,11 @@ class NetworkRepository
                     $subscriptionMember->getTwitterUsername()
                 ));
 
-                return $this->memberSubscriptionRepository->saveMemberSubscription($member, $subscriptionMember);
+                $memberSubscription = $this->memberSubscriptionRepository->saveMemberSubscription(
+                    $member,
+                    $subscriptionMember
+                );
+                $this->entityManager->detach($memberSubscription);
             }
         );
     }
@@ -75,6 +87,8 @@ class NetworkRepository
      */
     private function saveMemberSubscribees(MemberInterface $member, array $subscribees)
     {
+        $subscribees = $this->memberSubscribeeRepository->findMissingSubscribees($member, $subscribees);
+
         return array_walk(
             $subscribees,
             function (string $subscribee) use ($member) {
@@ -90,7 +104,11 @@ class NetworkRepository
                     $subscribeeMember->getTwitterUsername()
                 ));
 
-                return $this->memberSubscribeeRepository->saveMemberSubscribee($member, $subscribeeMember);
+                $memberSubscribee = $this->memberSubscribeeRepository->saveMemberSubscribee(
+                    $member,
+                    $subscribeeMember
+                );
+                $this->entityManager->detach($memberSubscribee);
             }
         );
     }
