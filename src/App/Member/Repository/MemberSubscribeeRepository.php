@@ -7,9 +7,6 @@ use App\Member\MemberInterface;
 use Doctrine\ORM\EntityRepository;
 use WTW\UserBundle\Repository\UserRepository;
 
-/**
- * @method findMissingSubscribees(MemberInterface $member, array $subscribees)
- */
 class MemberSubscribeeRepository extends EntityRepository
 {
     /**
