@@ -24,6 +24,7 @@ services:
         class:                            'App\Member\Repository\NetworkRepository'
         properties:
             accessor:                     "@weaving_the_web_twitter.api_accessor"
+            entityManager:                "@doctrine.orm.entity_manager"
             logger:                       "@logger"
             memberRepository:             "@user_manager"
             memberSubscribeeRepository:   "@repository.member_subscribee"

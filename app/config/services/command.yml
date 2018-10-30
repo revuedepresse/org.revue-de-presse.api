@@ -62,6 +62,13 @@ services:
         tags:
             - { name: 'console.command' }
 
+    command.recommend_subscriptions:
+        class:                  'App\Recommendation\Command\RecommendSubscriptionsCommand'
+        properties:
+            entityManager:      '@doctrine.orm.entity_manager'
+        tags:
+            - { name: 'console.command' }
+
     weaving_the_web_amqp.consumer.conversation_status:
         class:                        "%weaving_the_web_amqp.consumer.conversation_status.class%"
         calls:
