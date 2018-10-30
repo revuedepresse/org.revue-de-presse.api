@@ -126,7 +126,7 @@ class NetworkRepository
             $this->logger->info($exception->getMessage());
 
             $member = $notFoundMember->make(
-                $exception->screenName,
+                is_null($exception->screenName) ? $memberId : $exception->screenName,
                 intval($memberId)
             );
         } catch (ProtectedAccountException $exception) {
@@ -153,6 +153,10 @@ class NetworkRepository
         } finally {
             if (isset($exception)) {
                 $existingMember = $this->memberRepository->findOneBy(['twitter_username' => $exception->screenName]);
+                if (!$existingMember instanceof MemberInterface) {
+                    $existingMember = $this->memberRepository->findOneBy(['twitterID' => $memberId]);
+                }
+
                 if ($existingMember instanceof MemberInterface) {
                     if ($existingMember->getTwitterID() !== $member->getTwitterID() &&
                     $member->getTwitterID() !== null) {
