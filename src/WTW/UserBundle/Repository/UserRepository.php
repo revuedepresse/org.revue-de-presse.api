@@ -97,6 +97,22 @@ class UserRepository extends EntityRepository
     }
 
     /**
+     * @param $screenName
+     * @return MemberInterface|null
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function declareMemberAsSuspended(string $screenName)
+    {
+        $member = $this->findOneBy(['twitter_username' => $screenName]);
+
+        if (!$member instanceof User) {
+            return null;
+        }
+
+        return $this->declareMemberAsSuspended($member);
+    }
+
+    /**
      * @param User $user
      * @return MemberInterface
      * @throws \Doctrine\ORM\OptimisticLockException

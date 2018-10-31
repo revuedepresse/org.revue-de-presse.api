@@ -3,15 +3,15 @@
 use Symfony\Component\ClassLoader\ApcClassLoader,
     Symfony\Component\HttpFoundation\Request;
 
-$loader = require_once __DIR__ . '/../app/bootstrap.php.cache';
+$loader = require_once __DIR__ . '/../app/autoload.php';
 
-$loader = new ApcClassLoader('dashboard', $loader);
-$loader->register(true);
+//$loader = new ApcClassLoader('dashboard', $loader);
+//$loader->register(true);
 
 require_once __DIR__ . '/../app/AppKernel.php';
 
-$kernel = new AppKernel('prod', false);
-$kernel->loadClassCache();
+$kernel = new AppKernel('dev', true);
+//$kernel->loadClassCache();
 
 $request  = Request::createFromGlobals();
 
