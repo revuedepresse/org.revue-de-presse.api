@@ -1066,10 +1066,16 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
 
         try {
             return $this->contactEndpoint(str_replace('{{ screen_name }}', $screenName, $showUserFriendEndpoint));
+        } catch (SuspendedAccountException  $exception) {
+            $this->userRepository->declareMemberAsSuspended($screenName);
+        } catch (NotFoundMemberException $exception) {
+            $this->userRepository->declareUserAsNotFoundByUsername($screenName);
         } catch (ProtectedAccountException $exception) {
             $this->userRepository->declareUserAsProtected($screenName);
-
-            return (object)['ids' => []];
+        } finally {
+            if (isset($exception)) {
+                return (object)['ids' => []];
+            }
         }
     }
 
@@ -1093,10 +1099,16 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
                     $showUserFriendEndpoint
                 ).'&cursor='.$cursor
             );
+        } catch (SuspendedAccountException  $exception) {
+            $this->userRepository->declareMemberAsSuspended($screenName);
+        } catch (NotFoundMemberException $exception) {
+            $this->userRepository->declareUserAsNotFoundByUsername($screenName);
         } catch (ProtectedAccountException $exception) {
             $this->userRepository->declareUserAsProtected($screenName);
-
-            return (object)['ids' => []];
+        } finally {
+            if (isset($exception)) {
+                return (object)['ids' => []];
+            }
         }
     }
 
