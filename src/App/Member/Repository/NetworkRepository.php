@@ -54,7 +54,9 @@ class NetworkRepository
      */
     private function saveMemberSubscriptions(MemberInterface $member, array $subscriptions)
     {
-        $subscriptions = $this->memberSubscriptionRepository->findMissingSubscriptions($member, $subscriptions);
+        if (count($subscriptions) > 0) {
+            $subscriptions = $this->memberSubscriptionRepository->findMissingSubscriptions($member, $subscriptions);
+        }
 
         return array_walk(
             $subscriptions,
@@ -87,7 +89,9 @@ class NetworkRepository
      */
     private function saveMemberSubscribees(MemberInterface $member, array $subscribees)
     {
-        $subscribees = $this->memberSubscribeeRepository->findMissingSubscribees($member, $subscribees);
+        if (count($subscribees) > 0) {
+            $subscribees = $this->memberSubscribeeRepository->findMissingSubscribees($member, $subscribees);
+        }
 
         return array_walk(
             $subscribees,

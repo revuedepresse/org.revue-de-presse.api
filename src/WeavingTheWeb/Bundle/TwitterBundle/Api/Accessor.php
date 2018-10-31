@@ -1064,14 +1064,20 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     {
         $showUserFriendEndpoint = $this->getShowUserFriendsEndpoint();
 
-        return $this->contactEndpoint(str_replace('{{ screen_name }}', $screenName, $showUserFriendEndpoint));
+        try {
+            return $this->contactEndpoint(str_replace('{{ screen_name }}', $screenName, $showUserFriendEndpoint));
+        } catch (ProtectedAccountException $exception) {
+            $this->userRepository->declareUserAsProtected($screenName);
+
+            return (object)['ids' => []];
+        }
     }
 
 
     /**
      * @param string $screenName
      * @param int    $cursor
-     * @return string
+     * @return \API|mixed|object|\stdClass
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
      * @throws \Doctrine\ORM\OptimisticLockException
@@ -1080,12 +1086,18 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     {
         $showUserFriendEndpoint = $this->getShowMemberSubscribeesEndpoint();
 
-        return $this->contactEndpoint(
-            str_replace('{{ screen_name }}',
-                $screenName,
-                $showUserFriendEndpoint
-            ).'&cursor='.$cursor
-        );
+        try {
+            return $this->contactEndpoint(
+                str_replace('{{ screen_name }}',
+                    $screenName,
+                    $showUserFriendEndpoint
+                ).'&cursor='.$cursor
+            );
+        } catch (ProtectedAccountException $exception) {
+            $this->userRepository->declareUserAsProtected($screenName);
+
+            return (object)['ids' => []];
+        }
     }
 
     /**
@@ -1785,7 +1797,8 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
                 );
             }
 
-            if ($errorCode === self::ERROR_USER_NOT_FOUND) {
+            if ($errorCode === self::ERROR_USER_NOT_FOUND ||
+                $errorCode === self::ERROR_NOT_FOUND) {
                 throw new NotFoundMemberException(
                     $content->errors[0]->message,
                     $content->errors[0]->code
