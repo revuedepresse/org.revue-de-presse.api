@@ -165,7 +165,7 @@ class NetworkRepository
         string $memberId
     ) {
         try {
-            $existingMember = $doing();
+            $existingMember = $doing($memberId);
         } catch (NotFoundMemberException $exception) {
             $notFoundMember = new NotFoundMember();
             $this->logger->info($exception->getMessage());

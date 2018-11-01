@@ -1261,7 +1261,7 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
      */
     private function getMemberListSubscriptionsEndpoint($version = '1.1')
     {
-        return $this->getApiBaseUrl($version) . '/lists/subscriptions.json?screen_name={{ screenName }}';
+        return $this->getApiBaseUrl($version) . '/lists/subscriptions.json?count=1000&screen_name={{ screenName }}';
     }
 
     /**

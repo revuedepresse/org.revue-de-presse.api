@@ -12,7 +12,6 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use OldSound\RabbitMqBundle\RabbitMq\ConsumerInterface;
 use PhpAmqpLib\Message\AMQPMessage;
-use Psr\Log\Test\LoggerInterfaceTest;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository;
 
 class TimelyStatusConsumer implements ConsumerInterface
@@ -34,7 +33,7 @@ class TimelyStatusConsumer implements ConsumerInterface
     public $aggregateRepository;
 
     /**
-     * @var LoggerInterfaceTest
+     * @var \Psr\Log\LoggerInterface
      */
     protected $logger;
 
