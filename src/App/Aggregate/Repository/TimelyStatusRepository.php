@@ -3,6 +3,7 @@
 namespace App\Aggregate\Repository;
 
 use App\Aggregate\Entity\TimelyStatus;
+use App\Member\Entity\AggregateSubscription;
 use Doctrine\ORM\EntityRepository;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\StatusInterface;
@@ -40,6 +41,14 @@ class TimelyStatusRepository extends EntityRepository
             'id' => $properties['aggregate_id'],
             'screenName' => $properties['member_name']
         ]);
+
+        if (!($aggregate instanceof Aggregate)) {
+            $aggregate = $this->aggregateRepository->make(
+                $properties['member_name'],
+                $properties['aggregate_name']
+            );
+            $this->aggregateRepository->save($aggregate);
+        }
 
         return new TimelyStatus(
             $status,
