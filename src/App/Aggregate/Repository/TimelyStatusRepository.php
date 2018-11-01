@@ -43,11 +43,18 @@ class TimelyStatusRepository extends EntityRepository
         ]);
 
         if (!($aggregate instanceof Aggregate)) {
-            $aggregate = $this->aggregateRepository->make(
-                $properties['member_name'],
-                $properties['aggregate_name']
-            );
-            $this->aggregateRepository->save($aggregate);
+            $aggregate = $this->aggregateRepository->findOneBy([
+                'name' => $properties['aggregate_name'],
+                'screenName' => $properties['member_name']
+            ]);
+
+            if (!($aggregate instanceof Aggregate)) {
+                $aggregate = $this->aggregateRepository->make(
+                    $properties['member_name'],
+                    $properties['aggregate_name']
+                );
+                $this->aggregateRepository->save($aggregate);
+            }
         }
 
         return new TimelyStatus(
