@@ -523,12 +523,16 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
         $shouldIncludeOwner = true;
 
         foreach ($ownerships->lists as $list) {
-            $shouldIncludeOwner = $this->processMemberList(
-                $doNotApplyListRestriction,
-                $list,
-                $shouldIncludeOwner,
-                $messageBody
-            );
+            try {
+                $shouldIncludeOwner = $this->processMemberList(
+                    $doNotApplyListRestriction,
+                    $list,
+                    $shouldIncludeOwner,
+                    $messageBody
+                );
+            } catch (\Exception $exception) {
+                $this->logger->critical($exception->getMessage());
+            }
         }
 
         return self::RETURN_STATUS_SUCCESS;

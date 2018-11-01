@@ -139,4 +139,10 @@ interface StatusInterface
      * @return ArrayCollection
      */
     public function getAggregates();
+
+    /**
+     * @param Aggregate $aggregate
+     * @return self
+     */
+    public function removeFrom(Aggregate $aggregate): self;
 }
