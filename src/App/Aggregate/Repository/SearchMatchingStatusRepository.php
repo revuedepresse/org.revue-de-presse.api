@@ -6,7 +6,6 @@ use App\Aggregate\Entity\SavedSearch;
 use App\Aggregate\Entity\SearchMatchingStatus;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\QueryBuilder;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\StatusInterface;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
 
