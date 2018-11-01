@@ -6,10 +6,15 @@ parameters:
 services:
 
     repository.aggregate_subscription:
-        factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
-        class: 'App\Member\Repository\AggregateSubscriptionRepository'
+        factory:                                    [ '@doctrine.orm.entity_manager', 'getRepository' ]
+        class:                                      'App\Member\Repository\AggregateSubscriptionRepository'
         arguments:
             - 'App\Member\Entity\AggregateSubscription'
+        properties:
+            accessor:                               "@weaving_the_web_twitter.api_accessor"
+            memberAggregateSubscriptionRepository:  '@repository.member_aggregate_subscription'
+            memberSubscriptionRepository:           '@repository.member_subscription'
+            networkRepository:                      '@repository.network'
 
     repository.member_aggregate_subscription:
         factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]

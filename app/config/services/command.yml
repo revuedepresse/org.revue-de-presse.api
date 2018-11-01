@@ -79,6 +79,15 @@ services:
         tags:
             - { name: 'console.command' }
 
+    command.subscribe_to_member_timelines:
+        class:                               'App\Member\Command\SubscribeToMemberTimelinesCommand'
+        properties:
+            accessor:                        '@weaving_the_web_twitter.api_accessor'
+            aggregateSubscriptionRepository: '@repository.aggregate_subscription'
+            logger:                          '@logger'
+        tags:
+            - { name: 'console.command' }
+
     weaving_the_web_amqp.consumer.conversation_status:
         class:                        "%weaving_the_web_amqp.consumer.conversation_status.class%"
         calls:
