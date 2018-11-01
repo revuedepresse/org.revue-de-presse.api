@@ -20,7 +20,7 @@ class AggregateSubscription
     /**
      * @var MemberInterface
      */
-    private $subscription;
+    public $subscription;
 
     /**
      * @param MemberAggregateSubscription $memberAggregateSubscription

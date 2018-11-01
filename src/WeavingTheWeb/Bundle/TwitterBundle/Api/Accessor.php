@@ -3,10 +3,12 @@
 namespace WeavingTheWeb\Bundle\TwitterBundle\Api;
 
 use App\Accessor\Exception\NotFoundStatusException;
+use App\Accessor\Exception\ReadOnlyApplicationException;
 use App\Accessor\Exception\UnexpectedApiResponseException;
 use App\Accessor\StatusAccessor;
 use App\Accessor\Exception\ApiRateLimitingException;
 
+use App\Member\Entity\AggregateSubscription;
 use App\Member\MemberInterface;
 use App\Status\LikedStatusCollectionAwareInterface;
 use Doctrine\Common\Persistence\ObjectRepository;
@@ -368,6 +370,26 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
         $endpoint = $this->getCreateSavedSearchEndpoint()."query=$query";
 
         return $this->contactEndpoint($endpoint);
+    }
+
+    /**
+     * @param AggregateSubscription $subscription
+     * @return \API|mixed|object|\stdClass
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function subscribeToMemberTimeline(AggregateSubscription $subscription)
+    {
+        $endpoint = $this->getCreateFriendshipsEndpoint();
+
+        return $this->contactEndpoint(
+            str_replace(
+                '{{ screen_name }}',
+                $subscription->subscription->getTwitterUsername(),
+                $endpoint
+            )
+        );
     }
 
     /**
@@ -878,6 +900,17 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     }
 
     /**
+     * @see https://developer.twitter.com/en/docs/accounts-and-users/follow-search-get-users/api-reference/post-friendships-create
+     *
+     * @param string $version
+     * @return string
+     */
+    protected function getCreateFriendshipsEndpoint($version = '1.1')
+    {
+        return $this->getApiBaseUrl($version) . '/friendships/create.json?screen_name={{ screen_name }}';
+    }
+
+    /**
      * @param string $version
      * @return string
      */
@@ -907,7 +940,7 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     protected function getRateLimitStatusEndpoint($version = '1.1')
     {
         return $this->getApiBaseUrl($version) . '/application/rate_limit_status.json?'.
-            'resources=favorites,statuses,users,lists,friends,followers';
+            'resources=favorites,statuses,users,lists,friends,friendships,followers';
     }
 
     /**
@@ -1380,13 +1413,24 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
                     $endpoint = "/followers/ids";
                     $resourceType = 'followers';
                 }
+
+                if (false !== strpos($fullEndpoint, '/friendships/create')) {
+                    $endpoint = "/friendships/create";
+                    $resourceType = 'friendships';
+                }
             }
 
             $this->logger->info(json_encode($rateLimitStatus));
 
             if (!is_null($endpoint) && isset($rateLimitStatus->resources->$resourceType)) {
                 $limit = $rateLimitStatus->resources->$resourceType->$endpoint->limit;
+
+                if (is_null($limit)) {
+                    return false;
+                }
+
                 $remainingCalls = $rateLimitStatus->resources->$resourceType->$endpoint->remaining;
+
                 $remainingCallsMessage = $this->translator->transChoice(
                     'logs.info.calls_remaining',
                     $remainingCalls,
@@ -1860,6 +1904,14 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     private function guardAgainstContentFetchingException($content, $endpoint): void
     {
         if ($this->hasError($content)) {
+            if (isset($content->error)) {
+                if ($content->error === 'Read-only application cannot POST.') {
+                    throw new ReadOnlyApplicationException($content->error);
+                }
+
+                throw new \Exception($content->error);
+            }
+
             $errorCode = $content->errors[0]->code;
 
             if ($errorCode === self::ERROR_OVER_CAPACITY) {
@@ -1885,6 +1937,7 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
             }
 
             if ($errorCode === self::ERROR_USER_NOT_FOUND ||
+                $errorCode === self::ERROR_CAN_NOT_FIND_SPECIFIED_USER ||
                 $errorCode === self::ERROR_NOT_FOUND) {
                 throw new NotFoundMemberException(
                     $content->errors[0]->message,

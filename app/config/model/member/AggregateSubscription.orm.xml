@@ -25,7 +25,6 @@
         <many-to-one
             field="memberAggregateSubscription"
             target-entity="App\Aggregate\Entity\MemberAggregateSubscription"
-            inversed-by="subscription"
         >
             <join-column
                 name="member_aggregate_subscription_id"
@@ -36,7 +35,6 @@
         <many-to-one
             target-entity="WTW\UserBundle\Entity\User"
             field="subscription"
-            inversed-by="subscriber"
         >
             <join-column
                 name="subscription_id"

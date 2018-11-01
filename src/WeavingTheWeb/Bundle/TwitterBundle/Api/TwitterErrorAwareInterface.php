@@ -55,6 +55,8 @@ interface TwitterErrorAwareInterface
 
     const ERROR_REQUIRED_SSL = 92;
 
+    const ERROR_CAN_NOT_FIND_SPECIFIED_USER = 108;
+
     const ERROR_OVER_CAPACITY = 130;
 
     const ERROR_INTERNAL_ERROR = 131;

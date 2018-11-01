@@ -123,8 +123,49 @@ class NetworkRepository
      */
     public function ensureMemberExists(string $memberId)
     {
+        return $this->guardAgainstExceptionalMemberWhenLookingForOne(
+            function (string $memberId) {
+                return $this->accessor->ensureMemberHavingIdExists(intval($memberId));
+            },
+            $memberId
+        );
+    }
+
+    /**
+     * @param $members
+     */
+    public function saveNetwork($members)
+    {
+        array_walk(
+            $members,
+            function (string $member) {
+                $member = $this->accessor->ensureMemberHavingNameExists($member);
+
+                $friends = $this->accessor->showUserFriends($member->getTwitterUsername());
+                if ($member instanceof MemberInterface) {
+                    $this->saveMemberSubscriptions($member, $friends->ids);
+                }
+
+                $subscribees = $this->accessor->showMemberSubscribees($member->getTwitterUsername());
+                if ($member instanceof MemberInterface) {
+                    $this->saveMemberSubscribees($member, $subscribees->ids);
+                }
+            }
+        );
+    }
+
+    /**
+     * @param callable $doing
+     * @param string   $memberId
+     * @return MemberInterface|null|object
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function guardAgainstExceptionalMemberWhenLookingForOne(
+        callable $doing,
+        string $memberId
+    ) {
         try {
-            $member = $this->accessor->ensureMemberHavingIdExists(intval($memberId));
+            $existingMember = $doing();
         } catch (NotFoundMemberException $exception) {
             $notFoundMember = new NotFoundMember();
             $this->logger->info($exception->getMessage());
@@ -155,51 +196,30 @@ class NetworkRepository
 
             throw $exception;
         } finally {
-            if (isset($exception)) {
-                $existingMember = $this->memberRepository->findOneBy(['twitter_username' => $exception->screenName]);
-                if (!$existingMember instanceof MemberInterface) {
-                    $existingMember = $this->memberRepository->findOneBy(['twitterID' => $memberId]);
-                }
+            if (!isset($exception)) {
+                return $existingMember;
+            }
 
-                if ($existingMember instanceof MemberInterface) {
-                    if ($existingMember->getTwitterID() !== $member->getTwitterID() &&
+            $existingMember = $this->memberRepository->findOneBy([
+                'twitter_username' => $exception->screenName
+            ]);
+            if (!$existingMember instanceof MemberInterface) {
+                $existingMember = $this->memberRepository->findOneBy(['twitterID' => $memberId]);
+            }
+
+            if ($existingMember instanceof MemberInterface) {
+                if ($existingMember->getTwitterID() !== $member->getTwitterID() &&
                     $member->getTwitterID() !== null) {
-                        $existingMember->setTwitterID($member->getTwitterID());
+                    $existingMember->setTwitterID($member->getTwitterID());
 
-                        return $this->memberRepository->saveMember($existingMember);
-                    }
-
-
-                    return $existingMember;
+                    return $this->memberRepository->saveMember($existingMember);
                 }
 
-                return $this->memberRepository->saveMember($member);
+
+                return $existingMember;
             }
+
+            return $this->memberRepository->saveMember($member);
         }
-
-        return $member;
-    }
-
-    /**
-     * @param $members
-     */
-    public function saveNetwork($members)
-    {
-        array_walk(
-            $members,
-            function (string $member) {
-                $member = $this->accessor->ensureMemberHavingNameExists($member);
-
-                $friends = $this->accessor->showUserFriends($member->getTwitterUsername());
-                if ($member instanceof MemberInterface) {
-                    $this->saveMemberSubscriptions($member, $friends->ids);
-                }
-
-                $subscribees = $this->accessor->showMemberSubscribees($member->getTwitterUsername());
-                if ($member instanceof MemberInterface) {
-                    $this->saveMemberSubscribees($member, $subscribees->ids);
-                }
-            }
-        );
     }
 }
