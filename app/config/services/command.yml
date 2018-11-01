@@ -38,6 +38,16 @@ services:
         tags:
             - { name: 'console.command' }
 
+    command.import_member_aggregates:
+        class:                                      'App\Aggregate\Command\ImportMemberAggregatesCommand'
+        properties:
+            accessor:                               '@weaving_the_web_twitter.api_accessor'
+            aggregateSubscriptionRepository:        '@repository.aggregate_subscription'
+            memberAggregateSubscriptionRepository:  '@repository.member_aggregate_subscription'
+            networkRepository:                      '@repository.network'
+        tags:
+            - { name: 'console.command' }
+
     command.map_status_collection:
         class:                      "%command.map_status_collection.class%"
         properties:

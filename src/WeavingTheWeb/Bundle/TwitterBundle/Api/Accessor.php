@@ -1197,12 +1197,38 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     }
 
     /**
+     * @param $screenName
+     * @return \API|mixed|object|\stdClass
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function getUserListSubscriptions($screenName)
+    {
+        return $this->contactEndpoint(
+            strtr(
+                $this->getMemberListSubscriptionsEndpoint(),
+                ['{{ screenName }}' => $screenName]
+            )
+        );
+    }
+
+    /**
      * @param string $version
      * @return string
      */
     protected function getUserListsEndpoint($version = '1.1')
     {
         return $this->getApiBaseUrl($version) . '/lists/list.json?reverse={{ reverse }}&screen_name={{ screenName }}';
+    }
+
+    /**
+     * @param string $version
+     * @return string
+     */
+    private function getMemberListSubscriptionsEndpoint($version = '1.1')
+    {
+        return $this->getApiBaseUrl($version) . '/lists/subscriptions.json?screen_name={{ screenName }}';
     }
 
     /**
@@ -1288,12 +1314,13 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     }
 
     /**
+     * @see https://developer.twitter.com/en/docs/accounts-and-users/create-manage-lists/api-reference/get-lists-members
      * @param string $version
      * @return string
      */
     protected function getListMembersEndpoint($version = '1.1')
     {
-        return $this->getApiBaseUrl($version) . '/lists/members.json?count=200&list_id={{ id }}';
+        return $this->getApiBaseUrl($version) . '/lists/members.json?count=5000&list_id={{ id }}';
     }
 
     /**
