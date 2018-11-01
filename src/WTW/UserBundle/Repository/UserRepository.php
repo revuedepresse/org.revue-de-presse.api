@@ -53,6 +53,21 @@ class UserRepository extends EntityRepository
     }
 
     /**
+     * @param string|int         $identifier
+     * @param string|null $screenName
+     * @return MemberInterface|null|object|User
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function suspendMemberByScreenNameOrIdentifier($identifier)
+    {
+        if (is_int($identifier)) {
+            return $this->suspendMemberByIdentifier($identifier);
+        }
+
+        return $this->suspendMember($identifier);
+    }
+
+    /**
      * @param string $screenName
      * @return null|object|User
      * @throws \Doctrine\ORM\OptimisticLockException
@@ -356,5 +371,33 @@ class UserRepository extends EntityRepository
         }
 
         return $member;
+    }
+
+    /**
+     * @param int $identifier
+     * @return MemberInterface
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function suspendMemberByIdentifier(int $identifier)
+    {
+        $suspendedMember = $this->findOneBy(['twitterID' => $identifier]);
+
+        if ($suspendedMember instanceof User) {
+            $suspendedMember->setSuspended(true);
+
+            return $this->saveUser($suspendedMember);
+        }
+
+        $suspendedMember = new User();
+        $suspendedMember->setTwitterUsername($identifier);
+        $suspendedMember->setTwitterID($identifier);
+        $suspendedMember->setEnabled(false);
+        $suspendedMember->setLocked(false);
+        $suspendedMember->setEmail('@' . $identifier);
+        $suspendedMember->setEnabled(0);
+        $suspendedMember->setProtected(false);
+        $suspendedMember->setSuspended(true);
+
+        return $this->saveUser($suspendedMember);
     }
 }
