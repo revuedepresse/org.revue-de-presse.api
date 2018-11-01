@@ -5,6 +5,18 @@ parameters:
 
 services:
 
+    repository.aggregate_subscription:
+        factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
+        class: 'App\Member\Repository\AggregateSubscriptionRepository'
+        arguments:
+            - 'App\Member\Entity\AggregateSubscription'
+
+    repository.member_aggregate_subscription:
+        factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
+        class: 'App\Aggregate\Repository\MemberAggregateSubscriptionRepository'
+        arguments:
+            - 'App\Aggregate\Entity\MemberAggregateSubscription'
+
     repository.not_found_status:
         factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
         class: 'App\Status\Repository\NotFoundStatusRepository'
