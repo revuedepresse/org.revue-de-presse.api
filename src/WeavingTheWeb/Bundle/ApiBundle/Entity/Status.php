@@ -389,7 +389,7 @@ class Status implements StatusInterface
     public function removeFrom(Aggregate $aggregate): StatusInterface
     {
         if ($this->aggregates->contains($aggregate)) {
-            $this->aggregates->remove($aggregate);
+            $this->aggregates->removeElement($aggregate);
         }
 
         return $this;
