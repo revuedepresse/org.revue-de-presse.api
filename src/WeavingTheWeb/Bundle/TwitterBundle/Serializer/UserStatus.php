@@ -601,7 +601,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         if ((count($status) === 1) && array_key_exists('statusId', $status)) {
             $option = $this->getExtremumOption($discoverPastTweets);
             $shift = $this->getShiftFromExtremum($discoverPastTweets);
-            $options[$option] = $status['statusId'] + $shift;
+            $options[$option] = intval($status['statusId']) + $shift;
 
             $this->logger->info(sprintf(
                 'Extremum (%s%s) retrieved for "%s": #%s',
@@ -756,7 +756,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    protected function saveStatusesMatchingCriteria($options, $aggregateId = null)
+    protected function saveStatusesMatchingCriteria($options, int $aggregateId = null)
     {
         $options = $this->declareOptionsToCollectStatuses($options);
         $statuses = $this->accessor->fetchStatuses($options);
@@ -1078,7 +1078,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     private function saveStatusesForScreenName(
         array $statuses,
         string $screenName,
-        int $aggregateId
+        int $aggregateId = null
     ) {
         $success = null;
 
