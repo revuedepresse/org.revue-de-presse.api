@@ -790,6 +790,8 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
         if (is_integer($identifier)) {
             $userId = $identifier;
             $option = 'user_id';
+
+            $this->guardAgainstSpecialMemberWithIdentifier($identifier);
         } else {
             $screenName = $identifier;
             $option = 'screen_name';
@@ -812,20 +814,30 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
             );
         } catch (UnavailableResourceException $exception) {
             if ($exception->getCode() === self::ERROR_SUSPENDED_USER) {
-                $this->userRepository->suspendMember($screenName);
+                $suspendedMember = $this->userRepository->suspendMemberByScreenNameOrIdentifier($identifier);
+                $this->logSuspendedMemberMessage($suspendedMember->getTwitterUsername());
 
-                $suspendedMessageMessage = $this->logSuspendedMemberMessage($screenName);
-                throw new SuspendedAccountException($suspendedMessageMessage, $exception->getCode(), $exception);
+                SuspendedAccountException::raiseExceptionAboutSuspendedMemberHavingScreenName(
+                    $suspendedMember->getTwitterUsername(),
+                    $exception->getCode(),
+                    $exception
+                );
             }
 
-            if ($exception->getCode() === self::ERROR_NOT_FOUND || $exception->getCode() === self::ERROR_USER_NOT_FOUND) {
+            if ($exception->getCode() === self::ERROR_NOT_FOUND ||
+                $exception->getCode() === self::ERROR_USER_NOT_FOUND
+            ) {
                 $member = $this->userRepository->findOneBy(['twitter_username' => $screenName]);
                 if ($member instanceof User) {
                     $this->userRepository->declareUserAsNotFound($member);
                 }
 
-                $memberNotFoundMessage = $this->logNotFoundMemberMessage($screenName);
-                throw new NotFoundMemberException($memberNotFoundMessage, $exception->getCode(), $exception);
+                $this->logNotFoundMemberMessage($screenName);
+                NotFoundMemberException::raiseExceptionAboutNotFoundMemberHavingScreenName(
+                    $member->getTwitterUsername(),
+                    $exception->getCode(),
+                    $exception
+                );
             }
 
             throw $exception;
@@ -1735,6 +1747,42 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
                 $this->logProtectedMemberMessage($screenName);
                 ProtectedAccountException::raiseExceptionAboutProtectedMemberHavingScreenName(
                     $screenName,
+                    self::ERROR_PROTECTED_ACCOUNT
+                );
+            }
+        }
+    }
+
+    /**
+     * @param int $identifier
+     * @throws NotFoundMemberException
+     * @throws ProtectedAccountException
+     * @throws SuspendedAccountException
+     */
+    private function guardAgainstSpecialMemberWithIdentifier(int $identifier): void
+    {
+        $member = $this->userRepository->findOneBy(['twitterID' => $identifier]);
+        if ($member instanceof User) {
+            if ($member->isSuspended()) {
+                $this->logSuspendedMemberMessage($member->getTwitterUsername());
+                SuspendedAccountException::raiseExceptionAboutSuspendedMemberHavingScreenName(
+                    $member->getTwitterUsername(),
+                    self::ERROR_SUSPENDED_ACCOUNT
+                );
+            }
+
+            if ($member->isNotFound()) {
+                $this->logNotFoundMemberMessage($member->getTwitterUsername());
+                NotFoundMemberException::raiseExceptionAboutNotFoundMemberHavingScreenName(
+                    $member->getTwitterUsername(),
+                    self::ERROR_NOT_FOUND
+                );
+            }
+
+            if ($member->isProtected()) {
+                $this->logProtectedMemberMessage($member->getTwitterUsername());
+                ProtectedAccountException::raiseExceptionAboutProtectedMemberHavingScreenName(
+                    $member->getTwitterUsername(),
                     self::ERROR_PROTECTED_ACCOUNT
                 );
             }
