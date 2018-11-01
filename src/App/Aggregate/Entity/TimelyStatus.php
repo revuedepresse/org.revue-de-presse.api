@@ -62,4 +62,16 @@ class TimelyStatus implements TimeRangeAwareInterface
 
         $this->updateTimeRange();
     }
+
+    /**
+     * @param Aggregate $aggregate
+     * @throws \Exception
+     */
+    public function updateAggregate(Aggregate $aggregate)
+    {
+        $this->aggregate = $aggregate;
+        $this->aggregateName = $aggregate->getName();
+
+        $this->updateTimeRange();
+    }
 }

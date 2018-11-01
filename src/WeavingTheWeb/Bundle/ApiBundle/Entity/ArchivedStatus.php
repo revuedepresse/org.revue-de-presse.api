@@ -352,4 +352,15 @@ class ArchivedStatus implements StatusInterface
     {
         return $this->aggregates;
     }
+
+    /**
+     * @param Aggregate $aggregate
+     * @return StatusInterface
+     */
+    public function removeFrom(Aggregate $aggregate): StatusInterface
+    {
+        $this->aggregates->remove($aggregate);
+
+        return $this;
+    }
 }

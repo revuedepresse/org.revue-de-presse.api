@@ -2,8 +2,11 @@
 
 namespace WeavingTheWeb\Bundle\ApiBundle\Repository;
 
+use App\Aggregate\Entity\TimelyStatus;
+use App\Aggregate\Repository\TimelyStatusRepository;
 use App\Member\MemberInterface;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
+use WeavingTheWeb\Bundle\ApiBundle\Entity\StatusInterface;
 
 /**
  * @package WeavingTheWeb\Bundle\ApiBundle\Repository
@@ -12,12 +15,31 @@ use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
 class AggregateRepository extends ResourceRepository
 {
     /**
-     * @param $screenName
-     * @param $listName
+     * @var TimelyStatusRepository
+     */
+    public $timelyStatusRepository;
+
+    /**
+     * @var StatusRepository
+     */
+    public $statusRepository;
+
+    /**
+     * @param string $screenName
+     * @param string $listName
      * @return Aggregate
      */
-    public function make($screenName, $listName)
+    public function make(string $screenName, string $listName)
     {
+        $aggregate = $this->findByRemovingDuplicates(
+            $screenName,
+            $listName
+        );
+
+        if ($aggregate instanceof Aggregate) {
+            return $aggregate;
+        }
+
         return new Aggregate($screenName, $listName);
     }
 
@@ -103,6 +125,69 @@ QUERY;
     {
         $this->getEntityManager()->persist($aggregate);
         $this->getEntityManager()->flush();
+
+        return $aggregate;
+    }
+
+    /**
+     * @param string $screenName
+     * @param string $listName
+     * @return null|object
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    private function findByRemovingDuplicates(
+        string $screenName,
+        string $listName
+    ) {
+        $aggregate = $this->findOneBy([
+            'screenName' => $screenName,
+            'name' => $listName
+        ]);
+
+        if ($aggregate instanceof Aggregate) {
+            $aggregates = $this->findBy([
+                'screenName' => $screenName,
+                'name' => $listName
+            ]);
+
+            if (count($aggregates) > 1) {
+                foreach ($aggregates as $index => $aggregate) {
+                    if ($index === 0) {
+                        continue;
+                    }
+
+                    $statuses = $this->statusRepository
+                        ->findByAggregate($aggregate);
+
+                    foreach ($statuses as $status) {
+                        /** @var StatusInterface $status */
+                        $status->removeFrom($aggregate);
+                        $status->addToAggregates($aggregates[0]);
+                    }
+
+                    $timelyStatuses = $this->timelyStatusRepository
+                        ->findBy(['aggregate' => $aggregate]);
+
+                    /** @var TimelyStatus $timelyStatus */
+                    foreach ($timelyStatuses as $timelyStatus) {
+                        /** @var StatusInterface $status */
+                        $timelyStatus->updateAggregate($aggregates[0]);
+                    }
+                }
+
+                $this->getEntityManager()->flush();
+
+                foreach ($aggregates as $index => $aggregate) {
+                    if ($index === 0) {
+                        continue;
+                    }
+
+                    $this->getEntityManager()->remove($aggregate);
+                }
+
+                $this->getEntityManager()->flush();
+            }
+        }
 
         return $aggregate;
     }
