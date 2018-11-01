@@ -601,6 +601,11 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         if ((count($status) === 1) && array_key_exists('statusId', $status)) {
             $option = $this->getExtremumOption($discoverPastTweets);
             $shift = $this->getShiftFromExtremum($discoverPastTweets);
+
+            if ($status['statusId'] === '-INF' && $option === 'max_id') {
+                $status['statusId'] = 0;
+            }
+
             $options[$option] = intval($status['statusId']) + $shift;
 
             $this->logger->info(sprintf(
