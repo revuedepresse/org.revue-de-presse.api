@@ -7,6 +7,7 @@ use App\StatusCollection\Mapping\MappingAwareInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\QueryBuilder;
+use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Status;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\StatusInterface;
 use WTW\UserBundle\Entity\User;
@@ -388,5 +389,19 @@ class StatusRepository extends ArchivedStatusRepository
             $minStatus,
             $memberName
         );
+    }
+
+    /**
+     * @param Aggregate $aggregate
+     * @return array
+     */
+    public function findByAggregate(Aggregate $aggregate)
+    {
+        $queryBuilder = $this->createQueryBuilder('s');
+        $queryBuilder->join('s.aggregates', 'a');
+        $queryBuilder->andWhere('a.id = :id');
+        $queryBuilder->setParameter('id', $aggregate->getId());
+
+        return $queryBuilder->getQuery()->getResult();
     }
 }

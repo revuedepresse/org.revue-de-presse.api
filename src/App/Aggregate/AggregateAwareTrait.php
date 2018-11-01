@@ -15,19 +15,12 @@ trait AggregateAwareTrait
         string $listName,
         string $listId = null
     ) {
-        $aggregate = $this->aggregateRepository->findOneBy([
-            'name' => $listName,
-            'screenName' => $screenName
-        ]);
+        $aggregate = $this->aggregateRepository->make(
+            $screenName,
+            $listName
+        );
 
-        if (!$aggregate) {
-            $aggregate = $this->aggregateRepository->make(
-                $screenName,
-                $listName
-            );
-
-            $this->entityManager->persist($aggregate);
-        }
+        $this->entityManager->persist($aggregate);
 
         if (!is_null($listId)) {
             $aggregate->listId = $listId;
