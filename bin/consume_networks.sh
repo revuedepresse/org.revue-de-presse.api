@@ -9,4 +9,4 @@ fi
 
 source "${current_directory}"/functions.sh
 
-consume_amqp_messages_for_news_status
+consume_amqp_messages_for_networks
