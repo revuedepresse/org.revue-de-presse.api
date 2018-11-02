@@ -202,4 +202,9 @@ trait MemberTrait
     {
         return false;
     }
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
 }

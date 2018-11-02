@@ -132,4 +132,6 @@ interface MemberInterface
      * @return bool
      */
     public function isAWhisperer(): bool;
+
+    public function getDescription(): ?string;
 }

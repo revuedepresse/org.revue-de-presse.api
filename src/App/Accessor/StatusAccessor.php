@@ -240,7 +240,7 @@ class StatusAccessor
             $member->hasNotBeenDeclaredAsNotFound()
         ;
 
-        if (is_null($member->description) && $memberDescriptionIsAvailable) {
+        if (is_null($member->getDescription()) && $memberDescriptionIsAvailable) {
             $fetchedMember = $this->accessor->showUser($memberName);
             $member->description = $fetchedMember->description;
             $this->userManager->saveMember($member);

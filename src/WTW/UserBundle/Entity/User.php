@@ -1031,6 +1031,12 @@ class User extends BaseUser implements MemberInterface
      */
     public $description = '';
 
+
+    public function getDescription(): ?string
+    {
+        return $this->description;
+    }
+
     /**
      * @var \DateTime
      *
