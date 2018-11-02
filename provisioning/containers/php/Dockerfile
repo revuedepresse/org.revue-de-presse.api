@@ -1,4 +1,4 @@
-FROM php:7.2.6-cli-stretch
+FROM php:7.2.11-cli-stretch
 
 RUN apt-get update && apt-get install wget unzip && \
     docker-php-ext-install mysqli pdo_mysql bcmath pcntl && \
