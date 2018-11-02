@@ -67,6 +67,17 @@ class NetworkRepository
                     return;
                 }
 
+                if (!($subscriptionMember instanceof MemberInterface)) {
+                    $this->logger->critical(
+                        sprintf(
+                            'Could not ensure a member with id "%s" exists.',
+                            $subscription
+                        )
+                    );
+
+                    return;
+                }
+
                 $this->logger->info(sprintf(
                     'About to save subscription of member "%s" for member "%s"',
                     $member->getTwitterUsername(),
@@ -99,6 +110,17 @@ class NetworkRepository
                 try {
                     $subscribeeMember = $this->ensureMemberExists($subscribee);
                 } catch (\Exception $exception) {
+                    return;
+                }
+
+                if (!($subscribeeMember instanceof MemberInterface)) {
+                    $this->logger->critical(
+                        sprintf(
+                            'Could not ensure a member with id "%s" exists',
+                            $subscribee
+                        )
+                    );
+
                     return;
                 }
 
@@ -198,6 +220,12 @@ class NetworkRepository
         } finally {
             if (!isset($exception)) {
                 return $existingMember;
+            }
+
+            if (!isset($exception->screenName)) {
+                $this->logger->critical($exception->getMessage());
+
+                throw $exception;
             }
 
             $existingMember = $this->memberRepository->findOneBy([
