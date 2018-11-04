@@ -7,7 +7,6 @@ use App\Member\Repository\NetworkRepository;
 use OldSound\RabbitMqBundle\RabbitMq\ConsumerInterface;
 use PhpAmqpLib\Message\AMQPMessage;
 use Psr\Log\LoggerInterface;
-use WeavingTheWeb\Bundle\TwitterBundle\Exception\ProtectedAccountException;
 
 class NetworkConsumer implements ConsumerInterface
 {
