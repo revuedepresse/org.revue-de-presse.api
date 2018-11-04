@@ -22,6 +22,9 @@ use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\ArchivedStatus;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Status;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\StatusInterface;
+use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
+use WeavingTheWeb\Bundle\TwitterBundle\Exception\ProtectedAccountException;
+use WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException;
 use WTW\UserBundle\Entity\User;
 use WTW\UserBundle\Repository\UserRepository;
 
@@ -111,16 +114,49 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
         $this->logger = $logger;
 
         $entityManager = $this->getEntityManager();
-        $extracts = $this->extractProperties($statuses, function ($extract) use ($identifier) {
-            $extract['identifier'] = $identifier;
 
-            return $extract;
-        });
+        $statusIds = array_map(
+            function ($status) {
+                return $status->id_str;
+            }, $statuses
+        );
+
+        $indexedStatuses = [];
+        if (count($statusIds) > 0) {
+            $queryBuilder = $this->createQueryBuilder('s');
+            $queryBuilder->andWhere('s.statusId in (:ids)');
+            $queryBuilder->setParameter('ids', $statusIds);
+            $existingStatuses = $queryBuilder->getQuery()->getResult();
+
+            array_walk(
+                $existingStatuses,
+                function (StatusInterface $existingStatus) use (&$indexedStatuses) {
+                    $indexedStatuses[$existingStatus->getStatusId()] = $existingStatus;
+                }
+            );
+        }
+
+        $extracts = $this->extractProperties(
+            $statuses,
+            function ($extract) use ($identifier, $indexedStatuses) {
+                $extract['identifier'] = $identifier;
+
+                $extract['existing_status'] = null;
+                if (array_key_exists($extract['status_id'], $indexedStatuses)) {
+                    $extract['existing_status'] = $indexedStatuses[$extract['status_id']];
+                }
+
+                return $extract;
+            }
+        );
 
         $likedStatuses = [];
 
         foreach ($extracts as $key => $extract) {
-            $memberStatus = $this->makeStatusFromApiResponseForAggregate($extract, $aggregate);
+            $memberStatus = $extract['existing_status'];
+            if (!$memberStatus) {
+                $memberStatus = $this->makeStatusFromApiResponseForAggregate($extract, $aggregate);
+            }
 
             if ($memberStatus->getId() === null) {
                 $this->logStatus($memberStatus);
@@ -144,15 +180,22 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
                     );
                 }
 
-                $member = $ensureMemberExists($memberStatus->getScreenName());
-                $likedStatuses[] = $this->likedStatusRepository->ensureMemberStatusHasBeenMarkedAsLikedBy(
-                    $member,
-                    $memberStatus,
-                    $likedBy,
-                    $aggregate
-                );
+                try {
+                    $member = $ensureMemberExists($memberStatus->getScreenName());
+                } catch (ProtectedAccountException|SuspendedAccountException|NotFoundMemberException $exception) {
+                    $member = $this->memberManager->findOneBy(['twitter_username' => $memberStatus->getScreenName()]);
+                }
 
-                $entityManager->persist($memberStatus);
+                if ($member instanceof MemberInterface) {
+                    $likedStatuses[] = $this->likedStatusRepository->ensureMemberStatusHasBeenMarkedAsLikedBy(
+                        $member,
+                        $memberStatus,
+                        $likedBy,
+                        $aggregate
+                    );
+
+                    $entityManager->persist($memberStatus);
+                }
             } catch (ORMException $exception) {
                 if ($exception->getMessage() === ORMException::entityManagerClosed()->getMessage()) {
                     $entityManager = $this->registry->resetManager('default');
@@ -160,6 +203,7 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
                 }
             } catch (\Exception $exception) {
                 $this->logger->critical($exception->getMessage());
+                continue;
             }
         }
 

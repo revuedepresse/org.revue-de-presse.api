@@ -5,13 +5,11 @@ namespace WeavingTheWeb\Bundle\ApiBundle\ORM;
 use Doctrine\ORM\EntityManager,
     Doctrine\ORM\QueryBuilder,
     Doctrine\Common\Util\Inflector;
+use Psr\Log\LoggerInterface;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Json;
 
 /**
- * Class QueryFactory
- *
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
- * @package WeavingTheWeb\Bundle\ApiBundle\ORM
  */
 class QueryFactory
 {
@@ -429,24 +427,25 @@ class QueryFactory
      *
      * @return mixed
      */
-    public function makeInstance($entity, $properties)
+    public function makeInstance($entity, $properties, LoggerInterface $logger = null)
     {
         $instance = null;
 
         if (class_exists($entity)) {
             $instance = new $entity();
-            $instance = $this->setProperties($instance, $properties);
+            $instance = $this->setProperties($instance, $properties, $logger);
         }
 
         return $instance;
     }
 
     /**
-     * @param $instance
-     * @param $properties
+     * @param                      $instance
+     * @param                      $properties
+     * @param LoggerInterface|null $logger
      * @return mixed
      */
-    public function setProperties($instance, $properties)
+    public function setProperties($instance, $properties, LoggerInterface $logger = null)
     {
         if (!array_key_exists('created_at', $properties)) {
             $properties['created_at'] = new \DateTime();
@@ -470,10 +469,10 @@ class QueryFactory
             }
         }
 
-        if (count($missedProperties) >  0) {
+        if (count($missedProperties) >  0 && ($logger instanceof LoggerInterface)) {
             $output = 'property missed at introspection for entity ' . $entity . "\n" .
                 implode("\n", $missedProperties ) . "\n";
-            echo $output;
+            $logger->info($output);
         }
 
         return $instance;
