@@ -135,16 +135,16 @@ class UserStatus implements ConsumerInterface
 
     /**
      * @param $screenName
-     * @return User
-     * @throws \Exception
+     * @return MemberInterface
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function handleNotFoundUsers($screenName)
     {
-        $user = $this->userRepository->findOneBy(
+        $member = $this->userRepository->findOneBy(
             ['twitter_username' => $screenName]
         );
 
-        if (is_null($user)) {
+        if (!($member instanceof MemberInterface)) {
             $message = sprintf(
                 'User with screen name "%s" could not be found via Twitter API not in database',
                 $screenName
@@ -152,7 +152,7 @@ class UserStatus implements ConsumerInterface
             throw new \Exception($message, self::ERROR_CODE_USER_NOT_FOUND);
         }
 
-        return $this->userRepository->declareUserAsNotFound($user);
+        return $this->userRepository->declareUserAsNotFound($member);
     }
 
     /**

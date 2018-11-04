@@ -850,13 +850,17 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
                 $exception->getCode() === self::ERROR_USER_NOT_FOUND
             ) {
                 $member = $this->userRepository->findOneBy(['twitter_username' => $screenName]);
-                if ($member instanceof User) {
+                if (!($member instanceof MemberInterface) && !is_null($screenName)) {
+                    $member = $this->userRepository->declareMemberHavingScreenNameNotFound($screenName);
+                }
+
+                if ($member instanceof MemberInterface && !$member->isNotFound()) {
                     $this->userRepository->declareUserAsNotFound($member);
                 }
 
-                $this->logNotFoundMemberMessage($screenName);
+                $this->logNotFoundMemberMessage(is_null($screenName) ? $identifier : $screenName);
                 NotFoundMemberException::raiseExceptionAboutNotFoundMemberHavingScreenName(
-                    $member->getTwitterUsername(),
+                    is_null($screenName) ? $identifier : $screenName,
                     $exception->getCode(),
                     $exception
                 );

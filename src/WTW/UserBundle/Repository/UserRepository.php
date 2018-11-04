@@ -33,14 +33,20 @@ class UserRepository extends EntityRepository
         $totalSubscribees = 0
     ) {
         $member = new User();
+
+        if (is_numeric($twitterId)) {
+            $member->setTwitterID($twitterId);
+        }
+
         $member->setTwitterUsername($screenName);
-        $member->setTwitterID($twitterId);
+
         $member->setEnabled(false);
         $member->setLocked(false);
         $member->setEmail('@' . $screenName);
-        $member->setEnabled(0);
+
         $member->setProtected($protected);
         $member->setSuspended($suspended);
+        $member->setNotFound(false);
 
         if (!is_null($description)) {
             $member->description = $description;
@@ -104,7 +110,7 @@ class UserRepository extends EntityRepository
     {
         $user = $this->findOneBy(['twitter_username' => $screenName]);
 
-        if (!$user instanceof User) {
+        if (!$user instanceof MemberInterface) {
             return null;
         }
 
@@ -128,11 +134,11 @@ class UserRepository extends EntityRepository
     }
 
     /**
-     * @param User $user
+     * @param MemberInterface $user
      * @return MemberInterface
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function declareUserAsNotFound(User $user)
+    public function declareUserAsNotFound(MemberInterface $user)
     {
         $user->setNotFound(true);
 
@@ -399,5 +405,21 @@ class UserRepository extends EntityRepository
         $suspendedMember->setSuspended(true);
 
         return $this->saveUser($suspendedMember);
+    }
+
+    /**
+     * @param string $screenName
+     * @return MemberInterface
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function declareMemberHavingScreenNameNotFound(string $screenName)
+    {
+        $notFoundMember = $this->make(
+            null,
+            $screenName
+        );
+        $notFoundMember->setNotFound(true);
+
+        return $this->saveMember($notFoundMember);
     }
 }
