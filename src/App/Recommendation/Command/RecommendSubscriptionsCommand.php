@@ -91,7 +91,7 @@ class RecommendSubscriptionsCommand extends Command implements CommandReturnCode
         $flippedPositions = array_flip($positions);
 
         return array_map(function ($subscription, $index) use ($flippedPositions) {
-            if ($subscription === 0) {
+            if (!$subscription) {
                 return null;
             }
 
