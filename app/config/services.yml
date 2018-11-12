@@ -89,8 +89,9 @@ services:
         factory: 'doctrine.orm.entity_manager:getRepository'
         arguments: [ '%weaving_the_web_twitter.entity.aggregate.class%' ]
         properties:
-            statusRepository:         '@weaving_the_web_twitter.repository.status'
-            timelyStatusRepository:   '@repository.timely_status'
+            statusRepository:       '@weaving_the_web_twitter.repository.status'
+            timelyStatusRepository: '@repository.timely_status'
+            likedStatusRepository:  '@repository.liked_status'
 
     weaving_the_web_twitter.application_authenticator:
         class: '%weaving_the_web_twitter.application_authenticator.class%'

@@ -5,6 +5,8 @@ namespace WeavingTheWeb\Bundle\ApiBundle\Repository;
 use App\Aggregate\Entity\TimelyStatus;
 use App\Aggregate\Repository\TimelyStatusRepository;
 use App\Member\MemberInterface;
+use App\Status\Entity\LikedStatus;
+use App\Status\Repository\LikedStatusRepository;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\StatusInterface;
 
@@ -18,6 +20,11 @@ class AggregateRepository extends ResourceRepository
      * @var TimelyStatusRepository
      */
     public $timelyStatusRepository;
+
+    /**
+     * @var LikedStatusRepository
+     */
+    public $likedStatusRepository;
 
     /**
      * @var StatusRepository
@@ -170,8 +177,15 @@ QUERY;
 
                     /** @var TimelyStatus $timelyStatus */
                     foreach ($timelyStatuses as $timelyStatus) {
-                        /** @var StatusInterface $status */
                         $timelyStatus->updateAggregate($aggregates[0]);
+                    }
+
+                    $likedStatuses = $this->likedStatusRepository
+                        ->findBy(['aggregate' => $aggregate]);
+
+                    /** @var LikedStatus $likedStatus */
+                    foreach ($likedStatuses as $likedStatus) {
+                        $likedStatus->setAggregate($aggregates[0]);
                     }
                 }
 
