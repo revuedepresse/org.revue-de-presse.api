@@ -6,7 +6,6 @@ use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\EntityRepository,
     Doctrine\ORM\NoResultException;
 
-use Doctrine\ORM\QueryBuilder;
 use Psr\Log\LoggerInterface;
 
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Token,
