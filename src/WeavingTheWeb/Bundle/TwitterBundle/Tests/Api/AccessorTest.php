@@ -635,6 +635,8 @@ class AccessorTest extends WebTestCase
             ->willReturn($tokenMock)->shouldBeCalled();
         $tokenRepositoryProphecy->isOauthTokenFrozen(Argument::any())
             ->willReturn(false)->shouldBeCalled();
+        $tokenRepositoryProphecy->findUnfrozenToken(Argument::any())
+            ->willReturn($tokenMock)->shouldBeCalled();
 
         return $tokenRepositoryProphecy->reveal();
     }

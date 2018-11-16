@@ -506,7 +506,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
                 return true;
             }
 
-            $now = new \DateTime();
+            $now = new \DateTime('now', new \DateTimeZone('UTC'));
             $timeout = $frozenUntil->getTimestamp() - $now->getTimestamp();
             $oauthToken = $token->getOauthToken();
 
