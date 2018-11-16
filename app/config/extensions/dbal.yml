@@ -1,3 +1,6 @@
+imports:
+    - { resource: dql.yml }
+
 parameters:
     mapping:
         WTWUserBundle: ~
@@ -91,20 +94,22 @@ doctrine:
             default:
                 connection: default
                 mappings: '%mapping%'
-                dql:
-                    datetime_functions:
-                        date: DoctrineExtensions\Query\Mysql\Date
+                dql: "%doctrine_extensions_dql%"
             admin:
                 connection: admin
                 mappings: '%mapping%'
+                dql: "%doctrine_extensions_dql%"
             read:
                 connection: read
                 mappings: '%mapping%'
+                dql: "%doctrine_extensions_dql%"
             test_mysql:
                 connection: test_mysql
                 mappings: '%mapping%'
+                dql: "%doctrine_extensions_dql%"
             write:
                 connection: write
                 mappings: '%mapping%'
+                dql: "%doctrine_extensions_dql%"
         auto_generate_proxy_classes: '%kernel.debug%'
 
