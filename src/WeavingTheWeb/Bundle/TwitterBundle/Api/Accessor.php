@@ -1327,7 +1327,7 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     public function getListMembers($id)
     {
         $listMembersEndpoint = $this->getListMembersEndpoint();
-        $this->guardAgainstApiLimit($listMembersEndpoint, $findNextAvailableToken = false);
+        $this->guardAgainstApiLimit($listMembersEndpoint);
 
         $sendRequest = function () use ($listMembersEndpoint, $id) {
             return $this->contactEndpoint(strtr($listMembersEndpoint, ['{{ id }}' => $id]));
@@ -1597,6 +1597,8 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
 
         $apiLimitReached = $apiLimitReached || $this->tokenRepository->isOauthTokenFrozen($this->userToken);
         if ($apiLimitReached) {
+            $unfrozenToken = false;
+
             if ($findNextAvailableToken) {
                 $token = $this->tokenRepository->findFirstUnfrozenToken();
                 $unfrozenToken = $token !== null;
@@ -1606,6 +1608,10 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
                     $token = $this->tokenRepository->findFirstUnfrozenToken();
                     $unfrozenToken = $token !== null;
                 }
+            }
+
+            if ($unfrozenToken) {
+                return $token;
             }
 
             $message = $this->translator->trans('twitter.error.api_limit_reached.all_tokens', [], 'messages');
