@@ -150,7 +150,7 @@ class StatusAccessor
     {
         $member = $this->userManager->findOneBy(['twitter_username' => $memberName]);
         if ($member instanceof MemberInterface) {
-            $this->ensureMemberHasDescription($member, $memberName);
+            $this->ensureMemberHasBio($member, $memberName);
 
             return $member;
         }
@@ -158,7 +158,7 @@ class StatusAccessor
         $fetchedMember = $this->accessor->showUser($memberName);
         $member = $this->userManager->findOneBy(['twitterID' => $fetchedMember->id]);
         if ($member instanceof MemberInterface) {
-            $this->ensureMemberHasDescription($member, $memberName);
+            $this->ensureMemberHasBio($member, $memberName);
 
             return $member;
         }
@@ -188,7 +188,7 @@ class StatusAccessor
     {
         $member = $this->userManager->findOneBy(['twitterID' => $id]);
         if ($member instanceof MemberInterface) {
-            $this->ensureMemberHasDescription($member, $member->getTwitterUsername());
+            $this->ensureMemberHasBio($member, $member->getTwitterUsername());
 
             return $member;
         }
@@ -233,16 +233,29 @@ class StatusAccessor
      * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
      * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
      */
-    private function ensureMemberHasDescription(MemberInterface $member, string $memberName): MemberInterface
-    {
-        $memberDescriptionIsAvailable = $member->isNotSuspended() &&
+    private function ensureMemberHasBio(
+        MemberInterface $member,
+        string $memberName
+    ): MemberInterface {
+        $memberBioIsAvailable = $member->isNotSuspended() &&
             $member->isNotProtected() &&
             $member->hasNotBeenDeclaredAsNotFound()
         ;
 
-        if (is_null($member->getDescription()) && $memberDescriptionIsAvailable) {
+        $shouldTryToSaveDescription = is_null($member->getDescription()) && $memberBioIsAvailable;
+        $shouldTryToUrl = is_null($member->getUrl()) && $memberBioIsAvailable;
+
+        if ($shouldTryToSaveDescription || $shouldTryToUrl) {
             $fetchedMember = $this->accessor->showUser($memberName);
-            $member->description = $fetchedMember->description;
+
+            if ($shouldTryToSaveDescription) {
+                $member->description = $fetchedMember->description;
+            }
+
+            if ($shouldTryToUrl) {
+                $member->url = $fetchedMember->url;
+            }
+
             $this->userManager->saveMember($member);
         }
 
