@@ -183,30 +183,34 @@ QUERY;
     private function findClosestVectors(): array
     {
         $query = <<<QUERY
-            SELECT 
-            u.usr_twitter_username identifier, 
-            GROUP_CONCAT(
-                FIND_IN_SET(
-                  subscription_id,
-                  (
-                    SELECT group_concat(DISTINCT subscription_id) FROM member_subscription
-                  )
-                )
-            ) subscription_ids,
-            COUNT(DISTINCT subscription_id) total_subscriptions
-            FROM member_subscription s, weaving_user u 
-            WHERE u.usr_id = s.member_id
-            GROUP BY member_id
-            HAVING total_subscriptions BETWEEN :min AND :max
-            LIMIT 100
+            SELECT                                               
+            u.usr_twitter_username identifier,                   
+            GROUP_CONCAT(                                        
+              FIND_IN_SET(                                       
+                subscription_id,                                 
+                (SELECT group_concat(DISTINCT subscription_id)   
+                 FROM member_subscription)                       
+                )                                                
+              ) subscription_ids,                                
+            u.total_subscriptions                                
+            FROM member_subscription s, weaving_user u           
+            WHERE u.usr_id = s.member_id                         
+            AND total_subscriptions BETWEEN :min AND :max              
+            AND s.member_id in (                                 
+               SELECT usr_id                                     
+               FROM weaving_user                                 
+               WHERE total_subscriptions > 0)                    
+            AND total_subscriptions > 0                          
+            GROUP BY member_id                                   
+            LIMIT 50                                             
 QUERY;
         $statement = $this->entityManager->getConnection()
             ->executeQuery(
                 strtr(
                     $query,
                     [
-                        ':min' => $this->totalSignificantSubscriptions * 0.75,
-                        ':max' => $this->totalSignificantSubscriptions * 1.25
+                        ':min' => $this->totalSignificantSubscriptions * 0.5,
+                        ':max' => $this->totalSignificantSubscriptions * 1
                     ]
                 )
             );
