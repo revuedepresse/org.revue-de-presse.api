@@ -15,6 +15,18 @@ use WTW\UserBundle\Model\User as BaseUser;
  *      name="weaving_user",
  *      uniqueConstraints={
  *          @ORM\UniqueConstraint(name="unique_twitter_id", columns={"usr_twitter_id"}),
+ *      },
+ *      indexes={
+ *          @ORM\Index(name="membership", columns={
+ *              "usr_id",
+ *              "usr_twitter_id",
+ *              "usr_twitter_username",
+ *              "not_found",
+ *              "protected",
+ *              "suspended",
+ *              "total_subscribees",
+ *              "total_subscriptions"
+ *          })
  *      }
  * )
  * @ORM\Entity(repositoryClass="WTW\UserBundle\Repository\UserRepository")
