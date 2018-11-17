@@ -2,18 +2,13 @@
 
 namespace WTW\UserBundle\Model;
 
-use Doctrine\Common\Collections\Collection,
-    Doctrine\Common\Collections\ArrayCollection;
-use Symfony\Component\Security\Core\User\UserInterface;
+use App\Member\MemberInterface;
 
-/**
- * Storage agnostic user object
- *
- * @author Thibault Duplessis <thibault.duplessis@gmail.com>
- * @author Johannes M. Schmitt <schmittjoh@gmail.com>
- */
-abstract class User implements UserInterface
+abstract class User
 {
+    /**
+     * @var
+     */
     protected $id;
 
     /**
@@ -24,12 +19,22 @@ abstract class User implements UserInterface
     /**
      * @var string
      */
+    protected $username;
+
+    /**
+     * @var string
+     */
     protected $usernameCanonical;
 
     /**
      * @var boolean
      */
     protected $enabled;
+
+    /**
+     * @var integer
+     */
+    protected $positionInHierarchy;
 
     /**
      * The salt to use for hashing
@@ -53,98 +58,17 @@ abstract class User implements UserInterface
     protected $plainPassword;
 
     /**
-     * @var \DateTime
-     */
-    protected $lastLogin;
-
-    /**
-     * Random string sent to the user email address in order to verify it
-     *
-     * @var string
-     */
-    protected $confirmationToken;
-
-    /**
-     * @var \DateTime
-     */
-    protected $passwordRequestedAt;
-
-    /**
-     * @var Collection
-     */
-    protected $groups;
-
-    /**
-     * @var boolean
-     */
-    protected $locked;
-
-    /**
-     * @var boolean
-     */
-    protected $expired;
-
-    /**
-     * @var \DateTime
-     */
-    protected $expiresAt;
-
-    /**
-     * @var ArrayCollection
-     */
-    protected $roles;
-
-    /**
-     * @var boolean
-     */
-    protected $credentialsExpired;
-
-    /**
-     * @var \DateTime
-     */
-    protected $credentialsExpireAt;
-
-    /**
-     * @var integer
-     */
-    protected $positionInHierarchy;
-
-    /**
      * @var string
      */
     protected $email;
 
+    /**
+     */
     public function __construct()
     {
         $this->salt = base_convert(sha1(uniqid(mt_rand(), true)), 16, 36);
         $this->enabled = false;
-        $this->locked = false;
-        $this->expired = false;
-        $this->roles = [];
         $this->positionInHierarchy = 1;
-        $this->credentialsExpired = false;
-    }
-
-    public function addRole($role)
-    {
-        if (is_null($this->roles)) {
-            $this->roles = new ArrayCollection();
-        }
-
-        $role = strtoupper($role);
-        if ($role === static::ROLE_DEFAULT) {
-            return $this;
-        }
-
-        if (is_array($this->roles)) {
-            if (!in_array($role, $this->roles, true)) {
-                $this->roles[] = $role;
-            }
-        } elseif (!$this->roles->contains($role)) {
-            $this->roles->add($role);
-        }
-
-        return $this;
     }
 
     /**
@@ -156,17 +80,14 @@ abstract class User implements UserInterface
      */
     public function serialize()
     {
-        return serialize(array(
+        return serialize([
             $this->password,
             $this->salt,
             $this->usernameCanonical,
             $this->username,
-            $this->expired,
-            $this->locked,
-            $this->credentialsExpired,
             $this->enabled,
             $this->id,
-        ));
+        ]);
     }
 
     /**
@@ -186,20 +107,9 @@ abstract class User implements UserInterface
             $this->salt,
             $this->usernameCanonical,
             $this->username,
-            $this->expired,
-            $this->locked,
-            $this->credentialsExpired,
             $this->enabled,
             $this->id
         ) = $data;
-    }
-
-    /**
-     * Removes sensitive data from the user.
-     */
-    public function eraseCredentials()
-    {
-        $this->plainPassword = null;
     }
 
     /**
@@ -212,171 +122,59 @@ abstract class User implements UserInterface
         return $this->id;
     }
 
+    /**
+     * @return string
+     */
     public function getUsername()
     {
         return $this->username;
     }
 
+    /**
+     * @return string
+     */
     public function getUsernameCanonical()
     {
         return $this->usernameCanonical;
     }
 
-    public function getSalt()
-    {
-        return $this->salt;
-    }
-
+    /**
+     * @return string
+     */
     public function getEmail()
     {
         return $this->email;
     }
 
+    /**
+     * @return string
+     */
     public function getEmailCanonical()
     {
         return $this->emailCanonical;
     }
 
     /**
-     * Gets the encrypted password.
-     *
-     * @return string
+     * @return bool
      */
-    public function getPassword()
-    {
-        return $this->password;
-    }
-
-    public function getPlainPassword()
-    {
-        return $this->plainPassword;
-    }
-
-    /**
-     * Gets the last login time.
-     *
-     * @return \DateTime
-     */
-    public function getLastLogin()
-    {
-        return $this->lastLogin;
-    }
-
-    public function getConfirmationToken()
-    {
-        return $this->confirmationToken;
-    }
-
-    /**
-     * Returns the user roles
-     *
-     * @return array The roles
-     */
-    public function getRoles()
-    {
-        $roles = $this->roles->toArray();
-
-        foreach ($this->getGroups() as $group) {
-            $roles = array_merge($roles, $group->getRoles());
-        }
-
-        // we need to make sure to have at least one role
-        $roles[] = static::ROLE_DEFAULT;
-
-        return array_unique($roles);
-    }
-
-    /**
-     * Never use this to check if this user has access to anything!
-     *
-     * Use the SecurityContext, or an implementation of AccessDecisionManager
-     * instead, e.g.
-     *
-     *         $securityContext->isGranted('ROLE_USER');
-     *
-     * @param string $role
-     *
-     * @return boolean
-     */
-    public function hasRole($role)
-    {
-        return in_array(strtoupper($role), $this->getRoles(), true);
-    }
-
-    public function isAccountNonExpired()
-    {
-        if (true === $this->expired) {
-            return false;
-        }
-
-        if (null !== $this->expiresAt && $this->expiresAt->getTimestamp() < time()) {
-            return false;
-        }
-
-        return true;
-    }
-
-    public function isAccountNonLocked()
-    {
-        return !$this->locked;
-    }
-
-    public function isCredentialsNonExpired()
-    {
-        if (true === $this->credentialsExpired) {
-            return false;
-        }
-
-        if (null !== $this->credentialsExpireAt && $this->credentialsExpireAt->getTimestamp() < time()) {
-            return false;
-        }
-
-        return true;
-    }
-
-    public function isCredentialsExpired()
-    {
-        return !$this->isCredentialsNonExpired();
-    }
-
     public function isEnabled()
     {
         return $this->enabled;
     }
 
-    public function isExpired()
-    {
-        return !$this->isAccountNonExpired();
-    }
-
-    public function isLocked()
-    {
-        return !$this->isAccountNonLocked();
-    }
-
-    public function isSuperAdmin()
-    {
-        return $this->hasRole(static::ROLE_SUPER_ADMIN);
-    }
-
-    public function isUser($user = null)
+    /**
+     * @param MemberInterface|null $user
+     * @return bool
+     */
+    public function isSameMemberThan(MemberInterface $user = null)
     {
         return null !== $user && $this->getId() === $user->getId();
     }
 
-    public function removeRole($role)
-    {
-        if (false !== $key = array_search(strtoupper($role), $this->roles, true)) {
-            unset($this->roles[$key]);
-
-            if (is_array($this->roles)) {
-                $this->roles = array_values($this->roles);
-            }
-        }
-
-        return $this;
-    }
-
+    /**
+     * @param $username
+     * @return $this
+     */
     public function setUsername($username)
     {
         $this->username = $username;
@@ -384,6 +182,10 @@ abstract class User implements UserInterface
         return $this;
     }
 
+    /**
+     * @param $usernameCanonical
+     * @return $this
+     */
     public function setUsernameCanonical($usernameCanonical)
     {
         $this->usernameCanonical = $usernameCanonical;
@@ -392,29 +194,9 @@ abstract class User implements UserInterface
     }
 
     /**
-     * @param \DateTime $date
-     *
-     * @return User
+     * @param $email
+     * @return $this
      */
-    public function setCredentialsExpireAt(\DateTime $date = null)
-    {
-        $this->credentialsExpireAt = $date;
-
-        return $this;
-    }
-
-    /**
-     * @param boolean $boolean
-     *
-     * @return User
-     */
-    public function setCredentialsExpired($boolean)
-    {
-        $this->credentialsExpired = $boolean;
-
-        return $this;
-    }
-
     public function setEmail($email)
     {
         $this->email = $email;
@@ -422,6 +204,10 @@ abstract class User implements UserInterface
         return $this;
     }
 
+    /**
+     * @param $emailCanonical
+     * @return $this
+     */
     public function setEmailCanonical($emailCanonical)
     {
         $this->emailCanonical = $emailCanonical;
@@ -429,6 +215,10 @@ abstract class User implements UserInterface
         return $this;
     }
 
+    /**
+     * @param $boolean
+     * @return $this
+     */
     public function setEnabled($boolean)
     {
         $this->enabled = (Boolean) $boolean;
@@ -437,156 +227,34 @@ abstract class User implements UserInterface
     }
 
     /**
-     * Sets this user to expired.
-     *
-     * @param Boolean $boolean
-     *
-     * @return User
+     * @return string
      */
-    public function setExpired($boolean)
-    {
-        $this->expired = (Boolean) $boolean;
-
-        return $this;
-    }
-
-    /**
-     * @param \DateTime $date
-     *
-     * @return User
-     */
-    public function setExpiresAt(\DateTime $date = null)
-    {
-        $this->expiresAt = $date;
-
-        return $this;
-    }
-
-    public function setPassword($password)
-    {
-        $this->password = $password;
-
-        return $this;
-    }
-
-    public function setSuperAdmin($boolean)
-    {
-        if (true === $boolean) {
-            $this->addRole(static::ROLE_SUPER_ADMIN);
-        } else {
-            $this->removeRole(static::ROLE_SUPER_ADMIN);
-        }
-
-        return $this;
-    }
-
-    public function setPlainPassword($password)
-    {
-        $this->plainPassword = $password;
-
-        return $this;
-    }
-
-    public function setLastLogin(\DateTime $time = null)
-    {
-        $this->lastLogin = $time;
-
-        return $this;
-    }
-
-    public function setLocked($boolean)
-    {
-        $this->locked = $boolean;
-
-        return $this;
-    }
-
-    public function setConfirmationToken($confirmationToken)
-    {
-        $this->confirmationToken = $confirmationToken;
-
-        return $this;
-    }
-
-    public function setPasswordRequestedAt(\DateTime $date = null)
-    {
-        $this->passwordRequestedAt = $date;
-
-        return $this;
-    }
-
-    /**
-     * Gets the timestamp that the user requested a password reset.
-     *
-     * @return null|\DateTime
-     */
-    public function getPasswordRequestedAt()
-    {
-        return $this->passwordRequestedAt;
-    }
-
-    public function isPasswordRequestNonExpired($ttl)
-    {
-        return $this->getPasswordRequestedAt() instanceof \DateTime &&
-               $this->getPasswordRequestedAt()->getTimestamp() + $ttl > time();
-    }
-
-    public function setRoles(array $roles)
-    {
-        $this->roles = array();
-
-        foreach ($roles as $role) {
-            $this->addRole($role);
-        }
-
-        return $this;
-    }
-
-    /**
-     * Gets the groups granted to the user.
-     *
-     * @return Collection
-     */
-    public function getGroups()
-    {
-        return $this->groups ?: $this->groups = new ArrayCollection();
-    }
-
-    public function getGroupNames()
-    {
-        $names = array();
-        foreach ($this->getGroups() as $group) {
-            $names[] = $group->getName();
-        }
-
-        return $names;
-    }
-
-    public function hasGroup($name)
-    {
-        return in_array($name, $this->getGroupNames());
-    }
-
-    public function addGroup($group)
-    {
-        if (!$this->getGroups()->contains($group)) {
-            $this->getGroups()->add($group);
-        }
-
-        return $this;
-    }
-
-    public function removeGroup($group)
-    {
-        if ($this->getGroups()->contains($group)) {
-            $this->getGroups()->removeElement($group);
-        }
-
-        return $this;
-    }
-
     public function __toString()
     {
         return (string) $this->getUsername();
+    }
+
+    /**
+     * Removes sensitive data from the user.
+     */
+    public function eraseCredentials()
+    {
+        $this->plainPassword = null;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSalt()
+    {
+        return $this->salt;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRoles()
+    {
+        return ['ROLE_USER'];
     }
 }
