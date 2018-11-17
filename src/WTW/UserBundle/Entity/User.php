@@ -638,7 +638,7 @@ class User extends BaseUser implements MemberInterface
     /**
      * @return string
      */
-    public function getUrl(): string {
+    public function getUrl(): ?string {
         return $this->url;
     }
 
