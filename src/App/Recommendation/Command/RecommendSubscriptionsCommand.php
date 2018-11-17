@@ -102,8 +102,8 @@ class RecommendSubscriptionsCommand extends Command implements CommandReturnCode
             }
 
             if (array_key_exists($index, $flippedPositions)) {
-                // Normalization
-                return $subscription / $subscription;
+                // Result of normalization: $subscription / $subscription (!== 0)
+                return 1;
             }
 
             return null;
