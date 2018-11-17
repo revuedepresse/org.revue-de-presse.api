@@ -4,14 +4,11 @@ namespace WTW\UserBundle\Model;
 
 use App\Member\MemberInterface;
 
-/**
- * Storage agnostic user object
- *
- * @author Thibault Duplessis <thibault.duplessis@gmail.com>
- * @author Johannes M. Schmitt <schmittjoh@gmail.com>
- */
 abstract class User
 {
+    /**
+     * @var
+     */
     protected $id;
 
     /**
@@ -40,12 +37,36 @@ abstract class User
     protected $positionInHierarchy;
 
     /**
+     * The salt to use for hashing
+     *
+     * @var string
+     */
+    protected $salt;
+
+    /**
+     * Encrypted password. Must be persisted.
+     *
+     * @var string
+     */
+    protected $password;
+
+    /**
+     * Plain password. Used for model validation. Must not be persisted.
+     *
+     * @var string
+     */
+    protected $plainPassword;
+
+    /**
      * @var string
      */
     protected $email;
 
+    /**
+     */
     public function __construct()
     {
+        $this->salt = base_convert(sha1(uniqid(mt_rand(), true)), 16, 36);
         $this->enabled = false;
         $this->positionInHierarchy = 1;
     }
@@ -60,6 +81,8 @@ abstract class User
     public function serialize()
     {
         return serialize([
+            $this->password,
+            $this->salt,
             $this->usernameCanonical,
             $this->username,
             $this->enabled,
@@ -80,6 +103,8 @@ abstract class User
         $data = array_merge($data, array_fill(0, 2, null));
 
         list(
+            $this->password,
+            $this->salt,
             $this->usernameCanonical,
             $this->username,
             $this->enabled,
@@ -97,36 +122,59 @@ abstract class User
         return $this->id;
     }
 
+    /**
+     * @return string
+     */
     public function getUsername()
     {
         return $this->username;
     }
 
+    /**
+     * @return string
+     */
     public function getUsernameCanonical()
     {
         return $this->usernameCanonical;
     }
 
+    /**
+     * @return string
+     */
     public function getEmail()
     {
         return $this->email;
     }
 
+    /**
+     * @return string
+     */
     public function getEmailCanonical()
     {
         return $this->emailCanonical;
     }
 
+    /**
+     * @return bool
+     */
     public function isEnabled()
     {
         return $this->enabled;
     }
 
+    /**
+     * @param MemberInterface|null $user
+     * @return bool
+     */
     public function isSameMemberThan(MemberInterface $user = null)
     {
         return null !== $user && $this->getId() === $user->getId();
     }
 
+    /**
+     * @param $username
+     * @return $this
+     */
     public function setUsername($username)
     {
         $this->username = $username;
@@ -134,6 +182,10 @@ abstract class User
         return $this;
     }
 
+    /**
+     * @param $usernameCanonical
+     * @return $this
+     */
     public function setUsernameCanonical($usernameCanonical)
     {
         $this->usernameCanonical = $usernameCanonical;
@@ -141,6 +193,10 @@ abstract class User
         return $this;
     }
 
+    /**
+     * @param $email
+     * @return $this
+     */
     public function setEmail($email)
     {
         $this->email = $email;
@@ -148,6 +204,10 @@ abstract class User
         return $this;
     }
 
+    /**
+     * @param $emailCanonical
+     * @return $this
+     */
     public function setEmailCanonical($emailCanonical)
     {
         $this->emailCanonical = $emailCanonical;
@@ -155,6 +215,10 @@ abstract class User
         return $this;
     }
 
+    /**
+     * @param $boolean
+     * @return $this
+     */
     public function setEnabled($boolean)
     {
         $this->enabled = (Boolean) $boolean;
@@ -162,8 +226,35 @@ abstract class User
         return $this;
     }
 
+    /**
+     * @return string
+     */
     public function __toString()
     {
         return (string) $this->getUsername();
+    }
+
+    /**
+     * Removes sensitive data from the user.
+     */
+    public function eraseCredentials()
+    {
+        $this->plainPassword = null;
+    }
+
+    /**
+     * @return string
+     */
+    public function getSalt()
+    {
+        return $this->salt;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRoles()
+    {
+        return ['ROLE_USER'];
     }
 }

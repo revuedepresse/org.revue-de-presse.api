@@ -2,7 +2,9 @@
 
 namespace App\Member;
 
-interface MemberInterface
+use Symfony\Component\Security\Core\User\UserInterface;
+
+interface MemberInterface extends UserInterface
 {
     /**
      * @return string

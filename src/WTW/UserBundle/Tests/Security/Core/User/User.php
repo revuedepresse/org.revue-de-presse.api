@@ -26,6 +26,7 @@ class User extends BaseUser
         }
 
         $this->username = $username;
+        $this->password = $password;
         $this->enabled = $enabled;
         $this->positionInHierarchy = 0;
     }
