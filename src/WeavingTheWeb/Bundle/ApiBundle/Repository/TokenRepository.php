@@ -9,8 +9,7 @@ use Doctrine\ORM\EntityRepository,
 use Psr\Log\LoggerInterface;
 
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Token,
-    WeavingTheWeb\Bundle\ApiBundle\Entity\TokenType,
-    WeavingTheWeb\Bundle\ApiBundle\Exception\InvalidTokenException;
+    WeavingTheWeb\Bundle\ApiBundle\Entity\TokenType;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
@@ -130,7 +129,6 @@ class TokenRepository extends EntityRepository
     public function findUnfrozenToken(string $token)
     {
         $queryBuilder = $this->createQueryBuilder('t');
-
 
         $queryBuilder->andWhere('t.oauthToken = :token');
         $queryBuilder->setParameter('token', $token);
