@@ -6,8 +6,6 @@ use Doctrine\ORM\Mapping as ORM;
 use WTW\UserBundle\Entity\User as BaseUser;
 
 /**
- * Class User
- * @package WTW\UserBundle\Tests\Security\Core\User
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  * @ORM\Entity
  * @ORM\MappedSuperclass
@@ -30,11 +28,6 @@ class User extends BaseUser
         $this->username = $username;
         $this->password = $password;
         $this->enabled = $enabled;
-        $this->locked = false;
-        $this->accountNonExpired = $userNonExpired;
-        $this->credentialsNonExpired = $credentialsNonExpired;
-        $this->accountNonLocked = $userNonLocked;
         $this->positionInHierarchy = 0;
-        $this->roles = $roles;
     }
 }

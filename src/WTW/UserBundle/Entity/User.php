@@ -4,8 +4,7 @@ namespace WTW\UserBundle\Entity;
 
 use App\Member\MemberInterface;
 
-use Doctrine\Common\Collections\ArrayCollection,
-    Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping as ORM;
 use WTW\UserBundle\Model\User as BaseUser;
 
 /**
@@ -51,13 +50,6 @@ class User extends BaseUser implements MemberInterface
     /**
      * @var integer
      *
-     * @ORM\Column(name="grp_id", type="integer", nullable=true)
-     */
-    protected $groupId;
-
-    /**
-     * @var integer
-     *
      * @ORM\Column(name="usr_avatar", type="integer", nullable=true)
      */
     protected $avatar;
@@ -65,37 +57,9 @@ class User extends BaseUser implements MemberInterface
     /**
      * @var string
      *
-     * @ORM\Column(name="usr_first_name", type="string", length=255, nullable=true)
-     */
-    protected $firstName;
-
-    /**
-     * @var string
-     *
      * @ORM\Column(name="usr_full_name", type="string", length=255, nullable=true)
      */
     protected $fullName;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="usr_last_name", type="string", length=255, nullable=true)
-     */
-    protected $lastName;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="usr_middle_name", type="string", length=255, nullable=true)
-     */
-    protected $middleName;
-
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="usr_phone", type="string", length=30, nullable=true)
-     */
-    protected $phone;
 
     /**
      * @var boolean
@@ -132,92 +96,9 @@ class User extends BaseUser implements MemberInterface
     protected $emailCanonical;
 
     /**
-     * @var string
-     *
-     * @ORM\Column(name="usr_password", type="string", length=255, nullable=true)
-     */
-    protected $password;
-
-    /**
-     * @var \DateTime
-     * @ORM\Column(name="usr_password_requested_at", type="datetime", nullable=true)
-     */
-    protected $passwordRequestedAt;
-
-    /**
-     * The salt to use for hashing
-     *
-     * @var string
-     * @ORM\Column(name="usr_salt", type="string", length=255, nullable=true)
-     */
-    protected $salt;
-
-    /**
-     * @var boolean
-     * @ORM\Column(name="usr_locked", type="boolean")
-     */
-    protected $locked;
-
-    /**
-     * @var boolean
-     * @ORM\Column(name="usr_credentials_expired", type="boolean", nullable=true)
-     */
-    protected $credentialsExpired;
-
-    /**
-     * @var \DateTime
-     * @ORM\Column(name="usr_credentials_expires_at", type="datetime", nullable=true)
-     */
-    protected $credentialsExpireAt;
-
-    /**
-     * Random string sent to the user email address in order to verify it
-     *
-     * @var string
-     * @ORM\Column(name="usr_confirmation_token", type="string", length=255, nullable=true)
-     */
-    protected $confirmationToken;
-
-    /**
-     * @var boolean
-     * @ORM\Column(name="usr_expired", type="boolean", nullable=true)
-     */
-    protected $expired;
-
-    /**
-     * @var \DateTime
-     * @ORM\Column(name="usr_expires_at", type="datetime", nullable=true)
-     */
-    protected $expiresAt;
-
-    /**
-     * @var \DateTime
-     * @ORM\Column(name="usr_last_login", type="datetime", nullable=true)
-     */
-    protected $lastLogin;
-
-    /**
-     * @ORM\ManyToMany(targetEntity="WeavingTheWeb\Bundle\UserBundle\Entity\Group")
-     * @ORM\JoinTable(name="weaving_user_group",
-     *      joinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="usr_id")},
-     *      inverseJoinColumns={@ORM\JoinColumn(name="group_id", referencedColumnName="rol_id")}
-     * )
-     */
-    protected $groups;
-
-    /**
      * @var \DateTime
      */
     protected $positionInHierarchy;
-
-    /**
-     * @ORM\ManyToMany(targetEntity="WeavingTheWeb\Bundle\UserBundle\Entity\Role", inversedBy="users")
-     * @ORM\JoinTable(name="weaving_user_role",
-     *      joinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="usr_id")},
-     *      inverseJoinColumns={@ORM\JoinColumn(name="role_id", referencedColumnName="id")}
-     * )
-     */
-    protected $roles;
 
     /**
      * @ORM\ManyToMany(targetEntity="WeavingTheWeb\Bundle\ApiBundle\Entity\Token", inversedBy="users", fetch="EAGER")
@@ -247,27 +128,6 @@ class User extends BaseUser implements MemberInterface
     public function getId(): int
     {
         return $this->id;
-    }
-
-    /**
-     * @param  integer $groupId
-     * @return User
-     */
-    public function setGroupId(int $groupId): MemberInterface
-    {
-        $this->groupId = $groupId;
-
-        return $this;
-    }
-
-    /**
-     * Get groupId
-     *
-     * @return integer
-     */
-    public function getGroupId()
-    {
-        return $this->groupId;
     }
 
     /**
@@ -304,67 +164,6 @@ class User extends BaseUser implements MemberInterface
     }
 
     /**
-     * @param string $firstName
-     * @return MemberInterface
-     */
-    public function setFirstName(string $firstName): MemberInterface
-    {
-        $this->firstName = $firstName;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getFirstName(): string
-    {
-        return $this->firstName;
-    }
-
-    /**
-     * @param string $lastName
-     * @return MemberInterface
-     */
-    public function setLastName(string $lastName): MemberInterface
-    {
-        $this->lastName = $lastName;
-
-        return $this;
-    }
-
-    /**
-     * @return strirng
-     */
-    public function getLastName(): string
-    {
-        return $this->lastName;
-    }
-
-    /**
-     * Set middleName
-     *
-     * @param  string $middleName
-     * @return User
-     */
-    public function setMiddleName($middleName)
-    {
-        $this->middleName = $middleName;
-
-        return $this;
-    }
-
-    /**
-     * Get middleName
-     *
-     * @return string
-     */
-    public function getMiddleName()
-    {
-        return $this->middleName;
-    }
-
-    /**
      * Set email
      *
      * @param  string $email
@@ -385,29 +184,6 @@ class User extends BaseUser implements MemberInterface
     public function getEmail()
     {
         return $this->email;
-    }
-
-    /**
-     * Set phone
-     *
-     * @param  string $phone
-     * @return User
-     */
-    public function setPhone($phone)
-    {
-        $this->phone = $phone;
-
-        return $this;
-    }
-
-    /**
-     * Get phone
-     *
-     * @return string
-     */
-    public function getPhone()
-    {
-        return $this->phone;
     }
 
     /**
@@ -440,7 +216,6 @@ class User extends BaseUser implements MemberInterface
     public function setTwitterID(string $twitterId): MemberInterface
     {
       $this->twitterID = $twitterId;
-      $this->salt = '';
 
       return $this;
     }
@@ -563,29 +338,6 @@ class User extends BaseUser implements MemberInterface
     }
 
     /**
-     * Set salt
-     *
-     * @param  string $salt
-     * @return User
-     */
-    public function setSalt($salt)
-    {
-        $this->salt = $salt;
-
-        return $this;
-    }
-
-    /**
-     * Get salt
-     *
-     * @return string
-     */
-    public function getSalt()
-    {
-        return $this->salt;
-    }
-
-    /**
      * Set locked
      *
      * @param  boolean $locked
@@ -667,172 +419,11 @@ class User extends BaseUser implements MemberInterface
         return $this;
     }
 
-    /**
-     * Set credentialsExpired
-     *
-     * @param  boolean $credentialsExpired
-     * @return User
-     */
-    public function setCredentialsExpired($credentialsExpired)
-    {
-        $this->credentialsExpired = $credentialsExpired;
-
-        return $this;
-    }
-
-    /**
-     * Get credentialsExpired
-     *
-     * @return boolean
-     */
-    public function getCredentialsExpired()
-    {
-        return $this->credentialsExpired;
-    }
-
-    /**
-     * Set expiresAt
-     *
-     * @param  \DateTime $expiresAt
-     * @return User
-     */
-    public function setExpiresAt(\DateTime $expiresAt = null)
-    {
-        $this->expiresAt = $expiresAt;
-
-        return $this;
-    }
-
-    /**
-     * Get expiresAt
-     *
-     * @return \DateTime
-     */
-    public function getExpiresAt()
-    {
-        return $this->expiresAt;
-    }
-
-    /**
-     * Set lastLogin
-     *
-     * @param  \DateTime $lastLogin
-     * @return User
-     */
-    public function setLastLogin(\DateTime $lastLogin = null)
-    {
-        $this->lastLogin = $lastLogin;
-
-        return $this;
-    }
-
-    /**
-     * Get lastLogin
-     *
-     * @return \DateTime
-     */
-    public function getLastLogin()
-    {
-        return $this->lastLogin;
-    }
-
-    /**
-     * Set passwordRequestedAt
-     *
-     * @param  \DateTime $passwordRequestedAt
-     * @return User
-     */
-    public function setPasswordRequestedAt(\DateTime $passwordRequestedAt = null)
-    {
-        $this->passwordRequestedAt = $passwordRequestedAt;
-
-        return $this;
-    }
-
-    /**
-     * Get passwordRequestedAt
-     *
-     * @return \DateTime
-     */
-    public function getPasswordRequestedAt()
-    {
-        return $this->passwordRequestedAt;
-    }
-
-    /**
-     * Set credentialsExpireAt
-     *
-     * @param  \DateTime $credentialsExpireAt
-     * @return User
-     */
-    public function setCredentialsExpireAt(\DateTime $credentialsExpireAt = null)
-    {
-        $this->credentialsExpireAt = $credentialsExpireAt;
-
-        return $this;
-    }
-
-    /**
-     * Get credentialsExpireAt
-     *
-     * @return \DateTime
-     */
-    public function getCredentialsExpireAt()
-    {
-        return $this->credentialsExpireAt;
-    }
-
     public function __construct()
     {
         parent::__construct();
 
-        $this->roles = new \Doctrine\Common\Collections\ArrayCollection();
         $this->tokens = new \Doctrine\Common\Collections\ArrayCollection();
-    }
-
-    /**
-     * Add roles
-     *
-     * @param  \WeavingTheWeb\Bundle\UserBundle\Entity\Role $roles
-     * @return User
-     */
-    public function addRole($roles)
-    {
-        $this->roles[] = $roles;
-
-        return $this;
-    }
-
-    /**
-     * @param string $roles
-     * @return $this|void
-     */
-    public function removeRole($roles)
-    {
-        $this->roles->removeElement($roles);
-    }
-
-    /**
-     * Get roles
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getRoles()
-    {
-        if (is_null($this->roles) || (!$this->roles instanceof ArrayCollection)) {
-            $collection = new ArrayCollection();
-
-            foreach ($this->roles as $role) {
-                $role = (string) $role;
-                if (!$collection->contains($role)) {
-                    $collection->add($role);
-                }
-            }
-
-            $this->roles = $collection;
-        }
-
-        return $this->roles->toArray();
     }
 
     /**
@@ -1031,10 +622,24 @@ class User extends BaseUser implements MemberInterface
      */
     public $description = '';
 
-
+    /**
+     * @return null|string
+     */
     public function getDescription(): ?string
     {
         return $this->description;
+    }
+
+    /**
+     * @ORM\Column(name="url", type="text", nullable=true)
+     */
+    public $url;
+
+    /**
+     * @return string
+     */
+    public function getUrl(): string {
+        return $this->url;
     }
 
     /**

@@ -75,7 +75,13 @@ class RecommendSubscriptionsCommand extends Command implements CommandReturnCode
         array_walk(
             $sortedDistances,
             function ($distance) {
-                $this->output->writeln($distance['member']);
+                $this->output->writeln(
+                    sprintf(
+                        '%s %s',
+                        $distance['member'],
+                        $distance['distance']
+                    )
+                );
             }
         );
     }
@@ -138,7 +144,7 @@ class RecommendSubscriptionsCommand extends Command implements CommandReturnCode
             SELECT member_id,
             GROUP_CONCAT(
                 FIND_IN_SET(
-                    subscription_id,
+                    COALESCE(subscription_id, 0),
                     (
                         SELECT group_concat(DISTINCT subscription_id) FROM member_subscription
                     )

@@ -2,7 +2,9 @@
 
 namespace App\Member;
 
-interface MemberInterface
+use Symfony\Component\Security\Core\User\UserInterface;
+
+interface MemberInterface extends UserInterface
 {
     /**
      * @return string
@@ -15,37 +17,9 @@ interface MemberInterface
     public function getId(): int;
 
     /**
-     * @param int $groupId
-     * @return MemberInterface
-     */
-    public function setGroupId(int $groupId): self;
-
-    /**
      * @return string
      */
     public function getUsername();
-
-    /**
-     * @param string $firstName
-     * @return MemberInterface
-     */
-    public function setFirstName(string $firstName): self;
-
-    /**
-     * @return string
-     */
-    public function getFirstName(): string;
-
-    /**
-     * @param string $lastName
-     * @return MemberInterface
-     */
-    public function setLastName(string $lastName): self;
-
-    /**
-     * @return string
-     */
-    public function getLastName(): string;
 
     /**
      * @param string $twitterId
@@ -134,4 +108,6 @@ interface MemberInterface
     public function isAWhisperer(): bool;
 
     public function getDescription(): ?string;
+
+    public function getUrl(): ?string;
 }

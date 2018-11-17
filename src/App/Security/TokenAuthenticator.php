@@ -2,6 +2,7 @@
 
 namespace App\Security;
 
+use App\Member\MemberInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -42,7 +43,7 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
     /**
      * @param mixed                 $credentials
      * @param UserProviderInterface $userProvider
-     * @return null|User|UserInterface
+     * @return null|User|MemberInterface
      */
     public function getUser($credentials, UserProviderInterface $userProvider)
     {
@@ -55,7 +56,7 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
         /** @var $member User */
         $member = $userProvider->loadUserByUsername($apiKey);
 
-        if ($member instanceof UserInterface) {
+        if ($member instanceof MemberInterface) {
             return $member;
         }
     }

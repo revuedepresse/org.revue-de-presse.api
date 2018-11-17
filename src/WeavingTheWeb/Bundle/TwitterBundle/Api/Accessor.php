@@ -1536,6 +1536,14 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     /**
      * @return int
      */
+    public function getBadAuthenticationDataCode()
+    {
+        return self::ERROR_BAD_AUTHENTICATION_DATA;
+    }
+
+    /**
+     * @return int
+     */
     public function getExceededRateLimitErrorCode()
     {
         return self::ERROR_EXCEEDED_RATE_LIMIT;
@@ -1659,11 +1667,25 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
                 $availableApi = true;
             }
         } catch (\Exception $exception) {
-            if ($exception->getCode() === $this->getEmptyReplyErrorCode()) {
-                $availableApi = true;
-            } else {
-                $this->logger->error($exception->getMessage());
-                $this->tokenRepository->freezeToken($this->userToken);
+            switch ($exception->getCode()) {
+                case $this->getBadAuthenticationDataCode():
+
+                    $this->logger->error('Please check your token consumer key '.$exception->getMessage());
+
+                    $availableApi = false;
+
+                    break;
+
+
+                case $this->getEmptyReplyErrorCode():
+
+                    $availableApi = true;
+
+                    break;
+
+                default:
+                    $this->logger->error($exception->getMessage());
+                    $this->tokenRepository->freezeToken($this->userToken);
             }
         }
 
