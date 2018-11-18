@@ -18,6 +18,13 @@ class AggregateSubscription
     private $memberAggregateSubscription;
 
     /**
+     * @return MemberAggregateSubscription
+     */
+    public function getMemberAggregateSubscription() {
+        return $this->memberAggregateSubscription;
+    }
+
+    /**
      * @var MemberInterface
      */
     public $subscription;
