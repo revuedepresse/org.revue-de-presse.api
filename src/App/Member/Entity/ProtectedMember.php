@@ -8,6 +8,7 @@ use WTW\UserBundle\Entity\User;
 class ProtectedMember implements MemberInterface
 {
     use MemberTrait;
+    use ExceptionalUserInterfaceTrait;
 
     /**
      * @param bool $protected
