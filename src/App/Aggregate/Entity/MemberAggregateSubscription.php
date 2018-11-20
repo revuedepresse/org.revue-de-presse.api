@@ -12,6 +12,14 @@ class MemberAggregateSubscription
     private $id;
 
     /**
+     * @return int
+     */
+    public function getId()
+    {
+        return $this->id;
+    }
+
+    /**
      * @var MemberInterface
      */
     private $member;
