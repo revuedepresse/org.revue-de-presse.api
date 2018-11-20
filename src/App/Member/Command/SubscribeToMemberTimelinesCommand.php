@@ -66,6 +66,10 @@ class SubscribeToMemberTimelinesCommand extends AbstractCommand
             $this->output->writeln($exception->getMessage());
 
             return self::RETURN_STATUS_FAILURE;
+        } catch (\Exception $exception) {
+            $this->logger->critical($exception->getMessage());
+
+            return self::RETURN_STATUS_FAILURE;
         }
 
         $this->output->writeln(sprintf(
