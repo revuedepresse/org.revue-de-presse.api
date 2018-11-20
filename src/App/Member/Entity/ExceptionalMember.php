@@ -8,4 +8,5 @@ use WTW\UserBundle\Entity\User;
 class ExceptionalMember implements MemberInterface
 {
     use MemberTrait;
+    use ExceptionalUserInterfaceTrait;
 }

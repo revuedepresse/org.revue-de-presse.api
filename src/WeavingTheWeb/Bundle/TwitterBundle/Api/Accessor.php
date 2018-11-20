@@ -690,6 +690,7 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     {
         if (strpos($endpoint, 'create.json') !== false
         || strpos($endpoint, 'create_all.json') !== false
+        || strpos($endpoint, 'destroy.json') !== false
         ) {
             return $client->post($endpoint, $parameters);
         }
@@ -912,6 +913,15 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     protected function getCreateFriendshipsEndpoint($version = '1.1')
     {
         return $this->getApiBaseUrl($version) . '/friendships/create.json?screen_name={{ screen_name }}';
+    }
+
+    /**
+     * @param string $version
+     * @return string
+     */
+    protected function getDestroyFriendshipsEndpoint($version = '1.1')
+    {
+        return $this->getApiBaseUrl($version) . '/friendships/destroy.json?screen_name={{ screen_name }}';
     }
 
     /**
