@@ -9,7 +9,7 @@
             table="highlight">
 
         <indexes>
-            <index name="highlight_idx" columns="status_id,member_id,publication_date_time"/>
+            <index name="highlight_idx" columns="status_id,member_id,publication_date_time,total_retweets,total_favorites"/>
         </indexes>
 
         <id name="id" column="id" type="uuid">
@@ -36,6 +36,18 @@
             name="publicationDateTime"
             column="publication_date_time"
             type="datetime"
+        />
+
+        <field
+            name="totalRetweets"
+            column="total_retweets"
+            type="integer"
+        />
+
+        <field
+            name="totalFavorites"
+            column="total_favorites"
+            type="integer"
         />
     </entity>
 
