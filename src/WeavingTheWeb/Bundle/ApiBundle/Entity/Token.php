@@ -26,7 +26,7 @@ class Token
      * @var string
      *
      * @ORM\ManyToOne(targetEntity="TokenType", inversedBy="tokens", cascade={"all"})
-     * @ORM\JoinColumn(name="type_id", referencedColumnName="id")
+     * @ORM\JoinColumn(name="type", referencedColumnName="id")
      */
     protected $type;
 
