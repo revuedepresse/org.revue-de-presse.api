@@ -7,6 +7,7 @@ use App\Aggregate\AggregateAwareTrait;
 use App\Aggregate\Entity\TimelyStatus;
 use App\Aggregate\Repository\TimelyStatusRepository;
 use App\Amqp\AmqpMessageAwareTrait;
+use App\Console\CommandReturnCodeAwareInterface;
 use App\Conversation\ConversationAwareTrait;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
@@ -14,7 +15,7 @@ use OldSound\RabbitMqBundle\RabbitMq\ConsumerInterface;
 use PhpAmqpLib\Message\AMQPMessage;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository;
 
-class TimelyStatusConsumer implements ConsumerInterface
+class TimelyStatusConsumer implements ConsumerInterface, CommandReturnCodeAwareInterface
 {
     use AggregateAwareTrait;
     use ConversationAwareTrait;
@@ -82,15 +83,49 @@ class TimelyStatusConsumer implements ConsumerInterface
 
         try {
             $options = $this->parseMessage($message);
-            $timelyStatus = $this->timelyStatusRepository->fromArray($options);
+            $this->logger->info(sprintf(
+                'About to save timely statuses for time range #%d',
+                $options['time_range']
+            ));
+
+            $totalProcessedEntities = 0;
+            $itemsPerFlushingWindow = 1000;
+
+            array_walk(
+                $options['records'],
+                function ($properties) use (&$totalProcessedEntities, $itemsPerFlushingWindow) {
+                    $timelyStatus = $this->timelyStatusRepository->fromArray($properties);
+                    $this->timelyStatusRepository->saveTimelyStatus($timelyStatus, $doNotFlush = true);
+                    $totalProcessedEntities++;
+
+                    if ($totalProcessedEntities % $itemsPerFlushingWindow === 0) {
+                        $this->logger->info(
+                            sprintf(
+                                '%d timely statuses have been saved successfully',
+                                $itemsPerFlushingWindow
+                            )
+                        );
+                        $this->entityManager->flush();
+                    }
+
+                    return $timelyStatus;
+                }
+            );
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());
 
-            return false;
+            return self::RETURN_STATUS_FAILURE;
         }
 
-        $this->timelyStatusRepository->saveTimelyStatus($timelyStatus);
+        $this->entityManager->flush();
 
-        return $timelyStatus instanceof TimelyStatus;
+        $this->logger->info(
+            sprintf(
+                '%d timely statuses have been saved successfully',
+                count($options['records'])
+            )
+        );
+
+        return self::RETURN_STATUS_SUCCESS;
     }
 }
