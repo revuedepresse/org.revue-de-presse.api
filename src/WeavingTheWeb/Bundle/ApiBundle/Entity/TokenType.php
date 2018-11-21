@@ -72,7 +72,7 @@ class TokenType
 
     /**
      * @var ArrayCollection
-     * @ORM\OneToMany(targetEntity="Token", mappedBy="type_id")
+     * @ORM\OneToMany(targetEntity="Token", mappedBy="type")
      */
     protected $tokens;
 
