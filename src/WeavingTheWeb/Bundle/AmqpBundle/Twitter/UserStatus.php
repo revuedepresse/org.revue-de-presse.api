@@ -17,8 +17,6 @@ use WeavingTheWeb\Bundle\TwitterBundle\Api\TwitterErrorAwareInterface;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\ProtectedAccountException;
 
-use WTW\UserBundle\Entity\User;
-
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
