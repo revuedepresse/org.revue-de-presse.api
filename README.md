@@ -8,6 +8,9 @@ Easing observation of Twitter lists to publish a daily press review
 
 ## Installation
 
+The shell scripts written to install the project dependencies have been tested under Ubuntu 16.04.5 LTS.
+My guess about running them from another OS would be that it simply won't terminate as expected.
+
 ### Requirements
 
 Install git by following instructions from the [official documentation](https://git-scm.org/).
@@ -27,7 +30,15 @@ make build-php-container
 Initialize MySQL from `app/config/parameters.yml`
 
 ```
+# Provide with access to a shell in a mysql container 
+# where access have been granted from credentials in parameters.yml
 make initialize-mysql-volume
+```
+
+```
+# Generate queries to be executed
+# when the project data model has been modified
+make diff-schema
 ```
 
 ### RabbitMQ

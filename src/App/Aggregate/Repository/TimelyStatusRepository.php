@@ -3,7 +3,6 @@
 namespace App\Aggregate\Repository;
 
 use App\Aggregate\Entity\TimelyStatus;
-use App\Member\Entity\AggregateSubscription;
 use Doctrine\ORM\EntityRepository;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\StatusInterface;
@@ -117,10 +116,11 @@ class TimelyStatusRepository extends EntityRepository
 
     /**
      * @param TimelyStatus $timelyStatus
+     * @param bool         $doNotFlush
      * @return TimelyStatus
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function saveTimelyStatus(TimelyStatus $timelyStatus)
+    public function saveTimelyStatus(TimelyStatus $timelyStatus, $doNotFlush = false)
     {
         $this->getEntityManager()->persist($timelyStatus);
         $this->getEntityManager()->flush();

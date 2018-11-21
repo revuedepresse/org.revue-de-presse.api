@@ -10,5 +10,5 @@ build/*
 !build/.gitignore
 composer.phar
 provisioning/containers/mysql/templates/mysql/my.cnf
-provisioning/containers/volumes/mysql/*
+provisioning/volumes/mysql/*
 vendor

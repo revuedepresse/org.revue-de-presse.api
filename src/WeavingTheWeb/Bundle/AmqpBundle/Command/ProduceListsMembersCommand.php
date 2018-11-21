@@ -29,6 +29,10 @@ use WTW\UserBundle\Entity\User;
  */
 class ProduceListsMembersCommand extends AggregateAwareCommand
 {
+    const OPTION_SCREEN_NAME = 'screen_name';
+
+    const OPTION_MEMBER_RESTRICTION = 'member_restriction';
+
     use MemberAwareTrait;
 
     /**
@@ -50,6 +54,11 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
      * @var string
      */
     private $listRestriction;
+
+    /**
+     * @var string
+     */
+    private $memberRestriction;
 
     /**
      * @var string
@@ -106,7 +115,7 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
             InputOption::VALUE_OPTIONAL,
             'A secret is required'
         )->addOption(
-            'screen_name',
+            self::OPTION_SCREEN_NAME,
             null,
             InputOption::VALUE_REQUIRED,
             'The screen name of a user'
@@ -132,6 +141,11 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
             'qr',
             InputOption::VALUE_OPTIONAL,
             'Query to search statuses against'
+        )->addOption(
+            self::OPTION_MEMBER_RESTRICTION,
+            'mr',
+            InputOption::VALUE_OPTIONAL,
+            'Restrict to member, which screen name has been passed as value of this option'
         )->addOption(
             'before',
             null,
@@ -189,6 +203,14 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
         $publishedMessages = 0;
 
         foreach ($members->users as $friend) {
+            if ($this->memberRestriction && $friend->screen_name !== $this->memberRestriction) {
+                $this->output->writeln(sprintf(
+                    'Skipping "%s" as member restriction applies',
+                    $friend->screen_name
+                ));
+                continue;
+            }
+
             try {
                 $member = $this->getMessageUser($friend);
 
@@ -226,8 +248,12 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
                     $messageBody['before'] = $this->before;
                 }
 
-                $this->producer->setContentType('application/json');
-                $this->producer->publish(serialize(json_encode($messageBody)));
+                $i = 10;
+                do {
+                    $this->producer->setContentType('application/json');
+                    $this->producer->publish(serialize(json_encode($messageBody)));
+                    $i--;
+                } while ($i > 0);
 
                 if ($this->likesMessagesProducer instanceof Producer) {
                     $this->likesMessagesProducer->setContentType('application/json');
@@ -437,7 +463,7 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
 
     private function setOptionsFromInput(): void
     {
-        $this->screenName = $this->input->getOption('screen_name');
+        $this->screenName = $this->input->getOption(self::OPTION_SCREEN_NAME);
 
         $this->listRestriction = null;
         if ($this->input->hasOption('list') && !is_null($this->input->getOption('list'))) {
@@ -470,6 +496,11 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
         if ($this->input->hasOption('query_restriction') &&
             $this->input->getOption('query_restriction')) {
             $this->queryRestriction = $this->input->getOption('query_restriction');
+        }
+
+        if ($this->input->hasOption(self::OPTION_MEMBER_RESTRICTION) &&
+            $this->input->getOption(self::OPTION_MEMBER_RESTRICTION)) {
+            $this->memberRestriction = $this->input->getOption(self::OPTION_MEMBER_RESTRICTION);
         }
     }
 

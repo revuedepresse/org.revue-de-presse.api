@@ -39,6 +39,27 @@ parameters:
     database_user_test:       "%mysql.test_user%"
     database_password_test:   "%mysql.test_password%"
 
+    # The configuration should go the other way around in development.
+    # The value of %database_port_admin% should come from %port_local%
+    # In production, %database_port_admin% should *not* come from %port_local%.
+    # In fact %port_local% is not even required in production.
+    # In production, %database_port_admin% may be a copy of another parameter,
+    # which suffix depends on the machine hosting the project files
+    # e.g. %port_caprica%
+    #
+    # @see the definition of migrate_schema function in bin/functions.sh
+    # for a better understanding of the risks
+    #
+    # tl;dr A database migration could be applied in a production server
+    # without human confirmation.
+    port_local:               "%database_port_admin%"
+
+    # For compatibility with the original schema counting many tables
+    # not to be removed by recent migrations
+    # - to collect posts, likes, videos and photos from Facebook
+    # - to collect projects created on GitHub
+    # - to connect to an email server via IMAP
+    # - to drive lots of other half-baked experiments
     it_1: 'header|mail_uid|mailbox|mailbox_mail_uid|mailbox_mail_uid_header|message|message_property'
     it_2: '|property|tmp_news|weaving_arc|weaving_author|weaving_contact|weaving_content|weaving_content_type|'
     it_3: 'weaving_edge|weaving_entity|weaving_entity_table|weaving_entity_type|weaving_event|weaving_facebook*'

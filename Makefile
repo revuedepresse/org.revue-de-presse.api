@@ -70,10 +70,13 @@ remove-php-fpm-container: ## Remove PHP-FPM container
 create-database-schema-test: # Create database schema in test environment
 		@/bin/bash -c 'source ./bin/functions.sh && create_database_test_schema'
 
-diff-schema: ## Generate schema migrations scripts
-		@/bin/bash -c "export PROJECT_DIR=`pwd`; echo 'php /var/www/devobs/app/console doc:mig:diff -vvvv' | make run-php"
+create-prod-like-schema: ## Create production-like schema
+		@/bin/bash -c 'export PROJECT_DIR='/var/www/devobs'; source ./bin/functions.sh && create_database_prod_like_schema '
 
-migrate-schema-in-production: ## Migrate the database schema in production
+diff-schema: ## Generate schema migrations scripts
+		@/bin/bash -c 'export PROJECT_DIR='/var/www/devobs'; source ./bin/functions.sh && diff_schema'
+
+migrate-schema: ## Migrate the database schema
 		@/bin/bash -c 'export PROJECT_DIR='/var/www/devobs'; source ./bin/functions.sh && migrate_schema'
 
 configure-rabbitmq-user-privileges: ## Configure RabbitMQ user privileges
