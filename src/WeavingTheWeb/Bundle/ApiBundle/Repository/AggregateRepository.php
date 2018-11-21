@@ -200,6 +200,8 @@ QUERY;
                 }
 
                 $this->getEntityManager()->flush();
+
+                $aggregate = $aggregates[0];
             }
         }
 
