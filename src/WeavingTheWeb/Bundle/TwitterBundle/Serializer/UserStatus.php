@@ -170,7 +170,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             $token = $this->tokenRepository->findOneBy(['oauthToken' => $oauthTokens['token']]);
 
             if (! $token instanceof Token) {
-                throw new \Exception('Invalid token');
+                $token = $this->tokenRepository->findFirstUnfrozenToken();
             }
 
             $this->accessor->setConsumerKey($token->consumerKey);
