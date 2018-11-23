@@ -24,6 +24,16 @@ class Highlight
      */
     private $member;
 
+    /**
+     * @var int
+     */
+    private $totalRetweets;
+
+    /**
+     * @var int
+     */
+    private $totalFavorites;
+
     public function __construct(
         MemberInterface $member,
         StatusInterface $status,
