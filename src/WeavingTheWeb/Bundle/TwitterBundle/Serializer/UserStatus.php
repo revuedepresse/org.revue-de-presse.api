@@ -17,10 +17,13 @@ use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Token,
     WeavingTheWeb\Bundle\ApiBundle\Entity\Whisperer;
 
+use WeavingTheWeb\Bundle\TwitterBundle\Exception\BadAuthenticationDataException;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\ProtectedAccountException;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;
+use WeavingTheWeb\Bundle\TwitterBundle\Serializer\Exception\RateLimitedException;
+use WeavingTheWeb\Bundle\TwitterBundle\Serializer\Exception\SkipSerializationException;
 
 /**
  * @package WeavingTheWeb\Bundle\TwitterBundle\Accessor
@@ -30,6 +33,8 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     const MAX_AVAILABLE_TWEETS_PER_USER = 3200;
 
     const MAX_BATCH_SIZE = 200;
+
+    const MESSAGE_OPTION_TOKEN = 'oauth';
 
     /**
      * @var \Symfony\Component\Translation\Translator $translator
@@ -200,28 +205,13 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         $successfulSerializationOptionSetup = $this->setUpSerializationOptions($options);
 
         try {
-            if ($this->shouldSkipSerialization($options)) {
-                return true;
+            $this->decideWhetherSerializationShouldBeSkipped($options);
+        } catch (SkipSerializationException $exception) {
+            if ($exception instanceof RateLimitedException) {
+                return false; // unsuccessfully made an attempt to serialize statuses
             }
-        } catch (UnavailableResourceException
-            |SuspendedAccountException
-            |NotFoundMemberException
-            |ProtectedAccountException $exception
-        ) {
-            $this->handleUnavailableMemberException($exception, $options);
-        } catch (ApiRateLimitingException $exception) {
-            $this->delayingConsumption();
 
-            return false;
-        } catch (\Exception $exception) {
-            $this->logger->error(
-                sprintf(
-                    'An error occurred when checking if a serialization could be skipped ("%s")',
-                    $exception->getMessage()
-                )
-            );
-
-            return false;
+            return true;
         }
 
         if ($successfulSerializationOptionSetup) {
@@ -253,63 +243,23 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         $options = $this->updateExtremum($options, $discoverPastTweets);
 
         try {
-            $this->logIntentionWithRegardsToAggregate($options);
-
-            $lastSerializationBatchSize = $this->saveStatusesMatchingCriteria(
-                $options,
-                $this->serializationOptions['aggregate_id']
-            );
-            $success = true;
-
-            if ($discoverPastTweets || (
-                !is_null($lastSerializationBatchSize) && $lastSerializationBatchSize == self::MAX_BATCH_SIZE
-            )) {
-                // When some of the last batch of statuses have been serialized for the first time,
-                // and we should discover statuses in the past,
-                // keep retrieving statuses in the past
-                // otherwise start serializing statuses never seen before,
-                // which have been more recently published
-                $discoverPastTweets = !is_null($lastSerializationBatchSize) && $discoverPastTweets;
-                if ($greedy) {
-                    $options['aggregate_id'] = $this->serializationOptions['aggregate_id'];
-                    $options['before'] = $this->serializationOptions['before'];
-
-                    $success = $this->serialize($options, $greedy, $discoverPastTweets);
-
-                    $justDiscoveredFutureTweets = !$discoverPastTweets;
-                    if ($justDiscoveredFutureTweets && is_null($this->serializationOptions['before'])) {
-                        unset($options['aggregate_id']);
-
-                        $options = $this->updateExtremum($options, $discoverPastTweets = false);
-                        $options = $this->accessor->guessMaxId(
-                            $options,
-                            $this->shouldLookUpFutureItems($options['screen_name'])
-                        );
-
-                        $lastSerializationBatchSize = $this->saveStatusesMatchingCriteria(
-                            $options,
-                            $this->serializationOptions['aggregate_id']
-                        );
-
-                        $totalSerializedStatuses = $this->logHowManyItemsHaveBeenCollected($options);
-                        $this->logSerializationProgress(
-                            $options,
-                            $lastSerializationBatchSize,
-                            $totalSerializedStatuses
-                        );
-
-                        $this->flagWhisperers(
-                            $options['screen_name'],
-                            $lastSerializationBatchSize,
-                            $totalSerializedStatuses
-                        );
-                    }
-                }
+            $success = $this->trySerializingFurther($options, $greedy, $discoverPastTweets);
+        } catch (BadAuthenticationDataException $exception) {
+            $token = $this->tokenRepository->findFirstUnfrozenToken();
+            if (!($token instanceof Token)) {
+                return false;
             }
+
+            $options = $this->setUpAccessorWithFirstAvailableToken($token, $options);
+            $success = $this->trySerializingFurther($options, $greedy, $discoverPastTweets);
         } catch (UnavailableResourceException $exception) {
             throw $exception;
         } catch (\Exception $exception) {
-            $this->logger->error('[' . $exception->getMessage() . ']');
+            $this->logger->error(sprintf(
+                '[from %s %s]',
+                __METHOD__ ,
+                $exception->getMessage()
+            ));
             $success = false;
         } finally {
             $this->unlockAggregate();
@@ -1613,5 +1563,141 @@ class UserStatus implements LikedStatusCollectionAwareInterface
                 );
             }
         }
+    }
+
+    /**
+     * @param array $options
+     * @throws ProtectedAccountException
+     * @throws RateLimitedException
+     * @throws SkipSerializationException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    private function decideWhetherSerializationShouldBeSkipped(array $options)
+    {
+        try {
+            if ($this->shouldSkipSerialization($options)) {
+                throw new SkipSerializationException('Skipped pretty naturally ^_^');
+            }
+        } catch (SuspendedAccountException
+        |NotFoundMemberException
+        |ProtectedAccountException $exception
+        ) {
+            $this->handleUnavailableMemberException($exception, $options);
+        } catch (BadAuthenticationDataException $exception) {
+            $this->logger->error(
+                sprintf(
+                    'The provided tokens have come to expire (%s).',
+                    $exception->getMessage()
+                )
+            );
+
+            throw new SkipSerializationException('Skipped because of bad authentication credentials');
+        } catch (ApiRateLimitingException $exception) {
+            $this->delayingConsumption();
+
+            throw new RateLimitedException('No more call to the API can be made.');
+        } catch (UnavailableResourceException|\Exception $exception) {
+            $this->logger->error(
+                sprintf(
+                    'An error occurred when checking if a serialization could be skipped ("%s")',
+                    $exception->getMessage()
+                )
+            );
+
+            throw new SkipSerializationException(
+                'Skipped because Twitter sent error message and codes never dealt with so far'
+            );
+        }
+    }
+
+    /**
+     * @param $options
+     * @param $greedy
+     * @param $discoverPastTweets
+     * @return bool
+     * @throws NotFoundMemberException
+     * @throws ProtectedAccountException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    private function trySerializingFurther($options, $greedy, $discoverPastTweets): bool
+    {
+        $this->logIntentionWithRegardsToAggregate($options);
+
+        $lastSerializationBatchSize = $this->saveStatusesMatchingCriteria(
+            $options,
+            $this->serializationOptions['aggregate_id']
+        );
+        $success = true;
+
+        if ($discoverPastTweets || (
+                !is_null($lastSerializationBatchSize) && $lastSerializationBatchSize == self::MAX_BATCH_SIZE
+            )) {
+            // When some of the last batch of statuses have been serialized for the first time,
+            // and we should discover statuses in the past,
+            // keep retrieving statuses in the past
+            // otherwise start serializing statuses never seen before,
+            // which have been more recently published
+            $discoverPastTweets = !is_null($lastSerializationBatchSize) && $discoverPastTweets;
+            if ($greedy) {
+                $options['aggregate_id'] = $this->serializationOptions['aggregate_id'];
+                $options['before'] = $this->serializationOptions['before'];
+
+                $success = $this->serialize($options, $greedy, $discoverPastTweets);
+
+                $justDiscoveredFutureTweets = !$discoverPastTweets;
+                if ($justDiscoveredFutureTweets && is_null($this->serializationOptions['before'])) {
+                    unset($options['aggregate_id']);
+
+                    $options = $this->updateExtremum($options, $discoverPastTweets = false);
+                    $options = $this->accessor->guessMaxId(
+                        $options,
+                        $this->shouldLookUpFutureItems($options['screen_name'])
+                    );
+
+                    $lastSerializationBatchSize = $this->saveStatusesMatchingCriteria(
+                        $options,
+                        $this->serializationOptions['aggregate_id']
+                    );
+
+                    $totalSerializedStatuses = $this->logHowManyItemsHaveBeenCollected($options);
+                    $this->logSerializationProgress(
+                        $options,
+                        $lastSerializationBatchSize,
+                        $totalSerializedStatuses
+                    );
+
+                    $this->flagWhisperers(
+                        $options['screen_name'],
+                        $lastSerializationBatchSize,
+                        $totalSerializedStatuses
+                    );
+                }
+            }
+        }
+
+        return $success;
+    }
+
+    /**
+     * @param Token $token
+     * @param       $options
+     * @return array
+     * @throws \Exception
+     */
+    private function setUpAccessorWithFirstAvailableToken(Token $token, $options): array
+    {
+        $options[self::MESSAGE_OPTION_TOKEN] = $token->getOauthToken();
+        $this->setupAccessor([
+            'token' => $options[self::MESSAGE_OPTION_TOKEN],
+            'secret' => $token->getOauthTokenSecret()
+        ]);
+
+        return $options;
     }
 }
