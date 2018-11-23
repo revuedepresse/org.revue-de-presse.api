@@ -5,11 +5,14 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="App\Status\Entity\Highlight"
-            table="highlight">
+    <entity name="App\Aggregate\Entity\ArchivedTimelyStatus"
+            repository-class="App\Aggregate\Repository\ArchivedTimelyStatusRepository"
+            table="archived_timely_status">
 
         <indexes>
-            <index name="highlight_idx" columns="status_id,member_id,publication_date_time,total_retweets,total_favorites"/>
+            <index name="publication_idx" columns="publication_date_time"/>
+            <index name="status_idx" columns="status_id,publication_date_time,time_range,aggregate_id,aggregate_name"/>
+            <index name="member_name" columns="member_name"/>
         </indexes>
 
         <id name="id" column="id" type="uuid">
@@ -18,8 +21,8 @@
         </id>
 
         <one-to-one
-            field="status"
-            target-entity="WeavingTheWeb\Bundle\ApiBundle\Entity\Status">
+                field="status"
+                target-entity="WeavingTheWeb\Bundle\ApiBundle\Entity\ArchivedStatus">
             <join-column
                 name="status_id"
                 referenced-column-name="ust_id"
@@ -27,10 +30,10 @@
         </one-to-one>
 
         <many-to-one
-            field="member"
-            target-entity="WTW\UserBundle\Entity\User">
-            <join-column name="member_id" referenced-column-name="usr_id" />
-        </many-to-one>
+            target-entity="WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate"
+            field="aggregate"
+            inversed-by="timelyStatuses"
+        />
 
         <field
             name="publicationDateTime"
@@ -39,16 +42,25 @@
         />
 
         <field
-            name="totalRetweets"
-            column="total_retweets"
-            type="integer"
+            name="aggregateName"
+            column="aggregate_name"
+            type="string"
+            length="100"
         />
 
         <field
-            name="totalFavorites"
-            column="total_favorites"
+            name="memberName"
+            column="member_name"
+            type="string"
+            length="100"
+        />
+
+        <field
+            name="timeRange"
+            column="time_range"
             type="integer"
         />
+
     </entity>
 
 </doctrine-mapping>
