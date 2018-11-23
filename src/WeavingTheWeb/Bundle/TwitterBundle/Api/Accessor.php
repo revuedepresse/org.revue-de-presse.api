@@ -18,7 +18,7 @@ use Psr\Log\LoggerInterface;
 
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Token;
 
-use WeavingTheWeb\Bundle\ApiBundle\Exception\InvalidTokenException;
+use WeavingTheWeb\Bundle\TwitterBundle\Exception\BadAuthenticationDataException;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\EmptyErrorCodeException;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\OverCapacityException;
@@ -1962,6 +1962,13 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
 
             if ($errorCode === self::ERROR_NO_STATUS_FOUND_WITH_THAT_ID) {
                 throw new NotFoundStatusException(
+                    $content->errors[0]->message,
+                    $content->errors[0]->code
+                );
+            }
+
+            if ($errorCode === self::ERROR_BAD_AUTHENTICATION_DATA) {
+                throw new BadAuthenticationDataException(
                     $content->errors[0]->message,
                     $content->errors[0]->code
                 );
