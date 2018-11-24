@@ -1,5 +1,12 @@
 weaving_the_web_twitter:
-    prefix:   /api/twitter
+    prefix:   '/api/twitter'
     resource: "@WeavingTheWebTwitterBundle/Controller/"
     type:     annotation
 
+authentication_verify:
+    path:     '/api/authentication/verify'
+    defaults: { _controller: controller.authentication:verify }
+
+aggregate:
+    path:     '/api/twitter/admin/lists'
+    defaults: { _controller: controller.list:getLists }
