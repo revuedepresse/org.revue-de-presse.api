@@ -353,7 +353,7 @@ function install_php_dependencies {
 }
 
 function run_mysql_client {
-    docker exec -ti mysql mysql -uroot
+    docker exec -ti mysql mysql -uroot -A
 }
 
 function remove_mysql_container {

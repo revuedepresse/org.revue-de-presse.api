@@ -27,6 +27,16 @@ security:
                 property:            apiKey
 
     firewalls:
+        # @see https://symfony.com/doc/current/security/multiple_guard_authenticators.html#multiple-authenticators-with-separate-entry-points
+        auth0:
+            pattern: '^/api/twitter/admin/lists'
+
+            logout: ~
+
+            guard:
+                authenticators:
+                    - app.auth0_token_authenticator
+
         main:
             anonymous: ~
 

@@ -19,6 +19,7 @@
         "php": ">=7.2.5",
         "ext-json": "*",
         "ext-pdo": "*",
+        "auth0/auth0-php": "~5.0",
         "beberlei/DoctrineExtensions": "dev-master",
         "doctrine/doctrine-bundle": "~1.4",
         "doctrine/doctrine-fixtures-bundle": "*",

@@ -25,3 +25,7 @@ parameters:
     production_main_level:      error
 
     allowed.origin:             '*'
+
+    # Authentication
+    valid_audience:             ''
+    authorized_iss:             ''

@@ -1,0 +1,10 @@
+services:
+    controller.authentication:
+        class: 'App\Member\Authentication\Controller\AuthenticationController'
+        properties:
+            authenticator:        '@app.authenticator'
+
+    controller.list:
+        class: 'App\Aggregate\Controller\ListController'
+        properties:
+            aggregateRepository: '@repository.aggregate'

@@ -16,11 +16,23 @@ services:
             memberSubscriptionRepository:           '@repository.member_subscription'
             networkRepository:                      '@repository.network'
 
+    repository.authentication_token:
+        factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
+        class:   'App\Member\Repository\AuthenticationTokenRepository'
+        arguments:
+            - 'App\Member\Entity\AuthenticationToken'
+
     repository.member_aggregate_subscription:
         factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
         class: 'App\Aggregate\Repository\MemberAggregateSubscriptionRepository'
         arguments:
             - 'App\Aggregate\Entity\MemberAggregateSubscription'
+
+    repository.aggregate:
+        factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
+        class: 'WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository'
+        arguments:
+            - 'WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate'
 
     repository.not_found_status:
         factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
@@ -35,7 +47,6 @@ services:
             - 'App\Aggregate\Entity\TimelyStatus'
         properties:
             statusRepository:    "@weaving_the_web_twitter.repository.status"
-            aggregateRepository: "@weaving_the_web_twitter.repository.aggregate"
 
     repository.network:
         class:                            'App\Member\Repository\NetworkRepository'

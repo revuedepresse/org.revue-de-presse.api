@@ -24,6 +24,8 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
     /**
      * @param Request $request
      * @return array|mixed|null
+     * @throws \Doctrine\ORM\NoResultException
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function getCredentials(Request $request)
     {

@@ -1,5 +1,6 @@
 imports:
     - { resource: services/command.yml }
+    - { resource: services/controller.yml }
     - { resource: services/mapping.yml }
     - { resource: services/operation.yml }
     - { resource: services/repository.yml }
@@ -44,6 +45,13 @@ parameters:
     weaving_the_web_twitter.version:                              '%api_twitter_version%'
 
 services:
+
+    app.authenticator:
+        class: 'App\Member\Authentication\Authenticator'
+        properties:
+            authenticationTokenRepository:  '@repository.authentication_token'
+            authorizedIss:                  '%authorized_iss%'
+            validAudience:                  '%valid_audience%'
 
     app.event_subscriber.console:
         class: 'App\Console\EventSubscriber\ConsoleEventsSubscriber'

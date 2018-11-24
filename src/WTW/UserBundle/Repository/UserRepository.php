@@ -3,6 +3,7 @@
 namespace WTW\UserBundle\Repository;
 
 use App\Member\MemberInterface;
+use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityRepository;
 
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
@@ -421,5 +422,42 @@ class UserRepository extends EntityRepository
         $notFoundMember->setNotFound(true);
 
         return $this->saveMember($notFoundMember);
+    }
+
+    /**
+     * @param array $tokenInfo
+     * @return MemberInterface|null
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function findByAuthenticationToken(array $tokenInfo): ?MemberInterface
+    {
+        /** @var Connection $connection */
+        $connection = $this->getEntityManager()->getConnection();
+        $query = <<<QUERY
+            SELECT usr_id member_id
+            FROM authentication_token a
+            LEFT JOIN weaving_user m
+            ON a.member_id = m.usr_id
+            WHERE a.token = ?
+QUERY;
+        $statement = $connection->executeQuery(
+            $query,
+            [$tokenInfo['sub']],
+            [\PDO::PARAM_STR]
+        );
+        $results = $statement->fetchAll();
+
+        if (count($results) !== 1 ||
+            !array_key_exists('member_id', $results[0])) {
+            return null;
+        }
+
+        $member = $this->findOneBy(['id' => $results[0]['member_id']]);
+
+        if ($member instanceof MemberInterface) {
+            return $member;
+        }
+
+        return null;
     }
 }
