@@ -400,13 +400,20 @@ function run_mysql_container {
 
     local gateway=`ip -f inet addr  | grep docker0 -A1 | cut -d '/' -f 1 | grep inet | sed -e 's/inet//' -e 's/\s*//g'`
 
+    local mysql_volume_path=`pwd`"/../../volumes/mysql"
+    if [ ! -z "${MYSQL_VOLUME}" ];
+    then
+        mysql_volume_path="${MYSQL_VOLUME}"
+        echo 'About to mount "'"${MYSQL_VOLUME}"'" as MySQL volume'
+    fi
+
     # @see https://hub.docker.com/_/mysql/
     command="docker run --restart=always -d -p${gateway}:3306:3306 --name mysql \
         -e MYSQL_DATABASE=${database_name} \
         -e MYSQL_USER=${database_user} \
         -e MYSQL_PASSWORD=${database_password} \
         -e MYSQL_ROOT_PASSWORD=${database_password} \
-        ${configuration_volume} -v `pwd`/../../volumes/mysql:/var/lib/mysql \
+        ${configuration_volume} -v ${mysql_volume_path}:/var/lib/mysql \
         mysql:5.7 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci"
 
     # Restore current directory to project root dir
@@ -428,8 +435,13 @@ function run_mysql_container {
             test $(echo "${last_container_logs}" | grep -c "\.sock") -eq 0 && echo -n '.'
         done
 
-        grant_privileges && \
-        create_database_prod_like_schema
+        local matching_databases=$(docker exec -ti "${last_container_id}" mysql \-e 'show databases' | \
+            grep weaving_dev | grep -c '')
+        if [ ${matching_databases} -eq 0 ];
+        then
+            grant_privileges && \
+            create_database_prod_like_schema
+        fi
     fi
 
     # Log the last created container on initialization
