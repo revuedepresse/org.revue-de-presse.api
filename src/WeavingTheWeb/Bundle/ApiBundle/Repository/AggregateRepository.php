@@ -235,9 +235,9 @@ QUERY;
         $queryBuilder = $this->createQueryBuilder(self::TABLE_ALIAS);
         $this->applyCriteria($queryBuilder, $searchParams);
 
-
         $queryBuilder->setFirstResult($searchParams->getFirstItemIndex());
         $queryBuilder->setMaxResults($searchParams->getPageSize());
+        $queryBuilder->orderBy('a.name', 'ASC');
 
         return $queryBuilder->getQuery()->getArrayResult();
     }
