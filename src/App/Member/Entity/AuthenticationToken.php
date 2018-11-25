@@ -17,6 +17,13 @@ class AuthenticationToken
     private $token;
 
     /**
+     * @return string
+     */
+    public function getToken(): string {
+        return $this->token;
+    }
+
+    /**
      * @var MemberInterface
      */
     private $member;

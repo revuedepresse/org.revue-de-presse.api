@@ -1903,6 +1903,15 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
      * @param string   $endpoint
      * @param callable $fetchContent
      * @return null
+     * @throws ApiRateLimitingException
+     * @throws BadAuthenticationDataException
+     * @throws NotFoundMemberException
+     * @throws NotFoundStatusException
+     * @throws ProtectedAccountException
+     * @throws ReadOnlyApplicationException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     private function fetchContentWithRetries(string $endpoint, callable $fetchContent)
     {
@@ -1937,13 +1946,27 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
      * @param $content
      * @param $endpoint
      * @throws ApiRateLimitingException
+     * @throws BadAuthenticationDataException
+     * @throws NotFoundMemberException
      * @throws NotFoundStatusException
      * @throws OverCapacityException
+     * @throws ProtectedAccountException
+     * @throws ReadOnlyApplicationException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     private function guardAgainstContentFetchingException($content, $endpoint): void
     {
         if ($this->hasError($content)) {
             if (isset($content->error)) {
+                if ($content->error === 'Not authorized.') {
+                    throw new ProtectedAccountException(
+                        $content->error,
+                        self::ERROR_PROTECTED_TWEET
+                    );
+                }
+
                 if ($content->error === 'Read-only application cannot POST.') {
                     throw new ReadOnlyApplicationException($content->error);
                 }
@@ -1995,13 +2018,6 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
                 throw new SuspendedAccountException(
                     $content->errors[0]->message,
                     $content->errors[0]->code
-                );
-            }
-
-            if (isset($content->error) && ($content->error === 'Not authorized.')) {
-                throw new ProtectedAccountException(
-                    $content->error,
-                    self::ERROR_PROTECTED_TWEET
                 );
             }
         }
