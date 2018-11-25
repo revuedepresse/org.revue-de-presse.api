@@ -125,14 +125,21 @@ class ListController
         } catch (NonUniqueResultException $exception) {
             $this->logger->critical($exception->getMessage());
 
-            return new JsonResponse('Sorry, an unexpected error has occurred', 501);
+            return new JsonResponse(
+                'Sorry, an unexpected error has occurred',
+                501,
+                $this->getAccessControlOriginHeaders(
+                    $this->environment,
+                    $this->allowedOrigin
+                )
+            );
         }
 
         $totalPagesHeader = ['x-total-pages' => $totalPages];
         $pageIndexHeader = ['x-page-index' => $searchParams->getPageIndex()];
 
         if ($searchParams->getPageIndex() > $totalPages) {
-            $response = new JsonResponse([]);
+            $response = $this->makeOkResponse([]);
             $response->headers->add($totalPagesHeader);
             $response->headers->add($pageIndexHeader);
 
@@ -141,10 +148,26 @@ class ListController
 
         $aggregates = $finder($searchParams);
 
-        $response = new JsonResponse($aggregates);
+        $response = $this->makeOkResponse($aggregates);
         $response->headers->add($totalPagesHeader);
         $response->headers->add($pageIndexHeader);
 
         return $response;
+    }
+
+    /**
+     * @param $data
+     * @return JsonResponse
+     */
+    private function makeOkResponse($data): JsonResponse
+    {
+        return new JsonResponse(
+            $data,
+            200,
+            $this->getAccessControlOriginHeaders(
+                $this->environment,
+                $this->allowedOrigin
+            )
+        );
     }
 }

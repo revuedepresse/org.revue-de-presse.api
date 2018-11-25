@@ -9,9 +9,25 @@ trait CorsHeadersAwareTrait
     /**
      * @param string $environment
      * @param string $allowedOrigin
+     * @return array
+     */
+    private function getAccessControlOriginHeaders(
+        string $environment,
+        string $allowedOrigin
+    ) {
+        if ($environment === 'prod') {
+            return ['Access-Control-Allow-Origin' => $allowedOrigin];
+        }
+
+        return ['Access-Control-Allow-Origin' => '*'];
+    }
+
+    /**
+     * @param string $environment
+     * @param string $allowedOrigin
      * @return JsonResponse
      */
-    protected function getCorsOptionsResponse(
+    private function getCorsOptionsResponse(
         string $environment,
         string $allowedOrigin
     ) {
