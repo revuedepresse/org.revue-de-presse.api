@@ -8,3 +8,7 @@ services:
         class: 'App\Aggregate\Controller\ListController'
         properties:
             aggregateRepository: '@repository.aggregate'
+            allowedOrigin:       '%allowed.origin%'
+            environment:         '%kernel.environment%'
+            logger:              '@logger'
+            memberRepository:    '@user_manager'

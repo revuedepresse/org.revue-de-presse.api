@@ -9,4 +9,8 @@ authentication_verify:
 
 aggregate:
     path:     '/api/twitter/admin/lists'
-    defaults: { _controller: controller.list:getLists }
+    defaults: { _controller: controller.list:getAggregates }
+
+member:
+    path:     '/api/twitter/admin/members'
+    defaults: { _controller: controller.list:getMembers }
