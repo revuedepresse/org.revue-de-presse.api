@@ -160,6 +160,8 @@ class TimelyStatusRepository extends EntityRepository
         $queryBuilder->setFirstResult($searchParams->getFirstItemIndex());
         $queryBuilder->setMaxResults($searchParams->getPageSize());
 
+        $queryBuilder->orderBy(self::TABLE_ALIAS.'.publicationDateTime', 'DESC');
+
         $results = $queryBuilder->getQuery()->getArrayResult();
         $statuses = array_map(
             function ($status) {

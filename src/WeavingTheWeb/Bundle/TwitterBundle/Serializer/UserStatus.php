@@ -712,10 +712,13 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     }
 
     /**
-     * @param      $options
-     * @param null $aggregateId
+     * @param          $options
+     * @param int|null $aggregateId
      * @return int|null
      * @throws NotFoundMemberException
+     * @throws ProtectedAccountException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\OptimisticLockException
@@ -751,7 +754,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             !is_null($lastStatusId) &&
             count($statuses) > 0 &&
             ($statuses[count($statuses) - 1]->id >= intval($firstStatusId)) &&
-            ($statuses[count($statuses) - 1]->id <= intval($lastStatusId))
+            ($statuses[0]->id <= intval($lastStatusId))
         ) {
             return 0;
         }
