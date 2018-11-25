@@ -14,3 +14,7 @@ aggregate:
 member:
     path:     '/api/twitter/admin/members'
     defaults: { _controller: controller.list:getMembers }
+
+status:
+    path:     '/api/twitter/admin/statuses'
+    defaults: { _controller: controller.list:getStatuses }

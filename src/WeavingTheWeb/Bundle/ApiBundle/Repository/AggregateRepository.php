@@ -4,12 +4,11 @@ namespace WeavingTheWeb\Bundle\ApiBundle\Repository;
 
 use App\Aggregate\Controller\SearchParams;
 use App\Aggregate\Entity\TimelyStatus;
+use App\Aggregate\Repository\PaginationAwareTrait;
 use App\Aggregate\Repository\TimelyStatusRepository;
 use App\Member\MemberInterface;
 use App\Status\Entity\LikedStatus;
 use App\Status\Repository\LikedStatusRepository;
-use Doctrine\DBAL\Exception\NonUniqueFieldNameException;
-use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\QueryBuilder;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\StatusInterface;
@@ -20,6 +19,10 @@ use WeavingTheWeb\Bundle\ApiBundle\Entity\StatusInterface;
  */
 class AggregateRepository extends ResourceRepository
 {
+    const TABLE_ALIAS = 'a';
+
+    use PaginationAwareTrait;
+
     /**
      * @var TimelyStatusRepository
      */
@@ -220,17 +223,7 @@ QUERY;
      */
     public function countTotalPages(SearchParams $searchParams): int
     {
-        $queryBuilder = $this->createQueryBuilder('a');
-        $queryBuilder->select('count(a.id) total_lists');
-        $this->applyCriteria($queryBuilder, $searchParams->getKeyword());
-
-        try {
-            $result = $queryBuilder->getQuery()->getSingleResult();
-        } catch (NoResultException $exception) {
-            return 0;
-        }
-
-        return ceil($result['total_lists'] / $searchParams->getPageSize());
+        return $this->howManyPages($searchParams, self::TABLE_ALIAS);
     }
 
     /**
@@ -239,8 +232,8 @@ QUERY;
      */
     public function findAggregates(SearchParams $searchParams): array
     {
-        $queryBuilder = $this->createQueryBuilder('a');
-        $this->applyCriteria($queryBuilder, $searchParams->getKeyword());
+        $queryBuilder = $this->createQueryBuilder(self::TABLE_ALIAS);
+        $this->applyCriteria($queryBuilder, $searchParams);
 
 
         $queryBuilder->setFirstResult($searchParams->getFirstItemIndex());
@@ -251,19 +244,19 @@ QUERY;
 
     /**
      * @param QueryBuilder $queryBuilder
-     * @param string       $keyword
+     * @param SearchParams $searchParams
      */
-    private function applyCriteria(QueryBuilder $queryBuilder, string $keyword = null): void
+    private function applyCriteria(QueryBuilder $queryBuilder, SearchParams $searchParams): void
     {
         $queryBuilder->andWhere('a.screenName IS NULL');
         $queryBuilder->andWhere('a.name not like :name');
         $queryBuilder->setParameter('name', "user ::%");
 
-        if (!is_null($keyword)) {
+        if ($searchParams->hasKeyword()) {
             $queryBuilder->andWhere('a.name like :keyword');
             $queryBuilder->setParameter(
                 'keyword',
-                sprintf('%%%s%%', $keyword)
+                sprintf('%%%s%%', $searchParams->getKeyword())
             );
         }
     }
