@@ -3,11 +3,11 @@
 namespace WTW\UserBundle\Repository;
 
 use App\Aggregate\Controller\SearchParams;
+use App\Aggregate\Repository\PaginationAwareTrait;
 use App\Member\MemberInterface;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityRepository;
 
-use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\QueryBuilder;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
 use WTW\UserBundle\Entity\User;
@@ -17,6 +17,10 @@ use WTW\UserBundle\Entity\User;
  */
 class UserRepository extends EntityRepository
 {
+    const TABLE_ALIAS = 'm';
+
+    use PaginationAwareTrait;
+
     /**
      * @param      $twitterId
      * @param      $screenName
@@ -472,17 +476,7 @@ QUERY;
      */
     public function countTotalPages(SearchParams $searchParams): int
     {
-        $queryBuilder = $this->createQueryBuilder('m');
-        $queryBuilder->select('count(m.id) total_lists');
-        $this->applyCriteria($queryBuilder, $searchParams);
-
-        try {
-            $result = $queryBuilder->getQuery()->getSingleResult();
-        } catch (NoResultException $exception) {
-            return 0;
-        }
-
-        return ceil($result['total_lists'] / $searchParams->getPageSize());
+        return $this->howManyPages($searchParams, self::TABLE_ALIAS);
     }
 
     /**
@@ -492,7 +486,7 @@ QUERY;
      */
     public function findMembers(SearchParams $searchParams): array
     {
-        $queryBuilder = $this->createQueryBuilder('m');
+        $queryBuilder = $this->createQueryBuilder(self::TABLE_ALIAS);
         $aggregateProperties = $this->applyCriteria($queryBuilder, $searchParams);
 
         $queryBuilder->setFirstResult($searchParams->getFirstItemIndex());

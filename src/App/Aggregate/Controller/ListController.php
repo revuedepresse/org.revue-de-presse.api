@@ -2,6 +2,7 @@
 
 namespace App\Aggregate\Controller;
 
+use App\Aggregate\Repository\TimelyStatusRepository;
 use App\Security\Cors\CorsHeadersAwareTrait;
 use Doctrine\ORM\NonUniqueResultException;
 use Psr\Log\LoggerInterface;
@@ -25,6 +26,11 @@ class ListController
     public $memberRepository;
 
     /**
+     * @var TimelyStatusRepository
+     */
+    public $timelyStatusRepository;
+
+    /**
      * @var string
      */
     public $environment;
@@ -45,9 +51,15 @@ class ListController
      */
     public function getAggregates(Request $request)
     {
-        return $this->getCollection($request, $finder = function (SearchParams $searchParams) {
-            return $this->aggregateRepository->findAggregates($searchParams);
-        });
+        return $this->getCollection(
+            $request,
+            $counter = function (SearchParams $searchParams) {
+                return $this->aggregateRepository->countTotalPages($searchParams);
+            },
+            $finder = function (SearchParams $searchParams) {
+                return $this->aggregateRepository->findAggregates($searchParams);
+            }
+        );
     }
 
     /**
@@ -56,19 +68,46 @@ class ListController
      */
     public function getMembers(Request $request)
     {
-        return $this->getCollection($request, $finder = function (SearchParams $searchParams) {
-            return $this->memberRepository->findMembers($searchParams);
-        }, ['aggregateId' => 'int']);
+        return $this->getCollection(
+            $request,
+            $counter = function (SearchParams $searchParams) {
+                return $this->memberRepository->countTotalPages($searchParams);
+            },
+            $finder = function (SearchParams $searchParams) {
+                return $this->memberRepository->findMembers($searchParams);
+            },
+            ['aggregateId' => 'int']
+        );
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getStatuses(Request $request)
+    {
+        return $this->getCollection(
+            $request,
+            $counter = function (SearchParams $searchParams) {
+                return $this->timelyStatusRepository->countTotalPages($searchParams);
+            },
+            $finder = function (SearchParams $searchParams) {
+                return $this->timelyStatusRepository->findStatuses($searchParams);
+            },
+            ['memberName' => 'string']
+        );
     }
 
     /**
      * @param Request  $request
+     * @param callable $counter
      * @param callable $finder
      * @param array    $params
      * @return JsonResponse
      */
     private function getCollection(
         Request $request,
+        callable $counter,
         callable $finder,
         array $params = []
     ): JsonResponse {
@@ -82,7 +121,7 @@ class ListController
         $searchParams = SearchParams::fromRequest($request, $params);
 
         try {
-            $totalPages = $this->aggregateRepository->countTotalPages($searchParams);
+            $totalPages = $counter($searchParams);
         } catch (NonUniqueResultException $exception) {
             $this->logger->critical($exception->getMessage());
 

@@ -2,8 +2,11 @@
 
 namespace App\Aggregate\Repository;
 
+use App\Aggregate\Controller\SearchParams;
 use App\Aggregate\Entity\TimelyStatus;
+use App\Conversation\ConversationAwareTrait;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\StatusInterface;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository;
@@ -11,6 +14,11 @@ use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
 
 class TimelyStatusRepository extends EntityRepository
 {
+    const TABLE_ALIAS = 't';
+
+    use PaginationAwareTrait;
+    use ConversationAwareTrait;
+
     /**
      * @var StatusRepository
      */
@@ -23,7 +31,8 @@ class TimelyStatusRepository extends EntityRepository
 
     /**
      * @param array $properties
-     * @return TimelyStatus
+     * @return TimelyStatus|\App\TimeRange\TimeRangeAwareInterface
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function fromArray(array $properties)
     {
@@ -68,7 +77,7 @@ class TimelyStatusRepository extends EntityRepository
      */
     public function selectStatuses()
     {
-        $queryBuilder = $this->createQueryBuilder('t');
+        $queryBuilder = $this->createQueryBuilder(self::TABLE_ALIAS);
         $queryBuilder->select(
             [
                 's.userAvatar as author_avatar',
@@ -126,5 +135,88 @@ class TimelyStatusRepository extends EntityRepository
         $this->getEntityManager()->flush();
 
         return $timelyStatus;
+    }
+
+    /**
+     * @param $searchParams
+     * @return int
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function countTotalPages($searchParams): int
+    {
+        return $this->howManyPages($searchParams, self::TABLE_ALIAS);
+    }
+
+    /**
+     * @param SearchParams $searchParams
+     * @return array
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function findStatuses(SearchParams $searchParams): array
+    {
+        $queryBuilder = $this->createQueryBuilder(self::TABLE_ALIAS);
+        $this->applyCriteria($queryBuilder, $searchParams);
+
+        $queryBuilder->setFirstResult($searchParams->getFirstItemIndex());
+        $queryBuilder->setMaxResults($searchParams->getPageSize());
+
+        $results = $queryBuilder->getQuery()->getArrayResult();
+        $statuses = array_map(
+            function ($status) {
+                $extractedProperties = [
+                    'status' => $this->extractStatusProperties(
+                        [$status],
+                        false)[0]
+                ];
+
+                unset($status['original_document']);
+                unset($status['screen_name']);
+                unset($status['author_avatar']);
+                unset($status['status_id']);
+
+                return array_merge($status, $extractedProperties);
+            },
+            $results
+        );
+
+        return $statuses;
+    }
+
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @param SearchParams $searchParams
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    private function applyCriteria(
+        QueryBuilder $queryBuilder,
+        SearchParams $searchParams
+    ) {
+        $queryBuilder->select('s.apiDocument as original_document');
+        $queryBuilder->addSelect('t.memberName as screen_name');
+        $queryBuilder->addSelect('t.memberName as screenName');
+        $queryBuilder->addSelect('t.aggregateName as aggregateName');
+        $queryBuilder->addSelect('a.id as aggregateId');
+        $queryBuilder->addSelect('s.id as id');
+        $queryBuilder->addSelect('s.statusId as twitterId');
+        $queryBuilder->addSelect('s.userAvatar as author_avatar');
+        $queryBuilder->addSelect('s.text');
+        $queryBuilder->addSelect('s.statusId as status_id');
+
+        if ($searchParams->hasKeyword()) {
+            $queryBuilder->andWhere('s.text like :keyword');
+            $queryBuilder->setParameter(
+                'keyword',
+                sprintf('%%%s%%', $searchParams->getKeyword())
+            );
+        }
+
+        $queryBuilder->innerJoin('t.status', 's');
+        $queryBuilder->innerJoin('t.aggregate', 'a');
+
+        $params = $searchParams->getParams();
+        if (array_key_exists('memberName', $params)) {
+            $queryBuilder->andWhere('t.memberName = :member_name');
+            $queryBuilder->setParameter('member_name', $params['memberName']);
+        }
     }
 }
