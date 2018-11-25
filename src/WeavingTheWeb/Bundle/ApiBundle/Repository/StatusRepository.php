@@ -161,28 +161,17 @@ class StatusRepository extends ArchivedStatusRepository
 
     /**
      * @param $screenName
-     * @return int|mixed
-     * @throws NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @return \App\Member\MemberInterface
+     * @throws NotFoundStatusException
+     * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException
      */
     public function updateLastStatusPublicationDate($screenName)
     {
         /** @var User $member */
         $member = $this->memberManager->findOneBy(['twitter_username' => $screenName]);
 
-        $lastStatus = $this->findOneBy([
-            'screenName' => $screenName
-        ], ['createdAt' => 'DESC']);
-
-        if (!$lastStatus instanceof StatusInterface) {
-            throw new NotFoundStatusException(sprintf(
-                'No status has been collected for member with screen name "%s"',
-                $screenName
-            ));
-        }
-
+        $lastStatus = $this->getLastKnownStatusFor($screenName);
         $member->lastStatusPublicationDate = $lastStatus->getCreatedAt();
 
         return $this->memberManager->saveMember($member);
@@ -403,5 +392,76 @@ class StatusRepository extends ArchivedStatusRepository
         $queryBuilder->setParameter('id', $aggregate->getId());
 
         return $queryBuilder->getQuery()->getResult();
+    }
+
+    /**
+     * @param string $screenName
+     * @return array
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    private function howManyStatusesForMemberHavingScreenName($screenName): array
+    {
+        $connection = $this->getEntityManager()->getConnection();
+        $query = <<<QUERY
+            SELECT count(*) total_statuses
+            FROM weaving_status s
+            WHERE s.ust_full_name = ?
+QUERY;
+
+        $statement = $connection->executeQuery($query, [$screenName], [\PDO::PARAM_STR]);
+
+        return $statement->fetchAll();
+    }
+
+    /**
+     * @param string $screenName
+     * @return null|Status
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    private function getLastKnownStatusForMemberHavingScreenName(string $screenName)
+    {
+        $connection = $this->getEntityManager()->getConnection();
+        $query = <<<QUERY
+              SELECT id, publication_date_time
+              FROM (
+                SELECT s.ust_id AS id,
+                s.ust_created_at publication_date_time
+                FROM weaving_status s
+                WHERE s.ust_full_name = ?
+              ) select_
+              ORDER BY select_.publication_date_time DESC
+QUERY;
+
+        $statement = $connection->executeQuery($query, [$screenName], [\PDO::PARAM_STR]);
+        $result = $statement->fetchAll();
+
+        $criteria = ['id' => $result[0]['id']];
+        $lastStatus = $this->findOneBy($criteria);
+        return $lastStatus;
+    }
+
+    /**
+     * @param string $screenName
+     * @return null|Status
+     * @throws NotFoundStatusException
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    private function getLastKnownStatusFor(string $screenName)
+    {
+        $result = $this->howManyStatusesForMemberHavingScreenName($screenName);
+
+        $lastStatus = null;
+        if ($result[0]['total_statuses'] > 0) {
+            $lastStatus = $this->getLastKnownStatusForMemberHavingScreenName($screenName);
+        }
+
+        if (!$lastStatus instanceof StatusInterface) {
+            throw new NotFoundStatusException(sprintf(
+                'No status has been collected for member with screen name "%s"',
+                $screenName
+            ));
+        }
+
+        return $lastStatus;
     }
 }

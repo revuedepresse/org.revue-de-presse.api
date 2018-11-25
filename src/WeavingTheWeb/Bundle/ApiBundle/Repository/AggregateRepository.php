@@ -233,6 +233,11 @@ QUERY;
     public function findAggregates(SearchParams $searchParams): array
     {
         $queryBuilder = $this->createQueryBuilder(self::TABLE_ALIAS);
+
+        $queryBuilder->select();
+        $queryBuilder->distinct();
+        $queryBuilder->groupBy('a.name');
+
         $this->applyCriteria($queryBuilder, $searchParams);
 
         $queryBuilder->setFirstResult($searchParams->getFirstItemIndex());
@@ -248,7 +253,6 @@ QUERY;
      */
     private function applyCriteria(QueryBuilder $queryBuilder, SearchParams $searchParams): void
     {
-        $queryBuilder->andWhere('a.screenName IS NULL');
         $queryBuilder->andWhere('a.name not like :name');
         $queryBuilder->setParameter('name', "user ::%");
 

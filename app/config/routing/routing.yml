@@ -18,3 +18,13 @@ member:
 status:
     path:     '/api/twitter/admin/statuses'
     defaults: { _controller: controller.list:getStatuses }
+
+collect:
+    path:     '/api/twitter/admin/collect'
+    defaults: { _controller: controller.list:requestCollection }
+    methods:  [POST, OPTIONS]
+
+unlock:
+    path:     '/api/twitter/admin/unlock-aggregate'
+    defaults: { _controller: controller.list:unlockAggregate }
+    methods:  [POST, OPTIONS]
