@@ -254,6 +254,15 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             $success = $this->trySerializingFurther($options, $greedy, $discoverPastTweets);
         } catch (UnavailableResourceException $exception) {
             throw $exception;
+        } catch (SuspendedAccountException
+            |NotFoundMemberException
+            |ProtectedAccountException $exception
+        ) {
+            $this->handleUnavailableMemberException($exception, $options);
+
+            // Figuring out a member is now protected, suspended or not found is considered to be a "success",
+            // provided the workers would not call the API on behalf of them
+            $success = true;
         } catch (\Exception $exception) {
             $this->logger->error(sprintf(
                 '[from %s %s]',
@@ -1585,6 +1594,8 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         |ProtectedAccountException $exception
         ) {
             $this->handleUnavailableMemberException($exception, $options);
+        } catch (SkipSerializationException $exception) {
+            throw $exception;
         } catch (BadAuthenticationDataException $exception) {
             $this->logger->error(
                 sprintf(
