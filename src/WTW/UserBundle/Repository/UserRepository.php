@@ -542,7 +542,6 @@ QUERY;
                 a.unlocked_at
                 FROM weaving_aggregate a
                 WHERE screen_name IS NOT NULL
-                AND a.list_id IS NOT NULL
                 AND name in (
                     SELECT a.name
                     FROM weaving_aggregate a
