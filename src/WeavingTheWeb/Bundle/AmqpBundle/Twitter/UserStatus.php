@@ -2,6 +2,7 @@
 
 namespace WeavingTheWeb\Bundle\AmqpBundle\Twitter;
 
+use App\Member\MemberInterface;
 use App\Operation\OperationClock;
 use App\Status\LikedStatusCollectionAwareInterface;
 use Doctrine\ORM\EntityRepository;

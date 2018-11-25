@@ -5,6 +5,7 @@ namespace WeavingTheWeb\Bundle\TwitterBundle\Controller;
 use App\Accessor\Exception\NotFoundStatusException;
 use App\Accessor\StatusAccessor;
 use App\Conversation\ConversationAwareTrait;
+use App\Security\Cors\CorsHeadersAwareTrait;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Exception\ConnectionException;
 use Doctrine\DBAL\Exception\DriverException;
@@ -22,6 +23,7 @@ use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
 class TweetController extends Controller
 {
     use ConversationAwareTrait;
+    use CorsHeadersAwareTrait;
 
     /** @var StatusRepository */
     private $statusRepository;
@@ -45,7 +47,10 @@ class TweetController extends Controller
     public function getStatusesAction(Request $request)
     {
         if ($request->isMethod('OPTIONS')) {
-            return $this->getCorsOptionsResponse();
+            return $this->getCorsOptionsResponse(
+                $this->get('service_container')->getParameter('kernel.environment'),
+                $this->get('service_container')->getParameter('allowed.origin')
+            );
         }
 
         try {
@@ -114,7 +119,10 @@ class TweetController extends Controller
     public function getLikedStatusesAction(Request $request)
     {
         if ($request->isMethod('OPTIONS')) {
-            return $this->getCorsOptionsResponse();
+            return $this->getCorsOptionsResponse(
+                $this->get('service_container')->getParameter('kernel.environment'),
+                $this->get('service_container')->getParameter('allowed.origin')
+            );
         }
 
         try {
@@ -168,7 +176,10 @@ class TweetController extends Controller
     public function getStatusAction(Request $request)
     {
         if ($request->isMethod('OPTIONS')) {
-            return $this->getCorsOptionsResponse();
+            return $this->getCorsOptionsResponse(
+                $this->get('service_container')->getParameter('kernel.environment'),
+                $this->get('service_container')->getParameter('allowed.origin')
+            );
         }
 
         try {
@@ -326,44 +337,6 @@ class TweetController extends Controller
         }
 
         return $oauthTokens;
-    }
-
-    /**
-     * @return JsonResponse
-     */
-    protected function getCorsOptionsResponse()
-    {
-        $allowedHeaders = implode(
-            ', ',
-            [
-                'Keep-Alive',
-                'User-Agent',
-                'X-Requested-With',
-                'If-Modified-Since',
-                'Cache-Control',
-                'Content-Type',
-                'x-auth-token',
-                'x-decompressed-content-length'
-            ]
-        );
-
-        $headers = [
-            'Access-Control-Allow-Origin' => '*',
-            'Access-Control-Allow-Headers' => $allowedHeaders,
-        ];
-        if ($this->get('service_container')->getParameter('kernel.environment') === 'prod') {
-            $allowedOrigin = $this->get('service_container')->getParameter('allowed.origin');
-            $headers = [
-                'Access-Control-Allow-Origin' => $allowedOrigin,
-                'Access-Control-Allow-Headers' => $allowedHeaders,
-            ];
-        }
-
-        return new JsonResponse(
-            [],
-            200,
-            $headers
-        );
     }
 
     /**

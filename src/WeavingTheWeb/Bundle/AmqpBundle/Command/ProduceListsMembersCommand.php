@@ -33,6 +33,8 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
 
     const OPTION_MEMBER_RESTRICTION = 'member_restriction';
 
+    const OPTION_INCLUDE_OWNER = 'include_owner';
+
     use MemberAwareTrait;
 
     /**
@@ -100,6 +102,11 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
      */
     public $searchMatchingStatusRepository;
 
+    /**
+     * @var bool
+     */
+    public $shouldIncludeOwner;
+
     public function configure()
     {
         $this->setName('weaving_the_web:amqp:produce:lists_members')
@@ -151,6 +158,12 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
             null,
             InputOption::VALUE_OPTIONAL,
             'Date before which statuses should have been created'
+        )->setAliases(array('wtw:amqp:tw:prd:lm')
+        )->addOption(
+            self::OPTION_INCLUDE_OWNER,
+            null,
+            InputOption::VALUE_NONE,
+            'Should add owner to the list of accounts to be considered'
         )->setAliases(array('wtw:amqp:tw:prd:lm'));
     }
 
@@ -547,7 +560,9 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
             $ownerships = $this->guardAgainstInvalidToken($ownerships);
         }
 
-        $shouldIncludeOwner = true;
+        $this->shouldIncludeOwner = $this->input->hasOption(self::OPTION_INCLUDE_OWNER) &&
+            $this->input->getOption(self::OPTION_INCLUDE_OWNER);
+        $shouldIncludeOwner = $this->shouldIncludeOwner;
 
         foreach ($ownerships->lists as $list) {
             try {

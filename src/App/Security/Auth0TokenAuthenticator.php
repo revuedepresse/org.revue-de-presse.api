@@ -4,6 +4,7 @@ namespace App\Security;
 
 use App\Member\Authentication\Authenticator;
 use App\Member\MemberInterface;
+use App\Member\Repository\AuthenticationTokenRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
@@ -15,6 +16,11 @@ class Auth0TokenAuthenticator extends TokenAuthenticator
      * @var UserRepository
      */
     public $userRepository;
+
+    /**
+     * @var AuthenticationTokenRepository
+     */
+    public $authenticationTokenRepository;
 
     /**
      * @var Authenticator
@@ -29,6 +35,12 @@ class Auth0TokenAuthenticator extends TokenAuthenticator
      */
     public function getCredentials(Request $request)
     {
+        if ($request->isMethod('OPTIONS')) {
+            $token = $this->authenticationTokenRepository->findOneBy([]);
+
+            return ['token_info' => ['sub' => $token->getToken()]];
+        }
+
         if (!$token = $request->headers->get('x-auth-admin-token')) {
             $token = null;
         }
@@ -44,15 +56,17 @@ class Auth0TokenAuthenticator extends TokenAuthenticator
      */
     public function getUser($credentials, UserProviderInterface $userProvider)
     {
-        $apiKey = $credentials['token'];
+        $apiKey = null;
+        if (array_key_exists('token', $credentials)) {
+            $apiKey = $credentials['token'];
+        }
 
-        if (null === $apiKey) {
+        if (is_null($apiKey) && !array_key_exists('token_info', $credentials)) {
             return null;
         }
 
-        try {
-            $tokenInfo = $this->authenticator->authenticate($apiKey);
-        } catch (\Exception $exception) {
+        $tokenInfo = $this->decodeTokenInfo($credentials, $apiKey);
+        if (is_null($tokenInfo)) {
             return null;
         }
 
@@ -61,5 +75,23 @@ class Auth0TokenAuthenticator extends TokenAuthenticator
         if ($member instanceof MemberInterface) {
             return $member;
         }
+    }
+
+    /**
+     * @param $credentials
+     * @param $apiKey
+     * @return array|null
+     */
+    private function decodeTokenInfo($credentials, $apiKey)
+    {
+        if (!array_key_exists('token_info', $credentials)) {
+            try {
+                return $this->authenticator->authenticate($apiKey);
+            } catch (\Exception $exception) {
+                return null;
+            }
+        }
+
+        return $credentials['token_info'];
     }
 }

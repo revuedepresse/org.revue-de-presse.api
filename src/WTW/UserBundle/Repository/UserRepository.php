@@ -2,10 +2,13 @@
 
 namespace WTW\UserBundle\Repository;
 
+use App\Aggregate\Controller\SearchParams;
 use App\Member\MemberInterface;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityRepository;
 
+use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\QueryBuilder;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
 use WTW\UserBundle\Entity\User;
 
@@ -459,5 +462,124 @@ QUERY;
         }
 
         return null;
+    }
+
+    /**
+     * @param SearchParams $searchParams
+     * @return int
+     * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function countTotalPages(SearchParams $searchParams): int
+    {
+        $queryBuilder = $this->createQueryBuilder('m');
+        $queryBuilder->select('count(m.id) total_lists');
+        $this->applyCriteria($queryBuilder, $searchParams);
+
+        try {
+            $result = $queryBuilder->getQuery()->getSingleResult();
+        } catch (NoResultException $exception) {
+            return 0;
+        }
+
+        return ceil($result['total_lists'] / $searchParams->getPageSize());
+    }
+
+    /**
+     * @param SearchParams $searchParams
+     * @return array
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function findMembers(SearchParams $searchParams): array
+    {
+        $queryBuilder = $this->createQueryBuilder('m');
+        $aggregateProperties = $this->applyCriteria($queryBuilder, $searchParams);
+
+        $queryBuilder->setFirstResult($searchParams->getFirstItemIndex());
+        $queryBuilder->setMaxResults($searchParams->getPageSize());
+
+        $results = $queryBuilder->getQuery()->getArrayResult();
+
+        if (count($aggregateProperties) > 0) {
+            return array_map(function ($result) use ($aggregateProperties) {
+                return array_merge(
+                    $result,
+                    $aggregateProperties[strtolower($result['name'])]
+                );
+            }, $results);
+        }
+
+        return $results;
+    }
+
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @param SearchParams $searchParams
+     * @return array
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    private function applyCriteria(QueryBuilder $queryBuilder, SearchParams $searchParams): array
+    {
+        $queryBuilder->addSelect('m.twitter_username as name');
+        $queryBuilder->addSelect('m.url');
+        $queryBuilder->addSelect('m.description');
+        $queryBuilder->addSelect('m.twitterID as twitterId');
+        $queryBuilder->addSelect('m.notFound as isNotFound');
+        $queryBuilder->addSelect('m.suspended as isSuspended');
+        $queryBuilder->addSelect('m.protected as isProtected');
+        $queryBuilder->addSelect('m.id as id');
+
+        if ($searchParams->hasKeyword()) {
+            $queryBuilder->andWhere('m.twitter_username like :keyword');
+            $queryBuilder->setParameter(
+                'keyword',
+                sprintf('%%%s%%', $searchParams->getKeyword())
+            );
+        }
+
+        $params = $searchParams->getParams();
+        if (array_key_exists('aggregateId', $params)) {
+            $connection = $this->getEntityManager()->getConnection();
+            $query = <<< QUERY
+                SELECT 
+                a.screen_name, 
+                a.locked, 
+                a.locked_at,
+                a.unlocked_at
+                FROM weaving_aggregate a
+                WHERE screen_name IS NOT NULL
+                AND a.list_id IS NOT NULL
+                AND name in (
+                    SELECT a.name
+                    FROM weaving_aggregate a
+                    WHERE id = ?
+                )
+QUERY;
+            $statement = $connection->executeQuery($query, [$params['aggregateId']], [\PDO::PARAM_INT]);
+            $results = $statement->fetchAll();
+            $screenNames = array_map(
+                function ($result) {
+                    return $result['screen_name'];
+                },
+                $results
+            );
+            $aggregateProperties = [];
+            array_walk(
+                $results,
+                function ($result) use (&$aggregateProperties) {
+                    $result['locked'] = (bool) $result['locked'];
+                    $result['unlocked_at'] = (new \DateTime($result['unlocked_at'], new \DateTimeZone('UTC')))
+                        ->getTimestamp();
+                    $aggregateProperties[strtolower($result['screen_name'])] = $result;
+                }
+            );
+
+            $queryBuilder->andWhere('m.twitter_username in (:screen_names)');
+            $queryBuilder->setParameter('screen_names', $screenNames);
+
+            return $aggregateProperties;
+        }
+
+        return [];
     }
 }

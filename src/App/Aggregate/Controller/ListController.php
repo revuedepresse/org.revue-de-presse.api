@@ -2,70 +2,110 @@
 
 namespace App\Aggregate\Controller;
 
-use Doctrine\ORM\QueryBuilder;
+use App\Security\Cors\CorsHeadersAwareTrait;
+use Doctrine\ORM\NonUniqueResultException;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository;
+use WTW\UserBundle\Repository\UserRepository;
 
 class ListController
 {
+    use CorsHeadersAwareTrait;
+
     /**
      * @var AggregateRepository
      */
     public $aggregateRepository;
 
-    public function getLists(Request $request)
+    /**
+     * @var UserRepository
+     */
+    public $memberRepository;
+
+    /**
+     * @var string
+     */
+    public $environment;
+
+    /**
+     * @var string
+     */
+    public $allowedOrigin;
+
+    /**
+     * @var LoggerInterface
+     */
+    public $logger;
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getAggregates(Request $request)
     {
-        $pageIndex = intval($request->get('page_index', 1));
-        $pageSize = intval($request->get('page_size', 25));
+        return $this->getCollection($request, $finder = function (SearchParams $searchParams) {
+            return $this->aggregateRepository->findAggregates($searchParams);
+        });
+    }
 
-        $totalPages = $this->countTotalPages($pageSize);
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getMembers(Request $request)
+    {
+        return $this->getCollection($request, $finder = function (SearchParams $searchParams) {
+            return $this->memberRepository->findMembers($searchParams);
+        }, ['aggregateId' => 'int']);
+    }
 
-        $totalPagesHeader = ['total-pages' => $totalPages];
+    /**
+     * @param Request  $request
+     * @param callable $finder
+     * @param array    $params
+     * @return JsonResponse
+     */
+    private function getCollection(
+        Request $request,
+        callable $finder,
+        array $params = []
+    ): JsonResponse {
+        if ($request->isMethod('OPTIONS')) {
+            return $this->getCorsOptionsResponse(
+                $this->environment,
+                $this->allowedOrigin
+            );
+        }
 
-        if ($pageIndex > $totalPages) {
+        $searchParams = SearchParams::fromRequest($request, $params);
+
+        try {
+            $totalPages = $this->aggregateRepository->countTotalPages($searchParams);
+        } catch (NonUniqueResultException $exception) {
+            $this->logger->critical($exception->getMessage());
+
+            return new JsonResponse('Sorry, an unexpected error has occurred', 501);
+        }
+
+        $totalPagesHeader = ['x-total-pages' => $totalPages];
+        $pageIndexHeader = ['x-page-index' => $searchParams->getPageIndex()];
+
+        if ($searchParams->getPageIndex() > $totalPages) {
             $response = new JsonResponse([]);
             $response->headers->add($totalPagesHeader);
+            $response->headers->add($pageIndexHeader);
 
             return $response;
         }
 
-        $queryBuilder = $this->aggregateRepository->createQueryBuilder('a');
-        $this->applyCriteria($queryBuilder);
-
-        $queryBuilder->setFirstResult(($pageIndex - 1) * $pageSize);
-        $queryBuilder->setMaxResults($pageSize);
-
-        $aggregates = $queryBuilder->getQuery()->getArrayResult();
+        $aggregates = $finder($searchParams);
 
         $response = new JsonResponse($aggregates);
         $response->headers->add($totalPagesHeader);
+        $response->headers->add($pageIndexHeader);
 
         return $response;
-    }
-
-    /**
-     * @param QueryBuilder $queryBuilder
-     */
-    private function applyCriteria(QueryBuilder $queryBuilder): void
-    {
-        $queryBuilder->andWhere('a.screenName IS NULL');
-        $queryBuilder->andWhere('a.name not like :name');
-        $queryBuilder->setParameter('name', "user ::%");
-    }
-
-    /**
-     * @return int
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     */
-    private function countTotalPages($pageSize): int
-    {
-        $queryBuilder = $this->aggregateRepository->createQueryBuilder('a');
-        $queryBuilder->select('count(a.id) total_lists');
-        $this->applyCriteria($queryBuilder);
-        $result = $queryBuilder->getQuery()->getSingleResult();
-
-        return ceil($result['total_lists'] / $pageSize);
     }
 }

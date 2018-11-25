@@ -7,5 +7,6 @@ services:
     app.auth0_token_authenticator:
         class:              'App\Security\Auth0TokenAuthenticator'
         properties:
-            authenticator:  '@app.authenticator'
-            userRepository: '@user_manager'
+            authenticator:                  '@app.authenticator'
+            authenticationTokenRepository:  '@repository.authentication_token'
+            userRepository:                 '@user_manager'

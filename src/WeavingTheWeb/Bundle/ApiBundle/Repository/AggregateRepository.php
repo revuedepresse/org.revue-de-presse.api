@@ -2,11 +2,15 @@
 
 namespace WeavingTheWeb\Bundle\ApiBundle\Repository;
 
+use App\Aggregate\Controller\SearchParams;
 use App\Aggregate\Entity\TimelyStatus;
 use App\Aggregate\Repository\TimelyStatusRepository;
 use App\Member\MemberInterface;
 use App\Status\Entity\LikedStatus;
 use App\Status\Repository\LikedStatusRepository;
+use Doctrine\DBAL\Exception\NonUniqueFieldNameException;
+use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\QueryBuilder;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\StatusInterface;
 
@@ -34,7 +38,8 @@ class AggregateRepository extends ResourceRepository
     /**
      * @param string $screenName
      * @param string $listName
-     * @return Aggregate
+     * @return null|object|Aggregate
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function make(string $screenName, string $listName)
     {
@@ -206,5 +211,60 @@ QUERY;
         }
 
         return $aggregate;
+    }
+
+    /**
+     * @param SearchParams $searchParams
+     * @return int
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function countTotalPages(SearchParams $searchParams): int
+    {
+        $queryBuilder = $this->createQueryBuilder('a');
+        $queryBuilder->select('count(a.id) total_lists');
+        $this->applyCriteria($queryBuilder, $searchParams->getKeyword());
+
+        try {
+            $result = $queryBuilder->getQuery()->getSingleResult();
+        } catch (NoResultException $exception) {
+            return 0;
+        }
+
+        return ceil($result['total_lists'] / $searchParams->getPageSize());
+    }
+
+    /**
+     * @param SearchParams $searchParams
+     * @return array
+     */
+    public function findAggregates(SearchParams $searchParams): array
+    {
+        $queryBuilder = $this->createQueryBuilder('a');
+        $this->applyCriteria($queryBuilder, $searchParams->getKeyword());
+
+
+        $queryBuilder->setFirstResult($searchParams->getFirstItemIndex());
+        $queryBuilder->setMaxResults($searchParams->getPageSize());
+
+        return $queryBuilder->getQuery()->getArrayResult();
+    }
+
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @param string       $keyword
+     */
+    private function applyCriteria(QueryBuilder $queryBuilder, string $keyword = null): void
+    {
+        $queryBuilder->andWhere('a.screenName IS NULL');
+        $queryBuilder->andWhere('a.name not like :name');
+        $queryBuilder->setParameter('name', "user ::%");
+
+        if (!is_null($keyword)) {
+            $queryBuilder->andWhere('a.name like :keyword');
+            $queryBuilder->setParameter(
+                'keyword',
+                sprintf('%%%s%%', $keyword)
+            );
+        }
     }
 }
