@@ -80,7 +80,10 @@ class TweetController extends Controller
             $response = new JsonResponse(
                 $statuses,
                 $statusCode,
-                $this->getAccessControlOriginHeaders()
+                $this->getAccessControlOriginHeaders(
+                    $this->get('service_container')->getParameter('kernel.environment'),
+                    $this->get('service_container')->getParameter('allowed.origin')
+                )
             );
 
             $encodedStatuses = json_encode($statuses);
@@ -139,7 +142,10 @@ class TweetController extends Controller
             $response = new JsonResponse(
                 $likedStatuses,
                 $statusCode,
-                $this->getAccessControlOriginHeaders()
+                $this->getAccessControlOriginHeaders(
+                    $this->get('service_container')->getParameter('kernel.environment'),
+                    $this->get('service_container')->getParameter('allowed.origin')
+                )
             );
 
             $encodedStatuses = json_encode($likedStatuses);
@@ -203,7 +209,10 @@ class TweetController extends Controller
             $response = new JsonResponse(
                 $statuses,
                 $statusCode,
-                $this->getAccessControlOriginHeaders()
+                $this->getAccessControlOriginHeaders(
+                    $this->get('service_container')->getParameter('kernel.environment'),
+                    $this->get('service_container')->getParameter('allowed.origin')
+                )
             );
 
             $encodedStatuses = json_encode($statuses);
@@ -225,7 +234,10 @@ class TweetController extends Controller
             return $this->setCacheHeaders(new JsonResponse(
                 ['error' => $errorMessage],
                 404,
-                $this->getAccessControlOriginHeaders()
+                $this->getAccessControlOriginHeaders(
+                    $this->get('service_container')->getParameter('kernel.environment'),
+                    $this->get('service_container')->getParameter('allowed.origin')
+                )
             ));
         } catch (\Exception $exception) {
             return $this->getExceptionResponse($exception);
@@ -270,21 +282,14 @@ class TweetController extends Controller
 
         $statusCode = 500;
 
-        return new JsonResponse($data, $statusCode, $this->getAccessControlOriginHeaders());
-    }
-
-    /**
-     * @return array
-     */
-    protected function getAccessControlOriginHeaders()
-    {
-        if ($this->get('service_container')->getParameter('kernel.environment') === 'prod') {
-            $allowedOrigin = $this->get('service_container')->getParameter('allowed.origin');
-
-            return ['Access-Control-Allow-Origin' => $allowedOrigin];
-        }
-
-        return ['Access-Control-Allow-Origin' => '*'];
+        return new JsonResponse(
+            $data,
+            $statusCode,
+            $this->getAccessControlOriginHeaders(
+                $this->get('service_container')->getParameter('kernel.environment'),
+                $this->get('service_container')->getParameter('allowed.origin')
+            )
+        );
     }
 
     /**
