@@ -20,10 +20,17 @@ class ImportMemberAggregatesCommand extends AbstractCommand
 
     const OPTION_FIND_OWNERSHIP = 'find-ownerships';
 
+    const OPTION_LIST_RESTRICTION = 'list-restriction';
+
     /**
      * @var Accessor
      */
     public $accessor;
+
+    /**
+     * @var string
+     */
+    public $listRestriction;
 
     /**
      * @var AggregateSubscriptionRepository
@@ -64,6 +71,11 @@ class ImportMemberAggregatesCommand extends AbstractCommand
                 'o',
                 InputOption::VALUE_NONE
             )
+            ->addOption(
+                self::OPTION_LIST_RESTRICTION,
+                'lr',
+                InputOption::VALUE_OPTIONAL
+            )
             ->setDescription('Import lists of a member as aggregates');
     }
 
@@ -71,6 +83,11 @@ class ImportMemberAggregatesCommand extends AbstractCommand
      * @param InputInterface  $input
      * @param OutputInterface $output
      * @return int|null|void
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws \WeavingTheWeb\Bundle\ApiBundle\Exception\InvalidTokenException
+     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
+     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
@@ -89,6 +106,15 @@ class ImportMemberAggregatesCommand extends AbstractCommand
                         $member,
                         (array) $list
                     );
+
+                if ($this->input->hasOption(self::OPTION_LIST_RESTRICTION) &&
+                    $this->input->getOption(self::OPTION_LIST_RESTRICTION)) {
+                    $this->listRestriction = $this->input->getOption(self::OPTION_LIST_RESTRICTION);
+                }
+
+                if ($list->name !== $this->listRestriction) {
+                    return;
+                }
 
                 $list = $this->accessor->getListMembers($memberAggregateSubscription->listId);
 
