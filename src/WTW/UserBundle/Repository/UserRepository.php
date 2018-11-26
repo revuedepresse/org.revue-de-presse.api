@@ -527,7 +527,16 @@ QUERY;
             $queryBuilder->andWhere('m.twitter_username like :keyword');
             $queryBuilder->setParameter(
                 'keyword',
-                sprintf('%%%s%%', $searchParams->getKeyword())
+                sprintf(
+                    '%%%s%%',
+                    strtr(
+                        $searchParams->getKeyword(),
+                        [
+                            '_' => '\_',
+                            '%' => '%%',
+                        ]
+                    )
+                )
             );
         }
 

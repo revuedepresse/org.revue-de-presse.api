@@ -39,6 +39,11 @@ class AggregateRepository extends ResourceRepository
     public $statusRepository;
 
     /**
+     * @var \Psr\Log\LoggerInterface
+     */
+    public $logger;
+
+    /**
      * @param string $screenName
      * @param string $listName
      * @return null|object|Aggregate
@@ -239,12 +244,61 @@ QUERY;
         $queryBuilder->groupBy('a.name');
 
         $this->applyCriteria($queryBuilder, $searchParams);
-
+        
         $queryBuilder->setFirstResult($searchParams->getFirstItemIndex());
         $queryBuilder->setMaxResults($searchParams->getPageSize());
         $queryBuilder->orderBy('a.name', 'ASC');
 
-        return $queryBuilder->getQuery()->getArrayResult();
+        $aggregates = $queryBuilder->getQuery()->getArrayResult();
+
+        $query = <<< QUERY
+            SELECT count(*) as total_statuses
+            FROM timely_status
+            WHERE aggregate_id in (
+              SELECT am.id
+              FROM weaving_aggregate a
+              INNER JOIN weaving_aggregate am 
+              ON ( a.name = am.name )
+              WHERE a.id = ? 
+            );
+QUERY;
+
+        $connection = $this->getEntityManager()->getConnection();
+        $aggregates = array_map(
+            function(array $aggregate) use ($connection, $query) {
+                if ($aggregate['totalStatuses'] === 0) {
+                    $statement = $connection->executeQuery(
+                        $query,
+                        [$aggregate['id']],
+                        [\PDO::PARAM_INT]
+                    );
+
+                    $aggregate['totalStatuses'] = intval($statement->fetchAll()[0]['total_statuses']);
+
+                    /** @var Aggregate $existingAggregate */
+                    $existingAggregate = $this->findOneBy(['id' => $aggregate['id']]);
+
+                    $existingAggregate->totalStatuses = $aggregate['totalStatuses'];
+                    if ($aggregate['totalStatuses'] === 0) {
+                        $existingAggregate->totalStatuses = -1;
+                    }
+
+                    $this->getEntityManager()->persist($existingAggregate);
+                }
+
+                return $aggregate;
+            },
+            $aggregates
+        );
+
+        try {
+            $this->getEntityManager()->flush();
+        } catch (\Exception $exception) {
+            $this->logger->critical($exception);
+        }
+
+
+        return $aggregates;
     }
 
     /**
@@ -260,7 +314,16 @@ QUERY;
             $queryBuilder->andWhere('a.name like :keyword');
             $queryBuilder->setParameter(
                 'keyword',
-                sprintf('%%%s%%', $searchParams->getKeyword())
+                sprintf(
+                    '%%%s%%',
+                    strtr(
+                        $searchParams->getKeyword(),
+                        [
+                            '_' => '\_',
+                            '%' => '%%',
+                        ]
+                    )
+                )
             );
         }
     }
