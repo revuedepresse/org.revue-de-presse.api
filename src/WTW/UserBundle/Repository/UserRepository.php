@@ -9,6 +9,7 @@ use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityRepository;
 
 use Doctrine\ORM\QueryBuilder;
+use WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
 use WTW\UserBundle\Entity\User;
 
@@ -18,6 +19,14 @@ use WTW\UserBundle\Entity\User;
 class UserRepository extends EntityRepository
 {
     const TABLE_ALIAS = 'm';
+
+    /** @var AggregateRepository */
+    public $aggregateRepository;
+
+    /**
+     * @var \Psr\Log\LoggerInterface
+     */
+    public $logger;
 
     use PaginationAwareTrait;
 
@@ -514,7 +523,7 @@ QUERY;
      */
     private function applyCriteria(QueryBuilder $queryBuilder, SearchParams $searchParams): array
     {
-        $queryBuilder->addSelect('m.twitter_username as name');
+        $queryBuilder->select('m.twitter_username as name');
         $queryBuilder->addSelect('m.url');
         $queryBuilder->addSelect('m.description');
         $queryBuilder->addSelect('m.twitterID as twitterId');
@@ -542,13 +551,53 @@ QUERY;
 
         $params = $searchParams->getParams();
         if (array_key_exists('aggregateId', $params)) {
-            $connection = $this->getEntityManager()->getConnection();
-            $query = <<< QUERY
+            $aggregates = $this->findRelatedAggregates($params);
+            $aggregateProperties = [];
+            array_walk(
+                $aggregates,
+                function ($aggregate) use (&$aggregateProperties) {
+                    $aggregate['id'] = intval($aggregate['id']);
+                    $aggregate['totalStatuses'] = intval($aggregate['totalStatuses']);
+                    $aggregate['locked'] = (bool)$aggregate['locked'];
+                    $aggregate['unlockedAt'] = (new \DateTime(
+                        $aggregate['unlocked_at'],
+                        new \DateTimeZone('UTC'))
+                    )->getTimestamp();
+                    $aggregateProperties[strtolower($aggregate['screenName'])] = $aggregate;
+                }
+            );
+
+            $screenNames = array_map(
+                function ($result) {
+                    return $result['screenName'];
+                },
+                $aggregates
+            );
+            $queryBuilder->andWhere('m.twitter_username in (:screen_names)');
+            $queryBuilder->setParameter('screen_names', $screenNames);
+
+            return $aggregateProperties;
+        }
+
+        return [];
+    }
+
+    /**
+     * @param $params
+     * @return array
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    private function findRelatedAggregates($params): array
+    {
+        $connection = $this->getEntityManager()->getConnection();
+        $query = <<< QUERY
                 SELECT 
-                a.screen_name, 
+                a.id,
+                a.screen_name AS screenName, 
+                a.total_statuses AS totalStatuses,
                 a.locked, 
-                a.locked_at,
-                a.unlocked_at
+                a.locked_at AS lockedAt,
+                a.unlocked_at AS unlockedAt
                 FROM weaving_aggregate a
                 WHERE screen_name IS NOT NULL
                 AND name in (
@@ -557,31 +606,34 @@ QUERY;
                     WHERE id = ?
                 )
 QUERY;
-            $statement = $connection->executeQuery($query, [$params['aggregateId']], [\PDO::PARAM_INT]);
-            $results = $statement->fetchAll();
-            $screenNames = array_map(
-                function ($result) {
-                    return $result['screen_name'];
-                },
-                $results
-            );
-            $aggregateProperties = [];
-            array_walk(
-                $results,
-                function ($result) use (&$aggregateProperties) {
-                    $result['locked'] = (bool) $result['locked'];
-                    $result['unlocked_at'] = (new \DateTime($result['unlocked_at'], new \DateTimeZone('UTC')))
-                        ->getTimestamp();
-                    $aggregateProperties[strtolower($result['screen_name'])] = $result;
+        $statement = $connection->executeQuery($query, [$params['aggregateId']], [\PDO::PARAM_INT]);
+        $results = $statement->fetchAll();
+
+        $results = array_map(
+            function (array $aggregate) {
+                if (intval($aggregate['totalStatuses']) === 0 || true) {
+                    $matchingAggregate = $this->aggregateRepository->findOneBy(
+                        ['id' => intval($aggregate['id'])]
+                    );
+
+                    $this->aggregateRepository->updateTotalStatusesByExcludingRelatedAggregates(
+                        $aggregate,
+                        $matchingAggregate
+                    );
+                    $aggregate['totalStatuses'] = $matchingAggregate->totalStatuses;
                 }
-            );
 
-            $queryBuilder->andWhere('m.twitter_username in (:screen_names)');
-            $queryBuilder->setParameter('screen_names', $screenNames);
+                return $aggregate;
+            },
+            $results
+        );
 
-            return $aggregateProperties;
+        try {
+            $this->getEntityManager()->flush();
+        } catch (\Exception $exception) {
+            $this->logger->critical($exception->getMessage());
         }
 
-        return [];
+        return $results;
     }
 }

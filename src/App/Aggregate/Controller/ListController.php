@@ -6,8 +6,6 @@ use App\Aggregate\Repository\TimelyStatusRepository;
 use App\Security\Cors\CorsHeadersAwareTrait;
 use Doctrine\ORM\NonUniqueResultException;
 use OldSound\RabbitMqBundle\RabbitMq\Producer;
-use PHPUnit\Util\Json;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
@@ -61,7 +59,7 @@ class ListController
     public $allowedOrigin;
 
     /**
-     * @var LoggerInterface
+     * @var \Psr\Log\LoggerInterface
      */
     public $logger;
 
