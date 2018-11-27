@@ -33,6 +33,11 @@ services:
         class: 'WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository'
         arguments:
             - 'WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate'
+        properties:
+            logger:                 '@logger'
+            statusRepository:       '@weaving_the_web_twitter.repository.status'
+            timelyStatusRepository: '@repository.timely_status'
+            likedStatusRepository:  '@repository.liked_status'
 
     repository.not_found_status:
         factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]

@@ -14,6 +14,8 @@
         <service id="user_manager" class="%user_manager.class%">
             <factory service="doctrine.orm.entity_manager" method="getRepository" />
             <argument type="string">%wtw_user.entity.user.class%</argument>
+            <property type="service" id="repository.aggregate" name="aggregateRepository" />
+            <property type="service" id="logger" name="logger" />
         </service>
     </services>
 </container>
