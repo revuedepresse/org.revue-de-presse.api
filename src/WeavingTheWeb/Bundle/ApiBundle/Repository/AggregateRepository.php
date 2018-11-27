@@ -39,6 +39,11 @@ class AggregateRepository extends ResourceRepository
     public $statusRepository;
 
     /**
+     * @var \Psr\Log\LoggerInterface
+     */
+    public $logger;
+
+    /**
      * @param string $screenName
      * @param string $listName
      * @return null|object|Aggregate
@@ -239,12 +244,150 @@ QUERY;
         $queryBuilder->groupBy('a.name');
 
         $this->applyCriteria($queryBuilder, $searchParams);
-
+        
         $queryBuilder->setFirstResult($searchParams->getFirstItemIndex());
         $queryBuilder->setMaxResults($searchParams->getPageSize());
         $queryBuilder->orderBy('a.name', 'ASC');
 
-        return $queryBuilder->getQuery()->getArrayResult();
+        $aggregates = $queryBuilder->getQuery()->getArrayResult();
+
+        $aggregates = array_map(
+            function(array $aggregate) {
+                $existingAggregate = null;
+                if (($aggregate['totalStatuses'] === 0) ||
+                    ($aggregate['totalMembers'] === 0 || true)) {
+                    /** @var Aggregate $existingAggregate */
+                    $existingAggregate = $this->findOneBy(['id' => $aggregate['id']]);
+                    if (!($existingAggregate instanceof Aggregate)) {
+                        return $aggregate;
+                    }
+                }
+
+                $aggregate = $this->updateTotalStatuses(
+                    $aggregate,
+                    $existingAggregate
+                );
+
+
+                return $this->updateTotalMembers($aggregate, $existingAggregate);
+            },
+            $aggregates
+        );
+
+        try {
+            $this->getEntityManager()->flush();
+        } catch (\Exception $exception) {
+            $this->logger->critical($exception);
+        }
+
+
+        return $aggregates;
+    }
+
+    /**
+     * @param array          $aggregate
+     * @param Aggregate|null $matchingAggregate
+     * @return array
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function updateTotalStatusesByExcludingRelatedAggregates(
+        array $aggregate,
+        Aggregate $matchingAggregate = null
+    ): array {
+        return $this->updateTotalStatuses($aggregate, $matchingAggregate, $includeRelatedAggregates = false);
+    }
+
+    /**
+     * @param array          $aggregate
+     * @param Aggregate|null $matchingAggregate
+     * @param bool           $includeRelatedAggregates
+     * @return array
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    public function updateTotalStatuses(
+        array $aggregate,
+        Aggregate $matchingAggregate = null,
+        bool $includeRelatedAggregates = true
+    ): array {
+        if ($aggregate['totalStatuses'] === 0 || true) {
+            $connection = $this->getEntityManager()->getConnection();
+
+            $query = <<< QUERY
+                SELECT count(*) as total_statuses
+                FROM timely_status
+                WHERE aggregate_id = ?;
+QUERY;
+
+            if ($includeRelatedAggregates) {
+                $query = <<< QUERY
+                    SELECT count(*) as total_statuses
+                    FROM timely_status
+                    WHERE aggregate_id in (
+                      SELECT am.id
+                      FROM weaving_aggregate a
+                      INNER JOIN weaving_aggregate am 
+                      ON ( a.name = am.name )
+                      WHERE a.id = ? 
+                    );
+QUERY;
+            }
+
+            $statement = $connection->executeQuery(
+                $query,
+                [$aggregate['id']],
+                [\PDO::PARAM_INT]
+            );
+
+            $aggregate['totalStatuses'] = intval($statement->fetchAll()[0]['total_statuses']);
+
+            $matchingAggregate->totalStatuses = $aggregate['totalStatuses'];
+            if ($aggregate['totalStatuses'] === 0) {
+                $matchingAggregate->totalStatuses = -1;
+            }
+
+            $this->getEntityManager()->persist($matchingAggregate);
+        }
+
+        return $aggregate;
+    }
+
+    /**
+     * @param array          $aggregate
+     * @param Aggregate|null $matchingAggregate
+     * @return array
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    private function updateTotalMembers(
+        array $aggregate,
+        Aggregate $matchingAggregate = null
+    ): array {
+        if ($aggregate['totalMembers'] === 0 || true) {
+            $query = <<<QUERY
+                SELECT 
+                count(a.screen_name) as total_members
+                FROM weaving_aggregate a
+                WHERE screen_name IS NOT NULL
+                AND name in (
+                    SELECT a.name
+                    FROM weaving_aggregate a
+                    WHERE id = ?
+                )
+QUERY;
+            $connection = $this->getEntityManager()->getConnection();
+            $statement = $connection->executeQuery($query, [$aggregate['id']], [\Pdo::PARAM_INT]);
+
+            $aggregate['totalMembers'] = intval($statement->fetchAll()[0]['total_members']);
+
+            $matchingAggregate->totalMembers = $aggregate['totalMembers'];
+            if ($aggregate['totalMembers'] === 0) {
+                $matchingAggregate->totalMembers = -1;
+            }
+
+            $this->getEntityManager()->persist($matchingAggregate);
+
+        }
+
+        return $aggregate;
     }
 
     /**
@@ -260,7 +403,16 @@ QUERY;
             $queryBuilder->andWhere('a.name like :keyword');
             $queryBuilder->setParameter(
                 'keyword',
-                sprintf('%%%s%%', $searchParams->getKeyword())
+                sprintf(
+                    '%%%s%%',
+                    strtr(
+                        $searchParams->getKeyword(),
+                        [
+                            '_' => '\_',
+                            '%' => '%%',
+                        ]
+                    )
+                )
             );
         }
     }

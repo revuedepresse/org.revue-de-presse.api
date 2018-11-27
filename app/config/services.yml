@@ -97,6 +97,7 @@ services:
         factory: 'doctrine.orm.entity_manager:getRepository'
         arguments: [ '%weaving_the_web_twitter.entity.aggregate.class%' ]
         properties:
+            logger:                 '@logger'
             statusRepository:       '@weaving_the_web_twitter.repository.status'
             timelyStatusRepository: '@repository.timely_status'
             likedStatusRepository:  '@repository.liked_status'

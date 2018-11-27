@@ -75,6 +75,20 @@ class Aggregate
      */
     public $listId;
 
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="total_members", type="integer", options={"default": 0})
+     */
+    public $totalMembers = 0;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="total_statuses", type="integer", options={"default": 0})
+     */
+    public $totalStatuses = 0;
+
     public function lock()
     {
         $this->locked = true;
