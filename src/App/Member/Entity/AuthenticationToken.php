@@ -27,4 +27,12 @@ class AuthenticationToken
      * @var MemberInterface
      */
     private $member;
+
+    /**
+     * @return MemberInterface
+     */
+    public function getMember(): MemberInterface {
+        return $this->member;
+    }
+
 }

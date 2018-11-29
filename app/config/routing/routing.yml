@@ -28,3 +28,9 @@ unlock:
     path:     '/api/twitter/admin/unlock-aggregate'
     defaults: { _controller: controller.list:unlockAggregate }
     methods:  [POST, OPTIONS]
+
+logged_in_member_profile:
+    path:     '/api/twitter/admin/logged-in-member/profile'
+    defaults: { _controller: controller.logged_in_member:getProfile }
+    methods:  [POST, OPTIONS]
+

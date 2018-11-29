@@ -21,6 +21,9 @@ services:
         class:   'App\Member\Repository\AuthenticationTokenRepository'
         arguments:
             - 'App\Member\Entity\AuthenticationToken'
+        properties:
+            memberRepository: "@user_manager"
+            authenticator:    "@app.authenticator"
 
     repository.member_aggregate_subscription:
         factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]

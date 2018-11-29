@@ -16,3 +16,11 @@ services:
             memberRepository:           '@user_manager'
             timelyStatusRepository:     '@repository.timely_status'
             tokenRepository:            '@weaving_the_web_api.repository.token'
+
+    controller.logged_in_member:
+        class: 'App\Member\Controller\LoggedInMemberController'
+        properties:
+            logger:                        '@logger'
+            authenticationTokenRepository: '@repository.authentication_token'
+            allowedOrigin:                 '%allowed.origin%'
+            environment:                   '%kernel.environment%'
