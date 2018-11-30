@@ -60,13 +60,16 @@ class LoggedInMemberController
             return $this->makeInvalidIdTokenResponse($corsHeaders);
         }
 
-        $member = $this->authenticationTokenRepository->findMemberByTokenId($tokenId);
-        if (!($member instanceof MemberInterface)) {
+        $memberProperties = $this->authenticationTokenRepository->findByTokenIdentifier($tokenId);
+        if (!($memberProperties['member'] instanceof MemberInterface)) {
             return $this->makeInvalidIdTokenResponse($corsHeaders);
         }
 
         return new JsonResponse(
-            ['username' => $member->getTwitterUsername()],
+            [
+                'username' => $memberProperties['member']->getTwitterUsername(),
+                'grantedRoutes' => json_decode($memberProperties['granted_routes'])
+            ],
             200,
             $corsHeaders
         );

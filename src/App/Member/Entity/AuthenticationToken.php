@@ -19,8 +19,22 @@ class AuthenticationToken
     /**
      * @return string
      */
-    public function getToken(): string {
+    public function getToken(): string
+    {
         return $this->token;
+    }
+
+    /**
+     * @var string
+     */
+    private $grantedRoutes;
+
+    /**
+     * @return string
+     */
+    public function getGrantedRoutes(): string
+    {
+        return $this->grantedRoutes;
     }
 
     /**

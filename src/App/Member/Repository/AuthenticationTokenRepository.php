@@ -4,8 +4,8 @@ namespace App\Member\Repository;
 
 use App\Member\Authentication\Authenticator;
 use App\Member\Entity\AuthenticationToken;
-use App\Member\MemberInterface;
 use Doctrine\ORM\EntityRepository;
+use WTW\UserBundle\Entity\User;
 use WTW\UserBundle\Repository\UserRepository;
 
 class AuthenticationTokenRepository extends EntityRepository
@@ -22,9 +22,9 @@ class AuthenticationTokenRepository extends EntityRepository
 
     /**
      * @param string $tokenId
-     * @return MemberInterface
+     * @return array
      */
-    public function findMemberByTokenId(string $tokenId): MemberInterface
+    public function findByTokenIdentifier(string $tokenId): array
     {
         try {
             $tokenInfo = $this->authenticator->authenticate($tokenId);
@@ -35,6 +35,19 @@ class AuthenticationTokenRepository extends EntityRepository
         /** @var AuthenticationToken $token */
         $token = $this->findOneBy(['token' => $tokenInfo['sub']]);
 
-        return $token->getMember();
+        if (!($token instanceof AuthenticationToken)) {
+            $defaultMember = new User();
+            $defaultMember->setTwitterUsername('revue_2_presse');
+
+            return [
+                'member' => $defaultMember,
+                'granted_routes' => json_encode(['bucket']),
+            ];
+        }
+
+        return [
+            'member' => $token->getMember(),
+            'granted_routes' => $token->getGrantedRoutes()
+        ];
     }
 }
