@@ -61,7 +61,7 @@ List AMQP messages
 make list-amqp-messages
 ```
 
-## Usage
+## Running containers
 
 Run MySQL container
 
@@ -85,6 +85,17 @@ Consume Twitter API from messages
 
 ```
 make consume-twitter-api-messages
+```
+
+## Executing commands
+
+Add members to a list
+
+```
+app/console add-members-to-aggregate -e prod \
+--member-name="list-owner-username" \
+--aggregate-name="list-name" \
+--member-list="member-username"
 ```
 
 ## Testing

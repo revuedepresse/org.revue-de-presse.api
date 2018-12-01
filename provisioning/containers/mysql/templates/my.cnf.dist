@@ -15,6 +15,7 @@ character-set-server = utf8mb4
 init-connect='SET NAMES utf8mb4'
 ft_min_word_len=2general-log=1
 general-log-file = "/var/log/mysql.queries.log"
+group_concat_max_len=18446744073709551615
 innodb_file_per_table
 innodb_flush_method=O_DIRECT
 innodb_log_file_size=1G
@@ -32,6 +33,7 @@ query_cache_size = 16777216
 lower_case_table_names=2
 slow-query-log-file = /var/log/mysql/mysql-slow.log
 server-id   = 1
+# @see https://stackoverflow.com/a/37248560/282073
 sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
 
 [mysqldump]
