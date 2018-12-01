@@ -404,6 +404,7 @@ function run_mysql_container {
     if [ ! -z "${MYSQL_VOLUME}" ];
     then
         mysql_volume_path="${MYSQL_VOLUME}"
+        configuration_volume='-v '"`pwd`"'/templates/my.cnf:/etc/mysql/conf.d/config-file.cnf '
         echo 'About to mount "'"${MYSQL_VOLUME}"'" as MySQL volume'
     fi
 
