@@ -112,7 +112,7 @@ class ImportMemberAggregatesCommand extends AbstractCommand
                     $this->listRestriction = $this->input->getOption(self::OPTION_LIST_RESTRICTION);
                 }
 
-                if ($list->name !== $this->listRestriction) {
+                if (!is_null($this->listRestriction) && ($list->name !== $this->listRestriction)) {
                     return;
                 }
 

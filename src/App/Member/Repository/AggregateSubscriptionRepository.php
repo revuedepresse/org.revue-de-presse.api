@@ -8,8 +8,8 @@ use App\Member\Entity\AggregateSubscription;
 use App\Member\Entity\MemberSubscription;
 use App\Member\MemberInterface;
 use Doctrine\ORM\EntityRepository;
+use Psr\Log\LoggerInterface;
 use WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor;
-use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
 
 class AggregateSubscriptionRepository extends EntityRepository
 {
@@ -17,6 +17,11 @@ class AggregateSubscriptionRepository extends EntityRepository
      * @var Accessor
      */
     public $accessor;
+
+    /**
+     * @var LoggerInterface
+     */
+    public $logger;
 
     /**
      * @var MemberAggregateSubscriptionRepository
@@ -104,7 +109,13 @@ class AggregateSubscriptionRepository extends EntityRepository
     {
         $member = $this->accessor->ensureMemberHavingNameExists($memberName);
 
-        $subscriptions = $this->findSubscriptionsByAggregateName($aggregateName);
+        try {
+            $subscriptions = $this->findSubscriptionsByAggregateName($aggregateName);
+        } catch (\Exception $exception) {
+            $this->logger->error($exception->getMessage());
+
+            return;
+        }
 
         array_walk(
             $subscriptions,

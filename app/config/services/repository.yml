@@ -12,6 +12,7 @@ services:
             - 'App\Member\Entity\AggregateSubscription'
         properties:
             accessor:                               "@weaving_the_web_twitter.api_accessor"
+            logger:                                 '@logger'
             memberAggregateSubscriptionRepository:  '@repository.member_aggregate_subscription'
             memberSubscriptionRepository:           '@repository.member_subscription'
             networkRepository:                      '@repository.network'
