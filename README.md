@@ -87,15 +87,33 @@ Consume Twitter API from messages
 make consume-twitter-api-messages
 ```
 
-## Executing commands
+## Available commands
 
 Add members to a list
 
 ```
 app/console add-members-to-aggregate -e prod \
---member-name="list-owner-username" \
+--member-name="username-of-list-owner" \
 --aggregate-name="list-name" \
 --member-list="member-username"
+```
+
+Import subscriptions related to a list
+
+```
+app/console import-aggregates -e prod \
+--member-name="username-of-list-owner" \
+--find-ownerships
+```
+
+Add members from a list to another list 
+(requires importing source list beforehand)
+
+```
+app/console add-members-to-aggregate -e prod \
+--member-name="username-of-list-owner" \
+--aggregate-name="name-of-destination-list" 
+--list="name-of-source-list"
 ```
 
 ## Testing
