@@ -7,6 +7,10 @@ authentication_verify:
     path:     '/api/authentication/verify'
     defaults: { _controller: controller.authentication:verify }
 
+highlight:
+    path:     '/api/twitter/highlights'
+    defaults: { _controller: controller.list:getHighlights }
+
 aggregate:
     path:     '/api/twitter/admin/lists'
     defaults: { _controller: controller.list:getAggregates }

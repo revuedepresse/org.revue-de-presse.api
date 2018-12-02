@@ -29,7 +29,7 @@ security:
     firewalls:
         # @see https://symfony.com/doc/current/security/multiple_guard_authenticators.html#multiple-authenticators-with-separate-entry-points
         auth0:
-            pattern: '^/api/twitter/admin/lists'
+            pattern: '^/api/twitter/admin'
 
             logout: ~
 

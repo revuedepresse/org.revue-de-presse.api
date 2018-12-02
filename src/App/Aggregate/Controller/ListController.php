@@ -4,6 +4,7 @@ namespace App\Aggregate\Controller;
 
 use App\Aggregate\Repository\TimelyStatusRepository;
 use App\Security\Cors\CorsHeadersAwareTrait;
+use App\Status\Repository\HighlightRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use OldSound\RabbitMqBundle\RabbitMq\Producer;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -32,6 +33,11 @@ class ListController
      * @var UserRepository
      */
     public $memberRepository;
+
+    /**
+     * @var HighlightRepository
+     */
+    public $highlightRepository;
 
     /**
      * @var TimelyStatusRepository
@@ -77,6 +83,24 @@ class ListController
             $finder = function (SearchParams $searchParams) {
                 return $this->aggregateRepository->findAggregates($searchParams);
             }
+        );
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getHighlights(Request $request)
+    {
+        return $this->getCollection(
+            $request,
+            $counter = function (SearchParams $searchParams) {
+                return $this->highlightRepository->countTotalPages($searchParams);
+            },
+            $finder = function (SearchParams $searchParams) {
+                return $this->highlightRepository->findHighlights($searchParams);
+            },
+            ['date' => 'datetime']
         );
     }
 
