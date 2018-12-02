@@ -7,11 +7,12 @@ services:
     controller.list:
         class: 'App\Aggregate\Controller\ListController'
         properties:
+            allowedOrigin:              '%allowed.origin%'
             aggregateLikesProducer:     '@old_sound_rabbit_mq.weaving_the_web_amqp.producer.aggregates_likes_producer'
             aggregateRepository:        '@repository.aggregate'
             aggregateStatusesProducer:  '@old_sound_rabbit_mq.weaving_the_web_amqp.twitter.aggregates_status_producer'
-            allowedOrigin:              '%allowed.origin%'
             environment:                '%kernel.environment%'
+            highlightRepository:        '@repository.highlight'
             logger:                     '@logger'
             memberRepository:           '@user_manager'
             timelyStatusRepository:     '@repository.timely_status'

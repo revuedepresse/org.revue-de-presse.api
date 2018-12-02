@@ -4,7 +4,6 @@ parameters:
     weaving_the_web_api.entity.whisperer.class:     'WeavingTheWeb\Bundle\ApiBundle\Entity\Whisperer'
 
 services:
-
     repository.aggregate_subscription:
         factory:                                    [ '@doctrine.orm.entity_manager', 'getRepository' ]
         class:                                      'App\Member\Repository\AggregateSubscriptionRepository'
@@ -42,6 +41,14 @@ services:
             statusRepository:       '@weaving_the_web_twitter.repository.status'
             timelyStatusRepository: '@repository.timely_status'
             likedStatusRepository:  '@repository.liked_status'
+
+    repository.highlight:
+        factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
+        class: 'App\Status\Repository\HighlightRepository'
+        arguments:
+            - 'App\Status\Entity\Highlight'
+        properties:
+            logger: '@logger'
 
     repository.not_found_status:
         factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]

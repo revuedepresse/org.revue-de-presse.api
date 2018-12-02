@@ -55,10 +55,19 @@ class SearchParams
                 if ($params[$name] == 'int') {
                     $filteredParams[$name] = intval($value);
                 }
+
+                if ($params[$name] == 'datetime') {
+                    $filteredParams[$name] = new \DateTime($value, new \DateTimeZone('Europe/Paris'));
+                }
             }
         );
 
-        return new self($pageIndex, $pageSize, $keyword, $filteredParams);
+        return new self(
+            $pageIndex,
+            $pageSize,
+            $keyword,
+            $filteredParams
+        );
     }
 
     /**
