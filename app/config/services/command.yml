@@ -24,9 +24,11 @@ services:
     command.add_members_to_aggregate:
         class:                      "%command.add_members_to_aggregate.class%"
         properties:
-            aggregateRepository:    "@weaving_the_web_twitter.repository.aggregate"
-            accessor:               "@weaving_the_web_twitter.api_accessor"
-            userRepository:         "@user_manager"
+            aggregateRepository:                "@weaving_the_web_twitter.repository.aggregate"
+            aggregateSubscriptionRepository:    "@repository.aggregate_subscription"
+            accessor:                           "@weaving_the_web_twitter.api_accessor"
+            logger:                             "@logger"
+            userRepository:                     "@user_manager"
         tags:
             - { name: 'console.command' }
 
