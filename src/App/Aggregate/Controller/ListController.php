@@ -3,6 +3,7 @@
 namespace App\Aggregate\Controller;
 
 use App\Aggregate\Repository\TimelyStatusRepository;
+use App\Cache\RedisCache;
 use App\Security\Cors\CorsHeadersAwareTrait;
 use App\Status\Repository\HighlightRepository;
 use Doctrine\ORM\NonUniqueResultException;
@@ -70,18 +71,37 @@ class ListController
     public $logger;
 
     /**
+     * @var RedisCache
+     */
+    public $redisCache;
+
+    /**
      * @param Request $request
      * @return JsonResponse
      */
     public function getAggregates(Request $request)
     {
+        $client = $this->redisCache->getClient();
+
         return $this->getCollection(
             $request,
-            $counter = function (SearchParams $searchParams) {
-                return $this->aggregateRepository->countTotalPages($searchParams);
+            $counter = function (SearchParams $searchParams) use ($client) {
+                $totalPages = $client->get('aggregates.total_pages');
+                if (!$totalPages) {
+                    $totalPages = $this->aggregateRepository->countTotalPages($searchParams);
+                    $client->set('aggregates.total_pages', $totalPages);
+                }
+
+                return $totalPages;
             },
-            $finder = function (SearchParams $searchParams) {
-                return $this->aggregateRepository->findAggregates($searchParams);
+            $finder = function (SearchParams $searchParams) use ($client) {
+                $aggregates = $client->get('aggregates.items');
+                if (!$aggregates) {
+                    $aggregates = json_encode($this->aggregateRepository->findAggregates($searchParams));
+                    $client->set('aggregates.items', $aggregates);
+                }
+
+                return json_decode($aggregates, true);
             }
         );
     }
@@ -92,16 +112,52 @@ class ListController
      */
     public function getHighlights(Request $request)
     {
+        $client = $this->redisCache->getClient();
+
         return $this->getCollection(
             $request,
-            $counter = function (SearchParams $searchParams) {
-                return $this->highlightRepository->countTotalPages($searchParams);
+            $counter = function (SearchParams $searchParams) use ($client) {
+                if ($this->invalidHighlightsSearchParams($searchParams)) {
+                    return 0;
+                }
+
+                $key = 'highlights.total_pages' . $searchParams->getParams()['date']->format('Y-m-d');
+                $totalPages = $client->get($key);
+
+                if (!$totalPages) {
+                    $totalPages = $this->highlightRepository->countTotalPages($searchParams);
+                    $client->set($key, $totalPages);
+                }
+
+                return $totalPages;
             },
-            $finder = function (SearchParams $searchParams) {
-                return $this->highlightRepository->findHighlights($searchParams);
+            $finder = function (SearchParams $searchParams) use ($client) {
+                if ($this->invalidHighlightsSearchParams($searchParams)) {
+                    return [];
+                }
+
+                $key = 'highlights.items'.$searchParams->getParams()['date']->format('Y-m-d');
+                $highlights = $client->get($key);
+
+                if (!$highlights) {
+                    $highlights = json_encode($this->highlightRepository->findHighlights($searchParams));
+                    $client->set($key, $highlights);
+                }
+
+                return json_decode($highlights, true);
             },
             ['date' => 'datetime']
         );
+    }
+
+    /**
+     * @param SearchParams $searchParams
+     * @return bool
+     */
+    private function invalidHighlightsSearchParams(SearchParams $searchParams): bool
+    {
+        return !array_key_exists('date', $searchParams->getParams()) ||
+            ($searchParams->getParams() instanceof \DateTime);
     }
 
     /**

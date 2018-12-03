@@ -7,13 +7,12 @@ imports:
     - { resource: services/security.yml }
 
 parameters:
+    redis_cache:                                                  'App\Cache\RedisCache'
 
     weaving_the_web_twitter.api_accessor.class:                   'WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor'
     weaving_the_web_twitter.api_host:                             'api.twitter.com'
 
     weaving_the_web_twitter.moderator.api_limit.class:            'WeavingTheWeb\Bundle\ApiBundle\Moderator\ApiLimitModerator'
-
-    weaving_the_web_twitter.application_authenticator.class:      'WeavingTheWeb\Bundle\TwitterBundle\Security\ApplicationAuthenticator'
 
     weaving_the_web_twitter.authenticate_application.class:       'WeavingTheWeb\Bundle\TwitterBundle\Command\AuthenticateApplicationCommand'
     weaving_the_web_twitter.authentication_uri:                   '/oauth2/token'
@@ -45,6 +44,11 @@ parameters:
     weaving_the_web_twitter.version:                              '%api_twitter_version%'
 
 services:
+    app.cache.redis:
+        class: '%redis_cache%'
+        arguments:
+            - "%redis_host%"
+            - "%redis_port%"
 
     app.authenticator:
         class: 'App\Member\Authentication\Authenticator'
@@ -101,17 +105,6 @@ services:
             statusRepository:       '@weaving_the_web_twitter.repository.status'
             timelyStatusRepository: '@repository.timely_status'
             likedStatusRepository:  '@repository.liked_status'
-
-    weaving_the_web_twitter.application_authenticator:
-        class: '%weaving_the_web_twitter.application_authenticator.class%'
-        calls:
-            - [ 'setupClient', [ '%weaving_the_web_twitter.client.class%, %weaving_the_web_twitter.http_client.class%' ] ]
-        properties:
-            apiHost:            '%weaving_the_web_twitter.api_host%'
-            authenticationUri:  '%weaving_the_web_twitter.authentication_uri%'
-            key:                '%weaving_the_web_twitter.consumer_key%'
-            secret:             '%weaving_the_web_twitter.consumer_secret%'
-            tokenRepository:    '@weaving_the_web_twitter.repository.token'
 
     weaving_the_web_twitter.repository.status:
         class:                        '%weaving_the_web_api.repository.status.class%'
