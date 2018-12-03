@@ -53,7 +53,8 @@ class TweetControllerTest extends WebTestCase
     }
 
     /**
-     * @param string $message
+     * @param $message
+     * @return Response
      */
     protected function assertValidStatusContent($message)
     {
@@ -63,6 +64,8 @@ class TweetControllerTest extends WebTestCase
         $decodedJson = $this->decodeJsonResponseContent($response);
         $this->assertArrayHasKey(0, $decodedJson, 'The decoded json array should contain one status');
         $this->assertEquals('194987972', $decodedJson[0]['status_id']);
+
+        return $response;
     }
 
     /**
@@ -102,66 +105,6 @@ class TweetControllerTest extends WebTestCase
         return $prophecy->reveal();
     }
 
-    public function testBookmarksAction()
-    {
-        /** @var \Symfony\Component\Routing\Router $router */
-        $router = $this->get('router');
-        $latestTweetUrl = $router->generate('weaving_the_web_twitter_tweet_sync_bookmarks');
-
-        $this->client->request('POST', $latestTweetUrl, ['statusIds' => [194987972], 'username' => 'user']);
-
-        $this->assertValidStatusContent('When syncing bookmarks, the response should contain statuses');
-
-        $this->assertValidOptionsResponse($latestTweetUrl);
-    }
-
-    /**
-     * @dataProvider getStarringExpectations
-     */
-    public function testToggleStarringStatusAction($routeName, $expectedStarringStatus)
-    {
-        /** @var \Symfony\Component\Routing\Router $router */
-        $router = $this->get('router');
-
-        $statusId = 194987972;
-        $actionUrl = $router->generate($routeName, ['statusId' => $statusId]);
-        $this->client->request('OPTIONS', $actionUrl);
-        $response = $this->assertResponseStatusCodeEquals(200);
-        $this->assertEquals('*', $response->headers->get('Access-Control-Allow-Origin'));
-
-        $this->client->request('POST', $actionUrl);
-        $response = $this->assertResponseStatusCodeEquals(200);
-
-        $decodedContent = $this->decodeJsonResponseContent($response);
-        $this->assertArrayHasKey('status', $decodedContent);
-        $this->assertEquals(
-            $statusId,
-            $decodedContent['status'],
-            'It should return a json response containing the status id of a tweet which has been updated'
-        );
-
-        /** @var \WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository $userStatusRepository */
-        $userStatusRepository = $this->get('weaving_the_web_twitter.repository.read.status');
-        /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Status $userStatus */
-        $userStatus = $userStatusRepository->findOneBy(['starred' => $expectedStarringStatus]);
-
-        $this->assertNotNull($userStatus);
-        $this->assertEquals($expectedStarringStatus, $userStatus->isStarred());
-    }
-
-    public function getStarringExpectations()
-    {
-        return [
-            [
-                'route_name' => 'weaving_the_web_twitter_tweet_star',
-                'expected_starring_status' => true,
-            ], [
-                'route_name' => 'weaving_the_web_twitter_tweet_unstar',
-                'expected_starring_status' => false,
-            ]
-        ];
-    }
-
     private function mockAuthentication(): void
     {
         // User inserting by fixtures bundle from WeavingTheWeb\Bundle\UserBundle\DataFixtures\ORM\UserData
@@ -197,10 +140,10 @@ class TweetControllerTest extends WebTestCase
         $requestParameters = ['username' => 'user'];
         $this->client->request('GET', $latestTweetUrl, $requestParameters);
 
-        $this->assertValidStatusContent($message = 'It should respond with the latest tweets ');
+        $response = $this->assertValidStatusContent($message = 'It should respond with the latest tweets ');
 
         $this->assertTrue(
-            $this->client->getResponse()->isCacheable(),
+            $response->isCacheable(),
             'It should be possible to cache the latest statuses.'
         );
 

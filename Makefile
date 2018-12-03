@@ -124,7 +124,7 @@ produce-amqp-messages-from-member-timeline: ## Produce messages from member time
 refresh-statuses: ## Refresh statuses
 		@/bin/bash -c 'source ./bin/functions.sh && refresh_statuses'
 
-run-rabbitmq-container: ## Run Redis container (https://hub.docker.com/_/redis/)
+run-redis-container: ## Run Redis container (https://hub.docker.com/_/redis/)
 		@/bin/bash -c 'source ./bin/functions.sh && run_redis_container'
 
 keep-php-container-running: ## Keep a running container having PHP
