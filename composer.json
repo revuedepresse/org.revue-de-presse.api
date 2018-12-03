@@ -4,15 +4,21 @@
     "autoload": {
         "psr-4": {
             "": "src/"
-        }
+        },
+        "classmap": [ "app/AppKernel.php", "app/AppCache.php" ]
     },
     "autoload-dev": {
-        "files": [ "vendor/symfony/symfony/src/Symfony/Component/VarDumper/Resources/functions/dump.php" ]
+        "files": [ "vendor/symfony/symfony/src/Symfony/Component/VarDumper/Resources/functions/dump.php" ],
+        "psr-4": { "Tests\\": "tests/" }
     },
     "repositories": [
         {
             "type": "vcs",
             "url": "git@github.com:thierrymarianne/twitteroauth.git"
+        },
+        {
+            "type": "vcs",
+            "url": "git@github.com:WeavingTheWeb/DoctrineExtensions.git"
         }
     ],
     "require": {
@@ -25,17 +31,17 @@
         "doctrine/doctrine-fixtures-bundle": "*",
         "doctrine/doctrine-migrations-bundle": "^1.0",
         "doctrine/inflector": "*",
-        "doctrine/orm": "^2.4.8",
-        "fabpot/goutte": "3.2.2",
+        "doctrine/orm": "~2.4,>=2.4.5",
+        "fabpot/goutte": "^3.2@dev",
         "guzzle/guzzle": "3.3.1",
         "incenteev/composer-parameter-handler": "~2.0",
         "kertz/twitteroauth": "dev-master",
-        "php-amqplib/rabbitmq-bundle": "^1.14",
+        "php-amqplib/rabbitmq-bundle": "1.14.4",
         "ramsey/uuid-doctrine": "dev-master",
-        "sensio/distribution-bundle": "~4.0",
-        "sensio/framework-extra-bundle": "3.*",
-        "symfony/monolog-bundle": "^3.0.2",
-        "symfony/symfony": "2.8.44",
+        "sensio/distribution-bundle": "^5.0@dev",
+        "sensio/framework-extra-bundle": "5.*",
+        "symfony/monolog-bundle": "^3.1.0",
+        "symfony/symfony": "v3.4.19",
         "themattharris/tmhOAuth": "dev-master",
         "twig/extensions": "1.0.*"
     },
@@ -46,6 +52,7 @@
         "symfony-scripts": [
             "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::buildBootstrap",
             "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::clearCache",
+            "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installAssets",
             "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::installRequirementsFile",
             "Sensio\\Bundle\\DistributionBundle\\Composer\\ScriptHandler::prepareDeploymentTarget"
         ],
@@ -64,21 +71,21 @@
         "platform": {
             "php": "7.2.5"
         },
-        "sort-packages": true,
-        "github-oauth": {
-
-        }
+        "sort-packages": true
     },
     "minimum-stability": "dev",
     "extra": {
         "symfony-app-dir": "app",
+        "symfony-bin-dir": "app",
+        "symfony-var-dir": "app",
         "symfony-web-dir": "web",
+        "symfony-tests-dir": "tests",
         "symfony-assets-install": "relative",
         "incenteev-parameters": {
             "file": "app/config/parameters.yml"
         },
         "branch-alias": {
-            "dev-master": "2.7-dev"
+            "dev-master": "3.4-dev"
         }
     }
 }

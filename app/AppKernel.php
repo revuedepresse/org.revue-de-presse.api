@@ -1,8 +1,8 @@
 <?php
 
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Config\Loader\LoaderInterface;
-use Symfony\Component\DependencyInjection\Loader;
 
 /**
  * Registers bundles
@@ -40,7 +40,7 @@ class AppKernel extends Kernel
             new WeavingTheWeb\Bundle\AmqpBundle\WeavingTheWebAmqpBundle(),
         );
 
-        if (in_array($this->getEnvironment(), array('dev', 'test'))) {
+        if (in_array($this->getEnvironment(), ['dev', 'test'], true)) {
             $bundles[] = new Symfony\Bundle\WebProfilerBundle\WebProfilerBundle();
             $bundles[] = new Sensio\Bundle\DistributionBundle\SensioDistributionBundle();
             $bundles[] = new WTW\CodeGeneration\QualityAssuranceBundle\WTWCodeGenerationQualityAssuranceBundle();
@@ -50,11 +50,40 @@ class AppKernel extends Kernel
     }
 
     /**
+     * @return string
+     */
+    public function getRootDir()
+    {
+        return __DIR__;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCacheDir()
+    {
+        return dirname(__DIR__).'/app/cache/'.$this->getEnvironment();
+    }
+
+    /**
+     * @return string
+     */
+    public function getLogDir()
+    {
+        return dirname(__DIR__).'/app/logs';
+    }
+
+    /**
      * @param LoaderInterface $loader
      * @throws Exception
      */
     public function registerContainerConfiguration(LoaderInterface $loader)
     {
-        $loader->load(__DIR__ . '/config/environment/config_' . $this->getEnvironment() . '.yml');
+        $loader->load(function (ContainerBuilder $container) {
+            $container->setParameter('container.autowiring.strict_mode', true);
+            $container->setParameter('container.dumper.inline_class_loader', true);
+            $container->addObjectResource($this);
+        });
+        $loader->load($this->getRootDir().'/config/environment/config_'.$this->getEnvironment().'.yml');
     }
 }

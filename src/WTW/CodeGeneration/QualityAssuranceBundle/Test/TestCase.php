@@ -399,7 +399,8 @@ abstract class TestCase extends WebTestCase implements TestCaseInterface, DataFi
     }
 
     /**
-     * @param $options
+     * @param array $options
+     * @return \Symfony\Component\HttpKernel\KernelInterface
      */
     public static function bootKernel(array $options = array())
     {
@@ -409,6 +410,8 @@ abstract class TestCase extends WebTestCase implements TestCaseInterface, DataFi
 
         static::$kernel = static::createKernel($options);
         static::$kernel->boot();
+
+        return static::$kernel;
     }
 
     /**

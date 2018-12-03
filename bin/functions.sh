@@ -1023,6 +1023,15 @@ function run_php_unit_tests() {
     bin/phpunit -c ./app/phpunit-twitter-messaging.xml.dist --verbose --debug
 }
 
+function run_redis_container() {
+    local redis_volume_path=`pwd`'/../../volumes/redis'
+    local command="docker run --name some-redis -d \
+    redis redis-server \
+    --appendonly yes \
+    -v "${redis_volume_path}":/data"
+    /bin/bash -c "${command}"
+}
+
 function today_statuses() {
     cat app/logs/dev.log | awk '{$1=$2=$3="";print $0}' | sed -e 's/^\s\+//' | grep `date -I` | awk '{$1=$2="";print $0}'
 }
