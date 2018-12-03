@@ -56,6 +56,9 @@ parameters:
     mysql.database_write:         'test'
     mysql.user_write:             'root'
 
+    redis_host:                   127.0.0.1
+    redis_port:                   6379
+
     rabbitmq.host:                127.0.0.1
     rabbitmq.vhost:               /
     rabbitmq.user:                guest
