@@ -69,6 +69,12 @@ Run MySQL container
 make run-mysql-container
 ```
 
+Run Redis container
+
+```
+make run-redis-container
+```
+
 Run RabbitMQ container
 
 ```
