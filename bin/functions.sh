@@ -578,7 +578,12 @@ function setup_amqp_queue() {
 }
 function list_php_extensions() {
     remove_php_container
-    docker run --name php php -m
+
+    local extensions=`pwd`"/provisioning/containers/php/templates/extensions.ini.dist";
+    local volume="-v ${extensions}:/usr/local/etc/php/conf.d/extensions.ini"
+    local command="docker run ${volume} --name php php -m"
+    echo "${command}"
+    /bin/bash -c "${command}"
 }
 
 function set_permissions_in_apache_container() {
@@ -624,11 +629,14 @@ function run_apache() {
 
     local symfony_environment="$(get_symfony_environment)"
 
+    local extensions=`pwd`"/provisioning/containers/apache/templates/extensions.ini.dist";
+    local extensions_volume="-v ${extensions}:/usr/local/etc/php/conf.d/extensions.ini"
+
     local network=`get_network_option`
     local command=$(echo -n 'docker run '"${network}"' \
 --restart=always \
 -d -p '${host}''${port}':80 \
--e '"${symfony_environment}"' \
+-e '"${symfony_environment}"' '"${extensions_volume}"' \
 -v '`pwd`'/provisioning/containers/apache/templates:/templates \
 -v '`pwd`'/provisioning/containers/apache/tasks:/tasks \
 -v '`pwd`'/provisioning/containers/apache/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini \
@@ -672,11 +680,14 @@ function run_php_fpm() {
 
     local symfony_environment="$(get_symfony_environment)"
 
+    local extensions=`pwd`"/provisioning/containers/php-fpm/templates/extensions.ini.dist";
+    local extensions_volume="-v ${extensions}:/usr/local/etc/php/conf.d/extensions.ini"
+
     local network=`get_network_option`
     local command=$(echo -n 'docker run '"${network}"' \
 --restart=always \
 -d -p '${host}''${port}':9000 \
--e '"${symfony_environment}"' \
+-e '"${symfony_environment}"' '"${extensions_volume}"' \
 -v '`pwd`'/provisioning/containers/php-fpm/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini \
 -v '`pwd`'/provisioning/containers/php-fpm/templates/press-review.conf:/usr/local/etc/php-fpm.d/www.conf \
 -v '`pwd`'/provisioning/containers/php-fpm/templates/docker.conf:/usr/local/etc/php-fpm.d/docker.conf \
@@ -1023,12 +1034,24 @@ function run_php_unit_tests() {
     bin/phpunit -c ./app/phpunit-twitter-messaging.xml.dist --verbose --debug
 }
 
+function remove_redis_container {
+    if [ `docker ps -a | grep redis | grep -c ''` -gt 0 ];
+    then
+        docker rm -f `docker ps -a | grep redis | awk '{print $1}'`
+    fi
+}
+
 function run_redis_container() {
+    remove_redis_container
+
     local redis_volume_path=`pwd`'/../../volumes/redis'
-    local command="docker run --name some-redis -d \
+    local network=`get_network_option`
+    local command="docker run --name redis -d \
+    --hostname reddis ${network} \
+    -v ${redis_volume_path}:/data \
     redis redis-server \
-    --appendonly yes \
-    -v "${redis_volume_path}":/data"
+    --appendonly yes "
+
     /bin/bash -c "${command}"
 }
 
