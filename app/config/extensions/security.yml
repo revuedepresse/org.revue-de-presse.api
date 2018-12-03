@@ -37,6 +37,8 @@ security:
                 authenticators:
                     - app.auth0_token_authenticator
 
+            stateless: true
+
         main:
             anonymous: ~
 
@@ -45,6 +47,8 @@ security:
             guard:
                 authenticators:
                     - app.token_authenticator
+
+            stateless: true
 
     access_control:
         - { path: ^/api,          role: ROLE_USER }
