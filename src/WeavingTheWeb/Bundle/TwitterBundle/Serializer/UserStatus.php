@@ -289,7 +289,10 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      */
     protected function shouldSkipSerialization($options)
     {
-        if ($this->accessor->shouldSkipSerializationForMemberWithScreenName($options['screen_name'])) {
+
+        if (!array_key_exists('screen_name', $options) ||
+            is_null($options['screen_name']) ||
+            $this->accessor->shouldSkipSerializationForMemberWithScreenName($options['screen_name'])) {
             return true;
         }
 

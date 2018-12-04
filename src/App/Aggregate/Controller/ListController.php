@@ -8,6 +8,7 @@ use App\Security\Cors\CorsHeadersAwareTrait;
 use App\Status\Repository\HighlightRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use OldSound\RabbitMqBundle\RabbitMq\Producer;
+use Predis\Client;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
@@ -86,24 +87,57 @@ class ListController
         return $this->getCollection(
             $request,
             $counter = function (SearchParams $searchParams) use ($client) {
-                $totalPages = $client->get('aggregates.total_pages');
-                if (!$totalPages) {
+                $key = 'aggregates.total_pages.'.$searchParams->getFingerprint();
+
+                $totalPages = $client->get($key);
+
+                if ($this->shouldRefreshCache($client) && $totalPages) {
+                    $client->del($key);
+                    $totalPages = null;
+                }
+
+                if (is_null($totalPages)) {
                     $totalPages = $this->aggregateRepository->countTotalPages($searchParams);
-                    $client->set('aggregates.total_pages', $totalPages);
+                    $client->set($key, $totalPages);
                 }
 
                 return $totalPages;
             },
             $finder = function (SearchParams $searchParams) use ($client) {
-                $aggregates = $client->get('aggregates.items');
-                if (!$aggregates) {
+                $key = 'aggregates.items.'.$searchParams->getFingerprint();
+                $aggregates = $client->get($key);
+
+                if ($this->shouldRefreshCache($client) && $aggregates) {
+                    $client->del($key);
+
+                    if ($client->get('aggregates.recent_delete')) {
+                        $client->del('aggregates.recent_delete');
+                    }
+                    if ($client->get('aggregates.recent_statuses_collect')) {
+                        $client->del('aggregates.recent_statuses_collect');
+                    }
+
+                    $aggregates = null;
+                }
+
+                if (is_null($aggregates)) {
                     $aggregates = json_encode($this->aggregateRepository->findAggregates($searchParams));
-                    $client->set('aggregates.items', $aggregates);
+                    $client->set($key, $aggregates);
                 }
 
                 return json_decode($aggregates, true);
             }
         );
+    }
+
+    /**
+     * @param Client $client
+     * @return bool
+     */
+    function shouldRefreshCache(Client $client)
+    {
+        return $client->get('aggregates.recent_delete') ||
+            $client->get('aggregates.recent_statuses_collect');
     }
 
     /**

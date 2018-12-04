@@ -145,4 +145,10 @@ interface StatusInterface
      * @return self
      */
     public function removeFrom(Aggregate $aggregate): self;
+
+    /**
+     * @param Aggregate $aggregate
+     * @return mixed
+     */
+    public function addToAggregates(Aggregate $aggregate);
 }
