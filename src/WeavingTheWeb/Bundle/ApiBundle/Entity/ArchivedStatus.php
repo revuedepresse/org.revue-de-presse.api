@@ -2,6 +2,7 @@
 
 namespace WeavingTheWeb\Bundle\ApiBundle\Entity;
 
+use App\Status\Entity\StatusTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -23,6 +24,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class ArchivedStatus implements StatusInterface
 {
+    use StatusTrait;
+
     /**
      * @var integer
      *

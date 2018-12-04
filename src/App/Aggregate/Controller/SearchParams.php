@@ -129,4 +129,12 @@ class SearchParams
     {
         return $this->params;
     }
+
+    /**
+     * @return string
+     */
+    public function getFingerprint()
+    {
+        return sha1(serialize($this));
+    }
 }

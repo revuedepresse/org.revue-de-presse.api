@@ -485,7 +485,7 @@ class User extends BaseUser implements MemberInterface
      * Protected status according to Twitter
      *
      * @var boolean
-     * @ORM\Column(name="protected", type="boolean", options={"default": false})
+     * @ORM\Column(name="protected", type="boolean", options={"default": false}, nullable=true)
      */
     protected $protected = false;
 

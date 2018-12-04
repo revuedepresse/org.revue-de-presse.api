@@ -37,9 +37,11 @@ services:
         arguments:
             - 'WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate'
         properties:
+            amqpMessageProducer:    '@old_sound_rabbit_mq.weaving_the_web_amqp.twitter.aggregates_status_producer'
             logger:                 '@logger'
             statusRepository:       '@weaving_the_web_twitter.repository.status'
             timelyStatusRepository: '@repository.timely_status'
+            tokenRepository:        '@weaving_the_web_api.repository.token'
             likedStatusRepository:  '@repository.liked_status'
 
     repository.highlight:

@@ -7,17 +7,18 @@ use App\Aggregate\Entity\TimelyStatus;
 use App\Aggregate\Repository\PaginationAwareTrait;
 use App\Aggregate\Repository\TimelyStatusRepository;
 use App\Member\MemberInterface;
+use App\Operation\CapableOfDeletionInterface;
 use App\Status\Entity\LikedStatus;
 use App\Status\Repository\LikedStatusRepository;
 use Doctrine\ORM\QueryBuilder;
+use OldSound\RabbitMqBundle\RabbitMq\Producer;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\StatusInterface;
 
 /**
- * @package WeavingTheWeb\Bundle\ApiBundle\Repository
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
-class AggregateRepository extends ResourceRepository
+class AggregateRepository extends ResourceRepository implements CapableOfDeletionInterface
 {
     const TABLE_ALIAS = 'a';
 
@@ -39,6 +40,16 @@ class AggregateRepository extends ResourceRepository
     public $statusRepository;
 
     /**
+     * @var Producer
+     */
+    public $amqpMessageProducer;
+
+    /**
+     * @var TokenRepository
+     */
+    public $tokenRepository;
+
+    /**
      * @var \Psr\Log\LoggerInterface
      */
     public $logger;
@@ -47,6 +58,7 @@ class AggregateRepository extends ResourceRepository
      * @param string $screenName
      * @param string $listName
      * @return null|object|Aggregate
+     * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function make(string $screenName, string $listName)
@@ -66,7 +78,8 @@ class AggregateRepository extends ResourceRepository
     /**
      * @param MemberInterface $member
      * @param \stdClass       $list
-     * @return null|object|Aggregate
+     * @return Aggregate
+     * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function addMemberToList(
@@ -114,31 +127,32 @@ QUERY;
 
     /**
      * @param Aggregate $aggregate
+     * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function lockAggregate(Aggregate $aggregate)
     {
         $aggregate->lock();
 
-        $this->getEntityManager()->persist($aggregate);
-        $this->getEntityManager()->flush();
+        $this->save($aggregate);
     }
 
     /**
      * @param Aggregate $aggregate
+     * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function unlockAggregate(Aggregate $aggregate)
     {
         $aggregate->unlock();
 
-        $this->getEntityManager()->persist($aggregate);
-        $this->getEntityManager()->flush();
+        $this->save($aggregate);
     }
 
     /**
      * @param Aggregate $aggregate
      * @return Aggregate
+     * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function save(Aggregate $aggregate)
@@ -153,6 +167,7 @@ QUERY;
      * @param string $screenName
      * @param string $listName
      * @return null|object
+     * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
     private function findByRemovingDuplicates(
@@ -179,6 +194,7 @@ QUERY;
                     $statuses = $this->statusRepository
                         ->findByAggregate($aggregate);
 
+                    /** @var StatusInterface $status */
                     foreach ($statuses as $status) {
                         /** @var StatusInterface $status */
                         $status->removeFrom($aggregate);
@@ -289,6 +305,7 @@ QUERY;
      * @param Aggregate|null $matchingAggregate
      * @return array
      * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\ORMException
      */
     public function updateTotalStatusesByExcludingRelatedAggregates(
         array $aggregate,
@@ -303,6 +320,7 @@ QUERY;
      * @param bool           $includeRelatedAggregates
      * @return array
      * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\ORMException
      */
     public function updateTotalStatuses(
         array $aggregate,
@@ -356,6 +374,7 @@ QUERY;
      * @param Aggregate|null $matchingAggregate
      * @return array
      * @throws \Doctrine\DBAL\DBALException
+     * @throws \Doctrine\ORM\ORMException
      */
     private function updateTotalMembers(
         array $aggregate,
@@ -399,6 +418,8 @@ QUERY;
         $queryBuilder->andWhere('a.name not like :name');
         $queryBuilder->setParameter('name', "user ::%");
 
+        $queryBuilder = $this->excludeDeletedRecords($queryBuilder);
+
         if ($searchParams->hasKeyword()) {
             $queryBuilder->andWhere('a.name like :keyword');
             $queryBuilder->setParameter(
@@ -415,5 +436,109 @@ QUERY;
                 )
             );
         }
+    }
+
+    /**
+     * @param array $aggregateIds
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function bulkRemoveAggregates(array $aggregateIds)
+    {
+        $queryBuilder = $this->createQueryBuilder(self::TABLE_ALIAS);
+        $queryBuilder->andWhere(self::TABLE_ALIAS.'.id in (:aggregate_ids)');
+        $queryBuilder->setParameter('aggregate_ids', $aggregateIds);
+
+        $aggregates = $queryBuilder->getQuery()->getResult();
+        array_walk(
+            $aggregates,
+            function (Aggregate $aggregate) {
+                $aggregate->markAsDeleted();
+            }
+        );
+
+        $this->getEntityManager()->flush();
+    }
+
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @return QueryBuilder|mixed
+     */
+    public function excludeDeletedRecords(QueryBuilder $queryBuilder)
+    {
+        $queryBuilder->andWhere(self::TABLE_ALIAS.'.deletedAt IS NULL');
+
+        return $queryBuilder;
+    }
+
+    /**
+     * @param $aggregateIds
+     * @throws \Doctrine\ORM\NonUniqueResultException
+     */
+    public function publishStatusesForAggregates($aggregateIds)
+    {
+        $token = $this->tokenRepository->findFirstUnfrozenToken();
+
+        $messageBody = [
+            'token' => $token->getOauthToken(),
+            'secret' => $token->getOauthTokenSecret(),
+            'consumer_token' => $token->consumerKey,
+            'consumer_secret' => $token->consumerSecret
+        ];
+
+        $query = <<<QUERY
+            SELECT id, screen_name
+            FROM weaving_aggregate
+            WHERE screen_name IS NOT NULL
+            AND name in (
+                SELECT name 
+                FROM weaving_aggregate
+                WHERE id in (:ids)
+            )
+QUERY;
+        $connection = $this->getEntityManager()->getConnection();
+        $aggregateIds = implode(
+            array_map(
+                'intval',
+                $aggregateIds
+            ),
+            ','
+        );
+
+        try {
+            $statement = $connection->executeQuery(
+                strtr(
+                    $query,
+                    [
+                        ':ids' => $aggregateIds
+                    ]
+                )
+            );
+            $records = $statement->fetchAll();
+        } catch (\Exception $exception) {
+            $this->logger->critical($exception->getMessage());
+        }
+
+        $aggregateIds = array_map(
+            function ($record) {
+                return $record['id'];
+            }, $records
+        );
+        $aggregates = $this->findBy(['id' => $aggregateIds]);
+
+        array_walk(
+            $aggregates,
+            function (Aggregate $aggregate) {
+                $messageBody['screen_name'] = $aggregate->screenName;
+                $messageBody['aggregate_id'] = $aggregate->getId();
+                $aggregate->totalStatuses = 0;
+                $aggregate->totalMembers = 0;
+
+                $this->save($aggregate);
+
+                $this->amqpMessageProducer->setContentType('application/json');
+                $this->amqpMessageProducer->publish(serialize(json_encode($messageBody)));
+            }
+        );
     }
 }

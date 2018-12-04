@@ -26,3 +26,11 @@ services:
             authenticationTokenRepository: '@repository.authentication_token'
             allowedOrigin:                 '%allowed.origin%'
             environment:                   '%kernel.environment%'
+
+    controller.aggregate:
+        class: 'App\Aggregate\Controller\AggregateController'
+        properties:
+            aggregateRepository: '@repository.aggregate'
+            allowedOrigin:       '%allowed.origin%'
+            environment:         '%kernel.environment%'
+            redisCache:          '@app.cache.redis'
