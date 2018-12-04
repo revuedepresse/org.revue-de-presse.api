@@ -38,3 +38,13 @@ logged_in_member_profile:
     defaults: { _controller: controller.logged_in_member:getProfile }
     methods:  [POST, OPTIONS]
 
+remove_aggregate:
+    path:     '/api/twitter/admin/aggregate'
+    defaults: { _controller: controller.aggregate:bulkRemoveAggregates }
+    methods:  [POST, OPTIONS]
+
+collect_statuses:
+    path:     '/api/twitter/admin/aggregate/collect-statuses'
+    defaults: { _controller: controller.aggregate:collectAggregatesStatuses }
+    methods:  [POST, OPTIONS]
+

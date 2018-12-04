@@ -2,6 +2,7 @@
 
 namespace WeavingTheWeb\Bundle\ApiBundle\Entity;
 
+use App\Status\Entity\StatusTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -25,6 +26,8 @@ use Doctrine\ORM\Mapping as ORM;
  */
 class Status implements StatusInterface
 {
+    use StatusTrait;
+
     /**
      * @var integer
      *
@@ -375,11 +378,6 @@ class Status implements StatusInterface
     public function __construct()
     {
         $this->aggregates = new ArrayCollection();
-    }
-
-    public function addToAggregates(Aggregate $aggregate)
-    {
-        $this->aggregates->add($aggregate);
     }
 
     /**

@@ -57,13 +57,13 @@ class Aggregate
     public $locked;
 
     /**
-     * @var bool
+     * @var \DateTime
      * @ORM\Column(name="locked_at", type="datetime", nullable=true)
      */
     public $lockedAt;
 
     /**
-     * @var bool
+     * @var \DateTime
      * @ORM\Column(name="unlocked_at", type="datetime", nullable=true)
      */
     public $unlockedAt;
@@ -88,6 +88,22 @@ class Aggregate
      * @ORM\Column(name="total_statuses", type="integer", options={"default": 0})
      */
     public $totalStatuses = 0;
+
+    /**
+     * @var \DateTime
+     * @ORM\Column(name="deleted_at", type="datetime", nullable=true)
+     */
+    private $deletedAt;
+
+    /**
+     * @return $this
+     */
+    public function markAsDeleted()
+    {
+        $this->deletedAt = new \DateTime('now', new \DateTimeZone('UTC'));
+
+        return $this;
+    }
 
     public function lock()
     {

@@ -4,6 +4,7 @@ namespace App\Aggregate\Repository;
 
 use App\Aggregate\Controller\SearchParams;
 use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\QueryBuilder;
 
 trait PaginationAwareTrait
 {
@@ -15,6 +16,9 @@ trait PaginationAwareTrait
      */
     public function howManyPages(SearchParams $searchParams, $alias): int
     {
+        /**
+         * @var QueryBuilder $queryBuilder
+         */
         $queryBuilder = $this->createQueryBuilder($alias);
 
         $this->applyCriteria($queryBuilder, $searchParams);

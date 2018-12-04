@@ -292,6 +292,7 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
      * @param bool $protected
      * @param bool $suspended
      * @return User
+     * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
     protected function makeUser($twitterUser, $friend, $protected = false, $suspended = false)
@@ -342,12 +343,11 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
     }
 
     /**
-     * @param                 $ownerships
+     * @param $ownerships
      * @return \API|mixed|object|\stdClass
      * @throws UnavailableResourceException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \Exception
      * @throws \WeavingTheWeb\Bundle\ApiBundle\Exception\InvalidTokenException
      * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
      */
