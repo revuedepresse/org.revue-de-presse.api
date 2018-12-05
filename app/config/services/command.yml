@@ -125,6 +125,7 @@ services:
         class:                       "%weaving_the_web_amqp.consumer.status.class%"
         properties:
             operationClock:          "@operation.clock"
+            tokenRepository:         "@weaving_the_web_api.repository.token"
         calls:
             - [ 'setLogger',            [ '@monolog.logger.status'] ]
 
@@ -145,6 +146,7 @@ services:
             - [ 'setUserRepository',    [ '@user_manager'] ]
         properties:
             operationClock:             "@operation.clock"
+            tokenRepository:            "@weaving_the_web_api.repository.token"
 
     weaving_the_web_amqp.producer.conversation_status:
         class:               "%weaving_the_web_amqp.producer.produce_conversation_messages_command.class%"

@@ -13,6 +13,8 @@ use PhpAmqpLib\Message\AmqpMessage;
 
 use Psr\Log\LoggerInterface;
 
+use WeavingTheWeb\Bundle\ApiBundle\Entity\Token;
+use WeavingTheWeb\Bundle\ApiBundle\Repository\TokenRepository;
 use WeavingTheWeb\Bundle\TwitterBundle\Api\TwitterErrorAwareInterface;
 
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;
@@ -60,6 +62,11 @@ class UserStatus implements ConsumerInterface
      * @var \WTW\UserBundle\Repository\UserRepository
      */
     protected $userRepository;
+
+    /**
+     * @var TokenRepository
+     */
+    public $tokenRepository;
 
     /**
      * @param EntityRepository $userRepository
@@ -156,33 +163,38 @@ class UserStatus implements ConsumerInterface
 
     /**
      * @param AmqpMessage $message
-     * @return mixed
+     * @return array
      * @throws \Exception
      */
-    public function parseMessage(AmqpMessage $message)
+    public function parseMessage(AmqpMessage $message): array
     {
         $options = json_decode(unserialize($message->body), true);
         if (json_last_error() !== JSON_ERROR_NONE) {
             throw new \InvalidArgumentException('Valid credentials are required');
         }
-        $this->setupCredentials($options);
 
-        return $options;
+        return $this->setupCredentials($options);
     }
 
     /**
-     * @param $tokens
-     * @throws \Exception
+     * @param array $tokens
+     * @return array
+     * @throws \Doctrine\ORM\NonUniqueResultException
      */
-    protected function setupCredentials($tokens)
+    protected function setupCredentials(array $tokens): array
     {
         if ((!array_key_exists('token', $tokens) ||
             !array_key_exists('secret', $tokens)) &&
             !array_key_exists('bearer', $tokens)) {
-            throw new \InvalidArgumentException('Valid token and secret are required');
-        } else {
-            $this->serializer->setupAccessor($tokens);
+            /** @var Token $token */
+            $token = $this->tokenRepository->findFirstUnfrozenToken();
+            $tokens['token'] = $token->getOauthToken();
+            $tokens['secret'] = $token->getOauthTokenSecret();
         }
+
+        $this->serializer->setupAccessor($tokens);
+
+        return $tokens;
     }
 
     /**
