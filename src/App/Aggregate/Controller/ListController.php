@@ -116,6 +116,9 @@ class ListController
                     if ($client->get('aggregates.recent_statuses_collect')) {
                         $client->del('aggregates.recent_statuses_collect');
                     }
+                    if ($client->get('aggregates.total_statuses_reset')) {
+                        $client->del('aggregates.total_statuses_reset');
+                    }
 
                     $aggregates = null;
                 }
@@ -137,7 +140,8 @@ class ListController
     function shouldRefreshCache(Client $client)
     {
         return $client->get('aggregates.recent_delete') ||
-            $client->get('aggregates.recent_statuses_collect');
+            $client->get('aggregates.recent_statuses_collect') ||
+            $client->get('aggregates.total_statuses_reset');
     }
 
     /**

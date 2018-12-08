@@ -43,6 +43,11 @@ remove_aggregate:
     defaults: { _controller: controller.aggregate:bulkRemoveAggregates }
     methods:  [POST, OPTIONS]
 
+reset_total_members_for_aggregate:
+    path:     '/api/twitter/admin/aggregate/reset-total-statuses'
+    defaults: { _controller: controller.aggregate:resetTotalStatusesForAggregates }
+    methods:  [POST, OPTIONS]
+
 collect_statuses:
     path:     '/api/twitter/admin/aggregate/collect-statuses'
     defaults: { _controller: controller.aggregate:collectAggregatesStatuses }
