@@ -65,6 +65,22 @@ class AggregateController
     }
 
     /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function resetTotalStatusesForAggregates(Request $request)
+    {
+        return $this->applyToAggregateCollection(
+            $request,
+            function ($aggregateIds) {
+                $this->aggregateRepository->resetTotalStatusesForAggregates($aggregateIds);
+                $client = $this->redisCache->getClient();
+                $client->set('aggregates.total_statuses_reset', json_encode($aggregateIds));
+            }
+        );
+    }
+
+    /**
      * @param Request  $request
      * @param callable $apply
      * @return JsonResponse

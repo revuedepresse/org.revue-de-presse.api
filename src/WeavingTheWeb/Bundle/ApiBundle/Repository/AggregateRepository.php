@@ -472,20 +472,10 @@ QUERY;
     }
 
     /**
-     * @param $aggregateIds
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @param array $aggregateIds
      */
-    public function publishStatusesForAggregates($aggregateIds)
+    public function publishStatusesForAggregates(array $aggregateIds)
     {
-        $token = $this->tokenRepository->findFirstUnfrozenToken();
-
-        $messageBody = [
-            'token' => $token->getOauthToken(),
-            'secret' => $token->getOauthTokenSecret(),
-            'consumer_token' => $token->consumerKey,
-            'consumer_secret' => $token->consumerSecret
-        ];
-
         $query = <<<QUERY
             SELECT id, screen_name
             FROM weaving_aggregate
@@ -540,5 +530,38 @@ QUERY;
                 $this->amqpMessageProducer->publish(serialize(json_encode($messageBody)));
             }
         );
+    }
+
+    /**
+     * @param array $aggregateIds
+     */
+    public function resetTotalStatusesForAggregates(array $aggregateIds)
+    {
+        $query = <<<QUERY
+            UPDATE weaving_aggregate a
+            SET total_statuses = 0
+            WHERE id in (:ids)
+QUERY;
+        $connection = $this->getEntityManager()->getConnection();
+        $aggregateIds = implode(
+            array_map(
+                'intval',
+                $aggregateIds
+            ),
+            ','
+        );
+
+        try {
+            $connection->executeQuery(
+                strtr(
+                    $query,
+                    [
+                        ':ids' => $aggregateIds
+                    ]
+                )
+            );
+        } catch (\Exception $exception) {
+            $this->logger->critical($exception->getMessage());
+        }
     }
 }
