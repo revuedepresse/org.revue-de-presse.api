@@ -559,10 +559,15 @@ QUERY;
                     $aggregate['id'] = intval($aggregate['id']);
                     $aggregate['totalStatuses'] = intval($aggregate['totalStatuses']);
                     $aggregate['locked'] = (bool)$aggregate['locked'];
-                    $aggregate['unlockedAt'] = (new \DateTime(
-                        $aggregate['unlocked_at'],
-                        new \DateTimeZone('UTC'))
-                    )->getTimestamp();
+
+                    $aggregate['unlockedAt'] = $aggregate['unlocked_at'];
+                    if (!is_null($aggregate['unlocked_at'])) {
+                        $aggregate['unlockedAt'] = (new \DateTime(
+                            $aggregate['unlocked_at'],
+                            new \DateTimeZone('UTC'))
+                        )->getTimestamp();
+                    }
+
                     $aggregateProperties[strtolower($aggregate['screenName'])] = $aggregate;
                 }
             );
