@@ -40,6 +40,12 @@
         />
 
         <field
+                name="isRetweet"
+                column="is_retweet"
+                type="boolean"
+        />
+
+        <field
             name="totalRetweets"
             column="total_retweets"
             type="integer"

@@ -7,6 +7,7 @@ use App\Aggregate\Repository\PaginationAwareTrait;
 use App\Conversation\ConversationAwareTrait;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 
 class HighlightRepository extends EntityRepository implements PaginationAwareRepositoryInterface
@@ -40,20 +41,38 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
         $queryBuilder = $this->createQueryBuilder(self::TABLE_ALIAS);
 
         $queryBuilder->select('s.statusId as status_id');
+        $queryBuilder->addSelect('s.id as id');
         $queryBuilder->addSelect('s.apiDocument as original_document');
         $queryBuilder->addSelect('s.text');
         $queryBuilder->addSelect('s.createdAt as publicationDateTime');
         $queryBuilder->addSelect('s.screenName as screen_name');
-        $queryBuilder->addSelect(self::TABLE_ALIAS.'.totalRetweets');
+        $queryBuilder->addSelect(implode([
+            'COALESCE(',
+            '   p.totalRetweets, ',
+            '   '.self::TABLE_ALIAS.'.totalRetweets',
+            ') as totalRetweets',
+        ]));
 
-        $queryBuilder->join(self::TABLE_ALIAS.'.status', 's');
-        $queryBuilder->join(self::TABLE_ALIAS.'.member', 'm');
+        $queryBuilder->innerJoin(self::TABLE_ALIAS.'.status', 's');
+        $queryBuilder->innerJoin(self::TABLE_ALIAS.'.member', 'm');
+
+        $queryBuilder->leftJoin(
+            's.popularity',
+            'p',
+            Join::WITH,
+            "DATE(DATESUB(p.checkedAt, 1, 'HOUR')) = :date"
+        );
 
         $queryBuilder->setFirstResult($searchParams->getFirstItemIndex());
         $queryBuilder->setMaxResults(min($searchParams->getPageSize(), 10));
-        $queryBuilder->orderBy(self::TABLE_ALIAS.'.totalRetweets', 'DESC');
+
+        $queryBuilder->groupBy('s.id');
+
+        $queryBuilder->addOrderBy(self::TABLE_ALIAS.'.totalRetweets', 'DESC');
+        $queryBuilder->addOrderBy('p.checkedAt', 'DESC');
 
         $this->applyCriteria($queryBuilder, $searchParams);
+
         $results = $queryBuilder->getQuery()->getArrayResult();
         $statuses = array_map(
             function ($status) {

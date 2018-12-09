@@ -400,4 +400,9 @@ class Status implements StatusInterface
     {
         return $this->aggregates;
     }
+
+    /**
+     * @ORM\OneToMany(targetEntity="App\Popularity\Entity\StatusPopularity", mappedBy="status")
+     */
+    private $popularity;
 }

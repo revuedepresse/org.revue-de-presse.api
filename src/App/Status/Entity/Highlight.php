@@ -25,6 +25,11 @@ class Highlight
     private $member;
 
     /**
+     * @var boolean
+     */
+    private $isRetweet;
+
+    /**
      * @var int
      */
     private $totalRetweets;
