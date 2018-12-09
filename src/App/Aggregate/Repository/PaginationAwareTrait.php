@@ -22,7 +22,7 @@ trait PaginationAwareTrait
         $queryBuilder = $this->createQueryBuilder($alias);
 
         $this->applyCriteria($queryBuilder, $searchParams);
-        $queryBuilder->select('count('.$alias.'.id) total_items');
+        $queryBuilder->select('COUNT(DISTINCT '.$alias.'.id) total_items');
 
         try {
             $result = $queryBuilder->getQuery()->getSingleResult();

@@ -159,7 +159,7 @@ class ListController
                     return 0;
                 }
 
-                $key = 'highlights.total_pages' . $searchParams->getParams()['date']->format('Y-m-d');
+                $key = 'highlights.total_pages' . $searchParams->getParams()['date']->format('Y-m-d H');
                 $totalPages = $client->get($key);
 
                 if (!$totalPages) {
@@ -174,7 +174,7 @@ class ListController
                     return [];
                 }
 
-                $key = 'highlights.items'.$searchParams->getParams()['date']->format('Y-m-d');
+                $key = 'highlights.items'.$searchParams->getParams()['date']->format('Y-m-d H');
                 $highlights = $client->get($key);
 
                 if (!$highlights) {
