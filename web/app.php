@@ -5,13 +5,13 @@ use Symfony\Component\ClassLoader\ApcClassLoader,
 
 $loader = require_once __DIR__ . '/../app/autoload.php';
 
-//$loader = new ApcClassLoader('dashboard', $loader);
-//$loader->register(true);
+$loader = new ApcClassLoader('dashboard', $loader);
+$loader->register(true);
 
 require_once __DIR__ . '/../app/AppKernel.php';
 
 $kernel = new AppKernel('prod', false);
-//$kernel->loadClassCache();
+$kernel->loadClassCache();
 
 $request  = Request::createFromGlobals();
 
