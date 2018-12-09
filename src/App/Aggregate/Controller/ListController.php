@@ -159,10 +159,10 @@ class ListController
                     return 0;
                 }
 
-                $key = 'highlights.total_pages' . $searchParams->getParams()['date']->format('Y-m-d H');
+                $key = $this->getCacheKey('highlights.total_pages', $searchParams);
                 $totalPages = $client->get($key);
 
-                if (!$totalPages) {
+                if (!$totalPages || true) {
                     $totalPages = $this->highlightRepository->countTotalPages($searchParams);
                     $client->setex($key, 3600, $totalPages);
                 }
@@ -174,10 +174,10 @@ class ListController
                     return [];
                 }
 
-                $key = 'highlights.items'.$searchParams->getParams()['date']->format('Y-m-d H');
+                $key = $this->getCacheKey('highlights.items', $searchParams);
                 $highlights = $client->get($key);
 
-                if (!$highlights) {
+                if (!$highlights || true) {
                     $highlights = json_encode($this->highlightRepository->findHighlights($searchParams));
                     $client->setex($key, 3600, $highlights);
                 }
@@ -192,13 +192,30 @@ class ListController
     }
 
     /**
+     * @param string       $prefix
+     * @param SearchParams $searchParams
+     * @return string
+     */
+    public function getCacheKey(string $prefix, SearchParams $searchParams): string
+    {
+        $includedRetweets = 'includeRetweets=' . $searchParams->getParams()['includeRetweets'];
+
+        return implode([
+            $prefix,
+            $searchParams->getParams()['date']->format('Y-m-d H'),
+            $includedRetweets
+        ]);
+    }
+
+    /**
      * @param SearchParams $searchParams
      * @return bool
      */
     private function invalidHighlightsSearchParams(SearchParams $searchParams): bool
     {
         return !array_key_exists('date', $searchParams->getParams()) ||
-            ($searchParams->getParams() instanceof \DateTime);
+            ($searchParams->getParams() instanceof \DateTime) ||
+            !array_key_exists('includeRetweets', $searchParams->getParams());
     }
 
     /**
