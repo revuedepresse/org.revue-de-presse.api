@@ -53,25 +53,14 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
             ') as totalRetweets',
         ]));
 
-        $queryBuilder->innerJoin(self::TABLE_ALIAS.'.status', 's');
-        $queryBuilder->innerJoin(self::TABLE_ALIAS.'.member', 'm');
-
-        $queryBuilder->leftJoin(
-            's.popularity',
-            'p',
-            Join::WITH,
-            "DATE(DATESUB(p.checkedAt, 1, 'HOUR')) = :date"
-        );
-
         $queryBuilder->setFirstResult($searchParams->getFirstItemIndex());
         $queryBuilder->setMaxResults(min($searchParams->getPageSize(), 10));
 
-        $queryBuilder->groupBy('s.id');
-
-        $queryBuilder->addOrderBy(self::TABLE_ALIAS.'.totalRetweets', 'DESC');
-        $queryBuilder->addOrderBy('p.checkedAt', 'DESC');
-
         $this->applyCriteria($queryBuilder, $searchParams);
+
+        $queryBuilder->groupBy('s.id');
+        $queryBuilder->addOrderBy('totalRetweets', 'DESC');
+        $queryBuilder->addOrderBy('p.checkedAt', 'DESC');
 
         $results = $queryBuilder->getQuery()->getArrayResult();
         $statuses = array_map(
@@ -101,6 +90,17 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
      */
     public function applyCriteria(QueryBuilder $queryBuilder, SearchParams $searchParams): void
     {
+        $queryBuilder->innerJoin(self::TABLE_ALIAS.'.status', 's');
+        $queryBuilder->innerJoin(self::TABLE_ALIAS.'.member', 'm');
+
+        $queryBuilder->leftJoin(
+            's.popularity',
+            'p',
+            Join::WITH,
+            "DATE(DATESUB(p.checkedAt, 1, 'HOUR')) = :date"
+        );
+
+
         $queryBuilder->andWhere("DATE(DATEADD(".self::TABLE_ALIAS.".publicationDateTime, 1, 'HOUR')) = :date");
         $queryBuilder->setParameter('date', $searchParams->getParams()['date']);
     }
