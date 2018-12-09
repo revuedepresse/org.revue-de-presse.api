@@ -164,7 +164,7 @@ class ListController
 
                 if (!$totalPages) {
                     $totalPages = $this->highlightRepository->countTotalPages($searchParams);
-                    $client->set($key, $totalPages);
+                    $client->setex($key, 3600, $totalPages);
                 }
 
                 return $totalPages;
@@ -179,7 +179,7 @@ class ListController
 
                 if (!$highlights) {
                     $highlights = json_encode($this->highlightRepository->findHighlights($searchParams));
-                    $client->set($key, $highlights);
+                    $client->setex($key, 3600, $highlights);
                 }
 
                 return json_decode($highlights, true);
