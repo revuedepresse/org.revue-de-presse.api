@@ -52,8 +52,12 @@ class SearchParams
                 $value = $request->get($name, null);
                 $filteredParams[$name] = $value;
 
-                if ($params[$name] == 'int') {
+                if ($params[$name] == 'int' || $params[$name] == 'integer') {
                     $filteredParams[$name] = intval($value);
+                }
+
+                if ($params[$name] == 'boolean' || $params[$name] == 'bool') {
+                    $filteredParams[$name] = boolval(intval($value));
                 }
 
                 if ($params[$name] == 'datetime') {

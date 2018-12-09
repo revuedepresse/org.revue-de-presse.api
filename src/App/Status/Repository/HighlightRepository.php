@@ -100,8 +100,13 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
             "DATE(DATESUB(p.checkedAt, 1, 'HOUR')) = :date"
         );
 
-
         $queryBuilder->andWhere("DATE(DATEADD(".self::TABLE_ALIAS.".publicationDateTime, 1, 'HOUR')) = :date");
+
+        $excludeRetweets = !$searchParams->getParams()['includeRetweets'];
+        if ($excludeRetweets) {
+            $queryBuilder->andWhere(self::TABLE_ALIAS.".isRetweet = 0");
+        }
+
         $queryBuilder->setParameter('date', $searchParams->getParams()['date']);
     }
 }

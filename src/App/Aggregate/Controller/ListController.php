@@ -184,7 +184,10 @@ class ListController
 
                 return json_decode($highlights, true);
             },
-            ['date' => 'datetime']
+            [
+                'date' => 'datetime',
+                'includeRetweets' => 'bool'
+            ]
         );
     }
 
