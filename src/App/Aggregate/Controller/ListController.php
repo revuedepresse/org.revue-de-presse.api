@@ -162,7 +162,7 @@ class ListController
                 $key = $this->getCacheKey('highlights.total_pages', $searchParams);
                 $totalPages = $client->get($key);
 
-                if (!$totalPages || true) {
+                if (!$totalPages) {
                     $totalPages = $this->highlightRepository->countTotalPages($searchParams);
                     $client->setex($key, 3600, $totalPages);
                 }
@@ -177,7 +177,7 @@ class ListController
                 $key = $this->getCacheKey('highlights.items', $searchParams);
                 $highlights = $client->get($key);
 
-                if (!$highlights || true) {
+                if (!$highlights) {
                     $highlights = json_encode($this->highlightRepository->findHighlights($searchParams));
                     $client->setex($key, 3600, $highlights);
                 }
