@@ -226,9 +226,6 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
 
             try {
                 $member = $this->getMessageUser($friend);
-                if ($member->getTwitterUsername() !== 'afpfr') {
-                    continue;
-                }
 
                 if ($member->isAWhisperer()) {
                     $message = sprintf('Ignoring whisperer with screen name "%s"', $friend->screen_name);
