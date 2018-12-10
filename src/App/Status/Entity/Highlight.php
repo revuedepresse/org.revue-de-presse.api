@@ -30,6 +30,11 @@ class Highlight
     private $isRetweet;
 
     /**
+     * @var \DateTime
+     */
+    private $retweetedStatusPublicationDate;
+
+    /**
      * @var int
      */
     private $totalRetweets;

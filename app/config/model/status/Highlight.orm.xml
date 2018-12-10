@@ -40,9 +40,16 @@
         />
 
         <field
-                name="isRetweet"
-                column="is_retweet"
-                type="boolean"
+            name="isRetweet"
+            column="is_retweet"
+            type="boolean"
+        />
+
+        <field
+            name="retweetedStatusPublicationDate"
+            column="retweeted_status_publication_date"
+            type="datetime"
+            nullable="true"
         />
 
         <field
