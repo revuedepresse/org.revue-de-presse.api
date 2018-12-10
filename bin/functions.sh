@@ -1044,7 +1044,7 @@ function remove_redis_container {
 function run_redis_container() {
     remove_redis_container
 
-    local redis_volume_path=`pwd`'./provisioning/volumes/redis'
+    local redis_volume_path=`pwd`'/provisioning/volumes/redis'
     local network=`get_network_option`
     local command="docker run --name redis -d \
     --hostname reddis ${network} \
