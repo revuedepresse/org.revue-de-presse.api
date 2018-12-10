@@ -46,11 +46,18 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
         $queryBuilder->addSelect('s.text');
         $queryBuilder->addSelect('s.createdAt as publicationDateTime');
         $queryBuilder->addSelect('s.screenName as screen_name');
+        $queryBuilder->addSelect("COALESCE(p.checkedAt, s.createdAt) as last_update");
         $queryBuilder->addSelect(implode([
             'COALESCE(',
             '   p.totalRetweets, ',
             '   '.self::TABLE_ALIAS.'.totalRetweets',
-            ') as totalRetweets',
+            ') as total_retweets',
+        ]));
+        $queryBuilder->addSelect(implode([
+            'COALESCE(',
+            '   p.totalFavorites, ',
+            '   '.self::TABLE_ALIAS.'.totalFavorites',
+            ') as total_favorites',
         ]));
 
         $queryBuilder->setFirstResult($searchParams->getFirstItemIndex());
@@ -59,22 +66,39 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
         $this->applyCriteria($queryBuilder, $searchParams);
 
         $queryBuilder->groupBy('s.id');
-        $queryBuilder->addOrderBy('totalRetweets', 'DESC');
-        $queryBuilder->addOrderBy('p.checkedAt', 'DESC');
+        $queryBuilder->addOrderBy('total_retweets', 'DESC');
+        $queryBuilder->addOrderBy("last_update", 'DESC');
 
         $results = $queryBuilder->getQuery()->getArrayResult();
         $statuses = array_map(
-            function ($status) {
+            function ($status) use ($searchParams) {
                 $extractedProperties = [
                     'status' => $this->extractStatusProperties(
                         [$status],
                         false)[0]
                 ];
 
+                $decodedDocument = json_decode($status['original_document'], true);
+                $decodedDocument['retweets_count'] = intval($status['total_retweets']);
+                $decodedDocument['favorites_count'] = intval($status['total_favorites']);
+                $extractedProperties['status']['retweet_count'] = intval($status['total_retweets']);
+                $extractedProperties['status']['favorite_count'] = intval($status['total_favorites']);
+                $extractedProperties['status']['original_document'] = json_encode($decodedDocument);
+
+                $status['lastUpdate'] = $status['last_update'];
+
+                $includeRetweets = $searchParams->getParams()['includeRetweets'];
+                if ($includeRetweets && $extractedProperties['status']['favorite_count'] === 0) {
+                    $extractedProperties['status']['favorite_count'] = $decodedDocument['retweeted_status']['favorite_count'];
+                }
+
+                unset($status['total_retweets']);
+                unset($status['total_favorites']);
                 unset($status['original_document']);
                 unset($status['screen_name']);
                 unset($status['author_avatar']);
                 unset($status['status_id']);
+                unset($status['last_update']);
 
                 return array_merge($status, $extractedProperties);
             },
