@@ -1133,7 +1133,14 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             unset($options['max_id']);
         }
 
-        return $this->accessor->fetchStatuses($options);
+        $statuses = $this->accessor->fetchStatuses($options);
+        if (count($statuses) === 0 && array_key_exists('max_id', $options) ){
+            unset($options['max_id']);
+
+            $statuses = $this->fetchLatestStatuses($options, $discoverPastTweets = false);
+        }
+
+        return $statuses;
     }
 
     /**
