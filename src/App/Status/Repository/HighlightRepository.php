@@ -15,6 +15,11 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
     use PaginationAwareTrait;
     use ConversationAwareTrait;
 
+    /**
+     * @var string
+     */
+    public $aggregate;
+
     const TABLE_ALIAS = 'h';
 
     public function __construct($entityManager, ClassMetadata $class)
@@ -124,23 +129,74 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
             "DATE(DATESUB(p.checkedAt, 1, 'HOUR')) = :date"
         );
 
-        $queryBuilder->andWhere("DATE(DATEADD(".self::TABLE_ALIAS.".publicationDateTime, 1, 'HOUR')) = :date");
-
-        $retweetedStatusPublicationDate = "COALESCE(
-                DATE(
-                    DATEADD(".
-                        self::TABLE_ALIAS.".retweetedStatusPublicationDate, 1, 'HOUR'
-                    )
-                ),
-                DATE(DATEADD(".self::TABLE_ALIAS.".publicationDateTime, 1, 'HOUR'))
-            )";
-        $queryBuilder->andWhere($retweetedStatusPublicationDate." = :date");
-
-        $excludeRetweets = !$searchParams->getParams()['includeRetweets'];
-        if ($excludeRetweets) {
-            $queryBuilder->andWhere(self::TABLE_ALIAS.".isRetweet = 0");
-        }
+        $this->applyConstraintAboutPublicationDateTime($queryBuilder)
+        ->applyConstraintAboutPublicationDateOfRetweetedStatus($queryBuilder)
+        ->applyConstraintAboutRetweetedStatus($queryBuilder, $searchParams)
+        ->applyConstraintAboutRelatedAggregate($queryBuilder, $searchParams);
 
         $queryBuilder->setParameter('date', $searchParams->getParams()['date']);
+    }
+
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @return HighlightRepository
+     */
+    private function applyConstraintAboutPublicationDateOfRetweetedStatus(QueryBuilder $queryBuilder): self
+    {
+        $retweetedStatusPublicationDate = "COALESCE(
+                DATE(
+                    DATEADD(" .
+            self::TABLE_ALIAS . ".retweetedStatusPublicationDate, 1, 'HOUR'
+                    )
+                ),
+                DATE(DATEADD(" . self::TABLE_ALIAS . ".publicationDateTime, 1, 'HOUR'))
+            )";
+        $queryBuilder->andWhere($retweetedStatusPublicationDate . " = :date");
+
+        return $this;
+    }
+
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @param SearchParams $searchParams
+     * @return HighlightRepository
+     */
+    private function applyConstraintAboutRetweetedStatus(QueryBuilder $queryBuilder, SearchParams $searchParams): self
+    {
+        $excludeRetweets = !$searchParams->getParams()['includeRetweets'];
+        if ($excludeRetweets) {
+            $queryBuilder->andWhere(self::TABLE_ALIAS . ".isRetweet = 0");
+        }
+
+        return $this;
+    }
+
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @return HighlightRepository
+     */
+    private function applyConstraintAboutPublicationDateTime(QueryBuilder $queryBuilder): self
+    {
+        $queryBuilder->andWhere("DATE(DATEADD(" . self::TABLE_ALIAS . ".publicationDateTime, 1, 'HOUR')) = :date");
+
+        return $this;
+    }
+
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @param SearchParams $searchParams
+     * @return HighlightRepository
+     */
+    private function applyConstraintAboutRelatedAggregate(QueryBuilder $queryBuilder, SearchParams $searchParams): self
+    {
+        $aggregates = [$this->aggregate];
+        if ($searchParams->hasParams('aggregate')) {
+            $aggregates = explode(',', $searchParams->getParams()['aggregate']);
+        }
+
+        $queryBuilder->andWhere(self::TABLE_ALIAS . '.aggregateName in (:aggregates)');
+        $queryBuilder->setParameter('aggregates', $aggregates);
+
+        return $this;
     }
 }

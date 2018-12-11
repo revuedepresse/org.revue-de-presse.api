@@ -50,10 +50,19 @@ class SearchParams
             $paramsNames,
             function ($name) use ($request, $params, &$filteredParams) {
                 $value = $request->get($name, null);
+
+                if (is_null($value)) {
+                    return;
+                }
+
                 $filteredParams[$name] = $value;
 
                 if ($params[$name] == 'int' || $params[$name] == 'integer') {
                     $filteredParams[$name] = intval($value);
+                }
+
+                if ($params[$name] == 'string' && !empty($value)) {
+                    $filteredParams[$name] = trim((string) $value);
                 }
 
                 if ($params[$name] == 'boolean' || $params[$name] == 'bool') {
@@ -132,6 +141,15 @@ class SearchParams
     public function getParams(): array
     {
         return $this->params;
+    }
+
+    /**
+     * @param $name
+     * @return bool
+     */
+    public function hasParams(string $name): bool
+    {
+        return array_key_exists($name, $this->params);
     }
 
     /**
