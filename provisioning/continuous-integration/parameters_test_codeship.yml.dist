@@ -66,3 +66,5 @@ parameters:
 
     operations_skipped_after:   12:00
     operations_skipped_before:  12:01
+
+    highlight_aggregate_default:  ''

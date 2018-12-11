@@ -3,6 +3,7 @@
 namespace App\Status\Entity;
 
 use App\Member\MemberInterface;
+use Predis\Configuration\Option\Aggregate;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\StatusInterface;
 
 class Highlight
@@ -28,6 +29,16 @@ class Highlight
      * @var boolean
      */
     private $isRetweet;
+
+    /**
+     * @var Aggregate
+     */
+    private $aggregate;
+
+    /**
+     * @var string
+     */
+    private $aggregateName;
 
     /**
      * @var \DateTime

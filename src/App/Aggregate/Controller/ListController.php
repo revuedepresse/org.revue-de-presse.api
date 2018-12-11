@@ -162,7 +162,7 @@ class ListController
                 $key = $this->getCacheKey('highlights.total_pages', $searchParams);
                 $totalPages = $client->get($key);
 
-                if (!$totalPages) {
+                if (!$totalPages || $this->notInProduction()) {
                     $totalPages = $this->highlightRepository->countTotalPages($searchParams);
                     $client->setex($key, 3600, $totalPages);
                 }
@@ -177,7 +177,7 @@ class ListController
                 $key = $this->getCacheKey('highlights.items', $searchParams);
                 $highlights = $client->get($key);
 
-                if (!$highlights) {
+                if (!$highlights || $this->notInProduction()) {
                     $highlights = json_encode($this->highlightRepository->findHighlights($searchParams));
                     $client->setex($key, 3600, $highlights);
                 }
@@ -186,9 +186,19 @@ class ListController
             },
             [
                 'date' => 'datetime',
-                'includeRetweets' => 'bool'
+                'includeRetweets' => 'bool',
+                'aggregate' => 'string'
             ]
         );
+    }
+
+    /**
+     * @param $this
+     * @return bool
+     */
+    private function notInProduction(): bool
+    {
+        return $this->environment !== 'prod';
     }
 
     /**
@@ -379,6 +389,7 @@ class ListController
      * @param Request $request
      * @return array|JsonResponse
      * @throws NonUniqueResultException
+     * @throws \Doctrine\ORM\ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function unlockAggregate(Request $request)

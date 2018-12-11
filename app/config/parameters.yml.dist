@@ -6,29 +6,31 @@ imports:
     - { resource: parameters/parameters_weaving_the_web.yml }
 
 parameters:
-    app_version:                0.1
+    app_version:                    0.1
 
-    feature_toggling_search:    false
+    feature_toggling_search:        false
 
-    locale:                     en
+    locale:                         en
 
-    framework_secret:           E04GDc6h5f#3glVUR6pM##VuGG&6hoD8q&WYlOBHg3wKJXfN1LqtDP&Z6pRjeaEh
+    framework_secret:               E04GDc6h5f#3glVUR6pM##VuGG&6hoD8q&WYlOBHg3wKJXfN1LqtDP&Z6pRjeaEh
 
-    test_database_memory:       false
-    test_database_path:         %kernel.cache_dir%/wtw_dashboard.db
+    test_database_memory:           false
+    test_database_path:             %kernel.cache_dir%/wtw_dashboard.db
 
-    php_binary:                 /usr/bin/php
+    php_binary:                     /usr/bin/php
 
-    operations_skipped_after:   21:00
-    operations_skipped_before:  22:30
+    operations_skipped_after:       21:00
+    operations_skipped_before:      22:30
 
-    production_main_level:      error
+    production_main_level:          error
 
-    allowed.origin:             '*'
+    allowed.origin:                 '*'
 
     # Authentication
-    valid_audience:             ''
-    authorized_iss:             ''
+    valid_audience:                 ''
+    authorized_iss:                 ''
 
-    redis_host:                 127.0.0.1
-    redis_port:                 6379
+    redis_host:                     127.0.0.1
+    redis_port:                     6379
+
+    highlight_aggregate_default:    ''
