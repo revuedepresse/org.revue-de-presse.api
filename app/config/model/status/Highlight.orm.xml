@@ -45,6 +45,21 @@
             type="boolean"
         />
 
+        <many-to-one
+            target-entity="WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate"
+            field="aggregate"
+            inversed-by="timelyStatuses">
+            <join-column name="aggregate_id" />
+        </many-to-one>
+
+        <field
+            name="aggregateName"
+            column="aggregate_name"
+            type="string"
+            nullable="true"
+            length="100"
+        />
+
         <field
             name="retweetedStatusPublicationDate"
             column="retweeted_status_publication_date"
