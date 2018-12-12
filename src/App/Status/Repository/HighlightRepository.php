@@ -20,6 +20,11 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
      */
     public $aggregate;
 
+    /**
+     * @var string
+     */
+    public $adminRouteName;
+
     const TABLE_ALIAS = 'h';
 
     public function __construct($entityManager, ClassMetadata $class)
@@ -187,10 +192,19 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
      * @param SearchParams $searchParams
      * @return HighlightRepository
      */
-    private function applyConstraintAboutRelatedAggregate(QueryBuilder $queryBuilder, SearchParams $searchParams): self
-    {
+    private function applyConstraintAboutRelatedAggregate(
+        QueryBuilder $queryBuilder,
+        SearchParams $searchParams
+    ): self {
+        if ($searchParams->paramIs('routeName', $this->adminRouteName)) {
+            $queryBuilder->andWhere(self::TABLE_ALIAS . '.aggregateName != :aggregate');
+            $queryBuilder->setParameter('aggregate', $this->aggregate);
+
+            return $this;
+        }
+
         $aggregates = [$this->aggregate];
-        if ($searchParams->hasParams('aggregate')) {
+        if ($searchParams->hasParam('aggregate')) {
             $aggregates = explode(',', $searchParams->getParams()['aggregate']);
         }
 

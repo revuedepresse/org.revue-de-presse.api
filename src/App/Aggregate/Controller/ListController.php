@@ -4,6 +4,9 @@ namespace App\Aggregate\Controller;
 
 use App\Aggregate\Repository\TimelyStatusRepository;
 use App\Cache\RedisCache;
+use App\Member\Authentication\Authenticator;
+use App\Member\MemberInterface;
+use App\Member\Repository\AuthenticationTokenRepository;
 use App\Security\Cors\CorsHeadersAwareTrait;
 use App\Status\Repository\HighlightRepository;
 use Doctrine\ORM\NonUniqueResultException;
@@ -20,6 +23,11 @@ use WTW\UserBundle\Repository\UserRepository;
 class ListController
 {
     use CorsHeadersAwareTrait;
+
+    /**
+     * @var AuthenticationTokenRepository
+     */
+    public $authenticationTokenRepository;
 
     /**
      * @var TokenRepository
@@ -154,9 +162,29 @@ class ListController
 
         return $this->getCollection(
             $request,
-            $counter = function (SearchParams $searchParams) use ($client) {
+            $counter = function (SearchParams $searchParams) use ($client, $request) {
+                $unauthorizedJsonResponse = new JsonResponse(
+                    'Unauthorized request',
+                    403,
+                    $this->getAccessControlOriginHeaders($this->environment, $this->allowedOrigin)
+                );
+
                 if ($this->invalidHighlightsSearchParams($searchParams)) {
-                    return 0;
+                    return $unauthorizedJsonResponse;
+                }
+
+                $queriedRouteAccess = $searchParams->hasParam('routeName');
+                if ($queriedRouteAccess && !$request->headers->has('x-auth-admin-token')) {
+                    return $unauthorizedJsonResponse;
+                }
+
+                if ($queriedRouteAccess) {
+                    $tokenId = $request->headers->get('x-auth-admin-token');
+                    $memberProperties = $this->authenticationTokenRepository->findByTokenIdentifier($tokenId);
+
+                    if (!($memberProperties['member'] instanceof MemberInterface)) {
+                        return $unauthorizedJsonResponse;
+                    }
                 }
 
                 $key = $this->getCacheKey('highlights.total_pages', $searchParams);
@@ -187,7 +215,8 @@ class ListController
             [
                 'date' => 'datetime',
                 'includeRetweets' => 'bool',
-                'aggregate' => 'string'
+                'aggregate' => 'string',
+                'routeName' => 'string'
             ]
         );
     }

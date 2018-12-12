@@ -147,9 +147,19 @@ class SearchParams
      * @param $name
      * @return bool
      */
-    public function hasParams(string $name): bool
+    public function hasParam(string $name): bool
     {
         return array_key_exists($name, $this->params);
+    }
+
+    /**
+     * @param string $name
+     * @param        $value
+     * @return bool
+     */
+    public function paramIs(string $name, $value): bool
+    {
+        return $this->hasParam($name) && $this->params[$name] === $value;
     }
 
     /**
