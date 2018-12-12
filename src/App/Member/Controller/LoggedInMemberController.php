@@ -61,7 +61,8 @@ class LoggedInMemberController
         }
 
         $memberProperties = $this->authenticationTokenRepository->findByTokenIdentifier($tokenId);
-        if (!($memberProperties['member'] instanceof MemberInterface)) {
+        if (!array_key_exists('member', $memberProperties) ||
+            !($memberProperties['member'] instanceof MemberInterface)) {
             return $this->makeInvalidIdTokenResponse($corsHeaders);
         }
 

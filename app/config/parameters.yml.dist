@@ -34,3 +34,4 @@ parameters:
     redis_port:                     6379
 
     highlight_aggregate_default:    ''
+    admin_route_name:               ''

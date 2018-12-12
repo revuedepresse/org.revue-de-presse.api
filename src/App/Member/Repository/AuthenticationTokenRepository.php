@@ -29,7 +29,7 @@ class AuthenticationTokenRepository extends EntityRepository
         try {
             $tokenInfo = $this->authenticator->authenticate($tokenId);
         } catch (\Exception $exception) {
-            return null;
+            return [];
         }
 
         /** @var AuthenticationToken $token */
