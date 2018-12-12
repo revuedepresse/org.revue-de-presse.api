@@ -72,6 +72,15 @@ class SearchParams
                 if ($params[$name] == 'datetime') {
                     $filteredParams[$name] = new \DateTime($value, new \DateTimeZone('Europe/Paris'));
                 }
+
+
+                if ($params[$name] == 'array') {
+                    $filteredParams[$name] = $value;
+
+                    if (!is_array($value)) {
+                        $filteredParams[$name] = [];
+                    }
+                }
             }
         );
 
@@ -147,9 +156,19 @@ class SearchParams
      * @param $name
      * @return bool
      */
-    public function hasParams(string $name): bool
+    public function hasParam(string $name): bool
     {
         return array_key_exists($name, $this->params);
+    }
+
+    /**
+     * @param string $name
+     * @param        $value
+     * @return bool
+     */
+    public function paramIs(string $name, $value): bool
+    {
+        return $this->hasParam($name) && $this->params[$name] === $value;
     }
 
     /**

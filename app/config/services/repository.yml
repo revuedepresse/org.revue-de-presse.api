@@ -50,8 +50,9 @@ services:
         arguments:
             - 'App\Status\Entity\Highlight'
         properties:
-            logger: '@logger'
-            aggregate: '%highlight_aggregate_default%'
+            aggregate:      '%highlight_aggregate_default%'
+            logger:         '@logger'
+            adminRouteName: '%admin_route_name%'
 
     repository.not_found_status:
         factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]

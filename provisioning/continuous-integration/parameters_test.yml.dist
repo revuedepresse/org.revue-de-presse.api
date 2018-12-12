@@ -70,3 +70,4 @@ parameters:
     operations_skipped_before:    12:01
 
     highlight_aggregate_default:  ''
+    admin_route_name:             ''
