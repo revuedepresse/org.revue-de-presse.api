@@ -219,7 +219,7 @@ class ListController
                 'includeRetweets' => 'bool',
                 'aggregate' => 'string',
                 'routeName' => 'string',
-                'selectedAggregates' => 'array'
+                'selectedAggregates' => 'array',
             ]
         );
     }
