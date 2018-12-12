@@ -242,9 +242,16 @@ class ListController
     {
         $includedRetweets = 'includeRetweets=' . $searchParams->getParams()['includeRetweets'];
 
+        $sortedSelectedAggregates = [];
+        if ($searchParams->hasParam('selectedAggregates')) {
+            $sortedSelectedAggregates = $searchParams->getParams()['selectedAggregates'];
+            sort($sortedSelectedAggregates);
+        }
+
         return implode([
             $prefix,
             $searchParams->getParams()['date']->format('Y-m-d H'),
+            implode(',', $sortedSelectedAggregates),
             $includedRetweets
         ]);
     }
