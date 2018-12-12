@@ -220,7 +220,7 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
         QueryBuilder $queryBuilder,
         SearchParams $searchParams
     ): self {
-        if ($searchParams->paramIs('routeName', $this->adminRouteName)) {
+        if ($this->accessingAdministrativeRoute($searchParams)) {
             $queryBuilder->andWhere(self::TABLE_ALIAS . '.aggregateName != :aggregate');
             $queryBuilder->setParameter('aggregate', $this->aggregate);
 
