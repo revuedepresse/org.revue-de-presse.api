@@ -72,6 +72,15 @@ class SearchParams
                 if ($params[$name] == 'datetime') {
                     $filteredParams[$name] = new \DateTime($value, new \DateTimeZone('Europe/Paris'));
                 }
+
+
+                if ($params[$name] == 'array') {
+                    $filteredParams[$name] = $value;
+
+                    if (!is_array($value)) {
+                        $filteredParams[$name] = [];
+                    }
+                }
             }
         );
 

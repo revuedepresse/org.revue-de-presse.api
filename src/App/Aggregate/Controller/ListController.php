@@ -163,10 +163,11 @@ class ListController
         return $this->getCollection(
             $request,
             $counter = function (SearchParams $searchParams) use ($client, $request) {
+                $headers = $this->getAccessControlOriginHeaders($this->environment, $this->allowedOrigin);
                 $unauthorizedJsonResponse = new JsonResponse(
                     'Unauthorized request',
                     403,
-                    $this->getAccessControlOriginHeaders($this->environment, $this->allowedOrigin)
+                    $headers
                 );
 
                 if ($this->invalidHighlightsSearchParams($searchParams)) {
@@ -182,7 +183,8 @@ class ListController
                     $tokenId = $request->headers->get('x-auth-admin-token');
                     $memberProperties = $this->authenticationTokenRepository->findByTokenIdentifier($tokenId);
 
-                    if (!($memberProperties['member'] instanceof MemberInterface)) {
+                    if (!array_key_exists('member', $memberProperties) ||
+                        !($memberProperties['member'] instanceof MemberInterface)) {
                         return $unauthorizedJsonResponse;
                     }
                 }
@@ -216,7 +218,8 @@ class ListController
                 'date' => 'datetime',
                 'includeRetweets' => 'bool',
                 'aggregate' => 'string',
-                'routeName' => 'string'
+                'routeName' => 'string',
+                'selectedAggregates' => 'array'
             ]
         );
     }
@@ -316,7 +319,7 @@ class ListController
         $searchParams = SearchParams::fromRequest($request, $params);
 
         try {
-            $totalPages = $counter($searchParams);
+            $totalPagesOrResponse = $counter($searchParams);
         } catch (NonUniqueResultException $exception) {
             $this->logger->critical($exception->getMessage());
 
@@ -330,11 +333,17 @@ class ListController
             );
         }
 
-        $totalPagesHeader = ['x-total-pages' => $totalPages];
+
+        if ($totalPagesOrResponse instanceof JsonResponse) {
+            return $totalPagesOrResponse;
+        }
+
+        $totalPagesHeader = ['x-total-pages' => $totalPagesOrResponse];
         $pageIndexHeader = ['x-page-index' => $searchParams->getPageIndex()];
 
-        if ($searchParams->getPageIndex() > $totalPages) {
+        if ($searchParams->getPageIndex() > $totalPagesOrResponse) {
             $response = $this->makeOkResponse([]);
+
             $response->headers->add($totalPagesHeader);
             $response->headers->add($pageIndexHeader);
 

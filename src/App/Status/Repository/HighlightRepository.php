@@ -5,6 +5,8 @@ namespace App\Status\Repository;
 use App\Aggregate\Controller\SearchParams;
 use App\Aggregate\Repository\PaginationAwareTrait;
 use App\Conversation\ConversationAwareTrait;
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Query\Expr\Join;
@@ -24,6 +26,11 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
      * @var string
      */
     public $adminRouteName;
+
+    /**
+     * @var \Psr\Log\LoggerInterface
+     */
+    public $logger;
 
     const TABLE_ALIAS = 'h';
 
@@ -45,6 +52,7 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
     /**
      * @param SearchParams $searchParams
      * @return array
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function findHighlights(SearchParams $searchParams): array
     {
@@ -71,7 +79,13 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
         ]));
 
         $queryBuilder->setFirstResult($searchParams->getFirstItemIndex());
-        $queryBuilder->setMaxResults(min($searchParams->getPageSize(), 10));
+
+        $maxResults = min($searchParams->getPageSize(), 10);
+        if ($this->accessingAdministrativeRoute($searchParams)) {
+            $maxResults = 100;
+        }
+
+        $queryBuilder->setMaxResults($maxResults);
 
         $this->applyCriteria($queryBuilder, $searchParams);
 
@@ -115,7 +129,10 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
             $results
         );
 
-        return $statuses;
+        return [
+            'aggregates' => $this->selectDistinctAggregates($searchParams),
+            'statuses' => $statuses,
+        ];
     }
 
     /**
@@ -137,7 +154,8 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
         $this->applyConstraintAboutPublicationDateTime($queryBuilder)
         ->applyConstraintAboutPublicationDateOfRetweetedStatus($queryBuilder)
         ->applyConstraintAboutRetweetedStatus($queryBuilder, $searchParams)
-        ->applyConstraintAboutRelatedAggregate($queryBuilder, $searchParams);
+        ->applyConstraintAboutRelatedAggregate($queryBuilder, $searchParams)
+        ->applyConstraintAboutSelectedAggregates($queryBuilder, $searchParams);
 
         $queryBuilder->setParameter('date', $searchParams->getParams()['date']);
     }
@@ -196,7 +214,7 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
         QueryBuilder $queryBuilder,
         SearchParams $searchParams
     ): self {
-        if ($searchParams->paramIs('routeName', $this->adminRouteName)) {
+        if ($this->accessingAdministrativeRoute($searchParams)) {
             $queryBuilder->andWhere(self::TABLE_ALIAS . '.aggregateName != :aggregate');
             $queryBuilder->setParameter('aggregate', $this->aggregate);
 
@@ -210,6 +228,98 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
 
         $queryBuilder->andWhere(self::TABLE_ALIAS . '.aggregateName in (:aggregates)');
         $queryBuilder->setParameter('aggregates', $aggregates);
+
+        return $this;
+    }
+
+    /**
+     * @param SearchParams $searchParams
+     * @return bool
+     */
+    private function accessingAdministrativeRoute(SearchParams $searchParams): bool
+    {
+        return $searchParams->paramIs('routeName', $this->adminRouteName);
+    }
+
+    /**
+     * @param SearchParams $searchParams
+     * @return array
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    private function selectDistinctAggregates(SearchParams $searchParams): array
+    {
+        $aggregateRestriction = 'AND a.name = ? ';
+        $groupBy = 'GROUP BY h.member_id';
+
+        if ($this->accessingAdministrativeRoute($searchParams)) {
+            $aggregateRestriction = 'AND a.name != ? ';
+            $groupBy = 'GROUP BY h.aggregate_id';
+        }
+
+        $queryDistinctAggregates = <<< QUERY
+                SELECT
+                ust_name as memberFullName,
+                usr_twitter_username as memberName,
+                usr_twitter_id as twitterMemberId,
+                usr_id as memberId,
+                count(h.id) totalHighlights
+                FROM highlight h,
+                weaving_aggregate a,
+                weaving_status s,
+                weaving_user m
+                WHERE h.member_id = m.usr_id
+                AND a.id = h.aggregate_id
+                $aggregateRestriction
+                AND h.status_id = s.ust_id
+                AND DATE(publication_date_time) = ? 
+                $groupBy
+                ORDER BY totalHighlights
+QUERY;
+
+        /** @var Connection $connection */
+        $connection = $this->getEntityManager()->getConnection();
+
+        try {
+        $statement = $connection->executeQuery(
+            $queryDistinctAggregates,
+            [
+                $this->aggregate,
+                $searchParams->getParams()['date']
+            ],
+            [
+                \Pdo::PARAM_STR,
+                Type::DATETIME,
+            ]
+        );
+        } catch (\Exception $exception) {
+            $this->logger->critical($exception->getMessage());
+
+            return [];
+        }
+
+        return $statement->fetchAll();
+    }
+
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @param SearchParams $searchParams
+     * @return HighlightRepository
+     */
+    private function applyConstraintAboutSelectedAggregates(
+        QueryBuilder $queryBuilder,
+        SearchParams $searchParams): self
+    {
+        if ($searchParams->hasParam('selectedAggregates') &&
+            count($searchParams->getParams()['selectedAggregates']) > 0
+        ) {
+            $queryBuilder->andWhere(
+                self::TABLE_ALIAS . '.member in (:selected_members)'
+            );
+            $queryBuilder->setParameter(
+                'selected_members',
+                $searchParams->getParams()['selectedAggregates']
+            );
+        }
 
         return $this;
     }
