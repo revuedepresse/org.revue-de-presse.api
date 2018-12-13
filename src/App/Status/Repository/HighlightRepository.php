@@ -256,6 +256,12 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
             $groupBy = 'GROUP BY h.aggregate_id';
         }
 
+        $excludeRetweets = !$searchParams->getParams()['includeRetweets'];
+        $clauseAboutRetweets = '';
+        if ($excludeRetweets) {
+            $clauseAboutRetweets = 'AND h.is_retweet = 0';
+        }
+
         $queryDistinctAggregates = <<< QUERY
                 SELECT
                 ust_name as memberFullName,
@@ -273,6 +279,7 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
                 AND h.status_id = s.ust_id
                 AND DATE(publication_date_time) = ? 
                 AND DATE(COALESCE(retweeted_status_publication_date, ?)) = ? 
+                $clauseAboutRetweets
                 $groupBy
                 ORDER BY totalHighlights
 QUERY;
