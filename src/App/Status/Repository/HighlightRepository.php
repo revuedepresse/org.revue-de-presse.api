@@ -246,7 +246,7 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
      * @return array
      * @throws \Doctrine\DBAL\DBALException
      */
-    private function selectDistinctAggregates(SearchParams $searchParams): array
+    public function selectDistinctAggregates(SearchParams $searchParams): array
     {
         $aggregateRestriction = 'AND a.name = ? ';
         $groupBy = 'GROUP BY h.member_id';
@@ -272,6 +272,7 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
                 $aggregateRestriction
                 AND h.status_id = s.ust_id
                 AND DATE(publication_date_time) = ? 
+                AND DATE(COALESCE(retweeted_status_publication_date, ?)) = ? 
                 $groupBy
                 ORDER BY totalHighlights
 QUERY;
@@ -280,17 +281,21 @@ QUERY;
         $connection = $this->getEntityManager()->getConnection();
 
         try {
-        $statement = $connection->executeQuery(
-            $queryDistinctAggregates,
-            [
-                $this->aggregate,
-                $searchParams->getParams()['date']
-            ],
-            [
-                \Pdo::PARAM_STR,
-                Type::DATETIME,
-            ]
-        );
+            $statement = $connection->executeQuery(
+                $queryDistinctAggregates,
+                [
+                    $this->aggregate,
+                    $searchParams->getParams()['date'],
+                    $searchParams->getParams()['date'],
+                    $searchParams->getParams()['date'],
+                ],
+                [
+                    \Pdo::PARAM_STR,
+                    Type::DATETIME,
+                    Type::DATETIME,
+                    Type::DATETIME,
+                ]
+            );
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());
 
