@@ -16,6 +16,7 @@ services:
             highlightRepository:            '@repository.highlight'
             logger:                         '@logger'
             memberRepository:               '@user_manager'
+            router:                         '@router'
             redisCache:                     '@app.cache.redis'
             timelyStatusRepository:         '@repository.timely_status'
             tokenRepository:                '@weaving_the_web_api.repository.token'

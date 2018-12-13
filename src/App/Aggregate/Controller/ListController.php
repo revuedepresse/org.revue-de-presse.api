@@ -14,6 +14,7 @@ use OldSound\RabbitMqBundle\RabbitMq\Producer;
 use Predis\Client;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\RouterInterface;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Token;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository;
@@ -83,6 +84,11 @@ class ListController
      * @var RedisCache
      */
     public $redisCache;
+
+    /**
+     * @var RouterInterface
+     */
+    public $router;
 
     /**
      * @param Request $request
@@ -309,6 +315,7 @@ class ListController
      * @param callable $finder
      * @param array    $params
      * @return JsonResponse
+     * @throws \Doctrine\DBAL\DBALException
      */
     private function getCollection(
         Request $request,
@@ -349,7 +356,13 @@ class ListController
         $pageIndexHeader = ['x-page-index' => $searchParams->getPageIndex()];
 
         if ($searchParams->getPageIndex() > $totalPagesOrResponse) {
+            $highlightUrl = $this->router->generate('highlight');
             $response = $this->makeOkResponse([]);
+            if ($request->getPathInfo() === $highlightUrl) {
+                $response = $this->makeOkResponse([
+                    'aggregates' => $this->highlightRepository->selectDistinctAggregates($searchParams),
+                ]);
+            }
 
             $response->headers->add($totalPagesHeader);
             $response->headers->add($pageIndexHeader);

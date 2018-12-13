@@ -14,6 +14,16 @@ parameters:
     weaving_the_web_amqp.produce_lists_members_command.class:                   'WeavingTheWeb\Bundle\AmqpBundle\Command\ProduceListsMembersCommand'
 
 services:
+    command.import_media_relationships:
+        class: 'App\Media\Command\ImportMediaRelationshipsCommand'
+        properties:
+            logger:          '@logger'
+            mediasDirectory: '%kernel.root_dir%/../src/App/Resources/medias'
+            mediaRepository: '@repository.media'
+            ownerRepository: '@repository.owner'
+        tags:
+            - { name: 'console.command' }
+
     command.select_status_collection:
         class:                      "%command.select_status_collection.class%"
         properties:
