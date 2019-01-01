@@ -161,6 +161,7 @@ class ListController
     /**
      * @param Request $request
      * @return JsonResponse
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function getHighlights(Request $request)
     {
@@ -221,7 +222,8 @@ class ListController
                 return json_decode($highlights, true);
             },
             [
-                'date' => 'datetime',
+                'startDate' => 'datetime',
+                'endDate' => 'datetime',
                 'includeRetweets' => 'bool',
                 'aggregate' => 'string',
                 'routeName' => 'string',
@@ -254,12 +256,16 @@ class ListController
             sort($sortedSelectedAggregates);
         }
 
-        return implode([
-            $prefix,
-            $searchParams->getParams()['date']->format('Y-m-d H'),
-            implode(',', $sortedSelectedAggregates),
-            $includedRetweets
-        ]);
+        return implode(
+            ';'
+            , [
+                $prefix,
+                $searchParams->getParams()['startDate']->format('Y-m-d H'),
+                $searchParams->getParams()['endDate']->format('Y-m-d H'),
+                implode(',', $sortedSelectedAggregates),
+                $includedRetweets
+            ]
+        );
     }
 
     /**
@@ -268,8 +274,10 @@ class ListController
      */
     private function invalidHighlightsSearchParams(SearchParams $searchParams): bool
     {
-        return !array_key_exists('date', $searchParams->getParams()) ||
-            ($searchParams->getParams() instanceof \DateTime) ||
+        return !array_key_exists('startDate', $searchParams->getParams()) ||
+            (!($searchParams->getParams()['startDate'] instanceof \DateTime)) ||
+            !array_key_exists('endDate', $searchParams->getParams()) ||
+            (!($searchParams->getParams()['endDate'] instanceof \DateTime)) ||
             !array_key_exists('includeRetweets', $searchParams->getParams());
     }
 

@@ -148,7 +148,10 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
             's.popularity',
             'p',
             Join::WITH,
-            "DATE(DATESUB(p.checkedAt, 1, 'HOUR')) = :date"
+            implode([
+                "DATE(DATESUB(p.checkedAt, 1, 'HOUR')) >= :startDate AND ",
+                "DATE(DATESUB(p.checkedAt, 1, 'HOUR')) <= :endDate"
+            ])
         );
 
         $this->applyConstraintAboutPublicationDateTime($queryBuilder)
@@ -157,7 +160,8 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
         ->applyConstraintAboutRelatedAggregate($queryBuilder, $searchParams)
         ->applyConstraintAboutSelectedAggregates($queryBuilder, $searchParams);
 
-        $queryBuilder->setParameter('date', $searchParams->getParams()['date']);
+        $queryBuilder->setParameter('startDate', $searchParams->getParams()['startDate']);
+        $queryBuilder->setParameter('endDate', $searchParams->getParams()['endDate']);
     }
 
     /**
@@ -174,7 +178,8 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
                 ),
                 DATE(DATEADD(" . self::TABLE_ALIAS . ".publicationDateTime, 1, 'HOUR'))
             )";
-        $queryBuilder->andWhere($retweetedStatusPublicationDate . " = :date");
+        $queryBuilder->andWhere($retweetedStatusPublicationDate . " >= :startDate");
+        $queryBuilder->andWhere($retweetedStatusPublicationDate . " <= :endDate");
 
         return $this;
     }
@@ -200,7 +205,8 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
      */
     private function applyConstraintAboutPublicationDateTime(QueryBuilder $queryBuilder): self
     {
-        $queryBuilder->andWhere("DATE(DATEADD(" . self::TABLE_ALIAS . ".publicationDateTime, 1, 'HOUR')) = :date");
+        $queryBuilder->andWhere("DATE(DATEADD(" . self::TABLE_ALIAS . ".publicationDateTime, 1, 'HOUR')) >= :startDate");
+        $queryBuilder->andWhere("DATE(DATEADD(" . self::TABLE_ALIAS . ".publicationDateTime, 1, 'HOUR')) <= :endDate");
 
         return $this;
     }
@@ -277,8 +283,10 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
                 AND a.id = h.aggregate_id
                 $aggregateRestriction
                 AND h.status_id = s.ust_id
-                AND DATE(publication_date_time) = ? 
-                AND DATE(COALESCE(retweeted_status_publication_date, ?)) = ? 
+                AND DATE(publication_date_time) >= ? 
+                AND DATE(publication_date_time) <= ? 
+                AND DATE(COALESCE(retweeted_status_publication_date, ?)) >= ? 
+                AND DATE(COALESCE(retweeted_status_publication_date, ?)) <= ? 
                 $clauseAboutRetweets
                 $groupBy
                 ORDER BY totalHighlights
@@ -292,12 +300,18 @@ QUERY;
                 $queryDistinctAggregates,
                 [
                     $this->aggregate,
-                    $searchParams->getParams()['date'],
-                    $searchParams->getParams()['date'],
-                    $searchParams->getParams()['date'],
+                    $searchParams->getParams()['startDate'],
+                    $searchParams->getParams()['endDate'],
+                    $searchParams->getParams()['startDate'],
+                    $searchParams->getParams()['startDate'],
+                    $searchParams->getParams()['endDate'],
+                    $searchParams->getParams()['endDate'],
                 ],
                 [
                     \Pdo::PARAM_STR,
+                    Type::DATETIME,
+                    Type::DATETIME,
+                    Type::DATETIME,
                     Type::DATETIME,
                     Type::DATETIME,
                     Type::DATETIME,
@@ -309,7 +323,9 @@ QUERY;
             return [];
         }
 
-        return $statement->fetchAll();
+        $aggregates = $statement->fetchAll();
+
+        return $aggregates;
     }
 
     /**

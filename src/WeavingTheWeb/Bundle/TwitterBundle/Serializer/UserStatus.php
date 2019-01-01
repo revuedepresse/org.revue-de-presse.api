@@ -923,6 +923,10 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             };
         }
 
+        if (!array_key_exists('max_id', $options)) {
+            $options['max_id'] = INF;
+        }
+
         $totalStatuses = $countCollectedItems(
             $options['screen_name'],
             $options['max_id']
