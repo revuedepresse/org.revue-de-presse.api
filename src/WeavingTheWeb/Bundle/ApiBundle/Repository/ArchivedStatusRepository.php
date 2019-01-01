@@ -429,7 +429,12 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
      */
     public function findLocalMaximum(string $screenName, \DateTime $before = null): array
     {
-        return $this->findNextExtremum($screenName, 'asc', $before);
+        $direction = 'asc';
+        if (is_null($before)) {
+            $direction = 'desc';
+        }
+
+        return $this->findNextExtremum($screenName, $direction, $before);
     }
 
     /**

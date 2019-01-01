@@ -1351,7 +1351,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      */
     private function getExtremumOptions($options, $discoverPastTweets): array
     {
-        if (!$discoverPastTweets) {
+        if (!$discoverPastTweets && array_key_exists('max_id', $options)) {
             unset($options['max_id']);
         }
 
