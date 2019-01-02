@@ -10,6 +10,7 @@ use Doctrine\ORM\QueryBuilder;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Status;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\StatusInterface;
+use WeavingTheWeb\Bundle\TwitterBundle\Serializer\UserStatus;
 use WTW\UserBundle\Entity\User;
 
 /**
@@ -142,6 +143,13 @@ class StatusRepository extends ArchivedStatusRepository
     {
         $member = $this->memberManager->findOneBy(['twitter_username' => $screenName]);
         if ($member instanceof User && $member->totalStatuses !== 0) {
+            $status = $this->findOneBy(['screenName' => $screenName], ['createdAt' => 'DESC']);
+            $decodedStatusDocument = json_decode($status->getApiDocument(), true);
+
+            if ($decodedStatusDocument['user']['statuses_count'] > UserStatus::MAX_AVAILABLE_TWEETS_PER_USER) {
+                return $decodedStatusDocument['user']['statuses_count'];
+            }
+
             return $member->totalStatuses;
         }
 
