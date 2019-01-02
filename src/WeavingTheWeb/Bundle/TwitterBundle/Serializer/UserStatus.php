@@ -14,6 +14,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\Translation\TranslatorInterface;
 
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
+use WeavingTheWeb\Bundle\ApiBundle\Entity\StatusInterface;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Token,
     WeavingTheWeb\Bundle\ApiBundle\Entity\Whisperer;
 
@@ -1138,8 +1139,17 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         }
 
         $statuses = $this->accessor->fetchStatuses($options);
-        if (count($statuses) === 0 && array_key_exists('max_id', $options) ){
-            unset($options['max_id']);
+
+        $discoverMoreRecentStatuses = false;
+        if ($this->statusRepository->findOneBy(['statusId' => $statuses[0]->id]) instanceof StatusInterface) {
+            $discoverMoreRecentStatuses = true;
+        }
+
+        if ($discoverMoreRecentStatuses ||
+            (count($statuses) === 0)) {
+            if (array_key_exists('max_id', $options)) {
+                unset($options['max_id']);
+            }
 
             $statuses = $this->fetchLatestStatuses($options, $discoverPastTweets = false);
         }
