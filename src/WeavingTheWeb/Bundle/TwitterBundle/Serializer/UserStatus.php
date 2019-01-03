@@ -1141,12 +1141,15 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         $statuses = $this->accessor->fetchStatuses($options);
 
         $discoverMoreRecentStatuses = false;
-        if ($this->statusRepository->findOneBy(['statusId' => $statuses[0]->id]) instanceof StatusInterface) {
+        if (count($statuses) > 0 &&
+            $this->statusRepository->findOneBy(['statusId' => $statuses[0]->id]) instanceof StatusInterface) {
             $discoverMoreRecentStatuses = true;
         }
 
-        if ($discoverMoreRecentStatuses ||
-            (count($statuses) === 0)) {
+        if ($discoverPastTweets && (
+            $discoverMoreRecentStatuses ||
+            (count($statuses) === 0))
+        ) {
             if (array_key_exists('max_id', $options)) {
                 unset($options['max_id']);
             }
