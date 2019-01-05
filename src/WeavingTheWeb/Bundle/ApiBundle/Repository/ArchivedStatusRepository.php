@@ -252,6 +252,7 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
 
     /**
      * @param EntityManager $entityManager
+     * @throws ORMException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
     private function flushStatuses(EntityManager $entityManager): void

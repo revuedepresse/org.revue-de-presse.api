@@ -2,10 +2,8 @@
 
 namespace App\Aggregate\Producer;
 
-use App\Operation\OperationClock;
 use App\TimeRange\TimeRangeAwareInterface;
 use App\TimeRange\TimeRangeAwareTrait;
-use Doctrine\DBAL\Connection;
 use Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Output\OutputInterface;
 

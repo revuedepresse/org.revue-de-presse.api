@@ -144,16 +144,7 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
         $queryBuilder->innerJoin(self::TABLE_ALIAS.'.status', 's');
         $queryBuilder->innerJoin(self::TABLE_ALIAS.'.member', 'm');
 
-        $queryBuilder->leftJoin(
-            's.popularity',
-            'p',
-            Join::WITH,
-            implode([
-                "DATE(DATESUB(p.checkedAt, 1, 'HOUR')) >= :startDate AND ",
-                "DATE(DATESUB(p.checkedAt, 1, 'HOUR')) <= :endDate"
-            ])
-        );
-
+        $this->applyConstraintAboutPopularity($queryBuilder, $searchParams);
         $this->applyConstraintAboutPublicationDateTime($queryBuilder)
         ->applyConstraintAboutPublicationDateOfRetweetedStatus($queryBuilder)
         ->applyConstraintAboutRetweetedStatus($queryBuilder, $searchParams)
@@ -161,7 +152,9 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
         ->applyConstraintAboutSelectedAggregates($queryBuilder, $searchParams);
 
         $queryBuilder->setParameter('startDate', $searchParams->getParams()['startDate']);
-        $queryBuilder->setParameter('endDate', $searchParams->getParams()['endDate']);
+        if ($this->overMoreThanADay($searchParams)) {
+            $queryBuilder->setParameter('endDate', $searchParams->getParams()['endDate']);
+        }
     }
 
     /**
@@ -350,5 +343,48 @@ QUERY;
         }
 
         return $this;
+    }
+
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @param SearchParams $searchParams
+     * @return QueryBuilder
+     */
+    private function applyConstraintAboutPopularity(QueryBuilder $queryBuilder, SearchParams $searchParams): QueryBuilder
+    {
+        $condition =  implode([
+            "DATE(DATESUB(p.checkedAt, 1, 'HOUR')) >= :startDate AND ",
+            "DATE(DATESUB(p.checkedAt, 1, 'HOUR')) <= :endDate"
+        ]);
+        if ($this->overOneDay($searchParams)) {
+            $condition = implode([
+                "DATE(DATESUB(p.checkedAt, 1, 'HOUR')) = :startDate",
+            ]);
+        }
+
+        return $queryBuilder->leftJoin(
+            's.popularity',
+            'p',
+            Join::WITH,
+            $condition
+        );
+    }
+
+    /**
+     * @param SearchParams $searchParams
+     * @return bool
+     */
+    private function overOneDay(SearchParams $searchParams): bool
+    {
+        return $searchParams->getParams()['startDate'] === $searchParams->getParams()['endDate'];
+    }
+
+    /**
+     * @param SearchParams $searchParams
+     * @return bool
+     */
+    private function overMoreThanADay(SearchParams $searchParams): bool
+    {
+        return $searchParams->getParams()['startDate'] !== $searchParams->getParams()['endDate'];
     }
 }
