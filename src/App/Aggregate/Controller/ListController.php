@@ -4,7 +4,6 @@ namespace App\Aggregate\Controller;
 
 use App\Aggregate\Repository\TimelyStatusRepository;
 use App\Cache\RedisCache;
-use App\Member\Authentication\Authenticator;
 use App\Member\MemberInterface;
 use App\Member\Repository\AuthenticationTokenRepository;
 use App\Security\Cors\CorsHeadersAwareTrait;
@@ -20,6 +19,8 @@ use WeavingTheWeb\Bundle\ApiBundle\Entity\Token;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\TokenRepository;
 use WTW\UserBundle\Repository\UserRepository;
+use Kreait\Firebase\Factory;
+use Kreait\Firebase\ServiceAccount;
 
 class ListController
 {
@@ -69,6 +70,11 @@ class ListController
      * @var string
      */
     public $environment;
+
+    /**
+     * @var string
+     */
+    public $configDirectory;
 
     /**
      * @var string
@@ -212,14 +218,49 @@ class ListController
                 }
 
                 $key = $this->getCacheKey('highlights.items', $searchParams);
-                $highlights = $client->get($key);
 
-                if (!$highlights || $this->notInProduction()) {
-                    $highlights = json_encode($this->highlightRepository->findHighlights($searchParams));
-                    $client->setex($key, 3600, $highlights);
+                $aggregateId = $this->aggregateRepository->findOneBy([
+                    'name' => $searchParams->getParams()['aggregate']
+                ]);
+                if (is_null($aggregateId)) {
+                    $aggregateId = 1;
                 }
 
-                return json_decode($highlights, true);
+                $hasChild = false;
+                if (!$searchParams->hasParam('selectedAggregates')) {
+                    $snapshot = $this->getFirebaseDatabaseSnapshot($searchParams, $aggregateId);
+                    $hasChild = $snapshot->hasChildren();
+                }
+
+                if (!$hasChild) {
+                    $highlights = $client->get($key);
+
+                    if (!$highlights || $this->notInProduction()) {
+                        $highlights = json_encode($this->highlightRepository->findHighlights($searchParams));
+                        $client->setex($key, 3600, $highlights);
+                    }
+
+                    return json_decode($highlights, true);
+                }
+
+                $highlights = array_reverse($snapshot->getValue());
+                $highlights = array_map(function (array $highlight) {
+                    return [
+                        'original_document' => $highlight['json'],
+                        'id' => $highlight['id'],
+                        'publicationDateTime' => $highlight['publishedAt'],
+                        'screen_name' => $highlight['username'],
+                        'last_update' => $highlight['checkedAt'],
+                        'total_retweets' => $highlight['totalRetweets'],
+                        'total_favorites' => $highlight['totalFavorites'],
+                    ];
+                }, $highlights);
+                $statuses = $this->highlightRepository->mapStatuses($searchParams, $highlights);
+
+                return [
+                    'aggregates' => $this->highlightRepository->selectDistinctAggregates($searchParams),
+                    'statuses' => $statuses,
+                ];
             },
             [
                 'startDate' => 'datetime',
@@ -230,6 +271,54 @@ class ListController
                 'selectedAggregates' => 'array',
             ]
         );
+    }
+
+    /**
+     * @param SearchParams $searchParams
+     * @param              $aggregateId
+     * @return mixed
+     */
+    private function getFirebaseDatabaseSnapshot(SearchParams $searchParams, $aggregateId)
+    {
+        $database = $this->getFirebaseDatabase();
+        $reference = $database
+            ->getReference(implode(
+                '/',
+                [
+                    'highlights',
+                    $aggregateId,
+                    $searchParams->getParams()['startDate']->format('Y-m-d'),
+                    $searchParams->getParams()['includeRetweets'] ? 'retweet' : 'status',
+                    $searchParams->getParams()['startDate']->format('Y-m-d') . ' ' . '22:00:00'
+                ]
+            ));
+
+        $snapshot = $reference
+            ->orderByChild('totalRetweets')
+            ->limitToLast(10)
+            ->getSnapshot();
+
+        return $snapshot;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getFirebaseDatabase()
+    {
+        $serviceAccount = ServiceAccount::fromJsonFile(
+            $this->configDirectory . '/google-service-account.json'
+        );
+
+        $firebase = (new Factory)
+            ->withServiceAccount($serviceAccount)
+            // The following line is optional if the project id in your credentials file
+            // is identical to the subdomain of your Firebase project. If you need it,
+            // make sure to replace the URL with the URL of your project.
+            ->withDatabaseUri('https://weaving-the-web-6fe11.firebaseio.com')
+            ->create();
+
+        return $firebase->getDatabase();
     }
 
     /**

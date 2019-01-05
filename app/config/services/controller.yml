@@ -8,6 +8,7 @@ services:
         class: 'App\Aggregate\Controller\ListController'
         properties:
             allowedOrigin:                  '%allowed.origin%'
+            configDirectory:                '%kernel.root_dir%/config'
             authenticationTokenRepository:  '@repository.authentication_token'
             aggregateLikesProducer:         '@old_sound_rabbit_mq.weaving_the_web_amqp.producer.aggregates_likes_producer'
             aggregateRepository:            '@repository.aggregate'

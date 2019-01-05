@@ -36,6 +36,7 @@
         "guzzle/guzzle": "3.3.1",
         "incenteev/composer-parameter-handler": "~2.0",
         "kertz/twitteroauth": "dev-master",
+        "kreait/firebase-php": "~4.18",
         "php-amqplib/rabbitmq-bundle": "1.14.4",
         "predis/predis": "^2.0@dev",
         "ramsey/uuid-doctrine": "dev-master",
