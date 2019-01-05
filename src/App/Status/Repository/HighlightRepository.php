@@ -84,44 +84,9 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
 
         $results = $queryBuilder->getQuery()->getArrayResult();
 
-        $statuses = array_map(
-            function ($status) use ($searchParams) {
-                $extractedProperties = [
-                    'status' => $this->extractStatusProperties(
-                        [$status],
-                        false)[0]
-                ];
-
-                $decodedDocument = json_decode($status['original_document'], true);
-                $decodedDocument['retweets_count'] = intval($status['total_retweets']);
-                $decodedDocument['favorites_count'] = intval($status['total_favorites']);
-                $extractedProperties['status']['retweet_count'] = intval($status['total_retweets']);
-                $extractedProperties['status']['favorite_count'] = intval($status['total_favorites']);
-                $extractedProperties['status']['original_document'] = json_encode($decodedDocument);
-
-                $status['lastUpdate'] = $status['last_update'];
-
-                $includeRetweets = $searchParams->getParams()['includeRetweets'];
-                if ($includeRetweets && $extractedProperties['status']['favorite_count'] === 0) {
-                    $extractedProperties['status']['favorite_count'] = $decodedDocument['retweeted_status']['favorite_count'];
-                }
-
-                unset($status['total_retweets']);
-                unset($status['total_favorites']);
-                unset($status['original_document']);
-                unset($status['screen_name']);
-                unset($status['author_avatar']);
-                unset($status['status_id']);
-                unset($status['last_update']);
-
-                return array_merge($status, $extractedProperties);
-            },
-            $results
-        );
-
         return [
             'aggregates' => $this->selectDistinctAggregates($searchParams),
-            'statuses' => $statuses,
+            'statuses' => $this->mapStatuses($searchParams, $results),
         ];
     }
 
@@ -397,5 +362,48 @@ QUERY;
     {
         return $searchParams->getParams()['startDate']->format('Y-m-d') !==
             $searchParams->getParams()['endDate']->format('Y-m-d');
+    }
+
+    /**
+     * @param SearchParams $searchParams
+     * @param              $results
+     * @return array
+     */
+    public function mapStatuses(SearchParams $searchParams, $results): array
+    {
+        return array_map(
+            function ($status) use ($searchParams) {
+                $extractedProperties = [
+                    'status' => $this->extractStatusProperties(
+                        [$status],
+                        false)[0]
+                ];
+
+                $decodedDocument = json_decode($status['original_document'], true);
+                $decodedDocument['retweets_count'] = intval($status['total_retweets']);
+                $decodedDocument['favorites_count'] = intval($status['total_favorites']);
+                $extractedProperties['status']['retweet_count'] = intval($status['total_retweets']);
+                $extractedProperties['status']['favorite_count'] = intval($status['total_favorites']);
+                $extractedProperties['status']['original_document'] = json_encode($decodedDocument);
+
+                $status['lastUpdate'] = $status['last_update'];
+
+                $includeRetweets = $searchParams->getParams()['includeRetweets'];
+                if ($includeRetweets && $extractedProperties['status']['favorite_count'] === 0) {
+                    $extractedProperties['status']['favorite_count'] = $decodedDocument['retweeted_status']['favorite_count'];
+                }
+
+                unset($status['total_retweets']);
+                unset($status['total_favorites']);
+                unset($status['original_document']);
+                unset($status['screen_name']);
+                unset($status['author_avatar']);
+                unset($status['status_id']);
+                unset($status['last_update']);
+
+                return array_merge($status, $extractedProperties);
+            },
+            $results
+        );
     }
 }
