@@ -64,19 +64,9 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
         $queryBuilder->addSelect('s.text');
         $queryBuilder->addSelect('s.createdAt as publicationDateTime');
         $queryBuilder->addSelect('s.screenName as screen_name');
-        $queryBuilder->addSelect("COALESCE(p.checkedAt, s.createdAt) as last_update");
-        $queryBuilder->addSelect(implode([
-            'COALESCE(',
-            '   p.totalRetweets, ',
-            '   '.self::TABLE_ALIAS.'.totalRetweets',
-            ') as total_retweets',
-        ]));
-        $queryBuilder->addSelect(implode([
-            'COALESCE(',
-            '   p.totalFavorites, ',
-            '   '.self::TABLE_ALIAS.'.totalFavorites',
-            ') as total_favorites',
-        ]));
+        $queryBuilder->addSelect("s.createdAt as last_update");
+        $queryBuilder->addSelect('MAX(p.totalRetweets) as total_retweets');
+        $queryBuilder->addSelect('MAX(p.totalFavorites) as total_favorites');
 
         $queryBuilder->setFirstResult($searchParams->getFirstItemIndex());
 
@@ -91,9 +81,9 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
 
         $queryBuilder->groupBy('s.id');
         $queryBuilder->addOrderBy('total_retweets', 'DESC');
-        $queryBuilder->addOrderBy("last_update", 'DESC');
 
         $results = $queryBuilder->getQuery()->getArrayResult();
+
         $statuses = array_map(
             function ($status) use ($searchParams) {
                 $extractedProperties = [
@@ -144,32 +134,28 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
         $queryBuilder->innerJoin(self::TABLE_ALIAS.'.status', 's');
         $queryBuilder->innerJoin(self::TABLE_ALIAS.'.member', 'm');
 
-        $queryBuilder->leftJoin(
-            's.popularity',
-            'p',
-            Join::WITH,
-            implode([
-                "DATE(DATESUB(p.checkedAt, 1, 'HOUR')) >= :startDate AND ",
-                "DATE(DATESUB(p.checkedAt, 1, 'HOUR')) <= :endDate"
-            ])
-        );
-
-        $this->applyConstraintAboutPublicationDateTime($queryBuilder)
-        ->applyConstraintAboutPublicationDateOfRetweetedStatus($queryBuilder)
+        $this->applyConstraintAboutPopularity($queryBuilder, $searchParams);
+        $this->applyConstraintAboutPublicationDateTime($queryBuilder, $searchParams)
+        ->applyConstraintAboutPublicationDateOfRetweetedStatus($queryBuilder, $searchParams)
         ->applyConstraintAboutRetweetedStatus($queryBuilder, $searchParams)
         ->applyConstraintAboutRelatedAggregate($queryBuilder, $searchParams)
         ->applyConstraintAboutSelectedAggregates($queryBuilder, $searchParams);
 
         $queryBuilder->setParameter('startDate', $searchParams->getParams()['startDate']);
-        $queryBuilder->setParameter('endDate', $searchParams->getParams()['endDate']);
+        if ($this->overMoreThanADay($searchParams)) {
+            $queryBuilder->setParameter('endDate', $searchParams->getParams()['endDate']);
+        }
     }
 
     /**
      * @param QueryBuilder $queryBuilder
+     * @param SearchParams $searchParams
      * @return HighlightRepository
      */
-    private function applyConstraintAboutPublicationDateOfRetweetedStatus(QueryBuilder $queryBuilder): self
-    {
+    private function applyConstraintAboutPublicationDateOfRetweetedStatus(
+        QueryBuilder $queryBuilder,
+        SearchParams $searchParams
+    ): self {
         $retweetedStatusPublicationDate = "COALESCE(
                 DATE(
                     DATEADD(" .
@@ -178,8 +164,15 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
                 ),
                 DATE(DATEADD(" . self::TABLE_ALIAS . ".publicationDateTime, 1, 'HOUR'))
             )";
-        $queryBuilder->andWhere($retweetedStatusPublicationDate . " >= :startDate");
-        $queryBuilder->andWhere($retweetedStatusPublicationDate . " <= :endDate");
+
+        if ($this->overOneDay($searchParams)) {
+            $queryBuilder->andWhere($retweetedStatusPublicationDate . " = :startDate");
+        }
+
+        if ($this->overMoreThanADay($searchParams)) {
+            $queryBuilder->andWhere($retweetedStatusPublicationDate . " >= :startDate");
+            $queryBuilder->andWhere($retweetedStatusPublicationDate . " <= :endDate");
+        }
 
         return $this;
     }
@@ -201,12 +194,19 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
 
     /**
      * @param QueryBuilder $queryBuilder
+     * @param SearchParams $searchParams
      * @return HighlightRepository
      */
-    private function applyConstraintAboutPublicationDateTime(QueryBuilder $queryBuilder): self
-    {
-        $queryBuilder->andWhere("DATE(DATEADD(" . self::TABLE_ALIAS . ".publicationDateTime, 1, 'HOUR')) >= :startDate");
-        $queryBuilder->andWhere("DATE(DATEADD(" . self::TABLE_ALIAS . ".publicationDateTime, 1, 'HOUR')) <= :endDate");
+    private function applyConstraintAboutPublicationDateTime(
+        QueryBuilder $queryBuilder,
+        SearchParams $searchParams
+    ): self {
+        $queryBuilder->andWhere("DATE(DATEADD(" . self::TABLE_ALIAS . ".publicationDateTime, 1, 'HOUR')) = :startDate");
+
+        if ($this->overMoreThanADay($searchParams)) {
+            $queryBuilder->andWhere("DATE(DATEADD(" . self::TABLE_ALIAS . ".publicationDateTime, 1, 'HOUR')) >= :startDate");
+            $queryBuilder->andWhere("DATE(DATEADD(" . self::TABLE_ALIAS . ".publicationDateTime, 1, 'HOUR')) <= :endDate");
+        }
 
         return $this;
     }
@@ -350,5 +350,52 @@ QUERY;
         }
 
         return $this;
+    }
+
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @param SearchParams $searchParams
+     * @return QueryBuilder
+     */
+    private function applyConstraintAboutPopularity(
+        QueryBuilder $queryBuilder,
+        SearchParams $searchParams
+    ): QueryBuilder {
+        $condition = implode([
+            "DATE(DATESUB(p.checkedAt, 1, 'HOUR')) >= :startDate AND ",
+            "DATE(DATESUB(p.checkedAt, 1, 'HOUR')) <= :endDate"
+        ]);
+        if ($this->overOneDay($searchParams)) {
+            $condition = implode([
+                "DATE(DATESUB(p.checkedAt, 1, 'HOUR')) = :startDate",
+            ]);
+        }
+
+        return $queryBuilder->innerJoin(
+            's.popularity',
+            'p',
+            Join::WITH,
+            $condition
+        );
+    }
+
+    /**
+     * @param SearchParams $searchParams
+     * @return bool
+     */
+    private function overOneDay(SearchParams $searchParams): bool
+    {
+        return $searchParams->getParams()['startDate']->format('Y-m-d') ===
+            $searchParams->getParams()['endDate']->format('Y-m-d');
+    }
+
+    /**
+     * @param SearchParams $searchParams
+     * @return bool
+     */
+    private function overMoreThanADay(SearchParams $searchParams): bool
+    {
+        return $searchParams->getParams()['startDate']->format('Y-m-d') !==
+            $searchParams->getParams()['endDate']->format('Y-m-d');
     }
 }

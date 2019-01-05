@@ -284,6 +284,7 @@ class ListController
     /**
      * @param Request $request
      * @return JsonResponse
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function getMembers(Request $request)
     {
@@ -302,6 +303,7 @@ class ListController
     /**
      * @param Request $request
      * @return JsonResponse
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function getStatuses(Request $request)
     {
