@@ -283,10 +283,10 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
                 AND a.id = h.aggregate_id
                 $aggregateRestriction
                 AND h.status_id = s.ust_id
-                AND DATE(publication_date_time) >= ? 
-                AND DATE(publication_date_time) <= ? 
-                AND DATE(COALESCE(retweeted_status_publication_date, ?)) >= ? 
-                AND DATE(COALESCE(retweeted_status_publication_date, ?)) <= ? 
+                AND DATE(publication_date_time) >= ?
+                AND DATE(publication_date_time) <= ?
+                AND DATE(COALESCE(retweeted_status_publication_date, ?)) >= ?
+                AND DATE(COALESCE(retweeted_status_publication_date, ?)) <= ?
                 $clauseAboutRetweets
                 $groupBy
                 ORDER BY totalHighlights
