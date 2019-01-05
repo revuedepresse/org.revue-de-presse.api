@@ -10,7 +10,7 @@
             table="status_popularity">
 
         <indexes>
-            <index name="status_popularity_idx" columns="status_id,checked_at" />
+            <index name="status_popularity_idx" columns="status_id,checked_at,total_retweets,total_favorites" />
         </indexes>
 
         <id name="id" column="id" type="uuid">
