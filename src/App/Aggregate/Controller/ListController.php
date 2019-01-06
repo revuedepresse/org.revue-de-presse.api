@@ -303,15 +303,13 @@ class ListController
                 'highlights',
                 $aggregateId,
                 $searchParams->getParams()['startDate']->format('Y-m-d'),
-                $searchParams->getParams()['includeRetweets'] ? 'retweet' : 'status',
-                $searchParams->getParams()['startDate']->format('Y-m-d') . ' ' . '22:00:00'
+                $searchParams->getParams()['includeRetweets'] ? 'retweet' : 'status'
             ]
         );
         $reference = $database->getReference($path);
 
         return $reference
             ->orderByChild('totalRetweets')
-            ->limitToLast(10)
             ->getSnapshot();
     }
 
