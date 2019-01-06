@@ -65,8 +65,8 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
         $queryBuilder->addSelect('s.createdAt as publicationDateTime');
         $queryBuilder->addSelect('s.screenName as screen_name');
         $queryBuilder->addSelect("s.createdAt as last_update");
-        $queryBuilder->addSelect('MAX(p.totalRetweets) as total_retweets');
-        $queryBuilder->addSelect('MAX(p.totalFavorites) as total_favorites');
+        $queryBuilder->addSelect('MAX(COALESCE(p.totalRetweets, s.createdAt)) as total_retweets');
+        $queryBuilder->addSelect('MAX(COALESCE(p.totalFavorites, s.createdAt)) as total_favorites');
 
         $queryBuilder->setFirstResult($searchParams->getFirstItemIndex());
 
@@ -327,8 +327,8 @@ QUERY;
         SearchParams $searchParams
     ): QueryBuilder {
         $condition = implode([
-            "DATE(DATESUB(p.checkedAt, 1, 'HOUR')) >= :startDate AND ",
-            "DATE(DATESUB(p.checkedAt, 1, 'HOUR')) <= :endDate"
+            "DATE(DATESUB(COALESCE(p.checkedAt, s.createdAt), 1, 'HOUR')) >= :startDate AND ",
+            "DATE(DATESUB(COALESCE(p.checkedAt, s.createdAt), 1, 'HOUR')) <= :endDate"
         ]);
         if ($this->overOneDay($searchParams)) {
             $condition = implode([
@@ -336,7 +336,7 @@ QUERY;
             ]);
         }
 
-        return $queryBuilder->innerJoin(
+        return $queryBuilder->leftJoin(
             's.popularity',
             'p',
             Join::WITH,
