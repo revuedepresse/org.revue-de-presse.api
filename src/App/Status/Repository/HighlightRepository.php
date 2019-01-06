@@ -65,8 +65,8 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
         $queryBuilder->addSelect('s.createdAt as publicationDateTime');
         $queryBuilder->addSelect('s.screenName as screen_name');
         $queryBuilder->addSelect("s.createdAt as last_update");
-        $queryBuilder->addSelect('MAX(COALESCE(p.totalRetweets, s.createdAt)) as total_retweets');
-        $queryBuilder->addSelect('MAX(COALESCE(p.totalFavorites, s.createdAt)) as total_favorites');
+        $queryBuilder->addSelect('MAX(COALESCE(p.totalRetweets, h.totalRetweets)) as total_retweets');
+        $queryBuilder->addSelect('MAX(COALESCE(p.totalFavorites, h.totalFavorites)) as total_favorites');
 
         $queryBuilder->setFirstResult($searchParams->getFirstItemIndex());
 
@@ -79,7 +79,7 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
 
         $this->applyCriteria($queryBuilder, $searchParams);
 
-        $queryBuilder->groupBy('s.id');
+        $queryBuilder->groupBy('h.status');
         $queryBuilder->addOrderBy('total_retweets', 'DESC');
 
         $results = $queryBuilder->getQuery()->getArrayResult();
