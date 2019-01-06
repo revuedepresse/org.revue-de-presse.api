@@ -217,24 +217,15 @@ class ListController
                     return [];
                 }
 
-                $key = $this->getCacheKey('highlights.items', $searchParams);
-
-                $aggregateId = $this->aggregateRepository->findOneBy([
-                    'name' => $searchParams->getParams()['aggregate']
-                ]);
-                if (is_null($aggregateId)) {
-                    $aggregateId = 1;
-                }
-
                 $hasChild = false;
                 if (!$searchParams->hasParam('selectedAggregates')) {
-                    $snapshot = $this->getFirebaseDatabaseSnapshot($searchParams, $aggregateId);
+                    $snapshot = $this->getFirebaseDatabaseSnapshot($searchParams);
                     $hasChild = $snapshot->hasChildren();
                 }
 
                 if (!$hasChild) {
+                    $key = $this->getCacheKey('highlights.items', $searchParams);
                     $highlights = $client->get($key);
-
                     if (!$highlights || $this->notInProduction()) {
                         $highlights = json_encode($this->highlightRepository->findHighlights($searchParams));
                         $client->setex($key, 3600, $highlights);
@@ -243,24 +234,8 @@ class ListController
                     return json_decode($highlights, true);
                 }
 
-                $highlights = array_reverse($snapshot->getValue());
-                $highlights = array_map(function (array $highlight) {
-                    return [
-                        'original_document' => $highlight['json'],
-                        'id' => $highlight['id'],
-                        'publicationDateTime' => $highlight['publishedAt'],
-                        'screen_name' => $highlight['username'],
-                        'last_update' => $highlight['checkedAt'],
-                        'total_retweets' => $highlight['totalRetweets'],
-                        'total_favorites' => $highlight['totalFavorites'],
-                    ];
-                }, $highlights);
-                $statuses = $this->highlightRepository->mapStatuses($searchParams, $highlights);
 
-                return [
-                    'aggregates' => $this->highlightRepository->selectDistinctAggregates($searchParams),
-                    'statuses' => $statuses,
-                ];
+                return $this->getHighlightsFromFirebaseSnapshot($searchParams, $snapshot, $client);
             },
             [
                 'startDate' => 'datetime',
@@ -275,30 +250,69 @@ class ListController
 
     /**
      * @param SearchParams $searchParams
-     * @param              $aggregateId
+     * @param              $snapshot
+     * @param              $client
+     * @return array
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    private function getHighlightsFromFirebaseSnapshot(SearchParams $searchParams, $snapshot, Client $client): array
+    {
+        $key = $this->getCacheKey('highlights.items', $searchParams);
+
+        $highlights = array_reverse($snapshot->getValue());
+        $highlights = array_map(function (array $highlight) {
+            return [
+                'original_document' => $highlight['json'],
+                'id' => $highlight['id'],
+                'publicationDateTime' => $highlight['publishedAt'],
+                'screen_name' => $highlight['username'],
+                'last_update' => $highlight['checkedAt'],
+                'total_retweets' => $highlight['totalRetweets'],
+                'total_favorites' => $highlight['totalFavorites'],
+            ];
+        }, $highlights);
+        $statuses = $this->highlightRepository->mapStatuses($searchParams, $highlights);
+
+        $cachedHighlights = [
+            'aggregates' => $this->highlightRepository->selectDistinctAggregates($searchParams),
+            'statuses' => $statuses,
+        ];
+        $client->setex($key, 3600, json_encode($cachedHighlights));
+
+        return $cachedHighlights;
+    }
+
+    /**
+     * @param SearchParams $searchParams
      * @return mixed
      */
-    private function getFirebaseDatabaseSnapshot(SearchParams $searchParams, $aggregateId)
+    private function getFirebaseDatabaseSnapshot(SearchParams $searchParams)
     {
         $database = $this->getFirebaseDatabase();
-        $reference = $database
-            ->getReference(implode(
-                '/',
-                [
-                    'highlights',
-                    $aggregateId,
-                    $searchParams->getParams()['startDate']->format('Y-m-d'),
-                    $searchParams->getParams()['includeRetweets'] ? 'retweet' : 'status',
-                    $searchParams->getParams()['startDate']->format('Y-m-d') . ' ' . '22:00:00'
-                ]
-            ));
 
-        $snapshot = $reference
+        $aggregateId = $this->aggregateRepository->findOneBy([
+            'name' => $searchParams->getParams()['aggregate']
+        ]);
+        if (is_null($aggregateId)) {
+            $aggregateId = 1;
+        }
+
+        $path = implode(
+            '/',
+            [
+                'highlights',
+                $aggregateId,
+                $searchParams->getParams()['startDate']->format('Y-m-d'),
+                $searchParams->getParams()['includeRetweets'] ? 'retweet' : 'status',
+                $searchParams->getParams()['startDate']->format('Y-m-d') . ' ' . '22:00:00'
+            ]
+        );
+        $reference = $database->getReference($path);
+
+        return $reference
             ->orderByChild('totalRetweets')
             ->limitToLast(10)
             ->getSnapshot();
-
-        return $snapshot;
     }
 
     /**
