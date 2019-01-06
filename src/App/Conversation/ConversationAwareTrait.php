@@ -74,11 +74,19 @@ trait ConversationAwareTrait
                     return $defaultStatus;
                 }
 
+                if (is_null($defaultStatus['status_id'])) {
+                    $defaultStatus['status_id'] = $decodedDocument['id_str'];
+                }
+
 
                 if (array_key_exists('full_text', $decodedDocument) &&
-                    $defaultStatus['text'] !== $decodedDocument['full_text']
-                ) {
-                    $defaultStatus['text'] = $decodedDocument['full_text'];
+                    $defaultStatus['text'] !== $decodedDocument['full_text']) {
+                        $defaultStatus['text'] = $decodedDocument['full_text'];
+                }
+
+                if (!array_key_exists('full_text', $decodedDocument) &&
+                    array_key_exists('text', $decodedDocument)) {
+                    $defaultStatus['text'] = $decodedDocument['text'];
                 }
 
                 $likedBy = null;
