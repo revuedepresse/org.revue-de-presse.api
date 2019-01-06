@@ -75,9 +75,12 @@ trait ConversationAwareTrait
                 }
 
                 if (is_null($defaultStatus['status_id'])) {
-                    $defaultStatus['status_id'] = $decodedDocument['id_str'];
+                    $defaultStatus['url'] = 'https://twitter.com/' . $status['screen_name'] . '/status/' . $decodedDocument['id_str'];
                 }
 
+                if (is_null($defaultStatus['status_id'])) {
+                    $defaultStatus['status_id'] = $decodedDocument['id_str'];
+                }
 
                 if (array_key_exists('full_text', $decodedDocument) &&
                     $defaultStatus['text'] !== $decodedDocument['full_text']) {
