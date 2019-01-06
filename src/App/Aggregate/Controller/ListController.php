@@ -295,14 +295,17 @@ class ListController
     {
         $database = $this->getFirebaseDatabase();
 
-        $aggregateId = $this->aggregateRepository->findOneBy([
-            'name' => $searchParams->getParams()['aggregate']
-        ]);
+        $aggregateId = null;
+        if ($searchParams->hasParam('aggregate')) {
+            $aggregateId = $this->aggregateRepository->findOneBy([
+                'name' => $searchParams->getParams()['aggregate']
+            ]);
+        }
         if (is_null($aggregateId)) {
             $aggregateId = 1;
         }
 
-        $path = implode(
+        $path = '/'.implode(
             '/',
             [
                 'highlights',
@@ -311,6 +314,7 @@ class ListController
                 $searchParams->getParams()['includeRetweets'] ? 'retweet' : 'status'
             ]
         );
+        $this->logger->info(sprintf('Firebase Path: %s', $path));
         $reference = $database->getReference($path);
 
         return $reference
