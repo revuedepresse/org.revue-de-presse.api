@@ -203,6 +203,11 @@ class ListController
                 }
 
                 $key = $this->getCacheKey('highlights.total_pages', $searchParams);
+
+                if (!$searchParams->hasParam('selectedAggregates') && !$queriedRouteAccess) {
+                    return 1;
+                }
+
                 $totalPages = $client->get($key);
 
                 if (!$totalPages || $this->notInProduction()) {
@@ -274,7 +279,7 @@ class ListController
         $statuses = $this->highlightRepository->mapStatuses($searchParams, $highlights);
 
         $cachedHighlights = [
-            'aggregates' => $this->highlightRepository->selectDistinctAggregates($searchParams),
+            'aggregates' => [],
             'statuses' => $statuses,
         ];
         $client->setex($key, 3600, json_encode($cachedHighlights));
