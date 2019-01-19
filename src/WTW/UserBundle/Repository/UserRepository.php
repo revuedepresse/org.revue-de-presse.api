@@ -560,8 +560,12 @@ QUERY;
                     $aggregate['totalStatuses'] = intval($aggregate['totalStatuses']);
                     $aggregate['locked'] = (bool)$aggregate['locked'];
 
-                    $aggregate['unlockedAt'] = $aggregate['unlocked_at'];
-                    if (!is_null($aggregate['unlocked_at'])) {
+                    if (array_key_exists('unlocked_at', $aggregate)) {
+                        $aggregate['unlockedAt'] = $aggregate['unlocked_at'];
+                    }
+
+                    if (array_key_exists('unlocked_at', $aggregate) &&
+                        !is_null($aggregate['unlocked_at'])) {
                         $aggregate['unlockedAt'] = (new \DateTime(
                             $aggregate['unlocked_at'],
                             new \DateTimeZone('UTC'))
@@ -616,7 +620,7 @@ QUERY;
 
         $results = array_map(
             function (array $aggregate) {
-                if (intval($aggregate['totalStatuses']) === 0 || true) {
+                if (intval($aggregate['totalStatuses']) <= 0) {
                     $matchingAggregate = $this->aggregateRepository->findOneBy(
                         ['id' => intval($aggregate['id'])]
                     );

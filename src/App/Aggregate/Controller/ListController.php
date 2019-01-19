@@ -2,6 +2,7 @@
 
 namespace App\Aggregate\Controller;
 
+use App\Aggregate\Controller\Exception\InvalidRequestException;
 use App\Aggregate\Repository\TimelyStatusRepository;
 use App\Cache\RedisCache;
 use App\Member\MemberInterface;
@@ -99,6 +100,7 @@ class ListController
     /**
      * @param Request $request
      * @return JsonResponse
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function getAggregates(Request $request)
     {
@@ -222,8 +224,10 @@ class ListController
                     return [];
                 }
 
+                $queriedRouteAccess = $searchParams->hasParam('routeName');
+
                 $hasChild = false;
-                if (!$searchParams->hasParam('selectedAggregates')) {
+                if (!$searchParams->hasParam('selectedAggregates') && !$queriedRouteAccess) {
                     $snapshot = $this->getFirebaseDatabaseSnapshot($searchParams);
                     $hasChild = $snapshot->hasChildren();
                 }
@@ -520,6 +524,41 @@ class ListController
      * @return JsonResponse
      * @throws NonUniqueResultException
      */
+    public function bulkCollectAggregatesStatuses(Request $request)
+    {
+        if ($request->isMethod('OPTIONS')) {
+            return $this->getCorsOptionsResponse(
+                $this->environment,
+                $this->allowedOrigin
+            );
+        }
+
+        $requirementsOrJsonResponse = $this->guardAgainstMissingRequirementsForBulkStatusCollection($request);
+        if ($requirementsOrJsonResponse instanceof JsonResponse) {
+            return $requirementsOrJsonResponse;
+        }
+
+        array_walk(
+            $requirementsOrJsonResponse['members_names'],
+            function ($memberName) use ($requirementsOrJsonResponse) {
+                $requirements = [
+                    'token' => $requirementsOrJsonResponse['token'],
+                    'member_name' => $memberName,
+                    'aggregate_id' => $requirementsOrJsonResponse['aggregate_id']
+                ];
+
+                $this->produceCollectionRequestFromRequirements($requirements);
+            }
+        );
+
+        return $this->makeJsonResponse();
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws NonUniqueResultException
+     */
     public function requestCollection(Request $request)
     {
         if ($request->isMethod('OPTIONS')) {
@@ -529,38 +568,14 @@ class ListController
             );
         }
 
-        $requirementsOrJsonResponse = $this->guardAgainstMissingRequirements($request);
+        $requirementsOrJsonResponse = $this->guardAgainstMissingRequirementsForStatusCollection($request);
         if ($requirementsOrJsonResponse instanceof JsonResponse) {
             return $requirementsOrJsonResponse;
         }
 
-        /** @var Token $token */
-        $token = $requirementsOrJsonResponse['token'];
+        $this->produceCollectionRequestFromRequirements($requirementsOrJsonResponse);
 
-        $messageBody = [
-            'token' => $token->getOauthToken(),
-            'secret' => $token->getOauthTokenSecret(),
-            'consumer_token' => $token->consumerKey,
-            'consumer_secret' => $token->consumerSecret
-        ];
-        $messageBody['screen_name'] = $requirementsOrJsonResponse['member_name'];
-        $messageBody['aggregate_id'] = $requirementsOrJsonResponse['aggregate_id'];
-
-
-        $this->aggregateLikesProducer->setContentType('application/json');
-        $this->aggregateLikesProducer->publish(serialize(json_encode($messageBody)));
-
-        $this->aggregateStatusesProducer->setContentType('application/json');
-        $this->aggregateStatusesProducer->publish(serialize(json_encode($messageBody)));
-
-        return new JsonResponse(
-            'Your request should be processed very soon',
-            200,
-            $this->getAccessControlOriginHeaders(
-                $this->environment,
-                $this->allowedOrigin
-            )
-        );
+        return $this->makeJsonResponse();
     }
 
     /**
@@ -579,7 +594,7 @@ class ListController
             );
         }
 
-        $requirementsOrJsonResponse = $this->guardAgainstMissingRequirements($request);
+        $requirementsOrJsonResponse = $this->guardAgainstMissingRequirementsForStatusCollection($request);
         if ($requirementsOrJsonResponse instanceof JsonResponse) {
             return $requirementsOrJsonResponse;
         }
@@ -605,14 +620,7 @@ class ListController
 
         $this->aggregateRepository->unlockAggregate($aggregate);
 
-        return new JsonResponse(
-            'Your request should be processed very soon',
-            200,
-            $this->getAccessControlOriginHeaders(
-                $this->environment,
-                $this->allowedOrigin
-            )
-        );
+        return $this->makeJsonResponse();
     }
 
     /**
@@ -620,64 +628,210 @@ class ListController
      * @return array|JsonResponse
      * @throws NonUniqueResultException
      */
-    private function guardAgainstMissingRequirements(Request $request)
+    private function guardAgainstMissingRequirementsForStatusCollection(Request $request)
     {
         $corsHeaders = $this->getAccessControlOriginHeaders(
             $this->environment,
             $this->allowedOrigin
         );
 
+        $decodedContent = $this->guardAgainstInvalidParametersEncoding($request, $corsHeaders);
+        $decodedContent = $this->guardAgainstInvalidParameters($decodedContent, $corsHeaders);
+
+        return [
+            'token' => $this->guardAgainstInvalidAuthenticationToken($corsHeaders),
+            'member_name' => $this->guardAgainstMissingMemberName($decodedContent, $corsHeaders),
+            'aggregate_id' => $this->guardAgainstMissingAggregateId($decodedContent, $corsHeaders)
+        ];
+    }
+
+    /**
+     * @param Request $request
+     * @return array|JsonResponse
+     * @throws NonUniqueResultException
+     */
+    private function guardAgainstMissingRequirementsForBulkStatusCollection(Request $request)
+    {
+        $corsHeaders = $this->getAccessControlOriginHeaders(
+            $this->environment,
+            $this->allowedOrigin
+        );
+
+        $decodedContent = $this->guardAgainstInvalidParametersEncoding($request, $corsHeaders);
+        $decodedContent = $this->guardAgainstInvalidParameters($decodedContent, $corsHeaders);
+        $aggregateId = $this->guardAgainstMissingAggregateId($decodedContent, $corsHeaders);
+        $membersNames = $this->guardAgainstMissingMembersNames($decodedContent, $corsHeaders);
+
+        return [
+            'token' => $this->guardAgainstInvalidAuthenticationToken($corsHeaders),
+            'aggregate_id' => $aggregateId,
+            'members_names' => $membersNames
+        ];
+    }
+
+    /**
+     * @param $decodedContent
+     * @param $corsHeaders
+     * @return int
+     */
+    private function guardAgainstMissingAggregateId($decodedContent, $corsHeaders): int
+    {
+        if (!array_key_exists('aggregateId', $decodedContent['params']) ||
+            intval($decodedContent['params']['aggregateId']) < 1) {
+            $exceptionMessage = 'Invalid aggregated id';
+            $jsonResponse = new JsonResponse(
+                $exceptionMessage,
+                422,
+                $corsHeaders
+            );
+            InvalidRequestException::guardAgainstInvalidRequest($jsonResponse, $exceptionMessage);
+        }
+
+        return intval($decodedContent['params']['aggregateId']);
+    }
+
+    /**
+     * @param $decodedContent
+     * @param $corsHeaders
+     * @return mixed
+     */
+    private function guardAgainstMissingMemberName($decodedContent, $corsHeaders): string
+    {
+        if (!array_key_exists('memberName', $decodedContent['params'])) {
+            $exceptionMessage = 'Invalid member name';
+            $jsonResponse = new JsonResponse(
+                $exceptionMessage,
+                422,
+                $corsHeaders
+            );
+            InvalidRequestException::guardAgainstInvalidRequest($jsonResponse, $exceptionMessage);
+        }
+
+        return $decodedContent['params']['memberName'];
+    }
+
+    /**
+     * @param $decodedContent
+     * @param $corsHeaders
+     * @return mixed
+     */
+    private function guardAgainstMissingMembersNames($decodedContent, $corsHeaders): array
+    {
+        if (!array_key_exists('membersNames', $decodedContent['params'])) {
+            $exceptionMessage = 'Invalid members names';
+            $jsonResponse = new JsonResponse(
+                $exceptionMessage,
+                422,
+                $corsHeaders
+            );
+            InvalidRequestException::guardAgainstInvalidRequest($jsonResponse, $exceptionMessage);
+        }
+
+        return $decodedContent['params']['membersNames'];
+    }
+
+    /**
+     * @param Request $request
+     * @param         $corsHeaders
+     * @return mixed
+     */
+    private function guardAgainstInvalidParametersEncoding(Request $request, $corsHeaders): array
+    {
         $decodedContent = json_decode($request->getContent(), $asArray = true);
         $lastError = json_last_error();
         if ($lastError !== JSON_ERROR_NONE) {
-            return new JsonResponse(
-                'Invalid parameters encoding',
+            $exceptionMessage = 'Invalid parameters encoding';
+            $jsonResponse = new JsonResponse(
+                $exceptionMessage,
                 422,
                 $corsHeaders
             );
+            InvalidRequestException::guardAgainstInvalidRequest($jsonResponse, $exceptionMessage);
         }
 
+        return $decodedContent;
+    }
+
+    /**
+     * @param $decodedContent
+     * @param $corsHeaders
+     * @return mixed
+     */
+    private function guardAgainstInvalidParameters($decodedContent, $corsHeaders): array
+    {
         if (!array_key_exists('params', $decodedContent) ||
             !is_array($decodedContent['params'])) {
-            return new JsonResponse(
-                'Invalid params',
+            $exceptionMessage = 'Invalid params';
+            $jsonResponse = new JsonResponse(
+                $exceptionMessage,
                 422,
                 $corsHeaders
             );
+            InvalidRequestException::guardAgainstInvalidRequest($jsonResponse, $exceptionMessage);
         }
 
-        if (!array_key_exists('aggregateId', $decodedContent['params']) ||
-            intval($decodedContent['params']['aggregateId']) < 1) {
-            return new JsonResponse(
-                'Invalid aggregated id',
-                422,
-                $corsHeaders
-            );
-        }
-        $aggregateId = intval($decodedContent['params']['aggregateId']);
+        return $decodedContent;
+    }
 
-        if (!array_key_exists('memberName', $decodedContent['params'])) {
-            return new JsonResponse(
-                'Invalid member name',
-                422,
-                $corsHeaders
-            );
-        }
-        $memberName = $decodedContent['params']['memberName'];
-
+    /**
+     * @param $corsHeaders
+     * @return Token
+     * @throws NonUniqueResultException
+     */
+    private function guardAgainstInvalidAuthenticationToken($corsHeaders): Token
+    {
         $token = $this->tokenRepository->findFirstUnfrozenToken();
         if (!($token instanceof Token)) {
-            return new JsonResponse(
-                'Could not process your request at the moment',
+            $exceptionMessage = 'Could not process your request at the moment';
+            $jsonResponse = new JsonResponse(
+                $exceptionMessage,
                 503,
                 $corsHeaders
             );
+            InvalidRequestException::guardAgainstInvalidRequest($jsonResponse, $exceptionMessage);
         }
 
-        return [
-            'token' => $token,
-            'member_name' => $memberName,
-            'aggregate_id' => $aggregateId
+        return $token;
+    }
+
+    /**
+     * @param $requirementsOrJsonResponse
+     */
+    private function produceCollectionRequestFromRequirements($requirementsOrJsonResponse): void
+    {
+        /** @var Token $token */
+        $token = $requirementsOrJsonResponse['token'];
+
+        $messageBody = [
+            'token' => $token->getOauthToken(),
+            'secret' => $token->getOauthTokenSecret(),
+            'consumer_token' => $token->consumerKey,
+            'consumer_secret' => $token->consumerSecret
         ];
+        $messageBody['screen_name'] = $requirementsOrJsonResponse['member_name'];
+        $messageBody['aggregate_id'] = $requirementsOrJsonResponse['aggregate_id'];
+
+
+        $this->aggregateLikesProducer->setContentType('application/json');
+        $this->aggregateLikesProducer->publish(serialize(json_encode($messageBody)));
+
+        $this->aggregateStatusesProducer->setContentType('application/json');
+        $this->aggregateStatusesProducer->publish(serialize(json_encode($messageBody)));
+    }
+
+    /**
+     * @param string $message
+     * @return JsonResponse
+     */
+    private function makeJsonResponse($message = 'Your request should be processed very soon'): JsonResponse
+    {
+        return new JsonResponse(
+            $message,
+            200,
+            $this->getAccessControlOriginHeaders(
+                $this->environment,
+                $this->allowedOrigin
+            )
+        );
     }
 }

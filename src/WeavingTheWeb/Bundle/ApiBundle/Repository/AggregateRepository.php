@@ -327,19 +327,19 @@ QUERY;
         Aggregate $matchingAggregate = null,
         bool $includeRelatedAggregates = true
     ): array {
-        if ($aggregate['totalStatuses'] === 0 || true) {
+        if ($aggregate['totalStatuses'] <= 0) {
             $connection = $this->getEntityManager()->getConnection();
 
             $query = <<< QUERY
                 SELECT count(*) as total_statuses
-                FROM timely_status
+                FROM weaving_status_aggregate
                 WHERE aggregate_id = ?;
 QUERY;
 
             if ($includeRelatedAggregates) {
                 $query = <<< QUERY
                     SELECT count(*) as total_statuses
-                    FROM timely_status
+                    FROM weaving_status_aggregate
                     WHERE aggregate_id in (
                       SELECT am.id
                       FROM weaving_aggregate a
