@@ -344,7 +344,7 @@ QUERY;
                       SELECT am.id
                       FROM weaving_aggregate a
                       INNER JOIN weaving_aggregate am 
-                      ON ( a.name = am.name )
+                      ON ( a.screen_name = am.screen_name AND am.screen_name IS NOT NULL )
                       WHERE a.id = ? 
                     );
 QUERY;
@@ -370,6 +370,25 @@ QUERY;
     }
 
     /**
+     * @param string $memberName
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function resetTotalStatusesForAggregateRelatedToScreenName(string $memberName)
+    {
+        $aggregates = $this->findBy(['screenName' => $memberName]);
+        array_walk(
+            $aggregates,
+            function (Aggregate $aggregate) {
+                $aggregate->totalStatuses = 0;
+
+                $this->getEntityManager()->persist($aggregate);
+                $this->getEntityManager()->flush();
+            }
+        );
+    }
+
+    /**
      * @param array          $aggregate
      * @param Aggregate|null $matchingAggregate
      * @return array
@@ -380,10 +399,10 @@ QUERY;
         array $aggregate,
         Aggregate $matchingAggregate = null
     ): array {
-        if ($aggregate['totalMembers'] === 0 || true) {
+        if ($aggregate['totalMembers'] === 0) {
             $query = <<<QUERY
                 SELECT 
-                count(a.screen_name) as total_members
+                COUNT(a.screen_name) as total_members
                 FROM weaving_aggregate a
                 WHERE screen_name IS NOT NULL
                 AND name in (
@@ -391,6 +410,7 @@ QUERY;
                     FROM weaving_aggregate a
                     WHERE id = ?
                 )
+                GROUP BY a.screen_name
 QUERY;
             $connection = $this->getEntityManager()->getConnection();
             $statement = $connection->executeQuery($query, [$aggregate['id']], [\Pdo::PARAM_INT]);

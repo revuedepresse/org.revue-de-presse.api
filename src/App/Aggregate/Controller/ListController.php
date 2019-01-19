@@ -494,9 +494,9 @@ class ListController
             return $response;
         }
 
-        $aggregates = $finder($searchParams);
+        $items = $finder($searchParams);
 
-        $response = $this->makeOkResponse($aggregates);
+        $response = $this->makeOkResponse($items);
         $response->headers->add($totalPagesHeader);
         $response->headers->add($pageIndexHeader);
 
@@ -521,8 +521,10 @@ class ListController
 
     /**
      * @param Request $request
-     * @return JsonResponse
+     * @return array|JsonResponse
      * @throws NonUniqueResultException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function bulkCollectAggregatesStatuses(Request $request)
     {
@@ -546,6 +548,7 @@ class ListController
                     'member_name' => $memberName,
                     'aggregate_id' => $requirementsOrJsonResponse['aggregate_id']
                 ];
+                $this->aggregateRepository->resetTotalStatusesForAggregateRelatedToScreenName($memberName);
 
                 $this->produceCollectionRequestFromRequirements($requirements);
             }
