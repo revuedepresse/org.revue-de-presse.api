@@ -113,7 +113,7 @@ class ListController
 
                 $totalPages = $client->get($key);
 
-                if ($this->shouldRefreshCache($client) && $totalPages) {
+                if ($this->shouldRefreshCacheForAggregates($client) && $totalPages) {
                     $client->del($key);
                     $totalPages = null;
                 }
@@ -129,7 +129,7 @@ class ListController
                 $key = 'aggregates.items.'.$searchParams->getFingerprint();
                 $aggregates = $client->get($key);
 
-                if ($this->shouldRefreshCache($client) && $aggregates) {
+                if ($this->shouldRefreshCacheForAggregates($client) && $aggregates) {
                     $client->del($key);
 
                     if ($client->get('aggregates.recent_delete')) {
@@ -159,11 +159,31 @@ class ListController
      * @param Client $client
      * @return bool
      */
-    function shouldRefreshCache(Client $client)
+    function shouldRefreshCacheForAggregates(Client $client)
     {
-        return $client->get('aggregates.recent_delete') ||
-            $client->get('aggregates.recent_statuses_collect') ||
-            $client->get('aggregates.total_statuses_reset');
+        return $this->shouldRefreshCacheFor($client, 'aggregates');
+    }
+
+    /**
+     * @param Client $client
+     * @return bool
+     */
+    function shouldRefreshCacheForMembers(Client $client)
+    {
+        return $this->shouldRefreshCacheFor($client, 'members');
+    }
+
+    /**
+     * @param Client $client
+     * @param string $key
+     * @param string $prefix
+     * @return bool
+     */
+    function shouldRefreshCacheFor(Client $client, string $prefix)
+    {
+        return $client->get($prefix.'.recent_delete') ||
+            $client->get($prefix.'.recent_statuses_collect') ||
+            $client->get($prefix.'.total_statuses_reset');
     }
 
     /**
@@ -397,18 +417,61 @@ class ListController
 
     /**
      * @param Request $request
-     * @return JsonResponse
+     * @return int|null|JsonResponse
+     * @throws NonUniqueResultException
      * @throws \Doctrine\DBAL\DBALException
      */
     public function getMembers(Request $request)
     {
+        $client = $this->redisCache->getClient();
+
         return $this->getCollection(
             $request,
-            $counter = function (SearchParams $searchParams) {
-                return $this->memberRepository->countTotalPages($searchParams);
+            $counter = function (SearchParams $searchParams) use ($client) {
+                $key = 'members.total_pages.'.$searchParams->getFingerprint();
+                $totalPages = $client->get($key);
+
+                if ($this->shouldRefreshCacheForMembers($client) && $totalPages) {
+                    $client->del($key);
+                    $totalPages = null;
+                }
+
+                if (is_null($totalPages)) {
+                    $totalPages = $this->memberRepository->countTotalPages($searchParams);
+                    $client->set($key, $totalPages);
+                }
+
+                return intval($totalPages);
             },
-            $finder = function (SearchParams $searchParams) {
-                return $this->memberRepository->findMembers($searchParams);
+            $finder = function (SearchParams $searchParams) use ($client) {
+                $key = 'members.items.'.$searchParams->getFingerprint();
+
+                $members = $client->get($key);
+
+                if ($this->shouldRefreshCacheForMembers($client) && $members) {
+                    $client->del($key);
+
+                    if ($client->get('members.recent_delete')) {
+                        $client->del('members.recent_delete');
+                    }
+
+                    if ($client->get('members.recent_statuses_collect')) {
+                        $client->del('members.recent_statuses_collect');
+                    }
+
+                    if ($client->get('members.total_statuses_reset')) {
+                        $client->del('members.total_statuses_reset');
+                    }
+
+                    $members = null;
+                }
+
+                if (is_null($members)) {
+                    $members = json_encode($this->memberRepository->findMembers($searchParams));
+                    $client->set($key, $members);
+                }
+
+                return $members;
             },
             ['aggregateId' => 'int']
         );
