@@ -58,3 +58,6 @@ collect_statuses:
     defaults: { _controller: controller.aggregate:collectAggregatesStatuses }
     methods:  [POST, OPTIONS]
 
+keywords:
+    path:     '/api/twitter/admin/keywords'
+    defaults: { _controller: controller.keyword:getKeywords }
