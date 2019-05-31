@@ -193,88 +193,109 @@ class ListController
      */
     public function getHighlights(Request $request)
     {
-        $client = $this->redisCache->getClient();
-
         return $this->getCollection(
             $request,
-            $counter = function (SearchParams $searchParams) use ($client, $request) {
-                $headers = $this->getAccessControlOriginHeaders($this->environment, $this->allowedOrigin);
-                $unauthorizedJsonResponse = new JsonResponse(
-                    'Unauthorized request',
-                    403,
-                    $headers
-                );
-
-                if ($this->invalidHighlightsSearchParams($searchParams)) {
-                    return $unauthorizedJsonResponse;
-                }
-
-                $queriedRouteAccess = $searchParams->hasParam('routeName');
-                if ($queriedRouteAccess && !$request->headers->has('x-auth-admin-token')) {
-                    return $unauthorizedJsonResponse;
-                }
-
-                if ($queriedRouteAccess) {
-                    $tokenId = $request->headers->get('x-auth-admin-token');
-                    $memberProperties = $this->authenticationTokenRepository->findByTokenIdentifier($tokenId);
-
-                    if (!array_key_exists('member', $memberProperties) ||
-                        !($memberProperties['member'] instanceof MemberInterface)) {
-                        return $unauthorizedJsonResponse;
-                    }
-                }
-
-                $key = $this->getCacheKey('highlights.total_pages', $searchParams);
-
-                if (!$searchParams->hasParam('selectedAggregates') && !$queriedRouteAccess) {
-                    return 1;
-                }
-
-                $totalPages = $client->get($key);
-
-                if (!$totalPages || $this->notInProduction()) {
-                    $totalPages = $this->highlightRepository->countTotalPages($searchParams);
-                    $client->setex($key, 3600, $totalPages);
-                }
-
-                return $totalPages;
+            $counter = function (SearchParams $searchParams) use ($request) {
+                return $this->getTotalPages($searchParams, $request);
             },
-            $finder = function (SearchParams $searchParams) use ($client) {
-                if ($this->invalidHighlightsSearchParams($searchParams)) {
-                    return [];
-                }
-
-                $queriedRouteAccess = $searchParams->hasParam('routeName');
-
-                $hasChild = false;
-                if (!$searchParams->hasParam('selectedAggregates') && !$queriedRouteAccess) {
-                    $snapshot = $this->getFirebaseDatabaseSnapshot($searchParams);
-                    $hasChild = $snapshot->hasChildren();
-                }
-
-                if (!$hasChild) {
-                    $key = $this->getCacheKey('highlights.items', $searchParams);
-                    $highlights = $client->get($key);
-                    if (!$highlights || $this->notInProduction()) {
-                        $highlights = json_encode($this->highlightRepository->findHighlights($searchParams));
-                        $client->setex($key, 3600, $highlights);
-                    }
-
-                    return json_decode($highlights, true);
-                }
-
-
-                return $this->getHighlightsFromFirebaseSnapshot($searchParams, $snapshot, $client);
+            $finder = function (SearchParams $searchParams) {
+                return $this->getHighlightsFromSearchParams($searchParams);
             },
             [
-                'startDate' => 'datetime',
+                'aggregate' => 'string',
                 'endDate' => 'datetime',
                 'includeRetweets' => 'bool',
-                'aggregate' => 'string',
                 'routeName' => 'string',
                 'selectedAggregates' => 'array',
+                'startDate' => 'datetime',
+                'term' => 'string',
             ]
         );
+    }
+
+    /**
+     * @param SearchParams $searchParams
+     * @param Request      $request
+     * @return bool|int|string|JsonResponse
+     * @throws NonUniqueResultException
+     */
+    private function getTotalPages(SearchParams $searchParams, Request $request) {
+        $headers = $this->getAccessControlOriginHeaders($this->environment, $this->allowedOrigin);
+        $unauthorizedJsonResponse = new JsonResponse(
+            'Unauthorized request',
+            403,
+            $headers
+        );
+
+        if ($this->invalidHighlightsSearchParams($searchParams)) {
+            return $unauthorizedJsonResponse;
+        }
+
+        $queriedRouteAccess = $searchParams->hasParam('routeName');
+        if ($queriedRouteAccess && !$request->headers->has('x-auth-admin-token')) {
+            return $unauthorizedJsonResponse;
+        }
+
+        if ($queriedRouteAccess) {
+            $tokenId = $request->headers->get('x-auth-admin-token');
+            $memberProperties = $this->authenticationTokenRepository->findByTokenIdentifier($tokenId);
+
+            if (!array_key_exists('member', $memberProperties) ||
+                !($memberProperties['member'] instanceof MemberInterface)) {
+                return $unauthorizedJsonResponse;
+            }
+        }
+
+        $key = $this->getCacheKey('highlights.total_pages', $searchParams);
+
+        if (!$searchParams->hasParam('selectedAggregates') && !$queriedRouteAccess) {
+            return 1;
+        }
+
+        $client = $this->redisCache->getClient();
+        $totalPages = $client->get($key);
+
+        if (!$totalPages || $this->notInProduction()) {
+            $totalPages = $this->highlightRepository->countTotalPages($searchParams);
+            $client->setex($key, 3600, $totalPages);
+        }
+
+        return $totalPages;
+    }
+
+    /**
+     * @param $searchParams
+     * @return array|mixed
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    private function getHighlightsFromSearchParams(SearchParams $searchParams) {
+        if ($this->invalidHighlightsSearchParams($searchParams)) {
+            return [];
+        }
+
+        $queriedRouteAccess = $searchParams->hasParam('routeName');
+
+        $hasChild = false;
+        if (!$searchParams->hasParam('selectedAggregates') && !$queriedRouteAccess) {
+            $snapshot = $this->getFirebaseDatabaseSnapshot($searchParams);
+            $hasChild = $snapshot->hasChildren();
+        }
+
+        $client = $this->redisCache->getClient();
+
+        if (!$hasChild) {
+            $key = $this->getCacheKey('highlights.items', $searchParams);
+
+            $highlights = $client->get($key);
+            if (!$highlights || $this->notInProduction()) {
+                $highlights = json_encode($this->highlightRepository->findHighlights($searchParams));
+                $client->setex($key, 3600, $highlights);
+            }
+
+            return json_decode($highlights, true);
+        }
+
+        return $this->getHighlightsFromFirebaseSnapshot($searchParams, $snapshot, $client);
     }
 
     /**
@@ -390,6 +411,11 @@ class ListController
             sort($sortedSelectedAggregates);
         }
 
+        $term = '';
+        if ($searchParams->hasParam('term')) {
+            $term = $searchParams->getParams()['term'];
+        }
+
         return implode(
             ';'
             , [
@@ -397,7 +423,8 @@ class ListController
                 $searchParams->getParams()['startDate']->format('Y-m-d H'),
                 $searchParams->getParams()['endDate']->format('Y-m-d H'),
                 implode(',', $sortedSelectedAggregates),
-                $includedRetweets
+                $includedRetweets,
+                $term
             ]
         );
     }
