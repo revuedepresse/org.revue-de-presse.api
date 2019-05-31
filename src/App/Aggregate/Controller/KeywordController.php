@@ -35,7 +35,8 @@ class KeywordController
 
     /**
      * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     * @return JsonResponse
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function getKeywords(Request $request)
     {
@@ -46,7 +47,10 @@ class KeywordController
             );
         }
 
-        $keywords = $this->keywordRepository->getKeywords();
+        $startDate = new \DateTime($request->query->get('startDate'));
+        $endDate = new \DateTime($request->query->get('endDate'));
+
+        $keywords = $this->keywordRepository->getKeywords($startDate, $endDate);
 
         return new JsonResponse($keywords);
     }
