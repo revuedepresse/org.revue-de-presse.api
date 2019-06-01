@@ -1,10 +1,10 @@
-# Press review
+# Devobs
 
-[![Build Status](https://travis-ci.org/thierrymarianne/daily-press-review.svg?branch=master)](https://travis-ci.org/thierrymarianne/daily-press-review)
+[![Build Status](https://travis-ci.org/thierrymarianne/devobs-api.svg?branch=master)](https://travis-ci.org/thierrymarianne/devobs-api)
 
-[ ![Codeship Status for thierrymarianne/daily-press-review](https://app.codeship.com/projects/24369620-8f96-0136-7068-0e8ef5ba2310/status?branch=master)](https://app.codeship.com/projects/304052)
+[![Codeship Status for thierrymarianne/devobs-api](https://app.codeship.com/projects/beea8780-6695-0137-8a94-5e66d93e8e29/status?branch=master)](https://app.codeship.com/projects/345349)
 
-Easing observation of Twitter lists to publish a daily press review
+Easing observation of Twitter lists related to software development
 
 ## Installation
 

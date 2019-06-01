@@ -659,9 +659,9 @@ function build_php_fpm_container() {
 
 function run_php_fpm() {
     local suffix=''
-    if [ ! -z "${PRESS_REVIEW_PHP_FPM_PREFIX}" ];
+    if [ ! -z "${PRESS_REVIEW_PHP_FPM_SUFFIX}" ];
     then
-        suffix="-${PRESS_REVIEW_PHP_FPM_PREFIX}"
+        suffix="-${PRESS_REVIEW_PHP_FPM_SUFFIX}"
     fi
 
     remove_php_fpm_container "${suffix}"
@@ -703,7 +703,7 @@ function run_php_fpm() {
 -v '`pwd`'/provisioning/containers/apache/templates/blackfire/agent:/etc/blackfire/agent \
 '"${mount}"' \
 -v '`pwd`':/var/www/devobs \
---name=php-fpm-"${suffix}" php-fpm php-fpm'
+--name=php-fpm'"${suffix}"' php-fpm php-fpm'
 )
 
     echo 'About to execute "'"${command}"'"'
