@@ -99,12 +99,25 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
         $queryBuilder->innerJoin(self::TABLE_ALIAS.'.status', 's');
         $queryBuilder->innerJoin(self::TABLE_ALIAS.'.member', 'm');
 
+        if ($searchParams->hasParam('term')) {
+            $queryBuilder->innerJoin(
+                'Status:Keyword',
+                'k',
+                Join::WITH,
+                's.id = k.status'
+            );
+        }
+
         $this->applyConstraintAboutPopularity($queryBuilder, $searchParams);
         $this->applyConstraintAboutPublicationDateTime($queryBuilder, $searchParams)
         ->applyConstraintAboutPublicationDateOfRetweetedStatus($queryBuilder, $searchParams)
         ->applyConstraintAboutRetweetedStatus($queryBuilder, $searchParams)
         ->applyConstraintAboutRelatedAggregate($queryBuilder, $searchParams)
         ->applyConstraintAboutSelectedAggregates($queryBuilder, $searchParams);
+
+        if ($searchParams->hasParam('term')) {
+            $this->applyConstraintAboutTerm($queryBuilder, $searchParams);
+        }
 
         $queryBuilder->setParameter('startDate', $searchParams->getParams()['startDate']);
         if ($this->overMoreThanADay($searchParams)) {
@@ -130,7 +143,7 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
                 DATE(DATEADD(" . self::TABLE_ALIAS . ".publicationDateTime, 1, 'HOUR'))
             )";
 
-        if ($this->overOneDay($searchParams)) {
+        if ($this->overOneDay($searchParams) && !$searchParams->hasParam('term')) {
             $queryBuilder->andWhere($retweetedStatusPublicationDate . " = :startDate");
         }
 
@@ -138,6 +151,19 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
             $queryBuilder->andWhere($retweetedStatusPublicationDate . " >= :startDate");
             $queryBuilder->andWhere($retweetedStatusPublicationDate . " <= :endDate");
         }
+
+        return $this;
+    }
+
+    /**
+     * @param QueryBuilder $queryBuilder
+     * @param SearchParams $searchParams
+     * @return HighlightRepository
+     */
+    private function applyConstraintAboutTerm(QueryBuilder $queryBuilder, SearchParams $searchParams): self
+    {
+        $queryBuilder->andWhere('k.keyword LIKE :term');
+        $queryBuilder->setParameter('term', $searchParams->getParams()['term'].'%');
 
         return $this;
     }
@@ -166,12 +192,14 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
         QueryBuilder $queryBuilder,
         SearchParams $searchParams
     ): self {
-        $queryBuilder->andWhere("DATE(DATEADD(" . self::TABLE_ALIAS . ".publicationDateTime, 1, 'HOUR')) = :startDate");
-
-        if ($this->overMoreThanADay($searchParams)) {
+         if ($this->overMoreThanADay($searchParams)) {
             $queryBuilder->andWhere("DATE(DATEADD(" . self::TABLE_ALIAS . ".publicationDateTime, 1, 'HOUR')) >= :startDate");
             $queryBuilder->andWhere("DATE(DATEADD(" . self::TABLE_ALIAS . ".publicationDateTime, 1, 'HOUR')) <= :endDate");
+
+            return $this;
         }
+
+        $queryBuilder->andWhere("DATE(DATEADD(" . self::TABLE_ALIAS . ".publicationDateTime, 1, 'HOUR')) = :startDate");
 
         return $this;
     }
@@ -185,7 +213,9 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
         QueryBuilder $queryBuilder,
         SearchParams $searchParams
     ): self {
-        if ($this->accessingAdministrativeRoute($searchParams)) {
+        if ($this->accessingAdministrativeRoute($searchParams)
+            || $searchParams->hasParam('term')
+        ) {
             $queryBuilder->andWhere(self::TABLE_ALIAS . '.aggregateName != :aggregate');
             $queryBuilder->setParameter('aggregate', $this->aggregate);
 
@@ -330,6 +360,9 @@ QUERY;
             "DATE(DATESUB(COALESCE(p.checkedAt, s.createdAt), 1, 'HOUR')) >= :startDate AND ",
             "DATE(DATESUB(COALESCE(p.checkedAt, s.createdAt), 1, 'HOUR')) <= :endDate"
         ]);
+
+        // Do not consider the last time a status has been checked
+        // when searching for statuses by a term
         if ($this->overOneDay($searchParams)) {
             $condition = implode([
                 "DATE(DATESUB(p.checkedAt, 1, 'HOUR')) = :startDate",

@@ -60,6 +60,12 @@ services:
             tokenRepository:        '@weaving_the_web_api.repository.token'
             likedStatusRepository:  '@repository.liked_status'
 
+    repository.keyword:
+        factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
+        class: 'App\Status\Repository\KeywordRepository'
+        arguments:
+            - 'App\Status\Entity\Keyword'
+
     repository.highlight:
         factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
         class: 'App\Status\Repository\HighlightRepository'

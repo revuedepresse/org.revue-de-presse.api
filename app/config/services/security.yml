@@ -9,4 +9,5 @@ services:
         properties:
             authenticator:                  '@app.authenticator'
             authenticationTokenRepository:  '@repository.authentication_token'
+            logger:                         '@monolog.logger.security'
             userRepository:                 '@user_manager'

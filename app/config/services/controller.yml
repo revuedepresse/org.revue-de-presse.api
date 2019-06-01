@@ -37,3 +37,11 @@ services:
             allowedOrigin:       '%allowed.origin%'
             environment:         '%kernel.environment%'
             redisCache:          '@app.cache.redis'
+
+    controller.keyword:
+        class: 'App\Aggregate\Controller\KeywordController'
+        properties:
+            keywordRepository: '@repository.keyword'
+            allowedOrigin:     '%allowed.origin%'
+            environment:       '%kernel.environment%'
+            redisCache:        '@app.cache.redis'
