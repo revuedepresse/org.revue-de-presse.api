@@ -23,7 +23,10 @@
     ],
     "require": {
         "php": ">=7.2.5",
+        "ext-bc": "*",
+        "ext-curl": "*",
         "ext-json": "*",
+        "ext-mysql": "*",
         "ext-pdo": "*",
         "auth0/auth0-php": "~5.0",
         "beberlei/DoctrineExtensions": "dev-master",
