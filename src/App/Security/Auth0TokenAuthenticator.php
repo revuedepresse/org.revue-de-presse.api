@@ -28,6 +28,11 @@ class Auth0TokenAuthenticator extends TokenAuthenticator
     public $authenticator;
 
     /**
+     * @var \Psr\Log\LoggerInterface
+     */
+    public $logger;
+
+    /**
      * @param Request $request
      * @return array|mixed|null
      * @throws \Doctrine\ORM\NoResultException
@@ -88,6 +93,8 @@ class Auth0TokenAuthenticator extends TokenAuthenticator
             try {
                 return $this->authenticator->authenticate($apiKey);
             } catch (\Exception $exception) {
+                $this->logger->info($exception->getMessage());
+
                 return null;
             }
         }

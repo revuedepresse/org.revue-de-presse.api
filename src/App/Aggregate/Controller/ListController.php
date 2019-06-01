@@ -2,6 +2,7 @@
 
 namespace App\Aggregate\Controller;
 
+use App\Aggregate\Controller\Exception\InvalidRequestException;
 use App\Aggregate\Repository\TimelyStatusRepository;
 use App\Cache\RedisCache;
 use App\Member\MemberInterface;
@@ -99,6 +100,7 @@ class ListController
     /**
      * @param Request $request
      * @return JsonResponse
+     * @throws \Doctrine\DBAL\DBALException
      */
     public function getAggregates(Request $request)
     {
@@ -111,7 +113,7 @@ class ListController
 
                 $totalPages = $client->get($key);
 
-                if ($this->shouldRefreshCache($client) && $totalPages) {
+                if ($this->shouldRefreshCacheForAggregates($client) && $totalPages) {
                     $client->del($key);
                     $totalPages = null;
                 }
@@ -127,7 +129,7 @@ class ListController
                 $key = 'aggregates.items.'.$searchParams->getFingerprint();
                 $aggregates = $client->get($key);
 
-                if ($this->shouldRefreshCache($client) && $aggregates) {
+                if ($this->shouldRefreshCacheForAggregates($client) && $aggregates) {
                     $client->del($key);
 
                     if ($client->get('aggregates.recent_delete')) {
@@ -157,11 +159,31 @@ class ListController
      * @param Client $client
      * @return bool
      */
-    function shouldRefreshCache(Client $client)
+    function shouldRefreshCacheForAggregates(Client $client)
     {
-        return $client->get('aggregates.recent_delete') ||
-            $client->get('aggregates.recent_statuses_collect') ||
-            $client->get('aggregates.total_statuses_reset');
+        return $this->shouldRefreshCacheFor($client, 'aggregates');
+    }
+
+    /**
+     * @param Client $client
+     * @return bool
+     */
+    function shouldRefreshCacheForMembers(Client $client)
+    {
+        return $this->shouldRefreshCacheFor($client, 'members');
+    }
+
+    /**
+     * @param Client $client
+     * @param string $key
+     * @param string $prefix
+     * @return bool
+     */
+    function shouldRefreshCacheFor(Client $client, string $prefix)
+    {
+        return $client->get($prefix.'.recent_delete') ||
+            $client->get($prefix.'.recent_statuses_collect') ||
+            $client->get($prefix.'.total_statuses_reset');
     }
 
     /**
@@ -171,86 +193,109 @@ class ListController
      */
     public function getHighlights(Request $request)
     {
-        $client = $this->redisCache->getClient();
-
         return $this->getCollection(
             $request,
-            $counter = function (SearchParams $searchParams) use ($client, $request) {
-                $headers = $this->getAccessControlOriginHeaders($this->environment, $this->allowedOrigin);
-                $unauthorizedJsonResponse = new JsonResponse(
-                    'Unauthorized request',
-                    403,
-                    $headers
-                );
-
-                if ($this->invalidHighlightsSearchParams($searchParams)) {
-                    return $unauthorizedJsonResponse;
-                }
-
-                $queriedRouteAccess = $searchParams->hasParam('routeName');
-                if ($queriedRouteAccess && !$request->headers->has('x-auth-admin-token')) {
-                    return $unauthorizedJsonResponse;
-                }
-
-                if ($queriedRouteAccess) {
-                    $tokenId = $request->headers->get('x-auth-admin-token');
-                    $memberProperties = $this->authenticationTokenRepository->findByTokenIdentifier($tokenId);
-
-                    if (!array_key_exists('member', $memberProperties) ||
-                        !($memberProperties['member'] instanceof MemberInterface)) {
-                        return $unauthorizedJsonResponse;
-                    }
-                }
-
-                $key = $this->getCacheKey('highlights.total_pages', $searchParams);
-
-                if (!$searchParams->hasParam('selectedAggregates') && !$queriedRouteAccess) {
-                    return 1;
-                }
-
-                $totalPages = $client->get($key);
-
-                if (!$totalPages || $this->notInProduction()) {
-                    $totalPages = $this->highlightRepository->countTotalPages($searchParams);
-                    $client->setex($key, 3600, $totalPages);
-                }
-
-                return $totalPages;
+            $counter = function (SearchParams $searchParams) use ($request) {
+                return $this->getTotalPages($searchParams, $request);
             },
-            $finder = function (SearchParams $searchParams) use ($client) {
-                if ($this->invalidHighlightsSearchParams($searchParams)) {
-                    return [];
-                }
-
-                $hasChild = false;
-                if (!$searchParams->hasParam('selectedAggregates')) {
-                    $snapshot = $this->getFirebaseDatabaseSnapshot($searchParams);
-                    $hasChild = $snapshot->hasChildren();
-                }
-
-                if (!$hasChild) {
-                    $key = $this->getCacheKey('highlights.items', $searchParams);
-                    $highlights = $client->get($key);
-                    if (!$highlights || $this->notInProduction()) {
-                        $highlights = json_encode($this->highlightRepository->findHighlights($searchParams));
-                        $client->setex($key, 3600, $highlights);
-                    }
-
-                    return json_decode($highlights, true);
-                }
-
-
-                return $this->getHighlightsFromFirebaseSnapshot($searchParams, $snapshot, $client);
+            $finder = function (SearchParams $searchParams) {
+                return $this->getHighlightsFromSearchParams($searchParams);
             },
             [
-                'startDate' => 'datetime',
+                'aggregate' => 'string',
                 'endDate' => 'datetime',
                 'includeRetweets' => 'bool',
-                'aggregate' => 'string',
                 'routeName' => 'string',
                 'selectedAggregates' => 'array',
+                'startDate' => 'datetime',
+                'term' => 'string',
             ]
         );
+    }
+
+    /**
+     * @param SearchParams $searchParams
+     * @param Request      $request
+     * @return bool|int|string|JsonResponse
+     * @throws NonUniqueResultException
+     */
+    private function getTotalPages(SearchParams $searchParams, Request $request) {
+        $headers = $this->getAccessControlOriginHeaders($this->environment, $this->allowedOrigin);
+        $unauthorizedJsonResponse = new JsonResponse(
+            'Unauthorized request',
+            403,
+            $headers
+        );
+
+        if ($this->invalidHighlightsSearchParams($searchParams)) {
+            return $unauthorizedJsonResponse;
+        }
+
+        $queriedRouteAccess = $searchParams->hasParam('routeName');
+        if ($queriedRouteAccess && !$request->headers->has('x-auth-admin-token')) {
+            return $unauthorizedJsonResponse;
+        }
+
+        if ($queriedRouteAccess) {
+            $tokenId = $request->headers->get('x-auth-admin-token');
+            $memberProperties = $this->authenticationTokenRepository->findByTokenIdentifier($tokenId);
+
+            if (!array_key_exists('member', $memberProperties) ||
+                !($memberProperties['member'] instanceof MemberInterface)) {
+                return $unauthorizedJsonResponse;
+            }
+        }
+
+        $key = $this->getCacheKey('highlights.total_pages', $searchParams);
+
+        if (!$searchParams->hasParam('selectedAggregates') && !$queriedRouteAccess) {
+            return 1;
+        }
+
+        $client = $this->redisCache->getClient();
+        $totalPages = $client->get($key);
+
+        if (!$totalPages || $this->notInProduction()) {
+            $totalPages = $this->highlightRepository->countTotalPages($searchParams);
+            $client->setex($key, 3600, $totalPages);
+        }
+
+        return $totalPages;
+    }
+
+    /**
+     * @param $searchParams
+     * @return array|mixed
+     * @throws \Doctrine\DBAL\DBALException
+     */
+    private function getHighlightsFromSearchParams(SearchParams $searchParams) {
+        if ($this->invalidHighlightsSearchParams($searchParams)) {
+            return [];
+        }
+
+        $queriedRouteAccess = $searchParams->hasParam('routeName');
+
+        $hasChild = false;
+        if (!$searchParams->hasParam('selectedAggregates') && !$queriedRouteAccess) {
+            $snapshot = $this->getFirebaseDatabaseSnapshot($searchParams);
+            $hasChild = $snapshot->hasChildren();
+        }
+
+        $client = $this->redisCache->getClient();
+
+        if (!$hasChild) {
+            $key = $this->getCacheKey('highlights.items', $searchParams);
+
+            $highlights = $client->get($key);
+            if (!$highlights || $this->notInProduction()) {
+                $highlights = json_encode($this->highlightRepository->findHighlights($searchParams));
+                $client->setex($key, 3600, $highlights);
+            }
+
+            return json_decode($highlights, true);
+        }
+
+        return $this->getHighlightsFromFirebaseSnapshot($searchParams, $snapshot, $client);
     }
 
     /**
@@ -366,6 +411,11 @@ class ListController
             sort($sortedSelectedAggregates);
         }
 
+        $term = '';
+        if ($searchParams->hasParam('term')) {
+            $term = $searchParams->getParams()['term'];
+        }
+
         return implode(
             ';'
             , [
@@ -373,7 +423,8 @@ class ListController
                 $searchParams->getParams()['startDate']->format('Y-m-d H'),
                 $searchParams->getParams()['endDate']->format('Y-m-d H'),
                 implode(',', $sortedSelectedAggregates),
-                $includedRetweets
+                $includedRetweets,
+                $term
             ]
         );
     }
@@ -393,18 +444,61 @@ class ListController
 
     /**
      * @param Request $request
-     * @return JsonResponse
+     * @return int|null|JsonResponse
+     * @throws NonUniqueResultException
      * @throws \Doctrine\DBAL\DBALException
      */
     public function getMembers(Request $request)
     {
+        $client = $this->redisCache->getClient();
+
         return $this->getCollection(
             $request,
-            $counter = function (SearchParams $searchParams) {
-                return $this->memberRepository->countTotalPages($searchParams);
+            $counter = function (SearchParams $searchParams) use ($client) {
+                $key = 'members.total_pages.'.$searchParams->getFingerprint();
+                $totalPages = $client->get($key);
+
+                if ($this->shouldRefreshCacheForMembers($client) && $totalPages) {
+                    $client->del($key);
+                    $totalPages = null;
+                }
+
+                if (is_null($totalPages)) {
+                    $totalPages = $this->memberRepository->countTotalPages($searchParams);
+                    $client->set($key, $totalPages);
+                }
+
+                return intval($totalPages);
             },
-            $finder = function (SearchParams $searchParams) {
-                return $this->memberRepository->findMembers($searchParams);
+            $finder = function (SearchParams $searchParams) use ($client) {
+                $key = 'members.items.'.$searchParams->getFingerprint();
+
+                $members = $client->get($key);
+
+                if ($this->shouldRefreshCacheForMembers($client) && $members) {
+                    $client->del($key);
+
+                    if ($client->get('members.recent_delete')) {
+                        $client->del('members.recent_delete');
+                    }
+
+                    if ($client->get('members.recent_statuses_collect')) {
+                        $client->del('members.recent_statuses_collect');
+                    }
+
+                    if ($client->get('members.total_statuses_reset')) {
+                        $client->del('members.total_statuses_reset');
+                    }
+
+                    $members = null;
+                }
+
+                if (is_null($members)) {
+                    $members = json_encode($this->memberRepository->findMembers($searchParams));
+                    $client->set($key, $members);
+                }
+
+                return $members;
             },
             ['aggregateId' => 'int']
         );
@@ -490,9 +584,9 @@ class ListController
             return $response;
         }
 
-        $aggregates = $finder($searchParams);
+        $items = $finder($searchParams);
 
-        $response = $this->makeOkResponse($aggregates);
+        $response = $this->makeOkResponse($items);
         $response->headers->add($totalPagesHeader);
         $response->headers->add($pageIndexHeader);
 
@@ -517,6 +611,44 @@ class ListController
 
     /**
      * @param Request $request
+     * @return array|JsonResponse
+     * @throws NonUniqueResultException
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function bulkCollectAggregatesStatuses(Request $request)
+    {
+        if ($request->isMethod('OPTIONS')) {
+            return $this->getCorsOptionsResponse(
+                $this->environment,
+                $this->allowedOrigin
+            );
+        }
+
+        $requirementsOrJsonResponse = $this->guardAgainstMissingRequirementsForBulkStatusCollection($request);
+        if ($requirementsOrJsonResponse instanceof JsonResponse) {
+            return $requirementsOrJsonResponse;
+        }
+
+        array_walk(
+            $requirementsOrJsonResponse['members_names'],
+            function ($memberName) use ($requirementsOrJsonResponse) {
+                $requirements = [
+                    'token' => $requirementsOrJsonResponse['token'],
+                    'member_name' => $memberName,
+                    'aggregate_id' => $requirementsOrJsonResponse['aggregate_id']
+                ];
+                $this->aggregateRepository->resetTotalStatusesForAggregateRelatedToScreenName($memberName);
+
+                $this->produceCollectionRequestFromRequirements($requirements);
+            }
+        );
+
+        return $this->makeJsonResponse();
+    }
+
+    /**
+     * @param Request $request
      * @return JsonResponse
      * @throws NonUniqueResultException
      */
@@ -529,38 +661,14 @@ class ListController
             );
         }
 
-        $requirementsOrJsonResponse = $this->guardAgainstMissingRequirements($request);
+        $requirementsOrJsonResponse = $this->guardAgainstMissingRequirementsForStatusCollection($request);
         if ($requirementsOrJsonResponse instanceof JsonResponse) {
             return $requirementsOrJsonResponse;
         }
 
-        /** @var Token $token */
-        $token = $requirementsOrJsonResponse['token'];
+        $this->produceCollectionRequestFromRequirements($requirementsOrJsonResponse);
 
-        $messageBody = [
-            'token' => $token->getOauthToken(),
-            'secret' => $token->getOauthTokenSecret(),
-            'consumer_token' => $token->consumerKey,
-            'consumer_secret' => $token->consumerSecret
-        ];
-        $messageBody['screen_name'] = $requirementsOrJsonResponse['member_name'];
-        $messageBody['aggregate_id'] = $requirementsOrJsonResponse['aggregate_id'];
-
-
-        $this->aggregateLikesProducer->setContentType('application/json');
-        $this->aggregateLikesProducer->publish(serialize(json_encode($messageBody)));
-
-        $this->aggregateStatusesProducer->setContentType('application/json');
-        $this->aggregateStatusesProducer->publish(serialize(json_encode($messageBody)));
-
-        return new JsonResponse(
-            'Your request should be processed very soon',
-            200,
-            $this->getAccessControlOriginHeaders(
-                $this->environment,
-                $this->allowedOrigin
-            )
-        );
+        return $this->makeJsonResponse();
     }
 
     /**
@@ -579,7 +687,7 @@ class ListController
             );
         }
 
-        $requirementsOrJsonResponse = $this->guardAgainstMissingRequirements($request);
+        $requirementsOrJsonResponse = $this->guardAgainstMissingRequirementsForStatusCollection($request);
         if ($requirementsOrJsonResponse instanceof JsonResponse) {
             return $requirementsOrJsonResponse;
         }
@@ -605,14 +713,7 @@ class ListController
 
         $this->aggregateRepository->unlockAggregate($aggregate);
 
-        return new JsonResponse(
-            'Your request should be processed very soon',
-            200,
-            $this->getAccessControlOriginHeaders(
-                $this->environment,
-                $this->allowedOrigin
-            )
-        );
+        return $this->makeJsonResponse();
     }
 
     /**
@@ -620,64 +721,210 @@ class ListController
      * @return array|JsonResponse
      * @throws NonUniqueResultException
      */
-    private function guardAgainstMissingRequirements(Request $request)
+    private function guardAgainstMissingRequirementsForStatusCollection(Request $request)
     {
         $corsHeaders = $this->getAccessControlOriginHeaders(
             $this->environment,
             $this->allowedOrigin
         );
 
+        $decodedContent = $this->guardAgainstInvalidParametersEncoding($request, $corsHeaders);
+        $decodedContent = $this->guardAgainstInvalidParameters($decodedContent, $corsHeaders);
+
+        return [
+            'token' => $this->guardAgainstInvalidAuthenticationToken($corsHeaders),
+            'member_name' => $this->guardAgainstMissingMemberName($decodedContent, $corsHeaders),
+            'aggregate_id' => $this->guardAgainstMissingAggregateId($decodedContent, $corsHeaders)
+        ];
+    }
+
+    /**
+     * @param Request $request
+     * @return array|JsonResponse
+     * @throws NonUniqueResultException
+     */
+    private function guardAgainstMissingRequirementsForBulkStatusCollection(Request $request)
+    {
+        $corsHeaders = $this->getAccessControlOriginHeaders(
+            $this->environment,
+            $this->allowedOrigin
+        );
+
+        $decodedContent = $this->guardAgainstInvalidParametersEncoding($request, $corsHeaders);
+        $decodedContent = $this->guardAgainstInvalidParameters($decodedContent, $corsHeaders);
+        $aggregateId = $this->guardAgainstMissingAggregateId($decodedContent, $corsHeaders);
+        $membersNames = $this->guardAgainstMissingMembersNames($decodedContent, $corsHeaders);
+
+        return [
+            'token' => $this->guardAgainstInvalidAuthenticationToken($corsHeaders),
+            'aggregate_id' => $aggregateId,
+            'members_names' => $membersNames
+        ];
+    }
+
+    /**
+     * @param $decodedContent
+     * @param $corsHeaders
+     * @return int
+     */
+    private function guardAgainstMissingAggregateId($decodedContent, $corsHeaders): int
+    {
+        if (!array_key_exists('aggregateId', $decodedContent['params']) ||
+            intval($decodedContent['params']['aggregateId']) < 1) {
+            $exceptionMessage = 'Invalid aggregated id';
+            $jsonResponse = new JsonResponse(
+                $exceptionMessage,
+                422,
+                $corsHeaders
+            );
+            InvalidRequestException::guardAgainstInvalidRequest($jsonResponse, $exceptionMessage);
+        }
+
+        return intval($decodedContent['params']['aggregateId']);
+    }
+
+    /**
+     * @param $decodedContent
+     * @param $corsHeaders
+     * @return mixed
+     */
+    private function guardAgainstMissingMemberName($decodedContent, $corsHeaders): string
+    {
+        if (!array_key_exists('memberName', $decodedContent['params'])) {
+            $exceptionMessage = 'Invalid member name';
+            $jsonResponse = new JsonResponse(
+                $exceptionMessage,
+                422,
+                $corsHeaders
+            );
+            InvalidRequestException::guardAgainstInvalidRequest($jsonResponse, $exceptionMessage);
+        }
+
+        return $decodedContent['params']['memberName'];
+    }
+
+    /**
+     * @param $decodedContent
+     * @param $corsHeaders
+     * @return mixed
+     */
+    private function guardAgainstMissingMembersNames($decodedContent, $corsHeaders): array
+    {
+        if (!array_key_exists('membersNames', $decodedContent['params'])) {
+            $exceptionMessage = 'Invalid members names';
+            $jsonResponse = new JsonResponse(
+                $exceptionMessage,
+                422,
+                $corsHeaders
+            );
+            InvalidRequestException::guardAgainstInvalidRequest($jsonResponse, $exceptionMessage);
+        }
+
+        return $decodedContent['params']['membersNames'];
+    }
+
+    /**
+     * @param Request $request
+     * @param         $corsHeaders
+     * @return mixed
+     */
+    private function guardAgainstInvalidParametersEncoding(Request $request, $corsHeaders): array
+    {
         $decodedContent = json_decode($request->getContent(), $asArray = true);
         $lastError = json_last_error();
         if ($lastError !== JSON_ERROR_NONE) {
-            return new JsonResponse(
-                'Invalid parameters encoding',
+            $exceptionMessage = 'Invalid parameters encoding';
+            $jsonResponse = new JsonResponse(
+                $exceptionMessage,
                 422,
                 $corsHeaders
             );
+            InvalidRequestException::guardAgainstInvalidRequest($jsonResponse, $exceptionMessage);
         }
 
+        return $decodedContent;
+    }
+
+    /**
+     * @param $decodedContent
+     * @param $corsHeaders
+     * @return mixed
+     */
+    private function guardAgainstInvalidParameters($decodedContent, $corsHeaders): array
+    {
         if (!array_key_exists('params', $decodedContent) ||
             !is_array($decodedContent['params'])) {
-            return new JsonResponse(
-                'Invalid params',
+            $exceptionMessage = 'Invalid params';
+            $jsonResponse = new JsonResponse(
+                $exceptionMessage,
                 422,
                 $corsHeaders
             );
+            InvalidRequestException::guardAgainstInvalidRequest($jsonResponse, $exceptionMessage);
         }
 
-        if (!array_key_exists('aggregateId', $decodedContent['params']) ||
-            intval($decodedContent['params']['aggregateId']) < 1) {
-            return new JsonResponse(
-                'Invalid aggregated id',
-                422,
-                $corsHeaders
-            );
-        }
-        $aggregateId = intval($decodedContent['params']['aggregateId']);
+        return $decodedContent;
+    }
 
-        if (!array_key_exists('memberName', $decodedContent['params'])) {
-            return new JsonResponse(
-                'Invalid member name',
-                422,
-                $corsHeaders
-            );
-        }
-        $memberName = $decodedContent['params']['memberName'];
-
+    /**
+     * @param $corsHeaders
+     * @return Token
+     * @throws NonUniqueResultException
+     */
+    private function guardAgainstInvalidAuthenticationToken($corsHeaders): Token
+    {
         $token = $this->tokenRepository->findFirstUnfrozenToken();
         if (!($token instanceof Token)) {
-            return new JsonResponse(
-                'Could not process your request at the moment',
+            $exceptionMessage = 'Could not process your request at the moment';
+            $jsonResponse = new JsonResponse(
+                $exceptionMessage,
                 503,
                 $corsHeaders
             );
+            InvalidRequestException::guardAgainstInvalidRequest($jsonResponse, $exceptionMessage);
         }
 
-        return [
-            'token' => $token,
-            'member_name' => $memberName,
-            'aggregate_id' => $aggregateId
+        return $token;
+    }
+
+    /**
+     * @param $requirementsOrJsonResponse
+     */
+    private function produceCollectionRequestFromRequirements($requirementsOrJsonResponse): void
+    {
+        /** @var Token $token */
+        $token = $requirementsOrJsonResponse['token'];
+
+        $messageBody = [
+            'token' => $token->getOauthToken(),
+            'secret' => $token->getOauthTokenSecret(),
+            'consumer_token' => $token->consumerKey,
+            'consumer_secret' => $token->consumerSecret
         ];
+        $messageBody['screen_name'] = $requirementsOrJsonResponse['member_name'];
+        $messageBody['aggregate_id'] = $requirementsOrJsonResponse['aggregate_id'];
+
+
+        $this->aggregateLikesProducer->setContentType('application/json');
+        $this->aggregateLikesProducer->publish(serialize(json_encode($messageBody)));
+
+        $this->aggregateStatusesProducer->setContentType('application/json');
+        $this->aggregateStatusesProducer->publish(serialize(json_encode($messageBody)));
+    }
+
+    /**
+     * @param string $message
+     * @return JsonResponse
+     */
+    private function makeJsonResponse($message = 'Your request should be processed very soon'): JsonResponse
+    {
+        return new JsonResponse(
+            $message,
+            200,
+            $this->getAccessControlOriginHeaders(
+                $this->environment,
+                $this->allowedOrigin
+            )
+        );
     }
 }

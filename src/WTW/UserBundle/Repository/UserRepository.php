@@ -551,7 +551,7 @@ QUERY;
 
         $params = $searchParams->getParams();
         if (array_key_exists('aggregateId', $params)) {
-            $aggregates = $this->findRelatedAggregates($params);
+            $aggregates = $this->findRelatedAggregates($searchParams);
             $aggregateProperties = [];
             array_walk(
                 $aggregates,
@@ -560,8 +560,12 @@ QUERY;
                     $aggregate['totalStatuses'] = intval($aggregate['totalStatuses']);
                     $aggregate['locked'] = (bool)$aggregate['locked'];
 
-                    $aggregate['unlockedAt'] = $aggregate['unlocked_at'];
-                    if (!is_null($aggregate['unlocked_at'])) {
+                    if (array_key_exists('unlocked_at', $aggregate)) {
+                        $aggregate['unlockedAt'] = $aggregate['unlocked_at'];
+                    }
+
+                    if (array_key_exists('unlocked_at', $aggregate) &&
+                        !is_null($aggregate['unlocked_at'])) {
                         $aggregate['unlockedAt'] = (new \DateTime(
                             $aggregate['unlocked_at'],
                             new \DateTimeZone('UTC'))
@@ -588,40 +592,82 @@ QUERY;
     }
 
     /**
-     * @param $params
+     * @param SearchParams $params
      * @return array
      * @throws \Doctrine\DBAL\DBALException
      */
-    private function findRelatedAggregates($params): array
+    private function findRelatedAggregates(SearchParams $searchParams): array
     {
+        $params = $searchParams->getParams();
+        $hasKeyword = $searchParams->hasKeyword();
+
+        $keywordCondition = '';
+        if ($hasKeyword) {
+            $keywordCondition = 'AND aggregate.screen_name like ?';
+        }
+
         $connection = $this->getEntityManager()->getConnection();
         $query = <<< QUERY
-                SELECT 
-                a.id,
-                a.screen_name AS screenName, 
-                a.total_statuses AS totalStatuses,
-                a.locked, 
-                a.locked_at AS lockedAt,
-                a.unlocked_at AS unlockedAt
+            SELECT 
+            aggregate.id,
+            aggregate.screen_name AS screenName, 
+            aggregate.total_statuses AS totalStatuses,
+            aggregate.locked, 
+            aggregate.locked_at AS lockedAt,
+            aggregate.unlocked_at AS unlockedAt
+            FROM weaving_aggregate a
+            INNER JOIN weaving_aggregate aggregate
+            ON aggregate.screen_name = a.screen_name AND aggregate.screen_name IS NOT NULL
+            WHERE a.name in (
+                SELECT a.name
                 FROM weaving_aggregate a
-                WHERE screen_name IS NOT NULL
-                AND name in (
-                    SELECT a.name
-                    FROM weaving_aggregate a
-                    WHERE id = ?
-                )
+                WHERE id = ?
+            )
+            $keywordCondition
+            GROUP BY aggregate.id
 QUERY;
-        $statement = $connection->executeQuery($query, [$params['aggregateId']], [\PDO::PARAM_INT]);
+
+        $params = [$params['aggregateId']];
+        if ($hasKeyword) {
+            $keyword = sprintf(
+                '%%%s%%',
+                strtr(
+                    $searchParams->getKeyword(),
+                    [
+                        '_' => '\_',
+                        '%' => '%%',
+                    ]
+                )
+            );
+            $params[] = $keyword;
+        }
+
+        $paramsTypes = [
+            \PDO::PARAM_INT,
+        ];
+        if ($hasKeyword) {
+            $paramsTypes =  [
+                \PDO::PARAM_INT,
+                \PDO::PARAM_STR
+            ];
+        }
+
+        $statement = $connection->executeQuery(
+            $query,
+            $params,
+            $paramsTypes
+        );
+
         $results = $statement->fetchAll();
 
         $results = array_map(
             function (array $aggregate) {
-                if (intval($aggregate['totalStatuses']) === 0 || true) {
+                if (intval($aggregate['totalStatuses']) <= 0) {
                     $matchingAggregate = $this->aggregateRepository->findOneBy(
                         ['id' => intval($aggregate['id'])]
                     );
 
-                    $this->aggregateRepository->updateTotalStatusesByExcludingRelatedAggregates(
+                    $this->aggregateRepository->updateTotalStatuses(
                         $aggregate,
                         $matchingAggregate
                     );

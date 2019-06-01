@@ -23,6 +23,11 @@ status:
     path:     '/api/twitter/admin/statuses'
     defaults: { _controller: controller.list:getStatuses }
 
+bulk_collect_statuses:
+    path:     '/api/twitter/admin/bulk-collect-statuses'
+    defaults: { _controller: controller.list:bulkCollectAggregatesStatuses }
+    methods:  [POST, OPTIONS]
+
 collect:
     path:     '/api/twitter/admin/collect'
     defaults: { _controller: controller.list:requestCollection }
@@ -53,3 +58,6 @@ collect_statuses:
     defaults: { _controller: controller.aggregate:collectAggregatesStatuses }
     methods:  [POST, OPTIONS]
 
+keywords:
+    path:     '/api/twitter/admin/keywords'
+    defaults: { _controller: controller.keyword:getKeywords }
