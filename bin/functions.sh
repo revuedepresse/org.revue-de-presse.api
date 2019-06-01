@@ -658,7 +658,13 @@ function build_php_fpm_container() {
 }
 
 function run_php_fpm() {
-    remove_php_fpm_container
+    local suffix=''
+    if [ ! -z "${PRESS_REVIEW_PHP_FPM_PREFIX}" ];
+    then
+        suffix="-${PRESS_REVIEW_PHP_FPM_PREFIX}"
+    fi
+
+    remove_php_fpm_container "${suffix}"
 
     local port=80
     if [ ! -z "${PRESS_REVIEW_PHP_FPM_PORT}" ];
@@ -697,7 +703,7 @@ function run_php_fpm() {
 -v '`pwd`'/provisioning/containers/apache/templates/blackfire/agent:/etc/blackfire/agent \
 '"${mount}"' \
 -v '`pwd`':/var/www/devobs \
---name=php-fpm php-fpm php-fpm'
+--name=php-fpm-"${suffix}" php-fpm php-fpm'
 )
 
     echo 'About to execute "'"${command}"'"'
@@ -706,12 +712,14 @@ function run_php_fpm() {
 }
 
 function remove_php_fpm_container {
-    if [ `docker ps -a | grep fpm -c` -eq 0 ]
+    local suffix="${1}"
+
+    if [ `docker ps -a | grep fpm"${suffix}" -c` -eq 0 ]
     then
         return;
     fi
 
-    docker ps -a | grep fpm | awk '{print $1}' | xargs docker rm -f
+    docker ps -a | grep fpm"${suffix}" | awk '{print $1}' | xargs docker rm -f
 }
 
 function run_php_script() {
