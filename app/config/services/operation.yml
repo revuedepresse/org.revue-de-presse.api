@@ -5,3 +5,6 @@ services:
             timeAfterWhichOperationIsSkipped:  '%operations_skipped_after%'
             timeBeforeWhichOperationIsSkipped: '%operations_skipped_before%'
             logger:                            '@monolog.logger.twitter_api'
+
+    monolog.json_formatter:
+        class:                                  'Monolog\Formatter\JsonFormatter'

@@ -35,6 +35,8 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
 
     const OPTION_INCLUDE_OWNER = 'include_owner';
 
+    const OPTION_IGNORE_WHISPERS = 'ignore_whispers';
+
     use MemberAwareTrait;
 
     /**
@@ -107,6 +109,11 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
      */
     public $shouldIncludeOwner;
 
+    /**
+     * @var bool
+     */
+    private $ignoreWhispers = false;
+
     public function configure()
     {
         $this->setName('weaving_the_web:amqp:produce:lists_members')
@@ -158,12 +165,16 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
             null,
             InputOption::VALUE_OPTIONAL,
             'Date before which statuses should have been created'
-        )->setAliases(array('wtw:amqp:tw:prd:lm')
         )->addOption(
             self::OPTION_INCLUDE_OWNER,
             null,
             InputOption::VALUE_NONE,
             'Should add owner to the list of accounts to be considered'
+        )->addOption(
+            self::OPTION_IGNORE_WHISPERS,
+            'iw',
+            InputOption::VALUE_NONE,
+            'Should ignore whispers (publication from members having not published anything for a month)'
         )->setAliases(array('wtw:amqp:tw:prd:lm'));
     }
 
@@ -227,7 +238,7 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
             try {
                 $member = $this->getMessageUser($friend);
 
-                if ($member->isAWhisperer()) {
+                if ($this->ignoreWhispers && $member->isAWhisperer()) {
                     $message = sprintf('Ignoring whisperer with screen name "%s"', $friend->screen_name);
                     $this->logger->info($message);
 
@@ -510,6 +521,11 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
         if ($this->input->hasOption(self::OPTION_MEMBER_RESTRICTION) &&
             $this->input->getOption(self::OPTION_MEMBER_RESTRICTION)) {
             $this->memberRestriction = $this->input->getOption(self::OPTION_MEMBER_RESTRICTION);
+        }
+
+        if ($this->input->hasOption(self::OPTION_IGNORE_WHISPERS) &&
+            $this->input->getOption(self::OPTION_IGNORE_WHISPERS)) {
+            $this->ignoreWhispers = $this->input->getOption(self::OPTION_IGNORE_WHISPERS);
         }
     }
 
