@@ -2,16 +2,16 @@
 
 namespace WeavingTheWeb\Bundle\ApiBundle\Entity;
 
-use Doctrine\ORM\Mapping as ORM,
-    Doctrine\Common\Collections\ArrayCollection;
+use App\Security\AccessTokenInterface;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\Mapping as ORM;
 use WTW\UserBundle\Entity\User;
-use WeavingTheWeb\Bundle\ApiBundle\Entity\TokenType;
 
 /**
  * @ORM\Table(name="weaving_access_token")
  * @ORM\Entity(repositoryClass="WeavingTheWeb\Bundle\ApiBundle\Repository\TokenRepository")
  */
-class Token
+class Token implements AccessTokenInterface
 {
     /**
      * @var integer
@@ -52,11 +52,27 @@ class Token
     public $consumerKey;
 
     /**
+     * @return string
+     */
+    public function getConsumerKey()
+    {
+        return $this->consumerKey;
+    }
+
+    /**
      * @var string
      *
      * @ORM\Column(name="consumer_secret", type="string", length=255, nullable=true)
      */
     public $consumerSecret;
+
+    /**
+     * @return string
+     */
+    public function getConsumerSecret()
+    {
+        return $this->consumerSecret;
+    }
 
     /**
      * @var \DateTime
@@ -113,11 +129,18 @@ class Token
     }
 
     /**
-     * Get oauthToken
-     *
-     * @return string 
+     * @return string
+     * @deprecated
      */
     public function getOauthToken()
+    {
+        return $this->getAccessToken();
+    }
+
+    /**
+     * @return string
+     */
+    public function getAccessToken()
     {
         return $this->oauthToken;
     }
@@ -136,11 +159,18 @@ class Token
     }
 
     /**
-     * Get oauthTokenSecret
-     *
-     * @return string 
+     * @return string
+     * @deprecated
      */
     public function getOauthTokenSecret()
+    {
+        return $this->oauthTokenSecret;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAccessTokenSecret()
     {
         return $this->oauthTokenSecret;
     }

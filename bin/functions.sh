@@ -1,5 +1,23 @@
 #!/usr/bin/env bash
 
+# 2019-06-27 - Notes
+#
+# - Ensure environment variable PROJECT_DIR has been declared
+# - Ensure the appropriate docker network has been created before considering to initialize a MySQL volume
+# - Building a PHP docker image is a requirement of the initialization of the MySQL volume
+# ```
+# # First shortcut command to be executed before running a MySQL container
+# make initialize-mysql-volume
+# ```
+# - Building RabbitMQ docker image would prevent having warning provided the project configuration
+# when initializing MySQL volume
+# - Before running a RabbitMQ container, the following commands should have been executed
+# ```
+# make run-rabbitmq-container
+# make configure-rabbitmq-user-privileges
+# make setup-amqp-fabric
+# ```
+
 function get_docker_network() {
     echo 'press-review-network'
 }
@@ -186,6 +204,7 @@ function grant_privileges {
     local database_user_test="$(get_param_value_from_config "database_user_test")"
     local database_name_test="$(get_param_value_from_config "database_name_test")"
     local database_password_test="$(get_param_value_from_config "database_password_test")"
+    local container_name=`get_mysql_container_name`
 
     cat provisioning/containers/mysql/templates/grant-privileges-to-testing-user.sql.dist | \
         sed -e 's/{database_name_test}/'"${database_name_test}"'/g' \
@@ -193,7 +212,7 @@ function grant_privileges {
         -e 's/{database_password_test}/'"${database_password_test}"'/g' \
         >  provisioning/containers/mysql/templates/grant-privileges-to-testing-user.sql
 
-    docker exec -ti mysql mysql -uroot \
+    docker exec -ti "${container_name}" mysql \
         -e "$(cat provisioning/containers/mysql/templates/grant-privileges-to-testing-user.sql)"
 
     local database_user="$(get_param_value_from_config "database_user")"
@@ -206,7 +225,7 @@ function grant_privileges {
         -e 's/{database_password}/'"${database_password}"'/g' \
         >  provisioning/containers/mysql/templates/grant-privileges-to-user.sql
 
-    docker exec -ti mysql mysql -uroot \
+    docker exec -ti "${container_name}" mysql \
         -e "$(cat provisioning/containers/mysql/templates/grant-privileges-to-user.sql)"
 }
 
@@ -230,7 +249,13 @@ function create_database_schema {
     fi
 
     local project_dir="$(get_project_dir)"
-    echo 'php /var/www/devobs/app/console doctrine:schema:create -e '"${env}" | make run-php
+
+    local entity_manager_option=''
+    if [ "${env}" = 'prod' ];
+    then
+        entity_manager_option=' --em=admin'
+    fi
+    echo 'php /var/www/devobs/app/console doctrine:schema:create -e '"${env}${entity_manager_option}" | make run-php
 }
 
 function create_database_test_schema {
@@ -352,19 +377,95 @@ function install_php_dependencies {
     echo ${command} | make run-php
 }
 
+function get_gateway() {
+    local gateway=`ip -f inet addr  | grep docker0 -A1 | cut -d '/' -f 1 | grep inet | sed -e 's/inet//' -e 's/\s*//g'`
+    if [ ! -z "${GATEWAY}" ];
+    then
+        gateway="${GATEWAY}"
+    fi
+
+    echo "${gateway}"
+}
+
 function run_mysql_client {
-    docker exec -ti mysql mysql -uroot -A
+    local mysql_volume_path="${1}"
+
+    local gateway="$(get_gateway)"
+    local last_container_id="$(get_mysql_container_id)"
+
+    if `is_mysql_volume_initialized "${mysql_volume_path}"`;
+    then
+        docker exec -ti "${last_container_id}" mysql -uroot -A -h"${gateway}"
+        return
+    fi
+
+    docker exec -ti "${last_container_id}" mysql -uroot -A
 }
 
 function remove_mysql_container {
-    if [ `docker ps -a | grep mysql | grep -c ''` -gt 0 ];
+    local container_name=`get_mysql_container_name`
+
+    if [ `docker ps -a | grep "${container_name}" | grep -c ''` -gt 0 ];
     then
-        docker rm -f `docker ps -a | grep mysql | awk '{print $1}'`
+        docker rm -f `docker ps -a | grep "${container_name}" | awk '{print $1}'`
     fi
+}
+
+function is_mysql_volume_initialized() {
+    local mysql_volume_path="${1}"
+
+    if [ -e "${mysql_volume_path}"/initialized ];
+    then
+        return 0;
+    fi
+
+    return 1;
+}
+
+function get_mysql_container_name() {
+    local from="${1}"
+    if [ -z "${from}" ];
+    then
+        from=`pwd`
+    fi
+
+    local container_name=$(echo "${from}" | sha1sum | awk '{print $1}')
+
+    echo "maria-${container_name}"
+}
+
+function get_mysql_container_id() {
+    local container_name=`get_mysql_container_name`
+
+    echo "$(docker ps -a  | grep "${container_name}" | awk '{print $1}')"
+}
+
+function mark_mysql_volume_as_initialized() {
+    local last_container_id="$(get_mysql_container_id)"
+    docker exec -ti "${last_container_id}" touch "/var/lib/mysql/initialized"
+}
+
+function wait_until_mysql_container_is_ready() {
+    local last_container_id="$(get_mysql_container_id)"
+    local last_container_logs="$(docker logs "${last_container_id}" 2>&1)"
+
+    while [ $(echo "${last_container_logs}" | grep -c "\.sock") -eq 0 ];
+    do
+        sleep 1
+        last_container_logs="$(docker logs "${last_container_id}" 2>&1)"
+
+        test $(echo "${last_container_logs}" | grep -c "\.sock") -eq 0 && echo -n '.'
+    done
 }
 
 function run_mysql_container {
     local from="${1}"
+
+    if [ -z "${from}" ];
+    then
+        from=`pwd`
+    fi
+    local container_name=`get_mysql_container_name "${from}"`
 
     if [ ! -z "${from}" ];
     then
@@ -375,6 +476,12 @@ function run_mysql_container {
     local database_password="$(get_param_value_from_config "database_password_admin")"
     local database_name="$(get_param_value_from_config "database_name_admin")"
     local database_user="$(get_param_value_from_config "database_user_admin")"
+    if [ ! -z "${REPLICATION_SERVER}" ] && [ -z "${MASTER_SERVER}" ];
+    then
+        database_password="$(get_param_value_from_config "database_password_read")"
+        database_name="$(get_param_value_from_config "database_name_read")"
+        database_user="$(get_param_value_from_config "database_user_read")"
+    fi
 
     echo 'Database name is "'"${database_name}"'"'
     echo 'User name is '"${database_user}*****"
@@ -383,22 +490,20 @@ function run_mysql_container {
 
     cd ./provisioning/containers/mysql
 
+    local configuration_file='my-master.cnf.dist'
+    if [ ! -z "${REPLICATION_SERVER}" ] && [ -z "${MASTER_SERVER}" ];
+    then
+        configuration_file='my-slave.cnf.dist'
+    fi
+
     local replacement_pattern='s/{password\}/'"${database_password}"'/'
-    cat ./templates/my.cnf.dist | sed -e "${replacement_pattern}" > ./templates/my.cnf
+    cat ./templates/"${configuration_file}" | sed -e "${replacement_pattern}" > ./templates/my.cnf
 
     remove_mysql_container
 
     local initializing=1
-    local configuration_volume='-v '"`pwd`"'/templates/my.cnf:/etc/mysql/conf.d/config-file.cnf '
-
-    if [ -z "${INIT}" ];
-    then
-        # Credentials yet to be granted can not be configured at initialization
-        configuration_volume=''
-        initializing=0
-    fi
-
-    local gateway=`ip -f inet addr  | grep docker0 -A1 | cut -d '/' -f 1 | grep inet | sed -e 's/inet//' -e 's/\s*//g'`
+    local default_configuration_volume='-v '"`pwd`"'/templates/my.cnf:/etc/mysql/conf.d/config-file.cnf '
+    local configuration_volume="${default_configuration_volume}"
 
     local mysql_volume_path=`pwd`"/../../volumes/mysql"
     if [ ! -z "${MYSQL_VOLUME}" ];
@@ -408,14 +513,41 @@ function run_mysql_container {
         echo 'About to mount "'"${MYSQL_VOLUME}"'" as MySQL volume'
     fi
 
+    if [ -z "${INIT}" ];
+    then
+        # Credentials yet to be granted can not be configured at initialization
+        configuration_volume=''
+        initializing=0
+
+        if `is_mysql_volume_initialized "${mysql_volume_path}"`;
+        then
+            local configuration_volume="${default_configuration_volume}"
+        fi
+    fi
+
+    local gateway="$(get_gateway)"
+    local log_path=`pwd`"/app/logs/mysql"
+
+    local is_replication_server=''
+    if [ ! -z "${REPLICATION_SERVER}" ];
+    then
+        is_replication_server='--server-id=2 '
+
+        if [ ! -z "${MASTER_SERVER}" ];
+        then
+            is_replication_server='--server-id=1 '
+        fi
+    fi
+
     # @see https://hub.docker.com/_/mysql/
-    command="docker run --restart=always -d -p${gateway}:3306:3306 --name mysql \
+    command="docker run --restart=always -d -p${gateway}:3306:3306 --name "${container_name}" \
         -e MYSQL_DATABASE=${database_name} \
         -e MYSQL_USER=${database_user} \
         -e MYSQL_PASSWORD=${database_password} \
         -e MYSQL_ROOT_PASSWORD=${database_password} \
+        -v "${log_path}":/var/mysql/log \
         ${configuration_volume} -v ${mysql_volume_path}:/var/lib/mysql \
-        mysql:5.7 --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci"
+        db-maria ${is_replication_server}--character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci"
 
     # Restore current directory to project root dir
     cd ./../../../
@@ -425,49 +557,37 @@ function run_mysql_container {
 
     if [ "${initializing}" -eq 0 ];
     then
-        local last_container_id="$(docker ps -ql)"
-        local last_container_logs="$(docker logs "${last_container_id}" 2>&1)"
+        wait_until_mysql_container_is_ready
 
-        while [ $(echo "${last_container_logs}" | grep -c "\.sock") -eq 0 ];
-        do
-            sleep 1
-            last_container_logs="$(docker logs "${last_container_id}" 2>&1)"
-
-            test $(echo "${last_container_logs}" | grep -c "\.sock") -eq 0 && echo -n '.'
-        done
-
-        local matching_databases=$(docker exec -ti "${last_container_id}" mysql \-e 'show databases' | \
+        local last_container_id="$(get_mysql_container_id)"
+        local matching_databases=$(docker exec -ti "${last_container_id}" mysql -uroot -h"${gateway}" \
+            -e 'show databases' | \
             grep weaving_dev | grep -c '')
+
         if [ ${matching_databases} -eq 0 ];
         then
+            echo 'About to grant privileges and to create a database.'
+
             grant_privileges && \
-            create_database_prod_like_schema
+            create_database_prod_like_schema && \
+            create_database_test_schema
+
+            mark_mysql_volume_as_initialized
         fi
     fi
 
     # Log the last created container on initialization
-    if [ ${initializing} -eq 1 ];
+    if [ "${initializing}" -eq 1 ];
     then
+        echo 'About to initialize MySQL container.'
 
-        local last_container_id="$(docker ps -ql)"
-        local last_container_logs="$(docker logs "${last_container_id}" 2>&1)"
-
-        while [ $(echo "${last_container_logs}" | grep -c "\.sock") -eq 0 ];
-        do
-            sleep 1
-            last_container_logs="$(docker logs "${last_container_id}" 2>&1)"
-
-            test $(echo "${last_container_logs}" | grep -c "\.sock") -eq 0 && echo -n '.' \
-            || printf "\n"%s ''
-        done
-
+        wait_until_mysql_container_is_ready
         remove_mysql_container
 
         unset INIT
         run_mysql_container `pwd`
     else
-        local last_container_id="$(docker ps -a | grep mysql | awk '{print $1}')"
-        docker exec -ti "${last_container_id}" mysql
+        run_mysql_client "${mysql_volume_path}"
     fi
 }
 
@@ -652,6 +772,11 @@ function run_apache() {
     /bin/bash -c "${command}"
 }
 
+function build_mysql_container() {
+    cd provisioning/containers/mysql
+    docker build -t db-maria .
+}
+
 function build_php_fpm_container() {
     cd provisioning/containers/php-fpm
     docker build -t php-fpm .
@@ -775,8 +900,9 @@ function run_php() {
     local symfony_environment="$(get_symfony_environment)"
 
     local network=`get_network_option`
+
     local command=$(echo -n 'docker run '"${network}"'\
-    -e '"${symfony_environment}"' \
+    -e '"${symfony_environment}" '\
     -v '`pwd`'/provisioning/containers/php/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini \
     -v '`pwd`':/var/www/devobs \
     --name=php'"${suffix}"' '"${arguments}")

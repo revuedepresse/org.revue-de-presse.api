@@ -18,6 +18,12 @@ parameters:
             is_bundle:  false
             prefix:     App\Aggregate\Entity
             type:       xml
+        Analysis:
+            alias:      'Analysis'
+            dir:        '%kernel.root_dir%/config/model/analysis'
+            is_bundle:  false
+            prefix:     App\Analysis\Entity
+            type:       xml
         Member:
             alias:      'Member'
             dir:        '%kernel.root_dir%/config/model/member'

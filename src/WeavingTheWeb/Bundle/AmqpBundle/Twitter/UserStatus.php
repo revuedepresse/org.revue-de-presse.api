@@ -5,6 +5,7 @@ namespace WeavingTheWeb\Bundle\AmqpBundle\Twitter;
 use App\Member\MemberInterface;
 use App\Operation\OperationClock;
 use App\Status\LikedStatusCollectionAwareInterface;
+use App\StatusCollection\Messaging\Exception\InvalidStatusCollectionMessageException;
 use Doctrine\ORM\EntityRepository;
 
 use OldSound\RabbitMqBundle\RabbitMq\ConsumerInterface;
@@ -13,7 +14,9 @@ use PhpAmqpLib\Message\AmqpMessage;
 
 use Psr\Log\LoggerInterface;
 
+use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Token;
+use WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\TokenRepository;
 use WeavingTheWeb\Bundle\TwitterBundle\Api\TwitterErrorAwareInterface;
 
@@ -26,6 +29,11 @@ use WeavingTheWeb\Bundle\TwitterBundle\Exception\ProtectedAccountException;
 class UserStatus implements ConsumerInterface
 {
     const ERROR_CODE_USER_NOT_FOUND = 100;
+
+    /**
+     * @var AggregateRepository
+     */
+    public $aggregateRepository;
 
     /**
      * @var OperationClock
@@ -78,13 +86,12 @@ class UserStatus implements ConsumerInterface
 
     /**
      * @param AmqpMessage $message
-     * @return bool|mixed
+     * @return bool
      * @throws \Doctrine\ORM\NoResultException
      * @throws \Doctrine\ORM\NonUniqueResultException
      * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \Exception
      */
-    public function execute(AmqpMessage $message)
+    public function execute(AmqpMessage $message): bool
     {
         try {
             $options = $this->parseMessage($message);
@@ -94,13 +101,24 @@ class UserStatus implements ConsumerInterface
             return false;
         }
 
+        try {
+            $screenName = InvalidStatusCollectionMessageException::ensureMessageContainsValidScreenName(
+                $this->aggregateRepository,
+                $options
+            );
+        } catch (InvalidStatusCollectionMessageException $exception) {
+            $this->logger->critical($exception->getMessage());
+
+            return true;
+        }
+
         $options = [
             LikedStatusCollectionAwareInterface::INTENT_TO_FETCH_LIKES => $this->extractIntentToCollectLikes($options),
             'aggregate_id' => $this->extractAggregateId($options),
             'before' => $this->extractBeforeOption($options),
             'count' => 200,
             'oauth' => $options['token'],
-            'screen_name' => $options['screen_name'],
+            'screen_name' => $screenName,
         ];
 
         try {

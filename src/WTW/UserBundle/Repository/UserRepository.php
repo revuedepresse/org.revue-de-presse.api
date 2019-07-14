@@ -2,7 +2,7 @@
 
 namespace WTW\UserBundle\Repository;
 
-use App\Aggregate\Controller\SearchParams;
+use App\Http\SearchParams;
 use App\Aggregate\Repository\PaginationAwareTrait;
 use App\Member\MemberInterface;
 use Doctrine\DBAL\Connection;
@@ -552,6 +552,10 @@ QUERY;
         $params = $searchParams->getParams();
         if (array_key_exists('aggregateId', $params)) {
             $aggregates = $this->findRelatedAggregates($searchParams);
+            if ($aggregates < 10) {
+                $aggregates = $this->updateTotalStatusesForEachAggregate($aggregates);
+            }
+
             $aggregateProperties = [];
             array_walk(
                 $aggregates,
@@ -658,8 +662,15 @@ QUERY;
             $paramsTypes
         );
 
-        $results = $statement->fetchAll();
+        return $statement->fetchAll();
+    }
 
+    /**
+     * @param array $aggregates
+     * @return array
+     */
+    private function updateTotalStatusesForEachAggregate(array $aggregates): array
+    {
         $results = array_map(
             function (array $aggregate) {
                 if (intval($aggregate['totalStatuses']) <= 0) {
@@ -676,7 +687,7 @@ QUERY;
 
                 return $aggregate;
             },
-            $results
+            $aggregates
         );
 
         try {

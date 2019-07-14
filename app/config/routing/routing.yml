@@ -19,6 +19,10 @@ member:
     path:     '/api/twitter/admin/members'
     defaults: { _controller: controller.list:getMembers }
 
+refresh_member_profile:
+    path:     '/api/twitter/admin/member/refresh-profile'
+    defaults: { _controller: controller.member:refreshProfile }
+
 status:
     path:     '/api/twitter/admin/statuses'
     defaults: { _controller: controller.list:getStatuses }
@@ -61,3 +65,11 @@ collect_statuses:
 keywords:
     path:     '/api/twitter/admin/keywords'
     defaults: { _controller: controller.keyword:getKeywords }
+
+subscriptions:
+    path:     '/api/twitter/admin/member-subscriptions'
+    defaults: { _controller: controller.subscription:getMemberSubscriptions }
+
+collect_subscription_statuses:
+    path:     '/api/twitter/admin/member-subscriptions/collect-statuses'
+    defaults: { _controller: controller.subscription:requestMemberSubscriptionStatusCollection }

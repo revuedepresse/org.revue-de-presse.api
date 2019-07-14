@@ -2,7 +2,8 @@
 
 namespace WeavingTheWeb\Bundle\ApiBundle\Repository;
 
-use App\Aggregate\Controller\SearchParams;
+use App\Aggregate\AggregateAwareTrait;
+use App\Http\SearchParams;
 use App\Aggregate\Entity\TimelyStatus;
 use App\Aggregate\Repository\PaginationAwareTrait;
 use App\Aggregate\Repository\TimelyStatusRepository;
@@ -20,9 +21,12 @@ use WeavingTheWeb\Bundle\ApiBundle\Entity\StatusInterface;
  */
 class AggregateRepository extends ResourceRepository implements CapableOfDeletionInterface
 {
-    const TABLE_ALIAS = 'a';
-
+    use AggregateAwareTrait;
     use PaginationAwareTrait;
+
+    const PREFIX_MEMBER_AGGREGATE = 'user :: ';
+
+    const TABLE_ALIAS = 'a';
 
     /**
      * @var TimelyStatusRepository
@@ -98,6 +102,24 @@ class AggregateRepository extends ResourceRepository implements CapableOfDeletio
         $aggregate->listId = $list->id_str;
 
         return $this->save($aggregate);
+    }
+
+    /**
+     * @param string $username
+     * @return Aggregate
+     * @throws \Doctrine\ORM\ORMException
+     * @throws \Doctrine\ORM\OptimisticLockException
+     */
+    public function getMemberAggregateByUsername(string $username): Aggregate {
+        $aggregate = $this->make(
+            $username,
+            self::PREFIX_MEMBER_AGGREGATE.$username
+        );
+
+        $this->getEntityManager()->persist($aggregate);
+        $this->getEntityManager()->flush();
+
+        return $aggregate;
     }
 
     /**

@@ -221,7 +221,7 @@ QUERY;
         array_walk(
             $statusesByTimeRanges,
             function ($records) {
-                if (count($records) === 0) {
+                if (!array_key_exists(0, $records) || count($records) === 0) {
                     return;
                 }
 

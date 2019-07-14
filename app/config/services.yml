@@ -2,6 +2,8 @@ imports:
     - { resource: services/command.yml }
     - { resource: services/controller.yml }
     - { resource: services/mapping.yml }
+    - { resource: services/membership.yml }
+    - { resource: services/messaging.yml }
     - { resource: services/operation.yml }
     - { resource: services/repository.yml }
     - { resource: services/security.yml }
@@ -95,6 +97,7 @@ services:
             notFoundStatusRepository:   '@repository.not_found_status'
             statusRepository:           '@weaving_the_web_twitter.repository.status'
             userManager:                '@user_manager'
+            memberProfileAccessor:      '@accessor.member_profile'
 
     weaving_the_web_twitter.repository.aggregate:
         class: '%weaving_the_web_twitter.repository.aggregate.class%'

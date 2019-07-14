@@ -4,6 +4,8 @@ namespace WTW\UserBundle\Entity;
 
 use App\Member\MemberInterface;
 
+use App\Serialization\JsonEncodingAwareInterface;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use WTW\UserBundle\Model\User as BaseUser;
 
@@ -34,7 +36,7 @@ use WTW\UserBundle\Model\User as BaseUser;
  * @ORM\DiscriminatorColumn(name="usr_position_in_hierarchy", type="integer")
  * @ORM\DiscriminatorMap({"1" = "User", "0" = "\WTW\UserBundle\Tests\Security\Core\User\User"})
  */
-class User extends BaseUser implements MemberInterface
+class User extends BaseUser implements MemberInterface, JsonEncodingAwareInterface
 {
     /**
      * @var integer
@@ -46,10 +48,10 @@ class User extends BaseUser implements MemberInterface
     protected $id;
 
     /**
-    * @var string
-    *
-    * @ORM\Column(name="usr_twitter_id", type="string", length=255, nullable=true)
-    */
+     * @var string
+     *
+     * @ORM\Column(name="usr_twitter_id", type="string", length=255, nullable=true)
+     */
     protected $twitterID;
 
     /**
@@ -155,7 +157,7 @@ class User extends BaseUser implements MemberInterface
     /**
      * Set avatar
      *
-     * @param  integer $avatar
+     * @param integer $avatar
      * @return User
      */
     public function setAvatar($avatar)
@@ -178,7 +180,7 @@ class User extends BaseUser implements MemberInterface
     /**
      * Set email
      *
-     * @param  string $email
+     * @param string $email
      * @return User
      */
     public function setEmail($email)
@@ -201,7 +203,7 @@ class User extends BaseUser implements MemberInterface
     /**
      * Set password
      *
-     * @param  string $password
+     * @param string $password
      * @return User
      */
     public function setPassword($password)
@@ -227,9 +229,9 @@ class User extends BaseUser implements MemberInterface
      */
     public function setTwitterID(string $twitterId): MemberInterface
     {
-      $this->twitterID = $twitterId;
+        $this->twitterID = $twitterId;
 
-      return $this;
+        return $this;
     }
 
     /**
@@ -244,13 +246,13 @@ class User extends BaseUser implements MemberInterface
     }
 
     /**
-    * Get twitter_username
-    *
-    * @return string
-    */
+     * Get twitter_username
+     *
+     * @return string
+     */
     public function getTwitterUsername(): string
     {
-      return $this->twitter_username;
+        return $this->twitter_username;
     }
 
     /**
@@ -264,7 +266,7 @@ class User extends BaseUser implements MemberInterface
     /**
      * Set enabled
      *
-     * @param  boolean $enabled
+     * @param boolean $enabled
      * @return User
      */
     public function setEnabled($enabled)
@@ -306,7 +308,7 @@ class User extends BaseUser implements MemberInterface
     /**
      * Set usernameCanonical
      *
-     * @param  string $usernameCanonical
+     * @param string $usernameCanonical
      * @return User
      */
     public function setUsernameCanonical($usernameCanonical)
@@ -329,7 +331,7 @@ class User extends BaseUser implements MemberInterface
     /**
      * Set emailCanonical
      *
-     * @param  string $emailCanonical
+     * @param string $emailCanonical
      * @return User
      */
     public function setEmailCanonical($emailCanonical)
@@ -352,7 +354,7 @@ class User extends BaseUser implements MemberInterface
     /**
      * Set locked
      *
-     * @param  boolean $locked
+     * @param boolean $locked
      * @return User
      */
     public function setLocked($locked)
@@ -375,7 +377,7 @@ class User extends BaseUser implements MemberInterface
     /**
      * Set expired
      *
-     * @param  boolean $expired
+     * @param boolean $expired
      * @return User
      */
     public function setExpired($expired)
@@ -398,7 +400,7 @@ class User extends BaseUser implements MemberInterface
     /**
      * Set confirmationToken
      *
-     * @param  string $confirmationToken
+     * @param string $confirmationToken
      * @return User
      */
     public function setConfirmationToken($confirmationToken)
@@ -421,7 +423,7 @@ class User extends BaseUser implements MemberInterface
     /**
      * Set username
      *
-     * @param  string $username
+     * @param string $username
      * @return User
      */
     public function setUsername($username): MemberInterface
@@ -435,13 +437,14 @@ class User extends BaseUser implements MemberInterface
     {
         parent::__construct();
 
-        $this->tokens = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->tokens = new ArrayCollection();
+        $this->publicationFrequencies = new ArrayCollection();
     }
 
     /**
      * Get enabled
      *
-     * @return boolean 
+     * @return boolean
      */
     public function getEnabled()
     {
@@ -457,7 +460,7 @@ class User extends BaseUser implements MemberInterface
     public function addToken(\WeavingTheWeb\Bundle\ApiBundle\Entity\Token $tokens)
     {
         $this->tokens[] = $tokens;
-    
+
         return $this;
     }
 
@@ -474,7 +477,7 @@ class User extends BaseUser implements MemberInterface
     /**
      * Get tokens
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return \Doctrine\Common\Collections\Collection
      */
     public function getTokens()
     {
@@ -490,7 +493,7 @@ class User extends BaseUser implements MemberInterface
     protected $protected = false;
 
     /**
-     * @param  boolean $protected
+     * @param boolean $protected
      * @return User
      */
     public function setProtected(bool $protected): MemberInterface
@@ -650,7 +653,8 @@ class User extends BaseUser implements MemberInterface
     /**
      * @return string
      */
-    public function getUrl(): ?string {
+    public function getUrl(): ?string
+    {
         return $this->url;
     }
 
@@ -674,6 +678,30 @@ class User extends BaseUser implements MemberInterface
     public $totalSubscriptions = 0;
 
     /**
+     * @return false|string
+     */
+    public function encodeAsJson(): string
+    {
+        $jsonEncodedMember = json_encode([
+            'id' => $this->id,
+            'username' => $this->username,
+            'description' => $this->description,
+            'url' => $this->url,
+        ]);
+
+        if (!$jsonEncodedMember) {
+            return json_encode([
+                'id' => 0,
+                'username' => '',
+                'description' => '',
+                'url' => '',
+            ]);
+        }
+
+        return $jsonEncodedMember;
+    }
+
+    /**
      * @return bool
      */
     public function isAWhisperer(): bool
@@ -684,4 +712,14 @@ class User extends BaseUser implements MemberInterface
         return !is_null($this->lastStatusPublicationDate) &&
             ($this->lastStatusPublicationDate < $oneMonthAgo);
     }
+
+    /**
+     * @var ArrayCollection
+     *
+     * @ORM\OneToMany(
+     *     targetEntity="\App\Analysis\Entity\PublicationFrequency",
+     *     mappedBy="member"
+     * )
+     */
+    private $publicationFrequencies;
 }

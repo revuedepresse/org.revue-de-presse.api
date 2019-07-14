@@ -134,6 +134,7 @@ services:
     weaving_the_web_amqp.twitter:
         class:                       "%weaving_the_web_amqp.consumer.status.class%"
         properties:
+            aggregateRepository:    "@weaving_the_web_twitter.repository.aggregate"
             operationClock:          "@operation.clock"
             tokenRepository:         "@weaving_the_web_api.repository.token"
         calls:
@@ -155,6 +156,7 @@ services:
             - [ 'setLogger',            [ '@monolog.logger.status'] ]
             - [ 'setUserRepository',    [ '@user_manager'] ]
         properties:
+            aggregateRepository:        "@repository.aggregate"
             operationClock:             "@operation.clock"
             tokenRepository:            "@weaving_the_web_api.repository.token"
 

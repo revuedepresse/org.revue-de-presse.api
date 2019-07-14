@@ -212,7 +212,7 @@ class ProduceUserFriendListCommand extends AggregateAwareCommand
 
         $this->guardAgainstMembersWhichShouldBeSkipped($member, $assumedScreenName);
 
-        $aggregate = $this->getListAggregateByName($twitterUsername, 'user :: ' . $twitterUsername);
+        $aggregate = $this->aggregateRepository->getMemberAggregateByUsername($twitterUsername);
 
         $messageBody['aggregate_id'] = $aggregate->getId();
         $messageBody['screen_name'] = $twitterUsername;

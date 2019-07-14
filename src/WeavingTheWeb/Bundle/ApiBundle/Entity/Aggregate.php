@@ -4,15 +4,17 @@ namespace WeavingTheWeb\Bundle\ApiBundle\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository;
 
 /**
  * @ORM\Entity(repositoryClass="WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository")
  * @ORM\Table(
  *     name="weaving_aggregate",
+ *     options={"collate":"utf8mb4_general_ci", "charset":"utf8mb4"},
  *     indexes={
  *         @ORM\Index(
  *             name="name",
- *             columns={"name"}
+ *             columns={"name", "screen_name"}
  *         )
  *     }
  * )
@@ -170,4 +172,12 @@ class Aggregate
      * @ORM\ManyToMany(targetEntity="Status", mappedBy="aggregates")
      */
     protected $userStreams;
+
+    /**
+     * @return bool
+     */
+    public function isMemberAggregate()
+    {
+        return strpos($this->name, AggregateRepository::PREFIX_MEMBER_AGGREGATE) === 0;
+    }
 }

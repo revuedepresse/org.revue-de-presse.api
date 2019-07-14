@@ -2,7 +2,7 @@
 
 namespace App\Status\Repository;
 
-use App\Aggregate\Controller\SearchParams;
+use App\Http\SearchParams;
 use App\Aggregate\Repository\PaginationAwareTrait;
 use App\Conversation\ConversationAwareTrait;
 use Doctrine\DBAL\Connection;

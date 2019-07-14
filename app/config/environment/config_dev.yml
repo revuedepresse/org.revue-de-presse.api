@@ -7,8 +7,10 @@ parameters:
 
 monolog:
     channels:
-        - 'twitter_api'
-        - 'status'
         - 'development'
+        - 'membership'
+        - 'status'
+        - 'twitter_api'
+        - 'messaging'
     handlers:
         main:   "%monolog_main_logging_handler%"

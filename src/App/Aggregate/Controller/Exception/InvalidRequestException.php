@@ -11,11 +11,16 @@ class InvalidRequestException extends \Exception
      */
     public $jsonResponse;
 
+    /**
+     * @param JsonResponse $jsonResponse
+     * @param              $message
+     * @throws InvalidRequestException
+     */
     public static function guardAgainstInvalidRequest(JsonResponse $jsonResponse, $message)
     {
         $exception = new self($message);
         $exception->jsonResponse = $jsonResponse;
 
-        return $exception;
+        throw $exception;
     }
 }

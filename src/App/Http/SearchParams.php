@@ -1,34 +1,37 @@
 <?php
 
-namespace App\Aggregate\Controller;
+namespace App\Http;
 
 use Symfony\Component\HttpFoundation\Request;
 
 class SearchParams
 {
-    private $pageIndex;
-    private $pageSize;
+    /**
+     * @var PaginationParams
+     */
+    private $paginationParams;
+
+    /**
+     * @var string|null
+     */
     private $keyword;
+
+    /**
+     * @var array
+     */
     private $params;
 
     /**
-     * @param int         $pageIndex
-     * @param int         $pageSize
-     * @param string|null $keyword
-     * @param array       $filteredParams
+     * @param PaginationParams $paginationParams
+     * @param string|null      $keyword
+     * @param array            $filteredParams
      */
     public function __construct(
-        int $pageIndex,
-        int $pageSize,
+        PaginationParams $paginationParams,
         string $keyword = null,
         array $filteredParams = []
     ) {
-        if ($this->pageSize < 0) {
-            throw new \LogicException('A page size should be greater than 0');
-        }
-        $this->pageSize = $pageSize;
-
-        $this->pageIndex = $pageIndex;
+        $this->paginationParams = $paginationParams;
         $this->keyword = $keyword;
         $this->params = $filteredParams;
     }
@@ -40,8 +43,7 @@ class SearchParams
      */
     public static function fromRequest(Request $request, array $params = []): self
     {
-        $pageIndex = intval($request->get('pageIndex', 1));
-        $pageSize = intval($request->get('pageSize', 25));
+        $paginationParams = PaginationParams::fromRequest($request);
         $keyword = $request->get('keyword', null);
 
         $filteredParams = [];
@@ -85,8 +87,7 @@ class SearchParams
         );
 
         return new self(
-            $pageIndex,
-            $pageSize,
+            $paginationParams,
             $keyword,
             $filteredParams
         );
@@ -98,8 +99,8 @@ class SearchParams
     public function toArray(): array
     {
         return [
-            'page_index' => $this->pageIndex,
-            'page_size' => $this->pageSize,
+            'page_index' => $this->paginationParams->pageIndex,
+            'page_size' => $this->paginationParams->pageSize,
             'keyword' => $this->keyword,
         ];
     }
@@ -109,7 +110,7 @@ class SearchParams
      */
     public function getPageIndex(): int
     {
-        return $this->pageIndex;
+        return $this->paginationParams->pageIndex;
     }
 
     /**
@@ -117,7 +118,7 @@ class SearchParams
      */
     public function getPageSize(): int
     {
-        return $this->pageSize;
+        return $this->paginationParams->pageSize;
     }
 
     /**
@@ -141,7 +142,7 @@ class SearchParams
      */
     public function getFirstItemIndex(): int
     {
-        return ($this->pageIndex - 1) * $this->pageSize;
+        return $this->paginationParams->getFirstItemIndex();
     }
 
     /**

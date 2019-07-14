@@ -95,7 +95,7 @@ class TimelyStatusConsumer implements ConsumerInterface, CommandReturnCodeAwareI
                 $options['records'],
                 function ($properties) use (&$totalProcessedEntities, $itemsPerFlushingWindow) {
                     $timelyStatus = $this->timelyStatusRepository->fromArray($properties);
-                    $this->timelyStatusRepository->saveTimelyStatus($timelyStatus, $doNotFlush = true);
+                    $this->timelyStatusRepository->saveTimelyStatus($timelyStatus);
                     $totalProcessedEntities++;
 
                     if ($totalProcessedEntities % $itemsPerFlushingWindow === 0) {

@@ -54,6 +54,8 @@ class NetworkRepository
      */
     private function saveMemberSubscriptions(MemberInterface $member, array $subscriptions)
     {
+        $this->memberSubscriptionRepository->cancelAllSubscriptionsFor($member);
+
         if (count($subscriptions) > 0) {
             $subscriptions = $this->memberSubscriptionRepository->findMissingSubscriptions($member, $subscriptions);
         }

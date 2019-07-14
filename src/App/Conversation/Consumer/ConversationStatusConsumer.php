@@ -126,7 +126,7 @@ class ConversationStatusConsumer implements ConsumerInterface
 
             $member = $this->ensureStatusAuthorExists($status);
 
-            $aggregate = $this->getListAggregateByName($member->getTwitterUsername(), $options['aggregate_name']);
+            $aggregate = $this->aggregateRepository->getListAggregateByName($member->getTwitterUsername(), $options['aggregate_name']);
         } catch (NotFoundMemberException $notFoundMemberException) {
             list($aggregate, $status) = $this->handleMemberNotFoundException($notFoundMemberException, $options);
         } catch (NotFoundStatusException $exception) {

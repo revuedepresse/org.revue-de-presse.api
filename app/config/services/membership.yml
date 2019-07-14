@@ -1,0 +1,6 @@
+services:
+    accessor.member_profile:
+        class: 'App\Member\Accessor\MemberProfileAccessor'
+        arguments:
+            - '@weaving_the_web_twitter.api_accessor'
+            - '@user_manager'

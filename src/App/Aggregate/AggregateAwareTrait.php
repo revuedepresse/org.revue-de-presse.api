@@ -4,6 +4,7 @@ namespace App\Aggregate;
 
 trait AggregateAwareTrait
 {
+
     /**
      * @param string      $screenName
      * @param string      $listName

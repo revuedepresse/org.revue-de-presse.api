@@ -2,6 +2,7 @@
 
 namespace App\Accessor;
 
+use App\Member\Accessor\MemberProfileAccessor;
 use App\Member\MemberInterface;
 use App\Status\Entity\NullStatus;
 use App\Status\Repository\NotFoundStatusRepository;
@@ -55,6 +56,11 @@ class StatusAccessor
      * @var Accessor
      */
     public $accessor;
+
+    /**
+     * @var MemberProfileAccessor
+     */
+    public $memberProfileAccessor;
 
     /**
      * @param string $identifier
@@ -150,7 +156,7 @@ class StatusAccessor
     {
         $member = $this->userManager->findOneBy(['twitter_username' => $memberName]);
         if ($member instanceof MemberInterface) {
-            $this->ensureMemberHasBio($member, $memberName);
+            $this->memberProfileAccessor->ensureMemberProfileIsUpToDate($member, $memberName);
 
             return $member;
         }
@@ -158,7 +164,7 @@ class StatusAccessor
         $fetchedMember = $this->accessor->showUser($memberName);
         $member = $this->userManager->findOneBy(['twitterID' => $fetchedMember->id]);
         if ($member instanceof MemberInterface) {
-            $this->ensureMemberHasBio($member, $memberName);
+            $this->memberProfileAccessor->ensureMemberProfileIsUpToDate($member, $memberName);
 
             return $member;
         }
@@ -188,7 +194,7 @@ class StatusAccessor
     {
         $member = $this->userManager->findOneBy(['twitterID' => $id]);
         if ($member instanceof MemberInterface) {
-            $this->ensureMemberHasBio($member, $member->getTwitterUsername());
+            $this->memberProfileAccessor->ensureMemberProfileIsUpToDate($member, $member->getTwitterUsername());
 
             return $member;
         }
@@ -222,43 +228,5 @@ class StatusAccessor
         }
 
         return $status;
-    }
-
-    /**
-     * @param MemberInterface $member
-     * @param string          $memberName
-     * @return MemberInterface
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
-     */
-    private function ensureMemberHasBio(
-        MemberInterface $member,
-        string $memberName
-    ): MemberInterface {
-        $memberBioIsAvailable = $member->isNotSuspended() &&
-            $member->isNotProtected() &&
-            $member->hasNotBeenDeclaredAsNotFound()
-        ;
-
-        $shouldTryToSaveDescription = is_null($member->getDescription()) && $memberBioIsAvailable;
-        $shouldTryToUrl = is_null($member->getUrl()) && $memberBioIsAvailable;
-
-        if ($shouldTryToSaveDescription || $shouldTryToUrl) {
-            $fetchedMember = $this->accessor->showUser($memberName);
-
-            if ($shouldTryToSaveDescription) {
-                $member->description = $fetchedMember->description;
-            }
-
-            if ($shouldTryToUrl) {
-                $member->url = $fetchedMember->url;
-            }
-
-            $this->userManager->saveMember($member);
-        }
-
-        return $member;
     }
 }

@@ -30,7 +30,7 @@ trait CorsHeadersAwareTrait
     private function getCorsOptionsResponse(
         string $environment,
         string $allowedOrigin
-    ) {
+    ): JsonResponse {
         $allowedHeaders = implode(
             ', ',
             [
