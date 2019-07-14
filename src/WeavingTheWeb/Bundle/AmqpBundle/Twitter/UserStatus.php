@@ -6,19 +6,14 @@ use App\Member\MemberInterface;
 use App\Operation\OperationClock;
 use App\Status\LikedStatusCollectionAwareInterface;
 use Doctrine\ORM\EntityRepository;
-
 use OldSound\RabbitMqBundle\RabbitMq\ConsumerInterface;
-
 use PhpAmqpLib\Message\AmqpMessage;
-
 use Psr\Log\LoggerInterface;
-
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Token;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\TokenRepository;
 use WeavingTheWeb\Bundle\TwitterBundle\Api\TwitterErrorAwareInterface;
-
-use WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\ProtectedAccountException;
+use WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
@@ -93,7 +88,7 @@ class UserStatus implements ConsumerInterface
 
             return false;
         }
-
+ 
         $options = [
             LikedStatusCollectionAwareInterface::INTENT_TO_FETCH_LIKES => $this->extractIntentToCollectLikes($options),
             'aggregate_id' => $this->extractAggregateId($options),

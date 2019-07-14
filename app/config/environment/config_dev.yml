@@ -11,4 +11,5 @@ monolog:
         - 'status'
         - 'development'
     handlers:
-        main:   "%monolog_main_logging_handler%"
+        main:       "%monolog_main_logging_handler%"
+        datadog:    "%monolog_monitoring_logging_handler%"
