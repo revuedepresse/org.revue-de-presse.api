@@ -5,6 +5,6 @@ parameters:
         level:    "%main_log_level%"
     monolog_monitoring_logging_handler:
         type:     stream
-        path:     "%kernel.logs_dir%/%kernel.environment%.log"
+        path:     "%kernel.logs_dir%/%kernel.environment%.json"
         level:    "%main_log_level%"
         formatter: monolog.json_formatter
