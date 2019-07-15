@@ -1,7 +1,0 @@
-; @see https://github.com/docker-library/php/issues/207#issuecomment-446547341
-; @see https://github.com/Scalingo/php-buildpack/pull/74
-; @see https://github.com/docker-library/php/issues/358
-; @see https://github.com/docker-library/php/issues/207
-; @see https://github.com/php/php-src/pull/1076
-; @see https://github.com/php/php-src/pull/2458
-decorate_workers_output = no
