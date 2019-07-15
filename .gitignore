@@ -11,4 +11,5 @@ build/*
 composer.phar
 provisioning/containers/mysql/templates/mysql/my.cnf
 provisioning/volumes/mysql/*
+provisioning/volumes/mysql*/*
 vendor
