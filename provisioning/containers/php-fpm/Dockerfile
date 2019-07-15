@@ -1,11 +1,13 @@
-FROM php:7.2.10-fpm-stretch
+# @see https://docs.docker.com/samples/library/php/ and also
+# https://hub.docker.com/_/php?tab=tags for vulnerabilites
+FROM php:7.3.6-fpm-stretch
 
 RUN apt-get update && apt-get install wget unzip libcurl4-openssl-dev -y && \
     docker-php-ext-install bcmath mysqli pcntl pdo_mysql && \
     cd /tmp && \
-    wget https://github.com/xdebug/xdebug/archive/2.6.0.zip && \
-    unzip 2.6.0.zip && \
-    cd xdebug-2.6.0 && \
+    wget https://github.com/xdebug/xdebug/archive/2.7.2.zip && \
+    unzip 2.7.2.zip && \
+    cd xdebug-2.7.2 && \
     phpize . && ./configure --with-php-config=`which php-config` && \
     make && make install && \
     docker-php-ext-install sockets && \

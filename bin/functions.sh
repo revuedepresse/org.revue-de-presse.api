@@ -182,15 +182,23 @@ function execute_command () {
     fi
 }
 
+function get_mysql_gateway() {
+    local gateway=`ip -f inet addr  | grep docker0 -A1 | cut -d '/' -f 1 | grep inet | sed -e 's/inet//' -e 's/\s*//g'`
+    echo "${gateway}"
+}
+
 function grant_privileges {
     local database_user_test="$(get_param_value_from_config "database_user_test")"
     local database_name_test="$(get_param_value_from_config "database_name_test")"
     local database_password_test="$(get_param_value_from_config "database_password_test")"
 
+    local gateway="`get_mysql_gateway`"
+
     cat provisioning/containers/mysql/templates/grant-privileges-to-testing-user.sql.dist | \
         sed -e 's/{database_name_test}/'"${database_name_test}"'/g' \
         -e 's/{database_user_test}/'"${database_user_test}"'/g' \
         -e 's/{database_password_test}/'"${database_password_test}"'/g' \
+        -e 's/{gateway}/'"${gateway}"'/g' \
         >  provisioning/containers/mysql/templates/grant-privileges-to-testing-user.sql
 
     docker exec -ti mysql mysql -uroot \
@@ -204,6 +212,7 @@ function grant_privileges {
         sed -e 's/{database_name}/'"${database_name}"'/g' \
         -e 's/{database_user}/'"${database_user}"'/g' \
         -e 's/{database_password}/'"${database_password}"'/g' \
+        -e 's/{gateway}/'"${gateway}"'/g' \
         >  provisioning/containers/mysql/templates/grant-privileges-to-user.sql
 
     docker exec -ti mysql mysql -uroot \
@@ -398,7 +407,7 @@ function run_mysql_container {
         initializing=0
     fi
 
-    local gateway=`ip -f inet addr  | grep docker0 -A1 | cut -d '/' -f 1 | grep inet | sed -e 's/inet//' -e 's/\s*//g'`
+    local gateway="`get_mysql_gateway`"
 
     local mysql_volume_path=`pwd`"/../../volumes/mysql"
     if [ ! -z "${MYSQL_VOLUME}" ];
@@ -680,6 +689,16 @@ function run_php_fpm() {
 
     local symfony_environment="$(get_symfony_environment)"
 
+    if [ ! -e "`pwd`/provisioning/containers/php-fpm/templates/.blackfire.ini" ]
+    then
+        /bin/bash -c "cp `pwd`/provisioning/containers/php-fpm/templates/.blackfire.ini{.dist,}";
+    fi
+
+    if [ ! -e "`pwd`/provisioning/containers/php-fpm/templates/zz-blackfire.ini" ];
+    then
+        /bin/bash -c "cp `pwd`/provisioning/containers/php-fpm/templates/zz-blackfire.ini{.dist,}";
+    fi
+
     local extensions=`pwd`"/provisioning/containers/php-fpm/templates/extensions.ini.dist";
     local extensions_volume="-v ${extensions}:/usr/local/etc/php/conf.d/extensions.ini"
 
@@ -689,11 +708,12 @@ function run_php_fpm() {
 -d -p '${host}''${port}':9000 \
 -e '"${symfony_environment}"' '"${extensions_volume}"' \
 -v '`pwd`'/provisioning/containers/php-fpm/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini \
+-v '`pwd`'/provisioning/containers/php-fpm/templates/decoration.ini.dist:/usr/local/etc/php/conf.d/decoration.ini \
 -v '`pwd`'/provisioning/containers/php-fpm/templates/press-review.conf:/usr/local/etc/php-fpm.d/www.conf \
 -v '`pwd`'/provisioning/containers/php-fpm/templates/docker.conf:/usr/local/etc/php-fpm.d/docker.conf \
 -v '`pwd`'/provisioning/containers/php-fpm/templates/zz-docker.conf:/usr/local/etc/php-fpm.d/zz-docker.conf \
--v '`pwd`'/provisioning/containers/apache/templates/blackfire/zz-blackfire.ini:/usr/local/etc/php/conf.d/zz-blackfire.ini \
--v '`pwd`'/provisioning/containers/apache/templates/blackfire/.blackfire.ini:/root/.blackfire.ini \
+-v '`pwd`'/provisioning/containers/php-fpm/templates/zz-blackfire.ini:/usr/local/etc/php/conf.d/zz-blackfire.ini \
+-v '`pwd`'/provisioning/containers/php-fpm/templates/.blackfire.ini:/root/.blackfire.ini \
 -v '`pwd`'/provisioning/containers/apache/templates/blackfire/agent:/etc/blackfire/agent \
 '"${mount}"' \
 -v '`pwd`':/var/www/devobs \

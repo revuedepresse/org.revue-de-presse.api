@@ -1,10 +1,5 @@
 CREATE DATABASE IF NOT EXISTS {database_name};
-CREATE USER IF NOT EXISTS '{database_user}'@'172.17.42.1';
-ALTER USER '{database_user}'@'172.17.42.1' IDENTIFIED BY '{database_password}';
-GRANT ALL PRIVILEGES ON `{database_name}`.* TO '{database_user}'@'172.17.42.1';
-GRANT USAGE, ALTER ON *.* TO '{database_user}'@'172.17.42.1';
-
-CREATE USER IF NOT EXISTS '{database_user}'@'172.17.0.2';
-ALTER USER '{database_user}'@'172.17.0.2' IDENTIFIED BY '{database_password}';
-GRANT ALL PRIVILEGES ON `{database_name}`.* TO '{database_user}'@'172.17.0.2';
-GRANT USAGE, ALTER ON *.* TO '{database_user}'@'172.17.0.2';
+CREATE USER '{database_user}'@'{gateway}';
+ALTER USER '{database_user}'@'{gateway}' IDENTIFIED BY '{database_password}';
+GRANT ALL PRIVILEGES ON `{database_name}`.* TO '{database_user}'@'{gateway}';
+GRANT USAGE, ALTER ON *.* TO '{database_user}'@'{gateway}';
