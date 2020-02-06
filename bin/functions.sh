@@ -20,8 +20,11 @@ function get_network_option() {
 }
 
 function kill_existing_consumers {
-    local pids=(`ps ux | grep "rabbitmq:consumer" | grep -v '/bash' | grep -v grep | cut -d ' ' -f 2-3`)
-    local totalProcesses=`ps ux | grep "rabbitmq:consumer" | grep -v grep | grep -c ''`
+    local pids
+    pids=(`ps ux | grep "rabbitmq:consumer" | grep -v '/bash' | grep -v grep | cut -d ' ' -f 2-3`)
+
+    local totalProcesses
+    totalProcesses=`ps ux | grep "rabbitmq:consumer" | grep -v grep | grep -c ''`
 
     if [ ! -z "${DOCKER_MODE}" ];
     then
@@ -644,24 +647,32 @@ function ensure_blackfire_configuration_files_are_present() {
 function run_apache() {
     remove_apache_container
 
-    local port=80
+    local port
+    port='80'
+
     if [ ! -z "${PRESS_REVIEW_APACHE_PORT}" ];
     then
         port="${PRESS_REVIEW_APACHE_PORT}"
     fi
 
-    host host=''
+    host host
+    host='127.0.0.1'
+
     if [ ! -z "${PRESS_REVIEW_APACHE_HOST}" ];
     then
-        host="${PRESS_REVIEW_APACHE_HOST}"':'
+        host="${PRESS_REVIEW_APACHE_HOST}"
     fi
+
+    host="${host}:"
 
     local symfony_environment="$(get_symfony_environment)"
 
     local extensions=`pwd`"/provisioning/containers/apache/templates/extensions.ini.dist";
     local extensions_volume="-v ${extensions}:/usr/local/etc/php/conf.d/extensions.ini"
 
-    local network=`get_network_option`
+    local network
+    network=`get_network_option`
+
     ensure_blackfire_configuration_files_are_present
 
     local command=$(echo -n 'docker run '"${network}"' \
