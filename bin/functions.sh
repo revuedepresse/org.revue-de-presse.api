@@ -621,6 +621,26 @@ function get_apache_container_interactive_shell() {
     docker exec -ti apache bash
 }
 
+function ensure_blackfire_configuration_files_are_present() {
+    if [ ! -e `pwd`'/provisioning/containers/apache/templates/blackfire/zz-blackfire.ini' ];
+    then
+      cp `pwd`'/provisioning/containers/apache/templates/blackfire/zz-blackfire.ini.dist' \
+        `pwd`'/provisioning/containers/apache/templates/blackfire/zz-blackfire.ini'
+    fi
+
+    if [ ! -e `pwd`'/provisioning/containers/apache/templates/blackfire/agent' ];
+    then
+      cp `pwd`'/provisioning/containers/apache/templates/blackfire/agent.dist' \
+        `pwd`'/provisioning/containers/apache/templates/blackfire/agent'
+    fi
+
+    if [ ! -e `pwd`'/provisioning/containers/apache/templates/blackfire/.blackfire.ini' ];
+    then
+      cp `pwd`'/provisioning/containers/apache/templates/blackfire/.blackfire.ini.dist' \
+        `pwd`'/provisioning/containers/apache/templates/blackfire/.blackfire.ini'
+    fi
+}
+
 function run_apache() {
     remove_apache_container
 
@@ -642,6 +662,8 @@ function run_apache() {
     local extensions_volume="-v ${extensions}:/usr/local/etc/php/conf.d/extensions.ini"
 
     local network=`get_network_option`
+    ensure_blackfire_configuration_files_are_present
+
     local command=$(echo -n 'docker run '"${network}"' \
 --restart=always \
 -d -p '${host}''${port}':80 \
