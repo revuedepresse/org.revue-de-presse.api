@@ -220,7 +220,7 @@ function grant_privileges {
 }
 
 function get_project_dir {
-    local project_dir=''
+    local project_dir='/var/www/devobs'
 
     if [ ! -z "${PROJECT_DIR}" ];
     then
