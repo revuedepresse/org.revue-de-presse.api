@@ -333,7 +333,7 @@ function migrate_schema {
     else
         if [ ${port_admin} != '%port_local%' ];
         then
-            echo "Sorry won't do for your own sake (please see README.me)."
+            echo "Sorry won't do for your own sake (please see README.md)."
             return
         fi
     fi
