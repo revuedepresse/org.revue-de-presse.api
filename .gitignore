@@ -13,3 +13,6 @@ provisioning/containers/mysql/templates/mysql/my.cnf
 provisioning/volumes/mysql/*
 provisioning/volumes/mysql*/*
 vendor
+
+# migrating Symfony 3.x to Symfony 4.x
+\.env
