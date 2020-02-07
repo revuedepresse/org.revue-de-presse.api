@@ -788,9 +788,17 @@ function remove_php_fpm_container {
 function run_php_script() {
     local script="${1}"
 
-    if [ -z ${script} ];
+    if [ -z "${script}" ];
     then
-        script="${SCRIPT}"
+      if [ -z "${SCRIPT}" ];
+      then
+        echo 'Please pass a valid path to a script by export an environment variable'
+        echo 'e.g.'
+        echo 'export SCRIPT=app/console cache:clear'
+        return
+      fi
+
+      script="${SCRIPT}"
     fi
 
     local memory=''
