@@ -364,6 +364,25 @@ function install_php_dependencies {
     echo ${command} | make run-php
 }
 
+function run_composer {
+    local command=''
+    if [ -z "${COMMAND}" ];
+    then
+        command="${COMMAND}"
+        echo 'Please pass a non-empty command as environment variable'
+        echo 'e.g.'
+        echo 'export COMMAND="install --prefer-dist"'
+        return
+    fi
+
+    command="${COMMAND}"
+
+    local project_dir="$(get_project_dir)"
+    local command=$(echo -n 'php /bin/bash -c "cd '"${project_dir}"' &&
+    php -dmemory_limit="-1" '"${project_dir}"'/composer.phar "'"${command}")
+    echo ${command} | make run-php
+}
+
 function run_mysql_client {
     docker exec -ti mysql mysql -uroot -A
 }

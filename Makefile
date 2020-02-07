@@ -144,3 +144,6 @@ follow-today-statuses: ## Filter the statuses for today from the log file
 
 run-php-unit-tests: ## Run unit tests with PHPUnit
 		@/bin/bash -c 'source ./bin/functions.sh && run_php_unit_tests'
+
+run-composer: # Run composer
+		@/bin/bash -c 'source ./bin/functions.sh && run_composer'
