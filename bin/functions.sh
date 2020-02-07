@@ -340,10 +340,10 @@ function migrate_schema {
 
     local question="Are you sure you'd like to migrate the schema for database running on port ${port_admin}?"
     # @see https://stackoverflow.com/a/27875395/282073
-    # The second most voted proposition was adopted for its use of use and readability
+    # The second most voted proposition was adopted for its ease of use and readability
     #
-    #                                                                           About the box width and height to be rendered
-    #                                                                           $ man whiptail | grep yesno -A4
+    # About the box width and height to be rendered
+    # $ man whiptail | grep yesno -A4
     if whiptail --defaultno --yesno "${question}...${queries}" 20 60;
     then
         echo 'OK, let us migrate this schema.'
