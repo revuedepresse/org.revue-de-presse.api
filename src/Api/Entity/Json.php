@@ -1,13 +1,13 @@
 <?php
 
-namespace WeavingTheWeb\Bundle\ApiBundle\Entity;
+namespace App\Api\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
 /**
  * Json
  *
- * @ORM\Entity(repositoryClass="WeavingTheWeb\Bundle\ApiBundle\Repository\JsonRepository")
+ * @ORM\Entity(repositoryClass="App\Api\Repository\JsonRepository")
  * @ORM\Table(name="weaving_json",
  *  uniqueConstraints={
  *      @ORM\UniqueConstraint(

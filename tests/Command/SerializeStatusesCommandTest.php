@@ -49,8 +49,8 @@ class SerializeStatusesCommandTest extends CommandTestCase
             'name' => $options['user']['screen_name'],
         ];
 
-        /** @var \WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor $accessorMock */
-        $accessorMock = $this->prophet->prophesize('\WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor');
+        /** @var \App\Twitter\Api\Accessor $accessorMock */
+        $accessorMock = $this->prophet->prophesize('\App\Twitter\Api\Accessor');
 
         if (array_key_exists('protected', $options['user'])) {
             $user->protected = $options['user']['protected'];
@@ -87,7 +87,7 @@ class SerializeStatusesCommandTest extends CommandTestCase
         );
 
         $container = $this->client->getKernel()->getContainer();
-        /** @var \WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor $accessorMock */
+        /** @var \App\Twitter\Api\Accessor $accessorMock */
         $container->set('weaving_the_web_twitter.api_accessor', $accessorMock->reveal());
 
         $mockedTokenRepository = $this->getMockedTokenRepository();

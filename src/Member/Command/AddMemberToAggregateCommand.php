@@ -12,8 +12,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository;
-use WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor;
-use WTW\UserBundle\Repository\MemberRepository;
+use App\Twitter\Api\Accessor;
+use App\Member\Repository\MemberRepository;
 
 class AddMemberToAggregateCommand extends Command implements CommandReturnCodeAwareInterface
 {

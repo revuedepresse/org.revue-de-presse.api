@@ -5,9 +5,9 @@ namespace WeavingTheWeb\Bundle\TwitterBundle\Tests\Serializer;
 use Prophecy\Argument,
     Prophecy\Prophet;
 
-use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
+use App\Api\Entity\Aggregate;
 
-use WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor;
+use App\Twitter\Api\Accessor;
 use WTW\CodeGeneration\QualityAssuranceBundle\Test\WebTestCase;
 
 /**
@@ -98,7 +98,7 @@ class UserStatusTest extends WebTestCase
 
     protected function mockAccessor()
     {
-        $accessorMock = $this->prophet->prophesize('WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor');
+        $accessorMock = $this->prophet->prophesize('App\Twitter\Api\Accessor');
 
         $accessorMock->userToken = '';
         $accessorMock->showUser(Argument::type('string'))->willReturn(

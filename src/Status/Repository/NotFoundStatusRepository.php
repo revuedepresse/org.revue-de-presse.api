@@ -4,7 +4,7 @@ namespace App\Status\Repository;
 
 use App\Status\Entity\NotFoundStatus;
 use Doctrine\ORM\EntityRepository;
-use WeavingTheWeb\Bundle\ApiBundle\Entity\ArchivedStatus;
+use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;
 use App\Api\Entity\StatusInterface;
 

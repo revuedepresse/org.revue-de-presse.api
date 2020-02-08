@@ -2,7 +2,7 @@
 
 namespace App\Status\Entity;
 
-use WeavingTheWeb\Bundle\ApiBundle\Entity\ArchivedStatus;
+use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;
 use App\Api\Entity\StatusInterface;
 

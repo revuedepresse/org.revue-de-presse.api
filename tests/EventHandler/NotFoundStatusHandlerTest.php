@@ -5,7 +5,7 @@ namespace App\Tests\EventHandler;
 use App\Accessor\Exception\NotFoundStatusException;
 use App\Status\Entity\NotFoundStatus;
 use App\Tests\StatusConsumptionTestCase;
-use WeavingTheWeb\Bundle\ApiBundle\Entity\ArchivedStatus;
+use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;
 use App\Api\Entity\StatusInterface;
 

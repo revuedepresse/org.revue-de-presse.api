@@ -27,8 +27,8 @@ use App\Twitter\Exception\SuspendedAccountException;
 use App\Twitter\Exception\UnavailableResourceException;
 
 use TwitterOauth;
-use WTW\UserBundle\Entity\User;
-use WTW\UserBundle\Repository\MemberRepository;
+use App\Member\Entity\Member;
+use App\Member\Repository\MemberRepository;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
@@ -80,7 +80,7 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     public $twitterApiLogger;
 
     /**
-     * @var \WeavingTheWeb\Bundle\ApiBundle\Moderator\ApiLimitModerator $moderator
+     * @var \App\Api\Moderator\ApiLimitModerator $moderator
      */
     protected $moderator;
 

@@ -24,7 +24,7 @@
 
         <many-to-one
             field="member"
-            target-entity="WTW\UserBundle\Entity\User"
+            target-entity="App\Member\Entity\Member"
         >
             <join-column
                 name="member_id"

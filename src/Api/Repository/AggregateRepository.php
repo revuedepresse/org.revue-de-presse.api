@@ -57,14 +57,14 @@ class AggregateRepository extends ResourceRepository implements CapableOfDeletio
 
     /**
      * @param ManagerRegistry $managerRegistry
-     * @param Aggregate       $aggregate
+     * @param string         $aggregate
      */
     public function __construct(
         ManagerRegistry $managerRegistry,
-        Aggregate $aggregate
+        string $aggregateClass
     )
     {
-       parent::__construct($managerRegistry, getRepository($aggregate));
+       parent::__construct($managerRegistry, $aggregateClass);
     }
 
     /**

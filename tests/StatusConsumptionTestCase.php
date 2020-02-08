@@ -7,7 +7,7 @@ use WTW\CodeGeneration\QualityAssuranceBundle\Test\WebTestCase;
 abstract class StatusConsumptionTestCase extends WebTestCase
 {
     /**
-     * @var $accessor \WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor
+     * @var $accessor \App\Twitter\Api\Accessor
      */
     protected $accessor;
 

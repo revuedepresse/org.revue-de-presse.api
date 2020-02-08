@@ -11,8 +11,8 @@ use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
-use WTW\UserBundle\Model\User;
-use WTW\UserBundle\Repository\MemberRepository;
+use App\Member\Model\Member;
+use App\Member\Repository\MemberRepository;
 
 abstract class TokenAuthenticator extends AbstractGuardAuthenticator
 {

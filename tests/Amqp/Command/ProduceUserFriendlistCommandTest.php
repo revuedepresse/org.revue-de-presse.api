@@ -64,8 +64,8 @@ class ProduceUserFriendListCommandTest extends CommandTestCase
         $this->client = $this->getClient();
 
         if (array_key_exists('accessor', $mockingOptions)) {
-            /** @var \WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor $accessorMock */
-            $accessorMock = $this->prophet->prophesize('\WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor');
+            /** @var \App\Twitter\Api\Accessor $accessorMock */
+            $accessorMock = $this->prophet->prophesize('\App\Twitter\Api\Accessor');
             $accessorMock->setUserToken(Argument::type('string'))->willReturn(null);
             $accessorMock->setUserSecret(Argument::type('string'))->willReturn(null);
             $accessorMock->showUserFriends(Argument::type('string'))->willReturn(
@@ -204,7 +204,7 @@ class ProduceUserFriendListCommandTest extends CommandTestCase
 
     public function setupAccessorMock()
     {
-        $accessorMock = $this->prophet->prophesize('\WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor');
+        $accessorMock = $this->prophet->prophesize('\App\Twitter\Api\Accessor');
         $accessorMock->showUserFriends(Argument::any())->willReturn((object)['ids' => ['user1', 'user2']]);
         $accessorMock->showUser(Argument::type('string'))->will(function ($arguments) {
             return (object)['screen_name' => $arguments[0]];
@@ -230,7 +230,7 @@ class ProduceUserFriendListCommandTest extends CommandTestCase
                 $callable = array($this, 'findOneByBis');
             }
 
-            $mockBuilder = $this->getMockBuilder('WTW\UserBundle\Repository\MemberRepository')
+            $mockBuilder = $this->getMockBuilder('App\Member\Repository\MemberRepository')
                 ->disableOriginalConstructor()
                 ->disableAutoload();
 
@@ -267,7 +267,7 @@ class ProduceUserFriendListCommandTest extends CommandTestCase
      */
     protected function getUserMock()
     {
-        $userMockBuilder = $this->getMockBuilder('WTW\UserBundle\Entity\User')
+        $userMockBuilder = $this->getMockBuilder('App\Member\Entity\Member')
             ->disableOriginalConstructor()
             ->disableAutoload();
 

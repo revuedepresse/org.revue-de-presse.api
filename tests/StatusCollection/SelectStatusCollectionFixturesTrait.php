@@ -4,7 +4,7 @@ namespace App\Tests\StatusCollection;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManager;
-use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
+use App\Api\Entity\Aggregate;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
 

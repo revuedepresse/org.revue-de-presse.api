@@ -24,7 +24,7 @@
 
         <many-to-one
             field="member"
-            target-entity="WTW\UserBundle\Entity\User"
+            target-entity="App\Member\Entity\Member"
             inversed-by="subscribee"
         >
             <join-column
@@ -34,7 +34,7 @@
         </many-to-one>
 
         <many-to-one
-            target-entity="WTW\UserBundle\Entity\User"
+            target-entity="App\Member\Entity\Member"
             field="subscribee"
             inversed-by="subscriber"
         >

@@ -54,7 +54,7 @@ class UserStatus implements ConsumerInterface
     }
 
     /**
-     * @var \WTW\UserBundle\Repository\MemberRepository
+     * @var \App\Member\Repository\MemberRepository
      */
     protected $userRepository;
 

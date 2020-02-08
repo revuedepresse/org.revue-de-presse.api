@@ -15,11 +15,11 @@ use Predis\Client;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RouterInterface;
-use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
+use App\Api\Entity\Aggregate;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Token;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\TokenRepository;
-use WTW\UserBundle\Repository\MemberRepository;
+use App\Member\Repository\MemberRepository;
 use Kreait\Firebase\Factory;
 use Kreait\Firebase\ServiceAccount;
 

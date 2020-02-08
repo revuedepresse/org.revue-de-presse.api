@@ -5,7 +5,7 @@ namespace App\DataFixtures\ORM;
 use App\Aggregate\Entity\TimelyStatus;
 use Doctrine\Common\DataFixtures\FixtureInterface,
     Doctrine\Common\Persistence\ObjectManager;
-use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
+use App\Api\Entity\Aggregate;
 use App\Api\Entity\Status;
 
 class StatusData implements FixtureInterface

@@ -21,7 +21,7 @@ class Highlight
     private $status;
 
     /**
-     * @var \WTW\UserBundle\Entity\User
+     * @var \App\Member\Entity\Member
      */
     private $member;
 

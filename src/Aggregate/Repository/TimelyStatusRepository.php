@@ -7,7 +7,7 @@ use App\Aggregate\Entity\TimelyStatus;
 use App\Conversation\ConversationAwareTrait;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
-use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
+use App\Api\Entity\Aggregate;
 use App\Api\Entity\StatusInterface;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;

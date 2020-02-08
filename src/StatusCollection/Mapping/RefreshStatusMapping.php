@@ -4,10 +4,10 @@ namespace App\StatusCollection\Mapping;
 
 use App\Accessor\Exception\NotFoundStatusException;
 use Psr\Log\LoggerInterface;
-use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
+use App\Api\Entity\Aggregate;
 use App\Api\Entity\Status;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
-use WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor;
+use App\Twitter\Api\Accessor;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
 
 class RefreshStatusMapping implements MappingAwareInterface

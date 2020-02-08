@@ -2,7 +2,7 @@
 
 namespace App\Status\Entity;
 
-use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
+use App\Api\Entity\Aggregate;
 
 trait StatusTrait
 {

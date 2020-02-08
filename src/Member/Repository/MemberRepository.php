@@ -4,19 +4,19 @@ namespace App\Member\Repository;
 
 use App\Aggregate\Controller\SearchParams;
 use App\Aggregate\Repository\PaginationAwareTrait;
+use App\Api\Entity\Aggregate;
 use App\Member\MemberInterface;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityRepository;
 
 use Doctrine\ORM\QueryBuilder;
+use Doctrine\Persistence\ManagerRegistry;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
-use WTW\UserBundle\Entity\User;
+use App\Member\Entity\Member;
 
-/**
- * @package WTW\UserBundle\Repository
- */
-class MemberRepository extends EntityRepository
+class MemberRepository extends ServiceEntityRepository
 {
     const TABLE_ALIAS = 'm';
 
@@ -29,6 +29,18 @@ class MemberRepository extends EntityRepository
     public $logger;
 
     use PaginationAwareTrait;
+
+    /**
+     * @param ManagerRegistry $managerRegistry
+     * @param Aggregate       $aggregate
+     */
+    public function __construct(
+        ManagerRegistry $managerRegistry,
+        $memberClass
+    )
+    {
+        parent::__construct($managerRegistry, $memberClass);
+    }
 
     /**
      * @param      $twitterId

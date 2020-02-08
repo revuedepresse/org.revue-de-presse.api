@@ -22,7 +22,7 @@ use WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;
-use WTW\UserBundle\Entity\User;
+use App\Member\Entity\Member;
 
 class ConversationStatusConsumer implements ConsumerInterface
 {
@@ -71,7 +71,7 @@ class ConversationStatusConsumer implements ConsumerInterface
     public $statusRepository;
 
     /**
-     * @var \WTW\UserBundle\Repository\MemberRepository
+     * @var \App\Member\Repository\MemberRepository
      */
     protected $userRepository;
 

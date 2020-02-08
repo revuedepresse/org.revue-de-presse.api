@@ -22,7 +22,7 @@ use WeavingTheWeb\Bundle\ApiBundle\Entity\Token;
 
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;
 
-use WTW\UserBundle\Entity\User;
+use App\Member\Entity\Member;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>

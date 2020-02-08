@@ -5,7 +5,7 @@ namespace App\Member\Repository;
 use App\Member\Entity\MemberSubscription;
 use App\Member\MemberInterface;
 use Doctrine\ORM\EntityRepository;
-use WTW\UserBundle\Repository\MemberRepository;
+use App\Member\Repository\MemberRepository;
 
 class MemberSubscriptionRepository extends EntityRepository
 {

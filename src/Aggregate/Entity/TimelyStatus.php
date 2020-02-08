@@ -4,7 +4,7 @@ namespace App\Aggregate\Entity;
 
 use App\TimeRange\TimeRangeAwareTrait;
 use App\TimeRange\TimeRangeAwareInterface;
-use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
+use App\Api\Entity\Aggregate;
 use App\Api\Entity\Status;
 use App\Api\Entity\StatusInterface;
 

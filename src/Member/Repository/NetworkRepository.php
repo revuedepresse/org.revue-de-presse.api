@@ -8,11 +8,11 @@ use App\Member\Entity\ProtectedMember;
 use App\Member\Entity\SuspendedMember;
 use App\Member\MemberInterface;
 use Doctrine\ORM\EntityManager;
-use WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor;
+use App\Twitter\Api\Accessor;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\ProtectedAccountException;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException;
-use WTW\UserBundle\Repository\MemberRepository;
+use App\Member\Repository\MemberRepository;
 
 class NetworkRepository
 {

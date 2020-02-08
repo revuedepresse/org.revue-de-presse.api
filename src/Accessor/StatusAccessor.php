@@ -6,13 +6,13 @@ use App\Member\MemberInterface;
 use App\Status\Entity\NullStatus;
 use App\Status\Repository\NotFoundStatusRepository;
 use Doctrine\ORM\EntityManager;
-use WeavingTheWeb\Bundle\ApiBundle\Entity\ArchivedStatus;
+use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\ArchivedStatusRepository;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
-use WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor;
+use App\Twitter\Api\Accessor;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
-use WTW\UserBundle\Repository\MemberRepository;
+use App\Member\Repository\MemberRepository;
 
 class StatusAccessor
 {

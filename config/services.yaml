@@ -179,10 +179,10 @@ parameters:
 
     redis_cache:                                                  'App\Cache\RedisCache'
 
-    weaving_the_web_twitter.api_accessor.class:                   'WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor'
+    weaving_the_web_twitter.api_accessor.class:                   'App\Twitter\Api\Accessor'
     weaving_the_web_twitter.api_host:                             'api.twitter.com'
 
-    weaving_the_web_twitter.moderator.api_limit.class:            'WeavingTheWeb\Bundle\ApiBundle\Moderator\ApiLimitModerator'
+    weaving_the_web_twitter.moderator.api_limit.class:            'App\Api\Moderator\ApiLimitModerator'
 
     weaving_the_web_twitter.authenticate_application.class:       'WeavingTheWeb\Bundle\TwitterBundle\Command\AuthenticateApplicationCommand'
     weaving_the_web_twitter.authentication_uri:                   '/oauth2/token'
@@ -198,7 +198,7 @@ parameters:
     weaving_the_web_twitter.oauth_token.default:                  '%env(resolve:API_TWITTER_USER_TOKEN)%'
     weaving_the_web_twitter.oauth_secret.default:                 '%env(resolve:API_TWITTER_USER_SECRET)%'
 
-    weaving_the_web_twitter.entity.archived_status.class:         'WeavingTheWeb\Bundle\ApiBundle\Entity\ArchivedStatus'
+    weaving_the_web_twitter.entity.archived_status.class:         'App\Api\Entity\ArchivedStatus'
     weaving_the_web_twitter.entity.aggregate.class:               '%weaving_the_web_api.entity.aggregate.class%'
     weaving_the_web_twitter.entity.status.class:                  '%weaving_the_web_api.entity.status.class%'
     weaving_the_web_twitter.entity.token.class:                   '%weaving_the_web_api.entity.token.class%'

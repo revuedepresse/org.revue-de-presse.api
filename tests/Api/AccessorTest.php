@@ -6,7 +6,7 @@ use GuzzleHttp\Exception\ConnectException;
 use Prophecy\Argument;
 use Prophecy\Prophet;
 
-use WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor;
+use App\Twitter\Api\Accessor;
 use WeavingTheWeb\Bundle\TwitterBundle\Api\TwitterErrorAwareInterface;
 
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;
@@ -20,7 +20,7 @@ use WTW\CodeGeneration\QualityAssuranceBundle\Test\WebTestCase;
 class AccessorTest extends WebTestCase
 {
     /**
-     * @var $accessor \WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor
+     * @var $accessor \App\Twitter\Api\Accessor
      */
     protected $accessor;
 
@@ -590,11 +590,11 @@ class AccessorTest extends WebTestCase
         $this->accessor->setTokenRepository($tokenRepositoryMock);
 
         $moderatorProphecy = $this->prophet
-            ->prophesize('\WeavingTheWeb\Bundle\ApiBundle\Moderator\ApiLimitModerator');
+            ->prophesize('\App\Api\Moderator\ApiLimitModerator');
         $moderatorProphecy->waitFor(Argument::type('integer'), Argument::type('array'))->willReturn(null)
             ->shouldBeCalled();
 
-        /** @var \WeavingTheWeb\Bundle\ApiBundle\Moderator\ApiLimitModerator $moderatorMock */
+        /** @var \App\Api\Moderator\ApiLimitModerator $moderatorMock */
         $moderatorMock = $moderatorProphecy->reveal();
 
         $this->accessor->setModerator($moderatorMock);

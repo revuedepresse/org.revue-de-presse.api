@@ -1,6 +1,6 @@
 <?php
 
-namespace WeavingTheWeb\Bundle\ApiBundle\Entity;
+namespace App\Api\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 

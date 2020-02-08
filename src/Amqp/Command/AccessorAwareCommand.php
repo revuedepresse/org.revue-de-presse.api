@@ -13,7 +13,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 abstract class AccessorAwareCommand extends Command
 {
     /**
-     * @var \WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor $accessor
+     * @var \App\Twitter\Api\Accessor $accessor
      */
     protected $accessor;
 
@@ -37,7 +37,7 @@ abstract class AccessorAwareCommand extends Command
      */
     protected function setupAccessor($oauthTokens)
     {
-        /** @var \WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor $accessor */
+        /** @var \App\Twitter\Api\Accessor $accessor */
         $this->accessor = $this->getContainer()->get('weaving_the_web_twitter.api_accessor');
         $this->accessor->setUserToken($oauthTokens['token']);
         $this->accessor->setUserSecret($oauthTokens['secret']);

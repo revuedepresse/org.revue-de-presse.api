@@ -13,7 +13,7 @@ use App\Status\Repository\LikedStatusRepository;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Translation\TranslatorInterface;
 
-use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
+use App\Api\Entity\Aggregate;
 use App\Api\Entity\StatusInterface;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\Token,
     WeavingTheWeb\Bundle\ApiBundle\Entity\Whisperer;
@@ -125,7 +125,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     }
 
     /**
-     * @var \WeavingTheWeb\Bundle\ApiBundle\Moderator\ApiLimitModerator $moderator
+     * @var \App\Api\Moderator\ApiLimitModerator $moderator
      */
     protected $moderator;
 
@@ -1061,7 +1061,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             if (is_null($aggregateId)) {
                 $aggregate = null;
             } else {
-                /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate $aggregate */
+                /** @var \App\Api\Entity\Aggregate $aggregate */
                 $aggregate = $this->aggregateRepository->find($aggregateId);
             }
 

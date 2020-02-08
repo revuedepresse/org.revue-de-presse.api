@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Membership\Model;
+namespace App\Member\Model;
 
 use App\Member\MemberInterface;
 

@@ -30,7 +30,7 @@
         </many-to-one>
 
         <many-to-one
-            target-entity="WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate"
+            target-entity="App\Api\Entity\Aggregate"
             field="aggregate"
             inversed-by="timelyStatuses"
         />

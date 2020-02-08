@@ -5,8 +5,8 @@ namespace App\Status\Entity;
 use App\Member\MemberInterface;
 use App\TimeRange\TimeRangeAwareTrait;
 use App\TimeRange\TimeRangeAwareInterface;
-use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
-use WeavingTheWeb\Bundle\ApiBundle\Entity\ArchivedStatus;
+use App\Api\Entity\Aggregate;
+use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;
 use App\Api\Entity\StatusInterface;
 

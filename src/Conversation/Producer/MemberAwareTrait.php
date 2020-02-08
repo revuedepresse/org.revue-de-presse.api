@@ -3,7 +3,7 @@
 namespace App\Conversation\Producer;
 
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;
-use WTW\UserBundle\Entity\User;
+use App\Member\Entity\Member;
 
 trait MemberAwareTrait
 {

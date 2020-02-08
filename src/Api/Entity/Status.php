@@ -409,9 +409,9 @@ class Status implements StatusInterface
     /**
      * @param Aggregate $aggregate
      *
-     * @return ArrayCollection|mixed
+     * @return ArrayCollection
      */
-    public function addToAggregates(Aggregate $aggregate) {
+    public function addToAggregates(Aggregate $aggregate): ArrayCollection {
         $this->aggregates->add($aggregate);
 
         return $this->aggregates;

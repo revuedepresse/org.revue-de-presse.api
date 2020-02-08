@@ -3,7 +3,7 @@
 namespace App\Member\Entity;
 
 use App\Member\MemberInterface;
-use App\UserManagement\Model\User as MemberModel;
+use App\Member\Model\Member as MemberModel;
 
 use Doctrine\ORM\Mapping as ORM;
 
@@ -28,10 +28,10 @@ use Doctrine\ORM\Mapping as ORM;
  *          })
  *      }
  * )
- * @ORM\Entity(repositoryClass="App\UserRepository\Repository\UserRepository")
+ * @ORM\Entity(repositoryClass="App\Member\Repository\MemberRepository")
  * @ORM\InheritanceType("SINGLE_TABLE")
  * @ORM\DiscriminatorColumn(name="usr_position_in_hierarchy", type="integer")
- * @ORM\DiscriminatorMap({"1" = "User", "0" = "\WTW\UserBundle\Tests\Security\Core\User\User"})
+ * @ORM\DiscriminatorMap({"1" = "Member", "0" = "\App\Tests\Security\Core\Member\Member"})
  */
 class Member extends MemberModel implements MemberInterface
 {
@@ -112,7 +112,7 @@ class Member extends MemberModel implements MemberInterface
     protected $positionInHierarchy;
 
     /**
-     * @ORM\ManyToMany(targetEntity="WeavingTheWeb\Bundle\ApiBundle\Entity\Token", inversedBy="users", fetch="EAGER")
+     * @ORM\ManyToMany(targetEntity="App\Api\Entity\Token", inversedBy="users", fetch="EAGER")
      * @ORM\JoinTable(name="weaving_user_token",
      *      joinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="usr_id")},
      *      inverseJoinColumns={@ORM\JoinColumn(name="token_id", referencedColumnName="id")}

@@ -6,9 +6,9 @@ use App\Member\MemberInterface;
 use App\Status\Entity\LikedStatus;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
-use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
+use App\Api\Entity\Aggregate;
 use App\Api\Entity\StatusInterface;
-use WTW\UserBundle\Repository\MemberRepository;
+use App\Member\Repository\MemberRepository;
 
 /**
  * @method LikedStatus|null find($id, $lockMode = null, $lockVersion = null)

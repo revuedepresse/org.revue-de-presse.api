@@ -3,7 +3,7 @@
 namespace App\Member\Entity;
 
 use App\Member\MemberInterface;
-use WTW\UserBundle\Entity\User;
+use App\Member\Entity\Member;
 
 class SuspendedMember implements MemberInterface
 {

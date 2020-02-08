@@ -1,10 +1,10 @@
 <?php
 
-namespace WeavingTheWeb\Bundle\ApiBundle\Entity;
+namespace App\Api\Entity;
 
 use Doctrine\ORM\Mapping as ORM,
     Doctrine\Common\Collections\ArrayCollection;
-use WTW\UserBundle\Entity\User;
+use App\Member\Entity\Member;
 use WeavingTheWeb\Bundle\ApiBundle\Entity\TokenType;
 
 /**
@@ -80,7 +80,7 @@ class Token
     protected $updatedAt;
 
     /**
-     * @ORM\ManyToMany(targetEntity="WTW\UserBundle\Entity\User", mappedBy="tokens")
+     * @ORM\ManyToMany(targetEntity="App\Member\Entity\Member", mappedBy="tokens")
      */
     protected $users;
 
@@ -201,7 +201,7 @@ class Token
     /**
      * Add users
      *
-     * @param \WTW\UserBundle\Entity\User $users
+     * @param \App\Member\Entity\Member $users
      * @return Token
      */
     public function addUser(User $users)
@@ -214,7 +214,7 @@ class Token
     /**
      * Remove users
      *
-     * @param \WTW\UserBundle\Entity\User $users
+     * @param \App\Member\Entity\Member $users
      */
     public function removeUser(User $users)
     {

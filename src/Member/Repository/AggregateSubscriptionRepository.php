@@ -4,14 +4,17 @@ namespace App\Member\Repository;
 
 use App\Aggregate\Entity\MemberAggregateSubscription;
 use App\Aggregate\Repository\MemberAggregateSubscriptionRepository;
+use App\Api\Entity\Aggregate;
 use App\Member\Entity\AggregateSubscription;
 use App\Member\Entity\MemberSubscription;
 use App\Member\MemberInterface;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\Persistence\ManagerRegistry;
 use Psr\Log\LoggerInterface;
-use WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor;
+use App\Twitter\Api\Accessor;
 
-class AggregateSubscriptionRepository extends EntityRepository
+class AggregateSubscriptionRepository extends ServiceEntityRepository
 {
     /**
      * @var Accessor
@@ -37,6 +40,18 @@ class AggregateSubscriptionRepository extends EntityRepository
      * @var NetworkRepository
      */
     public $networkRepository;
+
+    /**
+     * @param ManagerRegistry $managerRegistry
+     * @param string          $className
+     */
+    public function __construct(
+        ManagerRegistry $managerRegistry,
+        string $className
+    )
+    {
+        parent::__construct($managerRegistry, $className);
+    }
 
     /**
      * @param MemberAggregateSubscription $memberAggregateSubscription

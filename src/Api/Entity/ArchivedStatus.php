@@ -5,6 +5,7 @@ namespace App\Api\Entity;
 use App\Status\Entity\StatusTrait;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
+use Twig\Tests\Loader\ArrayTest;
 
 /**
  * @ORM\Entity(repositoryClass="WeavingTheWeb\Bundle\ApiBundle\Repository\ArchivedStatusRepository")
@@ -365,5 +366,16 @@ class ArchivedStatus implements StatusInterface
         $this->aggregates->remove($aggregate);
 
         return $this;
+    }
+
+    /**
+     * @param Aggregate $aggregate
+     *
+     * @return ArrayCollection
+     */
+    public function addToAggregates(Aggregate $aggregate): ArrayCollection {
+        $this->aggregates->add($aggregate);
+
+        return $this->aggregates;
     }
 }

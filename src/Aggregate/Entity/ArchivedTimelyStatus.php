@@ -2,8 +2,8 @@
 
 namespace App\Aggregate\Entity;
 
-use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
-use WeavingTheWeb\Bundle\ApiBundle\Entity\ArchivedStatus;
+use App\Api\Entity\Aggregate;
+use App\Api\Entity\ArchivedStatus;
 
 class ArchivedTimelyStatus
 {

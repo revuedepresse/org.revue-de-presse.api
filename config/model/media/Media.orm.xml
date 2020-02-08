@@ -60,7 +60,7 @@
 
         <one-to-one
             field="member"
-            target-entity="App\UserManagement\Entity\User"
+            target-entity="App\Member\Entity\Member"
         >
             <join-column
                 name="member_id"

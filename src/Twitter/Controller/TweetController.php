@@ -315,7 +315,7 @@ class TweetController extends Controller
                 throw new \Exception($this->get('translator')->trans('twitter.error.invalid_oauth_token', [], 'messages'));
             }
         } else {
-            /** @var \WTW\UserBundle\Entity\User $user */
+            /** @var \App\Member\Entity\Member $user */
             $user = $userManager->findOneBy(['twitter_username' => $username]);
 
             if (is_null($user)) {

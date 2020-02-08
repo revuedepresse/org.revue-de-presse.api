@@ -5,7 +5,7 @@ namespace App\Member\Entity;
 use Doctrine\Common\Collections\ArrayCollection,
     Doctrine\ORM\Mapping as ORM;
 
-use WTW\UserBundle\Entity\User;
+use App\Member\Entity\Member;
 
 /**
  * @ORM\Entity
@@ -36,7 +36,7 @@ class Role implements RoleInterface
     protected $role;
 
     /**
-     * @ORM\ManyToMany(targetEntity="WTW\UserBundle\Entity\User", mappedBy="roles")
+     * @ORM\ManyToMany(targetEntity="App\Member\Entity\Member", mappedBy="roles")
      */
     protected $users;
 

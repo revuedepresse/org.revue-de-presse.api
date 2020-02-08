@@ -1,16 +1,16 @@
 <?php
 
-namespace WTW\UserBundle\Tests\Security\Core\User;
+namespace App\Tests\Security\Core\Member;
 
 use Doctrine\ORM\Mapping as ORM;
-use WTW\UserBundle\Entity\User as BaseUser;
+use App\Member\Entity\Member as BaseUser;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  * @ORM\Entity
  * @ORM\MappedSuperclass
  */
-class User extends BaseUser
+class Member extends BaseUser
 {
     public function __construct(
         $username,

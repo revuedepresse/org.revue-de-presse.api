@@ -25,8 +25,8 @@ use App\Api\Entity\StatusInterface;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\ProtectedAccountException;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException;
-use WTW\UserBundle\Entity\User;
-use WTW\UserBundle\Repository\MemberRepository;
+use App\Member\Entity\Member;
+use App\Member\Repository\MemberRepository;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>

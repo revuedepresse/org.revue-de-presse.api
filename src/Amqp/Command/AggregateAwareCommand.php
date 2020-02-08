@@ -30,7 +30,7 @@ abstract class AggregateAwareCommand extends AccessorAwareCommand implements Com
     protected $aggregateRepository;
 
     /**
-     * @var \WTW\UserBundle\Repository\MemberRepository
+     * @var \App\Member\Repository\MemberRepository
      */
     protected $userRepository;
 

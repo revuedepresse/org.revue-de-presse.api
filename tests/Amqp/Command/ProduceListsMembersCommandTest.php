@@ -42,7 +42,7 @@ class ProduceListMembersCommandTest extends CommandTestCase
         $mockedProducer = $this->prophet->prophesize('\OldSound\RabbitMqBundle\RabbitMq\Producer');
         $container->set('old_sound_rabbit_mq.weaving_the_web_amqp.twitter.user_status_producer', $mockedProducer);
 
-        $mockedAccessor = $this->prophet->prophesize('\WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor');
+        $mockedAccessor = $this->prophet->prophesize('\App\Twitter\Api\Accessor');
         $lists = [
             (object) [
                 'name' => 'Specific List',

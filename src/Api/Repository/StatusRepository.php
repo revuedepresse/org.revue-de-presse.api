@@ -11,7 +11,7 @@ use App\Api\Entity\Aggregate;
 use App\Api\Entity\Status;
 use App\Api\Entity\StatusInterface;
 use WeavingTheWeb\Bundle\TwitterBundle\Serializer\UserStatus;
-use WTW\UserBundle\Entity\User;
+use App\Member\Entity\Member;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
