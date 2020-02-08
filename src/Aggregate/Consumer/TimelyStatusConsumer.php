@@ -13,7 +13,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use OldSound\RabbitMqBundle\RabbitMq\ConsumerInterface;
 use PhpAmqpLib\Message\AMQPMessage;
-use WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository;
+use App\Api\Repository\AggregateRepository;
 
 class TimelyStatusConsumer implements ConsumerInterface, CommandReturnCodeAwareInterface
 {

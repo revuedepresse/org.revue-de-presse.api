@@ -5,8 +5,8 @@ namespace App\Tests\StatusCollection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManager;
 use App\Api\Entity\Aggregate;
-use WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository;
-use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
+use App\Api\Repository\AggregateRepository;
+use App\Api\Repository\StatusRepository;
 
 trait SelectStatusCollectionFixturesTrait
 {

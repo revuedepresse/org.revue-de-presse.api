@@ -4,12 +4,13 @@ namespace App\Aggregate\Repository;
 
 use App\Aggregate\Entity\SavedSearch;
 use App\Aggregate\Entity\SearchMatchingStatus;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityRepository;
 use App\Api\Entity\StatusInterface;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
 
-class SearchMatchingStatusRepository extends EntityRepository
+class SearchMatchingStatusRepository extends ServiceEntityRepository
 {
     /**
      * @var StatusRepository

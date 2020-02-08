@@ -6,7 +6,7 @@ use App\Cache\RedisCache;
 use App\Security\Cors\CorsHeadersAwareTrait;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository;
+use App\Api\Repository\AggregateRepository;
 
 class AggregateController
 {

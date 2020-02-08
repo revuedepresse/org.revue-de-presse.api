@@ -4,15 +4,29 @@ namespace App\Member\Repository;
 
 use App\Member\Entity\MemberSubscribee;
 use App\Membership\Entity\MemberInterface;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityRepository;
 use App\Member\Repository\MemberRepository;
+use Doctrine\Persistence\ManagerRegistry;
 
-class MemberSubscribeeRepository extends EntityRepository
+class MemberSubscribeeRepository extends ServiceEntityRepository
 {
     /**
      * @var MemberRepository
      */
     public $memberRepository;
+
+    /**
+     * @param ManagerRegistry $managerRegistry
+     * @param string         $aggregate
+     */
+    public function __construct(
+        ManagerRegistry $managerRegistry,
+        string $aggregateClass
+    )
+    {
+        parent::__construct($managerRegistry, $aggregateClass);
+    }
 
     /**
      * @param MemberInterface $member

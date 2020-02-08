@@ -9,7 +9,7 @@ use App\Api\Entity\TokenType;
 
 /**
  * @ORM\Table(name="weaving_access_token")
- * @ORM\Entity(repositoryClass="WeavingTheWeb\Bundle\ApiBundle\Repository\TokenRepository")
+ * @ORM\Entity(repositoryClass="App\Api\Repository\TokenRepository")
  */
 class Token
 {

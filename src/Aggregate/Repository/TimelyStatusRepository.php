@@ -5,14 +5,16 @@ namespace App\Aggregate\Repository;
 use App\Aggregate\Controller\SearchParams;
 use App\Aggregate\Entity\TimelyStatus;
 use App\Conversation\ConversationAwareTrait;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\StatusInterface;
-use WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository;
+use App\Api\Repository\AggregateRepository;
+use Laminas\Service;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
 
-class TimelyStatusRepository extends EntityRepository
+class TimelyStatusRepository extends ServiceEntityRepository
 {
     const TABLE_ALIAS = 't';
 

@@ -18,7 +18,7 @@ use PhpAmqpLib\Message\AmqpMessage;
 use Psr\Log\LoggerInterface;
 
 use App\Api\Entity\Status;
-use WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository;
+use App\Api\Repository\AggregateRepository;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;

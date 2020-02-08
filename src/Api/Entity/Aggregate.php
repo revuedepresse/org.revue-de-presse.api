@@ -6,7 +6,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository")
+ * @ORM\Entity(repositoryClass="App\Api\Repository\AggregateRepository")
  * @ORM\Table(
  *     name="weaving_aggregate",
  *     indexes={

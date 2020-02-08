@@ -3,12 +3,25 @@
 namespace App\Api\Repository;
 
 use App\Api\Entity\Whisperer;
+use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
 class WhispererRepository extends ResourceRepository
 {
+    /**
+     * @param ManagerRegistry $managerRegistry
+     * @param string         $aggregate
+     */
+    public function __construct(
+        ManagerRegistry $managerRegistry,
+        string $aggregateClass
+    )
+    {
+        parent::__construct($managerRegistry, $aggregateClass);
+    }
+
     /**
      * @param Whisperer $whisperer
      * @return Whisperer

@@ -25,7 +25,7 @@ abstract class AggregateAwareCommand extends AccessorAwareCommand implements Com
     use AggregateAwareTrait;
 
     /**
-     * @var \WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository
+     * @var \App\Api\Repository\AggregateRepository
      */
     protected $aggregateRepository;
 

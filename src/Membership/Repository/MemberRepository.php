@@ -12,7 +12,7 @@ use Doctrine\ORM\EntityRepository;
 
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
-use WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository;
+use App\Api\Repository\AggregateRepository;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
 use App\Membership\Entity\Member;
 

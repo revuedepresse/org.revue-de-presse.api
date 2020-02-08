@@ -703,7 +703,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     }
 
     /**
-     * @var \WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository $aggregateRepository
+     * @var \App\Api\Repository\AggregateRepository $aggregateRepository
      */
     protected $aggregateRepository;
 

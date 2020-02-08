@@ -4,11 +4,13 @@ namespace App\Status\Repository;
 
 use App\Membership\Entity\MemberInterface;
 use App\Status\Entity\LikedStatus;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\StatusInterface;
 use App\Member\Repository\MemberRepository;
+use Laminas\Service;
 
 /**
  * @method LikedStatus|null find($id, $lockMode = null, $lockVersion = null)
@@ -16,7 +18,7 @@ use App\Member\Repository\MemberRepository;
  * @method LikedStatus[]    findAll()
  * @method LikedStatus[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class LikedStatusRepository extends EntityRepository implements ExtremumAwareInterface
+class LikedStatusRepository extends ServiceEntityRepository implements ExtremumAwareInterface
 {
     /**
      * @var MemberRepository

@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RouterInterface;
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\Token;
-use WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository;
+use App\Api\Repository\AggregateRepository;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\TokenRepository;
 use App\Member\Repository\MemberRepository;
 use Kreait\Firebase\Factory;

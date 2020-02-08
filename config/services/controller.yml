@@ -1,18 +1,20 @@
 services:
     controller.authentication:
+        public: true
         class: 'App\Member\Authentication\Controller\AuthenticationController'
         properties:
             authenticator:        '@app.authenticator'
 
     controller.list:
+        public: true
         class: 'App\Aggregate\Controller\ListController'
         properties:
             allowedOrigin:                  '%allowed.origin%'
             configDirectory:                '%kernel.project_dir%/config'
             authenticationTokenRepository:  '@repository.authentication_token'
-            aggregateLikesProducer:         '@old_sound_rabbit_mq.weaving_the_web_amqp.producer.aggregates_likes_producer'
+#            aggregateLikesProducer:         '@old_sound_rabbit_mq.weaving_the_web_amqp.producer.aggregates_likes_producer'
             aggregateRepository:            '@repository.aggregate'
-            aggregateStatusesProducer:      '@old_sound_rabbit_mq.weaving_the_web_amqp.twitter.aggregates_status_producer'
+#            aggregateStatusesProducer:      '@old_sound_rabbit_mq.weaving_the_web_amqp.twitter.aggregates_status_producer'
             environment:                    '%kernel.environment%'
             highlightRepository:            '@repository.highlight'
             logger:                         '@logger'
@@ -23,6 +25,7 @@ services:
             tokenRepository:                '@weaving_the_web_api.repository.token'
 
     controller.logged_in_member:
+        public: true
         class: 'App\Member\Controller\LoggedInMemberController'
         properties:
             logger:                        '@logger'
@@ -31,6 +34,7 @@ services:
             environment:                   '%kernel.environment%'
 
     controller.aggregate:
+        public: true
         class: 'App\Aggregate\Controller\AggregateController'
         properties:
             aggregateRepository: '@repository.aggregate'
@@ -39,6 +43,7 @@ services:
             redisCache:          '@app.cache.redis'
 
     controller.keyword:
+        public: true
         class: 'App\Aggregate\Controller\KeywordController'
         properties:
             keywordRepository: '@repository.keyword'

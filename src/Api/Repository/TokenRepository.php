@@ -19,18 +19,6 @@ use App\Api\Entity\Token,
 class TokenRepository extends ServiceEntityRepository
 {
     /**
-     * @param ManagerRegistry $managerRegistry
-     * @param string         $aggregate
-     */
-    public function __construct(
-        ManagerRegistry $managerRegistry,
-        string $aggregateClass
-    )
-    {
-        parent::__construct($managerRegistry, $aggregateClass);
-    }
-
-    /**
      * @param $properties
      * @return Token
      */

@@ -2,11 +2,12 @@
 
 namespace App\Status\Repository;
 
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityRepository;
 
-class KeywordRepository extends EntityRepository
+class KeywordRepository extends ServiceEntityRepository
 {
     /**
      * @param \DateTime $startDate

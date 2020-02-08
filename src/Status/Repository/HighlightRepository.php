@@ -5,6 +5,7 @@ namespace App\Status\Repository;
 use App\Aggregate\Controller\SearchParams;
 use App\Aggregate\Repository\PaginationAwareTrait;
 use App\Conversation\ConversationAwareTrait;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\EntityRepository;
@@ -12,7 +13,7 @@ use Doctrine\ORM\Mapping\ClassMetadata;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
 
-class HighlightRepository extends EntityRepository implements PaginationAwareRepositoryInterface
+class HighlightRepository extends ServiceEntityRepository implements PaginationAwareRepositoryInterface
 {
     use PaginationAwareTrait;
     use ConversationAwareTrait;
@@ -33,11 +34,6 @@ class HighlightRepository extends EntityRepository implements PaginationAwareRep
     public $logger;
 
     const TABLE_ALIAS = 'h';
-
-    public function __construct($entityManager, ClassMetadata $class)
-    {
-        parent::__construct($entityManager, $class);
-    }
 
     /**
      * @param SearchParams $searchParams

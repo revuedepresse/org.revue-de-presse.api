@@ -4,10 +4,11 @@ namespace App\Member\Repository;
 
 use App\Member\Entity\MemberSubscription;
 use App\Membership\Entity\MemberInterface;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityRepository;
 use App\Member\Repository\MemberRepository;
 
-class MemberSubscriptionRepository extends EntityRepository
+class MemberSubscriptionRepository extends ServiceEntityRepository
 {
     /**
      * @var MemberRepository

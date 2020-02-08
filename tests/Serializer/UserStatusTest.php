@@ -157,7 +157,7 @@ class UserStatusTest extends WebTestCase
 
     protected function mockAggregateRepository()
     {
-        $aggregateRepositoryMock = $this->prophet->prophesize('WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository');
+        $aggregateRepositoryMock = $this->prophet->prophesize('App\Api\Repository\AggregateRepository');
 
         $aggregate = new Aggregate('test_aggregate', 'My List');
 

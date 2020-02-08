@@ -3,9 +3,10 @@
 namespace App\Aggregate\Repository;
 
 use App\Aggregate\Entity\SavedSearch;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityRepository;
 
-class SavedSearchRepository extends EntityRepository
+class SavedSearchRepository extends ServiceEntityRepository
 {
     /**
      * @param \stdClass $response
