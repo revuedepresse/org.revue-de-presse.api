@@ -169,7 +169,7 @@ class UserStatusTest extends WebTestCase
 
     public function mockToken()
     {
-        $tokenMock = $this->prophet->prophesize('WeavingTheWeb\Bundle\ApiBundle\Entity\Token');
+        $tokenMock = $this->prophet->prophesize('App\Api\Entity\Token');
         $tokenMock->isFrozen()->willReturn(false);
 
         return $tokenMock;

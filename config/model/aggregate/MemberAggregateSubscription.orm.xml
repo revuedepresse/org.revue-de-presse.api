@@ -24,7 +24,7 @@
 
         <many-to-one
             field="member"
-            target-entity="App\Member\Entity\Member"
+            target-entity="App\Membership\Entity\Member"
         >
             <join-column
                 name="member_id"

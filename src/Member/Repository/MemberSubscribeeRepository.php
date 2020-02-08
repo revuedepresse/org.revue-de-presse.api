@@ -3,7 +3,7 @@
 namespace App\Member\Repository;
 
 use App\Member\Entity\MemberSubscribee;
-use App\Member\MemberInterface;
+use App\Membership\Entity\MemberInterface;
 use Doctrine\ORM\EntityRepository;
 use App\Member\Repository\MemberRepository;
 

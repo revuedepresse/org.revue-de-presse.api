@@ -2,7 +2,7 @@
 
 namespace App\Accessor;
 
-use App\Member\MemberInterface;
+use App\Membership\Entity\MemberInterface;
 use App\Status\Entity\NullStatus;
 use App\Status\Repository\NotFoundStatusRepository;
 use Doctrine\ORM\EntityManager;

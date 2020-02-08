@@ -2,7 +2,7 @@
 
 namespace App\Member\Entity;
 
-use App\Member\MemberInterface;
+use App\Membership\Entity\MemberInterface;
 
 class AuthenticationToken
 {

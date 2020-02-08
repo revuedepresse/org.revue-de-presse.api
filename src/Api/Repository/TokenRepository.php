@@ -2,10 +2,12 @@
 
 namespace App\Api\Repository;
 
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\EntityRepository,
     Doctrine\ORM\NoResultException;
 
+use Doctrine\Persistence\ManagerRegistry;
 use Psr\Log\LoggerInterface;
 
 use App\Api\Entity\Token,
@@ -14,8 +16,20 @@ use App\Api\Entity\Token,
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
-class TokenRepository extends EntityRepository
+class TokenRepository extends ServiceEntityRepository
 {
+    /**
+     * @param ManagerRegistry $managerRegistry
+     * @param string         $aggregate
+     */
+    public function __construct(
+        ManagerRegistry $managerRegistry,
+        string $aggregateClass
+    )
+    {
+        parent::__construct($managerRegistry, $aggregateClass);
+    }
+
     /**
      * @param $properties
      * @return Token

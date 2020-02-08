@@ -2,8 +2,8 @@
 
 namespace App\Member\Entity;
 
-use App\Member\MemberInterface;
-use App\Member\Entity\Member;
+use App\Membership\Entity\MemberInterface;
+use App\Membership\Entity\Member;
 
 class SuspendedMember implements MemberInterface
 {

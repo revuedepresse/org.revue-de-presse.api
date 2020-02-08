@@ -7,7 +7,7 @@ use App\Aggregate\Repository\MemberAggregateSubscriptionRepository;
 use App\Api\Entity\Aggregate;
 use App\Member\Entity\AggregateSubscription;
 use App\Member\Entity\MemberSubscription;
-use App\Member\MemberInterface;
+use App\Membership\Entity\MemberInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ManagerRegistry;

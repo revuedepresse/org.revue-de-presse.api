@@ -2,7 +2,7 @@
 
 namespace App\Status\Entity;
 
-use App\Member\MemberInterface;
+use App\Membership\Entity\MemberInterface;
 use App\TimeRange\TimeRangeAwareTrait;
 use App\TimeRange\TimeRangeAwareInterface;
 use App\Api\Entity\Aggregate;

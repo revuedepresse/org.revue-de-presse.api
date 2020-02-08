@@ -92,11 +92,11 @@ class UserData extends AbstractFixture implements OrderedFixtureInterface,  Cont
             $user->setUsernameCanonical($userProperties['username_canonical']);
             $user->setTwitterUsername($userProperties['twitter_username']);
 
-            /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $firstToken */
+            /** @var \App\Api\Entity\Token $firstToken */
             $firstToken = $manager->merge($this->getReference('user_token_1'));
             $user->addToken($firstToken);
 
-            /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $secondToken */
+            /** @var \App\Api\Entity\Token $secondToken */
             $secondToken = $manager->merge($this->getReference('user_token_2'));
             $user->addToken($secondToken);
 

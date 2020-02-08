@@ -173,7 +173,7 @@ class SerializeStatusesCommandTest extends CommandTestCase
     {
         $tokenRepositoryClass = $this->getParameter('weaving_the_web_api.repository.token.class');
 
-        $tokenMock = $this->prophet->prophesize('\WeavingTheWeb\Bundle\ApiBundle\Entity\Token');
+        $tokenMock = $this->prophet->prophesize('\App\Api\Entity\Token');
         $tokenMock->getFrozenUntil()->willReturn(new \DateTime('1979'));
         $tokenMock->isFrozen()->willReturn(false);
 

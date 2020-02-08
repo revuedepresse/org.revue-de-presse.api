@@ -4,7 +4,7 @@ namespace App\Member\Command;
 
 use App\Console\CommandReturnCodeAwareInterface;
 use App\Member\Entity\AggregateSubscription;
-use App\Member\MemberInterface;
+use App\Membership\Entity\MemberInterface;
 use App\Member\Repository\AggregateSubscriptionRepository;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;

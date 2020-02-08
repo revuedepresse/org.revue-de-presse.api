@@ -4,7 +4,7 @@ namespace App\Twitter\Serializer;
 
 use App\Accessor\Exception\ApiRateLimitingException;
 use App\Amqp\Exception\SkippableMessageException;
-use App\Member\MemberInterface;
+use App\Membership\Entity\MemberInterface;
 use App\Status\LikedStatusCollectionAwareInterface;
 
 use App\Accessor\Exception\NotFoundStatusException;
@@ -15,7 +15,7 @@ use Symfony\Component\Translation\TranslatorInterface;
 
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\StatusInterface;
-use WeavingTheWeb\Bundle\ApiBundle\Entity\Token,
+use App\Api\Entity\Token,
     WeavingTheWeb\Bundle\ApiBundle\Entity\Whisperer;
 
 use App\Twitter\Exception\BadAuthenticationDataException;
@@ -453,7 +453,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         $availableApi = false;
 
         /**
-         * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token
+         * @var \App\Api\Entity\Token $token
          */
         $token = $this->tokenRepository->refreshFreezeCondition($this->accessor->userToken, $this->logger);
 

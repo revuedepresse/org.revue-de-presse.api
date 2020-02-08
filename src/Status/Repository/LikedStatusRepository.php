@@ -2,7 +2,7 @@
 
 namespace App\Status\Repository;
 
-use App\Member\MemberInterface;
+use App\Membership\Entity\MemberInterface;
 use App\Status\Entity\LikedStatus;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;

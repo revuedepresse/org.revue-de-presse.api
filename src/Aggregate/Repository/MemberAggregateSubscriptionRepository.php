@@ -3,7 +3,7 @@
 namespace App\Aggregate\Repository;
 
 use App\Aggregate\Entity\MemberAggregateSubscription;
-use App\Member\MemberInterface;
+use App\Membership\Entity\MemberInterface;
 use Doctrine\ORM\EntityRepository;
 
 class MemberAggregateSubscriptionRepository extends EntityRepository

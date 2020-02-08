@@ -3,7 +3,7 @@
 namespace App\Api\Repository;
 
 use App\Aggregate\Repository\TimelyStatusRepository;
-use App\Member\MemberInterface;
+use App\Membership\Entity\MemberInterface;
 use App\Status\Entity\LikedStatus;
 use App\Status\Repository\ExtremumAwareInterface;
 use App\Status\Repository\LikedStatusRepository;
@@ -16,6 +16,7 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\ORMException;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\Persistence\ManagerRegistry;
 use Psr\Log\LoggerInterface;
 
 use App\Api\Entity\Aggregate;
@@ -25,7 +26,7 @@ use App\Api\Entity\StatusInterface;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\ProtectedAccountException;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException;
-use App\Member\Entity\Member;
+use App\Membership\Entity\Member;
 use App\Member\Repository\MemberRepository;
 
 /**
@@ -77,6 +78,18 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
      * @var Connection
      */
     public $connection;
+
+    /**
+     * @param ManagerRegistry $managerRegistry
+     * @param string         $aggregate
+     */
+    public function __construct(
+        ManagerRegistry $managerRegistry,
+        string $aggregateClass
+    )
+    {
+        parent::__construct($managerRegistry, $aggregateClass);
+    }
 
     public function setOauthTokens($oauthTokens)
     {

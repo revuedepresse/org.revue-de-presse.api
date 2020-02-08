@@ -2,7 +2,7 @@
 
 namespace App\Status\Entity;
 
-use App\Member\MemberInterface;
+use App\Membership\Entity\MemberInterface;
 use Predis\Configuration\Option\Aggregate;
 use App\Api\Entity\StatusInterface;
 
@@ -21,7 +21,7 @@ class Highlight
     private $status;
 
     /**
-     * @var \App\Member\Entity\Member
+     * App\Membership\Entity\Member
      */
     private $member;
 

@@ -2,7 +2,7 @@
 
 namespace App\Security;
 
-use App\Member\MemberInterface;
+use App\Membership\Entity\MemberInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;

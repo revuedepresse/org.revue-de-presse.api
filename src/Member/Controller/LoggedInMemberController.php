@@ -2,7 +2,7 @@
 
 namespace App\Member\Controller;
 
-use App\Member\MemberInterface;
+use App\Membership\Entity\MemberInterface;
 use App\Member\Repository\AuthenticationTokenRepository;
 use App\Security\Cors\CorsHeadersAwareTrait;
 use Symfony\Component\HttpFoundation\JsonResponse;

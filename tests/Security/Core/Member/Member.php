@@ -3,14 +3,14 @@
 namespace App\Tests\Security\Core\Member;
 
 use Doctrine\ORM\Mapping as ORM;
-use App\Member\Entity\Member as BaseUser;
+use App\Membership\Entity\Member as BaseMember;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  * @ORM\Entity
  * @ORM\MappedSuperclass
  */
-class Member extends BaseUser
+class Member extends BaseMember
 {
     public function __construct(
         $username,

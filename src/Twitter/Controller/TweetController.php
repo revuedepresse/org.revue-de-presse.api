@@ -315,7 +315,7 @@ class TweetController extends Controller
                 throw new \Exception($this->get('translator')->trans('twitter.error.invalid_oauth_token', [], 'messages'));
             }
         } else {
-            /** @var \App\Member\Entity\Member $user */
+            /** App\Membership\Entity\Member $user */
             $user = $userManager->findOneBy(['twitter_username' => $username]);
 
             if (is_null($user)) {
@@ -328,7 +328,7 @@ class TweetController extends Controller
             $tokens = $user->getTokens()->toArray();
 
             $oauthTokens = [];
-            /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token */
+            /** @var \App\Api\Entity\Token $token */
             foreach ($tokens as $token) {
                 $oauthToken = $token->getOauthToken();
                 $oauthTokens[] = $token->getOauthToken();

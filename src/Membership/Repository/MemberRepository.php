@@ -1,11 +1,11 @@
 <?php
 
-namespace App\Member\Repository;
+namespace App\Membership\Repository;
 
 use App\Aggregate\Controller\SearchParams;
 use App\Aggregate\Repository\PaginationAwareTrait;
 use App\Api\Entity\Aggregate;
-use App\Member\MemberInterface;
+use App\Membership\Entity\MemberInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityRepository;
@@ -14,7 +14,7 @@ use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
-use App\Member\Entity\Member;
+use App\Membership\Entity\Member;
 
 class MemberRepository extends ServiceEntityRepository
 {

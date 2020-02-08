@@ -6,7 +6,7 @@ use App\Member\Entity\ExceptionalMember;
 use App\Member\Entity\NotFoundMember;
 use App\Member\Entity\ProtectedMember;
 use App\Member\Entity\SuspendedMember;
-use App\Member\MemberInterface;
+use App\Membership\Entity\MemberInterface;
 use Doctrine\ORM\EntityManager;
 use App\Twitter\Api\Accessor;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;

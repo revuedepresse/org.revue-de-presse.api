@@ -5,7 +5,7 @@ namespace App\Aggregate\Command;
 use App\Aggregate\Repository\MemberAggregateSubscriptionRepository;
 use App\Console\AbstractCommand;
 use App\Member\Entity\AggregateSubscription;
-use App\Member\MemberInterface;
+use App\Membership\Entity\MemberInterface;
 use App\Member\Repository\AggregateSubscriptionRepository;
 use App\Member\Repository\NetworkRepository;
 use Symfony\Component\Console\Input\InputInterface;

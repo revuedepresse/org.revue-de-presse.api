@@ -10,8 +10,9 @@ use Doctrine\ORM\QueryBuilder;
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\Status;
 use App\Api\Entity\StatusInterface;
+use Doctrine\Persistence\ManagerRegistry;
 use WeavingTheWeb\Bundle\TwitterBundle\Serializer\UserStatus;
-use App\Member\Entity\Member;
+use App\Membership\Entity\Member;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
@@ -169,7 +170,7 @@ class StatusRepository extends ArchivedStatusRepository
 
     /**
      * @param $screenName
-     * @return \App\Member\MemberInterface
+     * @return \App\Membership\Entity\MemberInterface
      * @throws NotFoundStatusException
      * @throws \Doctrine\DBAL\DBALException
      * @throws \Doctrine\ORM\OptimisticLockException
@@ -324,7 +325,7 @@ class StatusRepository extends ArchivedStatusRepository
 
     /**
      * @param $status
-     * @return \App\Member\MemberInterface
+     * @return \App\Membership\Entity\MemberInterface
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException
      */
@@ -340,7 +341,7 @@ class StatusRepository extends ArchivedStatusRepository
 
     /**
      * @param $status
-     * @return \App\Member\MemberInterface
+     * @return \App\Membership\Entity\MemberInterface
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException
      */
@@ -357,7 +358,7 @@ class StatusRepository extends ArchivedStatusRepository
     /**
      * @param        $status
      * @param string $memberName
-     * @return \App\Member\MemberInterface
+     * @return \App\Membership\Entity\MemberInterface
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException
      */
@@ -374,7 +375,7 @@ class StatusRepository extends ArchivedStatusRepository
     /**
      * @param        $status
      * @param string $memberName
-     * @return \App\Member\MemberInterface
+     * @return \App\Membership\Entity\MemberInterface
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException
      */

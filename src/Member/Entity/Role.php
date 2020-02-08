@@ -5,7 +5,7 @@ namespace App\Member\Entity;
 use Doctrine\Common\Collections\ArrayCollection,
     Doctrine\ORM\Mapping as ORM;
 
-use App\Member\Entity\Member;
+use App\Membership\Entity\Member;
 
 /**
  * @ORM\Entity

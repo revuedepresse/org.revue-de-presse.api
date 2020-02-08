@@ -6,7 +6,7 @@ use App\Aggregate\Controller\SearchParams;
 use App\Aggregate\Entity\TimelyStatus;
 use App\Aggregate\Repository\PaginationAwareTrait;
 use App\Aggregate\Repository\TimelyStatusRepository;
-use App\Member\MemberInterface;
+use App\Membership\Entity\MemberInterface;
 use App\Operation\CapableOfDeletionInterface;
 use App\Status\Entity\LikedStatus;
 use App\Status\Repository\LikedStatusRepository;

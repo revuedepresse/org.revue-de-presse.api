@@ -3,7 +3,7 @@
 namespace App\Member\Entity;
 
 use App\Aggregate\Entity\MemberAggregateSubscription;
-use App\Member\MemberInterface;
+use App\Membership\Entity\MemberInterface;
 
 class AggregateSubscription
 {

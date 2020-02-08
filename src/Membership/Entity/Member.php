@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Member\Entity;
+namespace App\Membership\Entity;
 
-use App\Member\MemberInterface;
-use App\Member\Model\Member as MemberModel;
+use App\Membership\Entity\MemberInterface;
+use App\Membership\Model\Member as MemberModel;
 
 use Doctrine\ORM\Mapping as ORM;
 
@@ -28,7 +28,7 @@ use Doctrine\ORM\Mapping as ORM;
  *          })
  *      }
  * )
- * @ORM\Entity(repositoryClass="App\Member\Repository\MemberRepository")
+ * @ORM\Entity(repositoryClass="App\Membership\Repository\MemberRepository")
  * @ORM\InheritanceType("SINGLE_TABLE")
  * @ORM\DiscriminatorColumn(name="usr_position_in_hierarchy", type="integer")
  * @ORM\DiscriminatorMap({"1" = "Member", "0" = "\App\Tests\Security\Core\Member\Member"})
@@ -450,10 +450,10 @@ class Member extends MemberModel implements MemberInterface
     /**
      * Add tokens
      *
-     * @param \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $tokens
+     * @param \App\Api\Entity\Token $tokens
      * @return User
      */
-    public function addToken(\WeavingTheWeb\Bundle\ApiBundle\Entity\Token $tokens)
+    public function addToken(\App\Api\Entity\Token $tokens)
     {
         $this->tokens[] = $tokens;
     
@@ -463,9 +463,9 @@ class Member extends MemberModel implements MemberInterface
     /**
      * Remove tokens
      *
-     * @param \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $tokens
+     * @param \App\Api\Entity\Token $tokens
      */
-    public function removeToken(\WeavingTheWeb\Bundle\ApiBundle\Entity\Token $tokens)
+    public function removeToken(\App\Api\Entity\Token $tokens)
     {
         $this->tokens->removeElement($tokens);
     }

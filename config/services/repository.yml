@@ -1,6 +1,6 @@
 parameters:
 
-    weaving_the_web_api.entity.token.class:         'WeavingTheWeb\Bundle\ApiBundle\Entity\Token'
+    weaving_the_web_api.entity.token.class:         'App\Api\Entity\Token'
     weaving_the_web_api.entity.whisperer.class:     'WeavingTheWeb\Bundle\ApiBundle\Entity\Whisperer'
 
 services:

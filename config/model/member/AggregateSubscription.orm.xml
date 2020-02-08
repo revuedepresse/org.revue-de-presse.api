@@ -33,7 +33,7 @@
         </many-to-one>
 
         <many-to-one
-            target-entity="App\Member\Entity\Member"
+            target-entity="App\Membership\Entity\Member"
             field="subscription"
         >
             <join-column

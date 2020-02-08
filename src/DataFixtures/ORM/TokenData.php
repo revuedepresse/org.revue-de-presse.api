@@ -7,8 +7,8 @@ use Doctrine\Common\DataFixtures\AbstractFixture,
     Doctrine\Common\Persistence\ObjectManager,
     Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 
-use WeavingTheWeb\Bundle\ApiBundle\Entity\Token,
-    WeavingTheWeb\Bundle\ApiBundle\Entity\TokenType;
+use App\Api\Entity\Token,
+    App\Api\Entity\TokenType;
 
 class TokenData extends AbstractFixture implements OrderedFixtureInterface
 {
@@ -31,7 +31,7 @@ class TokenData extends AbstractFixture implements OrderedFixtureInterface
 
         $token = new Token();
 
-        /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\TokenType $userTokenType */
+        /** @var \App\Api\Entity\TokenType $userTokenType */
         $userTokenType = $manager->merge($this->getReference('token_type_' . TokenType::USER));
         $token->setType($userTokenType);
 

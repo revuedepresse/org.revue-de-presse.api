@@ -22,7 +22,7 @@ use WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;
-use App\Member\Entity\Member;
+use App\Membership\Entity\Member;
 
 class ConversationStatusConsumer implements ConsumerInterface
 {

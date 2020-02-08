@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Member\Model;
+namespace App\Membership\Model;
 
-use App\Member\MemberInterface;
+use App\Membership\Entity\MemberInterface;
 
 abstract class Member
 {

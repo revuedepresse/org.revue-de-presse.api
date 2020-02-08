@@ -9,14 +9,14 @@ use App\Accessor\StatusAccessor;
 use App\Accessor\Exception\ApiRateLimitingException;
 
 use App\Member\Entity\AggregateSubscription;
-use App\Member\MemberInterface;
+use App\Membership\Entity\MemberInterface;
 use App\Status\LikedStatusCollectionAwareInterface;
 use Doctrine\Common\Persistence\ObjectRepository;
 
 use GuzzleHttp\Exception\ConnectException;
 use Psr\Log\LoggerInterface;
 
-use WeavingTheWeb\Bundle\ApiBundle\Entity\Token;
+use App\Api\Entity\Token;
 
 use App\Twitter\Exception\BadAuthenticationDataException;
 use App\Twitter\Exception\EmptyErrorCodeException;
@@ -27,7 +27,7 @@ use App\Twitter\Exception\SuspendedAccountException;
 use App\Twitter\Exception\UnavailableResourceException;
 
 use TwitterOauth;
-use App\Member\Entity\Member;
+use App\Membership\Entity\Member;
 use App\Member\Repository\MemberRepository;
 
 /**
@@ -715,7 +715,7 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
      */
     public function preEndpointContact(array $tokens, $endpoint)
     {
-        /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token */
+        /** @var \App\Api\Entity\Token $token */
         $token = $this->tokenRepository->refreshFreezeCondition($tokens['oauth'], $this->logger);
 
         if (!$token->isFrozen()) {
@@ -1349,7 +1349,7 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
             $members = $sendRequest();
         } catch (UnavailableResourceException $exception) {
             /**
-             * @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $token
+             * @var \App\Api\Entity\Token $token
              */
             $token = $this->tokenRepository->findOneBy(['oauthToken' => $this->userToken]);
             $this->waitUntilTokenUnfrozen($token);

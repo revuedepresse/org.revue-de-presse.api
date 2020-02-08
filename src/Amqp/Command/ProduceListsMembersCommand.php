@@ -18,11 +18,11 @@ use Symfony\Component\Translation\TranslatorInterface;
 
 use WeavingTheWeb\Bundle\AmqpBundle\Exception\InvalidListNameException;
 
-use WeavingTheWeb\Bundle\ApiBundle\Entity\Token;
+use App\Api\Entity\Token;
 
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;
 
-use App\Member\Entity\Member;
+use App\Membership\Entity\Member;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>

@@ -2,7 +2,7 @@
 
 namespace App\Media\Entity;
 
-use App\Member\MemberInterface;
+use App\Membership\Entity\MemberInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 
 class Media

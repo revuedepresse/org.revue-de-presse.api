@@ -7,7 +7,7 @@ use Doctrine\Common\DataFixtures\AbstractFixture,
     Doctrine\Common\Persistence\ObjectManager,
     Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 
-use WeavingTheWeb\Bundle\ApiBundle\Entity\TokenType;
+use App\Api\Entity\TokenType;
 
 class TokenTypeData extends AbstractFixture implements OrderedFixtureInterface
 {

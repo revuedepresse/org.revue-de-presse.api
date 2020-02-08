@@ -276,10 +276,10 @@ class AccessorTest extends WebTestCase
         $exception = $this->makeException(1);
         $caughtExceptions = [];
 
-        $tokenProphecy = $this->prophet->prophesize('\WeavingTheWeb\Bundle\ApiBundle\Entity\Token');
+        $tokenProphecy = $this->prophet->prophesize('\App\Api\Entity\Token');
         $tokenProphecy->getOauthToken()->shouldBeCalled();
 
-        /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $tokenMock */
+        /** @var \App\Api\Entity\Token $tokenMock */
         $tokenMock = $tokenProphecy->reveal();
 
         try {
@@ -324,7 +324,7 @@ class AccessorTest extends WebTestCase
      */
     public function it_should_refresh_freezing_conditions_before_contacting_endpoint()
     {
-        $tokenProphecy = $this->prophet->prophesize('\WeavingTheWeb\Bundle\ApiBundle\Entity\Token');
+        $tokenProphecy = $this->prophet->prophesize('\App\Api\Entity\Token');
         $tokenProphecy->isFrozen()->shouldBeCalled();
 
         $tokenRepositoryProphecy = $this->prophet->prophesize(
@@ -340,7 +340,7 @@ class AccessorTest extends WebTestCase
         $token = $this->accessor->preEndpointContact(['oauth' => ''], '/' );
 
         $this->assertInstanceOf(
-            '\WeavingTheWeb\Bundle\ApiBundle\Entity\Token',
+            '\App\Api\Entity\Token',
             $token,
             'It should return a refreshed token'
         );
@@ -411,9 +411,9 @@ class AccessorTest extends WebTestCase
     {
         $tokens = $this->mockOAuthTokens();
 
-        $tokenProphecy = $this->prophet->prophesize('\WeavingTheWeb\Bundle\ApiBundle\Entity\Token');
+        $tokenProphecy = $this->prophet->prophesize('\App\Api\Entity\Token');
 
-        /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $tokenMock */
+        /** @var \App\Api\Entity\Token $tokenMock */
         $tokenMock = $tokenProphecy->reveal();
 
         $caughtExceptions = [];
@@ -483,9 +483,9 @@ class AccessorTest extends WebTestCase
 
         $this->accessor->setLogger($loggerMock);
 
-        $tokenProphecy = $this->prophet->prophesize('\WeavingTheWeb\Bundle\ApiBundle\Entity\Token');
+        $tokenProphecy = $this->prophet->prophesize('\App\Api\Entity\Token');
 
-        /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $tokenMock */
+        /** @var \App\Api\Entity\Token $tokenMock */
         $tokenMock = $tokenProphecy->reveal();
 
         $exception = $this->accessor->logExceptionForToken('/', $content, $tokenMock);
@@ -564,19 +564,19 @@ class AccessorTest extends WebTestCase
      */
     public function it_should_take_care_of_request_errors_mismatching_twitter_error()
     {
-        $tokenProphecy = $this->prophet->prophesize('\WeavingTheWeb\Bundle\ApiBundle\Entity\Token');
+        $tokenProphecy = $this->prophet->prophesize('\App\Api\Entity\Token');
         $tokenProphecy->getOauthToken()->willReturn('token')->shouldBeCalled();
         $tokenProphecy->__toString()->willReturn('tok')->shouldBeCalled();
 
-        /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $tokenMock */
+        /** @var \App\Api\Entity\Token $tokenMock */
         $tokenMock = $tokenProphecy->reveal();
 
-        $unfrozenTokenProphecy = $this->prophet->prophesize('\WeavingTheWeb\Bundle\ApiBundle\Entity\Token');
+        $unfrozenTokenProphecy = $this->prophet->prophesize('\App\Api\Entity\Token');
         $unfrozenTokenProphecy->isFrozen()->willReturn(false)->shouldBeCalled();
         $unfrozenTokenProphecy->getOauthToken()->willReturn('token')->shouldBeCalled();
         $unfrozenTokenProphecy->__toString()->willReturn('tok')->shouldBeCalled();
 
-         /** @var \WeavingTheWeb\Bundle\ApiBundle\Entity\Token $unfrozenTokenMock */
+         /** @var \App\Api\Entity\Token $unfrozenTokenMock */
         $unfrozenTokenMock = $unfrozenTokenProphecy->reveal();
 
         $tokenRepositoryProphecy = $this->prophet
@@ -625,7 +625,7 @@ class AccessorTest extends WebTestCase
      */
     protected function mockOauthTokenCheck()
     {
-        $tokenProphecy = $this->prophet->prophesize('\WeavingTheWeb\Bundle\ApiBundle\Entity\Token');
+        $tokenProphecy = $this->prophet->prophesize('\App\Api\Entity\Token');
         $tokenProphecy->isFrozen()->willReturn(false)->shouldBeCalled();
         $tokenMock = $tokenProphecy->reveal();
 

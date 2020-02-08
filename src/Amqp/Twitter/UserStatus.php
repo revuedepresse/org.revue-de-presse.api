@@ -2,14 +2,14 @@
 
 namespace Amqp\Twitter;
 
-use App\Member\MemberInterface;
+use App\Membership\Entity\MemberInterface;
 use App\Operation\OperationClock;
 use App\Status\LikedStatusCollectionAwareInterface;
 use Doctrine\ORM\EntityRepository;
 use OldSound\RabbitMqBundle\RabbitMq\ConsumerInterface;
 use PhpAmqpLib\Message\AmqpMessage;
 use Psr\Log\LoggerInterface;
-use WeavingTheWeb\Bundle\ApiBundle\Entity\Token;
+use App\Api\Entity\Token;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\TokenRepository;
 use WeavingTheWeb\Bundle\TwitterBundle\Api\TwitterErrorAwareInterface;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\ProtectedAccountException;

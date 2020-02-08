@@ -16,7 +16,7 @@ use WeavingTheWeb\Bundle\TwitterBundle\Exception\ProtectedAccountException,
 
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException;
 
-use App\Member\Entity\Member;
+use App\Membership\Entity\Member;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>

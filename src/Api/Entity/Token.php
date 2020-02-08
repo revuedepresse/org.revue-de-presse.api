@@ -4,8 +4,8 @@ namespace App\Api\Entity;
 
 use Doctrine\ORM\Mapping as ORM,
     Doctrine\Common\Collections\ArrayCollection;
-use App\Member\Entity\Member;
-use WeavingTheWeb\Bundle\ApiBundle\Entity\TokenType;
+use App\Membership\Entity\Member;
+use App\Api\Entity\TokenType;
 
 /**
  * @ORM\Table(name="weaving_access_token")
@@ -80,7 +80,7 @@ class Token
     protected $updatedAt;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Member\Entity\Member", mappedBy="tokens")
+     * @ORM\ManyToMany(targetEntity="App\Membership\Entity\Member", mappedBy="tokens")
      */
     protected $users;
 
@@ -201,7 +201,7 @@ class Token
     /**
      * Add users
      *
-     * @param \App\Member\Entity\Member $users
+     * @param \App\Membership\Entity\Member $users
      * @return Token
      */
     public function addUser(User $users)
@@ -214,7 +214,7 @@ class Token
     /**
      * Remove users
      *
-     * @param \App\Member\Entity\Member $users
+     * @param \App\Membership\Entity\Member $users
      */
     public function removeUser(User $users)
     {
@@ -258,7 +258,7 @@ class Token
     /**
      * Set type
      *
-     * @param \WeavingTheWeb\Bundle\ApiBundle\Entity\TokenType $type
+     * @param \App\Api\Entity\TokenType $type
      * @return Token
      */
     public function setType(TokenType $type = null)

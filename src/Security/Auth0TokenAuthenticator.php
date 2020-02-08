@@ -3,7 +3,7 @@
 namespace App\Security;
 
 use App\Member\Authentication\Authenticator;
-use App\Member\MemberInterface;
+use App\Membership\Entity\MemberInterface;
 use App\Member\Repository\AuthenticationTokenRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\User\UserInterface;
