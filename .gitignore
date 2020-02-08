@@ -1,10 +1,6 @@
 app/*.xml
-app/bootstrap.php.cache
-app/cache
 app/config/*.yml
 !app/config/services.yml
-app/logs
-app/SymfonyRequirements.php
 bin/phpunit
 build/*
 !build/.gitignore
@@ -14,5 +10,18 @@ provisioning/volumes/mysql/*
 provisioning/volumes/mysql*/*
 vendor
 
-# migrating Symfony 3.x to Symfony 4.x
-\.env
+###> symfony/framework-bundle ###
+/.env.local
+/.env.local.php
+/.env.*.local
+/config/secrets/prod/prod.decrypt.private.php
+/public/bundles/
+/var/cache
+/var/logs
+/vendor/
+###< symfony/framework-bundle ###
+
+###> phpunit/phpunit ###
+/phpunit.xml
+.phpunit.result.cache
+###< phpunit/phpunit ###

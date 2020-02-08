@@ -6,44 +6,26 @@ imports:
     - { resource: services/repository.yml }
     - { resource: services/security.yml }
 
-parameters:
-    redis_cache:                                                  'App\Cache\RedisCache'
-
-    weaving_the_web_twitter.api_accessor.class:                   'WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor'
-    weaving_the_web_twitter.api_host:                             'api.twitter.com'
-
-    weaving_the_web_twitter.moderator.api_limit.class:            'WeavingTheWeb\Bundle\ApiBundle\Moderator\ApiLimitModerator'
-
-    weaving_the_web_twitter.authenticate_application.class:       'WeavingTheWeb\Bundle\TwitterBundle\Command\AuthenticateApplicationCommand'
-    weaving_the_web_twitter.authentication_uri:                   '/oauth2/token'
-
-    weaving_the_web_twitter.client.class:                         '\Goutte\Client'
-
-    weaving_the_web_twitter.consumer_key:                         '%api_twitter_consumer_key%'
-    weaving_the_web_twitter.consumer_secret:                      '%api_twitter_consumer_secret%'
-    weaving_the_web_twitter.endpoint.feed:                        '%endpoint_twitter_feed%'
-
-    weaving_the_web_twitter.http_client.class:                    '\GuzzleHttp\Client'
-
-    weaving_the_web_twitter.oauth_client.class:                   'TwitterOAuth'
-    weaving_the_web_twitter.oauth_token.default:                  '%api_twitter_user_token%'
-    weaving_the_web_twitter.oauth_secret.default:                 '%api_twitter_user_secret%'
-
-    weaving_the_web_twitter.entity.archived_status.class:         'WeavingTheWeb\Bundle\ApiBundle\Entity\ArchivedStatus'
-    weaving_the_web_twitter.entity.aggregate.class:               '%weaving_the_web_api.entity.aggregate.class%'
-    weaving_the_web_twitter.entity.status.class:                  '%weaving_the_web_api.entity.status.class%'
-    weaving_the_web_twitter.entity.token.class:                   '%weaving_the_web_api.entity.token.class%'
-
-    weaving_the_web_twitter.repository.aggregate.class:           '%weaving_the_web_api.repository.aggregate.class%'
-    weaving_the_web_twitter.repository.status.class:              '%weaving_the_web_api.repository.status.class%'
-    weaving_the_web_twitter.repository.token.class:               '%weaving_the_web_api.repository.token.class%'
-
-    weaving_the_web_twitter.serializer.user_status.class:         'WeavingTheWeb\Bundle\TwitterBundle\Serializer\UserStatus'
-    weaving_the_web_twitter.serialize_statuses.class:             'WeavingTheWeb\Bundle\TwitterBundle\Command\SerializeStatusesCommand'
-
-    weaving_the_web_twitter.version:                              '%api_twitter_version%'
-
 services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    #    App\:
+    #        resource: '../src/*'
+    #        exclude: '../src/{Controler,DependencyInjection,Entity,Migrations,Tests,Kernel.php}'
+
+    # controllers are imported separately to make sure services can be injected
+    # as action arguments even if you don't extend any base controller class
+    App\Controller\:
+        resource: '../src/Aggregate/Controller/.*.php'
+        tags: ['controller.service_arguments']
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
     app.cache.redis:
         class: '%redis_cache%'
         arguments:
@@ -98,8 +80,9 @@ services:
 
     weaving_the_web_twitter.repository.aggregate:
         class: '%weaving_the_web_twitter.repository.aggregate.class%'
-        factory: 'doctrine.orm.entity_manager:getRepository'
-        arguments: [ '%weaving_the_web_twitter.entity.aggregate.class%' ]
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - '%weaving_the_web_twitter.entity.aggregate.class%'
         properties:
             logger:                 '@logger'
             statusRepository:       '@weaving_the_web_twitter.repository.status'
@@ -107,9 +90,10 @@ services:
             likedStatusRepository:  '@repository.liked_status'
 
     weaving_the_web_twitter.repository.status:
-        class:                        '%weaving_the_web_api.repository.status.class%'
-        factory:                      'doctrine.orm.entity_manager:getRepository'
-        arguments:                    [ '%weaving_the_web_twitter.entity.status.class%' ]
+        class:  '%weaving_the_web_api.repository.status.class%'
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - '%weaving_the_web_twitter.entity.status.class%'
         properties:
             archivedStatusRepository: '@weaving_the_web_twitter.repository.archived_status'
             likedStatusRepository:    '@repository.liked_status'
@@ -117,26 +101,28 @@ services:
             registry:                 '@doctrine'
             statusLogger:             '@monolog.logger.status'
             timelyStatusRepository:   '@repository.timely_status'
-            connection:               '@doctrine.dbal.read_connection'
+            connection:               '@doctrine.dbal.default_connection'
             queryFactory:             '@weaving_the_web.api.query_factory'
 
     weaving_the_web_twitter.repository.archived_status:
-        class:               '%weaving_the_web_api.repository.archived_status.class%'
-        factory:             'doctrine.orm.entity_manager:getRepository'
-        arguments:           [ '%weaving_the_web_twitter.entity.archived_status.class%' ]
+        class:  '%weaving_the_web_api.repository.archived_status.class%'
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - '%weaving_the_web_twitter.entity.archived_status.class%'
         properties:
             likedStatusRepository:  '@repository.liked_status'
             memberManager:          '@user_manager'
             registry:               '@doctrine'
             statusLogger:           '@monolog.logger.status'
             timelyStatusRepository: '@repository.timely_status'
-            connection:             '@doctrine.dbal.read_connection'
+            connection:             '@doctrine.dbal.default_connection'
             queryFactory:           '@weaving_the_web.api.query_factory'
 
     weaving_the_web_twitter.repository.read.status:
-        class:              '%weaving_the_web_api.repository.status.class%'
-        factory:            'doctrine.orm.read_entity_manager:getRepository'
-        arguments:          [ '%weaving_the_web_twitter.entity.status.class%' ]
+        class:  '%weaving_the_web_api.repository.status.class%'
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - '%weaving_the_web_twitter.entity.status.class%'
         calls:
             - [ 'setOauthTokens', [ [ '%weaving_the_web_twitter.oauth_token.default%' ] ] ]
         properties:
@@ -145,18 +131,20 @@ services:
             registry:               '@doctrine'
             statusLogger:           '@monolog.logger.status'
             timelyStatusRepository: '@repository.timely_status'
-            connection:             '@doctrine.dbal.read_connection'
+            connection:             '@doctrine.dbal.default_connection'
             queryFactory:           '@weaving_the_web.api.query_factory'
 
     weaving_the_web_twitter.repository.token:
         class: '%weaving_the_web_twitter.repository.token.class%'
-        factory: 'doctrine.orm.entity_manager:getRepository'
-        arguments: [ '%weaving_the_web_twitter.entity.token.class%' ]
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - '%weaving_the_web_twitter.entity.token.class%'
 
     weaving_the_web_twitter.repository.read.token:
         class: '%weaving_the_web_twitter.repository.token.class%'
-        factory: 'doctrine.orm.read_entity_manager:getRepository'
-        arguments: [ '%weaving_the_web_twitter.entity.token.class%' ]
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - '%weaving_the_web_twitter.entity.token.class%'
 
     weaving_the_web_twitter.moderator.api_limit:
         class:  '%weaving_the_web_twitter.moderator.api_limit.class%'
@@ -177,3 +165,49 @@ services:
         properties:
             twitterApiLogger:       '@monolog.logger.twitter_api'
             likedStatusRepository:  '@repository.liked_status'
+
+# This file is the entry point to configure your own services.
+# Files in the packages/ subdirectory configure your dependencies.
+
+# Put parameters here that don't need to change on each machine where the app is deployed
+# https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
+parameters:
+    monolog_channels:
+        - 'twitter_api'
+        - 'status'
+        - 'development'
+
+    redis_cache:                                                  'App\Cache\RedisCache'
+
+    weaving_the_web_twitter.api_accessor.class:                   'WeavingTheWeb\Bundle\TwitterBundle\Api\Accessor'
+    weaving_the_web_twitter.api_host:                             'api.twitter.com'
+
+    weaving_the_web_twitter.moderator.api_limit.class:            'WeavingTheWeb\Bundle\ApiBundle\Moderator\ApiLimitModerator'
+
+    weaving_the_web_twitter.authenticate_application.class:       'WeavingTheWeb\Bundle\TwitterBundle\Command\AuthenticateApplicationCommand'
+    weaving_the_web_twitter.authentication_uri:                   '/oauth2/token'
+
+    weaving_the_web_twitter.client.class:                         '\Goutte\Client'
+
+    weaving_the_web_twitter.consumer_key:                         '%env(resolve:API_TWITTER_CONSUMER_KEY)%'
+    weaving_the_web_twitter.consumer_secret:                      '%env(resolve:API_TWITTER_CONSUMER_SECRET)%'
+
+    weaving_the_web_twitter.http_client.class:                    '\GuzzleHttp\Client'
+
+    weaving_the_web_twitter.oauth_client.class:                   'TwitterOAuth'
+    weaving_the_web_twitter.oauth_token.default:                  '%env(resolve:API_TWITTER_USER_TOKEN)%'
+    weaving_the_web_twitter.oauth_secret.default:                 '%env(resolve:API_TWITTER_USER_SECRET)%'
+
+    weaving_the_web_twitter.entity.archived_status.class:         'WeavingTheWeb\Bundle\ApiBundle\Entity\ArchivedStatus'
+    weaving_the_web_twitter.entity.aggregate.class:               '%weaving_the_web_api.entity.aggregate.class%'
+    weaving_the_web_twitter.entity.status.class:                  '%weaving_the_web_api.entity.status.class%'
+    weaving_the_web_twitter.entity.token.class:                   '%weaving_the_web_api.entity.token.class%'
+
+    weaving_the_web_twitter.repository.aggregate.class:           '%weaving_the_web_api.repository.aggregate.class%'
+    weaving_the_web_twitter.repository.status.class:              '%weaving_the_web_api.repository.status.class%'
+    weaving_the_web_twitter.repository.token.class:               '%weaving_the_web_api.repository.token.class%'
+
+    weaving_the_web_twitter.serializer.user_status.class:         'WeavingTheWeb\Bundle\TwitterBundle\Serializer\UserStatus'
+    weaving_the_web_twitter.serialize_statuses.class:             'WeavingTheWeb\Bundle\TwitterBundle\Command\SerializeStatusesCommand'
+
+    weaving_the_web_twitter.version:                              '%env(resolve:API_TWITTER_VERSION)%'

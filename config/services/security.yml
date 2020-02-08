@@ -1,0 +1,13 @@
+services:
+    app.token_authenticator:
+        class:              'App\Security\TokenAuthenticator'
+        properties:
+            userRepository: '@user_manager'
+
+    app.auth0_token_authenticator:
+        class:              'App\Security\Auth0TokenAuthenticator'
+        properties:
+            authenticator:                  '@app.authenticator'
+            authenticationTokenRepository:  '@repository.authentication_token'
+            logger:                         '@monolog.logger.security'
+            userRepository:                 '@user_manager'
