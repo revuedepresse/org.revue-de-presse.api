@@ -10,7 +10,7 @@ use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use App\Member\Repository\MemberRepository;
 
-abstract class Auth0TokenAuthenticator extends TokenAuthenticator
+class Auth0TokenAuthenticator extends TokenAuthenticator
 {
     /**
      * @var MemberRepository

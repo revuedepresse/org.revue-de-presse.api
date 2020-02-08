@@ -13,13 +13,19 @@ use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use App\Member\Model\Member;
 use App\Member\Repository\MemberRepository;
+use Symfony\Component\Security\Guard\Token\PostAuthenticationGuardToken;
 
-abstract class TokenAuthenticator extends AbstractGuardAuthenticator
+class TokenAuthenticator extends AbstractGuardAuthenticator
 {
     /**
      * @var MemberRepository
      */
     public $userRepository;
+
+    public function supports(Request $request)
+    {
+        return true;
+    }
 
     /**
      * @param Request $request
