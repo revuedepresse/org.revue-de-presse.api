@@ -124,6 +124,14 @@ services:
             memberRepository: "@user_manager"
             statusRepository: "@weaving_the_web_twitter.repository.status"
 
+    App\Membership\Repository\MemberRepository:
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - 'App\Membership\Entity\Member'
+        properties:
+            aggregateRepository: "@repository.aggregate"
+        tags: [ 'doctrine.repository_service' ]
+
     repository.member_subscription:
         class: 'App\Member\Repository\MemberSubscriptionRepository'
         arguments:
