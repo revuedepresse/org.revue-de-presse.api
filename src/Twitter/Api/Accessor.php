@@ -1639,6 +1639,10 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
                 $token = $this->tokenRepository->findFirstFrozenToken();
             }
 
+            if ($token === null) {
+                InconsistentTokenRepository::onEmptyAvailableTokenList();
+            }
+
             $this->waitUntilTokenUnfrozen($token);
 
             return $token;
