@@ -4,7 +4,7 @@ namespace App\Console\EventSubscriber;
 
 use Doctrine\DBAL\Exception\ConnectionException;
 use Symfony\Component\Console\ConsoleEvents;
-use Symfony\Component\Console\Event\ConsoleExceptionEvent;
+use Symfony\Component\Console\Event\ConsoleErrorEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class ConsoleEventsSubscriber implements EventSubscriberInterface
@@ -25,18 +25,18 @@ class ConsoleEventsSubscriber implements EventSubscriberInterface
     }
 
 
-    public function logException(ConsoleExceptionEvent $event)
+    public function logException(ConsoleErrorEvent $event)
     {
-        $exception = $event->getException();
+        $exception = $event->getError();
         $this->logger->critical($exception->getMessage());
     }
 
     /**
-     * @param ConsoleExceptionEvent $event
+     * @param ConsoleErrorEvent $event
      */
-    public function notifyException(ConsoleExceptionEvent $event)
+    public function notifyException(ConsoleErrorEvent $event)
     {
-        $exception = $event->getException();
+        $exception = $event->getError();
 
         if (
             $exception->getTrace()[0]['function'] === 'error_handler' &&
@@ -48,7 +48,7 @@ class ConsoleEventsSubscriber implements EventSubscriberInterface
         }
 
         if ($exception instanceof ConnectionException) {
-            $event->setException(
+            $event->setError(
                 new \Exception(
                     'Could not connect to the database',
                     $exception->getCode()
