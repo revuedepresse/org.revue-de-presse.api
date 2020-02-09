@@ -17,8 +17,7 @@ install:
     - /bin/bash -c 'source ./bin/install-composer.sh'
     - php composer.phar config -g github-oauth.github.com $GITHUB_OAUTH_TOKEN
     - php composer.phar install --prefer-dist --no-scripts
-    - php composer.phar run-script build-bootstrap
-    - php app/console doctrine:schema:create -n -e test
+    - php bin/console doctrine:schema:create -n -e test
 script:
     - make run-php-unit-tests
 cache:
