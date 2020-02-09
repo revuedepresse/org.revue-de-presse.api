@@ -1,73 +1,38 @@
-imports:
-    - { resource: parameters/parameters_dbal.yml }
-    - { resource: parameters/parameters_maintenance.yml }
-    - { resource: parameters/parameters_rabbitmq.yml }
-    - { resource: parameters/parameters_test.yml }
-    - { resource: parameters/parameters_twitter.yml }
-    - { resource: parameters/parameters_weaving_the_web.yml }
+APP_ENV=test
+APP_SECRET=64ba62c3b4d48062948d77bc9b7a224f
+  #TRUSTED_PROXIES=127.0.0.0/8,10.0.0.0/8,172.16.0.0/12,192.168.0.0/16
+  #TRUSTED_HOSTS='^(localhost|example\.com)$'
+  ###< symfony/framework-bundle ###
 
-parameters:
-    app_version:                0.1
+  ###> doctrine/doctrine-bundle ###
+  # Format described at https://www.doctrine-project.org/projects/doctrine-dbal/en/latest/reference/configuration.html#connecting-using-a-url
+  # For an SQLite database, use: "sqlite:///%kernel.project_dir%/var/data.db"
+  # For a PostgreSQL database, use: "postgresql://db_user:db_password@127.0.0.1:5432/db_name?serverVersion=11&charset=utf8"
+  # IMPORTANT: You MUST configure your server version, either here or in config/packages/doctrine.yaml
+DATABASE_URL=mysql://root!iYH@127.0.0.1:3306/test?serverVersion=5.7
+DATABASE_WRITE_URL=mysql://root!iYH@127.0.0.1:3306/test?serverVersion=5.7
+  ###< doctrine/doctrine-bundle ###
 
-    feature_toggling_search:    false
+API_TWITTER_VERSION=1.1
 
-    locale:                     en
+API_TWITTER_CONSUMER_KEY=''
+API_TWITTER_CONSUMER_SECRET=''
 
-    framework_secret:           AN3wKindofS3cr3tf0rmyT3sts
+API_TWITTER_USER_TOKEN=''
+API_TWITTER_USER_SECRET=''
 
-    test_database_memory:       false
-    test_database_path:         %kernel.cache_dir%/wtw_dashboard.db
+OPERATIONS_SKIPPED_AFTER=12:00
+OPERATIONS_SKIPPED_BEFORE=11:30
 
-    php_binary:                 /usr/bin/php
+ADMIN_ROUTE_NAME=''
 
-    operations_skipped_after:   12:00
-    operations_skipped_before:  12:01
+ALLOWED_ORIGIN='*'
 
-    production_main_level:      error
+HIGHLIGHT_AGGREGATE_DEFAULT=''
 
-    api.twitter.protocol:        ''
-    api.twitter.host_port:       ''
+REDIS_HOST=127.0.0.1
+REDIS_PORT=6379
 
-    api.twitter.callback_url:    ''
+VALID_AUDIENCE=''
+AUTHORIZED_ISS=''
 
-    # Can be declared as environment variables
-    #api.twitter.consumer_key:    '_'
-    #api.twitter.consumer_secret: '_'
-    #api.twitter.user_secret:     ''
-    #api.twitter.user_token:      ''
-
-    mysql.host:                   '127.0.0.1'
-    mysql.port:                   '3306'
-    mysql.database:               'test'
-    mysql.user:                   'root'
-    mysql.password:               ''
-
-    mysql.admin_user:             'root'
-    mysql.admin_password:         ''
-
-    mysql.test_database:          'test'
-    mysql.test_user:              'root'
-    mysql.test_password:          ''
-
-    mysql.host_read:              '127.0.0.1'
-    mysql.port_read:              '3306'
-    mysql.database_read:          'test'
-    mysql.user_read:              'root'
-    mysql.password_read:          ''
-
-    mysql.host_write:             '127.0.0.1'
-    mysql.port_write:             '3306'
-    mysql.database_write:         'test'
-    mysql.user_write:             'root'
-    mysql.password_write:         ''
-
-    rabbitmq.host:                127.0.0.1
-    rabbitmq.vhost:               /
-    rabbitmq.user:                guest
-    rabbitmq.password:            guest
-
-    operations_skipped_after:     12:00
-    operations_skipped_before:    12:01
-
-    highlight_aggregate_default:  ''
-    admin_route_name:             ''
