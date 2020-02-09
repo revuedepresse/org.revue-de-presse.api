@@ -11,8 +11,8 @@ use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
-use App\Member\Model\Member;
-use App\Member\Repository\MemberRepository;
+use App\Membership\Model\Member;
+use App\Membership\Repository\MemberRepository;
 use Symfony\Component\Security\Guard\Token\PostAuthenticationGuardToken;
 
 class TokenAuthenticator extends AbstractGuardAuthenticator
@@ -61,7 +61,7 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
             return null;
         }
 
-        /** @var $member User */
+        /** @var Member $member */
         $member = $userProvider->loadUserByUsername($apiKey);
 
         if ($member instanceof MemberInterface) {
