@@ -36,7 +36,7 @@ class Role implements RoleInterface
     protected $role;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Member\Entity\Member", mappedBy="roles")
+     * @ORM\ManyToMany(targetEntity="App\Membership\Entity\Member", mappedBy="roles")
      */
     protected $users;
 
@@ -110,7 +110,7 @@ class Role implements RoleInterface
      * @param  User $users
      * @return Role
      */
-    public function addUser(User $users)
+    public function addUser(Member $users)
     {
         $this->users[] = $users;
 
@@ -122,7 +122,7 @@ class Role implements RoleInterface
      *
      * @param User $users
      */
-    public function removeUser(User $users)
+    public function removeUser(Member $users)
     {
         $this->users->removeElement($users);
     }

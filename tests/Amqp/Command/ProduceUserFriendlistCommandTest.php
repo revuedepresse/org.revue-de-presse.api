@@ -267,7 +267,7 @@ class ProduceUserFriendListCommandTest extends CommandTestCase
      */
     protected function getUserMock()
     {
-        $userMockBuilder = $this->getMockBuilder('App\Member\Entity\Member')
+        $userMockBuilder = $this->getMockBuilder('App\Membership\Entity\Member')
             ->disableOriginalConstructor()
             ->disableAutoload();
 

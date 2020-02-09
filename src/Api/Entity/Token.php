@@ -204,7 +204,7 @@ class Token
      * @param \App\Membership\Entity\Member $users
      * @return Token
      */
-    public function addUser(User $users)
+    public function addUser(Member $users)
     {
         $this->users[] = $users;
     
@@ -216,7 +216,7 @@ class Token
      *
      * @param \App\Membership\Entity\Member $users
      */
-    public function removeUser(User $users)
+    public function removeUser(Member $users)
     {
         $this->users->removeElement($users);
     }

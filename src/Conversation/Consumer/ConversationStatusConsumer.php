@@ -238,7 +238,7 @@ class ConversationStatusConsumer implements ConsumerInterface
      * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
      * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
      */
-    private function ensureStatusAuthorExists(Status $status): User
+    private function ensureStatusAuthorExists(Status $status): Member
     {
         $member = $this->userRepository->findOneBy(['twitter_username' => $status->getScreenName()]);
         if (!$member instanceof User) {

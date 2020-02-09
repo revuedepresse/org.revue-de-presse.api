@@ -179,7 +179,7 @@ class MemberRepository extends ServiceEntityRepository
      * @return MemberInterface
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    public function declareUserAsFound(User $user)
+    public function declareUserAsFound(Member $user)
     {
         $user->setNotFound(false);
 
@@ -227,7 +227,7 @@ class MemberRepository extends ServiceEntityRepository
      * @return MemberInterface
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    protected function saveUser(User $member)
+    protected function saveUser(Member $member)
     {
         return $this->saveMember($member);
     }

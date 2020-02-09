@@ -177,7 +177,7 @@ class UserStatusTest extends TestCase
         $userRepositoryProphecy = $this->prophet->prophesize('\App\Member\Repository\MemberRepository');
 
         if ($mockUser) {
-            $userProphecy = $this->prophet->prophesize('\App\Member\Entity\Member');
+            $userProphecy = $this->prophet->prophesize('\App\Membership\Entity\Member');
             $userMock = $userProphecy->reveal();
 
             $userRepositoryProphecy->findOneBy(Argument::any())

@@ -206,7 +206,7 @@ class ProduceUserFriendListCommand extends AggregateAwareCommand
      * @throws SkippableMemberException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
-    private function handlePreExistingMember(User $member, $assumedScreenName, $messageBody)
+    private function handlePreExistingMember(Member $member, $assumedScreenName, $messageBody)
     {
         $twitterUsername = $member->getTwitterUsername();
 
@@ -302,7 +302,7 @@ class ProduceUserFriendListCommand extends AggregateAwareCommand
      * @throws \Exception
      * @throws \WeavingTheWeb\Bundle\ApiBundle\Exception\InvalidTokenException
      */
-    private function saveMemberWithTwitterId($twitterUserId, $prexistingMember): User
+    private function saveMemberWithTwitterId($twitterUserId, $prexistingMember): Member
     {
         $twitterUser = $this->accessor->showUser($twitterUserId);
 
@@ -341,7 +341,7 @@ class ProduceUserFriendListCommand extends AggregateAwareCommand
      * @param      $assumedScreenName
      * @throws SkippableMemberException
      */
-    private function guardAgainstMembersWhichShouldBeSkipped(User $member, $assumedScreenName): void
+    private function guardAgainstMembersWhichShouldBeSkipped(Member $member, $assumedScreenName): void
     {
         if ($member->isAWhisperer()) {
             $skippedWhispererMessage = $this->translator->trans(
