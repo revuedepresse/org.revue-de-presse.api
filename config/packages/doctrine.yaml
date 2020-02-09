@@ -1,0 +1,70 @@
+doctrine:
+    dbal:
+        connections:
+            default:
+                url: '%env(resolve:DATABASE_URL)%'
+                # IMPORTANT: You MUST configure your server version,
+                # either here or in the DATABASE_URL env var (see .env file)
+                server_version: '5.7'
+                charset: utf8mb4
+            write:
+                url: '%env(resolve:DATABASE_WRITE_URL)%'
+                server_version: '5.7'
+                charset: utf8mb4
+        types:
+            uuid:  Ramsey\Uuid\Doctrine\UuidType
+    orm:
+        auto_generate_proxy_classes: true
+        entity_managers:
+            default:
+                naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+                auto_mapping: true
+                connection: default
+                mappings:
+                    Api:
+                        alias:      'Api'
+                        is_bundle:  false
+                        type:       annotation
+                        dir:        '%kernel.project_dir%/src/Api/Entity'
+                        prefix:     'App\Api\Entity'
+                    Aggregate:
+                        alias:      'Aggregate'
+                        dir:        '%kernel.project_dir%/config/model/aggregate'
+                        is_bundle:  false
+                        prefix:     App\Aggregate\Entity
+                        type:       xml
+                    Member:
+                        alias:      'Member'
+                        dir:        '%kernel.project_dir%/src/Membership/Entity'
+                        type:       annotation
+                        is_bundle:  false
+                        prefix:     App\Member\Entity
+                    Membership:
+                        alias:      'Membership'
+                        dir:        '%kernel.project_dir%/config/model/member'
+                        type:       xml
+                        is_bundle:  false
+                        prefix:     App\Membership\Entity
+                    Media:
+                        alias:      'Media'
+                        dir:        '%kernel.project_dir%/config/model/media'
+                        is_bundle:  false
+                        prefix:     App\Media\Entity
+                        type:       xml
+                    Popularity:
+                        alias:      'Popularity'
+                        dir:        '%kernel.project_dir%/config/model/popularity'
+                        is_bundle:  false
+                        prefix:     App\Popularity\Entity
+                        type:       xml
+                    Status:
+                        alias:      'Status'
+                        dir:        '%kernel.project_dir%/config/model/status'
+                        is_bundle:  false
+                        prefix:     App\Status\Entity
+                        type:       xml
+                    TestMembership:
+                        dir:        '%kernel.project_dir%/tests/Security/Core/Member'
+                        prefix:     App\Tests\Security\Core\Member
+                        type:       annotation
+                        is_bundle:  false
