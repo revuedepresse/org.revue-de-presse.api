@@ -7,7 +7,7 @@ use App\Conversation\Consistency\StatusConsistency;
 use App\Conversation\Exception\InvalidStatusException;
 use App\Conversation\Validation\StatusValidator;
 use App\Twitter\Exception\NotFoundMemberException;
-use InvalidArgumentException;
+
 use function array_key_exists;
 use function json_decode;
 
