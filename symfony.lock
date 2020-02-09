@@ -458,6 +458,22 @@
     "symfony/orm-pack": {
         "version": "dev-master"
     },
+    "symfony/phpunit-bridge": {
+        "version": "4.3",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "master",
+            "version": "4.3",
+            "ref": "3f8a8c93cd47061999316f8d56edd6c2abca9308"
+        },
+        "files": [
+            ".env.test",
+            "bin/phpunit",
+            "config/services_test.yaml",
+            "phpunit.xml.dist",
+            "tests/bootstrap.php"
+        ]
+    },
     "symfony/polyfill-ctype": {
         "version": "1.14-dev"
     },
@@ -519,6 +535,9 @@
     },
     "symfony/stopwatch": {
         "version": "5.1-dev"
+    },
+    "symfony/test-pack": {
+        "version": "dev-master"
     },
     "symfony/translation": {
         "version": "3.3",
@@ -591,6 +610,9 @@
     },
     "symfony/yaml": {
         "version": "5.1-dev"
+    },
+    "thecodingmachine/safe": {
+        "version": "0.1-dev"
     },
     "themattharris/tmhoauth": {
         "version": "dev-master"

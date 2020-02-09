@@ -3,7 +3,13 @@
 namespace App\Conversation;
 
 use App\Api\Entity\StatusInterface;
-use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
+use App\Conversation\Consistency\StatusConsistency;
+use App\Conversation\Exception\InvalidStatusException;
+use App\Conversation\Validation\StatusValidator;
+use App\Twitter\Exception\NotFoundMemberException;
+use InvalidArgumentException;
+use function array_key_exists;
+use function json_decode;
 
 trait ConversationAwareTrait
 {
@@ -43,6 +49,21 @@ trait ConversationAwareTrait
                         'text' => $status->getText(),
                         'original_document' => $status->getApiDocument(),
                     ];
+                }
+
+                try {
+                    StatusValidator::guardAgainstMissingOriginalDocument($status);
+                    StatusValidator::guardAgainstMissingStatusId($status);
+                    StatusValidator::guardAgainstMissingText($status);
+                } catch (InvalidStatusException $exception) {
+                    if ($exception->wasThrownBecauseOfMissingOriginalDocument()) {
+                        throw $exception;
+                    }
+
+                    $status = StatusConsistency::fillMissingStatusProps(
+                        $status['original_document'],
+                        $status
+                    );
                 }
 
                 $defaultStatus = [
