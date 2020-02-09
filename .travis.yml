@@ -13,7 +13,6 @@ before_install:
     - mysql -e 'CREATE DATABASE test;'
 install:
     - cp provisioning/continuous-integration/parameters_test.yml.dist .env.test
-    - /bin/bash -c 'cp app/config/parameters.yml{.dist,}'
     - /bin/bash -c 'source ./bin/install-composer.sh'
     - php composer.phar config -g github-oauth.github.com $GITHUB_OAUTH_TOKEN
     - php composer.phar install --prefer-dist --no-scripts
