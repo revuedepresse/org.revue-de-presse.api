@@ -35,14 +35,14 @@ doctrine:
                         type:       xml
                     Member:
                         alias:      'Member'
-                        dir:        '%kernel.project_dir%/src/Membership/Entity'
-                        type:       annotation
+                        dir:        '%kernel.project_dir%/config/model/member'
+                        type:       xml
                         is_bundle:  false
                         prefix:     App\Member\Entity
                     Membership:
                         alias:      'Membership'
-                        dir:        '%kernel.project_dir%/config/model/member'
-                        type:       xml
+                        dir:        '%kernel.project_dir%/src/Membership/Entity'
+                        type:       annotation
                         is_bundle:  false
                         prefix:     App\Membership\Entity
                     Media:
