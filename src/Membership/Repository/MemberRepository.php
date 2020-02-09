@@ -31,18 +31,6 @@ class MemberRepository extends ServiceEntityRepository
     use PaginationAwareTrait;
 
     /**
-     * @param ManagerRegistry $managerRegistry
-     * @param Aggregate       $aggregate
-     */
-    public function __construct(
-        ManagerRegistry $managerRegistry,
-        $memberClass
-    )
-    {
-        parent::__construct($managerRegistry, $memberClass);
-    }
-
-    /**
      * @param      $twitterId
      * @param      $screenName
      * @param bool $protected
