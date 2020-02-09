@@ -1,6 +1,3 @@
-app/*.xml
-app/config/*.yml
-!app/config/services.yml
 bin/phpunit
 build/*
 !build/.gitignore
