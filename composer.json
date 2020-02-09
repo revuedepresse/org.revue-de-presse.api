@@ -49,6 +49,7 @@
         "symfony/security-bundle": "^5.1@dev",
         "symfony/translation": "^5.1@dev",
         "symfony/validator": "^5.1@dev",
+        "thecodingmachine/safe": "^0.1.0@dev",
         "themattharris/tmhOAuth": "dev-master"
     },
     "require-dev": {
@@ -57,6 +58,7 @@
         "symfony/dotenv": "^5.1@dev",
         "symfony/maker-bundle": "^1.0@dev",
         "symfony/profiler-pack": "dev-master",
+        "symfony/test-pack": "dev-master",
         "symfony/twig-pack": "dev-master"
     },
     "scripts": {
