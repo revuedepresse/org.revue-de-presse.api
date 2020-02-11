@@ -2,21 +2,23 @@
 
 namespace App\Conversation\Producer;
 
-use WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;
-use App\Membership\Entity\Member;
+use Exception;
+use stdClass;
+use App\Twitter\Exception\UnavailableResourceException;
+use App\Membership\Model\Member;
 
 trait MemberAwareTrait
 {
     /**
-     * @param \stdClass $friend
-     * @return User
-     * @throws \Exception
+     * @param stdClass $friend
+     * @return Member
+     * @throws Exception
      */
-    private function getMessageUser(\stdClass $friend)
+    private function getMessageMember(stdClass $friend)
     {
-        /** @var User $member */
+        /** @var Member $member */
         $member = $this->userRepository->findOneBy(['twitterID' => $friend->id]);
-        $preExistingMember = $member instanceof User;
+        $preExistingMember = $member instanceof Member;
 
         if ($preExistingMember && $member->hasNotBeenDeclaredAsNotFound()) {
             return $member;
@@ -29,7 +31,7 @@ trait MemberAwareTrait
         }
 
         if (!isset($twitterUser)) {
-            throw new \Exception('An unexpected error has occurred.', self::UNEXPECTED_ERROR);
+            throw new Exception('An unexpected error has occurred.', self::UNEXPECTED_ERROR);
         }
 
         if (!$preExistingMember) {
@@ -44,7 +46,7 @@ trait MemberAwareTrait
     /**
      * @param $friend
      * @param UnavailableResourceException $exception
-     * @throws \Exception
+     * @throws Exception
      */
     protected function handleUnavailableResourceException($friend, UnavailableResourceException $exception)
     {
@@ -55,7 +57,7 @@ trait MemberAwareTrait
             $message = sprintf('User with screen name %s can not be found', $friend->screen_name);
             $this->logger->info($message);
 
-            throw new \Exception($message, self::NOT_FOUND_MEMBER);
+            throw new Exception($message, self::NOT_FOUND_MEMBER);
         } else {
             if ($exception->getCode() === $this->accessor->getSuspendedUserErrorCode()) {
                 $message = sprintf(
@@ -71,7 +73,7 @@ trait MemberAwareTrait
                     $protected = false,
                     $suspended = true
                 );
-                throw new \Exception($message, self::SUSPENDED_USER);
+                throw new Exception($message, self::SUSPENDED_USER);
             } elseif ($exception->getCode() === $this->accessor->getProtectedAccountErrorCode()) {
                 $message = sprintf(
                     'User with screen name "%s" has a protected account (code: %d, message: "%s")',
@@ -85,7 +87,7 @@ trait MemberAwareTrait
                     $friend,
                     $protected = true
                 );
-                throw new \Exception($message, self::PROTECTED_ACCOUNT);
+                throw new Exception($message, self::PROTECTED_ACCOUNT);
             } else {
                 $message = sprintf(
                     'Unavailable resource for user with screen name %s (code: %d, message: "%s")',
@@ -94,7 +96,7 @@ trait MemberAwareTrait
                     $exception->getMessage()
                 );
                 $this->logger->error($message);
-                throw new \Exception($message, self::UNAVAILABLE_RESOURCE);
+                throw new Exception($message, self::UNAVAILABLE_RESOURCE);
             }
         }
     }
@@ -103,7 +105,7 @@ trait MemberAwareTrait
      * @param $exception
      * @return bool
      */
-    protected function shouldBreakPublication(\Exception $exception)
+    protected function shouldBreakPublication(Exception $exception)
     {
         return $exception->getCode() === self::UNEXPECTED_ERROR || $exception->getCode() === self::UNAVAILABLE_RESOURCE;
     }
@@ -112,7 +114,7 @@ trait MemberAwareTrait
      * @param $exception
      * @return bool
      */
-    protected function shouldContinuePublication(\Exception $exception)
+    protected function shouldContinuePublication(Exception $exception)
     {
         return $exception->getCode() === self::NOT_FOUND_MEMBER || $exception->getCode() === self::SUSPENDED_USER ||
             $exception->getCode() === self::PROTECTED_ACCOUNT;

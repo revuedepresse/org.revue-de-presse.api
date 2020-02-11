@@ -1,19 +1,29 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Accessor;
 
+use App\Api\Entity\StatusInterface;
 use App\Membership\Entity\MemberInterface;
+use App\Membership\Repository\MemberRepository;
 use App\Status\Entity\NullStatus;
 use App\Status\Repository\NotFoundStatusRepository;
+use App\Twitter\Exception\SuspendedAccountException;
+use App\Twitter\Exception\UnavailableResourceException;
+use Doctrine\Common\Persistence\Mapping\MappingException;
 use Doctrine\ORM\EntityManager;
 use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;
-use WeavingTheWeb\Bundle\ApiBundle\Repository\ArchivedStatusRepository;
-use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
+use App\Api\Repository\ArchivedStatusRepository;
+use App\Api\Repository\StatusRepository;
 use App\Twitter\Api\Accessor;
-use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
-use App\Member\Repository\MemberRepository;
+use App\Twitter\Exception\NotFoundMemberException;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\OptimisticLockException;
 
+/**
+ * @package App\Accessor
+ */
 class StatusAccessor
 {
     /**
@@ -44,12 +54,12 @@ class StatusAccessor
     /**
      * @var StatusRepository
      */
-    public $statusRepository;
+    public StatusRepository $statusRepository;
 
     /**
      * @var MemberRepository
      */
-    public $userManager;
+    public MemberRepository $userManager;
 
     /**
      * @var Accessor
@@ -58,7 +68,7 @@ class StatusAccessor
 
     /**
      * @param string $identifier
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws OptimisticLockException
      */
     public function declareStatusNotFoundByIdentifier(string $identifier)
     {
@@ -94,11 +104,13 @@ class StatusAccessor
     /**
      * @param string $identifier
      * @param bool   $skipExistingStatus
-     * @param bool   $extraProperties
-     * @return \API|NullStatus|array|mixed|null|object|\stdClass
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
+     * @param bool   $extractProperties
+     *
+     * @return StatusInterface|NullStatus|array|null
+     * @throws OptimisticLockException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws MappingException
      */
     public function refreshStatusByIdentifier(
         string $identifier,
@@ -138,15 +150,15 @@ class StatusAccessor
     }
 
     /**
-     * @param string   $memberName
-     * @param int|null $memberId
-     * @return \API|MemberInterface|mixed|null|object|\stdClass
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
+     * @param string $memberName
+     *
+     * @return MemberInterface|object|null
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
      */
-    public function ensureMemberHavingNameExists(string $memberName)
+    public function ensureMemberHavingNameExists(string $memberName): MemberInterface
     {
         $member = $this->userManager->findOneBy(['twitter_username' => $memberName]);
         if ($member instanceof MemberInterface) {
@@ -178,11 +190,12 @@ class StatusAccessor
 
     /**
      * @param int $id
+     *
      * @return MemberInterface|null|object
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
      */
     public function ensureMemberHavingIdExists(int $id)
     {
@@ -210,8 +223,8 @@ class StatusAccessor
 
     /**
      * @param string $identifier
-     * @param bool   $extractProperties
-     * @return NullStatus|array
+     *
+     * @return StatusInterface|NullStatus|array
      */
     private function findStatusIdentifiedBy(string $identifier)
     {
@@ -227,11 +240,12 @@ class StatusAccessor
     /**
      * @param MemberInterface $member
      * @param string          $memberName
+     *
      * @return MemberInterface
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
      */
     private function ensureMemberHasBio(
         MemberInterface $member,

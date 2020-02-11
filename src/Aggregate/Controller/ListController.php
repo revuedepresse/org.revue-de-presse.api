@@ -468,7 +468,7 @@ class ListController
                     $client->set($key, $totalPages);
                 }
 
-                return intval($totalPages);
+                return (int) $totalPages;
             },
             $finder = function (SearchParams $searchParams) use ($client) {
                 $key = 'members.items.'.$searchParams->getFingerprint();
@@ -770,7 +770,7 @@ class ListController
     private function guardAgainstMissingAggregateId($decodedContent, $corsHeaders): int
     {
         if (!array_key_exists('aggregateId', $decodedContent['params']) ||
-            intval($decodedContent['params']['aggregateId']) < 1) {
+            (int) $decodedContent['params']['aggregateId'] < 1) {
             $exceptionMessage = 'Invalid aggregated id';
             $jsonResponse = new JsonResponse(
                 $exceptionMessage,
@@ -780,7 +780,7 @@ class ListController
             InvalidRequestException::guardAgainstInvalidRequest($jsonResponse, $exceptionMessage);
         }
 
-        return intval($decodedContent['params']['aggregateId']);
+        return (int) $decodedContent['params']['aggregateId'];
     }
 
     /**

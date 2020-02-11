@@ -44,6 +44,7 @@
         "sensio/framework-extra-bundle": "^5.5@dev",
         "symfony/console": "^5.1@dev",
         "symfony/flex": "^1.5@dev",
+        "symfony/messenger": "^5.1@dev",
         "symfony/monolog-bundle": "^3.0@dev",
         "symfony/orm-pack": "dev-master",
         "symfony/security-bundle": "^5.1@dev",
@@ -72,7 +73,7 @@
     "config": {
         "bin-dir": "bin",
         "platform": {
-            "php": "7.3.11"
+            "php": "7.4.2"
         },
         "sort-packages": true
     },

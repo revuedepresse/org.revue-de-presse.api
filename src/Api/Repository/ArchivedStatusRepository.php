@@ -11,12 +11,14 @@ use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 
 use Doctrine\ORM\ORMException;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\Persistence\ManagerRegistry;
+use Exception;
 use Psr\Log\LoggerInterface;
 
 use App\Api\Entity\Aggregate;
@@ -112,7 +114,7 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
      * @param callable        $ensureMemberExists
      * @return array
      * @throws NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      * @throws \Doctrine\ORM\OptimisticLockException
      * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException
      */
@@ -214,7 +216,7 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
                     $entityManager = $this->registry->resetManager('default');
                     $entityManager->persist($memberStatus);
                 }
-            } catch (\Exception $exception) {
+            } catch (Exception $exception) {
                 $this->logger->critical($exception->getMessage());
                 continue;
             }
@@ -240,8 +242,8 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
      * @param LoggerInterface|null $logger
      * @return array
      * @throws NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Exception
+     * @throws NonUniqueResultException
+     * @throws Exception
      */
     public function saveStatuses(
         $statuses,
@@ -275,7 +277,7 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
         } catch (UniqueConstraintViolationException $exception) {
             $entityManager = $this->registry->resetManager('default');
 
-            throw new \Exception(
+            throw new Exception(
                 'Can not insert duplicates into the database',
                 0,
                 $exception
@@ -284,10 +286,12 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
     }
 
     /**
-     * @param int $id
-     * @return array|StatusInterface
+     * @param string $id
+     *
+     * @return array
+     * @throws Exception
      */
-    public function findStatusIdentifiedBy(int $id)
+    public function findStatusIdentifiedBy(string $id): array
     {
         $status = $this->findOneBy(['statusId' => $id]);
         if (!($status instanceof StatusInterface)) {
@@ -304,11 +308,13 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
     }
 
     /**
-     * @param $statuses
-     * @param $setter
+     * @param array    $statuses
+     * @param callable $setter
+     *
      * @return array
+     * @throws Exception
      */
-    protected function extractProperties($statuses, callable $setter)
+    protected function extractProperties(array $statuses, callable $setter): array
     {
         $extracts = [];
 
@@ -338,12 +344,12 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
      * @param array $statuses
      * @return bool
      * @throws NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function hasBeenSavedBefore(array $statuses): bool
     {
         if (count($statuses) === 0) {
-            throw new \Exception('There should be one item at least');
+            throw new Exception('There should be one item at least');
         }
 
         $identifier = '';
@@ -360,7 +366,7 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
      * @param $hash
      * @return bool
      * @throws NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function existsAlready($hash)
     {
@@ -369,7 +375,7 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
             ->andWhere('s.hash = :hash');
 
         $queryBuilder->setParameter('hash', $hash);
-        $count = intval($queryBuilder->getQuery()->getSingleScalarResult());
+        $count = (int) $queryBuilder->getQuery()->getSingleScalarResult();
 
         if ($this->logger) {
             $this->logger->info(
@@ -388,7 +394,7 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
      * @param $screenName
      * @return int
      * @throws NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      * @deprecated in favor of ->countHowManyStatusesFor
      */
     public function countStatuses($screenName)
@@ -400,7 +406,7 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
      * @param $screenName
      * @return int
      * @throws NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function countHowManyStatusesFor($screenName)
     {
@@ -412,13 +418,13 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
 
         $totalStatuses = $queryBuilder->getQuery()->getSingleScalarResult();
 
-        return intval($totalStatuses);
+        return (int) $totalStatuses;
     }
 
     /**
      * @param string $screenName
      * @return array
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function findNextMaximum(string $screenName): array
     {
@@ -428,7 +434,7 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
     /**
      * @param string $screenName
      * @return array
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function findNextMininum(string $screenName): array
     {
@@ -439,7 +445,7 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
      * @param string         $screenName
      * @param \DateTime|null $before
      * @return array
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function findLocalMaximum(string $screenName, \DateTime $before = null): array
     {
@@ -456,7 +462,7 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
      * @param string         $direction
      * @param \DateTime|null $before
      * @return array
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function findNextExtremum(
         string $screenName,
@@ -464,7 +470,7 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
         \DateTime $before = null
     ): array {
         $member = $this->memberManager->findOneBy(['twitter_username' => $screenName]);
-        if ($member instanceof User) {
+        if ($member instanceof MemberInterface) {
             if ($direction = 'desc' && !is_null($member->maxStatusId)) {
                 return ['statusId' => $member->maxStatusId];
             }
@@ -507,7 +513,7 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
      * @param $screenName
      * @param $maxId
      * @return mixed
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function countCollectedStatuses($screenName, $maxId)
     {
@@ -691,7 +697,7 @@ QUERY
         array_walk(
             $statuses,
             function (&$status) {
-                $target = sprintf('user stream of id #%d', intval($status['id']));
+                $target = sprintf('user stream of id #%d', (int) $status['id']);
                 if (strlen($status['original_document']) > 0) {
                     $decodedValue = json_decode($status['original_document'], true);
                     $lastJsonError = json_last_error();
@@ -701,10 +707,10 @@ QUERY
                                 $decodedValue['retweeted_status']['full_text'];
                         }
                     } else {
-                        throw new \Exception(sprintf($lastJsonError . ' affecting ' . $target));
+                        throw new Exception(sprintf($lastJsonError . ' affecting ' . $target));
                     }
                 } else {
-                    throw new \Exception(sprintf('Empty JSON document for ' . $target));
+                    throw new Exception(sprintf('Empty JSON document for ' . $target));
                 }
             }
         );
@@ -717,7 +723,7 @@ QUERY
      * @param Aggregate|null $aggregate
      * @return StatusInterface
      * @throws NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     private function makeStatusFromApiResponseForAggregate($extract, Aggregate $aggregate = null): StatusInterface
     {
@@ -914,7 +920,7 @@ QUERY
      * @param LoggerInterface $logger
      * @return array
      * @throws NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function iterateOverStatuses(

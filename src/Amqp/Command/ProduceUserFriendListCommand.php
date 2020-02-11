@@ -2,6 +2,7 @@
 
 namespace App\Amqp\Command;
 
+use App\Membership\Entity\MemberInterface;
 use App\Operation\OperationClock;
 
 use Symfony\Component\Console\Input\InputInterface,
@@ -111,7 +112,7 @@ class ProduceUserFriendListCommand extends AggregateAwareCommand
         $friends = $this->accessor->showUserFriends($this->input->getOption('screen_name'));
         foreach ($friends->ids as $twitterUserId) {
             $foundMember = $this->userRepository->findOneBy(['twitterID' => $twitterUserId]);
-            $preExistingMember = $foundMember instanceof User;
+            $preExistingMember = $foundMember instanceof MemberInterface;
 
             if ($preExistingMember && !$foundMember->isNotFound()) {
                 $member = $foundMember;
@@ -193,7 +194,7 @@ class ProduceUserFriendListCommand extends AggregateAwareCommand
         $tokens = $this->getTokensFromInput();
 
         $this->setUpLogger();
-        $this->setupAccessor($tokens);
+        $this->setOAuthTokens($tokens);
         $this->setupAggregateRepository();
 
         $this->translator = $this->getContainer()->get('translator');
@@ -309,7 +310,7 @@ class ProduceUserFriendListCommand extends AggregateAwareCommand
         if (isset($twitterUser->screen_name)) {
             $member = new User();
 
-            if ($prexistingMember instanceof User) {
+            if ($prexistingMember instanceof MemberInterface) {
                 $member = $prexistingMember;
                 $member->setNotFound(false);
             }

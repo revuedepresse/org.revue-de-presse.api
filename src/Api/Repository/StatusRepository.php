@@ -3,8 +3,11 @@
 namespace App\Api\Repository;
 
 use App\Accessor\Exception\NotFoundStatusException;
+use App\Membership\Entity\MemberInterface;
 use App\StatusCollection\Mapping\MappingAwareInterface;
+use App\Twitter\Exception\NotFoundMemberException;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\QueryBuilder;
 use App\Api\Entity\Aggregate;
@@ -104,7 +107,7 @@ class StatusRepository extends ArchivedStatusRepository
      * @param      $hash
      * @return bool
      * @throws NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function existsAlready($hash)
     {
@@ -117,7 +120,7 @@ class StatusRepository extends ArchivedStatusRepository
             ->andWhere('s.hash = :hash');
 
         $queryBuilder->setParameter('hash', $hash);
-        $count = intval($queryBuilder->getQuery()->getSingleScalarResult());
+        $count = (int) $queryBuilder->getQuery()->getSingleScalarResult();
 
         if ($this->logger) {
             $this->logger->info(
@@ -134,16 +137,15 @@ class StatusRepository extends ArchivedStatusRepository
 
     /**
      * @param $screenName
+     *
      * @return int|mixed
      * @throws NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException
+     * @throws NonUniqueResultException
      */
     public function countHowManyStatusesFor($screenName)
     {
         $member = $this->memberManager->findOneBy(['twitter_username' => $screenName]);
-        if ($member instanceof User && $member->totalStatuses !== 0) {
+        if ($member instanceof MemberInterface && $member->totalStatuses !== 0) {
             $status = $this->findOneBy(['screenName' => $screenName], ['createdAt' => 'DESC']);
             $decodedStatusDocument = json_decode($status->getApiDocument(), true);
 
@@ -161,7 +163,7 @@ class StatusRepository extends ArchivedStatusRepository
         $queryBuilder->setParameter('screenName', $screenName);
 
         $totalStatuses = $queryBuilder->getQuery()->getSingleScalarResult();
-        $totalStatuses = intval($totalStatuses) + $this->archivedStatusRepository->countHowManyStatusesFor($screenName);
+        $totalStatuses = (int) $totalStatuses + $this->archivedStatusRepository->countHowManyStatusesFor($screenName);
 
         $this->memberManager->declareTotalStatusesOfMemberWithName($totalStatuses, $screenName);
 
@@ -274,9 +276,9 @@ class StatusRepository extends ArchivedStatusRepository
      * @param string         $direction
      * @param \DateTime|null $before
      * @return array
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException
+     * @throws NotFoundMemberException
      */
     public function findNextExtremum(string $screenName, string $direction = 'asc', \DateTime $before = null): array
     {
@@ -304,7 +306,7 @@ class StatusRepository extends ArchivedStatusRepository
             $extremum = $queryBuilder->getQuery()->getSingleResult();
 
             if ($direction === 'asc') {
-                $nextMinimum = min(intval($extremum['statusId']), $nextExtremum['statusId']);
+                $nextMinimum = min((int) $extremum['statusId'], $nextExtremum['statusId']);
 
                 return ['statusId' => $this->memberManager->declareMinStatusIdForMemberWithScreenName(
                     "$nextMinimum",
@@ -312,7 +314,7 @@ class StatusRepository extends ArchivedStatusRepository
                 )->minStatusId];
             }
 
-            $nextMaximum = max(intval($extremum['statusId']), $nextExtremum['statusId']);
+            $nextMaximum = max((int) $extremum['statusId'], $nextExtremum['statusId']);
 
             return ['statusId' => $this->memberManager->declareMaxStatusIdForMemberWithScreenName(
                 "$nextMaximum",
@@ -327,7 +329,7 @@ class StatusRepository extends ArchivedStatusRepository
      * @param $status
      * @return \App\Membership\Entity\MemberInterface
      * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException
+     * @throws NotFoundMemberException
      */
     public function declareMaximumStatusId($status)
     {
@@ -343,7 +345,7 @@ class StatusRepository extends ArchivedStatusRepository
      * @param $status
      * @return \App\Membership\Entity\MemberInterface
      * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException
+     * @throws NotFoundMemberException
      */
     public function declareMinimumStatusId($status)
     {
@@ -360,7 +362,7 @@ class StatusRepository extends ArchivedStatusRepository
      * @param string $memberName
      * @return \App\Membership\Entity\MemberInterface
      * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException
+     * @throws NotFoundMemberException
      */
     public function declareMaximumLikedStatusId($status, string $memberName)
     {
@@ -377,7 +379,7 @@ class StatusRepository extends ArchivedStatusRepository
      * @param string $memberName
      * @return \App\Membership\Entity\MemberInterface
      * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException
+     * @throws NotFoundMemberException
      */
     public function declareMinimumLikedStatusId($status, string $memberName)
     {

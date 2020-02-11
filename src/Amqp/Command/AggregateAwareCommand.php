@@ -3,10 +3,13 @@
 namespace App\Amqp\Command;
 
 use App\Aggregate\AggregateAwareTrait;
+use App\Api\Repository\AggregateRepository;
 use App\Console\CommandReturnCodeAwareInterface;
+use App\Membership\Repository\MemberRepository;
+use Doctrine\ORM\EntityManager;
 
 /**
- * @package WeavingTheWeb\Bundle\AmqpBundle\Command
+ * @package App\Amqp\Command
  */
 abstract class AggregateAwareCommand extends AccessorAwareCommand implements CommandReturnCodeAwareInterface
 {
@@ -25,24 +28,59 @@ abstract class AggregateAwareCommand extends AccessorAwareCommand implements Com
     use AggregateAwareTrait;
 
     /**
-     * @var \App\Api\Repository\AggregateRepository
+     * @var AggregateRepository
      */
-    protected $aggregateRepository;
+    protected AggregateRepository $aggregateRepository;
 
     /**
-     * @var \App\Member\Repository\MemberRepository
+     * @param AggregateRepository $aggregateRepository
+     *
+     * @return $this
      */
-    protected $userRepository;
+    public function setAggregateRepository(AggregateRepository $aggregateRepository): self
+    {
+        $this->aggregateRepository = $aggregateRepository;
+
+        return $this;
+    }
 
     /**
-     * @var \Doctrine\ORM\EntityManager
+     * @var MemberRepository
      */
-    protected $entityManager;
+    protected MemberRepository $userRepository;
+
+    /**
+     * @param MemberRepository $memberRepository
+     *
+     * @return $this
+     */
+    public function setMemberRepository(MemberRepository $memberRepository): self
+    {
+        $this->userRepository = $memberRepository;
+
+        return $this;
+    }
+
+    /**
+     * @var EntityManager
+     */
+    protected EntityManager $entityManager;
+
+    /**
+     * @param EntityManager $entityManager
+     *
+     * @return $this
+     */
+    public function setEntityManager(EntityManager $entityManager): self
+    {
+        $this->entityManager = $entityManager;
+
+        return $this;
+    }
 
     protected function setupAggregateRepository()
     {
-        $this->entityManager = $this->getContainer()->get('doctrine.orm.entity_manager');
-        $this->aggregateRepository = $this->getContainer()->get('weaving_the_web_twitter.repository.aggregate');
-        $this->userRepository = $this->getContainer()->get('user_manager');
+        // noop for backward compatibility
+        // TODO remove all 5 calls to this method
     }
 }

@@ -40,7 +40,7 @@ class OwnerRepository extends EntityRepository
                 $name = $ownership[1];
                 if (!array_key_exists($name, $ownerships)) {
                     $ownerships[$name] = new Owner(
-                        $sourceId = intval($ownership[0]),
+                        $sourceId = (int) $ownership[0],
                         $name
                     );
                     $this->getEntityManager()->persist($ownerships[$name]);

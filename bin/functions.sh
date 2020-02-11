@@ -520,9 +520,9 @@ function remove_rabbitmq_container {
 }
 
 function run_rabbitmq_container {
-    local rabbitmq_vhost="$(cat <(cat app/config/parameters.yml | grep -v '#' | grep 'rabbitmq_vhost:' | cut -f 2 -d ':' | sed -e 's/[[:space:]]//g'))"
-    local rabbitmq_password="cat ../../../app/config/parameters.yml | grep -v '#' | grep 'rabbitmq_password:' | cut -f 2 -d ':' | sed -e 's/[[:space:]]//g'"
-    local rabbitmq_user=$(cat <(cat app/config/parameters.yml | \
+    local rabbitmq_vhost="$(cat <(cat ../backup/app/config/parameters.yml | grep -v '#' | grep 'rabbitmq_vhost:' | cut -f 2 -d ':' | sed -e 's/[[:space:]]//g'))"
+    local rabbitmq_password="cat ../../../../backup/app/config/parameters.yml | grep -v '#' | grep 'rabbitmq_password:' | cut -f 2 -d ':' | sed -e 's/[[:space:]]//g'"
+    local rabbitmq_user=$(cat <(cat ../backup/app/config/parameters.yml | \
         grep 'rabbitmq_user:' | grep -v '#' | \
         cut -f 2 -d ':' | sed -e 's/[[:space:]]//g'))
 
@@ -599,7 +599,7 @@ function configure_rabbitmq_user_privileges() {
 }
 
 function list_amqp_queues() {
-    local rabbitmq_vhost="$(cat <(cat .env.local | grep amqp | sed -E 's#.+(/.+)$#\1#'))"
+    local rabbitmq_vhost="$(cat <(cat .env.local | grep amqp | sed -E 's#.+(/.+)$#\1#' | sed -E 's/\/%2f/\//g'))"
     docker exec -ti rabbitmq watch -n1 'rabbitmqctl list_queues -p '"${rabbitmq_vhost}"
 }
 

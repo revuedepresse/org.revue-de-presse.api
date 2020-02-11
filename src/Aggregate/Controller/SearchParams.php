@@ -40,8 +40,8 @@ class SearchParams
      */
     public static function fromRequest(Request $request, array $params = []): self
     {
-        $pageIndex = intval($request->get('pageIndex', 1));
-        $pageSize = intval($request->get('pageSize', 25));
+        $pageIndex = (int) $request->get('pageIndex', 1);
+        $pageSize = (int) $request->get('pageSize', 25);
         $keyword = $request->get('keyword', null);
 
         $filteredParams = [];
@@ -58,7 +58,7 @@ class SearchParams
                 $filteredParams[$name] = $value;
 
                 if ($params[$name] == 'int' || $params[$name] == 'integer') {
-                    $filteredParams[$name] = intval($value);
+                    $filteredParams[$name] = (int) $value;
                 }
 
                 if ($params[$name] == 'string' && !empty($value)) {
@@ -66,7 +66,7 @@ class SearchParams
                 }
 
                 if ($params[$name] == 'boolean' || $params[$name] == 'bool') {
-                    $filteredParams[$name] = boolval(intval($value));
+                    $filteredParams[$name] = boolval((int) $value);
                 }
 
                 if ($params[$name] == 'datetime') {

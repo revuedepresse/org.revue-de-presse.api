@@ -2,25 +2,94 @@
 
 namespace App\Amqp\Command;
 
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand,
-    Symfony\Component\Console\Input\InputInterface;
+use App\Api\Repository\TokenRepository;
+use App\Twitter\Api\Accessor;
+use Psr\Log\LoggerInterface;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * @package WeavingTheWeb\Bundle\AmqpBundle\Command
+ * @package App\Amqp\Command
  */
 abstract class AccessorAwareCommand extends Command
 {
     /**
-     * @var \App\Twitter\Api\Accessor $accessor
+     * @var Accessor $accessor
      */
-    protected $accessor;
+    protected Accessor $accessor;
 
     /**
-     * @var \Psr\Log\LoggerInterface $logger
+     * @var string
      */
-    protected $logger;
+    protected string $defaultSecret;
+
+    /**
+     * @var string
+     */
+    protected string $defaultToken;
+
+    /**
+     * @param string $secret
+     */
+    public function setDefaultSecret(string $secret)
+    {
+        $this->defaultSecret = $secret;
+    }
+
+    /**
+     * @param string $token
+     */
+    public function setDefaultToken(string $token)
+    {
+        $this->defaultToken = $token;
+    }
+
+    /**
+     * @param Accessor $accessor
+     *
+     * @return $this
+     */
+    public function setAccessor(Accessor $accessor): self
+    {
+        $this->accessor = $accessor;
+
+        return $this;
+    }
+
+    /**
+     * @var LoggerInterface $logger
+     */
+    protected LoggerInterface $logger;
+
+    /**
+     * @param LoggerInterface $logger
+     *
+     * @return $this
+     */
+    public function setLogger(LoggerInterface $logger): self
+    {
+        $this->logger = $logger;
+
+        return $this;
+    }
+
+    /**
+     * @var TokenRepository $logger
+     */
+    protected TokenRepository $tokenRepository;
+
+    /**
+     * @param TokenRepository $tokenRepository
+     *
+     * @return $this
+     */
+    public function setTokenRepository(TokenRepository $tokenRepository): self
+    {
+        $this->tokenRepository = $tokenRepository;
+
+        return $this;
+    }
 
     /**
      * @var InputInterface
@@ -35,10 +104,8 @@ abstract class AccessorAwareCommand extends Command
     /**
      * @param $oauthTokens
      */
-    protected function setupAccessor($oauthTokens)
+    protected function setOAuthTokens($oauthTokens)
     {
-        /** @var \App\Twitter\Api\Accessor $accessor */
-        $this->accessor = $this->getContainer()->get('weaving_the_web_twitter.api_accessor');
         $this->accessor->setUserToken($oauthTokens['token']);
         $this->accessor->setUserSecret($oauthTokens['secret']);
 
@@ -56,12 +123,12 @@ abstract class AccessorAwareCommand extends Command
         if ($this->input->hasOption('oauth_secret') && !is_null($this->input->getOption('oauth_secret'))) {
             $secret = $this->input->getOption('oauth_secret');
         } else {
-            $secret = $this->getContainer()->getParameter('weaving_the_web_twitter.oauth_secret.default');
+            $secret = $this->defaultSecret;
         }
         if ($this->input->hasOption('oauth_token') && !is_null($this->input->getOption('oauth_token'))) {
             $token = $this->input->getOption('oauth_token');
         } else {
-            $token = $this->getContainer()->getParameter('weaving_the_web_twitter.oauth_token.default');
+            $token = $this->defaultToken;
         }
 
         return [
@@ -78,16 +145,12 @@ abstract class AccessorAwareCommand extends Command
      */
     protected function findTokenOtherThan(string $token)
     {
-        $tokenRepository = $this->getContainer()->get('weaving_the_web_twitter.repository.token');
-
-        return $tokenRepository->findTokenOtherThan($token);
+        return $this->tokenRepository->findTokenOtherThan($token);
     }
 
     protected function setUpLogger()
     {
-        /**
-         * @var \Psr\Log\LoggerInterface $logger
-         */
-        $this->logger = $this->getContainer()->get('monolog.logger.status');
+        // noop for backward compatibility
+        // TODO remove all 5 calls to this method
     }
 }

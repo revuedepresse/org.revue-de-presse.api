@@ -57,7 +57,7 @@ QUERY;
                         ':' =>  '',
                     ]
                 ),
-                'occurrences' => intval($record['weight'])
+                'occurrences' => (int) $record['weight']
             ];
         }, $results);
     }

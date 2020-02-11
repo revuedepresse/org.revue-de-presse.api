@@ -1,9 +1,13 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Accessor\Exception;
 
-use WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;
+use App\Twitter\Exception\UnavailableResourceException;
 
+/**
+ * @package App\Accessor\Exception
+ */
 class NotFoundStatusException extends UnavailableResourceException
 {
 }

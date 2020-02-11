@@ -106,7 +106,7 @@ QUERY;
         $statement = $this->entityManager->getConnection()->executeQuery($query);
         $records = $statement->fetchAll();
 
-        return intval($records[0]['total_statuses']);
+        return (int) $records[0]['total_statuses'];
     }
 
     /**
@@ -230,7 +230,7 @@ QUERY;
                     'records' => array_map(
                         function ($record) {
                             return [
-                                'status_id' => intval(trim($record['status_id'])),
+                                'status_id' => (int) trim($record['status_id']),
                                 'aggregate_id' => $record['aggregate_id'],
                                 'aggregate_name' => $record['aggregate_name'],
                                 'publication_date_time' => $record['publication_date_time'],

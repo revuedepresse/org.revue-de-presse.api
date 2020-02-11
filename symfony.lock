@@ -196,7 +196,7 @@
         "version": "1.0.1"
     },
     "php": {
-        "version": "7.3.11"
+        "version": "7.4.2"
     },
     "phpdocumentor/reflection-common": {
         "version": "2.x-dev"
@@ -335,6 +335,9 @@
     "superbalist/flysystem-google-storage": {
         "version": "7.2.2"
     },
+    "symfony/amqp-messenger": {
+        "version": "5.1-dev"
+    },
     "symfony/browser-kit": {
         "version": "5.1-dev"
     },
@@ -365,7 +368,13 @@
     "symfony/dependency-injection": {
         "version": "5.1-dev"
     },
+    "symfony/deprecation-contracts": {
+        "version": "2.1-dev"
+    },
     "symfony/doctrine-bridge": {
+        "version": "5.1-dev"
+    },
+    "symfony/doctrine-messenger": {
         "version": "5.1-dev"
     },
     "symfony/dom-crawler": {
@@ -438,6 +447,18 @@
             "ref": "fadbfe33303a76e25cb63401050439aa9b1a9c7f"
         }
     },
+    "symfony/messenger": {
+        "version": "4.3",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "master",
+            "version": "4.3",
+            "ref": "8a2675c061737658bed85102e9241c752620e575"
+        },
+        "files": [
+            "config/packages/messenger.yaml"
+        ]
+    },
     "symfony/monolog-bridge": {
         "version": "5.1-dev"
     },
@@ -490,6 +511,9 @@
         "version": "5.1-dev"
     },
     "symfony/property-info": {
+        "version": "5.1-dev"
+    },
+    "symfony/redis-messenger": {
         "version": "5.1-dev"
     },
     "symfony/routing": {

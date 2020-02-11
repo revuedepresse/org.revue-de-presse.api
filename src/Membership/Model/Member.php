@@ -1,66 +1,70 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Membership\Model;
 
 use App\Membership\Entity\MemberInterface;
 
-abstract class Member
+/**
+ * @package App\Membership\Model
+ */
+abstract class Member implements MemberInterface
 {
     /**
      * @var
      */
-    protected $id;
+    protected int $id;
 
     /**
      * @var string
      */
-    protected $emailCanonical;
+    protected ?string $emailCanonical;
 
     /**
      * @var string
      */
-    protected $username;
+    protected ?string $username;
 
     /**
      * @var string
      */
-    protected $usernameCanonical;
+    protected ?string $usernameCanonical;
 
     /**
      * @var boolean
      */
-    protected $enabled;
+    protected bool $enabled;
 
     /**
      * @var integer
      */
-    protected $positionInHierarchy;
+    protected int $positionInHierarchy;
 
     /**
      * The salt to use for hashing
      *
      * @var string
      */
-    protected $salt;
+    protected string $salt;
 
     /**
      * Encrypted password. Must be persisted.
      *
      * @var string
      */
-    protected $password;
+    protected string $password;
 
     /**
      * Plain password. Used for model validation. Must not be persisted.
      *
      * @var string
      */
-    protected $plainPassword;
+    protected ?string $plainPassword;
 
     /**
      * @var string
      */
-    protected $email;
+    protected string $email;
 
     /**
      */
@@ -102,14 +106,14 @@ abstract class Member
         // older data which does not include all properties.
         $data = array_merge($data, array_fill(0, 2, null));
 
-        list(
+        [
             $this->password,
             $this->salt,
             $this->usernameCanonical,
             $this->username,
             $this->enabled,
             $this->id
-        ) = $data;
+        ] = $data;
     }
 
     /**
@@ -117,7 +121,7 @@ abstract class Member
      *
      * @return mixed
      */
-    public function getId()
+    public function getId(): int
     {
         return $this->id;
     }
@@ -125,15 +129,26 @@ abstract class Member
     /**
      * @return string
      */
-    public function getUsername()
+    public function getUsername(): string
     {
         return $this->username;
     }
 
     /**
+     * @param $usernameCanonical
+     * @return $this
+     */
+    public function setUsernameCanonical($usernameCanonical): self
+    {
+        $this->usernameCanonical = $usernameCanonical;
+
+        return $this;
+    }
+
+    /**
      * @return string
      */
-    public function getUsernameCanonical()
+    public function getUsernameCanonical(): string
     {
         return $this->usernameCanonical;
     }
@@ -141,15 +156,26 @@ abstract class Member
     /**
      * @return string
      */
-    public function getEmail()
+    public function getEmail(): string
     {
         return $this->email;
     }
 
     /**
+     * @param $email
+     * @return $this
+     */
+    public function setEmail(string $email): self
+    {
+        $this->email = $email;
+
+        return $this;
+    }
+
+    /**
      * @return string
      */
-    public function getEmailCanonical()
+    public function getEmailCanonical(): string
     {
         return $this->emailCanonical;
     }
@@ -157,7 +183,7 @@ abstract class Member
     /**
      * @return bool
      */
-    public function isEnabled()
+    public function isEnabled(): bool
     {
         return $this->enabled;
     }
@@ -166,7 +192,7 @@ abstract class Member
      * @param MemberInterface|null $user
      * @return bool
      */
-    public function isSameMemberThan(MemberInterface $user = null)
+    public function isSameMemberThan(MemberInterface $user = null): bool
     {
         return null !== $user && $this->getId() === $user->getId();
     }
@@ -175,31 +201,9 @@ abstract class Member
      * @param $username
      * @return $this
      */
-    public function setUsername($username)
+    public function setUsername($username): self
     {
         $this->username = $username;
-
-        return $this;
-    }
-
-    /**
-     * @param $usernameCanonical
-     * @return $this
-     */
-    public function setUsernameCanonical($usernameCanonical)
-    {
-        $this->usernameCanonical = $usernameCanonical;
-
-        return $this;
-    }
-
-    /**
-     * @param $email
-     * @return $this
-     */
-    public function setEmail($email)
-    {
-        $this->email = $email;
 
         return $this;
     }
@@ -208,7 +212,7 @@ abstract class Member
      * @param $emailCanonical
      * @return $this
      */
-    public function setEmailCanonical($emailCanonical)
+    public function setEmailCanonical(string $emailCanonical): self
     {
         $this->emailCanonical = $emailCanonical;
 
@@ -216,12 +220,12 @@ abstract class Member
     }
 
     /**
-     * @param $boolean
+     * @param bool $enabled
      * @return $this
      */
-    public function setEnabled($boolean)
+    public function setEnabled(bool $enabled): self
     {
-        $this->enabled = (Boolean) $boolean;
+        $this->enabled = $enabled;
 
         return $this;
     }
@@ -237,7 +241,7 @@ abstract class Member
     /**
      * Removes sensitive data from the user.
      */
-    public function eraseCredentials()
+    public function eraseCredentials(): void
     {
         $this->plainPassword = null;
     }
@@ -245,7 +249,7 @@ abstract class Member
     /**
      * @return string
      */
-    public function getSalt()
+    public function getSalt(): string
     {
         return $this->salt;
     }
@@ -253,7 +257,7 @@ abstract class Member
     /**
      * @return array
      */
-    public function getRoles()
+    public function getRoles(): array
     {
         return ['ROLE_USER'];
     }

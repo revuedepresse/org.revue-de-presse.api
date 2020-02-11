@@ -369,7 +369,7 @@ QUERY;
                 [\PDO::PARAM_INT]
             );
 
-            $aggregate['totalStatuses'] = intval($statement->fetchAll()[0]['total_statuses']);
+            $aggregate['totalStatuses'] = (int) $statement->fetchAll([0]['total_statuses']);
 
             $matchingAggregate->totalStatuses = $aggregate['totalStatuses'];
             if ($aggregate['totalStatuses'] === 0) {
@@ -428,7 +428,7 @@ QUERY;
             $connection = $this->getEntityManager()->getConnection();
             $statement = $connection->executeQuery($query, [$aggregate['id']], [\Pdo::PARAM_INT]);
 
-            $aggregate['totalMembers'] = intval($statement->fetchAll()[0]['total_members']);
+            $aggregate['totalMembers'] = (int) $statement->fetchAll([0]['total_members']);
 
             $matchingAggregate->totalMembers = $aggregate['totalMembers'];
             if ($aggregate['totalMembers'] === 0) {

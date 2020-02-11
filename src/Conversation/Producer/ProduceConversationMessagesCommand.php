@@ -114,7 +114,7 @@ class ProduceConversationMessagesCommand extends AggregateAwareCommand
                         $toBeSavedForAggregate
                     ) {
                         $messageBody = [
-                            'status_id' => intval(trim($statusId)),
+                            'status_id' => (int) trim($statusId),
                             'screen_name' => $onBehalfOf,
                             'aggregate_name' => $toBeSavedForAggregate
                         ];

@@ -50,7 +50,7 @@ class MediaRepository extends EntityRepository
                     '’' =>  '\'',
                 ]);
 
-                $sourceId = intval($media[0]);
+                $sourceId = (int) $media[0];
                 $media = $this->findOneBy(['sourceId' => $sourceId]);
                 if ($media instanceof Media) {
                     return $media;
@@ -59,7 +59,7 @@ class MediaRepository extends EntityRepository
                 $media = new Media(
                     $sourceId,
                     $name,
-                    $type = intval($media[3]),
+                    $type = (int) $media[3],
                     $channel = $media[5],
                     $periodicity = $media[6],
                     $scope = $media[7]

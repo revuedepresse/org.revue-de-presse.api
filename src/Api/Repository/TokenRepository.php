@@ -3,11 +3,10 @@
 namespace App\Api\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
-use Doctrine\ORM\EntityRepository,
-    Doctrine\ORM\NoResultException;
+use Doctrine\ORM\NoResultException;
 
-use Doctrine\Persistence\ManagerRegistry;
 use Psr\Log\LoggerInterface;
 
 use App\Api\Entity\Token,
@@ -30,7 +29,7 @@ class TokenRepository extends ServiceEntityRepository
         $token->setCreatedAt($now);
         $token->setUpdatedAt($now);
 
-        $tokenRepository = $this->getEntityManager()->getRepository('WeavingTheWebApiBundle:TokenType');
+        $tokenRepository = $this->getEntityManager()->getRepository('Api:TokenType');
 
         /** @var \App\Api\Entity\TokenType $tokenType */
         $tokenType = $tokenRepository->findOneBy(['name' => TokenType::USER]);
@@ -113,10 +112,11 @@ class TokenRepository extends ServiceEntityRepository
 
     /**
      * @param $oauthToken
+     *
      * @return bool
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
-    public function isOauthTokenFrozen($oauthToken)
+    public function isOauthTokenFrozen($oauthToken): bool
     {
         $token = $this->findUnfrozenToken($oauthToken);
 
@@ -125,10 +125,11 @@ class TokenRepository extends ServiceEntityRepository
 
     /**
      * @param string $token
-     * @return mixed|null
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     *
+     * @return Token|null
+     * @throws NonUniqueResultException
      */
-    public function findUnfrozenToken(string $token)
+    public function findUnfrozenToken(string $token): ?Token
     {
         $queryBuilder = $this->createQueryBuilder('t');
 
@@ -145,13 +146,31 @@ class TokenRepository extends ServiceEntityRepository
     }
 
     /**
+     * @return mixed|null
+     * @throws NonUniqueResultException
+     */
+    public function howManyUnfrozenTokenAreThere()
+    {
+        $queryBuilder = $this->createQueryBuilder('t');
+        $queryBuilder->select('COUNT(t.id) as count_');
+
+        $this->applyUnfrozenTokenCriteria($this->createQueryBuilder('t'));
+
+        try {
+            return $queryBuilder->getQuery()->getSingleResult()['count_'];
+        } catch (NoResultException $exception) {
+            return null;
+        }
+    }
+
+    /**
      * @param QueryBuilder $queryBuilder
+     *
      * @return QueryBuilder
      */
-    private function applyUnfrozenTokenCriteria(QueryBuilder $queryBuilder): QueryBuilder
-    {
+    private function applyUnfrozenTokenCriteria(QueryBuilder $queryBuilder): QueryBuilder {
         $queryBuilder->andWhere('t.type = :type');
-        $tokenRepository = $this->getEntityManager()->getRepository('WeavingTheWebApiBundle:TokenType');
+        $tokenRepository = $this->getEntityManager()->getRepository('Api:TokenType');
         $tokenType = $tokenRepository->findOneBy(['name' => TokenType::USER]);
         $queryBuilder->setParameter('type', $tokenType);
 
@@ -170,7 +189,7 @@ class TokenRepository extends ServiceEntityRepository
      */
     public function persistBearerToken($applicationToken, $accessToken)
     {
-        $tokenRepository = $this->getEntityManager()->getRepository('WeavingTheWebApiBundle:TokenType');
+        $tokenRepository = $this->getEntityManager()->getRepository('Api:TokenType');
         $tokenType = $tokenRepository->findOneBy(['name' => TokenType::APPLICATION]);
 
         $token = new Token();
@@ -188,7 +207,7 @@ class TokenRepository extends ServiceEntityRepository
 
     /**
      * @return mixed|null
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function findFirstUnfrozenToken()
     {
@@ -205,13 +224,13 @@ class TokenRepository extends ServiceEntityRepository
 
     /**
      * @return mixed|null
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function findFirstFrozenToken()
     {
         $queryBuilder = $this->createQueryBuilder('t');
 
-        $tokenRepository = $this->getEntityManager()->getRepository('WeavingTheWebApiBundle:TokenType');
+        $tokenRepository = $this->getEntityManager()->getRepository('Api:TokenType');
         $tokenType = $tokenRepository->findOneBy(['name' => TokenType::USER]);
 
         $queryBuilder->andWhere('t.type = :type');
@@ -239,7 +258,7 @@ class TokenRepository extends ServiceEntityRepository
      * @param string $token
      * @return mixed
      * @throws NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function findTokenOtherThan(string $token)
     {

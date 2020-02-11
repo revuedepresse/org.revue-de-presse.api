@@ -7,24 +7,26 @@ use App\Accessor\StatusAccessor;
 use App\Aggregate\AggregateAwareTrait;
 use App\Amqp\AmqpMessageAwareTrait;
 use App\Conversation\ConversationAwareTrait;
+use App\Membership\Entity\MemberInterface;
 use App\Operation\OperationClock;
+use App\Twitter\Exception\SuspendedAccountException;
+use Doctrine\Common\Persistence\Mapping\MappingException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 
-use OldSound\RabbitMqBundle\RabbitMq\ConsumerInterface;
-
-use PhpAmqpLib\Message\AmqpMessage;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\OptimisticLockException;
 
 use Psr\Log\LoggerInterface;
 
 use App\Api\Entity\Status;
 use App\Api\Repository\AggregateRepository;
-use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
-use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
-use WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;
+use App\Api\Repository\StatusRepository;
+use App\Twitter\Exception\NotFoundMemberException;
+use App\Twitter\Exception\UnavailableResourceException;
 use App\Membership\Entity\Member;
 
-class ConversationStatusConsumer implements ConsumerInterface
+class ConversationStatusConsumer
 {
     use AggregateAwareTrait;
     use ConversationAwareTrait;
@@ -87,8 +89,8 @@ class ConversationStatusConsumer implements ConsumerInterface
      * @param AmqpMessage $message
      * @return bool|mixed
      * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
      * @throws \Exception
      */
     public function execute(AmqpMessage $message)
@@ -105,7 +107,7 @@ class ConversationStatusConsumer implements ConsumerInterface
             return false;
         }
 
-        $statusId = intval(trim($options['status_id']));
+        $statusId = (int) trim($options['status_id']);
         if (!$statusId) {
             return true;
         }
@@ -128,7 +130,7 @@ class ConversationStatusConsumer implements ConsumerInterface
 
             $aggregate = $this->getListAggregateByName($member->getTwitterUsername(), $options['aggregate_name']);
         } catch (NotFoundMemberException $notFoundMemberException) {
-            list($aggregate, $status) = $this->handleMemberNotFoundException($notFoundMemberException, $options);
+            [$aggregate, $status] = $this->handleMemberNotFoundException($notFoundMemberException, $options);
         } catch (NotFoundStatusException $exception) {
             $this->handleStatusNotFoundException($options);
         } catch (UnavailableResourceException $exception) {
@@ -185,16 +187,20 @@ class ConversationStatusConsumer implements ConsumerInterface
     }
 
     /**
-     * @param $notFoundMemberException
-     * @param $options
+     * @param NotFoundMemberException $notFoundMemberException
+     * @param array                   $options
+     *
      * @return array
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws MappingException
      */
-    private function handleMemberNotFoundException($notFoundMemberException, $options): array
-    {
+    private function handleMemberNotFoundException(
+        NotFoundMemberException $notFoundMemberException,
+        array $options
+    ): array {
         $member = $this->statusAccessor->ensureMemberHavingNameExists($notFoundMemberException->screenName);
         $aggregate = $this->getListAggregateByName($member->getTwitterUsername(), $options['aggregate_name']);
         $status = $this->statusAccessor->refreshStatusByIdentifier(
@@ -232,16 +238,17 @@ class ConversationStatusConsumer implements ConsumerInterface
 
     /**
      * @param Status $status
-     * @return User
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
+     *
+     * @return Member
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
      */
     private function ensureStatusAuthorExists(Status $status): Member
     {
         $member = $this->userRepository->findOneBy(['twitter_username' => $status->getScreenName()]);
-        if (!$member instanceof User) {
+        if (!$member instanceof MemberInterface) {
             $member = $this->statusAccessor->ensureMemberHavingNameExists($status->getScreenName());
             $existingMember = $this->userRepository->findOneBy(['twitterID' => $member->getTwitterID()]);
 

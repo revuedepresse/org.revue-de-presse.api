@@ -10,6 +10,9 @@ use App\Status\LikedStatusCollectionAwareInterface;
 use App\Accessor\Exception\NotFoundStatusException;
 use App\Aggregate\Exception\LockedAggregateException;
 use App\Status\Repository\LikedStatusRepository;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\OptimisticLockException;
+use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Translation\TranslatorInterface;
 
@@ -164,7 +167,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     /**
      * @param $oauthTokens
      * @return $this
-     * @throws \Exception
+     * @throws Exception
      */
     public function setupAccessor($oauthTokens)
     {
@@ -197,9 +200,9 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
      * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \Exception
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
+     * @throws Exception
      */
     public function serialize($options, $greedy = false, $discoverPastTweets = true)
     {
@@ -264,7 +267,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             // Figuring out a member is now protected, suspended or not found is considered to be a "success",
             // provided the workers would not call the API on behalf of them
             $success = true;
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             $this->logger->error(sprintf(
                 '[from %s %s]',
                 __METHOD__ ,
@@ -284,9 +287,9 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
      * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \Exception
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
+     * @throws Exception
      */
     protected function shouldSkipSerialization($options)
     {
@@ -415,9 +418,9 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @return bool
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \Exception
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
+     * @throws Exception
      */
     public function flagWhisperers($screenName, $lastSerializationBatchSize, $totalSerializedStatuses)
     {
@@ -444,9 +447,9 @@ class UserStatus implements LikedStatusCollectionAwareInterface
 
     /**
      * @return bool
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \Exception
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
+     * @throws Exception
      */
     protected function isTwitterApiAvailable()
     {
@@ -501,8 +504,8 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     /**
      * @param Token $token
      * @return bool
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \Exception
+     * @throws OptimisticLockException
+     * @throws Exception
      */
     protected function isApiAvailableForToken(Token $token) {
         $this->setupAccessor(['token' => $token->getOauthToken(), 'secret' => $token->getOauthTokenSecret()]);
@@ -512,7 +515,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
 
     /**
      * @return bool
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws OptimisticLockException
      */
     protected function isApiAvailable()
     {
@@ -526,7 +529,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             if (!$this->accessor->isApiRateLimitReached('/statuses/user_timeline')) {
                 $availableApi = true;
             }
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             $this->twitterApiLogger->info('[error message] Testing for API availability: '.$exception->getMessage());
             $this->twitterApiLogger->info('[error code] '.(int)$exception->getCode());
 
@@ -544,7 +547,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @param      $options
      * @param bool $discoverPastTweets
      * @return mixed
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     protected function updateExtremum($options, $discoverPastTweets = true)
     {
@@ -569,7 +572,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
                 $status['statusId'] = 0;
             }
 
-            $options[$option] = intval($status['statusId']) + $shift;
+            $options[$option] = (int) $status['statusId'] + $shift;
 
             $this->logger->info(sprintf(
                 'Extremum (%s%s) retrieved for "%s": #%s',
@@ -597,9 +600,9 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
      * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \Exception
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
+     * @throws Exception
      */
     protected function remainingItemsToCollect($options)
     {
@@ -616,9 +619,9 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
      * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \Exception
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
+     * @throws Exception
      */
     protected function remainingLikes($options)
     {
@@ -658,13 +661,12 @@ class UserStatus implements LikedStatusCollectionAwareInterface
 
     /**
      * @param $options
+     *
      * @return bool
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \Exception
      */
     protected function remainingStatuses($options)
     {
@@ -724,8 +726,8 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
      * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
      */
     protected function saveStatusesMatchingCriteria($options, int $aggregateId = null)
     {
@@ -757,8 +759,8 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             !is_null($firstStatusId) &&
             !is_null($lastStatusId) &&
             count($statuses) > 0 &&
-            ($statuses[count($statuses) - 1]->id >= intval($firstStatusId)) &&
-            ($statuses[0]->id <= intval($lastStatusId))
+            ($statuses[count($statuses) - 1]->id >= (int) $firstStatusId) &&
+            ($statuses[0]->id <= (int) $lastStatusId)
         ) {
             return 0;
         }
@@ -817,7 +819,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @param string $memberName
      * @return MemberInterface
      * @throws NotFoundMemberException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws OptimisticLockException
      */
     private function declareExtremumIdForMember(
         array $statuses,
@@ -907,7 +909,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     /**
      * @param $options
      * @return mixed
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     protected function logHowManyItemsHaveBeenCollected($options)
     {
@@ -1019,7 +1021,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
 
     /**
      * @return bool
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     private function delayingConsumption(): bool
     {
@@ -1048,7 +1050,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @param int    $aggregateId
      * @return int|null
      * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     private function saveStatusesForScreenName(
         array $statuses,
@@ -1091,8 +1093,8 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @return array
      * @throws NotFoundMemberException
      * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
      */
     private function saveStatuses(
         array $statuses,
@@ -1124,7 +1126,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @param      $options
      * @param bool $discoverPastTweets
      * @return array
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     protected function fetchLatestStatuses($options, $discoverPastTweets = true): array
     {
@@ -1225,13 +1227,13 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     }
 
     /**
-     * @param \Exception $exception
+     * @param Exception $exception
      * @param            $options
      * @throws ProtectedAccountException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
      */
-    private function handleUnavailableMemberException(\Exception $exception, array $options): void
+    private function handleUnavailableMemberException(Exception $exception, array $options): void
     {
         $message = 'Skipping member with screen name "%s", which has not been found';
 
@@ -1273,8 +1275,8 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @return bool
      * @throws NotFoundMemberException
      * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
      */
     private function shouldLookUpFutureItems(string $memberName): bool
     {
@@ -1305,7 +1307,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @param $options
      * @param $updateMethod
      * @return array|mixed
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     private function findExtremum($options, $updateMethod)
     {
@@ -1330,7 +1332,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @param $options
      * @param $updateMethod
      * @return array|mixed
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     private function findLikeExtremum($options, $updateMethod)
     {
@@ -1409,8 +1411,8 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
      * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
      */
     private function beforeFetchingStatuses($options)
     {
@@ -1424,7 +1426,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         }
 
         $whisperer->member = $this->accessor->showUser($options['screen_name']);
-        $whispers = intval($whisperer->member->statuses_count);
+        $whispers = (int) $whisperer->member->statuses_count;
 
         $storedWhispers = $this->statusRepository->countHowManyStatusesFor($options['screen_name']);
 
@@ -1447,8 +1449,8 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @param Whisperer $whisperer
      * @throws SkippableMessageException
      * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
      */
     private function afterCountingCollectedStatuses(
         array $options,
@@ -1491,7 +1493,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     /**
      * @param $options
      * @param $whisperer
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws OptimisticLockException
      */
     private function afterUpdatingLastPublicationDate($options, Whisperer $whisperer): void
     {
@@ -1570,8 +1572,8 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @throws NotFoundMemberException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
      */
     private function safelyDeclareExtremum(
         $statuses,
@@ -1611,7 +1613,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @throws SkipSerializationException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     private function decideWhetherSerializationShouldBeSkipped(array $options)
     {
@@ -1639,7 +1641,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             $this->delayingConsumption();
 
             throw new RateLimitedException('No more call to the API can be made.');
-        } catch (UnavailableResourceException|\Exception $exception) {
+        } catch (UnavailableResourceException|Exception $exception) {
             $this->logger->error(
                 sprintf(
                     'An error occurred when checking if a serialization could be skipped ("%s")',
@@ -1663,8 +1665,8 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
      * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
      */
     private function trySerializingFurther($options, $greedy, $discoverPastTweets): bool
     {
@@ -1729,7 +1731,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @param Token $token
      * @param       $options
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     private function setUpAccessorWithFirstAvailableToken(Token $token, $options): array
     {

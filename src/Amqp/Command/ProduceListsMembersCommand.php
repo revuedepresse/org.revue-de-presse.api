@@ -2,27 +2,44 @@
 
 namespace App\Amqp\Command;
 
+use App\Accessor\Exception\ApiRateLimitingException;
+use App\Accessor\Exception\NotFoundStatusException;
+use App\Accessor\Exception\ReadOnlyApplicationException;
+use App\Accessor\Exception\UnexpectedApiResponseException;
 use App\Aggregate\Entity\SavedSearch;
 use App\Aggregate\Repository\SavedSearchRepository;
 use App\Aggregate\Repository\SearchMatchingStatusRepository;
+use App\Amqp\Message\FetchMemberLikes;
+use App\Amqp\Message\FetchMemberStatuses;
+use App\Api\Exception\InvalidTokenException;
 use App\Conversation\Producer\MemberAwareTrait;
+use App\Membership\Entity\Member;
+use App\Membership\Entity\MemberInterface;
 use App\Operation\OperationClock;
 
-use App\Status\LikedStatusCollectionAwareInterface;
-use OldSound\RabbitMqBundle\RabbitMq\Producer;
+use App\Twitter\Exception\BadAuthenticationDataException;
+use App\Twitter\Exception\InconsistentTokenRepository;
+use App\Twitter\Exception\NotFoundMemberException;
+use App\Twitter\Exception\ProtectedAccountException;
+use App\Twitter\Exception\SuspendedAccountException;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
+use Exception;
+use ReflectionException;
+use stdClass;
 use Symfony\Component\Console\Input\InputOption,
     Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Output\OutputInterface;
 
-use Symfony\Component\Translation\TranslatorInterface;
-
-use WeavingTheWeb\Bundle\AmqpBundle\Exception\InvalidListNameException;
+use App\Amqp\Exception\InvalidListNameException;
 
 use App\Api\Entity\Token;
 
-use WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;
-
-use App\Membership\Entity\Member;
+use App\Twitter\Exception\UnavailableResourceException;
+use Symfony\Component\Messenger\MessageBusInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
@@ -40,49 +57,61 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
     use MemberAwareTrait;
 
     /**
-     * @var \OldSound\RabbitMqBundle\RabbitMq\Producer
+     * @var MessageBusInterface
      */
-    private $producer;
+    private MessageBusInterface $producer;
 
     /**
-     * @var \OldSound\RabbitMqBundle\RabbitMq\Producer
+     * @var MessageBusInterface|null
      */
-    private $likesMessagesProducer;
+    private ?MessageBusInterface $likesMessagesProducer = null;
 
     /**
      * @var TranslatorInterface
      */
-    private $translator;
+    private TranslatorInterface $translator;
+
+    /**
+     * @param TranslatorInterface $translator
+     *
+     * @return $this
+     */
+    public function setTranslator(TranslatorInterface $translator): self
+    {
+        $this->translator = $translator;
+
+        return $this;
+    }
 
     /**
      * @var string
      */
-    private $listRestriction;
+    private ?string $listRestriction = null;
 
     /**
      * @var string
      */
-    private $memberRestriction;
+    private ?string $memberRestriction = null;
 
     /**
      * @var string
      */
-    private $queryRestriction;
+    private ?string $queryRestriction = null;
 
     /**
      * @var array[string]
      */
-    private $listCollectionRestriction;
+    private array $listCollectionRestriction = [];
 
     /**
      * @var string
      */
-    private $screenName;
+    private string $screenName;
 
     /**
      * @var bool
      */
-    private $givePriorityToAggregate = false;
+    private bool $givePriorityToAggregate = false;
 
     /**
      * @var string
@@ -92,27 +121,39 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
     /**
      * @var OperationClock
      */
-    public $operationClock;
+    public OperationClock $operationClock;
 
     /**
      * @var SavedSearchRepository
      */
-    public $savedSearchRepository;
+    public SavedSearchRepository $savedSearchRepository;
 
     /**
      * @var SearchMatchingStatusRepository
      */
-    public $searchMatchingStatusRepository;
+    public SearchMatchingStatusRepository $searchMatchingStatusRepository;
 
     /**
      * @var bool
      */
-    public $shouldIncludeOwner;
+    public bool $shouldIncludeOwner = false;
 
     /**
      * @var bool
      */
-    private $ignoreWhispers = false;
+    private bool $ignoreWhispers = false;
+
+    /**
+     * @param $messageBus
+     *
+     * @return $this
+     */
+    public function setMessageBus(MessageBusInterface $messageBus): self
+    {
+        $this->producer = $messageBus;
+
+        return $this;
+    }
 
     public function configure()
     {
@@ -181,14 +222,21 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
     /**
      * @param InputInterface  $input
      * @param OutputInterface $output
-     * @return int|null
+     *
+     * @return int
+     * @throws ApiRateLimitingException
+     * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
      * @throws InvalidListNameException
+     * @throws InvalidTokenException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
+     * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
+     * @throws SuspendedAccountException
      * @throws UnavailableResourceException
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \WeavingTheWeb\Bundle\ApiBundle\Exception\InvalidTokenException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
+     * @throws UnexpectedApiResponseException
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
@@ -206,21 +254,55 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
 
         $this->setUpDependencies();
 
-        if ($this->queryRestriction) {
+        if ($this->applyQueryRestriction()) {
             $this->productSearchStatusesMessages();
 
             return self::RETURN_STATUS_SUCCESS;
         }
 
-        return $this->productListsMessages();
+        return $this->producesListsMessages();
+    }
+
+    /**
+     * @param array           $messageBody
+     * @param stdClass        $list
+     * @param MemberInterface $member
+     *
+     * @return FetchMemberStatuses
+     */
+    protected function makeMemberIdentityCard(
+        array $messageBody,
+        stdClass $list,
+        MemberInterface $member
+    ): FetchMemberStatuses {
+        $messageBody['screen_name'] = $member->getTwitterUsername();
+
+        $aggregate                   = $this->getListAggregateByName(
+            $messageBody['screen_name'],
+            $list->name,
+            $list->id_str
+        );
+        $messageBody['aggregate_id'] = $aggregate->getId();
+
+        $before = null;
+        if (isset($this->before)) {
+            $before = $this->before;
+        }
+
+        return new FetchMemberStatuses(
+            $messageBody['screen_name'],
+            $messageBody['aggregate_id'],
+            $before
+        );
     }
 
     /**
      * @param $members
      * @param $messageBody
      * @param $list
+     *
      * @return int
-     * @throws \Exception
+     * @throws Exception
      */
     protected function publishMembersScreenNames($members, $messageBody, $list)
     {
@@ -236,7 +318,7 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
             }
 
             try {
-                $member = $this->getMessageUser($friend);
+                $member = $this->getMessageMember($friend);
 
                 if ($this->ignoreWhispers && $member->isAWhisperer()) {
                     $message = sprintf('Ignoring whisperer with screen name "%s"', $friend->screen_name);
@@ -259,31 +341,24 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
                     continue;
                 }
 
-                $messageBody['screen_name'] = $member->getTwitterUsername();
-
-                $aggregate = $this->getListAggregateByName(
-                    $messageBody['screen_name'],
-                    $list->name,
-                    $list->id_str
+                $fetchMemberStatuses = $this->makeMemberIdentityCard(
+                    $messageBody,
+                    $list,
+                    $member
                 );
-                $messageBody['aggregate_id'] = $aggregate->getId();
 
-                if ($this->before) {
-                    $messageBody['before'] = $this->before;
-                }
+                $this->producer->dispatch($fetchMemberStatuses);
 
-                $this->producer->setContentType('application/json');
-                $this->producer->publish(serialize(json_encode($messageBody)));
-
-                if ($this->likesMessagesProducer instanceof Producer) {
-                    $this->likesMessagesProducer->setContentType('application/json');
-                    $messageBody[LikedStatusCollectionAwareInterface::INTENT_TO_FETCH_LIKES] = true;
-                    $this->likesMessagesProducer->publish(serialize(json_encode($messageBody)));
-                    $messageBody[LikedStatusCollectionAwareInterface::INTENT_TO_FETCH_LIKES] = false;
+                if ($this->likesMessagesProducer instanceof MessageBusInterface) {
+                    $this->likesMessagesProducer->dispatch(
+                        FetchMemberLikes::from(
+                            $fetchMemberStatuses
+                        )
+                    );
                 }
 
                 $publishedMessages++;
-            } catch (\Exception $exception) {
+            } catch (Exception $exception) {
                 if ($this->shouldBreakPublication($exception)) {
                     break;
                 } elseif ($this->shouldContinuePublication($exception)) {
@@ -298,15 +373,21 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
     }
 
     /**
-     * @param      $twitterUser
-     * @param      $friend
-     * @param bool $protected
-     * @param bool $suspended
-     * @return User
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @param stdClass $twitterUser
+     * @param stdClass $friend
+     * @param bool     $protected
+     * @param bool     $suspended
+     *
+     * @return Member
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
-    protected function makeUser($twitterUser, $friend, $protected = false, $suspended = false)
+    protected function makeUser(
+        stdClass $twitterUser,
+        stdClass $friend,
+        bool $protected = false,
+        bool $suspended = false
+    )
     {
         $message = '[publishing new message produced for "' . ($twitterUser->screen_name) . '"]';
         $this->logger->info($message);
@@ -317,6 +398,18 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
         $this->entityManager->flush();
 
         return $user;
+    }
+
+    /**
+     * @return bool
+     */
+    private function applyQueryRestriction(): bool
+    {
+        if ($this->queryRestriction === null) {
+            return false;
+        }
+
+        return $this->queryRestriction;
     }
 
     /**
@@ -354,31 +447,42 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
     }
 
     /**
-     * @param $ownerships
-     * @return \API|mixed|object|\stdClass
+     * @param stdClass $ownerships
+     *
+     * @return stdClass
+     * @throws ApiRateLimitingException
+     * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
+     * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
+     * @throws SuspendedAccountException
      * @throws UnavailableResourceException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \WeavingTheWeb\Bundle\ApiBundle\Exception\InvalidTokenException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
+     * @throws UnexpectedApiResponseException
+     * @throws NotFoundStatusException
+     * @throws NotFoundMemberException
+     * @throws ProtectedAccountException
      */
-    private function findNextBatchOfListOwnerships($ownerships)
+    private function findNextBatchOfListOwnerships(stdClass $ownerships): stdClass
     {
         $previousCursor = -1;
 
-        if (is_null($this->listRestriction)) {
-            return $this->accessor->getUserOwnerships($this->screenName, $ownerships->next_cursor);
+        if ($this->listRestriction === null) {
+            return $this->accessor->getUserOwnerships(
+                $this->screenName,
+                $ownerships->next_cursor
+            );
         }
 
         while ($this->targetListHasNotBeenFound($ownerships, $this->listRestriction)) {
             $ownerships = $this->accessor->getUserOwnerships($this->screenName, $ownerships->next_cursor);
 
             if (!isset($ownerships->next_cursor) || $previousCursor === $ownerships->next_cursor) {
-                $this->output->write(sprintf(
+                $this->output->write(sprintf(implode([
                     'No more pages of members lists to be processed. ',
                     'Does the Twitter API access token used belong to "%s"?',
-                    $this->screenName
-                ));
+                ]), $this->screenName));
 
                 break;
             }
@@ -392,20 +496,13 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
     private function setUpDependencies()
     {
         $tokens = $this->getTokensFromInput();
-        $this->setupAccessor($tokens);
+
+        $this->setOAuthTokens($tokens);
 
         $this->setupAggregateRepository();
         $this->setUpLogger();
 
-        $this->producer = $this->getContainer()
-            ->get('old_sound_rabbit_mq.weaving_the_web_amqp.twitter.user_status_producer');
-
-        if (!is_null($this->listRestriction) && $this->listRestriction == 'news :: France') {
-            $this->producer = $this->getContainer()
-                ->get('old_sound_rabbit_mq.weaving_the_web_amqp.twitter.news_status_producer');
-        }
-
-        if ((!is_null($this->listRestriction) || !is_null($this->listCollectionRestriction)) &&
+        if (($this->listRestriction !== null || $this->listCollectionRestriction !== null) &&
             $this->givePriorityToAggregate
         ) {
             $this->producer = $this->getContainer()
@@ -415,18 +512,16 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
                 ->get('old_sound_rabbit_mq.weaving_the_web_amqp.producer.aggregates_likes_producer');
         }
 
-        if ($this->queryRestriction) {
+        if ($this->applyQueryRestriction()) {
             $this->producer = $this->getContainer()
                 ->get('old_sound_rabbit_mq.weaving_the_web_amqp.producer.search_matching_statuses_producer');
         }
-
-        $this->translator = $this->getContainer()->get('translator');
     }
 
     /**
      * @return array
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
     private function updateAccessToken()
     {
@@ -441,7 +536,7 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
             'consumer_token' => $token->consumerKey,
             'consumer_secret' => $token->consumerSecret
         ];
-        $this->setupAccessor($oauthTokens);
+        $this->setOAuthTokens($oauthTokens);
 
         return $oauthTokens;
     }
@@ -451,18 +546,16 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
      * @return \API|mixed|object|\stdClass
      * @throws InvalidListNameException
      * @throws UnavailableResourceException
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \Exception
-     * @throws \WeavingTheWeb\Bundle\ApiBundle\Exception\InvalidTokenException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
+     * @throws Exception
+     * @throws InvalidTokenException
+     * @throws SuspendedAccountException
      */
     private function guardAgainstInvalidListName($ownerships)
     {
         if ($this->listRestriction) {
-            $ownerships = $this->findNextBatchOfListOwnerships($ownerships);
-
             if ($this->targetListHasNotBeenFound($ownerships, $this->listRestriction)) {
                 $ownerships = $this->guardAgainstInvalidToken($ownerships);
             }
@@ -533,12 +626,12 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
      * @param $ownerships
      * @return \API|mixed|object|\stdClass
      * @throws UnavailableResourceException
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \Exception
-     * @throws \WeavingTheWeb\Bundle\ApiBundle\Exception\InvalidTokenException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
+     * @throws Exception
+     * @throws InvalidTokenException
+     * @throws SuspendedAccountException
      */
     private function guardAgainstInvalidToken($ownerships)
     {
@@ -550,22 +643,47 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
 
     /**
      * @return int
+     * @throws ApiRateLimitingException
+     * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
      * @throws InvalidListNameException
+     * @throws InvalidTokenException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
+     * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
+     * @throws SuspendedAccountException
      * @throws UnavailableResourceException
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \WeavingTheWeb\Bundle\ApiBundle\Exception\InvalidTokenException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
+     * @throws UnexpectedApiResponseException
      */
-    private function productListsMessages()
+    private function producesListsMessages(): int
     {
-        try {
-            $ownerships = $this->accessor->getUserOwnerships($this->screenName);
-            $messageBody = $this->getTokensFromInput();
-        } catch (UnavailableResourceException $exception) {
-            $messageBody = $this->updateAccessToken();
-            $ownerships = $this->accessor->getUserOwnerships($this->screenName);
+        $unfrozenTokenCount = $this->tokenRepository->howManyUnfrozenTokenAreThere();
+
+        while ($unfrozenTokenCount > 0) {
+            try {
+                $ownerships = $this->accessor->getUserOwnerships($this->screenName);
+
+                if (count($ownerships->lists) === 0) {
+                    continue;
+                }
+
+                $messageBody = $this->getTokensFromInput();
+
+                break;
+            } catch (UnavailableResourceException $exception) {
+                $this->logger->info($exception->getMessage());
+                $messageBody = $this->updateAccessToken();
+            }
+
+            $unfrozenTokenCount--;
+        }
+
+        if (!isset($ownerships)) {
+            $this->output->writeln('Over capacity usage of all available tokens.');
+
+            return self::RETURN_STATUS_SUCCESS;
         }
 
         $ownerships = $this->guardAgainstInvalidListName($ownerships);
@@ -588,7 +706,7 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
                     $shouldIncludeOwner,
                     $messageBody
                 );
-            } catch (\Exception $exception) {
+            } catch (Exception $exception) {
                 $this->logger->critical($exception->getMessage());
             }
         }
@@ -597,11 +715,18 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
     }
 
     /**
+     * @throws ApiRateLimitingException
+     * @throws BadAuthenticationDataException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     * @throws NotFoundMemberException
+     * @throws NotFoundStatusException
+     * @throws OptimisticLockException
+     * @throws ProtectedAccountException
+     * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
+     * @throws SuspendedAccountException
      * @throws UnavailableResourceException
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
      */
     private function productSearchStatusesMessages()
     {
@@ -630,10 +755,10 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
      * @param $messageBody
      * @return bool
      * @throws UnavailableResourceException
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
+     * @throws SuspendedAccountException
      */
     private function processMemberList(
         $doNotApplyListRestriction,

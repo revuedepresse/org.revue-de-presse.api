@@ -194,7 +194,7 @@ class LikedStatusRepository extends ServiceEntityRepository implements ExtremumA
             $extremum = $queryBuilder->getQuery()->getSingleResult();
 
             if ($direction === 'asc') {
-                $nextMinimum = min(intval($extremum['statusId']), $nextExtremum['statusId']);
+                $nextMinimum = min((int) $extremum['statusId'], $nextExtremum['statusId']);
 
                 return ['statusId' => $this->memberRepository->declareMaxLikeIdForMemberWithScreenName(
                     "$nextMinimum",
@@ -202,7 +202,7 @@ class LikedStatusRepository extends ServiceEntityRepository implements ExtremumA
                 )->minStatusId];
             }
 
-            $nextMaximum = max(intval($extremum['statusId']), $nextExtremum['statusId']);
+            $nextMaximum = max((int) $extremum['statusId'], $nextExtremum['statusId']);
 
             return ['statusId' => $this->memberRepository->declareMaxLikeIdForMemberWithScreenName(
                 "$nextMaximum",
@@ -384,7 +384,7 @@ QUERY
             strtr(
                 $query,
                 [
-                    ':status_id' => intval($status->id_str),
+                    ':status_id' => (int) $status->id_str,
                     ':aggregate_name' => $connection->quote($aggregateName),
                     ':liked_by_member_name' => $connection->quote($likedByMemberName),
                     ':member_name' => $connection->quote($memberName),

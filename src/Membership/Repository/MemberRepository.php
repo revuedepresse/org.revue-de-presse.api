@@ -1,21 +1,22 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Membership\Repository;
 
 use App\Aggregate\Controller\SearchParams;
 use App\Aggregate\Repository\PaginationAwareTrait;
-use App\Api\Entity\Aggregate;
 use App\Membership\Entity\MemberInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
-use Doctrine\ORM\EntityRepository;
 
 use Doctrine\ORM\QueryBuilder;
-use Doctrine\Persistence\ManagerRegistry;
 use App\Api\Repository\AggregateRepository;
-use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
+use App\Twitter\Exception\NotFoundMemberException;
 use App\Membership\Entity\Member;
 
+/**
+ * @package App\Membership\Repository
+ */
 class MemberRepository extends ServiceEntityRepository
 {
     const TABLE_ALIAS = 'm';
@@ -31,25 +32,26 @@ class MemberRepository extends ServiceEntityRepository
     use PaginationAwareTrait;
 
     /**
-     * @param      $twitterId
-     * @param      $screenName
-     * @param bool $protected
-     * @param bool $suspended
-     * @param null $description
-     * @param int  $totalSubscriptions
-     * @param int  $totalSubscribees
-     * @return User
+     * @param string      $twitterId
+     * @param string      $screenName
+     * @param bool        $protected
+     * @param bool        $suspended
+     * @param string|null $description
+     * @param int         $totalSubscriptions
+     * @param int         $totalSubscribees
+     *
+     * @return Member
      */
     public function make(
-        $twitterId,
-        $screenName,
-        $protected = false,
-        $suspended = false,
-        $description = null,
-        $totalSubscriptions = 0,
-        $totalSubscribees = 0
+        string $twitterId,
+        string $screenName,
+        bool $protected = false,
+        bool $suspended = false,
+        string $description = null,
+        int $totalSubscriptions = 0,
+        int $totalSubscribees = 0
     ) {
-        $member = new User();
+        $member = new Member();
 
         if (is_numeric($twitterId)) {
             $member->setTwitterID($twitterId);
@@ -65,7 +67,7 @@ class MemberRepository extends ServiceEntityRepository
         $member->setSuspended($suspended);
         $member->setNotFound(false);
 
-        if (!is_null($description)) {
+        if ($description !== null) {
             $member->description = $description;
         }
 
@@ -99,13 +101,13 @@ class MemberRepository extends ServiceEntityRepository
     {
         $member = $this->findOneBy(['twitter_username' => $screenName]);
 
-        if ($member instanceof User) {
+        if ($member instanceof MemberInterface) {
             $member->setSuspended(true);
 
             return $this->saveUser($member);
         }
 
-        $member = new User();
+        $member = new Member();
         $member->setTwitterUsername($screenName);
         $member->setTwitterID(0);
         $member->setEnabled(false);
@@ -143,7 +145,7 @@ class MemberRepository extends ServiceEntityRepository
     {
         $member = $this->findOneBy(['twitter_username' => $screenName]);
 
-        if (!$member instanceof User) {
+        if (!$member instanceof MemberInterface) {
             return null;
         }
 
@@ -182,7 +184,7 @@ class MemberRepository extends ServiceEntityRepository
     public function declareUserAsProtected(string $screenName)
     {
         $member = $this->findOneBy(['twitter_username' => $screenName]);
-        if (!$member instanceof User) {
+        if (!$member instanceof MemberInterface) {
             return $this->make(
                 0,
                 $screenName,
@@ -231,7 +233,7 @@ class MemberRepository extends ServiceEntityRepository
     {
         $member = $this->ensureMemberExists($screenName);
 
-        if (is_null($member->maxStatusId) || (intval($maxStatusId) > intval($member->maxStatusId))) {
+        if (is_null($member->maxStatusId) || ((int) $maxStatusId > (int) $member->maxStatusId)) {
             $member->maxStatusId = $maxStatusId;
         }
 
@@ -249,7 +251,7 @@ class MemberRepository extends ServiceEntityRepository
     {
         $member = $this->ensureMemberExists($screenName);
 
-        if (is_null($member->minStatusId) || (intval($minStatusId) < intval($member->minStatusId))) {
+        if (is_null($member->minStatusId) || ((int) $minStatusId < (int) $member->minStatusId)) {
             $member->minStatusId = $minStatusId;
         }
 
@@ -267,7 +269,7 @@ class MemberRepository extends ServiceEntityRepository
     {
         $member = $this->ensureMemberExists($screenName);
 
-        if (is_null($member->maxLikeId) || (intval($maxLikeId) > intval($member->maxLikeId))) {
+        if (is_null($member->maxLikeId) || ((int) $maxLikeId > (int) $member->maxLikeId)) {
             $member->maxLikeId = $maxLikeId;
         }
 
@@ -285,7 +287,7 @@ class MemberRepository extends ServiceEntityRepository
     {
         $member = $this->ensureMemberExists($screenName);
 
-        if (is_null($member->minLikeId) || (intval($minLikeId) < intval($member->minLikeId))) {
+        if (is_null($member->minLikeId) || ((int) $minLikeId < (int) $member->minLikeId)) {
             $member->minLikeId = $minLikeId;
         }
 
@@ -405,13 +407,13 @@ class MemberRepository extends ServiceEntityRepository
     {
         $suspendedMember = $this->findOneBy(['twitterID' => $identifier]);
 
-        if ($suspendedMember instanceof User) {
+        if ($suspendedMember instanceof MemberInterface) {
             $suspendedMember->setSuspended(true);
 
             return $this->saveUser($suspendedMember);
         }
 
-        $suspendedMember = new User();
+        $suspendedMember = new Member();
         $suspendedMember->setTwitterUsername($identifier);
         $suspendedMember->setTwitterID($identifier);
         $suspendedMember->setEnabled(false);
@@ -556,8 +558,8 @@ QUERY;
             array_walk(
                 $aggregates,
                 function ($aggregate) use (&$aggregateProperties) {
-                    $aggregate['id'] = intval($aggregate['id']);
-                    $aggregate['totalStatuses'] = intval($aggregate['totalStatuses']);
+                    $aggregate['id'] = (int) $aggregate['id'];
+                    $aggregate['totalStatuses'] = (int) $aggregate['totalStatuses'];
                     $aggregate['locked'] = (bool)$aggregate['locked'];
 
                     if (array_key_exists('unlocked_at', $aggregate)) {
@@ -662,9 +664,9 @@ QUERY;
 
         $results = array_map(
             function (array $aggregate) {
-                if (intval($aggregate['totalStatuses']) <= 0) {
+                if ((int) $aggregate['totalStatuses'] <= 0) {
                     $matchingAggregate = $this->aggregateRepository->findOneBy(
-                        ['id' => intval($aggregate['id'])]
+                        ['id' => (int) $aggregate['id']]
                     );
 
                     $this->aggregateRepository->updateTotalStatuses(

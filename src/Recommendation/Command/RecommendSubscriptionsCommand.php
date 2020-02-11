@@ -123,7 +123,7 @@ class RecommendSubscriptionsCommand extends Command implements CommandReturnCode
         $allSubscriptions = explode(',', $allSubscriptions);
         $allSubscriptions = array_map(
             function ($subscription) {
-                return intval($subscription);
+                return (int) $subscription;
             },
             $allSubscriptions
         );

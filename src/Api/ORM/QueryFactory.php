@@ -75,7 +75,7 @@ class QueryFactory
 
         $alias = $this->getJsonAlias();
         $queryBuilder = $this->prepareQueryBuilder(
-            'WeavingTheWebApiBundle:Json', $alias);
+            'Api:Json', $alias);
         $this->count($queryBuilder, $alias);
         $this->addConstraints($queryBuilder, $constraints, $alias);
 
@@ -108,7 +108,7 @@ class QueryFactory
     public function selectJson(array $constraints = array(), $offset = null, $limit = null)
     {
         $jsonAlias    = $this->getJsonAlias();
-        $queryBuilder = $this->prepareQueryBuilder('WeavingTheWebApiBundle:Json', $jsonAlias);
+        $queryBuilder = $this->prepareQueryBuilder('Api:Json', $jsonAlias);
         $queryBuilder->orderBy($jsonAlias . '.id', 'DESC');
 
         $constraints['offset'] = $limit;
@@ -310,7 +310,7 @@ class QueryFactory
         $offset = null,
         $limit = null)
     {
-        return $this->querySelection('WeavingTheWebApiBundle:Json',
+        return $this->querySelection('Api:Json',
             array_merge(array(
                 'limit' => $limit,
                 'offset' => $offset), $constraints));

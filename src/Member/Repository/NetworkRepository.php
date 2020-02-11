@@ -147,7 +147,7 @@ class NetworkRepository
     {
         return $this->guardAgainstExceptionalMemberWhenLookingForOne(
             function (string $memberId) {
-                return $this->accessor->ensureMemberHavingIdExists(intval($memberId));
+                return $this->accessor->ensureMemberHavingIdExists((int) $memberId);
             },
             $memberId
         );
@@ -194,7 +194,7 @@ class NetworkRepository
 
             $member = $notFoundMember->make(
                 is_null($exception->screenName) ? $memberId : $exception->screenName,
-                intval($memberId)
+                (int) $memberId
             );
         } catch (ProtectedAccountException $exception) {
             $protectedMember = new ProtectedMember();
@@ -202,7 +202,7 @@ class NetworkRepository
 
             $member = $protectedMember->make(
                 $exception->screenName,
-                intval($memberId)
+                (int) $memberId
             );
         } catch (SuspendedAccountException $exception) {
             $suspendedMember = new SuspendedMember();
@@ -210,7 +210,7 @@ class NetworkRepository
 
             $member = $suspendedMember->make(
                 $exception->screenName,
-                intval($memberId)
+                (int) $memberId
             );
         } catch (\Exception $exception) {
             $member = new ExceptionalMember();

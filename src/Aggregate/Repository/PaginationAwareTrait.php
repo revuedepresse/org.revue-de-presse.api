@@ -30,6 +30,6 @@ trait PaginationAwareTrait
             return 0;
         }
 
-        return ceil(intval($result['total_items']) / $searchParams->getPageSize());
+        return ceil((int) $result['total_items'] / $searchParams->getPageSize());
     }
 }
