@@ -19,6 +19,11 @@ class FetchMemberStatuses
     private int $aggregateId;
 
     /**
+     * @var array $credentials
+     */
+    private array $credentials;
+
+    /**
      * @var string
      */
     private ?string $before;
@@ -26,17 +31,20 @@ class FetchMemberStatuses
     /**
      * @param string      $screenName
      * @param int         $aggregateId
+     * @param array       $credentials
      * @param string|null $before
      */
     public function __construct(
         string $screenName,
         int $aggregateId,
+        array $credentials,
         ?string $before = null
     ) {
 
         $this->screenName = $screenName;
         $this->aggregateId = $aggregateId;
         $this->before = $before;
+        $this->credentials = $credentials;
     }
 
     /**
@@ -61,5 +69,13 @@ class FetchMemberStatuses
     public function before(): ?string
     {
         return $this->before;
+    }
+
+    /**
+     * @return array
+     */
+    public function credentials(): array
+    {
+        return $this->credentials;
     }
 }
