@@ -11,7 +11,7 @@ parameters:
     weaving_the_web_amqp.consumer.status.class:                                 'App\Amqp\Twitter\UserStatus'
     weaving_the_web_amqp.consumer.timely_status.class:                          'App\Aggregate\Consumer\TimelyStatusConsumer'
     weaving_the_web_amqp.consumer.network.class:                                'App\Member\Consumer\NetworkConsumer'
-    weaving_the_web_amqp.produce_lists_members_command.class:                   'App\Amqp\Command\ProduceListsMembersCommand'
+    press_review.fetch_member_status.class:                                     'App\Amqp\Command\FetchMemberStatusMessageDispatcher'
 
 services:
     command.import_media_relationships:
@@ -139,26 +139,6 @@ services:
         calls:
             - [ 'setLogger',            [ '@monolog.logger.status'] ]
 
-    weaving_the_web_amqp.twitter.lists_member_status:
-        class:                              "%weaving_the_web_amqp.produce_lists_members_command.class%"
-        properties:
-            operationClock:                 "@operation.clock"
-            savedSearchRepository:          "@repository.saved_search"
-            searchMatchingStatusRepository: "@repository.search_matching_status"
-        calls:
-            - [ 'setAccessor',              [ '@weaving_the_web_twitter.api_accessor'] ]
-            - [ 'setDefaultSecret',         [ '%weaving_the_web_twitter.oauth_secret.default%'] ]
-            - [ 'setDefaultToken',          [ '%weaving_the_web_twitter.oauth_token.default%'] ]
-            - [ 'setMessageBus',            [ '@messenger.default_bus'] ]
-            - [ 'setTokenRepository',       [ '@weaving_the_web_api.repository.token'] ]
-            - [ 'setTranslator',            [ '@translator'] ]
-            - [ 'setMemberRepository',      [ '@user_manager'] ]
-            - [ 'setAggregateRepository',   [ '@repository.aggregate'] ]
-            - [ 'setEntityManager',         [ '@doctrine.orm.entity_manager'] ]
-            - [ 'setLogger',                [ '@logger'] ]
-        tags:
-            - { name: 'console.command' }
-
     weaving_the_web_amqp.consumer.status:
         class:                        "%weaving_the_web_amqp.consumer.status.class%"
         calls:
@@ -192,3 +172,24 @@ services:
             statusDirectory: "%kernel.project_dir%/../src/App/Resources/statuses"
         tags:
             - { name: 'console.command' }
+
+    press_review.fetch_member_status:
+        class:                              "%press_review.fetch_member_status.class%"
+        properties:
+            operationClock:                 "@operation.clock"
+            savedSearchRepository:          "@repository.saved_search"
+            searchMatchingStatusRepository: "@repository.search_matching_status"
+        calls:
+            - [ 'setAccessor',              [ '@weaving_the_web_twitter.api_accessor'] ]
+            - [ 'setDefaultSecret',         [ '%weaving_the_web_twitter.oauth_secret.default%'] ]
+            - [ 'setDefaultToken',          [ '%weaving_the_web_twitter.oauth_token.default%'] ]
+            - [ 'setMessageBus',            [ '@messenger.default_bus'] ]
+            - [ 'setTokenRepository',       [ '@weaving_the_web_api.repository.token'] ]
+            - [ 'setTranslator',            [ '@translator'] ]
+            - [ 'setMemberRepository',      [ '@user_manager'] ]
+            - [ 'setAggregateRepository',   [ '@repository.aggregate'] ]
+            - [ 'setEntityManager',         [ '@doctrine.orm.entity_manager'] ]
+            - [ 'setLogger',                [ '@logger'] ]
+        tags:
+            - { name: 'console.command' }
+

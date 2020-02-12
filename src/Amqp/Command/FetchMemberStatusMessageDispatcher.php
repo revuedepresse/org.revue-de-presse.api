@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Amqp\Command;
 
@@ -42,17 +43,17 @@ use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
- * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ * @package App\Amqp\Command
  */
-class ProduceListsMembersCommand extends AggregateAwareCommand
+class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
 {
-    const OPTION_SCREEN_NAME = 'screen_name';
+    private const OPTION_SCREEN_NAME = 'screen_name';
 
-    const OPTION_MEMBER_RESTRICTION = 'member_restriction';
+    private const OPTION_MEMBER_RESTRICTION = 'member_restriction';
 
-    const OPTION_INCLUDE_OWNER = 'include_owner';
+    private const OPTION_INCLUDE_OWNER = 'include_owner';
 
-    const OPTION_IGNORE_WHISPERS = 'ignore_whispers';
+    private const OPTION_IGNORE_WHISPERS = 'ignore_whispers';
 
     use MemberAwareTrait;
 
@@ -116,7 +117,7 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
     /**
      * @var string
      */
-    private $before = null;
+    private ?string $before = null;
 
     /**
      * @var OperationClock
@@ -157,8 +158,8 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
 
     public function configure()
     {
-        $this->setName('weaving_the_web:amqp:produce:lists_members')
-            ->setDescription('Produce a message to get lists members status')
+        $this->setName('press-review:dispatch-messages-to-fetch-member-statuses')
+            ->setDescription('Dispatch messages to fetch member statuses')
             ->addOption(
             'oauth_token',
             null,
@@ -216,7 +217,7 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
             'iw',
             InputOption::VALUE_NONE,
             'Should ignore whispers (publication from members having not published anything for a month)'
-        )->setAliases(array('wtw:amqp:tw:prd:lm'));
+        )->setAliases(['pr:d-m-t-f-m-s']);
     }
 
     /**
@@ -275,24 +276,19 @@ class ProduceListsMembersCommand extends AggregateAwareCommand
         stdClass $list,
         MemberInterface $member
     ): FetchMemberStatuses {
-        $messageBody['screen_name'] = $member->getTwitterUsername();
+        $credentials = $messageBody;
 
-        $aggregate                   = $this->getListAggregateByName(
-            $messageBody['screen_name'],
+        $aggregate = $this->getListAggregateByName(
+            $member->getTwitterUsername(),
             $list->name,
             $list->id_str
         );
-        $messageBody['aggregate_id'] = $aggregate->getId();
-
-        $before = null;
-        if (isset($this->before)) {
-            $before = $this->before;
-        }
 
         return new FetchMemberStatuses(
-            $messageBody['screen_name'],
-            $messageBody['aggregate_id'],
-            $before
+            $member->getTwitterUsername(),
+            $aggregate->getId(),
+            $credentials,
+            $this->before
         );
     }
 
