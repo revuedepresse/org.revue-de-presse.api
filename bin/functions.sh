@@ -599,7 +599,7 @@ function configure_rabbitmq_user_privileges() {
 }
 
 function list_amqp_queues() {
-    local rabbitmq_vhost="$(cat <(cat .env.local | grep amqp | sed -E 's#.+(/.+)$#\1#' | sed -E 's/\/%2f/\//g'))"
+    local rabbitmq_vhost="$(cat <(cat .env.local | grep amqp | sed -E 's#.+(/.+)/[^/]*$#\1#' | sed -E 's/\/%2f/\//g'))"
     docker exec -ti rabbitmq watch -n1 'rabbitmqctl list_queues -p '"${rabbitmq_vhost}"
 }
 
