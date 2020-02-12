@@ -22,16 +22,12 @@ use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\Handler\MessageSubscriberInterface;
 use function array_key_exists;
-use function json_decode;
-use function json_last_error;
 use function sprintf;
-use function unserialize;
-use const JSON_ERROR_NONE;
 
 /**
  * @package App\Amqp\MessageHandler
  */
-class FetchMemberStastusesHandler implements MessageSubscriberInterface
+class FetchMemberStatusesHandler implements MessageSubscriberInterface
 {
     const ERROR_CODE_USER_NOT_FOUND = 100;
 
@@ -105,7 +101,7 @@ class FetchMemberStastusesHandler implements MessageSubscriberInterface
     public function __invoke(FetchMemberStatuses $message)
     {
         try {
-            $options = $this->parseMessage($message);
+            $options = $this->processMessage($message);
         } catch (Exception $exception) {
             $this->logger->critical($exception->getMessage());
 
@@ -180,17 +176,12 @@ class FetchMemberStastusesHandler implements MessageSubscriberInterface
     }
 
     /**
-     * @param AmqpMessage $message
+     * @param FetchMemberStatuses $message
      * @return array
      * @throws Exception
      */
-    public function parseMessage(AmqpMessage $message): array
+    public function processMessage(FetchMemberStatuses $message): array
     {
-        $options = json_decode(unserialize($message->body), true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new \InvalidArgumentException('Valid credentials are required');
-        }
-
         return $this->setupCredentials($options);
     }
 
