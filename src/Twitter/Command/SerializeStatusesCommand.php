@@ -2,6 +2,7 @@
 
 namespace App\Twitter\Command;
 
+use App\Twitter\Serializer\UserStatus;
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand,
     Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Output\OutputInterface,
@@ -79,7 +80,7 @@ class SerializeStatusesCommand extends ContainerAwareCommand
             'bearer' => $input->getOption('bearer'),
         ];
 
-        /** @var \App\Twitter\Serializer\UserStatus $serializer */
+        /** @var UserStatus $serializer */
         $serializer = $this->getContainer()->get('weaving_the_web_twitter.serializer.user_status');
         if ($input->hasOption('bearer') && $input->getOption('bearer')) {
             $header = $this->getAuthenticationHeader();
