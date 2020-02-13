@@ -22,4 +22,4 @@ RUN apt-get update && apt-get install -y wget unzip git libicu-dev librabbitmq-d
 ADD templates/20-xdebug.ini.dist /usr/local/etc/php/conf.d/20-xdebug.ini
 ADD templates/extensions.ini /usr/local/etc/php/conf.d/extensions.ini
 
-CMD ["php", "-a"]
+CMD /bin/bash -c 'tail -f /dev/null'
