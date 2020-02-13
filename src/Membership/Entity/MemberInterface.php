@@ -19,7 +19,7 @@ interface MemberInterface extends UserInterface
     /**
      * @return string
      */
-    public function getUsername(): string;
+    public function getUsername(): ?string;
 
     /**
      * @param string $twitterId

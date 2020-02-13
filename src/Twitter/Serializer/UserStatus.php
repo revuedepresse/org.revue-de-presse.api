@@ -1215,9 +1215,10 @@ class UserStatus implements LikedStatusCollectionAwareInterface
 
     /**
      * @param $options
-     * @return null
+     *
+     * @return int|null
      */
-    private function extractAggregateIdFromOptions($options)
+    private function extractAggregateIdFromOptions($options): ?int
     {
         if (!array_key_exists('aggregate_id', $options)) {
             return null;
