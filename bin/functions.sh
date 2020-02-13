@@ -529,7 +529,7 @@ function remove_rabbitmq_container {
 
 function run_rabbitmq_container {
     local rabbitmq_vhost="$(cat <(cat ../backup/app/config/parameters.yml | grep -v '#' | grep 'rabbitmq_vhost:' | cut -f 2 -d ':' | sed -e 's/[[:space:]]//g'))"
-    local rabbitmq_password="cat ../../../../backup/app/config/parameters.yml | grep -v '#' | grep 'rabbitmq_password:' | cut -f 2 -d ':' | sed -e 's/[[:space:]]//g'"
+    local rabbitmq_password="$(cat ../backup/app/config/parameters.yml | grep -v '#' | grep 'rabbitmq_password:' | cut -f 2 -d ':' | sed -e 's/[[:space:]]//g')"
     local rabbitmq_user=$(cat <(cat ../backup/app/config/parameters.yml | \
         grep 'rabbitmq_user:' | grep -v '#' | \
         cut -f 2 -d ':' | sed -e 's/[[:space:]]//g'))
