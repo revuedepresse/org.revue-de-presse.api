@@ -20,6 +20,11 @@ RUN apt-get update && apt-get install -y wget unzip git libicu-dev librabbitmq-d
     apt-get update && apt install blackfire-agent blackfire-php
 
 ADD templates/20-xdebug.ini.dist /usr/local/etc/php/conf.d/20-xdebug.ini
+
 ADD templates/extensions.ini /usr/local/etc/php/conf.d/extensions.ini
 
-CMD /bin/bash -c 'tail -f /dev/null'
+VOLUME /var/www/devobs
+
+WORKDIR /var/www/devobs
+
+CMD ["tail", "-f", "/dev/null"]
