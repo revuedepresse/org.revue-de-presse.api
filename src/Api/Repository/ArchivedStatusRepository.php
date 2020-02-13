@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Api\Repository;
 
@@ -14,6 +15,7 @@ use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 
+use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 
 use Doctrine\ORM\EntityManager;
@@ -25,65 +27,37 @@ use App\Api\Entity\Aggregate;
 use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;
 use App\Api\Entity\StatusInterface;
-use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
-use WeavingTheWeb\Bundle\TwitterBundle\Exception\ProtectedAccountException;
-use WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException;
-use App\Membership\Entity\Member;
-use App\Member\Repository\MemberRepository;
+use App\Twitter\Exception\NotFoundMemberException;
+use App\Twitter\Exception\ProtectedAccountException;
+use App\Twitter\Exception\SuspendedAccountException;
+use App\Membership\Repository\MemberRepository;
 
 /**
- * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ * @package App\Api\Repository
  */
 class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwareInterface
 {
-    /**
-     * @var array
-     */
-    protected $oauthTokens;
+    protected array $oauthTokens;
 
-    /**
-     * @var \Psr\Log\LoggerInterface
-     */
-    protected $logger;
+    protected LoggerInterface $logger;
 
-    /**
-     * @var Registry
-     */
-    public $registry;
+    public Registry $registry;
 
-    /**
-     * @var LoggerInterface
-     */
-    public $statusLogger;
+    public LoggerInterface $statusLogger;
 
-    /**
-     * @var MemberRepository
-     */
-    public $memberManager;
+    public MemberRepository $memberManager;
 
-    /**
-     * @var bool
-     */
-    public $shouldExtractProperties;
+    public bool $shouldExtractProperties;
 
-    /**
-     * @var TimelyStatusRepository
-     */
-    public $timelyStatusRepository;
+    public TimelyStatusRepository $timelyStatusRepository;
 
-    /***
-     * @var LikedStatusRepository
-     */
-    public $likedStatusRepository;
+    public LikedStatusRepository $likedStatusRepository;
 
-    /**
-     * @var Connection
-     */
-    public $connection;
+    public Connection $connection;
 
     /**
      * @param ManagerRegistry $managerRegistry
-     * @param string         $aggregate
+     * @param string          $aggregateClass
      */
     public function __construct(
         ManagerRegistry $managerRegistry,
@@ -112,11 +86,13 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
      * @param LoggerInterface $logger
      * @param MemberInterface $likedBy
      * @param callable        $ensureMemberExists
+     *
      * @return array
      * @throws NoResultException
      * @throws NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException
+     * @throws NotFoundMemberException
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function saveLikes(
         array $statuses,
@@ -268,7 +244,7 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
     /**
      * @param EntityManager $entityManager
      * @throws ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws OptimisticLockException
      */
     private function flushStatuses(EntityManager $entityManager): void
     {
@@ -377,15 +353,13 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
         $queryBuilder->setParameter('hash', $hash);
         $count = (int) $queryBuilder->getQuery()->getSingleScalarResult();
 
-        if ($this->logger) {
-            $this->logger->info(
-                sprintf(
-                    '%d statuses already serialized for "%s"',
-                    $count,
-                    $hash
-                )
-            );
-        }
+        $this->statusLogger->info(
+            sprintf(
+                '%d statuses already serialized for "%s"',
+                $count,
+                $hash
+            )
+        );
 
         return $count > 0;
     }
@@ -903,7 +877,7 @@ QUERY
 
     /**
      * @param $likedStatuses
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws OptimisticLockException
      */
     private function flushLikedStatuses($likedStatuses): void
     {
@@ -921,7 +895,7 @@ QUERY
      * @return array
      * @throws NoResultException
      * @throws NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws OptimisticLockException
      */
     public function iterateOverStatuses(
         $statuses,

@@ -1,7 +1,7 @@
 parameters:
 
     weaving_the_web_api.entity.token.class:         'App\Api\Entity\Token'
-    weaving_the_web_api.entity.whisperer.class:     'WeavingTheWeb\Bundle\ApiBundle\Entity\Whisperer'
+    weaving_the_web_api.entity.whisperer.class:     'App\Api\Entity\Whisperer'
 
 services:
     repository.aggregate_subscription:
@@ -53,9 +53,15 @@ services:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - 'App\Api\Entity\Aggregate'
         properties:
-#            amqpMessageProducer:    '@old_sound_rabbit_mq.weaving_the_web_amqp.twitter.aggregates_status_producer'
+            #
+            #
+            # TODO
+            # Replace rabbimq bundle messager producer with
+            # symfony component message dispatcher
+            #
+            # amqpMessageProducer:    '@old_sound_rabbit_mq.weaving_the_web_amqp.twitter.aggregates_status_producer'
             logger:                 '@logger'
-            statusRepository:       '@weaving_the_web_twitter.repository.status'
+            statusRepository:       '@App\Api\Repository\StatusRepository'
             timelyStatusRepository: '@repository.timely_status'
             tokenRepository:        '@weaving_the_web_api.repository.token'
             likedStatusRepository:  '@repository.liked_status'
@@ -88,7 +94,7 @@ services:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - 'App\Aggregate\Entity\TimelyStatus'
         properties:
-            statusRepository:    "@weaving_the_web_twitter.repository.status"
+            statusRepository:    '@App\Api\Repository\StatusRepository'
 
     repository.network:
         class:                            'App\Member\Repository\NetworkRepository'
@@ -112,7 +118,7 @@ services:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - 'App\Aggregate\Entity\SearchMatchingStatus'
         properties:
-            statusRepository: "@weaving_the_web_twitter.repository.status"
+            statusRepository: '@App\Api\Repository\StatusRepository'
             logger:           "@logger"
 
     repository.liked_status:
@@ -122,7 +128,7 @@ services:
             - 'App\Status\Entity\LikedStatus'
         properties:
             memberRepository: "@user_manager"
-            statusRepository: "@weaving_the_web_twitter.repository.status"
+            statusRepository: '@App\Api\Repository\StatusRepository'
 
     App\Membership\Repository\MemberRepository:
         arguments:

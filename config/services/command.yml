@@ -27,28 +27,34 @@ services:
     command.select_status_collection:
         class:                      "%command.select_status_collection.class%"
         properties:
-            statusRepository:       "@weaving_the_web_twitter.repository.status"
+            statusRepository: '@App\Api\Repository\StatusRepository'
         tags:
             - { name: 'console.command' }
 
     command.add_members_to_aggregate:
         class:                      "%command.add_members_to_aggregate.class%"
         properties:
-            aggregateRepository:                "@weaving_the_web_twitter.repository.aggregate"
-            aggregateSubscriptionRepository:    "@repository.aggregate_subscription"
-            accessor:                           "@weaving_the_web_twitter.api_accessor"
-            logger:                             "@logger"
-            userRepository:                     "@user_manager"
+            aggregateRepository:                '@weaving_the_web_twitter.repository.aggregate'
+            aggregateSubscriptionRepository:    '@repository.aggregate_subscription'
+            accessor:                           '@weaving_the_web_twitter.api_accessor'
+            logger:                             '@logger'
+            userRepository:                     '@user_manager'
         tags:
             - { name: 'console.command' }
 
-#    command.import_network:
-#        class:                 "%command.import_network.class%"
-#        properties:
-#            networkRepository: '@repository.network'
-#            producer:          '@old_sound_rabbit_mq.weaving_the_web_amqp.producer.network_producer'
-#        tags:
-#            - { name: 'console.command' }
+    command.import_network:
+        class:                 "%command.import_network.class%"
+        properties:
+            networkRepository: '@repository.network'
+            #
+            #
+            # TODO
+            # Replace rabbimq bundle messager producer with
+            # symfony component message dispatcher
+            #
+            # producer:          '@old_sound_rabbit_mq.weaving_the_web_amqp.producer.network_producer'
+        tags:
+            - { name: 'console.command' }
 
     command.import_member_aggregates:
         class:                                      'App\Aggregate\Command\ImportMemberAggregatesCommand'
@@ -58,15 +64,15 @@ services:
             logger:                                 '@logger'
             memberAggregateSubscriptionRepository:  '@repository.member_aggregate_subscription'
             networkRepository:                      '@repository.network'
-            memberRepository:                       "@user_manager"
+            memberRepository:                       '@user_manager'
         tags:
             - { name: 'console.command' }
 
     command.map_status_collection:
         class:                      "%command.map_status_collection.class%"
         properties:
-            statusRepository:       "@weaving_the_web_twitter.repository.status"
-            refreshStatusMapping:   "@mapping.refresh_status"
+            statusRepository:       '@App\Api\Repository\StatusRepository'
+            refreshStatusMapping:   '@mapping.refresh_status'
             oauthToken:             "%weaving_the_web_twitter.oauth_token.default%"
             oauthSecret:            "%weaving_the_web_twitter.oauth_secret.default%"
         tags:
@@ -75,9 +81,9 @@ services:
     command.map_aggregate_status_collection:
         class:                      "%command.map_aggregate_status_collection.class%"
         properties:
-            logger:                             "@monolog.logger.status"
-            statusRepository:                   "@weaving_the_web_twitter.repository.status"
-            refreshStatusMapping:               "@mapping.refresh_status"
+            logger:                             '@monolog.logger.status'
+            statusRepository:                   '@App\Api\Repository\StatusRepository'
+            refreshStatusMapping:               '@mapping.refresh_status'
             oauthToken:                         "%weaving_the_web_twitter.oauth_token.default%"
             oauthSecret:                        "%weaving_the_web_twitter.oauth_secret.default%"
             searchMatchingStatusRepository:     '@repository.search_matching_status'
@@ -108,11 +114,11 @@ services:
             - [ 'setLogger',            [ '@monolog.logger.status'] ]
             - [ 'setUserRepository',    [ '@user_manager'] ]
         properties:
-            aggregateRepository:    "@weaving_the_web_twitter.repository.aggregate"
-            entityManager:          "@doctrine.orm.entity_manager"
-            operationClock:         "@operation.clock"
-            statusAccessor:         "@weaving_the_web.accessor.status"
-            statusRepository:       "@weaving_the_web_twitter.repository.status"
+            aggregateRepository:    '@weaving_the_web_twitter.repository.aggregate'
+            entityManager:          '@doctrine.orm.entity_manager'
+            operationClock:         '@operation.clock'
+            statusAccessor:         '@weaving_the_web.accessor.status'
+            statusRepository:       '@App\Api\Repository\StatusRepository'
 
     weaving_the_web_amqp.consumer.timely_status:
         class:                        "%weaving_the_web_amqp.consumer.timely_status.class%"
@@ -120,22 +126,22 @@ services:
             - [ 'setLogger',            [ '@monolog.logger.status'] ]
             - [ 'setUserRepository',    [ '@user_manager'] ]
         properties:
-            aggregateRepository:    "@weaving_the_web_twitter.repository.aggregate"
-            entityManager:          "@doctrine.orm.entity_manager"
-            statusAccessor:         "@weaving_the_web.accessor.status"
-            timelyStatusRepository: "@repository.timely_status"
+            aggregateRepository:    '@weaving_the_web_twitter.repository.aggregate'
+            entityManager:          '@doctrine.orm.entity_manager'
+            statusAccessor:         '@weaving_the_web.accessor.status'
+            timelyStatusRepository: '@repository.timely_status'
 
     weaving_the_web_amqp.consumer.network:
         class:                      "%weaving_the_web_amqp.consumer.network.class%"
         properties:
-            networkRepository:      "@repository.network"
-            logger:                 "@logger"
+            networkRepository:      '@repository.network'
+            logger:                 '@logger'
 
     weaving_the_web_amqp.twitter:
         class:                       "%weaving_the_web_amqp.consumer.status.class%"
         properties:
-            operationClock:          "@operation.clock"
-            tokenRepository:         "@weaving_the_web_api.repository.token"
+            operationClock:          '@operation.clock'
+            tokenRepository:         '@weaving_the_web_api.repository.token'
         calls:
             - [ 'setLogger',            [ '@monolog.logger.status'] ]
 
@@ -146,8 +152,8 @@ services:
             - [ 'setLogger',            [ '@monolog.logger.status'] ]
             - [ 'setUserRepository',    [ '@user_manager'] ]
         properties:
-            operationClock:             "@operation.clock"
-            tokenRepository:            "@weaving_the_web_api.repository.token"
+            operationClock:             '@operation.clock'
+            tokenRepository:            '@weaving_the_web_api.repository.token'
         tags:
             -
                 name: messenger.message_handler
@@ -156,8 +162,8 @@ services:
     weaving_the_web_amqp.producer.conversation_status:
         class:               "%weaving_the_web_amqp.producer.produce_conversation_messages_command.class%"
         properties:
-            operationClock:  "@operation.clock"
-            filesystem:      "@filesystem"
+            operationClock:  '@operation.clock'
+            filesystem:      '@filesystem'
             statusDirectory: "%kernel.project_dir%/../src/App/Resources/statuses"
         tags:
             - { name: 'console.command' }
@@ -172,7 +178,7 @@ services:
     weaving_the_web_amqp.producer.member_status:
         class:               "%weaving_the_web_amqp.producer.produce_member_messages_command.class%"
         properties:
-            operationClock:  "@operation.clock"
+            operationClock:  '@operation.clock'
             statusDirectory: "%kernel.project_dir%/../src/App/Resources/statuses"
         tags:
             - { name: 'console.command' }
@@ -180,10 +186,11 @@ services:
     press_review.fetch_member_status:
         class:                              "%press_review.fetch_member_status.class%"
         properties:
-            operationClock:                 "@operation.clock"
-            savedSearchRepository:          "@repository.saved_search"
-            searchMatchingStatusRepository: "@repository.search_matching_status"
+            operationClock:                 '@operation.clock'
+            savedSearchRepository:          '@repository.saved_search'
+            searchMatchingStatusRepository: '@repository.search_matching_status'
         calls:
+            - [ 'setAccessor',              [ '@weaving_the_web_twitter.api_accessor'] ]
             - [ 'setDefaultSecret',         [ '%weaving_the_web_twitter.oauth_secret.default%'] ]
             - [ 'setDefaultToken',          [ '%weaving_the_web_twitter.oauth_token.default%'] ]
             - [ 'setMessageBus',            [ '@messenger.default_bus'] ]

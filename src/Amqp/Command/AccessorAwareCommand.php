@@ -4,6 +4,8 @@ namespace App\Amqp\Command;
 
 use App\Api\Repository\TokenRepository;
 use App\Twitter\Api\Accessor;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Command\Command;
@@ -140,8 +142,8 @@ abstract class AccessorAwareCommand extends Command
     /**
      * @param string $token
      * @return mixed
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
     protected function findTokenOtherThan(string $token)
     {

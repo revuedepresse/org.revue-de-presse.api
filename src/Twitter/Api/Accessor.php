@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Twitter\Api;
 
@@ -21,6 +22,7 @@ use Doctrine\Common\Persistence\ObjectRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Exception;
+use Goutte\Client;
 use GuzzleHttp\Exception\ConnectException;
 use Psr\Log\LoggerInterface;
 
@@ -40,45 +42,34 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Translation\Translator;
 use TwitterOAuth;
 use App\Membership\Repository\MemberRepository;
+use function is_array;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
 class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAwareInterface
 {
-    const ERROR_PROTECTED_ACCOUNT = 2048;
+    public const ERROR_PROTECTED_ACCOUNT = 2048;
 
-    const MAX_RETRIES = 5;
+    private const MAX_RETRIES = 5;
 
-    /**
-     * @var StatusAccessor
-     */
-    public $statusAccessor;
+    public StatusAccessor $statusAccessor;
 
     /**
-     * @var \Goutte\Client $httpClient
+     * @var string|Client
      */
     public $httpClient;
 
-    /**
-     * @var
-     */
-    public $httpClientClass;
+    public string $httpClientClass;
 
-    /**
-     * @var
-     */
-    public $clientClass;
+    public string $clientClass;
+
+    public string $environment = 'dev';
 
     /**
      * @var string
      */
-    public $environment = 'dev';
-
-    /**
-     * @var string
-     */
-    protected $apiHost = 'api.twitter.com';
+    protected string $apiHost = 'api.twitter.com';
 
     /**
      * @var LoggerInterface;
@@ -128,7 +119,14 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     /**
      * @var MemberRepository
      */
-    public MemberRepository $userRepository;
+    private MemberRepository $userRepository;
+
+    public function setMemberRepository(MemberRepository $memberRepository): self
+    {
+        $this->userRepository = $memberRepository;
+
+        return $this;
+    }
 
     /**
      * @var Translator $translator
@@ -166,18 +164,14 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
      *
      * @return $this
      */
-    public function setLogger($logger = null)
+    public function setLogger(LoggerInterface $logger = null): self
     {
         $this->logger = $logger;
 
         return $this;
     }
 
-    /**
-     * @param ApiLimitModerator|null $moderator
-     * @return $this
-     */
-    public function setModerator(ApiLimitModerator $moderator = null)
+    public function setModerator(ApiLimitModerator $moderator = null): self
     {
         $this->moderator = $moderator;
 
@@ -281,7 +275,7 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
      * @param string $httpClientClass
      * @return $this
      */
-    public function setHttpClientClass($httpClientClass)
+    public function setHttpClientClass(string $httpClientClass)
     {
         $this->httpClientClass = $httpClientClass;
 
@@ -315,18 +309,20 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     /**
      * @param array $options
      *
-     * @return stdClass
+     * @return stdClass|array
      * @throws ApiRateLimitingException
      * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
      * @throws NonUniqueResultException
      * @throws NotFoundMemberException
      * @throws NotFoundStatusException
      * @throws OptimisticLockException
      * @throws ProtectedAccountException
      * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
-     * @throws ReflectionException
+     * @throws UnexpectedApiResponseException
      */
     public function fetchStatuses(array $options)
     {
@@ -353,15 +349,17 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
      * @return stdClass
      * @throws ApiRateLimitingException
      * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
      * @throws NonUniqueResultException
      * @throws NotFoundMemberException
      * @throws NotFoundStatusException
      * @throws OptimisticLockException
      * @throws ProtectedAccountException
      * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
-     * @throws ReflectionException
+     * @throws UnexpectedApiResponseException
      */
     public function fetchTimelineStatuses(array $parameters)
     {
@@ -373,18 +371,20 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     /**
      * @param array $parameters
      *
-     * @return stdClass
+     * @return stdClass|array
      * @throws ApiRateLimitingException
      * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
      * @throws NonUniqueResultException
      * @throws NotFoundMemberException
      * @throws NotFoundStatusException
      * @throws OptimisticLockException
      * @throws ProtectedAccountException
      * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
-     * @throws ReflectionException
+     * @throws UnexpectedApiResponseException
      */
     public function fetchLikes(array $parameters)
     {
@@ -396,18 +396,20 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     /**
      * @param string $query
      *
-     * @return stdClass
+     * @return stdClass|array
      * @throws ApiRateLimitingException
      * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
      * @throws NonUniqueResultException
      * @throws NotFoundMemberException
      * @throws NotFoundStatusException
      * @throws OptimisticLockException
      * @throws ProtectedAccountException
      * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
-     * @throws ReflectionException
+     * @throws UnexpectedApiResponseException
      */
     public function saveSearch(string $query)
     {
@@ -532,7 +534,7 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     /**
      * @param string $endpoint
      *
-     * @return stdClass
+     * @return stdClass|array
      * @throws ApiRateLimitingException
      * @throws BadAuthenticationDataException
      * @throws InconsistentTokenRepository
@@ -547,7 +549,7 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
      * @throws UnavailableResourceException
      * @throws UnexpectedApiResponseException
      */
-    public function contactEndpoint(string $endpoint): stdClass
+    public function contactEndpoint(string $endpoint)
     {
         $response = null;
 
@@ -606,7 +608,7 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     public function delayUnknownExceptionHandlingOnEndpointForToken(
         string $endpoint,
         Token $token = null
-    ): stdClass {
+    ) {
         if ($this->shouldRaiseExceptionOnApiLimit) {
             throw new UnexpectedApiResponseException(
                 sprintf('Could not access "%s" for an unknown reason.', $endpoint)
@@ -732,7 +734,7 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
      * @return stdClass
      * @throws Exception
      */
-    public function contactEndpointUsingBearerToken(string $endpoint): stdClass
+    public function contactEndpointUsingBearerToken(string $endpoint)
     {
         $this->httpClient->setHeader('Authorization', $this->authenticationHeader);
         $this->httpClient->request('GET', $endpoint);
@@ -748,13 +750,13 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
      * @param string $endpoint
      * @param Token  $token
      *
-     * @return stdClass
+     * @return stdClass|array
      * @throws Exception
      */
     public function contactEndpointUsingConsumerKey(
         string $endpoint,
         Token $token
-    ): stdClass {
+    ) {
         $tokens = $this->getTokens();
 
         $connection = $this->makeHttpClient($tokens);
@@ -790,13 +792,13 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
      * @param              $endpoint
      * @param array        $parameters
      *
-     * @return stdClass
+     * @return stdClass|array
      */
     public function connectToEndpoint(
         TwitterOAuth $client,
         string $endpoint,
         array $parameters = []
-    ): stdClass {
+    ) {
         if (strpos($endpoint, 'create.json') !== false
         || strpos($endpoint, 'create_all.json') !== false
         || strpos($endpoint, 'destroy.json') !== false
@@ -804,7 +806,9 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
             return $client->post($endpoint, $parameters);
         }
 
-        return $client->get($endpoint, $parameters);
+        $response = $client->get($endpoint, $parameters);
+
+        return $response;
     }
 
     /**
@@ -1429,7 +1433,7 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
         string $screenName,
         int $cursor = -1,
         int $count = 800
-    ): stdClass {
+    ) {
         $endpoint = $this->getUserOwnershipsEndpoint();
         $this->guardAgainstApiLimit($endpoint);
 
@@ -1588,9 +1592,10 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
                 $remainingCallsMessage = $this->translator->trans(
                     'logs.info.calls_remaining',
                     [
-                        '{{ count }}' => $remainingCalls,
-                        '{{ endpoint }}' => $endpoint,
-                        '{{ identifier }}' => $this->takeFirstTokenCharacters($token),
+                        'count' => $remainingCalls,
+                        'remaining_calls' => $remainingCalls,
+                        'endpoint' => $endpoint,
+                        'identifier' => $this->takeFirstTokenCharacters($token),
                     ],
                     'logs'
                 );
@@ -1868,7 +1873,7 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
      * @param $exception
      * @return stdClass
      */
-    private function convertExceptionIntoContent($exception): stdClass
+    private function convertExceptionIntoContent($exception)
     {
         return (object) [
             'errors' => [
@@ -1883,14 +1888,13 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     /**
      * @param string $endpoint
      *
-     * @return stdClass
+     * @return array|stdClass
      * @throws ApiRateLimitingException
      * @throws InconsistentTokenRepository
      * @throws NonUniqueResultException
-     * @throws NotFoundStatusException
      * @throws OptimisticLockException
      */
-    private function fetchContent(string $endpoint): stdClass
+    private function fetchContent(string $endpoint)
     {
         if ($this->shouldUseBearerToken()) {
             $this->setupClient();
@@ -2046,7 +2050,7 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
      * @param string   $endpoint
      * @param callable $fetchContent
      *
-     * @return stdClass
+     * @return stdClass|array
      * @throws ApiRateLimitingException
      * @throws BadAuthenticationDataException
      * @throws NotFoundMemberException
@@ -2059,7 +2063,7 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     private function fetchContentWithRetries(
         string $endpoint,
         callable $fetchContent
-    ): stdClass {
+    ) {
         $content = null;
 
         $this->logger->info(

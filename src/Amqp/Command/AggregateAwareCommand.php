@@ -13,17 +13,17 @@ use Doctrine\ORM\EntityManager;
  */
 abstract class AggregateAwareCommand extends AccessorAwareCommand implements CommandReturnCodeAwareInterface
 {
-    const NOT_FOUND_MEMBER = 10;
+    protected const NOT_FOUND_MEMBER = 10;
 
-    const UNAVAILABLE_RESOURCE = 20;
+    protected const UNAVAILABLE_RESOURCE = 20;
 
-    const API_ERROR = 30;
+    protected const API_ERROR = 30;
 
-    const UNEXPECTED_ERROR = 40;
+    protected const UNEXPECTED_ERROR = 40;
 
-    const SUSPENDED_USER = 50;
+    protected const SUSPENDED_USER = 50;
 
-    const PROTECTED_ACCOUNT = 60;
+    protected const PROTECTED_ACCOUNT = 60;
 
     use AggregateAwareTrait;
 

@@ -11,7 +11,6 @@
         <parameter key="weaving_the_web.api.query_factory.class">App\Api\ORM\QueryFactory</parameter>
         <parameter key="weaving_the_web_api.repository.aggregate.class">App\Api\Repository\AggregateRepository</parameter>
         <parameter key="weaving_the_web_api.repository.token.class">App\Api\Repository\TokenRepository</parameter>
-        <parameter key="weaving_the_web_api.repository.status.class">App\Api\Repository\StatusRepository</parameter>
         <parameter key="weaving_the_web_api.repository.archived_status.class">App\Api\Repository\ArchivedStatusRepository</parameter>
         <parameter key="weaving_the_web_api.repository.whisperer.class">App\Api\Repository\WhispererRepository</parameter>
         <parameter key="weaving_the_web.api.user_status">App\Api\Entity\UserStream</parameter>

@@ -8,6 +8,10 @@ namespace App\Amqp\Message;
  */
 class FetchMemberStatuses
 {
+    public const AGGREGATE_ID = 'aggregate_id';
+    public const SCREEN_NAME = 'screen_name';
+    public const BEFORE = 'before';
+
     /**
      * @var string
      */

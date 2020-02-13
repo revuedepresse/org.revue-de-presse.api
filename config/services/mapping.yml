@@ -8,4 +8,4 @@ services:
             - '@weaving_the_web_twitter.api_accessor'
         properties:
             logger:             '@monolog.logger.status'
-            statusRepository:   '@weaving_the_web_twitter.repository.status'
+            statusRepository:   '@App\Api\Repository\StatusRepository'

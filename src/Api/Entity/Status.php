@@ -1,13 +1,15 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Api\Entity;
 
 use App\Status\Entity\StatusTrait;
-use Doctrine\Common\Collections\ArrayCollection;
+use DateTimeInterface;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository")
+ * @ORM\Entity(repositoryClass="App\Api\Repository\StatusRepository")
  * @ORM\Table(
  *      name="weaving_status",
  *      uniqueConstraints={
@@ -35,322 +37,71 @@ class Status implements StatusInterface
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="IDENTITY")
      */
-    protected $id;
+    protected ?int $id = null;
 
     /**
      * @var string
      *
      * @ORM\Column(name="ust_hash", type="string", length=40, nullable=true)
      */
-    protected $hash;
+    protected ?string $hash;
 
     /**
      * @ORM\Column(name="ust_full_name", type="string", length=32)
      */
-    protected $screenName;
+    protected string $screenName;
 
     /**
      * @ORM\Column(name="ust_name", type="text")
      */
-    protected $name;
+    protected string $name;
 
     /**
      * @ORM\Column(name="ust_text", type="text")
      */
-    protected $text;
+    protected string $text;
 
     /**
      * @ORM\Column(name="ust_avatar", type="string", length=255)
      */
-    protected $userAvatar;
+    protected string $userAvatar;
 
     /**
      * @ORM\Column(name="ust_access_token", type="string", length=255)
      */
-    protected $identifier;
+    protected string $identifier;
 
     /**
      * @ORM\Column(name="ust_status_id", type="string", length=255, nullable=true)
      */
-    protected $statusId;
+    protected ?string $statusId;
 
     /**
      * @ORM\Column(name="ust_api_document", type="text", nullable=true)
      */
-    protected $apiDocument;
+    protected ?string $apiDocument;
 
     /**
      * @ORM\Column(name="ust_starred", type="boolean", options={"default": false})
      */
-    protected $starred = false;
-
-    /**
-     * @param $starred
-     * @return $this
-     */
-    public function setStarred($starred)
-    {
-        $this->starred = $starred;
-
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function isStarred()
-    {
-        return $this->starred;
-    }
+    protected bool $starred = false;
 
     /**
      * @ORM\Column(name="ust_indexed", type="boolean", options={"default": false})
      */
-    protected $indexed;
+    protected bool $indexed;
 
     /**
-     * @var \DateTime
+     * @var DateTimeInterface|null
      *
      * @ORM\Column(name="ust_created_at", type="datetime")
      */
-    protected $createdAt;
+    protected DateTimeInterface $createdAt;
 
     /**
-     * @var \DateTime
-     *
      * @ORM\Column(name="ust_updated_at", type="datetime", nullable=true)
      */
-    protected $updatedAt;
-
-    /**
-     * Get id
-     *
-     * @return integer
-     */
-    public function getId()
-    {
-        return $this->id;
-    }
-
-    /**
-     * @param string $hash
-     */
-    public function setHash($hash)
-    {
-        $this->hash = $hash;
-    }
-
-    /**
-     * @return string
-     */
-    public function getHash()
-    {
-        return $this->hash;
-    }
-
-    /**
-     * Set screeName
-     *
-     * @param  string     $screenName
-     * @return Status
-     */
-    public function setScreenName($screenName)
-    {
-        $this->screenName = $screenName;
-
-        return $this;
-    }
-
-    /**
-     * Get screeName
-     *
-     * @return string
-     */
-    public function getScreenName()
-    {
-        return $this->screenName;
-    }
-
-    /**
-     * Set name
-     *
-     * @param  string     $name
-     * @return Status
-     */
-    public function setName($name)
-    {
-        $this->name = $name;
-
-        return $this;
-    }
-
-    /**
-     * Get name
-     *
-     * @return string
-     */
-    public function getName()
-    {
-        return $this->name;
-    }
-
-    /**
-     * Set text
-     *
-     * @param  string     $text
-     * @return Status
-     */
-    public function setText($text)
-    {
-        $this->text = $text;
-
-        return $this;
-    }
-
-    /**
-     * Get text
-     *
-     * @return string
-     */
-    public function getText()
-    {
-        return $this->text;
-    }
-
-    /**
-     * Set userAvatar
-     *
-     * @param  string     $userAvatar
-     * @return Status
-     */
-    public function setUserAvatar($userAvatar)
-    {
-        $this->userAvatar = $userAvatar;
-
-        return $this;
-    }
-
-    /**
-     * Get userAvatar
-     *
-     * @return string
-     */
-    public function getUserAvatar()
-    {
-        return $this->userAvatar;
-    }
-
-    /**
-     * Set identifier
-     *
-     * @param  string     $identifier
-     * @return Status
-     */
-    public function setIdentifier($identifier)
-    {
-        $this->identifier = $identifier;
-
-        return $this;
-    }
-
-    /**
-     * Get identifier
-     *
-     * @return string
-     */
-    public function getIdentifier()
-    {
-        return $this->identifier;
-    }
-
-    public function setStatusId($statusId)
-    {
-        $this->statusId = $statusId;
-    }
-
-    public function getStatusId()
-    {
-        return $this->statusId;
-    }
-
-    public function setApiDocument($apiDocument)
-    {
-        $this->apiDocument = $apiDocument;
-    }
-
-    public function getApiDocument()
-    {
-        return $this->apiDocument;
-    }
-
-    /**
-     * Set createdAt
-     *
-     * @param  \DateTime  $createdAt
-     * @return Status
-     */
-    public function setCreatedAt($createdAt)
-    {
-        $this->createdAt = $createdAt;
-
-        return $this;
-    }
-
-    /**
-     * Get createdAt
-     *
-     * @return \DateTime
-     */
-    public function getCreatedAt()
-    {
-        return $this->createdAt;
-    }
-
-    /**
-     * Set updatedAt
-     *
-     * @param  \DateTime  $updatedAt
-     * @return Status
-     */
-    public function setUpdatedAt($updatedAt)
-    {
-        $this->updatedAt = $updatedAt;
-
-        return $this;
-    }
-
-    /**
-     * Get updatedAt
-     *
-     * @return \DateTime
-     */
-    public function getUpdatedAt()
-    {
-        return $this->updatedAt;
-    }
-
-    /**
-     * Set indexed
-     *
-     * @param boolean $indexed
-     * @return Status
-     */
-    public function setIndexed($indexed)
-    {
-        $this->indexed = $indexed;
-    
-        return $this;
-    }
-
-    /**
-     * Get indexed
-     *
-     * @return boolean 
-     */
-    public function getIndexed()
-    {
-        return $this->indexed;
-    }
+    protected ?DateTimeInterface $updatedAt;
 
     /**
      * @ORM\ManyToMany(
@@ -373,47 +124,18 @@ class Status implements StatusInterface
      *      }
      * )
      */
-    protected $aggregates;
-
-    public function __construct()
-    {
-        $this->aggregates = new ArrayCollection();
-    }
-
-    /**
-     * @param Aggregate $aggregate
-     * @return StatusInterface
-     */
-    public function removeFrom(Aggregate $aggregate): StatusInterface
-    {
-        if ($this->aggregates->contains($aggregate)) {
-            $this->aggregates->removeElement($aggregate);
-        }
-
-        return $this;
-    }
-
-    /**
-     * @return ArrayCollection
-     */
-    public function getAggregates()
-    {
-        return $this->aggregates;
-    }
+    protected Collection $aggregates;
 
     /**
      * @ORM\OneToMany(targetEntity="App\Popularity\Entity\StatusPopularity", mappedBy="status")
      */
-    private $popularity;
+    private Collection $popularity;
 
     /**
-     * @param Aggregate $aggregate
-     *
-     * @return ArrayCollection
+     * @return Collection
      */
-    public function addToAggregates(Aggregate $aggregate): ArrayCollection {
-        $this->aggregates->add($aggregate);
-
-        return $this->aggregates;
+    public function getPopularity(): Collection
+    {
+        return $this->popularity;
     }
 }

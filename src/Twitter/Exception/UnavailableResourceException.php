@@ -19,9 +19,9 @@ use function is_object;
 class UnavailableResourceException extends Exception implements TwitterErrorAwareInterface
 {
     /**
-     * @param stdClass $content
-     * @param string   $endpoint
-     * @param callable $onApiLimitExceeded
+     * @param stdClass|array $content
+     * @param string         $endpoint
+     * @param callable       $onApiLimitExceeded
      *
      * @throws ApiRateLimitingException
      * @throws BadAuthenticationDataException
@@ -34,7 +34,7 @@ class UnavailableResourceException extends Exception implements TwitterErrorAwar
      * @throws UnknownApiAccessException
      */
     public static function guardAgainstContentFetchingException(
-        stdClass $content,
+        $content,
         string $endpoint,
         callable $onApiLimitExceeded
     ): void {
@@ -109,11 +109,11 @@ class UnavailableResourceException extends Exception implements TwitterErrorAwar
     }
 
     /**
-     * @param stdClass $response
+     * @param $response
      *
      * @return bool
      */
-    public static function containErrors(stdClass $response): bool
+    public static function containErrors($response): bool
     {
         return is_object($response) && (
                 (isset($response->errors, $response->errors[0]) && is_array($response->errors))

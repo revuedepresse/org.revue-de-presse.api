@@ -1,13 +1,18 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Amqp\Exception;
 
-use WeavingTheWeb\Bundle\ApiBundle\Entity\Whisperer;
-
+/**
+ * @package App\Amqp\Exception
+ */
 class SkippableMessageException extends \Exception
 {
-    public $shouldSkipMessageConsumption;
+    public bool $shouldSkipMessageConsumption;
 
+    /**
+     * @throws SkippableMessageException
+     */
     public static function stopMessageConsumption()
     {
         $exception = new self();
@@ -17,8 +22,6 @@ class SkippableMessageException extends \Exception
     }
 
     /**
-     * @param Whisperer|null $whisperer
-     * @param \stdClass|null $member
      * @throws SkippableMessageException
      */
     public static function continueMessageConsumption()

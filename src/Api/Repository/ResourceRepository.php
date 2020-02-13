@@ -2,9 +2,8 @@
 
 namespace App\Api\Repository;
 
+use App\Api\ORM\QueryFactory;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use JMS\DiExtraBundle\Annotation as DI;
-use Doctrine\ORM\EntityRepository;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
@@ -13,9 +12,9 @@ use Doctrine\ORM\EntityRepository;
 abstract class ResourceRepository extends ServiceEntityRepository
 {
     /**
-     * @var \App\Api\ORM\QueryFactory
+     * @var QueryFactory
      */
-    public $queryFactory;
+    public QueryFactory $queryFactory;
 
     public function getSelectQueryBuilder(array $constraints = [])
     {

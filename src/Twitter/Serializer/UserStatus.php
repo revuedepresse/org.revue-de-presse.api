@@ -4,8 +4,11 @@ namespace App\Twitter\Serializer;
 
 use App\Accessor\Exception\ApiRateLimitingException;
 use App\Accessor\Exception\NotFoundStatusException;
+use App\Accessor\Exception\ReadOnlyApplicationException;
+use App\Accessor\Exception\UnexpectedApiResponseException;
 use App\Aggregate\Exception\LockedAggregateException;
 use App\Amqp\Exception\SkippableMessageException;
+use App\Amqp\Message\FetchMemberStatuses;
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\StatusInterface;
 use App\Api\Entity\Token;
@@ -20,25 +23,29 @@ use App\Status\LikedStatusCollectionAwareInterface;
 use App\Status\Repository\LikedStatusRepository;
 use App\Twitter\Api\Accessor;
 use App\Twitter\Exception\BadAuthenticationDataException;
+use App\Twitter\Exception\InconsistentTokenRepository;
 use App\Twitter\Exception\NotFoundMemberException;
 use App\Twitter\Exception\ProtectedAccountException;
 use App\Twitter\Exception\SuspendedAccountException;
 use App\Twitter\Exception\UnavailableResourceException;
 use App\Twitter\Serializer\Exception\RateLimitedException;
 use App\Twitter\Serializer\Exception\SkipSerializationException;
+use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Exception;
 use Psr\Log\LoggerInterface;
+use ReflectionException;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use function array_key_exists;
 
 /**
  * @package App\Twitter\Accessor
  */
 class UserStatus implements LikedStatusCollectionAwareInterface
 {
-    private const MAX_AVAILABLE_TWEETS_PER_USER = 3200;
+    public const MAX_AVAILABLE_TWEETS_PER_USER = 3200;
 
     private const MAX_BATCH_SIZE = 200;
 
@@ -179,7 +186,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      */
     public function setupAccessor(array $oauthTokens)
     {
-        if (\array_key_exists('authentication_header', $oauthTokens)) {
+        if (array_key_exists('authentication_header', $oauthTokens)) {
             $this->accessor->setAuthenticationHeader($oauthTokens['authentication_header']);
 
             return $this;
@@ -208,13 +215,20 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @param bool  $discoverPastTweets
      *
      * @return bool
+     * @throws ApiRateLimitingException
+     * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
      * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws NotFoundMemberException
+     * @throws NotFoundStatusException
      * @throws OptimisticLockException
      * @throws ProtectedAccountException
+     * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
+     * @throws UnexpectedApiResponseException
      */
     public function serialize(array $options, $greedy = false, $discoverPastTweets = true)
     {
@@ -295,20 +309,24 @@ class UserStatus implements LikedStatusCollectionAwareInterface
 
     /**
      * @param $options
+     *
      * @return bool
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
      * @throws NoResultException
      * @throws NonUniqueResultException
+     * @throws NotFoundMemberException
      * @throws OptimisticLockException
-     * @throws Exception
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws DBALException
      */
-    protected function shouldSkipSerialization($options)
+    protected function shouldSkipSerialization($options): bool
     {
-
-        if (!array_key_exists('screen_name', $options) ||
-            is_null($options['screen_name']) ||
-            $this->accessor->shouldSkipSerializationForMemberWithScreenName($options['screen_name'])) {
+        if (!array_key_exists(FetchMemberStatuses::SCREEN_NAME, $options) ||
+            $options[FetchMemberStatuses::SCREEN_NAME] === null ||
+            $this->accessor->shouldSkipSerializationForMemberWithScreenName(
+                $options[FetchMemberStatuses::SCREEN_NAME]
+            )
+        ) {
             return true;
         }
 
@@ -558,15 +576,18 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     }
 
     /**
-     * @param      $options
+     * @param array $options
      * @param bool $discoverPastTweets
      * @return mixed
      * @throws NonUniqueResultException
      */
-    protected function updateExtremum($options, $discoverPastTweets = true)
+    protected function updateExtremum(array $options, bool $discoverPastTweets = true)
     {
-        if (array_key_exists('before', $this->serializationOptions) &&
-            $this->serializationOptions['before']
+        if (array_key_exists(
+                FetchMemberStatuses::BEFORE,
+                $this->serializationOptions
+            ) &&
+            $this->serializationOptions[FetchMemberStatuses::BEFORE]
         ) {
             $discoverPastTweets = true;
         }
@@ -640,12 +661,12 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     protected function remainingLikes($options)
     {
         $serializedLikesCount = $this->likedStatusRepository->countHowManyLikesFor($options['screen_name']);
-        $existingStatus = $this->translator->transChoice(
+        $existingStatus = $this->translator->trans(
             'logs.info.likes_existing',
-            $serializedLikesCount,
             [
-                '{{ count }}' => $serializedLikesCount,
-                '{{ user }}' => $options['screen_name'],
+                'total_likes' => $serializedLikesCount,
+                'count' => $serializedLikesCount,
+                'member' => $options['screen_name'],
             ],
             'logs'
         );
@@ -660,11 +681,12 @@ class UserStatus implements LikedStatusCollectionAwareInterface
          * Twitter allows 3200 past tweets at most to be retrieved for any given user
          */
         $likesCount = max($member->statuses_count, self::MAX_AVAILABLE_TWEETS_PER_USER);
-        $discoveredLikes = $this->translator->transChoice(
+        $discoveredLikes = $this->translator->trans(
             'logs.info.likes_discovered',
-            $member->statuses_count, [
-                '{{ user }}' => $options['screen_name'],
-                '{{ count }}' => $likesCount,
+            [
+                'total_likes' => $likesCount,
+                'member' => $options['screen_name'],
+                'count' => $likesCount,
             ],
             'logs'
         );
@@ -681,16 +703,17 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @throws OptimisticLockException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
+     * @throws NoResultException
      */
     protected function remainingStatuses($options)
     {
         $serializedStatusCount = $this->statusRepository->countHowManyStatusesFor($options['screen_name']);
-        $existingStatus = $this->translator->transChoice(
+        $existingStatus = $this->translator->trans(
             'logs.info.status_existing',
-            $serializedStatusCount,
             [
-                '{{ count }}' => $serializedStatusCount,
-                '{{ user }}' => $options['screen_name'],
+                'count' => $serializedStatusCount,
+                'total_status' => $serializedStatusCount,
+                'member' => $options['screen_name'],
             ],
             'logs'
         );
@@ -705,11 +728,12 @@ class UserStatus implements LikedStatusCollectionAwareInterface
          * Twitter allows 3200 past tweets at most to be retrieved for any given user
          */
         $statusesCount = max($user->statuses_count, self::MAX_AVAILABLE_TWEETS_PER_USER);
-        $discoveredStatus = $this->translator->transChoice(
+        $discoveredStatus = $this->translator->trans(
             'logs.info.status_discovered',
-            $user->statuses_count, [
-                '{{ user }}' => $options['screen_name'],
-                '{{ count }}' => $statusesCount,
+            [
+                'member' => $options['screen_name'],
+                'count' => $statusesCount,
+                'total_status' => $statusesCount,
             ],
             'logs'
         );
@@ -734,14 +758,22 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     /**
      * @param          $options
      * @param int|null $aggregateId
+     *
      * @return int|null
+     * @throws ApiRateLimitingException
+     * @throws BadAuthenticationDataException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      * @throws NotFoundMemberException
+     * @throws NotFoundStatusException
+     * @throws OptimisticLockException
      * @throws ProtectedAccountException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
-     * @throws NoResultException
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
+     * @throws ReadOnlyApplicationException
+     * @throws UnexpectedApiResponseException
+     * @throws InconsistentTokenRepository
+     * @throws ReflectionException
      */
     protected function saveStatusesMatchingCriteria($options, int $aggregateId = null)
     {
@@ -1540,15 +1572,18 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             $success = $statusesCount;
 
             $messageKey = 'logs.info.status_saved';
+            $total = 'total_status';
             if ($this->isAboutToCollectLikesFromCriteria($this->serializationOptions)) {
                 $messageKey = 'logs.info.likes_saved';
+                $total = 'total_likes';
             }
-            $savedTweets = $this->translator->transChoice(
-                $messageKey,
-                $statusesCount, [
-                '{{ user }}' => $memberName,
-                '{{ count }}' => $statusesCount,
-            ],
+
+            $savedTweets = $this->translator->trans(
+                $messageKey, [
+                    'count' => $statusesCount,
+                    'member' => $memberName,
+                    $total => $statusesCount,
+                ],
                 'logs'
             );
             $this->logger->info($savedTweets);
@@ -1673,14 +1708,22 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @param $options
      * @param $greedy
      * @param $discoverPastTweets
+     *
      * @return bool
-     * @throws NotFoundMemberException
-     * @throws ProtectedAccountException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
+     * @throws ApiRateLimitingException
+     * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
      * @throws NoResultException
      * @throws NonUniqueResultException
+     * @throws NotFoundMemberException
+     * @throws NotFoundStatusException
      * @throws OptimisticLockException
+     * @throws ProtectedAccountException
+     * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws UnexpectedApiResponseException
      */
     private function trySerializingFurther($options, $greedy, $discoverPastTweets): bool
     {

@@ -24,6 +24,21 @@ services:
         resource: '../src/Aggregate/Controller/.*.php'
         tags: ['controller.service_arguments']
 
+    App\Api\Repository\StatusRepository:
+        class:  '\App\Api\Repository\StatusRepository'
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - '%weaving_the_web_twitter.entity.status.class%'
+        properties:
+            archivedStatusRepository: '@weaving_the_web_twitter.repository.archived_status'
+            likedStatusRepository:    '@repository.liked_status'
+            memberManager:            '@user_manager'
+            registry:                 '@doctrine'
+            statusLogger:             '@monolog.logger.status'
+            timelyStatusRepository:   '@repository.timely_status'
+            connection:               '@doctrine.dbal.default_connection'
+            queryFactory:             '@weaving_the_web.api.query_factory'
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
     app.cache.redis:
@@ -50,7 +65,13 @@ services:
         class: '%weaving_the_web_twitter.api_accessor.class%'
         arguments:
             - '@logger'
+        properties:
+            environment:          '%kernel.environment%'
+            httpClient:           '%weaving_the_web_twitter.oauth_client.class%'
+            twitterApiLogger:     '@monolog.logger.twitter_api'
+            statusAccessor:       '@weaving_the_web.accessor.status'
         calls:
+            - [ 'setMemberRepository', [ '@user_manager' ] ]
             - [ 'setClientClass', [ '\Goutte\Client' ] ]
             - [ 'setConsumerKey', [ '%weaving_the_web_twitter.consumer_key%' ] ]
             - [ 'setConsumerSecret', [ '%weaving_the_web_twitter.consumer_secret%' ] ]
@@ -60,12 +81,6 @@ services:
             - [ 'setUserSecret', [ '%weaving_the_web_twitter.oauth_secret.default%' ] ]
             - [ 'setUserToken', [ '%weaving_the_web_twitter.oauth_token.default%' ] ]
             - [ 'setTranslator', [ '@translator' ] ]
-        properties:
-            environment:          '%kernel.environment%'
-            httpClient:           '%weaving_the_web_twitter.oauth_client.class%'
-            twitterApiLogger:     '@monolog.logger.twitter_api'
-            statusAccessor:       '@weaving_the_web.accessor.status'
-            userRepository:       '@user_manager'
 
     weaving_the_web.accessor.status:
         class: 'App\Accessor\StatusAccessor'
@@ -75,7 +90,7 @@ services:
             entityManager:              '@doctrine.orm.entity_manager'
             logger:                     '@monolog.logger.status'
             notFoundStatusRepository:   '@repository.not_found_status'
-            statusRepository:           '@weaving_the_web_twitter.repository.status'
+            statusRepository:           '@App\Api\Repository\StatusRepository'
             userManager:                '@user_manager'
 
     weaving_the_web_twitter.repository.aggregate:
@@ -85,24 +100,9 @@ services:
             - '%weaving_the_web_twitter.entity.aggregate.class%'
         properties:
             logger:                 '@logger'
-            statusRepository:       '@weaving_the_web_twitter.repository.status'
+            statusRepository:       '@App\Api\Repository\StatusRepository'
             timelyStatusRepository: '@repository.timely_status'
             likedStatusRepository:  '@repository.liked_status'
-
-    weaving_the_web_twitter.repository.status:
-        class:  '%weaving_the_web_api.repository.status.class%'
-        arguments:
-            - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - '%weaving_the_web_twitter.entity.status.class%'
-        properties:
-            archivedStatusRepository: '@weaving_the_web_twitter.repository.archived_status'
-            likedStatusRepository:    '@repository.liked_status'
-            memberManager:            '@user_manager'
-            registry:                 '@doctrine'
-            statusLogger:             '@monolog.logger.status'
-            timelyStatusRepository:   '@repository.timely_status'
-            connection:               '@doctrine.dbal.default_connection'
-            queryFactory:             '@weaving_the_web.api.query_factory'
 
     weaving_the_web_twitter.repository.archived_status:
         class:  '%weaving_the_web_api.repository.archived_status.class%'
@@ -119,7 +119,7 @@ services:
             queryFactory:           '@weaving_the_web.api.query_factory'
 
     weaving_the_web_twitter.repository.read.status:
-        class:  '%weaving_the_web_api.repository.status.class%'
+        class:  'App\Api\Repository\StatusRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - '%weaving_the_web_twitter.entity.status.class%'
@@ -157,7 +157,7 @@ services:
             - [ 'setAccessor', [ '@weaving_the_web_twitter.api_accessor' ] ]
             - [ 'setLogger', [ '@monolog.logger.status' ] ]
             - [ 'setModerator', [ '@weaving_the_web_twitter.moderator.api_limit' ] ]
-            - [ 'setStatusRepository', [ '@weaving_the_web_twitter.repository.status' ] ]
+            - [ 'setStatusRepository', [ '@App\Api\Repository\StatusRepository' ] ]
             - [ 'setWhispererRepository', [ '@weaving_the_web_api.repository.whisperer' ] ]
             - [ 'setTokenRepository', [ '@weaving_the_web_twitter.repository.token' ] ]
             - [ 'setAggregateRepository', [ '@weaving_the_web_twitter.repository.aggregate' ] ]
@@ -184,7 +184,7 @@ parameters:
 
     weaving_the_web_twitter.moderator.api_limit.class:            'App\Api\Moderator\ApiLimitModerator'
 
-    weaving_the_web_twitter.authenticate_application.class:       'WeavingTheWeb\Bundle\TwitterBundle\Command\AuthenticateApplicationCommand'
+    weaving_the_web_twitter.authenticate_application.class:       'App\Twitter\Command\AuthenticateApplicationCommand'
     weaving_the_web_twitter.authentication_uri:                   '/oauth2/token'
 
     weaving_the_web_twitter.client.class:                         '\Goutte\Client'
@@ -204,11 +204,10 @@ parameters:
     weaving_the_web_twitter.entity.token.class:                   '%weaving_the_web_api.entity.token.class%'
 
     weaving_the_web_twitter.repository.aggregate.class:           '%weaving_the_web_api.repository.aggregate.class%'
-    weaving_the_web_twitter.repository.status.class:              '%weaving_the_web_api.repository.status.class%'
     weaving_the_web_twitter.repository.token.class:               '%weaving_the_web_api.repository.token.class%'
 
-    weaving_the_web_twitter.serializer.user_status.class:         'WeavingTheWeb\Bundle\TwitterBundle\Serializer\UserStatus'
-    weaving_the_web_twitter.serialize_statuses.class:             'WeavingTheWeb\Bundle\TwitterBundle\Command\SerializeStatusesCommand'
+    weaving_the_web_twitter.serializer.user_status.class:         'App\Twitter\Serializer\UserStatus'
+    weaving_the_web_twitter.serialize_statuses.class:             'App\Twitter\Command\SerializeStatusesCommand'
 
     weaving_the_web_twitter.version:                              '%env(resolve:API_TWITTER_VERSION)%'
 

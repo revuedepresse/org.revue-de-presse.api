@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Api\Repository;
 
@@ -7,15 +8,17 @@ use App\Membership\Entity\MemberInterface;
 use App\StatusCollection\Mapping\MappingAwareInterface;
 use App\Twitter\Exception\NotFoundMemberException;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 use Doctrine\ORM\QueryBuilder;
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\Status;
 use App\Api\Entity\StatusInterface;
-use Doctrine\Persistence\ManagerRegistry;
-use WeavingTheWeb\Bundle\TwitterBundle\Serializer\UserStatus;
-use App\Membership\Entity\Member;
+use App\Twitter\Serializer\UserStatus;
+use Exception;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
@@ -30,7 +33,7 @@ class StatusRepository extends ArchivedStatusRepository
     /**
      * @var ArchivedStatusRepository
      */
-    public $archivedStatusRepository;
+    public ArchivedStatusRepository $archivedStatusRepository;
 
     /**
      * @param $properties
@@ -71,7 +74,7 @@ class StatusRepository extends ArchivedStatusRepository
 
     /**
      * @param Status $status
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws OptimisticLockException
      */
     public function save(Status $status)
     {
@@ -81,6 +84,9 @@ class StatusRepository extends ArchivedStatusRepository
 
     /**
      * @param ArrayCollection $statuses
+     *
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function saveBatch(ArrayCollection $statuses)
     {
@@ -122,15 +128,13 @@ class StatusRepository extends ArchivedStatusRepository
         $queryBuilder->setParameter('hash', $hash);
         $count = (int) $queryBuilder->getQuery()->getSingleScalarResult();
 
-        if ($this->logger) {
-            $this->logger->info(
-                sprintf(
-                    '%d statuses already serialized for "%s"',
-                    $count,
-                    $hash
-                )
-            );
-        }
+        $this->statusLogger->info(
+            sprintf(
+                '%d statuses already serialized for "%s"',
+                $count,
+                $hash
+            )
+        );
 
         return $count > 0;
     }
@@ -172,14 +176,15 @@ class StatusRepository extends ArchivedStatusRepository
 
     /**
      * @param $screenName
-     * @return \App\Membership\Entity\MemberInterface
+     *
+     * @return MemberInterface
      * @throws NotFoundStatusException
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws DBALException
+     * @throws OptimisticLockException
      */
     public function updateLastStatusPublicationDate($screenName)
     {
-        /** @var User $member */
+        /** @var MemberInterface $member */
         $member = $this->memberManager->findOneBy(['twitter_username' => $screenName]);
 
         $lastStatus = $this->getLastKnownStatusFor($screenName);
@@ -190,11 +195,13 @@ class StatusRepository extends ArchivedStatusRepository
 
     /**
      * @param array $extract
-     * @return \App\Api\Entity\Status
+     *
+     * @return Status
+     * @throws Exception
      */
     public function updateResponseBody(array $extract): StatusInterface
     {
-        /** @var \App\Api\Entity\Status $userStream */
+        /** @var Status $userStream */
         $userStream = $this->findOneBy(['statusId' => $extract['status_id']]);
 
         if (!$userStream instanceof Status) {
@@ -277,7 +284,7 @@ class StatusRepository extends ArchivedStatusRepository
      * @param \DateTime|null $before
      * @return array
      * @throws NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws OptimisticLockException
      * @throws NotFoundMemberException
      */
     public function findNextExtremum(string $screenName, string $direction = 'asc', \DateTime $before = null): array
@@ -327,8 +334,9 @@ class StatusRepository extends ArchivedStatusRepository
 
     /**
      * @param $status
-     * @return \App\Membership\Entity\MemberInterface
-     * @throws \Doctrine\ORM\OptimisticLockException
+     *
+     * @return MemberInterface
+     * @throws OptimisticLockException
      * @throws NotFoundMemberException
      */
     public function declareMaximumStatusId($status)
@@ -343,8 +351,9 @@ class StatusRepository extends ArchivedStatusRepository
 
     /**
      * @param $status
-     * @return \App\Membership\Entity\MemberInterface
-     * @throws \Doctrine\ORM\OptimisticLockException
+     *
+     * @return MemberInterface
+     * @throws OptimisticLockException
      * @throws NotFoundMemberException
      */
     public function declareMinimumStatusId($status)
@@ -360,8 +369,9 @@ class StatusRepository extends ArchivedStatusRepository
     /**
      * @param        $status
      * @param string $memberName
-     * @return \App\Membership\Entity\MemberInterface
-     * @throws \Doctrine\ORM\OptimisticLockException
+     *
+     * @return MemberInterface
+     * @throws OptimisticLockException
      * @throws NotFoundMemberException
      */
     public function declareMaximumLikedStatusId($status, string $memberName)
@@ -377,8 +387,9 @@ class StatusRepository extends ArchivedStatusRepository
     /**
      * @param        $status
      * @param string $memberName
-     * @return \App\Membership\Entity\MemberInterface
-     * @throws \Doctrine\ORM\OptimisticLockException
+     *
+     * @return MemberInterface
+     * @throws OptimisticLockException
      * @throws NotFoundMemberException
      */
     public function declareMinimumLikedStatusId($status, string $memberName)
@@ -408,7 +419,7 @@ class StatusRepository extends ArchivedStatusRepository
     /**
      * @param string $screenName
      * @return array
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      */
     private function howManyStatusesForMemberHavingScreenName($screenName): array
     {
@@ -427,7 +438,7 @@ QUERY;
     /**
      * @param string $screenName
      * @return null|Status
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      */
     private function getLastKnownStatusForMemberHavingScreenName(string $screenName)
     {
@@ -455,7 +466,7 @@ QUERY;
      * @param string $screenName
      * @return null|Status
      * @throws NotFoundStatusException
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      */
     private function getLastKnownStatusFor(string $screenName)
     {

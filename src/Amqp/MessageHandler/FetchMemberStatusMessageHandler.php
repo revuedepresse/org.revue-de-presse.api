@@ -5,6 +5,7 @@ namespace App\Amqp\MessageHandler;
 
 use App\Amqp\Message\FetchMemberStatuses;
 use App\Api\Entity\Token;
+use App\Api\Entity\TokenInterface;
 use App\Api\Repository\TokenRepository;
 use App\Membership\Entity\MemberInterface;
 use App\Membership\Repository\MemberRepository;
@@ -110,11 +111,11 @@ class FetchMemberStatusMessageHandler implements MessageSubscriberInterface
 
         $options = [
             LikedStatusCollectionAwareInterface::INTENT_TO_FETCH_LIKES => $this->extractIntentToCollectLikes($options),
-            'aggregate_id'                                             => $this->extractAggregateId($options),
-            'before'                                                   => $this->extractBeforeOption($options),
+            $message::AGGREGATE_ID                                     => $message->aggregateId(),
+            $message::BEFORE                                           => $message->before(),
             'count'                                                    => 200,
-            'oauth'                                                    => $options['token'],
-            'screen_name'                                              => $options['screen_name'],
+            'oauth'                                                    => $options[TokenInterface::FIELD_TOKEN],
+            $message::SCREEN_NAME                                      => $message->screenName(),
         ];
 
         try {
@@ -137,8 +138,14 @@ class FetchMemberStatusMessageHandler implements MessageSubscriberInterface
             if (
                 $unavailableResource instanceof ProtectedAccountException
                 || $userNotFound
-                || $unavailableResource->getCode() === TwitterErrorAwareInterface::ERROR_NOT_FOUND
-                || $unavailableResource->getCode() === TwitterErrorAwareInterface::ERROR_SUSPENDED_USER
+                || \in_array(
+                    $unavailableResource->getCode(),
+                    [
+                        TwitterErrorAwareInterface::ERROR_NOT_FOUND,
+                        TwitterErrorAwareInterface::ERROR_SUSPENDED_USER
+                    ],
+                    true
+                )
             ) {
                 /**
                  * This message should not be processed again for protected accounts,
@@ -156,79 +163,17 @@ class FetchMemberStatusMessageHandler implements MessageSubscriberInterface
     }
 
     /**
-     * @param $screenName
-     *
-     * @return MemberInterface
-     * @throws OptimisticLockException
-     */
-    public function handleNotFoundUsers($screenName)
-    {
-        $member = $this->userRepository->findOneBy(
-            ['twitter_username' => $screenName]
-        );
-
-        if (!($member instanceof MemberInterface)) {
-            $message = sprintf(
-                'User with screen name "%s" could not be found via Twitter API not in database',
-                $screenName
-            );
-            throw new Exception($message, self::ERROR_CODE_USER_NOT_FOUND);
-        }
-
-        return $this->userRepository->declareUserAsNotFound($member);
-    }
-
-    /**
      * @param FetchMemberStatuses $message
      *
      * @return array
      * @throws Exception
      */
-    public function processMessage(
-        FetchMemberStatuses $message
-    ): array {
-        $tokens = [];
+    public function processMessage(FetchMemberStatuses $message): array {
+        $oauthToken = $this->extractOAuthToken($message);
 
-        if (
-            array_key_exists('token', $message->credentials())
-            && array_key_exists(
-                'secret',
-                $message->credentials()
-            )
-        ) {
-            $this->serializer->setupAccessor([
-                'token' => $message->credentials()['token'],
-                'secret' => $message->credentials()['secret'],
-            ]);
+        $this->serializer->setupAccessor($oauthToken);
 
-            return $tokens;
-        }
-
-        /** @var Token $token */
-        $token = $this->tokenRepository->findFirstUnfrozenToken();
-
-        $tokens['token'] = $token->getOauthToken();
-        $tokens['secret'] = $token->getOauthTokenSecret();
-
-        $this->serializer->setupAccessor($tokens);
-
-        return $tokens;
-    }
-
-    /**
-     * @param $options
-     *
-     * @return null
-     */
-    protected function extractAggregateId($options)
-    {
-        if (array_key_exists('aggregate_id', $options)) {
-            $aggregateId = $options['aggregate_id'];
-        } else {
-            $aggregateId = null;
-        }
-
-        return $aggregateId;
+        return $oauthToken;
     }
 
     /**
@@ -246,18 +191,43 @@ class FetchMemberStatusMessageHandler implements MessageSubscriberInterface
     }
 
     /**
-     * @param $options
+     * @param FetchMemberStatuses $message
      *
-     * @return null
+     * @return array
+     * @throws NonUniqueResultException
      */
-    protected function extractBeforeOption($options)
-    {
-        if (array_key_exists('before', $options)) {
-            $before = $options['before'];
-        } else {
-            $before = null;
+    private function extractOAuthToken(FetchMemberStatuses $message): array {
+        $credentials = $message->credentials();
+
+        if ($this->isOAuthTokenValid($credentials)) {
+            return [
+                TokenInterface::FIELD_TOKEN  => $credentials[TokenInterface::FIELD_TOKEN],
+                TokenInterface::FIELD_SECRET => $credentials[TokenInterface::FIELD_SECRET],
+            ];
         }
 
-        return $before;
+        /** @var Token $token */
+        $token = $this->tokenRepository->findFirstUnfrozenToken();
+
+        return [
+            TokenInterface::FIELD_TOKEN => $token->getOauthToken(),
+            TokenInterface::FIELD_SECRET => $token->getOauthTokenSecret(),
+        ];
+    }
+
+    /**
+     * @param array $credentials
+     *
+     * @return bool
+     */
+    private function isOAuthTokenValid(array $credentials): bool {
+        return array_key_exists(
+                TokenInterface::FIELD_TOKEN,
+                $credentials
+            )
+            && array_key_exists(
+                TokenInterface::FIELD_SECRET,
+                $credentials
+            );
     }
 }

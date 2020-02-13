@@ -1,144 +1,157 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Api\Entity;
 
-use Doctrine\Common\Collections\ArrayCollection;
+use DateTimeInterface;
+use Doctrine\Common\Collections\Collection;
 
+/**
+ * @package App\Api\Entity
+ */
 interface StatusInterface
 {
     /**
-     * Get id
-     *
-     * @return integer
+     * @return int
      */
-    public function getId();
+    public function getId(): ?int;
 
     /**
      * @param string $hash
-     */
-    public function setHash($hash);
-
-    /**
-     * @return string
-     */
-    public function getHash();
-
-    /**
-     * @param $screenName
-     * @return $this
-     */
-    public function setScreenName($screenName);
-
-    /**
-     * Get screeName
      *
-     * @return string
-     */
-    public function getScreenName();
-
-    /**
-     * @param $name
      * @return $this
      */
-    public function setName($name);
+    public function setHash(string $hash): self;
+
+    /**
+     * @return string
+     */
+    public function getHash(): string;
+
+    /**
+     * @param string $screenName
+     *
+     * @return mixed
+     */
+    public function setScreenName(string $screenName);
+
+    /**
+     * @return $this
+     */
+    public function getScreenName(): string;
+
+    /**
+     * @param string $name
+     *
+     * @return $this
+     */
+    public function setName(string $name): self;
 
     /**
      * Get name
      *
      * @return string
      */
-    public function getName();
+    public function getName(): string;
 
     /**
      * @param $text
      * @return $this
      */
-    public function setText($text);
+    public function setText(string $text): self;
 
     /**
      * Get text
      *
      * @return string
      */
-    public function getText();
+    public function getText(): string;
 
     /**
      * @param $userAvatar
      * @return $this
      */
-    public function setUserAvatar($userAvatar);
+    public function setUserAvatar(string $userAvatar): self;
 
     /**
-     * Get userAvatar
-     *
      * @return string
      */
-    public function getUserAvatar();
+    public function getUserAvatar(): string;
 
     /**
      * @param $identifier
      * @return $this
      */
-    public function setIdentifier($identifier);
+    public function setIdentifier(string $identifier): self;
 
     /**
-     * Get identifier
-     *
      * @return string
      */
-    public function getIdentifier();
-
-    public function setStatusId($statusId);
-
-    public function getStatusId();
-
-    public function setApiDocument($apiDocument);
-
-    public function getApiDocument();
+    public function getIdentifier(): string;
 
     /**
-     * @param $createdAt
+     * @param string $statusId
+     *
      * @return $this
      */
-    public function setCreatedAt($createdAt);
+    public function setStatusId(string $statusId): self;
 
     /**
-     * Get createdAt
-     *
-     * @return \DateTime
+     * @return string
      */
-    public function getCreatedAt();
+    public function getStatusId(): string;
 
     /**
-     * @param $updatedAt
+     * @param string $apiDocument
+     *
      * @return $this
      */
-    public function setUpdatedAt($updatedAt);
+    public function setApiDocument(string $apiDocument): self;
 
     /**
-     * Get updatedAt
-     *
-     * @return \DateTime
+     * @return mixed
      */
-    public function getUpdatedAt();
+    public function getApiDocument(): string;
 
     /**
-     * @param $indexed
+     * @param DateTimeInterface $createdAt
+     *
      * @return $this
      */
-    public function setIndexed($indexed);
+    public function setCreatedAt(DateTimeInterface $createdAt): self;
 
     /**
-     * Get indexed
+     * @return DateTimeInterface
+     */
+    public function getCreatedAt(): DateTimeInterface;
+
+    /**
+     * @param DateTimeInterface $updatedAt
      *
-     * @return boolean
+     * @return mixed
      */
-    public function getIndexed();
+    public function setUpdatedAt(DateTimeInterface $updatedAt): self;
 
     /**
-     * @return ArrayCollection
+     * @return DateTimeInterface
      */
-    public function getAggregates();
+    public function getUpdatedAt(): DateTimeInterface;
+
+    /**
+     * @param bool $indexed
+     * @return $this
+     */
+    public function setIndexed(bool $indexed): self;
+
+    /**
+     * @return bool
+     */
+    public function getIndexed(): bool;
+
+    /**
+     * @return Collection
+     */
+    public function getAggregates(): Collection;
 
     /**
      * @param Aggregate $aggregate
@@ -150,5 +163,5 @@ interface StatusInterface
      * @param Aggregate $aggregate
      * @return mixed
      */
-    public function addToAggregates(Aggregate $aggregate);
+    public function addToAggregates(Aggregate $aggregate): Collection;
 }
