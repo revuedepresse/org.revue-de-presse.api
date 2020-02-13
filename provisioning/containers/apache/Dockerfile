@@ -25,5 +25,7 @@ VOLUME /etc/apache2/sites-available
 
 WORKDIR /var/www/devobs
 
-CMD ["/etc/init.d/blackfire-agent restart && apache2-foreground"]
+ADD ./tasks /tasks
+
+CMD /bin/bash -c "source /tasks/setup-virtual-host.sh && tail -f /var/www/devobs/var/logs/apache*.log"
 
