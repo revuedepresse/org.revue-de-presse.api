@@ -6,15 +6,14 @@ namespace App\Amqp\MessageHandler;
 use App\Amqp\Message\FetchMemberStatuses;
 use App\Api\Entity\Token;
 use App\Api\Repository\TokenRepository;
-use App\Membership\Repository\MemberRepository;
 use App\Membership\Entity\MemberInterface;
+use App\Membership\Repository\MemberRepository;
 use App\Operation\OperationClock;
 use App\Status\LikedStatusCollectionAwareInterface;
 use App\Twitter\Api\TwitterErrorAwareInterface;
 use App\Twitter\Exception\ProtectedAccountException;
 use App\Twitter\Exception\UnavailableResourceException;
 use App\Twitter\Serializer\UserStatus;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
@@ -27,9 +26,9 @@ use function sprintf;
 /**
  * @package App\Amqp\MessageHandler
  */
-class FetchMemberStatusesHandler implements MessageSubscriberInterface
+class FetchMemberStatusMessageHandler implements MessageSubscriberInterface
 {
-    const ERROR_CODE_USER_NOT_FOUND = 100;
+    private const ERROR_CODE_USER_NOT_FOUND = 100;
 
     /**
      * @var OperationClock
@@ -44,7 +43,7 @@ class FetchMemberStatusesHandler implements MessageSubscriberInterface
     /**
      * @param LoggerInterface $logger
      */
-    public function setLogger($logger)
+    public function setLogger(LoggerInterface $logger)
     {
         $this->logger = $logger;
     }
@@ -52,12 +51,12 @@ class FetchMemberStatusesHandler implements MessageSubscriberInterface
     /**
      * @var UserStatus $serializer
      */
-    protected $serializer;
+    protected UserStatus $serializer;
 
     /**
-     * @param $serializer
+     * @param UserStatus $serializer
      */
-    public function setSerializer($serializer)
+    public function setSerializer(UserStatus $serializer)
     {
         $this->serializer = $serializer;
     }
@@ -73,7 +72,7 @@ class FetchMemberStatusesHandler implements MessageSubscriberInterface
     public TokenRepository $tokenRepository;
 
     /**
-     * @param ServiceEntityRepository $userRepository
+     * @param MemberRepository $userRepository
      */
     public function setUserRepository(MemberRepository $userRepository)
     {
@@ -83,7 +82,8 @@ class FetchMemberStatusesHandler implements MessageSubscriberInterface
     /**
      * @return iterable
      */
-    public static function getHandledMessages(): iterable
+    public static function getHandledMessages()
+    : iterable
     {
         yield FetchMemberStatuses::class => [
             'from_transport' => 'async'
@@ -110,21 +110,23 @@ class FetchMemberStatusesHandler implements MessageSubscriberInterface
 
         $options = [
             LikedStatusCollectionAwareInterface::INTENT_TO_FETCH_LIKES => $this->extractIntentToCollectLikes($options),
-            'aggregate_id' => $this->extractAggregateId($options),
-            'before' => $this->extractBeforeOption($options),
-            'count' => 200,
-            'oauth' => $options['token'],
-            'screen_name' => $options['screen_name'],
+            'aggregate_id'                                             => $this->extractAggregateId($options),
+            'before'                                                   => $this->extractBeforeOption($options),
+            'count'                                                    => 200,
+            'oauth'                                                    => $options['token'],
+            'screen_name'                                              => $options['screen_name'],
         ];
 
         try {
             $success = $this->serializer->serialize($options, $greedy = true);
             if (!$success) {
-                $this->logger->info(sprintf(
-                                        'Re-queuing message for %s in aggregate %d',
-                                        $options['screen_name'],
-                                        $options['aggregate_id']
-                                    ));
+                $this->logger->info(
+                    sprintf(
+                        'Re-queuing message for %s in aggregate %d',
+                        $options['screen_name'],
+                        $options['aggregate_id']
+                    )
+                );
             }
         } catch (UnavailableResourceException $unavailableResource) {
             $userNotFound = $unavailableResource->getCode() === TwitterErrorAwareInterface::ERROR_USER_NOT_FOUND;
@@ -133,10 +135,10 @@ class FetchMemberStatusesHandler implements MessageSubscriberInterface
             }
 
             if (
-                $unavailableResource instanceof ProtectedAccountException ||
-                $userNotFound ||
-                $unavailableResource->getCode() === TwitterErrorAwareInterface::ERROR_NOT_FOUND ||
-                $unavailableResource->getCode() === TwitterErrorAwareInterface::ERROR_SUSPENDED_USER
+                $unavailableResource instanceof ProtectedAccountException
+                || $userNotFound
+                || $unavailableResource->getCode() === TwitterErrorAwareInterface::ERROR_NOT_FOUND
+                || $unavailableResource->getCode() === TwitterErrorAwareInterface::ERROR_SUSPENDED_USER
             ) {
                 /**
                  * This message should not be processed again for protected accounts,
@@ -155,6 +157,7 @@ class FetchMemberStatusesHandler implements MessageSubscriberInterface
 
     /**
      * @param $screenName
+     *
      * @return MemberInterface
      * @throws OptimisticLockException
      */
@@ -177,29 +180,35 @@ class FetchMemberStatusesHandler implements MessageSubscriberInterface
 
     /**
      * @param FetchMemberStatuses $message
+     *
      * @return array
      * @throws Exception
      */
-    public function processMessage(FetchMemberStatuses $message): array
-    {
-        return $this->setupCredentials($options);
-    }
+    public function processMessage(
+        FetchMemberStatuses $message
+    ): array {
+        $tokens = [];
 
-    /**
-     * @param array $tokens
-     * @return array
-     * @throws NonUniqueResultException
-     */
-    protected function setupCredentials(array $tokens): array
-    {
-        if ((!array_key_exists('token', $tokens) ||
-                !array_key_exists('secret', $tokens)) &&
-            !array_key_exists('bearer', $tokens)) {
-            /** @var Token $token */
-            $token = $this->tokenRepository->findFirstUnfrozenToken();
-            $tokens['token'] = $token->getOauthToken();
-            $tokens['secret'] = $token->getOauthTokenSecret();
+        if (
+            array_key_exists('token', $message->credentials())
+            && array_key_exists(
+                'secret',
+                $message->credentials()
+            )
+        ) {
+            $this->serializer->setupAccessor([
+                'token' => $message->credentials()['token'],
+                'secret' => $message->credentials()['secret'],
+            ]);
+
+            return $tokens;
         }
+
+        /** @var Token $token */
+        $token = $this->tokenRepository->findFirstUnfrozenToken();
+
+        $tokens['token'] = $token->getOauthToken();
+        $tokens['secret'] = $token->getOauthTokenSecret();
 
         $this->serializer->setupAccessor($tokens);
 
@@ -208,6 +217,7 @@ class FetchMemberStatusesHandler implements MessageSubscriberInterface
 
     /**
      * @param $options
+     *
      * @return null
      */
     protected function extractAggregateId($options)
@@ -223,10 +233,11 @@ class FetchMemberStatusesHandler implements MessageSubscriberInterface
 
     /**
      * @param array $options
+     *
      * @return bool
      */
-    protected function extractIntentToCollectLikes(array $options): bool
-    {
+    protected function extractIntentToCollectLikes(array $options)
+    : bool {
         if (!array_key_exists(LikedStatusCollectionAwareInterface::INTENT_TO_FETCH_LIKES, $options)) {
             return false;
         }
@@ -236,6 +247,7 @@ class FetchMemberStatusesHandler implements MessageSubscriberInterface
 
     /**
      * @param $options
+     *
      * @return null
      */
     protected function extractBeforeOption($options)

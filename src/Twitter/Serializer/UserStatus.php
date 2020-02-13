@@ -3,24 +3,22 @@
 namespace App\Twitter\Serializer;
 
 use App\Accessor\Exception\ApiRateLimitingException;
-use App\Amqp\Exception\SkippableMessageException;
-use App\Membership\Entity\MemberInterface;
-use App\Status\LikedStatusCollectionAwareInterface;
-
 use App\Accessor\Exception\NotFoundStatusException;
 use App\Aggregate\Exception\LockedAggregateException;
-use App\Status\Repository\LikedStatusRepository;
-use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\OptimisticLockException;
-use Exception;
-use Psr\Log\LoggerInterface;
-use Symfony\Component\Translation\TranslatorInterface;
-
+use App\Amqp\Exception\SkippableMessageException;
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\StatusInterface;
-use App\Api\Entity\Token,
-    WeavingTheWeb\Bundle\ApiBundle\Entity\Whisperer;
-
+use App\Api\Entity\Token;
+use App\Api\Entity\TokenInterface;
+use App\Api\Entity\Whisperer;
+use App\Api\Moderator\ApiLimitModerator;
+use App\Api\Repository\StatusRepository;
+use App\Api\Repository\TokenRepository;
+use App\Api\Repository\WhispererRepository;
+use App\Membership\Entity\MemberInterface;
+use App\Status\LikedStatusCollectionAwareInterface;
+use App\Status\Repository\LikedStatusRepository;
+use App\Twitter\Api\Accessor;
 use App\Twitter\Exception\BadAuthenticationDataException;
 use App\Twitter\Exception\NotFoundMemberException;
 use App\Twitter\Exception\ProtectedAccountException;
@@ -28,25 +26,32 @@ use App\Twitter\Exception\SuspendedAccountException;
 use App\Twitter\Exception\UnavailableResourceException;
 use App\Twitter\Serializer\Exception\RateLimitedException;
 use App\Twitter\Serializer\Exception\SkipSerializationException;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\OptimisticLockException;
+use Exception;
+use Psr\Log\LoggerInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @package App\Twitter\Accessor
  */
 class UserStatus implements LikedStatusCollectionAwareInterface
 {
-    const MAX_AVAILABLE_TWEETS_PER_USER = 3200;
+    private const MAX_AVAILABLE_TWEETS_PER_USER = 3200;
 
-    const MAX_BATCH_SIZE = 200;
+    private const MAX_BATCH_SIZE = 200;
 
-    const MESSAGE_OPTION_TOKEN = 'oauth';
+    private const MESSAGE_OPTION_TOKEN = 'oauth';
 
     /**
-     * @var \Symfony\Component\Translation\Translator $translator
+     * @var TranslatorInterface $translator
      */
-    public $translator;
+    public TranslatorInterface $translator;
 
     /**
-     * @param $translator
+     * @param TranslatorInterface $translator
+     *
      * @return $this
      */
     public function setTranslator(TranslatorInterface $translator)
@@ -57,15 +62,15 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     }
 
     /**
-     * @var \App\Twitter\Api\Accessor $accessor
+     * @var Accessor $accessor
      */
-    protected $accessor;
+    protected Accessor $accessor;
 
     /**
      * @param $accessor
      * @return $this
      */
-    public function setAccessor($accessor)
+    public function setAccessor(Accessor $accessor)
     {
         $this->accessor = $accessor;
 
@@ -73,20 +78,21 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     }
 
     /**
-     * @var \WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository $statusRepository
+     * @var StatusRepository $statusRepository
      */
-    protected $statusRepository;
+    protected StatusRepository $statusRepository;
 
     /**
      * @var LikedStatusRepository
      */
-    public $likedStatusRepository;
+    public LikedStatusRepository $likedStatusRepository;
 
     /**
-     * @param $statusRepository
+     * @param StatusRepository $statusRepository
+     *
      * @return $this
      */
-    public function setStatusRepository($statusRepository)
+    public function setStatusRepository(StatusRepository $statusRepository)
     {
         $this->statusRepository = $statusRepository;
 
@@ -94,9 +100,9 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     }
 
     /**
-     * @var \WeavingTheWeb\Bundle\ApiBundle\Repository\WhispererRepository $whispererRepository
+     * @var WhispererRepository $whispererRepository
      */
-    protected $whispererRepository;
+    protected WhispererRepository $whispererRepository;
 
     /**
      * @param $whispererRepository
@@ -110,33 +116,34 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     }
 
     /**
-     * @var \Psr\Log\LoggerInterface
+     * @var LoggerInterface
      */
-    protected $logger;
+    protected LoggerInterface $logger;
 
     /**
      * @var LoggerInterface
      */
-    public $twitterApiLogger;
+    public LoggerInterface $twitterApiLogger;
 
     /**
-     * @param \Psr\Log\LoggerInterface $logger
+     * @param LoggerInterface $logger
      */
-    public function setLogger($logger)
+    public function setLogger(LoggerInterface $logger)
     {
         $this->logger = $logger;
     }
 
     /**
-     * @var \App\Api\Moderator\ApiLimitModerator $moderator
+     * @var ApiLimitModerator $moderator
      */
-    protected $moderator;
+    protected ApiLimitModerator $moderator;
 
     /**
-     * @param $moderator
+     * @param ApiLimitModerator $moderator
+     *
      * @return $this
      */
-    public function setModerator($moderator)
+    public function setModerator(ApiLimitModerator $moderator)
     {
         $this->moderator = $moderator;
 
@@ -144,15 +151,15 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     }
 
     /**
-     * @var \WeavingTheWeb\Bundle\ApiBundle\Repository\TokenRepository $tokenRepository
+     * @var TokenRepository $tokenRepository
      */
-    protected $tokenRepository;
+    protected TokenRepository $tokenRepository;
 
     /**
      * @param $tokenRepository
      * @return $this
      */
-    public function setTokenRepository($tokenRepository)
+    public function setTokenRepository(TokenRepository $tokenRepository)
     {
         $this->tokenRepository = $tokenRepository;
 
@@ -162,49 +169,54 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     /**
      * @var array
      */
-    protected $serializationOptions = [];
+    protected array $serializationOptions = [];
 
     /**
-     * @param $oauthTokens
+     * @param array $oauthTokens
+     *
      * @return $this
-     * @throws Exception
+     * @throws NonUniqueResultException
      */
-    public function setupAccessor($oauthTokens)
+    public function setupAccessor(array $oauthTokens)
     {
-        if (!array_key_exists('authentication_header', $oauthTokens)) {
-            $this->accessor->setUserToken($oauthTokens['token']);
-            $this->accessor->setUserSecret($oauthTokens['secret']);
-
-            /** @var Token token */
-            $token = $this->tokenRepository->findOneBy(['oauthToken' => $oauthTokens['token']]);
-
-            if (! $token instanceof Token) {
-                $token = $this->tokenRepository->findFirstUnfrozenToken();
-            }
-
-            $this->accessor->setConsumerKey($token->consumerKey);
-            $this->accessor->setConsumerSecret($token->consumerSecret);
-        } else {
+        if (\array_key_exists('authentication_header', $oauthTokens)) {
             $this->accessor->setAuthenticationHeader($oauthTokens['authentication_header']);
+
+            return $this;
         }
+
+        $this->accessor->setUserToken($oauthTokens[TokenInterface::FIELD_TOKEN]);
+        $this->accessor->setUserSecret($oauthTokens[TokenInterface::FIELD_SECRET]);
+
+        /** @var Token token */
+        $token = $this->tokenRepository
+            ->findOneBy(['oauthToken' => $oauthTokens[TokenInterface::FIELD_TOKEN]]);
+
+        if (!$token instanceof Token) {
+            $token = $this->tokenRepository->findFirstUnfrozenToken();
+        }
+
+        $this->accessor->setConsumerKey($token->consumerKey);
+        $this->accessor->setConsumerSecret($token->consumerSecret);
 
         return $this;
     }
 
     /**
-     * @param      $options
-     * @param bool $greedy
-     * @param bool $discoverPastTweets
+     * @param array $options
+     * @param bool  $greedy
+     * @param bool  $discoverPastTweets
+     *
      * @return bool
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     * @throws NotFoundMemberException
+     * @throws OptimisticLockException
      * @throws ProtectedAccountException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
-     * @throws Exception
      */
-    public function serialize($options, $greedy = false, $discoverPastTweets = true)
+    public function serialize(array $options, $greedy = false, $discoverPastTweets = true)
     {
         $successfulSerializationOptionSetup = $this->setUpSerializationOptions($options);
 
@@ -286,7 +298,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @return bool
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
-     * @throws \Doctrine\ORM\NoResultException
+     * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws OptimisticLockException
      * @throws Exception
@@ -508,7 +520,9 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @throws Exception
      */
     protected function isApiAvailableForToken(Token $token) {
-        $this->setupAccessor(['token' => $token->getOauthToken(), 'secret' => $token->getOauthTokenSecret()]);
+        $this->setupAccessor([
+            TokenInterface::FIELD_TOKEN => $token->getOauthToken(),
+            TokenInterface::FIELD_SECRET => $token->getOauthTokenSecret()]);
 
         return $this->isApiAvailable();
     }
@@ -599,7 +613,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @return bool
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
-     * @throws \Doctrine\ORM\NoResultException
+     * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws OptimisticLockException
      * @throws Exception
@@ -618,7 +632,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @return bool
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
-     * @throws \Doctrine\ORM\NoResultException
+     * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws OptimisticLockException
      * @throws Exception
@@ -725,7 +739,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @throws ProtectedAccountException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
-     * @throws \Doctrine\ORM\NoResultException
+     * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws OptimisticLockException
      */
@@ -1049,7 +1063,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @param string $screenName
      * @param int    $aggregateId
      * @return int|null
-     * @throws \Doctrine\ORM\NoResultException
+     * @throws NoResultException
      * @throws NonUniqueResultException
      */
     private function saveStatusesForScreenName(
@@ -1092,7 +1106,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @param Aggregate|null $aggregate
      * @return array
      * @throws NotFoundMemberException
-     * @throws \Doctrine\ORM\NoResultException
+     * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws OptimisticLockException
      */
@@ -1274,7 +1288,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @param string $memberName
      * @return bool
      * @throws NotFoundMemberException
-     * @throws \Doctrine\ORM\NoResultException
+     * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws OptimisticLockException
      */
@@ -1410,7 +1424,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @throws SkippableMessageException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
-     * @throws \Doctrine\ORM\NoResultException
+     * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws OptimisticLockException
      */
@@ -1448,7 +1462,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @param array     $statuses
      * @param Whisperer $whisperer
      * @throws SkippableMessageException
-     * @throws \Doctrine\ORM\NoResultException
+     * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws OptimisticLockException
      */
@@ -1664,7 +1678,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @throws ProtectedAccountException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
-     * @throws \Doctrine\ORM\NoResultException
+     * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws OptimisticLockException
      */
@@ -1737,8 +1751,8 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     {
         $options[self::MESSAGE_OPTION_TOKEN] = $token->getOauthToken();
         $this->setupAccessor([
-            'token' => $options[self::MESSAGE_OPTION_TOKEN],
-            'secret' => $token->getOauthTokenSecret()
+            TokenInterface::FIELD_TOKEN => $options[self::MESSAGE_OPTION_TOKEN],
+            TokenInterface::FFIELD_SECRET => $token->getOauthTokenSecret()
         ]);
 
         return $options;

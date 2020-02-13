@@ -1,17 +1,20 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Api\Entity;
 
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM,
     Doctrine\Common\Collections\ArrayCollection;
 use App\Membership\Entity\Member;
-use App\Api\Entity\TokenType;
 
 /**
+ * @package App\Api\Entity
+ *
  * @ORM\Table(name="weaving_access_token")
  * @ORM\Entity(repositoryClass="App\Api\Repository\TokenRepository")
  */
-class Token
+class Token implements TokenInterface
 {
     /**
      * @var integer
@@ -201,7 +204,8 @@ class Token
     /**
      * Add users
      *
-     * @param \App\Membership\Entity\Member $users
+     * @param Member $users
+     *
      * @return Token
      */
     public function addUser(Member $users)
@@ -214,7 +218,7 @@ class Token
     /**
      * Remove users
      *
-     * @param \App\Membership\Entity\Member $users
+     * @param Member $users
      */
     public function removeUser(Member $users)
     {
@@ -224,7 +228,7 @@ class Token
     /**
      * Get users
      *
-     * @return \Doctrine\Common\Collections\Collection 
+     * @return Collection
      */
     public function getUsers()
     {

@@ -7,10 +7,3 @@ framework:
         routing:
             # Route your messages to the transports
             'App\Amqp\Message\FetchMemberStatuses': async
-
-services:
-    App\Amqp\MessageHandler\FetchMemberStatusesHandler:
-        tags:
-            -
-                name: messenger.message_handler
-                handles: App\Amqp\Message\FetchMemberStatuses
