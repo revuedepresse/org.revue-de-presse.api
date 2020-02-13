@@ -9,9 +9,11 @@ use App\Membership\Entity\MemberInterface;
 use App\Member\Repository\AuthenticationTokenRepository;
 use App\Security\Cors\CorsHeadersAwareTrait;
 use App\Status\Repository\HighlightRepository;
+use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\NonUniqueResultException;
 use OldSound\RabbitMqBundle\RabbitMq\Producer;
 use Predis\Client;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RouterInterface;
@@ -83,24 +85,24 @@ class ListController
     public $allowedOrigin;
 
     /**
-     * @var \Psr\Log\LoggerInterface
+     * @var LoggerInterface
      */
-    public $logger;
+    public LoggerInterface $logger;
 
     /**
      * @var RedisCache
      */
-    public $redisCache;
+    public RedisCache $redisCache;
 
     /**
      * @var RouterInterface
      */
-    public $router;
+    public RouterInterface $router;
 
     /**
      * @param Request $request
      * @return JsonResponse
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      */
     public function getAggregates(Request $request)
     {
@@ -189,7 +191,7 @@ class ListController
     /**
      * @param Request $request
      * @return JsonResponse
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      */
     public function getHighlights(Request $request)
     {
@@ -266,7 +268,7 @@ class ListController
     /**
      * @param $searchParams
      * @return array|mixed
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      */
     private function getHighlightsFromSearchParams(SearchParams $searchParams) {
         if ($this->invalidHighlightsSearchParams($searchParams)) {
@@ -303,7 +305,7 @@ class ListController
      * @param              $snapshot
      * @param              $client
      * @return array
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      */
     private function getHighlightsFromFirebaseSnapshot(SearchParams $searchParams, $snapshot, Client $client): array
     {
@@ -446,7 +448,7 @@ class ListController
      * @param Request $request
      * @return int|null|JsonResponse
      * @throws NonUniqueResultException
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      */
     public function getMembers(Request $request)
     {
@@ -507,7 +509,7 @@ class ListController
     /**
      * @param Request $request
      * @return JsonResponse
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      */
     public function getStatuses(Request $request)
     {
@@ -529,7 +531,7 @@ class ListController
      * @param callable $finder
      * @param array    $params
      * @return JsonResponse
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      */
     private function getCollection(
         Request $request,
