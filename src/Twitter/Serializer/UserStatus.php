@@ -1190,7 +1190,9 @@ class UserStatus implements LikedStatusCollectionAwareInterface
 
         $discoverMoreRecentStatuses = false;
         if (count($statuses) > 0 &&
-            $this->statusRepository->findOneBy(['statusId' => $statuses[0]->id]) instanceof StatusInterface) {
+            $this->statusRepository->findOneBy(
+                ['statusId' => $statuses[0]->id]) instanceof StatusInterface
+            ) {
             $discoverMoreRecentStatuses = true;
         }
 
@@ -1202,7 +1204,10 @@ class UserStatus implements LikedStatusCollectionAwareInterface
                 unset($options['max_id']);
             }
 
-            $statuses = $this->fetchLatestStatuses($options, $discoverPastTweets = false);
+            $statuses = $this->fetchLatestStatuses(
+                $options,
+                $discoverPastTweets = false
+            );
         }
 
         return $statuses;
