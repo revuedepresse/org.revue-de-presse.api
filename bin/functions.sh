@@ -5,8 +5,16 @@ function get_docker_network() {
 }
 
 function create_network() {
-    local network=`get_docker_network`
-    /bin/bash -c 'docker network create '"${network}"
+    local network
+    network=`get_docker_network`
+
+    local command
+    command="$(echo -n 'docker network create '"${network}"' \
+    --subnet=192.168.176.0/20 \
+    --ip-range=192.168.176.0/10 \
+    --gateway=192.168.176.1')"
+
+    /bin/bash -c "${command}"
 }
 
 function get_network_option() {
