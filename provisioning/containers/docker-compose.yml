@@ -35,6 +35,10 @@ services:
 
     worker:
         build: ./php
+        networks:
+            press-review-network:
+                aliases:
+                    - worker
         volumes:
             - ../containers/php/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini
             - ../../:/var/www/devobs
