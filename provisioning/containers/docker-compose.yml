@@ -45,6 +45,8 @@ services:
 
     cache:
         image: redis
+        command:
+            redis-server --appendonly yes
         expose:
             - "6379"
         networks:
