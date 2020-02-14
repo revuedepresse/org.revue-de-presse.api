@@ -19,8 +19,6 @@ RUN apt-get update && apt-get install -y wget git libicu-dev librabbitmq-dev lib
     echo "deb http://packages.blackfire.io/debian any main" | tee /etc/apt/sources.list.d/blackfire.list && \
     apt-get update && apt install blackfire-agent blackfire-php
 
-RUN docker-php-ext-install sockets
-
 VOLUME /etc/apache2/sites-available
 
 WORKDIR /var/www/devobs
