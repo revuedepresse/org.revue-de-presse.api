@@ -1820,7 +1820,12 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
             switch ($exception->getCode()) {
                 case $this->getBadAuthenticationDataCode():
 
-                    $this->logger->error('Please check your token consumer key '.$exception->getMessage());
+                    $this->logger->error(
+                        sprintf(
+                            'Please check your token consumer key (%s)',
+                            $exception->getMessage()
+                        )
+                    );
 
                     $availableApi = false;
 
