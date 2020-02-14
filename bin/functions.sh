@@ -275,6 +275,8 @@ function get_param_value_from_config() {
     echo "${param_value}"
 }
 
+# @deprecated
+# In the past, all existing migrations were removed before computing new ones
 function diff_schema {
     local question="Would you like to remove the previous queries generated? Not doing so might have some unpredictable consequences."
 
@@ -298,6 +300,7 @@ function diff_schema {
     /bin/bash -c "export PROJECT_DIR=`pwd`; echo 'php /var/www/devobs/app/console doc:mig:diff -vvvv' | make run-php"
 }
 
+# @deprecated
 # In production, export the *appropriate* environment variable (contains "_accepted_") to migrate a schema
 # No export of variable environment is provided here or in the Makefile documentation to prevent bad mistakes
 # from happening
@@ -362,6 +365,14 @@ function migrate_schema {
 
     local project_dir="$(get_project_dir)"
     echo 'php '"${project_dir}"'/app/console doc:mig:mig --em=admin' | make run-php
+}
+
+function compute_schema_differences() {
+    /bin/bash -c "php /var/www/devobs/bin/console doc:mig:diff -vvvv"
+}
+
+function migrate_from_previous_schema_to_next_one() {
+    SYMFONY_DEPRECATIONS_HELPER=0 /bin/bash -c "php /var/www/devobs/bin/console doc:mig:mig -vvv"
 }
 
 function install_php_dependencies {
