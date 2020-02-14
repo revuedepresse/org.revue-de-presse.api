@@ -23,8 +23,6 @@ services:
 
     worker:
         build: ./php
-        environment:
-            APP_ENV: prod
         networks:
             press-review-network:
                 aliases:
