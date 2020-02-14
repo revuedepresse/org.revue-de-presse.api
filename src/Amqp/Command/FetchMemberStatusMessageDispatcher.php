@@ -516,15 +516,18 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
 
     /**
      * @return array
-     * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    private function updateAccessToken()
+    private function updateAccessToken(): array
     {
         $tokens = $this->getTokensFromInput();
 
-        /** @var Token $token */
-        $token = $this->findTokenOtherThan($tokens['token']);
+        try {
+            /** @var Token $token */
+            $token = $this->findTokenOtherThan($tokens['token']);
+        } catch (NoResultException $exception) {
+            return [];
+        }
 
         $oauthTokens = [
             'token' => $token->getOauthToken(),
