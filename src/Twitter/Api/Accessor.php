@@ -99,12 +99,12 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     /**
      * @var string
      */
-    protected string $consumerKey;
+    protected ?string $consumerKey;
 
     /**
      * @var string
      */
-    protected string $consumerSecret;
+    protected ?string $consumerSecret;
 
     /**
      * @var string
