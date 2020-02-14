@@ -1866,7 +1866,7 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
      */
     protected function takeFirstTokenCharacters(Token $token)
     {
-        return substr($token->getOauthToken(), 0, '8');
+        return substr($token->getOauthToken(), 0, 8);
     }
 
     /**
