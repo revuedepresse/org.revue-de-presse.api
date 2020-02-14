@@ -19,19 +19,7 @@ services:
             - mysql
         depends_on:
             - cache
-            - messenger
             - worker
-
-    messenger:
-        build: ./rabbitmq
-        expose:
-            - "5672"
-        networks:
-            press-review-network:
-                aliases:
-                    - messenger
-        volumes:
-            - ../volumes/rabbitmq:/var/lib/rabbitmq
 
     worker:
         build: ./php
@@ -42,6 +30,24 @@ services:
         volumes:
             - ../containers/php/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini
             - ../../:/var/www/devobs
+        depends_on:
+            - messenger
+
+    messenger:
+        build: ./rabbitmq
+        expose:
+            - "5672"
+        ports:
+            - "127.0.0.1:15672:15672"
+        networks:
+            press-review-network:
+                aliases:
+                    - messenger
+        restart: always
+        env_file:
+            - ../../.env.local
+        volumes:
+            - ../volumes/rabbitmq:/var/lib/rabbitmq
 
     cache:
         image: redis
@@ -49,6 +55,7 @@ services:
             redis-server --appendonly yes
         expose:
             - "6379"
+        restart: always
         networks:
             press-review-network:
                 aliases:
