@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace App\Amqp\MessageHandler;
 
+use App\Accessor\Exception\ApiRateLimitingException;
+use App\Accessor\Exception\ReadOnlyApplicationException;
+use App\Accessor\Exception\UnexpectedApiResponseException;
 use App\Amqp\Message\FetchMemberStatuses;
 use App\Api\Entity\Token;
 use App\Api\Entity\TokenInterface;
@@ -12,6 +15,8 @@ use App\Membership\Repository\MemberRepository;
 use App\Operation\OperationClock;
 use App\Status\LikedStatusCollectionAwareInterface;
 use App\Twitter\Api\TwitterErrorAwareInterface;
+use App\Twitter\Exception\BadAuthenticationDataException;
+use App\Twitter\Exception\InconsistentTokenRepository;
 use App\Twitter\Exception\ProtectedAccountException;
 use App\Twitter\Exception\UnavailableResourceException;
 use App\Twitter\Serializer\UserStatus;
@@ -20,6 +25,7 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Exception;
 use Psr\Log\LoggerInterface;
+use ReflectionException;
 use Symfony\Component\Messenger\Handler\MessageSubscriberInterface;
 use function array_key_exists;
 use function sprintf;
@@ -98,6 +104,12 @@ class FetchMemberStatusMessageHandler implements MessageSubscriberInterface
      * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws OptimisticLockException
+     * @throws ApiRateLimitingException
+     * @throws ReadOnlyApplicationException
+     * @throws UnexpectedApiResponseException
+     * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
+     * @throws ReflectionException
      */
     public function __invoke(FetchMemberStatuses $message)
     {
