@@ -627,6 +627,7 @@ function set_permissions_in_apache_container() {
 
     cd ./provisioning/containers
     docker-compose exec worker bin/console cache:clear -e prod --no-warmup
+    docker-compose exec worker bin/console cache:clear -e dev --no-warmup
     cd "../../"
 }
 
