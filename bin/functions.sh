@@ -246,7 +246,7 @@ function create_database_schema {
     fi
 
     local project_dir="$(get_project_dir)"
-    echo 'php /var/www/devobs/app/console doctrine:schema:create -e '"${env}" | make run-php
+    echo 'php /var/www/devobs/bin/console doctrine:schema:create -e '"${env}" | make run-php
 }
 
 function create_database_test_schema {
@@ -293,7 +293,7 @@ function diff_schema {
         fi
     fi
 
-    /bin/bash -c "export PROJECT_DIR=`pwd`; echo 'php /var/www/devobs/app/console doc:mig:diff -vvvv' | make run-php"
+    /bin/bash -c "export PROJECT_DIR=`pwd`; echo 'php /var/www/devobs/bin/console doc:mig:diff -vvvv' | make run-php"
 }
 
 # @deprecated
@@ -360,7 +360,7 @@ function migrate_schema {
     fi
 
     local project_dir="$(get_project_dir)"
-    echo 'php '"${project_dir}"'/app/console doc:mig:mig --em=admin' | make run-php
+    echo 'php '"${project_dir}"'/bin/console doc:mig:mig --em=admin' | make run-php
 }
 
 function compute_schema_differences() {
@@ -801,7 +801,7 @@ function run_php_script() {
       then
         echo 'Please pass a valid path to a script by export an environment variable'
         echo 'e.g.'
-        echo 'export SCRIPT=app/console cache:clear'
+        echo 'export SCRIPT=bin/console cache:clear'
         return
       fi
 
@@ -1093,7 +1093,7 @@ function refresh_statuses() {
         return
     fi
 
-    local php_command='app/console press-review:map-aggregate-status-collection --aggregate-name="'"${aggregate_name}"'" -vvv'
+    local php_command='bin/console press-review:map-aggregate-status-collection --aggregate-name="'"${aggregate_name}"'" -vvv'
 
     local symfony_environment="$(get_symfony_environment)"
 
