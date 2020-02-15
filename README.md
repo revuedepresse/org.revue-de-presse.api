@@ -41,6 +41,12 @@ make initialize-mysql-volume
 make diff-schema
 ```
 
+```
+# For an administration port to be declared,
+# migrate a schema
+accepted_port= make migrate-schema
+```
+
 ### RabbitMQ
 
 Configure RabbitMQ privileges

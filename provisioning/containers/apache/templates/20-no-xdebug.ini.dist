@@ -1,0 +1,13 @@
+zend_extension=/usr/local/lib/php/extensions/no-debug-non-zts-20190902/xdebug.so
+xdebug.remote_port=9001
+xdebug.remote_mode=req
+xdebug.remote_handler=dbgp
+xdebug.remote_enable=1
+xdebug.remote_autostart=1
+xdebug.remote_host=172.17.0.1
+xdebug.idekey='phpstorm-xdebug'
+xdebug.overload_var_dump=1
+xdebug.trace_format=1
+xdebug.show_exception_trace=0
+xdebug.default_enable=1
+xdebug.max_nesting_level=250

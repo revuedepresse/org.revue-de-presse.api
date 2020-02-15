@@ -1,0 +1,55 @@
+security:
+    # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+    providers:
+        in_memory: { memory: null }
+        chain_provider:
+            chain:
+                providers: [user_provider]
+        user_provider:
+            entity:
+                class:          Membership:Member
+                property:       apiKey
+                manager_name:   default
+
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+        # @see https://symfony.com/doc/current/security/multiple_guard_authenticators.html#multiple-authenticators-with-separate-entry-points
+        auth0:
+            pattern: '^/api/twitter/admin'
+
+            logout: ~
+
+            provider: user_provider
+
+            guard:
+                authenticators:
+                    - app.auth0_token_authenticator
+
+            stateless: true
+
+        main:
+            anonymous: ~
+
+            logout: ~
+
+            provider: user_provider
+
+            guard:
+                authenticators:
+                    - app.token_authenticator
+
+            stateless: true
+
+            # activate different ways to authenticate
+            # https://symfony.com/doc/current/security.html#firewalls-authentication
+
+            # https://symfony.com/doc/current/security/impersonating_user.html
+            # switch_user: true
+
+    # Easy way to control access for large sections of your site
+    # Note: Only the *first* access control that matches will be used
+    access_control:
+        - { path: ^/api,          role: ROLE_USER }

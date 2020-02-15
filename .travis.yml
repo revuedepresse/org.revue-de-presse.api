@@ -1,10 +1,10 @@
-dist: trusty
+dist: bionic
 git:
     depth: 3
 sudo: false
 language: php
 php:
-    - '7.1'
+    - '7.4'
 services:
     - mysql
     - rabbitmq
@@ -12,13 +12,11 @@ services:
 before_install:
     - mysql -e 'CREATE DATABASE test;'
 install:
-    - cp provisioning/continuous-integration/parameters_test.yml.dist app/config/parameters_test.yml
-    - /bin/bash -c 'cp app/config/parameters.yml{.dist,}'
+    - cp provisioning/continuous-integration/parameters_test.yml.dist .env.test
     - /bin/bash -c 'source ./bin/install-composer.sh'
     - php composer.phar config -g github-oauth.github.com $GITHUB_OAUTH_TOKEN
     - php composer.phar install --prefer-dist --no-scripts
-    - php composer.phar run-script build-bootstrap
-    - php app/console doctrine:schema:create -n -e test
+    - php bin/console doctrine:schema:create -n -e test
 script:
     - make run-php-unit-tests
 cache:
