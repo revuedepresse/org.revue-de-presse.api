@@ -109,7 +109,7 @@ function handle_messages {
 
     if [ -z "${MEMORY_LIMIT}" ]
     then
-        MEMORY_LIMIT=64;
+        MEMORY_LIMIT="64M";
         echo '[default memory limit] '$MEMORY_LIMIT
     fi
 
