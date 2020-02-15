@@ -1,0 +1,71 @@
+version: '3'
+services:
+
+    web:
+        build: ./apache
+        networks:
+            - press-review-network
+        ports:
+            - "127.0.0.1:80:80"
+        volumes:
+            - ../containers/apache/templates:/templates
+            - ../containers/apache/tasks:/tasks
+            - ../containers/apache/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini
+            - ../containers/apache/templates/blackfire/zz-blackfire.ini:/usr/local/etc/php/conf.d/zz-blackfire.ini
+            - ../containers/apache/templates/blackfire/.blackfire.ini:/root/.blackfire.ini
+            - ../containers/apache/templates/blackfire/agent:/etc/blackfire/agent
+            - ../../:/var/www/devobs
+        external_links:
+            - mysql
+        depends_on:
+            - cache
+            - worker
+
+    worker:
+        build: ./php
+        networks:
+            press-review-network:
+                aliases:
+                    - worker
+        volumes:
+            - ../containers/php/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini
+            - ../../:/var/www/devobs
+        depends_on:
+            - messenger
+
+    messenger:
+        build: ./rabbitmq
+        expose:
+            - "5672"
+        ports:
+            - "127.0.0.1:15672:15672"
+        networks:
+            press-review-network:
+                aliases:
+                    - messenger
+        restart: always
+        env_file:
+            - ../../.env.local
+        volumes:
+            - ../volumes/rabbitmq:/var/lib/rabbitmq
+
+    cache:
+        image: redis
+        command:
+            redis-server --appendonly yes
+        expose:
+            - "6379"
+        restart: always
+        networks:
+            press-review-network:
+                aliases:
+                    - cache
+        volumes:
+            - ../volumes/redis:/data
+
+networks:
+    press-review-network:
+        driver: bridge
+        ipam:
+            config:
+                - subnet: 192.169.195.0/20

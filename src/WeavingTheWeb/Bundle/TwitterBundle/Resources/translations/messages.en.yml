@@ -1,5 +1,0 @@
-twitter.success.statuses.persistence:       'Tweets have been successfully saved.'
-twitter.success.authentication:             'Application with consumer key {{ consumer_key }} has been successfully authenticated.'
-twitter.error.database_connection:          'The API serving statuses is currently in maintenance. Sorry for the inconvenience!'
-twitter.error.invalid_oauth_token:          'No valid OAuth token has been provided.'
-twitter.error.api_limit_reached.all_tokens: 'The API rate limit has been reached for all tokens.'

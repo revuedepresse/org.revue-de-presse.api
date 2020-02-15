@@ -1,5 +1,0 @@
-imports:
-    - { resource: config_dev.yml }
-
-parameters:
-    main_log_level:     "%production_main_level%"

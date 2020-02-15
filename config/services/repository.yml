@@ -1,0 +1,167 @@
+parameters:
+
+    weaving_the_web_api.entity.token.class:         'App\Api\Entity\Token'
+    weaving_the_web_api.entity.whisperer.class:     'App\Api\Entity\Whisperer'
+
+services:
+    repository.aggregate_subscription:
+        class:      'App\Member\Repository\AggregateSubscriptionRepository'
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - 'App\Member\Entity\AggregateSubscription'
+        properties:
+            accessor:                               '@weaving_the_web_twitter.api_accessor'
+            logger:                                 '@logger'
+            memberAggregateSubscriptionRepository:  '@repository.member_aggregate_subscription'
+            memberSubscriptionRepository:           '@repository.member_subscription'
+            networkRepository:                      '@repository.network'
+
+    repository.authentication_token:
+        factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
+        class:   'App\Member\Repository\AuthenticationTokenRepository'
+        arguments:
+            - 'App\Member\Entity\AuthenticationToken'
+        properties:
+            memberRepository: "@user_manager"
+            authenticator:    "@app.authenticator"
+
+    repository.owner:
+        factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
+        class: 'App\Media\Repository\OwnerRepository'
+        arguments:
+            - 'App\Media\Entity\Owner'
+        properties:
+             logger: '@logger'
+
+    repository.media:
+        factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
+        class: 'App\Media\Repository\MediaRepository'
+        arguments:
+            - 'App\Media\Entity\Media'
+        properties:
+            logger: '@logger'
+
+    repository.member_aggregate_subscription:
+        factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
+        class: 'App\Aggregate\Repository\MemberAggregateSubscriptionRepository'
+        arguments:
+            - 'App\Aggregate\Entity\MemberAggregateSubscription'
+
+    repository.aggregate:
+        class: 'App\Api\Repository\AggregateRepository'
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - 'App\Api\Entity\Aggregate'
+        properties:
+            #
+            #
+            # TODO
+            # Replace rabbimq bundle messager producer with
+            # symfony component message dispatcher
+            #
+            # amqpMessageProducer:    '@old_sound_rabbit_mq.weaving_the_web_amqp.twitter.aggregates_status_producer'
+            logger:                 '@logger'
+            statusRepository:       '@App\Api\Repository\StatusRepository'
+            timelyStatusRepository: '@repository.timely_status'
+            tokenRepository:        '@weaving_the_web_api.repository.token'
+            likedStatusRepository:  '@repository.liked_status'
+
+    repository.keyword:
+        class: 'App\Status\Repository\KeywordRepository'
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - 'App\Status\Entity\Keyword'
+
+    repository.highlight:
+        class: 'App\Status\Repository\HighlightRepository'
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - 'App\Status\Entity\Highlight'
+        properties:
+            aggregate:      '%highlight_aggregate_default%'
+            logger:         '@logger'
+            adminRouteName: '%admin_route_name%'
+
+    repository.not_found_status:
+        class: 'App\Status\Repository\NotFoundStatusRepository'
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - 'App\Status\Entity\NotFoundStatus'
+
+    repository.timely_status:
+        class: 'App\Aggregate\Repository\TimelyStatusRepository'
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - 'App\Aggregate\Entity\TimelyStatus'
+        properties:
+            statusRepository:    '@App\Api\Repository\StatusRepository'
+
+    repository.network:
+        class:                            'App\Member\Repository\NetworkRepository'
+        properties:
+            accessor:                     '@weaving_the_web_twitter.api_accessor'
+            entityManager:                "@doctrine.orm.entity_manager"
+            logger:                       "@logger"
+            memberRepository:             "@user_manager"
+            memberSubscribeeRepository:   "@repository.member_subscribee"
+            memberSubscriptionRepository: "@repository.member_subscription"
+
+    repository.saved_search:
+        class: 'App\Aggregate\Repository\SavedSearchRepository'
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - 'App\Aggregate\Entity\SavedSearch'
+
+    repository.search_matching_status:
+        class: 'App\Aggregate\Repository\SearchMatchingStatusRepository'
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - 'App\Aggregate\Entity\SearchMatchingStatus'
+        properties:
+            statusRepository: '@App\Api\Repository\StatusRepository'
+            logger:           "@logger"
+
+    repository.liked_status:
+        class: 'App\Status\Repository\LikedStatusRepository'
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - 'App\Status\Entity\LikedStatus'
+        properties:
+            memberRepository: "@user_manager"
+            statusRepository: '@App\Api\Repository\StatusRepository'
+
+    App\Membership\Repository\MemberRepository:
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - 'App\Membership\Entity\Member'
+        properties:
+            aggregateRepository: "@repository.aggregate"
+        tags: [ 'doctrine.repository_service' ]
+
+    repository.member_subscription:
+        class: 'App\Member\Repository\MemberSubscriptionRepository'
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - 'App\Member\Entity\MemberSubscription'
+        properties:
+            memberRepository: "@user_manager"
+
+    repository.member_subscribee:
+        class: 'App\Member\Repository\MemberSubscribeeRepository'
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - 'App\Member\Entity\MemberSubscribee'
+        properties:
+            memberRepository: "@user_manager"
+
+    weaving_the_web_api.repository.token:
+        class: '%weaving_the_web_api.repository.token.class%'
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - '%weaving_the_web_api.entity.token.class%'
+
+    weaving_the_web_api.repository.whisperer:
+        class: '%weaving_the_web_api.repository.whisperer.class%'
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - '%weaving_the_web_api.entity.whisperer.class%'

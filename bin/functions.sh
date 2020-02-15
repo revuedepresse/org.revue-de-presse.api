@@ -5,8 +5,16 @@ function get_docker_network() {
 }
 
 function create_network() {
-    local network=`get_docker_network`
-    /bin/bash -c 'docker network create '"${network}"
+    local network
+    network=`get_docker_network`
+
+    local command
+    command="$(echo -n 'docker network create '"${network}"' \
+    --subnet=192.168.176.0/20 \
+    --ip-range=192.168.176.0/10 \
+    --gateway=192.168.176.1')"
+
+    /bin/bash -c "${command}"
 }
 
 function get_network_option() {
@@ -20,8 +28,11 @@ function get_network_option() {
 }
 
 function kill_existing_consumers {
-    local pids=(`ps ux | grep "rabbitmq:consumer" | grep -v '/bash' | grep -v grep | cut -d ' ' -f 2-3`)
-    local totalProcesses=`ps ux | grep "rabbitmq:consumer" | grep -v grep | grep -c ''`
+    local pids
+    pids=(`ps ux | grep "rabbitmq:consumer" | grep -v '/bash' | grep -v grep | cut -d ' ' -f 2-3`)
+
+    local totalProcesses
+    totalProcesses=`ps ux | grep "rabbitmq:consumer" | grep -v grep | grep -c ''`
 
     if [ ! -z "${DOCKER_MODE}" ];
     then
@@ -74,16 +85,19 @@ function kill_existing_consumers {
     done
 }
 
-function consume_amqp_messages {
-    local command_suffix="${1}"
-    local namespace="${2}"
+function handle_messages {
+    local command_suffix
+    command_suffix="${1}"
+
+    local namespace
+    namespace="${2}"
 
     if [ -z "${namespace}" ];
     then
         namespace='twitter'
     fi
 
-    export NAMESPACE="consume_amqp_messages_${command_suffix}_${namespace}"
+    export NAMESPACE="handle_amqp_messages_${command_suffix}_${namespace}"
 
     export XDEBUG_CONFIG="idekey='phpstorm-xdebug'"
 
@@ -95,7 +109,7 @@ function consume_amqp_messages {
 
     if [ -z "${MEMORY_LIMIT}" ]
     then
-        MEMORY_LIMIT=64;
+        MEMORY_LIMIT="64M";
         echo '[default memory limit] '$MEMORY_LIMIT
     fi
 
@@ -106,56 +120,49 @@ function consume_amqp_messages {
 
     remove_exited_containers
 
-    local rabbitmq_output_log="app/logs/rabbitmq."${NAMESPACE}".out.log"
-    local rabbitmq_error_log="app/logs/rabbitmq."${NAMESPACE}".error.log"
+    local rabbitmq_output_log="./var/logs/rabbitmq."${NAMESPACE}".out.log"
+    local rabbitmq_error_log="./var/logs/rabbitmq."${NAMESPACE}".error.log"
     ensure_log_files_exist "${rabbitmq_output_log}" "${rabbitmq_error_log}"
     rabbitmq_output_log="${PROJECT_DIR}/${rabbitmq_output_log}"
     rabbitmq_error_log="${PROJECT_DIR}/${rabbitmq_error_log}"
 
-    env_option="$(get_environment_option)"
-    export SCRIPT="app/console rabbitmq:consumer -l $MEMORY_LIMIT -w -m $MESSAGES weaving_the_web_amqp.""${namespace}"".""${command_suffix}""$env_option -vvv"
+    export SCRIPT="bin/console messenger:consume -m $MEMORY_LIMIT -l $MESSAGES "${command_suffix}" --time-limit 3000"
 
     local symfony_environment="$(get_symfony_environment)"
 
-    if [ -z "${DOCKER_MODE}" ];
-    then
-        command="${symfony_environment} /usr/bin/php $PROJECT_DIR/""${SCRIPT}"
-        echo 'Executing command: "'$command'"'
-        echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
-        echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
-        /bin/bash -c "$command >> ${rabbitmq_output_log} 2>> ${rabbitmq_error_log}"
+    cd "${PROJECT_DIR}/provisioning/containers"
 
-        return
-    fi
-
+    command="docker-compose exec -d worker ${SCRIPT}"
+    echo 'Executing command: "'$command'"'
     echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
     echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
-
-    execute_command "${rabbitmq_output_log}" "${rabbitmq_error_log}"
+    /bin/bash -c "$command >> ${rabbitmq_output_log} 2>> ${rabbitmq_error_log}"
+    cd "../../"
+    sleep 3000
 }
 
 function consume_amqp_lively_status_messages {
-    consume_amqp_messages 'timely_status' 'consumer'
+    handle_messages 'timely_status' 'consumer'
 }
 
 function consume_amqp_messages_for_aggregates_likes {
-    consume_amqp_messages 'aggregates_likes' 'consumer'
+    handle_messages 'aggregates_likes' 'consumer'
 }
 
 function consume_amqp_messages_for_networks {
-    consume_amqp_messages 'network' 'consumer'
+    handle_messages 'network' 'consumer'
 }
 
 function consume_amqp_messages_for_aggregates_status {
-    consume_amqp_messages 'aggregates_status'
+    handle_messages 'aggregates_status'
 }
 
 function consume_amqp_messages_for_member_status {
-    consume_amqp_messages 'user_status'
+    handle_messages 'user_status'
 }
 
 function consume_amqp_messages_for_news_status {
-    consume_amqp_messages 'news_status'
+    handle_messages 'news_status'
 }
 
 function purge_queues() {
@@ -220,7 +227,7 @@ function grant_privileges {
 }
 
 function get_project_dir {
-    local project_dir=''
+    local project_dir='/var/www/devobs'
 
     if [ ! -z "${PROJECT_DIR}" ];
     then
@@ -239,7 +246,7 @@ function create_database_schema {
     fi
 
     local project_dir="$(get_project_dir)"
-    echo 'php /var/www/devobs/app/console doctrine:schema:create -e '"${env}" | make run-php
+    echo 'php /var/www/devobs/bin/console doctrine:schema:create -e '"${env}" | make run-php
 }
 
 function create_database_test_schema {
@@ -264,6 +271,8 @@ function get_param_value_from_config() {
     echo "${param_value}"
 }
 
+# @deprecated
+# In the past, all existing migrations were removed before computing new ones
 function diff_schema {
     local question="Would you like to remove the previous queries generated? Not doing so might have some unpredictable consequences."
 
@@ -284,9 +293,10 @@ function diff_schema {
         fi
     fi
 
-    /bin/bash -c "export PROJECT_DIR=`pwd`; echo 'php /var/www/devobs/app/console doc:mig:diff -vvvv' | make run-php"
+    /bin/bash -c "export PROJECT_DIR=`pwd`; echo 'php /var/www/devobs/bin/console doc:mig:diff -vvvv' | make run-php"
 }
 
+# @deprecated
 # In production, export the *appropriate* environment variable (contains "_accepted_") to migrate a schema
 # No export of variable environment is provided here or in the Makefile documentation to prevent bad mistakes
 # from happening
@@ -330,17 +340,17 @@ function migrate_schema {
     else
         if [ ${port_admin} != '%port_local%' ];
         then
-            echo "Sorry won't do for your own sake (please see README.me)."
+            echo "Sorry won't do for your own sake (please see README.md)."
             return
         fi
     fi
 
     local question="Are you sure you'd like to migrate the schema for database running on port ${port_admin}?"
     # @see https://stackoverflow.com/a/27875395/282073
-    # The second most voted proposition was adopted for its use of use and readability
+    # The second most voted proposition was adopted for its ease of use and readability
     #
-    #                                                                           About the box width and height to be rendered
-    #                                                                           $ man whiptail | grep yesno -A4
+    # About the box width and height to be rendered
+    # $ man whiptail | grep yesno -A4
     if whiptail --defaultno --yesno "${question}...${queries}" 20 60;
     then
         echo 'OK, let us migrate this schema.'
@@ -350,7 +360,15 @@ function migrate_schema {
     fi
 
     local project_dir="$(get_project_dir)"
-    echo 'php '"${project_dir}"'/app/console doc:mig:mig --em=admin' | make run-php
+    echo 'php '"${project_dir}"'/bin/console doc:mig:mig --em=admin' | make run-php
+}
+
+function compute_schema_differences() {
+    /bin/bash -c "php /var/www/devobs/bin/console doc:mig:diff -vvvv"
+}
+
+function migrate_from_previous_schema_to_next_one() {
+    SYMFONY_DEPRECATIONS_HELPER=0 /bin/bash -c "php /var/www/devobs/bin/console doc:mig:mig -vvv"
 }
 
 function install_php_dependencies {
@@ -358,6 +376,25 @@ function install_php_dependencies {
     local command=$(echo -n 'php /bin/bash -c "cd '"${project_dir}"' &&
     source '"${project_dir}"'/bin/install-composer.sh &&
     php '"${project_dir}"'/composer.phar install --prefer-dist"')
+    echo ${command} | make run-php
+}
+
+function run_composer {
+    local command=''
+    if [ -z "${COMMAND}" ];
+    then
+        command="${COMMAND}"
+        echo 'Please pass a non-empty command as environment variable'
+        echo 'e.g.'
+        echo 'export COMMAND="install --prefer-dist"'
+        return
+    fi
+
+    command="${COMMAND}"
+
+    local project_dir="$(get_project_dir)"
+    local command=$(echo -n 'php /bin/bash -c "cd '"${project_dir}"' &&
+    php -dmemory_limit="-1" '"${project_dir}"'/composer.phar "'"${command}")
     echo ${command} | make run-php
 }
 
@@ -498,9 +535,9 @@ function remove_rabbitmq_container {
 }
 
 function run_rabbitmq_container {
-    local rabbitmq_vhost="$(cat <(cat app/config/parameters.yml | grep -v '#' | grep 'rabbitmq_vhost:' | cut -f 2 -d ':' | sed -e 's/[[:space:]]//g'))"
-    local rabbitmq_password="cat ../../../app/config/parameters.yml | grep -v '#' | grep 'rabbitmq_password:' | cut -f 2 -d ':' | sed -e 's/[[:space:]]//g'"
-    local rabbitmq_user=$(cat <(cat app/config/parameters.yml | \
+    local rabbitmq_vhost="$(cat <(cat ../backup/app/config/parameters.yml | grep -v '#' | grep 'rabbitmq_vhost:' | cut -f 2 -d ':' | sed -e 's/[[:space:]]//g'))"
+    local rabbitmq_password="$(cat ../backup/app/config/parameters.yml | grep -v '#' | grep 'rabbitmq_password:' | cut -f 2 -d ':' | sed -e 's/[[:space:]]//g')"
+    local rabbitmq_user=$(cat <(cat ../backup/app/config/parameters.yml | \
         grep 'rabbitmq_user:' | grep -v '#' | \
         cut -f 2 -d ':' | sed -e 's/[[:space:]]//g'))
 
@@ -577,30 +614,21 @@ function configure_rabbitmq_user_privileges() {
 }
 
 function list_amqp_queues() {
-    local rabbitmq_vhost="$(cat <(cat app/config/parameters.yml | grep -v '#' | grep 'rabbitmq_vhost:' | cut -f 2 -d ':' | sed -e 's/[[:space:]]//g'))"
-    docker exec -ti rabbitmq watch -n1 'rabbitmqctl list_queues -p '"${rabbitmq_vhost}"
-}
-
-function setup_amqp_queue() {
-    local project_dir="$(get_project_dir)"
-    echo 'php '"${project_dir}"'/app/console rabbitmq:setup-fabric' | make run-php
-}
-function list_php_extensions() {
-    remove_php_container
-
-    local extensions=`pwd`"/provisioning/containers/php/templates/extensions.ini.dist";
-    local volume="-v ${extensions}:/usr/local/etc/php/conf.d/extensions.ini"
-    local command="docker run ${volume} --name php php -m"
-    echo "${command}"
-    /bin/bash -c "${command}"
+    local rabbitmq_vhost="$(cat <(cat .env.local | grep amqp | sed -E 's#.+(/.+)/[^/]*$#\1#' | sed -E 's/\/%2f/\//g'))"
+    cd provisioning/containers
+    docker-compose exec messenger watch -n1 'rabbitmqctl list_queues -p '"${rabbitmq_vhost}"
+    cd ../..
 }
 
 function set_permissions_in_apache_container() {
-    local project_dir="$(get_project_dir)"
-    sudo rm -rf "${project_dir}"/app/cache
-    sudo mkdir "${project_dir}"/app/cache
-    sudo chown -R www-data "${project_dir}"/app/logs "${project_dir}"/app/var
-    docker exec -ti apache php app/console cache:clear -e prod --no-warmup
+    sudo rm -rf ./var/cache
+    sudo mkdir ./var/cache
+    sudo chown -R `whoami` ./var/logs ./var
+
+    cd ./provisioning/containers
+    docker-compose exec worker bin/console cache:clear -e prod --no-warmup
+    docker-compose exec worker bin/console cache:clear -e dev --no-warmup
+    cd "../../"
 }
 
 function build_apache_container() {
@@ -621,27 +649,57 @@ function get_apache_container_interactive_shell() {
     docker exec -ti apache bash
 }
 
+function ensure_blackfire_configuration_files_are_present() {
+    if [ ! -e `pwd`'/provisioning/containers/apache/templates/blackfire/zz-blackfire.ini' ];
+    then
+      cp `pwd`'/provisioning/containers/apache/templates/blackfire/zz-blackfire.ini.dist' \
+        `pwd`'/provisioning/containers/apache/templates/blackfire/zz-blackfire.ini'
+    fi
+
+    if [ ! -e `pwd`'/provisioning/containers/apache/templates/blackfire/agent' ];
+    then
+      cp `pwd`'/provisioning/containers/apache/templates/blackfire/agent.dist' \
+        `pwd`'/provisioning/containers/apache/templates/blackfire/agent'
+    fi
+
+    if [ ! -e `pwd`'/provisioning/containers/apache/templates/blackfire/.blackfire.ini' ];
+    then
+      cp `pwd`'/provisioning/containers/apache/templates/blackfire/.blackfire.ini.dist' \
+        `pwd`'/provisioning/containers/apache/templates/blackfire/.blackfire.ini'
+    fi
+}
+
 function run_apache() {
     remove_apache_container
 
-    local port=80
+    local port
+    port='80'
+
     if [ ! -z "${PRESS_REVIEW_APACHE_PORT}" ];
     then
         port="${PRESS_REVIEW_APACHE_PORT}"
     fi
 
-    host host=''
+    host host
+    host='127.0.0.1'
+
     if [ ! -z "${PRESS_REVIEW_APACHE_HOST}" ];
     then
-        host="${PRESS_REVIEW_APACHE_HOST}"':'
+        host="${PRESS_REVIEW_APACHE_HOST}"
     fi
+
+    host="${host}:"
 
     local symfony_environment="$(get_symfony_environment)"
 
     local extensions=`pwd`"/provisioning/containers/apache/templates/extensions.ini.dist";
     local extensions_volume="-v ${extensions}:/usr/local/etc/php/conf.d/extensions.ini"
 
-    local network=`get_network_option`
+    local network
+    network=`get_network_option`
+
+    ensure_blackfire_configuration_files_are_present
+
     local command=$(echo -n 'docker run '"${network}"' \
 --restart=always \
 -d -p '${host}''${port}':80 \
@@ -736,9 +794,17 @@ function remove_php_fpm_container {
 function run_php_script() {
     local script="${1}"
 
-    if [ -z ${script} ];
+    if [ -z "${script}" ];
     then
-        script="${SCRIPT}"
+      if [ -z "${SCRIPT}" ];
+      then
+        echo 'Please pass a valid path to a script by export an environment variable'
+        echo 'e.g.'
+        echo 'export SCRIPT=bin/console cache:clear'
+        return
+      fi
+
+      script="${SCRIPT}"
     fi
 
     local memory=''
@@ -761,15 +827,13 @@ function run_php_script() {
     local symfony_environment="$(get_symfony_environment)"
 
     local network=`get_network_option`
-    local command=$(echo -n 'docker run '"${network}"'\
-    -e '"${symfony_environment}"' \
-    -v '`pwd`'/provisioning/containers/php/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini \
-    -v '`pwd`':/var/www/devobs \
-    --name=php'"${suffix}"' php'"${memory}"' /var/www/devobs/'"${script}")
+    local command=$(echo -n 'docker-compose exec -d worker '"${script}")
 
     echo 'About to execute "'"${command}"'"'
 
+    cd provisioning/containers
     /bin/bash -c "${command}"
+    cd ../..
 }
 
 function run_php() {
@@ -795,6 +859,18 @@ function run_php() {
     echo 'About to execute '"${command}"
 
     /bin/bash -c "${command}"
+}
+
+function run_stack() {
+    cd provisioning/containers
+    docker-compose up
+    cd ../..
+}
+
+function run_worker() {
+    cd provisioning/containers
+    docker-compose up worker
+    cd ../..
 }
 
 function keep_php_container_running() {
@@ -831,7 +907,7 @@ function get_symfony_environment() {
         symfony_env="${SYMFONY_ENV}"
     fi
 
-    echo 'SYMFONY_ENV='"${symfony_env}"
+    echo 'APP_ENV='"${symfony_env}"
 }
 
 function get_environment_option() {
@@ -841,10 +917,11 @@ function get_environment_option() {
         symfony_env="${SYMFONY_ENV}"
     fi
 
-    echo ' --env='"${symfony_env}"
+    echo ' APP_ENV='"${symfony_env}"
 }
 
-function produce_amqp_messages_from_members_lists {
+# @deprecated
+function dispatch_messages_from_members_lists {
     export NAMESPACE="produce_messages_from_members_lists"
     before_running_command
 
@@ -855,10 +932,11 @@ function produce_amqp_messages_from_members_lists {
         return
     fi
 
-    run_command 'app/console weaving_the_web:amqp:produce:lists_members --screen_name='"${username}"
+    run_command 'bin/console weaving_the_web:amqp:produce:lists_members --screen_name='"${username}"
 }
 
-function produce_amqp_messages_for_networks {
+# @deprecated
+function dispatch_messages_for_networks {
     export NAMESPACE="produce_messages_for_networks"
     before_running_command
 
@@ -869,17 +947,19 @@ function produce_amqp_messages_for_networks {
         return
     fi
 
-    run_command 'app/console import-network --member-list="'${MEMBER_LIST}'"'
+    run_command 'bin/console import-network --member-list="'${MEMBER_LIST}'"'
 }
 
-function produce_amqp_messages_for_timely_statuses {
+# @deprecated
+function dispatch_messages_for_timely_statuses {
     export NAMESPACE="produce_messages_for_timely_statuses"
     before_running_command
 
-    run_command 'app/console weaving_the_web:amqp:produce:timely_statuses'
+    run_command 'bin/console weaving_the_web:amqp:produce:timely_statuses'
 }
 
-function produce_amqp_messages_from_member_timeline {
+# @deprecated
+function dispatch_messages_from_member_timeline {
     export NAMESPACE="produce_messages_from_member_timeline"
 
     before_running_command
@@ -890,7 +970,7 @@ function produce_amqp_messages_from_member_timeline {
         return
     fi
 
-    run_command 'app/console weaving_the_web:amqp:produce:user_timeline --screen_name="'"${username}"'" -vvv'
+    run_command 'bin/console weaving_the_web:amqp:produce:user_timeline --screen_name="'"${username}"'" -vvv'
 }
 
 function before_running_command() {
@@ -908,24 +988,16 @@ function run_command {
     local php_command=${1}
     local memory_limit=${2}
 
-    local rabbitmq_output_log="app/logs/rabbitmq."${NAMESPACE}".out.log"
-    local rabbitmq_error_log="app/logs/rabbitmq."${NAMESPACE}".error.log"
+    local rabbitmq_output_log="var/logs/rabbitmq."${NAMESPACE}".out.log"
+    local rabbitmq_error_log="var/logs/rabbitmq."${NAMESPACE}".error.log"
+
+    local PROJECT_DIR
+    PROJECT_DIR='.'
+
     ensure_log_files_exist "${rabbitmq_output_log}" "${rabbitmq_error_log}"
+
     rabbitmq_output_log="${PROJECT_DIR}/${rabbitmq_output_log}"
     rabbitmq_error_log="${PROJECT_DIR}/${rabbitmq_error_log}"
-
-    local symfony_environment="$(get_symfony_environment)"
-
-    if [ -z "${DOCKER_MODE}" ];
-    then
-        command="${symfony_environment} /usr/bin/php $PROJECT_DIR/${php_command}"
-        echo 'Executing command: "'$command'"'
-        echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
-        echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
-        /bin/bash -c "$command >> ${rabbitmq_output_log} 2>> ${rabbitmq_error_log}"
-
-        return
-    fi
 
     export SCRIPT="${php_command}"
 
@@ -940,18 +1012,20 @@ function run_command {
     execute_command "${rabbitmq_output_log}" "${rabbitmq_error_log}"
 }
 
-function produce_amqp_messages_for_aggregates_list {
+# @deprecated
+function dispatch_messages_for_aggregates_list {
     export in_priority=1
     export NAMESPACE="produce_aggregates_messages"
-    produce_amqp_messages_for_news_list
+    dispatch_messages_for_news_list
 }
 
-function produce_amqp_messages_for_search_query {
+# @deprecated
+function dispatch_messages_for_search_query {
     export NAMESPACE="produce_search_query"
-    produce_amqp_messages_for_news_list
+    dispatch_messages_for_news_list
 }
 
-function produce_amqp_messages_for_news_list {
+function dispatch_messages_for_news_list {
     if [ -z ${NAMESPACE} ];
     then
         export NAMESPACE="produce_news_messages"
@@ -993,7 +1067,7 @@ function produce_amqp_messages_for_news_list {
     fi
 
     local arguments="${priority_option}"'--screen_name='"${username}"' '"${list_option}"' '"${query_restriction}"
-    run_command 'app/console weaving_the_web:amqp:produce:lists_members '"${arguments}"
+    run_command 'bin/console press-review:dispatch-messages-to-fetch-member-statuses '"${arguments}"
 }
 
 function refresh_statuses() {
@@ -1007,8 +1081,8 @@ function refresh_statuses() {
         export PROJECT_DIR='/var/www/devobs'
     fi
 
-    local rabbitmq_output_log="app/logs/rabbitmq."${NAMESPACE}".out.log"
-    local rabbitmq_error_log="app/logs/rabbitmq."${NAMESPACE}".error.log"
+    local rabbitmq_output_log="var/logs/rabbitmq."${NAMESPACE}".out.log"
+    local rabbitmq_error_log="var/logs/rabbitmq."${NAMESPACE}".error.log"
     ensure_log_files_exist "${rabbitmq_output_log}" "${rabbitmq_error_log}"
     rabbitmq_output_log="${PROJECT_DIR}/${rabbitmq_output_log}"
     rabbitmq_error_log="${PROJECT_DIR}/${rabbitmq_error_log}"
@@ -1020,7 +1094,7 @@ function refresh_statuses() {
         return
     fi
 
-    local php_command='app/console press-review:map-aggregate-status-collection --aggregate-name="'"${aggregate_name}"'" -vvv'
+    local php_command='bin/console press-review:map-aggregate-status-collection --aggregate-name="'"${aggregate_name}"'" -vvv'
 
     local symfony_environment="$(get_symfony_environment)"
 
@@ -1046,11 +1120,11 @@ function refresh_statuses() {
 function run_php_unit_tests() {
     if [ -z ${DEBUG} ];
     then
-        bin/phpunit -c ./app/phpunit-twitter-messaging.xml.dist --process-isolation
+        bin/phpunit -c ./phpunit.xml.dist --process-isolation
         return
     fi
 
-    bin/phpunit -c ./app/phpunit-twitter-messaging.xml.dist --verbose --debug
+    bin/phpunit -c ./phpunit.xml.dist --verbose --debug
 }
 
 function remove_redis_container {
@@ -1076,9 +1150,9 @@ function run_redis_container() {
 }
 
 function today_statuses() {
-    cat app/logs/dev.log | awk '{$1=$2=$3="";print $0}' | sed -e 's/^\s\+//' | grep `date -I` | awk '{$1=$2="";print $0}'
+    cat var/logs/dev.log | awk '{$1=$2=$3="";print $0}' | sed -e 's/^\s\+//' | grep `date -I` | awk '{$1=$2="";print $0}'
 }
 
 function follow_today_statuses() {
-    tail -f app/logs/dev.log | awk '{$1=$2=$3="";print $0}' | sed -e 's/^\s\+//' | grep `date -I` | awk '{$1=$2="";print $0}'
+    tail -f var/logs/dev.log | awk '{$1=$2=$3="";print $0}' | sed -e 's/^\s\+//' | grep `date -I` | awk '{$1=$2="";print $0}'
 }

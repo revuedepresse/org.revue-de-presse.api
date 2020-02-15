@@ -1,0 +1,11 @@
+services:
+    mapping.identity:
+        class: 'App\StatusCollection\Mapping\IdentityMapping'
+
+    mapping.refresh_status:
+        class: 'App\StatusCollection\Mapping\RefreshStatusMapping'
+        arguments:
+            - '@weaving_the_web_twitter.api_accessor'
+        properties:
+            logger:             '@monolog.logger.status'
+            statusRepository:   '@App\Api\Repository\StatusRepository'
