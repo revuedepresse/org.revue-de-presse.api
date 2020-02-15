@@ -115,9 +115,6 @@ run-rabbitmq-container: ## Run RabbitMQ container (https://hub.docker.com/_/rabb
 remove-rabbitmq-container: ## Remove RabbitMQ container
 		@/bin/bash -c 'source ./bin/functions.sh && remove_rabbitmq_container'
 
-list-rabbitmq-messages: ## List messages accumulated with RabbitMQ
-		@/bin/bash -c '/usr/local/sbin/rabbitmqctl list_queues -p /weaving_the_web'
-
 refresh-statuses: ## Refresh statuses
 		@/bin/bash -c 'source ./bin/functions.sh && refresh_statuses'
 
