@@ -1070,7 +1070,7 @@ function dispatch_messages_for_news_list {
     fi
 
     local arguments="${priority_option}"'--screen_name='"${username}"' '"${list_option}"' '"${query_restriction}"
-    run_command 'app/console weaving_the_web:amqp:produce:lists_members '"${arguments}"
+    run_command 'bin/console press-review:dispatch-messages-to-fetch-member-statuses '"${arguments}"
 }
 
 function refresh_statuses() {
