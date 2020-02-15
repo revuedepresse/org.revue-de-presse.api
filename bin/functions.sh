@@ -621,11 +621,13 @@ function list_amqp_queues() {
 }
 
 function set_permissions_in_apache_container() {
-    local project_dir="$(get_project_dir)"
-    sudo rm -rf "${project_dir}"/app/cache
-    sudo mkdir "${project_dir}"/app/cache
-    sudo chown -R www-data "${project_dir}"/app/logs "${project_dir}"/app/var
-    docker exec -ti apache php app/console cache:clear -e prod --no-warmup
+    sudo rm -rf ./var/cache
+    sudo mkdir ./var/cache
+    sudo chown -R www-data ./var/logs ./var
+
+    cd ./provisioning/containers
+    docker-compose exec worker bin/console cache:clear -e prod --no-warmup
+    cd "../../"
 }
 
 function build_apache_container() {
