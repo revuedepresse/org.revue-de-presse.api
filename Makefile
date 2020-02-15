@@ -80,9 +80,6 @@ migrate-schema: ## Migrate the database schema
 configure-rabbitmq-user-privileges: ## Configure RabbitMQ user privileges
 		@/bin/bash -c 'source ./bin/functions.sh && configure_rabbitmq_user_privileges'
 
-setup-amqp-fabric: ## Set up AMQP fabric (create expected queue)
-		@/bin/bash -c 'echo "php "${PROJECT_DIR}"/app/console rabbitmq:setup-fabric" | make run-php'
-
 list-amqp-messages: ## List AMQP messags
 		@/bin/bash -c 'source ./bin/functions.sh && list_amqp_queues'
 
