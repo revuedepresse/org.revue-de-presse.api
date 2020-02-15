@@ -900,7 +900,7 @@ function get_symfony_environment() {
         symfony_env="${SYMFONY_ENV}"
     fi
 
-    echo 'SYMFONY_ENV='"${symfony_env}"
+    echo 'APP_ENV='"${symfony_env}"
 }
 
 function get_environment_option() {
