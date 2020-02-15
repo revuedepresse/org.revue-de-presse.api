@@ -860,6 +860,12 @@ function run_php() {
     /bin/bash -c "${command}"
 }
 
+function run_worker() {
+    cd provisioning/containers
+    docker-compose up worker
+    cd ../..
+}
+
 function keep_php_container_running() {
     echo 'php -r "while (true) { sleep(1); } "' | make run-php
 }
