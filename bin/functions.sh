@@ -85,16 +85,19 @@ function kill_existing_consumers {
     done
 }
 
-function consume_amqp_messages {
-    local command_suffix="${1}"
-    local namespace="${2}"
+function handle_messages {
+    local command_suffix
+    command_suffix="${1}"
+
+    local namespace
+    namespace="${2}"
 
     if [ -z "${namespace}" ];
     then
         namespace='twitter'
     fi
 
-    export NAMESPACE="consume_amqp_messages_${command_suffix}_${namespace}"
+    export NAMESPACE="handle_amqp_messages_${command_suffix}_${namespace}"
 
     export XDEBUG_CONFIG="idekey='phpstorm-xdebug'"
 
@@ -117,56 +120,49 @@ function consume_amqp_messages {
 
     remove_exited_containers
 
-    local rabbitmq_output_log="app/logs/rabbitmq."${NAMESPACE}".out.log"
-    local rabbitmq_error_log="app/logs/rabbitmq."${NAMESPACE}".error.log"
+    local rabbitmq_output_log="./var/logs/rabbitmq."${NAMESPACE}".out.log"
+    local rabbitmq_error_log="./var/logs/rabbitmq."${NAMESPACE}".error.log"
     ensure_log_files_exist "${rabbitmq_output_log}" "${rabbitmq_error_log}"
     rabbitmq_output_log="${PROJECT_DIR}/${rabbitmq_output_log}"
     rabbitmq_error_log="${PROJECT_DIR}/${rabbitmq_error_log}"
 
-    env_option="$(get_environment_option)"
-    export SCRIPT="app/console rabbitmq:consumer -l $MEMORY_LIMIT -w -m $MESSAGES weaving_the_web_amqp.""${namespace}"".""${command_suffix}""$env_option -vvv"
+    export SCRIPT="bin/console messenger:consume -m $MEMORY_LIMIT -l $MESSAGES "${command_suffix}" -vvv"
 
     local symfony_environment="$(get_symfony_environment)"
 
-    if [ -z "${DOCKER_MODE}" ];
-    then
-        command="${symfony_environment} /usr/bin/php $PROJECT_DIR/""${SCRIPT}"
-        echo 'Executing command: "'$command'"'
-        echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
-        echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
-        /bin/bash -c "$command >> ${rabbitmq_output_log} 2>> ${rabbitmq_error_log}"
+    cd "${PROJECT_DIR}/provisioning/containers"
 
-        return
-    fi
-
+    command="docker-compose exec worker ${SCRIPT}"
+    echo 'Executing command: "'$command'"'
     echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
     echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
+    /bin/bash -c "$command >> ${rabbitmq_output_log} 2>> ${rabbitmq_error_log}"
 
-    execute_command "${rabbitmq_output_log}" "${rabbitmq_error_log}"
+    cd "../../"
 }
 
 function consume_amqp_lively_status_messages {
-    consume_amqp_messages 'timely_status' 'consumer'
+    handle_messages 'timely_status' 'consumer'
 }
 
 function consume_amqp_messages_for_aggregates_likes {
-    consume_amqp_messages 'aggregates_likes' 'consumer'
+    handle_messages 'aggregates_likes' 'consumer'
 }
 
 function consume_amqp_messages_for_networks {
-    consume_amqp_messages 'network' 'consumer'
+    handle_messages 'network' 'consumer'
 }
 
 function consume_amqp_messages_for_aggregates_status {
-    consume_amqp_messages 'aggregates_status'
+    handle_messages 'aggregates_status'
 }
 
 function consume_amqp_messages_for_member_status {
-    consume_amqp_messages 'user_status'
+    handle_messages 'user_status'
 }
 
 function consume_amqp_messages_for_news_status {
-    consume_amqp_messages 'news_status'
+    handle_messages 'news_status'
 }
 
 function purge_queues() {
@@ -920,7 +916,7 @@ function get_environment_option() {
         symfony_env="${SYMFONY_ENV}"
     fi
 
-    echo ' --env='"${symfony_env}"
+    echo ' APP_ENV='"${symfony_env}"
 }
 
 function produce_amqp_messages_from_members_lists {

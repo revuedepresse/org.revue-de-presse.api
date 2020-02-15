@@ -127,14 +127,14 @@ refresh-statuses: ## Refresh statuses
 run-redis-container: ## Run Redis container (https://hub.docker.com/_/redis/)
 		@/bin/bash -c 'source ./bin/functions.sh && run_redis_container'
 
-keep-php-container-running: ## Keep a running container having PHP
-		@/bin/bash -c 'source ./bin/functions.sh && keep_php_container_running'
-
-consume-twitter-api-messages: ## Consume twitter API messages
+handle-messages: ## Consume twitter API messages
 		@/bin/bash -c 'export PROJECT_DIR=`pwd` DOCKER_MODE=1 && cd "${PROJECT_DIR}" && source bin/consume_twitter_api.sh'
 
-consume-twitter-api-news-messages: ## Consume twitter API news messages
-		@/bin/bash -c 'export PROJECT_DIR=`pwd` DOCKER_MODE=1 && cd "${PROJECT_DIR}" && source bin/consume_twitter_api_for_news.sh'
+handle-news-messages: ## Consume twitter API news messages
+		@/bin/bash -c 'export PROJECT_DIR=`pwd` && cd "${PROJECT_DIR}" && source bin/consume_twitter_api_for_news.sh'
+
+keep-php-container-running: ## Keep a running container having PHP
+		@/bin/bash -c 'source ./bin/functions.sh && keep_php_container_running'
 
 today-statuses: ## Filter the statuses for today from the log file
 		@/bin/bash -c 'source ./bin/functions.sh && today_statuses'
