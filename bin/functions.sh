@@ -826,15 +826,13 @@ function run_php_script() {
     local symfony_environment="$(get_symfony_environment)"
 
     local network=`get_network_option`
-    local command=$(echo -n 'docker run '"${network}"'\
-    -e '"${symfony_environment}"' \
-    -v '`pwd`'/provisioning/containers/php/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini \
-    -v '`pwd`':/var/www/devobs \
-    --name=php'"${suffix}"' php'"${memory}"' /var/www/devobs/'"${script}")
+    local command=$(echo -n 'docker-compose exec worker '"${script}")
 
     echo 'About to execute "'"${command}"'"'
 
+    cd provisioning/containers
     /bin/bash -c "${command}"
+    cd ../..
 }
 
 function run_php() {
@@ -983,24 +981,16 @@ function run_command {
     local php_command=${1}
     local memory_limit=${2}
 
-    local rabbitmq_output_log="app/logs/rabbitmq."${NAMESPACE}".out.log"
-    local rabbitmq_error_log="app/logs/rabbitmq."${NAMESPACE}".error.log"
+    local rabbitmq_output_log="var/logs/rabbitmq."${NAMESPACE}".out.log"
+    local rabbitmq_error_log="var/logs/rabbitmq."${NAMESPACE}".error.log"
+
+    local PROJECT_DIR
+    PROJECT_DIR='.'
+
     ensure_log_files_exist "${rabbitmq_output_log}" "${rabbitmq_error_log}"
+
     rabbitmq_output_log="${PROJECT_DIR}/${rabbitmq_output_log}"
     rabbitmq_error_log="${PROJECT_DIR}/${rabbitmq_error_log}"
-
-    local symfony_environment="$(get_symfony_environment)"
-
-    if [ -z "${DOCKER_MODE}" ];
-    then
-        command="${symfony_environment} /usr/bin/php $PROJECT_DIR/${php_command}"
-        echo 'Executing command: "'$command'"'
-        echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
-        echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
-        /bin/bash -c "$command >> ${rabbitmq_output_log} 2>> ${rabbitmq_error_log}"
-
-        return
-    fi
 
     export SCRIPT="${php_command}"
 
