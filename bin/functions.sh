@@ -615,13 +615,9 @@ function configure_rabbitmq_user_privileges() {
 
 function list_amqp_queues() {
     local rabbitmq_vhost="$(cat <(cat .env.local | grep amqp | sed -E 's#.+(/.+)/[^/]*$#\1#' | sed -E 's/\/%2f/\//g'))"
-    docker exec -ti rabbitmq watch -n1 'rabbitmqctl list_queues -p '"${rabbitmq_vhost}"
-}
-
-function setup_amqp_queue() {
-    local project_dir="$(get_project_dir)"
-    echo 'php '"${project_dir}"'/app/console rabbitmq:setup-fabric' | make run-php
-}
+    cd provisioning/containers
+    docker-compose exec messenger watch -n1 'rabbitmqctl list_queues -p '"${rabbitmq_vhost}"
+    cd ../..
 }
 
 function set_permissions_in_apache_container() {
