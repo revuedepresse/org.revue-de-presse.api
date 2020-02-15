@@ -623,7 +623,7 @@ function list_amqp_queues() {
 function set_permissions_in_apache_container() {
     sudo rm -rf ./var/cache
     sudo mkdir ./var/cache
-    sudo chown -R www-data ./var/logs ./var
+    sudo chown -R `whoami` ./var/logs ./var
 
     cd ./provisioning/containers
     docker-compose exec worker bin/console cache:clear -e prod --no-warmup
