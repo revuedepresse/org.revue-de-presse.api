@@ -1084,8 +1084,8 @@ function refresh_statuses() {
         export PROJECT_DIR='/var/www/devobs'
     fi
 
-    local rabbitmq_output_log="app/logs/rabbitmq."${NAMESPACE}".out.log"
-    local rabbitmq_error_log="app/logs/rabbitmq."${NAMESPACE}".error.log"
+    local rabbitmq_output_log="var/logs/rabbitmq."${NAMESPACE}".out.log"
+    local rabbitmq_error_log="var/logs/rabbitmq."${NAMESPACE}".error.log"
     ensure_log_files_exist "${rabbitmq_output_log}" "${rabbitmq_error_log}"
     rabbitmq_output_log="${PROJECT_DIR}/${rabbitmq_output_log}"
     rabbitmq_error_log="${PROJECT_DIR}/${rabbitmq_error_log}"
@@ -1153,9 +1153,9 @@ function run_redis_container() {
 }
 
 function today_statuses() {
-    cat app/logs/dev.log | awk '{$1=$2=$3="";print $0}' | sed -e 's/^\s\+//' | grep `date -I` | awk '{$1=$2="";print $0}'
+    cat var/logs/dev.log | awk '{$1=$2=$3="";print $0}' | sed -e 's/^\s\+//' | grep `date -I` | awk '{$1=$2="";print $0}'
 }
 
 function follow_today_statuses() {
-    tail -f app/logs/dev.log | awk '{$1=$2=$3="";print $0}' | sed -e 's/^\s\+//' | grep `date -I` | awk '{$1=$2="";print $0}'
+    tail -f var/logs/dev.log | awk '{$1=$2=$3="";print $0}' | sed -e 's/^\s\+//' | grep `date -I` | awk '{$1=$2="";print $0}'
 }
