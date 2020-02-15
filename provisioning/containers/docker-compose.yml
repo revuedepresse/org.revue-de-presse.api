@@ -29,7 +29,6 @@ services:
                     - worker
         volumes:
             - ../containers/php/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini
-            - ../containers/php/templates/extensions.ini.dist:/usr/local/etc/php/conf.d/extensions.ini
             - ../../:/var/www/devobs
         depends_on:
             - messenger
