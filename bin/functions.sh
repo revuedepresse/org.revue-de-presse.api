@@ -126,19 +126,19 @@ function handle_messages {
     rabbitmq_output_log="${PROJECT_DIR}/${rabbitmq_output_log}"
     rabbitmq_error_log="${PROJECT_DIR}/${rabbitmq_error_log}"
 
-    export SCRIPT="bin/console messenger:consume -m $MEMORY_LIMIT -l $MESSAGES "${command_suffix}" -vvv"
+    export SCRIPT="bin/console messenger:consume -m $MEMORY_LIMIT -l $MESSAGES "${command_suffix}" --time-limit 3000"
 
     local symfony_environment="$(get_symfony_environment)"
 
     cd "${PROJECT_DIR}/provisioning/containers"
 
-    command="docker-compose exec worker ${SCRIPT}"
+    command="docker-compose exec -d worker ${SCRIPT}"
     echo 'Executing command: "'$command'"'
     echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
     echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
     /bin/bash -c "$command >> ${rabbitmq_output_log} 2>> ${rabbitmq_error_log}"
-
     cd "../../"
+    sleep 3000
 }
 
 function consume_amqp_lively_status_messages {
