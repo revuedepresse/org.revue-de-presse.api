@@ -19,6 +19,8 @@ services:
             - mysql
         depends_on:
             - cache
+            - db_read
+            - db_write
             - worker
 
     worker:
@@ -31,7 +33,21 @@ services:
             - ../containers/php/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini
             - ../../:/var/www/devobs
         depends_on:
+            - db_read
+            - db_write
             - messenger
+
+    db_read:
+        build: ./mysql
+        restart: always
+        networks:
+            press-review-network:
+                aliases:
+                    - read
+        ports:
+            - "127.0.0.1:3306:3306"
+        volumes:
+            - ../volumes/mysql:/var/lib/mysql
 
     db_write:
         build: ./mariadb
