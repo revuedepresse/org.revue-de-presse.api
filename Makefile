@@ -43,6 +43,26 @@ grant-privileges: ## Grant privileges
 build-php-container: ## Build PHP image
 		@/bin/bash -c 'source ./bin/functions.sh && build_php_container'
 
+dispatch-messages-from-aggregates-lists: ## Produce messages from aggregates list
+		@/bin/bash -c 'source ./bin/functions.sh && produce_amqp_messages_for_aggregates_list'
+
+dispatch-messages-from-member-timeline: ## Produce messages from member timeline
+		@/bin/bash -c 'source ./bin/functions.sh && produce_amqp_messages_from_member_timeline'
+
+dispatch-messages-from-members-lists: ## Produce messages from members lists
+		@/bin/bash -c 'source ./bin/functions.sh && produce_amqp_messages_from_members_lists'
+
+dispatch-messages-from-networks: ## Produce messages for networks
+		@/bin/bash -c 'source ./bin/functions.sh && produce_amqp_messages_for_networks'
+
+dispatch-messages-from-news-list: ## Produce messages from news list
+		@/bin/bash -c 'source ./bin/functions.sh && produce_amqp_messages_for_news_list'
+
+dispatch-messages-from-search-query: ## Produce messages from search query
+		@/bin/bash -c 'source ./bin/functions.sh && produce_amqp_messages_for_search_query'
+
+dispatch-messages-from-timely-statuses: ## Produce messages for timely statuses
+		@/bin/bash -c 'source ./bin/functions.sh && produce_amqp_messages_for_timely_statuses'
 
 remove-php-container: ## Remove PHP container
 		@/bin/bash -c 'source ./bin/functions.sh && remove_php_container'
@@ -94,27 +114,6 @@ remove-rabbitmq-container: ## Remove RabbitMQ container
 
 list-rabbitmq-messages: ## List messages accumulated with RabbitMQ
 		@/bin/bash -c '/usr/local/sbin/rabbitmqctl list_queues -p /weaving_the_web'
-
-produce-amqp-messages-from-members-lists: ## Produce messages from members lists
-		@/bin/bash -c 'source ./bin/functions.sh && produce_amqp_messages_from_members_lists'
-
-produce-amqp-messages-from-aggregates-lists: ## Produce messages from aggregates list
-		@/bin/bash -c 'source ./bin/functions.sh && produce_amqp_messages_for_aggregates_list'
-
-produce-amqp-messages-from-search-query: ## Produce messages from search query
-		@/bin/bash -c 'source ./bin/functions.sh && produce_amqp_messages_for_search_query'
-
-produce-amqp-messages-for-timely-statuses: ## Produce messages for timely statuses
-		@/bin/bash -c 'source ./bin/functions.sh && produce_amqp_messages_for_timely_statuses'
-
-produce-amqp-messages-for-networks: ## Produce messages for networks
-		@/bin/bash -c 'source ./bin/functions.sh && produce_amqp_messages_for_networks'
-
-produce-amqp-messages-from-news-lists: ## Produce messages from news list
-		@/bin/bash -c 'source ./bin/functions.sh && produce_amqp_messages_for_news_list'
-
-produce-amqp-messages-from-member-timeline: ## Produce messages from member timeline
-		@/bin/bash -c 'source ./bin/functions.sh && produce_amqp_messages_from_member_timeline'
 
 refresh-statuses: ## Refresh statuses
 		@/bin/bash -c 'source ./bin/functions.sh && refresh_statuses'

@@ -911,7 +911,8 @@ function get_environment_option() {
     echo ' APP_ENV='"${symfony_env}"
 }
 
-function produce_amqp_messages_from_members_lists {
+# @deprecated
+function dispatch_messages_from_members_lists {
     export NAMESPACE="produce_messages_from_members_lists"
     before_running_command
 
@@ -922,10 +923,11 @@ function produce_amqp_messages_from_members_lists {
         return
     fi
 
-    run_command 'app/console weaving_the_web:amqp:produce:lists_members --screen_name='"${username}"
+    run_command 'bin/console weaving_the_web:amqp:produce:lists_members --screen_name='"${username}"
 }
 
-function produce_amqp_messages_for_networks {
+# @deprecated
+function dispatch_messages_for_networks {
     export NAMESPACE="produce_messages_for_networks"
     before_running_command
 
@@ -936,17 +938,19 @@ function produce_amqp_messages_for_networks {
         return
     fi
 
-    run_command 'app/console import-network --member-list="'${MEMBER_LIST}'"'
+    run_command 'bin/console import-network --member-list="'${MEMBER_LIST}'"'
 }
 
-function produce_amqp_messages_for_timely_statuses {
+# @deprecated
+function dispatch_messages_for_timely_statuses {
     export NAMESPACE="produce_messages_for_timely_statuses"
     before_running_command
 
-    run_command 'app/console weaving_the_web:amqp:produce:timely_statuses'
+    run_command 'bin/console weaving_the_web:amqp:produce:timely_statuses'
 }
 
-function produce_amqp_messages_from_member_timeline {
+# @deprecated
+function dispatch_messages_from_member_timeline {
     export NAMESPACE="produce_messages_from_member_timeline"
 
     before_running_command
@@ -957,7 +961,7 @@ function produce_amqp_messages_from_member_timeline {
         return
     fi
 
-    run_command 'app/console weaving_the_web:amqp:produce:user_timeline --screen_name="'"${username}"'" -vvv'
+    run_command 'bin/console weaving_the_web:amqp:produce:user_timeline --screen_name="'"${username}"'" -vvv'
 }
 
 function before_running_command() {
@@ -1007,18 +1011,20 @@ function run_command {
     execute_command "${rabbitmq_output_log}" "${rabbitmq_error_log}"
 }
 
-function produce_amqp_messages_for_aggregates_list {
+# @deprecated
+function dispatch_messages_for_aggregates_list {
     export in_priority=1
     export NAMESPACE="produce_aggregates_messages"
-    produce_amqp_messages_for_news_list
+    dispatch_messages_for_news_list
 }
 
-function produce_amqp_messages_for_search_query {
+# @deprecated
+function dispatch_messages_for_search_query {
     export NAMESPACE="produce_search_query"
-    produce_amqp_messages_for_news_list
+    dispatch_messages_for_news_list
 }
 
-function produce_amqp_messages_for_news_list {
+function dispatch_messages_for_news_list {
     if [ -z ${NAMESPACE} ];
     then
         export NAMESPACE="produce_news_messages"
