@@ -622,14 +622,6 @@ function setup_amqp_queue() {
     local project_dir="$(get_project_dir)"
     echo 'php '"${project_dir}"'/app/console rabbitmq:setup-fabric' | make run-php
 }
-function list_php_extensions() {
-    remove_php_container
-
-    local extensions=`pwd`"/provisioning/containers/php/templates/extensions.ini.dist";
-    local volume="-v ${extensions}:/usr/local/etc/php/conf.d/extensions.ini"
-    local command="docker run ${volume} --name php php -m"
-    echo "${command}"
-    /bin/bash -c "${command}"
 }
 
 function set_permissions_in_apache_container() {

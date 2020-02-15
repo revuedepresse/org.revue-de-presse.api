@@ -43,8 +43,6 @@ grant-privileges: ## Grant privileges
 build-php-container: ## Build PHP image
 		@/bin/bash -c 'source ./bin/functions.sh && build_php_container'
 
-list-php-extensions: ## List PHP extensions
-		@/bin/bash -c 'source ./bin/functions.sh && list_php_extensions'
 
 remove-php-container: ## Remove PHP container
 		@/bin/bash -c 'source ./bin/functions.sh && remove_php_container'
