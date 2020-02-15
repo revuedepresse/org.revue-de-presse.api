@@ -860,6 +860,12 @@ function run_php() {
     /bin/bash -c "${command}"
 }
 
+function run_stack() {
+    cd provisioning/containers
+    docker-compose up
+    cd ../..
+}
+
 function run_worker() {
     cd provisioning/containers
     docker-compose up worker

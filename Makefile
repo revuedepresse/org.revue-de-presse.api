@@ -67,17 +67,20 @@ dispatch-messages-from-timely-statuses: ## Produce messages for timely statuses
 remove-php-container: ## Remove PHP container
 		@/bin/bash -c 'source ./bin/functions.sh && remove_php_container'
 
-run-worker: ## Run worker and its dependencies
-		@/bin/bash -c 'source ./bin/functions.sh && run_worker'
-
-run-php-script: ## Run PHP script
-		@/bin/bash -c 'source ./bin/functions.sh && run_php_script ${1}'
-
 install-php-dependencies: ## Install PHP dependencies
 		@/bin/bash -c 'source ./bin/functions.sh && install_php_dependencies'
 
 run-php: ## Run PHP with arguments
 		@/bin/bash -c 'source ./bin/functions.sh && run_php'
+
+run-php-script: ## Run PHP script
+		@/bin/bash -c 'source ./bin/functions.sh && run_php_script ${1}'
+
+run-stack: ## Run stack and its dependencies
+		@/bin/bash -c 'source ./bin/functions.sh && run_stack'
+
+run-worker: ## Run worker and its dependencies
+		@/bin/bash -c 'source ./bin/functions.sh && run_worker'
 
 build-php-fpm-container: ## Build PHP-FPM image
 		@/bin/bash -c 'source ./bin/functions.sh && build_php_fpm_container'
