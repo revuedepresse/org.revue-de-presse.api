@@ -827,7 +827,7 @@ function run_php_script() {
     local symfony_environment="$(get_symfony_environment)"
 
     local network=`get_network_option`
-    local command=$(echo -n 'docker-compose exec worker '"${script}")
+    local command=$(echo -n 'docker-compose exec -d worker '"${script}")
 
     echo 'About to execute "'"${command}"'"'
 
