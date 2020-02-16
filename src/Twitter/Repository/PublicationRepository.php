@@ -5,6 +5,7 @@ namespace App\Twitter\Repository;
 
 use App\Api\Adapter\StatusToArray;
 use App\Api\Entity\ArchivedStatus;
+use App\Api\Entity\Status;
 use App\Api\Entity\StatusInterface;
 use App\Operation\Collection\Collection;
 use App\Operation\Collection\CollectionInterface;
@@ -27,24 +28,14 @@ class PublicationRepository extends ServiceEntityRepository implements Publicati
         $this->entityManager  = $entityManager;
     }
 
+    /**
+     * @throws DBALException
+     */
     public function migrateStatusesToPublications(): void
     {
-        $statuses = $this->findLastBatchOfStatus();
+        $this->migrateStatusToPublications();
 
-        while ($statuses->count() > 0) {
-            $ids = $statuses->map(function (StatusInterface $status) {
-                return $status->getId();
-            });
-
-            $this->persistPublications(
-                new Collection(
-                    StatusToArray::fromStatusCollection($statuses)->toArray()
-                )
-            );
-            $this->markStatusAsPublished($ids);
-
-            $statuses = $this->findLastBatchOfStatus();
-        }
+        $this->migrateArchivedStatusToPublications();
     }
 
     /**
@@ -62,7 +53,14 @@ class PublicationRepository extends ServiceEntityRepository implements Publicati
             $publications = $collection->map(
                 function ($item) use (&$increment) {
                     $publication = Publication::fromArray($item);
-                    $this->entityManager->persist($publication);
+
+                    $existingPublication = $this->findOneBy([
+                        'hash' => $publication->getHash()
+                    ]);
+
+                    if ($existingPublication === null) {
+                        $this->entityManager->persist($publication);
+                    }
 
                     if ($increment % 1000) {
                         $this->entityManager->flush();
@@ -81,7 +79,7 @@ class PublicationRepository extends ServiceEntityRepository implements Publicati
     /**
      * @return CollectionInterface
      */
-    private function findLastBatchOfStatus(): CollectionInterface
+    private function findLastBatchOfArchivedStatus(): CollectionInterface
     {
         $classMetadata = $this->entityManager->getClassMetadata(ArchivedStatus::class);
         $entityRepository = new EntityRepository($this->entityManager, $classMetadata);
@@ -89,8 +87,27 @@ class PublicationRepository extends ServiceEntityRepository implements Publicati
         $status = $entityRepository->findBy(
                 ['isPublished' => 0],
                 null,
-                10000
+                1000
             );
+
+        return new Collection($status);
+    }
+
+    /**
+     * @return CollectionInterface
+     */
+    private function findLastBatchOfStatus(): CollectionInterface
+    {
+        $classMetadata = $this->entityManager->getClassMetadata(Status::class);
+        $entityRepository = new EntityRepository($this->entityManager, $classMetadata);
+
+        $queryBuilder = $entityRepository->createQueryBuilder('s')
+            ->andWhere('s.isPublished = :is_published')
+            ->setParameter('is_published', false)
+            ->groupBy('s.statusId')
+            ->setMaxResults(10000);
+
+        $status = $queryBuilder->getQuery()->execute();
 
         return new Collection($status);
     }
@@ -100,7 +117,7 @@ class PublicationRepository extends ServiceEntityRepository implements Publicati
      *
      * @throws DBALException
      */
-    private function markStatusAsPublished(CollectionInterface $ids): void
+    private function markArchivedStatusAsPublished(CollectionInterface $ids): void
     {
         /** @var CollectionInterface $ids */
         if ($ids->count() > 0) {
@@ -114,6 +131,76 @@ QUERY
                 [':ids' => $ids->toArray()],
                 [':ids' => Connection::PARAM_INT_ARRAY]
             );
+        }
+    }
+
+    /**
+     * @param CollectionInterface $ids
+     *
+     * @throws DBALException
+     */
+    private function markStatusAsPublished(CollectionInterface $ids): void
+    {
+        /** @var CollectionInterface $ids */
+        if ($ids->count() > 0) {
+            $this->entityManager->getConnection()->executeQuery(
+                <<<QUERY
+                    UPDATE weaving_status 
+                    SET is_published = 1
+                    WHERE ust_id in (:ids)
+QUERY
+                ,
+                [':ids' => $ids->toArray()],
+                [':ids' => Connection::PARAM_INT_ARRAY]
+            );
+        }
+    }
+
+    private function migrateArchivedStatusToPublications(): void
+    {
+        $archivedStatus = $this->findLastBatchOfArchivedStatus();
+
+        while ($archivedStatus->count() > 0) {
+            $ids = $archivedStatus->map(
+                function (StatusInterface $status) {
+                    return $status->getId();
+                }
+            );
+
+            $this->persistPublications(
+                new Collection(
+                    StatusToArray::fromStatusCollection($archivedStatus)->toArray()
+                )
+            );
+            $this->markArchivedStatusAsPublished($ids);
+
+            $archivedStatus = $this->findLastBatchOfArchivedStatus();
+        }
+    }
+
+    /**
+     * @return mixed
+     * @throws DBALException
+     */
+    private function migrateStatusToPublications()
+    {
+        $statuses = $this->findLastBatchOfStatus();
+
+        while ($statuses->count() > 0) {
+            $ids = $statuses->map(
+                function (StatusInterface $status) {
+                    return $status->getId();
+                }
+            );
+
+            $this->persistPublications(
+                new Collection(
+                    StatusToArray::fromStatusCollection($statuses)->toArray()
+                )
+            );
+            $this->markStatusAsPublished($ids);
+
+            $statuses = $this->findLastBatchOfStatus();
         }
     }
 }
