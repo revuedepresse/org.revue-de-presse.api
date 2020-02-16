@@ -3,12 +3,13 @@ declare(strict_types=1);
 
 namespace App\Twitter\Entity;
 
+use App\Twitter\Repository\PublicationInterface;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Ramsey\Uuid\UuidInterface;
 
 /**
- * @ORM\Entity(repositoryClass="App\Twitter\Entity\PublicationRepository")
+ * @ORM\Entity(repositoryClass="App\Twitter\Repository\PublicationRepository")
  * @ORM\Table(
  *      name="publication",
  *      uniqueConstraints={
@@ -26,6 +27,25 @@ use Ramsey\Uuid\UuidInterface;
  */
 class Publication implements PublicationInterface
 {
+    /**
+     * @param array $item
+     *
+     * @return static
+     */
+    public static function fromArray(array $item): self
+    {
+        return new self(
+            $item['legacy_id'],
+            $item['hash'],
+            $item['avatar_url'],
+            $item['screen_name'],
+            $item['text'],
+            $item['document_id'],
+            $item['document'],
+            $item['published_at'],
+        );
+    }
+
     /**
      * @ORM\Column(name="legacy_id", type="integer", nullable=true)
      */
@@ -74,6 +94,46 @@ class Publication implements PublicationInterface
      */
     protected DateTimeInterface $publishedAt;
 
+    public function __construct(
+        int $legacyId,
+        string $hash,
+        string $avatarUrl,
+        string $screenName,
+        string $text,
+        string $documentId,
+        string $document,
+        \DateTimeInterface $publishedAt
+    ) {
+        $this->legacyId    = $legacyId;
+        $this->hash        = $hash;
+        $this->avatarUrl   = $avatarUrl;
+        $this->screenName  = $screenName;
+        $this->text        = $text;
+        $this->documentId  = $documentId;
+        $this->document    = $document;
+        $this->publishedAt = $publishedAt;
+    }
+
+    public function getAvatarUrl(): string
+    {
+        return $this->avatarUrl;
+    }
+
+    public function getDocument(): string
+    {
+        return $this->document;
+    }
+
+    public function getDocumentId(): string
+    {
+        return $this->documentId;
+    }
+
+    public function getHash(): string
+    {
+        return $this->hash;
+    }
+
     public function getId(): UuidInterface
     {
         return $this->id;
@@ -84,14 +144,9 @@ class Publication implements PublicationInterface
         return $this->legacyId;
     }
 
-    public function getHash(): string
+    public function getPublishedAt(): DateTimeInterface
     {
-        return $this->hash;
-    }
-
-    public function getAvatarUrl(): string
-    {
-         return $this->avatarUrl;
+        return $this->publishedAt;
     }
 
     public function getScreenName(): string
@@ -102,20 +157,5 @@ class Publication implements PublicationInterface
     public function getText(): string
     {
         return $this->text;
-    }
-
-    public function getDocumentId(): string
-    {
-        return $this->documentId;
-    }
-
-    public function getDocument(): string
-    {
-        return $this->document;
-    }
-
-    public function getPublishedAt(): DateTimeInterface
-    {
-        return $this->publishedAt;
     }
 }

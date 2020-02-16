@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Twitter\Entity;
+namespace App\Twitter\Repository;
 
 use DateTimeInterface;
 use Ramsey\Uuid\UuidInterface;
