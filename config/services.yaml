@@ -41,11 +41,21 @@ services:
             connection:               '@doctrine.dbal.default_connection'
             queryFactory:             '@weaving_the_web.api.query_factory'
 
-    App\Twitter\Command\MigrateStatusesToPublications:
-        class:  '\App\Twitter\Command\MigrateStatusesToPublications'
+    App\Api\Repository\ArchivedStatusRepository:
+        class:  '\App\Api\Repository\ArchivedStatusRepository'
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - '%weaving_the_web_twitter.entity.archived_status.class%'
         calls:
             - [ 'setPublicationRepository', [ '@App\Twitter\Repository\PublicationRepository' ] ]
-            - [ 'setStatusRepository', [ '@App\Api\Repository\StatusRepository' ] ]
+        properties:
+            likedStatusRepository:  '@repository.liked_status'
+            memberManager:          '@user_manager'
+            registry:               '@doctrine'
+            statusLogger:           '@monolog.logger.status'
+            timelyStatusRepository: '@repository.timely_status'
+            connection:             '@doctrine.dbal.default_connection'
+            queryFactory:           '@weaving_the_web.api.query_factory'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

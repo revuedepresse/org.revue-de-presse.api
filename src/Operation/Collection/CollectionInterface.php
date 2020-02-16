@@ -8,6 +8,11 @@ use Closure;
 interface CollectionInterface
 {
     /**
+     * @return int
+     */
+    public function count();
+
+    /**
      * @param callable $callable
      *
      * @return mixed

@@ -164,4 +164,9 @@ interface StatusInterface
      * @return mixed
      */
     public function addToAggregates(Aggregate $aggregate): Collection;
+
+    /**
+     * @return $this
+     */
+    public function markAsPublished(): self;
 }

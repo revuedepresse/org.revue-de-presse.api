@@ -124,6 +124,7 @@ doctrine:
                 url: '%env(resolve:DATABASE_WRITE_URL)%'
                 server_version: 'mariadb-10.3.22'
                 charset: utf8mb4
+                logging: false
         types:
             uuid:  Ramsey\Uuid\Doctrine\UuidType
     orm:

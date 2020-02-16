@@ -14,6 +14,13 @@ parameters:
     press_review.fetch_member_status.class:                                     'App\Amqp\Command\FetchMemberStatusMessageDispatcher'
 
 services:
+    App\Twitter\Command\MigrateStatusToPublicationsCommand:
+        class:  '\App\Twitter\Command\MigrateStatusToPublicationsCommand'
+        calls:
+            - [ 'setPublicationRepository', [ '@App\Twitter\Repository\PublicationRepository' ] ]
+        tags:
+            - { name: 'console.command' }
+
     command.import_media_relationships:
         class: 'App\Media\Command\ImportMediaRelationshipsCommand'
         properties:

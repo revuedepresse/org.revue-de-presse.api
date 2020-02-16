@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Command;
 
-use App\Api\Repository\StatusRepository;
+use App\Console\CommandReturnCodeAwareInterface;
 use App\Twitter\Repository\PublicationRepositoryInterface;
 use Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Output\OutputInterface;
@@ -13,18 +13,11 @@ use Symfony\Component\Console\Command\Command;
  * @package App\Twitter\Command
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
-class MigrateStatusToPublications extends Command
+class MigrateStatusToPublicationsCommand extends Command implements CommandReturnCodeAwareInterface
 {
-    private StatusRepository $statusRepository;
-
-    public function setStatusRepository(StatusRepository $statusRepository): void
-    {
-        $this->statusRepository = $statusRepository;
-    }
-
     private PublicationRepositoryInterface $publicationRepository;
 
-    public function setPublicationRepositoryRepository(PublicationRepositoryInterface $publicationRepository): void
+    public function setPublicationRepository(PublicationRepositoryInterface $publicationRepository): void
     {
         $this->publicationRepository = $publicationRepository;
     }
@@ -47,9 +40,8 @@ class MigrateStatusToPublications extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $statuses = $this->statusRepository->findBy([
-            'indexed' => 0
-        ], [], 10000);
+        $this->publicationRepository->migrateStatusesToPublications();
 
+        return self::RETURN_STATUS_SUCCESS;
     }
 }

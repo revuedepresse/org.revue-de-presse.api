@@ -9,6 +9,9 @@ services:
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - 'App\Twitter\Entity\Publication'
+        calls:
+            - [ 'setStatusRepository', [ '@App\Api\Repository\StatusRepository' ] ]
+            - [ 'setArchivedStatusRepository', [ '@App\Api\Repository\StatusRepository' ] ]
 
     repository.aggregate_subscription:
         class:      'App\Member\Repository\AggregateSubscriptionRepository'
