@@ -8,7 +8,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Ramsey\Uuid\UuidInterface;
 
 /**
- * @ORM\Entity(repositoryClass="App\Api\Repository\StatusRepository")
+ * @ORM\Entity(repositoryClass="App\Twitter\Entity\PublicationRepository")
  * @ORM\Table(
  *      name="publication",
  *      uniqueConstraints={
