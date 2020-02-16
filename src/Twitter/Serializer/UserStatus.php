@@ -1123,34 +1123,35 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     ): ?int {
         $success = null;
 
-        if (is_array($statuses) && count($statuses) > 0) {
-            if (is_null($aggregateId)) {
-                $aggregate = null;
-            } else {
-                /** @var Aggregate $aggregate */
-                $aggregate = $this->aggregateRepository->find($aggregateId);
-            }
-
-            $this->logger->info(
-                sprintf(
-                    'Fetched "%d" statuses for "%s"',
-                    count($statuses),
-                    $screenName
-                )
-            );
-
-            $likedBy = null;
-            if ($this->isAboutToCollectLikesFromCriteria($this->serializationOptions)) {
-                $likedBy = $this->accessor->ensureMemberHavingNameExists($screenName);
-            }
-            $statuses = $this->saveStatuses($statuses, $aggregate, $likedBy);
-            $success = $this->logHowManyItemsHaveBeenSaved(
-                count($statuses),
-                $screenName
-            );
+        if (!is_array($statuses) || count($statuses) === 0) {
+            return $success;
         }
 
-        return $success;
+        $aggregate = null;
+        if ($aggregateId !== null) {
+            /** @var Aggregate $aggregate */
+            $aggregate = $this->aggregateRepository->findOneBy(['id' => $aggregateId]);
+        }
+
+        $this->logger->info(
+            sprintf(
+                'Fetched "%d" statuses for "%s"',
+                count($statuses),
+                $screenName
+            )
+        );
+
+        $likedBy = null;
+        if ($this->isAboutToCollectLikesFromCriteria($this->serializationOptions)) {
+            $likedBy = $this->accessor->ensureMemberHavingNameExists($screenName);
+        }
+
+        $statuses = $this->saveStatuses($statuses, $aggregate, $likedBy);
+
+        return $this->logHowManyItemsHaveBeenSaved(
+            count($statuses),
+            $screenName
+        );
     }
 
     /**
