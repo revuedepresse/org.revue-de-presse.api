@@ -29,6 +29,8 @@ services:
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - '%weaving_the_web_twitter.entity.status.class%'
+        calls:
+            - [ 'setPublicationRepository', [ '@App\Twitter\Repository\PublicationRepository' ] ]
         properties:
             archivedStatusRepository: '@weaving_the_web_twitter.repository.archived_status'
             likedStatusRepository:    '@repository.liked_status'
@@ -109,6 +111,8 @@ services:
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - '%weaving_the_web_twitter.entity.archived_status.class%'
+        calls:
+            - [ 'setPublicationRepository', [ '@App\Twitter\Repository\PublicationRepository' ] ]
         properties:
             likedStatusRepository:  '@repository.liked_status'
             memberManager:          '@user_manager'
@@ -156,12 +160,12 @@ services:
         calls:
             - [ 'setAccessor', [ '@weaving_the_web_twitter.api_accessor' ] ]
             - [ 'setLogger', [ '@monolog.logger.status' ] ]
+            - [ 'setAggregateRepository', [ '@weaving_the_web_twitter.repository.aggregate' ] ]
             - [ 'setModerator', [ '@weaving_the_web_twitter.moderator.api_limit' ] ]
             - [ 'setStatusRepository', [ '@App\Api\Repository\StatusRepository' ] ]
-            - [ 'setWhispererRepository', [ '@weaving_the_web_api.repository.whisperer' ] ]
             - [ 'setTokenRepository', [ '@weaving_the_web_twitter.repository.token' ] ]
-            - [ 'setAggregateRepository', [ '@weaving_the_web_twitter.repository.aggregate' ] ]
             - [ 'setTranslator', [ '@translator' ] ]
+            - [ 'setWhispererRepository', [ '@weaving_the_web_api.repository.whisperer' ] ]
         properties:
             twitterApiLogger:       '@monolog.logger.twitter_api'
             likedStatusRepository:  '@repository.liked_status'
