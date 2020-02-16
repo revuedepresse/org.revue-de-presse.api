@@ -41,6 +41,12 @@ services:
             connection:               '@doctrine.dbal.default_connection'
             queryFactory:             '@weaving_the_web.api.query_factory'
 
+    App\Twitter\Command\MigrateStatusesToPublications:
+        class:  '\App\Twitter\Command\MigrateStatusesToPublications'
+        calls:
+            - [ 'setPublicationRepository', [ '@App\Twitter\Repository\PublicationRepository' ] ]
+            - [ 'setStatusRepository', [ '@App\Api\Repository\StatusRepository' ] ]
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
     app.cache.redis:
@@ -212,7 +218,6 @@ parameters:
     weaving_the_web_twitter.repository.token.class:               '%weaving_the_web_api.repository.token.class%'
 
     weaving_the_web_twitter.serializer.user_status.class:         'App\Twitter\Serializer\UserStatus'
-    weaving_the_web_twitter.serialize_statuses.class:             'App\Twitter\Command\SerializeStatusesCommand'
 
     weaving_the_web_twitter.version:                              '%env(resolve:API_TWITTER_VERSION)%'
 
