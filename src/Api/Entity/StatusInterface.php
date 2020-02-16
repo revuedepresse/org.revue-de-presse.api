@@ -135,7 +135,7 @@ interface StatusInterface
     /**
      * @return DateTimeInterface
      */
-    public function getUpdatedAt(): DateTimeInterface;
+    public function getUpdatedAt(): ?DateTimeInterface;
 
     /**
      * @param bool $indexed
