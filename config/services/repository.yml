@@ -10,8 +10,7 @@ services:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - 'App\Twitter\Entity\Publication'
         calls:
-            - [ 'setStatusRepository', [ '@App\Api\Repository\StatusRepository' ] ]
-            - [ 'setArchivedStatusRepository', [ '@App\Api\Repository\StatusRepository' ] ]
+            - [ 'setEntityManager', [ '@doctrine.orm.write_entity_manager' ] ]
 
     repository.aggregate_subscription:
         class:      'App\Member\Repository\AggregateSubscriptionRepository'

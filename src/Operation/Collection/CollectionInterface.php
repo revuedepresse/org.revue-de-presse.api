@@ -12,11 +12,6 @@ interface CollectionInterface
      */
     public function count();
 
-    /**
-     * @param callable $callable
-     *
-     * @return mixed
-     */
     public function map(Closure $callable);
 
     /**
@@ -25,4 +20,9 @@ interface CollectionInterface
      * @return mixed
      */
     public static function fromArray(array $collection): self;
+
+    /**
+     * @return array
+     */
+    public function toArray();
 }
