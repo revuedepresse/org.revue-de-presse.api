@@ -56,11 +56,17 @@ class PublicationRepository extends ServiceEntityRepository implements Publicati
         CollectionInterface $collection
     ): CollectionInterface {
         $publications = Collection::fromArray([]);
+        $increment = 0;
+
         if ($collection instanceof CollectionInterface) {
             $publications = $collection->map(
-                function ($item) {
+                function ($item) use (&$increment) {
                     $publication = Publication::fromArray($item);
                     $this->entityManager->persist($publication);
+
+                    if ($increment % 1000) {
+                        $this->entityManager->flush();
+                    }
 
                     return $publication;
                 }
@@ -83,7 +89,7 @@ class PublicationRepository extends ServiceEntityRepository implements Publicati
         $status = $entityRepository->findBy(
                 ['isPublished' => 0],
                 null,
-                100
+                10000
             );
 
         return new Collection($status);
