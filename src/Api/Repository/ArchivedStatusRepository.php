@@ -893,9 +893,11 @@ QUERY
      * @param                 $identifier
      * @param Aggregate       $aggregate
      * @param LoggerInterface $logger
+     *
      * @return array
      * @throws NoResultException
      * @throws NonUniqueResultException
+     * @throws ORMException
      * @throws OptimisticLockException
      */
     public function iterateOverStatuses(

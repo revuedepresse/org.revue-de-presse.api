@@ -1184,8 +1184,21 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     /**
      * @param      $options
      * @param bool $discoverPastTweets
+     *
      * @return array
+     * @throws ApiRateLimitingException
+     * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
      * @throws NonUniqueResultException
+     * @throws NotFoundMemberException
+     * @throws NotFoundStatusException
+     * @throws OptimisticLockException
+     * @throws ProtectedAccountException
+     * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws UnexpectedApiResponseException
      */
     protected function fetchLatestStatuses($options, $discoverPastTweets = true): array
     {
