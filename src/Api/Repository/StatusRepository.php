@@ -7,6 +7,7 @@ use App\Accessor\Exception\NotFoundStatusException;
 use App\Membership\Entity\MemberInterface;
 use App\StatusCollection\Mapping\MappingAwareInterface;
 use App\Twitter\Exception\NotFoundMemberException;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\NonUniqueResultException;
@@ -91,7 +92,7 @@ class StatusRepository extends ArchivedStatusRepository
         return $this;
     }
 
-    public function getAlias()
+    public function getAlias(): string
     {
         return 'status';
     }
@@ -132,8 +133,10 @@ class StatusRepository extends ArchivedStatusRepository
      * @return int|mixed
      * @throws NoResultException
      * @throws NonUniqueResultException
+     * @throws NotFoundMemberException
+     * @throws OptimisticLockException
      */
-    public function countHowManyStatusesFor($screenName)
+    public function countHowManyStatusesFor($screenName): int
     {
         $member = $this->memberManager->findOneBy(['twitter_username' => $screenName]);
         if ($member instanceof MemberInterface && $member->totalStatuses !== 0) {
@@ -199,19 +202,19 @@ class StatusRepository extends ArchivedStatusRepository
         $userStream->setIdentifier($extract['identifier']);
         $userStream->setText($extract['text']);
 
-        return $userStream->setUpdatedAt(new \DateTime('now', new \DateTimeZone('UTC')));
+        return $userStream->setUpdatedAt(new DateTime('now', new \DateTimeZone('UTC')));
     }
 
     /**
      * @param string    $memberScreenName
-     * @param \DateTime $earliestDate
-     * @param \DateTime $latestDate
+     * @param DateTime $earliestDate
+     * @param DateTime $latestDate
      * @return ArrayCollection
      */
     public function selectStatusCollection(
         string $memberScreenName,
-        \DateTime $earliestDate,
-        \DateTime $latestDate
+        DateTime $earliestDate,
+        DateTime $latestDate
     ) {
         $queryBuilder = $this->createQueryBuilder('s');
 
@@ -225,13 +228,13 @@ class StatusRepository extends ArchivedStatusRepository
 
     /**
      * @param QueryBuilder $queryBuilder
-     * @param \DateTime    $earliestDate
-     * @param \DateTime    $latestDate
+     * @param DateTime    $earliestDate
+     * @param DateTime    $latestDate
      */
     private function between(
         QueryBuilder $queryBuilder,
-        \DateTime $earliestDate,
-        \DateTime $latestDate
+        DateTime $earliestDate,
+        DateTime $latestDate
     ): void {
         $queryBuilder->andWhere('s.createdAt >= :after');
         $queryBuilder->setParameter('after', $earliestDate);
@@ -242,14 +245,14 @@ class StatusRepository extends ArchivedStatusRepository
 
     /**
      * @param string    $aggregateName
-     * @param \DateTime $earliestDate
-     * @param \DateTime $latestDate
+     * @param DateTime $earliestDate
+     * @param DateTime $latestDate
      * @return ArrayCollection
      */
     public function selectAggregateStatusCollection(
         string $aggregateName,
-        \DateTime $earliestDate,
-        \DateTime $latestDate
+        DateTime $earliestDate,
+        DateTime $latestDate
     ) {
         $queryBuilder = $this->createQueryBuilder('s');
 
@@ -268,14 +271,17 @@ class StatusRepository extends ArchivedStatusRepository
     /**
      * @param string         $screenName
      * @param string         $direction
-     * @param \DateTime|null $before
+     * @param DateTime|null $before
      * @return array
      * @throws NonUniqueResultException
      * @throws OptimisticLockException
      * @throws NotFoundMemberException
      */
-    public function findNextExtremum(string $screenName, string $direction = 'asc', \DateTime $before = null): array
-    {
+    public function findNextExtremum(
+        string $screenName,
+        string $direction = 'asc',
+        DateTime $before = null
+    ): array {
         $nextExtremum = $this->archivedStatusRepository->findNextExtremum($screenName, $direction, $before);
 
         $queryBuilder = $this->createQueryBuilder('s');
@@ -291,7 +297,7 @@ class StatusRepository extends ArchivedStatusRepository
             $queryBuilder->andWhere('DATE(s.createdAt) = :date');
             $queryBuilder->setParameter(
                 'date',
-                (new \DateTime($before, new \DateTimeZone('UTC')))
+                (new DateTime($before, new \DateTimeZone('UTC')))
                     ->format('Y-m-d')
             );
         }
@@ -446,6 +452,7 @@ QUERY;
 
         $criteria = ['id' => $result[0]['id']];
         $lastStatus = $this->findOneBy($criteria);
+
         return $lastStatus;
     }
 

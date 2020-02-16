@@ -41,6 +41,7 @@ use ReflectionException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use function array_key_exists;
 use function count;
+use function is_array;
 
 /**
  * @package App\Twitter\Accessor
@@ -313,13 +314,22 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @param $options
      *
      * @return bool
+     * @throws ApiRateLimitingException
+     * @throws BadAuthenticationDataException
+     * @throws DBALException
+     * @throws InconsistentTokenRepository
      * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws NotFoundMemberException
+     * @throws NotFoundStatusException
+     * @throws ORMException
      * @throws OptimisticLockException
+     * @throws ProtectedAccountException
+     * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
-     * @throws DBALException
+     * @throws UnexpectedApiResponseException
      */
     protected function shouldSkipSerialization($options): bool
     {
@@ -1110,7 +1120,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         array $statuses,
         string $screenName,
         int $aggregateId = null
-    ) {
+    ): ?int {
         $success = null;
 
         if (is_array($statuses) && count($statuses) > 0) {
