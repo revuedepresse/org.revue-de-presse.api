@@ -55,7 +55,7 @@ services:
         ports:
             - "127.0.0.1:3307:3306"
         env_file:
-            - ../../.env
+            - ../../.env.local
         networks:
             press-review-network:
                 aliases:

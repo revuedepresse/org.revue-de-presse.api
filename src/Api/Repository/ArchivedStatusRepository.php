@@ -31,6 +31,7 @@ use App\Twitter\Exception\NotFoundMemberException;
 use App\Twitter\Exception\ProtectedAccountException;
 use App\Twitter\Exception\SuspendedAccountException;
 use App\Membership\Repository\MemberRepository;
+use function count;
 
 /**
  * @package App\Api\Repository

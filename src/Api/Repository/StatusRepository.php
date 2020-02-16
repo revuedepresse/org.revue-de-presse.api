@@ -74,9 +74,11 @@ class StatusRepository extends ArchivedStatusRepository
 
     /**
      * @param Status $status
+     *
+     * @throws ORMException
      * @throws OptimisticLockException
      */
-    public function save(Status $status)
+    public function save(Status $status): void
     {
         $this->getEntityManager()->persist($status);
         $this->getEntityManager()->flush();
@@ -115,7 +117,7 @@ class StatusRepository extends ArchivedStatusRepository
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    public function existsAlready($hash)
+    public function existsAlready($hash): bool
     {
         if ($this->archivedStatusRepository->existsAlready($hash)) {
             return true;
@@ -464,12 +466,11 @@ QUERY;
 
     /**
      * @param string $screenName
-     * @return null|Status
+     * @return Status
      * @throws NotFoundStatusException
      * @throws DBALException
      */
-    private function getLastKnownStatusFor(string $screenName)
-    {
+    private function getLastKnownStatusFor(string $screenName): StatusInterface {
         $result = $this->howManyStatusesForMemberHavingScreenName($screenName);
 
         $lastStatus = null;
