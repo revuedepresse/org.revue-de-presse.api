@@ -97,11 +97,17 @@ create-database-schema-test: # Create database schema in test environment
 create-prod-like-schema: ## Create production-like schema
 		@/bin/bash -c 'export PROJECT_DIR='/var/www/devobs'; source ./bin/functions.sh && create_database_prod_like_schema '
 
-diff-schema: ## Generate schema migrations scripts
-		@/bin/bash -c 'export PROJECT_DIR='/var/www/devobs'; source ./bin/functions.sh && compute_schema_differences'
+diff-schema-of-read-database: ## Generate schema migrations scripts
+		@/bin/bash -c 'export PROJECT_DIR='/var/www/devobs'; source ./bin/functions.sh && compute_schema_differences_for_read_database'
 
-migrate-schema: ## Migrate the database schema
-		@/bin/bash -c 'export PROJECT_DIR='/var/www/devobs'; source ./bin/functions.sh && migrate_from_previous_schema_to_next_one'
+diff-schema-of-write-database: ## Generate schema migrations scripts
+		@/bin/bash -c 'export PROJECT_DIR='/var/www/devobs'; source ./bin/functions.sh && compute_schema_differences_for_write_database'
+
+migrate-schema-of-read-database: ## Migrate the read database schema
+		@/bin/bash -c 'export PROJECT_DIR='/var/www/devobs'; source ./bin/functions.sh && migrate_schema_of_read_database'
+
+migrate-schema-of-write-database: ## Migrate the write database schema
+		@/bin/bash -c 'export PROJECT_DIR='/var/www/devobs'; source ./bin/functions.sh && migrate_schema_of_write_database'
 
 configure-rabbitmq-user-privileges: ## Configure RabbitMQ user privileges
 		@/bin/bash -c 'source ./bin/functions.sh && configure_rabbitmq_user_privileges'

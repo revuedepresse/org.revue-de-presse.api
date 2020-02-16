@@ -34,11 +34,14 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 use Exception;
 use Psr\Log\LoggerInterface;
 use ReflectionException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use function array_key_exists;
+use function count;
+use function is_array;
 
 /**
  * @package App\Twitter\Accessor
@@ -311,13 +314,22 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @param $options
      *
      * @return bool
+     * @throws ApiRateLimitingException
+     * @throws BadAuthenticationDataException
+     * @throws DBALException
+     * @throws InconsistentTokenRepository
      * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws NotFoundMemberException
+     * @throws NotFoundStatusException
+     * @throws ORMException
      * @throws OptimisticLockException
+     * @throws ProtectedAccountException
+     * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
-     * @throws DBALException
+     * @throws UnexpectedApiResponseException
      */
     protected function shouldSkipSerialization($options): bool
     {
@@ -1094,49 +1106,62 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @param array  $statuses
      * @param string $screenName
      * @param int    $aggregateId
+     *
      * @return int|null
      * @throws NoResultException
      * @throws NonUniqueResultException
+     * @throws NotFoundMemberException
+     * @throws OptimisticLockException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws ORMException
      */
     private function saveStatusesForScreenName(
         array $statuses,
         string $screenName,
         int $aggregateId = null
-    ) {
+    ): ?int {
         $success = null;
 
-        if (is_array($statuses) && count($statuses) > 0) {
-            if (is_null($aggregateId)) {
-                $aggregate = null;
-            } else {
-                /** @var \App\Api\Entity\Aggregate $aggregate */
-                $aggregate = $this->aggregateRepository->find($aggregateId);
-            }
-
-            $this->logger->info(sprintf(
-                'Fetched "%d" statuses for "%s"',
-                count($statuses),
-                $screenName)
-            );
-
-            $likedBy = null;
-            if ($this->isAboutToCollectLikesFromCriteria($this->serializationOptions)) {
-                $likedBy = $this->accessor->ensureMemberHavingNameExists($screenName);
-            }
-            $statuses = $this->saveStatuses($statuses, $aggregate, $likedBy);
-            $success = $this->logHowManyItemsHaveBeenSaved(
-                count($statuses),
-                $screenName
-            );
+        if (!is_array($statuses) || count($statuses) === 0) {
+            return $success;
         }
 
-        return $success;
+        $aggregate = null;
+        if ($aggregateId !== null) {
+            /** @var Aggregate $aggregate */
+            $aggregate = $this->aggregateRepository->findOneBy(['id' => $aggregateId]);
+        }
+
+        $this->logger->info(
+            sprintf(
+                'Fetched "%d" statuses for "%s"',
+                count($statuses),
+                $screenName
+            )
+        );
+
+        $likedBy = null;
+        if ($this->isAboutToCollectLikesFromCriteria($this->serializationOptions)) {
+            $likedBy = $this->accessor->ensureMemberHavingNameExists($screenName);
+        }
+
+        $statuses = $this->saveStatuses($statuses, $aggregate, $likedBy);
+
+        return $this->logHowManyItemsHaveBeenSaved(
+            count($statuses),
+            $screenName
+        );
     }
 
     /**
-     * @param array          $statuses
-     * @param Aggregate|null $aggregate
+     * @param array                $statuses
+     * @param Aggregate|null       $aggregate
+     * @param MemberInterface|null $likedBy
+     *
      * @return array
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      * @throws NotFoundMemberException
      * @throws NoResultException
      * @throws NonUniqueResultException
@@ -1171,8 +1196,21 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     /**
      * @param      $options
      * @param bool $discoverPastTweets
+     *
      * @return array
+     * @throws ApiRateLimitingException
+     * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
      * @throws NonUniqueResultException
+     * @throws NotFoundMemberException
+     * @throws NotFoundStatusException
+     * @throws OptimisticLockException
+     * @throws ProtectedAccountException
+     * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws UnexpectedApiResponseException
      */
     protected function fetchLatestStatuses($options, $discoverPastTweets = true): array
     {
@@ -1499,6 +1537,11 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @param array     $options
      * @param array     $statuses
      * @param Whisperer $whisperer
+     *
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     * @throws NotFoundMemberException
+     * @throws OptimisticLockException
      * @throws SkippableMessageException
      * @throws NoResultException
      * @throws NonUniqueResultException

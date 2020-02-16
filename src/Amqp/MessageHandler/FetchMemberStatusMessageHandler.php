@@ -10,7 +10,6 @@ use App\Amqp\Message\FetchMemberStatuses;
 use App\Api\Entity\Token;
 use App\Api\Entity\TokenInterface;
 use App\Api\Repository\TokenRepository;
-use App\Membership\Entity\MemberInterface;
 use App\Membership\Repository\MemberRepository;
 use App\Operation\OperationClock;
 use App\Status\LikedStatusCollectionAwareInterface;
@@ -35,8 +34,6 @@ use function sprintf;
  */
 class FetchMemberStatusMessageHandler implements MessageSubscriberInterface
 {
-    private const ERROR_CODE_USER_NOT_FOUND = 100;
-
     /**
      * @var OperationClock
      */

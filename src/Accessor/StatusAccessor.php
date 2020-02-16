@@ -20,6 +20,7 @@ use App\Twitter\Api\Accessor;
 use App\Twitter\Exception\NotFoundMemberException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
+use Exception;
 
 /**
  * @package App\Accessor
@@ -142,7 +143,7 @@ class StatusAccessor
             );
         } catch (NotFoundMemberException $notFoundMemberException) {
             return $this->findStatusIdentifiedBy($identifier);
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             $this->logger->info($exception->getMessage());
         }
 
@@ -225,6 +226,7 @@ class StatusAccessor
      * @param string $identifier
      *
      * @return StatusInterface|NullStatus|array
+     * @throws Exception
      */
     private function findStatusIdentifiedBy(string $identifier)
     {

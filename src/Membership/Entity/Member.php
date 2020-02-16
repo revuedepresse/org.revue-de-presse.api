@@ -9,7 +9,6 @@ use App\Membership\Model\Member as MemberModel;
 use DateTime;
 use Doctrine\Common\Collections\Selectable;
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\PersistentCollection;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>

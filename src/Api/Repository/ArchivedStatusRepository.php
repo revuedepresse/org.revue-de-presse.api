@@ -5,6 +5,7 @@ namespace App\Api\Repository;
 
 use App\Aggregate\Repository\TimelyStatusRepository;
 use App\Membership\Entity\MemberInterface;
+use App\Operation\Collection\Collection;
 use App\Status\Entity\LikedStatus;
 use App\Status\Repository\ExtremumAwareInterface;
 use App\Status\Repository\LikedStatusRepository;
@@ -31,6 +32,9 @@ use App\Twitter\Exception\NotFoundMemberException;
 use App\Twitter\Exception\ProtectedAccountException;
 use App\Twitter\Exception\SuspendedAccountException;
 use App\Membership\Repository\MemberRepository;
+use App\Twitter\Repository\PublicationRepositoryInterface;
+
+use function count;
 
 /**
  * @package App\Api\Repository
@@ -54,6 +58,13 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
     public LikedStatusRepository $likedStatusRepository;
 
     public Connection $connection;
+
+    protected PublicationRepositoryInterface $publicationRepository;
+
+    public function setPublicationRepository(PublicationRepositoryInterface $publicationRepository)
+    {
+        $this->publicationRepository = $publicationRepository;
+    }
 
     /**
      * @param ManagerRegistry $managerRegistry
@@ -230,6 +241,23 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
         $result = $this->iterateOverStatuses($statuses, $identifier, $aggregate, $logger);
         $extracts = $result['extracts'];
         $screenName = $result['screen_name'];
+
+        $statuses = array_map(function (StatusInterface $status) {
+            return [
+                'legacy_id' => $status->getId(),
+                'hash' => hash('sha256', $status->getScreenName().'|'.$status->getStatusId()),
+                'avatar_url' => $status->getUserAvatar(),
+                'screen_name' => $status->getScreenName(),
+                'text' => $status->getText(),
+                'document_id' => $status->getStatusId(),
+                'document' => $status->getApiDocument(),
+                'published_at' => $status->getCreatedAt(),
+            ];
+        }, $result['statuses']);
+
+        $this->publicationRepository->savePublications(
+            Collection::fromArray($statuses)
+        );
 
         if (count($extracts) > 0) {
             $this->memberManager->incrementTotalStatusesOfMemberWithName(
@@ -892,9 +920,11 @@ QUERY
      * @param                 $identifier
      * @param Aggregate       $aggregate
      * @param LoggerInterface $logger
+     *
      * @return array
      * @throws NoResultException
      * @throws NonUniqueResultException
+     * @throws ORMException
      * @throws OptimisticLockException
      */
     public function iterateOverStatuses(

@@ -4,6 +4,12 @@ parameters:
     weaving_the_web_api.entity.whisperer.class:     'App\Api\Entity\Whisperer'
 
 services:
+    App\Twitter\Repository\PublicationRepository:
+        class: 'App\Twitter\Repository\PublicationRepository'
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - 'App\Twitter\Entity\Publication'
+
     repository.aggregate_subscription:
         class:      'App\Member\Repository\AggregateSubscriptionRepository'
         arguments:
