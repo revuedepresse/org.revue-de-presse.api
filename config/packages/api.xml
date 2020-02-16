@@ -13,7 +13,6 @@
         <parameter key="weaving_the_web_api.repository.token.class">App\Api\Repository\TokenRepository</parameter>
         <parameter key="weaving_the_web_api.repository.archived_status.class">App\Api\Repository\ArchivedStatusRepository</parameter>
         <parameter key="weaving_the_web_api.repository.whisperer.class">App\Api\Repository\WhispererRepository</parameter>
-        <parameter key="weaving_the_web.api.user_status">App\Api\Entity\UserStream</parameter>
     </parameters>
 
     <services>

@@ -363,19 +363,49 @@ function migrate_schema {
     echo 'php '"${project_dir}"'/bin/console doc:mig:mig --em=admin' | make run-php
 }
 
-function compute_schema_differences() {
-    /bin/bash -c "php /var/www/devobs/bin/console doc:mig:diff -vvvv"
+function compute_schema_differences_for_read_database() {
+    run_php_script "php /var/www/devobs/bin/console doc:mig:diff -vvvv --em=default -n" interactive_mode
 }
 
-function migrate_from_previous_schema_to_next_one() {
-    SYMFONY_DEPRECATIONS_HELPER=0 /bin/bash -c "php /var/www/devobs/bin/console doc:mig:mig -vvv"
+function compute_schema_differences_for_write_database() {
+    run_php_script "php /var/www/devobs/bin/console doc:mig:diff -vvvv --em=write -n" interactive_mode
+}
+
+function migrate_schema_of_read_database() {
+    run_php_script "php /var/www/devobs/bin/console doc:mig:mig --em=default" interactive_mode
+}
+
+function migrate_schema_of_write_database() {
+    run_php_script "php /var/www/devobs/bin/console doc:mig:mig --em=write" interactive_mode
 }
 
 function install_php_dependencies {
-    local project_dir="$(get_project_dir)"
-    local command=$(echo -n 'php /bin/bash -c "cd '"${project_dir}"' &&
+    local project_dir
+    project_dir="$(get_project_dir)"
+
+    local command
+    command=$(echo -n 'php /bin/bash -c "cd '"${project_dir}"' &&
     source '"${project_dir}"'/bin/install-composer.sh &&
     php '"${project_dir}"'/composer.phar install --prefer-dist"')
+    echo "${command}" | make run-php
+}
+
+function run_composer {
+    local command=''
+    if [ -z "${COMMAND}" ];
+    then
+        command="${COMMAND}"
+        echo 'Please pass a non-empty command as environment variable'
+        echo 'e.g.'
+        echo 'export COMMAND="install --prefer-dist"'
+        return
+    fi
+
+    command="${COMMAND}"
+
+    local project_dir="$(get_project_dir)"
+    local command=$(echo -n 'php /bin/bash -c "cd '"${project_dir}"' &&
+    php -dmemory_limit="-1" '"${project_dir}"'/composer.phar "'"${command}")
     echo ${command} | make run-php
 }
 
@@ -792,7 +822,11 @@ function remove_php_fpm_container {
 }
 
 function run_php_script() {
-    local script="${1}"
+    local script
+    script="${1}"
+
+    local interactive_mode
+    interactive_mode="${2}"
 
     if [ -z "${script}" ];
     then
@@ -813,25 +847,38 @@ function run_php_script() {
         memory="${PHP_MEMORY_LIMIT}"
     fi
 
-    local namespace=''
-    if [ ! -z "${NAMESPACE}" ];
+    local namespace=
+    namespace=''
+    if [ -n "${NAMESPACE}" ];
     then
         namespace="${NAMESPACE}-"
 
         echo 'About to run container in namespace '"${NAMESPACE}"
     fi
 
-    local suffix='-'"${namespace}""$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 32 2>> /dev/null)"
+    local suffix
+    suffix='-'"${namespace}""$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 32 2>> /dev/null)"
 
     export SUFFIX="${suffix}"
-    local symfony_environment="$(get_symfony_environment)"
+    local symfony_environment
+    symfony_environment="$(get_symfony_environment)"
 
-    local network=`get_network_option`
-    local command=$(echo -n 'docker-compose exec -d worker '"${script}")
+    local option_detached
+    option_detached=''
+    if [ -z "${interactive_mode}" ];
+    then
+        option_detached=' -d'
+    fi
+
+    local network
+    network=`get_network_option`
+
+    local command
+    command=$(echo -n 'docker-compose exec'"${option_detached}"' worker '"${script}")
 
     echo 'About to execute "'"${command}"'"'
 
-    cd provisioning/containers
+    cd provisioning/containers || exit
     /bin/bash -c "${command}"
     cd ../..
 }

@@ -122,7 +122,7 @@ doctrine:
                 charset: utf8mb4
             write:
                 url: '%env(resolve:DATABASE_WRITE_URL)%'
-                server_version: '5.7'
+                server_version: 'mariadb-10.3.22'
                 charset: utf8mb4
         types:
             uuid:  Ramsey\Uuid\Doctrine\UuidType
@@ -131,16 +131,16 @@ doctrine:
         entity_managers:
             default:
                 naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
-                auto_mapping: true
+                auto_mapping: false
                 connection: default
                 dql: "%doctrine_extensions_dql%"
-                mappings:
+                mappings: &mappings_default
                     Api:
                         alias:      'Api'
                         is_bundle:  false
-                        type:       annotation
                         dir:        '%kernel.project_dir%/src/Api/Entity'
                         prefix:     'App\Api\Entity'
+                        type:       annotation
                     Aggregate:
                         alias:      'Aggregate'
                         dir:        '%kernel.project_dir%/config/model/aggregate'
@@ -150,15 +150,15 @@ doctrine:
                     Member:
                         alias:      'Member'
                         dir:        '%kernel.project_dir%/config/model/member'
-                        type:       xml
                         is_bundle:  false
                         prefix:     App\Member\Entity
+                        type:       xml
                     Membership:
                         alias:      'Membership'
                         dir:        '%kernel.project_dir%/src/Membership/Entity'
-                        type:       annotation
                         is_bundle:  false
                         prefix:     App\Membership\Entity
+                        type:       annotation
                     Media:
                         alias:      'Media'
                         dir:        '%kernel.project_dir%/config/model/media'
@@ -179,6 +179,18 @@ doctrine:
                         type:       xml
                     TestMembership:
                         dir:        '%kernel.project_dir%/tests/Security/Core/Member'
+                        is_bundle:  false
                         prefix:     App\Tests\Security\Core\Member
                         type:       annotation
+            write:
+                naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+                connection: write
+                dql: "%doctrine_extensions_dql%"
+                mappings:
+                    <<: *mappings_default
+                    Publication:
+                        alias:      'Publication'
+                        dir:        '%kernel.project_dir%/src/Twitter/Entity'
                         is_bundle:  false
+                        prefix:     App\Twitter\Entity
+                        type:       annotation

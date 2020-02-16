@@ -19,6 +19,8 @@ services:
             - mysql
         depends_on:
             - cache
+            - db_read
+            - db_write
             - worker
 
     worker:
@@ -32,6 +34,35 @@ services:
             - ../../:/var/www/devobs
         depends_on:
             - messenger
+            - db_read
+            - db_write
+            - messenger
+
+    db_read:
+        build: ./mysql
+        restart: always
+        networks:
+            press-review-network:
+                aliases:
+                    - read
+        ports:
+            - "127.0.0.1:3306:3306"
+        volumes:
+            - ../volumes/mysql:/var/lib/mysql
+
+    db_write:
+        build: ./mariadb
+        restart: always
+        ports:
+            - "127.0.0.1:3307:3306"
+        env_file:
+            - ../../.env.local
+        networks:
+            press-review-network:
+                aliases:
+                    - write
+        volumes:
+            - ../volumes/mariadb:/var/lib/mysql
 
     messenger:
         build: ./rabbitmq
