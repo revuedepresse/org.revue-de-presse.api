@@ -84,21 +84,6 @@ class StatusRepository extends ArchivedStatusRepository
         $this->getEntityManager()->flush();
     }
 
-    /**
-     * @param ArrayCollection $statuses
-     *
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
-    public function saveBatch(ArrayCollection $statuses)
-    {
-        $statuses->map(function ($status) {
-            $this->getEntityManager()->persist($status);
-        });
-
-        $this->getEntityManager()->flush();
-    }
-
     public function setOauthTokens($oauthTokens)
     {
         $this->oauthTokens = $oauthTokens;
