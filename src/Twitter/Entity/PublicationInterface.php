@@ -17,6 +17,8 @@ interface PublicationInterface
 
     public function getHash(): string;
 
+    public function getAvatarUrl(): string;
+
     public function getScreenName(): string;
 
     public function getText(): string;

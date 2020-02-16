@@ -45,6 +45,11 @@ class Publication implements PublicationInterface
     protected string $hash;
 
     /**
+     * @ORM\Column(name="avatar_url", type="string", length=255)
+     */
+    protected string $avatarUrl;
+
+    /**
      * @ORM\Column(name="screen_name", type="string", length=32)
      */
     protected string $screenName;
@@ -82,6 +87,11 @@ class Publication implements PublicationInterface
     public function getHash(): string
     {
         return $this->hash;
+    }
+
+    public function getAvatarUrl(): string
+    {
+         return $this->avatarUrl;
     }
 
     public function getScreenName(): string
