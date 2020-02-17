@@ -62,6 +62,7 @@ services:
                     - write
         volumes:
             - ../volumes/mariadb:/var/lib/mysql
+            - ./mariadb/templates/docker.cnf:/etc/mysql/mariadb.conf.d/docker.cnf
 
     messenger:
         build: ./rabbitmq
