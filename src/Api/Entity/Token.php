@@ -3,19 +3,23 @@ declare(strict_types=1);
 
 namespace App\Api\Entity;
 
+use App\Api\Exception\InvalidSerializedTokenException;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM,
     Doctrine\Common\Collections\ArrayCollection;
 use App\Membership\Entity\Member;
+use function array_key_exists;
 
 /**
  * @package App\Api\Entity
  *
  * @ORM\Table(name="weaving_access_token")
- * @ORM\Entity(repositoryClass="App\Api\Repository\TokenRepository")
+ * @ORM\Entity(repositoryClass="App\Api\AccessToken\Repository\TokenRepositoryInterface")
  */
 class Token implements TokenInterface
 {
+    use TokenTrait;
+
     /**
      * @var integer
      *
@@ -41,6 +45,25 @@ class Token implements TokenInterface
     protected $oauthToken;
 
     /**
+     * @param string $oauthToken
+     * @return Token
+     */
+    public function setOAuthToken($oauthToken): self
+    {
+        $this->oauthToken = $oauthToken;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getOAuthToken(): string
+    {
+        return $this->oauthToken;
+    }
+
+    /**
      * @var string
      *
      * @ORM\Column(name="secret", type="string", length=255, nullable=true)
@@ -52,14 +75,43 @@ class Token implements TokenInterface
      *
      * @ORM\Column(name="consumer_key", type="string", length=255, nullable=true)
      */
-    public $consumerKey;
+    public ?string $consumerKey;
+
+    public function getConsumerKey(): string
+    {
+        $this->consumerKey;
+    }
+
+    public function setConsumerKey(?string $consumerKey): self
+    {
+        $this->consumerKey = $consumerKey;
+
+        return $this;
+    }
+
+    public function hasConsumerKey(): bool
+    {
+        return $this->consumerKey !== null;
+    }
 
     /**
      * @var string
      *
      * @ORM\Column(name="consumer_secret", type="string", length=255, nullable=true)
      */
-    public $consumerSecret;
+    public ?string $consumerSecret;
+
+    public function getConsumerSecret(): string
+    {
+        $this->consumerSecret;
+    }
+
+    public function setConsumerSecret(?string $consumerSecret): self
+    {
+        $this->consumerSecret = $consumerSecret;
+
+        return $this;
+    }
 
     /**
      * @var \DateTime
@@ -93,9 +145,7 @@ class Token implements TokenInterface
     protected $frozen;
 
     /**
-     * Get id
-     *
-     * @return integer 
+     * @return integer
      */
     public function getId()
     {
@@ -103,31 +153,6 @@ class Token implements TokenInterface
     }
 
     /**
-     * Set oauthToken
-     *
-     * @param string $oauthToken
-     * @return Token
-     */
-    public function setOauthToken($oauthToken)
-    {
-        $this->oauthToken = $oauthToken;
-    
-        return $this;
-    }
-
-    /**
-     * Get oauthToken
-     *
-     * @return string 
-     */
-    public function getOauthToken()
-    {
-        return $this->oauthToken;
-    }
-
-    /**
-     * Set oauthTokenSecret
-     *
      * @param string $oauthTokenSecret
      * @return Token
      */
@@ -139,13 +164,11 @@ class Token implements TokenInterface
     }
 
     /**
-     * Get oauthTokenSecret
-     *
-     * @return string 
+     * @return string
      */
     public function getOauthTokenSecret()
     {
-        return $this->oauthTokenSecret;
+        return $this->getOAuthSecret();
     }
 
     /**
@@ -193,17 +216,13 @@ class Token implements TokenInterface
     {
         return $this->updatedAt;
     }
-    /**
-     * Constructor
-     */
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
     }
     
     /**
-     * Add users
-     *
      * @param Member $users
      *
      * @return Token
@@ -216,8 +235,6 @@ class Token implements TokenInterface
     }
 
     /**
-     * Remove users
-     *
      * @param Member $users
      */
     public function removeUser(Member $users)
@@ -226,8 +243,6 @@ class Token implements TokenInterface
     }
 
     /**
-     * Get users
-     *
      * @return Collection
      */
     public function getUsers()
@@ -260,8 +275,6 @@ class Token implements TokenInterface
     }
 
     /**
-     * Set type
-     *
      * @param \App\Api\Entity\TokenType $type
      * @return Token
      */
@@ -305,5 +318,53 @@ class Token implements TokenInterface
     public function isNotFrozen()
     {
         return !$this->isFrozen();
+    }
+
+    public function getOAuthSecret(): string
+    {
+        return $this->oauthTokenSecret;
+    }
+
+    public function setOAuthSecret($oauthSecret): self
+    {
+        $this->oauthTokenSecret = $oauthSecret;
+
+        return $this;
+    }
+
+    /**
+     * @param array $properties
+     *
+     * @return static
+     * @throws InvalidSerializedTokenException
+     */
+    public static function fromArray(array $properties): self
+    {
+        $token = new self();
+
+        if (!array_key_exists('token', $properties)) {
+            InvalidSerializedTokenException::throws('A token is required');
+        }
+
+        if (!array_key_exists('secret', $properties)) {
+            InvalidSerializedTokenException::throws('A secret is required');
+        }
+
+        $consumerKey = null;
+        if (array_key_exists('consumer_key', $properties)) {
+            $consumerKey = $properties['consumer_key'];
+        }
+
+        $consumerSecret = null;
+        if (array_key_exists('consumer_secret', $properties)) {
+            $consumerSecret = $properties['consumer_secret'];
+        }
+
+        $token->setOAuthToken($properties['token']);
+        $token->setOAuthSecret($properties['secret']);
+        $token->setConsumerKey($consumerKey);
+        $token->setConsumerSecret($consumerSecret);
+
+        return $token;
     }
 }

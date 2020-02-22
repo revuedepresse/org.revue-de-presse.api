@@ -9,6 +9,8 @@ services:
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - 'App\Twitter\Entity\Publication'
+        calls:
+            - [ 'setEntityManager', [ '@doctrine.orm.write_entity_manager' ] ]
 
     repository.aggregate_subscription:
         class:      'App\Member\Repository\AggregateSubscriptionRepository'

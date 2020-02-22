@@ -2,6 +2,9 @@
 
 namespace App\Amqp\Command;
 
+use App\Amqp\SkippableMemberException;
+use App\Api\Entity\Token;
+use App\Api\Exception\InvalidSerializedTokenException;
 use App\Membership\Entity\MemberInterface;
 use App\Operation\OperationClock;
 
@@ -9,15 +12,13 @@ use Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Input\InputOption,
     Symfony\Component\Console\Output\OutputInterface;
 
-use Symfony\Component\Translation\TranslatorInterface;
+use App\Twitter\Exception\ProtectedAccountException,
+    App\Twitter\Exception\UnavailableResourceException;
 
-use WeavingTheWeb\Bundle\AmqpBundle\Exception\SkippableMemberException;
-use WeavingTheWeb\Bundle\TwitterBundle\Exception\ProtectedAccountException,
-    WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException;
-
-use WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException;
+use App\Twitter\Exception\SuspendedAccountException;
 
 use App\Membership\Entity\Member;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
@@ -29,9 +30,6 @@ class ProduceUserFriendListCommand extends AggregateAwareCommand
      */
     private $routingKey;
 
-    /**
-     * @var \OldSound\RabbitMqBundle\RabbitMq\Producer
-     */
     private $producer;
 
     /**
@@ -97,7 +95,7 @@ class ProduceUserFriendListCommand extends AggregateAwareCommand
         $this->input = $input;
         $this->output = $output;
 
-        $messageBody = $this->getTokensFromInput();
+        $messageBody = $this->getTokensFromInputOrFallback();
 
         if (array_key_exists('screen_name', $messageBody)) {
             $assumedScreenName = $messageBody['screen_name'];
@@ -186,15 +184,20 @@ class ProduceUserFriendListCommand extends AggregateAwareCommand
         ));
     }
 
+    /**
+     * @throws InvalidSerializedTokenException
+     */
     private function setUpDependencies()
     {
         $this->setProducer();
         $this->extractRoutingKeyFromOptions();
 
-        $tokens = $this->getTokensFromInput();
+        $tokens = $this->getTokensFromInputOrFallback();
 
         $this->setUpLogger();
-        $this->setOAuthTokens($tokens);
+
+        $this->accessor->setAccessToken(Token::fromArray($tokens));
+
         $this->setupAggregateRepository();
 
         $this->translator = $this->getContainer()->get('translator');
@@ -205,7 +208,6 @@ class ProduceUserFriendListCommand extends AggregateAwareCommand
      * @param $assumedScreenName
      * @param $messageBody
      * @throws SkippableMemberException
-     * @throws \Doctrine\ORM\OptimisticLockException
      */
     private function handlePreExistingMember(Member $member, $assumedScreenName, $messageBody)
     {

@@ -9,7 +9,7 @@ use App\Accessor\Exception\UnexpectedApiResponseException;
 use App\Amqp\Message\FetchMemberStatuses;
 use App\Api\Entity\Token;
 use App\Api\Entity\TokenInterface;
-use App\Api\Repository\TokenRepository;
+use App\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Membership\Repository\MemberRepository;
 use App\Operation\OperationClock;
 use App\Status\LikedStatusCollectionAwareInterface;
@@ -71,9 +71,9 @@ class FetchMemberStatusMessageHandler implements MessageSubscriberInterface
     protected MemberRepository $userRepository;
 
     /**
-     * @var TokenRepository
+     * @var TokenRepositoryInterface
      */
-    public TokenRepository $tokenRepository;
+    public TokenRepositoryInterface $tokenRepository;
 
     /**
      * @param MemberRepository $userRepository

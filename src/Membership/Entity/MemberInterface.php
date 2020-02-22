@@ -14,10 +14,10 @@ interface MemberInterface extends UserInterface
     /**
      * @return int
      */
-    public function getId(): int;
+    public function getId(): ?int;
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getUsername(): ?string;
 
@@ -34,12 +34,12 @@ interface MemberInterface extends UserInterface
     public function setTwitterUsername(string $twitterUsername): self;
 
     /**
-     * @return string
+     * @return string|null
      */
-    public function getTwitterUsername(): string;
+    public function getTwitterUsername(): ?string;
 
     /**
-     * @return string
+     * @return string|null
      */
     public function getTwitterID(): ?string;
 
@@ -107,7 +107,13 @@ interface MemberInterface extends UserInterface
      */
     public function isAWhisperer(): bool;
 
+    /**
+     * @return string|null
+     */
     public function getDescription(): ?string;
 
+    /**
+     * @return string|null
+     */
     public function getUrl(): ?string;
 }

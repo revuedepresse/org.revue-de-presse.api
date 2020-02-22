@@ -10,7 +10,7 @@
         <parameter key="weaving_the_web_api.entity.status.class">App\Api\Entity\Status</parameter>
         <parameter key="weaving_the_web.api.query_factory.class">App\Api\ORM\QueryFactory</parameter>
         <parameter key="weaving_the_web_api.repository.aggregate.class">App\Api\Repository\AggregateRepository</parameter>
-        <parameter key="weaving_the_web_api.repository.token.class">App\Api\Repository\TokenRepository</parameter>
+        <parameter key="weaving_the_web_api.repository.token.class">App\Api\AccessToken\Repository\TokenRepository</parameter>
         <parameter key="weaving_the_web_api.repository.archived_status.class">App\Api\Repository\ArchivedStatusRepository</parameter>
         <parameter key="weaving_the_web_api.repository.whisperer.class">App\Api\Repository\WhispererRepository</parameter>
     </parameters>

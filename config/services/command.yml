@@ -14,6 +14,35 @@ parameters:
     press_review.fetch_member_status.class:                                     'App\Amqp\Command\FetchMemberStatusMessageDispatcher'
 
 services:
+    App\Amqp\Command\FetchMemberStatusMessageDispatcher:
+        class:                              "%press_review.fetch_member_status.class%"
+        properties:
+            operationClock:                 '@operation.clock'
+            savedSearchRepository:          '@repository.saved_search'
+            searchMatchingStatusRepository: '@repository.search_matching_status'
+        calls:
+            - [ 'setAccessor',              [ '@weaving_the_web_twitter.api_accessor'] ]
+            - [ 'setDefaultSecret',         [ '%weaving_the_web_twitter.oauth_secret.default%'] ]
+            - [ 'setDefaultToken',          [ '%weaving_the_web_twitter.oauth_token.default%'] ]
+            - [ 'setMessageBus',            [ '@messenger.default_bus'] ]
+            - [ 'setTokenRepository',       [ '@weaving_the_web_api.repository.token'] ]
+            - [ 'setTranslator',            [ '@translator'] ]
+            - [ 'setMemberRepository',      [ '@user_manager'] ]
+            - [ 'setAggregateRepository',   [ '@repository.aggregate'] ]
+            - [ 'setEntityManager',         [ '@doctrine.orm.entity_manager'] ]
+            - [ 'setLogger',                [ '@logger'] ]
+            - [ 'setTokenChange',           [ '@App\Api\AccessToken\TokenChange'] ]
+        tags:
+            - { name: 'console.command' }
+        public: true
+
+    App\Twitter\Command\MigrateStatusToPublicationsCommand:
+        class:  '\App\Twitter\Command\MigrateStatusToPublicationsCommand'
+        calls:
+            - [ 'setPublicationRepository', [ '@App\Twitter\Repository\PublicationRepository' ] ]
+        tags:
+            - { name: 'console.command' }
+
     command.import_media_relationships:
         class: 'App\Media\Command\ImportMediaRelationshipsCommand'
         properties:
@@ -182,24 +211,3 @@ services:
             statusDirectory: "%kernel.project_dir%/../src/App/Resources/statuses"
         tags:
             - { name: 'console.command' }
-
-    press_review.fetch_member_status:
-        class:                              "%press_review.fetch_member_status.class%"
-        properties:
-            operationClock:                 '@operation.clock'
-            savedSearchRepository:          '@repository.saved_search'
-            searchMatchingStatusRepository: '@repository.search_matching_status'
-        calls:
-            - [ 'setAccessor',              [ '@weaving_the_web_twitter.api_accessor'] ]
-            - [ 'setDefaultSecret',         [ '%weaving_the_web_twitter.oauth_secret.default%'] ]
-            - [ 'setDefaultToken',          [ '%weaving_the_web_twitter.oauth_token.default%'] ]
-            - [ 'setMessageBus',            [ '@messenger.default_bus'] ]
-            - [ 'setTokenRepository',       [ '@weaving_the_web_api.repository.token'] ]
-            - [ 'setTranslator',            [ '@translator'] ]
-            - [ 'setMemberRepository',      [ '@user_manager'] ]
-            - [ 'setAggregateRepository',   [ '@repository.aggregate'] ]
-            - [ 'setEntityManager',         [ '@doctrine.orm.entity_manager'] ]
-            - [ 'setLogger',                [ '@logger'] ]
-        tags:
-            - { name: 'console.command' }
-

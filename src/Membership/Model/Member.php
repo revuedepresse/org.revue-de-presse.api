@@ -4,6 +4,9 @@ declare(strict_types=1);
 namespace App\Membership\Model;
 
 use App\Membership\Entity\MemberInterface;
+use function mt_rand;
+use function sha1;
+use function uniqid;
 
 /**
  * @package App\Membership\Model
@@ -13,7 +16,7 @@ abstract class Member implements MemberInterface
     /**
      * @var
      */
-    protected int $id;
+    protected ?int $id;
 
     /**
      * @var string
@@ -70,7 +73,10 @@ abstract class Member implements MemberInterface
      */
     public function __construct()
     {
-        $this->salt = base_convert(sha1(uniqid(mt_rand(), true)), 16, 36);
+        $random = (string) mt_rand();
+        $uniqueId = uniqid($random, true);
+        $hash = sha1($uniqueId);
+        $this->salt = base_convert($hash, 16, 36);
         $this->enabled = false;
         $this->positionInHierarchy = 1;
     }
@@ -117,11 +123,9 @@ abstract class Member implements MemberInterface
     }
 
     /**
-     * Returns the user unique id.
-     *
-     * @return mixed
+     * @return int|null
      */
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }

@@ -4,11 +4,9 @@ namespace App\Status\Repository;
 
 use App\Status\Entity\NotFoundStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\EntityRepository;
 use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;
 use App\Api\Entity\StatusInterface;
-use Laminas\Service;
 
 class NotFoundStatusRepository extends ServiceEntityRepository
 {

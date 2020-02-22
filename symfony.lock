@@ -108,6 +108,9 @@
     "firebase/php-jwt": {
         "version": "v5.0.0"
     },
+    "fzaninotto/faker": {
+        "version": "1.9-dev"
+    },
     "giggsey/libphonenumber-for-php": {
         "version": "8.x-dev"
     },

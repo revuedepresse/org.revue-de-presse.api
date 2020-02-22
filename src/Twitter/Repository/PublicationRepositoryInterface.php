@@ -7,5 +7,5 @@ use App\Operation\Collection\CollectionInterface;
 
 interface PublicationRepositoryInterface
 {
-    public function savePublications(CollectionInterface $collection): CollectionInterface;
+    public function persistPublications(CollectionInterface $collection): CollectionInterface;
 }

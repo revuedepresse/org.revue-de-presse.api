@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Api\Repository;
 
 use App\Aggregate\Repository\TimelyStatusRepository;
+use App\Api\Adapter\StatusToArray;
 use App\Membership\Entity\MemberInterface;
 use App\Operation\Collection\Collection;
 use App\Status\Entity\LikedStatus;
@@ -242,22 +243,14 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
         $extracts = $result['extracts'];
         $screenName = $result['screen_name'];
 
-        $statuses = array_map(function (StatusInterface $status) {
-            return [
-                'legacy_id' => $status->getId(),
-                'hash' => hash('sha256', $status->getScreenName().'|'.$status->getStatusId()),
-                'avatar_url' => $status->getUserAvatar(),
-                'screen_name' => $status->getScreenName(),
-                'text' => $status->getText(),
-                'document_id' => $status->getStatusId(),
-                'document' => $status->getApiDocument(),
-                'published_at' => $status->getCreatedAt(),
-            ];
-        }, $result['statuses']);
-
-        $this->publicationRepository->savePublications(
+        $statuses = StatusToArray::fromStatusCollection(
+            new Collection($result['statuses'])
+        );
+        $this->publicationRepository->persistPublications(
             Collection::fromArray($statuses)
         );
+
+        $this->getEntityManager()->flush();
 
         if (count($extracts) > 0) {
             $this->memberManager->incrementTotalStatusesOfMemberWithName(

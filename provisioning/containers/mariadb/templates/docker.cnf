@@ -1,0 +1,5 @@
+[mysqld]
+collation-server = utf8mb4_unicode_ci
+max_allowed_packet = 1G
+character-set-server = utf8mb4
+init-connect='SET NAMES utf8mb4'

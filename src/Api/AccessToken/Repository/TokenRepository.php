@@ -1,7 +1,10 @@
 <?php
+declare(strict_types=1);
 
-namespace App\Api\Repository;
+namespace App\Api\AccessToken\Repository;
 
+use App\Api\Entity\TokenInterface;
+use App\Api\Exception\UnavailableTokenException;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
@@ -15,11 +18,13 @@ use App\Api\Entity\Token,
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
-class TokenRepository extends ServiceEntityRepository
+class TokenRepository extends ServiceEntityRepository implements TokenRepositoryInterface
 {
     /**
      * @param $properties
+     *
      * @return Token
+     * @throws \Exception
      */
     public function makeToken($properties)
     {
@@ -149,7 +154,7 @@ class TokenRepository extends ServiceEntityRepository
      * @return mixed|null
      * @throws NonUniqueResultException
      */
-    public function howManyUnfrozenTokenAreThere()
+    public function howManyUnfrozenTokenAreThere(): int
     {
         $queryBuilder = $this->createQueryBuilder('t');
         $queryBuilder->select('COUNT(t.id) as count_');
@@ -159,7 +164,7 @@ class TokenRepository extends ServiceEntityRepository
         try {
             return $queryBuilder->getQuery()->getSingleResult()['count_'];
         } catch (NoResultException $exception) {
-            return null;
+            UnavailableTokenException::throws();
         }
     }
 
@@ -260,7 +265,7 @@ class TokenRepository extends ServiceEntityRepository
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    public function findTokenOtherThan(string $token)
+    public function findTokenOtherThan(string $token): ?TokenInterface
     {
         $queryBuilder = $this->createQueryBuilder('t');
         $queryBuilder->andWhere('t.oauthToken != :token');

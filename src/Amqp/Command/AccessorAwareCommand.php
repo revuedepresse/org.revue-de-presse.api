@@ -2,13 +2,12 @@
 
 namespace App\Amqp\Command;
 
-use App\Api\Repository\TokenRepository;
+use App\Api\Entity\TokenInterface;
+use App\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Twitter\Api\Accessor;
-use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\NoResultException;
 use Psr\Log\LoggerInterface;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -16,6 +15,9 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 abstract class AccessorAwareCommand extends Command
 {
+    private const OPTION_OAUTH_SECRET = 'oauth_secret';
+    private const OPTION_OAUTH_TOKEN  = 'oauth_token';
+
     /**
      * @var Accessor $accessor
      */
@@ -30,6 +32,35 @@ abstract class AccessorAwareCommand extends Command
      * @var string
      */
     protected string $defaultToken;
+
+    /**
+     * @var LoggerInterface $logger
+     */
+    protected LoggerInterface $logger;
+
+    protected TokenRepositoryInterface $tokenRepository;
+
+    /**
+     * @var InputInterface
+     */
+    protected $input;
+
+    /**
+     * @var OutputInterface
+     */
+    protected $output;
+
+    /**
+     * @param Accessor $accessor
+     *
+     * @return $this
+     */
+    public function setAccessor(Accessor $accessor): self
+    {
+        $this->accessor = $accessor;
+
+        return $this;
+    }
 
     /**
      * @param string $secret
@@ -48,23 +79,6 @@ abstract class AccessorAwareCommand extends Command
     }
 
     /**
-     * @param Accessor $accessor
-     *
-     * @return $this
-     */
-    public function setAccessor(Accessor $accessor): self
-    {
-        $this->accessor = $accessor;
-
-        return $this;
-    }
-
-    /**
-     * @var LoggerInterface $logger
-     */
-    protected LoggerInterface $logger;
-
-    /**
      * @param LoggerInterface $logger
      *
      * @return $this
@@ -77,16 +91,11 @@ abstract class AccessorAwareCommand extends Command
     }
 
     /**
-     * @var TokenRepository $logger
-     */
-    protected TokenRepository $tokenRepository;
-
-    /**
-     * @param TokenRepository $tokenRepository
+     * @param TokenRepositoryInterface $tokenRepository
      *
      * @return $this
      */
-    public function setTokenRepository(TokenRepository $tokenRepository): self
+    public function setTokenRepository(TokenRepositoryInterface $tokenRepository): self
     {
         $this->tokenRepository = $tokenRepository;
 
@@ -94,65 +103,74 @@ abstract class AccessorAwareCommand extends Command
     }
 
     /**
-     * @var InputInterface
+     * @return bool|string|string[]|null
      */
-    protected $input;
-
-    /**
-     * @var OutputInterface
-     */
-    protected $output;
-
-    /**
-     * @param $oauthTokens
-     */
-    protected function setOAuthTokens($oauthTokens)
+    protected function getOAuthSecret()
     {
-        $this->accessor->setUserToken($oauthTokens['token']);
-        $this->accessor->setUserSecret($oauthTokens['secret']);
-
-        if (array_key_exists('consumer_token', $oauthTokens)) {
-            $this->accessor->setConsumerKey($oauthTokens['consumer_token']);
-            $this->accessor->setConsumerSecret($oauthTokens['consumer_secret']);
+        $secret = $this->defaultSecret;
+        if ($this->hasOAuthSecretBeenPassedAsOption()) {
+            $secret = $this->input->getOption(self::OPTION_OAUTH_SECRET);
         }
+
+        return $secret;
+    }
+
+    /**
+     * @return bool|string|string[]|null
+     */
+    protected function getOAuthToken()
+    {
+        $token = $this->defaultToken;
+        if ($this->hasOAuthTokenBeenPassedAsOption()) {
+            $token = $this->input->getOption(self::OPTION_OAUTH_TOKEN);
+        }
+
+        return $token;
     }
 
     /**
      * @return array
      */
-    protected function getTokensFromInput()
+    protected function getTokensFromInputOrFallback(): array
     {
-        if ($this->input->hasOption('oauth_secret') && !is_null($this->input->getOption('oauth_secret'))) {
-            $secret = $this->input->getOption('oauth_secret');
-        } else {
-            $secret = $this->defaultSecret;
-        }
-        if ($this->input->hasOption('oauth_token') && !is_null($this->input->getOption('oauth_token'))) {
-            $token = $this->input->getOption('oauth_token');
-        } else {
-            $token = $this->defaultToken;
-        }
-
         return [
-            'secret' => $secret,
-            'token' => $token,
+            'token'  => $this->getOAuthToken(),
+            'secret' => $this->getOAuthSecret(),
         ];
     }
 
     /**
-     * @param string $token
-     * @return mixed
-     * @throws NoResultException
-     * @throws NonUniqueResultException
+     * @return bool
      */
-    protected function findTokenOtherThan(string $token)
+    private function hasOAuthSecretBeenPassedAsOption(): bool
     {
-        return $this->tokenRepository->findTokenOtherThan($token);
+        return $this->input->hasOption(self::OPTION_OAUTH_SECRET)
+            && $this->input->getOption(self::OPTION_OAUTH_SECRET) !== null;
+    }
+
+    protected function setOAuthTokens(TokenInterface $token): void
+    {
+        $this->accessor->setUserToken($token->getOAuthToken());
+        $this->accessor->setUserSecret($token->getOAuthSecret());
+
+        if ($token->hasConsumerKey()) {
+            $this->accessor->setConsumerKey($token->getConsumerKey());
+            $this->accessor->setConsumerSecret($token->getConsumerKey());
+        }
     }
 
     protected function setUpLogger()
     {
         // noop for backward compatibility
         // TODO remove all 5 calls to this method
+    }
+
+    /**
+     * @return bool
+     */
+    private function hasOAuthTokenBeenPassedAsOption(): bool
+    {
+        return $this->input->hasOption(self::OPTION_OAUTH_TOKEN) &&
+            $this->input->getOption(self::OPTION_OAUTH_TOKEN) !== null;
     }
 }
