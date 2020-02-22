@@ -19,6 +19,8 @@
         </testsuite>
     </testsuites>
 
+    <server name="KERNEL_CLASS" value="App\Kernel" />
+
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
             <directory suffix=".php">src</directory>
