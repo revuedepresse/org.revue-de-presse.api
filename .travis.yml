@@ -3,6 +3,8 @@ dist: bionic
 git:
     depth: 3
 
+sudo: false
+
 language: php
 
 php:
@@ -13,9 +15,14 @@ services:
     - rabbitmq
     - redis-server
 
+addons:
+    apt:
+        packages:
+            - rabbitmq-server
+            - librabbitmq-dev
+
 before_install:
     - mysql -e 'CREATE DATABASE test;'
-    - sudo apt -y install librabbitmq-dev
     - echo "extension = amqp" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
 
 after_failure:
