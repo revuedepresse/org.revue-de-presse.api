@@ -15,7 +15,6 @@ services:
 
 before_install:
     - mysql -e 'CREATE DATABASE test;'
-    - ls /home/travis/.phpenv/versions/7.4.0/lib/php/extensions/no-debug-zts-20190902
     - sudo apt -y install librabbitmq-dev
     - echo "extension = amqp" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
 
