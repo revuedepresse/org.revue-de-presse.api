@@ -1,0 +1,6 @@
+services:
+    App\Api\TokenChange:
+        class: 'App\Api\TokenChange'
+        arguments:
+            - '@repository.authentication_token'
+            - '@logger'

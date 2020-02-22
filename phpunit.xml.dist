@@ -20,10 +20,11 @@
         </testsuite>
     </testsuites>
 
-
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">src</directory>
+            <directory suffix=".php">src/Amqp/Command/FetchMemberStatusMessageDispatcher.php</directory>
+            <directory suffix=".php">src/Conversation/Consistency/StatusConsistency.php</directory>
+            <directory suffix=".php">src/Api/AccessToken/TokenChange.php</directory>
         </whitelist>
     </filter>
 </phpunit>
