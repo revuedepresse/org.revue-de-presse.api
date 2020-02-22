@@ -12,7 +12,10 @@ use App\Aggregate\Repository\SavedSearchRepository;
 use App\Aggregate\Repository\SearchMatchingStatusRepository;
 use App\Amqp\Message\FetchMemberLikes;
 use App\Amqp\Message\FetchMemberStatuses;
+use App\Api\Entity\NullToken;
+use App\Api\Entity\TokenInterface;
 use App\Api\Exception\InvalidTokenException;
+use App\Api\Exception\UnavailableTokenException;
 use App\Conversation\Producer\MemberAwareTrait;
 use App\Membership\Entity\Member;
 use App\Membership\Entity\MemberInterface;
@@ -537,14 +540,19 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
     {
         $tokens = $this->getTokensFromInput();
 
+        $token = new NullToken;
+
         try {
             /** @var Token $token */
             $token = $this->findTokenOtherThan($tokens['token']);
-        } catch (NoResultException $exception) {
+        } catch (NoResultException|NonUniqueResultException $exception) {
             $this->logger->error($exception->getMessage());
-            return [];
-        } catch (Exception $exception) {
-            $this->logger->error($exception->getMessage());
+        }
+
+        if (!($token instanceof TokenInterface) ||
+            $token instanceof NullToken
+        ) {
+            UnavailableTokenException::throws();
         }
 
         $oauthTokens = [
