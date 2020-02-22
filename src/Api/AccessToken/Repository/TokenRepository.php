@@ -1,7 +1,9 @@
 <?php
+declare(strict_types=1);
 
-namespace App\Api\Repository;
+namespace App\Api\AccessToken\Repository;
 
+use App\Api\Entity\TokenInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
@@ -15,11 +17,13 @@ use App\Api\Entity\Token,
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
-class TokenRepository extends ServiceEntityRepository
+class TokenRepository extends ServiceEntityRepository implements TokenRepositoryInterface
 {
     /**
      * @param $properties
+     *
      * @return Token
+     * @throws \Exception
      */
     public function makeToken($properties)
     {
@@ -260,7 +264,7 @@ class TokenRepository extends ServiceEntityRepository
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    public function findTokenOtherThan(string $token)
+    public function findTokenOtherThan(string $token): ?TokenInterface
     {
         $queryBuilder = $this->createQueryBuilder('t');
         $queryBuilder->andWhere('t.oauthToken != :token');
