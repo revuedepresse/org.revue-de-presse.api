@@ -42,6 +42,9 @@ use App\Twitter\Exception\UnavailableResourceException;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
+use function in_array;
+use function sprintf;
+
 /**
  * @package App\Amqp\Command
  */
@@ -395,6 +398,13 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
             self::MESSAGE_PUBLISHING_NEW_MESSAGE,
             $twitterUser->screen_name
         ));
+
+        $user = $this->userRepository->make(
+            $friend->id,
+            $twitterUser->screen_name,
+            $protected,
+            $suspended
+        );
 
         $this->entityManager->persist($user);
         $this->entityManager->flush();
