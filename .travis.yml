@@ -17,6 +17,7 @@ services:
 
 before_install:
     - mysql -e 'CREATE DATABASE test;'
+    - echo "extension = amqp" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
 
 after_failure:
     - cat ./var/logs/test.log
