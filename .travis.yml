@@ -1,24 +1,43 @@
 dist: bionic
+
 git:
     depth: 3
+
 sudo: false
+
 language: php
+
 php:
     - '7.4'
+
 services:
     - mysql
     - rabbitmq
     - redis-server
+
+addons:
+    apt:
+        packages:
+            - rabbitmq-server
+            - librabbitmq-dev
+
 before_install:
     - mysql -e 'CREATE DATABASE test;'
+    - echo "extension = amqp" >> ~/.phpenv/versions/$(phpenv version-name)/etc/php.ini
+
+after_failure:
+    - cat ./var/logs/test.log
+
 install:
     - cp provisioning/continuous-integration/parameters_test.yml.dist .env.test
     - /bin/bash -c 'source ./bin/install-composer.sh'
     - php composer.phar config -g github-oauth.github.com $GITHUB_OAUTH_TOKEN
     - php composer.phar install --prefer-dist --no-scripts
     - php bin/console doctrine:schema:create -n -e test
+
 script:
     - make run-php-unit-tests
+
 cache:
     directories:
         - $HOME/.composer

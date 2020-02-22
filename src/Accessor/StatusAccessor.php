@@ -71,7 +71,7 @@ class StatusAccessor
      * @param string $identifier
      * @throws OptimisticLockException
      */
-    public function declareStatusNotFoundByIdentifier(string $identifier)
+    public function declareStatusNotFoundByIdentifier(string $identifier): void
     {
         $status = $this->statusRepository->findOneBy(['statusId' => $identifier]);
         if (is_null($status)) {

@@ -1,8 +1,10 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Recommendation\Command;
 
 use App\Console\CommandReturnCodeAwareInterface;
+use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -112,7 +114,7 @@ class RecommendSubscriptionsCommand extends Command implements CommandReturnCode
 
     /**
      * @return RecommendSubscriptionsCommand
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      */
     private function findAllDistinctSubscriptions(): self
     {
@@ -136,7 +138,7 @@ class RecommendSubscriptionsCommand extends Command implements CommandReturnCode
 
     /**
      * @return $this
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      */
     private function buildReferenceVector()
     {
@@ -178,7 +180,7 @@ QUERY;
 
     /**
      * @return array
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      */
     private function findClosestVectors(): array
     {

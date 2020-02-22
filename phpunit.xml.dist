@@ -11,7 +11,16 @@
         <ini name="error_reporting" value="-1" />
         <server name="APP_ENV" value="test" force="true" />
         <server name="SHELL_VERBOSITY" value="-1" />
+        <server name="KERNEL_CLASS" value="App\Kernel" />
     </php>
+
+    <groups>
+        <include>
+<!--            <group>api_access</group>-->
+<!--            <group>command</group>-->
+<!--            <group>conversation</group>-->
+        </include>
+    </groups>
 
     <testsuites>
         <testsuite name="Project Test Suite">
@@ -21,7 +30,9 @@
 
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">src</directory>
+            <directory suffix=".php">src/Amqp/Command/FetchMemberStatusMessageDispatcher.php</directory>
+            <directory suffix=".php">src/Conversation/Consistency/StatusConsistency.php</directory>
+            <directory suffix=".php">src/Api/AccessToken/TokenChange.php</directory>
         </whitelist>
     </filter>
 </phpunit>

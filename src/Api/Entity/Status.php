@@ -22,7 +22,8 @@ use Doctrine\ORM\Mapping as ORM;
  *          @ORM\Index(name="screen_name", columns={"ust_full_name"}),
  *          @ORM\Index(name="status_id", columns={"ust_status_id"}),
  *          @ORM\Index(name="indexed", columns={"ust_indexed"}),
- *          @ORM\Index(name="ust_created_at", columns={"ust_created_at"})
+ *          @ORM\Index(name="ust_created_at", columns={"ust_created_at"}),
+ *          @ORM\Index(name="idx_published", columns={"is_published"})
  *      }
  * )
  */
@@ -90,6 +91,18 @@ class Status implements StatusInterface
      * @ORM\Column(name="ust_indexed", type="boolean", options={"default": false})
      */
     protected bool $indexed;
+
+    /**
+     * @ORM\Column(name="is_published", type="boolean", options={"default": false})
+     */
+    protected bool $isPublished;
+
+    public function markAsPublished(): self
+    {
+        $this->isPublished = true;
+
+        return $this;
+    }
 
     /**
      * @var DateTimeInterface|null

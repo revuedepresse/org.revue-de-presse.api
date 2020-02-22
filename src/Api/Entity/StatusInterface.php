@@ -135,7 +135,7 @@ interface StatusInterface
     /**
      * @return DateTimeInterface
      */
-    public function getUpdatedAt(): DateTimeInterface;
+    public function getUpdatedAt(): ?DateTimeInterface;
 
     /**
      * @param bool $indexed
@@ -164,4 +164,9 @@ interface StatusInterface
      * @return mixed
      */
     public function addToAggregates(Aggregate $aggregate): Collection;
+
+    /**
+     * @return $this
+     */
+    public function markAsPublished(): self;
 }

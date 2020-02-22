@@ -46,7 +46,7 @@ class Member extends MemberModel
      * @ORM\Column(name="usr_id", type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    protected int $id;
+    protected ?int $id;
 
     /**
     * @var string
@@ -60,7 +60,7 @@ class Member extends MemberModel
      *
      * @ORM\Column(name="usr_twitter_username", type="string", nullable=true)
      */
-    protected string $twitter_username;
+    protected ?string $twitter_username;
 
     /**
      * @var string
@@ -146,9 +146,9 @@ class Member extends MemberModel
     }
 
     /**
-     * @return integer
+     * @return int|null
      */
-    public function getId(): int
+    public function getId(): ?int
     {
         return $this->id;
     }
@@ -226,12 +226,7 @@ class Member extends MemberModel
         return $this;
     }
 
-    /**
-    * Get twitter_username
-    *
-    * @return string
-    */
-    public function getTwitterUsername(): string
+    public function getTwitterUsername(): ?string
     {
       return $this->twitter_username;
     }

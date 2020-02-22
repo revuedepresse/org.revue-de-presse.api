@@ -1,4 +1,5 @@
 imports:
+    - { resource: services/api.yml }
     - { resource: services/command.yml }
     - { resource: services/controller.yml }
     - { resource: services/mapping.yml }
@@ -40,6 +41,22 @@ services:
             timelyStatusRepository:   '@repository.timely_status'
             connection:               '@doctrine.dbal.default_connection'
             queryFactory:             '@weaving_the_web.api.query_factory'
+
+    App\Api\Repository\ArchivedStatusRepository:
+        class:  '\App\Api\Repository\ArchivedStatusRepository'
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - '%weaving_the_web_twitter.entity.archived_status.class%'
+        calls:
+            - [ 'setPublicationRepository', [ '@App\Twitter\Repository\PublicationRepository' ] ]
+        properties:
+            likedStatusRepository:  '@repository.liked_status'
+            memberManager:          '@user_manager'
+            registry:               '@doctrine'
+            statusLogger:           '@monolog.logger.status'
+            timelyStatusRepository: '@repository.timely_status'
+            connection:             '@doctrine.dbal.default_connection'
+            queryFactory:           '@weaving_the_web.api.query_factory'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
@@ -212,7 +229,6 @@ parameters:
     weaving_the_web_twitter.repository.token.class:               '%weaving_the_web_api.repository.token.class%'
 
     weaving_the_web_twitter.serializer.user_status.class:         'App\Twitter\Serializer\UserStatus'
-    weaving_the_web_twitter.serialize_statuses.class:             'App\Twitter\Command\SerializeStatusesCommand'
 
     weaving_the_web_twitter.version:                              '%env(resolve:API_TWITTER_VERSION)%'
 
