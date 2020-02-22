@@ -55,6 +55,8 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
 
     private const OPTION_IGNORE_WHISPERS = 'ignore_whispers';
 
+    private const MESSAGE_PUBLISHING_NEW_MESSAGE = '[publishing new message produced for "%s"]';
+
     use MemberAwareTrait;
 
     /**
@@ -389,10 +391,10 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
         bool $suspended = false
     )
     {
-        $message = '[publishing new message produced for "' . ($twitterUser->screen_name) . '"]';
-        $this->logger->info($message);
-
-        $user = $this->userRepository->make($friend->id, $twitterUser->screen_name, $protected, $suspended);
+        $this->logger->info(sprintf(
+            self::MESSAGE_PUBLISHING_NEW_MESSAGE,
+            $twitterUser->screen_name
+        ));
 
         $this->entityManager->persist($user);
         $this->entityManager->flush();
