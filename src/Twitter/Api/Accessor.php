@@ -1474,11 +1474,14 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
 
     /**
      * @param $id
-     * @return \API|array|mixed|object|stdClass
+     *
+     * @return array|stdClass
+     * @throws ApiRateLimitingException
+     * @throws InconsistentTokenRepository
      * @throws NonUniqueResultException
      * @throws OptimisticLockException
      */
-    public function getListMembers($id)
+    public function getListMembers(int $id)
     {
         $listMembersEndpoint = $this->getListMembersEndpoint();
         $this->guardAgainstApiLimit($listMembersEndpoint);
@@ -1544,36 +1547,36 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
                 $endpoint = null;
 
                 if (false !== strpos($fullEndpoint, '/users/show')) {
-                    $endpoint = "/users/show/:id";
+                    $endpoint = '/users/show/:id';
                     $resourceType = 'users';
                 }
 
                 if (false !== strpos($fullEndpoint, '/statuses/user_timeline')) {
-                    $endpoint = "/statuses/user_timeline";
+                    $endpoint = '/statuses/user_timeline';
                 }
 
                 if (false !== strpos($fullEndpoint, '/lists/ownerships')) {
-                    $endpoint = "/lists/ownerships";
+                    $endpoint = '/lists/ownerships';
                     $resourceType = 'lists';
                 }
 
                 if (false !== strpos($fullEndpoint, '/favorites/list')) {
-                    $endpoint = "/favorites/list";
+                    $endpoint = '/favorites/list';
                     $resourceType = 'favorites';
                 }
 
                 if (false !== strpos($fullEndpoint, '/friends/ids')) {
-                    $endpoint = "/friends/ids";
+                    $endpoint = '/friends/ids';
                     $resourceType = 'friends';
                 }
 
                 if (false !== strpos($fullEndpoint, '/followers/ids')) {
-                    $endpoint = "/followers/ids";
+                    $endpoint = '/followers/ids';
                     $resourceType = 'followers';
                 }
 
                 if (false !== strpos($fullEndpoint, '/friendships/create')) {
-                    $endpoint = "/friendships/create";
+                    $endpoint = '/friendships/create';
                     $resourceType = 'friendships';
                 }
             }

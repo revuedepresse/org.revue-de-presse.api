@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Aggregate;
 
@@ -22,7 +23,7 @@ trait AggregateAwareTrait
 
         $this->entityManager->persist($aggregate);
 
-        if (!is_null($listId)) {
+        if ($listId !== null) {
             $aggregate->listId = $listId;
         }
 

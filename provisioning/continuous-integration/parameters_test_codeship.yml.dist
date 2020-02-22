@@ -7,6 +7,8 @@ DATABASE_URL=mysql://root:${MYSQL_PASSWORD}@127.0.0.1:3306/test?serverVersion=5.
 DATABASE_WRITE_URL=mysql://root:${MYSQL_PASSWORD}@127.0.0.1:3306/test?serverVersion=5.7
 ###< doctrine/doctrine-bundle ###
 
+MESSENGER_TRANSPORT_DSN=amqp://guest:guest@messenger:5672/%2f/get-news-status
+
 API_TWITTER_VERSION=1.1
 
 API_TWITTER_CONSUMER_KEY=''

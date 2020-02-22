@@ -356,12 +356,16 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
                 $publishedMessages++;
             } catch (Exception $exception) {
                 if ($this->shouldBreakPublication($exception)) {
+                    $this->logger->info($exception->getMessage());
+
                     break;
-                } elseif ($this->shouldContinuePublication($exception)) {
-                    continue;
-                } else {
-                    throw $exception;
                 }
+
+                if ($this->shouldContinuePublication($exception)) {
+                    continue;
+                }
+
+                throw $exception;
             }
         }
 
@@ -516,7 +520,6 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
 
     /**
      * @return array
-     * @throws NonUniqueResultException
      */
     private function updateAccessToken(): array
     {
@@ -526,7 +529,10 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
             /** @var Token $token */
             $token = $this->findTokenOtherThan($tokens['token']);
         } catch (NoResultException $exception) {
+            $this->logger->error($exception->getMessage());
             return [];
+        } catch (Exception $exception) {
+            $this->logger->error($exception->getMessage());
         }
 
         $oauthTokens = [
@@ -707,6 +713,8 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
                 );
             } catch (Exception $exception) {
                 $this->logger->critical($exception->getMessage());
+
+                return self::RETURN_STATUS_FAILURE;
             }
         }
 
@@ -716,6 +724,7 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
     /**
      * @throws ApiRateLimitingException
      * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
      * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws NotFoundMemberException
@@ -726,6 +735,7 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
      * @throws ReflectionException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
+     * @throws UnexpectedApiResponseException
      */
     private function productSearchStatusesMessages()
     {
@@ -752,12 +762,14 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
      * @param $list
      * @param $shouldIncludeOwner
      * @param $messageBody
+     *
      * @return bool
-     * @throws UnavailableResourceException
-     * @throws NoResultException
+     * @throws ApiRateLimitingException
+     * @throws InconsistentTokenRepository
      * @throws NonUniqueResultException
      * @throws OptimisticLockException
      * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
      */
     private function processMemberList(
         $doNotApplyListRestriction,
