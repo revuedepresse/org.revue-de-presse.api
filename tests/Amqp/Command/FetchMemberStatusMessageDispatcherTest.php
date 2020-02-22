@@ -16,8 +16,6 @@ use App\Membership\Repository\MemberRepository;
 use App\Twitter\Api\Accessor;
 use App\Twitter\Api\ApiAccessorInterface;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\NoResultException;
 use Prophecy\Argument;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -79,8 +77,6 @@ class FetchMemberStatusMessageDispatcherTest extends KernelTestCase
     }
 
     /**
-     * @throws NonUniqueResultException
-     * @throws NoResultException
      * @throws InvalidSerializedTokenException
      */
     protected function setUp(): void
@@ -238,9 +234,6 @@ class FetchMemberStatusMessageDispatcherTest extends KernelTestCase
 
     /**
      * @return TokenRepository
-     * @throws NonUniqueResultException
-     * @throws NoResultException
-     * @throws InvalidSerializedTokenException
      */
     private function prophesizeTokenRepository(): TokenRepositoryInterface
     {
