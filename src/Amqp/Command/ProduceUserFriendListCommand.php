@@ -3,6 +3,8 @@
 namespace App\Amqp\Command;
 
 use App\Amqp\SkippableMemberException;
+use App\Api\Entity\Token;
+use App\Api\Exception\InvalidSerializedTokenException;
 use App\Membership\Entity\MemberInterface;
 use App\Operation\OperationClock;
 
@@ -93,7 +95,7 @@ class ProduceUserFriendListCommand extends AggregateAwareCommand
         $this->input = $input;
         $this->output = $output;
 
-        $messageBody = $this->getTokensFromInput();
+        $messageBody = $this->getTokensFromInputOrFallback();
 
         if (array_key_exists('screen_name', $messageBody)) {
             $assumedScreenName = $messageBody['screen_name'];
@@ -182,15 +184,20 @@ class ProduceUserFriendListCommand extends AggregateAwareCommand
         ));
     }
 
+    /**
+     * @throws InvalidSerializedTokenException
+     */
     private function setUpDependencies()
     {
         $this->setProducer();
         $this->extractRoutingKeyFromOptions();
 
-        $tokens = $this->getTokensFromInput();
+        $tokens = $this->getTokensFromInputOrFallback();
 
         $this->setUpLogger();
-        $this->setOAuthTokens($tokens);
+
+        $this->accessor->setAccessToken(Token::fromArray($tokens));
+
         $this->setupAggregateRepository();
 
         $this->translator = $this->getContainer()->get('translator');

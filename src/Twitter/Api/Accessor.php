@@ -3,51 +3,48 @@ declare(strict_types=1);
 
 namespace App\Twitter\Api;
 
+use App\Accessor\Exception\ApiRateLimitingException;
 use App\Accessor\Exception\NotFoundStatusException;
 use App\Accessor\Exception\ReadOnlyApplicationException;
 use App\Accessor\Exception\UnexpectedApiResponseException;
 use App\Accessor\StatusAccessor;
-use App\Accessor\Exception\ApiRateLimitingException;
-
+use App\Api\AccessToken\Repository\TokenRepositoryInterface;
+use App\Api\Entity\Token;
+use App\Api\Entity\TokenInterface;
 use App\Api\Moderator\ApiLimitModerator;
-use App\Api\Repository\TokenRepository;
 use App\Member\Entity\AggregateSubscription;
 use App\Membership\Entity\MemberInterface;
+use App\Membership\Repository\MemberRepository;
 use App\Status\LikedStatusCollectionAwareInterface;
+use App\Twitter\Exception\BadAuthenticationDataException;
+use App\Twitter\Exception\EmptyErrorCodeException;
 use App\Twitter\Exception\InconsistentTokenRepository;
 use App\Twitter\Exception\InvalidTokensException;
+use App\Twitter\Exception\NotFoundMemberException;
+use App\Twitter\Exception\OverCapacityException;
+use App\Twitter\Exception\ProtectedAccountException;
+use App\Twitter\Exception\SuspendedAccountException;
+use App\Twitter\Exception\UnavailableResourceException;
 use App\Twitter\Exception\UnknownApiAccessException;
-use Doctrine\Common\Persistence\ObjectRepository;
-
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Exception;
 use Goutte\Client;
 use GuzzleHttp\Exception\ConnectException;
 use Psr\Log\LoggerInterface;
-
-use App\Api\Entity\Token;
-
-use App\Twitter\Exception\BadAuthenticationDataException;
-use App\Twitter\Exception\EmptyErrorCodeException;
-use App\Twitter\Exception\NotFoundMemberException;
-use App\Twitter\Exception\OverCapacityException;
-use App\Twitter\Exception\ProtectedAccountException;
-use App\Twitter\Exception\SuspendedAccountException;
-use App\Twitter\Exception\UnavailableResourceException;
-
 use ReflectionException;
 use stdClass;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Translation\Translator;
 use TwitterOAuth;
-use App\Membership\Repository\MemberRepository;
 use function is_array;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
-class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAwareInterface
+class Accessor implements ApiAccessorInterface,
+    TwitterErrorAwareInterface,
+    LikedStatusCollectionAwareInterface
 {
     public const ERROR_PROTECTED_ACCOUNT = 2048;
 
@@ -67,6 +64,26 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     public string $environment = 'dev';
 
     /**
+     * @var LoggerInterface;
+     */
+    public LoggerInterface $twitterApiLogger;
+
+    /**
+     * @var string
+     */
+    public string $userToken;
+
+    /**
+     * @var bool
+     */
+    public bool $propagateNotFoundStatuses = false;
+
+    /**
+     * @var bool
+     */
+    public bool $shouldRaiseExceptionOnApiLimit = false;
+
+    /**
      * @var string
      */
     protected string $apiHost = 'api.twitter.com';
@@ -74,22 +91,12 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     /**
      * @var LoggerInterface;
      */
-    protected LoggerInterface $logger;
-
-    /**
-     * @var LoggerInterface;
-     */
-    public LoggerInterface $twitterApiLogger;
+    protected ?LoggerInterface $logger;
 
     /**
      * @var ApiLimitModerator $moderator
      */
     protected ApiLimitModerator $moderator;
-
-    /**
-     * @var string
-     */
-    public string $userToken;
 
     /**
      * @var string
@@ -111,22 +118,7 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
      */
     protected string $authenticationHeader;
 
-    /**
-     * @var TokenRepository $tokenRepository
-     */
-    protected TokenRepository $tokenRepository;
-
-    /**
-     * @var MemberRepository
-     */
-    private MemberRepository $userRepository;
-
-    public function setMemberRepository(MemberRepository $memberRepository): self
-    {
-        $this->userRepository = $memberRepository;
-
-        return $this;
-    }
+    protected TokenRepositoryInterface $tokenRepository;
 
     /**
      * @var Translator $translator
@@ -134,22 +126,14 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     protected Translator $translator;
 
     /**
-     * @var bool
+     * @var boolean
      */
-    public bool $propagateNotFoundStatuses = false;
+    protected $apiLimitReached = false;
 
     /**
-     * @var bool
+     * @var MemberRepository
      */
-    public bool $shouldRaiseExceptionOnApiLimit = false;
-
-    /**
-     * @param Translator $translator
-     */
-    public function setTranslator($translator)
-    {
-        $this->translator = $translator;
-    }
+    private MemberRepository $userRepository;
 
     /**
      * @param LoggerInterface $logger
@@ -157,294 +141,6 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     public function __construct(LoggerInterface $logger = null)
     {
         $this->setLogger($logger);
-    }
-
-    /**
-     * @param LoggerInterface|null $logger
-     *
-     * @return $this
-     */
-    public function setLogger(LoggerInterface $logger = null): self
-    {
-        $this->logger = $logger;
-
-        return $this;
-    }
-
-    public function setModerator(ApiLimitModerator $moderator = null): self
-    {
-        $this->moderator = $moderator;
-
-        return $this;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getUserSecret()
-    {
-        return $this->userSecret;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getUserToken()
-    {
-        return $this->userToken;
-    }
-
-    /**
-     * @param string $consumerKey
-     * @return $this
-     */
-    public function setConsumerKey($consumerKey)
-    {
-        $this->consumerKey = $consumerKey;
-
-        return $this;
-    }
-
-    /**
-     * @param string $consumerSecret
-     * @return $this
-     */
-    public function setConsumerSecret($consumerSecret)
-    {
-        $this->consumerSecret = $consumerSecret;
-
-        return $this;
-    }
-
-    /**
-     * @param string $userSecret
-     * @return $this
-     */
-    public function setUserSecret($userSecret)
-    {
-        $this->userSecret = $userSecret;
-
-        return $this;
-    }
-
-    /**
-     * @param string $userToken
-     * @return $this
-     */
-    public function setUserToken($userToken)
-    {
-        $this->userToken = $userToken;
-
-        return $this;
-    }
-
-    /**
-     * @param string $header
-     * @return $this
-     */
-    public function setAuthenticationHeader($header)
-    {
-        $this->authenticationHeader = $header;
-
-        return $this;
-    }
-
-    /**
-     * @param string $host
-     * @return $this
-     */
-    public function setApiHost($host)
-    {
-        $this->apiHost = $host;
-
-        return $this;
-    }
-
-    /**
-     * @param string $clientClass
-     * @return $this
-     */
-    public function setClientClass($clientClass)
-    {
-        $this->clientClass = $clientClass;
-
-        return $this;
-    }
-
-    /**
-     * @param string $httpClientClass
-     * @return $this
-     */
-    public function setHttpClientClass(string $httpClientClass)
-    {
-        $this->httpClientClass = $httpClientClass;
-
-        return $this;
-    }
-
-    /**
-     * @param ObjectRepository $tokenRepository
-     * @return $this
-     */
-    public function setTokenRepository(ObjectRepository $tokenRepository)
-    {
-        $this->tokenRepository = $tokenRepository;
-
-        return $this;
-    }
-
-    /**
-     * @param array $criteria
-     * @return bool
-     */
-    public function isAboutToCollectLikesFromCriteria(array $criteria): bool
-    {
-        if (!array_key_exists(self::INTENT_TO_FETCH_LIKES, $criteria)) {
-            return false;
-        }
-
-        return $criteria[self::INTENT_TO_FETCH_LIKES];
-    }
-
-    /**
-     * @param array $options
-     *
-     * @return stdClass|array
-     * @throws ApiRateLimitingException
-     * @throws BadAuthenticationDataException
-     * @throws InconsistentTokenRepository
-     * @throws NonUniqueResultException
-     * @throws NotFoundMemberException
-     * @throws NotFoundStatusException
-     * @throws OptimisticLockException
-     * @throws ProtectedAccountException
-     * @throws ReadOnlyApplicationException
-     * @throws ReflectionException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws UnexpectedApiResponseException
-     */
-    public function fetchStatuses(array $options)
-    {
-        if (is_null($options) || (!is_object($options) && !is_array($options))) {
-            throw new Exception('Invalid options');
-        }
-
-        if (is_array($options)) {
-            $options = (object)$options;
-        }
-
-        $parameters = $this->validateRequestOptions($options);
-
-        if ($this->isAboutToCollectLikesFromCriteria((array)$options)) {
-            return $this->fetchLikes($parameters);
-        }
-
-        return $this->fetchTimelineStatuses($parameters);
-    }
-
-    /**
-     * @param array $parameters
-     *
-     * @return stdClass
-     * @throws ApiRateLimitingException
-     * @throws BadAuthenticationDataException
-     * @throws InconsistentTokenRepository
-     * @throws NonUniqueResultException
-     * @throws NotFoundMemberException
-     * @throws NotFoundStatusException
-     * @throws OptimisticLockException
-     * @throws ProtectedAccountException
-     * @throws ReadOnlyApplicationException
-     * @throws ReflectionException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws UnexpectedApiResponseException
-     */
-    public function fetchTimelineStatuses(array $parameters)
-    {
-        $endpoint = $this->getUserTimelineStatusesEndpoint() . '&' . implode('&', $parameters);
-
-        return $this->contactEndpoint($endpoint);
-    }
-
-    /**
-     * @param array $parameters
-     *
-     * @return stdClass|array
-     * @throws ApiRateLimitingException
-     * @throws BadAuthenticationDataException
-     * @throws InconsistentTokenRepository
-     * @throws NonUniqueResultException
-     * @throws NotFoundMemberException
-     * @throws NotFoundStatusException
-     * @throws OptimisticLockException
-     * @throws ProtectedAccountException
-     * @throws ReadOnlyApplicationException
-     * @throws ReflectionException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws UnexpectedApiResponseException
-     */
-    public function fetchLikes(array $parameters)
-    {
-        $endpoint = $this->getLikesEndpoint() . '&' . implode('&', $parameters);
-
-        return $this->contactEndpoint($endpoint);
-    }
-
-    /**
-     * @param string $query
-     *
-     * @return stdClass|array
-     * @throws ApiRateLimitingException
-     * @throws BadAuthenticationDataException
-     * @throws InconsistentTokenRepository
-     * @throws NonUniqueResultException
-     * @throws NotFoundMemberException
-     * @throws NotFoundStatusException
-     * @throws OptimisticLockException
-     * @throws ProtectedAccountException
-     * @throws ReadOnlyApplicationException
-     * @throws ReflectionException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws UnexpectedApiResponseException
-     */
-    public function saveSearch(string $query)
-    {
-        $endpoint = $this->getCreateSavedSearchEndpoint()."query=$query";
-
-        return $this->contactEndpoint($endpoint);
-    }
-
-    /**
-     * @param AggregateSubscription $subscription
-     *
-     * @return stdClass
-     * @throws ApiRateLimitingException
-     * @throws BadAuthenticationDataException
-     * @throws NonUniqueResultException
-     * @throws NotFoundMemberException
-     * @throws NotFoundStatusException
-     * @throws OptimisticLockException
-     * @throws ProtectedAccountException
-     * @throws ReadOnlyApplicationException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws ReflectionException
-     */
-    public function subscribeToMemberTimeline(AggregateSubscription $subscription)
-    {
-        $endpoint = $this->getCreateFriendshipsEndpoint();
-
-        return $this->contactEndpoint(
-            str_replace(
-                '{{ screen_name }}',
-                $subscription->subscription->getTwitterUsername(),
-                $endpoint
-            )
-        );
     }
 
     /**
@@ -470,65 +166,36 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
             throw new \LogicException('No more than 100 members can be added to a list at once');
         }
 
-        $endpoint = $this->getAddMembersToListEndpoint().
-            "screen_name=".implode(',', $members).
-            '&list_id='.$listId
-        ;
+        $endpoint = $this->getAddMembersToListEndpoint() .
+            "screen_name=" . implode(',', $members) .
+            '&list_id=' . $listId;
 
         return $this->contactEndpoint($endpoint);
     }
 
     /**
-     * @param string $query
-     * @param string $params
+     * @param TwitterOAuth $client
+     * @param              $endpoint
+     * @param array        $parameters
      *
-     * @return stdClass
-     * @throws ApiRateLimitingException
-     * @throws BadAuthenticationDataException
-     * @throws NonUniqueResultException
-     * @throws NotFoundMemberException
-     * @throws NotFoundStatusException
-     * @throws OptimisticLockException
-     * @throws ProtectedAccountException
-     * @throws ReadOnlyApplicationException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws ReflectionException
+     * @return stdClass|array
      */
-    public function search(string $query, $params = '')
-    {
-        $endpoint = $this->getSearchEndpoint()."q=$query&count=100".$params;
-
-        return $this->contactEndpoint($endpoint);
-    }
-
-    /**
-     * @param array $options
-     * @param bool  $shouldDiscoverFutureStatuses
-     *
-     * @return array
-     */
-    public function guessMaxId(array $options, bool $shouldDiscoverFutureStatuses)
-    {
-        if ($shouldDiscoverFutureStatuses) {
-            $member = $this->userRepository->findOneBy(
-                ['twitter_username' => $options['screen_name']]
-            );
-            if (($member instanceof MemberInterface) && !is_null($member->maxStatusId)) {
-                $options['since_id'] = $member->maxStatusId + 1;
-
-                return $options;
-            }
+    public function connectToEndpoint(
+        TwitterOAuth $client,
+        string $endpoint,
+        array $parameters = []
+    ) {
+        if (
+            strpos($endpoint, 'create.json') !== false
+            || strpos($endpoint, 'create_all.json') !== false
+            || strpos($endpoint, 'destroy.json') !== false
+        ) {
+            return $client->post($endpoint, $parameters);
         }
 
-        if (array_key_exists('since_id', $options)) {
-            $options['max_id'] = $options['since_id'] - 2;
-            unset($options['since_id']);
-        } else {
-            $options['max_id'] = INF;
-        }
+        $response = $client->get($endpoint, $parameters);
 
-        return $options;
+        return $response;
     }
 
     /**
@@ -563,8 +230,10 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
                     throw $exception;
                 }
 
-                if ($this->propagateNotFoundStatuses &&
-                    ($exception instanceof NotFoundStatusException)) {
+                if (
+                    $this->propagateNotFoundStatuses
+                    && ($exception instanceof NotFoundStatusException)
+                ) {
                     throw $exception;
                 }
 
@@ -584,6 +253,49 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
         }
 
         return $this->delayUnknownExceptionHandlingOnEndpointForToken($endpoint);
+    }
+
+    /**
+     * @param string $endpoint
+     *
+     * @return stdClass
+     * @throws Exception
+     */
+    public function contactEndpointUsingBearerToken(string $endpoint)
+    {
+        $this->httpClient->setHeader('Authorization', $this->authenticationHeader);
+        $this->httpClient->request('GET', $endpoint);
+
+        /** @var Response $response */
+        $response       = $this->httpClient->getResponse();
+        $encodedContent = $response->getContent();
+
+        return \Safe\json_decode($encodedContent);
+    }
+
+    /**
+     * @param string $endpoint
+     * @param Token  $token
+     *
+     * @return stdClass|array
+     * @throws Exception
+     */
+    public function contactEndpointUsingConsumerKey(
+        string $endpoint,
+        Token $token
+    ) {
+        $tokens = $this->getTokens();
+
+        $connection = $this->makeHttpClient($tokens);
+
+        try {
+            $content = $this->connectToEndpoint($connection, $endpoint);
+            $this->checkApiLimit($connection);
+        } catch (Exception $exception) {
+            $content = $this->handleResponseContentWithEmptyErrorCode($exception, $token);
+        }
+
+        return $content;
     }
 
     /**
@@ -628,436 +340,69 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     }
 
     /**
-     * @param string                       $endpoint
-     * @param UnavailableResourceException $exception
-     * @param callable                     $fetchContent
+     * @param int $memberId
      *
-     * @return |null
+     * @return MemberInterface
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     */
+    public function ensureMemberHavingIdExists(int $memberId): MemberInterface
+    {
+        return $this->statusAccessor->ensureMemberHavingIdExists($memberId);
+    }
+
+    /**
+     * @param string $memberName
+     *
+     * @return MemberInterface
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     */
+    public function ensureMemberHavingNameExists(string $memberName): MemberInterface
+    {
+        return $this->statusAccessor->ensureMemberHavingNameExists($memberName);
+    }
+
+    /**
+     * @param stdClass $content
+     *
+     * @return UnavailableResourceException
+     */
+    public function extractContentErrorAsException(stdClass $content)
+    {
+        $message = $content->errors[0]->message;
+        $code    = $content->errors[0]->code;
+
+        return new UnavailableResourceException($message, $code);
+    }
+
+    /**
+     * @param array $parameters
+     *
+     * @return stdClass|array
      * @throws ApiRateLimitingException
      * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
      * @throws NonUniqueResultException
      * @throws NotFoundMemberException
      * @throws NotFoundStatusException
      * @throws OptimisticLockException
      * @throws ProtectedAccountException
      * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
+     * @throws UnexpectedApiResponseException
      */
-    public function handleTwitterErrorExceptionForToken(
-        string $endpoint,
-        UnavailableResourceException $exception,
-        callable $fetchContent
-    ) {
-        if (!\in_array(
-            $exception->getCode(),
-            [self::ERROR_EXCEEDED_RATE_LIMIT, self::ERROR_OVER_CAPACITY],
-            true
-        )) {
-            $this->throwException($exception);
-        }
-
-        $token = $this->maybeGetToken($endpoint);
-        $this->tokenRepository->freezeToken($token->getOauthToken());
-
-        if (strpos($endpoint, '/statuses/user_timeline') === false &&
-            strpos($endpoint, '/favorites/list') === false
-        ) {
-            $this->throwException($exception);
-        }
-
-        $this->moderator->waitFor(
-            15 * 60,
-            ['{{ token }}' => $this->takeFirstTokenCharacters($token)]
-        );
-
-        return $this->fetchContentWithRetries($endpoint, $fetchContent);
-    }
-
-    /**
-     * @param UnavailableResourceException $exception
-     * @return bool
-     * @throws ReflectionException
-     */
-    public function matchWithOneOfTwitterErrorCodes(UnavailableResourceException $exception)
+    public function fetchLikes(array $parameters)
     {
-        return in_array($exception->getCode(), $this->getTwitterErrorCodes());
-    }
+        $endpoint = $this->getLikesEndpoint() . '&' . implode('&', $parameters);
 
-    /**
-     * @return array
-     * @throws ReflectionException
-     */
-    public function getTwitterErrorCodes()
-    {
-        $reflection = new \ReflectionClass(__NAMESPACE__ . '\TwitterErrorAwareInterface');
-
-        return $reflection->getConstants();
-    }
-
-    /**
-     * @param string     $endpoint
-     * @param stdClass  $content
-     * @param Token|null $token
-     * @return UnavailableResourceException
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
-     */
-    public function logExceptionForToken(string $endpoint, stdClass $content, Token $token = null)
-    {
-        $exception = $this->extractContentErrorAsException($content);
-
-        $this->twitterApiLogger->info('[message] ' . $exception->getMessage());
-        $this->twitterApiLogger->info('[code] ' . $exception->getCode());
-
-        $token = $this->maybeGetToken($endpoint, $token);
-        $this->twitterApiLogger->info('[token] ' . $token->getOauthToken());
-
-        return $exception;
-    }
-
-    /**
-     * @param stdClass $content
-     * @return UnavailableResourceException
-     */
-    public function extractContentErrorAsException(stdClass $content)
-    {
-        $message = $content->errors[0]->message;
-        $code = $content->errors[0]->code;
-
-        return new UnavailableResourceException($message, $code);
-    }
-
-    /**
-     * @param string $endpoint
-     *
-     * @return stdClass
-     * @throws Exception
-     */
-    public function contactEndpointUsingBearerToken(string $endpoint)
-    {
-        $this->httpClient->setHeader('Authorization', $this->authenticationHeader);
-        $this->httpClient->request('GET', $endpoint);
-
-        /** @var Response $response */
-        $response = $this->httpClient->getResponse();
-        $encodedContent = $response->getContent();
-
-        return \Safe\json_decode($encodedContent);
-    }
-
-    /**
-     * @param string $endpoint
-     * @param Token  $token
-     *
-     * @return stdClass|array
-     * @throws Exception
-     */
-    public function contactEndpointUsingConsumerKey(
-        string $endpoint,
-        Token $token
-    ) {
-        $tokens = $this->getTokens();
-
-        $connection = $this->makeHttpClient($tokens);
-
-        try {
-            $content = $this->connectToEndpoint($connection, $endpoint);
-            $this->checkApiLimit($connection);
-        } catch (Exception $exception) {
-            $content = $this->handleResponseContentWithEmptyErrorCode($exception, $token);
-        }
-
-        return $content;
-    }
-
-    /**
-     * @param array $tokens
-     * @return mixed
-     */
-    public function makeHttpClient(array $tokens)
-    {
-        $httpClient = $this->httpClient;
-
-        return new $httpClient(
-            $tokens['key'],
-            $tokens['secret'],
-            $tokens['oauth'],
-            $tokens['oauth_secret']
-        );
-    }
-
-    /**
-     * @param TwitterOAuth $client
-     * @param              $endpoint
-     * @param array        $parameters
-     *
-     * @return stdClass|array
-     */
-    public function connectToEndpoint(
-        TwitterOAuth $client,
-        string $endpoint,
-        array $parameters = []
-    ) {
-        if (strpos($endpoint, 'create.json') !== false
-        || strpos($endpoint, 'create_all.json') !== false
-        || strpos($endpoint, 'destroy.json') !== false
-        ) {
-            return $client->post($endpoint, $parameters);
-        }
-
-        $response = $client->get($endpoint, $parameters);
-
-        return $response;
-    }
-
-    /**
-     * @return bool
-     */
-    public function shouldUseBearerToken(): bool
-    {
-        if (!isset($this->authenticationHeader)) {
-            return false;
-        }
-
-        return $this->authenticationHeader !== null;
-    }
-
-    /**
-     * @param string $endpoint
-     *
-     * @return Token|null
-     * @throws ApiRateLimitingException
-     * @throws InconsistentTokenRepository
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
-     */
-    public function preEndpointContact(string $endpoint): ?Token
-    {
-        $tokens = $this->getTokens();
-
-        /** @var Token $token */
-        $token = $this->tokenRepository->refreshFreezeCondition(
-            $tokens['oauth'],
-            $this->logger
-        );
-
-        if (!$token->isFrozen()) {
-            return $token;
-        }
-
-        return $this->guardAgainstApiLimit($endpoint);
-    }
-
-    /**
-     * @param Exception $exception
-     * @param Token $token
-     * @return object
-     * @throws Exception
-     */
-    public function handleResponseContentWithEmptyErrorCode(
-        Exception $exception,
-        Token $token
-    ) {
-        if ($exception->getCode() === 0) {
-            $emptyErrorCodeMessage = $this->translator->trans(
-                'logs.info.empty_error_code',
-                ['{{ oauth token start }}' => $this->takeFirstTokenCharacters($token)],
-                'logs'
-            );
-            $emptyErrorCodeException = EmptyErrorCodeException::encounteredWhenUsingToken(
-                $emptyErrorCodeMessage,
-                self::getExceededRateLimitErrorCode(),
-                $exception
-            );
-            $this->logger->info($emptyErrorCodeException->getMessage());
-
-            return $this->makeContentOutOfException($emptyErrorCodeException);
-        }
-
-        throw $exception;
-    }
-
-    /**
-     * @param UnavailableResourceException $exception
-     * @return object
-     */
-    public function makeContentOutOfException(UnavailableResourceException $exception)
-    {
-        return (object)[
-            'errors' => [
-                (object)[
-                    'message' => $exception->getMessage(),
-                    'code' => self::getExceededRateLimitErrorCode(),
-                ],
-            ],
-        ];
-    }
-
-    public function setupClient()
-    {
-        $requesterClass = $this->clientClass;
-        $this->httpClient = new $requesterClass();
-
-        $httpClientClass = $this->httpClientClass;
-        $httpClient = new $httpClientClass();
-        $this->httpClient->setClient($httpClient);
-    }
-
-    /**
-     * @param string $screenName
-     * @return bool
-     */
-    public function shouldSkipSerializationForMemberWithScreenName(string $screenName)
-    {
-        $member = $this->userRepository->findOneBy(['twitter_username' => $screenName]);
-        if (!$member instanceof MemberInterface) {
-            return false;
-        }
-
-        return $member->isProtected() ||
-            $member->hasBeenDeclaredAsNotFound() ||
-            $member->isSuspended() ||
-            $member->isAWhisperer()
-        ;
-    }
-
-    /**
-     * @param $identifier
-     *
-     * @return \API|mixed|object|stdClass
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
-     * @throws Exception
-     */
-    public function showUser($identifier)
-    {
-        $screenName = null;
-        $userId = null;
-
-        if (is_integer($identifier)) {
-            $userId = $identifier;
-            $option = 'user_id';
-
-            $this->guardAgainstSpecialMemberWithIdentifier($identifier);
-        } else {
-            $screenName = $identifier;
-            $option = 'screen_name';
-
-            $this->guardAgainstSpecialMembers($screenName);
-        }
-
-        $showUserEndpoint = $this->getShowUserEndpoint($version = '1.1', $option);
-        $this->guardAgainstApiLimit($showUserEndpoint);
-
-        try {
-            $twitterUser = $this->contactEndpoint(
-                strtr(
-                    $showUserEndpoint,
-                    [
-                        '{{ screen_name }}' => $screenName,
-                        '{{ user_id }}' => $userId
-                    ]
-                )
-            );
-        } catch (UnavailableResourceException $exception) {
-            if ($exception->getCode() === self::ERROR_SUSPENDED_USER) {
-                $suspendedMember = $this->userRepository->suspendMemberByScreenNameOrIdentifier($identifier);
-                $this->logSuspendedMemberMessage($suspendedMember->getTwitterUsername());
-
-                SuspendedAccountException::raiseExceptionAboutSuspendedMemberHavingScreenName(
-                    $suspendedMember->getTwitterUsername(),
-                    $exception->getCode(),
-                    $exception
-                );
-            }
-
-            if ($exception->getCode() === self::ERROR_NOT_FOUND ||
-                $exception->getCode() === self::ERROR_USER_NOT_FOUND
-            ) {
-                $member = $this->userRepository->findOneBy(['twitter_username' => $screenName]);
-                if (!($member instanceof MemberInterface) && !is_null($screenName)) {
-                    $member = $this->userRepository->declareMemberHavingScreenNameNotFound($screenName);
-                }
-
-                if ($member instanceof MemberInterface && !$member->isNotFound()) {
-                    $this->userRepository->declareUserAsNotFound($member);
-                }
-
-                $this->logNotFoundMemberMessage(is_null($screenName) ? $identifier : $screenName);
-                NotFoundMemberException::raiseExceptionAboutNotFoundMemberHavingScreenName(
-                    is_null($screenName) ? $identifier : $screenName,
-                    $exception->getCode(),
-                    $exception
-                );
-            }
-
-            throw $exception;
-        }
-
-        $this->guardAgainstUnavailableResource($twitterUser);
-
-        return $twitterUser;
-    }
-
-    /**
-     * @param string $version
-     * @return string
-     */
-    protected function getUserTimelineStatusesEndpoint($version = '1.1')
-    {
-        return $this->getApiBaseUrl($version) . '/statuses/user_timeline.json?' .
-            'tweet_mode=extended&include_entities=1&include_rts=1&exclude_replies=0&trim_user=0';
-    }
-
-    /**
-     * @param string $version
-     * @return string
-     */
-    protected function getLikesEndpoint($version = '1.1')
-    {
-        return $this->getApiBaseUrl($version) . '/favorites/list.json?' .
-            'tweet_mode=extended&include_entities=1&include_rts=1&exclude_replies=0&trim_user=0';
-    }
-
-    /**
-     * @param string $version
-     * @return string
-     */
-    protected function getCreateSavedSearchEndpoint($version = '1.1')
-    {
-        return $this->getApiBaseUrl($version) . '/saved_searches/create.json?';
-    }
-
-    /**
-     * @see https://developer.twitter.com/en/docs/accounts-and-users/follow-search-get-users/api-reference/post-friendships-create
-     *
-     * @param string $version
-     * @return string
-     */
-    protected function getCreateFriendshipsEndpoint($version = '1.1')
-    {
-        return $this->getApiBaseUrl($version) . '/friendships/create.json?screen_name={{ screen_name }}';
-    }
-
-    /**
-     * @param string $version
-     * @return string
-     */
-    protected function getDestroyFriendshipsEndpoint($version = '1.1')
-    {
-        return $this->getApiBaseUrl($version) . '/friendships/destroy.json?screen_name={{ screen_name }}';
-    }
-
-    /**
-     * @param string $version
-     * @return string
-     */
-    protected function getSearchEndpoint($version = '1.1')
-    {
-        return $this->getApiBaseUrl($version) . '/search/tweets.json?tweet_mode=extended&';
+        return $this->contactEndpoint($endpoint);
     }
 
     /**
@@ -1075,344 +420,44 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     }
 
     /**
-     * @param string $version
-     * @return string
-     */
-    protected function getRateLimitStatusEndpoint($version = '1.1')
-    {
-        return $this->getApiBaseUrl($version) . '/application/rate_limit_status.json?'.
-            'resources=favorites,statuses,users,lists,friends,friendships,followers';
-    }
-
-    /**
-     * @param string $version
-     * @return string
-     */
-    protected function getApiBaseUrl($version = '1.1')
-    {
-        return 'https://' . $this->apiHost . '/' . $version;
-    }
-
-    /**
-     * @param $options
-     * @return array
-     */
-    protected function validateRequestOptions($options)
-    {
-        $validatedOptions = [];
-
-        if (isset($options->{'count'})) {
-            $resultsCount = $options->{'count'};
-        } else {
-            $resultsCount = 1;
-        }
-        $validatedOptions[] = 'count' . '=' . $resultsCount;
-
-        if (isset($options->{'max_id'})) {
-            $maxId = $options->{'max_id'};
-            $validatedOptions[] = 'max_id' . '=' . $maxId;
-        }
-
-        if (isset($options->{'screen_name'})) {
-            $screenName = $options->{'screen_name'};
-            $validatedOptions[] = 'screen_name' . '=' . $screenName;
-        }
-
-        if (isset($options->{'since_id'})) {
-            $sinceId = $options->{'since_id'};
-            $validatedOptions[] = 'since_id' . '=' . $sinceId;
-        }
-
-        return $validatedOptions;
-    }
-
-    /**
-     * @param UnavailableResourceException $exception
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     */
-    protected function throwException(UnavailableResourceException $exception)
-    {
-        if ($exception->getCode() === self::ERROR_SUSPENDED_USER) {
-            throw new SuspendedAccountException($exception->getMessage(), $exception->getCode());
-        }
-
-        if ($exception->getCode() === self::ERROR_USER_NOT_FOUND) {
-            throw new NotFoundMemberException($exception->getMessage(), $exception->getCode());
-        }
-
-        throw $exception;
-    }
-
-    /**
-     * @return array
-     */
-    protected function getTokens(): array
-    {
-        try {
-            if ($this->userSecret === null || $this->userToken === null) {
-                InvalidTokensException::throws();
-            }
-        } catch (InvalidTokensException $exception) {
-            $this->logger->error($exception->getMessage());
-            throw $exception;
-        }
-
-        return [
-            'oauth' => $this->userToken,
-            'oauth_secret' => $this->userSecret,
-            'key' => $this->consumerKey,
-            'secret' => $this->consumerSecret,
-        ];
-    }
-
-    /**
-     * @param $twitterUser
-     * @return bool
-     * @throws ProtectedAccountException
-     * @throws UnavailableResourceException
-     * @throws OptimisticLockException
-     */
-    protected function guardAgainstUnavailableResource($twitterUser)
-    {
-        $validUser = is_object($twitterUser);
-
-        if ($validUser && !isset($twitterUser->errors)) {
-            return $this->guardAgainstProtectedAccount($twitterUser);
-        }
-
-        if ($validUser && isset($twitterUser->errors)) {
-            $errorCode = $twitterUser->errors[0]->code;
-            $errorMessage = $twitterUser->errors[0]->message;
-            $this->logger->error($errorMessage);
-
-            $this->throwUnavailableResourceException($errorMessage, $errorCode);
-        }
-
-        $errorMessage = 'Unavailable user';
-        $this->logger->info($errorMessage);
-
-        $this->throwUnavailableResourceException($errorMessage, 0);
-    }
-
-    /**
-     * @param $twitterUser
-     * @return bool
-     * @throws ProtectedAccountException
-     * @throws OptimisticLockException
-     */
-    protected function guardAgainstProtectedAccount($twitterUser)
-    {
-        if (!isset($twitterUser->protected) || !$twitterUser->protected) {
-            return true;
-        }
-
-        $this->userRepository->declareUserAsProtected($twitterUser->screen_name);
-
-        ProtectedAccountException::raiseExceptionAboutProtectedMemberHavingScreenName(
-            $twitterUser->screen_name,
-            self::ERROR_PROTECTED_ACCOUNT
-        );
-    }
-
-    /**
-     * @param $errorMessage
-     * @param $errorCode
-     * @throws UnavailableResourceException
-     */
-    protected function throwUnavailableResourceException($errorMessage, $errorCode)
-    {
-        throw new UnavailableResourceException($errorMessage, $errorCode);
-    }
-
-    /**
-     * @param string $version
-     * @param string $option
-     * @return string
-     */
-    protected function getShowUserEndpoint($version = '1.1', $option = 'screen_name')
-    {
-        if ($option === 'screen_name') {
-            $parameters = 'screen_name={{ screen_name }}';
-        } else {
-            $parameters = 'user_id={{ user_id }}';
-        }
-
-        return $this->getApiBaseUrl($version) . '/users/show.json?' . $parameters;
-    }
-
-    /**
-     * @param string $screenName
+     * @param array $options
      *
-     * @return \API|mixed|object|stdClass
+     * @return stdClass|array
+     * @throws ApiRateLimitingException
+     * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
+     * @throws NonUniqueResultException
+     * @throws NotFoundMemberException
+     * @throws NotFoundStatusException
+     * @throws OptimisticLockException
+     * @throws ProtectedAccountException
+     * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
-     * @throws OptimisticLockException
+     * @throws UnexpectedApiResponseException
      */
-    public function showUserFriends(string $screenName)
+    public function fetchStatuses(array $options)
     {
-        $showUserFriendEndpoint = $this->getShowUserFriendsEndpoint();
-
-        try {
-            return $this->contactEndpoint(str_replace('{{ screen_name }}', $screenName, $showUserFriendEndpoint));
-        } catch (SuspendedAccountException  $exception) {
-            $this->userRepository->declareMemberAsSuspended($screenName);
-        } catch (NotFoundMemberException $exception) {
-            $this->userRepository->declareUserAsNotFoundByUsername($screenName);
-        } catch (ProtectedAccountException $exception) {
-            $this->userRepository->declareUserAsProtected($screenName);
-        } finally {
-            if (isset($exception)) {
-                return (object)['ids' => []];
-            }
+        if (is_null($options) || (!is_object($options) && !is_array($options))) {
+            throw new Exception('Invalid options');
         }
-    }
 
-
-    /**
-     * @param string $screenName
-     * @param int    $cursor
-     *
-     * @return \API|mixed|object|stdClass
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws OptimisticLockException
-     */
-    public function showMemberSubscribees(string $screenName, int $cursor = -1)
-    {
-        $showUserFriendEndpoint = $this->getShowMemberSubscribeesEndpoint();
-
-        try {
-            return $this->contactEndpoint(
-                str_replace('{{ screen_name }}',
-                    $screenName,
-                    $showUserFriendEndpoint
-                ).'&cursor='.$cursor
-            );
-        } catch (SuspendedAccountException  $exception) {
-            $this->userRepository->declareMemberAsSuspended($screenName);
-        } catch (NotFoundMemberException $exception) {
-            $this->userRepository->declareUserAsNotFoundByUsername($screenName);
-        } catch (ProtectedAccountException $exception) {
-            $this->userRepository->declareUserAsProtected($screenName);
-        } finally {
-            if (isset($exception)) {
-                return (object)['ids' => []];
-            }
+        if (is_array($options)) {
+            $options = (object) $options;
         }
-    }
 
-    /**
-     * @param string $version
-     * @return string
-     */
-    protected function getShowUserFriendsEndpoint($version = '1.1')
-    {
-        return $this->getApiBaseUrl($version) . '/friends/ids.json?count=5000&screen_name={{ screen_name }}';
-    }
+        $parameters = $this->validateRequestOptions($options);
 
-    /**
-     * @param string $version
-     * @return string
-     */
-    protected function getShowMemberSubscribeesEndpoint($version = '1.1')
-    {
-        return $this->getApiBaseUrl($version) . '/followers/ids.json?count=5000&screen_name={{ screen_name }}';
-    }
-
-    /**
-     * @param string $version
-     * @return string
-     */
-    protected function getShowStatusEndpoint($version = '1.1')
-    {
-        return $this->getApiBaseUrl($version) . '/statuses/show.json?id={{ id }}&tweet_mode=extended';
-    }
-
-    /**
-     * @param $identifier
-     * @return \API|mixed|object|stdClass
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws OptimisticLockException
-     * @throws Exception
-     */
-    public function showStatus($identifier)
-    {
-        if (!is_numeric($identifier)) {
-            throw new \InvalidArgumentException('A status identifier should be an integer');
+        if ($this->isAboutToCollectLikesFromCriteria((array) $options)) {
+            return $this->fetchLikes($parameters);
         }
-        $showStatusEndpoint = $this->getShowStatusEndpoint($version = '1.1');
 
-        try {
-            return $this->contactEndpoint(strtr($showStatusEndpoint, ['{{ id }}' => $identifier]));
-        } catch (NotFoundStatusException $exception) {
-            $this->statusAccessor->declareStatusNotFoundByIdentifier($identifier);
-
-            throw $exception;
-        }
+        return $this->fetchTimelineStatuses($parameters);
     }
 
     /**
-     * @param $screenName
-     * @return \API|mixed|object|stdClass
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws OptimisticLockException
-     * @throws Exception
-     */
-    public function getUserLists($screenName)
-    {
-        return $this->contactEndpoint(
-            strtr(
-                $this->getUserListsEndpoint(),
-                [
-                    '{{ screenName }}' => $screenName,
-                    '{{ reverse }}' => true,
-                ]
-            )
-        );
-    }
-
-    /**
-     * @param $screenName
-     * @return \API|mixed|object|stdClass
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws OptimisticLockException
-     */
-    public function getUserListSubscriptions($screenName)
-    {
-        return $this->contactEndpoint(
-            strtr(
-                $this->getMemberListSubscriptionsEndpoint(),
-                ['{{ screenName }}' => $screenName]
-            )
-        );
-    }
-
-    /**
-     * @param string $version
-     * @return string
-     */
-    protected function getUserListsEndpoint($version = '1.1')
-    {
-        return $this->getApiBaseUrl($version) . '/lists/list.json?reverse={{ reverse }}&screen_name={{ screenName }}';
-    }
-
-    /**
-     * @param string $version
-     * @return string
-     */
-    private function getMemberListSubscriptionsEndpoint($version = '1.1')
-    {
-        return $this->getApiBaseUrl($version) . '/lists/subscriptions.json?count=1000&screen_name={{ screenName }}';
-    }
-
-    /**
-     * @param string $screenName
-     * @param int    $cursor
-     * @param int    $count
+     * @param array $parameters
      *
      * @return stdClass
      * @throws ApiRateLimitingException
@@ -1429,47 +474,35 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
      * @throws UnavailableResourceException
      * @throws UnexpectedApiResponseException
      */
-    public function getUserOwnerships(
-        string $screenName,
-        int $cursor = -1,
-        int $count = 800
-    ) {
-        $endpoint = $this->getUserOwnershipsEndpoint();
-        $this->guardAgainstApiLimit($endpoint);
+    public function fetchTimelineStatuses(array $parameters)
+    {
+        $endpoint = $this->getUserTimelineStatusesEndpoint() . '&' . implode('&', $parameters);
 
-        return $this->contactEndpoint(
-            strtr(
-                $endpoint,
-                [
-                    '{{ screenName }}' => $screenName,
-                    '{{ reverse }}' => true,
-                    '{{ count }}' => $count,
-                    '{{ cursor }}' => $cursor,
-                ]
-            )
-        );
+        return $this->contactEndpoint($endpoint);
     }
 
     /**
-     * @param string $version
-     *
-     * @return string
+     * @return int
      */
-    protected function getUserOwnershipsEndpoint(string $version = '1.1'): string
+    public function getBadAuthenticationDataCode()
     {
-        return $this->getApiBaseUrl($version) . '/lists/ownerships.json?reverse={{ reverse }}' .
-            '&screen_name={{ screenName }}' .
-            '&count={{ count }}&cursor={{ cursor }}';
+        return self::ERROR_BAD_AUTHENTICATION_DATA;
     }
 
     /**
-     * @param string $version
-     * @return string
+     * @return int
      */
-    protected function getAddMembersToListEndpoint($version = '1.1')
+    public function getEmptyReplyErrorCode()
     {
-        return $this->getApiBaseUrl($version) . '/lists/members/create_all.json' .
-            '?';
+        return self::ERROR_EMPTY_REPLY;
+    }
+
+    /**
+     * @return int
+     */
+    public function getExceededRateLimitErrorCode()
+    {
+        return self::ERROR_EXCEEDED_RATE_LIMIT;
     }
 
     /**
@@ -1508,17 +541,355 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     }
 
     /**
-     * @see https://developer.twitter.com/en/docs/accounts-and-users/create-manage-lists/api-reference/get-lists-members
-     * @param string $version
-     * @return string
+     * @return int
      */
-    protected function getListMembersEndpoint($version = '1.1')
+    public function getMemberNotFoundErrorCode()
     {
-        return $this->getApiBaseUrl($version) . '/lists/members.json?count=5000&list_id={{ id }}';
+        return self::ERROR_NOT_FOUND;
+    }
+
+    /**
+     * @return int
+     */
+    public function getProtectedAccountErrorCode()
+    {
+        return self::ERROR_PROTECTED_ACCOUNT;
+    }
+
+    /**
+     * @return int
+     */
+    public function getSuspendedUserErrorCode()
+    {
+        return self::ERROR_SUSPENDED_USER;
+    }
+
+    /**
+     * @return array
+     * @throws ReflectionException
+     */
+    public function getTwitterErrorCodes()
+    {
+        $reflection = new \ReflectionClass(__NAMESPACE__ . '\TwitterErrorAwareInterface');
+
+        return $reflection->getConstants();
+    }
+
+    /**
+     * @param $screenName
+     *
+     * @return \API|mixed|object|stdClass
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws OptimisticLockException
+     */
+    public function getUserListSubscriptions($screenName)
+    {
+        return $this->contactEndpoint(
+            strtr(
+                $this->getMemberListSubscriptionsEndpoint(),
+                ['{{ screenName }}' => $screenName]
+            )
+        );
+    }
+
+    /**
+     * @param $screenName
+     *
+     * @return \API|mixed|object|stdClass
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws OptimisticLockException
+     * @throws Exception
+     */
+    public function getUserLists($screenName)
+    {
+        return $this->contactEndpoint(
+            strtr(
+                $this->getUserListsEndpoint(),
+                [
+                    '{{ screenName }}' => $screenName,
+                    '{{ reverse }}'    => true,
+                ]
+            )
+        );
+    }
+
+    /**
+     * @return int
+     */
+    public function getUserNotFoundErrorCode()
+    {
+        return self::ERROR_USER_NOT_FOUND;
+    }
+
+    /**
+     * @param string $screenName
+     * @param int    $cursor
+     * @param int    $count
+     *
+     * @return stdClass
+     * @throws ApiRateLimitingException
+     * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
+     * @throws NonUniqueResultException
+     * @throws NotFoundMemberException
+     * @throws NotFoundStatusException
+     * @throws OptimisticLockException
+     * @throws ProtectedAccountException
+     * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws UnexpectedApiResponseException
+     */
+    public function getUserOwnerships(
+        string $screenName,
+        int $cursor = -1,
+        int $count = 800
+    ) {
+        $endpoint = $this->getUserOwnershipsEndpoint();
+        $this->guardAgainstApiLimit($endpoint);
+
+        return $this->contactEndpoint(
+            strtr(
+                $endpoint,
+                [
+                    '{{ screenName }}' => $screenName,
+                    '{{ reverse }}'    => true,
+                    '{{ count }}'      => $count,
+                    '{{ cursor }}'     => $cursor,
+                ]
+            )
+        );
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getUserSecret()
+    {
+        return $this->userSecret;
+    }
+
+    /**
+     * @param string $userSecret
+     *
+     * @return $this
+     */
+    public function setUserSecret($userSecret)
+    {
+        $this->userSecret = $userSecret;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getUserToken()
+    {
+        return $this->userToken;
+    }
+
+    /**
+     * @param string $userToken
+     *
+     * @return $this
+     */
+    public function setUserToken($userToken)
+    {
+        $this->userToken = $userToken;
+
+        return $this;
     }
 
     /**
      * @param string $endpoint
+     * @param bool   $findNextAvailableToken
+     *
+     * @return Token|null
+     * @throws ApiRateLimitingException
+     * @throws InconsistentTokenRepository
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
+     */
+    public function guardAgainstApiLimit(
+        string $endpoint,
+        bool $findNextAvailableToken = true
+    ): ?Token {
+        $apiLimitReached = $this->isApiLimitReached();
+        $token           = null;
+
+        $apiLimitReached = $apiLimitReached || $this->tokenRepository->isOauthTokenFrozen($this->userToken);
+        if ($apiLimitReached) {
+            $unfrozenToken = false;
+
+            if ($findNextAvailableToken) {
+                $token         = $this->tokenRepository->findFirstUnfrozenToken();
+                $unfrozenToken = $token !== null;
+
+                while ($apiLimitReached && $unfrozenToken) {
+                    $apiLimitReached = !$this->isApiAvailableForToken($endpoint, $token);
+                    $token           = $this->tokenRepository->findFirstUnfrozenToken();
+                    $unfrozenToken   = $token !== null;
+                }
+            }
+
+            if ($unfrozenToken) {
+                return $token;
+            }
+
+            $message = $this->translator->trans('twitter.error.api_limit_reached.all_tokens', [], 'messages');
+            $this->logger->info($message);
+
+            if (!isset($token)) {
+                $token = $this->tokenRepository->findFirstFrozenToken();
+            }
+
+            if ($token === null) {
+                InconsistentTokenRepository::onEmptyAvailableTokenList();
+            }
+
+            $this->waitUntilTokenUnfrozen($token);
+
+            return $token;
+        }
+
+        return $this->tokenRepository->findUnfrozenToken($this->userToken);
+    }
+
+    /**
+     * @param array $options
+     * @param bool  $shouldDiscoverFutureStatuses
+     *
+     * @return array
+     */
+    public function guessMaxId(array $options, bool $shouldDiscoverFutureStatuses)
+    {
+        if ($shouldDiscoverFutureStatuses) {
+            $member = $this->userRepository->findOneBy(
+                ['twitter_username' => $options['screen_name']]
+            );
+            if (($member instanceof MemberInterface) && !is_null($member->maxStatusId)) {
+                $options['since_id'] = $member->maxStatusId + 1;
+
+                return $options;
+            }
+        }
+
+        if (array_key_exists('since_id', $options)) {
+            $options['max_id'] = $options['since_id'] - 2;
+            unset($options['since_id']);
+        } else {
+            $options['max_id'] = INF;
+        }
+
+        return $options;
+    }
+
+    /**
+     * @param Exception $exception
+     * @param Token     $token
+     *
+     * @return object
+     * @throws Exception
+     */
+    public function handleResponseContentWithEmptyErrorCode(
+        Exception $exception,
+        Token $token
+    ) {
+        if ($exception->getCode() === 0) {
+            $emptyErrorCodeMessage   = $this->translator->trans(
+                'logs.info.empty_error_code',
+                ['{{ oauth token start }}' => $this->takeFirstTokenCharacters($token)],
+                'logs'
+            );
+            $emptyErrorCodeException = EmptyErrorCodeException::encounteredWhenUsingToken(
+                $emptyErrorCodeMessage,
+                self::getExceededRateLimitErrorCode(),
+                $exception
+            );
+            $this->logger->info($emptyErrorCodeException->getMessage());
+
+            return $this->makeContentOutOfException($emptyErrorCodeException);
+        }
+
+        throw $exception;
+    }
+
+    /**
+     * @param string                       $endpoint
+     * @param UnavailableResourceException $exception
+     * @param callable                     $fetchContent
+     *
+     * @return |null
+     * @throws ApiRateLimitingException
+     * @throws BadAuthenticationDataException
+     * @throws NonUniqueResultException
+     * @throws NotFoundMemberException
+     * @throws NotFoundStatusException
+     * @throws OptimisticLockException
+     * @throws ProtectedAccountException
+     * @throws ReadOnlyApplicationException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     */
+    public function handleTwitterErrorExceptionForToken(
+        string $endpoint,
+        UnavailableResourceException $exception,
+        callable $fetchContent
+    ) {
+        if (
+        !\in_array(
+            $exception->getCode(),
+            [self::ERROR_EXCEEDED_RATE_LIMIT, self::ERROR_OVER_CAPACITY],
+            true
+        )
+        ) {
+            $this->throwException($exception);
+        }
+
+        $token = $this->maybeGetToken($endpoint);
+        $this->tokenRepository->freezeToken($token->getOauthToken());
+
+        if (
+            strpos($endpoint, '/statuses/user_timeline') === false
+            && strpos($endpoint, '/favorites/list') === false
+        ) {
+            $this->throwException($exception);
+        }
+
+        $this->moderator->waitFor(
+            15 * 60,
+            ['{{ token }}' => $this->takeFirstTokenCharacters($token)]
+        );
+
+        return $this->fetchContentWithRetries($endpoint, $fetchContent);
+    }
+
+    /**
+     * @param array $criteria
+     *
+     * @return bool
+     */
+    public function isAboutToCollectLikesFromCriteria(array $criteria): bool
+    {
+        if (!array_key_exists(self::INTENT_TO_FETCH_LIKES, $criteria)) {
+            return false;
+        }
+
+        return $criteria[self::INTENT_TO_FETCH_LIKES];
+    }
+
+    public function isApiLimitReached()
+    {
+        return $this->apiLimitReached;
+    }
+
+    /**
+     * @param string $endpoint
+     *
      * @return bool
      * @throws Exception
      */
@@ -1547,7 +918,7 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
                 $endpoint = null;
 
                 if (false !== strpos($fullEndpoint, '/users/show')) {
-                    $endpoint = '/users/show/:id';
+                    $endpoint     = '/users/show/:id';
                     $resourceType = 'users';
                 }
 
@@ -1556,27 +927,27 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
                 }
 
                 if (false !== strpos($fullEndpoint, '/lists/ownerships')) {
-                    $endpoint = '/lists/ownerships';
+                    $endpoint     = '/lists/ownerships';
                     $resourceType = 'lists';
                 }
 
                 if (false !== strpos($fullEndpoint, '/favorites/list')) {
-                    $endpoint = '/favorites/list';
+                    $endpoint     = '/favorites/list';
                     $resourceType = 'favorites';
                 }
 
                 if (false !== strpos($fullEndpoint, '/friends/ids')) {
-                    $endpoint = '/friends/ids';
+                    $endpoint     = '/friends/ids';
                     $resourceType = 'friends';
                 }
 
                 if (false !== strpos($fullEndpoint, '/followers/ids')) {
-                    $endpoint = '/followers/ids';
+                    $endpoint     = '/followers/ids';
                     $resourceType = 'followers';
                 }
 
                 if (false !== strpos($fullEndpoint, '/friendships/create')) {
-                    $endpoint = '/friendships/create';
+                    $endpoint     = '/friendships/create';
                     $resourceType = 'friendships';
                 }
             }
@@ -1595,10 +966,10 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
                 $remainingCallsMessage = $this->translator->trans(
                     'logs.info.calls_remaining',
                     [
-                        'count' => $remainingCalls,
+                        'count'           => $remainingCalls,
                         'remaining_calls' => $remainingCalls,
-                        'endpoint' => $endpoint,
-                        'identifier' => $this->takeFirstTokenCharacters($token),
+                        'endpoint'        => $endpoint,
+                        'identifier'      => $this->takeFirstTokenCharacters($token),
                     ],
                     'logs'
                 );
@@ -1618,11 +989,508 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
      *
      * @param $remainingCalls
      * @param $limit
+     *
      * @return bool
      */
     public function lessRemainingCallsThanTenPercentOfLimit($remainingCalls, $limit)
     {
         return $remainingCalls < floor($limit * 1 / 10);
+    }
+
+    /**
+     * @param string     $endpoint
+     * @param stdClass   $content
+     * @param Token|null $token
+     *
+     * @return UnavailableResourceException
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
+     */
+    public function logExceptionForToken(string $endpoint, stdClass $content, Token $token = null)
+    {
+        $exception = $this->extractContentErrorAsException($content);
+
+        $this->twitterApiLogger->info('[message] ' . $exception->getMessage());
+        $this->twitterApiLogger->info('[code] ' . $exception->getCode());
+
+        $token = $this->maybeGetToken($endpoint, $token);
+        $this->twitterApiLogger->info('[token] ' . $token->getOauthToken());
+
+        return $exception;
+    }
+
+    /**
+     * @param UnavailableResourceException $exception
+     *
+     * @return object
+     */
+    public function makeContentOutOfException(UnavailableResourceException $exception)
+    {
+        return (object) [
+            'errors' => [
+                (object) [
+                    'message' => $exception->getMessage(),
+                    'code'    => self::getExceededRateLimitErrorCode(),
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * @param array $tokens
+     *
+     * @return mixed
+     */
+    public function makeHttpClient(array $tokens)
+    {
+        $httpClient = $this->httpClient;
+
+        return new $httpClient(
+            $tokens['key'],
+            $tokens['secret'],
+            $tokens['oauth'],
+            $tokens['oauth_secret']
+        );
+    }
+
+    /**
+     * @param UnavailableResourceException $exception
+     *
+     * @return bool
+     * @throws ReflectionException
+     */
+    public function matchWithOneOfTwitterErrorCodes(UnavailableResourceException $exception)
+    {
+        return in_array($exception->getCode(), $this->getTwitterErrorCodes());
+    }
+
+    /**
+     * @param string $endpoint
+     *
+     * @return Token|null
+     * @throws ApiRateLimitingException
+     * @throws InconsistentTokenRepository
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
+     */
+    public function preEndpointContact(string $endpoint): ?Token
+    {
+        $tokens = $this->getTokens();
+
+        /** @var Token $token */
+        $token = $this->tokenRepository->refreshFreezeCondition(
+            $tokens['oauth'],
+            $this->logger
+        );
+
+        if (!$token->isFrozen()) {
+            return $token;
+        }
+
+        return $this->guardAgainstApiLimit($endpoint);
+    }
+
+    /**
+     * @param string $query
+     *
+     * @return stdClass|array
+     * @throws ApiRateLimitingException
+     * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
+     * @throws NonUniqueResultException
+     * @throws NotFoundMemberException
+     * @throws NotFoundStatusException
+     * @throws OptimisticLockException
+     * @throws ProtectedAccountException
+     * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws UnexpectedApiResponseException
+     */
+    public function saveSearch(string $query)
+    {
+        $endpoint = $this->getCreateSavedSearchEndpoint() . "query=$query";
+
+        return $this->contactEndpoint($endpoint);
+    }
+
+    /**
+     * @param string $query
+     * @param string $params
+     *
+     * @return stdClass
+     * @throws ApiRateLimitingException
+     * @throws BadAuthenticationDataException
+     * @throws NonUniqueResultException
+     * @throws NotFoundMemberException
+     * @throws NotFoundStatusException
+     * @throws OptimisticLockException
+     * @throws ProtectedAccountException
+     * @throws ReadOnlyApplicationException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws ReflectionException
+     */
+    public function search(string $query, $params = '')
+    {
+        $endpoint = $this->getSearchEndpoint() . "q=$query&count=100" . $params;
+
+        return $this->contactEndpoint($endpoint);
+    }
+
+    /**
+     * @param string $host
+     *
+     * @return $this
+     */
+    public function setApiHost($host)
+    {
+        $this->apiHost = $host;
+
+        return $this;
+    }
+
+    /**
+     * @param string $header
+     *
+     * @return $this
+     */
+    public function setAuthenticationHeader($header)
+    {
+        $this->authenticationHeader = $header;
+
+        return $this;
+    }
+
+    /**
+     * @param string $clientClass
+     *
+     * @return $this
+     */
+    public function setClientClass($clientClass)
+    {
+        $this->clientClass = $clientClass;
+
+        return $this;
+    }
+
+    /**
+     * @param string $consumerKey
+     *
+     * @return $this
+     */
+    public function setConsumerKey($consumerKey)
+    {
+        $this->consumerKey = $consumerKey;
+
+        return $this;
+    }
+
+    /**
+     * @param string $consumerSecret
+     *
+     * @return $this
+     */
+    public function setConsumerSecret($consumerSecret)
+    {
+        $this->consumerSecret = $consumerSecret;
+
+        return $this;
+    }
+
+    /**
+     * @param string $httpClientClass
+     *
+     * @return $this
+     */
+    public function setHttpClientClass(string $httpClientClass)
+    {
+        $this->httpClientClass = $httpClientClass;
+
+        return $this;
+    }
+
+    /**
+     * @param LoggerInterface|null $logger
+     *
+     * @return $this
+     */
+    public function setLogger(LoggerInterface $logger = null): self
+    {
+        $this->logger = $logger;
+
+        return $this;
+    }
+
+    public function setMemberRepository(MemberRepository $memberRepository): self
+    {
+        $this->userRepository = $memberRepository;
+
+        return $this;
+    }
+
+    public function setModerator(ApiLimitModerator $moderator = null): self
+    {
+        $this->moderator = $moderator;
+
+        return $this;
+    }
+
+    /**
+     * @param TokenRepositoryInterface $tokenRepository
+     *
+     * @return $this
+     */
+    public function setTokenRepository(TokenRepositoryInterface $tokenRepository)
+    {
+        $this->tokenRepository = $tokenRepository;
+
+        return $this;
+    }
+
+    /**
+     * @param Translator $translator
+     */
+    public function setTranslator($translator)
+    {
+        $this->translator = $translator;
+    }
+
+    public function setupClient()
+    {
+        $requesterClass   = $this->clientClass;
+        $this->httpClient = new $requesterClass();
+
+        $httpClientClass = $this->httpClientClass;
+        $httpClient      = new $httpClientClass();
+        $this->httpClient->setClient($httpClient);
+    }
+
+    /**
+     * @param string $screenName
+     *
+     * @return bool
+     */
+    public function shouldSkipSerializationForMemberWithScreenName(string $screenName)
+    {
+        $member = $this->userRepository->findOneBy(['twitter_username' => $screenName]);
+        if (!$member instanceof MemberInterface) {
+            return false;
+        }
+
+        return $member->isProtected()
+            || $member->hasBeenDeclaredAsNotFound()
+            || $member->isSuspended()
+            || $member->isAWhisperer();
+    }
+
+    /**
+     * @return bool
+     */
+    public function shouldUseBearerToken(): bool
+    {
+        if (!isset($this->authenticationHeader)) {
+            return false;
+        }
+
+        return $this->authenticationHeader !== null;
+    }
+
+    /**
+     * @param string $screenName
+     * @param int    $cursor
+     *
+     * @return \API|mixed|object|stdClass
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws OptimisticLockException
+     */
+    public function showMemberSubscribees(string $screenName, int $cursor = -1)
+    {
+        $showUserFriendEndpoint = $this->getShowMemberSubscribeesEndpoint();
+
+        try {
+            return $this->contactEndpoint(
+                str_replace(
+                    '{{ screen_name }}',
+                    $screenName,
+                    $showUserFriendEndpoint
+                ) . '&cursor=' . $cursor
+            );
+        } catch (SuspendedAccountException  $exception) {
+            $this->userRepository->declareMemberAsSuspended($screenName);
+        } catch (NotFoundMemberException $exception) {
+            $this->userRepository->declareUserAsNotFoundByUsername($screenName);
+        } catch (ProtectedAccountException $exception) {
+            $this->userRepository->declareUserAsProtected($screenName);
+        } finally {
+            if (isset($exception)) {
+                return (object) ['ids' => []];
+            }
+        }
+    }
+
+    /**
+     * @param $identifier
+     *
+     * @return \API|mixed|object|stdClass
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws OptimisticLockException
+     * @throws Exception
+     */
+    public function showStatus($identifier)
+    {
+        if (!is_numeric($identifier)) {
+            throw new \InvalidArgumentException('A status identifier should be an integer');
+        }
+        $showStatusEndpoint = $this->getShowStatusEndpoint($version = '1.1');
+
+        try {
+            return $this->contactEndpoint(strtr($showStatusEndpoint, ['{{ id }}' => $identifier]));
+        } catch (NotFoundStatusException $exception) {
+            $this->statusAccessor->declareStatusNotFoundByIdentifier($identifier);
+
+            throw $exception;
+        }
+    }
+
+    /**
+     * @param $identifier
+     *
+     * @return \API|mixed|object|stdClass
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
+     * @throws Exception
+     */
+    public function showUser($identifier)
+    {
+        $screenName = null;
+        $userId     = null;
+
+        if (is_integer($identifier)) {
+            $userId = $identifier;
+            $option = 'user_id';
+
+            $this->guardAgainstSpecialMemberWithIdentifier($identifier);
+        } else {
+            $screenName = $identifier;
+            $option     = 'screen_name';
+
+            $this->guardAgainstSpecialMembers($screenName);
+        }
+
+        $showUserEndpoint = $this->getShowUserEndpoint($version = '1.1', $option);
+        $this->guardAgainstApiLimit($showUserEndpoint);
+
+        try {
+            $twitterUser = $this->contactEndpoint(
+                strtr(
+                    $showUserEndpoint,
+                    [
+                        '{{ screen_name }}' => $screenName,
+                        '{{ user_id }}'     => $userId
+                    ]
+                )
+            );
+        } catch (UnavailableResourceException $exception) {
+            if ($exception->getCode() === self::ERROR_SUSPENDED_USER) {
+                $suspendedMember = $this->userRepository->suspendMemberByScreenNameOrIdentifier($identifier);
+                $this->logSuspendedMemberMessage($suspendedMember->getTwitterUsername());
+
+                SuspendedAccountException::raiseExceptionAboutSuspendedMemberHavingScreenName(
+                    $suspendedMember->getTwitterUsername(),
+                    $exception->getCode(),
+                    $exception
+                );
+            }
+
+            if (
+                $exception->getCode() === self::ERROR_NOT_FOUND
+                || $exception->getCode() === self::ERROR_USER_NOT_FOUND
+            ) {
+                $member = $this->userRepository->findOneBy(['twitter_username' => $screenName]);
+                if (!($member instanceof MemberInterface) && !is_null($screenName)) {
+                    $member = $this->userRepository->declareMemberHavingScreenNameNotFound($screenName);
+                }
+
+                if ($member instanceof MemberInterface && !$member->isNotFound()) {
+                    $this->userRepository->declareUserAsNotFound($member);
+                }
+
+                $this->logNotFoundMemberMessage(is_null($screenName) ? $identifier : $screenName);
+                NotFoundMemberException::raiseExceptionAboutNotFoundMemberHavingScreenName(
+                    is_null($screenName) ? $identifier : $screenName,
+                    $exception->getCode(),
+                    $exception
+                );
+            }
+
+            throw $exception;
+        }
+
+        $this->guardAgainstUnavailableResource($twitterUser);
+
+        return $twitterUser;
+    }
+
+    /**
+     * @param string $screenName
+     *
+     * @return \API|mixed|object|stdClass
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws OptimisticLockException
+     */
+    public function showUserFriends(string $screenName)
+    {
+        $showUserFriendEndpoint = $this->getShowUserFriendsEndpoint();
+
+        try {
+            return $this->contactEndpoint(str_replace('{{ screen_name }}', $screenName, $showUserFriendEndpoint));
+        } catch (SuspendedAccountException  $exception) {
+            $this->userRepository->declareMemberAsSuspended($screenName);
+        } catch (NotFoundMemberException $exception) {
+            $this->userRepository->declareUserAsNotFoundByUsername($screenName);
+        } catch (ProtectedAccountException $exception) {
+            $this->userRepository->declareUserAsProtected($screenName);
+        } finally {
+            if (isset($exception)) {
+                return (object) ['ids' => []];
+            }
+        }
+    }
+
+    /**
+     * @param AggregateSubscription $subscription
+     *
+     * @return stdClass
+     * @throws ApiRateLimitingException
+     * @throws BadAuthenticationDataException
+     * @throws NonUniqueResultException
+     * @throws NotFoundMemberException
+     * @throws NotFoundStatusException
+     * @throws OptimisticLockException
+     * @throws ProtectedAccountException
+     * @throws ReadOnlyApplicationException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws ReflectionException
+     */
+    public function subscribeToMemberTimeline(AggregateSubscription $subscription)
+    {
+        $endpoint = $this->getCreateFriendshipsEndpoint();
+
+        return $this->contactEndpoint(
+            str_replace(
+                '{{ screen_name }}',
+                $subscription->subscription->getTwitterUsername(),
+                $endpoint
+            )
+        );
     }
 
     /**
@@ -1653,8 +1521,8 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
         );
         if (isset($connection->http_header)) {
             if (array_key_exists('x_rate_limit_limit', $connection->http_header)) {
-                $limit = (int)$connection->http_header['x_rate_limit_limit'];
-                $remainingCalls = (int)$connection->http_header['x_rate_limit_remaining'];
+                $limit          = (int) $connection->http_header['x_rate_limit_limit'];
+                $remainingCalls = (int) $connection->http_header['x_rate_limit_remaining'];
 
                 $this->twitterApiLogger->info(
                     sprintf(
@@ -1663,151 +1531,264 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
                     )
                 );
 
-
                 $this->apiLimitReached = $this->lessRemainingCallsThanTenPercentOfLimit($remainingCalls, $limit);
             }
         }
     }
 
     /**
-     * @return int
-     */
-    public function getEmptyReplyErrorCode()
-    {
-        return self::ERROR_EMPTY_REPLY;
-    }
-
-    /**
-     * @return int
-     */
-    public function getBadAuthenticationDataCode()
-    {
-        return self::ERROR_BAD_AUTHENTICATION_DATA;
-    }
-
-    /**
-     * @return int
-     */
-    public function getExceededRateLimitErrorCode()
-    {
-        return self::ERROR_EXCEEDED_RATE_LIMIT;
-    }
-
-    /**
-     * @return int
-     */
-    public function getMemberNotFoundErrorCode()
-    {
-        return self::ERROR_NOT_FOUND;
-    }
-
-    /**
-     * @return int
-     */
-    public function getUserNotFoundErrorCode()
-    {
-        return self::ERROR_USER_NOT_FOUND;
-    }
-
-    /**
-     * @return int
-     */
-    public function getSuspendedUserErrorCode()
-    {
-        return self::ERROR_SUSPENDED_USER;
-    }
-
-    /**
-     * @return int
-     */
-    public function getProtectedAccountErrorCode()
-    {
-        return self::ERROR_PROTECTED_ACCOUNT;
-    }
-
-    /**
-     * @var boolean
-     */
-    protected $apiLimitReached = false;
-
-    public function isApiLimitReached()
-    {
-        return $this->apiLimitReached;
-    }
-
-    /**
-     * @param string $endpoint
-     * @param bool   $findNextAvailableToken
+     * @param string $version
      *
-     * @return Token|null
-     * @throws ApiRateLimitingException
-     * @throws InconsistentTokenRepository
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
+     * @return string
      */
-    public function guardAgainstApiLimit(
-        string $endpoint,
-        bool $findNextAvailableToken = true
-    ): ?Token {
-        $apiLimitReached = $this->isApiLimitReached();
-        $token = null;
+    protected function getAddMembersToListEndpoint($version = '1.1')
+    {
+        return $this->getApiBaseUrl($version) . '/lists/members/create_all.json' .
+            '?';
+    }
 
-        $apiLimitReached = $apiLimitReached || $this->tokenRepository->isOauthTokenFrozen($this->userToken);
-        if ($apiLimitReached) {
-            $unfrozenToken = false;
+    /**
+     * @param string $version
+     *
+     * @return string
+     */
+    protected function getApiBaseUrl($version = '1.1')
+    {
+        return 'https://' . $this->apiHost . '/' . $version;
+    }
 
-            if ($findNextAvailableToken) {
-                $token = $this->tokenRepository->findFirstUnfrozenToken();
-                $unfrozenToken = $token !== null;
+    /**
+     * @see https://developer.twitter.com/en/docs/accounts-and-users/follow-search-get-users/api-reference/post-friendships-create
+     *
+     * @param string $version
+     *
+     * @return string
+     */
+    protected function getCreateFriendshipsEndpoint($version = '1.1')
+    {
+        return $this->getApiBaseUrl($version) . '/friendships/create.json?screen_name={{ screen_name }}';
+    }
 
-                while ($apiLimitReached && $unfrozenToken) {
-                    $apiLimitReached = !$this->isApiAvailableForToken($endpoint, $token);
-                    $token = $this->tokenRepository->findFirstUnfrozenToken();
-                    $unfrozenToken = $token !== null;
-                }
-            }
+    /**
+     * @param string $version
+     *
+     * @return string
+     */
+    protected function getCreateSavedSearchEndpoint($version = '1.1')
+    {
+        return $this->getApiBaseUrl($version) . '/saved_searches/create.json?';
+    }
 
-            if ($unfrozenToken) {
-                return $token;
-            }
+    /**
+     * @param string $version
+     *
+     * @return string
+     */
+    protected function getDestroyFriendshipsEndpoint($version = '1.1')
+    {
+        return $this->getApiBaseUrl($version) . '/friendships/destroy.json?screen_name={{ screen_name }}';
+    }
 
-            $message = $this->translator->trans('twitter.error.api_limit_reached.all_tokens', [], 'messages');
-            $this->logger->info($message);
+    /**
+     * @param string $version
+     *
+     * @return string
+     */
+    protected function getLikesEndpoint($version = '1.1')
+    {
+        return $this->getApiBaseUrl($version) . '/favorites/list.json?' .
+            'tweet_mode=extended&include_entities=1&include_rts=1&exclude_replies=0&trim_user=0';
+    }
 
-            if (!isset($token)) {
-                $token = $this->tokenRepository->findFirstFrozenToken();
-            }
+    /**
+     * @see https://developer.twitter.com/en/docs/accounts-and-users/create-manage-lists/api-reference/get-lists-members
+     *
+     * @param string $version
+     *
+     * @return string
+     */
+    protected function getListMembersEndpoint($version = '1.1')
+    {
+        return $this->getApiBaseUrl($version) . '/lists/members.json?count=5000&list_id={{ id }}';
+    }
 
-            if ($token === null) {
-                InconsistentTokenRepository::onEmptyAvailableTokenList();
-            }
+    /**
+     * @param string $version
+     *
+     * @return string
+     */
+    protected function getRateLimitStatusEndpoint($version = '1.1')
+    {
+        return $this->getApiBaseUrl($version) . '/application/rate_limit_status.json?' .
+            'resources=favorites,statuses,users,lists,friends,friendships,followers';
+    }
 
-            $this->waitUntilTokenUnfrozen($token);
+    /**
+     * @param string $version
+     *
+     * @return string
+     */
+    protected function getSearchEndpoint($version = '1.1')
+    {
+        return $this->getApiBaseUrl($version) . '/search/tweets.json?tweet_mode=extended&';
+    }
 
-            return $token;
+    /**
+     * @param string $version
+     *
+     * @return string
+     */
+    protected function getShowMemberSubscribeesEndpoint($version = '1.1')
+    {
+        return $this->getApiBaseUrl($version) . '/followers/ids.json?count=5000&screen_name={{ screen_name }}';
+    }
+
+    /**
+     * @param string $version
+     *
+     * @return string
+     */
+    protected function getShowStatusEndpoint($version = '1.1')
+    {
+        return $this->getApiBaseUrl($version) . '/statuses/show.json?id={{ id }}&tweet_mode=extended';
+    }
+
+    /**
+     * @param string $version
+     * @param string $option
+     *
+     * @return string
+     */
+    protected function getShowUserEndpoint($version = '1.1', $option = 'screen_name')
+    {
+        if ($option === 'screen_name') {
+            $parameters = 'screen_name={{ screen_name }}';
+        } else {
+            $parameters = 'user_id={{ user_id }}';
         }
 
-        return $this->tokenRepository->findUnfrozenToken($this->userToken);
+        return $this->getApiBaseUrl($version) . '/users/show.json?' . $parameters;
     }
 
     /**
-     * @param $endpoint
-     * @param Token $token
+     * @param string $version
+     *
+     * @return string
+     */
+    protected function getShowUserFriendsEndpoint($version = '1.1')
+    {
+        return $this->getApiBaseUrl($version) . '/friends/ids.json?count=5000&screen_name={{ screen_name }}';
+    }
+
+    /**
+     * @return array
+     */
+    protected function getTokens(): array
+    {
+        try {
+            if ($this->userSecret === null || $this->userToken === null) {
+                InvalidTokensException::throws();
+            }
+        } catch (InvalidTokensException $exception) {
+            $this->logger->error($exception->getMessage());
+            throw $exception;
+        }
+
+        return [
+            'oauth'        => $this->userToken,
+            'oauth_secret' => $this->userSecret,
+            'key'          => $this->consumerKey,
+            'secret'       => $this->consumerSecret,
+        ];
+    }
+
+    /**
+     * @param string $version
+     *
+     * @return string
+     */
+    protected function getUserListsEndpoint($version = '1.1')
+    {
+        return $this->getApiBaseUrl($version) . '/lists/list.json?reverse={{ reverse }}&screen_name={{ screenName }}';
+    }
+
+    /**
+     * @param string $version
+     *
+     * @return string
+     */
+    protected function getUserOwnershipsEndpoint(string $version = '1.1'): string
+    {
+        return $this->getApiBaseUrl($version) . '/lists/ownerships.json?reverse={{ reverse }}' .
+            '&screen_name={{ screenName }}' .
+            '&count={{ count }}&cursor={{ cursor }}';
+    }
+
+    /**
+     * @param string $version
+     *
+     * @return string
+     */
+    protected function getUserTimelineStatusesEndpoint($version = '1.1')
+    {
+        return $this->getApiBaseUrl($version) . '/statuses/user_timeline.json?' .
+            'tweet_mode=extended&include_entities=1&include_rts=1&exclude_replies=0&trim_user=0';
+    }
+
+    /**
+     * @param $twitterUser
+     *
      * @return bool
+     * @throws ProtectedAccountException
      * @throws OptimisticLockException
      */
-    protected function isApiAvailableForToken($endpoint, Token $token)
+    protected function guardAgainstProtectedAccount($twitterUser)
     {
-        $this->setUserToken($token->getOauthToken());
-        $this->setUserSecret($token->getOauthTokenSecret());
-        $this->setConsumerKey($token->consumerKey);
-        $this->setConsumerSecret($token->consumerSecret);
+        if (!isset($twitterUser->protected) || !$twitterUser->protected) {
+            return true;
+        }
 
-        return $this->isApiAvailable($endpoint);
+        $this->userRepository->declareUserAsProtected($twitterUser->screen_name);
+
+        ProtectedAccountException::raiseExceptionAboutProtectedMemberHavingScreenName(
+            $twitterUser->screen_name,
+            self::ERROR_PROTECTED_ACCOUNT
+        );
+    }
+
+    /**
+     * @param $twitterUser
+     *
+     * @return bool
+     * @throws ProtectedAccountException
+     * @throws UnavailableResourceException
+     * @throws OptimisticLockException
+     */
+    protected function guardAgainstUnavailableResource($twitterUser)
+    {
+        $validUser = is_object($twitterUser);
+
+        if ($validUser && !isset($twitterUser->errors)) {
+            return $this->guardAgainstProtectedAccount($twitterUser);
+        }
+
+        if ($validUser && isset($twitterUser->errors)) {
+            $errorCode    = $twitterUser->errors[0]->code;
+            $errorMessage = $twitterUser->errors[0]->message;
+            $this->logger->error($errorMessage);
+
+            $this->throwUnavailableResourceException($errorMessage, $errorCode);
+        }
+
+        $errorMessage = 'Unavailable user';
+        $this->logger->info($errorMessage);
+
+        $this->throwUnavailableResourceException($errorMessage, 0);
     }
 
     /**
      * @param $endpoint
+     *
      * @return bool
      * @throws OptimisticLockException
      */
@@ -1834,7 +1815,6 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
 
                     break;
 
-
                 case $this->getEmptyReplyErrorCode():
 
                     $availableApi = true;
@@ -1848,6 +1828,97 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
         }
 
         return $availableApi;
+    }
+
+    /**
+     * @param       $endpoint
+     * @param Token $token
+     *
+     * @return bool
+     * @throws OptimisticLockException
+     */
+    protected function isApiAvailableForToken($endpoint, Token $token)
+    {
+        $this->setUserToken($token->getOauthToken());
+        $this->setUserSecret($token->getOauthTokenSecret());
+        $this->setConsumerKey($token->consumerKey);
+        $this->setConsumerSecret($token->consumerSecret);
+
+        return $this->isApiAvailable($endpoint);
+    }
+
+    /**
+     * @param Token $token
+     *
+     * @return string
+     */
+    protected function takeFirstTokenCharacters(Token $token)
+    {
+        return substr($token->getOauthToken(), 0, 8);
+    }
+
+    /**
+     * @param UnavailableResourceException $exception
+     *
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     */
+    protected function throwException(UnavailableResourceException $exception)
+    {
+        if ($exception->getCode() === self::ERROR_SUSPENDED_USER) {
+            throw new SuspendedAccountException($exception->getMessage(), $exception->getCode());
+        }
+
+        if ($exception->getCode() === self::ERROR_USER_NOT_FOUND) {
+            throw new NotFoundMemberException($exception->getMessage(), $exception->getCode());
+        }
+
+        throw $exception;
+    }
+
+    /**
+     * @param $errorMessage
+     * @param $errorCode
+     *
+     * @throws UnavailableResourceException
+     */
+    protected function throwUnavailableResourceException($errorMessage, $errorCode)
+    {
+        throw new UnavailableResourceException($errorMessage, $errorCode);
+    }
+
+    /**
+     * @param $options
+     *
+     * @return array
+     */
+    protected function validateRequestOptions($options)
+    {
+        $validatedOptions = [];
+
+        if (isset($options->{'count'})) {
+            $resultsCount = $options->{'count'};
+        } else {
+            $resultsCount = 1;
+        }
+        $validatedOptions[] = 'count' . '=' . $resultsCount;
+
+        if (isset($options->{'max_id'})) {
+            $maxId              = $options->{'max_id'};
+            $validatedOptions[] = 'max_id' . '=' . $maxId;
+        }
+
+        if (isset($options->{'screen_name'})) {
+            $screenName         = $options->{'screen_name'};
+            $validatedOptions[] = 'screen_name' . '=' . $screenName;
+        }
+
+        if (isset($options->{'since_id'})) {
+            $sinceId            = $options->{'since_id'};
+            $validatedOptions[] = 'since_id' . '=' . $sinceId;
+        }
+
+        return $validatedOptions;
     }
 
     /**
@@ -1869,25 +1940,17 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     }
 
     /**
-     * @param Token $token
-     * @return string
-     */
-    protected function takeFirstTokenCharacters(Token $token)
-    {
-        return substr($token->getOauthToken(), 0, 8);
-    }
-
-    /**
      * @param $exception
+     *
      * @return stdClass
      */
     private function convertExceptionIntoContent($exception)
     {
         return (object) [
             'errors' => [
-                (object)[
+                (object) [
                     'message' => $exception->getMessage(),
-                    'code' => $exception->getCode(),
+                    'code'    => $exception->getCode(),
                 ],
             ],
         ];
@@ -1913,145 +1976,6 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
         $token = $this->preEndpointContact($endpoint);
 
         return $this->contactEndpointUsingConsumerKey($endpoint, $token);
-    }
-
-    /**
-     * @param string     $endpoint
-     * @param Token|null $token
-     *
-     * @return Token
-     * @throws ApiRateLimitingException
-     * @throws InconsistentTokenRepository
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
-     * @throws Exception
-     */
-    private function maybeGetToken(string $endpoint, Token $token = null): Token
-    {
-        if ($token !== null) {
-            return $token;
-        }
-
-        return $this->preEndpointContact($endpoint);
-    }
-
-    /**
-     * @param $screenName
-     * @return string
-     */
-    private function logSuspendedMemberMessage($screenName): string
-    {
-        $suspendedMessageMessage = $this->translator->trans(
-            'amqp.output.suspended_account',
-            ['{{ user }}' => $screenName],
-            'messages'
-        );
-        $this->logger->info($suspendedMessageMessage);
-
-        return $suspendedMessageMessage;
-    }
-
-    /**
-     * @param $screenName
-     * @return string
-     */
-    private function logNotFoundMemberMessage($screenName): string
-    {
-        $notFoundMemberMessage = $this->translator->trans(
-            'amqp.output.not_found_member',
-            ['{{ user }}' => $screenName],
-            'messages'
-        );
-        $this->logger->info($notFoundMemberMessage);
-
-        return $notFoundMemberMessage;
-    }
-
-    /**
-     * @param $screenName
-     * @return string
-     */
-    private function logProtectedMemberMessage($screenName): string
-    {
-        $protectedMemberMessage = $this->translator->trans(
-            'amqp.output.protected_member',
-            ['{{ user }}' => $screenName],
-            'messages'
-        );
-        $this->logger->info($protectedMemberMessage);
-
-        return $protectedMemberMessage;
-    }
-
-    /**
-     * @param $screenName
-     * @throws NotFoundMemberException
-     * @throws SuspendedAccountException
-     */
-    private function guardAgainstSpecialMembers($screenName): void
-    {
-        $member = $this->userRepository->findOneBy(['twitter_username' => $screenName]);
-        if ($member instanceof MemberInterface) {
-            if ($member->isSuspended()) {
-                $this->logSuspendedMemberMessage($screenName);
-                SuspendedAccountException::raiseExceptionAboutSuspendedMemberHavingScreenName(
-                    $screenName,
-                    self::ERROR_SUSPENDED_ACCOUNT
-                );
-            }
-
-            if ($member->isNotFound()) {
-                $this->logNotFoundMemberMessage($screenName);
-                NotFoundMemberException::raiseExceptionAboutNotFoundMemberHavingScreenName(
-                    $screenName,
-                    self::ERROR_NOT_FOUND
-                );
-            }
-
-            if ($member->isProtected()) {
-                $this->logProtectedMemberMessage($screenName);
-                ProtectedAccountException::raiseExceptionAboutProtectedMemberHavingScreenName(
-                    $screenName,
-                    self::ERROR_PROTECTED_ACCOUNT
-                );
-            }
-        }
-    }
-
-    /**
-     * @param int $identifier
-     * @throws NotFoundMemberException
-     * @throws ProtectedAccountException
-     * @throws SuspendedAccountException
-     */
-    private function guardAgainstSpecialMemberWithIdentifier(int $identifier): void
-    {
-        $member = $this->userRepository->findOneBy(['twitterID' => $identifier]);
-        if ($member instanceof MemberInterface) {
-            if ($member->isSuspended()) {
-                $this->logSuspendedMemberMessage($member->getTwitterUsername());
-                SuspendedAccountException::raiseExceptionAboutSuspendedMemberHavingScreenName(
-                    $member->getTwitterUsername(),
-                    self::ERROR_SUSPENDED_ACCOUNT
-                );
-            }
-
-            if ($member->isNotFound()) {
-                $this->logNotFoundMemberMessage($member->getTwitterUsername());
-                NotFoundMemberException::raiseExceptionAboutNotFoundMemberHavingScreenName(
-                    $member->getTwitterUsername(),
-                    self::ERROR_NOT_FOUND
-                );
-            }
-
-            if ($member->isProtected()) {
-                $this->logProtectedMemberMessage($member->getTwitterUsername());
-                ProtectedAccountException::raiseExceptionAboutProtectedMemberHavingScreenName(
-                    $member->getTwitterUsername(),
-                    self::ERROR_PROTECTED_ACCOUNT
-                );
-            }
-        }
     }
 
     /**
@@ -2097,7 +2021,8 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
 
                 break;
             } catch (OverCapacityException $exception) {
-                $this->logger->info(sprintf(
+                $this->logger->info(
+                    sprintf(
                         'About to retry making contact with endpoint (retry #%d out of %d) "%s"',
                         $retries + 1,
                         self::MAX_RETRIES,
@@ -2113,30 +2038,170 @@ class Accessor implements TwitterErrorAwareInterface, LikedStatusCollectionAware
     }
 
     /**
-     * @param string $memberName
+     * @param string $version
      *
-     * @return MemberInterface
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
+     * @return string
      */
-    public function ensureMemberHavingNameExists(string $memberName): MemberInterface
+    private function getMemberListSubscriptionsEndpoint($version = '1.1')
     {
-        return $this->statusAccessor->ensureMemberHavingNameExists($memberName);
+        return $this->getApiBaseUrl($version) . '/lists/subscriptions.json?count=1000&screen_name={{ screenName }}';
     }
 
     /**
-     * @param int $memberId
+     * @param int $identifier
      *
-     * @return MemberInterface
+     * @throws NotFoundMemberException
+     * @throws ProtectedAccountException
+     * @throws SuspendedAccountException
+     */
+    private function guardAgainstSpecialMemberWithIdentifier(int $identifier): void
+    {
+        $member = $this->userRepository->findOneBy(['twitterID' => $identifier]);
+        if ($member instanceof MemberInterface) {
+            if ($member->isSuspended()) {
+                $this->logSuspendedMemberMessage($member->getTwitterUsername());
+                SuspendedAccountException::raiseExceptionAboutSuspendedMemberHavingScreenName(
+                    $member->getTwitterUsername(),
+                    self::ERROR_SUSPENDED_ACCOUNT
+                );
+            }
+
+            if ($member->isNotFound()) {
+                $this->logNotFoundMemberMessage($member->getTwitterUsername());
+                NotFoundMemberException::raiseExceptionAboutNotFoundMemberHavingScreenName(
+                    $member->getTwitterUsername(),
+                    self::ERROR_NOT_FOUND
+                );
+            }
+
+            if ($member->isProtected()) {
+                $this->logProtectedMemberMessage($member->getTwitterUsername());
+                ProtectedAccountException::raiseExceptionAboutProtectedMemberHavingScreenName(
+                    $member->getTwitterUsername(),
+                    self::ERROR_PROTECTED_ACCOUNT
+                );
+            }
+        }
+    }
+
+    /**
+     * @param $screenName
+     *
+     * @throws NotFoundMemberException
+     * @throws SuspendedAccountException
+     */
+    private function guardAgainstSpecialMembers($screenName): void
+    {
+        $member = $this->userRepository->findOneBy(['twitter_username' => $screenName]);
+        if ($member instanceof MemberInterface) {
+            if ($member->isSuspended()) {
+                $this->logSuspendedMemberMessage($screenName);
+                SuspendedAccountException::raiseExceptionAboutSuspendedMemberHavingScreenName(
+                    $screenName,
+                    self::ERROR_SUSPENDED_ACCOUNT
+                );
+            }
+
+            if ($member->isNotFound()) {
+                $this->logNotFoundMemberMessage($screenName);
+                NotFoundMemberException::raiseExceptionAboutNotFoundMemberHavingScreenName(
+                    $screenName,
+                    self::ERROR_NOT_FOUND
+                );
+            }
+
+            if ($member->isProtected()) {
+                $this->logProtectedMemberMessage($screenName);
+                ProtectedAccountException::raiseExceptionAboutProtectedMemberHavingScreenName(
+                    $screenName,
+                    self::ERROR_PROTECTED_ACCOUNT
+                );
+            }
+        }
+    }
+
+    /**
+     * @param $screenName
+     *
+     * @return string
+     */
+    private function logNotFoundMemberMessage($screenName): string
+    {
+        $notFoundMemberMessage = $this->translator->trans(
+            'amqp.output.not_found_member',
+            ['{{ user }}' => $screenName],
+            'messages'
+        );
+        $this->logger->info($notFoundMemberMessage);
+
+        return $notFoundMemberMessage;
+    }
+
+    /**
+     * @param $screenName
+     *
+     * @return string
+     */
+    private function logProtectedMemberMessage($screenName): string
+    {
+        $protectedMemberMessage = $this->translator->trans(
+            'amqp.output.protected_member',
+            ['{{ user }}' => $screenName],
+            'messages'
+        );
+        $this->logger->info($protectedMemberMessage);
+
+        return $protectedMemberMessage;
+    }
+
+    /**
+     * @param $screenName
+     *
+     * @return string
+     */
+    private function logSuspendedMemberMessage($screenName): string
+    {
+        $suspendedMessageMessage = $this->translator->trans(
+            'amqp.output.suspended_account',
+            ['{{ user }}' => $screenName],
+            'messages'
+        );
+        $this->logger->info($suspendedMessageMessage);
+
+        return $suspendedMessageMessage;
+    }
+
+    /**
+     * @param string     $endpoint
+     * @param Token|null $token
+     *
+     * @return Token
+     * @throws ApiRateLimitingException
+     * @throws InconsistentTokenRepository
      * @throws NonUniqueResultException
      * @throws OptimisticLockException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
+     * @throws Exception
      */
-    public function ensureMemberHavingIdExists(int $memberId): MemberInterface
+    private function maybeGetToken(string $endpoint, Token $token = null): Token
     {
-        return $this->statusAccessor->ensureMemberHavingIdExists($memberId);
+        if ($token !== null) {
+            return $token;
+        }
+
+        return $this->preEndpointContact($endpoint);
+    }
+
+    /**
+     * @param TokenInterface $token
+     */
+    public function setAccessToken(TokenInterface $token)
+    {
+        $this->setUserToken($token->getOAuthToken());
+        $this->setUserSecret($token->getOAuthSecret());
+
+        if ($token->hasConsumerKey()) {
+            $this->setConsumerKey($token->getConsumerKey());
+            $this->setConsumerSecret($token->getConsumerKey());
+        }
     }
 }

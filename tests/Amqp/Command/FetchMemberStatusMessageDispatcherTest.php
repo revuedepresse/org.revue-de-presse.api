@@ -4,15 +4,21 @@ declare(strict_types=1);
 namespace App\Tests\Amqp\Command;
 
 use App\Amqp\Command\FetchMemberStatusMessageDispatcher;
+use App\Api\AccessToken\Repository\TokenRepository;
+use App\Api\AccessToken\Repository\TokenRepositoryInterface;
+use App\Api\AccessToken\TokenChangeInterface;
 use App\Api\Entity\Token;
-use App\Api\Repository\TokenRepository;
+use App\Api\Entity\TokenInterface;
+use App\Api\Exception\InvalidSerializedTokenException;
 use App\Membership\Entity\Member;
 use App\Membership\Entity\MemberInterface;
 use App\Membership\Repository\MemberRepository;
 use App\Twitter\Api\Accessor;
+use App\Twitter\Api\ApiAccessorInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
+use Prophecy\Argument;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Command\Command;
@@ -55,7 +61,7 @@ class FetchMemberStatusMessageDispatcherTest extends KernelTestCase
     /**
      * @test
      */
-    public function it_should_dispatch_messages_to_fetch_member_statuses(): void
+    public function it_dispatches_messages_to_fetch_member_statuses(): void
     {
         $this->commandTester->execute(
             [
@@ -75,6 +81,7 @@ class FetchMemberStatusMessageDispatcherTest extends KernelTestCase
     /**
      * @throws NonUniqueResultException
      * @throws NoResultException
+     * @throws InvalidSerializedTokenException
      */
     protected function setUp(): void
     {
@@ -88,6 +95,7 @@ class FetchMemberStatusMessageDispatcherTest extends KernelTestCase
         $command->setTokenRepository($this->prophesizeTokenRepository());
         $command->setAccessor($this->prophesizeAccessor());
         $command->setMemberRepository($this->prophesizeMemberRepository());
+        $command->setTokenChange($this->prophesizeTokenChange());
 
         $application = new Application($kernel);
 
@@ -174,9 +182,9 @@ class FetchMemberStatusMessageDispatcherTest extends KernelTestCase
     }
 
     /**
-     * @return TokenRepository
+     * @return MemberRepository
      */
-    private function prophesizeMemberRepository()
+    private function prophesizeMemberRepository(): MemberRepository
     {
         /** @var MemberRepository $memberRepositoryProphecy */
         $memberRepositoryProphecy = $this->prophesize(MemberRepository::class);
@@ -205,26 +213,42 @@ class FetchMemberStatusMessageDispatcherTest extends KernelTestCase
     }
 
     /**
+     * @throws InvalidSerializedTokenException
+     */
+    private function prophesizeTokenChange(): TokenChangeInterface
+    {
+        /** @var TokenChangeInterface $tokenChange */
+        $tokenChange = $this->prophesize(TokenChangeInterface::class);
+        $tokenChange->replaceAccessToken(
+            Argument::type(TokenInterface::class),
+            Argument::type(ApiAccessorInterface::class)
+        )->willReturn(
+            Token::fromArray(
+                [
+                    'token'           => self::USER_TOKEN_SECONDARY,
+                    'secret'          => self::USER_SECRET_SECONDARY,
+                    'consumer_key'    => self::CONSUMER_KEY,
+                    'consumer_secret' => self::CONSUMER_SECRET
+                ]
+            )
+        );
+
+        return $tokenChange->reveal();
+    }
+
+    /**
      * @return TokenRepository
      * @throws NonUniqueResultException
      * @throws NoResultException
+     * @throws InvalidSerializedTokenException
      */
-    private function prophesizeTokenRepository()
+    private function prophesizeTokenRepository(): TokenRepositoryInterface
     {
-        /** @var TokenRepository $tokenRepositoryProphecy */
-        $tokenRepositoryProphecy = $this->prophesize(TokenRepository::class);
+        /** @$tokenRepositoryProphecy */
+        $tokenRepositoryProphecy = $this->prophesize(TokenRepositoryInterface::class);
         $tokenRepositoryProphecy
             ->howManyUnfrozenTokenAreThere()
             ->willReturn(1);
-
-        $token = new Token;
-        $token->setOauthToken(self::USER_TOKEN_SECONDARY);
-        $token->setOauthTokenSecret(self::USER_SECRET_SECONDARY);
-        $token->consumerKey    = self::CONSUMER_KEY;
-        $token->consumerSecret = self::CONSUMER_SECRET;
-
-        $tokenRepositoryProphecy->findTokenOtherThan(self::USER_TOKEN)
-                                ->willReturn($token);
 
         return $tokenRepositoryProphecy->reveal();
     }

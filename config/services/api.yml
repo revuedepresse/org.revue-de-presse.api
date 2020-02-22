@@ -1,6 +1,6 @@
 services:
-    App\Api\TokenChange:
-        class: 'App\Api\TokenChange'
+    App\Api\AccessToken\TokenChange:
+        class: 'App\Api\AccessToken\TokenChange'
         arguments:
-            - '@repository.authentication_token'
+            - '@weaving_the_web_twitter.repository.token'
             - '@logger'

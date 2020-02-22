@@ -352,12 +352,12 @@ class Token implements TokenInterface
 
         $consumerKey = null;
         if (array_key_exists('consumer_key', $properties)) {
-            $consumerKey = $properties['consumerKey'];
+            $consumerKey = $properties['consumer_key'];
         }
 
         $consumerSecret = null;
         if (array_key_exists('consumer_secret', $properties)) {
-            $consumerSecret = $properties['consumerSecret'];
+            $consumerSecret = $properties['consumer_secret'];
         }
 
         $token->setOAuthToken($properties['token']);

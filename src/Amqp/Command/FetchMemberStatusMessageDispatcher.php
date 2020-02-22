@@ -10,22 +10,22 @@ use App\Accessor\Exception\UnexpectedApiResponseException;
 use App\Aggregate\Entity\SavedSearch;
 use App\Aggregate\Repository\SavedSearchRepository;
 use App\Aggregate\Repository\SearchMatchingStatusRepository;
+use App\Amqp\Exception\InvalidListNameException;
 use App\Amqp\Message\FetchMemberLikes;
 use App\Amqp\Message\FetchMemberStatuses;
-use App\Api\Entity\NullToken;
-use App\Api\Entity\TokenInterface;
-use App\Api\Exception\InvalidTokenException;
-use App\Api\Exception\UnavailableTokenException;
+use App\Api\AccessToken\TokenChangeInterface;
+use App\Api\Entity\Token;
+use App\Api\Exception\InvalidSerializedTokenException;
 use App\Conversation\Producer\MemberAwareTrait;
 use App\Membership\Entity\Member;
 use App\Membership\Entity\MemberInterface;
 use App\Operation\OperationClock;
-
 use App\Twitter\Exception\BadAuthenticationDataException;
 use App\Twitter\Exception\InconsistentTokenRepository;
 use App\Twitter\Exception\NotFoundMemberException;
 use App\Twitter\Exception\ProtectedAccountException;
 use App\Twitter\Exception\SuspendedAccountException;
+use App\Twitter\Exception\UnavailableResourceException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
@@ -33,18 +33,11 @@ use Doctrine\ORM\ORMException;
 use Exception;
 use ReflectionException;
 use stdClass;
-use Symfony\Component\Console\Input\InputOption,
-    Symfony\Component\Console\Input\InputInterface,
-    Symfony\Component\Console\Output\OutputInterface;
-
-use App\Amqp\Exception\InvalidListNameException;
-
-use App\Api\Entity\Token;
-
-use App\Twitter\Exception\UnavailableResourceException;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
-
 use function in_array;
 use function sprintf;
 
@@ -102,9 +95,6 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
      */
     private ?string $memberRestriction = null;
 
-    /**
-     * @var string
-     */
     private ?string $queryRestriction = null;
 
     /**
@@ -160,6 +150,18 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
     public function setMessageBus(MessageBusInterface $messageBus): self
     {
         $this->producer = $messageBus;
+
+        return $this;
+    }
+
+    /**
+     * @var TokenChangeInterface
+     */
+    private TokenChangeInterface $tokenChange;
+
+    public function setTokenChange(TokenChangeInterface $tokenChange): self
+    {
+        $this->tokenChange = $tokenChange;
 
         return $this;
     }
@@ -237,7 +239,6 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
      * @throws BadAuthenticationDataException
      * @throws InconsistentTokenRepository
      * @throws InvalidListNameException
-     * @throws InvalidTokenException
      * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws OptimisticLockException
@@ -261,7 +262,11 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
             return self::RETURN_STATUS_SUCCESS;
         }
 
-        $this->setUpDependencies();
+        try {
+            $this->setUpDependencies();
+        } catch (InvalidSerializedTokenException $exception) {
+            return self::RETURN_STATUS_FAILURE;
+        }
 
         if ($this->applyQueryRestriction()) {
             $this->productSearchStatusesMessages();
@@ -420,11 +425,7 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
      */
     private function applyQueryRestriction(): bool
     {
-        if ($this->queryRestriction === null) {
-            return false;
-        }
-
-        return $this->queryRestriction;
+        return $this->queryRestriction !== null;
     }
 
     /**
@@ -508,11 +509,14 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
         return $ownerships;
     }
 
-    private function setUpDependencies()
+    /**
+     * @throws InvalidSerializedTokenException
+     */
+    private function setUpDependencies(): void
     {
-        $tokens = $this->getTokensFromInput();
+        $tokens = $this->getTokensFromInputOrFallback();
 
-        $this->setOAuthTokens($tokens);
+        $this->setOAuthTokens(Token::fromArray($tokens));
 
         $this->setupAggregateRepository();
         $this->setUpLogger();
@@ -534,39 +538,6 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
     }
 
     /**
-     * @return array
-     */
-    private function updateAccessToken(): array
-    {
-        $tokens = $this->getTokensFromInput();
-
-        $token = new NullToken;
-
-        try {
-            /** @var Token $token */
-            $token = $this->findTokenOtherThan($tokens['token']);
-        } catch (NoResultException|NonUniqueResultException $exception) {
-            $this->logger->error($exception->getMessage());
-        }
-
-        if (!($token instanceof TokenInterface) ||
-            $token instanceof NullToken
-        ) {
-            UnavailableTokenException::throws();
-        }
-
-        $oauthTokens = [
-            'token' => $token->getOauthToken(),
-            'secret' => $token->getOauthTokenSecret(),
-            'consumer_token' => $token->consumerKey,
-            'consumer_secret' => $token->consumerSecret
-        ];
-        $this->setOAuthTokens($oauthTokens);
-
-        return $oauthTokens;
-    }
-
-    /**
      * @param $ownerships
      * @return \API|mixed|object|\stdClass
      * @throws InvalidListNameException
@@ -575,7 +546,6 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
      * @throws NonUniqueResultException
      * @throws OptimisticLockException
      * @throws Exception
-     * @throws InvalidTokenException
      * @throws SuspendedAccountException
      */
     private function guardAgainstInvalidListName($ownerships)
@@ -651,16 +621,17 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
      * @param $ownerships
      * @return \API|mixed|object|\stdClass
      * @throws UnavailableResourceException
-     * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws OptimisticLockException
      * @throws Exception
-     * @throws InvalidTokenException
      * @throws SuspendedAccountException
      */
     private function guardAgainstInvalidToken($ownerships)
     {
-        $this->updateAccessToken();
+        $this->tokenChange->replaceAccessToken(
+            $this->getTokensFromInputOrFallback(),
+            $this->accessor
+        );
         $ownerships->next_cursor = -1;
 
         return $this->findNextBatchOfListOwnerships($ownerships);
@@ -672,7 +643,6 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
      * @throws BadAuthenticationDataException
      * @throws InconsistentTokenRepository
      * @throws InvalidListNameException
-     * @throws InvalidTokenException
      * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws OptimisticLockException
@@ -694,12 +664,15 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
                     continue;
                 }
 
-                $messageBody = $this->getTokensFromInput();
+                $messageBody = $this->getTokensFromInputOrFallback();
 
                 break;
             } catch (UnavailableResourceException $exception) {
                 $this->logger->info($exception->getMessage());
-                $messageBody = $this->updateAccessToken();
+                $messageBody = $this->tokenChange->replaceAccessToken(
+                    $this->getTokensFromInputOrFallback(),
+                    $this->accessor
+                );
             }
 
             $unfrozenTokenCount--;
@@ -790,6 +763,7 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
      * @throws OptimisticLockException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
+     * @throws InvalidSerializedTokenException
      */
     private function processMemberList(
         $doNotApplyListRestriction,
@@ -829,7 +803,10 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
             // Reset accessor tokens in case they've been updated to find member usernames with alternative tokens
             // Members lists can only be accessed by authenticated users owning the lists
             // See also https://dev.twitter.com/rest/reference/get/lists/ownerships
-            $this->updateAccessToken();
+            $this->tokenChange->replaceAccessToken(
+                Token::fromArray($this->getTokensFromInputOrFallback()),
+                $this->accessor
+            );
 
             $this->output->writeln($this->translator->trans('amqp.production.list_members.success', [
                 '{{ count }}' => $publishedMessages,

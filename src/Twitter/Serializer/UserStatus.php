@@ -16,7 +16,7 @@ use App\Api\Entity\TokenInterface;
 use App\Api\Entity\Whisperer;
 use App\Api\Moderator\ApiLimitModerator;
 use App\Api\Repository\StatusRepository;
-use App\Api\Repository\TokenRepository;
+use App\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Api\Repository\WhispererRepository;
 use App\Membership\Entity\MemberInterface;
 use App\Status\LikedStatusCollectionAwareInterface;
@@ -161,15 +161,15 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     }
 
     /**
-     * @var TokenRepository $tokenRepository
+     * @var TokenRepositoryInterface $tokenRepository
      */
-    protected TokenRepository $tokenRepository;
+    protected TokenRepositoryInterface $tokenRepository;
 
     /**
-     * @param $tokenRepository
+     * @param TokenRepositoryInterface $tokenRepository
      * @return $this
      */
-    public function setTokenRepository(TokenRepository $tokenRepository)
+    public function setTokenRepository(TokenRepositoryInterface $tokenRepository)
     {
         $this->tokenRepository = $tokenRepository;
 

@@ -31,6 +31,7 @@ services:
             - [ 'setAggregateRepository',   [ '@repository.aggregate'] ]
             - [ 'setEntityManager',         [ '@doctrine.orm.entity_manager'] ]
             - [ 'setLogger',                [ '@logger'] ]
+            - [ 'setTokenChange',           [ '@App\Api\AccessToken\TokenChange'] ]
         tags:
             - { name: 'console.command' }
         public: true

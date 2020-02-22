@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Api\AccessToken\Repository;
 
 use App\Api\Entity\TokenInterface;
+use App\Api\Exception\UnavailableTokenException;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
@@ -153,7 +154,7 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
      * @return mixed|null
      * @throws NonUniqueResultException
      */
-    public function howManyUnfrozenTokenAreThere()
+    public function howManyUnfrozenTokenAreThere(): int
     {
         $queryBuilder = $this->createQueryBuilder('t');
         $queryBuilder->select('COUNT(t.id) as count_');
@@ -163,7 +164,7 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
         try {
             return $queryBuilder->getQuery()->getSingleResult()['count_'];
         } catch (NoResultException $exception) {
-            return null;
+            UnavailableTokenException::throws();
         }
     }
 

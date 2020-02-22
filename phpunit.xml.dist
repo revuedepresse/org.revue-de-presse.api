@@ -14,6 +14,14 @@
         <server name="KERNEL_CLASS" value="App\Kernel" />
     </php>
 
+    <groups>
+        <include>
+<!--            <group>api_access</group>-->
+<!--            <group>command</group>-->
+<!--            <group>conversation</group>-->
+        </include>
+    </groups>
+
     <testsuites>
         <testsuite name="Project Test Suite">
             <directory>tests</directory>

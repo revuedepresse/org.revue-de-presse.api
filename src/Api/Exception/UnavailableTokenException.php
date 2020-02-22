@@ -9,6 +9,6 @@ class UnavailableTokenException extends RuntimeException
 {
     public static function throws(): void
     {
-        throw new self('There is access token available');
+        throw new self('There is no access token available.');
     }
 }

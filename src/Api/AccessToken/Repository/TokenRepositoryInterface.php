@@ -8,4 +8,6 @@ use App\Api\Entity\TokenInterface;
 interface TokenRepositoryInterface
 {
     public function findTokenOtherThan(string $token): ?TokenInterface;
+
+    public function howManyUnfrozenTokenAreThere(): int;
 }
