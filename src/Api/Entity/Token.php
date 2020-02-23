@@ -80,7 +80,7 @@ class Token implements TokenInterface
 
     public function getConsumerKey(): string
     {
-        $this->consumerKey;
+        return $this->consumerKey;
     }
 
     public function setConsumerKey(?string $consumerKey): self

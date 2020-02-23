@@ -1131,15 +1131,17 @@ class Accessor implements ApiAccessorInterface,
      * @return stdClass
      * @throws ApiRateLimitingException
      * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
      * @throws NonUniqueResultException
      * @throws NotFoundMemberException
      * @throws NotFoundStatusException
      * @throws OptimisticLockException
      * @throws ProtectedAccountException
      * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
-     * @throws ReflectionException
+     * @throws UnexpectedApiResponseException
      */
     public function search(string $query, $params = '')
     {
