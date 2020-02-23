@@ -9,6 +9,7 @@ use App\Aggregate\Repository\SearchMatchingStatusRepository;
 use App\Amqp\Exception\InvalidListNameException;
 use App\Amqp\Message\FetchMemberLikes;
 use App\Amqp\Message\FetchMemberStatuses;
+use App\Amqp\SkippableMemberException;
 use App\Api\Entity\Token;
 use App\Api\Entity\TokenInterface;
 use App\Api\Exception\InvalidSerializedTokenException;
@@ -27,6 +28,7 @@ use App\Operation\OperationClock;
 use App\Twitter\Api\Resource\MemberCollection;
 use App\Twitter\Api\Resource\MemberIdentity;
 use App\Twitter\Api\Resource\OwnershipCollection;
+use App\Twitter\Exception\EmptyListException;
 use App\Twitter\Exception\OverCapacityException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -211,43 +213,15 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
         /** @var MemberIdentity $memberIdentity
          *
          */
-        foreach ($members->toArray() as $memberIdentity
-        ) {
-            if ($this->strategy->restrictDispatchToSpecificMember($memberIdentity)) {
-                $this->output->writeln(
-                    sprintf(
-                        'Skipping "%s" as member restriction applies',
-                        $memberIdentity->screenName()
-                    )
-                );
-                continue;
-            }
-
+        foreach ($members->toArray() as $memberIdentity) {
             try {
+                $this->skipUnrestrictedMember($memberIdentity);
+
                 $member = $this->getMessageMember($memberIdentity);
 
-                if ($this->strategy->shouldIgnoreMemberWhenWhispering($member)) {
-                    $message = sprintf('Ignoring whisperer with screen name "%s"', $memberIdentity->screenName());
-                    $this->logger->info($message);
-
-                    continue;
-                }
-
-                if ($member->isProtected()) {
-                    $message =
-                        sprintf('Ignoring protected member with screen name "%s"', $memberIdentity->screenName());
-                    $this->logger->info($message);
-
-                    continue;
-                }
-
-                if ($member->isSuspended()) {
-                    $message =
-                        sprintf('Ignoring suspended member with screen name "%s"', $memberIdentity->screenName());
-                    $this->logger->info($message);
-
-                    continue;
-                }
+                $this->guardAgainstWhisperingMember($member, $memberIdentity);
+                $this->guardAgainstProtectedMember($member, $memberIdentity);
+                $this->guardAgainstSuspendedMember($member, $memberIdentity);
 
                 $fetchMemberStatuses = $this->makeMemberIdentityCard(
                     $token,
@@ -266,6 +240,8 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
                 }
 
                 $publishedMessages++;
+            } catch (SkippableMemberException $exception) {
+                $this->logger->info($exception->getMessage());
             } catch (Exception $exception) {
                 if ($this->shouldBreakPublication($exception)) {
                     $this->logger->info($exception->getMessage());
@@ -282,6 +258,66 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
         }
 
         return $publishedMessages;
+    }
+
+    /**
+     * @param MemberInterface $member
+     * @param MemberIdentity               $memberIdentity
+     *
+     * @throws SkippableMemberException
+     */
+    protected function guardAgainstProtectedMember(
+        MemberInterface $member,
+        MemberIdentity $memberIdentity
+    ): void {
+        if ($member->isProtected()) {
+            throw new SkippableMemberException(
+                sprintf(
+                    'Ignoring protected member with screen name "%s"',
+                    $memberIdentity->screenName()
+                )
+            );
+        }
+    }
+
+    /**
+     * @param MemberInterface $member
+     * @param MemberIdentity               $memberIdentity
+     *
+     * @throws SkippableMemberException
+     */
+    protected function guardAgainstSuspendedMember(
+        MemberInterface $member,
+        MemberIdentity $memberIdentity
+    ): void {
+        if ($member->isSuspended()) {
+            throw new SkippableMemberException(
+                sprintf(
+                    'Ignoring suspended member with screen name "%s"',
+                    $memberIdentity->screenName()
+                )
+            );
+        }
+    }
+
+    /**
+     * @param MemberInterface $member
+     * @param MemberIdentity               $memberIdentity
+     *
+     * @throws SkippableMemberException
+     */
+    protected function guardAgainstWhisperingMember(
+        MemberInterface $member,
+        MemberIdentity $memberIdentity
+    ): void {
+        if ($this->strategy->shouldIgnoreMemberWhenWhispering($member)) {
+            throw new SkippableMemberException(
+                sprintf(
+                    'Ignoring whisperer with screen name "%s"',
+                    $memberIdentity->screenName()
+                )
+            );
+        }
     }
 
     /**
@@ -346,6 +382,23 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
         $this->entityManager->flush();
 
         return $user;
+    }
+
+    /**
+     * @param MemberIdentity $memberIdentity
+     *
+     * @throws SkippableMemberException
+     */
+    protected function skipUnrestrictedMember(MemberIdentity $memberIdentity): void
+    {
+        if ($this->strategy->restrictDispatchToSpecificMember($memberIdentity)) {
+            throw new SkippableMemberException(
+                sprintf(
+                    'Skipping "%s" as member restriction applies',
+                    $memberIdentity->screenName()
+                )
+            );
+        }
     }
 
     /**
@@ -491,7 +544,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
             $memberCollection = $this->addOwnerToListOptionally($memberCollection);
 
             if ($memberCollection->isEmpty()) {
-                $this->logger->info(
+                EmptyListException::throws(
                     sprintf(
                         'List "%s" has no members',
                         $list->name
@@ -589,6 +642,8 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
                     $list,
                     $memberOwnership->token()
                 );
+            } catch (EmptyListException $exception) {
+                $this->logger->info($exception->getMessage());
             } catch (Exception $exception) {
                 $this->logger->critical($exception->getMessage());
 
@@ -620,21 +675,21 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
                 || $this->strategy->shouldApplyListCollectionRestriction())
         ) {
             $this->dispatcher = $this->getContainer()
-                ->get(
-                    'old_sound_rabbit_mq.weaving_the_web_amqp.twitter.aggregates_status_producer'
-                );
+                                     ->get(
+                                         'old_sound_rabbit_mq.weaving_the_web_amqp.twitter.aggregates_status_producer'
+                                     );
 
             $this->likesMessagesProducer = $this->getContainer()
-                ->get(
-                    'old_sound_rabbit_mq.weaving_the_web_amqp.producer.aggregates_likes_producer'
-                );
+                                                ->get(
+                                                    'old_sound_rabbit_mq.weaving_the_web_amqp.producer.aggregates_likes_producer'
+                                                );
         }
 
         if ($this->strategy->shouldSearchByQuery()) {
             $this->dispatcher = $this->getContainer()
-                ->get(
-                    'old_sound_rabbit_mq.weaving_the_web_amqp.producer.search_matching_statuses_producer'
-                );
+                                     ->get(
+                                         'old_sound_rabbit_mq.weaving_the_web_amqp.producer.search_matching_statuses_producer'
+                                     );
         }
     }
 
