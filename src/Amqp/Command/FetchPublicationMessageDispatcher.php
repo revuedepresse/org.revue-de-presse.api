@@ -385,22 +385,20 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
             && ($this->collectionStrategy->listRestriction()
                 || $this->collectionStrategy->shouldApplyListCollectionRestriction())
         ) {
-            $this->dispatcher = $this->getContainer()
-                                     ->get(
-                                         'old_sound_rabbit_mq.weaving_the_web_amqp.twitter.aggregates_status_producer'
-                                     );
-
-            $this->likesMessagesDispatcher = $this->getContainer()
-                                                  ->get(
-                                                    'old_sound_rabbit_mq.weaving_the_web_amqp.producer.aggregates_likes_producer'
-                                                );
+            // TODO customize message to be dispatched
+            // Before introducting messenger component
+            // it produced messages with
+            // old_sound_rabbit_mq.weaving_the_web_amqp.twitter.aggregates_status_producer
+            // old_sound_rabbit_mq.weaving_the_web_amqp.producer.aggregates_likes_producer
+            // services
         }
 
         if ($this->collectionStrategy->shouldSearchByQuery()) {
-            $this->dispatcher = $this->getContainer()
-                                     ->get(
-                                         'old_sound_rabbit_mq.weaving_the_web_amqp.producer.search_matching_statuses_producer'
-                                     );
+            // TODO customize message to be dispatched
+            // Before introducing messenger component
+            // it produced messages with
+            // old_sound_rabbit_mq.weaving_the_web_amqp.producer.search_matching_statuses_producer
+            // service
         }
     }
 
