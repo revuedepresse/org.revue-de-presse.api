@@ -10,7 +10,7 @@ use App\Tests\Builder\ApiAccessorBuilder;
 use App\Tests\Builder\TokenChangeBuilder;
 use App\Tests\Builder\TokenRepositoryBuilder;
 use App\Twitter\Api\OwnershipAccessor;
-use App\Twitter\Api\Resource\MemberOwnerships;
+use App\Domain\Resource\MemberOwnerships;
 use App\Twitter\Exception\OverCapacityException;
 use Exception;
 use PHPUnit\Framework\TestCase;

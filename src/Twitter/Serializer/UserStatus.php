@@ -755,7 +755,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     }
 
     /**
-     * @var \App\Api\Repository\AggregateRepository $aggregateRepository
+     * @var \App\Api\Repository\PublicationListRepository $aggregateRepository
      */
     protected $aggregateRepository;
 

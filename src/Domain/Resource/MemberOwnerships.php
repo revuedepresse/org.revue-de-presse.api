@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Twitter\Api\Resource;
+namespace App\Domain\Resource;
 
 use App\Api\Entity\TokenInterface;
 

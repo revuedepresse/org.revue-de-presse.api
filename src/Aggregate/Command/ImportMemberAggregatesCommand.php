@@ -13,6 +13,7 @@ use App\Member\Entity\AggregateSubscription;
 use App\Membership\Entity\MemberInterface;
 use App\Member\Repository\AggregateSubscriptionRepository;
 use App\Member\Repository\NetworkRepository;
+use App\Twitter\Api\ApiAccessorInterface;
 use App\Twitter\Api\Resource\OwnershipCollection;
 use App\Twitter\Exception\BadAuthenticationDataException;
 use App\Twitter\Exception\InconsistentTokenRepository;
@@ -27,7 +28,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use App\Twitter\Api\Accessor;
-use App\Membership\Repository\MemberRepository;
+use App\Infrastructure\Repository\Membership\MemberRepository;
 
 class ImportMemberAggregatesCommand extends AbstractCommand
 {
@@ -38,9 +39,9 @@ class ImportMemberAggregatesCommand extends AbstractCommand
     const OPTION_LIST_RESTRICTION = 'list-restriction';
 
     /**
-     * @var Accessor
+     * @var ApiAccessorInterface
      */
-    public $accessor;
+    public ApiAccessorInterface $accessor;
 
     /**
      * @var string
@@ -137,17 +138,19 @@ class ImportMemberAggregatesCommand extends AbstractCommand
                     $this->listRestriction = $this->input->getOption(self::OPTION_LIST_RESTRICTION);
                 }
 
-                if (!is_null($this->listRestriction) && ($list->name !== $this->listRestriction)) {
+                if ($this->listRestriction !== null && ($list->name !== $this->listRestriction)) {
                     return;
                 }
 
-                $list = $this->accessor->getListMembers($memberAggregateSubscription->listId);
+                $list = $this->accessor->getListMembers(
+                    (int) $memberAggregateSubscription->listId
+                );
 
                 $ids = array_map(
                     function (\stdClass $user) {
                         return $user->id_str;
                     },
-                    $list->users
+                    $list->toArray()
                 );
 
                 $members = $this->memberRepository->createQueryBuilder('m')
@@ -193,7 +196,7 @@ class ImportMemberAggregatesCommand extends AbstractCommand
                 );
 
                 array_walk(
-                    $list->users,
+                    $list->toArray(),
                     function (
                         \stdClass $user
                     ) use (

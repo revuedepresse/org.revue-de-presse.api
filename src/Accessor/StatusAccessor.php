@@ -5,7 +5,7 @@ namespace App\Accessor;
 
 use App\Api\Entity\StatusInterface;
 use App\Membership\Entity\MemberInterface;
-use App\Membership\Repository\MemberRepository;
+use App\Infrastructure\Repository\Membership\MemberRepository;
 use App\Status\Entity\NullStatus;
 use App\Status\Repository\NotFoundStatusRepository;
 use App\Twitter\Exception\SuspendedAccountException;

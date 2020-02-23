@@ -12,6 +12,7 @@ use App\Operation\OperationClock;
 use App\Twitter\Exception\SuspendedAccountException;
 use Doctrine\Common\Persistence\Mapping\MappingException;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 
 use Doctrine\ORM\NonUniqueResultException;
@@ -20,7 +21,7 @@ use Doctrine\ORM\OptimisticLockException;
 use Psr\Log\LoggerInterface;
 
 use App\Api\Entity\Status;
-use App\Api\Repository\AggregateRepository;
+use App\Api\Repository\PublicationListRepository;
 use App\Api\Repository\StatusRepository;
 use App\Twitter\Exception\NotFoundMemberException;
 use App\Twitter\Exception\UnavailableResourceException;
@@ -42,12 +43,12 @@ class ConversationStatusConsumer
     /**
      * @var EntityManager
      */
-    public $entityManager;
+    public EntityManagerInterface $entityManager;
 
     /**
-     * @var AggregateRepository
+     * @var PublicationListRepository
      */
-    public $aggregateRepository;
+    public PublicationListRepository $aggregateRepository;
 
     /**
      * @var LoggerInterface

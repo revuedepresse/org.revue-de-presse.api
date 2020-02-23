@@ -10,7 +10,7 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\StatusInterface;
-use App\Api\Repository\AggregateRepository;
+use App\Api\Repository\PublicationListRepository;
 use Laminas\Service;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
 
@@ -27,7 +27,7 @@ class TimelyStatusRepository extends ServiceEntityRepository
     public $statusRepository;
 
     /**
-     * @var AggregateRepository
+     * @var PublicationListRepository
      */
     public $aggregateRepository;
 

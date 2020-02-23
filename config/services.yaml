@@ -58,6 +58,35 @@ services:
             connection:             '@doctrine.dbal.default_connection'
             queryFactory:           '@weaving_the_web.api.query_factory'
 
+    App\Infrastructure\Amqp\ResourceProcessor\MemberIdentityProcessor:
+        class: 'App\Infrastructure\Amqp\ResourceProcessor\MemberIdentityProcessor'
+        arguments:
+            - '@messenger.default_bus'
+            - '@repository.publication_list'
+            - '@weaving_the_web_twitter.api_accessor'
+            - '@user_manager'
+            - '@logger'
+
+    App\Infrastructure\Amqp\ResourceProcessor\PublicationListProcessor:
+        class: 'App\Infrastructure\Amqp\ResourceProcessor\PublicationListProcessor'
+        calls:
+            - [ 'setMemberIdentityProcessor', [ '@App\Infrastructure\Amqp\ResourceProcessor\MemberIdentityProcessor'] ]
+            - [ 'setTokenChange',             [ '@App\Api\AccessToken\TokenChange'] ]
+        arguments:
+            - '@weaving_the_web_twitter.api_accessor'
+            - '@translator'
+            - '@logger'
+
+    App\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher:
+        class: 'App\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher'
+        arguments:
+            - '@weaving_the_web_twitter.api_accessor'
+            - '@App\Twitter\Api\OwnershipAccessor'
+            - '@App\Infrastructure\Amqp\ResourceProcessor\PublicationListProcessor'
+            - '@App\Api\AccessToken\TokenChange'
+            - '@logger'
+            - '@translator'
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
     app.cache.redis:

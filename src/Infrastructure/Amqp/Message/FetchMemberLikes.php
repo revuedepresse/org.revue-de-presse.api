@@ -1,11 +1,8 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Amqp\Message;
+namespace App\Infrastructure\Amqp\Message;
 
-/**
- * @package App\Amqp\Message
- */
 class FetchMemberLikes extends FetchMemberStatuses
 {
     /**
@@ -18,6 +15,7 @@ class FetchMemberLikes extends FetchMemberStatuses
         return new self(
             $message->screenName(),
             $message->aggregateId(),
+            $message->token(),
             $message->before()
         );
     }

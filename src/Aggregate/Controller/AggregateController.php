@@ -6,14 +6,14 @@ use App\Cache\RedisCache;
 use App\Security\Cors\CorsHeadersAwareTrait;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use App\Api\Repository\AggregateRepository;
+use App\Api\Repository\PublicationListRepository;
 
 class AggregateController
 {
     use CorsHeadersAwareTrait;
 
     /**
-     * @var AggregateRepository
+     * @var PublicationListRepository
      */
     public $aggregateRepository;
 

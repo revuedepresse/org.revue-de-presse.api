@@ -17,6 +17,8 @@ interface CollectionInterface
 
     public function isEmpty(): bool;
 
+    public function isNotEmpty(): bool;
+
     /**
      * @param array $collection
      *

@@ -55,8 +55,8 @@ services:
         arguments:
             - 'App\Aggregate\Entity\MemberAggregateSubscription'
 
-    repository.aggregate:
-        class: 'App\Api\Repository\AggregateRepository'
+    repository.publication_list:
+        class: 'App\Api\Repository\PublicationListRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - 'App\Api\Entity\Aggregate'
@@ -138,12 +138,13 @@ services:
             memberRepository: "@user_manager"
             statusRepository: '@App\Api\Repository\StatusRepository'
 
-    App\Membership\Repository\MemberRepository:
+    App\Infrastructure\Repository\Membership\MemberRepository:
+        class: 'App\Infrastructure\Repository\Membership\MemberRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - 'App\Membership\Entity\Member'
         properties:
-            aggregateRepository: "@repository.aggregate"
+            aggregateRepository: "@repository.publication_list"
         tags: [ 'doctrine.repository_service' ]
 
     repository.member_subscription:

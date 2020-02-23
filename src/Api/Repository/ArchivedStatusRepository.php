@@ -32,7 +32,7 @@ use App\Api\Entity\StatusInterface;
 use App\Twitter\Exception\NotFoundMemberException;
 use App\Twitter\Exception\ProtectedAccountException;
 use App\Twitter\Exception\SuspendedAccountException;
-use App\Membership\Repository\MemberRepository;
+use App\Infrastructure\Repository\Membership\MemberRepository;
 use App\Twitter\Repository\PublicationRepositoryInterface;
 
 use function count;
