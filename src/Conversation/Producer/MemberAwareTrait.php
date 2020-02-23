@@ -3,7 +3,9 @@ declare(strict_types=1);
 
 namespace App\Conversation\Producer;
 
+use App\Accessor\Exception\UnexpectedApiResponseException;
 use App\Membership\Model\Member;
+use App\Twitter\Api\Resource\MemberIdentity;
 use App\Twitter\Exception\UnavailableResourceException;
 use Exception;
 use stdClass;
@@ -11,64 +13,66 @@ use stdClass;
 trait MemberAwareTrait
 {
     /**
-     * @param                              $friend
+     * @param                              $memberIdentity
      * @param UnavailableResourceException $exception
      *
      * @throws Exception
      */
     protected function handleUnavailableResourceException(
-        $friend,
+        MemberIdentity $memberIdentity,
         UnavailableResourceException $exception
-    ) {
+    ): void {
         if (
             $exception->getCode() === $this->accessor->getMemberNotFoundErrorCode()
             || $exception->getCode() === $this->accessor->getUserNotFoundErrorCode()
         ) {
-            $message = sprintf('User with screen name %s can not be found', $friend->screen_name);
+            $message = sprintf('User with screen name %s can not be found', $memberIdentity->screenName());
             $this->logger->info($message);
 
             throw new Exception($message, self::NOT_FOUND_MEMBER);
-        } else {
-            if ($exception->getCode() === $this->accessor->getSuspendedUserErrorCode()) {
-                $message = sprintf(
-                    'User with screen name "%s" has been suspended (code: %d, message: "%s")',
-                    $friend->screen_name,
-                    $exception->getCode(),
-                    $exception->getMessage()
-                );
-                $this->logger->error($message);
-                $this->makeUser(
-                    (object) ['screen_name' => $friend->screen_name],
-                    $friend,
-                    $protected = false,
-                    $suspended = true
-                );
-                throw new Exception($message, self::SUSPENDED_USER);
-            } elseif ($exception->getCode() === $this->accessor->getProtectedAccountErrorCode()) {
-                $message = sprintf(
-                    'User with screen name "%s" has a protected account (code: %d, message: "%s")',
-                    $friend->screen_name,
-                    $exception->getCode(),
-                    $exception->getMessage()
-                );
-                $this->logger->error($message);
-                $this->makeUser(
-                    (object) ['screen_name' => $friend->screen_name],
-                    $friend,
-                    $protected = true
-                );
-                throw new Exception($message, self::PROTECTED_ACCOUNT);
-            } else {
-                $message = sprintf(
-                    'Unavailable resource for user with screen name %s (code: %d, message: "%s")',
-                    $friend->screen_name,
-                    $exception->getCode(),
-                    $exception->getMessage()
-                );
-                $this->logger->error($message);
-                throw new Exception($message, self::UNAVAILABLE_RESOURCE);
-            }
         }
+
+        if ($exception->getCode() === $this->accessor->getSuspendedUserErrorCode()) {
+            $message = sprintf(
+                'User with screen name "%s" has been suspended (code: %d, message: "%s")',
+                $memberIdentity->screenName(),
+                $exception->getCode(),
+                $exception->getMessage()
+            );
+            $this->logger->error($message);
+            $this->makeUser(
+                (object) ['screen_name' => $memberIdentity->screenName()],
+                $memberIdentity,
+                $protected = false,
+                $suspended = true
+            );
+            throw new Exception($message, self::SUSPENDED_USER);
+        }
+
+        if ($exception->getCode() === $this->accessor->getProtectedAccountErrorCode()) {
+            $message = sprintf(
+                'User with screen name "%s" has a protected account (code: %d, message: "%s")',
+                $memberIdentity->screenName(),
+                $exception->getCode(),
+                $exception->getMessage()
+            );
+            $this->logger->error($message);
+            $this->makeUser(
+                (object) ['screen_name' => $memberIdentity->screenName()],
+                $memberIdentity,
+                $protected = true
+            );
+            throw new Exception($message, self::PROTECTED_ACCOUNT);
+        }
+
+        $message = sprintf(
+            'Unavailable resource for user with screen name %s (code: %d, message: "%s")',
+            $memberIdentity->screenName(),
+            $exception->getCode(),
+            $exception->getMessage()
+        );
+        $this->logger->error($message);
+        throw new Exception($message, self::UNAVAILABLE_RESOURCE);
     }
 
     /**
@@ -95,15 +99,17 @@ trait MemberAwareTrait
     }
 
     /**
-     * @param stdClass $friend
+     * @param MemberIdentity $memberIdentity
      *
      * @return Member
      * @throws Exception
      */
-    private function getMessageMember(stdClass $friend)
+    private function getMessageMember(MemberIdentity $memberIdentity)
     {
         /** @var Member $member */
-        $member            = $this->userRepository->findOneBy(['twitterID' => $friend->id]);
+        $member            = $this->userRepository->findOneBy(
+            ['twitterID' => $memberIdentity->id()]
+        );
         $preExistingMember = $member instanceof Member;
 
         if ($preExistingMember && $member->hasNotBeenDeclaredAsNotFound()) {
@@ -111,23 +117,28 @@ trait MemberAwareTrait
         }
 
         try {
-            $twitterUser = $this->accessor->showUser($friend->screen_name);
+            $twitterUser = $this->accessor->getMemberProfile(
+                $memberIdentity->screenName()
+            );
         } catch (UnavailableResourceException $exception) {
-            $this->handleUnavailableResourceException($friend, $exception);
+            $this->handleUnavailableResourceException($memberIdentity, $exception);
         }
 
         if (!isset($twitterUser)) {
-            throw new Exception(
+            throw new UnexpectedApiResponseException(
                 'An unexpected error has occurred.',
                 self::UNEXPECTED_ERROR
             );
         }
 
         if (!$preExistingMember) {
-            return $this->makeUser($twitterUser, $friend);
+            return $this->makeUser(
+                $twitterUser,
+                $memberIdentity
+            );
         }
 
-        $member = $member->setTwitterUsername($twitterUser->screen_name);
+        $member = $member->setTwitterUsername($twitterUser->screenName());
 
         return $this->userRepository->declareUserAsFound($member);
     }

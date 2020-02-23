@@ -3,10 +3,6 @@ declare(strict_types=1);
 
 namespace App\Amqp\Command;
 
-use App\Accessor\Exception\ApiRateLimitingException;
-use App\Accessor\Exception\NotFoundStatusException;
-use App\Accessor\Exception\ReadOnlyApplicationException;
-use App\Accessor\Exception\UnexpectedApiResponseException;
 use App\Aggregate\Entity\SavedSearch;
 use App\Aggregate\Repository\SavedSearchRepository;
 use App\Aggregate\Repository\SearchMatchingStatusRepository;
@@ -24,12 +20,10 @@ use App\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Membership\Entity\Member;
 use App\Membership\Entity\MemberInterface;
 use App\Operation\OperationClock;
+use App\Twitter\Api\Resource\MemberCollection;
+use App\Twitter\Api\Resource\MemberIdentity;
 use App\Twitter\Api\Resource\OwnershipCollection;
-use App\Twitter\Exception\BadAuthenticationDataException;
-use App\Twitter\Exception\InconsistentTokenRepository;
-use App\Twitter\Exception\NotFoundMemberException;
 use App\Twitter\Exception\OverCapacityException;
-use App\Twitter\Exception\ProtectedAccountException;
 use App\Twitter\Exception\SuspendedAccountException;
 use App\Twitter\Exception\UnavailableResourceException;
 use Doctrine\ORM\NonUniqueResultException;
@@ -37,7 +31,6 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Exception;
-use ReflectionException;
 use stdClass;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -196,21 +189,10 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
      * @param OutputInterface $output
      *
      * @return int
-     * @throws ApiRateLimitingException
-     * @throws BadAuthenticationDataException
-     * @throws InconsistentTokenRepository
      * @throws InvalidSerializedTokenException
      * @throws NoResultException
      * @throws NonUniqueResultException
-     * @throws NotFoundMemberException
-     * @throws NotFoundStatusException
      * @throws OptimisticLockException
-     * @throws ProtectedAccountException
-     * @throws ReadOnlyApplicationException
-     * @throws ReflectionException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws UnexpectedApiResponseException
      */
     public function execute(InputInterface $input, OutputInterface $output): int
     {
@@ -239,88 +221,27 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
     }
 
     /**
-     * @param TokenInterface  $token
-     * @param stdClass        $list
-     * @param MemberInterface $member
-     *
-     * @return FetchMemberStatuses
-     */
-    protected function makeMemberIdentityCard(
-        TokenInterface $token,
-        stdClass $list,
-        MemberInterface $member
-    ): FetchMemberStatuses {
-        $aggregate = $this->getListAggregateByName(
-            $member->getTwitterUsername(),
-            $list->name,
-            $list->id_str
-        );
-
-        return new FetchMemberStatuses(
-            $member->getTwitterUsername(),
-            $aggregate->getId(),
-            $token,
-            $this->before
-        );
-    }
-
-    /**
-     * @param stdClass $twitterUser
-     * @param stdClass $friend
-     * @param bool     $protected
-     * @param bool     $suspended
-     *
-     * @return Member
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
-    protected function makeUser(
-        stdClass $twitterUser,
-        stdClass $friend,
-        bool $protected = false,
-        bool $suspended = false
-    ) {
-        $this->logger->info(
-            sprintf(
-                self::MESSAGE_PUBLISHING_NEW_MESSAGE,
-                $twitterUser->screen_name
-            )
-        );
-
-        $user = $this->userRepository->make(
-            $friend->id,
-            $twitterUser->screen_name,
-            $protected,
-            $suspended
-        );
-
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
-
-        return $user;
-    }
-
-    /**
-     * @param $members
-     * @param $messageBody
-     * @param $list
+     * @param                $members
+     * @param TokenInterface $token
+     * @param                $list
      *
      * @return int
      * @throws Exception
      */
-    protected function publishMembersScreenNames(
-        $members,
-        TokenInterface $messageBody,
+    protected function dispatchMessages(
+        MemberCollection $members,
+        TokenInterface $token,
         $list
     ) {
         $publishedMessages = 0;
 
-        foreach ($members->users as $friend) {
-            if ($this->memberRestriction && $friend->screen_name !== $this->memberRestriction) {
+        /** @var MemberIdentity $friend */
+        foreach ($members->toArray() as $friend) {
+            if ($this->memberRestriction && $this->applyRestrictionForMemberIdentity($friend)) {
                 $this->output->writeln(
                     sprintf(
                         'Skipping "%s" as member restriction applies',
-                        $friend->screen_name
+                        $friend->screenName()
                     )
                 );
                 continue;
@@ -330,28 +251,28 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
                 $member = $this->getMessageMember($friend);
 
                 if ($this->ignoreWhispers && $member->isAWhisperer()) {
-                    $message = sprintf('Ignoring whisperer with screen name "%s"', $friend->screen_name);
+                    $message = sprintf('Ignoring whisperer with screen name "%s"', $friend->screenName());
                     $this->logger->info($message);
 
                     continue;
                 }
 
                 if ($member->isProtected()) {
-                    $message = sprintf('Ignoring protected member with screen name "%s"', $friend->screen_name);
+                    $message = sprintf('Ignoring protected member with screen name "%s"', $friend->screenName());
                     $this->logger->info($message);
 
                     continue;
                 }
 
                 if ($member->isSuspended()) {
-                    $message = sprintf('Ignoring suspended member with screen name "%s"', $friend->screen_name);
+                    $message = sprintf('Ignoring suspended member with screen name "%s"', $friend->screenName());
                     $this->logger->info($message);
 
                     continue;
                 }
 
                 $fetchMemberStatuses = $this->makeMemberIdentityCard(
-                    $messageBody,
+                    $token,
                     $list,
                     $member
                 );
@@ -383,6 +304,101 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
         }
 
         return $publishedMessages;
+    }
+
+    /**
+     * @param TokenInterface  $token
+     * @param stdClass        $list
+     * @param MemberInterface $member
+     *
+     * @return FetchMemberStatuses
+     */
+    protected function makeMemberIdentityCard(
+        TokenInterface $token,
+        stdClass $list,
+        MemberInterface $member
+    ): FetchMemberStatuses {
+        $aggregate = $this->getListAggregateByName(
+            $member->getTwitterUsername(),
+            $list->name,
+            $list->id_str
+        );
+
+        return new FetchMemberStatuses(
+            $member->getTwitterUsername(),
+            $aggregate->getId(),
+            $token,
+            $this->before
+        );
+    }
+
+    /**
+     * @param stdClass       $twitterUser
+     * @param MemberIdentity $friend
+     * @param bool           $protected
+     * @param bool           $suspended
+     *
+     * @return Member
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    protected function makeUser(
+        stdClass $twitterUser,
+        MemberIdentity $friend,
+        bool $protected = false,
+        bool $suspended = false
+    ) {
+        $this->logger->info(
+            sprintf(
+                self::MESSAGE_PUBLISHING_NEW_MESSAGE,
+                $twitterUser->screen_name
+            )
+        );
+
+        $user = $this->userRepository->make(
+            $friend->id(),
+            $twitterUser->screen_name,
+            $protected,
+            $suspended
+        );
+
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+
+        return $user;
+    }
+
+    /**
+     * @param MemberIdentity $friend
+     *
+     * @return bool
+     */
+    protected function applyRestrictionForMemberIdentity(MemberIdentity $friend): bool
+    {
+        return $friend->screenName() !== $this->memberRestriction;
+    }
+
+    /**
+     * @param $list
+     *
+     * @return bool
+     */
+    private function applyListRestriction($list): bool
+    {
+        return $list->name === $this->listRestriction;
+    }
+
+    /**
+     * @param $list
+     *
+     * @return bool
+     */
+    private function applyListRestrictionAmongOthers($list): bool
+    {
+        return array_key_exists(
+            $list->name,
+            $this->listCollectionRestriction
+        );
     }
 
     /**
@@ -471,14 +487,10 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
     }
 
     /**
-     * @param $ownerships
+     * @param OwnershipCollection $ownerships
      *
-     * @return \API|mixed|object|\stdClass
-     * @throws UnavailableResourceException
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
-     * @throws Exception
-     * @throws SuspendedAccountException
+     * @return OwnershipCollection
+     * @throws InvalidSerializedTokenException
      */
     private function guardAgainstInvalidToken(OwnershipCollection $ownerships): OwnershipCollection
     {
@@ -514,26 +526,26 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
         $list,
         TokenInterface $messageBody
     ) {
-        if (
-            $this->shouldApplyListRestriction() || $list->name === $this->listRestriction
-            || array_key_exists(
-                $list->name,
-                $this->listCollectionRestriction
-            )
-        ) {
-            $members = $this->accessor->getListMembers($list->id);
+        if ($this->shouldApplyListRestriction($list)) {
+            $memberCollection = $this->accessor->getListMembers($list->id);
+            $members          = $memberCollection->toArray();
 
             if ($this->shouldIncludeOwner) {
                 $additionalMember = $this->accessor->getMemberProfile($this->screenName);
-                array_unshift($members->users, $additionalMember);
+                array_unshift($members, $additionalMember);
                 $this->shouldIncludeOwner = false;
             }
 
-            if (!is_object($members) || !isset($members->users) || count($members->users) === 0) {
-                $this->logger->info(sprintf('List "%s" has no members', $list->name));
+            if ($memberCollection->isEmpty()) {
+                $this->logger->info(
+                    sprintf(
+                        'List "%s" has no members',
+                        $list->name
+                    )
+                );
             }
 
-            if (count($members->users) > 0) {
+            if ($memberCollection->isNotEmpty()) {
                 $this->logger->info(
                     sprintf(
                         'About to publish messages for members in list "%s"',
@@ -542,13 +554,13 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
                 );
             }
 
-            $publishedMessages = $this->publishMembersScreenNames(
-                $members,
+            $publishedMessages = $this->dispatchMessages(
+                $memberCollection,
                 $messageBody,
                 $list
             );
 
-            // Reset accessor tokens in case they've been updated to find member usernames with alternative tokens
+            // Change token for each list
             // Members lists can only be accessed by authenticated users owning the lists
             // See also https://dev.twitter.com/rest/reference/get/lists/ownerships
             $this->tokenChange->replaceAccessToken(
@@ -721,12 +733,15 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
     }
 
     /**
+     * @param $list
+     *
      * @return bool
      */
-    private function shouldApplyListRestriction(): bool
+    private function shouldApplyListRestriction(stdClass $list): bool
     {
-        return $this->listRestriction === null
-            && count($this->listCollectionRestriction) === 0;
+        return $this->shouldNotApplyListRestriction()
+            || $this->applyListRestriction($list)
+            || $this->applyListRestrictionAmongOthers($list);
     }
 
     /**
@@ -736,6 +751,15 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
     {
         return $this->input->hasOption(self::OPTION_INCLUDE_OWNER)
             && $this->input->getOption(self::OPTION_INCLUDE_OWNER);
+    }
+
+    /**
+     * @return bool
+     */
+    private function shouldNotApplyListRestriction(): bool
+    {
+        return $this->listRestriction === null
+            && count($this->listCollectionRestriction) === 0;
     }
 
     /**

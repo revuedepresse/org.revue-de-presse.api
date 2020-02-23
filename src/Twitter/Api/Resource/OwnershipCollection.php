@@ -49,6 +49,11 @@ class OwnershipCollection implements StrictCollectionInterface
         return count($this->list) === 0;
     }
 
+    public function isNotEmpty(): bool
+    {
+        return !$this->isEmpty();
+    }
+
     public function toArray(): array
     {
         return $this->list;

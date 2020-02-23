@@ -16,6 +16,7 @@ use App\Member\Entity\AggregateSubscription;
 use App\Membership\Entity\MemberInterface;
 use App\Membership\Repository\MemberRepository;
 use App\Status\LikedStatusCollectionAwareInterface;
+use App\Twitter\Api\Resource\MemberCollection;
 use App\Twitter\Api\Resource\OwnershipCollection;
 use App\Twitter\Exception\BadAuthenticationDataException;
 use App\Twitter\Exception\EmptyErrorCodeException;
@@ -39,8 +40,10 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Translation\Translator;
 use TwitterOAuth;
 use function is_array;
+use function is_int;
 use function is_integer;
 use function is_null;
+use function is_numeric;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
@@ -511,12 +514,12 @@ class Accessor implements ApiAccessorInterface,
     /**
      * @param $id
      *
-     * @return array|stdClass
+     * @return MemberCollection
      * @throws ApiRateLimitingException
      * @throws InconsistentTokenRepository
      * @throws OptimisticLockException
      */
-    public function getListMembers(int $id): \stdClass
+    public function getListMembers(int $id): MemberCollection
     {
         $listMembersEndpoint = $this->getListMembersEndpoint();
         $this->guardAgainstApiLimit($listMembersEndpoint);
@@ -538,7 +541,7 @@ class Accessor implements ApiAccessorInterface,
 
             $members = $sendRequest();
         } finally {
-            return $members;
+            return MemberCollection::fromArray($members->users);
         }
     }
 
@@ -1397,13 +1400,14 @@ class Accessor implements ApiAccessorInterface,
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
      * @throws UnexpectedApiResponseException
+     * @throws \App\Membership\Exception\InvalidMemberIdentifier
      */
     public function getMemberProfile($identifier): stdClass
     {
         $screenName = null;
         $userId     = null;
 
-        if (is_integer($identifier)) {
+        if (is_numeric($identifier)) {
             $userId = $identifier;
             $option = 'user_id';
 
@@ -2110,13 +2114,13 @@ class Accessor implements ApiAccessorInterface,
     }
 
     /**
-     * @param int $identifier
+     * @param string $identifier
      *
      * @throws NotFoundMemberException
      * @throws ProtectedAccountException
      * @throws SuspendedAccountException
      */
-    private function guardAgainstSpecialMemberWithIdentifier(int $identifier): void
+    private function guardAgainstSpecialMemberWithIdentifier(string $identifier): void
     {
         $member = $this->userRepository->findOneBy(['twitterID' => $identifier]);
         if ($member instanceof MemberInterface) {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Api;
 
 use App\Api\Entity\TokenInterface;
+use App\Twitter\Api\Resource\MemberCollection;
 use App\Twitter\Api\Resource\OwnershipCollection;
 
 interface ApiAccessorInterface
@@ -20,7 +21,7 @@ interface ApiAccessorInterface
         int $count = 800
     ): OwnershipCollection;
 
-    public function getListMembers(int $listId): \stdClass;
+    public function getListMembers(int $listId): MemberCollection;
 
     public function getMemberProfile($identifier): \stdClass;
 }
