@@ -13,7 +13,7 @@ use App\Api\Exception\InvalidSerializedTokenException;
 use App\Membership\Entity\Member;
 use App\Membership\Entity\MemberInterface;
 use App\Membership\Exception\InvalidMemberIdentifier;
-use App\Membership\Repository\MemberRepository;
+use App\Infrastructure\Repository\Membership\MemberRepository;
 use App\Tests\Builder\ApiAccessorBuilder;
 use App\Tests\Builder\TokenChangeBuilder;
 use App\Tests\Builder\TokenRepositoryBuilder;

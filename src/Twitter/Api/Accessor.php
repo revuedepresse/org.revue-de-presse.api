@@ -15,7 +15,7 @@ use App\Api\Moderator\ApiLimitModerator;
 use App\Member\Entity\AggregateSubscription;
 use App\Membership\Entity\MemberInterface;
 use App\Membership\Exception\InvalidMemberIdentifier;
-use App\Membership\Repository\MemberRepository;
+use App\Infrastructure\Repository\Membership\MemberRepository;
 use App\Status\LikedStatusCollectionAwareInterface;
 use App\Domain\Resource\MemberCollection;
 use App\Domain\Resource\OwnershipCollection;

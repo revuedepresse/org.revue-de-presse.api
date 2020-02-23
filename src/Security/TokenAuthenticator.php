@@ -12,7 +12,7 @@ use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
 use App\Membership\Model\Member;
-use App\Membership\Repository\MemberRepository;
+use App\Infrastructure\Repository\Membership\MemberRepository;
 use Symfony\Component\Security\Guard\Token\PostAuthenticationGuardToken;
 
 class TokenAuthenticator extends AbstractGuardAuthenticator

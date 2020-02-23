@@ -10,7 +10,7 @@ use App\Infrastructure\Amqp\Message\FetchMemberStatuses;
 use App\Api\Entity\Token;
 use App\Api\Entity\TokenInterface;
 use App\Api\AccessToken\Repository\TokenRepositoryInterface;
-use App\Membership\Repository\MemberRepository;
+use App\Infrastructure\Repository\Membership\MemberRepository;
 use App\Operation\OperationClock;
 use App\Status\LikedStatusCollectionAwareInterface;
 use App\Twitter\Api\TwitterErrorAwareInterface;

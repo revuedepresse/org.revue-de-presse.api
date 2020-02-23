@@ -28,7 +28,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use App\Twitter\Api\Accessor;
-use App\Membership\Repository\MemberRepository;
+use App\Infrastructure\Repository\Membership\MemberRepository;
 
 class ImportMemberAggregatesCommand extends AbstractCommand
 {

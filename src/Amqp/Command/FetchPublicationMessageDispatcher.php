@@ -7,6 +7,7 @@ use App\Aggregate\Entity\SavedSearch;
 use App\Aggregate\Repository\SavedSearchRepository;
 use App\Aggregate\Repository\SearchMatchingStatusRepository;
 use App\Amqp\Exception\InvalidListNameException;
+use App\Domain\Membership\Exception\MembershipException;
 use App\Infrastructure\Amqp\Message\FetchMemberLikes;
 use App\Infrastructure\Amqp\Message\FetchMemberStatuses;
 use App\Amqp\SkippableMemberException;
@@ -17,13 +18,12 @@ use App\Conversation\Producer\MemberAwareTrait;
 use App\Domain\Membership\MemberFacingStrategy;
 use App\Domain\Collection\PublicationCollectionStrategy;
 use App\Domain\Collection\PublicationStrategyInterface;
+use App\Infrastructure\DependencyInjection\MemberRepositoryTrait;
 use App\Infrastructure\DependencyInjection\MessageBusTrait;
 use App\Infrastructure\DependencyInjection\OwnershipAccessorTrait;
 use App\Infrastructure\DependencyInjection\TokenChangeTrait;
 use App\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Infrastructure\InputConverter\InputToCollectionStrategy;
-use App\Membership\Entity\Member;
-use App\Membership\Exception\InvalidMemberIdentifier;
 use App\Operation\OperationClock;
 use App\Domain\Resource\MemberCollection;
 use App\Domain\Resource\MemberIdentity;
@@ -34,13 +34,10 @@ use App\Twitter\Exception\OverCapacityException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
 use Exception;
-use stdClass;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Messenger\MessageBusInterface;
 use function in_array;
 use function sprintf;
 
@@ -61,13 +58,14 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
     private const OPTION_LISTS                   = self::RULE_LISTS;
     private const OPTION_OAUTH_TOKEN             = 'oauth_token';
     private const OPTION_OAUTH_SECRET            = 'oauth_secret';
+
     private const MESSAGE_PUBLISHING_NEW_MESSAGE = '[publishing new message produced for "%s"]';
 
     use MemberAwareTrait;
     use MessageBusTrait;
     use OwnershipAccessorTrait;
-    use TranslatorTrait;
     use TokenChangeTrait;
+    use TranslatorTrait;
 
     /**
      * @var OperationClock
@@ -258,7 +256,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
                 $publishedMessages++;
             } catch (SkippableMemberException $exception) {
                 $this->logger->info($exception->getMessage());
-            } catch (Exception $exception) {
+            } catch (MembershipException $exception) {
                 if (MemberFacingStrategy::shouldBreakPublication($exception)) {
                     $this->logger->info($exception->getMessage());
 
@@ -370,44 +368,6 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
         $ownerships->goBackToFirstPage();
 
         return $this->findNextBatchOfListOwnerships($ownerships);
-    }
-
-    /**
-     * @param stdClass       $twitterUser
-     * @param MemberIdentity $memberIdentity
-     *
-     * @param bool           $protected
-     * @param bool           $suspended
-     *
-     * @return Member
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @throws InvalidMemberIdentifier
-     */
-    private function makeUser(
-        stdClass $twitterUser,
-        MemberIdentity $memberIdentity,
-        bool $protected = false,
-        bool $suspended = false
-    ) {
-        $this->logger->info(
-            sprintf(
-                self::MESSAGE_PUBLISHING_NEW_MESSAGE,
-                $twitterUser->screen_name
-            )
-        );
-
-        $user = $this->userRepository->make(
-            $memberIdentity->id(),
-            $twitterUser->screen_name,
-            $protected,
-            $suspended
-        );
-
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
-
-        return $user;
     }
 
     /**

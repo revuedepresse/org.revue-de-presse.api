@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace App\Conversation\Producer;
 
 use App\Accessor\Exception\UnexpectedApiResponseException;
+use App\Domain\Membership\Exception\MembershipException;
+use App\Infrastructure\DependencyInjection\MemberRepositoryTrait;
 use App\Membership\Model\Member;
 use App\Domain\Resource\MemberIdentity;
 use App\Twitter\Exception\UnavailableResourceException;
@@ -11,11 +13,13 @@ use Exception;
 
 trait MemberAwareTrait
 {
+    use MemberRepositoryTrait;
+
     /**
-     * @param                              $memberIdentity
+     * @param MemberIdentity               $memberIdentity
      * @param UnavailableResourceException $exception
      *
-     * @throws Exception
+     * @throws MembershipException
      */
     protected function handleUnavailableResourceException(
         MemberIdentity $memberIdentity,
@@ -28,7 +32,7 @@ trait MemberAwareTrait
             $message = sprintf('User with screen name %s can not be found', $memberIdentity->screenName());
             $this->logger->info($message);
 
-            throw new Exception($message, self::NOT_FOUND_MEMBER);
+            throw new MembershipException($message, self::NOT_FOUND_MEMBER);
         }
 
         if ($exception->getCode() === $this->accessor->getSuspendedUserErrorCode()) {
@@ -39,13 +43,13 @@ trait MemberAwareTrait
                 $exception->getMessage()
             );
             $this->logger->error($message);
-            $this->makeUser(
-                (object) ['screen_name' => $memberIdentity->screenName()],
+
+            $this->memberRepository->saveSuspended(
                 $memberIdentity,
-                $protected = false,
-                $suspended = true
+                (object) ['screen_name' => $memberIdentity->screenName()],
             );
-            throw new Exception($message, self::SUSPENDED_USER);
+
+            MembershipException::throws($message, self::SUSPENDED_USER);
         }
 
         if ($exception->getCode() === $this->accessor->getProtectedAccountErrorCode()) {
@@ -56,12 +60,10 @@ trait MemberAwareTrait
                 $exception->getMessage()
             );
             $this->logger->error($message);
-            $this->makeUser(
-                (object) ['screen_name' => $memberIdentity->screenName()],
-                $memberIdentity,
-                $protected = true
-            );
-            throw new Exception($message, self::PROTECTED_ACCOUNT);
+
+            $this->memberRepository->saveProtectedMember($memberIdentity);
+
+            MembershipException::throws($message, self::PROTECTED_ACCOUNT);
         }
 
         $message = sprintf(
@@ -71,7 +73,8 @@ trait MemberAwareTrait
             $exception->getMessage()
         );
         $this->logger->error($message);
-        throw new Exception($message, self::UNAVAILABLE_RESOURCE);
+
+        MembershipException::throws($message, self::UNAVAILABLE_RESOURCE);
     }
 
     /**
@@ -83,7 +86,7 @@ trait MemberAwareTrait
     private function getMessageMember(MemberIdentity $memberIdentity)
     {
         /** @var Member $member */
-        $member            = $this->userRepository->findOneBy(
+        $member            = $this->memberRepository->findOneBy(
             ['twitterID' => $memberIdentity->id()]
         );
         $preExistingMember = $member instanceof Member;
@@ -108,14 +111,14 @@ trait MemberAwareTrait
         }
 
         if (!$preExistingMember) {
-            return $this->makeUser(
-                $twitterUser,
-                $memberIdentity
+            return $this->memberRepository->saveMemberWithAdditionalProps(
+                $memberIdentity,
+                $twitterUser
             );
         }
 
         $member = $member->setTwitterUsername($twitterUser->screenName());
 
-        return $this->userRepository->declareUserAsFound($member);
+        return $this->memberRepository->declareUserAsFound($member);
     }
 }
