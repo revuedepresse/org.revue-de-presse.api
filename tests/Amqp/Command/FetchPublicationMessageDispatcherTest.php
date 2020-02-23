@@ -120,12 +120,6 @@ class FetchPublicationMessageDispatcherTest extends KernelTestCase
             $accessorBuilder->makeOwnershipCollection(),
             $accessorBuilder::SCREEN_NAME
         )
-        ->willReceiveToken(self::USER_TOKEN)
-        ->willReceiveSecret(self::USER_SECRET)
-        ->willReceiveToken(self::USER_TOKEN_SECONDARY)
-        ->willReceiveSecret(self::USER_TOKEN_SECONDARY)
-        ->willReceiveConsumerKey(self::CONSUMER_KEY)
-        ->willReceiveConsumerSecret(self::CONSUMER_SECRET)
         ->willGetMembersInList(
             $accessorBuilder::LIST_ID,
             $accessorBuilder->makeMemberList()

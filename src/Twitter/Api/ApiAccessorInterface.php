@@ -10,10 +10,6 @@ interface ApiAccessorInterface
 {
     public function setAccessToken(TokenInterface $token);
 
-    public function setOAuthToken(string $token): self;
-
-    public function setOAuthSecret(string $secret): self;
-
     public function setConsumerKey(string $secret): self;
 
     public function setConsumerSecret(string $secret): self;

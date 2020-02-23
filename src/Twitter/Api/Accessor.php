@@ -684,7 +684,7 @@ class Accessor implements ApiAccessorInterface,
         return $this;
     }
 
-    public function setOAuthSecret(string $secret): self
+    private function setOAuthSecret(string $secret): self
     {
         $this->userSecret = $secret;
 
@@ -699,12 +699,15 @@ class Accessor implements ApiAccessorInterface,
         return $this->userToken;
     }
 
+    /**
+     * @deprecated
+     */
     public function setUserToken(string $token): self
     {
         return $this->setOAuthToken($token);
     }
 
-    public function setOAuthToken(string $token): self
+    private function setOAuthToken(string $token): self
     {
         $this->userToken = $token;
 
@@ -1150,8 +1153,8 @@ class Accessor implements ApiAccessorInterface,
      */
     public function setAccessToken(TokenInterface $token)
     {
-        $this->setUserToken($token->getOAuthToken());
-        $this->setUserSecret($token->getOAuthSecret());
+        $this->setOAuthToken($token->getOAuthToken());
+        $this->setOAuthSecret($token->getOAuthSecret());
 
         if ($token->hasConsumerKey()) {
             $this->setConsumerKey($token->getConsumerKey());

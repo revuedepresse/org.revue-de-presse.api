@@ -135,40 +135,4 @@ class ApiAccessorBuilder
 
         return $this;
     }
-
-    public function willReceiveConsumerKey(string $consumerKey): self
-    {
-        $this->prophecy
-            ->setConsumerKey($consumerKey)
-            ->willReturn($this->prophecy);
-
-        return $this;
-    }
-
-    public function willReceiveConsumerSecret(string $consumerSecret): self
-    {
-        $this->prophecy
-            ->setConsumerSecret($consumerSecret)
-            ->willReturn($this->prophecy);
-
-        return $this;
-    }
-
-    public function willReceiveSecret(string $secret): self
-    {
-        $this->prophecy
-            ->setOAuthSecret($secret)
-            ->willReturn($this->prophecy);
-
-        return $this;
-    }
-
-    public function willReceiveToken(string $token): self
-    {
-        $this->prophecy
-            ->setOAuthToken($token)
-            ->willReturn($this->prophecy);
-
-        return $this;
-    }
 }
