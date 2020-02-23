@@ -43,6 +43,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
+use function array_key_exists;
 use function count;
 use function in_array;
 use function sprintf;
@@ -504,24 +505,10 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
     }
 
     /**
-     * @param                $doNotApplyListRestriction
      * @param                $list
      * @param TokenInterface $messageBody
      *
-     * @return void
-     * @throws ApiRateLimitingException
-     * @throws BadAuthenticationDataException
-     * @throws InconsistentTokenRepository
      * @throws InvalidSerializedTokenException
-     * @throws NonUniqueResultException
-     * @throws NotFoundMemberException
-     * @throws OptimisticLockException
-     * @throws ProtectedAccountException
-     * @throws ReadOnlyApplicationException
-     * @throws ReflectionException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws UnexpectedApiResponseException
      */
     private function processMemberList(
         $list,
@@ -582,20 +569,9 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
     }
 
     /**
-     * @throws ApiRateLimitingException
-     * @throws BadAuthenticationDataException
-     * @throws InconsistentTokenRepository
      * @throws NoResultException
      * @throws NonUniqueResultException
-     * @throws NotFoundMemberException
-     * @throws NotFoundStatusException
      * @throws OptimisticLockException
-     * @throws ProtectedAccountException
-     * @throws ReadOnlyApplicationException
-     * @throws ReflectionException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws UnexpectedApiResponseException
      */
     private function produceSearchStatusesMessages(): void
     {
