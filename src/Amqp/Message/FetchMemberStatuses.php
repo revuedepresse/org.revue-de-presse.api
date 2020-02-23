@@ -3,7 +3,9 @@ declare(strict_types=1);
 
 namespace App\Amqp\Message;
 
+use App\Api\Entity\Aggregate;
 use App\Api\Entity\TokenInterface;
+use App\Membership\Entity\MemberInterface;
 
 /**
  * @package App\Amqp\Message
@@ -30,21 +32,21 @@ class FetchMemberStatuses
     private TokenInterface $token;
 
     /**
-     * @var string
+     * @var bool
      */
-    private ?string $before;
+    private bool $before;
 
     /**
      * @param string         $screenName
      * @param int            $aggregateId
      * @param TokenInterface $token
-     * @param string|null    $before
+     * @param bool           $before
      */
     public function __construct(
         string $screenName,
         int $aggregateId,
         TokenInterface $token,
-        ?string $before = null
+        bool $before = false
     ) {
 
         $this->screenName = $screenName;
@@ -83,5 +85,28 @@ class FetchMemberStatuses
     public function token(): TokenInterface
     {
         return $this->token;
+    }
+
+    /**
+     * @param Aggregate       $aggregate
+     * @param TokenInterface  $token
+     * @param MemberInterface $member
+     *
+     * @param                 $collectPublicationsPrecedingThoseAlreadyCollected
+     *
+     * @return FetchMemberStatuses
+     */
+    public static function makeMemberIdentityCard(
+        Aggregate $aggregate,
+        TokenInterface $token,
+        MemberInterface $member,
+        bool $collectPublicationsPrecedingThoseAlreadyCollected
+    ): FetchMemberStatuses {
+        return new FetchMemberStatuses(
+            $member->getTwitterUsername(),
+            $aggregate->getId(),
+            $token,
+            $collectPublicationsPrecedingThoseAlreadyCollected
+        );
     }
 }

@@ -16,7 +16,7 @@ class PublicationCollectionStrategy
 {
     private string $screenName;
 
-    private ?string $collectPublicationsPrecedingThoseAlreadyCollected = null;
+    private ?bool $collectPublicationsPrecedingThoseAlreadyCollected = null;
 
     private ?string $listRestriction = null;
 
@@ -33,9 +33,9 @@ class PublicationCollectionStrategy
     private bool $includeOwner = false;
 
     /**
-     * @return string|null
+     * @return bool|null
      */
-    public function collectPublicationsPrecedingThoseAlreadyCollected(): ?string
+    public function collectPublicationsPrecedingThoseAlreadyCollected(): ?bool
     {
         return $this->collectPublicationsPrecedingThoseAlreadyCollected;
     }
@@ -301,11 +301,11 @@ class PublicationCollectionStrategy
     }
 
     /**
-     * @param string|null $before
+     * @param bool|null $before
      *
      * @return PublicationCollectionStrategy
      */
-    public function willCollectPublicationsPrecedingThoseAlreadyCollected(string $before): self
+    public function willCollectPublicationsPrecedingThoseAlreadyCollected(?bool $before): self
     {
         $this->collectPublicationsPrecedingThoseAlreadyCollected = $before;
 

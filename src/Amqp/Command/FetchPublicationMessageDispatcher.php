@@ -23,7 +23,6 @@ use App\Infrastructure\DependencyInjection\TokenChangeTrait;
 use App\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Infrastructure\InputConverter\InputToCollectionStrategy;
 use App\Membership\Entity\Member;
-use App\Membership\Entity\MemberInterface;
 use App\Membership\Exception\InvalidMemberIdentifier;
 use App\Operation\OperationClock;
 use App\Domain\Resource\MemberCollection;
@@ -88,7 +87,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
     /**
      * @var MessageBusInterface|null
      */
-    private ?MessageBusInterface $likesMessagesProducer = null;
+    private ?MessageBusInterface $likesMessagesDispatcher = null;
 
     /**
      * @var PublicationCollectionStrategy
@@ -197,153 +196,6 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
     }
 
     /**
-     * @param MemberCollection $members
-     * @param TokenInterface   $token
-     * @param PublicationList  $list
-     *
-     * @return int
-     * @throws Exception
-     */
-    protected function dispatchMessages(
-        MemberCollection $members,
-        TokenInterface $token,
-        PublicationList $list
-    ) {
-        $publishedMessages = 0;
-
-        /** @var MemberIdentity $memberIdentity
-         *
-         */
-        foreach ($members->toArray() as $memberIdentity) {
-            try {
-                $this->skipUnrestrictedMember($memberIdentity);
-
-                $member = $this->getMessageMember($memberIdentity);
-
-                $this->collectionStrategy->guardAgainstWhisperingMember($member, $memberIdentity);
-
-                MemberFacingStrategy::guardAgainstProtectedMember($member, $memberIdentity);
-                MemberFacingStrategy::guardAgainstSuspendedMember($member, $memberIdentity);
-
-                $fetchMemberStatuses = $this->makeMemberIdentityCard(
-                    $token,
-                    $list,
-                    $member
-                );
-
-                $this->dispatcher->dispatch($fetchMemberStatuses);
-
-                if ($this->likesMessagesProducer instanceof MessageBusInterface) {
-                    $this->likesMessagesProducer->dispatch(
-                        FetchMemberLikes::from(
-                            $fetchMemberStatuses
-                        )
-                    );
-                }
-
-                $publishedMessages++;
-            } catch (SkippableMemberException $exception) {
-                $this->logger->info($exception->getMessage());
-            } catch (Exception $exception) {
-                if ($this->shouldBreakPublication($exception)) {
-                    $this->logger->info($exception->getMessage());
-
-                    break;
-                }
-
-                if ($this->shouldContinuePublication($exception)) {
-                    continue;
-                }
-
-                throw $exception;
-            }
-        }
-
-        return $publishedMessages;
-    }
-
-    /**
-     * @param TokenInterface  $token
-     * @param PublicationList $list
-     * @param MemberInterface $member
-     *
-     * @return FetchMemberStatuses
-     */
-    protected function makeMemberIdentityCard(
-        TokenInterface $token,
-        PublicationList $list,
-        MemberInterface $member
-    ): FetchMemberStatuses {
-        $aggregate = $this->getListAggregateByName(
-            $member->getTwitterUsername(),
-            $list->name(),
-            $list->id()
-        );
-
-        return new FetchMemberStatuses(
-            $member->getTwitterUsername(),
-            $aggregate->getId(),
-            $token,
-            $this->collectionStrategy->collectPublicationsPrecedingThoseAlreadyCollected()
-        );
-    }
-
-    /**
-     * @param stdClass       $twitterUser
-     * @param MemberIdentity $memberIdentity
-     *
-     * @param bool           $protected
-     * @param bool           $suspended
-     *
-     * @return Member
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @throws InvalidMemberIdentifier
-     */
-    protected function makeUser(
-        stdClass $twitterUser,
-        MemberIdentity $memberIdentity,
-        bool $protected = false,
-        bool $suspended = false
-    ) {
-        $this->logger->info(
-            sprintf(
-                self::MESSAGE_PUBLISHING_NEW_MESSAGE,
-                $twitterUser->screen_name
-            )
-        );
-
-        $user = $this->userRepository->make(
-            $memberIdentity->id(),
-            $twitterUser->screen_name,
-            $protected,
-            $suspended
-        );
-
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
-
-        return $user;
-    }
-
-    /**
-     * @param MemberIdentity $memberIdentity
-     *
-     * @throws SkippableMemberException
-     */
-    protected function skipUnrestrictedMember(MemberIdentity $memberIdentity): void
-    {
-        if ($this->collectionStrategy->restrictDispatchToSpecificMember($memberIdentity)) {
-            throw new SkippableMemberException(
-                sprintf(
-                    'Skipping "%s" as member restriction applies',
-                    $memberIdentity->screenName()
-                )
-            );
-        }
-    }
-
-    /**
      * @param MemberCollection $memberCollection
      *
      * @return MemberCollection
@@ -360,6 +212,75 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
         }
 
         return MemberCollection::fromArray($members);
+    }
+
+    /**
+     * @param MemberCollection $members
+     * @param TokenInterface   $token
+     * @param PublicationList  $list
+     *
+     * @return int
+     * @throws Exception
+     */
+    private function dispatchMessages(
+        MemberCollection $members,
+        TokenInterface $token,
+        PublicationList $list
+    ) {
+        $publishedMessages = 0;
+
+        /** @var MemberIdentity $memberIdentity */
+        foreach ($members->toArray() as $memberIdentity) {
+            try {
+                $this->skipUnrestrictedMember($memberIdentity);
+
+                $member = $this->getMessageMember($memberIdentity);
+
+                $this->collectionStrategy->guardAgainstWhisperingMember($member, $memberIdentity);
+
+                MemberFacingStrategy::guardAgainstProtectedMember($member, $memberIdentity);
+                MemberFacingStrategy::guardAgainstSuspendedMember($member, $memberIdentity);
+
+                $fetchMemberStatuses = FetchMemberStatuses::makeMemberIdentityCard(
+                    $this->getListAggregateByName(
+                        $member->getTwitterUsername(),
+                        $list->name(),
+                        $list->id()
+                    ),
+                    $token,
+                    $member,
+                    $this->collectionStrategy->collectPublicationsPrecedingThoseAlreadyCollected()
+                );
+
+                $this->dispatcher->dispatch($fetchMemberStatuses);
+
+                if ($this->likesMessagesDispatcher instanceof MessageBusInterface) {
+                    $this->likesMessagesDispatcher->dispatch(
+                        FetchMemberLikes::from(
+                            $fetchMemberStatuses
+                        )
+                    );
+                }
+
+                $publishedMessages++;
+            } catch (SkippableMemberException $exception) {
+                $this->logger->info($exception->getMessage());
+            } catch (Exception $exception) {
+                if (MemberFacingStrategy::shouldBreakPublication($exception)) {
+                    $this->logger->info($exception->getMessage());
+
+                    break;
+                }
+
+                if (MemberFacingStrategy::shouldContinuePublication($exception)) {
+                    continue;
+                }
+
+                throw $exception;
+            }
+        }
+
+        return $publishedMessages;
     }
 
     /**
@@ -456,6 +377,44 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
         $ownerships->goBackToFirstPage();
 
         return $this->findNextBatchOfListOwnerships($ownerships);
+    }
+
+    /**
+     * @param stdClass       $twitterUser
+     * @param MemberIdentity $memberIdentity
+     *
+     * @param bool           $protected
+     * @param bool           $suspended
+     *
+     * @return Member
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws InvalidMemberIdentifier
+     */
+    private function makeUser(
+        stdClass $twitterUser,
+        MemberIdentity $memberIdentity,
+        bool $protected = false,
+        bool $suspended = false
+    ) {
+        $this->logger->info(
+            sprintf(
+                self::MESSAGE_PUBLISHING_NEW_MESSAGE,
+                $twitterUser->screen_name
+            )
+        );
+
+        $user = $this->userRepository->make(
+            $memberIdentity->id(),
+            $twitterUser->screen_name,
+            $protected,
+            $suspended
+        );
+
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+
+        return $user;
     }
 
     /**
@@ -621,8 +580,8 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
                                          'old_sound_rabbit_mq.weaving_the_web_amqp.twitter.aggregates_status_producer'
                                      );
 
-            $this->likesMessagesProducer = $this->getContainer()
-                                                ->get(
+            $this->likesMessagesDispatcher = $this->getContainer()
+                                                  ->get(
                                                     'old_sound_rabbit_mq.weaving_the_web_amqp.producer.aggregates_likes_producer'
                                                 );
         }
@@ -644,6 +603,23 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
         return $this->operationClock->shouldSkipOperation()
             && $this->collectionStrategy->allListsAreEquivalent()
             && $this->collectionStrategy->noQueryRestriction();
+    }
+
+    /**
+     * @param MemberIdentity $memberIdentity
+     *
+     * @throws SkippableMemberException
+     */
+    private function skipUnrestrictedMember(MemberIdentity $memberIdentity): void
+    {
+        if ($this->collectionStrategy->restrictDispatchToSpecificMember($memberIdentity)) {
+            throw new SkippableMemberException(
+                sprintf(
+                    'Skipping "%s" as member restriction applies',
+                    $memberIdentity->screenName()
+                )
+            );
+        }
     }
 
     /**

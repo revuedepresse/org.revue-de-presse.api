@@ -5,10 +5,11 @@ namespace App\Domain\Membership;
 
 use App\Amqp\SkippableMemberException;
 use App\Membership\Entity\MemberInterface;
-use App\Twitter\Api\Resource\MemberIdentity;
+use App\Domain\Resource\MemberIdentity;
+use Exception;
 use function sprintf;
 
-class MemberFacingStrategy
+class MemberFacingStrategy implements MemberFacingStrategyInterface
 {
     /**
      * @param MemberInterface $member
@@ -50,4 +51,26 @@ class MemberFacingStrategy
         }
     }
 
+    /**
+     * @param $exception
+     *
+     * @return bool
+     */
+    public static function shouldBreakPublication(Exception $exception): bool
+    {
+        return $exception->getCode() === self::UNEXPECTED_ERROR
+            || $exception->getCode() === self::UNAVAILABLE_RESOURCE;
+    }
+
+    /**
+     * @param $exception
+     *
+     * @return bool
+     */
+    public static function shouldContinuePublication(Exception $exception): bool
+    {
+        return $exception->getCode() === self::NOT_FOUND_MEMBER
+            || $exception->getCode() === self::SUSPENDED_USER
+            || $exception->getCode() === self::PROTECTED_ACCOUNT;
+    }
 }

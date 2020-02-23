@@ -5,10 +5,9 @@ namespace App\Conversation\Producer;
 
 use App\Accessor\Exception\UnexpectedApiResponseException;
 use App\Membership\Model\Member;
-use App\Twitter\Api\Resource\MemberIdentity;
+use App\Domain\Resource\MemberIdentity;
 use App\Twitter\Exception\UnavailableResourceException;
 use Exception;
-use stdClass;
 
 trait MemberAwareTrait
 {
@@ -73,29 +72,6 @@ trait MemberAwareTrait
         );
         $this->logger->error($message);
         throw new Exception($message, self::UNAVAILABLE_RESOURCE);
-    }
-
-    /**
-     * @param $exception
-     *
-     * @return bool
-     */
-    protected function shouldBreakPublication(Exception $exception)
-    {
-        return $exception->getCode() === self::UNEXPECTED_ERROR
-            || $exception->getCode() === self::UNAVAILABLE_RESOURCE;
-    }
-
-    /**
-     * @param $exception
-     *
-     * @return bool
-     */
-    protected function shouldContinuePublication(Exception $exception)
-    {
-        return $exception->getCode() === self::NOT_FOUND_MEMBER
-            || $exception->getCode() === self::SUSPENDED_USER
-            || $exception->getCode() === self::PROTECTED_ACCOUNT;
     }
 
     /**
