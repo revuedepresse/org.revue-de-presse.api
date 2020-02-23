@@ -15,6 +15,7 @@ use App\Membership\Entity\MemberInterface;
 use App\Membership\Repository\MemberRepository;
 use App\Twitter\Api\Accessor;
 use App\Twitter\Api\ApiAccessorInterface;
+use App\Twitter\Api\Resource\OwnershipCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Prophecy\Argument;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
@@ -65,8 +66,7 @@ class FetchPublicationMessageDispatcherTest extends KernelTestCase
             [
                 '--list'        => self::LIST_NAME,
                 '--screen_name' => self::SCREEN_NAME,
-            ],
-            ['capture_stderr_separately' => true]
+            ]
         );
 
         self::assertEquals(
@@ -107,26 +107,27 @@ class FetchPublicationMessageDispatcherTest extends KernelTestCase
     }
 
     /**
-     * @return Accessor
+     * @return ApiAccessorInterface
      * @throws
      */
-    private function prophesizeAccessor()
+    private function prophesizeAccessor(): ApiAccessorInterface
     {
         /** @var Accessor $accessorProphecy */
         $accessorProphecy = $this->prophesize(Accessor::class);
+
+        $ownershipCollection = OwnershipCollection::fromArray(
+            [
+                self::LIST_NAME => (object) [
+                    'name'   => self::LIST_NAME,
+                    'id'     => self::LIST_ID,
+                    'id_str' => (string) self::LIST_ID,
+                ]
+            ]
+        );
+
         $accessorProphecy
             ->getUserOwnerships(self::SCREEN_NAME)
-            ->willReturn(
-                (object) [
-                    'lists' => [
-                        self::LIST_NAME => (object) [
-                            'name'   => self::LIST_NAME,
-                            'id'     => self::LIST_ID,
-                            'id_str' => (string) self::LIST_ID,
-                        ]
-                    ]
-                ]
-            );
+            ->willReturn($ownershipCollection);
 
         $accessorProphecy
             ->setUserToken(self::USER_TOKEN)

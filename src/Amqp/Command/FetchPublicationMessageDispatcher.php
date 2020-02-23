@@ -18,12 +18,15 @@ use App\Api\Exception\InvalidSerializedTokenException;
 use App\Conversation\Producer\MemberAwareTrait;
 use App\Infrastructure\DependencyInjection\MessageBusTrait;
 use App\Infrastructure\DependencyInjection\TokenChangeTrait;
+use App\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Membership\Entity\Member;
 use App\Membership\Entity\MemberInterface;
 use App\Operation\OperationClock;
+use App\Twitter\Api\Resource\OwnershipCollection;
 use App\Twitter\Exception\BadAuthenticationDataException;
 use App\Twitter\Exception\InconsistentTokenRepository;
 use App\Twitter\Exception\NotFoundMemberException;
+use App\Twitter\Exception\OverCapacityException;
 use App\Twitter\Exception\ProtectedAccountException;
 use App\Twitter\Exception\SuspendedAccountException;
 use App\Twitter\Exception\UnavailableResourceException;
@@ -38,7 +41,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Contracts\Translation\TranslatorTrait;
+use function count;
 use function in_array;
 use function sprintf;
 
@@ -383,6 +386,62 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
     }
 
     /**
+     * @return array|int
+     * @throws ApiRateLimitingException
+     * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
+     * @throws InvalidListNameException
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
+     * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws UnexpectedApiResponseException
+     */
+    private function fetchOwnershipsForMemberHavingScreenName()
+    {
+        $unfrozenTokenCount = $this->tokenRepository->howManyUnfrozenTokenAreThere();
+
+        $ownershipCollection = OwnershipCollection::fromArray([]);
+
+        while ($unfrozenTokenCount > 0) {
+            try {
+                $ownershipCollection = $this->accessor->getUserOwnerships($this->screenName);
+
+                if ($ownershipCollection->isEmpty()) {
+                    continue;
+                }
+
+                $messageBody = $this->getTokensFromInputOrFallback();
+
+                break;
+            } catch (UnavailableResourceException $exception) {
+                $this->logger->info($exception->getMessage());
+                $messageBody = $this->tokenChange->replaceAccessToken(
+                    $this->getTokensFromInputOrFallback(),
+                    $this->accessor
+                );
+            }
+
+            $unfrozenTokenCount--;
+        }
+
+        if ($ownershipCollection->count() === 0) {
+            throw new OverCapacityException(
+                'Over capacity usage of all available tokens.'
+            );
+        }
+
+        $ownershipCollection = $this->guardAgainstInvalidListName($ownershipCollection);
+        if ($this->shouldApplyListRestriction() && $ownershipCollection->count() === 0) {
+            $ownershipCollection = $this->guardAgainstInvalidToken($ownershipCollection);
+        }
+
+        return ['ownerships' => $ownershipCollection, 'message_body' => $messageBody];
+    }
+
+    /**
      * @param stdClass $ownerships
      *
      * @return stdClass
@@ -400,21 +459,24 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
      * @throws NotFoundMemberException
      * @throws ProtectedAccountException
      */
-    private function findNextBatchOfListOwnerships(stdClass $ownerships): stdClass
+    private function findNextBatchOfListOwnerships(OwnershipCollection $ownerships): OwnershipCollection
     {
         $previousCursor = -1;
 
         if ($this->listRestriction === null) {
             return $this->accessor->getUserOwnerships(
                 $this->screenName,
-                $ownerships->next_cursor
+                $ownerships->nextPage()
             );
         }
 
         while ($this->targetListHasNotBeenFound($ownerships, $this->listRestriction)) {
-            $ownerships = $this->accessor->getUserOwnerships($this->screenName, $ownerships->next_cursor);
+            $ownerships = $this->accessor->getUserOwnerships(
+                $this->screenName,
+                $ownerships->nextPage()
+            );
 
-            if (!isset($ownerships->next_cursor) || $previousCursor === $ownerships->next_cursor) {
+            if (!$ownerships->nextPage() || $previousCursor === $ownerships->nextPage()) {
                 $this->output->write(
                     sprintf(
                         implode(
@@ -430,40 +492,40 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
                 break;
             }
 
-            $previousCursor = $ownerships->next_cursor;
+            $previousCursor = $ownerships->nextPage();
         }
 
         return $ownerships;
     }
 
     /**
-     * @param $ownerships
+     * @param OwnershipCollection $ownerships
      *
-     * @return \API|mixed|object|\stdClass
+     * @return OwnershipCollection
      * @throws InvalidListNameException
-     * @throws UnavailableResourceException
-     * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws OptimisticLockException
-     * @throws Exception
      * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
      */
-    private function guardAgainstInvalidListName($ownerships)
+    private function guardAgainstInvalidListName(OwnershipCollection $ownerships): OwnershipCollection
     {
-        if ($this->listRestriction) {
-            if ($this->targetListHasNotBeenFound($ownerships, $this->listRestriction)) {
-                $ownerships = $this->guardAgainstInvalidToken($ownerships);
-            }
+        if ($this->listRestriction === null) {
+            return $ownerships;
+        }
 
-            if ($this->targetListHasNotBeenFound($ownerships, $this->listRestriction)) {
-                $message = sprintf(
-                    'Invalid list name ("%s"). Could not be found',
-                    $this->listRestriction
-                );
-                $this->output->writeln($message);
+        if ($this->targetListHasNotBeenFound($ownerships, $this->listRestriction)) {
+            $ownerships = $this->guardAgainstInvalidToken($ownerships);
+        }
 
-                throw new InvalidListNameException($message);
-            }
+        if ($this->targetListHasNotBeenFound($ownerships, $this->listRestriction)) {
+            $message = sprintf(
+                'Invalid list name ("%s"). Could not be found',
+                $this->listRestriction
+            );
+            $this->output->writeln($message);
+
+            throw new InvalidListNameException($message);
         }
 
         return $ownerships;
@@ -479,13 +541,13 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
      * @throws Exception
      * @throws SuspendedAccountException
      */
-    private function guardAgainstInvalidToken($ownerships)
+    private function guardAgainstInvalidToken(OwnershipCollection $ownerships): OwnershipCollection
     {
         $this->tokenChange->replaceAccessToken(
-            $this->getTokensFromInputOrFallback(),
+            Token::fromArray($this->getTokensFromInputOrFallback()),
             $this->accessor
         );
-        $ownerships->next_cursor = -1;
+        $ownerships->goBackToFirstPage();
 
         return $this->findNextBatchOfListOwnerships($ownerships);
     }
@@ -495,22 +557,17 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
      *
      * @return array
      */
-    private function mapOwnershipsLists($ownerships): array
+    private function mapOwnershipsLists(OwnershipCollection $ownerships): array
     {
         return array_map(
-            function ($list) {
-                $list = (array) $list;
-
-                return $list['name'];
-            },
-            (array) $ownerships->lists
+            fn($list) => $list->name,
+            $ownerships->toArray()
         );
     }
 
     /**
      * @param $doNotApplyListRestriction
      * @param $list
-     * @param $shouldIncludeOwner
      * @param $messageBody
      *
      * @return bool
@@ -525,7 +582,6 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
     private function processMemberList(
         $doNotApplyListRestriction,
         $list,
-        $shouldIncludeOwner,
         $messageBody
     ) {
         if (
@@ -537,16 +593,14 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
         ) {
             $members = $this->accessor->getListMembers($list->id);
 
-            if ($shouldIncludeOwner) {
+            if ($this->shouldIncludeOwner) {
                 $additionalMember = $this->accessor->showUser($this->screenName);
                 array_unshift($members->users, $additionalMember);
-                $shouldIncludeOwner = false;
+                $this->shouldIncludeOwner = false;
             }
 
             if (!is_object($members) || !isset($members->users) || count($members->users) === 0) {
                 $this->logger->info(sprintf('List "%s" has no members', $list->name));
-
-                return $shouldIncludeOwner;
             }
 
             if (count($members->users) > 0) {
@@ -578,84 +632,6 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
                 )
             );
         }
-
-        return $shouldIncludeOwner;
-    }
-
-    /**
-     * @return int
-     * @throws ApiRateLimitingException
-     * @throws BadAuthenticationDataException
-     * @throws InconsistentTokenRepository
-     * @throws InvalidListNameException
-     * @throws NoResultException
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
-     * @throws ReadOnlyApplicationException
-     * @throws ReflectionException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws UnexpectedApiResponseException
-     */
-    private function producesListsMessages(): int
-    {
-        $unfrozenTokenCount = $this->tokenRepository->howManyUnfrozenTokenAreThere();
-
-        while ($unfrozenTokenCount > 0) {
-            try {
-                $ownerships = $this->accessor->getUserOwnerships($this->screenName);
-
-                if (count($ownerships->lists) === 0) {
-                    continue;
-                }
-
-                $messageBody = $this->getTokensFromInputOrFallback();
-
-                break;
-            } catch (UnavailableResourceException $exception) {
-                $this->logger->info($exception->getMessage());
-                $messageBody = $this->tokenChange->replaceAccessToken(
-                    $this->getTokensFromInputOrFallback(),
-                    $this->accessor
-                );
-            }
-
-            $unfrozenTokenCount--;
-        }
-
-        if (!isset($ownerships)) {
-            $this->output->writeln('Over capacity usage of all available tokens.');
-
-            return self::RETURN_STATUS_SUCCESS;
-        }
-
-        $ownerships = $this->guardAgainstInvalidListName($ownerships);
-
-        $doNotApplyListRestriction = is_null($this->listRestriction) && count($this->listCollectionRestriction) === 0;
-        if ($doNotApplyListRestriction && count($ownerships->lists) === 0) {
-            $ownerships = $this->guardAgainstInvalidToken($ownerships);
-        }
-
-        $this->shouldIncludeOwner =
-            $this->input->hasOption(self::OPTION_INCLUDE_OWNER) && $this->input->getOption(self::OPTION_INCLUDE_OWNER);
-        $shouldIncludeOwner       = $this->shouldIncludeOwner;
-
-        foreach ($ownerships->lists as $list) {
-            try {
-                $shouldIncludeOwner = $this->processMemberList(
-                    $doNotApplyListRestriction,
-                    $list,
-                    $shouldIncludeOwner,
-                    $messageBody
-                );
-            } catch (Exception $exception) {
-                $this->logger->critical($exception->getMessage());
-
-                return self::RETURN_STATUS_FAILURE;
-            }
-        }
-
-        return self::RETURN_STATUS_SUCCESS;
     }
 
     /**
@@ -692,6 +668,53 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
             $results->statuses,
             $this->accessor->userToken
         );
+    }
+
+    /**
+     * @return int
+     * @throws ApiRateLimitingException
+     * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
+     * @throws InvalidListNameException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
+     * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws UnexpectedApiResponseException
+     */
+    private function producesListsMessages(): int
+    {
+        try {
+            $ownershipsBag = $this->fetchOwnershipsForMemberHavingScreenName();
+        } catch (OverCapacityException $exception) {
+            $this->output->writeln($exception->getMessage());
+
+            return self::RETURN_STATUS_SUCCESS;
+        }
+
+        $ownerships  = $ownershipsBag['ownerships'];
+        $messageBody = $ownershipsBag['message_body'];
+
+        $this->shouldIncludeOwner = $this->shouldIncludeOwner();
+
+        foreach ($ownerships->toArray() as $list) {
+            try {
+                $this->processMemberList(
+                    $this->shouldApplyListRestriction(),
+                    $list,
+                    $messageBody
+                );
+            } catch (Exception $exception) {
+                $this->logger->critical($exception->getMessage());
+
+                return self::RETURN_STATUS_FAILURE;
+            }
+        }
+
+        return self::RETURN_STATUS_SUCCESS;
     }
 
     private function setOptionsFromInput(): void
@@ -781,6 +804,24 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
                                          'old_sound_rabbit_mq.weaving_the_web_amqp.producer.search_matching_statuses_producer'
                                      );
         }
+    }
+
+    /**
+     * @return bool
+     */
+    private function shouldApplyListRestriction(): bool
+    {
+        return $this->listRestriction === null
+            && count($this->listCollectionRestriction) === 0;
+    }
+
+    /**
+     * @return bool
+     */
+    private function shouldIncludeOwner(): bool
+    {
+        return $this->input->hasOption(self::OPTION_INCLUDE_OWNER)
+            && $this->input->getOption(self::OPTION_INCLUDE_OWNER);
     }
 
     /**

@@ -16,6 +16,7 @@ use App\Member\Entity\AggregateSubscription;
 use App\Membership\Entity\MemberInterface;
 use App\Membership\Repository\MemberRepository;
 use App\Status\LikedStatusCollectionAwareInterface;
+use App\Twitter\Api\Resource\OwnershipCollection;
 use App\Twitter\Exception\BadAuthenticationDataException;
 use App\Twitter\Exception\EmptyErrorCodeException;
 use App\Twitter\Exception\InconsistentTokenRepository;
@@ -628,7 +629,7 @@ class Accessor implements ApiAccessorInterface,
      * @param int    $cursor
      * @param int    $count
      *
-     * @return stdClass
+     * @return mixed
      * @throws ApiRateLimitingException
      * @throws BadAuthenticationDataException
      * @throws InconsistentTokenRepository
@@ -647,11 +648,11 @@ class Accessor implements ApiAccessorInterface,
         string $screenName,
         int $cursor = -1,
         int $count = 800
-    ) {
+    ): OwnershipCollection {
         $endpoint = $this->getUserOwnershipsEndpoint();
         $this->guardAgainstApiLimit($endpoint);
 
-        return $this->contactEndpoint(
+        $ownerships = $this->contactEndpoint(
             strtr(
                 $endpoint,
                 [
@@ -662,6 +663,8 @@ class Accessor implements ApiAccessorInterface,
                 ]
             )
         );
+
+        return OwnershipCollection::fromArray($ownerships->lists);
     }
 
     /**
