@@ -184,6 +184,13 @@ class PublicationCollectionStrategy implements PublicationStrategyInterface
     /**
      * @return bool
      */
+    public function shouldNotSearchByQuery(): bool {
+        return !$this->shouldSearchByQuery();
+    }
+
+    /**
+     * @return bool
+     */
     public function noQueryRestriction(): bool
     {
         return $this->forWhichQuery() === null;

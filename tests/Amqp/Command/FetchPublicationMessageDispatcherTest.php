@@ -4,23 +4,10 @@ declare(strict_types=1);
 namespace App\Tests\Amqp\Command;
 
 use App\Amqp\Command\FetchPublicationMessageDispatcher;
-use App\Api\AccessToken\Repository\TokenRepository;
-use App\Api\AccessToken\Repository\TokenRepositoryInterface;
-use App\Api\AccessToken\TokenChangeInterface;
-use App\Api\Entity\Token;
 use App\Api\Entity\TokenInterface;
-use App\Api\Exception\InvalidSerializedTokenException;
-use App\Membership\Entity\Member;
-use App\Membership\Entity\MemberInterface;
-use App\Membership\Exception\InvalidMemberIdentifier;
-use App\Infrastructure\Repository\Membership\MemberRepository;
+use App\Domain\Collection\PublicationStrategyInterface;
+use App\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher;
 use App\Tests\Builder\ApiAccessorBuilder;
-use App\Tests\Builder\TokenChangeBuilder;
-use App\Tests\Builder\TokenRepositoryBuilder;
-use App\Twitter\Api\Accessor;
-use App\Twitter\Api\ApiAccessorInterface;
-use App\Twitter\Api\Resource\OwnershipCollection;
-use Doctrine\ORM\EntityManagerInterface;
 use Prophecy\Argument;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -32,20 +19,6 @@ use Symfony\Component\Console\Tester\CommandTester;
  */
 class FetchPublicationMessageDispatcherTest extends KernelTestCase
 {
-    private const MEMBER_ID          = '1';
-    private const MEMBER_NAME        = 'Marie Curie';
-    private const MEMBER_SCREEN_NAME = 'mariec';
-    private const MEMBER_EMAIL       = 'marie@curie.physics';
-
-    private const USER_TOKEN  = 'user-token';
-    private const USER_SECRET = 'user-secret';
-
-    private const USER_TOKEN_SECONDARY  = 'user-token-secondary';
-    private const USER_SECRET_SECONDARY = 'user-secret-secondary';
-
-    private const CONSUMER_KEY    = 'consumer-key';
-    private const CONSUMER_SECRET = 'consumer-secret';
-
     /**
      * @var Command
      */
@@ -76,23 +49,17 @@ class FetchPublicationMessageDispatcherTest extends KernelTestCase
             $this->commandTester->getStatusCode(),
             $this->command::SUCCESS,
             'The status code of a command should be successful',
-            );
+        );
     }
 
-    /**
-     * @throws InvalidSerializedTokenException
-     */
     protected function setUp(): void
     {
         $kernel = static::bootKernel();
 
         self::$container = $kernel->getContainer();
 
-        $this->removeTargetMember(self::$container->get('doctrine.orm.entity_manager'));
-
         $command = self::$container->get(FetchPublicationMessageDispatcher::class);
-        $command->setAccessor($this->prophesizeAccessor());
-        $command->setTokenChange($this->prophesizeTokenChange());
+        $command->setPublicationMessageDispatcher($this->prophesizePublicationMessagerDispatcher());
 
         $application = new Application($kernel);
 
@@ -101,72 +68,18 @@ class FetchPublicationMessageDispatcherTest extends KernelTestCase
         $this->commandTester = new CommandTester($command);
     }
 
-    protected function tearDown(): void
-    {
-        $entityManager = self::$container->get('doctrine.orm.entity_manager');
-        $this->removeTargetMember($entityManager);
-    }
-
     /**
-     * @return ApiAccessorInterface
-     * @throws
+     * @return object
      */
-    private function prophesizeAccessor(): ApiAccessorInterface
+    private function prophesizePublicationMessagerDispatcher()
     {
-        /** @var Accessor $accessor */
-        $accessorBuilder = ApiAccessorBuilder::newApiAccessorBuilder();
-
-        $accessor = $accessorBuilder->willGetOwnershipCollectionForMember(
-            $accessorBuilder->makeOwnershipCollection(),
-            $accessorBuilder::SCREEN_NAME
-        )
-        ->willGetMembersInList(
-            $accessorBuilder::LIST_ID,
-            $accessorBuilder->makeMemberList()
-        )
-        ->willGetProfileForMemberHavingScreenName(
-            (object) [
-                'screen_name' => $accessorBuilder::MEMBER_SCREEN_NAME
-            ],
-            $accessorBuilder::MEMBER_SCREEN_NAME,
-        )->build();
-
-        return $accessor;
-    }
-
-    /**
-     * @throws InvalidSerializedTokenException
-     */
-    private function prophesizeTokenChange(): TokenChangeInterface
-    {
-        $tokenChangeBuilder = new TokenChangeBuilder();
-        $tokenChangeBuilder = $tokenChangeBuilder->willReplaceAccessToken(
-            Token::fromArray(
-                [
-                    'token'           => self::USER_TOKEN_SECONDARY,
-                    'secret'          => self::USER_SECRET_SECONDARY,
-                    'consumer_key'    => self::CONSUMER_KEY,
-                    'consumer_secret' => self::CONSUMER_SECRET
-                ]
-            )
+        $publicationMessageDispatcherProphecy = $this->prophesize(PublicationMessageDispatcher::class);
+        $publicationMessageDispatcherProphecy->dispatchPublicationMessages(
+            Argument::type(PublicationStrategyInterface::class),
+            Argument::type(TokenInterface::class),
+            Argument::cetera()
         );
 
-        return $tokenChangeBuilder->build();
-    }
-
-    /**
-     * @param EntityManagerInterface $entityManager
-     */
-    private function removeTargetMember(EntityManagerInterface $entityManager): void
-    {
-        $memberRepository = $entityManager
-            ->getRepository('Membership:Member');
-
-        $member = $memberRepository->findOneBy(['twitterID' => self::MEMBER_ID]);
-
-        if ($member instanceof MemberInterface) {
-            $entityManager->remove($member);
-            $entityManager->flush();
-        }
+        return $publicationMessageDispatcherProphecy->reveal();
     }
 }

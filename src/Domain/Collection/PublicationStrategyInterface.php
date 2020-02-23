@@ -14,4 +14,8 @@ interface PublicationStrategyInterface
     public const RULE_LISTS                  = 'lists';
     public const RULE_QUERY_RESTRICTION      = 'query_restriction';
     public const RULE_PRIORITY_TO_AGGREGATES = 'priority_to_aggregates';
+
+    public function shouldSearchByQuery(): bool;
+
+    public function shouldNotSearchByQuery(): bool;
 }

@@ -11,23 +11,23 @@ class OperationClock
     /**
      * @var string
      */
-    public $timeAfterWhichOperationIsSkipped;
+    public string $timeAfterWhichOperationIsSkipped;
 
     /**
      * @var string
      */
-    public $timeBeforeWhichOperationIsSkipped;
+    public string $timeBeforeWhichOperationIsSkipped;
 
     /**
      * @var LoggerInterface
      */
-    public $logger;
+    public LoggerInterface $logger;
 
     /**
      * @return bool
      * @throws Exception
      */
-    public function shouldSkipOperation()
+    public function shouldSkipOperation(): bool
     {
         $now = new DateTime('now', new \DateTimeZone('UTC'));
         $today = $now->format('Y-m-d');

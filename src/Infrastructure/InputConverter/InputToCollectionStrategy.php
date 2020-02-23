@@ -9,7 +9,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use function array_walk;
 use function explode;
 
-class InputToCollectionStrategy implements PublicationStrategyInterface
+class InputToCollectionStrategy
 {
     public static function convertInputToCollectionStrategy(
         InputInterface $input
@@ -38,7 +38,7 @@ class InputToCollectionStrategy implements PublicationStrategyInterface
     protected static function screenName(
         InputInterface $input
     ): string {
-        return $input->getOption(self::RULE_SCREEN_NAME);
+        return $input->getOption(PublicationStrategyInterface::RULE_SCREEN_NAME);
     }
 
     /**
@@ -50,10 +50,10 @@ class InputToCollectionStrategy implements PublicationStrategyInterface
         PublicationCollectionStrategy $strategy
     ): void {
         if (
-            $input->hasOption(self::RULE_LIST)
-            && $input->getOption(self::RULE_LIST) !== null
+            $input->hasOption(PublicationStrategyInterface::RULE_LIST)
+            && $input->getOption(PublicationStrategyInterface::RULE_LIST) !== null
         ) {
-            $strategy->willApplyListRestrictionToAList($input->getOption(self::RULE_LIST));
+            $strategy->willApplyListRestrictionToAList($input->getOption(PublicationStrategyInterface::RULE_LIST));
         }
     }
 
@@ -65,10 +65,10 @@ class InputToCollectionStrategy implements PublicationStrategyInterface
         InputInterface $input,
         PublicationCollectionStrategy $strategy
     ): void {
-        if ($input->hasOption(self::RULE_LISTS) && $input->getOption(self::RULE_LISTS) !== null) {
+        if ($input->hasOption(PublicationStrategyInterface::RULE_LISTS) && $input->getOption(PublicationStrategyInterface::RULE_LISTS) !== null) {
             $listCollectionRestriction = explode(
                 ',',
-                $input->getOption(self::RULE_LISTS)
+                $input->getOption(PublicationStrategyInterface::RULE_LISTS)
             );
 
             $restiction       = (object) [];
@@ -93,11 +93,11 @@ class InputToCollectionStrategy implements PublicationStrategyInterface
         PublicationCollectionStrategy $strategy
     ): void {
         if (
-            $input->hasOption(self::RULE_BEFORE)
-            && $input->getOption(self::RULE_BEFORE) !== null
+            $input->hasOption(PublicationStrategyInterface::RULE_BEFORE)
+            && $input->getOption(PublicationStrategyInterface::RULE_BEFORE) !== null
         ) {
             $strategy->willCollectPublicationsPrecedingThoseAlreadyCollected(
-                $input->getOption(self::RULE_BEFORE)
+                $input->getOption(PublicationStrategyInterface::RULE_BEFORE)
             );
         }
     }
@@ -111,10 +111,10 @@ class InputToCollectionStrategy implements PublicationStrategyInterface
         PublicationCollectionStrategy $strategy
     ): void {
         if (
-            $input->hasOption(self::RULE_PRIORITY_TO_AGGREGATES)
-            && $input->getOption(self::RULE_PRIORITY_TO_AGGREGATES)
+            $input->hasOption(PublicationStrategyInterface::RULE_PRIORITY_TO_AGGREGATES)
+            && $input->getOption(PublicationStrategyInterface::RULE_PRIORITY_TO_AGGREGATES)
         ) {
-            $strategy->willPrioritizeAggregates($input->getOption(self::RULE_PRIORITY_TO_AGGREGATES));
+            $strategy->willPrioritizeAggregates($input->getOption(PublicationStrategyInterface::RULE_PRIORITY_TO_AGGREGATES));
         }
     }
 
@@ -127,10 +127,10 @@ class InputToCollectionStrategy implements PublicationStrategyInterface
         PublicationCollectionStrategy $strategy
     ): void {
         if (
-            $input->hasOption(self::RULE_QUERY_RESTRICTION)
-            && $input->getOption(self::RULE_QUERY_RESTRICTION)
+            $input->hasOption(PublicationStrategyInterface::RULE_QUERY_RESTRICTION)
+            && $input->getOption(PublicationStrategyInterface::RULE_QUERY_RESTRICTION)
         ) {
-            $strategy->willApplyQueryRestriction($input->getOption(self::RULE_QUERY_RESTRICTION));
+            $strategy->willApplyQueryRestriction($input->getOption(PublicationStrategyInterface::RULE_QUERY_RESTRICTION));
         }
     }
 
@@ -143,12 +143,12 @@ class InputToCollectionStrategy implements PublicationStrategyInterface
         PublicationCollectionStrategy $strategy
     ): void {
         if (
-            $input->hasOption(self::RULE_MEMBER_RESTRICTION)
+            $input->hasOption(PublicationStrategyInterface::RULE_MEMBER_RESTRICTION)
             && $input->getOption(
-                self::RULE_MEMBER_RESTRICTION
+                PublicationStrategyInterface::RULE_MEMBER_RESTRICTION
             )
         ) {
-            $strategy->willApplyRestrictionToAMember($input->getOption(self::RULE_MEMBER_RESTRICTION));
+            $strategy->willApplyRestrictionToAMember($input->getOption(PublicationStrategyInterface::RULE_MEMBER_RESTRICTION));
         }
     }
 
@@ -161,12 +161,12 @@ class InputToCollectionStrategy implements PublicationStrategyInterface
         PublicationCollectionStrategy $strategy
     ): void {
         if (
-            $input->hasOption(self::RULE_IGNORE_WHISPERS)
+            $input->hasOption(PublicationStrategyInterface::RULE_IGNORE_WHISPERS)
             && $input->getOption(
-                self::RULE_IGNORE_WHISPERS
+                PublicationStrategyInterface::RULE_IGNORE_WHISPERS
             )
         ) {
-            $strategy->willIgnoreWhispers($input->getOption(self::RULE_IGNORE_WHISPERS));
+            $strategy->willIgnoreWhispers($input->getOption(PublicationStrategyInterface::RULE_IGNORE_WHISPERS));
         }
     }
 
@@ -179,10 +179,10 @@ class InputToCollectionStrategy implements PublicationStrategyInterface
         PublicationCollectionStrategy $strategy
     ) {
         if (
-            $input->hasOption(self::RULE_INCLUDE_OWNER)
-            && $input->getOption(self::RULE_INCLUDE_OWNER)
+            $input->hasOption(PublicationStrategyInterface::RULE_INCLUDE_OWNER)
+            && $input->getOption(PublicationStrategyInterface::RULE_INCLUDE_OWNER)
         ) {
-            $strategy->willIncludeOwner($input->getOption(self::RULE_INCLUDE_OWNER));
+            $strategy->willIncludeOwner($input->getOption(PublicationStrategyInterface::RULE_INCLUDE_OWNER));
         }
     }
 }

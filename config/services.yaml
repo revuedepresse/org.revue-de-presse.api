@@ -77,6 +77,16 @@ services:
             - '@translator'
             - '@logger'
 
+    App\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher:
+        class: 'App\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher'
+        arguments:
+            - '@weaving_the_web_twitter.api_accessor'
+            - '@App\Twitter\Api\OwnershipAccessor'
+            - '@App\Infrastructure\Amqp\ResourceProcessor\PublicationListProcessor'
+            - '@App\Api\AccessToken\TokenChange'
+            - '@logger'
+            - '@translator'
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
     app.cache.redis:

@@ -6,20 +6,17 @@ namespace App\Amqp\Command;
 use App\Aggregate\Entity\SavedSearch;
 use App\Aggregate\Repository\SavedSearchRepository;
 use App\Aggregate\Repository\SearchMatchingStatusRepository;
-use App\Amqp\Exception\InvalidListNameException;
+use App\Amqp\Exception\SkippableOperationException;
+use App\Amqp\Exception\UnexpectedOwnershipException;
 use App\Api\Entity\Token;
 use App\Api\Exception\InvalidSerializedTokenException;
 use App\Domain\Collection\PublicationCollectionStrategy;
 use App\Domain\Collection\PublicationStrategyInterface;
-use App\Domain\Resource\OwnershipCollection;
-use App\Domain\Resource\PublicationList;
 use App\Infrastructure\DependencyInjection\OwnershipAccessorTrait;
-use App\Infrastructure\DependencyInjection\PublicationListProcessorTrait;
-use App\Infrastructure\DependencyInjection\TokenChangeTrait;
+use App\Infrastructure\DependencyInjection\PublicationMessageDispatcherTrait;
 use App\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Infrastructure\InputConverter\InputToCollectionStrategy;
 use App\Operation\OperationClock;
-use App\Twitter\Exception\EmptyListException;
 use App\Twitter\Exception\OverCapacityException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -28,30 +25,27 @@ use Exception;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use function in_array;
-use function sprintf;
 
 /**
  * @package App\Amqp\Command
  */
-class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements PublicationStrategyInterface
+class FetchPublicationMessageDispatcher extends AggregateAwareCommand
 {
-    private const OPTION_BEFORE                 = self::RULE_BEFORE;
-    private const OPTION_SCREEN_NAME            = self::RULE_SCREEN_NAME;
-    private const OPTION_MEMBER_RESTRICTION     = self::RULE_MEMBER_RESTRICTION;
-    private const OPTION_INCLUDE_OWNER          = self::RULE_INCLUDE_OWNER;
-    private const OPTION_IGNORE_WHISPERS        = self::RULE_IGNORE_WHISPERS;
-    private const OPTION_QUERY_RESTRICTION      = self::RULE_QUERY_RESTRICTION;
-    private const OPTION_PRIORITY_TO_AGGREGATES = self::RULE_PRIORITY_TO_AGGREGATES;
+    private const OPTION_BEFORE                 = PublicationStrategyInterface::RULE_BEFORE;
+    private const OPTION_SCREEN_NAME            = PublicationStrategyInterface::RULE_SCREEN_NAME;
+    private const OPTION_MEMBER_RESTRICTION     = PublicationStrategyInterface::RULE_MEMBER_RESTRICTION;
+    private const OPTION_INCLUDE_OWNER          = PublicationStrategyInterface::RULE_INCLUDE_OWNER;
+    private const OPTION_IGNORE_WHISPERS        = PublicationStrategyInterface::RULE_IGNORE_WHISPERS;
+    private const OPTION_QUERY_RESTRICTION      = PublicationStrategyInterface::RULE_QUERY_RESTRICTION;
+    private const OPTION_PRIORITY_TO_AGGREGATES = PublicationStrategyInterface::RULE_PRIORITY_TO_AGGREGATES;
+    private const OPTION_LIST                   = PublicationStrategyInterface::RULE_LIST;
+    private const OPTION_LISTS                  = PublicationStrategyInterface::RULE_LISTS;
 
-    private const OPTION_LIST                    = self::RULE_LIST;
-    private const OPTION_LISTS                   = self::RULE_LISTS;
-    private const OPTION_OAUTH_TOKEN             = 'oauth_token';
-    private const OPTION_OAUTH_SECRET            = 'oauth_secret';
+    private const OPTION_OAUTH_TOKEN  = 'oauth_token';
+    private const OPTION_OAUTH_SECRET = 'oauth_secret';
 
     use OwnershipAccessorTrait;
-    use PublicationListProcessorTrait;
-    use TokenChangeTrait;
+    use PublicationMessageDispatcherTrait;
     use TranslatorTrait;
 
     /**
@@ -143,11 +137,9 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
      * @param OutputInterface $output
      *
      * @return int
-     * @throws InvalidSerializedTokenException
      * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws OptimisticLockException
-     * @throws InvalidListNameException
      */
     public function execute(InputInterface $input, OutputInterface $output): int
     {
@@ -156,134 +148,42 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
 
         $this->collectionStrategy = InputToCollectionStrategy::convertInputToCollectionStrategy($input);
 
-        if ($this->shouldSkipOperation()) {
-            return self::RETURN_STATUS_SUCCESS;
-        }
-
         try {
             $this->setUpDependencies();
+        } catch (SkippableOperationException $exception) {
+            $this->output->writeln($exception->getMessage());
         } catch (InvalidSerializedTokenException $exception) {
+            $this->logger->info($exception->getMessage());
+
             return self::RETURN_STATUS_FAILURE;
         }
 
         if ($this->collectionStrategy->shouldSearchByQuery()) {
             $this->produceSearchStatusesMessages();
-
-            return self::RETURN_STATUS_SUCCESS;
         }
 
-        return $this->producesListMessages();
-    }
-
-    /**
-     * @param OwnershipCollection $ownerships
-     *
-     * @return OwnershipCollection
-     */
-    private function findNextBatchOfListOwnerships(OwnershipCollection $ownerships): OwnershipCollection
-    {
-        $previousCursor = -1;
-
-        if ($this->collectionStrategy->listRestriction()) {
-            return $this->accessor->getUserOwnerships(
-                $this->collectionStrategy->onBehalfOfWhom(),
-                $ownerships->nextPage()
-            );
-        }
-
-        while ($this->targetListHasNotBeenFound(
-            $ownerships,
-            $this->collectionStrategy->forWhichList()
-        )) {
-            $ownerships = $this->accessor->getUserOwnerships(
-                $this->collectionStrategy->onBehalfOfWhom(),
-                $ownerships->nextPage()
-            );
-
-            if (!$ownerships->nextPage() || $previousCursor === $ownerships->nextPage()) {
-                $this->output->write(
-                    sprintf(
-                        implode(
-                            [
-                                'No more pages of members lists to be processed. ',
-                                'Does the Twitter API access token used belong to "%s"?',
-                            ]
-                        ),
-                        $this->collectionStrategy->onBehalfOfWhom()
-                    )
+        if ($this->collectionStrategy->shouldNotSearchByQuery()) {
+            $returnStatus = self::RETURN_STATUS_FAILURE;
+            try {
+                $this->publicationMessageDispatcher->dispatchPublicationMessages(
+                    $this->collectionStrategy,
+                    Token::fromArray($this->getTokensFromInputOrFallback()),
+                    function ($message) {
+                        $this->output->writeln($message);
+                    }
                 );
-
-                break;
+                $returnStatus = self::RETURN_STATUS_SUCCESS;
+            } catch (UnexpectedOwnershipException|OverCapacityException $exception) {
+                $this->logger->error($exception->getMessage());
+            } catch (Exception $exception) {
+                $this->logger->error($exception->getMessage());
+            } finally {
+                return $returnStatus;
             }
-
-            $previousCursor = $ownerships->nextPage();
         }
 
-        return $ownerships;
+        return self::RETURN_STATUS_SUCCESS;
     }
-
-    /**
-     * @param OwnershipCollection $ownerships
-     *
-     * @return OwnershipCollection
-     * @throws InvalidListNameException
-     * @throws InvalidSerializedTokenException
-     */
-    private function guardAgainstInvalidListName(
-        OwnershipCollection $ownerships
-    ): OwnershipCollection {
-        if ($this->collectionStrategy->noListRestriction()) {
-            return $ownerships;
-        }
-
-        $listRestriction = $this->collectionStrategy->forWhichList();
-        if ($this->targetListHasNotBeenFound($ownerships, $listRestriction)) {
-            $ownerships = $this->guardAgainstInvalidToken($ownerships);
-        }
-
-        if ($this->targetListHasNotBeenFound($ownerships, $listRestriction)) {
-            $message = sprintf(
-                'Invalid list name ("%s"). Could not be found',
-                $listRestriction
-            );
-            $this->output->writeln($message);
-
-            throw new InvalidListNameException($message);
-        }
-
-        return $ownerships;
-    }
-
-    /**
-     * @param OwnershipCollection $ownerships
-     *
-     * @return OwnershipCollection
-     * @throws InvalidSerializedTokenException
-     */
-    private function guardAgainstInvalidToken(OwnershipCollection $ownerships): OwnershipCollection
-    {
-        $this->tokenChange->replaceAccessToken(
-            Token::fromArray($this->getTokensFromInputOrFallback()),
-            $this->accessor
-        );
-        $ownerships->goBackToFirstPage();
-
-        return $this->findNextBatchOfListOwnerships($ownerships);
-    }
-
-    /**
-     * @param $ownerships
-     *
-     * @return array
-     */
-    private function mapOwnershipsLists(OwnershipCollection $ownerships): array
-    {
-        return array_map(
-            fn(PublicationList $list) => $list->name(),
-            $ownerships->toArray()
-        );
-    }
-
 
     /**
      * @throws NoResultException
@@ -313,63 +213,14 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
     }
 
     /**
-     * @return int
-     * @throws InvalidListNameException
-     * @throws InvalidSerializedTokenException
-     */
-    private function producesListMessages(): int
-    {
-        try {
-            $memberOwnership = $this->ownershipAccessor->getOwnershipsForMemberHavingScreenNameAndToken(
-                $this->collectionStrategy->onBehalfOfWhom(),
-                Token::fromArray($this->getTokensFromInputOrFallback())
-            );
-        } catch (OverCapacityException $exception) {
-            $this->output->writeln($exception->getMessage());
-
-            return self::RETURN_STATUS_SUCCESS;
-        }
-
-        $ownerships = $this->guardAgainstInvalidListName(
-            $memberOwnership->ownershipCollection()
-        );
-
-        foreach ($ownerships->toArray() as $list) {
-            try {
-                $publishedMessages = $this->publicationListProcessor->processPublicationList(
-                    $list,
-                    $memberOwnership->token(),
-                    $this->collectionStrategy
-                );
-
-                if ($publishedMessages) {
-                    $this->output->writeln(
-                        $this->translator->trans(
-                            'amqp.production.list_members.success',
-                            [
-                                '{{ count }}' => $publishedMessages,
-                                '{{ list }}'  => $list->name(),
-                            ]
-                        )
-                    );
-                }
-            } catch (EmptyListException $exception) {
-                $this->logger->info($exception->getMessage());
-            } catch (Exception $exception) {
-                $this->logger->critical($exception->getMessage());
-
-                return self::RETURN_STATUS_FAILURE;
-            }
-        }
-
-        return self::RETURN_STATUS_SUCCESS;
-    }
-
-    /**
      * @throws InvalidSerializedTokenException
      */
     private function setUpDependencies(): void
     {
+        if ($this->shouldSkipOperation()) {
+            SkippableOperationException::throws('This operation has to be skipped.');
+        }
+
         $this->setUpLogger();
 
         $this->accessor->setAccessToken(
@@ -411,29 +262,5 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
         return $this->operationClock->shouldSkipOperation()
             && $this->collectionStrategy->allListsAreEquivalent()
             && $this->collectionStrategy->noQueryRestriction();
-    }
-
-    /**
-     * @param $ownerships
-     * @param $listRestriction
-     *
-     * @return bool
-     */
-    private function targetListHasBeenFound($ownerships, string $listRestriction): bool
-    {
-        $listNames = $this->mapOwnershipsLists($ownerships);
-
-        return in_array($listRestriction, $listNames, true);
-    }
-
-    /**
-     * @param        $ownerships
-     * @param string $listRestriction
-     *
-     * @return bool
-     */
-    private function targetListHasNotBeenFound($ownerships, string $listRestriction): bool
-    {
-        return !$this->targetListHasBeenFound($ownerships, $listRestriction);
     }
 }

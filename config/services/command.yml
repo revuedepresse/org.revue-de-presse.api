@@ -21,17 +21,15 @@ services:
             savedSearchRepository:          '@repository.saved_search'
             searchMatchingStatusRepository: '@repository.search_matching_status'
         calls:
-            - [ 'setAccessor',                 [ '@weaving_the_web_twitter.api_accessor'] ]
-            - [ 'setAggregateRepository',      [ '@repository.publication_list'] ]
-            - [ 'setDefaultSecret',            [ '%weaving_the_web_twitter.oauth_secret.default%'] ]
-            - [ 'setDefaultToken',             [ '%weaving_the_web_twitter.oauth_token.default%'] ]
-            - [ 'setTokenRepository',          [ '@weaving_the_web_api.repository.token'] ]
-            - [ 'setTranslator',               [ '@translator'] ]
-            - [ 'setPublicationListProcessor', [ '@App\Infrastructure\Amqp\ResourceProcessor\PublicationListProcessor'] ]
-            - [ 'setOwnershipAccessor',        [ '@App\Twitter\Api\OwnershipAccessor'] ]
-            - [ 'setEntityManager',            [ '@doctrine.orm.entity_manager'] ]
-            - [ 'setLogger',                   [ '@logger'] ]
-            - [ 'setTokenChange',              [ '@App\Api\AccessToken\TokenChange'] ]
+            - [ 'setAccessor',                      [ '@weaving_the_web_twitter.api_accessor'] ]
+            - [ 'setAggregateRepository',           [ '@repository.publication_list'] ]
+            - [ 'setDefaultSecret',                 [ '%weaving_the_web_twitter.oauth_secret.default%'] ]
+            - [ 'setDefaultToken',                  [ '%weaving_the_web_twitter.oauth_token.default%'] ]
+            - [ 'setTokenRepository',               [ '@weaving_the_web_api.repository.token'] ]
+            - [ 'setPublicationMessageDispatcher',  [ '@App\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher'] ]
+            - [ 'setTranslator',                    [ '@translator'] ]
+            - [ 'setEntityManager',                 [ '@doctrine.orm.entity_manager'] ]
+            - [ 'setLogger',                        [ '@logger'] ]
         tags:
             - { name: 'console.command' }
         public: true
