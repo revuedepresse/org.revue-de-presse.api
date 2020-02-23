@@ -141,17 +141,6 @@ abstract class AccessorAwareCommand extends Command
             && $this->input->getOption(self::OPTION_OAUTH_SECRET) !== null;
     }
 
-    protected function setOAuthTokens(TokenInterface $token): void
-    {
-        $this->accessor->setOAuthToken($token->getOAuthToken());
-        $this->accessor->setOAuthSecret($token->getOAuthSecret());
-
-        if ($token->hasConsumerKey()) {
-            $this->accessor->setConsumerKey($token->getConsumerKey());
-            $this->accessor->setConsumerSecret($token->getConsumerKey());
-        }
-    }
-
     protected function setUpLogger()
     {
         // noop for backward compatibility

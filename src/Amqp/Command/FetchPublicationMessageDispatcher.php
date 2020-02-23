@@ -715,8 +715,11 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
     {
         $this->setUpLogger();
 
-        $tokens = $this->getTokensFromInputOrFallback();
-        $this->setOAuthTokens(Token::fromArray($tokens));
+        $this->accessor->setAccessToken(
+            Token::fromArray(
+                $this->getTokensFromInputOrFallback()
+            )
+        );
 
         $this->setupAggregateRepository();
 
