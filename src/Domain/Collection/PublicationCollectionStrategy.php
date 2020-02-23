@@ -1,13 +1,16 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Domain;
+namespace App\Domain\Collection;
 
+use App\Amqp\SkippableMemberException;
 use App\Membership\Entity\MemberInterface;
 use App\Twitter\Api\Resource\MemberIdentity;
+use App\Twitter\Api\Resource\PublicationList;
 use stdClass;
 use function array_key_exists;
 use function count;
+use function sprintf;
 
 class PublicationCollectionStrategy
 {
@@ -111,9 +114,9 @@ class PublicationCollectionStrategy
      *
      * @return bool
      */
-    private function applyListRestriction(stdClass $list): bool
+    private function applyListRestriction(PublicationList $list): bool
     {
-        return $list->name === $this->listRestriction;
+        return $list->name() === $this->listRestriction;
     }
 
     /**
@@ -121,10 +124,10 @@ class PublicationCollectionStrategy
      *
      * @return bool
      */
-    private function applyListRestrictionAmongOthers(stdClass $list): bool
+    private function applyListRestrictionAmongOthers(PublicationList $list): bool
     {
         return array_key_exists(
-            $list->name,
+            $list->name(),
             $this->listCollectionRestriction
         );
     }
@@ -134,7 +137,7 @@ class PublicationCollectionStrategy
      *
      * @return bool
      */
-    public function shouldProcessList(stdClass $list): bool
+    public function shouldProcessList(PublicationList $list): bool
     {
         return $this->shouldNotApplyListRestriction()
             || $this->applyListRestriction($list)
@@ -208,9 +211,29 @@ class PublicationCollectionStrategy
      *
      * @return bool
      */
-    public function shouldIgnoreMemberWhenWhispering(MemberInterface $member)
+    public function shouldIgnoreMemberWhenWhispering(MemberInterface $member): bool
     {
         return $this->shouldIgnoreWhispers() && $member->isAWhisperer();
+    }
+
+    /**
+     * @param MemberInterface $member
+     * @param MemberIdentity               $memberIdentity
+     *
+     * @throws SkippableMemberException
+     */
+    public function guardAgainstWhisperingMember(
+        MemberInterface $member,
+        MemberIdentity $memberIdentity
+    ): void {
+        if ($this->shouldIgnoreMemberWhenWhispering($member)) {
+            throw new SkippableMemberException(
+                sprintf(
+                    'Ignoring whisperer with screen name "%s"',
+                    $memberIdentity->screenName()
+                )
+            );
+        }
     }
 
     /**

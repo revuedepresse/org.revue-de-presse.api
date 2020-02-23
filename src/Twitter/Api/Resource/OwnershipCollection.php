@@ -12,14 +12,20 @@ class OwnershipCollection implements StrictCollectionInterface
     /**
      * @var array
      */
-    private array $list;
+    private array $ownerships;
 
     private int $nextPage;
 
-    private function __construct(array $list, int $nextPage)
+    private function __construct(array $ownerships, int $nextPage)
     {
-        $this->list = $list;
         $this->nextPage = $nextPage;
+        $this->ownerships = array_map(
+            fn($ownership) => new PublicationList(
+                $ownership->id_str,
+                $ownership->name
+            ),
+            $ownerships
+        );
     }
 
     public function goBackToFirstPage(): self
@@ -31,22 +37,22 @@ class OwnershipCollection implements StrictCollectionInterface
 
     public function map(Closure $closure): array
     {
-        return array_map($closure, $this->list);
+        return array_map($closure, $this->ownerships);
     }
 
-    public static function fromArray(array $list, int $nextPage = -1): self
+    public static function fromArray(array $ownerships, int $nextPage = -1): self
     {
-        return new self($list, $nextPage);
+        return new self($ownerships, $nextPage);
     }
 
     public function count(): int
     {
-        return count($this->list);
+        return count($this->ownerships);
     }
 
     public function isEmpty(): bool
     {
-        return count($this->list) === 0;
+        return count($this->ownerships) === 0;
     }
 
     public function isNotEmpty(): bool
@@ -56,7 +62,7 @@ class OwnershipCollection implements StrictCollectionInterface
 
     public function toArray(): array
     {
-        return $this->list;
+        return $this->ownerships;
     }
 
     public function nextPage(): int

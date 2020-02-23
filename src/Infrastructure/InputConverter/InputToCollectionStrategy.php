@@ -3,15 +3,15 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\InputConverter;
 
-use App\Domain\PublicationCollectionStrategy;
-use App\Domain\PublicationStrategyInterface;
+use App\Domain\Collection\PublicationCollectionStrategy;
+use App\Domain\Collection\PublicationStrategyInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use function array_walk;
 use function explode;
 
-class InputOptionToPublicationCollectionStrategy implements PublicationStrategyInterface
+class InputToCollectionStrategy implements PublicationStrategyInterface
 {
-    public static function convertInputToPublicationCollectionStrategy(
+    public static function convertInputToCollectionStrategy(
         InputInterface $input
     ): PublicationCollectionStrategy {
         $strategy = new PublicationCollectionStrategy();

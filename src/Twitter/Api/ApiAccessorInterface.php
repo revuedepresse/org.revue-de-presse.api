@@ -21,7 +21,7 @@ interface ApiAccessorInterface
         int $count = 800
     ): OwnershipCollection;
 
-    public function getListMembers(int $listId): MemberCollection;
+    public function getListMembers(string $listId): MemberCollection;
 
     public function getMemberProfile(string $identifier): \stdClass;
 }

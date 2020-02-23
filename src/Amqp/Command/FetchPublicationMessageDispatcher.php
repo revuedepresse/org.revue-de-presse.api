@@ -14,13 +14,14 @@ use App\Api\Entity\Token;
 use App\Api\Entity\TokenInterface;
 use App\Api\Exception\InvalidSerializedTokenException;
 use App\Conversation\Producer\MemberAwareTrait;
-use App\Domain\PublicationCollectionStrategy;
-use App\Domain\PublicationStrategyInterface;
+use App\Domain\Membership\MemberFacingStrategy;
+use App\Domain\Collection\PublicationCollectionStrategy;
+use App\Domain\Collection\PublicationStrategyInterface;
 use App\Infrastructure\DependencyInjection\MessageBusTrait;
 use App\Infrastructure\DependencyInjection\OwnershipAccessorTrait;
 use App\Infrastructure\DependencyInjection\TokenChangeTrait;
 use App\Infrastructure\DependencyInjection\TranslatorTrait;
-use App\Infrastructure\InputConverter\InputOptionToPublicationCollectionStrategy;
+use App\Infrastructure\InputConverter\InputToCollectionStrategy;
 use App\Membership\Entity\Member;
 use App\Membership\Entity\MemberInterface;
 use App\Membership\Exception\InvalidMemberIdentifier;
@@ -28,6 +29,7 @@ use App\Operation\OperationClock;
 use App\Twitter\Api\Resource\MemberCollection;
 use App\Twitter\Api\Resource\MemberIdentity;
 use App\Twitter\Api\Resource\OwnershipCollection;
+use App\Twitter\Api\Resource\PublicationList;
 use App\Twitter\Exception\EmptyListException;
 use App\Twitter\Exception\OverCapacityException;
 use Doctrine\ORM\NonUniqueResultException;
@@ -91,7 +93,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
     /**
      * @var PublicationCollectionStrategy
      */
-    private PublicationCollectionStrategy $strategy;
+    private PublicationCollectionStrategy $collectionStrategy;
 
     public function configure()
     {
@@ -173,8 +175,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
         $this->input  = $input;
         $this->output = $output;
 
-        $this->strategy =
-            InputOptionToPublicationCollectionStrategy::convertInputToPublicationCollectionStrategy($input);
+        $this->collectionStrategy = InputToCollectionStrategy::convertInputToCollectionStrategy($input);
 
         if ($this->shouldSkipOperation()) {
             return self::RETURN_STATUS_SUCCESS;
@@ -186,7 +187,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
             return self::RETURN_STATUS_FAILURE;
         }
 
-        if ($this->strategy->shouldSearchByQuery()) {
+        if ($this->collectionStrategy->shouldSearchByQuery()) {
             $this->produceSearchStatusesMessages();
 
             return self::RETURN_STATUS_SUCCESS;
@@ -196,9 +197,9 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
     }
 
     /**
-     * @param                $members
-     * @param TokenInterface $token
-     * @param                $list
+     * @param MemberCollection $members
+     * @param TokenInterface   $token
+     * @param PublicationList  $list
      *
      * @return int
      * @throws Exception
@@ -206,7 +207,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
     protected function dispatchMessages(
         MemberCollection $members,
         TokenInterface $token,
-        $list
+        PublicationList $list
     ) {
         $publishedMessages = 0;
 
@@ -219,9 +220,10 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
 
                 $member = $this->getMessageMember($memberIdentity);
 
-                $this->guardAgainstWhisperingMember($member, $memberIdentity);
-                $this->guardAgainstProtectedMember($member, $memberIdentity);
-                $this->guardAgainstSuspendedMember($member, $memberIdentity);
+                $this->collectionStrategy->guardAgainstWhisperingMember($member, $memberIdentity);
+
+                MemberFacingStrategy::guardAgainstProtectedMember($member, $memberIdentity);
+                MemberFacingStrategy::guardAgainstSuspendedMember($member, $memberIdentity);
 
                 $fetchMemberStatuses = $this->makeMemberIdentityCard(
                     $token,
@@ -261,88 +263,28 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
     }
 
     /**
-     * @param MemberInterface $member
-     * @param MemberIdentity               $memberIdentity
-     *
-     * @throws SkippableMemberException
-     */
-    protected function guardAgainstProtectedMember(
-        MemberInterface $member,
-        MemberIdentity $memberIdentity
-    ): void {
-        if ($member->isProtected()) {
-            throw new SkippableMemberException(
-                sprintf(
-                    'Ignoring protected member with screen name "%s"',
-                    $memberIdentity->screenName()
-                )
-            );
-        }
-    }
-
-    /**
-     * @param MemberInterface $member
-     * @param MemberIdentity               $memberIdentity
-     *
-     * @throws SkippableMemberException
-     */
-    protected function guardAgainstSuspendedMember(
-        MemberInterface $member,
-        MemberIdentity $memberIdentity
-    ): void {
-        if ($member->isSuspended()) {
-            throw new SkippableMemberException(
-                sprintf(
-                    'Ignoring suspended member with screen name "%s"',
-                    $memberIdentity->screenName()
-                )
-            );
-        }
-    }
-
-    /**
-     * @param MemberInterface $member
-     * @param MemberIdentity               $memberIdentity
-     *
-     * @throws SkippableMemberException
-     */
-    protected function guardAgainstWhisperingMember(
-        MemberInterface $member,
-        MemberIdentity $memberIdentity
-    ): void {
-        if ($this->strategy->shouldIgnoreMemberWhenWhispering($member)) {
-            throw new SkippableMemberException(
-                sprintf(
-                    'Ignoring whisperer with screen name "%s"',
-                    $memberIdentity->screenName()
-                )
-            );
-        }
-    }
-
-    /**
      * @param TokenInterface  $token
-     * @param stdClass        $list
+     * @param PublicationList $list
      * @param MemberInterface $member
      *
      * @return FetchMemberStatuses
      */
     protected function makeMemberIdentityCard(
         TokenInterface $token,
-        stdClass $list,
+        PublicationList $list,
         MemberInterface $member
     ): FetchMemberStatuses {
         $aggregate = $this->getListAggregateByName(
             $member->getTwitterUsername(),
-            $list->name,
-            $list->id_str
+            $list->name(),
+            $list->id()
         );
 
         return new FetchMemberStatuses(
             $member->getTwitterUsername(),
             $aggregate->getId(),
             $token,
-            $this->strategy->collectPublicationsPrecedingThoseAlreadyCollected()
+            $this->collectionStrategy->collectPublicationsPrecedingThoseAlreadyCollected()
         );
     }
 
@@ -391,7 +333,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
      */
     protected function skipUnrestrictedMember(MemberIdentity $memberIdentity): void
     {
-        if ($this->strategy->restrictDispatchToSpecificMember($memberIdentity)) {
+        if ($this->collectionStrategy->restrictDispatchToSpecificMember($memberIdentity)) {
             throw new SkippableMemberException(
                 sprintf(
                     'Skipping "%s" as member restriction applies',
@@ -409,12 +351,12 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
     private function addOwnerToListOptionally(MemberCollection $memberCollection): MemberCollection
     {
         $members = $memberCollection->toArray();
-        if ($this->strategy->shouldIncludeOwner()) {
+        if ($this->collectionStrategy->shouldIncludeOwner()) {
             $additionalMember = $this->accessor->getMemberProfile(
-                $this->strategy->onBehalfOfWhom()
+                $this->collectionStrategy->onBehalfOfWhom()
             );
             array_unshift($members, $additionalMember);
-            $this->strategy->willIncludeOwner(false);
+            $this->collectionStrategy->willIncludeOwner(false);
         }
 
         return MemberCollection::fromArray($members);
@@ -429,19 +371,19 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
     {
         $previousCursor = -1;
 
-        if ($this->strategy->listRestriction()) {
+        if ($this->collectionStrategy->listRestriction()) {
             return $this->accessor->getUserOwnerships(
-                $this->strategy->onBehalfOfWhom(),
+                $this->collectionStrategy->onBehalfOfWhom(),
                 $ownerships->nextPage()
             );
         }
 
         while ($this->targetListHasNotBeenFound(
             $ownerships,
-            $this->strategy->forWhichList()
+            $this->collectionStrategy->forWhichList()
         )) {
             $ownerships = $this->accessor->getUserOwnerships(
-                $this->strategy->onBehalfOfWhom(),
+                $this->collectionStrategy->onBehalfOfWhom(),
                 $ownerships->nextPage()
             );
 
@@ -454,7 +396,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
                                 'Does the Twitter API access token used belong to "%s"?',
                             ]
                         ),
-                        $this->strategy->onBehalfOfWhom()
+                        $this->collectionStrategy->onBehalfOfWhom()
                     )
                 );
 
@@ -477,11 +419,11 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
     private function guardAgainstInvalidListName(
         OwnershipCollection $ownerships
     ): OwnershipCollection {
-        if ($this->strategy->noListRestriction()) {
+        if ($this->collectionStrategy->noListRestriction()) {
             return $ownerships;
         }
 
-        $listRestriction = $this->strategy->forWhichList();
+        $listRestriction = $this->collectionStrategy->forWhichList();
         if ($this->targetListHasNotBeenFound($ownerships, $listRestriction)) {
             $ownerships = $this->guardAgainstInvalidToken($ownerships);
         }
@@ -524,30 +466,30 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
     private function mapOwnershipsLists(OwnershipCollection $ownerships): array
     {
         return array_map(
-            fn($list) => $list->name,
+            fn(PublicationList $list) => $list->name(),
             $ownerships->toArray()
         );
     }
 
     /**
-     * @param                $list
-     * @param TokenInterface $messageBody
+     * @param PublicationList $list
+     * @param TokenInterface  $messageBody
      *
      * @throws InvalidSerializedTokenException
      */
     private function processMemberList(
-        $list,
+        PublicationList $list,
         TokenInterface $messageBody
     ) {
-        if ($this->strategy->shouldProcessList($list)) {
-            $memberCollection = $this->accessor->getListMembers($list->id);
+        if ($this->collectionStrategy->shouldProcessList($list)) {
+            $memberCollection = $this->accessor->getListMembers($list->id());
             $memberCollection = $this->addOwnerToListOptionally($memberCollection);
 
             if ($memberCollection->isEmpty()) {
                 EmptyListException::throws(
                     sprintf(
                         'List "%s" has no members',
-                        $list->name
+                        $list->name()
                     )
                 );
             }
@@ -556,7 +498,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
                 $this->logger->info(
                     sprintf(
                         'About to publish messages for members in list "%s"',
-                        $list->name
+                        $list->name()
                     )
                 );
             }
@@ -580,7 +522,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
                     'amqp.production.list_members.success',
                     [
                         '{{ count }}' => $publishedMessages,
-                        '{{ list }}'  => $list->name,
+                        '{{ list }}'  => $list->name(),
                     ]
                 )
             );
@@ -594,7 +536,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
      */
     private function produceSearchStatusesMessages(): void
     {
-        $searchQuery = $this->strategy->forWhichQuery();
+        $searchQuery = $this->collectionStrategy->forWhichQuery();
 
         $savedSearch = $this->savedSearchRepository
             ->findOneBy(['searchQuery' => $searchQuery]);
@@ -623,7 +565,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
     {
         try {
             $memberOwnership = $this->ownershipAccessor->getOwnershipsForMemberHavingScreenNameAndToken(
-                $this->strategy->onBehalfOfWhom(),
+                $this->collectionStrategy->onBehalfOfWhom(),
                 Token::fromArray($this->getTokensFromInputOrFallback())
             );
         } catch (OverCapacityException $exception) {
@@ -670,9 +612,9 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
         $this->setupAggregateRepository();
 
         if (
-            $this->strategy->shouldPrioritizeLists()
-            && ($this->strategy->listRestriction()
-                || $this->strategy->shouldApplyListCollectionRestriction())
+            $this->collectionStrategy->shouldPrioritizeLists()
+            && ($this->collectionStrategy->listRestriction()
+                || $this->collectionStrategy->shouldApplyListCollectionRestriction())
         ) {
             $this->dispatcher = $this->getContainer()
                                      ->get(
@@ -685,7 +627,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
                                                 );
         }
 
-        if ($this->strategy->shouldSearchByQuery()) {
+        if ($this->collectionStrategy->shouldSearchByQuery()) {
             $this->dispatcher = $this->getContainer()
                                      ->get(
                                          'old_sound_rabbit_mq.weaving_the_web_amqp.producer.search_matching_statuses_producer'
@@ -700,8 +642,8 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
     private function shouldSkipOperation(): bool
     {
         return $this->operationClock->shouldSkipOperation()
-            && $this->strategy->allListsAreEquivalent()
-            && $this->strategy->noQueryRestriction();
+            && $this->collectionStrategy->allListsAreEquivalent()
+            && $this->collectionStrategy->noQueryRestriction();
     }
 
     /**

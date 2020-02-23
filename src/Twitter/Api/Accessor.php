@@ -513,14 +513,14 @@ class Accessor implements ApiAccessorInterface,
     }
 
     /**
-     * @param $id
+     * @param string $id
      *
      * @return MemberCollection
      * @throws ApiRateLimitingException
      * @throws InconsistentTokenRepository
      * @throws OptimisticLockException
      */
-    public function getListMembers(int $id): MemberCollection
+    public function getListMembers(string $id): MemberCollection
     {
         $listMembersEndpoint = $this->getListMembersEndpoint();
         $this->guardAgainstApiLimit($listMembersEndpoint);
