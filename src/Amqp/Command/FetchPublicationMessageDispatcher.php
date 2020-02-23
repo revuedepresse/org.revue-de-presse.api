@@ -8,18 +8,13 @@ use App\Aggregate\Repository\SavedSearchRepository;
 use App\Aggregate\Repository\SearchMatchingStatusRepository;
 use App\Amqp\Exception\InvalidListNameException;
 use App\Api\Entity\Token;
-use App\Api\Entity\TokenInterface;
 use App\Api\Exception\InvalidSerializedTokenException;
 use App\Domain\Collection\PublicationCollectionStrategy;
 use App\Domain\Collection\PublicationStrategyInterface;
-use App\Domain\Resource\MemberCollection;
-use App\Domain\Resource\MemberIdentity;
 use App\Domain\Resource\OwnershipCollection;
 use App\Domain\Resource\PublicationList;
-use App\Infrastructure\Amqp\Exception\ContinuePublicationException;
-use App\Infrastructure\Amqp\Exception\StopPublicationException;
-use App\Infrastructure\DependencyInjection\MemberIdentityProcessorTrait;
 use App\Infrastructure\DependencyInjection\OwnershipAccessorTrait;
+use App\Infrastructure\DependencyInjection\PublicationListProcessorTrait;
 use App\Infrastructure\DependencyInjection\TokenChangeTrait;
 use App\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Infrastructure\InputConverter\InputToCollectionStrategy;
@@ -54,8 +49,8 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
     private const OPTION_OAUTH_TOKEN             = 'oauth_token';
     private const OPTION_OAUTH_SECRET            = 'oauth_secret';
 
-    use MemberIdentityProcessorTrait;
     use OwnershipAccessorTrait;
+    use PublicationListProcessorTrait;
     use TokenChangeTrait;
     use TranslatorTrait;
 
@@ -181,66 +176,6 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
     }
 
     /**
-     * @param MemberCollection $memberCollection
-     *
-     * @return MemberCollection
-     */
-    private function addOwnerToListOptionally(MemberCollection $memberCollection): MemberCollection
-    {
-        $members = $memberCollection->toArray();
-        if ($this->collectionStrategy->shouldIncludeOwner()) {
-            $additionalMember = $this->accessor->getMemberProfile(
-                $this->collectionStrategy->onBehalfOfWhom()
-            );
-            array_unshift($members, $additionalMember);
-            $this->collectionStrategy->willIncludeOwner(false);
-        }
-
-        return MemberCollection::fromArray($members);
-    }
-
-    /**
-     * @param MemberCollection $members
-     * @param TokenInterface   $token
-     * @param PublicationList  $list
-     *
-     * @return int
-     * @throws Exception
-     */
-    private function dispatchMessages(
-        MemberCollection $members,
-        TokenInterface $token,
-        PublicationList $list
-    ): int {
-        $publishedMessages = 0;
-
-        /** @var MemberIdentity $memberIdentity */
-        foreach ($members->toArray() as $memberIdentity) {
-            try {
-                $this->memberIdentityProcessor->process(
-                    $memberIdentity,
-                    $this->collectionStrategy,
-                    $token,
-                    $list
-                );
-                $publishedMessages++;
-            } catch (ContinuePublicationException $exception) {
-                $this->logger->info($exception->getMessage());
-                $this->output->writeln($exception->getMessage());
-
-                continue;
-            } catch (StopPublicationException $exception) {
-                $this->logger->error($exception->getMessage());
-                $this->output->writeln($exception->getMessage());
-
-                break;
-            }
-        }
-
-        return $publishedMessages;
-    }
-
-    /**
      * @param OwnershipCollection $ownerships
      *
      * @return OwnershipCollection
@@ -349,64 +284,6 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
         );
     }
 
-    /**
-     * @param PublicationList $list
-     * @param TokenInterface  $messageBody
-     *
-     * @throws InvalidSerializedTokenException
-     * @throws Exception
-     */
-    private function processMemberList(
-        PublicationList $list,
-        TokenInterface $messageBody
-    ) {
-        if ($this->collectionStrategy->shouldProcessList($list)) {
-            $memberCollection = $this->accessor->getListMembers($list->id());
-            $memberCollection = $this->addOwnerToListOptionally($memberCollection);
-
-            if ($memberCollection->isEmpty()) {
-                EmptyListException::throws(
-                    sprintf(
-                        'List "%s" has no members',
-                        $list->name()
-                    )
-                );
-            }
-
-            if ($memberCollection->isNotEmpty()) {
-                $this->logger->info(
-                    sprintf(
-                        'About to publish messages for members in list "%s"',
-                        $list->name()
-                    )
-                );
-            }
-
-            $publishedMessages = $this->dispatchMessages(
-                $memberCollection,
-                $messageBody,
-                $list
-            );
-
-            // Change token for each list
-            // Members lists can only be accessed by authenticated users owning the lists
-            // See also https://dev.twitter.com/rest/reference/get/lists/ownerships
-            $this->tokenChange->replaceAccessToken(
-                Token::fromArray($this->getTokensFromInputOrFallback()),
-                $this->accessor
-            );
-
-            $this->output->writeln(
-                $this->translator->trans(
-                    'amqp.production.list_members.success',
-                    [
-                        '{{ count }}' => $publishedMessages,
-                        '{{ list }}'  => $list->name(),
-                    ]
-                )
-            );
-        }
-    }
 
     /**
      * @throws NoResultException
@@ -459,10 +336,23 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
 
         foreach ($ownerships->toArray() as $list) {
             try {
-                $this->processMemberList(
+                $publishedMessages = $this->publicationListProcessor->processPublicationList(
                     $list,
-                    $memberOwnership->token()
+                    $memberOwnership->token(),
+                    $this->collectionStrategy
                 );
+
+                if ($publishedMessages) {
+                    $this->output->writeln(
+                        $this->translator->trans(
+                            'amqp.production.list_members.success',
+                            [
+                                '{{ count }}' => $publishedMessages,
+                                '{{ list }}'  => $list->name(),
+                            ]
+                        )
+                    );
+                }
             } catch (EmptyListException $exception) {
                 $this->logger->info($exception->getMessage());
             } catch (Exception $exception) {

@@ -67,6 +67,16 @@ services:
             - '@user_manager'
             - '@logger'
 
+    App\Infrastructure\Amqp\ResourceProcessor\PublicationListProcessor:
+        class: 'App\Infrastructure\Amqp\ResourceProcessor\PublicationListProcessor'
+        calls:
+            - [ 'setMemberIdentityProcessor', [ '@App\Infrastructure\Amqp\ResourceProcessor\MemberIdentityProcessor'] ]
+            - [ 'setTokenChange',             [ '@App\Api\AccessToken\TokenChange'] ]
+        arguments:
+            - '@weaving_the_web_twitter.api_accessor'
+            - '@translator'
+            - '@logger'
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
     app.cache.redis:
