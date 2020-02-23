@@ -203,15 +203,14 @@ class FetchMemberStatusMessageHandler implements MessageSubscriberInterface
      * @param FetchMemberStatuses $message
      *
      * @return array
-     * @throws NonUniqueResultException
      */
     private function extractOAuthToken(FetchMemberStatuses $message): array {
-        $credentials = $message->credentials();
+        $token = $message->token();
 
-        if ($this->isOAuthTokenValid($credentials)) {
+        if ($token->isValid()) {
             return [
-                TokenInterface::FIELD_TOKEN  => $credentials[TokenInterface::FIELD_TOKEN],
-                TokenInterface::FIELD_SECRET => $credentials[TokenInterface::FIELD_SECRET],
+                TokenInterface::FIELD_TOKEN  => $token->getOAuthToken(),
+                TokenInterface::FIELD_SECRET => $token->getOAuthSecret(),
             ];
         }
 
@@ -219,24 +218,8 @@ class FetchMemberStatusMessageHandler implements MessageSubscriberInterface
         $token = $this->tokenRepository->findFirstUnfrozenToken();
 
         return [
-            TokenInterface::FIELD_TOKEN => $token->getOauthToken(),
-            TokenInterface::FIELD_SECRET => $token->getOauthTokenSecret(),
+            TokenInterface::FIELD_TOKEN => $token->getOAuthToken(),
+            TokenInterface::FIELD_SECRET => $token->getOAuthSecret(),
         ];
-    }
-
-    /**
-     * @param array $credentials
-     *
-     * @return bool
-     */
-    private function isOAuthTokenValid(array $credentials): bool {
-        return array_key_exists(
-                TokenInterface::FIELD_TOKEN,
-                $credentials
-            )
-            && array_key_exists(
-                TokenInterface::FIELD_SECRET,
-                $credentials
-            );
     }
 }

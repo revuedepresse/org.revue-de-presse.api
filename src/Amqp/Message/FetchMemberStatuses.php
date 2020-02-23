@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Amqp\Message;
 
+use App\Api\Entity\TokenInterface;
+
 /**
  * @package App\Amqp\Message
  */
@@ -23,9 +25,9 @@ class FetchMemberStatuses
     private int $aggregateId;
 
     /**
-     * @var array $credentials
+     * @var TokenInterface $token
      */
-    private array $credentials;
+    private TokenInterface $token;
 
     /**
      * @var string
@@ -33,22 +35,22 @@ class FetchMemberStatuses
     private ?string $before;
 
     /**
-     * @param string      $screenName
-     * @param int         $aggregateId
-     * @param array       $credentials
-     * @param string|null $before
+     * @param string         $screenName
+     * @param int            $aggregateId
+     * @param TokenInterface $token
+     * @param string|null    $before
      */
     public function __construct(
         string $screenName,
         int $aggregateId,
-        array $credentials,
+        TokenInterface $token,
         ?string $before = null
     ) {
 
         $this->screenName = $screenName;
         $this->aggregateId = $aggregateId;
         $this->before = $before;
-        $this->credentials = $credentials;
+        $this->token = $token;
     }
 
     /**
@@ -76,10 +78,10 @@ class FetchMemberStatuses
     }
 
     /**
-     * @return array
+     * @return TokenInterface
      */
-    public function credentials(): array
+    public function token(): TokenInterface
     {
-        return $this->credentials;
+        return $this->token;
     }
 }

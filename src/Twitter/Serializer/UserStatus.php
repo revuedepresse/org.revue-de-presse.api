@@ -186,7 +186,6 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @param array $oauthTokens
      *
      * @return $this
-     * @throws NonUniqueResultException
      */
     public function setupAccessor(array $oauthTokens)
     {

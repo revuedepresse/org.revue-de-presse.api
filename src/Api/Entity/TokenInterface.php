@@ -18,6 +18,9 @@ interface TokenInterface
     public function getConsumerKey(): string;
     public function getConsumerSecret(): string;
     public function hasConsumerKey(): bool;
+
+    public function isValid(): bool;
+
     public function toArray(): array;
 
     /**

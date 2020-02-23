@@ -14,6 +14,7 @@ use App\Amqp\Exception\InvalidListNameException;
 use App\Amqp\Message\FetchMemberLikes;
 use App\Amqp\Message\FetchMemberStatuses;
 use App\Api\Entity\Token;
+use App\Api\Entity\TokenInterface;
 use App\Api\Exception\InvalidSerializedTokenException;
 use App\Conversation\Producer\MemberAwareTrait;
 use App\Infrastructure\DependencyInjection\MessageBusTrait;
@@ -232,19 +233,17 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
     }
 
     /**
-     * @param array           $messageBody
+     * @param TokenInterface  $token
      * @param stdClass        $list
      * @param MemberInterface $member
      *
      * @return FetchMemberStatuses
      */
     protected function makeMemberIdentityCard(
-        array $messageBody,
+        TokenInterface $token,
         stdClass $list,
         MemberInterface $member
     ): FetchMemberStatuses {
-        $credentials = $messageBody;
-
         $aggregate = $this->getListAggregateByName(
             $member->getTwitterUsername(),
             $list->name,
@@ -254,7 +253,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
         return new FetchMemberStatuses(
             $member->getTwitterUsername(),
             $aggregate->getId(),
-            $credentials,
+            $token,
             $this->before
         );
     }
@@ -303,8 +302,11 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
      * @return int
      * @throws Exception
      */
-    protected function publishMembersScreenNames($members, $messageBody, $list)
-    {
+    protected function publishMembersScreenNames(
+        $members,
+        TokenInterface $messageBody,
+        $list
+    ) {
         $publishedMessages = 0;
 
         foreach ($members->users as $friend) {
@@ -398,6 +400,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
      * @throws UnexpectedApiResponseException
+     * @throws InvalidSerializedTokenException
      */
     private function fetchOwnershipsForMemberHavingScreenName()
     {
@@ -413,15 +416,17 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
                     continue;
                 }
 
-                $messageBody = $this->getTokensFromInputOrFallback();
-
                 break;
             } catch (UnavailableResourceException $exception) {
                 $this->logger->info($exception->getMessage());
-                $messageBody = $this->tokenChange->replaceAccessToken(
-                    $this->getTokensFromInputOrFallback(),
-                    $this->accessor
-                );
+            } finally {
+                $activeToken = Token::fromArray($this->getTokensFromInputOrFallback());
+                if ($ownershipCollection->isEmpty()) {
+                    $activeToken = $this->tokenChange->replaceAccessToken(
+                        $activeToken,
+                        $this->accessor
+                    );
+                }
             }
 
             $unfrozenTokenCount--;
@@ -438,7 +443,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
             $ownershipCollection = $this->guardAgainstInvalidToken($ownershipCollection);
         }
 
-        return ['ownerships' => $ownershipCollection, 'message_body' => $messageBody];
+        return ['ownerships' => $ownershipCollection, 'active_token' => $activeToken];
     }
 
     /**
@@ -582,7 +587,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
     private function processMemberList(
         $doNotApplyListRestriction,
         $list,
-        $messageBody
+        TokenInterface $messageBody
     ) {
         if (
             $doNotApplyListRestriction || $list->name === $this->listRestriction
@@ -612,7 +617,11 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
                 );
             }
 
-            $publishedMessages = $this->publishMembersScreenNames($members, $messageBody, $list);
+            $publishedMessages = $this->publishMembersScreenNames(
+                $members,
+                $messageBody,
+                $list
+            );
 
             // Reset accessor tokens in case they've been updated to find member usernames with alternative tokens
             // Members lists can only be accessed by authenticated users owning the lists
@@ -696,7 +705,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
         }
 
         $ownerships  = $ownershipsBag['ownerships'];
-        $messageBody = $ownershipsBag['message_body'];
+        $messageBody = $ownershipsBag['active_token'];
 
         $this->shouldIncludeOwner = $this->shouldIncludeOwner();
 

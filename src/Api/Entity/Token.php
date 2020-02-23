@@ -4,10 +4,10 @@ declare(strict_types=1);
 namespace App\Api\Entity;
 
 use App\Api\Exception\InvalidSerializedTokenException;
-use Doctrine\Common\Collections\Collection;
-use Doctrine\ORM\Mapping as ORM,
-    Doctrine\Common\Collections\ArrayCollection;
 use App\Membership\Entity\Member;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
 use function array_key_exists;
 
 /**
@@ -46,6 +46,7 @@ class Token implements TokenInterface
 
     /**
      * @param string $oauthToken
+     *
      * @return Token
      */
     public function setOAuthToken($oauthToken): self
@@ -154,12 +155,13 @@ class Token implements TokenInterface
 
     /**
      * @param string $oauthTokenSecret
+     *
      * @return Token
      */
     public function setOauthTokenSecret($oauthTokenSecret)
     {
         $this->oauthTokenSecret = $oauthTokenSecret;
-    
+
         return $this;
     }
 
@@ -175,19 +177,20 @@ class Token implements TokenInterface
      * Set createdAt
      *
      * @param \DateTime $createdAt
+     *
      * @return Token
      */
     public function setCreatedAt($createdAt)
     {
         $this->createdAt = $createdAt;
-    
+
         return $this;
     }
 
     /**
      * Get createdAt
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getCreatedAt()
     {
@@ -198,19 +201,20 @@ class Token implements TokenInterface
      * Set updatedAt
      *
      * @param \DateTime $updatedAt
+     *
      * @return Token
      */
     public function setUpdatedAt($updatedAt)
     {
         $this->updatedAt = $updatedAt;
-    
+
         return $this;
     }
 
     /**
      * Get updatedAt
      *
-     * @return \DateTime 
+     * @return \DateTime
      */
     public function getUpdatedAt()
     {
@@ -221,7 +225,7 @@ class Token implements TokenInterface
     {
         $this->users = new ArrayCollection();
     }
-    
+
     /**
      * @param Member $users
      *
@@ -230,7 +234,7 @@ class Token implements TokenInterface
     public function addUser(Member $users)
     {
         $this->users[] = $users;
-    
+
         return $this;
     }
 
@@ -276,12 +280,13 @@ class Token implements TokenInterface
 
     /**
      * @param \App\Api\Entity\TokenType $type
+     *
      * @return Token
      */
     public function setType(TokenType $type = null)
     {
         $this->type = $type;
-    
+
         return $this;
     }
 
@@ -295,6 +300,7 @@ class Token implements TokenInterface
 
     /**
      * @param $frozen
+     *
      * @return $this
      */
     public function setFrozen($frozen)
@@ -366,5 +372,11 @@ class Token implements TokenInterface
         $token->setConsumerSecret($consumerSecret);
 
         return $token;
+    }
+
+    public function isValid(): bool
+    {
+        return $this->getOAuthToken() !== null
+            && $this->getOAuthSecret() !== null;
     }
 }
