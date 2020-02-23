@@ -672,12 +672,16 @@ class Accessor implements ApiAccessorInterface,
     }
 
     /**
+     * @param string $secret
+     *
+     * @return Accessor
      * @deprecated
-     * @param $ecret
      */
-    public function setUserSecret($ecret)
+    public function setUserSecret(string $secret): self
     {
-        $this->setOAuthSecret($ecret);
+        $this->setOAuthSecret($secret);
+
+        return $this;
     }
 
     public function setOAuthSecret(string $secret): self
@@ -689,14 +693,13 @@ class Accessor implements ApiAccessorInterface,
 
     /**
      * @deprecated
-     * @return mixed
      */
     public function getUserToken()
     {
         return $this->userToken;
     }
 
-    public function setUserToken($token)
+    public function setUserToken(string $token): self
     {
         return $this->setOAuthToken($token);
     }

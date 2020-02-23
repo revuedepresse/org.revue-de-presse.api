@@ -211,7 +211,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
      * @throws UnavailableResourceException
      * @throws UnexpectedApiResponseException
      */
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->input  = $input;
         $this->output = $output;

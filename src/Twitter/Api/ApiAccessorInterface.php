@@ -5,7 +5,6 @@ namespace App\Twitter\Api;
 
 use App\Api\Entity\TokenInterface;
 use App\Twitter\Api\Resource\OwnershipCollection;
-use App\Twitter\Exception\UnavailableResourceException;
 
 interface ApiAccessorInterface
 {
