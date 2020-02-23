@@ -12,6 +12,7 @@ use App\Api\Entity\TokenInterface;
 use App\Api\Exception\InvalidSerializedTokenException;
 use App\Membership\Entity\Member;
 use App\Membership\Entity\MemberInterface;
+use App\Membership\Exception\InvalidMemberIdentifier;
 use App\Membership\Repository\MemberRepository;
 use App\Tests\Builder\ApiAccessorBuilder;
 use App\Tests\Builder\TokenChangeBuilder;
@@ -136,6 +137,7 @@ class FetchPublicationMessageDispatcherTest extends KernelTestCase
 
     /**
      * @return MemberRepository
+     * @throws InvalidMemberIdentifier
      */
     private function prophesizeMemberRepository(): MemberRepository
     {

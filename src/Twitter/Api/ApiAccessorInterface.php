@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace App\Twitter\Api;
 
 use App\Api\Entity\TokenInterface;
-use App\Twitter\Api\Resource\MemberCollection;
-use App\Twitter\Api\Resource\OwnershipCollection;
+use App\Domain\Resource\MemberCollection;
+use App\Domain\Resource\OwnershipCollection;
 
 interface ApiAccessorInterface
 {
