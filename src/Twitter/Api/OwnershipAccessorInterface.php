@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Api;
 
 use App\Api\Entity\TokenInterface;
-use App\Twitter\Api\Resource\MemberOwnerships;
+use App\Domain\Resource\MemberOwnerships;
 
 interface OwnershipAccessorInterface
 {

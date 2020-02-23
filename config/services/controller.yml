@@ -13,7 +13,7 @@ services:
             configDirectory:                '%kernel.project_dir%/config'
             authenticationTokenRepository:  '@repository.authentication_token'
 #            aggregateLikesProducer:         '@old_sound_rabbit_mq.weaving_the_web_amqp.producer.aggregates_likes_producer'
-            aggregateRepository:            '@repository.aggregate'
+            aggregateRepository:            '@repository.publication_list'
 #            aggregateStatusesProducer:      '@old_sound_rabbit_mq.weaving_the_web_amqp.twitter.aggregates_status_producer'
             environment:                    '%kernel.environment%'
             highlightRepository:            '@repository.highlight'
@@ -37,7 +37,7 @@ services:
         public: true
         class: 'App\Aggregate\Controller\AggregateController'
         properties:
-            aggregateRepository: '@repository.aggregate'
+            aggregateRepository: '@repository.publication_list'
             allowedOrigin:       '%allowed.origin%'
             environment:         '%kernel.environment%'
             redisCache:          '@app.cache.redis'

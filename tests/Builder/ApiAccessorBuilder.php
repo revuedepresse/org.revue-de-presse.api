@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Tests\Builder;
 
 use App\Twitter\Api\ApiAccessorInterface;
-use App\Twitter\Api\Resource\OwnershipCollection;
+use App\Domain\Resource\OwnershipCollection;
 use App\Twitter\Exception\UnavailableResourceException;
 use Prophecy\Prophecy\ObjectProphecy;
 use Prophecy\Prophet;

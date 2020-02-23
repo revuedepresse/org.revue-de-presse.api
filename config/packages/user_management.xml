@@ -6,7 +6,7 @@
 
     <parameters>
         <parameter key="security.authentication.listener.basic.class">WTW\UserBundle\EventListener\BasicAuthenticationListener</parameter>
-        <parameter key="user_manager.class">App\Membership\Repository\MemberRepository</parameter>
+        <parameter key="user_manager.class">App\Infrastructure\Repository\Membership\MemberRepository</parameter>
         <parameter key="wtw_user.entity.user.class">App\Membership\Entity\Member</parameter>
     </parameters>
 
@@ -17,7 +17,7 @@
             <property
                 name="aggregateRepository"
                 type="service"
-                id="repository.aggregate" />
+                id="repository.publication_list" />
         </service>
     </services>
 </container>

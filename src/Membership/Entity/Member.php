@@ -31,7 +31,7 @@ use Doctrine\ORM\Mapping as ORM;
  *          })
  *      }
  * )
- * @ORM\Entity(repositoryClass="App\Membership\Repository\MemberRepository")
+ * @ORM\Entity(repositoryClass="App\Infrastructure\Repository\Membership\MemberRepository")
  * @ORM\InheritanceType("SINGLE_TABLE")
  * @ORM\DiscriminatorColumn(name="usr_position_in_hierarchy", type="integer")
  * @ORM\DiscriminatorMap({"1" = "Member", "0" = "\App\Tests\Security\Core\Member\Member"})
