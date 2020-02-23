@@ -1,18 +1,33 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Aggregate\Command;
 
+use App\Accessor\Exception\ApiRateLimitingException;
+use App\Accessor\Exception\NotFoundStatusException;
+use App\Accessor\Exception\ReadOnlyApplicationException;
+use App\Accessor\Exception\UnexpectedApiResponseException;
 use App\Aggregate\Repository\MemberAggregateSubscriptionRepository;
 use App\Console\AbstractCommand;
 use App\Member\Entity\AggregateSubscription;
 use App\Membership\Entity\MemberInterface;
 use App\Member\Repository\AggregateSubscriptionRepository;
 use App\Member\Repository\NetworkRepository;
+use App\Twitter\Api\Resource\OwnershipCollection;
+use App\Twitter\Exception\BadAuthenticationDataException;
+use App\Twitter\Exception\InconsistentTokenRepository;
+use App\Twitter\Exception\NotFoundMemberException;
+use App\Twitter\Exception\ProtectedAccountException;
+use App\Twitter\Exception\SuspendedAccountException;
+use App\Twitter\Exception\UnavailableResourceException;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\OptimisticLockException;
+use ReflectionException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use App\Twitter\Api\Accessor;
-use App\Member\Repository\MemberRepository;
+use App\Membership\Repository\MemberRepository;
 
 class ImportMemberAggregatesCommand extends AbstractCommand
 {
@@ -82,12 +97,21 @@ class ImportMemberAggregatesCommand extends AbstractCommand
     /**
      * @param InputInterface  $input
      * @param OutputInterface $output
+     *
      * @return int|null|void
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \WeavingTheWeb\Bundle\ApiBundle\Exception\InvalidTokenException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
+     * @throws ApiRateLimitingException
+     * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
+     * @throws NonUniqueResultException
+     * @throws NotFoundMemberException
+     * @throws NotFoundStatusException
+     * @throws OptimisticLockException
+     * @throws ProtectedAccountException
+     * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws UnexpectedApiResponseException
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
@@ -97,9 +121,10 @@ class ImportMemberAggregatesCommand extends AbstractCommand
         $member = $this->accessor->ensureMemberHavingNameExists($memberName);
 
         $listSubscriptions = $this->findListSubscriptions($memberName);
+        $subscriptions = $listSubscriptions->toArray();
 
         array_walk(
-            $listSubscriptions->lists,
+            $subscriptions,
             function (\stdClass $list) use ($member) {
                 $memberAggregateSubscription = $this->memberAggregateSubscriptionRepository
                     ->make(
@@ -209,14 +234,23 @@ class ImportMemberAggregatesCommand extends AbstractCommand
 
     /**
      * @param $memberName
+     *
      * @return \API|mixed|object|\stdClass
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \WeavingTheWeb\Bundle\ApiBundle\Exception\InvalidTokenException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws ApiRateLimitingException
+     * @throws NotFoundStatusException
+     * @throws ReadOnlyApplicationException
+     * @throws UnexpectedApiResponseException
+     * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
+     * @throws NotFoundMemberException
+     * @throws ProtectedAccountException
+     * @throws ReflectionException
      */
-    private function findListSubscriptions($memberName)
+    private function findListSubscriptions($memberName): OwnershipCollection
     {
         if ($this->input->hasOption(self::OPTION_FIND_OWNERSHIP) &&
             $this->input->getOption(self::OPTION_FIND_OWNERSHIP)

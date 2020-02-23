@@ -36,4 +36,9 @@ class NullToken implements TokenInterface
     {
         return new self();
     }
+
+    public function isValid(): bool
+    {
+        return false;
+    }
 }

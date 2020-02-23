@@ -21,7 +21,7 @@ class TokenRepositoryBuilder
         $this->prophecy = $prophet->prophesize(TokenRepositoryInterface::class);
     }
 
-    public function build()
+    public function build(): TokenRepositoryInterface
     {
         return $this->prophecy->reveal();
     }
@@ -35,7 +35,7 @@ class TokenRepositoryBuilder
         return $this;
     }
 
-    public function withTheNextCountOfUnfrozenTokens($count)
+    public function willReturnTheCountOfUnfrozenTokens($count)
     {
         $this->prophecy
             ->howManyUnfrozenTokenAreThere()

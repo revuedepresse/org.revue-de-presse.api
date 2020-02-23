@@ -5,17 +5,14 @@ namespace App\Operation\Collection;
 
 use Closure;
 
-interface CollectionInterface
+interface StrictCollectionInterface extends CollectionInterface
 {
     /**
      * @return int
      */
-    public function count();
+    public function count(): int;
 
-    public function map(Closure $callable);
-
-
-    public function isEmpty(): bool;
+    public function map(Closure $callable): array;
 
     /**
      * @param array $collection
@@ -27,5 +24,5 @@ interface CollectionInterface
     /**
      * @return array
      */
-    public function toArray();
+    public function toArray(): array;
 }

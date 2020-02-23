@@ -17,8 +17,6 @@ abstract class AggregateAwareCommand extends AccessorAwareCommand implements Com
 
     protected const UNAVAILABLE_RESOURCE = 20;
 
-    protected const API_ERROR = 30;
-
     protected const UNEXPECTED_ERROR = 40;
 
     protected const SUSPENDED_USER = 50;

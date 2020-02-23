@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Amqp\Command;
 
-use App\Amqp\Command\FetchMemberStatusMessageDispatcher;
+use App\Amqp\Command\FetchPublicationMessageDispatcher;
 use App\Api\AccessToken\Repository\TokenRepository;
 use App\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Api\AccessToken\TokenChangeInterface;
@@ -13,8 +13,12 @@ use App\Api\Exception\InvalidSerializedTokenException;
 use App\Membership\Entity\Member;
 use App\Membership\Entity\MemberInterface;
 use App\Membership\Repository\MemberRepository;
+use App\Tests\Builder\ApiAccessorBuilder;
+use App\Tests\Builder\TokenChangeBuilder;
+use App\Tests\Builder\TokenRepositoryBuilder;
 use App\Twitter\Api\Accessor;
 use App\Twitter\Api\ApiAccessorInterface;
+use App\Twitter\Api\Resource\OwnershipCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use Prophecy\Argument;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
@@ -25,13 +29,8 @@ use Symfony\Component\Console\Tester\CommandTester;
 /**
  * @group command
  */
-class FetchMemberStatusMessageDispatcherTest extends KernelTestCase
+class FetchPublicationMessageDispatcherTest extends KernelTestCase
 {
-    private const SCREEN_NAME = 'BobEponge';
-
-    private const LIST_ID   = 1;
-    private const LIST_NAME = 'science';
-
     private const MEMBER_ID          = '1';
     private const MEMBER_NAME        = 'Marie Curie';
     private const MEMBER_SCREEN_NAME = 'mariec';
@@ -61,13 +60,16 @@ class FetchMemberStatusMessageDispatcherTest extends KernelTestCase
      */
     public function it_dispatches_messages_to_fetch_member_statuses(): void
     {
+        // Act
+
         $this->commandTester->execute(
             [
-                '--list'        => self::LIST_NAME,
-                '--screen_name' => self::SCREEN_NAME,
-            ],
-            ['capture_stderr_separately' => true]
+                '--list'        => ApiAccessorBuilder::LIST_NAME,
+                '--screen_name' => ApiAccessorBuilder::SCREEN_NAME,
+            ]
         );
+
+        // Assert
 
         self::assertEquals(
             $this->commandTester->getStatusCode(),
@@ -87,8 +89,7 @@ class FetchMemberStatusMessageDispatcherTest extends KernelTestCase
 
         $this->removeTargetMember(self::$container->get('doctrine.orm.entity_manager'));
 
-        $command = self::$container->get(FetchMemberStatusMessageDispatcher::class);
-        $command->setTokenRepository($this->prophesizeTokenRepository());
+        $command = self::$container->get(FetchPublicationMessageDispatcher::class);
         $command->setAccessor($this->prophesizeAccessor());
         $command->setMemberRepository($this->prophesizeMemberRepository());
         $command->setTokenChange($this->prophesizeTokenChange());
@@ -107,74 +108,30 @@ class FetchMemberStatusMessageDispatcherTest extends KernelTestCase
     }
 
     /**
-     * @return Accessor
+     * @return ApiAccessorInterface
      * @throws
      */
-    private function prophesizeAccessor()
+    private function prophesizeAccessor(): ApiAccessorInterface
     {
-        /** @var Accessor $accessorProphecy */
-        $accessorProphecy = $this->prophesize(Accessor::class);
-        $accessorProphecy
-            ->getUserOwnerships(self::SCREEN_NAME)
-            ->willReturn(
-                (object) [
-                    'lists' => [
-                        self::LIST_NAME => (object) [
-                            'name'   => self::LIST_NAME,
-                            'id'     => self::LIST_ID,
-                            'id_str' => (string) self::LIST_ID,
-                        ]
-                    ]
-                ]
-            );
+        /** @var Accessor $accessor */
+        $accessorBuilder = ApiAccessorBuilder::newApiAccessorBuilder();
 
-        $accessorProphecy
-            ->setUserToken(self::USER_TOKEN)
-            ->willReturn();
+        $accessor = $accessorBuilder->willGetOwnershipCollectionForMember(
+            $accessorBuilder->makeOwnershipCollection(),
+            $accessorBuilder::SCREEN_NAME
+        )
+        ->willGetMembersInList(
+            $accessorBuilder::LIST_ID,
+            $accessorBuilder->makeMemberList()
+        )
+        ->willGetProfileForMemberHavingScreenName(
+            (object) [
+                'screen_name' => $accessorBuilder::MEMBER_SCREEN_NAME
+            ],
+            $accessorBuilder::MEMBER_SCREEN_NAME,
+        )->build();
 
-        $accessorProphecy
-            ->setUserSecret(self::USER_SECRET)
-            ->willReturn();
-
-        $accessorProphecy
-            ->setUserToken(self::USER_TOKEN_SECONDARY)
-            ->willReturn();
-
-        $accessorProphecy
-            ->setUserSecret(self::USER_SECRET_SECONDARY)
-            ->willReturn();
-
-        $accessorProphecy
-            ->setConsumerKey(self::CONSUMER_KEY)
-            ->willReturn();
-
-        $accessorProphecy
-            ->setConsumerSecret(self::CONSUMER_SECRET)
-            ->willReturn();
-
-        $members = (object) [
-            'users' => [
-                (object) [
-                    'name'        => self::MEMBER_NAME,
-                    'id'          => self::MEMBER_ID,
-                    'screen_name' => self::MEMBER_SCREEN_NAME
-                ]
-            ]
-        ];
-
-        $accessorProphecy
-            ->getListMembers(self::LIST_ID)
-            ->willReturn($members);
-
-        $accessorProphecy
-            ->showUser(self::MEMBER_SCREEN_NAME)
-            ->willReturn(
-                (object) [
-                    'screen_name' => self::MEMBER_SCREEN_NAME
-                ]
-            );
-
-        return $accessorProphecy->reveal();
+        return $accessor;
     }
 
     /**
@@ -213,12 +170,8 @@ class FetchMemberStatusMessageDispatcherTest extends KernelTestCase
      */
     private function prophesizeTokenChange(): TokenChangeInterface
     {
-        /** @var TokenChangeInterface $tokenChange */
-        $tokenChange = $this->prophesize(TokenChangeInterface::class);
-        $tokenChange->replaceAccessToken(
-            Argument::type(TokenInterface::class),
-            Argument::type(ApiAccessorInterface::class)
-        )->willReturn(
+        $tokenChangeBuilder = new TokenChangeBuilder();
+        $tokenChangeBuilder = $tokenChangeBuilder->willReplaceAccessToken(
             Token::fromArray(
                 [
                     'token'           => self::USER_TOKEN_SECONDARY,
@@ -229,21 +182,7 @@ class FetchMemberStatusMessageDispatcherTest extends KernelTestCase
             )
         );
 
-        return $tokenChange->reveal();
-    }
-
-    /**
-     * @return TokenRepository
-     */
-    private function prophesizeTokenRepository(): TokenRepositoryInterface
-    {
-        /** @$tokenRepositoryProphecy */
-        $tokenRepositoryProphecy = $this->prophesize(TokenRepositoryInterface::class);
-        $tokenRepositoryProphecy
-            ->howManyUnfrozenTokenAreThere()
-            ->willReturn(1);
-
-        return $tokenRepositoryProphecy->reveal();
+        return $tokenChangeBuilder->build();
     }
 
     /**

@@ -8,6 +8,8 @@ use App\Api\Exception\InvalidSerializedTokenException;
 use App\Membership\Entity\MemberInterface;
 use App\Operation\OperationClock;
 
+use Doctrine\ORM\OptimisticLockException;
+use Exception;
 use Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Input\InputOption,
     Symfony\Component\Console\Output\OutputInterface;
@@ -82,9 +84,8 @@ class ProduceUserFriendListCommand extends AggregateAwareCommand
      * @return int|mixed|null
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \Exception
-     * @throws \WeavingTheWeb\Bundle\ApiBundle\Exception\InvalidTokenException
+     * @throws OptimisticLockException
+     * @throws Exception
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
@@ -157,9 +158,9 @@ class ProduceUserFriendListCommand extends AggregateAwareCommand
     /**
      * @param $message
      * @param $level
-     * @param \Exception $exception
+     * @param Exception $exception
      */
-    protected function sendMessage($message, $level, \Exception $exception)
+    protected function sendMessage($message, $level, Exception $exception)
     {
         $this->output->writeln($message);
         $this->logger->$level($exception->getMessage());
@@ -235,7 +236,7 @@ class ProduceUserFriendListCommand extends AggregateAwareCommand
      * @param $twitterUserId
      * @param $assumedScreenName
      * @param $exception
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws OptimisticLockException
      */
     private function handleProtectedMemberException($twitterUserId, $assumedScreenName, $exception)
     {
@@ -273,7 +274,7 @@ class ProduceUserFriendListCommand extends AggregateAwareCommand
      * @param $twitterUserId
      * @param $assumedScreenName
      * @param $exception
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws OptimisticLockException
      */
     private function handleSuspendedMemberException($twitterUserId, $assumedScreenName, $exception)
     {
@@ -301,8 +302,8 @@ class ProduceUserFriendListCommand extends AggregateAwareCommand
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
      * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \Exception
+     * @throws OptimisticLockException
+     * @throws Exception
      * @throws \WeavingTheWeb\Bundle\ApiBundle\Exception\InvalidTokenException
      */
     private function saveMemberWithTwitterId($twitterUserId, $prexistingMember): Member

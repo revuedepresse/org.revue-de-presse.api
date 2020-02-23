@@ -2,11 +2,25 @@
 
 namespace App\Member\Command;
 
+use App\Accessor\Exception\ApiRateLimitingException;
+use App\Accessor\Exception\NotFoundStatusException;
+use App\Accessor\Exception\ReadOnlyApplicationException;
+use App\Accessor\Exception\UnexpectedApiResponseException;
 use App\Console\CommandReturnCodeAwareInterface;
 use App\Member\Entity\AggregateSubscription;
 use App\Membership\Entity\MemberInterface;
 use App\Member\Repository\AggregateSubscriptionRepository;
+use App\Twitter\Exception\BadAuthenticationDataException;
+use App\Twitter\Exception\InconsistentTokenRepository;
+use App\Twitter\Exception\NotFoundMemberException;
+use App\Twitter\Exception\ProtectedAccountException;
+use App\Twitter\Exception\SuspendedAccountException;
+use App\Twitter\Exception\UnavailableResourceException;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\OptimisticLockException;
 use Psr\Log\LoggerInterface;
+use ReflectionException;
+use stdClass;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -93,8 +107,8 @@ class AddMemberToAggregateCommand extends Command implements CommandReturnCodeAw
      * @param InputInterface  $input
      * @param OutputInterface $output
      * @return int
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
      * @throws \WeavingTheWeb\Bundle\ApiBundle\Exception\InvalidTokenException
      * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
      * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
@@ -126,21 +140,29 @@ class AddMemberToAggregateCommand extends Command implements CommandReturnCodeAw
     }
 
     /**
-     * @return \stdClass
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \WeavingTheWeb\Bundle\ApiBundle\Exception\InvalidTokenException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
+     * @return stdClass
+     * @throws ApiRateLimitingException
+     * @throws NotFoundStatusException
+     * @throws ReadOnlyApplicationException
+     * @throws UnexpectedApiResponseException
+     * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
+     * @throws NotFoundMemberException
+     * @throws ProtectedAccountException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
+     * @throws ReflectionException
      */
-    private function findListToWhichMembersShouldBeAddedTo(): \stdClass
+    private function findListToWhichMembersShouldBeAddedTo(): stdClass
     {
         $memberName = $this->input->getOption(self::OPTION_MEMBER_NAME);
         $ownershipsLists = $this->accessor->getUserOwnerships($memberName);
 
         $aggregateName = $this->input->getOption(self::OPTION_AGGREGATE_NAME);
         $filteredLists = array_filter(
-            $ownershipsLists->lists,
+            $ownershipsLists->toArray(),
             function ($list) use ($aggregateName) {
                 return $list->name === $aggregateName;
             }
@@ -154,13 +176,13 @@ class AddMemberToAggregateCommand extends Command implements CommandReturnCodeAw
     }
 
     /**
-     * @param \stdClass $targetList
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @param stdClass $targetList
+     * @throws OptimisticLockException
      * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
      * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
      */
     private function addMembersToList(
-        \stdClass $targetList
+        stdClass $targetList
     ): void {
         $membersList = $this->getListOfMembers($targetList);
 
@@ -195,10 +217,10 @@ class AddMemberToAggregateCommand extends Command implements CommandReturnCodeAw
     }
 
     /**
-     * @param \stdClass $targetList
+     * @param stdClass $targetList
      * @return array
      */
-    private function getListOfMembers(\stdClass $targetList): array
+    private function getListOfMembers(stdClass $targetList): array
     {
         if ($this->input->hasOption(self::OPTION_LIST_NAME) &&
             $this->input->getOption(self::OPTION_LIST_NAME)) {

@@ -16,9 +16,10 @@
 
     <groups>
         <include>
-<!--            <group>api_access</group>-->
-<!--            <group>command</group>-->
-<!--            <group>conversation</group>-->
+            <group>api_access</group>
+            <group>command</group>
+            <group>conversation</group>
+            <group>ownership</group>
         </include>
     </groups>
 
@@ -31,8 +32,9 @@
     <filter>
         <whitelist processUncoveredFilesFromWhitelist="true">
             <directory suffix=".php">src/Amqp/Command/FetchMemberStatusMessageDispatcher.php</directory>
-            <directory suffix=".php">src/Conversation/Consistency/StatusConsistency.php</directory>
             <directory suffix=".php">src/Api/AccessToken/TokenChange.php</directory>
+            <directory suffix=".php">src/Conversation/Consistency/StatusConsistency.php</directory>
+            <directory suffix=".php">src/Twitter/Api/OwnershipAccessor.php</directory>
         </whitelist>
     </filter>
 </phpunit>
