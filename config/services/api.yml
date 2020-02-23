@@ -4,3 +4,11 @@ services:
         arguments:
             - '@weaving_the_web_twitter.repository.token'
             - '@logger'
+
+    App\Twitter\Api\OwnershipAccessor:
+        class: 'App\Twitter\Api\OwnershipAccessor'
+        arguments:
+            - '@weaving_the_web_twitter.api_accessor'
+            - '@weaving_the_web_twitter.repository.token'
+            - '@App\Api\AccessToken\TokenChange'
+            - '@logger'
