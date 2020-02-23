@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Amqp\Command;
 
-use App\Amqp\Command\FetchMemberStatusMessageDispatcher;
+use App\Amqp\Command\FetchPublicationMessageDispatcher;
 use App\Api\AccessToken\Repository\TokenRepository;
 use App\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Api\AccessToken\TokenChangeInterface;
@@ -25,7 +25,7 @@ use Symfony\Component\Console\Tester\CommandTester;
 /**
  * @group command
  */
-class FetchMemberStatusMessageDispatcherTest extends KernelTestCase
+class FetchPublicationMessageDispatcherTest extends KernelTestCase
 {
     private const SCREEN_NAME = 'BobEponge';
 
@@ -87,7 +87,7 @@ class FetchMemberStatusMessageDispatcherTest extends KernelTestCase
 
         $this->removeTargetMember(self::$container->get('doctrine.orm.entity_manager'));
 
-        $command = self::$container->get(FetchMemberStatusMessageDispatcher::class);
+        $command = self::$container->get(FetchPublicationMessageDispatcher::class);
         $command->setTokenRepository($this->prophesizeTokenRepository());
         $command->setAccessor($this->prophesizeAccessor());
         $command->setMemberRepository($this->prophesizeMemberRepository());

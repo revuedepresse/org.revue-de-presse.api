@@ -11,10 +11,10 @@ parameters:
     weaving_the_web_amqp.consumer.status.class:                                 'App\Amqp\MessageHandler\FetchMemberStatusMessageHandler'
     weaving_the_web_amqp.consumer.timely_status.class:                          'App\Aggregate\Consumer\TimelyStatusConsumer'
     weaving_the_web_amqp.consumer.network.class:                                'App\Member\Consumer\NetworkConsumer'
-    press_review.fetch_member_status.class:                                     'App\Amqp\Command\FetchMemberStatusMessageDispatcher'
+    press_review.fetch_member_status.class:                                     'App\Amqp\Command\FetchPublicationMessageDispatcher'
 
 services:
-    App\Amqp\Command\FetchMemberStatusMessageDispatcher:
+    App\Amqp\Command\FetchPublicationMessageDispatcher:
         class:                              "%press_review.fetch_member_status.class%"
         properties:
             operationClock:                 '@operation.clock'

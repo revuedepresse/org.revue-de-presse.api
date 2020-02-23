@@ -13,10 +13,11 @@ use App\Aggregate\Repository\SearchMatchingStatusRepository;
 use App\Amqp\Exception\InvalidListNameException;
 use App\Amqp\Message\FetchMemberLikes;
 use App\Amqp\Message\FetchMemberStatuses;
-use App\Api\AccessToken\TokenChangeInterface;
 use App\Api\Entity\Token;
 use App\Api\Exception\InvalidSerializedTokenException;
 use App\Conversation\Producer\MemberAwareTrait;
+use App\Infrastructure\DependencyInjection\MessageBusTrait;
+use App\Infrastructure\DependencyInjection\TokenChangeTrait;
 use App\Membership\Entity\Member;
 use App\Membership\Entity\MemberInterface;
 use App\Operation\OperationClock;
@@ -37,53 +38,50 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorTrait;
 use function in_array;
 use function sprintf;
 
 /**
  * @package App\Amqp\Command
  */
-class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
+class FetchPublicationMessageDispatcher extends AggregateAwareCommand
 {
-    private const OPTION_SCREEN_NAME = 'screen_name';
-
-    private const OPTION_MEMBER_RESTRICTION = 'member_restriction';
-
-    private const OPTION_INCLUDE_OWNER = 'include_owner';
-
-    private const OPTION_IGNORE_WHISPERS = 'ignore_whispers';
-
+    private const OPTION_SCREEN_NAME             = 'screen_name';
+    private const OPTION_MEMBER_RESTRICTION      = 'member_restriction';
+    private const OPTION_INCLUDE_OWNER           = 'include_owner';
+    private const OPTION_IGNORE_WHISPERS         = 'ignore_whispers';
     private const MESSAGE_PUBLISHING_NEW_MESSAGE = '[publishing new message produced for "%s"]';
 
     use MemberAwareTrait;
+    use MessageBusTrait;
+    use TranslatorTrait;
+    use TokenChangeTrait;
 
     /**
-     * @var MessageBusInterface
+     * @var OperationClock
      */
-    private MessageBusInterface $producer;
+    public OperationClock $operationClock;
+
+    /**
+     * @var SavedSearchRepository
+     */
+    public SavedSearchRepository $savedSearchRepository;
+
+    /**
+     * @var SearchMatchingStatusRepository
+     */
+    public SearchMatchingStatusRepository $searchMatchingStatusRepository;
+
+    /**
+     * @var bool
+     */
+    public bool $shouldIncludeOwner = false;
 
     /**
      * @var MessageBusInterface|null
      */
     private ?MessageBusInterface $likesMessagesProducer = null;
-
-    /**
-     * @var TranslatorInterface
-     */
-    private TranslatorInterface $translator;
-
-    /**
-     * @param TranslatorInterface $translator
-     *
-     * @return $this
-     */
-    public function setTranslator(TranslatorInterface $translator): self
-    {
-        $this->translator = $translator;
-
-        return $this;
-    }
 
     /**
      * @var string
@@ -118,116 +116,72 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
     private ?string $before = null;
 
     /**
-     * @var OperationClock
-     */
-    public OperationClock $operationClock;
-
-    /**
-     * @var SavedSearchRepository
-     */
-    public SavedSearchRepository $savedSearchRepository;
-
-    /**
-     * @var SearchMatchingStatusRepository
-     */
-    public SearchMatchingStatusRepository $searchMatchingStatusRepository;
-
-    /**
-     * @var bool
-     */
-    public bool $shouldIncludeOwner = false;
-
-    /**
      * @var bool
      */
     private bool $ignoreWhispers = false;
 
-    /**
-     * @param $messageBus
-     *
-     * @return $this
-     */
-    public function setMessageBus(MessageBusInterface $messageBus): self
-    {
-        $this->producer = $messageBus;
-
-        return $this;
-    }
-
-    /**
-     * @var TokenChangeInterface
-     */
-    private TokenChangeInterface $tokenChange;
-
-    public function setTokenChange(TokenChangeInterface $tokenChange): self
-    {
-        $this->tokenChange = $tokenChange;
-
-        return $this;
-    }
-
     public function configure()
     {
         $this->setName('press-review:dispatch-messages-to-fetch-member-statuses')
-            ->setDescription('Dispatch messages to fetch member statuses')
-            ->addOption(
-            'oauth_token',
-            null,
-            InputOption::VALUE_OPTIONAL,
-            'A token is required'
-        )->addOption(
-            'oauth_secret',
-            null,
-            InputOption::VALUE_OPTIONAL,
-            'A secret is required'
-        )->addOption(
-            self::OPTION_SCREEN_NAME,
-            null,
-            InputOption::VALUE_REQUIRED,
-            'The screen name of a user'
-        )->addOption(
-            'list',
-            null,
-            InputOption::VALUE_OPTIONAL,
-            'A list to which production is restricted to'
-        )->addOption(
-            'lists',
+             ->setDescription('Dispatch messages to fetch member statuses')
+             ->addOption(
+                 'oauth_token',
+                 null,
+                 InputOption::VALUE_OPTIONAL,
+                 'A token is required'
+             )->addOption(
+                'oauth_secret',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'A secret is required'
+            )->addOption(
+                self::OPTION_SCREEN_NAME,
+                null,
+                InputOption::VALUE_REQUIRED,
+                'The screen name of a user'
+            )->addOption(
+                'list',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'A list to which production is restricted to'
+            )->addOption(
+                'lists',
                 'l',
-            InputOption::VALUE_OPTIONAL,
-            'List to which publication of messages is restricted to'
-        )
-        ->addOption(
-            'priority_to_aggregates',
-            'pa',
-            InputOption::VALUE_NONE,
-            'Publish messages the priority queue for visible aggregates'
-        )
-        ->addOption(
-            'query_restriction',
-            'qr',
-            InputOption::VALUE_OPTIONAL,
-            'Query to search statuses against'
-        )->addOption(
-            self::OPTION_MEMBER_RESTRICTION,
-            'mr',
-            InputOption::VALUE_OPTIONAL,
-            'Restrict to member, which screen name has been passed as value of this option'
-        )->addOption(
-            'before',
-            null,
-            InputOption::VALUE_OPTIONAL,
-            'Date before which statuses should have been created'
-        )->addOption(
-            self::OPTION_INCLUDE_OWNER,
-            null,
-            InputOption::VALUE_NONE,
-            'Should add owner to the list of accounts to be considered'
-        )->addOption(
-            self::OPTION_IGNORE_WHISPERS,
-            'iw',
-            InputOption::VALUE_NONE,
-            'Should ignore whispers (publication from members having not published anything for a month)'
-        )->setAliases(['pr:d-m-t-f-m-s']);
+                InputOption::VALUE_OPTIONAL,
+                'List to which publication of messages is restricted to'
+            )
+             ->addOption(
+                 'priority_to_aggregates',
+                 'pa',
+                 InputOption::VALUE_NONE,
+                 'Publish messages the priority queue for visible aggregates'
+             )
+             ->addOption(
+                 'query_restriction',
+                 'qr',
+                 InputOption::VALUE_OPTIONAL,
+                 'Query to search statuses against'
+             )->addOption(
+                self::OPTION_MEMBER_RESTRICTION,
+                'mr',
+                InputOption::VALUE_OPTIONAL,
+                'Restrict to member, which screen name has been passed as value of this option'
+            )->addOption(
+                'before',
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'Date before which statuses should have been created'
+            )->addOption(
+                self::OPTION_INCLUDE_OWNER,
+                null,
+                InputOption::VALUE_NONE,
+                'Should add owner to the list of accounts to be considered'
+            )->addOption(
+                self::OPTION_IGNORE_WHISPERS,
+                'iw',
+                InputOption::VALUE_NONE,
+                'Should ignore whispers (publication from members having not published anything for a month)'
+            )->setAliases(['pr:d-m-t-f-m-s']);
     }
 
     /**
@@ -243,22 +197,19 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
      * @throws NonUniqueResultException
      * @throws OptimisticLockException
      * @throws ReadOnlyApplicationException
-     * @throws ReflectionException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
      * @throws UnexpectedApiResponseException
+     * @throws ReflectionException
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->input = $input;
+        $this->input  = $input;
         $this->output = $output;
 
         $this->setOptionsFromInput();
 
-        if ($this->operationClock->shouldSkipOperation()
-            && !$this->givePriorityToAggregate
-            && !$this->queryRestriction
-        ) {
+        if ($this->shouldSkipOperation()) {
             return self::RETURN_STATUS_SUCCESS;
         }
 
@@ -306,6 +257,42 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
     }
 
     /**
+     * @param stdClass $twitterUser
+     * @param stdClass $friend
+     * @param bool     $protected
+     * @param bool     $suspended
+     *
+     * @return Member
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    protected function makeUser(
+        stdClass $twitterUser,
+        stdClass $friend,
+        bool $protected = false,
+        bool $suspended = false
+    ) {
+        $this->logger->info(
+            sprintf(
+                self::MESSAGE_PUBLISHING_NEW_MESSAGE,
+                $twitterUser->screen_name
+            )
+        );
+
+        $user = $this->userRepository->make(
+            $friend->id,
+            $twitterUser->screen_name,
+            $protected,
+            $suspended
+        );
+
+        $this->entityManager->persist($user);
+        $this->entityManager->flush();
+
+        return $user;
+    }
+
+    /**
      * @param $members
      * @param $messageBody
      * @param $list
@@ -319,10 +306,12 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
 
         foreach ($members->users as $friend) {
             if ($this->memberRestriction && $friend->screen_name !== $this->memberRestriction) {
-                $this->output->writeln(sprintf(
-                    'Skipping "%s" as member restriction applies',
-                    $friend->screen_name
-                ));
+                $this->output->writeln(
+                    sprintf(
+                        'Skipping "%s" as member restriction applies',
+                        $friend->screen_name
+                    )
+                );
                 continue;
             }
 
@@ -356,7 +345,7 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
                     $member
                 );
 
-                $this->producer->dispatch($fetchMemberStatuses);
+                $this->dispatcher->dispatch($fetchMemberStatuses);
 
                 if ($this->likesMessagesProducer instanceof MessageBusInterface) {
                     $this->likesMessagesProducer->dispatch(
@@ -386,80 +375,11 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
     }
 
     /**
-     * @param stdClass $twitterUser
-     * @param stdClass $friend
-     * @param bool     $protected
-     * @param bool     $suspended
-     *
-     * @return Member
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
-    protected function makeUser(
-        stdClass $twitterUser,
-        stdClass $friend,
-        bool $protected = false,
-        bool $suspended = false
-    )
-    {
-        $this->logger->info(sprintf(
-            self::MESSAGE_PUBLISHING_NEW_MESSAGE,
-            $twitterUser->screen_name
-        ));
-
-        $user = $this->userRepository->make(
-            $friend->id,
-            $twitterUser->screen_name,
-            $protected,
-            $suspended
-        );
-
-        $this->entityManager->persist($user);
-        $this->entityManager->flush();
-
-        return $user;
-    }
-
-    /**
      * @return bool
      */
     private function applyQueryRestriction(): bool
     {
         return $this->queryRestriction !== null;
-    }
-
-    /**
-     * @param $ownerships
-     * @param $listRestriction
-     * @return bool
-     */
-    private function targetListHasBeenFound($ownerships, string $listRestriction): bool
-    {
-        $listNames = $this->mapOwnershipsLists($ownerships);
-
-        return in_array($listRestriction, $listNames, true);
-    }
-
-    /**
-     * @param        $ownerships
-     * @param string $listRestriction
-     * @return bool
-     */
-    private function targetListHasNotBeenFound($ownerships, string $listRestriction): bool {
-        return ! $this->targetListHasBeenFound($ownerships, $listRestriction);
-    }
-
-    /**
-     * @param $ownerships
-     * @return array
-     */
-    private function mapOwnershipsLists($ownerships): array
-    {
-        return array_map(function ($list) {
-            $list = (array) $list;
-
-            return $list['name'];
-        }, (array)$ownerships->lists);
     }
 
     /**
@@ -495,10 +415,17 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
             $ownerships = $this->accessor->getUserOwnerships($this->screenName, $ownerships->next_cursor);
 
             if (!isset($ownerships->next_cursor) || $previousCursor === $ownerships->next_cursor) {
-                $this->output->write(sprintf(implode([
-                    'No more pages of members lists to be processed. ',
-                    'Does the Twitter API access token used belong to "%s"?',
-                ]), $this->screenName));
+                $this->output->write(
+                    sprintf(
+                        implode(
+                            [
+                                'No more pages of members lists to be processed. ',
+                                'Does the Twitter API access token used belong to "%s"?',
+                            ]
+                        ),
+                        $this->screenName
+                    )
+                );
 
                 break;
             }
@@ -510,35 +437,8 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
     }
 
     /**
-     * @throws InvalidSerializedTokenException
-     */
-    private function setUpDependencies(): void
-    {
-        $tokens = $this->getTokensFromInputOrFallback();
-
-        $this->setOAuthTokens(Token::fromArray($tokens));
-
-        $this->setupAggregateRepository();
-        $this->setUpLogger();
-
-        if (($this->listRestriction !== null || $this->listCollectionRestriction !== null) &&
-            $this->givePriorityToAggregate
-        ) {
-            $this->producer = $this->getContainer()
-                ->get('old_sound_rabbit_mq.weaving_the_web_amqp.twitter.aggregates_status_producer');
-
-            $this->likesMessagesProducer = $this->getContainer()
-                ->get('old_sound_rabbit_mq.weaving_the_web_amqp.producer.aggregates_likes_producer');
-        }
-
-        if ($this->applyQueryRestriction()) {
-            $this->producer = $this->getContainer()
-                ->get('old_sound_rabbit_mq.weaving_the_web_amqp.producer.search_matching_statuses_producer');
-        }
-    }
-
-    /**
      * @param $ownerships
+     *
      * @return \API|mixed|object|\stdClass
      * @throws InvalidListNameException
      * @throws UnavailableResourceException
@@ -569,56 +469,9 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
         return $ownerships;
     }
 
-    private function setOptionsFromInput(): void
-    {
-        $this->screenName = $this->input->getOption(self::OPTION_SCREEN_NAME);
-
-        $this->listRestriction = null;
-        if ($this->input->hasOption('list') && !is_null($this->input->getOption('list'))) {
-            $this->listRestriction = $this->input->getOption('list');
-        }
-
-        $this->listCollectionRestriction = [];
-        if ($this->input->hasOption('lists') && !is_null($this->input->getOption('lists'))) {
-            $this->listCollectionRestriction = explode(',', $this->input->getOption('lists'));
-            $restiction = (object)[];
-            $restiction->list = [];
-            array_walk(
-                $this->listCollectionRestriction,
-                function($list) use ($restiction) {
-                    $restiction->list[$list] = $list;
-                }
-            );
-            $this->listCollectionRestriction = $restiction->list;
-        }
-
-        if ($this->input->hasOption('before') && !is_null($this->input->getOption('before'))) {
-            $this->before = $this->input->getOption('before');
-        }
-
-        if ($this->input->hasOption('priority_to_aggregates') &&
-            $this->input->getOption('priority_to_aggregates')) {
-            $this->givePriorityToAggregate = true;
-        }
-
-        if ($this->input->hasOption('query_restriction') &&
-            $this->input->getOption('query_restriction')) {
-            $this->queryRestriction = $this->input->getOption('query_restriction');
-        }
-
-        if ($this->input->hasOption(self::OPTION_MEMBER_RESTRICTION) &&
-            $this->input->getOption(self::OPTION_MEMBER_RESTRICTION)) {
-            $this->memberRestriction = $this->input->getOption(self::OPTION_MEMBER_RESTRICTION);
-        }
-
-        if ($this->input->hasOption(self::OPTION_IGNORE_WHISPERS) &&
-            $this->input->getOption(self::OPTION_IGNORE_WHISPERS)) {
-            $this->ignoreWhispers = $this->input->getOption(self::OPTION_IGNORE_WHISPERS);
-        }
-    }
-
     /**
      * @param $ownerships
+     *
      * @return \API|mixed|object|\stdClass
      * @throws UnavailableResourceException
      * @throws NonUniqueResultException
@@ -635,6 +488,98 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
         $ownerships->next_cursor = -1;
 
         return $this->findNextBatchOfListOwnerships($ownerships);
+    }
+
+    /**
+     * @param $ownerships
+     *
+     * @return array
+     */
+    private function mapOwnershipsLists($ownerships): array
+    {
+        return array_map(
+            function ($list) {
+                $list = (array) $list;
+
+                return $list['name'];
+            },
+            (array) $ownerships->lists
+        );
+    }
+
+    /**
+     * @param $doNotApplyListRestriction
+     * @param $list
+     * @param $shouldIncludeOwner
+     * @param $messageBody
+     *
+     * @return bool
+     * @throws ApiRateLimitingException
+     * @throws InconsistentTokenRepository
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws InvalidSerializedTokenException
+     */
+    private function processMemberList(
+        $doNotApplyListRestriction,
+        $list,
+        $shouldIncludeOwner,
+        $messageBody
+    ) {
+        if (
+            $doNotApplyListRestriction || $list->name === $this->listRestriction
+            || array_key_exists(
+                $list->name,
+                $this->listCollectionRestriction
+            )
+        ) {
+            $members = $this->accessor->getListMembers($list->id);
+
+            if ($shouldIncludeOwner) {
+                $additionalMember = $this->accessor->showUser($this->screenName);
+                array_unshift($members->users, $additionalMember);
+                $shouldIncludeOwner = false;
+            }
+
+            if (!is_object($members) || !isset($members->users) || count($members->users) === 0) {
+                $this->logger->info(sprintf('List "%s" has no members', $list->name));
+
+                return $shouldIncludeOwner;
+            }
+
+            if (count($members->users) > 0) {
+                $this->logger->info(
+                    sprintf(
+                        'About to publish messages for members in list "%s"',
+                        $list->name
+                    )
+                );
+            }
+
+            $publishedMessages = $this->publishMembersScreenNames($members, $messageBody, $list);
+
+            // Reset accessor tokens in case they've been updated to find member usernames with alternative tokens
+            // Members lists can only be accessed by authenticated users owning the lists
+            // See also https://dev.twitter.com/rest/reference/get/lists/ownerships
+            $this->tokenChange->replaceAccessToken(
+                Token::fromArray($this->getTokensFromInputOrFallback()),
+                $this->accessor
+            );
+
+            $this->output->writeln(
+                $this->translator->trans(
+                    'amqp.production.list_members.success',
+                    [
+                        '{{ count }}' => $publishedMessages,
+                        '{{ list }}'  => $list->name,
+                    ]
+                )
+            );
+        }
+
+        return $shouldIncludeOwner;
     }
 
     /**
@@ -686,15 +631,14 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
 
         $ownerships = $this->guardAgainstInvalidListName($ownerships);
 
-        $doNotApplyListRestriction = is_null($this->listRestriction) &&
-            count($this->listCollectionRestriction) === 0;
+        $doNotApplyListRestriction = is_null($this->listRestriction) && count($this->listCollectionRestriction) === 0;
         if ($doNotApplyListRestriction && count($ownerships->lists) === 0) {
             $ownerships = $this->guardAgainstInvalidToken($ownerships);
         }
 
-        $this->shouldIncludeOwner = $this->input->hasOption(self::OPTION_INCLUDE_OWNER) &&
-            $this->input->getOption(self::OPTION_INCLUDE_OWNER);
-        $shouldIncludeOwner = $this->shouldIncludeOwner;
+        $this->shouldIncludeOwner =
+            $this->input->hasOption(self::OPTION_INCLUDE_OWNER) && $this->input->getOption(self::OPTION_INCLUDE_OWNER);
+        $shouldIncludeOwner       = $this->shouldIncludeOwner;
 
         foreach ($ownerships->lists as $list) {
             try {
@@ -736,7 +680,7 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
             ->findOneBy(['searchQuery' => $this->queryRestriction]);
 
         if (!($savedSearch instanceof SavedSearch)) {
-            $response = $this->accessor->saveSearch($this->queryRestriction);
+            $response    = $this->accessor->saveSearch($this->queryRestriction);
             $savedSearch = $this->savedSearchRepository->make($response);
             $this->savedSearchRepository->save($savedSearch);
         }
@@ -750,70 +694,126 @@ class FetchMemberStatusMessageDispatcher extends AggregateAwareCommand
         );
     }
 
-    /**
-     * @param $doNotApplyListRestriction
-     * @param $list
-     * @param $shouldIncludeOwner
-     * @param $messageBody
-     *
-     * @return bool
-     * @throws ApiRateLimitingException
-     * @throws InconsistentTokenRepository
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws InvalidSerializedTokenException
-     */
-    private function processMemberList(
-        $doNotApplyListRestriction,
-        $list,
-        $shouldIncludeOwner,
-        $messageBody
-    ) {
-        if ($doNotApplyListRestriction ||
-            $list->name === $this->listRestriction ||
-            array_key_exists($list->name, $this->listCollectionRestriction)
-        ) {
-            $members = $this->accessor->getListMembers($list->id);
+    private function setOptionsFromInput(): void
+    {
+        $this->screenName = $this->input->getOption(self::OPTION_SCREEN_NAME);
 
-            if ($shouldIncludeOwner) {
-                $additionalMember = $this->accessor->showUser($this->screenName);
-                array_unshift($members->users, $additionalMember);
-                $shouldIncludeOwner = false;
-            }
-
-            if (!is_object($members) || !isset($members->users) || count($members->users) === 0) {
-                $this->logger->info(sprintf('List "%s" has no members', $list->name));
-
-                return $shouldIncludeOwner;
-            }
-
-            if (count($members->users) > 0) {
-                $this->logger->info(
-                    sprintf(
-                        'About to publish messages for members in list "%s"',
-                        $list->name
-                    )
-                );
-            }
-
-            $publishedMessages = $this->publishMembersScreenNames($members, $messageBody, $list);
-
-            // Reset accessor tokens in case they've been updated to find member usernames with alternative tokens
-            // Members lists can only be accessed by authenticated users owning the lists
-            // See also https://dev.twitter.com/rest/reference/get/lists/ownerships
-            $this->tokenChange->replaceAccessToken(
-                Token::fromArray($this->getTokensFromInputOrFallback()),
-                $this->accessor
-            );
-
-            $this->output->writeln($this->translator->trans('amqp.production.list_members.success', [
-                '{{ count }}' => $publishedMessages,
-                '{{ list }}' => $list->name,
-            ]));
+        $this->listRestriction = null;
+        if ($this->input->hasOption('list') && !is_null($this->input->getOption('list'))) {
+            $this->listRestriction = $this->input->getOption('list');
         }
 
-        return $shouldIncludeOwner;
+        $this->listCollectionRestriction = [];
+        if ($this->input->hasOption('lists') && !is_null($this->input->getOption('lists'))) {
+            $this->listCollectionRestriction = explode(',', $this->input->getOption('lists'));
+            $restiction                      = (object) [];
+            $restiction->list                = [];
+            array_walk(
+                $this->listCollectionRestriction,
+                function ($list) use ($restiction) {
+                    $restiction->list[$list] = $list;
+                }
+            );
+            $this->listCollectionRestriction = $restiction->list;
+        }
+
+        if ($this->input->hasOption('before') && !is_null($this->input->getOption('before'))) {
+            $this->before = $this->input->getOption('before');
+        }
+
+        if ($this->input->hasOption('priority_to_aggregates') && $this->input->getOption('priority_to_aggregates')) {
+            $this->givePriorityToAggregate = true;
+        }
+
+        if ($this->input->hasOption('query_restriction') && $this->input->getOption('query_restriction')) {
+            $this->queryRestriction = $this->input->getOption('query_restriction');
+        }
+
+        if (
+            $this->input->hasOption(self::OPTION_MEMBER_RESTRICTION)
+            && $this->input->getOption(
+                self::OPTION_MEMBER_RESTRICTION
+            )
+        ) {
+            $this->memberRestriction = $this->input->getOption(self::OPTION_MEMBER_RESTRICTION);
+        }
+
+        if (
+            $this->input->hasOption(self::OPTION_IGNORE_WHISPERS)
+            && $this->input->getOption(
+                self::OPTION_IGNORE_WHISPERS
+            )
+        ) {
+            $this->ignoreWhispers = $this->input->getOption(self::OPTION_IGNORE_WHISPERS);
+        }
+    }
+
+    /**
+     * @throws InvalidSerializedTokenException
+     */
+    private function setUpDependencies(): void
+    {
+        $this->setUpLogger();
+
+        $tokens = $this->getTokensFromInputOrFallback();
+        $this->setOAuthTokens(Token::fromArray($tokens));
+
+        $this->setupAggregateRepository();
+
+        if (
+            ($this->listRestriction !== null || $this->listCollectionRestriction !== null)
+            && $this->givePriorityToAggregate
+        ) {
+            $this->dispatcher = $this->getContainer()
+                                     ->get(
+                                         'old_sound_rabbit_mq.weaving_the_web_amqp.twitter.aggregates_status_producer'
+                                     );
+
+            $this->likesMessagesProducer = $this->getContainer()
+                                                ->get(
+                                                    'old_sound_rabbit_mq.weaving_the_web_amqp.producer.aggregates_likes_producer'
+                                                );
+        }
+
+        if ($this->applyQueryRestriction()) {
+            $this->dispatcher = $this->getContainer()
+                                     ->get(
+                                         'old_sound_rabbit_mq.weaving_the_web_amqp.producer.search_matching_statuses_producer'
+                                     );
+        }
+    }
+
+    /**
+     * @return bool
+     */
+    private function shouldSkipOperation(): bool
+    {
+        return $this->operationClock->shouldSkipOperation()
+            && !$this->givePriorityToAggregate
+            && !$this->queryRestriction;
+    }
+
+    /**
+     * @param $ownerships
+     * @param $listRestriction
+     *
+     * @return bool
+     */
+    private function targetListHasBeenFound($ownerships, string $listRestriction): bool
+    {
+        $listNames = $this->mapOwnershipsLists($ownerships);
+
+        return in_array($listRestriction, $listNames, true);
+    }
+
+    /**
+     * @param        $ownerships
+     * @param string $listRestriction
+     *
+     * @return bool
+     */
+    private function targetListHasNotBeenFound($ownerships, string $listRestriction): bool
+    {
+        return !$this->targetListHasBeenFound($ownerships, $listRestriction);
     }
 }
