@@ -14,10 +14,16 @@ class MemberCollection implements StrictCollectionInterface
     public function __construct(array $members)
     {
         $this->members = array_map(
-            fn($member) => new MemberIdentity(
-                $member->id_str,
-                $member->screen_name
-            ),
+            function ($member) {
+                if ($member instanceof MemberIdentity) {
+                    return $member;
+                }
+
+                return new MemberIdentity(
+                    $member->screen_name,
+                    $member->id_str
+                );
+            },
             $members
         );
     }

@@ -46,13 +46,13 @@ use function sprintf;
  */
 class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements PublicationStrategyInterface
 {
-    private const OPTION_BEFORE                  = self::RULE_BEFORE;
-    private const OPTION_SCREEN_NAME             = self::RULE_SCREEN_NAME;
-    private const OPTION_MEMBER_RESTRICTION      = self::RULE_MEMBER_RESTRICTION;
-    private const OPTION_INCLUDE_OWNER           = self::RULE_INCLUDE_OWNER;
-    private const OPTION_IGNORE_WHISPERS         = self::RULE_IGNORE_WHISPERS;
-    private const OPTION_QUERY_RESTRICTION       = self::RULE_QUERY_RESTRICTION;
-    private const OPTION_PRIORITY_TO_AGGREGATES  = self::RULE_PRIORITY_TO_AGGREGATES;
+    private const OPTION_BEFORE                 = self::RULE_BEFORE;
+    private const OPTION_SCREEN_NAME            = self::RULE_SCREEN_NAME;
+    private const OPTION_MEMBER_RESTRICTION     = self::RULE_MEMBER_RESTRICTION;
+    private const OPTION_INCLUDE_OWNER          = self::RULE_INCLUDE_OWNER;
+    private const OPTION_IGNORE_WHISPERS        = self::RULE_IGNORE_WHISPERS;
+    private const OPTION_QUERY_RESTRICTION      = self::RULE_QUERY_RESTRICTION;
+    private const OPTION_PRIORITY_TO_AGGREGATES = self::RULE_PRIORITY_TO_AGGREGATES;
 
     private const OPTION_LIST                    = self::RULE_LIST;
     private const OPTION_LISTS                   = self::RULE_LISTS;
@@ -171,7 +171,8 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
         $this->input  = $input;
         $this->output = $output;
 
-        $this->strategy = InputOptionToPublicationCollectionStrategy::convertInputToPublicationCollectionStrategy($input);
+        $this->strategy =
+            InputOptionToPublicationCollectionStrategy::convertInputToPublicationCollectionStrategy($input);
 
         if ($this->shouldSkipOperation()) {
             return self::RETURN_STATUS_SUCCESS;
@@ -233,14 +234,16 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
                 }
 
                 if ($member->isProtected()) {
-                    $message = sprintf('Ignoring protected member with screen name "%s"', $memberIdentity->screenName());
+                    $message =
+                        sprintf('Ignoring protected member with screen name "%s"', $memberIdentity->screenName());
                     $this->logger->info($message);
 
                     continue;
                 }
 
                 if ($member->isSuspended()) {
-                    $message = sprintf('Ignoring suspended member with screen name "%s"', $memberIdentity->screenName());
+                    $message =
+                        sprintf('Ignoring suspended member with screen name "%s"', $memberIdentity->screenName());
                     $this->logger->info($message);
 
                     continue;
@@ -343,6 +346,25 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
         $this->entityManager->flush();
 
         return $user;
+    }
+
+    /**
+     * @param MemberCollection $memberCollection
+     *
+     * @return MemberCollection
+     */
+    private function addOwnerToListOptionally(MemberCollection $memberCollection): MemberCollection
+    {
+        $members = $memberCollection->toArray();
+        if ($this->strategy->shouldIncludeOwner()) {
+            $additionalMember = $this->accessor->getMemberProfile(
+                $this->strategy->onBehalfOfWhom()
+            );
+            array_unshift($members, $additionalMember);
+            $this->strategy->willIncludeOwner(false);
+        }
+
+        return MemberCollection::fromArray($members);
     }
 
     /**
@@ -466,15 +488,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
     ) {
         if ($this->strategy->shouldProcessList($list)) {
             $memberCollection = $this->accessor->getListMembers($list->id);
-            $members          = $memberCollection->toArray();
-
-            if ($this->strategy->shouldIncludeOwner()) {
-                $additionalMember = $this->accessor->getMemberProfile(
-                    $this->strategy->onBehalfOfWhom()
-                );
-                array_unshift($members, $additionalMember);
-                $this->strategy->willIncludeOwner(false);
-            }
+            $memberCollection = $this->addOwnerToListOptionally($memberCollection);
 
             if ($memberCollection->isEmpty()) {
                 $this->logger->info(
@@ -602,8 +616,8 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
 
         if (
             $this->strategy->shouldPrioritizeLists()
-            && ($this->strategy->listRestriction() ||
-                $this->strategy->shouldApplyListCollectionRestriction())
+            && ($this->strategy->listRestriction()
+                || $this->strategy->shouldApplyListCollectionRestriction())
         ) {
             $this->dispatcher = $this->getContainer()
                 ->get(
