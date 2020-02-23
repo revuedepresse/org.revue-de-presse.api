@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Builder;
 
+use App\Twitter\Api\Accessor;
 use App\Twitter\Api\ApiAccessorInterface;
 use App\Twitter\Api\Resource\OwnershipCollection;
 use App\Twitter\Exception\UnavailableResourceException;
@@ -144,7 +145,7 @@ class ApiAccessorBuilder
     {
         $this->prophecy
             ->setConsumerKey($consumerKey)
-            ->willReturn();
+            ->willReturn(new Accessor());
 
         return $this;
     }
@@ -153,7 +154,7 @@ class ApiAccessorBuilder
     {
         $this->prophecy
             ->setConsumerSecret($consumerSecret)
-            ->willReturn();
+            ->willReturn(new Accessor());
 
         return $this;
     }
@@ -161,7 +162,8 @@ class ApiAccessorBuilder
     public function willReceiveSecret(string $secret): self
     {
         $this->prophecy
-            ->setOAuthSecret($secret);
+            ->setOAuthSecret($secret)
+            ->willReturn(new Accessor());
 
         return $this;
     }
@@ -169,7 +171,8 @@ class ApiAccessorBuilder
     public function willReceiveToken(string $token): self
     {
         $this->prophecy
-            ->setOAuthToken($token);
+            ->setOAuthToken($token)
+            ->willReturn(new Accessor());
 
         return $this;
     }
