@@ -220,7 +220,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
         }
 
         if ($this->applyQueryRestriction()) {
-            $this->productSearchStatusesMessages();
+            $this->produceSearchStatusesMessages();
 
             return self::RETURN_STATUS_SUCCESS;
         }
@@ -674,7 +674,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
      * @throws UnavailableResourceException
      * @throws UnexpectedApiResponseException
      */
-    private function productSearchStatusesMessages()
+    private function produceSearchStatusesMessages(): void
     {
         $savedSearch = $this->savedSearchRepository
             ->findOneBy(['searchQuery' => $this->queryRestriction]);
