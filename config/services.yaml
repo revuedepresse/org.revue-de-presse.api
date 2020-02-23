@@ -58,6 +58,15 @@ services:
             connection:             '@doctrine.dbal.default_connection'
             queryFactory:           '@weaving_the_web.api.query_factory'
 
+    App\Infrastructure\Amqp\ResourceProcessor\MemberIdentityProcessor:
+        class: 'App\Infrastructure\Amqp\ResourceProcessor\MemberIdentityProcessor'
+        arguments:
+            - '@messenger.default_bus'
+            - '@repository.publication_list'
+            - '@weaving_the_web_twitter.api_accessor'
+            - '@user_manager'
+            - '@logger'
+
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
     app.cache.redis:

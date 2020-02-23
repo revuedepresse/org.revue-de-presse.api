@@ -11,7 +11,7 @@ use function array_key_exists;
 use function count;
 use function sprintf;
 
-class PublicationCollectionStrategy
+class PublicationCollectionStrategy implements PublicationStrategyInterface
 {
     private string $screenName;
 

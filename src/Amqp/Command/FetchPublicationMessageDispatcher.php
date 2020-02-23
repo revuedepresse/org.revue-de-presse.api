@@ -7,28 +7,23 @@ use App\Aggregate\Entity\SavedSearch;
 use App\Aggregate\Repository\SavedSearchRepository;
 use App\Aggregate\Repository\SearchMatchingStatusRepository;
 use App\Amqp\Exception\InvalidListNameException;
-use App\Domain\Membership\Exception\MembershipException;
-use App\Infrastructure\Amqp\Message\FetchMemberLikes;
-use App\Infrastructure\Amqp\Message\FetchMemberStatuses;
-use App\Amqp\SkippableMemberException;
 use App\Api\Entity\Token;
 use App\Api\Entity\TokenInterface;
 use App\Api\Exception\InvalidSerializedTokenException;
-use App\Conversation\Producer\MemberAwareTrait;
-use App\Domain\Membership\MemberFacingStrategy;
 use App\Domain\Collection\PublicationCollectionStrategy;
 use App\Domain\Collection\PublicationStrategyInterface;
-use App\Infrastructure\DependencyInjection\MemberRepositoryTrait;
-use App\Infrastructure\DependencyInjection\MessageBusTrait;
+use App\Domain\Resource\MemberCollection;
+use App\Domain\Resource\MemberIdentity;
+use App\Domain\Resource\OwnershipCollection;
+use App\Domain\Resource\PublicationList;
+use App\Infrastructure\Amqp\Exception\ContinuePublicationException;
+use App\Infrastructure\Amqp\Exception\StopPublicationException;
+use App\Infrastructure\DependencyInjection\MemberIdentityProcessorTrait;
 use App\Infrastructure\DependencyInjection\OwnershipAccessorTrait;
 use App\Infrastructure\DependencyInjection\TokenChangeTrait;
 use App\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Infrastructure\InputConverter\InputToCollectionStrategy;
 use App\Operation\OperationClock;
-use App\Domain\Resource\MemberCollection;
-use App\Domain\Resource\MemberIdentity;
-use App\Domain\Resource\OwnershipCollection;
-use App\Domain\Resource\PublicationList;
 use App\Twitter\Exception\EmptyListException;
 use App\Twitter\Exception\OverCapacityException;
 use Doctrine\ORM\NonUniqueResultException;
@@ -59,10 +54,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
     private const OPTION_OAUTH_TOKEN             = 'oauth_token';
     private const OPTION_OAUTH_SECRET            = 'oauth_secret';
 
-    private const MESSAGE_PUBLISHING_NEW_MESSAGE = '[publishing new message produced for "%s"]';
-
-    use MemberAwareTrait;
-    use MessageBusTrait;
+    use MemberIdentityProcessorTrait;
     use OwnershipAccessorTrait;
     use TokenChangeTrait;
     use TranslatorTrait;
@@ -225,49 +217,23 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
         /** @var MemberIdentity $memberIdentity */
         foreach ($members->toArray() as $memberIdentity) {
             try {
-                $this->skipUnrestrictedMember($memberIdentity);
-
-                $member = $this->getMessageMember($memberIdentity);
-
-                $this->collectionStrategy->guardAgainstWhisperingMember($member, $memberIdentity);
-
-                MemberFacingStrategy::guardAgainstProtectedMember($member, $memberIdentity);
-                MemberFacingStrategy::guardAgainstSuspendedMember($member, $memberIdentity);
-
-                $fetchMemberStatuses = FetchMemberStatuses::makeMemberIdentityCard(
-                    $this->getListAggregateByName(
-                        $member->getTwitterUsername(),
-                        $list->name(),
-                        $list->id()
-                    ),
+                $this->memberIdentityProcessor->process(
+                    $memberIdentity,
+                    $this->collectionStrategy,
                     $token,
-                    $member,
-                    $this->collectionStrategy->collectPublicationsPrecedingThoseAlreadyCollected()
+                    $list
                 );
-
-                $this->dispatcher->dispatch($fetchMemberStatuses);
-
-                $this->dispatcher->dispatch(
-                    FetchMemberLikes::from(
-                        $fetchMemberStatuses
-                    )
-                );
-
                 $publishedMessages++;
-            } catch (SkippableMemberException $exception) {
+            } catch (ContinuePublicationException $exception) {
                 $this->logger->info($exception->getMessage());
-            } catch (MembershipException $exception) {
-                if (MemberFacingStrategy::shouldBreakPublication($exception)) {
-                    $this->logger->info($exception->getMessage());
+                $this->output->writeln($exception->getMessage());
 
-                    break;
-                }
+                continue;
+            } catch (StopPublicationException $exception) {
+                $this->logger->error($exception->getMessage());
+                $this->output->writeln($exception->getMessage());
 
-                if (MemberFacingStrategy::shouldContinuePublication($exception)) {
-                    continue;
-                }
-
-                throw $exception;
+                break;
             }
         }
 
@@ -388,6 +354,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
      * @param TokenInterface  $messageBody
      *
      * @throws InvalidSerializedTokenException
+     * @throws Exception
      */
     private function processMemberList(
         PublicationList $list,
@@ -556,23 +523,6 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
         return $this->operationClock->shouldSkipOperation()
             && $this->collectionStrategy->allListsAreEquivalent()
             && $this->collectionStrategy->noQueryRestriction();
-    }
-
-    /**
-     * @param MemberIdentity $memberIdentity
-     *
-     * @throws SkippableMemberException
-     */
-    private function skipUnrestrictedMember(MemberIdentity $memberIdentity): void
-    {
-        if ($this->collectionStrategy->restrictDispatchToSpecificMember($memberIdentity)) {
-            throw new SkippableMemberException(
-                sprintf(
-                    'Skipping "%s" as member restriction applies',
-                    $memberIdentity->screenName()
-                )
-            );
-        }
     }
 
     /**

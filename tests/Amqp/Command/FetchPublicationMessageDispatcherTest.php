@@ -93,7 +93,6 @@ class FetchPublicationMessageDispatcherTest extends KernelTestCase
 
         $command = self::$container->get(FetchPublicationMessageDispatcher::class);
         $command->setAccessor($this->prophesizeAccessor());
-        $command->setMemberRepository($this->prophesizeMemberRepository());
         $command->setTokenChange($this->prophesizeTokenChange());
 
         $application = new Application($kernel);
@@ -134,38 +133,6 @@ class FetchPublicationMessageDispatcherTest extends KernelTestCase
         )->build();
 
         return $accessor;
-    }
-
-    /**
-     * @return MemberRepository
-     * @throws InvalidMemberIdentifier
-     */
-    private function prophesizeMemberRepository(): MemberRepository
-    {
-        /** @var MemberRepository $memberRepositoryProphecy */
-        $memberRepositoryProphecy = $this->prophesize(MemberRepository::class);
-        $memberRepositoryProphecy
-            ->findOneBy(['twitterID' => self::MEMBER_ID])
-            ->willReturn(null);
-
-        $member = new Member();
-        $member->setTwitterID(self::MEMBER_ID);
-        $member->setFullName(self::MEMBER_NAME);
-        $member->setTwitterUsername(self::MEMBER_SCREEN_NAME);
-        $member->setProtected(false);
-        $member->setSuspended(false);
-        $member->setEmail(self::MEMBER_EMAIL);
-
-        $memberRepositoryProphecy
-            ->make(
-                self::MEMBER_ID,
-                self::MEMBER_SCREEN_NAME,
-                false,
-                false
-            )
-            ->willReturn($member);
-
-        return $memberRepositoryProphecy->reveal();
     }
 
     /**

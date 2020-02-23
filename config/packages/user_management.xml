@@ -17,7 +17,7 @@
             <property
                 name="aggregateRepository"
                 type="service"
-                id="repository.aggregate" />
+                id="repository.publication_list" />
         </service>
     </services>
 </container>

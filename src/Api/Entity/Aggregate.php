@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Api\Entity;
 
@@ -6,7 +7,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="App\Api\Repository\AggregateRepository")
+ * @ORM\Entity(repositoryClass="App\Api\Repository\PublicationListRepository")
  * @ORM\Table(
  *     name="weaving_aggregate",
  *     indexes={

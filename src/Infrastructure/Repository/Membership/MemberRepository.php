@@ -18,7 +18,7 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\QueryBuilder;
-use App\Api\Repository\AggregateRepository;
+use App\Api\Repository\PublicationListRepository;
 use App\Twitter\Exception\NotFoundMemberException;
 use App\Membership\Entity\Member;
 use Psr\Log\LoggerInterface;
@@ -38,8 +38,8 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
 {
     private const TABLE_ALIAS = 'm';
 
-    /** @var AggregateRepository */
-    public AggregateRepository $aggregateRepository;
+    /** @var PublicationListRepository */
+    public PublicationListRepository $aggregateRepository;
 
     /**
      * @var LoggerInterface

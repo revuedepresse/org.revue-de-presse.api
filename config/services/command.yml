@@ -21,18 +21,17 @@ services:
             savedSearchRepository:          '@repository.saved_search'
             searchMatchingStatusRepository: '@repository.search_matching_status'
         calls:
-            - [ 'setAccessor',              [ '@weaving_the_web_twitter.api_accessor'] ]
-            - [ 'setAggregateRepository',   [ '@repository.aggregate'] ]
-            - [ 'setDefaultSecret',         [ '%weaving_the_web_twitter.oauth_secret.default%'] ]
-            - [ 'setDefaultToken',          [ '%weaving_the_web_twitter.oauth_token.default%'] ]
-            - [ 'setMessageBus',            [ '@messenger.default_bus'] ]
-            - [ 'setTokenRepository',       [ '@weaving_the_web_api.repository.token'] ]
-            - [ 'setTranslator',            [ '@translator'] ]
-            - [ 'setMemberRepository',      [ '@user_manager'] ]
-            - [ 'setOwnershipAccessor',     [ '@App\Twitter\Api\OwnershipAccessor'] ]
-            - [ 'setEntityManager',         [ '@doctrine.orm.entity_manager'] ]
-            - [ 'setLogger',                [ '@logger'] ]
-            - [ 'setTokenChange',           [ '@App\Api\AccessToken\TokenChange'] ]
+            - [ 'setAccessor',                [ '@weaving_the_web_twitter.api_accessor'] ]
+            - [ 'setAggregateRepository',     [ '@repository.publication_list'] ]
+            - [ 'setDefaultSecret',           [ '%weaving_the_web_twitter.oauth_secret.default%'] ]
+            - [ 'setDefaultToken',            [ '%weaving_the_web_twitter.oauth_token.default%'] ]
+            - [ 'setMemberIdentityProcessor', [ '@App\Infrastructure\Amqp\ResourceProcessor\MemberIdentityProcessor'] ]
+            - [ 'setTokenRepository',         [ '@weaving_the_web_api.repository.token'] ]
+            - [ 'setTranslator',              [ '@translator'] ]
+            - [ 'setOwnershipAccessor',       [ '@App\Twitter\Api\OwnershipAccessor'] ]
+            - [ 'setEntityManager',           [ '@doctrine.orm.entity_manager'] ]
+            - [ 'setLogger',                  [ '@logger'] ]
+            - [ 'setTokenChange',             [ '@App\Api\AccessToken\TokenChange'] ]
         tags:
             - { name: 'console.command' }
         public: true

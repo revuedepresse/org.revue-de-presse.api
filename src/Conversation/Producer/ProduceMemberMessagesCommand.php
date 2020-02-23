@@ -1,39 +1,34 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Conversation\Producer;
 
-use App\Operation\OperationClock;
-use Symfony\Component\Console\Input\InputInterface,
-    Symfony\Component\Console\Output\OutputInterface;
-
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Translation\TranslatorInterface;
-
 use App\Amqp\Command\AggregateAwareCommand;
-use App\Twitter\Exception\SuspendedAccountException;
-
+use App\Operation\OperationClock;
+use Exception;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
 class ProduceMemberMessagesCommand extends AggregateAwareCommand
 {
-    use MemberAwareTrait;
-
     /**
-     * @var \OldSound\RabbitMqBundle\RabbitMq\Producer
+     * TODO replace message producer with message bus
      */
-    private $producer;
+//    private $producer;
 
     /**
      * @var TranslatorInterface
      */
-    private $translator;
+    private TranslatorInterface $translator;
 
     /**
      * @var OperationClock
      */
-    public $operationClock;
+    public OperationClock $operationClock;
 
     public function configure()
     {
@@ -46,10 +41,7 @@ class ProduceMemberMessagesCommand extends AggregateAwareCommand
      * @param InputInterface  $input
      * @param OutputInterface $output
      * @return int|mixed|null
-     * @throws SuspendedAccountException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \Exception
-     * @throws \WeavingTheWeb\Bundle\ApiBundle\Exception\InvalidTokenException
+     * @throws Exception
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
@@ -57,9 +49,9 @@ class ProduceMemberMessagesCommand extends AggregateAwareCommand
             return self::RETURN_STATUS_SUCCESS;
         }
 
-        $this->producer = $this->getContainer()->get(
-            'old_sound_rabbit_mq.weaving_the_web_amqp.producer.member_status_producer'
-        );
+//        $this->producer = $this->getContainer()->get(
+//            'old_sound_rabbit_mq.weaving_the_web_amqp.producer.member_status_producer'
+//        );
 
         $this->input = $input;
         $this->output = $output;
@@ -71,7 +63,7 @@ class ProduceMemberMessagesCommand extends AggregateAwareCommand
 
         $this->setUpDependencies();
 
-        $this->producer->setContentType('application/json');
+//        $this->producer->setContentType('application/json');
 
         $records = $this->aggregateRepository->selectAggregatesForWhichNoStatusHasBeenCollected();
         $publications = (object)['count' => 0];
@@ -84,7 +76,9 @@ class ProduceMemberMessagesCommand extends AggregateAwareCommand
                         'id' => $record['member_id'],
                         'screen_name' => $record['member_screen_name'],
                     ];
-                    $member = $this->getMessageUser($memberProperties);
+
+                    // TODO replace with getMessageMember
+//                    $member = $this->getMessageUser($memberProperties);
 
                     if ($member->isProtected()) {
                         $message = sprintf(
@@ -110,11 +104,11 @@ class ProduceMemberMessagesCommand extends AggregateAwareCommand
                     $messageBody['aggregate_id'] = $record['aggregate_id'];
 
 
-                    $this->producer->setContentType('application/json');
-                    $this->producer->publish(serialize(json_encode($messageBody)));
+//                    $this->producer->setContentType('application/json');
+//                    $this->producer->publish(serialize(json_encode($messageBody)));
 
                     $publications->count++;
-                } catch (\Exception $exception) {
+                } catch (Exception $exception) {
                     if ($this->shouldBreakPublication($exception)) {
                         throw $exception;
                     } elseif ($this->shouldContinuePublication($exception)) {
@@ -139,13 +133,13 @@ class ProduceMemberMessagesCommand extends AggregateAwareCommand
     /**
      * @param $message
      * @param $level
-     * @param \Exception $exception
+     * @param Exception $exception
      */
-    private function sendMessage($message, $level, \Exception $exception = null)
+    private function sendMessage($message, $level, Exception $exception = null)
     {
         $this->output->writeln($message);
 
-        if ($exception instanceof \Exception) {
+        if ($exception instanceof Exception) {
             $this->logger->critical($exception->getMessage());
 
             return;
