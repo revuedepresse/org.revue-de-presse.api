@@ -18,6 +18,7 @@ use App\Api\Entity\TokenInterface;
 use App\Api\Exception\InvalidSerializedTokenException;
 use App\Conversation\Producer\MemberAwareTrait;
 use App\Infrastructure\DependencyInjection\MessageBusTrait;
+use App\Infrastructure\DependencyInjection\OwnershipAccessorTrait;
 use App\Infrastructure\DependencyInjection\TokenChangeTrait;
 use App\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Membership\Entity\Member;
@@ -59,6 +60,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
 
     use MemberAwareTrait;
     use MessageBusTrait;
+    use OwnershipAccessorTrait;
     use TranslatorTrait;
     use TokenChangeTrait;
 
@@ -196,15 +198,18 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
      * @throws ApiRateLimitingException
      * @throws BadAuthenticationDataException
      * @throws InconsistentTokenRepository
-     * @throws InvalidListNameException
+     * @throws InvalidSerializedTokenException
      * @throws NoResultException
      * @throws NonUniqueResultException
+     * @throws NotFoundMemberException
+     * @throws NotFoundStatusException
      * @throws OptimisticLockException
+     * @throws ProtectedAccountException
      * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
      * @throws UnexpectedApiResponseException
-     * @throws ReflectionException
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
@@ -229,7 +234,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
             return self::RETURN_STATUS_SUCCESS;
         }
 
-        return $this->producesListsMessages();
+        return $this->producesListMessages();
     }
 
     /**
@@ -388,81 +393,9 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
     }
 
     /**
-     * @return array|int
-     * @throws ApiRateLimitingException
-     * @throws BadAuthenticationDataException
-     * @throws InconsistentTokenRepository
-     * @throws InvalidListNameException
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
-     * @throws ReadOnlyApplicationException
-     * @throws ReflectionException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws UnexpectedApiResponseException
-     * @throws InvalidSerializedTokenException
-     */
-    private function fetchOwnershipsForMemberHavingScreenName()
-    {
-        $unfrozenTokenCount = $this->tokenRepository->howManyUnfrozenTokenAreThere();
-
-        $ownershipCollection = OwnershipCollection::fromArray([]);
-
-        while ($unfrozenTokenCount > 0) {
-            try {
-                $ownershipCollection = $this->accessor->getUserOwnerships($this->screenName);
-
-                if ($ownershipCollection->isEmpty()) {
-                    continue;
-                }
-
-                break;
-            } catch (UnavailableResourceException $exception) {
-                $this->logger->info($exception->getMessage());
-            } finally {
-                $activeToken = Token::fromArray($this->getTokensFromInputOrFallback());
-                if ($ownershipCollection->isEmpty()) {
-                    $activeToken = $this->tokenChange->replaceAccessToken(
-                        $activeToken,
-                        $this->accessor
-                    );
-                }
-            }
-
-            $unfrozenTokenCount--;
-        }
-
-        if ($ownershipCollection->count() === 0) {
-            throw new OverCapacityException(
-                'Over capacity usage of all available tokens.'
-            );
-        }
-
-        $ownershipCollection = $this->guardAgainstInvalidListName($ownershipCollection);
-        if ($this->shouldApplyListRestriction() && $ownershipCollection->count() === 0) {
-            $ownershipCollection = $this->guardAgainstInvalidToken($ownershipCollection);
-        }
-
-        return ['ownerships' => $ownershipCollection, 'active_token' => $activeToken];
-    }
-
-    /**
-     * @param stdClass $ownerships
+     * @param OwnershipCollection $ownerships
      *
-     * @return stdClass
-     * @throws ApiRateLimitingException
-     * @throws BadAuthenticationDataException
-     * @throws InconsistentTokenRepository
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
-     * @throws ReadOnlyApplicationException
-     * @throws ReflectionException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws UnexpectedApiResponseException
-     * @throws NotFoundStatusException
-     * @throws NotFoundMemberException
-     * @throws ProtectedAccountException
+     * @return OwnershipCollection
      */
     private function findNextBatchOfListOwnerships(OwnershipCollection $ownerships): OwnershipCollection
     {
@@ -571,18 +504,24 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
     }
 
     /**
-     * @param $doNotApplyListRestriction
-     * @param $list
-     * @param $messageBody
+     * @param                $doNotApplyListRestriction
+     * @param                $list
+     * @param TokenInterface $messageBody
      *
-     * @return bool
+     * @return void
      * @throws ApiRateLimitingException
+     * @throws BadAuthenticationDataException
      * @throws InconsistentTokenRepository
+     * @throws InvalidSerializedTokenException
      * @throws NonUniqueResultException
+     * @throws NotFoundMemberException
      * @throws OptimisticLockException
+     * @throws ProtectedAccountException
+     * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
-     * @throws InvalidSerializedTokenException
+     * @throws UnexpectedApiResponseException
      */
     private function processMemberList(
         $doNotApplyListRestriction,
@@ -599,7 +538,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
             $members = $this->accessor->getListMembers($list->id);
 
             if ($this->shouldIncludeOwner) {
-                $additionalMember = $this->accessor->showUser($this->screenName);
+                $additionalMember = $this->accessor->getMemberProfile($this->screenName);
                 array_unshift($members->users, $additionalMember);
                 $this->shouldIncludeOwner = false;
             }
@@ -681,40 +620,29 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
 
     /**
      * @return int
-     * @throws ApiRateLimitingException
-     * @throws BadAuthenticationDataException
-     * @throws InconsistentTokenRepository
-     * @throws InvalidListNameException
-     * @throws NoResultException
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
-     * @throws ReadOnlyApplicationException
-     * @throws ReflectionException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws UnexpectedApiResponseException
+     * @throws InvalidSerializedTokenException
      */
-    private function producesListsMessages(): int
+    private function producesListMessages(): int
     {
         try {
-            $ownershipsBag = $this->fetchOwnershipsForMemberHavingScreenName();
+            $memberOwnership = $this->ownershipAccessor->getOwnershipsForMemberHavingScreenNameAndToken(
+                $this->screenName,
+                Token::fromArray($this->getTokensFromInputOrFallback())
+            );
         } catch (OverCapacityException $exception) {
             $this->output->writeln($exception->getMessage());
 
             return self::RETURN_STATUS_SUCCESS;
         }
 
-        $ownerships  = $ownershipsBag['ownerships'];
-        $messageBody = $ownershipsBag['active_token'];
-
         $this->shouldIncludeOwner = $this->shouldIncludeOwner();
 
-        foreach ($ownerships->toArray() as $list) {
+        foreach ($memberOwnership->ownershipCollection()->toArray() as $list) {
             try {
                 $this->processMemberList(
                     $this->shouldApplyListRestriction(),
                     $list,
-                    $messageBody
+                    $memberOwnership->token()
                 );
             } catch (Exception $exception) {
                 $this->logger->critical($exception->getMessage());

@@ -22,13 +22,14 @@ services:
             searchMatchingStatusRepository: '@repository.search_matching_status'
         calls:
             - [ 'setAccessor',              [ '@weaving_the_web_twitter.api_accessor'] ]
+            - [ 'setAggregateRepository',   [ '@repository.aggregate'] ]
             - [ 'setDefaultSecret',         [ '%weaving_the_web_twitter.oauth_secret.default%'] ]
             - [ 'setDefaultToken',          [ '%weaving_the_web_twitter.oauth_token.default%'] ]
             - [ 'setMessageBus',            [ '@messenger.default_bus'] ]
             - [ 'setTokenRepository',       [ '@weaving_the_web_api.repository.token'] ]
             - [ 'setTranslator',            [ '@translator'] ]
             - [ 'setMemberRepository',      [ '@user_manager'] ]
-            - [ 'setAggregateRepository',   [ '@repository.aggregate'] ]
+            - [ 'setOwnershipAccessor',     [ '@App\Twitter\Api\OwnershipAccessor'] ]
             - [ 'setEntityManager',         [ '@doctrine.orm.entity_manager'] ]
             - [ 'setLogger',                [ '@logger'] ]
             - [ 'setTokenChange',           [ '@App\Api\AccessToken\TokenChange'] ]

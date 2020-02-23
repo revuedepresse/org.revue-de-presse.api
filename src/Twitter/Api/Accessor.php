@@ -39,6 +39,8 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Translation\Translator;
 use TwitterOAuth;
 use function is_array;
+use function is_integer;
+use function is_null;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
@@ -512,10 +514,9 @@ class Accessor implements ApiAccessorInterface,
      * @return array|stdClass
      * @throws ApiRateLimitingException
      * @throws InconsistentTokenRepository
-     * @throws NonUniqueResultException
      * @throws OptimisticLockException
      */
-    public function getListMembers(int $id)
+    public function getListMembers(int $id): \stdClass
     {
         $listMembersEndpoint = $this->getListMembersEndpoint();
         $this->guardAgainstApiLimit($listMembersEndpoint);
@@ -547,6 +548,29 @@ class Accessor implements ApiAccessorInterface,
     public function getMemberNotFoundErrorCode()
     {
         return self::ERROR_NOT_FOUND;
+    }
+
+    public function getMemberOwnerships(
+        string $screenName,
+        int $cursor = -1,
+        int $count = 800
+    ): OwnershipCollection {
+        $endpoint = $this->getUserOwnershipsEndpoint();
+        $this->guardAgainstApiLimit($endpoint);
+
+        $ownerships = $this->contactEndpoint(
+            strtr(
+                $endpoint,
+                [
+                    '{{ screenName }}' => $screenName,
+                    '{{ reverse }}'    => true,
+                    '{{ count }}'      => $count,
+                    '{{ cursor }}'     => $cursor,
+                ]
+            )
+        );
+
+        return OwnershipCollection::fromArray($ownerships->lists);
     }
 
     /**
@@ -629,42 +653,14 @@ class Accessor implements ApiAccessorInterface,
      * @param int    $cursor
      * @param int    $count
      *
-     * @return mixed
-     * @throws ApiRateLimitingException
-     * @throws BadAuthenticationDataException
-     * @throws InconsistentTokenRepository
-     * @throws NonUniqueResultException
-     * @throws NotFoundMemberException
-     * @throws NotFoundStatusException
-     * @throws OptimisticLockException
-     * @throws ProtectedAccountException
-     * @throws ReadOnlyApplicationException
-     * @throws ReflectionException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws UnexpectedApiResponseException
+     * @return OwnershipCollection
      */
     public function getUserOwnerships(
         string $screenName,
         int $cursor = -1,
         int $count = 800
     ): OwnershipCollection {
-        $endpoint = $this->getUserOwnershipsEndpoint();
-        $this->guardAgainstApiLimit($endpoint);
-
-        $ownerships = $this->contactEndpoint(
-            strtr(
-                $endpoint,
-                [
-                    '{{ screenName }}' => $screenName,
-                    '{{ reverse }}'    => true,
-                    '{{ count }}'      => $count,
-                    '{{ cursor }}'     => $cursor,
-                ]
-            )
-        );
-
-        return OwnershipCollection::fromArray($ownerships->lists);
+        return $this->getMemberOwnerships($screenName, $cursor, $count);
     }
 
     /**
@@ -676,18 +672,23 @@ class Accessor implements ApiAccessorInterface,
     }
 
     /**
-     * @param string $userSecret
-     *
-     * @return $this
+     * @deprecated
+     * @param $ecret
      */
-    public function setUserSecret($userSecret)
+    public function setUserSecret($ecret)
     {
-        $this->userSecret = $userSecret;
+        $this->setOAuthSecret($ecret);
+    }
+
+    public function setOAuthSecret(string $secret): self
+    {
+        $this->userSecret = $secret;
 
         return $this;
     }
 
     /**
+     * @deprecated
      * @return mixed
      */
     public function getUserToken()
@@ -695,14 +696,14 @@ class Accessor implements ApiAccessorInterface,
         return $this->userToken;
     }
 
-    /**
-     * @param string $userToken
-     *
-     * @return $this
-     */
-    public function setUserToken($userToken)
+    public function setUserToken($token)
     {
-        $this->userToken = $userToken;
+        return $this->setOAuthToken($token);
+    }
+
+    public function setOAuthToken(string $token): self
+    {
+        $this->userToken = $token;
 
         return $this;
     }
@@ -714,7 +715,6 @@ class Accessor implements ApiAccessorInterface,
      * @return Token|null
      * @throws ApiRateLimitingException
      * @throws InconsistentTokenRepository
-     * @throws NonUniqueResultException
      * @throws OptimisticLockException
      */
     public function guardAgainstApiLimit(
@@ -1143,6 +1143,20 @@ class Accessor implements ApiAccessorInterface,
     }
 
     /**
+     * @param TokenInterface $token
+     */
+    public function setAccessToken(TokenInterface $token)
+    {
+        $this->setUserToken($token->getOAuthToken());
+        $this->setUserSecret($token->getOAuthSecret());
+
+        if ($token->hasConsumerKey()) {
+            $this->setConsumerKey($token->getConsumerKey());
+            $this->setConsumerSecret($token->getConsumerKey());
+        }
+    }
+
+    /**
      * @param string $host
      *
      * @return $this
@@ -1183,7 +1197,7 @@ class Accessor implements ApiAccessorInterface,
      *
      * @return $this
      */
-    public function setConsumerKey($consumerKey)
+    public function setConsumerKey(string $consumerKey): self
     {
         $this->consumerKey = $consumerKey;
 
@@ -1195,7 +1209,7 @@ class Accessor implements ApiAccessorInterface,
      *
      * @return $this
      */
-    public function setConsumerSecret($consumerSecret)
+    public function setConsumerSecret(string $consumerSecret): self
     {
         $this->consumerSecret = $consumerSecret;
 
@@ -1362,14 +1376,21 @@ class Accessor implements ApiAccessorInterface,
     /**
      * @param $identifier
      *
-     * @return \API|mixed|object|stdClass
+     * @return array|stdClass
+     * @throws ApiRateLimitingException
+     * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
+     * @throws NonUniqueResultException
+     * @throws NotFoundMemberException
+     * @throws OptimisticLockException
+     * @throws ProtectedAccountException
+     * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
-     * @throws Exception
+     * @throws UnexpectedApiResponseException
      */
-    public function showUser($identifier)
+    public function getMemberProfile($identifier): stdClass
     {
         $screenName = null;
         $userId     = null;
@@ -1441,12 +1462,42 @@ class Accessor implements ApiAccessorInterface,
     }
 
     /**
-     * @param string $screenName
+     * @param $identifier
      *
-     * @return \API|mixed|object|stdClass
+     * @return stdClass
+     * @throws ApiRateLimitingException
+     * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
+     * @throws NonUniqueResultException
+     * @throws NotFoundMemberException
+     * @throws OptimisticLockException
+     * @throws ProtectedAccountException
+     * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
+     * @throws UnexpectedApiResponseException
+     * @deprecated
+     */
+    public function showUser($identifier): stdClass
+    {
+       return $this->getMemberProfile($identifier);
+    }
+
+    /**
+     * @param string $screenName
+     *
+     * @return array|object|stdClass
+     * @throws ApiRateLimitingException
+     * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
+     * @throws NonUniqueResultException
+     * @throws NotFoundStatusException
      * @throws OptimisticLockException
+     * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
+     * @throws UnavailableResourceException
+     * @throws UnexpectedApiResponseException
      */
     public function showUserFriends(string $screenName)
     {
@@ -2192,19 +2243,5 @@ class Accessor implements ApiAccessorInterface,
         }
 
         return $this->preEndpointContact($endpoint);
-    }
-
-    /**
-     * @param TokenInterface $token
-     */
-    public function setAccessToken(TokenInterface $token)
-    {
-        $this->setUserToken($token->getOAuthToken());
-        $this->setUserSecret($token->getOAuthSecret());
-
-        if ($token->hasConsumerKey()) {
-            $this->setConsumerKey($token->getConsumerKey());
-            $this->setConsumerSecret($token->getConsumerKey());
-        }
     }
 }

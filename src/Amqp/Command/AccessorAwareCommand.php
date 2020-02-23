@@ -4,7 +4,7 @@ namespace App\Amqp\Command;
 
 use App\Api\Entity\TokenInterface;
 use App\Api\AccessToken\Repository\TokenRepositoryInterface;
-use App\Twitter\Api\Accessor;
+use App\Twitter\Api\ApiAccessorInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -18,10 +18,7 @@ abstract class AccessorAwareCommand extends Command
     private const OPTION_OAUTH_SECRET = 'oauth_secret';
     private const OPTION_OAUTH_TOKEN  = 'oauth_token';
 
-    /**
-     * @var Accessor $accessor
-     */
-    protected Accessor $accessor;
+    protected ApiAccessorInterface $accessor;
 
     /**
      * @var string
@@ -50,12 +47,7 @@ abstract class AccessorAwareCommand extends Command
      */
     protected $output;
 
-    /**
-     * @param Accessor $accessor
-     *
-     * @return $this
-     */
-    public function setAccessor(Accessor $accessor): self
+    public function setAccessor(ApiAccessorInterface $accessor): self
     {
         $this->accessor = $accessor;
 
@@ -150,8 +142,8 @@ abstract class AccessorAwareCommand extends Command
 
     protected function setOAuthTokens(TokenInterface $token): void
     {
-        $this->accessor->setUserToken($token->getOAuthToken());
-        $this->accessor->setUserSecret($token->getOAuthSecret());
+        $this->accessor->setOAuthToken($token->getOAuthToken());
+        $this->accessor->setOAuthSecret($token->getOAuthSecret());
 
         if ($token->hasConsumerKey()) {
             $this->accessor->setConsumerKey($token->getConsumerKey());
