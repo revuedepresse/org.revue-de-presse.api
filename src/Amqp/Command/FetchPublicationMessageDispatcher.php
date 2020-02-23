@@ -524,12 +524,11 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
      * @throws UnexpectedApiResponseException
      */
     private function processMemberList(
-        $doNotApplyListRestriction,
         $list,
         TokenInterface $messageBody
     ) {
         if (
-            $doNotApplyListRestriction || $list->name === $this->listRestriction
+            $this->shouldApplyListRestriction() || $list->name === $this->listRestriction
             || array_key_exists(
                 $list->name,
                 $this->listCollectionRestriction
@@ -640,7 +639,6 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
         foreach ($memberOwnership->ownershipCollection()->toArray() as $list) {
             try {
                 $this->processMemberList(
-                    $this->shouldApplyListRestriction(),
                     $list,
                     $memberOwnership->token()
                 );
