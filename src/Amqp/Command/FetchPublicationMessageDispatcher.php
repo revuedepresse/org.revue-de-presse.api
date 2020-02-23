@@ -227,7 +227,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
             try {
                 $member = $this->getMessageMember($memberIdentity);
 
-                if ($this->strategy->shouldIgnoreMemberWhenWhispering()) {
+                if ($this->strategy->shouldIgnoreMemberWhenWhispering($member)) {
                     $message = sprintf('Ignoring whisperer with screen name "%s"', $memberIdentity->screenName());
                     $this->logger->info($message);
 
@@ -571,7 +571,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
             $memberOwnership->ownershipCollection()
         );
 
-        foreach ($ownerships as $list) {
+        foreach ($ownerships->toArray() as $list) {
             try {
                 $this->processMemberList(
                     $list,
@@ -628,6 +628,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
 
     /**
      * @return bool
+     * @throws Exception
      */
     private function shouldSkipOperation(): bool
     {

@@ -2,6 +2,8 @@
 
 namespace App\Operation;
 
+use DateTime;
+use Exception;
 use Psr\Log\LoggerInterface;
 
 class OperationClock
@@ -23,15 +25,16 @@ class OperationClock
 
     /**
      * @return bool
+     * @throws Exception
      */
     public function shouldSkipOperation()
     {
-        $now = new \DateTime('now', new \DateTimeZone('UTC'));
+        $now = new DateTime('now', new \DateTimeZone('UTC'));
         $today = $now->format('Y-m-d');
-        $operationSkippedAfter = (new \DateTime(
+        $operationSkippedAfter = (new DateTime(
             $today.' '.$this->timeAfterWhichOperationIsSkipped
         ));
-        $operationSkippedBefore = new \DateTime(
+        $operationSkippedBefore = new DateTime(
             $today.' '.$this->timeBeforeWhichOperationIsSkipped
         );
 
@@ -42,15 +45,17 @@ class OperationClock
     }
 
     /**
-     * @param \DateTime $earliestDate
-     * @param \DateTime $latestDate
+     * @param DateTime $earliestDate
+     * @param DateTime $latestDate
+     *
      * @return bool
+     * @throws Exception
      */
     private function shouldSkipOperationBetween(
-        \DateTime $earliestDate,
-        \DateTime $latestDate
+        DateTime $earliestDate,
+        DateTime $latestDate
     ) {
-        $now = new \DateTime('now', new \DateTimeZone('UTC'));
+        $now = new DateTime('now', new \DateTimeZone('UTC'));
         $shouldSkip = $now >= $earliestDate && $now <= $latestDate;
 
         if ($shouldSkip) {

@@ -81,9 +81,20 @@ class PublicationCollectionStrategy
         return count($this->listCollectionRestriction) === 0;
     }
 
+    /**
+     * @return bool
+     */
     public function shouldApplyListCollectionRestriction(): bool
     {
         return !$this->emptyListCollection();
+    }
+
+    /**
+     * @return bool
+     */
+    private function noMemberRestriction(): bool
+    {
+        return $this->forSpecificMember() === null;
     }
 
     /**
@@ -133,7 +144,7 @@ class PublicationCollectionStrategy
     /**
      * @return string
      */
-    private function forSpecificMember(): string
+    private function forSpecificMember(): ?string
     {
         return $this->memberRestriction;
     }
@@ -146,7 +157,7 @@ class PublicationCollectionStrategy
      */
     public function restrictDispatchToSpecificMember(MemberIdentity $memberIdentity): bool
     {
-        if ($this->forSpecificMember() === null) {
+        if ($this->noMemberRestriction()) {
             return false;
         }
 
