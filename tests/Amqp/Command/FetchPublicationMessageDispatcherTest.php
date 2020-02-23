@@ -80,6 +80,7 @@ class FetchPublicationMessageDispatcherTest extends KernelTestCase
     }
 
     /**
+     * @throws InvalidMemberIdentifier
      * @throws InvalidSerializedTokenException
      */
     protected function setUp(): void

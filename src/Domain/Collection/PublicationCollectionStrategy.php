@@ -5,9 +5,8 @@ namespace App\Domain\Collection;
 
 use App\Amqp\SkippableMemberException;
 use App\Membership\Entity\MemberInterface;
-use App\Twitter\Api\Resource\MemberIdentity;
-use App\Twitter\Api\Resource\PublicationList;
-use stdClass;
+use App\Domain\Resource\MemberIdentity;
+use App\Domain\Resource\PublicationList;
 use function array_key_exists;
 use function count;
 use function sprintf;

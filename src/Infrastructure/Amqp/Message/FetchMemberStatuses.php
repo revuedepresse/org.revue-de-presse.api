@@ -1,15 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Amqp\Message;
+namespace App\Infrastructure\Amqp\Message;
 
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\TokenInterface;
 use App\Membership\Entity\MemberInterface;
 
-/**
- * @package App\Amqp\Message
- */
 class FetchMemberStatuses
 {
     public const AGGREGATE_ID = 'aggregate_id';
@@ -34,21 +31,20 @@ class FetchMemberStatuses
     /**
      * @var bool
      */
-    private bool $before;
+    private ?bool $before;
 
     /**
      * @param string         $screenName
      * @param int            $aggregateId
      * @param TokenInterface $token
-     * @param bool           $before
+     * @param bool|null      $before
      */
     public function __construct(
         string $screenName,
         int $aggregateId,
         TokenInterface $token,
-        bool $before = false
+        ?bool $before = null
     ) {
-
         $this->screenName = $screenName;
         $this->aggregateId = $aggregateId;
         $this->before = $before;
@@ -72,9 +68,9 @@ class FetchMemberStatuses
     }
 
     /**
-     * @return string|null
+     * @return bool|null
      */
-    public function before(): ?string
+    public function before(): ?bool
     {
         return $this->before;
     }
@@ -91,8 +87,7 @@ class FetchMemberStatuses
      * @param Aggregate       $aggregate
      * @param TokenInterface  $token
      * @param MemberInterface $member
-     *
-     * @param                 $collectPublicationsPrecedingThoseAlreadyCollected
+     * @param bool|null       $collectPublicationsPrecedingThoseAlreadyCollected
      *
      * @return FetchMemberStatuses
      */
@@ -100,7 +95,7 @@ class FetchMemberStatuses
         Aggregate $aggregate,
         TokenInterface $token,
         MemberInterface $member,
-        bool $collectPublicationsPrecedingThoseAlreadyCollected
+        ?bool $collectPublicationsPrecedingThoseAlreadyCollected
     ): FetchMemberStatuses {
         return new FetchMemberStatuses(
             $member->getTwitterUsername(),
@@ -110,3 +105,4 @@ class FetchMemberStatuses
         );
     }
 }
+

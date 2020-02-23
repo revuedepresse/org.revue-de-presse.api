@@ -6,7 +6,7 @@ namespace App\Amqp\MessageHandler;
 use App\Accessor\Exception\ApiRateLimitingException;
 use App\Accessor\Exception\ReadOnlyApplicationException;
 use App\Accessor\Exception\UnexpectedApiResponseException;
-use App\Amqp\Message\FetchMemberStatuses;
+use App\Infrastructure\Amqp\Message\FetchMemberStatuses;
 use App\Api\Entity\Token;
 use App\Api\Entity\TokenInterface;
 use App\Api\AccessToken\Repository\TokenRepositoryInterface;
@@ -32,7 +32,7 @@ use function sprintf;
 /**
  * @package App\Amqp\MessageHandler
  */
-class FetchMemberStatusMessageHandler implements MessageSubscriberInterface
+class FetchPublicationMessageHandler implements MessageSubscriberInterface
 {
     /**
      * @var OperationClock

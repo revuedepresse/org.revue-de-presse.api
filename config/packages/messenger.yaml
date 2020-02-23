@@ -2,8 +2,10 @@ framework:
     messenger:
         transports:
             # https://symfony.com/doc/current/messenger.html#transport-configuration
-            news_status: '%env(MESSENGER_TRANSPORT_DSN)%'
+            news_status: '%env(MESSENGER_TRANSPORT_DSN_STATUS)%'
+            news_likes: '%env(MESSENGER_TRANSPORT_DSN_LIKES)%'
 
         routing:
             # Route your messages to the transports
-            'App\Amqp\Message\FetchMemberStatuses': news_status
+            'App\Infrastructure\Amqp\Message\FetchMemberStatuses': news_status
+            'App\Infrastructure\Amqp\Message\FetchMemberLikes':  news_likes

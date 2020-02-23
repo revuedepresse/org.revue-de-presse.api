@@ -7,8 +7,8 @@ use App\Aggregate\Entity\SavedSearch;
 use App\Aggregate\Repository\SavedSearchRepository;
 use App\Aggregate\Repository\SearchMatchingStatusRepository;
 use App\Amqp\Exception\InvalidListNameException;
-use App\Amqp\Message\FetchMemberLikes;
-use App\Amqp\Message\FetchMemberStatuses;
+use App\Infrastructure\Amqp\Message\FetchMemberLikes;
+use App\Infrastructure\Amqp\Message\FetchMemberStatuses;
 use App\Amqp\SkippableMemberException;
 use App\Api\Entity\Token;
 use App\Api\Entity\TokenInterface;
@@ -83,11 +83,6 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
      * @var SearchMatchingStatusRepository
      */
     public SearchMatchingStatusRepository $searchMatchingStatusRepository;
-
-    /**
-     * @var MessageBusInterface|null
-     */
-    private ?MessageBusInterface $likesMessagesDispatcher = null;
 
     /**
      * @var PublicationCollectionStrategy
@@ -226,7 +221,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
         MemberCollection $members,
         TokenInterface $token,
         PublicationList $list
-    ) {
+    ): int {
         $publishedMessages = 0;
 
         /** @var MemberIdentity $memberIdentity */
@@ -254,13 +249,11 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
 
                 $this->dispatcher->dispatch($fetchMemberStatuses);
 
-                if ($this->likesMessagesDispatcher instanceof MessageBusInterface) {
-                    $this->likesMessagesDispatcher->dispatch(
-                        FetchMemberLikes::from(
-                            $fetchMemberStatuses
-                        )
-                    );
-                }
+                $this->dispatcher->dispatch(
+                    FetchMemberLikes::from(
+                        $fetchMemberStatuses
+                    )
+                );
 
                 $publishedMessages++;
             } catch (SkippableMemberException $exception) {
