@@ -134,7 +134,7 @@ class PublicationCollectionStrategy
      *
      * @return bool
      */
-    public function shouldApplyListRestriction(stdClass $list): bool
+    public function shouldProcessList(stdClass $list): bool
     {
         return $this->shouldNotApplyListRestriction()
             || $this->applyListRestriction($list)

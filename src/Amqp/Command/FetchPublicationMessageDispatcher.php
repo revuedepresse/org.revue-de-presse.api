@@ -38,8 +38,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
-use function array_key_exists;
-use function count;
 use function in_array;
 use function sprintf;
 
@@ -466,7 +464,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand implements
         $list,
         TokenInterface $messageBody
     ) {
-        if ($this->strategy->shouldApplyListRestriction($list)) {
+        if ($this->strategy->shouldProcessList($list)) {
             $memberCollection = $this->accessor->getListMembers($list->id);
             $members          = $memberCollection->toArray();
 
