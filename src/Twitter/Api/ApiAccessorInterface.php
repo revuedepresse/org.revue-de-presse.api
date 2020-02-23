@@ -23,5 +23,5 @@ interface ApiAccessorInterface
 
     public function getListMembers(int $listId): MemberCollection;
 
-    public function getMemberProfile($identifier): \stdClass;
+    public function getMemberProfile(string $identifier): \stdClass;
 }

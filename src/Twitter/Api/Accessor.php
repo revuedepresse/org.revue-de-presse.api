@@ -14,6 +14,7 @@ use App\Api\Entity\TokenInterface;
 use App\Api\Moderator\ApiLimitModerator;
 use App\Member\Entity\AggregateSubscription;
 use App\Membership\Entity\MemberInterface;
+use App\Membership\Exception\InvalidMemberIdentifier;
 use App\Membership\Repository\MemberRepository;
 use App\Status\LikedStatusCollectionAwareInterface;
 use App\Twitter\Api\Resource\MemberCollection;
@@ -1400,9 +1401,9 @@ class Accessor implements ApiAccessorInterface,
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
      * @throws UnexpectedApiResponseException
-     * @throws \App\Membership\Exception\InvalidMemberIdentifier
+     * @throws InvalidMemberIdentifier
      */
-    public function getMemberProfile($identifier): stdClass
+    public function getMemberProfile(string $identifier): stdClass
     {
         $screenName = null;
         $userId     = null;
@@ -1449,7 +1450,7 @@ class Accessor implements ApiAccessorInterface,
                 || $exception->getCode() === self::ERROR_USER_NOT_FOUND
             ) {
                 $member = $this->userRepository->findOneBy(['twitter_username' => $screenName]);
-                if (!($member instanceof MemberInterface) && !is_null($screenName)) {
+                if (!($member instanceof MemberInterface) && $screenName !== null) {
                     $member = $this->userRepository->declareMemberHavingScreenNameNotFound($screenName);
                 }
 
@@ -1457,7 +1458,7 @@ class Accessor implements ApiAccessorInterface,
                     $this->userRepository->declareUserAsNotFound($member);
                 }
 
-                $this->logNotFoundMemberMessage(is_null($screenName) ? $identifier : $screenName);
+                $this->logNotFoundMemberMessage($screenName ?? $identifier);
                 NotFoundMemberException::raiseExceptionAboutNotFoundMemberHavingScreenName(
                     is_null($screenName) ? $identifier : $screenName,
                     $exception->getCode(),
@@ -1489,9 +1490,9 @@ class Accessor implements ApiAccessorInterface,
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
      * @throws UnexpectedApiResponseException
-     * @deprecated
+     * @throws InvalidMemberIdentifier
      */
-    public function showUser($identifier): stdClass
+    public function showUser(string $identifier): stdClass
     {
        return $this->getMemberProfile($identifier);
     }
