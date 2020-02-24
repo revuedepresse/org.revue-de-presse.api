@@ -40,7 +40,6 @@ services:
             statusLogger:             '@monolog.logger.status'
             timelyStatusRepository:   '@repository.timely_status'
             connection:               '@doctrine.dbal.default_connection'
-            queryFactory:             '@weaving_the_web.api.query_factory'
 
     App\Api\Repository\ArchivedStatusRepository:
         class:  '\App\Api\Repository\ArchivedStatusRepository'
@@ -56,7 +55,6 @@ services:
             statusLogger:           '@monolog.logger.status'
             timelyStatusRepository: '@repository.timely_status'
             connection:             '@doctrine.dbal.default_connection'
-            queryFactory:           '@weaving_the_web.api.query_factory'
 
     App\Infrastructure\Amqp\ResourceProcessor\MemberIdentityProcessor:
         class: 'App\Infrastructure\Amqp\ResourceProcessor\MemberIdentityProcessor'
@@ -171,7 +169,6 @@ services:
             statusLogger:           '@monolog.logger.status'
             timelyStatusRepository: '@repository.timely_status'
             connection:             '@doctrine.dbal.default_connection'
-            queryFactory:           '@weaving_the_web.api.query_factory'
 
     weaving_the_web_twitter.repository.read.status:
         class:  'App\Api\Repository\StatusRepository'
@@ -187,7 +184,6 @@ services:
             statusLogger:           '@monolog.logger.status'
             timelyStatusRepository: '@repository.timely_status'
             connection:             '@doctrine.dbal.default_connection'
-            queryFactory:           '@weaving_the_web.api.query_factory'
 
     weaving_the_web_twitter.repository.token:
         class: '%weaving_the_web_twitter.repository.token.class%'

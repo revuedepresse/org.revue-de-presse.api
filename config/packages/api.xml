@@ -14,12 +14,4 @@
         <parameter key="weaving_the_web_api.repository.whisperer.class">App\Api\Repository\WhispererRepository</parameter>
     </parameters>
 
-    <services>
-
-        <service id="weaving_the_web.api.data_provider" class="%weaving_the_web.api.data_provider.class%">
-            <argument type="service" id="weaving_the_web.api.query_factory" />
-        </service>
-
-    </services>
-
 </container>

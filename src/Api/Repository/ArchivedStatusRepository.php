@@ -12,6 +12,7 @@ use App\Status\Repository\ExtremumAwareInterface;
 use App\Status\Repository\LikedStatusRepository;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Inflector\Inflector;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\NonUniqueResultException;
@@ -35,7 +36,9 @@ use App\Twitter\Exception\SuspendedAccountException;
 use App\Infrastructure\Repository\Membership\MemberRepository;
 use App\Twitter\Repository\PublicationRepositoryInterface;
 
+use function array_key_exists;
 use function count;
+use function in_array;
 
 /**
  * @package App\Api\Repository
@@ -724,7 +727,7 @@ QUERY
     {
         $entityManager = $this->getEntityManager();
 
-        /** @var \App\Api\Repository\StatusRepository $statusRepository */
+        /** @var StatusRepository $statusRepository */
         $statusRepository = $entityManager->getRepository('\App\Api\Entity\Status');
 
         if ($this->existsAlready($extract['hash'])) {
@@ -743,8 +746,8 @@ QUERY
             return $memberStatus;
         }
 
-        /** @var \App\Api\Entity\Status $memberStatus */
-        $memberStatus = $this->queryFactory->makeStatus($extract);
+        /** @var Status $memberStatus */
+        $memberStatus = $this->makeStatus($extract);
         $memberStatus->setIndexed(true);
         $memberStatus->setIdentifier($extract['identifier']);
 
@@ -753,6 +756,60 @@ QUERY
         }
 
         return $memberStatus;
+    }
+
+    /**
+     * @param $properties
+     *
+     * @return Status|mixed
+     * @throws Exception
+     */
+    public function makeStatus(array $properties)
+    {
+        $status = new Status();
+
+        return $this->setProperties($status, $properties, $this->logger);
+    }
+
+    /**
+     * @param                      $instance
+     * @param                      $properties
+     * @param LoggerInterface|null $logger
+     *
+     * @return mixed
+     * @throws Exception
+     */
+    public function setProperties($instance, $properties, LoggerInterface $logger = null)
+    {
+        if (!array_key_exists('created_at', $properties)) {
+            $properties['created_at'] = new \DateTime();
+        }
+        if (!array_key_exists('updated_at', $properties)) {
+            $properties['updated_at'] = null;
+        }
+
+        $entity = get_class($instance);
+        $fieldNames = $this->getEntityManager()->getClassMetadata($entity)->getFieldNames();
+        $missedProperties = [];
+
+        foreach ($properties as $name => $value) {
+            $classifiedName = Inflector::classify($name);
+
+            if (in_array(lcfirst($classifiedName), $fieldNames, true)) {
+                $method = 'set' . $classifiedName;
+                $instance->$method($value);
+            } else {
+                $missedProperties[] = $name .': ' . $value;
+            }
+        }
+
+        if (count($missedProperties) >  0) {
+            $output = 'property missed at introspection for entity ' . $entity . "\n" .
+                implode("\n", $missedProperties ) . "\n";
+            $this->logger->info($output);
+        }
+
+        return $instance;
     }
 
     /**
