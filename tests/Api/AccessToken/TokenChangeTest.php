@@ -122,7 +122,7 @@ class TokenChangeTest extends TestCase
             ]
         );
 
-        $this->tokenRepository = TokenRepositoryBuilder::newTokenRepository()
+        $this->tokenRepository = TokenRepositoryBuilder::newTokenRepositoryBuilder()
                                                        ->willFindATokenOtherThan(
                                                            $this->excludedToken,
                                                            $replacementToken

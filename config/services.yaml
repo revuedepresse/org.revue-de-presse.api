@@ -65,6 +65,7 @@ services:
             - '@repository.publication_list'
             - '@weaving_the_web_twitter.api_accessor'
             - '@user_manager'
+            - '@App\Infrastructure\Twitter\Api\UnavailableResourceHandler'
             - '@logger'
 
     App\Infrastructure\Amqp\ResourceProcessor\PublicationListProcessor:
@@ -86,6 +87,12 @@ services:
             - '@App\Api\AccessToken\TokenChange'
             - '@logger'
             - '@translator'
+
+    App\Infrastructure\Twitter\Api\UnavailableResourceHandler:
+        class: 'App\Infrastructure\Twitter\Api\UnavailableResourceHandler'
+        arguments:
+            - '@user_manager'
+            - '@logger'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
