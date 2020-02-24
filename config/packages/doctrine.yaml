@@ -120,6 +120,7 @@ doctrine:
                 # either here or in the DATABASE_URL env var (see .env file)
                 server_version: '5.7'
                 charset: utf8mb4
+                logging: false
             write:
                 url: '%env(resolve:DATABASE_WRITE_URL)%'
                 server_version: 'mariadb-10.3.22'

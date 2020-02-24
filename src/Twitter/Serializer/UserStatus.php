@@ -9,7 +9,7 @@ use App\Accessor\Exception\ReadOnlyApplicationException;
 use App\Accessor\Exception\UnexpectedApiResponseException;
 use App\Aggregate\Exception\LockedAggregateException;
 use App\Amqp\Exception\SkippableMessageException;
-use App\Amqp\Message\FetchMemberStatuses;
+use App\Infrastructure\Amqp\Message\FetchMemberStatuses;
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\StatusInterface;
 use App\Api\Entity\Token;
@@ -1844,7 +1844,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         $options[self::MESSAGE_OPTION_TOKEN] = $token->getOauthToken();
         $this->setupAccessor([
             TokenInterface::FIELD_TOKEN => $options[self::MESSAGE_OPTION_TOKEN],
-            TokenInterface::FFIELD_SECRET => $token->getOauthTokenSecret()
+            TokenInterface::FIELD_SECRET => $token->getOauthTokenSecret()
         ]);
 
         return $options;

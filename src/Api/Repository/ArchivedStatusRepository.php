@@ -246,12 +246,12 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
         $extracts = $result['extracts'];
         $screenName = $result['screen_name'];
 
-        $statuses = StatusToArray::fromStatusCollection(
-            new Collection($result['statuses'])
-        );
-        $this->publicationRepository->persistPublications(
-            Collection::fromArray($statuses)
-        );
+        $statusCollection = new Collection($result['statuses']);
+
+        $statuses = StatusToArray::fromStatusCollection($statusCollection);
+        $this->publicationRepository->persistPublications($statuses);
+
+        $statusCollection->map(fn(StatusInterface $status) => $status->markAsPublished());
 
         $this->getEntityManager()->flush();
 

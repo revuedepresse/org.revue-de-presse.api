@@ -95,7 +95,7 @@ class Status implements StatusInterface
     /**
      * @ORM\Column(name="is_published", type="boolean", options={"default": false})
      */
-    protected bool $isPublished;
+    protected bool $isPublished = false;
 
     public function markAsPublished(): self
     {
