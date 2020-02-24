@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Membership\Entity;
 
@@ -44,10 +45,14 @@ interface MemberInterface extends UserInterface
     public function getTwitterID(): ?string;
 
     /**
+     * @deprecated
+     *
      * @param string $fullName
      * @return MemberInterface
      */
     public function setFullName(string $fullName): self;
+
+    public function setScreenName(string $screenName): self;
 
     /**
      * @return string

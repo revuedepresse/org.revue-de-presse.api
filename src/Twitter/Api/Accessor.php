@@ -31,6 +31,7 @@ use App\Twitter\Exception\UnavailableResourceException;
 use App\Twitter\Exception\UnknownApiAccessException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 use Exception;
 use Goutte\Client;
 use GuzzleHttp\Exception\ConnectException;
@@ -1400,6 +1401,7 @@ class Accessor implements ApiAccessorInterface,
      * @throws UnavailableResourceException
      * @throws UnexpectedApiResponseException
      * @throws InvalidMemberIdentifier
+     * @throws ORMException
      */
     public function getMemberProfile(string $identifier): stdClass
     {
@@ -1453,7 +1455,7 @@ class Accessor implements ApiAccessorInterface,
                 }
 
                 if ($member instanceof MemberInterface && !$member->isNotFound()) {
-                    $this->userRepository->declareUserAsNotFound($member);
+                    $this->userRepository->declareMemberAsNotFound($member);
                 }
 
                 $this->logNotFoundMemberMessage($screenName ?? $identifier);
@@ -1489,6 +1491,7 @@ class Accessor implements ApiAccessorInterface,
      * @throws UnavailableResourceException
      * @throws UnexpectedApiResponseException
      * @throws InvalidMemberIdentifier
+     * @throws ORMException
      */
     public function showUser(string $identifier): stdClass
     {

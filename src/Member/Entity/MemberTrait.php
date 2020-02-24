@@ -104,10 +104,17 @@ trait MemberTrait
     }
 
     /**
+     * @deprecated
+     *
      * @param string $fullName
      * @return MemberInterface
      */
     public function setFullName(string $fullName): MemberInterface
+    {
+        return $this->setScreenName();
+    }
+
+    public function setScreenName(string $screeName): MemberInterface
     {
         return $this;
     }

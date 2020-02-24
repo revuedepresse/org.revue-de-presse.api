@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Tests\Twitter\Api;
+namespace App\Tests\Infrastructure\Twitter\Api\Accessor;
 
 use App\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Api\Entity\Token;
@@ -9,7 +9,7 @@ use App\Api\Exception\InvalidSerializedTokenException;
 use App\Tests\Builder\ApiAccessorBuilder;
 use App\Tests\Builder\TokenChangeBuilder;
 use App\Tests\Builder\TokenRepositoryBuilder;
-use App\Twitter\Api\OwnershipAccessor;
+use App\Infrastructure\Twitter\Api\Accessor\OwnershipAccessor;
 use App\Domain\Resource\MemberOwnerships;
 use App\Twitter\Exception\OverCapacityException;
 use Exception;

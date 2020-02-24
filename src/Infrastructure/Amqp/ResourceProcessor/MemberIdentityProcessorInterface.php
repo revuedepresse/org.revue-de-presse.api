@@ -5,11 +5,10 @@ namespace App\Infrastructure\Amqp\ResourceProcessor;
 
 use App\Api\Entity\TokenInterface;
 use App\Domain\Collection\PublicationStrategyInterface;
-use App\Domain\Membership\Exception\ExceptionalMemberInterface;
 use App\Domain\Resource\MemberIdentity;
 use App\Domain\Resource\PublicationList;
 
-interface MemberIdentityProcessorInterface extends ExceptionalMemberInterface
+interface MemberIdentityProcessorInterface
 {
     /**
      * @param MemberIdentity               $memberIdentity

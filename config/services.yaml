@@ -62,10 +62,8 @@ services:
         class: 'App\Infrastructure\Amqp\ResourceProcessor\MemberIdentityProcessor'
         arguments:
             - '@messenger.default_bus'
+            - '@App\Infrastructure\Twitter\Api\Accessor\MemberProfileAccessor'
             - '@repository.publication_list'
-            - '@weaving_the_web_twitter.api_accessor'
-            - '@user_manager'
-            - '@App\Infrastructure\Twitter\Api\UnavailableResourceHandler'
             - '@logger'
 
     App\Infrastructure\Amqp\ResourceProcessor\PublicationListProcessor:
@@ -82,7 +80,7 @@ services:
         class: 'App\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher'
         arguments:
             - '@weaving_the_web_twitter.api_accessor'
-            - '@App\Twitter\Api\OwnershipAccessor'
+            - '@App\Infrastructure\Twitter\Api\Accessor\OwnershipAccessor'
             - '@App\Infrastructure\Amqp\ResourceProcessor\PublicationListProcessor'
             - '@App\Api\AccessToken\TokenChange'
             - '@logger'

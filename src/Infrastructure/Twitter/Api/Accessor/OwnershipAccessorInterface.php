@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Twitter\Api;
+namespace App\Infrastructure\Twitter\Api\Accessor;
 
 use App\Api\Entity\TokenInterface;
 use App\Domain\Resource\MemberOwnerships;

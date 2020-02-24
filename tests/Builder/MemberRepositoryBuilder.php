@@ -7,6 +7,7 @@ use App\Domain\Resource\MemberIdentity;
 use App\Infrastructure\Repository\Membership\MemberRepository;
 use App\Infrastructure\Repository\Membership\MemberRepositoryInterface;
 use App\Membership\Entity\Member;
+use App\Membership\Entity\MemberInterface;
 use Prophecy\Argument;
 use Prophecy\Prophecy\ObjectProphecy;
 use Prophecy\Prophet;
@@ -45,6 +46,37 @@ class MemberRepositoryBuilder
             Argument::type(MemberIdentity::class)
         )
         ->willReturn(new Member());
+
+        return $this;
+    }
+
+    public function willSaveMemberFromIdentity(): self
+    {
+        $this->prophecy->saveMemberFromIdentity(
+            Argument::type(MemberIdentity::class),
+            Argument::type(\stdClass::class)
+        )
+        ->willReturn(new Member());
+
+        return $this;
+    }
+
+    public function willFindAMemberByTwitterId(string $twitterId, $member): self
+    {
+        $this->prophecy->findOneBy(['twitterID' => $twitterId])
+            ->willReturn($member);
+
+        return $this;
+    }
+
+    public function willDeclareAMemberAsFound(MemberInterface $member): self
+    {
+        $this->prophecy->declareMemberAsFound($member)
+            ->will(function ($args) {
+                $args[0]->setNotFound(false);
+
+                return $args[0];
+            });
 
         return $this;
     }
