@@ -19,6 +19,7 @@
             <group>api_access</group>
             <group>command</group>
             <group>conversation</group>
+            <group>membership</group>
             <group>ownership</group>
             <group>unavailable_resource</group>
         </include>
@@ -35,7 +36,8 @@
             <directory suffix=".php">src/Amqp/Command/FetchMemberStatusMessageDispatcher.php</directory>
             <directory suffix=".php">src/Api/AccessToken/TokenChange.php</directory>
             <directory suffix=".php">src/Conversation/Consistency/StatusConsistency.php</directory>
-            <directory suffix=".php">src/Twitter/Api/OwnershipAccessor.php</directory>
+            <directory suffix=".php">src/Infrastructure/Twitter/Api/Accessor/MemberProfileAccessor.php</directory>
+            <directory suffix=".php">src/Infrastructure/Twitter/Api/Accessor/OwnershipAccessor.php</directory>
         </whitelist>
     </filter>
 </phpunit>

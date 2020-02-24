@@ -118,7 +118,7 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
     }
 
     /**
-     * @param $screenName
+     * @param string $screenName
      *
      * @return MemberInterface
      * @throws ORMException
@@ -144,28 +144,32 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
         $member->setProtected(false);
         $member->setSuspended(true);
 
-        return $this->saveUser($member);
+        return $this->saveMember($member);
     }
 
     /**
      * @param $screenName
+     *
      * @return MemberInterface|null
+     * @throws ORMException
      * @throws OptimisticLockException
      */
     public function declareUserAsNotFoundByUsername($screenName): ?MemberInterface
     {
-        $user = $this->findOneBy(['twitter_username' => $screenName]);
+        $member = $this->findOneBy(['twitter_username' => $screenName]);
 
-        if (!$user instanceof MemberInterface) {
+        if (!$member instanceof MemberInterface) {
             return null;
         }
 
-        return $this->declareUserAsNotFound($user);
+        return $this->declareMemberAsNotFound($member);
     }
 
     /**
-     * @param $screenName
+     * @param string $screenName
+     *
      * @return MemberInterface|null
+     * @throws ORMException
      * @throws OptimisticLockException
      */
     public function declareMemberAsSuspended(string $screenName): ?MemberInterface
@@ -177,15 +181,17 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
         }
 
         /** @var MemberInterface $member */
-        return $this->suspendMember($member);
+        return $this->suspendMember($screenName);
     }
 
     /**
      * @param MemberInterface $user
+     *
      * @return MemberInterface
+     * @throws ORMException
      * @throws OptimisticLockException
      */
-    public function declareUserAsNotFound(MemberInterface $user)
+    public function declareMemberAsNotFound(MemberInterface $user): MemberInterface
     {
         $user->setNotFound(true);
 
@@ -194,14 +200,16 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
 
     /**
      * @param MemberInterface $user
+     *
      * @return MemberInterface
-     * @throws OptimisticLockException
+     * @throws OptimisticLockException*@throws ORMException
+     * @throws ORMException
      */
-    public function declareUserAsFound(MemberInterface $user)
+    public function declareMemberAsFound(MemberInterface $user): MemberInterface
     {
         $user->setNotFound(false);
 
-        return $this->saveUser($user);
+        return $this->saveMember($user);
     }
 
     /**
@@ -209,6 +217,7 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
      *
      * @return Member|MemberInterface
      * @throws InvalidMemberIdentifier
+     * @throws ORMException
      * @throws OptimisticLockException
      */
     public function declareUserAsProtected(string $screenName)
@@ -747,6 +756,22 @@ QUERY;
         }
 
         return $results;
+    }
+
+    /**
+     * @param MemberIdentity $memberIdentity
+     * @param stdClass       $twitterUser
+     *
+     * @return MemberInterface
+     * @throws InvalidMemberIdentifier
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    public function saveMemberFromIdentity(
+        MemberIdentity $memberIdentity,
+        stdClass $twitterUser
+    ): MemberInterface {
+        return $this->saveMemberWithAdditionalProps($memberIdentity, $twitterUser);
     }
 
     /**

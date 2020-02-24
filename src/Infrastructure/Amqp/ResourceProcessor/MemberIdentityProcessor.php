@@ -16,15 +16,9 @@ use App\Infrastructure\Amqp\Exception\ContinuePublicationException;
 use App\Infrastructure\Amqp\Exception\StopPublicationException;
 use App\Infrastructure\Amqp\Message\FetchMemberLikes;
 use App\Infrastructure\Amqp\Message\FetchMemberStatuses;
-use App\Infrastructure\DependencyInjection\MemberRepositoryTrait;
-use App\Infrastructure\Repository\Membership\MemberRepositoryInterface;
+use App\Infrastructure\DependencyInjection\MemberProfileAccessorTrait;
 use App\Infrastructure\Repository\PublicationList\PublicationListRepositoryInterface;
-use App\Infrastructure\Twitter\Api\UnavailableResource;
-use App\Infrastructure\Twitter\Api\UnavailableResourceHandler;
-use App\Membership\Entity\MemberInterface;
-use App\Membership\Model\Member;
-use App\Twitter\Api\ApiAccessorInterface;
-use App\Twitter\Exception\UnavailableResourceException;
+use App\Infrastructure\Twitter\Api\Accessor\MemberProfileAccessorInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use function sprintf;
@@ -32,7 +26,7 @@ use function sprintf;
 class MemberIdentityProcessor implements MemberIdentityProcessorInterface
 {
     use AggregateAwareTrait;
-    use MemberRepositoryTrait;
+    use MemberProfileAccessorTrait;
 
     /**
      * @var MessageBusInterface
@@ -49,26 +43,15 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
      */
     private PublicationListRepositoryInterface $aggregateRepository;
 
-    /**
-     * @var ApiAccessorInterface
-     */
-    private ApiAccessorInterface $accessor;
-
-    private UnavailableResourceHandler $unavailableResourceHandler;
-
     public function __construct(
         MessageBusInterface $dispatcher,
+        MemberProfileAccessorInterface $memberProfileAccessor,
         PublicationListRepositoryInterface $aggregateRepository,
-        ApiAccessorInterface $accessor,
-        MemberRepositoryInterface $memberRepository,
-        UnavailableResourceHandler $unavailableResourceHandler,
         LoggerInterface $logger
     ) {
         $this->dispatcher                 = $dispatcher;
         $this->aggregateRepository        = $aggregateRepository;
-        $this->accessor                   = $accessor;
-        $this->memberRepository           = $memberRepository;
-        $this->unavailableResourceHandler = $unavailableResourceHandler;
+        $this->memberProfileAccessor      = $memberProfileAccessor;
         $this->logger                     = $logger;
     }
 
@@ -115,9 +98,7 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
      * @param TokenInterface               $token
      * @param PublicationList              $list
      *
-     * @throws MembershipException
      * @throws SkippableMemberException
-     * @throws UnexpectedApiResponseException
      */
     private function dispatchPublications(
         MemberIdentity $memberIdentity,
@@ -127,7 +108,9 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
     ): void {
         $this->skipUnrestrictedMember($memberIdentity, $strategy);
 
-        $member = $this->getMessageMember($memberIdentity);
+        $member = $this->memberProfileAccessor->getMemberByIdentity(
+            $memberIdentity
+        );
 
         $strategy->guardAgainstWhisperingMember($member, $memberIdentity);
 
@@ -152,58 +135,6 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
                 $fetchMemberStatuses
             )
         );
-    }
-
-    /**
-     * @param MemberIdentity $memberIdentity
-     *
-     * @return MemberInterface
-     * @throws MembershipException
-     * @throws UnexpectedApiResponseException
-     */
-    private function getMessageMember(MemberIdentity $memberIdentity): MemberInterface
-    {
-        /** @var Member $member */
-        $member            = $this->memberRepository->findOneBy(
-            ['twitterID' => $memberIdentity->id()]
-        );
-        $preExistingMember = $member instanceof Member;
-
-        if ($preExistingMember && $member->hasNotBeenDeclaredAsNotFound()) {
-            return $member;
-        }
-
-        try {
-            $twitterUser = $this->accessor->getMemberProfile(
-                $memberIdentity->screenName()
-            );
-        } catch (UnavailableResourceException $exception) {
-            $this->unavailableResourceHandler->handle(
-                $memberIdentity,
-                UnavailableResource::ofTypeAndRootCause(
-                    $exception->getCode(),
-                    $exception->getMessage()
-                )
-            );
-        }
-
-        if (!isset($twitterUser)) {
-            throw new UnexpectedApiResponseException(
-                'An unexpected error has occurred.',
-                self::UNEXPECTED_ERROR
-            );
-        }
-
-        if (!$preExistingMember) {
-            return $this->memberRepository->saveMemberWithAdditionalProps(
-                $memberIdentity,
-                $twitterUser
-            );
-        }
-
-        $member = $member->setTwitterUsername($twitterUser->screenName());
-
-        return $this->memberRepository->declareUserAsFound($member);
     }
 
     /**
