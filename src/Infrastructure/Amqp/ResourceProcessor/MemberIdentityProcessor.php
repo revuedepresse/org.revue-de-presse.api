@@ -174,7 +174,7 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
         }
 
         try {
-            $twitterUser = $this->accessor->getMemberProfile(
+            $twitterMember = $this->accessor->getMemberProfile(
                 $memberIdentity->screenName()
             );
         } catch (UnavailableResourceException $exception) {
@@ -187,7 +187,7 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
             );
         }
 
-        if (!isset($twitterUser)) {
+        if (!isset($twitterMember)) {
             throw new UnexpectedApiResponseException(
                 'An unexpected error has occurred.',
                 self::UNEXPECTED_ERROR
@@ -197,11 +197,11 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
         if (!$preExistingMember) {
             return $this->memberRepository->saveMemberWithAdditionalProps(
                 $memberIdentity,
-                $twitterUser
+                $twitterMember
             );
         }
 
-        $member = $member->setTwitterUsername($twitterUser->screenName());
+        $member = $member->setTwitterUsername($twitterMember->screenName());
 
         return $this->memberRepository->declareUserAsFound($member);
     }
