@@ -656,14 +656,14 @@ function set_permissions_in_apache_container() {
     sudo mkdir ./var/cache
     sudo chown -R `whoami` ./var/logs ./var
 
-    cd ./provisioning/containers
+    cd ./provisioning/containers || exit
     docker-compose exec worker bin/console cache:clear -e prod --no-warmup
     docker-compose exec worker bin/console cache:clear -e dev --no-warmup
     cd "../../"
 }
 
 function build_apache_container() {
-    cd provisioning/containers/apache
+    cd provisioning/containers/apache || exit
     docker build -t apache .
 }
 
