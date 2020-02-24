@@ -8,7 +8,7 @@ use Prophecy\Prophet;
 
 class TokenRepositoryBuilder
 {
-    public static function newTokenRepository()
+    public static function newTokenRepositoryBuilder()
     {
         return new self();
     }

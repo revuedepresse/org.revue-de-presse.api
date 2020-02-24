@@ -1145,7 +1145,7 @@ class Accessor implements ApiAccessorInterface,
      * @throws UnavailableResourceException
      * @throws UnexpectedApiResponseException
      */
-    public function search(string $query, $params = '')
+    public function search(string $query, string $params = ''): stdClass
     {
         $endpoint = $this->getSearchEndpoint() . "q=$query&count=100" . $params;
 
