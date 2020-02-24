@@ -98,22 +98,22 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
                 InputOption::VALUE_OPTIONAL,
                 'List to which publication of messages is restricted to'
             )
-             ->addOption(
-                 self::OPTION_PRIORITY_TO_AGGREGATES,
-                 'pa',
-                 InputOption::VALUE_NONE,
-                 'Publish messages the priority queue for visible aggregates'
-             )
-             ->addOption(
-                 self::OPTION_QUERY_RESTRICTION,
-                 'qr',
-                 InputOption::VALUE_OPTIONAL,
-                 'Query to search statuses against'
-             )->addOption(
-                self::OPTION_MEMBER_RESTRICTION,
-                'mr',
+            ->addOption(
+                self::OPTION_PRIORITY_TO_AGGREGATES,
+                'pa',
+                InputOption::VALUE_NONE,
+                'Publish messages the priority queue for visible aggregates'
+            )
+            ->addOption(
+                self::OPTION_QUERY_RESTRICTION,
+                'qr',
                 InputOption::VALUE_OPTIONAL,
-                'Restrict to member, which screen name has been passed as value of this option'
+                'Query to search statuses against'
+            )->addOption(
+               self::OPTION_MEMBER_RESTRICTION,
+               'mr',
+               InputOption::VALUE_OPTIONAL,
+               'Restrict to member, which screen name has been passed as value of this option'
             )->addOption(
                 self::OPTION_BEFORE,
                 null,

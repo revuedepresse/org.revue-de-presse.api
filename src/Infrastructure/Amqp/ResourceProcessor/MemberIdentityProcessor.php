@@ -19,6 +19,8 @@ use App\Infrastructure\Amqp\Message\FetchMemberStatuses;
 use App\Infrastructure\DependencyInjection\MemberRepositoryTrait;
 use App\Infrastructure\Repository\Membership\MemberRepositoryInterface;
 use App\Infrastructure\Repository\PublicationList\PublicationListRepositoryInterface;
+use App\Infrastructure\Twitter\Api\UnavailableResource;
+use App\Infrastructure\Twitter\Api\UnavailableResourceHandler;
 use App\Membership\Entity\MemberInterface;
 use App\Membership\Model\Member;
 use App\Twitter\Api\ApiAccessorInterface;
@@ -31,11 +33,6 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
 {
     use AggregateAwareTrait;
     use MemberRepositoryTrait;
-
-    private const EXCEPTION_MEMBER_NOT_FOUND     = 'User with screen name %s can not be found';
-    private const EXCEPTION_SUSPENDED_MEMBER     = 'User with screen name "%s" has been suspended (code: %d, message: "%s")';
-    private const EXCEPTION_PROTECTED_MEMBER     = 'User with screen name "%s" has a protected account (code: %d, message: "%s")';
-    private const EXCEPTION_UNAVAILABLE_RESOURCE = 'Unavailable resource for user with screen name %s (code: %d, message: "%s")';
 
     /**
      * @var MessageBusInterface
@@ -57,18 +54,22 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
      */
     private ApiAccessorInterface $accessor;
 
+    private UnavailableResourceHandler $unavailableResourceHandler;
+
     public function __construct(
         MessageBusInterface $dispatcher,
         PublicationListRepositoryInterface $aggregateRepository,
         ApiAccessorInterface $accessor,
         MemberRepositoryInterface $memberRepository,
+        UnavailableResourceHandler $unavailableResourceHandler,
         LoggerInterface $logger
     ) {
-        $this->dispatcher          = $dispatcher;
-        $this->aggregateRepository = $aggregateRepository;
-        $this->accessor            = $accessor;
-        $this->memberRepository    = $memberRepository;
-        $this->logger              = $logger;
+        $this->dispatcher                 = $dispatcher;
+        $this->aggregateRepository        = $aggregateRepository;
+        $this->accessor                   = $accessor;
+        $this->memberRepository           = $memberRepository;
+        $this->unavailableResourceHandler = $unavailableResourceHandler;
+        $this->logger                     = $logger;
     }
 
     /**
@@ -77,7 +78,7 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
      * @param TokenInterface               $token
      * @param PublicationList              $list
      *
-     * @return int
+     * @return void
      * @throws ContinuePublicationException
      * @throws MembershipException
      * @throws StopPublicationException
@@ -106,68 +107,6 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
 
             throw $exception;
         }
-    }
-
-    /**
-     * @param MemberIdentity               $memberIdentity
-     * @param UnavailableResourceException $exception
-     *
-     * @throws MembershipException
-     */
-    protected function handleUnavailableResourceException(
-        MemberIdentity $memberIdentity,
-        UnavailableResourceException $exception
-    ): void {
-        if (
-            $exception->getCode() === $this->accessor->getMemberNotFoundErrorCode()
-            || $exception->getCode() === $this->accessor->getUserNotFoundErrorCode()
-        ) {
-            $message = sprintf(self::EXCEPTION_MEMBER_NOT_FOUND, $memberIdentity->screenName());
-            $this->logger->info($message);
-
-            throw new MembershipException($message, self::NOT_FOUND_MEMBER);
-        }
-
-        if ($exception->getCode() === $this->accessor->getSuspendedUserErrorCode()) {
-            $message = sprintf(
-                self::EXCEPTION_SUSPENDED_MEMBER,
-                $memberIdentity->screenName(),
-                $exception->getCode(),
-                $exception->getMessage()
-            );
-            $this->logger->error($message);
-
-            $this->memberRepository->saveSuspended(
-                $memberIdentity,
-                (object) ['screen_name' => $memberIdentity->screenName()],
-                );
-
-            MembershipException::throws($message, self::SUSPENDED_USER);
-        }
-
-        if ($exception->getCode() === $this->accessor->getProtectedAccountErrorCode()) {
-            $message = sprintf(
-                self::EXCEPTION_PROTECTED_MEMBER,
-                $memberIdentity->screenName(),
-                $exception->getCode(),
-                $exception->getMessage()
-            );
-            $this->logger->error($message);
-
-            $this->memberRepository->saveProtectedMember($memberIdentity);
-
-            MembershipException::throws($message, self::PROTECTED_ACCOUNT);
-        }
-
-        $message = sprintf(
-            self::EXCEPTION_UNAVAILABLE_RESOURCE,
-            $memberIdentity->screenName(),
-            $exception->getCode(),
-            $exception->getMessage()
-        );
-        $this->logger->error($message);
-
-        MembershipException::throws($message, self::UNAVAILABLE_RESOURCE);
     }
 
     /**
@@ -239,7 +178,13 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
                 $memberIdentity->screenName()
             );
         } catch (UnavailableResourceException $exception) {
-            $this->handleUnavailableResourceException($memberIdentity, $exception);
+            $this->unavailableResourceHandler->handle(
+                $memberIdentity,
+                UnavailableResource::ofTypeAndRootCause(
+                    $exception->getCode(),
+                    $exception->getMessage()
+                )
+            );
         }
 
         if (!isset($twitterUser)) {

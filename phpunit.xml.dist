@@ -20,6 +20,7 @@
             <group>command</group>
             <group>conversation</group>
             <group>ownership</group>
+            <group>unavailable_resource</group>
         </include>
     </groups>
 

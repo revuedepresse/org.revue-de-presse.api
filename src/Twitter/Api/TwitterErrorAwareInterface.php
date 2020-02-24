@@ -4,9 +4,10 @@ namespace App\Twitter\Api;
 
 /**
  * Interface TwitterErrorAwareInterface
+ *
  * @package App\Twitter\Api
  *
- * @see https://dev.twitter.com/docs/error-codes-responses
+ * @see     https://dev.twitter.com/docs/error-codes-responses
  *
  * error code   6 => cURL error: Could not resolve host
  * error code  32 => Could not authenticate you
@@ -33,53 +34,105 @@ namespace App\Twitter\Api;
  */
 interface TwitterErrorAwareInterface
 {
-    const ERROR_HOST_RESOLUTION = 6;
+    public const ERROR_HOST_RESOLUTION = 6;
 
-    const ERROR_AUTHENTICATION = 32;
+    public const ERROR_AUTHENTICATION = 32;
 
-    const ERROR_NOT_FOUND = 34;
+    public const ERROR_NOT_FOUND = 34;
 
-    const ERROR_USER_NOT_FOUND = 50;
+    public const ERROR_USER_NOT_FOUND = 50;
 
-    const ERROR_EMPTY_REPLY = 52;
+    public const ERROR_EMPTY_REPLY = 52;
 
-    const ERROR_SUSPENDED_USER = 63;
+    public const ERROR_SUSPENDED_USER = 63;
 
-    const ERROR_SUSPENDED_ACCOUNT = 64;
+    public const ERROR_SUSPENDED_ACCOUNT = 64;
 
-    const ERROR_INACTIVE_API = 68;
+    public const ERROR_INACTIVE_API = 68;
 
-    const ERROR_EXCEEDED_RATE_LIMIT = 88;
+    public const ERROR_EXCEEDED_RATE_LIMIT = 88;
 
-    const ERROR_INVALID_TOKEN = 89;
+    public const ERROR_INVALID_TOKEN = 89;
 
-    const ERROR_REQUIRED_SSL = 92;
+    public const ERROR_REQUIRED_SSL = 92;
 
-    const ERROR_CAN_NOT_FIND_SPECIFIED_USER = 108;
+    public const ERROR_CAN_NOT_FIND_SPECIFIED_USER = 108;
 
-    const ERROR_OVER_CAPACITY = 130;
+    public const ERROR_OVER_CAPACITY = 130;
 
-    const ERROR_INTERNAL_ERROR = 131;
+    public const ERROR_INTERNAL_ERROR = 131;
 
-    const ERROR_AUTHENTICATION_OAUTH = 135;
+    public const ERROR_AUTHENTICATION_OAUTH = 135;
 
-    const ERROR_NO_STATUS_FOUND_WITH_THAT_ID  = 144;
+    public const ERROR_NO_STATUS_FOUND_WITH_THAT_ID = 144;
 
-    const ERROR_LIMITED_FOLLOWING = 161;
+    public const ERROR_LIMITED_FOLLOWING = 161;
 
-    const ERROR_PROTECTED_TWEET = 179;
+    public const ERROR_PROTECTED_TWEET = 179;
 
-    const ERROR_LIMITED_DAILY_STATUS_UPDATE = 185;
+    public const ERROR_LIMITED_DAILY_STATUS_UPDATE = 185;
 
-    const ERROR_DUPLICATE_STATUS = 187;
+    public const ERROR_DUPLICATE_STATUS = 187;
 
-    const ERROR_BAD_AUTHENTICATION_DATA = 215;
+    public const ERROR_BAD_AUTHENTICATION_DATA = 215;
 
-    const ERROR_AUTOMATED_REQUEST = 226;
+    public const ERROR_AUTOMATED_REQUEST = 226;
 
-    const ERROR_REQUIRED_LOGIN_VERIFICATION = 231;
+    public const ERROR_REQUIRED_LOGIN_VERIFICATION = 231;
 
-    const ERROR_RETIRED_URL = 251;
+    public const ERROR_RETIRED_URL = 251;
 
-    const ERROR_UNAUTHORIZED_ACTIONS = 261;
+    public const ERROR_UNAUTHORIZED_ACTIONS = 261;
+
+    public const ERROR_CODES = [
+        self::ERROR_HOST_RESOLUTION,
+
+        self::ERROR_AUTHENTICATION,
+
+        self::ERROR_NOT_FOUND,
+
+        self::ERROR_USER_NOT_FOUND,
+
+        self::ERROR_EMPTY_REPLY,
+
+        self::ERROR_SUSPENDED_USER,
+
+        self::ERROR_SUSPENDED_ACCOUNT,
+
+        self::ERROR_INACTIVE_API,
+
+        self::ERROR_EXCEEDED_RATE_LIMIT,
+
+        self::ERROR_INVALID_TOKEN,
+
+        self::ERROR_REQUIRED_SSL,
+
+        self::ERROR_CAN_NOT_FIND_SPECIFIED_USER,
+
+        self::ERROR_OVER_CAPACITY,
+
+        self::ERROR_INTERNAL_ERROR,
+
+        self::ERROR_AUTHENTICATION_OAUTH,
+
+        self::ERROR_NO_STATUS_FOUND_WITH_THAT_ID,
+
+        self::ERROR_LIMITED_FOLLOWING,
+
+        self::ERROR_PROTECTED_TWEET,
+
+        self::ERROR_LIMITED_DAILY_STATUS_UPDATE,
+
+        self::ERROR_DUPLICATE_STATUS,
+
+        self::ERROR_BAD_AUTHENTICATION_DATA,
+
+        self::ERROR_AUTOMATED_REQUEST,
+
+        self::ERROR_REQUIRED_LOGIN_VERIFICATION,
+
+        self::ERROR_RETIRED_URL,
+
+        self::ERROR_UNAUTHORIZED_ACTIONS,
+    ];
 }

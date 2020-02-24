@@ -13,7 +13,7 @@ class MembershipException extends Exception
      *
      * @throws MembershipException
      */
-    public function throws(string $message, int $errorCode): void
+    public static function throws(string $message, int $errorCode): void
     {
         throw new self($message, $errorCode);
     }
