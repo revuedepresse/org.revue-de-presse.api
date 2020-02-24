@@ -630,19 +630,6 @@ function remove_php_container() {
     /bin/bash -c "${command}" || echo 'No more container to be removed'
 }
 
-function configure_rabbitmq_user_privileges() {
-    local rabbitmq_vhost="$(cat <(cat app/config/parameters.yml | grep -v '#' | grep 'rabbitmq_vhost:' | cut -f 2 -d ':' | sed -e 's/[[:space:]]//g'))"
-    local rabbitmq_user=$(cat <(cat app/config/parameters.yml | \
-        grep 'rabbitmq_user:' | grep -v '#' | \
-        cut -f 2 -d ':' | sed -e 's/[[:space:]]//g'))
-    local rabbitmq_password="cat app/config/parameters.yml | grep -v '#' | grep 'rabbitmq_password:' | cut -f 2 -d ':' | sed -e 's/[[:space:]]//g'"
-
-    docker exec -ti rabbitmq /bin/bash -c 'rabbitmqctl add_vhost '"${rabbitmq_vhost}"
-    docker exec -ti rabbitmq /bin/bash -c 'rabbitmqctl add_user '"${rabbitmq_user}"' '"'""$(cat <(/bin/bash -c "${rabbitmq_password}"))""'"
-    docker exec -ti rabbitmq /bin/bash -c 'rabbitmqctl set_user_tags '"${rabbitmq_user}"' administrator'
-    docker exec -ti rabbitmq /bin/bash -c 'rabbitmqctl set_permissions -p '"${rabbitmq_vhost}"' '"${rabbitmq_user}"' ".*" ".*" ".*"'
-}
-
 function list_amqp_queues() {
     local rabbitmq_vhost
     rabbitmq_vhost="$(cat <(cat .env.local | grep amqp | sed -E 's#.+(/.+)/[^/]*$#\1#' | sed -E 's/\/%2f/\//g'))"
