@@ -15,7 +15,7 @@ use App\Infrastructure\DependencyInjection\PublicationListProcessorTrait;
 use App\Infrastructure\DependencyInjection\TokenChangeTrait;
 use App\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Twitter\Api\ApiAccessorInterface;
-use App\Twitter\Api\OwnershipAccessorInterface;
+use App\Infrastructure\Twitter\Api\Accessor\OwnershipAccessorInterface;
 use App\Twitter\Exception\EmptyListException;
 use Closure;
 use Exception;

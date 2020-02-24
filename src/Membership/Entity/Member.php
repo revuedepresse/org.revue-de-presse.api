@@ -240,12 +240,24 @@ class Member extends MemberModel
     }
 
     /**
+     * @deprecated
+     *
      * @param string $fullName
      * @return MemberInterface
      */
     public function setFullName(string $fullName): MemberInterface
     {
-        $this->fullName = $fullName;
+        return $this->setScreenName($fullName);
+    }
+
+    /**
+     * @param string $screenName
+     *
+     * @return MemberInterface
+     */
+    public function setScreenName(string $screenName): MemberInterface
+    {
+        $this->fullName = $screenName;
 
         return $this;
     }

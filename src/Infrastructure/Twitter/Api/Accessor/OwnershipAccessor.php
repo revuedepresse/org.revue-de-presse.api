@@ -1,13 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Twitter\Api;
+namespace App\Infrastructure\Twitter\Api\Accessor;
 
 use App\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Api\AccessToken\TokenChangeInterface;
 use App\Api\Entity\TokenInterface;
 use App\Domain\Resource\MemberOwnerships;
 use App\Domain\Resource\OwnershipCollection;
+use App\Twitter\Api\ApiAccessorInterface;
 use App\Twitter\Exception\OverCapacityException;
 use App\Twitter\Exception\UnavailableResourceException;
 use Psr\Log\LoggerInterface;
