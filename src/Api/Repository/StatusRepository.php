@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace App\Api\Repository;
 
 use App\Accessor\Exception\NotFoundStatusException;
+use App\Domain\Repository\StatusRepositoryInterface;
+use App\Domain\Status\TaggedStatus;
 use App\Membership\Entity\MemberInterface;
 use App\StatusCollection\Mapping\MappingAwareInterface;
 use App\Twitter\Exception\NotFoundMemberException;
@@ -29,7 +31,7 @@ use Exception;
  * @method Status[]    findAll()
  * @method Status[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class StatusRepository extends ArchivedStatusRepository
+class StatusRepository extends ArchivedStatusRepository implements StatusRepositoryInterface
 {
     /**
      * @var ArchivedStatusRepository
@@ -98,42 +100,13 @@ class StatusRepository extends ArchivedStatusRepository
     }
 
     /**
-     * @param      $hash
-     * @return bool
-     * @throws NoResultException
-     * @throws NonUniqueResultException
-     */
-    public function existsAlready($hash): bool
-    {
-        if ($this->archivedStatusRepository->existsAlready($hash)) {
-            return true;
-        }
-
-        $queryBuilder = $this->createQueryBuilder('s');
-        $queryBuilder->select('count(s.id) as count_')
-            ->andWhere('s.hash = :hash');
-
-        $queryBuilder->setParameter('hash', $hash);
-        $count = (int) $queryBuilder->getQuery()->getSingleScalarResult();
-
-        $this->statusLogger->info(
-            sprintf(
-                '%d statuses already serialized for "%s"',
-                $count,
-                $hash
-            )
-        );
-
-        return $count > 0;
-    }
-
-    /**
      * @param $screenName
      *
-     * @return int|mixed
+     * @return int
      * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws NotFoundMemberException
+     * @throws ORMException
      * @throws OptimisticLockException
      */
     public function countHowManyStatusesFor($screenName): int
@@ -168,8 +141,9 @@ class StatusRepository extends ArchivedStatusRepository
      * @param $screenName
      *
      * @return MemberInterface
-     * @throws NotFoundStatusException
      * @throws DBALException
+     * @throws NotFoundStatusException
+     * @throws ORMException
      * @throws OptimisticLockException
      */
     public function updateLastStatusPublicationDate($screenName)
@@ -184,25 +158,31 @@ class StatusRepository extends ArchivedStatusRepository
     }
 
     /**
-     * @param array $extract
+     * @param TaggedStatus $taggedStatus
      *
-     * @return Status
+     * @return StatusInterface
      * @throws Exception
      */
-    public function updateResponseBody(array $extract): StatusInterface
+    public function reviseDocument(TaggedStatus $taggedStatus): StatusInterface
     {
-        /** @var Status $userStream */
-        $userStream = $this->findOneBy(['statusId' => $extract['status_id']]);
+        /** @var Status $status */
+        $status = $this->findOneBy(
+            ['statusId' => $taggedStatus->documentId()]
+        );
 
-        if (!$userStream instanceof Status) {
-            $userStream = $this->archivedStatusRepository->findOneBy(['statusId' => $extract['status_id']]);
+        if (!$status instanceof Status) {
+            $status = $this->archivedStatusRepository->findOneBy(
+                ['statusId' => $taggedStatus->documentId()]
+            );
         }
 
-        $userStream->setApiDocument($extract['api_document']);
-        $userStream->setIdentifier($extract['identifier']);
-        $userStream->setText($extract['text']);
+        $status->setApiDocument($taggedStatus->document());
+        $status->setIdentifier($taggedStatus->token());
+        $status->setText($taggedStatus->text());
 
-        return $userStream->setUpdatedAt(new DateTime('now', new \DateTimeZone('UTC')));
+        return $status->setUpdatedAt(
+            new DateTime('now', new \DateTimeZone('UTC'))
+        );
     }
 
     /**

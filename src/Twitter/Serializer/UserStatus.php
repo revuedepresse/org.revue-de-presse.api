@@ -32,6 +32,7 @@ use App\Twitter\Exception\UnavailableResourceException;
 use App\Twitter\Serializer\Exception\RateLimitedException;
 use App\Twitter\Serializer\Exception\SkipSerializationException;
 use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Exception\ConstraintViolationException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
@@ -296,6 +297,9 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             // Figuring out a member is now protected, suspended or not found is considered to be a "success",
             // provided the workers would not call the API on behalf of them
             $success = true;
+        } catch (ConstraintViolationException $constraintViolationException) {
+            $this->logger->critical($constraintViolationException->getMessage());
+            $success = false;
         } catch (Exception $exception) {
             $this->logger->error(sprintf(
                 '[from %s %s]',

@@ -5,46 +5,43 @@ namespace App\Api\Repository;
 
 use App\Aggregate\Repository\TimelyStatusRepository;
 use App\Api\Adapter\StatusToArray;
+use App\Api\Entity\Aggregate;
+use App\Api\Entity\ArchivedStatus;
+use App\Api\Entity\Status;
+use App\Api\Entity\StatusInterface;
+use App\Infrastructure\DependencyInjection\TaggedStatusRepositoryTrait;
+use App\Infrastructure\Repository\Membership\MemberRepository;
 use App\Membership\Entity\MemberInterface;
 use App\Operation\Collection\Collection;
 use App\Status\Entity\LikedStatus;
 use App\Status\Repository\ExtremumAwareInterface;
 use App\Status\Repository\LikedStatusRepository;
-use Doctrine\Bundle\DoctrineBundle\Registry;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Inflector\Inflector;
-use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
-use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\NoResultException;
-
-use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
-
-use Doctrine\ORM\EntityManager;
-use Doctrine\Persistence\ManagerRegistry;
-use Exception;
-use Psr\Log\LoggerInterface;
-
-use App\Api\Entity\Aggregate;
-use App\Api\Entity\ArchivedStatus;
-use App\Api\Entity\Status;
-use App\Api\Entity\StatusInterface;
 use App\Twitter\Exception\NotFoundMemberException;
 use App\Twitter\Exception\ProtectedAccountException;
 use App\Twitter\Exception\SuspendedAccountException;
-use App\Infrastructure\Repository\Membership\MemberRepository;
 use App\Twitter\Repository\PublicationRepositoryInterface;
-
+use Doctrine\Bundle\DoctrineBundle\Registry;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
+use Doctrine\Persistence\ManagerRegistry;
+use Exception;
+use Psr\Log\LoggerInterface;
 use function array_key_exists;
 use function count;
-use function in_array;
 
 /**
  * @package App\Api\Repository
  */
 class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwareInterface
 {
+    use TaggedStatusRepositoryTrait;
+
     protected array $oauthTokens;
 
     protected LoggerInterface $logger;
@@ -161,7 +158,8 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
         foreach ($extracts as $key => $extract) {
             $memberStatus = $extract['existing_status'];
             if (!$memberStatus) {
-                $memberStatus = $this->makeStatusFromApiResponseForAggregate($extract, $aggregate);
+                $memberStatus = $this->taggedStatusRepository
+                    ->convertPropsToStatus($extract, $aggregate);
             }
 
             if ($memberStatus->getId() === null) {
@@ -232,8 +230,6 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
      * @param Aggregate|null       $aggregate
      * @param LoggerInterface|null $logger
      * @return array
-     * @throws NoResultException
-     * @throws NonUniqueResultException
      * @throws Exception
      */
     public function saveStatuses(
@@ -241,8 +237,13 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
         $identifier,
         Aggregate $aggregate = null,
         LoggerInterface $logger = null
-    ) {
-        $result = $this->iterateOverStatuses($statuses, $identifier, $aggregate, $logger);
+    ): array {
+        $result = $this->iterateOverStatuses(
+            $statuses,
+            $identifier,
+            $aggregate,
+            $logger
+        );
         $extracts = $result['extracts'];
         $screenName = $result['screen_name'];
 
@@ -342,62 +343,29 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
 
     /**
      * @param array $statuses
+     *
      * @return bool
-     * @throws NoResultException
-     * @throws NonUniqueResultException
+     * @throws Exception
      */
     public function hasBeenSavedBefore(array $statuses): bool
     {
         if (count($statuses) === 0) {
-            throw new Exception('There should be one item at least');
+            throw new \Exception('There should be one item at least');
         }
 
         $identifier = '';
-        $statusesProperties = $this->extractProperties([$statuses[0]], function ($extract) use ($identifier) {
-            $extract['identifier'] = $identifier;
+        $statusesProperties = $this->extractProperties(
+            [$statuses[0]],
+            function ($extract) use ($identifier) {
+                $extract['identifier'] = $identifier;
 
-            return $extract;
-        });
-
-        return $this->existsAlready($statusesProperties[0]['hash']);
-    }
-
-    /**
-     * @param $hash
-     * @return bool
-     * @throws NoResultException
-     * @throws NonUniqueResultException
-     */
-    public function existsAlready($hash)
-    {
-        $queryBuilder = $this->createQueryBuilder('s');
-        $queryBuilder->select('count(s.id) as count_')
-            ->andWhere('s.hash = :hash');
-
-        $queryBuilder->setParameter('hash', $hash);
-        $count = (int) $queryBuilder->getQuery()->getSingleScalarResult();
-
-        $this->statusLogger->info(
-            sprintf(
-                '%d statuses already serialized for "%s"',
-                $count,
-                $hash
-            )
+                return $extract;
+            }
         );
 
-        return $count > 0;
-    }
-
-    /**
-     * @param $screenName
-     * @return int
-     * @throws NoResultException
-     * @throws NonUniqueResultException
-     * @deprecated in favor of ->countHowManyStatusesFor
-     */
-    public function countStatuses($screenName)
-    {
-        return $this->countHowManyStatusesFor($screenName);
+        return $this->taggedStatusRepository->archivedStatusHavingHashExists(
+            $statusesProperties[0]['hash']
+        );
     }
 
     /**
@@ -406,7 +374,7 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    public function countHowManyStatusesFor($screenName)
+    public function countHowManyStatusesFor($screenName): int
     {
         $queryBuilder = $this->createQueryBuilder('s');
         $queryBuilder->select('COUNT(DISTINCT s.statusId) as count_')
@@ -717,102 +685,6 @@ QUERY
     }
 
     /**
-     * @param                $extract
-     * @param Aggregate|null $aggregate
-     * @return StatusInterface
-     * @throws NoResultException
-     * @throws NonUniqueResultException
-     */
-    private function makeStatusFromApiResponseForAggregate($extract, Aggregate $aggregate = null): StatusInterface
-    {
-        $entityManager = $this->getEntityManager();
-
-        /** @var StatusRepository $statusRepository */
-        $statusRepository = $entityManager->getRepository('\App\Api\Entity\Status');
-
-        if ($this->existsAlready($extract['hash'])) {
-            $memberStatus = $statusRepository->updateResponseBody($extract);
-
-            if ($this->logger) {
-                $this->logger->info(
-                    sprintf(
-                        'Updating response body of status with hash "%s" for member with screen_name "%s"',
-                        $extract['hash'],
-                        $extract['screen_name']
-                    )
-                );
-            }
-
-            return $memberStatus;
-        }
-
-        /** @var Status $memberStatus */
-        $memberStatus = $this->makeStatus($extract);
-        $memberStatus->setIndexed(true);
-        $memberStatus->setIdentifier($extract['identifier']);
-
-        if (!is_null($aggregate)) {
-            $memberStatus->addToAggregates($aggregate);
-        }
-
-        return $memberStatus;
-    }
-
-    /**
-     * @param $properties
-     *
-     * @return Status|mixed
-     * @throws Exception
-     */
-    public function makeStatus(array $properties)
-    {
-        $status = new Status();
-
-        return $this->setProperties($status, $properties, $this->logger);
-    }
-
-    /**
-     * @param                      $instance
-     * @param                      $properties
-     * @param LoggerInterface|null $logger
-     *
-     * @return mixed
-     * @throws Exception
-     */
-    public function setProperties($instance, $properties, LoggerInterface $logger = null)
-    {
-        if (!array_key_exists('created_at', $properties)) {
-            $properties['created_at'] = new \DateTime();
-        }
-        if (!array_key_exists('updated_at', $properties)) {
-            $properties['updated_at'] = null;
-        }
-
-        $entity = get_class($instance);
-        $fieldNames = $this->getEntityManager()->getClassMetadata($entity)->getFieldNames();
-        $missedProperties = [];
-
-        foreach ($properties as $name => $value) {
-            $classifiedName = Inflector::classify($name);
-
-            if (in_array(lcfirst($classifiedName), $fieldNames, true)) {
-                $method = 'set' . $classifiedName;
-                $instance->$method($value);
-            } else {
-                $missedProperties[] = $name .': ' . $value;
-            }
-        }
-
-        if (count($missedProperties) >  0) {
-            $output = 'property missed at introspection for entity ' . $entity . "\n" .
-                implode("\n", $missedProperties ) . "\n";
-            $this->logger->info($output);
-        }
-
-        return $instance;
-    }
-
-    /**
      * @param $memberStatus
      */
     private function logStatus(StatusInterface $memberStatus): void
@@ -972,13 +844,11 @@ QUERY
      * @param LoggerInterface $logger
      *
      * @return array
-     * @throws NoResultException
-     * @throws NonUniqueResultException
      * @throws ORMException
      * @throws OptimisticLockException
      */
     public function iterateOverStatuses(
-        $statuses,
+        array $statuses,
         $identifier,
         Aggregate $aggregate = null,
         LoggerInterface $logger = null
@@ -995,7 +865,8 @@ QUERY
         $statuses = [];
 
         foreach ($extracts as $key => $extract) {
-            $memberStatus = $this->makeStatusFromApiResponseForAggregate($extract, $aggregate);
+            $memberStatus = $this->taggedStatusRepository
+                ->convertPropsToStatus($extract, $aggregate);
 
             if ($memberStatus->getId() === null) {
                 $this->logStatus($memberStatus);

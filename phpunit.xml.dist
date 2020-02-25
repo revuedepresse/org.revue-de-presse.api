@@ -21,6 +21,7 @@
             <group>conversation</group>
             <group>membership</group>
             <group>ownership</group>
+            <group>tagged_status</group>
             <group>unavailable_resource</group>
         </include>
     </groups>

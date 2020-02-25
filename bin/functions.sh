@@ -633,10 +633,9 @@ function remove_php_container() {
 
 function list_amqp_queues() {
     local rabbitmq_vhost
-    rabbitmq_vhost="$(cat <(cat .env.local | grep amqp | sed -E 's#.+(/.+)/[^/]*$#\1#' | sed -E 's/\/%2f/\//g'))"
+    rabbitmq_vhost="$(cat <(cat .env.local | grep STATUS=amqp | sed -E 's#.+(/.+)/[^/]*$#\1#' | sed -E 's/\/%2f/\//g'))"
     cd provisioning/containers || exit
     docker-compose exec messenger watch -n1 'rabbitmqctl list_queues -p '"${rabbitmq_vhost}"
-    cd ../..
 }
 
 function set_permissions_in_apache_container() {

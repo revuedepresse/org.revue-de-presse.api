@@ -32,6 +32,7 @@ services:
             - '%weaving_the_web_twitter.entity.status.class%'
         calls:
             - [ 'setPublicationRepository', [ '@App\Twitter\Repository\PublicationRepository' ] ]
+            - [ 'setTaggedStatusRepository', [ '@App\Domain\Repository\TaggedStatusRepository' ] ]
         properties:
             archivedStatusRepository: '@weaving_the_web_twitter.repository.archived_status'
             likedStatusRepository:    '@repository.liked_status'
@@ -47,7 +48,8 @@ services:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - '%weaving_the_web_twitter.entity.archived_status.class%'
         calls:
-            - [ 'setPublicationRepository', [ '@App\Twitter\Repository\PublicationRepository' ] ]
+            - [ 'setPublicationRepository',  [ '@App\Twitter\Repository\PublicationRepository' ] ]
+            - [ 'setTaggedStatusRepository', [ '@App\Domain\Repository\TaggedStatusRepository' ] ]
         properties:
             likedStatusRepository:  '@repository.liked_status'
             memberManager:          '@user_manager'
@@ -88,6 +90,12 @@ services:
         class: 'App\Infrastructure\Twitter\Api\UnavailableResourceHandler'
         arguments:
             - '@user_manager'
+            - '@logger'
+
+    App\Domain\Repository\TaggedStatusRepository:
+        class: 'App\Domain\Repository\TaggedStatusRepository'
+        arguments:
+            - '@doctrine.orm.entity_manager'
             - '@logger'
 
     # add more service definitions when explicit configuration is needed
