@@ -5,7 +5,6 @@ namespace App\Api\Adapter;
 
 use App\Api\Entity\StatusInterface;
 use App\Operation\Collection\CollectionInterface;
-use function array_map;
 use function hash;
 
 class StatusToArray

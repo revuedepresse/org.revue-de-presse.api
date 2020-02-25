@@ -695,9 +695,14 @@ class Accessor implements ApiAccessorInterface,
     }
 
     /**
-     * @deprecated
+     * @deprecated in favor of ->getOAuthToken()
      */
     public function getUserToken()
+    {
+        return $this->getOAuthToken();
+    }
+
+    public function getOAuthToken()
     {
         return $this->userToken;
     }

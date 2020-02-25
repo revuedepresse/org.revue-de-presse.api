@@ -9,6 +9,7 @@ use App\Accessor\Exception\ReadOnlyApplicationException;
 use App\Accessor\Exception\UnexpectedApiResponseException;
 use App\Aggregate\Exception\LockedAggregateException;
 use App\Amqp\Exception\SkippableMessageException;
+use App\Api\AccessToken\AccessToken;
 use App\Infrastructure\Amqp\Message\FetchMemberStatuses;
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\StatusInterface;
@@ -1191,7 +1192,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
 
         return $this->statusRepository->saveStatuses(
             $statuses,
-            $this->accessor->getUserToken(),
+            new AccessToken($this->accessor->getOAuthToken()),
             $aggregate,
             $this->logger
         );

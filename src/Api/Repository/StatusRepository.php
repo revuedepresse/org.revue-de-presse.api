@@ -31,7 +31,7 @@ use Exception;
  * @method Status[]    findAll()
  * @method Status[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class StatusRepository extends ArchivedStatusRepository implements StatusRepositoryInterface
+class StatusRepository extends ArchivedStatusRepository
 {
     /**
      * @var ArchivedStatusRepository

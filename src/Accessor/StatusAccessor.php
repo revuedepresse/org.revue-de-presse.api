@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Accessor;
 
+use App\Api\AccessToken\AccessToken;
 use App\Api\Entity\StatusInterface;
 use App\Membership\Entity\MemberInterface;
 use App\Infrastructure\Repository\Membership\MemberRepository;
@@ -137,7 +138,7 @@ class StatusAccessor
         try {
             $this->statusRepository->saveStatuses(
                 [$status],
-                $this->accessor->userToken,
+                new AccessToken($this->accessor->userToken),
                 null,
                 $this->logger
             );
