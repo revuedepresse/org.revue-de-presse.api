@@ -19,6 +19,7 @@ use App\Infrastructure\Log\StatusLoggerInterface;
 use App\Infrastructure\Repository\Membership\MemberRepository;
 use App\Membership\Entity\MemberInterface;
 use App\Operation\Collection\Collection;
+use App\Operation\Collection\CollectionInterface;
 use App\Status\Entity\LikedStatus;
 use App\Status\Repository\ExtremumAwareInterface;
 use App\Status\Repository\LikedStatusRepository;
@@ -460,24 +461,24 @@ QUERY;
         $statuses = [];
 
         foreach ($extracts as $key => $extract) {
-            $memberStatus = $this->taggedStatusRepository
+            $status = $this->taggedStatusRepository
                 ->convertPropsToStatus($extract, $aggregate);
 
-            if ($memberStatus->getId() === null) {
-                $this->collectStatusLogger->logStatus($memberStatus);
+            if ($status->getId() === null) {
+                $this->collectStatusLogger->logStatus($status);
             }
 
-            if ($memberStatus->getId()) {
+            if ($status->getId()) {
                 unset($extracts[$key]);
             }
 
-            if ($memberStatus instanceof ArchivedStatus) {
-                $memberStatus = $this->unarchiveStatus($memberStatus, $entityManager);
+            if ($status instanceof ArchivedStatus) {
+                $status = $this->unarchiveStatus($status, $entityManager);
             }
 
             try {
-                if ($memberStatus->getId()) {
-                    $memberStatus->setUpdatedAt(
+                if ($status->getId()) {
+                    $status->setUpdatedAt(
                         new DateTime(
                             'now',
                             new \DateTimeZone('UTC')
@@ -487,19 +488,19 @@ QUERY;
 
                 if ($aggregate instanceof Aggregate) {
                     $timelyStatus = $this->timelyStatusRepository->fromAggregatedStatus(
-                        $memberStatus,
+                        $status,
                         $aggregate
                     );
                     $entityManager->persist($timelyStatus);
                 }
 
-                $entityManager->persist($memberStatus);
+                $entityManager->persist($status);
 
-                $statuses[] = $memberStatus;
+                $statuses[] = $status;
             } catch (ORMException $exception) {
                 if ($exception->getMessage() === ORMException::entityManagerClosed()->getMessage()) {
                     $entityManager = $this->registry->resetManager('default');
-                    $entityManager->persist($memberStatus);
+                    $entityManager->persist($status);
                 }
             }
         }
@@ -714,7 +715,8 @@ QUERY;
         $extracts = [];
 
         foreach ($statuses as $status) {
-            if (property_exists($status, 'text') || property_exists($status, 'full_text')) {
+            if (property_exists($status, 'text') ||
+                property_exists($status, 'full_text')) {
                 $text = isset($status->full_text) ? $status->full_text : $status->text;
 
                 $extract    = [
@@ -824,6 +826,7 @@ QUERY;
      * @param EntityManager  $entityManager
      *
      * @return Status
+     * @throws ORMException
      */
     private function unarchiveStatus(ArchivedStatus $memberStatus, EntityManager $entityManager): Status
     {
