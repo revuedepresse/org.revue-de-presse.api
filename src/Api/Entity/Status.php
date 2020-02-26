@@ -153,9 +153,9 @@ class Status implements StatusInterface
         return $this->popularity;
     }
 
-    public function fromArchivedStatus(ArchivedStatus $archivedStatus): StatusInterface
+    public static function fromArchivedStatus(ArchivedStatus $archivedStatus): StatusInterface
     {
-        $status = new Status();
+        $status = new self();
 
         $status->setCreatedAt($archivedStatus->getCreatedAt());
         $status->setApiDocument($archivedStatus->getApiDocument());
@@ -171,7 +171,7 @@ class Status implements StatusInterface
         $status->setUserAvatar($archivedStatus->getUserAvatar());
         $status->setScreenName($archivedStatus->getScreenName());
 
-        if (!$archivedStatus->getAggregates()->isEmpty()) {
+        if ($archivedStatus->belongsToAList()) {
             $archivedStatus->getAggregates()->map(
                 function (Aggregate $aggregate) use ($status) {
                     $status->addToAggregates($aggregate);
@@ -179,6 +179,7 @@ class Status implements StatusInterface
             );
         }
 
+        return $status;
     }
 
 }

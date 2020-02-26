@@ -9,17 +9,16 @@ use App\Api\Adapter\StatusToArray;
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;
-use App\Domain\Status\StatusInterface;
+use App\Api\Exception\InsertDuplicatesException;
 use App\Domain\Repository\StatusRepositoryInterface;
+use App\Domain\Status\StatusInterface;
 use App\Domain\Status\TaggedStatus;
 use App\Infrastructure\DependencyInjection\StatusLoggerTrait;
 use App\Infrastructure\DependencyInjection\TaggedStatusRepositoryTrait;
-use App\Infrastructure\Log\LogStatusInterface;
-use App\Infrastructure\Log\StatusLoggerInterface;
 use App\Infrastructure\Repository\Membership\MemberRepository;
+use App\Infrastructure\Twitter\Api\Normalizer\Normalizer;
 use App\Membership\Entity\MemberInterface;
 use App\Operation\Collection\Collection;
-use App\Operation\Collection\CollectionInterface;
 use App\Status\Entity\LikedStatus;
 use App\Status\Repository\ExtremumAwareInterface;
 use App\Status\Repository\LikedStatusRepository;
@@ -28,11 +27,11 @@ use App\Twitter\Exception\ProtectedAccountException;
 use App\Twitter\Exception\SuspendedAccountException;
 use App\Twitter\Repository\PublicationRepositoryInterface;
 use DateTime;
-use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
@@ -42,6 +41,7 @@ use Exception;
 use Psr\Log\LoggerInterface;
 use function array_key_exists;
 use function count;
+use const JSON_THROW_ON_ERROR;
 
 /**
  * @package App\Api\Repository
@@ -54,7 +54,7 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
 
     protected PublicationRepositoryInterface $publicationRepository;
 
-    public Registry $registry;
+    public ManagerRegistry $registry;
 
     public LoggerInterface $appLogger;
 
@@ -69,17 +69,6 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
     public bool $shouldExtractProperties;
 
     protected array $oauthTokens;
-
-    /**
-     * @param ManagerRegistry $managerRegistry
-     * @param string          $aggregateClass
-     */
-    public function __construct(
-        ManagerRegistry $managerRegistry,
-        string $aggregateClass
-    ) {
-        parent::__construct($managerRegistry, $aggregateClass);
-    }
 
     /**
      * @param $screenName
@@ -134,46 +123,29 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
     }
 
     /**
-     * @param $statusIds
-     *
-     * @return mixed
-     */
-    public function findBookmarks(array $statusIds)
-    {
-        if (count($statusIds) > 0) {
-            $queryBuilder = $this->selectStatuses()
-                                 ->andWhere('t.statusId IN (:statusIds)');
-            $queryBuilder->setParameter('statusIds', $statusIds);
-
-            $statuses = $queryBuilder->getQuery()->getResult();
-
-            return $this->highlightRetweets($statuses);
-        } else {
-            return [];
-        }
-    }
-
-    /**
      * @param null $lastId
      * @param null $aggregateName
      * @param bool $rawSql
      *
      * @return mixed
      */
-    public function findLatest($lastId = null, $aggregateName = null, $rawSql = false)
-    {
+    public function findLatest(
+        $lastId = null,
+        $aggregateName = null,
+        $rawSql = false
+    ) {
         if ($rawSql) {
             return $this->findLatestForAggregate($aggregateName);
         }
 
         $queryBuilder = $this->selectStatuses();
 
-        if (!is_null($lastId)) {
+        if ($lastId !== null) {
             $queryBuilder->andWhere('t.id < :lastId');
             $queryBuilder->setParameter('lastId', $lastId);
         }
 
-        if (!is_null($aggregateName)) {
+        if ($aggregateName !== null) {
             $queryBuilder->join(
                 't.aggregates',
                 'a'
@@ -359,10 +331,10 @@ QUERY;
     /**
      * @param string $id
      *
-     * @return array
+     * @return array|StatusInterface|TaggedStatus
      * @throws Exception
      */
-    public function findStatusIdentifiedBy(string $id): array
+    public function findStatusIdentifiedBy(string $id)
     {
         $status = $this->findOneBy(['statusId' => $id]);
         if (!($status instanceof StatusInterface)) {
@@ -373,9 +345,14 @@ QUERY;
             return $status;
         }
 
-        $statusDocument = json_decode($status->getApiDocument());
+        $statusDocument = json_decode(
+            $status->getApiDocument(),
+            false,
+            512,
+            JSON_THROW_ON_ERROR
+        );
 
-        return $this->extractProperties(
+        return $this->normalizeAll(
             [$statusDocument],
             function ($properties) {
                 return $properties;
@@ -416,7 +393,7 @@ QUERY;
         }
 
         $identifier         = '';
-        $statusesProperties = $this->extractProperties(
+        $statusesProperties = $this->normalizeAll(
             [$statuses[0]],
             function ($extract) use ($identifier) {
                 $extract['identifier'] = $identifier;
@@ -426,19 +403,18 @@ QUERY;
         );
 
         return $this->taggedStatusRepository->archivedStatusHavingHashExists(
-            $statusesProperties[0]['hash']
+            $statusesProperties[0]->hash()
         );
     }
 
     /**
-     * @param                 $statuses
-     * @param AccessToken     $accessToken
-     * @param Aggregate       $aggregate
-     * @param LoggerInterface $logger
+     * @param array                $statuses
+     * @param AccessToken          $accessToken
+     * @param Aggregate|null       $aggregate
+     * @param LoggerInterface|null $logger
      *
      * @return array
      * @throws ORMException
-     * @throws OptimisticLockException
      */
     public function iterateOverStatuses(
         array $statuses,
@@ -449,7 +425,8 @@ QUERY;
         $this->appLogger = $logger;
 
         $entityManager = $this->getEntityManager();
-        $extracts      = $this->extractProperties(
+
+        $propertiesCollection      = $this->normalizeAll(
             $statuses,
             function ($extract) use ($accessToken) {
                 $extract['identifier'] = $accessToken->accessToken();
@@ -460,7 +437,7 @@ QUERY;
 
         $statuses = [];
 
-        foreach ($extracts as $key => $extract) {
+        foreach ($propertiesCollection as $key => $extract) {
             $status = $this->taggedStatusRepository
                 ->convertPropsToStatus($extract, $aggregate);
 
@@ -468,8 +445,9 @@ QUERY;
                 $this->collectStatusLogger->logStatus($status);
             }
 
-            if ($status->getId()) {
-                unset($extracts[$key]);
+            if ($status->getId() !== null) {
+                // Remove processed properties
+                unset($propertiesCollection[$key]);
             }
 
             if ($status instanceof ArchivedStatus) {
@@ -505,10 +483,10 @@ QUERY;
             }
         }
 
-        $this->flushStatuses($entityManager);
+        $this->flushAndResetManagerOnUniqueConstraintViolation($entityManager);
 
         return [
-            'extracts'    => $extracts,
+            'extracts'    => $propertiesCollection,
             'screen_name' => $extract['screen_name'],
             'statuses'    => $statuses
         ];
@@ -523,8 +501,6 @@ QUERY;
      * @param callable        $ensureMemberExists
      *
      * @return array
-     * @throws NoResultException
-     * @throws NonUniqueResultException
      * @throws NotFoundMemberException
      * @throws ORMException
      * @throws OptimisticLockException
@@ -532,7 +508,7 @@ QUERY;
     public function saveLikes(
         array $statuses,
         $identifier,
-        Aggregate $aggregate,
+        ?Aggregate $aggregate,
         LoggerInterface $logger,
         MemberInterface $likedBy,
         callable $ensureMemberExists
@@ -563,7 +539,7 @@ QUERY;
             );
         }
 
-        $extracts = $this->extractProperties(
+        $extracts = $this->normalizeAll(
             $statuses,
             function ($extract) use ($identifier, $indexedStatuses) {
                 $extract['identifier'] = $identifier;
@@ -635,8 +611,8 @@ QUERY;
             }
         }
 
-        $this->flushStatuses($entityManager);
-        $this->flushLikedStatuses($likedStatuses);
+        $this->flushAndResetManagerOnUniqueConstraintViolation($entityManager);
+        $this->flushLikedStatuses($likedStatuses, $entityManager);
 
         if (count($extracts) > 0) {
             $this->memberManager->incrementTotalLikesOfMemberWithName(
@@ -707,30 +683,24 @@ QUERY;
      * @param array    $statuses
      * @param callable $setter
      *
-     * @return array
-     * @throws Exception
+     * @return array<TaggedStatus>
      */
-    protected function extractProperties(array $statuses, callable $setter): array
-    {
+    protected function normalizeAll(
+        array $statuses,
+        callable $setter
+    ): array {
         $extracts = [];
 
         foreach ($statuses as $status) {
-            if (property_exists($status, 'text') ||
-                property_exists($status, 'full_text')) {
-                $text = isset($status->full_text) ? $status->full_text : $status->text;
+            if (!property_exists($status, 'text') &&
+                !property_exists($status, 'full_text')) {
+                continue;
+            }
 
-                $extract    = [
-                    'hash'         => sha1($text . $status->id_str),
-                    'text'         => $text,
-                    'screen_name'  => $status->user->screen_name,
-                    'name'         => $status->user->name,
-                    'user_avatar'  => $status->user->profile_image_url,
-                    'status_id'    => $status->id_str,
-                    'api_document' => json_encode($status),
-                    'created_at'   => new DateTime($status->created_at),
-                ];
-                $extract    = $setter($extract);
-                $extracts[] = $extract;
+            try {
+                $extracts[] = Normalizer::normalizeStatusProperties($status, $setter);
+            } catch (\Exception $exception) {
+                $this->appLogger->error($exception->getMessage());
             }
         }
 
@@ -786,56 +756,56 @@ QUERY;
     }
 
     /**
-     * @param $likedStatuses
-     *
-     * @throws OptimisticLockException
-     */
-    private function flushLikedStatuses($likedStatuses): void
-    {
-        (new ArrayCollection($likedStatuses))->map(
-            function (LikedStatus $likedStatus) {
-                $this->getEntityManager()->persist($likedStatus);
-            }
-        );
-        $this->getEntityManager()->flush();
-    }
-
-    /**
-     * @param EntityManager $entityManager
+     * @param                        $likedStatuses
+     * @param EntityManagerInterface $entityManager
      *
      * @throws ORMException
      * @throws OptimisticLockException
      */
-    private function flushStatuses(EntityManager $entityManager): void
-    {
+    private function flushLikedStatuses(
+        $likedStatuses,
+        EntityManagerInterface $entityManager
+    ): void {
+        (new ArrayCollection($likedStatuses))->map(
+            function (LikedStatus $likedStatus) use ($entityManager) {
+                $entityManager->persist($likedStatus);
+            }
+        );
+
+        $this->flushAndResetManagerOnUniqueConstraintViolation(
+            $entityManager
+        );
+    }
+
+    /**
+     * @param EntityManagerInterface $entityManager
+     */
+    private function flushAndResetManagerOnUniqueConstraintViolation(
+        EntityManagerInterface $entityManager
+    ): void {
         try {
             $entityManager->flush();
         } catch (UniqueConstraintViolationException $exception) {
-            $entityManager = $this->registry->resetManager('default');
+            $this->registry->resetManager('default');
 
-            throw new Exception(
-                'Can not insert duplicates into the database',
-                0,
-                $exception
-            );
+            InsertDuplicatesException::throws($exception);
         }
     }
 
     /**
-     * @param ArchivedStatus $memberStatus
+     * @param ArchivedStatus $archivedStatus
      * @param EntityManager  $entityManager
      *
      * @return Status
      * @throws ORMException
      */
-    private function unarchiveStatus(ArchivedStatus $memberStatus, EntityManager $entityManager): Status
+    private function unarchiveStatus(ArchivedStatus $archivedStatus, EntityManager $entityManager): StatusInterface
     {
+        $status = Status::fromArchivedStatus($archivedStatus);
 
-        $entityManager->remove($memberStatus);
+        $entityManager->remove($archivedStatus);
 
-        $memberStatus = $status;
-
-        return $memberStatus;
+        return $status;
     }
 
     public function reviseDocument(TaggedStatus $taggedStatus): StatusInterface

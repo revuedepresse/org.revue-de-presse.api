@@ -10,7 +10,7 @@ interface TaggedStatusRepositoryInterface
 {
     public function convertPropsToStatus(
         array $properties,
-        Aggregate $aggregate
+        ?Aggregate $aggregate
     ): StatusInterface;
 
     public function archivedStatusHavingHashExists($hash): bool;

@@ -5,7 +5,6 @@ namespace App\Domain\Status;
 
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\Status;
-use App\Domain\Status\StatusInterface;
 use App\Domain\Status\Exception\InvalidTagPropertyException;
 use DateTimeInterface;
 use Doctrine\Common\Inflector\Inflector;

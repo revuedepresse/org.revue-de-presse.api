@@ -346,15 +346,22 @@ class Accessor implements ApiAccessorInterface,
     }
 
     /**
-     * @param int $memberId
+     * @param string $memberId
      *
      * @return MemberInterface
+     * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
+     * @throws InvalidMemberIdentifier
      * @throws NonUniqueResultException
+     * @throws NotFoundMemberException
+     * @throws ORMException
      * @throws OptimisticLockException
+     * @throws ProtectedAccountException
+     * @throws ReflectionException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
      */
-    public function ensureMemberHavingIdExists(int $memberId): MemberInterface
+    public function ensureMemberHavingIdExists(string $memberId): MemberInterface
     {
         return $this->statusAccessor->ensureMemberHavingIdExists($memberId);
     }

@@ -21,6 +21,7 @@ use App\Api\Repository\StatusRepository;
 use App\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Api\Repository\WhispererRepository;
 use App\Membership\Entity\MemberInterface;
+use App\Membership\Exception\InvalidMemberIdentifier;
 use App\Status\LikedStatusCollectionAwareInterface;
 use App\Status\Repository\LikedStatusRepository;
 use App\Twitter\Api\Accessor;
@@ -1168,8 +1169,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws NotFoundMemberException
-     * @throws NoResultException
-     * @throws NonUniqueResultException
+     * @throws ORMException
      * @throws OptimisticLockException
      */
     private function saveStatuses(
@@ -1500,14 +1500,24 @@ class UserStatus implements LikedStatusCollectionAwareInterface
 
     /**
      * @param $options
-     * @return null|Whisperer
+     *
+     * @return object|null
+     * @throws ApiRateLimitingException
+     * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      * @throws NotFoundMemberException
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws ProtectedAccountException
+     * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
      * @throws SkippableMessageException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
-     * @throws NoResultException
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
+     * @throws UnexpectedApiResponseException
+     * @throws InvalidMemberIdentifier
      */
     private function beforeFetchingStatuses($options)
     {
@@ -1546,11 +1556,11 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws NotFoundMemberException
+     * @throws ORMException
      * @throws OptimisticLockException
      * @throws SkippableMessageException
-     * @throws NoResultException
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
      */
     private function afterCountingCollectedStatuses(
         array $options,

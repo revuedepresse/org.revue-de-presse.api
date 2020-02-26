@@ -50,7 +50,7 @@ class TaggedStatusRepository implements TaggedStatusRepositoryInterface
      */
     public function convertPropsToStatus(
         array $properties,
-        Aggregate $aggregate = null
+        ?Aggregate $aggregate
     ): StatusInterface {
         $taggedStatus = TaggedStatus::fromLegacyProps($properties);
 
