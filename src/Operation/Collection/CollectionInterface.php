@@ -30,4 +30,6 @@ interface CollectionInterface
      * @return array
      */
     public function toArray();
+
+    public function first();
 }

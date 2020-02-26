@@ -147,9 +147,7 @@ class StatusAccessor
         try {
             $this->statusRepository->saveStatuses(
                 [$status],
-                new AccessToken($this->accessor->userToken),
-                null,
-                $this->logger
+                new AccessToken($this->accessor->userToken)
             );
         } catch (NotFoundMemberException $notFoundMemberException) {
             return $this->findStatusIdentifiedBy($identifier);

@@ -4,11 +4,14 @@ declare(strict_types=1);
 namespace App\Api\Repository;
 
 use App\Accessor\Exception\NotFoundStatusException;
-use App\Domain\Repository\StatusRepositoryInterface;
+use App\Api\Entity\Aggregate;
+use App\Api\Entity\Status;
+use App\Domain\Status\StatusInterface;
 use App\Domain\Status\TaggedStatus;
 use App\Membership\Entity\MemberInterface;
 use App\StatusCollection\Mapping\MappingAwareInterface;
 use App\Twitter\Exception\NotFoundMemberException;
+use App\Twitter\Serializer\UserStatus;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\DBALException;
@@ -17,10 +20,6 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\QueryBuilder;
-use App\Api\Entity\Aggregate;
-use App\Api\Entity\Status;
-use App\Domain\Status\StatusInterface;
-use App\Twitter\Serializer\UserStatus;
 use Exception;
 
 /**

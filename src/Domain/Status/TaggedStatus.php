@@ -204,14 +204,6 @@ class TaggedStatus
         return $this->documentId;
     }
 
-    /**
-     * @return string
-     */
-    public function text(): string
-    {
-        return $this->text;
-    }
-
     public function hash(): string
     {
         return $this->hash;
@@ -242,11 +234,11 @@ class TaggedStatus
     }
 
     /**
-     * @return string
+     * @param Tag $tag
      */
-    public function token(): string
+    public function setTag(Tag $tag)
     {
-        return $this->token;
+        $this->tag = $tag;
     }
 
     /**
@@ -258,11 +250,29 @@ class TaggedStatus
     }
 
     /**
-     * @param Tag $tag
+     * @return string
      */
-    public function setTag(Tag $tag)
+    public function text(): string
     {
-        $this->tag = $tag;
+        return $this->text;
+    }
+
+    /**
+     * @return array
+     */
+    public function toLegacyProps(): array
+    {
+        return [
+            'hash'         => $this->hash,
+            'text'         => $this->text,
+            'screen_name'  => $this->screenName,
+            'name'         => $this->name,
+            'user_avatar'  => $this->avatarUrl,
+            'status_id'    => $this->documentId,
+            'api_document' => $this->document,
+            'created_at'   => $this->publishedAt,
+            'identifier'   => $this->token,
+        ];
     }
 
     /**
@@ -279,18 +289,18 @@ class TaggedStatus
         LoggerInterface $logger,
         ?Aggregate $aggregate = null
     ): StatusInterface {
-        $status       = new Status();
+        $status = new Status();
 
         $properties = [
-            'hash' => $this->hash,
-            'text' => $this->text,
-            'screen_name' => $this->screenName,
-            'name' => $this->name,
-            'user_avatar' => $this->avatarUrl,
-            'status_id' => $this->documentId,
+            'hash'         => $this->hash,
+            'text'         => $this->text,
+            'screen_name'  => $this->screenName,
+            'name'         => $this->name,
+            'user_avatar'  => $this->avatarUrl,
+            'status_id'    => $this->documentId,
             'api_document' => $this->document,
-            'created_at' => $this->publishedAt,
-            'identifier' => $this->token,
+            'created_at'   => $this->publishedAt,
+            'identifier'   => $this->token,
         ];
 
         if (!array_key_exists('created_at', $properties)) {
@@ -330,5 +340,13 @@ class TaggedStatus
         }
 
         return $status;
+    }
+
+    /**
+     * @return string
+     */
+    public function token(): string
+    {
+        return $this->token;
     }
 }

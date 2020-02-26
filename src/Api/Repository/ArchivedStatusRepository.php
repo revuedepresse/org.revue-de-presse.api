@@ -14,6 +14,7 @@ use App\Domain\Repository\StatusRepositoryInterface;
 use App\Domain\Status\StatusInterface;
 use App\Domain\Status\TaggedStatus;
 use App\Infrastructure\DependencyInjection\StatusLoggerTrait;
+use App\Infrastructure\DependencyInjection\StatusPersistorTrait;
 use App\Infrastructure\DependencyInjection\TaggedStatusRepositoryTrait;
 use App\Infrastructure\Repository\Membership\MemberRepository;
 use App\Infrastructure\Twitter\Api\Normalizer\Normalizer;
@@ -30,7 +31,6 @@ use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -50,9 +50,8 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
     StatusRepositoryInterface
 {
     use StatusLoggerTrait;
+    use StatusPersistorTrait;
     use TaggedStatusRepositoryTrait;
-
-    protected PublicationRepositoryInterface $publicationRepository;
 
     public ManagerRegistry $registry;
 
@@ -67,6 +66,8 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
     public Connection $connection;
 
     public bool $shouldExtractProperties;
+
+    protected PublicationRepositoryInterface $publicationRepository;
 
     protected array $oauthTokens;
 
@@ -352,12 +353,13 @@ QUERY;
             JSON_THROW_ON_ERROR
         );
 
-        return $this->normalizeAll(
+        return Normalizer::normalizeAll(
             [$statusDocument],
             function ($properties) {
                 return $properties;
-            }
-        )[0];
+            },
+            $this->appLogger
+        )->first()->toLegacyProps();
     }
 
     public function getAlias()
@@ -393,103 +395,38 @@ QUERY;
         }
 
         $identifier         = '';
-        $statusesProperties = $this->normalizeAll(
+        $statusesProperties = Normalizer::normalizeAll(
             [$statuses[0]],
             function ($extract) use ($identifier) {
                 $extract['identifier'] = $identifier;
 
                 return $extract;
-            }
+            },
+            $this->appLogger
         );
 
         return $this->taggedStatusRepository->archivedStatusHavingHashExists(
-            $statusesProperties[0]->hash()
+            $statusesProperties->first()->hash()
         );
     }
 
-    /**
-     * @param array                $statuses
-     * @param AccessToken          $accessToken
-     * @param Aggregate|null       $aggregate
-     * @param LoggerInterface|null $logger
-     *
-     * @return array
-     * @throws ORMException
-     */
-    public function iterateOverStatuses(
-        array $statuses,
-        AccessToken $accessToken,
-        Aggregate $aggregate = null,
-        LoggerInterface $logger = null
-    ): array {
-        $this->appLogger = $logger;
-
-        $entityManager = $this->getEntityManager();
-
-        $propertiesCollection      = $this->normalizeAll(
-            $statuses,
-            function ($extract) use ($accessToken) {
-                $extract['identifier'] = $accessToken->accessToken();
-
-                return $extract;
-            }
+    public function reviseDocument(TaggedStatus $taggedStatus): StatusInterface
+    {
+        /** @var Status $status */
+        $status = $this->findOneBy(
+            ['statusId' => $taggedStatus->documentId()]
         );
 
-        $statuses = [];
+        $status->setApiDocument($taggedStatus->document());
+        $status->setIdentifier($taggedStatus->token());
+        $status->setText($taggedStatus->text());
 
-        foreach ($propertiesCollection as $key => $extract) {
-            $status = $this->taggedStatusRepository
-                ->convertPropsToStatus($extract, $aggregate);
-
-            if ($status->getId() === null) {
-                $this->collectStatusLogger->logStatus($status);
-            }
-
-            if ($status->getId() !== null) {
-                // Remove processed properties
-                unset($propertiesCollection[$key]);
-            }
-
-            if ($status instanceof ArchivedStatus) {
-                $status = $this->unarchiveStatus($status, $entityManager);
-            }
-
-            try {
-                if ($status->getId()) {
-                    $status->setUpdatedAt(
-                        new DateTime(
-                            'now',
-                            new \DateTimeZone('UTC')
-                        )
-                    );
-                }
-
-                if ($aggregate instanceof Aggregate) {
-                    $timelyStatus = $this->timelyStatusRepository->fromAggregatedStatus(
-                        $status,
-                        $aggregate
-                    );
-                    $entityManager->persist($timelyStatus);
-                }
-
-                $entityManager->persist($status);
-
-                $statuses[] = $status;
-            } catch (ORMException $exception) {
-                if ($exception->getMessage() === ORMException::entityManagerClosed()->getMessage()) {
-                    $entityManager = $this->registry->resetManager('default');
-                    $entityManager->persist($status);
-                }
-            }
-        }
-
-        $this->flushAndResetManagerOnUniqueConstraintViolation($entityManager);
-
-        return [
-            'extracts'    => $propertiesCollection,
-            'screen_name' => $extract['screen_name'],
-            'statuses'    => $statuses
-        ];
+        return $status->setUpdatedAt(
+            new DateTime(
+                'now',
+                new \DateTimeZone('UTC')
+            )
+        );
     }
 
     /**
@@ -539,7 +476,7 @@ QUERY;
             );
         }
 
-        $extracts = $this->normalizeAll(
+        $extracts = Normalizer::normalizeAll(
             $statuses,
             function ($extract) use ($identifier, $indexedStatuses) {
                 $extract['identifier'] = $identifier;
@@ -550,12 +487,14 @@ QUERY;
                 }
 
                 return $extract;
-            }
+            },
+            $this->appLogger
         );
 
         $likedStatuses = [];
 
-        foreach ($extracts as $key => $extract) {
+        foreach ($extracts->toArray() as $key => $taggedStatus) {
+            $extract      = $taggedStatus->toLegacyProps();
             $memberStatus = $extract['existing_status'];
             if (!$memberStatus) {
                 $memberStatus = $this->taggedStatusRepository
@@ -564,10 +503,6 @@ QUERY;
 
             if ($memberStatus->getId() === null) {
                 $this->collectStatusLogger->logStatus($memberStatus);
-            }
-
-            if ($memberStatus->getId()) {
-                unset($extracts[$key]);
             }
 
             if ($memberStatus instanceof ArchivedStatus) {
@@ -625,10 +560,9 @@ QUERY;
     }
 
     /**
-     * @param array                $statuses
-     * @param AccessToken          $identifier
-     * @param Aggregate|null       $aggregate
-     * @param LoggerInterface|null $logger
+     * @param array          $statuses
+     * @param AccessToken    $identifier
+     * @param Aggregate|null $aggregate
      *
      * @return array
      * @throws Exception
@@ -636,35 +570,32 @@ QUERY;
     public function saveStatuses(
         array $statuses,
         AccessToken $identifier,
-        Aggregate $aggregate = null,
-        LoggerInterface $logger = null
+        Aggregate $aggregate = null
     ): array {
-        $result     = $this->iterateOverStatuses(
+        $result           = $this->statusPersistor->persistAllStatuses(
             $statuses,
             $identifier,
-            $aggregate,
-            $logger
+            $aggregate
         );
-        $extracts   = $result['extracts'];
-        $screenName = $result['screen_name'];
+        $normalizedStatus = $result['extracts'];
+        $screenName       = $result['screen_name'];
 
         $statusCollection = new Collection($result['statuses']);
-
-        $statuses = StatusToArray::fromStatusCollection($statusCollection);
-        $this->publicationRepository->persistPublications($statuses);
+        $statusCollection = StatusToArray::fromStatusCollection($statusCollection);
+        $this->publicationRepository->persistPublications($statusCollection);
 
         $statusCollection->map(fn(StatusInterface $status) => $status->markAsPublished());
 
         $this->getEntityManager()->flush();
 
-        if (count($extracts) > 0) {
+        if (count($normalizedStatus) > 0) {
             $this->memberManager->incrementTotalStatusesOfMemberWithName(
-                count($extracts),
+                count($normalizedStatus),
                 $screenName
             );
         }
 
-        return $extracts;
+        return $normalizedStatus;
     }
 
     public function setOauthTokens($oauthTokens)
@@ -677,34 +608,6 @@ QUERY;
     public function setPublicationRepository(PublicationRepositoryInterface $publicationRepository)
     {
         $this->publicationRepository = $publicationRepository;
-    }
-
-    /**
-     * @param array    $statuses
-     * @param callable $setter
-     *
-     * @return array<TaggedStatus>
-     */
-    protected function normalizeAll(
-        array $statuses,
-        callable $setter
-    ): array {
-        $extracts = [];
-
-        foreach ($statuses as $status) {
-            if (!property_exists($status, 'text') &&
-                !property_exists($status, 'full_text')) {
-                continue;
-            }
-
-            try {
-                $extracts[] = Normalizer::normalizeStatusProperties($status, $setter);
-            } catch (\Exception $exception) {
-                $this->appLogger->error($exception->getMessage());
-            }
-        }
-
-        return $extracts;
     }
 
     /**
@@ -756,6 +659,21 @@ QUERY;
     }
 
     /**
+     * @param EntityManagerInterface $entityManager
+     */
+    private function flushAndResetManagerOnUniqueConstraintViolation(
+        EntityManagerInterface $entityManager
+    ): void {
+        try {
+            $entityManager->flush();
+        } catch (UniqueConstraintViolationException $exception) {
+            $this->registry->resetManager('default');
+
+            InsertDuplicatesException::throws($exception);
+        }
+    }
+
+    /**
      * @param                        $likedStatuses
      * @param EntityManagerInterface $entityManager
      *
@@ -774,56 +692,6 @@ QUERY;
 
         $this->flushAndResetManagerOnUniqueConstraintViolation(
             $entityManager
-        );
-    }
-
-    /**
-     * @param EntityManagerInterface $entityManager
-     */
-    private function flushAndResetManagerOnUniqueConstraintViolation(
-        EntityManagerInterface $entityManager
-    ): void {
-        try {
-            $entityManager->flush();
-        } catch (UniqueConstraintViolationException $exception) {
-            $this->registry->resetManager('default');
-
-            InsertDuplicatesException::throws($exception);
-        }
-    }
-
-    /**
-     * @param ArchivedStatus $archivedStatus
-     * @param EntityManager  $entityManager
-     *
-     * @return Status
-     * @throws ORMException
-     */
-    private function unarchiveStatus(ArchivedStatus $archivedStatus, EntityManager $entityManager): StatusInterface
-    {
-        $status = Status::fromArchivedStatus($archivedStatus);
-
-        $entityManager->remove($archivedStatus);
-
-        return $status;
-    }
-
-    public function reviseDocument(TaggedStatus $taggedStatus): StatusInterface
-    {
-        /** @var Status $status */
-        $status = $this->findOneBy(
-            ['statusId' => $taggedStatus->documentId()]
-        );
-
-        $status->setApiDocument($taggedStatus->document());
-        $status->setIdentifier($taggedStatus->token());
-        $status->setText($taggedStatus->text());
-
-        return $status->setUpdatedAt(
-            new DateTime(
-            'now',
-                new \DateTimeZone('UTC')
-            )
         );
     }
 }

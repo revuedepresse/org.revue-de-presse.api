@@ -349,6 +349,7 @@ class Accessor implements ApiAccessorInterface,
      * @param string $memberId
      *
      * @return MemberInterface
+     * @throws ApiRateLimitingException
      * @throws BadAuthenticationDataException
      * @throws InconsistentTokenRepository
      * @throws InvalidMemberIdentifier
@@ -357,9 +358,11 @@ class Accessor implements ApiAccessorInterface,
      * @throws ORMException
      * @throws OptimisticLockException
      * @throws ProtectedAccountException
+     * @throws ReadOnlyApplicationException
      * @throws ReflectionException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
+     * @throws UnexpectedApiResponseException
      */
     public function ensureMemberHavingIdExists(string $memberId): MemberInterface
     {
@@ -370,10 +373,6 @@ class Accessor implements ApiAccessorInterface,
      * @param string $memberName
      *
      * @return MemberInterface
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
      */
     public function ensureMemberHavingNameExists(string $memberName): MemberInterface
     {

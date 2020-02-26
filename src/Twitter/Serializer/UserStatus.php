@@ -1166,8 +1166,6 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @param MemberInterface|null $likedBy
      *
      * @return array
-     * @throws NoResultException
-     * @throws NonUniqueResultException
      * @throws NotFoundMemberException
      * @throws ORMException
      * @throws OptimisticLockException
@@ -1180,7 +1178,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         if ($this->isAboutToCollectLikesFromCriteria($this->serializationOptions)) {
             return $this->statusRepository->saveLikes(
                 $statuses,
-                $this->accessor->getUserToken(),
+                $this->accessor->getOAuthToken(),
                 $aggregate,
                 $this->logger,
                 $likedBy,
@@ -1193,8 +1191,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         return $this->statusRepository->saveStatuses(
             $statuses,
             new AccessToken($this->accessor->getOAuthToken()),
-            $aggregate,
-            $this->logger
+            $aggregate
         );
     }
 

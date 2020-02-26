@@ -56,6 +56,7 @@ services:
         calls:
             - [ 'setPublicationRepository',  [ '@App\Twitter\Repository\PublicationRepository' ] ]
             - [ 'setStatusLogger',           [ '@App\Infrastructure\Log\StatusLogger' ] ]
+            - [ 'setStatusPersistor',        [ '@App\Infrastructure\Status\Persistor\StatusPersistor' ] ]
             - [ 'setTaggedStatusRepository', [ '@App\Domain\Repository\TaggedStatusRepository' ] ]
         properties:
             appLogger:              '@logger'
@@ -105,8 +106,18 @@ services:
             - '@doctrine.orm.entity_manager'
             - '@logger'
 
-    # add more service definitions when explicit configuration is needed
-    # please note that last definitions always *replace* previous ones
+    App\Infrastructure\Status\Persistor\StatusPersistor:
+        class: 'App\Infrastructure\Status\Persistor\StatusPersistor'
+        arguments:
+            - '@repository.timely_status'
+            - '@doctrine'
+            - '@doctrine.orm.entity_manager'
+            - '@logger'
+        calls:
+            - [ 'setStatusLogger',           [ '@App\Infrastructure\Log\StatusLogger' ] ]
+            - [ 'setTaggedStatusRepository', [ '@App\Domain\Repository\TaggedStatusRepository' ] ]
+        public: true
+
     app.cache.redis:
         class: '%redis_cache%'
         arguments:
