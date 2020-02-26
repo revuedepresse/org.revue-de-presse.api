@@ -10,7 +10,7 @@ imports:
 services:
     # default configuration for services in *this* file
     _defaults:
-        autowire: true      # Automatically injects dependencies in your services.
+        autowire: false      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
 
     # makes classes in src/ available to be used as services
@@ -25,22 +25,28 @@ services:
         resource: '../src/Aggregate/Controller/.*.php'
         tags: ['controller.service_arguments']
 
+    App\Infrastructure\Log\StatusLogger:
+        class: 'App\Infrastructure\Log\StatusLogger'
+        arguments:
+            - '@monolog.logger.status'
+
     App\Api\Repository\StatusRepository:
         class:  '\App\Api\Repository\StatusRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - '%weaving_the_web_twitter.entity.status.class%'
         calls:
-            - [ 'setPublicationRepository', [ '@App\Twitter\Repository\PublicationRepository' ] ]
+            - [ 'setPublicationRepository',  [ '@App\Twitter\Repository\PublicationRepository' ] ]
+            - [ 'setStatusLogger',           [ '@App\Infrastructure\Log\StatusLogger' ] ]
+            - [ 'setTaggedStatusRepository', [ '@App\Domain\Repository\TaggedStatusRepository' ] ]
         properties:
+            appLogger:                '@logger'
             archivedStatusRepository: '@weaving_the_web_twitter.repository.archived_status'
+            connection:               '@doctrine.dbal.default_connection'
             likedStatusRepository:    '@repository.liked_status'
             memberManager:            '@user_manager'
             registry:                 '@doctrine'
-            statusLogger:             '@monolog.logger.status'
             timelyStatusRepository:   '@repository.timely_status'
-            connection:               '@doctrine.dbal.default_connection'
-            queryFactory:             '@weaving_the_web.api.query_factory'
 
     App\Api\Repository\ArchivedStatusRepository:
         class:  '\App\Api\Repository\ArchivedStatusRepository'
@@ -48,15 +54,17 @@ services:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - '%weaving_the_web_twitter.entity.archived_status.class%'
         calls:
-            - [ 'setPublicationRepository', [ '@App\Twitter\Repository\PublicationRepository' ] ]
+            - [ 'setPublicationRepository',  [ '@App\Twitter\Repository\PublicationRepository' ] ]
+            - [ 'setStatusLogger',           [ '@App\Infrastructure\Log\StatusLogger' ] ]
+            - [ 'setStatusPersistor',        [ '@App\Infrastructure\Status\Persistor\StatusPersistor' ] ]
+            - [ 'setTaggedStatusRepository', [ '@App\Domain\Repository\TaggedStatusRepository' ] ]
         properties:
+            appLogger:              '@logger'
             likedStatusRepository:  '@repository.liked_status'
             memberManager:          '@user_manager'
             registry:               '@doctrine'
-            statusLogger:           '@monolog.logger.status'
             timelyStatusRepository: '@repository.timely_status'
             connection:             '@doctrine.dbal.default_connection'
-            queryFactory:           '@weaving_the_web.api.query_factory'
 
     App\Infrastructure\Amqp\ResourceProcessor\MemberIdentityProcessor:
         class: 'App\Infrastructure\Amqp\ResourceProcessor\MemberIdentityProcessor'
@@ -92,8 +100,24 @@ services:
             - '@user_manager'
             - '@logger'
 
-    # add more service definitions when explicit configuration is needed
-    # please note that last definitions always *replace* previous ones
+    App\Domain\Repository\TaggedStatusRepository:
+        class: 'App\Domain\Repository\TaggedStatusRepository'
+        arguments:
+            - '@doctrine.orm.entity_manager'
+            - '@logger'
+
+    App\Infrastructure\Status\Persistor\StatusPersistor:
+        class: 'App\Infrastructure\Status\Persistor\StatusPersistor'
+        arguments:
+            - '@repository.timely_status'
+            - '@doctrine'
+            - '@doctrine.orm.entity_manager'
+            - '@logger'
+        calls:
+            - [ 'setStatusLogger',           [ '@App\Infrastructure\Log\StatusLogger' ] ]
+            - [ 'setTaggedStatusRepository', [ '@App\Domain\Repository\TaggedStatusRepository' ] ]
+        public: true
+
     app.cache.redis:
         class: '%redis_cache%'
         arguments:
@@ -171,7 +195,6 @@ services:
             statusLogger:           '@monolog.logger.status'
             timelyStatusRepository: '@repository.timely_status'
             connection:             '@doctrine.dbal.default_connection'
-            queryFactory:           '@weaving_the_web.api.query_factory'
 
     weaving_the_web_twitter.repository.read.status:
         class:  'App\Api\Repository\StatusRepository'
@@ -187,7 +210,6 @@ services:
             statusLogger:           '@monolog.logger.status'
             timelyStatusRepository: '@repository.timely_status'
             connection:             '@doctrine.dbal.default_connection'
-            queryFactory:           '@weaving_the_web.api.query_factory'
 
     weaving_the_web_twitter.repository.token:
         class: '%weaving_the_web_twitter.repository.token.class%'

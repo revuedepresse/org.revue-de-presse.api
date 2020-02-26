@@ -1,27 +1,29 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Status\Entity;
 
 use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;
-use App\Api\Entity\StatusInterface;
+use App\Domain\Status\StatusInterface;
+use Ramsey\Uuid\UuidInterface;
 
 class NotFoundStatus
 {
     /**
      * @var string
      */
-    private $id;
+    private UuidInterface $id;
 
     /**
      * @var Status
      */
-    private $status = null;
+    private ?Status $status = null;
 
     /**
      * @var ArchivedStatus
      */
-    private $archivedStatus = null;
+    private ?ArchivedStatus $archivedStatus = null;
 
     /**
      * @param $status
@@ -46,7 +48,7 @@ class NotFoundStatus
      */
     public function getStatus()
     {
-        if (is_null($this->status)) {
+        if ($this->status === null) {
             return $this->archivedStatus;
         }
 

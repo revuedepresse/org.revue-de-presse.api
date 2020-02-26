@@ -5,11 +5,15 @@ namespace App\Aggregate\Repository;
 use App\Aggregate\Controller\SearchParams;
 use App\Aggregate\Entity\TimelyStatus;
 use App\Conversation\ConversationAwareTrait;
+use App\TimeRange\TimeRangeAwareInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 use Doctrine\ORM\QueryBuilder;
 use App\Api\Entity\Aggregate;
-use App\Api\Entity\StatusInterface;
+use App\Domain\Status\StatusInterface;
 use App\Api\Repository\PublicationListRepository;
 use Laminas\Service;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
@@ -34,7 +38,7 @@ class TimelyStatusRepository extends ServiceEntityRepository
     /**
      * @param array $properties
      * @return TimelyStatus|\App\TimeRange\TimeRangeAwareInterface
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws OptimisticLockException
      */
     public function fromArray(array $properties)
     {
@@ -103,13 +107,13 @@ class TimelyStatusRepository extends ServiceEntityRepository
     /**
      * @param StatusInterface $status
      * @param Aggregate|null  $aggregate
-     * @return TimelyStatus
+     * @return TimeRangeAwareInterface
      * @throws \Exception
      */
     public function fromAggregatedStatus(
         StatusInterface $status,
         Aggregate $aggregate = null
-    ): TimelyStatus {
+    ): TimeRangeAwareInterface {
         $timelyStatus = $this->findOneBy([
             'status' => $status
         ]);
@@ -127,12 +131,14 @@ class TimelyStatusRepository extends ServiceEntityRepository
 
     /**
      * @param TimelyStatus $timelyStatus
-     * @param bool         $doNotFlush
+     *
      * @return TimelyStatus
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
-    public function saveTimelyStatus(TimelyStatus $timelyStatus, $doNotFlush = false)
-    {
+    public function saveTimelyStatus(
+        TimelyStatus $timelyStatus
+    ) {
         $this->getEntityManager()->persist($timelyStatus);
         $this->getEntityManager()->flush();
 
@@ -152,7 +158,7 @@ class TimelyStatusRepository extends ServiceEntityRepository
     /**
      * @param SearchParams $searchParams
      * @return array
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      */
     public function findStatuses(SearchParams $searchParams): array
     {
@@ -189,7 +195,7 @@ class TimelyStatusRepository extends ServiceEntityRepository
     /**
      * @param QueryBuilder $queryBuilder
      * @param SearchParams $searchParams
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      */
     private function applyCriteria(
         QueryBuilder $queryBuilder,

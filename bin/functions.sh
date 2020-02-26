@@ -19,7 +19,7 @@ function create_network() {
 
 function get_network_option() {
     network='--network '`get_docker_network`' '
-    if [ ! -z "${NO_DOCKER_NETWORK}" ];
+    if [ -n "${NO_DOCKER_NETWORK}" ];
     then
         network=''
     fi
@@ -34,7 +34,7 @@ function kill_existing_consumers {
     local totalProcesses
     totalProcesses=`ps ux | grep "rabbitmq:consumer" | grep -v grep | grep -c ''`
 
-    if [ ! -z "${DOCKER_MODE}" ];
+    if [ -n "${DOCKER_MODE}" ];
     then
         remove_exited_containers
     fi
@@ -54,7 +54,7 @@ function kill_existing_consumers {
 
     echo 'The maximum processes to be kept alive is '"${MAX_PROCESSES}"
 
-    if [ ! -z ${DOCKER_MODE} ];
+    if [ -n ${DOCKER_MODE} ];
     then
         totalProcesses="$(docker ps -a | grep php | grep -c '')"
     fi
@@ -69,7 +69,7 @@ function kill_existing_consumers {
         return
     fi
 
-    if [ ! -z "${DOCKER_MODE}" ];
+    if [ -n "${DOCKER_MODE}" ];
     then
         make remove-php-container
 
@@ -182,7 +182,7 @@ function execute_command () {
     cd "${PROJECT_DIR}"
     make run-php-script >> "${output_log}" 2>> "${error_log}"
 
-    if [ ! -z "${VERBOSE}" ];
+    if [ -n "${VERBOSE}" ];
     then
         cat "${output_log}" | tail -n1000
         cat "${error_log}" | tail -n1000
@@ -229,7 +229,7 @@ function grant_privileges {
 function get_project_dir {
     local project_dir='/var/www/devobs'
 
-    if [ ! -z "${PROJECT_DIR}" ];
+    if [ -n "${PROJECT_DIR}" ];
     then
         project_dir="${PROJECT_DIR}"
     fi
@@ -311,7 +311,7 @@ function migrate_schema {
     local queries=$(printf %s "$(echo ${first_query} | head -n1 | head -c500)")
 
     local port_accepted_once=''
-    if [ ! -z "${accepted_database_port}" ];
+    if [ -n "${accepted_database_port}" ];
     then
         port_accepted_once="${accepted_database_port}"
         unset accepted_database_port
@@ -442,7 +442,7 @@ function remove_mysql_container {
 function run_mysql_container {
     local from="${1}"
 
-    if [ ! -z "${from}" ];
+    if [ -n "${from}" ];
     then
         echo 'About to move to "'"${from}"'"'
         cd "${from}"
@@ -477,7 +477,7 @@ function run_mysql_container {
     local gateway="`get_mysql_gateway`"
 
     local mysql_volume_path=`pwd`"/../../volumes/mysql"
-    if [ ! -z "${MYSQL_VOLUME}" ];
+    if [ -n "${MYSQL_VOLUME}" ];
     then
         mysql_volume_path="${MYSQL_VOLUME}"
         configuration_volume='-v '"`pwd`"'/templates/my.cnf:/etc/mysql/conf.d/config-file.cnf '
@@ -607,7 +607,7 @@ function remove_exited_containers() {
 
 function remove_php_container() {
     local namespace=''
-    if [ ! -z  "${NAMESPACE}" ];
+    if [ -n  "${NAMESPACE}" ];
     then
         namespace=' | grep '"'""${NAMESPACE}""'"
     fi
@@ -616,7 +616,8 @@ function remove_php_container() {
 
     local running_containers_matching_namespace="docker ps -a | grep hours | grep php-""${namespace}"
 
-    local running_containers=`/bin/bash -c "${running_containers_matching_namespace} | grep -c ''"`
+    local running_containers
+    running_containers=`/bin/bash -c "${running_containers_matching_namespace} | grep -c ''"`
     if [ "${running_containers}" -eq 0 ];
     then
         echo 'No more PHP container to be removed'
@@ -630,24 +631,11 @@ function remove_php_container() {
     /bin/bash -c "${command}" || echo 'No more container to be removed'
 }
 
-function configure_rabbitmq_user_privileges() {
-    local rabbitmq_vhost="$(cat <(cat app/config/parameters.yml | grep -v '#' | grep 'rabbitmq_vhost:' | cut -f 2 -d ':' | sed -e 's/[[:space:]]//g'))"
-    local rabbitmq_user=$(cat <(cat app/config/parameters.yml | \
-        grep 'rabbitmq_user:' | grep -v '#' | \
-        cut -f 2 -d ':' | sed -e 's/[[:space:]]//g'))
-    local rabbitmq_password="cat app/config/parameters.yml | grep -v '#' | grep 'rabbitmq_password:' | cut -f 2 -d ':' | sed -e 's/[[:space:]]//g'"
-
-    docker exec -ti rabbitmq /bin/bash -c 'rabbitmqctl add_vhost '"${rabbitmq_vhost}"
-    docker exec -ti rabbitmq /bin/bash -c 'rabbitmqctl add_user '"${rabbitmq_user}"' '"'""$(cat <(/bin/bash -c "${rabbitmq_password}"))""'"
-    docker exec -ti rabbitmq /bin/bash -c 'rabbitmqctl set_user_tags '"${rabbitmq_user}"' administrator'
-    docker exec -ti rabbitmq /bin/bash -c 'rabbitmqctl set_permissions -p '"${rabbitmq_vhost}"' '"${rabbitmq_user}"' ".*" ".*" ".*"'
-}
-
 function list_amqp_queues() {
-    local rabbitmq_vhost="$(cat <(cat .env.local | grep amqp | sed -E 's#.+(/.+)/[^/]*$#\1#' | sed -E 's/\/%2f/\//g'))"
-    cd provisioning/containers
+    local rabbitmq_vhost
+    rabbitmq_vhost="$(cat <(cat .env.local | grep STATUS=amqp | sed -E 's#.+(/.+)/[^/]*$#\1#' | sed -E 's/\/%2f/\//g'))"
+    cd provisioning/containers || exit
     docker-compose exec messenger watch -n1 'rabbitmqctl list_queues -p '"${rabbitmq_vhost}"
-    cd ../..
 }
 
 function set_permissions_in_apache_container() {
@@ -655,14 +643,14 @@ function set_permissions_in_apache_container() {
     sudo mkdir ./var/cache
     sudo chown -R `whoami` ./var/logs ./var
 
-    cd ./provisioning/containers
+    cd ./provisioning/containers || exit
     docker-compose exec worker bin/console cache:clear -e prod --no-warmup
     docker-compose exec worker bin/console cache:clear -e dev --no-warmup
     cd "../../"
 }
 
 function build_apache_container() {
-    cd provisioning/containers/apache
+    cd provisioning/containers/apache || exit
     docker build -t apache .
 }
 
@@ -705,7 +693,7 @@ function run_apache() {
     local port
     port='80'
 
-    if [ ! -z "${PRESS_REVIEW_APACHE_PORT}" ];
+    if [ -n "${PRESS_REVIEW_APACHE_PORT}" ];
     then
         port="${PRESS_REVIEW_APACHE_PORT}"
     fi
@@ -713,7 +701,7 @@ function run_apache() {
     host host
     host='127.0.0.1'
 
-    if [ ! -z "${PRESS_REVIEW_APACHE_HOST}" ];
+    if [ -n "${PRESS_REVIEW_APACHE_HOST}" ];
     then
         host="${PRESS_REVIEW_APACHE_HOST}"
     fi
@@ -758,19 +746,19 @@ function run_php_fpm() {
     remove_php_fpm_container
 
     local port=80
-    if [ ! -z "${PRESS_REVIEW_PHP_FPM_PORT}" ];
+    if [ -n "${PRESS_REVIEW_PHP_FPM_PORT}" ];
     then
         port="${PRESS_REVIEW_PHP_FPM_PORT}"
     fi
 
     host host=''
-    if [ ! -z "${PRESS_REVIEW_PHP_FPM_HOST}" ];
+    if [ -n "${PRESS_REVIEW_PHP_FPM_HOST}" ];
     then
         host="${PRESS_REVIEW_PHP_FPM_HOST}"':'
     fi
 
     host mount=''
-    if [ ! -z "${PRESS_REVIEW_PHP_FPM_MOUNT}" ];
+    if [ -n "${PRESS_REVIEW_PHP_FPM_MOUNT}" ];
     then
         mount="${PRESS_REVIEW_PHP_FPM_MOUNT}"
     fi
@@ -842,7 +830,7 @@ function run_php_script() {
     fi
 
     local memory=''
-    if [ ! -z "${PHP_MEMORY_LIMIT}" ];
+    if [ -n "${PHP_MEMORY_LIMIT}" ];
     then
         memory="${PHP_MEMORY_LIMIT}"
     fi
@@ -949,7 +937,7 @@ function ensure_log_files_exist() {
 
 function get_symfony_environment() {
     local symfony_env='dev'
-    if [ ! -z "${SYMFONY_ENV}" ];
+    if [ -n "${SYMFONY_ENV}" ];
     then
         symfony_env="${SYMFONY_ENV}"
     fi
@@ -959,7 +947,7 @@ function get_symfony_environment() {
 
 function get_environment_option() {
     local symfony_env='dev'
-    if [ ! -z "${SYMFONY_ENV}" ];
+    if [ -n "${SYMFONY_ENV}" ];
     then
         symfony_env="${SYMFONY_ENV}"
     fi
@@ -1048,7 +1036,7 @@ function run_command {
 
     export SCRIPT="${php_command}"
 
-    if [ ! -z "${memory_limit}" ];
+    if [ -n "${memory_limit}" ];
     then
         export PHP_MEMORY_LIMIT=' -d memory_limit='"${memory_limit}"
     fi
@@ -1096,19 +1084,19 @@ function dispatch_messages_for_news_list {
     fi
 
     local priority_option=''
-    if [ ! -z "${in_priority}" ];
+    if [ -n "${in_priority}" ];
     then
         priority_option='--priority_to_aggregates '
     fi
 
     local query_restriction=''
-    if [ ! -z "${QUERY_RESTRICTION}" ];
+    if [ -n "${QUERY_RESTRICTION}" ];
     then
         query_restriction='--query_restriction='"${QUERY_RESTRICTION}"
     fi
 
     local list_option='--list='"'${list_name}'"
-    if [ ! -z "${multiple_lists}" ];
+    if [ -n "${multiple_lists}" ];
     then
         list_option='--lists='"'${multiple_lists}'"
     fi

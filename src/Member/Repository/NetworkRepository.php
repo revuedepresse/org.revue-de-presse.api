@@ -147,7 +147,7 @@ class NetworkRepository
     {
         return $this->guardAgainstExceptionalMemberWhenLookingForOne(
             function (string $memberId) {
-                return $this->accessor->ensureMemberHavingIdExists((int) $memberId);
+                return $this->accessor->ensureMemberHavingIdExists($memberId);
             },
             $memberId
         );

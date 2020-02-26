@@ -6,7 +6,7 @@ namespace App\Twitter\Repository;
 use App\Api\Adapter\StatusToArray;
 use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;
-use App\Api\Entity\StatusInterface;
+use App\Domain\Status\StatusInterface;
 use App\Operation\Collection\Collection;
 use App\Operation\Collection\CollectionInterface;
 use App\Twitter\Entity\Publication;

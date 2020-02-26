@@ -6,7 +6,9 @@ use App\TimeRange\TimeRangeAwareTrait;
 use App\TimeRange\TimeRangeAwareInterface;
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\Status;
-use App\Api\Entity\StatusInterface;
+use App\Domain\Status\StatusInterface;
+use DateTimeInterface;
+use Ramsey\Uuid\UuidInterface;
 
 class TimelyStatus implements TimeRangeAwareInterface
 {
@@ -15,42 +17,42 @@ class TimelyStatus implements TimeRangeAwareInterface
     /**
      * @var string
      */
-    private $id;
+    private UuidInterface $id;
 
     /**
      * @var Status
      */
-    private $status;
+    private StatusInterface $status;
 
     /**
      * @var Aggregate
      */
-    private $aggregate;
+    private Aggregate $aggregate;
 
     /**
-     * @var \DateTime
+     * @var DateTimeInterface
      */
-    private $publicationDateTime;
+    private DateTimeInterface $publicationDateTime;
 
     /**
      * @var string
      */
-    private $aggregateName;
+    private string $aggregateName;
 
     /**
      * @var int
      */
-    private $timeRange;
+    private int $timeRange;
 
     /**
      * @var string
      */
-    private $memberName;
+    private string $memberName;
 
     public function __construct(
         StatusInterface $status,
         Aggregate $aggregate,
-        \DateTime $publicationDateTime
+        \DateTimeInterface $publicationDateTime
     ) {
 
         $this->status = $status;

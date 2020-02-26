@@ -346,15 +346,25 @@ class Accessor implements ApiAccessorInterface,
     }
 
     /**
-     * @param int $memberId
+     * @param string $memberId
      *
      * @return MemberInterface
+     * @throws ApiRateLimitingException
+     * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
+     * @throws InvalidMemberIdentifier
      * @throws NonUniqueResultException
+     * @throws NotFoundMemberException
+     * @throws ORMException
      * @throws OptimisticLockException
+     * @throws ProtectedAccountException
+     * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
+     * @throws UnexpectedApiResponseException
      */
-    public function ensureMemberHavingIdExists(int $memberId): MemberInterface
+    public function ensureMemberHavingIdExists(string $memberId): MemberInterface
     {
         return $this->statusAccessor->ensureMemberHavingIdExists($memberId);
     }
@@ -363,10 +373,6 @@ class Accessor implements ApiAccessorInterface,
      * @param string $memberName
      *
      * @return MemberInterface
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
      */
     public function ensureMemberHavingNameExists(string $memberName): MemberInterface
     {
@@ -695,9 +701,14 @@ class Accessor implements ApiAccessorInterface,
     }
 
     /**
-     * @deprecated
+     * @deprecated in favor of ->getOAuthToken()
      */
     public function getUserToken()
+    {
+        return $this->getOAuthToken();
+    }
+
+    public function getOAuthToken()
     {
         return $this->userToken;
     }

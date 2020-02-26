@@ -107,6 +107,7 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
      * @throws BadAuthenticationDataException
      * @throws InconsistentTokenRepository
      * @throws ReflectionException
+     * @throws \Doctrine\ORM\ORMException
      */
     public function __invoke(FetchMemberStatuses $message)
     {

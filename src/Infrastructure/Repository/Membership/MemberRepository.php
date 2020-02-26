@@ -662,7 +662,8 @@ QUERY;
     }
 
     /**
-     * @param SearchParams $params
+     * @param SearchParams $searchParams
+     *
      * @return array
      * @throws DBALException
      */
@@ -760,7 +761,6 @@ QUERY;
 
     /**
      * @param MemberIdentity $memberIdentity
-     * @param stdClass       $twitterUser
      *
      * @return MemberInterface
      * @throws InvalidMemberIdentifier
@@ -768,15 +768,13 @@ QUERY;
      * @throws OptimisticLockException
      */
     public function saveMemberFromIdentity(
-        MemberIdentity $memberIdentity,
-        stdClass $twitterUser
+        MemberIdentity $memberIdentity
     ): MemberInterface {
-        return $this->saveMemberWithAdditionalProps($memberIdentity, $twitterUser);
+        return $this->saveMemberWithAdditionalProps($memberIdentity);
     }
 
     /**
      * @param MemberIdentity $memberIdentity
-     * @param stdClass       $twitterUser
      * @param bool           $protected
      * @param bool           $suspended
      *
@@ -787,13 +785,12 @@ QUERY;
      */
     private function saveMemberWithAdditionalProps(
         MemberIdentity $memberIdentity,
-        stdClass $twitterUser,
         bool $protected = false,
         bool $suspended = false
     ): MemberInterface {
         $member = $this->make(
             $memberIdentity->id(),
-            $twitterUser->screen_name,
+            $memberIdentity->screenName(),
             $protected,
             $suspended
         );
@@ -812,11 +809,11 @@ QUERY;
      * @throws ORMException
      * @throws OptimisticLockException
      */
-    public function saveProtectedMember(MemberIdentity $memberIdentity): MemberInterface
-    {
+    public function saveProtectedMember(
+        MemberIdentity $memberIdentity
+    ): MemberInterface {
         return $this->saveMemberWithAdditionalProps(
             $memberIdentity,
-            (object) ['screen_name' => $memberIdentity->screenName()],
             $protected = true
         );
     }
@@ -829,11 +826,11 @@ QUERY;
      * @throws ORMException
      * @throws OptimisticLockException
      */
-    public function saveSuspendedMember(MemberIdentity $memberIdentity): MemberInterface
-    {
+    public function saveSuspendedMember(
+        MemberIdentity $memberIdentity
+    ): MemberInterface {
         return $this->saveMemberWithAdditionalProps(
             $memberIdentity,
-            (object) ['screen_name' => $memberIdentity->screenName()],
             $protected = false,
             $suspended = true
         );

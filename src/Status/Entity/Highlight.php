@@ -4,7 +4,7 @@ namespace App\Status\Entity;
 
 use App\Membership\Entity\MemberInterface;
 use Predis\Configuration\Option\Aggregate;
-use App\Api\Entity\StatusInterface;
+use App\Domain\Status\StatusInterface;
 
 class Highlight
 {

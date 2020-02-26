@@ -4,6 +4,8 @@
 namespace App\TimeRange;
 
 use App\Api\Entity\Status;
+use DateTime;
+use Exception;
 
 /**
  * @package App\Status
@@ -12,7 +14,7 @@ trait TimeRangeAwareTrait
 {
     /**
      * @return TimeRangeAwareInterface
-     * @throws \Exception
+     * @throws Exception
      */
     public function updateTimeRange(): TimeRangeAwareInterface
     {
@@ -27,13 +29,13 @@ trait TimeRangeAwareTrait
     }
 
     /**
-     * @param \DateTime $statusPublicationDate
+     * @param DateTime $statusPublicationDate
      * @return int
-     * @throws \Exception
+     * @throws Exception
      */
-    public function mapDateToTimeRange(\DateTime $statusPublicationDate)
+    public function mapDateToTimeRange(DateTime $statusPublicationDate)
     {
-        $now = new \DateTime('now', new \DateTimeZone('UTC'));
+        $now = new DateTime('now', new \DateTimeZone('UTC'));
 
         $fiveMinutesAgo = (clone $now)->sub(new \DateInterval('PT5M'));
         $tenMinutesAgo = (clone $now)->sub(new \DateInterval('PT10M'));

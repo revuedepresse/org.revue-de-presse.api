@@ -14,4 +14,9 @@ class Collection extends ArrayCollection implements CollectionInterface
     {
         return new self($collection);
     }
+
+    public function isNotEmpty(): bool
+    {
+        return !$this->isEmpty();
+    }
 }

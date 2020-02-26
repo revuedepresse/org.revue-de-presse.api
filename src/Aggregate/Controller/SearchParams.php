@@ -6,10 +6,10 @@ use Symfony\Component\HttpFoundation\Request;
 
 class SearchParams
 {
-    private $pageIndex;
-    private $pageSize;
-    private $keyword;
-    private $params;
+    private int $pageIndex;
+    private int $pageSize;
+    private string $keyword;
+    private array $params;
 
     /**
      * @param int         $pageIndex

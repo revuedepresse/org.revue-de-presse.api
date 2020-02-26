@@ -9,9 +9,10 @@ use App\Accessor\Exception\ReadOnlyApplicationException;
 use App\Accessor\Exception\UnexpectedApiResponseException;
 use App\Aggregate\Exception\LockedAggregateException;
 use App\Amqp\Exception\SkippableMessageException;
-use App\Amqp\Message\FetchMemberStatuses;
+use App\Api\AccessToken\AccessToken;
+use App\Infrastructure\Amqp\Message\FetchMemberStatuses;
 use App\Api\Entity\Aggregate;
-use App\Api\Entity\StatusInterface;
+use App\Domain\Status\StatusInterface;
 use App\Api\Entity\Token;
 use App\Api\Entity\TokenInterface;
 use App\Api\Entity\Whisperer;
@@ -20,6 +21,7 @@ use App\Api\Repository\StatusRepository;
 use App\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Api\Repository\WhispererRepository;
 use App\Membership\Entity\MemberInterface;
+use App\Membership\Exception\InvalidMemberIdentifier;
 use App\Status\LikedStatusCollectionAwareInterface;
 use App\Status\Repository\LikedStatusRepository;
 use App\Twitter\Api\Accessor;
@@ -32,6 +34,7 @@ use App\Twitter\Exception\UnavailableResourceException;
 use App\Twitter\Serializer\Exception\RateLimitedException;
 use App\Twitter\Serializer\Exception\SkipSerializationException;
 use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Exception\ConstraintViolationException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
@@ -296,6 +299,9 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             // Figuring out a member is now protected, suspended or not found is considered to be a "success",
             // provided the workers would not call the API on behalf of them
             $success = true;
+        } catch (ConstraintViolationException $constraintViolationException) {
+            $this->logger->critical($constraintViolationException->getMessage());
+            $success = false;
         } catch (Exception $exception) {
             $this->logger->error(sprintf(
                 '[from %s %s]',
@@ -1160,11 +1166,8 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @param MemberInterface|null $likedBy
      *
      * @return array
-     * @throws NoResultException
-     * @throws NonUniqueResultException
      * @throws NotFoundMemberException
-     * @throws NoResultException
-     * @throws NonUniqueResultException
+     * @throws ORMException
      * @throws OptimisticLockException
      */
     private function saveStatuses(
@@ -1175,7 +1178,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         if ($this->isAboutToCollectLikesFromCriteria($this->serializationOptions)) {
             return $this->statusRepository->saveLikes(
                 $statuses,
-                $this->accessor->getUserToken(),
+                $this->accessor->getOAuthToken(),
                 $aggregate,
                 $this->logger,
                 $likedBy,
@@ -1187,9 +1190,8 @@ class UserStatus implements LikedStatusCollectionAwareInterface
 
         return $this->statusRepository->saveStatuses(
             $statuses,
-            $this->accessor->getUserToken(),
-            $aggregate,
-            $this->logger
+            new AccessToken($this->accessor->getOAuthToken()),
+            $aggregate
         );
     }
 
@@ -1495,14 +1497,24 @@ class UserStatus implements LikedStatusCollectionAwareInterface
 
     /**
      * @param $options
-     * @return null|Whisperer
+     *
+     * @return object|null
+     * @throws ApiRateLimitingException
+     * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      * @throws NotFoundMemberException
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws ProtectedAccountException
+     * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
      * @throws SkippableMessageException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
-     * @throws NoResultException
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
+     * @throws UnexpectedApiResponseException
+     * @throws InvalidMemberIdentifier
      */
     private function beforeFetchingStatuses($options)
     {
@@ -1541,11 +1553,11 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws NotFoundMemberException
+     * @throws ORMException
      * @throws OptimisticLockException
      * @throws SkippableMessageException
-     * @throws NoResultException
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
      */
     private function afterCountingCollectedStatuses(
         array $options,
@@ -1844,7 +1856,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         $options[self::MESSAGE_OPTION_TOKEN] = $token->getOauthToken();
         $this->setupAccessor([
             TokenInterface::FIELD_TOKEN => $options[self::MESSAGE_OPTION_TOKEN],
-            TokenInterface::FFIELD_SECRET => $token->getOauthTokenSecret()
+            TokenInterface::FIELD_SECRET => $token->getOauthTokenSecret()
         ]);
 
         return $options;

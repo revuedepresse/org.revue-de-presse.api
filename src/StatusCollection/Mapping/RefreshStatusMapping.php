@@ -75,6 +75,7 @@ class RefreshStatusMapping implements MappingAwareInterface
             return $status;
         }
 
+        // TODO point at Status Logger
         $reachBeforeRefresh = $this->statusRepository->extractReachOfStatus($status);
 
         $aggregate = $status->getAggregates()->first();

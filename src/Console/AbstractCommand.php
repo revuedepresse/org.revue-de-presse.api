@@ -11,12 +11,12 @@ abstract class AbstractCommand extends Command implements CommandReturnCodeAware
     /**
      * @var InputInterface
      */
-    protected $input;
+    protected InputInterface $input;
 
     /**
      * @var OutputInterface
      */
-    protected $output;
+    protected OutputInterface $output;
 
     /**
      * @param InputInterface  $input

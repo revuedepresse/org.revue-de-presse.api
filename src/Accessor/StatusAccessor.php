@@ -3,11 +3,19 @@ declare(strict_types=1);
 
 namespace App\Accessor;
 
-use App\Api\Entity\StatusInterface;
+use App\Accessor\Exception\ApiRateLimitingException;
+use App\Accessor\Exception\ReadOnlyApplicationException;
+use App\Accessor\Exception\UnexpectedApiResponseException;
+use App\Api\AccessToken\AccessToken;
+use App\Domain\Status\StatusInterface;
 use App\Membership\Entity\MemberInterface;
 use App\Infrastructure\Repository\Membership\MemberRepository;
+use App\Membership\Exception\InvalidMemberIdentifier;
 use App\Status\Entity\NullStatus;
 use App\Status\Repository\NotFoundStatusRepository;
+use App\Twitter\Exception\BadAuthenticationDataException;
+use App\Twitter\Exception\InconsistentTokenRepository;
+use App\Twitter\Exception\ProtectedAccountException;
 use App\Twitter\Exception\SuspendedAccountException;
 use App\Twitter\Exception\UnavailableResourceException;
 use Doctrine\Common\Persistence\Mapping\MappingException;
@@ -20,7 +28,9 @@ use App\Twitter\Api\Accessor;
 use App\Twitter\Exception\NotFoundMemberException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 use Exception;
+use ReflectionException;
 
 /**
  * @package App\Accessor
@@ -125,7 +135,7 @@ class StatusAccessor
             $status = $this->statusRepository->findStatusIdentifiedBy($identifier);
         }
 
-        if (!is_null($status) && !empty($status)) {
+        if ($status !== null && !empty($status)) {
             return $status;
         }
 
@@ -137,9 +147,7 @@ class StatusAccessor
         try {
             $this->statusRepository->saveStatuses(
                 [$status],
-                $this->accessor->userToken,
-                null,
-                $this->logger
+                new AccessToken($this->accessor->userToken)
             );
         } catch (NotFoundMemberException $notFoundMemberException) {
             return $this->findStatusIdentifiedBy($identifier);
@@ -150,15 +158,6 @@ class StatusAccessor
         return $this->findStatusIdentifiedBy($identifier);
     }
 
-    /**
-     * @param string $memberName
-     *
-     * @return MemberInterface|object|null
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     */
     public function ensureMemberHavingNameExists(string $memberName): MemberInterface
     {
         $member = $this->userManager->findOneBy(['twitter_username' => $memberName]);
@@ -190,15 +189,25 @@ class StatusAccessor
     }
 
     /**
-     * @param int $id
+     * @param string $id
      *
-     * @return MemberInterface|null|object
+     * @return MemberInterface|null
+     * @throws BadAuthenticationDataException
+     * @throws ApiRateLimitingException
+     * @throws ReadOnlyApplicationException
+     * @throws UnexpectedApiResponseException
+     * @throws InconsistentTokenRepository
+     * @throws InvalidMemberIdentifier
      * @throws NonUniqueResultException
+     * @throws NotFoundMemberException
+     * @throws ORMException
      * @throws OptimisticLockException
+     * @throws ProtectedAccountException
+     * @throws ReflectionException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
      */
-    public function ensureMemberHavingIdExists(int $id)
+    public function ensureMemberHavingIdExists(string $id)
     {
         $member = $this->userManager->findOneBy(['twitterID' => $id]);
         if ($member instanceof MemberInterface) {
@@ -207,11 +216,11 @@ class StatusAccessor
             return $member;
         }
 
-        $member = $this->accessor->showUser($id);
+        $member = $this->accessor->showUser((string) $id);
 
         return $this->userManager->saveMember(
             $this->userManager->make(
-                $id,
+                (string) $id,
                 $member->screen_name,
                 $protected = false,
                 $suspended = false,
