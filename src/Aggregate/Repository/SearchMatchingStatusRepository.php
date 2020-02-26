@@ -7,7 +7,7 @@ use App\Aggregate\Entity\SearchMatchingStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityRepository;
-use App\Api\Entity\StatusInterface;
+use App\Domain\Status\StatusInterface;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
 
 class SearchMatchingStatusRepository extends ServiceEntityRepository

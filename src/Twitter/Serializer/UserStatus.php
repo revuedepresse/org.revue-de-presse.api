@@ -12,7 +12,7 @@ use App\Amqp\Exception\SkippableMessageException;
 use App\Api\AccessToken\AccessToken;
 use App\Infrastructure\Amqp\Message\FetchMemberStatuses;
 use App\Api\Entity\Aggregate;
-use App\Api\Entity\StatusInterface;
+use App\Domain\Status\StatusInterface;
 use App\Api\Entity\Token;
 use App\Api\Entity\TokenInterface;
 use App\Api\Entity\Whisperer;

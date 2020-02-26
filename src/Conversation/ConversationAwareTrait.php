@@ -2,7 +2,7 @@
 
 namespace App\Conversation;
 
-use App\Api\Entity\StatusInterface;
+use App\Domain\Status\StatusInterface;
 use App\Conversation\Consistency\StatusConsistency;
 use App\Conversation\Exception\InvalidStatusException;
 use App\Conversation\Validation\StatusValidator;

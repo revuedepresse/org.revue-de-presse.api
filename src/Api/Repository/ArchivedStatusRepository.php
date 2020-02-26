@@ -9,7 +9,7 @@ use App\Api\Adapter\StatusToArray;
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;
-use App\Api\Entity\StatusInterface;
+use App\Domain\Status\StatusInterface;
 use App\Domain\Repository\StatusRepositoryInterface;
 use App\Domain\Status\TaggedStatus;
 use App\Infrastructure\DependencyInjection\StatusLoggerTrait;
@@ -830,29 +830,6 @@ QUERY;
      */
     private function unarchiveStatus(ArchivedStatus $memberStatus, EntityManager $entityManager): Status
     {
-        $status = new Status();
-
-        $status->setCreatedAt($memberStatus->getCreatedAt());
-        $status->setApiDocument($memberStatus->getApiDocument());
-        $status->setUpdatedAt($memberStatus->getUpdatedAt());
-        $status->setText($memberStatus->getText());
-        $status->setHash($memberStatus->getHash());
-        $status->setIdentifier($memberStatus->getIdentifier());
-        $status->setScreenName($memberStatus->getScreenName());
-        $status->setStarred($memberStatus->isStarred());
-        $status->setName($memberStatus->getName());
-        $status->setIndexed($memberStatus->getIndexed());
-        $status->setStatusId($memberStatus->getStatusId());
-        $status->setUserAvatar($memberStatus->getUserAvatar());
-        $status->setScreenName($memberStatus->getScreenName());
-
-        if (!$memberStatus->getAggregates()->isEmpty()) {
-            $memberStatus->getAggregates()->map(
-                function (Aggregate $aggregate) use ($status) {
-                    $status->addToAggregates($aggregate);
-                }
-            );
-        }
 
         $entityManager->remove($memberStatus);
 

@@ -2,7 +2,7 @@
 
 namespace App\Popularity\Entity;
 
-use App\Api\Entity\StatusInterface;
+use App\Domain\Status\StatusInterface;
 
 class StatusPopularity
 {

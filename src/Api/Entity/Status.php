@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Api\Entity;
 
+use App\Domain\Status\StatusInterface;
 use App\Status\Entity\StatusTrait;
 use DateTimeInterface;
 use Doctrine\Common\Collections\Collection;
@@ -97,7 +98,7 @@ class Status implements StatusInterface
      */
     protected bool $isPublished = false;
 
-    public function markAsPublished(): self
+    public function markAsPublished(): StatusInterface
     {
         $this->isPublished = true;
 
@@ -151,4 +152,33 @@ class Status implements StatusInterface
     {
         return $this->popularity;
     }
+
+    public function fromArchivedStatus(ArchivedStatus $archivedStatus): StatusInterface
+    {
+        $status = new Status();
+
+        $status->setCreatedAt($archivedStatus->getCreatedAt());
+        $status->setApiDocument($archivedStatus->getApiDocument());
+        $status->setUpdatedAt($archivedStatus->getUpdatedAt());
+        $status->setText($archivedStatus->getText());
+        $status->setHash($archivedStatus->getHash());
+        $status->setIdentifier($archivedStatus->getIdentifier());
+        $status->setScreenName($archivedStatus->getScreenName());
+        $status->setStarred($archivedStatus->isStarred());
+        $status->setName($archivedStatus->getName());
+        $status->setIndexed($archivedStatus->getIndexed());
+        $status->setStatusId($archivedStatus->getStatusId());
+        $status->setUserAvatar($archivedStatus->getUserAvatar());
+        $status->setScreenName($archivedStatus->getScreenName());
+
+        if (!$archivedStatus->getAggregates()->isEmpty()) {
+            $archivedStatus->getAggregates()->map(
+                function (Aggregate $aggregate) use ($status) {
+                    $status->addToAggregates($aggregate);
+                }
+            );
+        }
+
+    }
+
 }

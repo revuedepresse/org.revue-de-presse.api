@@ -6,7 +6,7 @@ namespace App\Domain\Repository;
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;
-use App\Api\Entity\StatusInterface;
+use App\Domain\Status\StatusInterface;
 use App\Domain\Status\TaggedStatus;
 use App\Infrastructure\DependencyInjection\StatusRepositoryTrait;
 use Doctrine\ORM\EntityManagerInterface;

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Api\Adapter;
 
-use App\Api\Entity\StatusInterface;
+use App\Domain\Status\StatusInterface;
 use App\Operation\Collection\CollectionInterface;
 use function hash;
 

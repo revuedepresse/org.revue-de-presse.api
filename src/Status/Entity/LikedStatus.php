@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Status\Entity;
 
@@ -8,7 +9,7 @@ use App\TimeRange\TimeRangeAwareInterface;
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;
-use App\Api\Entity\StatusInterface;
+use App\Domain\Status\StatusInterface;
 
 class LikedStatus implements TimeRangeAwareInterface
 {

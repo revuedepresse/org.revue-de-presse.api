@@ -7,12 +7,13 @@ use App\Aggregate\Entity\TimelyStatus;
 use App\Conversation\ConversationAwareTrait;
 use App\TimeRange\TimeRangeAwareInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\QueryBuilder;
 use App\Api\Entity\Aggregate;
-use App\Api\Entity\StatusInterface;
+use App\Domain\Status\StatusInterface;
 use App\Api\Repository\PublicationListRepository;
 use Laminas\Service;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
@@ -157,7 +158,7 @@ class TimelyStatusRepository extends ServiceEntityRepository
     /**
      * @param SearchParams $searchParams
      * @return array
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      */
     public function findStatuses(SearchParams $searchParams): array
     {
@@ -194,7 +195,7 @@ class TimelyStatusRepository extends ServiceEntityRepository
     /**
      * @param QueryBuilder $queryBuilder
      * @param SearchParams $searchParams
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      */
     private function applyCriteria(
         QueryBuilder $queryBuilder,

@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Accessor;
 
 use App\Api\AccessToken\AccessToken;
-use App\Api\Entity\StatusInterface;
+use App\Domain\Status\StatusInterface;
 use App\Membership\Entity\MemberInterface;
 use App\Infrastructure\Repository\Membership\MemberRepository;
 use App\Status\Entity\NullStatus;

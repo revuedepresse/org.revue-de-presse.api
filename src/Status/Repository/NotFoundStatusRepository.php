@@ -6,7 +6,7 @@ use App\Status\Entity\NotFoundStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;
-use App\Api\Entity\StatusInterface;
+use App\Domain\Status\StatusInterface;
 
 class NotFoundStatusRepository extends ServiceEntityRepository
 {

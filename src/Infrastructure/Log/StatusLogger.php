@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Log;
 
 use App\Api\Entity\Aggregate;
-use App\Api\Entity\StatusInterface;
+use App\Domain\Status\StatusInterface;
 use Psr\Log\LoggerInterface;
 use function array_key_exists;
 use function json_decode;
