@@ -4,8 +4,7 @@ declare(strict_types=1);
 namespace App\Status\Entity;
 
 use App\Api\Entity\Aggregate;
-use App\Api\Entity\ArchivedStatus;
-use App\Api\Entity\StatusInterface;
+use App\Domain\Status\StatusInterface;
 use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -28,7 +27,7 @@ trait StatusTrait
      *
      * @return $this
      */
-    public function setStarred(bool $starred): self
+    public function setStarred(bool $starred): StatusInterface
     {
         $this->starred = $starred;
 
@@ -48,7 +47,7 @@ trait StatusTrait
      *
      * @return $this
      */
-    public function setHash(string $hash = null): self
+    public function setHash(string $hash = null): StatusInterface
     {
         $this->hash = $hash;
 
@@ -68,7 +67,7 @@ trait StatusTrait
      *
      * @return $this
      */
-    public function setScreenName(string $screenName): self
+    public function setScreenName(string $screenName): StatusInterface
     {
         $this->screenName = $screenName;
 
@@ -88,7 +87,7 @@ trait StatusTrait
      *
      * @return self
      */
-    public function setName(string $name): self
+    public function setName(string $name): StatusInterface
     {
         $this->name = $name;
 
@@ -108,7 +107,7 @@ trait StatusTrait
      *
      * @return $this
      */
-    public function setText($text): self
+    public function setText($text): StatusInterface
     {
         $this->text = $text;
 
@@ -128,7 +127,7 @@ trait StatusTrait
      *
      * @return $this|StatusInterface
      */
-    public function setUserAvatar(string $userAvatar): self
+    public function setUserAvatar(string $userAvatar): StatusInterface
     {
         $this->userAvatar = $userAvatar;
 
@@ -148,7 +147,7 @@ trait StatusTrait
      *
      * @return $this|StatusInterface
      */
-    public function setIdentifier(string $identifier): self
+    public function setIdentifier(string $identifier): StatusInterface
     {
         $this->identifier = $identifier;
 
@@ -168,7 +167,7 @@ trait StatusTrait
      *
      * @return $this
      */
-    public function setStatusId(string $statusId = null): self
+    public function setStatusId(string $statusId = null): StatusInterface
     {
         $this->statusId = $statusId;
 
@@ -188,7 +187,7 @@ trait StatusTrait
      *
      * @return $this
      */
-    public function setApiDocument(string $apiDocument): self
+    public function setApiDocument(string $apiDocument): StatusInterface
     {
         $this->apiDocument = $apiDocument;
 
@@ -208,7 +207,7 @@ trait StatusTrait
      *
      * @return $this
      */
-    public function setCreatedAt(DateTimeInterface $createdAt): self
+    public function setCreatedAt(DateTimeInterface $createdAt): StatusInterface
     {
         $this->createdAt = $createdAt;
 
@@ -227,7 +226,7 @@ trait StatusTrait
      * @param $updatedAt
      * @return $this
      */
-    public function setUpdatedAt(DateTimeInterface $updatedAt = null): self
+    public function setUpdatedAt(DateTimeInterface $updatedAt = null): StatusInterface
     {
         $this->updatedAt = $updatedAt;
 
@@ -246,7 +245,7 @@ trait StatusTrait
      * @param $indexed
      * @return $this
      */
-    public function setIndexed(bool $indexed): self
+    public function setIndexed(bool $indexed): StatusInterface
     {
         $this->indexed = $indexed;
 
@@ -275,11 +274,19 @@ trait StatusTrait
     }
 
     /**
+     * @return bool
+     */
+    public function belongsToAList(): bool
+    {
+        return !$this->aggregates->isEmpty();
+    }
+
+    /**
      * @param Aggregate $aggregate
      *
      * @return $this
      */
-    public function removeFrom(Aggregate $aggregate): self
+    public function removeFrom(Aggregate $aggregate): StatusInterface
     {
         $this->aggregates->remove($aggregate);
 

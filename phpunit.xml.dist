@@ -21,6 +21,8 @@
             <group>conversation</group>
             <group>membership</group>
             <group>ownership</group>
+            <group>persistence</group>
+            <group>tagged_status</group>
             <group>unavailable_resource</group>
         </include>
     </groups>
@@ -38,6 +40,7 @@
             <directory suffix=".php">src/Conversation/Consistency/StatusConsistency.php</directory>
             <directory suffix=".php">src/Infrastructure/Twitter/Api/Accessor/MemberProfileAccessor.php</directory>
             <directory suffix=".php">src/Infrastructure/Twitter/Api/Accessor/OwnershipAccessor.php</directory>
+            <directory suffix=".php">src/Infrastructure/Twitter/Api/Normalizer/Normalizer.php</directory>
         </whitelist>
     </filter>
 </phpunit>

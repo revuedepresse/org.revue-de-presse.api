@@ -8,24 +8,10 @@
         <parameter key="weaving_the_web.api.data_provider.class">App\Api\DataProvider</parameter>
         <parameter key="weaving_the_web_api.entity.aggregate.class">App\Api\Entity\Aggregate</parameter>
         <parameter key="weaving_the_web_api.entity.status.class">App\Api\Entity\Status</parameter>
-        <parameter key="weaving_the_web.api.query_factory.class">App\Api\ORM\QueryFactory</parameter>
         <parameter key="weaving_the_web_api.repository.aggregate.class">App\Api\Repository\PublicationListRepository</parameter>
         <parameter key="weaving_the_web_api.repository.token.class">App\Api\AccessToken\Repository\TokenRepository</parameter>
         <parameter key="weaving_the_web_api.repository.archived_status.class">App\Api\Repository\ArchivedStatusRepository</parameter>
         <parameter key="weaving_the_web_api.repository.whisperer.class">App\Api\Repository\WhispererRepository</parameter>
     </parameters>
-
-    <services>
-
-        <service id="weaving_the_web.api.data_provider" class="%weaving_the_web.api.data_provider.class%">
-            <argument type="service" id="weaving_the_web.api.query_factory" />
-        </service>
-
-        <service id="weaving_the_web.api.query_factory" class="%weaving_the_web.api.query_factory.class%">
-            <argument type="service" id="doctrine.orm.entity_manager" />
-            <argument type="service" id="logger" />
-        </service>
-
-    </services>
 
 </container>

@@ -109,9 +109,6 @@ migrate-schema-of-read-database: ## Migrate the read database schema
 migrate-schema-of-write-database: ## Migrate the write database schema
 		@/bin/bash -c 'export PROJECT_DIR='/var/www/devobs'; source ./bin/functions.sh && migrate_schema_of_write_database'
 
-configure-rabbitmq-user-privileges: ## Configure RabbitMQ user privileges
-		@/bin/bash -c 'source ./bin/functions.sh && configure_rabbitmq_user_privileges'
-
 list-amqp-messages: ## List AMQP messags
 		@/bin/bash -c 'source ./bin/functions.sh && list_amqp_queues'
 

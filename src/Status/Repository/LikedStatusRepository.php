@@ -8,7 +8,7 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NoResultException;
 use App\Api\Entity\Aggregate;
-use App\Api\Entity\StatusInterface;
+use App\Domain\Status\StatusInterface;
 use App\Member\Repository\MemberRepository;
 use Laminas\Service;
 

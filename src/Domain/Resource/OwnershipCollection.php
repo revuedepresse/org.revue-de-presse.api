@@ -69,4 +69,12 @@ class OwnershipCollection implements StrictCollectionInterface
     {
         return $this->nextPage;
     }
+
+    /**
+     * @return PublicationList
+     */
+    public function first()
+    {
+        return $this->ownerships[0];
+    }
 }

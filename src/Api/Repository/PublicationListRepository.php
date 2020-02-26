@@ -9,7 +9,7 @@ use App\Aggregate\Repository\PaginationAwareTrait;
 use App\Aggregate\Repository\TimelyStatusRepository;
 use App\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Api\Entity\Aggregate;
-use App\Api\Entity\StatusInterface;
+use App\Domain\Status\StatusInterface;
 use App\Infrastructure\Repository\PublicationList\PublicationListRepositoryInterface;
 use App\Membership\Entity\MemberInterface;
 use App\Operation\CapableOfDeletionInterface;

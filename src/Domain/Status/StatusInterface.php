@@ -1,8 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Api\Entity;
+namespace App\Domain\Status;
 
+use App\Api\Entity\Aggregate;
 use DateTimeInterface;
 use Doctrine\Common\Collections\Collection;
 
@@ -21,7 +22,7 @@ interface StatusInterface
      *
      * @return $this
      */
-    public function setHash(string $hash): self;
+    public function setHash(string $hash): StatusInterface;
 
     /**
      * @return string
@@ -45,7 +46,7 @@ interface StatusInterface
      *
      * @return $this
      */
-    public function setName(string $name): self;
+    public function setName(string $name): StatusInterface;
 
     /**
      * Get name
@@ -58,7 +59,7 @@ interface StatusInterface
      * @param $text
      * @return $this
      */
-    public function setText(string $text): self;
+    public function setText(string $text): StatusInterface;
 
     /**
      * Get text
@@ -71,7 +72,7 @@ interface StatusInterface
      * @param $userAvatar
      * @return $this
      */
-    public function setUserAvatar(string $userAvatar): self;
+    public function setUserAvatar(string $userAvatar): StatusInterface;
 
     /**
      * @return string
@@ -82,7 +83,7 @@ interface StatusInterface
      * @param $identifier
      * @return $this
      */
-    public function setIdentifier(string $identifier): self;
+    public function setIdentifier(string $identifier): StatusInterface;
 
     /**
      * @return string
@@ -94,7 +95,7 @@ interface StatusInterface
      *
      * @return $this
      */
-    public function setStatusId(string $statusId): self;
+    public function setStatusId(string $statusId): StatusInterface;
 
     /**
      * @return string
@@ -106,7 +107,7 @@ interface StatusInterface
      *
      * @return $this
      */
-    public function setApiDocument(string $apiDocument): self;
+    public function setApiDocument(string $apiDocument): StatusInterface;
 
     /**
      * @return mixed
@@ -118,7 +119,7 @@ interface StatusInterface
      *
      * @return $this
      */
-    public function setCreatedAt(DateTimeInterface $createdAt): self;
+    public function setCreatedAt(DateTimeInterface $createdAt): StatusInterface;
 
     /**
      * @return DateTimeInterface
@@ -130,7 +131,7 @@ interface StatusInterface
      *
      * @return mixed
      */
-    public function setUpdatedAt(DateTimeInterface $updatedAt): self;
+    public function setUpdatedAt(DateTimeInterface $updatedAt): StatusInterface;
 
     /**
      * @return DateTimeInterface
@@ -141,7 +142,7 @@ interface StatusInterface
      * @param bool $indexed
      * @return $this
      */
-    public function setIndexed(bool $indexed): self;
+    public function setIndexed(bool $indexed): StatusInterface;
 
     /**
      * @return bool
@@ -157,7 +158,7 @@ interface StatusInterface
      * @param Aggregate $aggregate
      * @return self
      */
-    public function removeFrom(Aggregate $aggregate): self;
+    public function removeFrom(Aggregate $aggregate): StatusInterface;
 
     /**
      * @param Aggregate $aggregate
@@ -166,7 +167,12 @@ interface StatusInterface
     public function addToAggregates(Aggregate $aggregate): Collection;
 
     /**
+     * @return bool
+     */
+    public function belongsToAList(): bool;
+
+    /**
      * @return $this
      */
-    public function markAsPublished(): self;
+    public function markAsPublished(): StatusInterface;
 }

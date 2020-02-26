@@ -76,8 +76,7 @@ class MemberProfileAccessor implements MemberProfileAccessorInterface
 
         if (!$preExistingMember) {
             return $this->memberRepository->saveMemberFromIdentity(
-                $memberIdentity,
-                $twitterMember
+                $memberIdentity
             );
         }
 

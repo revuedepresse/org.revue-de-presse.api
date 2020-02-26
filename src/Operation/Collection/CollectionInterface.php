@@ -15,7 +15,7 @@ interface CollectionInterface
     public function map(Closure $callable);
 
 
-    public function isEmpty(): bool;
+    public function isEmpty();
 
     public function isNotEmpty(): bool;
 
@@ -30,4 +30,6 @@ interface CollectionInterface
      * @return array
      */
     public function toArray();
+
+    public function first();
 }

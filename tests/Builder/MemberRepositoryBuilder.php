@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace App\Tests\Builder;
 
 use App\Domain\Resource\MemberIdentity;
-use App\Infrastructure\Repository\Membership\MemberRepository;
 use App\Infrastructure\Repository\Membership\MemberRepositoryInterface;
 use App\Membership\Entity\Member;
 use App\Membership\Entity\MemberInterface;
@@ -22,7 +21,7 @@ class MemberRepositoryBuilder
     private function __construct()
     {
         $prophet = new Prophet();
-        $this->prophecy = $prophet->prophesize(MemberRepository::class);
+        $this->prophecy = $prophet->prophesize(MemberRepositoryInterface::class);
     }
 
     public static function newMemberRepositoryBuilder()
@@ -53,8 +52,7 @@ class MemberRepositoryBuilder
     public function willSaveMemberFromIdentity(): self
     {
         $this->prophecy->saveMemberFromIdentity(
-            Argument::type(MemberIdentity::class),
-            Argument::type(\stdClass::class)
+            Argument::type(MemberIdentity::class)
         )
         ->willReturn(new Member());
 

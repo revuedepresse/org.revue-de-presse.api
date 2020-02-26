@@ -1,16 +1,16 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Status\Entity;
 
 use App\Api\Entity\Status;
-use App\Api\Entity\StatusInterface;
 
-class NullStatus extends Status implements StatusInterface
+class NullStatus extends Status
 {
     /**
      * @return int
      */
-    public function getId()
+    public function getId(): int
     {
         return -1;
     }

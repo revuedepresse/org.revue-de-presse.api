@@ -1,8 +1,8 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Api\Repository;
 
-use App\Api\ORM\QueryFactory;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
@@ -11,16 +11,4 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
  */
 abstract class ResourceRepository extends ServiceEntityRepository
 {
-    /**
-     * @var QueryFactory
-     */
-    public QueryFactory $queryFactory;
-
-    public function getSelectQueryBuilder(array $constraints = [])
-    {
-        $this->createQueryBuilder($this->getAlias());
-        $entityName = $this->getEntityName();
-
-        return $this->queryFactory->querySelection($entityName, $constraints);
-    }
 }
