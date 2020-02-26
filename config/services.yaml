@@ -10,7 +10,7 @@ imports:
 services:
     # default configuration for services in *this* file
     _defaults:
-        autowire: false      # Automatically injects dependencies in your services.
+        autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
 
     # makes classes in src/ available to be used as services
@@ -56,7 +56,7 @@ services:
         calls:
             - [ 'setPublicationRepository',  [ '@App\Twitter\Repository\PublicationRepository' ] ]
             - [ 'setStatusLogger',           [ '@App\Infrastructure\Log\StatusLogger' ] ]
-            - [ 'setStatusPersistor',        [ '@App\Infrastructure\Status\Persistor\StatusPersistor' ] ]
+            - [ 'setStatusPersistence',      [ '@App\Infrastructure\Status\Persistence\StatusPersistence' ] ]
             - [ 'setTaggedStatusRepository', [ '@App\Domain\Repository\TaggedStatusRepository' ] ]
         properties:
             appLogger:              '@logger'
@@ -106,8 +106,8 @@ services:
             - '@doctrine.orm.entity_manager'
             - '@logger'
 
-    App\Infrastructure\Status\Persistor\StatusPersistor:
-        class: 'App\Infrastructure\Status\Persistor\StatusPersistor'
+    App\Infrastructure\Status\Persistence\StatusPersistence:
+        class: 'App\Infrastructure\Status\Persistence\StatusPersistence'
         arguments:
             - '@repository.timely_status'
             - '@doctrine'

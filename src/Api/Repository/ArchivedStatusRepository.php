@@ -14,7 +14,7 @@ use App\Domain\Repository\StatusRepositoryInterface;
 use App\Domain\Status\StatusInterface;
 use App\Domain\Status\TaggedStatus;
 use App\Infrastructure\DependencyInjection\StatusLoggerTrait;
-use App\Infrastructure\DependencyInjection\StatusPersistorTrait;
+use App\Infrastructure\DependencyInjection\StatusPersistenceTrait;
 use App\Infrastructure\DependencyInjection\TaggedStatusRepositoryTrait;
 use App\Infrastructure\Repository\Membership\MemberRepository;
 use App\Infrastructure\Twitter\Api\Normalizer\Normalizer;
@@ -50,7 +50,7 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
     StatusRepositoryInterface
 {
     use StatusLoggerTrait;
-    use StatusPersistorTrait;
+    use StatusPersistenceTrait;
     use TaggedStatusRepositoryTrait;
 
     public ManagerRegistry $registry;
@@ -572,7 +572,7 @@ QUERY;
         AccessToken $identifier,
         Aggregate $aggregate = null
     ): array {
-        $result           = $this->statusPersistor->persistAllStatuses(
+        $result           = $this->statusPersistence->persistAllStatuses(
             $statuses,
             $identifier,
             $aggregate

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Infrastructure\Status\Persistor;
+namespace App\Infrastructure\Status\Persistence;
 
 use App\Aggregate\Repository\TimelyStatusRepository;
 use App\Api\AccessToken\AccessToken;
@@ -22,7 +22,7 @@ use Doctrine\Persistence\ManagerRegistry;
 use Exception;
 use Psr\Log\LoggerInterface;
 
-class StatusPersistor implements StatusPersistorInterface
+class StatusPersistence implements StatusPersistenceInterface
 {
     use StatusLoggerTrait;
     use TaggedStatusRepositoryTrait;
