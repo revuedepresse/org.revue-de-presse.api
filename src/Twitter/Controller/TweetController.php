@@ -1,9 +1,11 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Twitter\Controller;
 
 use App\Accessor\Exception\NotFoundStatusException;
 use App\Accessor\StatusAccessor;
+use App\Api\Repository\ArchivedStatusRepository;
 use App\Conversation\ConversationAwareTrait;
 use App\Security\Cors\CorsHeadersAwareTrait;
 use Doctrine\DBAL\DBALException;
@@ -11,11 +13,10 @@ use Doctrine\DBAL\Exception\ConnectionException;
 use Doctrine\DBAL\Exception\DriverException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration as Extra;
 
-use Symfony\Bundle\FrameworkBundle\Controller\Controller,
-    Symfony\Component\HttpFoundation\JsonResponse,
+use Symfony\Component\HttpFoundation\JsonResponse,
     Symfony\Component\HttpFoundation\Request;
 
-use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
+use App\Api\Repository\StatusRepository;
 
 /**
  * @package App\Twitter\Controller
@@ -25,7 +26,7 @@ class TweetController extends Controller
     use ConversationAwareTrait;
     use CorsHeadersAwareTrait;
 
-    /** @var StatusRepository */
+    /** @var StatusRepository|ArchivedStatusRepository */
     private $statusRepository;
 
     /**

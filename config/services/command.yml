@@ -37,7 +37,7 @@ services:
     press_review.fetch_status:
         class:                        "%press_review.publication_message.handler%"
         calls:
-            - [ 'setSerializer',        [ '@weaving_the_web_twitter.serializer.user_status'] ]
+            - [ 'setSerializer',        [ '@App\Twitter\Serializer\UserStatus'] ]
             - [ 'setLogger',            [ '@monolog.logger.status'] ]
             - [ 'setUserRepository',    [ '@user_manager'] ]
         properties:
@@ -51,7 +51,7 @@ services:
     press_review.fetch_likes:
         class:                          "%press_review.publication_message.handler%"
         calls:
-            - [ 'setSerializer',        [ '@weaving_the_web_twitter.serializer.user_status'] ]
+            - [ 'setSerializer',        [ '@App\Twitter\Serializer\UserStatus'] ]
             - [ 'setLogger',            [ '@monolog.logger.status'] ]
             - [ 'setUserRepository',    [ '@user_manager'] ]
         properties:

@@ -169,8 +169,8 @@ services:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - '%weaving_the_web_api.entity.token.class%'
 
-    weaving_the_web_api.repository.whisperer:
-        class: '%weaving_the_web_api.repository.whisperer.class%'
+    repository.whisperer:
+        class: '%repository.whisperer.class%'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - '%weaving_the_web_api.entity.whisperer.class%'

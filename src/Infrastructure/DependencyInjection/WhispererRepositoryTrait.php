@@ -1,17 +1,16 @@
 <?php
-
+declare(strict_types=1);
 
 namespace App\Infrastructure\DependencyInjection;
 
-use App\Api\Repository\WhispererRepository;
-use App\Domain\Membership\WhispererRepositoryInterface;
+use App\Infrastructure\Repository\Membership\WhispererRepositoryInterface;
 
 trait WhispererRepositoryTrait
 {
     /**
      * @var WhispererRepositoryInterface $whispererRepository
      */
-    protected WhispererRepositoryInterface $whispererRepository;
+    private WhispererRepositoryInterface $whispererRepository;
 
     /**
      * @param $whispererRepository

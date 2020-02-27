@@ -16,14 +16,14 @@
 
     <groups>
         <include>
-<!--            <group>api_access</group>-->
-<!--            <group>command</group>-->
-<!--            <group>conversation</group>-->
-<!--            <group>membership</group>-->
-<!--            <group>ownership</group>-->
+            <group>api_access</group>
+            <group>command</group>
+            <group>conversation</group>
+            <group>membership</group>
+            <group>ownership</group>
             <group>persistence</group>
-<!--            <group>tagged_status</group>-->
-<!--            <group>unavailable_resource</group>-->
+            <group>tagged_status</group>
+            <group>unavailable_resource</group>
         </include>
     </groups>
 

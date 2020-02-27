@@ -1,6 +1,7 @@
 <?php
+declare(strict_types=1);
 
-namespace App\Api\Throttling;
+namespace App\Infrastructure\Api\Throttling;
 
 interface ApiLimitModeratorInterface
 {

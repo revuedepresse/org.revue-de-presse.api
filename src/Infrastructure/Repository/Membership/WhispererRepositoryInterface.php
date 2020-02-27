@@ -1,6 +1,7 @@
 <?php
+declare(strict_types=1);
 
-namespace App\Domain\Membership;
+namespace App\Infrastructure\Repository\Membership;
 
 use App\Api\Entity\Whisperer;
 

@@ -25,6 +25,7 @@ use App\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Infrastructure\DependencyInjection\WhispererRepositoryTrait;
 use App\Membership\Entity\MemberInterface;
 use App\Membership\Exception\InvalidMemberIdentifier;
+use App\Operation\Collection\CollectionInterface;
 use App\Status\LikedStatusCollectionAwareInterface;
 use App\Status\Repository\LikedStatusRepository;
 use App\Twitter\Exception\BadAuthenticationDataException;
@@ -95,8 +96,11 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             return $this;
         }
 
-        $this->apiAccessor->setUserToken($oauthTokens[TokenInterface::FIELD_TOKEN]);
-        $this->apiAccessor->setUserSecret($oauthTokens[TokenInterface::FIELD_SECRET]);
+        $token = new Token();
+        $token->setOAuthToken($oauthTokens[TokenInterface::FIELD_TOKEN]);
+        $token->setOAuthSecret($oauthTokens[TokenInterface::FIELD_SECRET]);
+
+        $this->apiAccessor->setAccessToken($token);
 
         /** @var Token token */
         $token = $this->tokenRepository
@@ -1010,18 +1014,11 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     }
 
     /**
-     * @param array  $statuses
-     * @param string $screenName
-     * @param int    $aggregateId
+     * @param array    $statuses
+     * @param string   $screenName
+     * @param int|null $aggregateId
      *
      * @return int|null
-     * @throws NoResultException
-     * @throws NonUniqueResultException
-     * @throws NotFoundMemberException
-     * @throws OptimisticLockException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws ORMException
      */
     private function saveStatusesForScreenName(
         array $statuses,
@@ -1053,10 +1050,10 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             $likedBy = $this->apiAccessor->ensureMemberHavingNameExists($screenName);
         }
 
-        $statuses = $this->saveStatuses($statuses, $aggregate, $likedBy);
+        $savedStatuses = $this->saveStatuses($statuses, $aggregate, $likedBy);
 
         return $this->logHowManyItemsHaveBeenSaved(
-            count($statuses),
+            $savedStatuses->count(),
             $screenName
         );
     }
@@ -1066,16 +1063,13 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @param Aggregate|null       $aggregate
      * @param MemberInterface|null $likedBy
      *
-     * @return array
-     * @throws NotFoundMemberException
-     * @throws ORMException
-     * @throws OptimisticLockException
+     * @return CollectionInterface
      */
     private function saveStatuses(
         array $statuses,
         Aggregate $aggregate = null,
         MemberInterface $likedBy = null
-    ) {
+    ): CollectionInterface {
         if ($this->isAboutToCollectLikesFromCriteria($this->serializationOptions)) {
             return $this->statusRepository->saveLikes(
                 $statuses,
@@ -1423,7 +1417,9 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             return null;
         }
 
-        $whisperer = $this->whispererRepository->findOneBy(['name' => $options['screen_name']]);
+        $whisperer = $this->whispererRepository->findOneBy(
+            ['name' => $options['screen_name']]
+        );
         if (!$whisperer instanceof Whisperer) {
             SkippableMessageException::continueMessageConsumption();
         }

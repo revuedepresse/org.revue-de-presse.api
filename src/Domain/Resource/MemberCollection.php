@@ -71,4 +71,16 @@ class MemberCollection implements StrictCollectionInterface
     {
         return $this->members;
     }
+
+    /**
+     * @return int|null
+     */
+    public function first(): ?int
+    {
+        if ($this->isEmpty()) {
+            return null;
+        }
+
+        return $this->members[0];
+    }
 }

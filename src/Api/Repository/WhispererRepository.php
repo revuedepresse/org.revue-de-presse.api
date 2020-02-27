@@ -1,9 +1,10 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Api\Repository;
 
 use App\Api\Entity\Whisperer;
-use App\Domain\Membership\WhispererRepositoryInterface;
+use App\Infrastructure\Repository\Membership\WhispererRepositoryInterface;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\Persistence\ManagerRegistry;
@@ -14,20 +15,10 @@ use Doctrine\Persistence\ManagerRegistry;
 class WhispererRepository extends ResourceRepository implements WhispererRepositoryInterface
 {
     /**
-     * @param ManagerRegistry $managerRegistry
-     * @param string $aggregateClass
-     */
-    public function __construct(
-        ManagerRegistry $managerRegistry,
-        string $aggregateClass
-    )
-    {
-        parent::__construct($managerRegistry, $aggregateClass);
-    }
-
-    /**
      * @param Whisperer $whisperer
+     *
      * @return Whisperer
+     * @throws ORMException
      * @throws OptimisticLockException
      */
     public function declareWhisperer(Whisperer $whisperer): Whisperer
@@ -75,7 +66,7 @@ class WhispererRepository extends ResourceRepository implements WhispererReposit
      * @throws OptimisticLockException
      * @throws ORMException
      */
-    public function forgetAboutWhisperer(Whisperer $whisperer)
+    public function forgetAboutWhisperer(Whisperer $whisperer): void
     {
         $this->getEntityManager()->remove($whisperer);
         $this->getEntityManager()->flush();

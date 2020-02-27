@@ -1,8 +1,9 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Api\Moderator;
 
-use App\Api\Throttling\ApiLimitModeratorInterface;
+use App\Infrastructure\Api\Throttling\ApiLimitModeratorInterface;
 use Psr\Log\LoggerInterface;
 
 /**
@@ -13,7 +14,7 @@ class ApiLimitModerator implements ApiLimitModeratorInterface
     /**
      * @var LoggerInterface $logger
      */
-    protected $logger;
+    protected LoggerInterface $logger;
 
     /**
      * @param LoggerInterface $logger

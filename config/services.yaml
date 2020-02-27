@@ -38,6 +38,7 @@ services:
         calls:
             - [ 'setPublicationRepository',  [ '@App\Twitter\Repository\PublicationRepository' ] ]
             - [ 'setStatusLogger',           [ '@App\Infrastructure\Log\StatusLogger' ] ]
+            - [ 'setStatusPersistence',      [ '@App\Infrastructure\Status\Persistence\StatusPersistence' ] ]
             - [ 'setTaggedStatusRepository', [ '@App\Domain\Repository\TaggedStatusRepository' ] ]
         properties:
             appLogger:                '@logger'
@@ -228,18 +229,17 @@ services:
         arguments:
             - '@?logger'
 
-    weaving_the_web_twitter.serializer.user_status:
-        class:  '%weaving_the_web_twitter.serializer.user_status.class%'
+    App\Twitter\Serializer\UserStatus:
+        class:  'App\Twitter\Serializer\UserStatus'
         calls:
-            - [ 'setApiAccessor', [ '@weaving_the_web_twitter.api_accessor' ] ]
-            - [ 'setLogger', [ '@monolog.logger.status' ] ]
-            - [ 'setAggregateRepository', [ '@weaving_the_web_twitter.repository.aggregate' ] ]
-            - [ 'setModerator', [ '@weaving_the_web_twitter.moderator.api_limit' ] ]
-            - [ 'setStatusRepository', [ '@App\Api\Repository\StatusRepository' ] ]
-            - [ 'setWhispererRepository', [ '@weaving_the_web_api.repository.whisperer' ] ]
-            - [ 'setTokenRepository', [ '@weaving_the_web_twitter.repository.token' ] ]
-            - [ 'setTranslator', [ '@translator' ] ]
-            - [ 'setWhispererRepository', [ '@weaving_the_web_api.repository.whisperer' ] ]
+            - [ 'setApiAccessor',               [ '@weaving_the_web_twitter.api_accessor' ] ]
+            - [ 'setLogger',                    [ '@monolog.logger.status' ] ]
+            - [ 'setAggregateRepository',       [ '@weaving_the_web_twitter.repository.aggregate' ] ]
+            - [ 'setModerator',                 [ '@weaving_the_web_twitter.moderator.api_limit' ] ]
+            - [ 'setStatusRepository',          [ '@App\Api\Repository\StatusRepository' ] ]
+            - [ 'setTokenRepository',           [ '@weaving_the_web_twitter.repository.token' ] ]
+            - [ 'setTranslator',                [ '@translator' ] ]
+            - [ 'setWhispererRepository',       [ '@repository.whisperer' ] ]
         properties:
             twitterApiLogger:       '@monolog.logger.twitter_api'
             likedStatusRepository:  '@repository.liked_status'
@@ -283,8 +283,6 @@ parameters:
 
     weaving_the_web_twitter.repository.aggregate.class:           '%weaving_the_web_api.repository.aggregate.class%'
     weaving_the_web_twitter.repository.token.class:               '%weaving_the_web_api.repository.token.class%'
-
-    weaving_the_web_twitter.serializer.user_status.class:         'App\Twitter\Serializer\UserStatus'
 
     weaving_the_web_twitter.version:                              '%env(resolve:API_TWITTER_VERSION)%'
 

@@ -13,6 +13,7 @@ use App\Api\Exception\InsertDuplicatesException;
 use App\Domain\Repository\StatusRepositoryInterface;
 use App\Domain\Status\StatusInterface;
 use App\Domain\Status\TaggedStatus;
+use App\Infrastructure\DependencyInjection\PublicationRepositoryTrait;
 use App\Infrastructure\DependencyInjection\StatusLoggerTrait;
 use App\Infrastructure\DependencyInjection\StatusPersistenceTrait;
 use App\Infrastructure\DependencyInjection\TaggedStatusRepositoryTrait;
@@ -20,13 +21,13 @@ use App\Infrastructure\Repository\Membership\MemberRepository;
 use App\Infrastructure\Twitter\Api\Normalizer\Normalizer;
 use App\Membership\Entity\MemberInterface;
 use App\Operation\Collection\Collection;
+use App\Operation\Collection\CollectionInterface;
 use App\Status\Entity\LikedStatus;
 use App\Status\Repository\ExtremumAwareInterface;
 use App\Status\Repository\LikedStatusRepository;
 use App\Twitter\Exception\NotFoundMemberException;
 use App\Twitter\Exception\ProtectedAccountException;
 use App\Twitter\Exception\SuspendedAccountException;
-use App\Twitter\Repository\PublicationRepositoryInterface;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\Connection;
@@ -49,6 +50,7 @@ use const JSON_THROW_ON_ERROR;
 class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwareInterface,
     StatusRepositoryInterface
 {
+    use PublicationRepositoryTrait;
     use StatusLoggerTrait;
     use StatusPersistenceTrait;
     use TaggedStatusRepositoryTrait;
@@ -66,8 +68,6 @@ class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwa
     public Connection $connection;
 
     public bool $shouldExtractProperties;
-
-    protected PublicationRepositoryInterface $publicationRepository;
 
     protected array $oauthTokens;
 
@@ -564,14 +564,16 @@ QUERY;
      * @param AccessToken    $identifier
      * @param Aggregate|null $aggregate
      *
-     * @return array
-     * @throws Exception
+     * @return CollectionInterface
+     * @throws NotFoundMemberException
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function saveStatuses(
         array $statuses,
         AccessToken $identifier,
         Aggregate $aggregate = null
-    ): array {
+    ): CollectionInterface {
         $result           = $this->statusPersistence->persistAllStatuses(
             $statuses,
             $identifier,
@@ -580,12 +582,15 @@ QUERY;
         $normalizedStatus = $result['extracts'];
         $screenName       = $result['screen_name'];
 
+        // Mark status as published
         $statusCollection = new Collection($result['statuses']);
+        $statusCollection->map(fn(StatusInterface $status) => $status->markAsPublished());
+
+        // Make publications
         $statusCollection = StatusToArray::fromStatusCollection($statusCollection);
         $this->publicationRepository->persistPublications($statusCollection);
 
-        $statusCollection->map(fn(StatusInterface $status) => $status->markAsPublished());
-
+        // Commit transaction
         $this->getEntityManager()->flush();
 
         if (count($normalizedStatus) > 0) {
@@ -603,11 +608,6 @@ QUERY;
         $this->oauthTokens = $oauthTokens;
 
         return $this;
-    }
-
-    public function setPublicationRepository(PublicationRepositoryInterface $publicationRepository)
-    {
-        $this->publicationRepository = $publicationRepository;
     }
 
     /**
