@@ -73,13 +73,13 @@ class StatusPersistenceTest extends KernelTestCase
 
         // Assert
 
-        self::assertArrayHasKey('extracts', $normalizedStatus);
+        self::assertArrayHasKey('normalized_status', $normalizedStatus);
         self::assertArrayHasKey('screen_name', $normalizedStatus);
-        self::assertArrayHasKey('statuses', $normalizedStatus);
+        self::assertArrayHasKey('status', $normalizedStatus);
 
-        self::assertInstanceOf(StatusCollection::class, $normalizedStatus['statuses']);
-        self::assertCount(0, $normalizedStatus['statuses']->toArray());
-        self::assertCount(0, $normalizedStatus['extracts']);
+        self::assertInstanceOf(StatusCollection::class, $normalizedStatus['status']);
+        self::assertCount(0, $normalizedStatus['status']->toArray());
+        self::assertCount(0, $normalizedStatus['normalized_status']);
     }
 
     /**
@@ -104,23 +104,23 @@ class StatusPersistenceTest extends KernelTestCase
 
         // Assert
 
-        self::assertArrayHasKey('extracts', $normalizedStatus);
+        self::assertArrayHasKey('normalized_status', $normalizedStatus);
         self::assertArrayHasKey('screen_name', $normalizedStatus);
-        self::assertArrayHasKey('statuses', $normalizedStatus);
+        self::assertArrayHasKey('status', $normalizedStatus);
 
         self::assertInstanceOf(
             CollectionInterface::class,
-            $normalizedStatus['extracts']
+            $normalizedStatus['normalized_status']
         );
         self::assertCount(
             count($allStatuses),
-            $normalizedStatus['extracts']
+            $normalizedStatus['normalized_status']
         );
 
-        $taggedStatus = $normalizedStatus['extracts']->first();
+        $taggedStatus = $normalizedStatus['normalized_status']->first();
         self::assertInstanceOf(
             TaggedStatus::class,
-            $normalizedStatus['extracts']->first()
+            $normalizedStatus['normalized_status']->first()
         );
 
         /** @var TaggedStatus $taggedStatus */
@@ -147,18 +147,18 @@ class StatusPersistenceTest extends KernelTestCase
 
         self::assertInstanceOf(
             StatusCollection::class,
-            $normalizedStatus['statuses']
+            $normalizedStatus['status']
         );
         self::assertCount(
             count($allStatuses),
-            $normalizedStatus['statuses']->toArray()
+            $normalizedStatus['status']->toArray()
         );
         self::assertNotNull(
-            $normalizedStatus['statuses']->first()
+            $normalizedStatus['status']->first()
         );
         self::assertInstanceOf(
             Status::class,
-            $normalizedStatus['statuses']->first()
+            $normalizedStatus['status']->first()
         );
     }
 
@@ -210,17 +210,17 @@ class StatusPersistenceTest extends KernelTestCase
 
         self::assertInstanceOf(
             StatusCollection::class,
-            $normalizedStatus['statuses']
+            $normalizedStatus['status']
         );
         self::assertCount(
             count($allStatuses),
-            $normalizedStatus['statuses']->toArray()
+            $normalizedStatus['status']->toArray()
         );
         self::assertNotNull(
-            $normalizedStatus['statuses']->first()
+            $normalizedStatus['status']->first()
         );
 
-        $unarchivedStatus = $normalizedStatus['statuses']->first();
+        $unarchivedStatus = $normalizedStatus['status']->first();
         self::assertInstanceOf(
             Status::class,
             $unarchivedStatus

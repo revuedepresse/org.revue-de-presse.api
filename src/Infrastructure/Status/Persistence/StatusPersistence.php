@@ -30,6 +30,10 @@ class StatusPersistence implements StatusPersistenceInterface
     use TaggedStatusRepositoryTrait;
     use TimelyStatusRepositoryTrait;
 
+    public const PROPERTY_NORMALIZED_STATUS = 'normalized_status';
+    public const PROPERTY_SCREEN_NAME       = 'screen_name';
+    public const PROPERTY_STATUS            = 'status';
+
     public ManagerRegistry $registry;
 
     /**
@@ -87,12 +91,12 @@ class StatusPersistence implements StatusPersistenceInterface
         $this->flushAndResetManagerOnUniqueConstraintViolation($this->entityManager);
 
         $firstStatus = $statusCollection->first();
-        $screenName = $firstStatus instanceof StatusInterface ? $firstStatus->getScreenName() : null;
+        $screenName  = $firstStatus instanceof StatusInterface ? $firstStatus->getScreenName() : null;
 
         return [
-            'extracts'    => $propertiesCollection,
-            'screen_name' => $screenName,
-            'statuses'    => $statusCollection
+            self::PROPERTY_NORMALIZED_STATUS => $propertiesCollection,
+            self::PROPERTY_SCREEN_NAME       => $screenName,
+            self::PROPERTY_STATUS            => $statusCollection
         ];
     }
 
@@ -189,7 +193,7 @@ class StatusPersistence implements StatusPersistenceInterface
         }
 
         $archivedStatus = $status;
-        $status = Status::fromArchivedStatus($archivedStatus);
+        $status         = Status::fromArchivedStatus($archivedStatus);
 
         $entityManager->remove($archivedStatus);
 

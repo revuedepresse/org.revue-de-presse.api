@@ -19,6 +19,7 @@ use App\Infrastructure\Amqp\Message\FetchMemberStatuses;
 use App\Infrastructure\DependencyInjection\ApiAccessorTrait;
 use App\Infrastructure\DependencyInjection\ApiLimitModeratorTrait;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
+use App\Infrastructure\DependencyInjection\PublicationPersistenceTrait;
 use App\Infrastructure\DependencyInjection\StatusRepositoryTrait;
 use App\Infrastructure\DependencyInjection\TokenRepositoryTrait;
 use App\Infrastructure\DependencyInjection\TranslatorTrait;
@@ -57,6 +58,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     use ApiAccessorTrait;
     use ApiLimitModeratorTrait;
     use LoggerTrait;
+    use PublicationPersistenceTrait;
     use StatusRepositoryTrait;
     use TokenRepositoryTrait;
     use TranslatorTrait;
@@ -1083,7 +1085,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             );
         }
 
-        return $this->statusRepository->saveStatuses(
+        return $this->publicationPersistence->persistStatusPublications(
             $statuses,
             new AccessToken($this->apiAccessor->getOAuthToken()),
             $aggregate

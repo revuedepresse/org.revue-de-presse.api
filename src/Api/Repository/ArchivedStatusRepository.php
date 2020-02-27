@@ -13,10 +13,13 @@ use App\Api\Exception\InsertDuplicatesException;
 use App\Domain\Repository\StatusRepositoryInterface;
 use App\Domain\Status\StatusInterface;
 use App\Domain\Status\TaggedStatus;
+use App\Infrastructure\DependencyInjection\MemberRepositoryTrait;
+use App\Infrastructure\DependencyInjection\PublicationPersistenceTrait;
 use App\Infrastructure\DependencyInjection\PublicationRepositoryTrait;
 use App\Infrastructure\DependencyInjection\StatusLoggerTrait;
 use App\Infrastructure\DependencyInjection\StatusPersistenceTrait;
 use App\Infrastructure\DependencyInjection\TaggedStatusRepositoryTrait;
+use App\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
 use App\Infrastructure\Repository\Membership\MemberRepository;
 use App\Infrastructure\Twitter\Api\Normalizer\Normalizer;
 use App\Membership\Entity\MemberInterface;
@@ -50,18 +53,17 @@ use const JSON_THROW_ON_ERROR;
 class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwareInterface,
     StatusRepositoryInterface
 {
+    use MemberRepositoryTrait;
     use PublicationRepositoryTrait;
     use StatusLoggerTrait;
     use StatusPersistenceTrait;
+    use PublicationPersistenceTrait;
     use TaggedStatusRepositoryTrait;
+    use TimelyStatusRepositoryTrait;
 
     public ManagerRegistry $registry;
 
     public LoggerInterface $appLogger;
-
-    public MemberRepository $memberManager;
-
-    public TimelyStatusRepository $timelyStatusRepository;
 
     public LikedStatusRepository $likedStatusRepository;
 
@@ -558,50 +560,6 @@ QUERY;
         }
 
         return $extracts;
-    }
-
-    /**
-     * @param array          $statuses
-     * @param AccessToken    $identifier
-     * @param Aggregate|null $aggregate
-     *
-     * @return CollectionInterface
-     * @throws NotFoundMemberException
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
-    public function saveStatuses(
-        array $statuses,
-        AccessToken $identifier,
-        Aggregate $aggregate = null
-    ): CollectionInterface {
-        $result           = $this->statusPersistence->persistAllStatuses(
-            $statuses,
-            $identifier,
-            $aggregate
-        );
-        $normalizedStatus = $result['extracts'];
-        $screenName       = $result['screen_name'];
-
-        // Mark status as published
-        $statusCollection = new Collection($result['statuses']);
-        $statusCollection->map(fn(StatusInterface $status) => $status->markAsPublished());
-
-        // Make publications
-        $statusCollection = StatusToArray::fromStatusCollection($statusCollection);
-        $this->publicationRepository->persistPublications($statusCollection);
-
-        // Commit transaction
-        $this->getEntityManager()->flush();
-
-        if (count($normalizedStatus) > 0) {
-            $this->memberManager->incrementTotalStatusesOfMemberWithName(
-                count($normalizedStatus),
-                $screenName
-            );
-        }
-
-        return $normalizedStatus;
     }
 
     public function setOauthTokens($oauthTokens)

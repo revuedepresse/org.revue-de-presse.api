@@ -216,12 +216,26 @@ class Member extends MemberModel
     }
 
     /**
+     * @deprecated in favor of ->setScreenName
+     *
      * @param $twitterUsername
      * @return $this
      */
     public function setTwitterUsername(string $twitterUsername): MemberInterface
     {
         $this->twitter_username = $twitterUsername;
+
+        return $this;
+    }
+
+    /**
+     * @param string $screenName
+     *
+     * @return MemberInterface
+     */
+    public function setScreenName(string $screenName): MemberInterface
+    {
+        $this->twitter_username = $screenName;
 
         return $this;
     }
@@ -240,24 +254,19 @@ class Member extends MemberModel
     }
 
     /**
-     * @deprecated
+     * @deprecated in favor of ->setName
      *
      * @param string $fullName
      * @return MemberInterface
      */
     public function setFullName(string $fullName): MemberInterface
     {
-        return $this->setScreenName($fullName);
+        return $this->setName($fullName);
     }
 
-    /**
-     * @param string $screenName
-     *
-     * @return MemberInterface
-     */
-    public function setScreenName(string $screenName): MemberInterface
+    public function setName(string $name): MemberInterface
     {
-        $this->fullName = $screenName;
+        $this->fullName = $name;
 
         return $this;
     }
@@ -526,7 +535,19 @@ class Member extends MemberModel
      *
      * @ORM\Column(name="total_statuses", type="integer", options={"default": 0})
      */
-    public $totalStatuses = 0;
+    public int $totalStatuses = 0;
+
+    public function totalStatus(): int
+    {
+        return $this->totalStatuses;
+    }
+
+    public function setTotalStatus($totalStatus): self
+    {
+        $this->totalStatuses = $totalStatus;
+
+        return $this;
+    }
 
     /**
      * @var integer

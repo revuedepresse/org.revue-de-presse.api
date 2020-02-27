@@ -6,6 +6,7 @@ services:
         class: 'App\StatusCollection\Mapping\RefreshStatusMapping'
         arguments:
             - '@weaving_the_web_twitter.api_accessor'
-        properties:
-            logger:             '@monolog.logger.status'
-            statusRepository:   '@App\Api\Repository\StatusRepository'
+        calls:
+            - [ 'setLogger', [ '@monolog.logger.status'  ] ]
+            - [ 'setPublicationPersistence', [ '@App\Infrastructure\Status\Persistence\PublicationPersistence'  ] ]
+            - [ 'setStatusRepository', [ '@App\Api\Repository\StatusRepository'  ] ]

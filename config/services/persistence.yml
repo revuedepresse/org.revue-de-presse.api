@@ -1,0 +1,22 @@
+services:
+
+    App\Infrastructure\Status\Persistence\PublicationPersistence:
+        class: 'App\Infrastructure\Status\Persistence\PublicationPersistence'
+        arguments:
+            - '@App\Infrastructure\Status\Persistence\StatusPersistence'
+            - '@App\Twitter\Repository\PublicationRepository'
+            - '@user_manager'
+            - '@doctrine.orm.entity_manager'
+        public: true
+
+    App\Infrastructure\Status\Persistence\StatusPersistence:
+        class: 'App\Infrastructure\Status\Persistence\StatusPersistence'
+        arguments:
+            - '@repository.timely_status'
+            - '@doctrine'
+            - '@doctrine.orm.entity_manager'
+            - '@logger'
+        calls:
+            - [ 'setStatusLogger',           [ '@App\Infrastructure\Log\StatusLogger' ] ]
+            - [ 'setTaggedStatusRepository', [ '@App\Domain\Repository\TaggedStatusRepository' ] ]
+        public: true

@@ -5,6 +5,7 @@ imports:
     - { resource: services/mapping.yml }
     - { resource: services/operation.yml }
     - { resource: services/repository.yml }
+    - { resource: services/persistence.yml }
     - { resource: services/security.yml }
 
 services:
@@ -106,18 +107,6 @@ services:
         arguments:
             - '@doctrine.orm.entity_manager'
             - '@logger'
-
-    App\Infrastructure\Status\Persistence\StatusPersistence:
-        class: 'App\Infrastructure\Status\Persistence\StatusPersistence'
-        arguments:
-            - '@repository.timely_status'
-            - '@doctrine'
-            - '@doctrine.orm.entity_manager'
-            - '@logger'
-        calls:
-            - [ 'setStatusLogger',           [ '@App\Infrastructure\Log\StatusLogger' ] ]
-            - [ 'setTaggedStatusRepository', [ '@App\Domain\Repository\TaggedStatusRepository' ] ]
-        public: true
 
     app.cache.redis:
         class: '%redis_cache%'
@@ -236,6 +225,7 @@ services:
             - [ 'setLogger',                    [ '@monolog.logger.status' ] ]
             - [ 'setAggregateRepository',       [ '@weaving_the_web_twitter.repository.aggregate' ] ]
             - [ 'setModerator',                 [ '@weaving_the_web_twitter.moderator.api_limit' ] ]
+            - [ 'setPublicationPersistence',    [ '@App\Infrastructure\Status\Persistence\PublicationPersistence' ] ]
             - [ 'setStatusRepository',          [ '@App\Api\Repository\StatusRepository' ] ]
             - [ 'setTokenRepository',           [ '@weaving_the_web_twitter.repository.token' ] ]
             - [ 'setTranslator',                [ '@translator' ] ]
