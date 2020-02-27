@@ -7,6 +7,7 @@ use App\Api\AccessToken\AccessToken;
 use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;
 use App\Domain\Repository\TaggedStatusRepositoryInterface;
+use App\Domain\Status\StatusCollection;
 use App\Domain\Status\StatusInterface;
 use App\Domain\Status\TaggedStatus;
 use App\Infrastructure\Status\Persistence\StatusPersistence;
@@ -14,6 +15,7 @@ use App\Infrastructure\Status\Persistence\StatusPersistenceInterface;
 use App\Operation\Collection\CollectionInterface;
 use DateTime;
 use DateTimeInterface;
+use DateTimeZone;
 use Exception;
 use Prophecy\Argument;
 use Prophecy\Prophecy\ObjectProphecy;
@@ -75,7 +77,8 @@ class StatusPersistenceTest extends KernelTestCase
         self::assertArrayHasKey('screen_name', $normalizedStatus);
         self::assertArrayHasKey('statuses', $normalizedStatus);
 
-        self::assertCount(0, $normalizedStatus['statuses']);
+        self::assertInstanceOf(StatusCollection::class, $normalizedStatus['statuses']);
+        self::assertCount(0, $normalizedStatus['statuses']->toArray());
         self::assertCount(0, $normalizedStatus['extracts']);
     }
 
@@ -142,17 +145,20 @@ class StatusPersistenceTest extends KernelTestCase
             $taggedStatus->publishedAt()
         );
 
-        self::assertCount(
-            count($allStatuses),
+        self::assertInstanceOf(
+            StatusCollection::class,
             $normalizedStatus['statuses']
         );
-        self::assertArrayHasKey(
-            0,
-            $normalizedStatus['statuses']
+        self::assertCount(
+            count($allStatuses),
+            $normalizedStatus['statuses']->toArray()
+        );
+        self::assertNotNull(
+            $normalizedStatus['statuses']->first()
         );
         self::assertInstanceOf(
             Status::class,
-            $normalizedStatus['statuses'][0]
+            $normalizedStatus['statuses']->first()
         );
     }
 
@@ -202,16 +208,19 @@ class StatusPersistenceTest extends KernelTestCase
 
         // Assert
 
+        self::assertInstanceOf(
+            StatusCollection::class,
+            $normalizedStatus['statuses']
+        );
         self::assertCount(
             count($allStatuses),
-            $normalizedStatus['statuses']
+            $normalizedStatus['statuses']->toArray()
         );
-        self::assertArrayHasKey(
-            0,
-            $normalizedStatus['statuses']
+        self::assertNotNull(
+            $normalizedStatus['statuses']->first()
         );
 
-        $unarchivedStatus = $normalizedStatus['statuses'][0];
+        $unarchivedStatus = $normalizedStatus['statuses']->first();
         self::assertInstanceOf(
             Status::class,
             $unarchivedStatus
@@ -291,7 +300,7 @@ class StatusPersistenceTest extends KernelTestCase
         return new DateTime(
             (new DateTime(
                 'now',
-                new \DateTimeZone('Europe/Paris')
+                new DateTimeZone('Europe/Paris')
             ))->format(DateTimeInterface::RFC7231)
         );
     }

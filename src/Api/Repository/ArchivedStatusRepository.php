@@ -506,6 +506,7 @@ QUERY;
             }
 
             if ($memberStatus instanceof ArchivedStatus) {
+                // TODO Replace this method with statusPersistence->unarchiveStatus
                 $memberStatus = $this->unarchiveStatus($memberStatus, $entityManager);
             }
 

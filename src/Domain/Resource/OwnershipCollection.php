@@ -35,9 +35,9 @@ class OwnershipCollection implements StrictCollectionInterface
         return $this;
     }
 
-    public function map(Closure $closure): array
+    public function map(Closure $closure): StrictCollectionInterface
     {
-        return array_map($closure, $this->ownerships);
+        return self::fromArray(array_map($closure, $this->ownerships));
     }
 
     public static function fromArray(array $ownerships, int $nextPage = -1): self
@@ -76,5 +76,12 @@ class OwnershipCollection implements StrictCollectionInterface
     public function first()
     {
         return $this->ownerships[0];
+    }
+
+    public function add($ownership): self
+    {
+        $this->ownerships[] = $ownership;
+
+        return $this;
     }
 }

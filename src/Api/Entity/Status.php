@@ -181,5 +181,4 @@ class Status implements StatusInterface
 
         return $status;
     }
-
 }
