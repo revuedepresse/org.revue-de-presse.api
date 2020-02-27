@@ -2,15 +2,16 @@
 
 namespace App\Api\Moderator;
 
+use App\Api\Throttling\ApiLimitModeratorInterface;
 use Psr\Log\LoggerInterface;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
-class ApiLimitModerator
+class ApiLimitModerator implements ApiLimitModeratorInterface
 {
     /**
-     * @var \Psr\Log\LoggerInterface $logger
+     * @var LoggerInterface $logger
      */
     protected $logger;
 
@@ -23,10 +24,10 @@ class ApiLimitModerator
     }
 
     /**
-     * @param integer $seconds
-     * @param array   $parameters
+     * @param $seconds
+     * @param array $parameters
      */
-    public function waitFor($seconds, array $parameters = [])
+    public function waitFor($seconds, array $parameters = []): void
     {
         if (!is_null($this->logger)) {
             if ($seconds < 60) {

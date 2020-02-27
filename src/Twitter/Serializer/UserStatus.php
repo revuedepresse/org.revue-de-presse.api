@@ -10,21 +10,23 @@ use App\Accessor\Exception\UnexpectedApiResponseException;
 use App\Aggregate\Exception\LockedAggregateException;
 use App\Amqp\Exception\SkippableMessageException;
 use App\Api\AccessToken\AccessToken;
-use App\Infrastructure\Amqp\Message\FetchMemberStatuses;
 use App\Api\Entity\Aggregate;
-use App\Domain\Status\StatusInterface;
 use App\Api\Entity\Token;
 use App\Api\Entity\TokenInterface;
 use App\Api\Entity\Whisperer;
-use App\Api\Moderator\ApiLimitModerator;
-use App\Api\Repository\StatusRepository;
-use App\Api\AccessToken\Repository\TokenRepositoryInterface;
-use App\Api\Repository\WhispererRepository;
+use App\Domain\Status\StatusInterface;
+use App\Infrastructure\Amqp\Message\FetchMemberStatuses;
+use App\Infrastructure\DependencyInjection\ApiAccessorTrait;
+use App\Infrastructure\DependencyInjection\ApiLimitModeratorTrait;
+use App\Infrastructure\DependencyInjection\LoggerTrait;
+use App\Infrastructure\DependencyInjection\StatusRepositoryTrait;
+use App\Infrastructure\DependencyInjection\TokenRepositoryTrait;
+use App\Infrastructure\DependencyInjection\TranslatorTrait;
+use App\Infrastructure\DependencyInjection\WhispererRepositoryTrait;
 use App\Membership\Entity\MemberInterface;
 use App\Membership\Exception\InvalidMemberIdentifier;
 use App\Status\LikedStatusCollectionAwareInterface;
 use App\Status\Repository\LikedStatusRepository;
-use App\Twitter\Api\Accessor;
 use App\Twitter\Exception\BadAuthenticationDataException;
 use App\Twitter\Exception\InconsistentTokenRepository;
 use App\Twitter\Exception\NotFoundMemberException;
@@ -42,7 +44,6 @@ use Doctrine\ORM\ORMException;
 use Exception;
 use Psr\Log\LoggerInterface;
 use ReflectionException;
-use Symfony\Contracts\Translation\TranslatorInterface;
 use function array_key_exists;
 use function count;
 use function is_array;
@@ -52,6 +53,14 @@ use function is_array;
  */
 class UserStatus implements LikedStatusCollectionAwareInterface
 {
+    use ApiAccessorTrait;
+    use ApiLimitModeratorTrait;
+    use LoggerTrait;
+    use StatusRepositoryTrait;
+    use TokenRepositoryTrait;
+    use TranslatorTrait;
+    use WhispererRepositoryTrait;
+
     public const MAX_AVAILABLE_TWEETS_PER_USER = 3200;
 
     private const MAX_BATCH_SIZE = 200;
@@ -59,126 +68,14 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     private const MESSAGE_OPTION_TOKEN = 'oauth';
 
     /**
-     * @var TranslatorInterface $translator
-     */
-    public TranslatorInterface $translator;
-
-    /**
-     * @param TranslatorInterface $translator
-     *
-     * @return $this
-     */
-    public function setTranslator(TranslatorInterface $translator)
-    {
-        $this->translator = $translator;
-
-        return $this;
-    }
-
-    /**
-     * @var Accessor $accessor
-     */
-    protected Accessor $accessor;
-
-    /**
-     * @param $accessor
-     * @return $this
-     */
-    public function setAccessor(Accessor $accessor)
-    {
-        $this->accessor = $accessor;
-
-        return $this;
-    }
-
-    /**
-     * @var StatusRepository $statusRepository
-     */
-    protected StatusRepository $statusRepository;
-
-    /**
      * @var LikedStatusRepository
      */
     public LikedStatusRepository $likedStatusRepository;
 
     /**
-     * @param StatusRepository $statusRepository
-     *
-     * @return $this
-     */
-    public function setStatusRepository(StatusRepository $statusRepository)
-    {
-        $this->statusRepository = $statusRepository;
-
-        return $this;
-    }
-
-    /**
-     * @var WhispererRepository $whispererRepository
-     */
-    protected WhispererRepository $whispererRepository;
-
-    /**
-     * @param $whispererRepository
-     * @return $this
-     */
-    public function setWhispererRepository($whispererRepository)
-    {
-        $this->whispererRepository = $whispererRepository;
-
-        return $this;
-    }
-
-    /**
-     * @var LoggerInterface
-     */
-    protected LoggerInterface $logger;
-
-    /**
      * @var LoggerInterface
      */
     public LoggerInterface $twitterApiLogger;
-
-    /**
-     * @param LoggerInterface $logger
-     */
-    public function setLogger(LoggerInterface $logger)
-    {
-        $this->logger = $logger;
-    }
-
-    /**
-     * @var ApiLimitModerator $moderator
-     */
-    protected ApiLimitModerator $moderator;
-
-    /**
-     * @param ApiLimitModerator $moderator
-     *
-     * @return $this
-     */
-    public function setModerator(ApiLimitModerator $moderator)
-    {
-        $this->moderator = $moderator;
-
-        return $this;
-    }
-
-    /**
-     * @var TokenRepositoryInterface $tokenRepository
-     */
-    protected TokenRepositoryInterface $tokenRepository;
-
-    /**
-     * @param TokenRepositoryInterface $tokenRepository
-     * @return $this
-     */
-    public function setTokenRepository(TokenRepositoryInterface $tokenRepository)
-    {
-        $this->tokenRepository = $tokenRepository;
-
-        return $this;
-    }
 
     /**
      * @var array
@@ -193,13 +90,13 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     public function setupAccessor(array $oauthTokens)
     {
         if (array_key_exists('authentication_header', $oauthTokens)) {
-            $this->accessor->setAuthenticationHeader($oauthTokens['authentication_header']);
+            $this->apiAccessor->setAuthenticationHeader($oauthTokens['authentication_header']);
 
             return $this;
         }
 
-        $this->accessor->setUserToken($oauthTokens[TokenInterface::FIELD_TOKEN]);
-        $this->accessor->setUserSecret($oauthTokens[TokenInterface::FIELD_SECRET]);
+        $this->apiAccessor->setUserToken($oauthTokens[TokenInterface::FIELD_TOKEN]);
+        $this->apiAccessor->setUserSecret($oauthTokens[TokenInterface::FIELD_SECRET]);
 
         /** @var Token token */
         $token = $this->tokenRepository
@@ -209,8 +106,8 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             $token = $this->tokenRepository->findFirstUnfrozenToken();
         }
 
-        $this->accessor->setConsumerKey($token->consumerKey);
-        $this->accessor->setConsumerSecret($token->consumerSecret);
+        $this->apiAccessor->setConsumerKey($token->consumerKey);
+        $this->apiAccessor->setConsumerSecret($token->consumerSecret);
 
         return $this;
     }
@@ -341,7 +238,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     {
         if (!array_key_exists(FetchMemberStatuses::SCREEN_NAME, $options) ||
             $options[FetchMemberStatuses::SCREEN_NAME] === null ||
-            $this->accessor->shouldSkipSerializationForMemberWithScreenName(
+            $this->apiAccessor->shouldSkipSerializationForMemberWithScreenName(
                 $options[FetchMemberStatuses::SCREEN_NAME]
             )
         ) {
@@ -477,7 +374,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         if (! $this->justSerializedSomeStatuses($lastSerializationBatchSize)) {
             $whisperer = new Whisperer($screenName, $totalSerializedStatuses);
 
-            $member = $this->accessor->showUser($screenName);
+            $member = $this->apiAccessor->showUser($screenName);
             $whisperer->setExpectedWhispers($member->statuses_count);
 
             $this->whispererRepository->declareWhisperer($whisperer);
@@ -506,7 +403,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         /**
          * @var \App\Api\Entity\Token $token
          */
-        $token = $this->tokenRepository->refreshFreezeCondition($this->accessor->userToken, $this->logger);
+        $token = $this->tokenRepository->refreshFreezeCondition($this->apiAccessor->userToken, $this->logger);
 
         if ($token->isNotFrozen()) {
             $availableApi = $this->isApiAvailable();
@@ -571,22 +468,22 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     {
         $availableApi = false;
 
-        if (!$this->accessor->isApiLimitReached()) {
+        if (!$this->apiAccessor->isApiLimitReached()) {
             return true;
         }
 
         try {
-            if (!$this->accessor->isApiRateLimitReached('/statuses/user_timeline')) {
+            if (!$this->apiAccessor->isApiRateLimitReached('/statuses/user_timeline')) {
                 $availableApi = true;
             }
         } catch (Exception $exception) {
             $this->twitterApiLogger->info('[error message] Testing for API availability: '.$exception->getMessage());
             $this->twitterApiLogger->info('[error code] '.(int)$exception->getCode());
 
-            if ($exception->getCode() === $this->accessor->getEmptyReplyErrorCode()) {
+            if ($exception->getCode() === $this->apiAccessor->getEmptyReplyErrorCode()) {
                 $availableApi = true;
             } else {
-                $this->tokenRepository->freezeToken($this->accessor->userToken);
+                $this->tokenRepository->freezeToken($this->apiAccessor->userToken);
             }
         }
 
@@ -690,7 +587,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         );
         $this->logger->info($existingStatus);
 
-        $member = $this->accessor->showUser($options['screen_name']);
+        $member = $this->apiAccessor->showUser($options['screen_name']);
         if (!isset($member->statuses_count)) {
             $member->statuses_count = 0;
         }
@@ -737,7 +634,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         );
         $this->logger->info($existingStatus);
 
-        $user = $this->accessor->showUser($options['screen_name']);
+        $user = $this->apiAccessor->showUser($options['screen_name']);
         if (!isset($user->statuses_count)) {
             $user->statuses_count = 0;
         }
@@ -796,12 +693,12 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     protected function saveStatusesMatchingCriteria($options, int $aggregateId = null)
     {
         $options = $this->declareOptionsToCollectStatuses($options);
-        $statuses = $this->accessor->fetchStatuses($options);
+        $statuses = $this->apiAccessor->fetchStatuses($options);
 
         if ($statuses instanceof \stdClass && isset($statuses->error)) {
             throw new ProtectedAccountException(
                 $statuses->error,
-                $this->accessor::ERROR_PROTECTED_ACCOUNT
+                $this->apiAccessor::ERROR_PROTECTED_ACCOUNT
             );
         }
 
@@ -1024,8 +921,11 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @param $lastSerializationBatchSize
      * @param $totalSerializedStatuses
      */
-    protected function logSerializationProgress($options, $lastSerializationBatchSize, $totalSerializedStatuses)
-    {
+    protected function logSerializationProgress(
+        $options,
+        $lastSerializationBatchSize,
+        $totalSerializedStatuses
+    ): void {
         $subject = 'statuses';
         if ($this->isAboutToCollectLikesFromCriteria($options)) {
             $subject = 'likes';
@@ -1034,31 +934,32 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         if ($this->serializedAllAvailableStatuses($lastSerializationBatchSize, $totalSerializedStatuses)) {
             $this->logger->info(
                 sprintf(
-                    'All available %s have most likely not been fetched for "%s" or few %s are available (%d)',
+                    'All available %s have most likely been fetched for "%s" or few %s are available (%d)',
                     $subject,
                     $options['screen_name'],
                     $subject,
                     $totalSerializedStatuses
                 )
             );
-        } else {
-            $this->logger->info(
-                sprintf(
-                    '%d more %s in the past have been saved for "%s" in aggregate #%d',
-                    $lastSerializationBatchSize,
-                    $subject,
-                    $options['screen_name'],
-                    $this->serializationOptions['aggregate_id']
-                )
-            );
+            return;
         }
+
+        $this->logger->info(
+            sprintf(
+                '%d more %s in the past have been saved for "%s" in aggregate #%d',
+                $lastSerializationBatchSize,
+                $subject,
+                $options['screen_name'],
+                $this->serializationOptions['aggregate_id']
+            )
+        );
     }
 
     /**
      * @param $statuses
      * @return bool
      */
-    public function hitSerializationLimit($statuses)
+    public function hitSerializationLimit($statuses): bool
     {
         return $statuses >= (self::MAX_AVAILABLE_TWEETS_PER_USER - 100);
     }
@@ -1067,7 +968,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @param $statuses
      * @return bool
      */
-    public function justSerializedSomeStatuses($statuses)
+    public function justSerializedSomeStatuses($statuses): bool
     {
         return ! is_null($statuses) && $statuses > 0;
     }
@@ -1077,7 +978,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @param $totalSerializedStatuses
      * @return bool
      */
-    public function serializedAllAvailableStatuses($lastSerializationBatchSize, $totalSerializedStatuses)
+    public function serializedAllAvailableStatuses($lastSerializationBatchSize, $totalSerializedStatuses): bool
     {
         return ! $this->justSerializedSomeStatuses($lastSerializationBatchSize) &&
             $this->hitSerializationLimit($totalSerializedStatuses);
@@ -1085,7 +986,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
 
     /**
      * @return bool
-     * @throws NonUniqueResultException
+     * @throws Exception
      */
     private function delayingConsumption(): bool
     {
@@ -1149,7 +1050,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
 
         $likedBy = null;
         if ($this->isAboutToCollectLikesFromCriteria($this->serializationOptions)) {
-            $likedBy = $this->accessor->ensureMemberHavingNameExists($screenName);
+            $likedBy = $this->apiAccessor->ensureMemberHavingNameExists($screenName);
         }
 
         $statuses = $this->saveStatuses($statuses, $aggregate, $likedBy);
@@ -1178,19 +1079,19 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         if ($this->isAboutToCollectLikesFromCriteria($this->serializationOptions)) {
             return $this->statusRepository->saveLikes(
                 $statuses,
-                $this->accessor->getOAuthToken(),
+                $this->apiAccessor->getOAuthToken(),
                 $aggregate,
                 $this->logger,
                 $likedBy,
                 function ($memberName) {
-                    return $this->accessor->ensureMemberHavingNameExists($memberName);
+                    return $this->apiAccessor->ensureMemberHavingNameExists($memberName);
                 }
             );
         }
 
         return $this->statusRepository->saveStatuses(
             $statuses,
-            new AccessToken($this->accessor->getOAuthToken()),
+            new AccessToken($this->apiAccessor->getOAuthToken()),
             $aggregate
         );
     }
@@ -1226,7 +1127,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             unset($options['max_id']);
         }
 
-        $statuses = $this->accessor->fetchStatuses($options);
+        $statuses = $this->apiAccessor->fetchStatuses($options);
 
         $discoverMoreRecentStatuses = false;
         if (count($statuses) > 0 &&
@@ -1527,7 +1428,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             SkippableMessageException::continueMessageConsumption();
         }
 
-        $whisperer->member = $this->accessor->showUser($options['screen_name']);
+        $whisperer->member = $this->apiAccessor->showUser($options['screen_name']);
         $whispers = (int) $whisperer->member->statuses_count;
 
         $storedWhispers = $this->statusRepository->countHowManyStatusesFor($options['screen_name']);
@@ -1697,7 +1598,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
                 $memberName
             );
         } catch (NotFoundMemberException $exception) {
-            $this->accessor->ensureMemberHavingNameExists($exception->screenName);
+            $this->apiAccessor->ensureMemberHavingNameExists($exception->screenName);
 
             try {
                 $this->declareExtremumIdForMember(
@@ -1706,7 +1607,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
                     $memberName
                 );
             } catch (NotFoundMemberException $exception) {
-                $this->accessor->ensureMemberHavingNameExists($exception->screenName);
+                $this->apiAccessor->ensureMemberHavingNameExists($exception->screenName);
                 $this->declareExtremumIdForMember(
                     $statuses,
                     $shouldDeclareMaximumStatusId,
@@ -1816,7 +1717,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
                     unset($options['aggregate_id']);
 
                     $options = $this->updateExtremum($options, $discoverPastTweets = false);
-                    $options = $this->accessor->guessMaxId(
+                    $options = $this->apiAccessor->guessMaxId(
                         $options,
                         $this->shouldLookUpFutureItems($options['screen_name'])
                     );

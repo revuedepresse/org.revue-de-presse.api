@@ -231,7 +231,7 @@ services:
     weaving_the_web_twitter.serializer.user_status:
         class:  '%weaving_the_web_twitter.serializer.user_status.class%'
         calls:
-            - [ 'setAccessor', [ '@weaving_the_web_twitter.api_accessor' ] ]
+            - [ 'setApiAccessor', [ '@weaving_the_web_twitter.api_accessor' ] ]
             - [ 'setLogger', [ '@monolog.logger.status' ] ]
             - [ 'setAggregateRepository', [ '@weaving_the_web_twitter.repository.aggregate' ] ]
             - [ 'setModerator', [ '@weaving_the_web_twitter.moderator.api_limit' ] ]
