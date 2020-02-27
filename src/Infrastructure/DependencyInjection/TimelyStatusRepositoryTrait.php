@@ -7,7 +7,7 @@ use App\Infrastructure\Repository\Status\TimelyStatusRepositoryInterface;
 
 trait TimelyStatusRepositoryTrait
 {
-    private TimelyStatusRepositoryInterface $timelyStatusRepository;
+    protected TimelyStatusRepositoryInterface $timelyStatusRepository;
 
     public function setTimelyStatusRepository(TimelyStatusRepositoryInterface $timelyStatusRepository): self
     {

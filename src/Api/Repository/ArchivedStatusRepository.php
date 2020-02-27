@@ -3,9 +3,6 @@ declare(strict_types=1);
 
 namespace App\Api\Repository;
 
-use App\Aggregate\Repository\TimelyStatusRepository;
-use App\Api\AccessToken\AccessToken;
-use App\Api\Adapter\StatusToArray;
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;
@@ -17,14 +14,10 @@ use App\Infrastructure\DependencyInjection\MemberRepositoryTrait;
 use App\Infrastructure\DependencyInjection\PublicationPersistenceTrait;
 use App\Infrastructure\DependencyInjection\PublicationRepositoryTrait;
 use App\Infrastructure\DependencyInjection\StatusLoggerTrait;
-use App\Infrastructure\DependencyInjection\StatusPersistenceTrait;
 use App\Infrastructure\DependencyInjection\TaggedStatusRepositoryTrait;
 use App\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
-use App\Infrastructure\Repository\Membership\MemberRepository;
 use App\Infrastructure\Twitter\Api\Normalizer\Normalizer;
 use App\Membership\Entity\MemberInterface;
-use App\Operation\Collection\Collection;
-use App\Operation\Collection\CollectionInterface;
 use App\Status\Entity\LikedStatus;
 use App\Status\Repository\ExtremumAwareInterface;
 use App\Status\Repository\LikedStatusRepository;
@@ -40,6 +33,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -50,13 +44,13 @@ use const JSON_THROW_ON_ERROR;
 /**
  * @package App\Api\Repository
  */
-class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwareInterface,
+class ArchivedStatusRepository extends ResourceRepository implements
+    ExtremumAwareInterface,
     StatusRepositoryInterface
 {
     use MemberRepositoryTrait;
     use PublicationRepositoryTrait;
     use StatusLoggerTrait;
-    use StatusPersistenceTrait;
     use PublicationPersistenceTrait;
     use TaggedStatusRepositoryTrait;
     use TimelyStatusRepositoryTrait;
@@ -269,7 +263,7 @@ QUERY;
         string $direction = 'asc',
         DateTime $before = null
     ): array {
-        $member = $this->memberManager->findOneBy(['twitter_username' => $screenName]);
+        $member = $this->memberRepository->findOneBy(['twitter_username' => $screenName]);
         if ($member instanceof MemberInterface) {
             if ($direction = 'desc' && !is_null($member->maxStatusId)) {
                 return ['statusId' => $member->maxStatusId];
@@ -376,7 +370,7 @@ QUERY;
      */
     public function getIdsOfExtremeStatusesSavedForMemberHavingScreenName(string $memberName): array
     {
-        $member = $this->memberManager->findOneBy(['twitter_username' => $memberName]);
+        $member = $this->memberRepository->findOneBy(['twitter_username' => $memberName]);
 
         return [
             'min_id' => $member->minStatusId,
@@ -525,7 +519,8 @@ QUERY;
                 try {
                     $member = $ensureMemberExists($memberStatus->getScreenName());
                 } catch (ProtectedAccountException|SuspendedAccountException|NotFoundMemberException $exception) {
-                    $member = $this->memberManager->findOneBy(['twitter_username' => $memberStatus->getScreenName()]);
+                    $member =
+                        $this->memberRepository->findOneBy(['twitter_username' => $memberStatus->getScreenName()]);
                 }
 
                 if ($member instanceof MemberInterface) {
@@ -553,7 +548,7 @@ QUERY;
         $this->flushLikedStatuses($likedStatuses, $entityManager);
 
         if (count($extracts) > 0) {
-            $this->memberManager->incrementTotalLikesOfMemberWithName(
+            $this->memberRepository->incrementTotalLikesOfMemberWithName(
                 count($extracts),
                 $likedBy->getTwitterUsername()
             );
@@ -601,9 +596,7 @@ QUERY;
     }
 
     /**
-     * @param bool $lastWeek
-     *
-     * @return \Doctrine\ORM\QueryBuilder
+     * @return QueryBuilder
      */
     protected function selectStatuses()
     {
