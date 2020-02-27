@@ -115,15 +115,13 @@ doctrine:
     dbal:
         connections:
             default:
-                url: '%env(resolve:DATABASE_URL)%'
-                # IMPORTANT: You MUST configure your server version,
-                # either here or in the DATABASE_URL env var (see .env file)
-                server_version: '5.7'
-                charset: utf8mb4
-                logging: false
-            write:
                 url: '%env(resolve:DATABASE_WRITE_URL)%'
                 server_version: 'mariadb-10.3.22'
+                charset: utf8mb4
+                logging: false
+            read:
+                url: '%env(resolve:DATABASE_URL)%'
+                server_version: '5.7'
                 charset: utf8mb4
                 logging: false
         types:
@@ -131,12 +129,12 @@ doctrine:
     orm:
         auto_generate_proxy_classes: true
         entity_managers:
-            default:
+            read:
                 naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
                 auto_mapping: false
-                connection: default
+                connection: read
                 dql: "%doctrine_extensions_dql%"
-                mappings: &mappings_default
+                mappings: &mappings_read
                     Api:
                         alias:      'Api'
                         is_bundle:  false
@@ -184,12 +182,12 @@ doctrine:
                         is_bundle:  false
                         prefix:     App\Tests\Security\Core\Member
                         type:       annotation
-            write:
+            default:
                 naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
-                connection: write
+                connection: default
                 dql: "%doctrine_extensions_dql%"
                 mappings:
-                    <<: *mappings_default
+                    <<: *mappings_read
                     Publication:
                         alias:      'Publication'
                         dir:        '%kernel.project_dir%/src/Twitter/Entity'
