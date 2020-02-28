@@ -8,7 +8,7 @@ use App\Api\Adapter\StatusToArray;
 use App\Api\Entity\Aggregate;
 use App\Domain\Status\StatusInterface;
 use App\Infrastructure\DependencyInjection\MemberRepositoryTrait;
-use App\Infrastructure\DependencyInjection\PublicationRepositoryTrait;
+use App\Infrastructure\DependencyInjection\Publication\PublicationRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Status\StatusPersistenceTrait;
 use App\Infrastructure\Repository\Membership\MemberRepositoryInterface;
 use App\Operation\Collection\Collection;

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Twitter\Serializer;
+namespace App\Infrastructure\Twitter\Collector;
 
 use App\Accessor\Exception\ApiRateLimitingException;
 use App\Accessor\Exception\NotFoundStatusException;
@@ -19,7 +19,9 @@ use App\Infrastructure\Amqp\Message\FetchMemberStatuses;
 use App\Infrastructure\DependencyInjection\ApiAccessorTrait;
 use App\Infrastructure\DependencyInjection\ApiLimitModeratorTrait;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
-use App\Infrastructure\DependencyInjection\PublicationPersistenceTrait;
+use App\Infrastructure\DependencyInjection\Publication\PublicationListRepositoryTrait;
+use App\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
+use App\Infrastructure\DependencyInjection\Status\StatusLoggerTrait;
 use App\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use App\Infrastructure\DependencyInjection\TokenRepositoryTrait;
 use App\Infrastructure\DependencyInjection\TranslatorTrait;
@@ -35,8 +37,8 @@ use App\Twitter\Exception\NotFoundMemberException;
 use App\Twitter\Exception\ProtectedAccountException;
 use App\Twitter\Exception\SuspendedAccountException;
 use App\Twitter\Exception\UnavailableResourceException;
-use App\Twitter\Serializer\Exception\RateLimitedException;
-use App\Twitter\Serializer\Exception\SkipSerializationException;
+use App\Infrastructure\Twitter\Collector\Exception\RateLimitedException;
+use App\Infrastructure\Twitter\Collector\Exception\SkipSerializationException;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Exception\ConstraintViolationException;
 use Doctrine\ORM\NonUniqueResultException;
@@ -50,15 +52,14 @@ use function array_key_exists;
 use function count;
 use function is_array;
 
-/**
- * @package App\Twitter\Accessor
- */
-class UserStatus implements LikedStatusCollectionAwareInterface
+class PublicationCollector implements PublicationCollectorInterface
 {
     use ApiAccessorTrait;
     use ApiLimitModeratorTrait;
     use LoggerTrait;
+    use PublicationListRepositoryTrait;
     use PublicationPersistenceTrait;
+    use StatusLoggerTrait;
     use StatusRepositoryTrait;
     use TokenRepositoryTrait;
     use TranslatorTrait;
@@ -83,12 +84,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     /**
      * @var array
      */
-    protected array $serializationOptions = [];
-
-    /**
-     * @var \App\Api\Repository\PublicationListRepository $aggregateRepository
-     */
-    protected $aggregateRepository;
+    protected array $collectingOptions = [];
 
     /**
      * @param $screenName
@@ -96,11 +92,6 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @param $totalSerializedStatuses
      *
      * @return bool
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
-     * @throws Exception
      */
     public function flagWhisperers($screenName, $lastSerializationBatchSize, $totalSerializedStatuses)
     {
@@ -130,7 +121,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      *
      * @return bool
      */
-    public function hitSerializationLimit($statuses): bool
+    public function hitCollectionLimit($statuses): bool
     {
         return $statuses >= (self::MAX_AVAILABLE_TWEETS_PER_USER - 100);
     }
@@ -156,7 +147,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      */
     public function justSerializedSomeStatuses($statuses): bool
     {
-        return !is_null($statuses) && $statuses > 0;
+        return $statuses !== null && $statuses > 0;
     }
 
     /**
@@ -180,7 +171,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @throws UnavailableResourceException
      * @throws UnexpectedApiResponseException
      */
-    public function serialize(array $options, $greedy = false, $discoverPastTweets = true)
+    public function collect(array $options, $greedy = false, $discoverPastTweets = true): bool
     {
         $successfulSerializationOptionSetup = $this->setUpSerializationOptions($options);
 
@@ -272,15 +263,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     public function serializedAllAvailableStatuses($lastSerializationBatchSize, $totalSerializedStatuses): bool
     {
         return !$this->justSerializedSomeStatuses($lastSerializationBatchSize)
-            && $this->hitSerializationLimit($totalSerializedStatuses);
-    }
-
-    /**
-     * @param $aggregateRepository
-     */
-    public function setAggregateRepository($aggregateRepository)
-    {
-        $this->aggregateRepository = $aggregateRepository;
+            && $this->hitCollectionLimit($totalSerializedStatuses);
     }
 
     /**
@@ -335,9 +318,9 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @throws UnavailableResourceException
      * @throws UnexpectedApiResponseException
      */
-    protected function fetchLatestStatuses($options, $discoverPastTweets = true): array
+    protected function fetchLatestStatuses($options, bool $discoverPastTweets = true): array
     {
-        $options[self::INTENT_TO_FETCH_LIKES] = $this->isAboutToCollectLikesFromCriteria($this->serializationOptions);
+        $options[self::INTENT_TO_FETCH_LIKES] = $this->isAboutToCollectLikesFromCriteria($this->collectingOptions);
         $options                              = $this->removeSerializationOptions($options);
         $options                              = $this->updateExtremum($options, $discoverPastTweets);
 
@@ -572,7 +555,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
                 $lastSerializationBatchSize,
                 $subject,
                 $options['screen_name'],
-                $this->serializationOptions['aggregate_id']
+                $this->collectingOptions['aggregate_id']
             )
         );
     }
@@ -775,23 +758,23 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         $foundOption = false;
 
         if (array_key_exists('aggregate_id', $options)) {
-            $this->serializationOptions['aggregate_id'] = $options['aggregate_id'];
-            $foundOption                                = true;
+            $this->collectingOptions['aggregate_id'] = $options['aggregate_id'];
+            $foundOption                             = true;
         } else {
-            $this->serializationOptions['aggregate_id'] = null;
+            $this->collectingOptions['aggregate_id'] = null;
         }
 
         if (array_key_exists('before', $options)) {
-            $this->serializationOptions['before'] = $options['before'];
-            $foundOption                          = true;
+            $this->collectingOptions['before'] = $options['before'];
+            $foundOption                       = true;
         } else {
-            $this->serializationOptions['before'] = null;
+            $this->collectingOptions['before'] = null;
         }
 
         if (array_key_exists(self::INTENT_TO_FETCH_LIKES, $options)) {
-            $this->serializationOptions[self::INTENT_TO_FETCH_LIKES] = $options[self::INTENT_TO_FETCH_LIKES];
+            $this->collectingOptions[self::INTENT_TO_FETCH_LIKES] = $options[self::INTENT_TO_FETCH_LIKES];
         } else {
-            $this->serializationOptions[self::INTENT_TO_FETCH_LIKES] = false;
+            $this->collectingOptions[self::INTENT_TO_FETCH_LIKES] = false;
         }
 
         return $foundOption;
@@ -831,9 +814,9 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         }
 
         $aggregate = null;
-        if (array_key_exists('aggregate_id', $this->serializationOptions)) {
-            $aggregate = $this->aggregateRepository->findOneBy(
-                ['id' => $this->serializationOptions['aggregate_id']]
+        if (array_key_exists('aggregate_id', $this->collectingOptions)) {
+            $aggregate = $this->publicationListRepository->findOneBy(
+                ['id' => $this->collectingOptions['aggregate_id']]
             );
         }
 
@@ -870,7 +853,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             }
         }
 
-        if ($this->isAboutToCollectLikesFromCriteria($this->serializationOptions)) {
+        if ($this->isAboutToCollectLikesFromCriteria($this->collectingOptions)) {
             $atLeastOneStatusFetched = count($statuses) > 0;
 
             $hasLikedStatusBeenSavedBefore = false;
@@ -929,7 +912,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             return false;
         }
 
-        if (!$this->isAboutToCollectLikesFromCriteria($this->serializationOptions)) {
+        if (!$this->isAboutToCollectLikesFromCriteria($this->collectingOptions)) {
             try {
                 $this->statusRepository->updateLastStatusPublicationDate($options['screen_name']);
             } catch (NotFoundStatusException $exception) {
@@ -956,9 +939,9 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         if (
             array_key_exists(
                 FetchMemberStatuses::BEFORE,
-                $this->serializationOptions
+                $this->collectingOptions
             )
-            && $this->serializationOptions[FetchMemberStatuses::BEFORE]
+            && $this->collectingOptions[FetchMemberStatuses::BEFORE]
         ) {
             $discoverPastTweets = true;
         }
@@ -1181,7 +1164,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             throw new \LogicException('There should be at least one status');
         }
 
-        if ($this->isAboutToCollectLikesFromCriteria($this->serializationOptions)) {
+        if ($this->isAboutToCollectLikesFromCriteria($this->collectingOptions)) {
             if ($shouldDeclareMaximumStatusId) {
                 $lastStatusFetched = $statuses[0];
 
@@ -1221,7 +1204,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             unset($options['max_id']);
         }
 
-        $options[self::INTENT_TO_FETCH_LIKES] = $this->isAboutToCollectLikesFromCriteria($this->serializationOptions);
+        $options[self::INTENT_TO_FETCH_LIKES] = $this->isAboutToCollectLikesFromCriteria($this->collectingOptions);
 
         return $options;
     }
@@ -1253,9 +1236,9 @@ class UserStatus implements LikedStatusCollectionAwareInterface
 
     private function ensureTargetAggregateIsNotLocked(): void
     {
-        if ($this->isSerializingStatusesForAggregate()) {
-            $aggregate = $this->aggregateRepository->findOneBy(
-                ['id' => $this->serializationOptions['aggregate_id']]
+        if ($this->isCollectingStatusesForAggregate()) {
+            $aggregate = $this->publicationListRepository->findOneBy(
+                ['id' => $this->collectingOptions['aggregate_id']]
             );
 
             if (!$aggregate instanceof Aggregate) {
@@ -1279,7 +1262,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
                 )
             );
 
-            $this->aggregateRepository->lockAggregate($aggregate);
+            $this->publicationListRepository->lockAggregate($aggregate);
         }
     }
 
@@ -1311,12 +1294,12 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         }
 
         if (
-            !array_key_exists('before', $this->serializationOptions)
-            || !$this->serializationOptions['before']
+            !array_key_exists('before', $this->collectingOptions)
+            || !$this->collectingOptions['before']
         ) {
             return $this->statusRepository->findLocalMaximum(
                 $options['screen_name'],
-                $this->serializationOptions['before']
+                $this->collectingOptions['before']
             );
         }
 
@@ -1336,12 +1319,12 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     private function findLikeExtremum($options, $findingDirection)
     {
         if (
-            !array_key_exists('before', $this->serializationOptions)
-            || !$this->serializationOptions['before']
+            !array_key_exists('before', $this->collectingOptions)
+            || !$this->collectingOptions['before']
         ) {
             return $this->likedStatusRepository->findLocalMaximum(
                 $options['screen_name'],
-                $this->serializationOptions['before']
+                $this->collectingOptions['before']
             );
         }
 
@@ -1359,7 +1342,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      */
     private function getExtremeStatusesIdsFor($options): array
     {
-        if ($this->isAboutToCollectLikesFromCriteria($this->serializationOptions)) {
+        if ($this->isAboutToCollectLikesFromCriteria($this->collectingOptions)) {
             return $this->likedStatusRepository->getIdsOfExtremeStatusesSavedForMemberHavingScreenName(
                 $options['screen_name']
             );
@@ -1422,8 +1405,8 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     private function getLogPrefix(): string
     {
         if (
-            !array_key_exists('before', $this->serializationOptions)
-            || !$this->serializationOptions['before']
+            !array_key_exists('before', $this->collectingOptions)
+            || !$this->collectingOptions['before']
         ) {
             return '';
         }
@@ -1491,64 +1474,9 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     /**
      * @return bool
      */
-    private function isSerializingStatusesForAggregate(): bool
+    private function isCollectingStatusesForAggregate(): bool
     {
-        return array_key_exists('aggregate_id', $this->serializationOptions);
-    }
-
-    /**
-     * @param int    $statusesCount
-     * @param string $memberName
-     *
-     * @return int|null
-     */
-    private function logHowManyItemsHaveBeenSaved(int $statusesCount, string $memberName)
-    {
-        if ($statusesCount > 0) {
-            $success = $statusesCount;
-
-            $messageKey = 'logs.info.status_saved';
-            $total      = 'total_status';
-            if ($this->isAboutToCollectLikesFromCriteria($this->serializationOptions)) {
-                $messageKey = 'logs.info.likes_saved';
-                $total      = 'total_likes';
-            }
-
-            $savedTweets = $this->translator->trans(
-                $messageKey,
-                [
-                    'count'  => $statusesCount,
-                    'member' => $memberName,
-                    $total   => $statusesCount,
-                ],
-                'logs'
-            );
-            $this->logger->info($savedTweets);
-
-            return $success;
-        }
-
-        $this->logger->info(sprintf('Nothing new for "%s"', $memberName));
-
-        return null;
-    }
-
-    /**
-     * @param $options
-     */
-    private function logIntentionWithRegardsToAggregate($options): void
-    {
-        if (is_null($this->serializationOptions['aggregate_id'])) {
-            $this->logger->info(sprintf('No aggregate id for "%s"', $options['screen_name']));
-        } else {
-            $this->logger->info(
-                sprintf(
-                    'About to save status for "%s" in aggregate #%d',
-                    $options['screen_name'],
-                    $this->serializationOptions['aggregate_id']
-                )
-            );
-        }
+        return array_key_exists('aggregate_id', $this->collectingOptions);
     }
 
     /**
@@ -1603,7 +1531,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         Aggregate $aggregate = null,
         MemberInterface $likedBy = null
     ): CollectionInterface {
-        if ($this->isAboutToCollectLikesFromCriteria($this->serializationOptions)) {
+        if ($this->isAboutToCollectLikesFromCriteria($this->collectingOptions)) {
             return $this->statusRepository->saveLikes(
                 $statuses,
                 $this->apiAccessor->getOAuthToken(),
@@ -1644,27 +1572,25 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         $aggregate = null;
         if ($aggregateId !== null) {
             /** @var Aggregate $aggregate */
-            $aggregate = $this->aggregateRepository->findOneBy(['id' => $aggregateId]);
+            $aggregate = $this->publicationListRepository->findOneBy(['id' => $aggregateId]);
         }
 
-        $this->logger->info(
-            sprintf(
-                'Fetched "%d" statuses for "%s"',
-                count($statuses),
-                $screenName
-            )
+        $this->collectStatusLogger->logHowManyItemsHaveBeenFetched(
+            $statuses,
+            $screenName
         );
 
         $likedBy = null;
-        if ($this->isAboutToCollectLikesFromCriteria($this->serializationOptions)) {
+        if ($this->isAboutToCollectLikesFromCriteria($this->collectingOptions)) {
             $likedBy = $this->apiAccessor->ensureMemberHavingNameExists($screenName);
         }
 
         $savedStatuses = $this->saveStatuses($statuses, $aggregate, $likedBy);
 
-        return $this->logHowManyItemsHaveBeenSaved(
+        return $this->collectStatusLogger->logHowManyItemsHaveBeenSaved(
             $savedStatuses->count(),
-            $screenName
+            $screenName,
+            $this->isAboutToCollectLikesFromCriteria($this->collectingOptions)
         );
     }
 
@@ -1692,14 +1618,12 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @param string $memberName
      *
      * @return bool
-     * @throws NotFoundMemberException
      * @throws NoResultException
      * @throws NonUniqueResultException
-     * @throws OptimisticLockException
      */
     private function shouldLookUpFutureItems(string $memberName): bool
     {
-        if ($this->isAboutToCollectLikesFromCriteria($this->serializationOptions)) {
+        if ($this->isAboutToCollectLikesFromCriteria($this->collectingOptions)) {
             return $this->likedStatusRepository->countHowManyLikesFor($memberName)
                 > self::MAX_AVAILABLE_TWEETS_PER_USER;
         }
@@ -1731,34 +1655,39 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      */
     private function trySerializingFurther($options, $greedy, $discoverPastTweets): bool
     {
-        $this->logIntentionWithRegardsToAggregate($options);
+        $success = true;
+
+        $this->collectStatusLogger->logIntentionWithRegardsToAggregate(
+            $options,
+            $this->collectingOptions['aggregate_id']
+        );
 
         $lastSerializationBatchSize = $this->saveStatusesMatchingCriteria(
             $options,
-            $this->serializationOptions['aggregate_id']
+            $this->collectingOptions['aggregate_id']
         );
-        $success                    = true;
 
         if (
             $discoverPastTweets
             || (
-                !is_null($lastSerializationBatchSize) && $lastSerializationBatchSize == self::MAX_BATCH_SIZE
+                $lastSerializationBatchSize !== null &&
+                $lastSerializationBatchSize === self::MAX_BATCH_SIZE
             )
         ) {
             // When some of the last batch of statuses have been serialized for the first time,
-            // and we should discover statuses in the past,
-            // keep retrieving statuses in the past
-            // otherwise start serializing statuses never seen before,
+            // and we should discover status in the past,
+            // keep retrieving status in the past
+            // otherwise start serializing status never seen before,
             // which have been more recently published
-            $discoverPastTweets = !is_null($lastSerializationBatchSize) && $discoverPastTweets;
+            $discoverPastTweets = $lastSerializationBatchSize !== null && $discoverPastTweets;
             if ($greedy) {
-                $options['aggregate_id'] = $this->serializationOptions['aggregate_id'];
-                $options['before']       = $this->serializationOptions['before'];
+                $options['aggregate_id'] = $this->collectingOptions['aggregate_id'];
+                $options['before']       = $this->collectingOptions['before'];
 
-                $success = $this->serialize($options, $greedy, $discoverPastTweets);
+                $success = $this->collect($options, $greedy, $discoverPastTweets);
 
                 $justDiscoveredFutureTweets = !$discoverPastTweets;
-                if ($justDiscoveredFutureTweets && is_null($this->serializationOptions['before'])) {
+                if ($justDiscoveredFutureTweets && is_null($this->collectingOptions['before'])) {
                     unset($options['aggregate_id']);
 
                     $options = $this->updateExtremum($options, $discoverPastTweets = false);
@@ -1769,7 +1698,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
 
                     $lastSerializationBatchSize = $this->saveStatusesMatchingCriteria(
                         $options,
-                        $this->serializationOptions['aggregate_id']
+                        $this->collectingOptions['aggregate_id']
                     );
 
                     $totalSerializedStatuses = $this->logHowManyItemsHaveBeenCollected($options);
@@ -1793,12 +1722,12 @@ class UserStatus implements LikedStatusCollectionAwareInterface
 
     private function unlockAggregate(): void
     {
-        if ($this->isSerializingStatusesForAggregate()) {
-            $aggregate = $this->aggregateRepository->findOneBy(
-                ['id' => $this->serializationOptions['aggregate_id']]
+        if ($this->isCollectingStatusesForAggregate()) {
+            $aggregate = $this->publicationListRepository->findOneBy(
+                ['id' => $this->collectingOptions['aggregate_id']]
             );
             if ($aggregate instanceof Aggregate) {
-                $this->aggregateRepository->unlockAggregate($aggregate);
+                $this->publicationListRepository->unlockAggregate($aggregate);
                 $this->logger->info(sprintf('Unlocked aggregate #%d', $aggregate->getId()));
             }
         }

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Infrastructure\DependencyInjection;
+namespace App\Infrastructure\DependencyInjection\Publication;
 
 use App\Infrastructure\Amqp\ResourceProcessor\PublicationListProcessorInterface;
 

@@ -13,7 +13,7 @@ use App\Api\Exception\InvalidSerializedTokenException;
 use App\Domain\Collection\PublicationCollectionStrategy;
 use App\Domain\Collection\PublicationStrategyInterface;
 use App\Infrastructure\DependencyInjection\OwnershipAccessorTrait;
-use App\Infrastructure\DependencyInjection\PublicationMessageDispatcherTrait;
+use App\Infrastructure\DependencyInjection\Publication\PublicationMessageDispatcherTrait;
 use App\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Infrastructure\InputConverter\InputToCollectionStrategy;
 use App\Operation\OperationClock;

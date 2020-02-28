@@ -5,8 +5,11 @@ namespace App\Infrastructure\Log;
 
 use App\Api\Entity\Aggregate;
 use App\Domain\Status\StatusInterface;
+use App\Infrastructure\DependencyInjection\TranslatorTrait;
 use Psr\Log\LoggerInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use function array_key_exists;
+use function count;
 use function json_decode;
 use function json_last_error;
 use function sprintf;
@@ -16,13 +19,18 @@ use const JSON_THROW_ON_ERROR;
 
 class StatusLogger implements StatusLoggerInterface
 {
+    use TranslatorTrait;
+
     /**
      * @var LoggerInterface
      */
     private LoggerInterface $logger;
 
-    public function __construct(LoggerInterface $logger)
-    {
+    public function __construct(
+        TranslatorInterface $translator,
+        LoggerInterface $logger
+    ) {
+        $this->translator = $translator;
         $this->logger = $logger;
     }
 
@@ -52,11 +60,51 @@ class StatusLogger implements StatusLoggerInterface
     }
 
     /**
+     * @param int    $statusesCount
+     * @param string $memberName
+     * @param bool   $collectingLikes
+     *
+     * @return int
+     */
+    public function logHowManyItemsHaveBeenSaved(
+        int $statusesCount,
+        string $memberName,
+        bool $collectingLikes
+    ): int {
+        if ($statusesCount > 0) {
+            $messageKey = 'logs.info.status_saved';
+            $total      = 'total_status';
+            if ($collectingLikes) {
+                $messageKey = 'logs.info.likes_saved';
+                $total      = 'total_likes';
+            }
+
+            $savedTweets = $this->translator->trans(
+                $messageKey,
+                [
+                    'count'  => $statusesCount,
+                    'member' => $memberName,
+                    $total   => $statusesCount,
+                ],
+                'logs'
+            );
+
+            $this->logger->info($savedTweets);
+
+            return $statusesCount;
+        }
+
+        $this->logger->info(sprintf('Nothing new for "%s"', $memberName));
+
+        return 0;
+    }
+
+    /**
      * @param StatusInterface $memberStatus
      *
      * @return array
      */
-    public function extractReachOfStatus(StatusInterface $memberStatus): array
+    private function extractReachOfStatus(StatusInterface $memberStatus): array
     {
         $decodedApiResponse = json_decode(
             $memberStatus->getApiDocument(),
@@ -126,5 +174,43 @@ class StatusLogger implements StatusLoggerInterface
         }
 
         return '____';
+    }
+
+    /**
+     * @param array  $statuses
+     * @param string $screenName
+     */
+    public function logHowManyItemsHaveBeenFetched(
+        array $statuses,
+        string $screenName
+    ): void {
+        $this->logger->info(
+            sprintf(
+                'Fetched "%d" statuses for "%s"',
+                count($statuses),
+                $screenName
+            )
+        );
+    }
+
+    /**
+     * @param             $options
+     * @param string|null $aggregateId
+     */
+    public function logIntentionWithRegardsToAggregate($options, ?string $aggregateId = null): void
+    {
+        if ($aggregateId === null) {
+            $this->logger->info(sprintf('No aggregate id for "%s"', $options['screen_name']));
+
+            return;
+        }
+
+        $this->logger->info(
+            sprintf(
+                'About to save status for "%s" in aggregate #%d',
+                $options['screen_name'],
+                $aggregateId
+            )
+        );
     }
 }

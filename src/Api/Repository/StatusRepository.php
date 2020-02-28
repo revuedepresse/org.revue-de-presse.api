@@ -11,7 +11,7 @@ use App\Domain\Status\TaggedStatus;
 use App\Membership\Entity\MemberInterface;
 use App\StatusCollection\Mapping\MappingAwareInterface;
 use App\Twitter\Exception\NotFoundMemberException;
-use App\Twitter\Serializer\UserStatus;
+use App\Infrastructure\Twitter\Collector\PublicationCollector;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\DBALException;
@@ -115,7 +115,7 @@ class StatusRepository extends ArchivedStatusRepository
             $status = $this->findOneBy(['screenName' => $screenName], ['createdAt' => 'DESC']);
             $decodedStatusDocument = json_decode($status->getApiDocument(), true);
 
-            if ($decodedStatusDocument['user']['statuses_count'] > UserStatus::MAX_AVAILABLE_TWEETS_PER_USER) {
+            if ($decodedStatusDocument['user']['statuses_count'] > PublicationCollector::MAX_AVAILABLE_TWEETS_PER_USER) {
                 return $decodedStatusDocument['user']['statuses_count'];
             }
 

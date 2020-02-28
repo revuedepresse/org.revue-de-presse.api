@@ -13,7 +13,7 @@ use App\Api\Repository\ArchivedStatusRepository;
 use App\Api\Repository\StatusRepository;
 use App\Domain\Status\StatusInterface;
 use App\Domain\Status\TaggedStatus;
-use App\Infrastructure\DependencyInjection\PublicationPersistenceTrait;
+use App\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
 use App\Infrastructure\Repository\Membership\MemberRepository;
 use App\Membership\Entity\MemberInterface;
 use App\Membership\Exception\InvalidMemberIdentifier;

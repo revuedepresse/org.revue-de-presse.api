@@ -3,9 +3,6 @@ declare(strict_types=1);
 
 namespace App\Amqp\MessageHandler;
 
-use App\Accessor\Exception\ApiRateLimitingException;
-use App\Accessor\Exception\ReadOnlyApplicationException;
-use App\Accessor\Exception\UnexpectedApiResponseException;
 use App\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Api\Entity\Token;
 use App\Api\Entity\TokenInterface;
@@ -13,22 +10,16 @@ use App\Infrastructure\Amqp\Message\FetchMemberLikes;
 use App\Infrastructure\Amqp\Message\FetchMemberStatuses;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\Repository\Membership\MemberRepository;
+use App\Infrastructure\Twitter\Collector\PublicationCollectorInterface;
 use App\Operation\OperationClock;
 use App\Status\LikedStatusCollectionAwareInterface;
 use App\Twitter\Api\TwitterErrorAwareInterface;
-use App\Twitter\Exception\BadAuthenticationDataException;
-use App\Twitter\Exception\InconsistentTokenRepository;
 use App\Twitter\Exception\ProtectedAccountException;
 use App\Twitter\Exception\UnavailableResourceException;
-use App\Twitter\Serializer\UserStatus;
-use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Exception;
-use ReflectionException;
 use Symfony\Component\Messenger\Handler\MessageSubscriberInterface;
-use function array_key_exists;
 use function sprintf;
 
 /**
@@ -63,9 +54,9 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
     public TokenRepositoryInterface $tokenRepository;
 
     /**
-     * @var UserStatus $serializer
+     * @var PublicationCollectorInterface $collector
      */
-    protected UserStatus $serializer;
+    protected PublicationCollectorInterface $collector;
 
     /**
      * @var MemberRepository
@@ -76,16 +67,8 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
      * @param FetchMemberStatuses $message
      *
      * @return bool
-     * @throws NoResultException
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
-     * @throws ApiRateLimitingException
-     * @throws ReadOnlyApplicationException
-     * @throws UnexpectedApiResponseException
-     * @throws BadAuthenticationDataException
-     * @throws InconsistentTokenRepository
-     * @throws ReflectionException
      * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function __invoke(FetchMemberStatuses $message)
     {
@@ -107,7 +90,7 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
         ];
 
         try {
-            $success = $this->serializer->serialize($options, $greedy = true);
+            $success = $this->collector->collect($options, $greedy = true);
             if (!$success) {
                 $this->logger->info(
                     sprintf(
@@ -160,17 +143,17 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
     {
         $oauthToken = $this->extractOAuthToken($message);
 
-        $this->serializer->setupAccessor($oauthToken);
+        $this->collector->setupAccessor($oauthToken);
 
         return $oauthToken;
     }
 
     /**
-     * @param UserStatus $serializer
+     * @param PublicationCollectorInterface $collector
      */
-    public function setSerializer(UserStatus $serializer)
+    public function setCollector(PublicationCollectorInterface $collector)
     {
-        $this->serializer = $serializer;
+        $this->collector = $collector;
     }
 
     /**

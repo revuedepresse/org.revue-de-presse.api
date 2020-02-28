@@ -29,6 +29,7 @@ services:
     App\Infrastructure\Log\StatusLogger:
         class: 'App\Infrastructure\Log\StatusLogger'
         arguments:
+            - '@translator'
             - '@monolog.logger.status'
 
     App\Api\Repository\StatusRepository:
@@ -206,14 +207,15 @@ services:
         arguments:
             - '@?logger'
 
-    App\Twitter\Serializer\UserStatus:
-        class:  'App\Twitter\Serializer\UserStatus'
+    App\Infrastructure\Twitter\Collector\PublicationCollector:
+        class:  'App\Infrastructure\Twitter\Collector\PublicationCollector'
         calls:
             - [ 'setApiAccessor',               [ '@weaving_the_web_twitter.api_accessor' ] ]
             - [ 'setLogger',                    [ '@monolog.logger.status' ] ]
-            - [ 'setAggregateRepository',       [ '@weaving_the_web_twitter.repository.aggregate' ] ]
             - [ 'setModerator',                 [ '@weaving_the_web_twitter.moderator.api_limit' ] ]
             - [ 'setPublicationPersistence',    [ '@App\Infrastructure\Status\Persistence\PublicationPersistence' ] ]
+            - [ 'setPublicationListRepository', [ '@weaving_the_web_twitter.repository.aggregate' ] ]
+            - [ 'setStatusLogger',              [ '@App\Infrastructure\Log\StatusLogger' ] ]
             - [ 'setStatusRepository',          [ '@App\Api\Repository\StatusRepository' ] ]
             - [ 'setTokenRepository',           [ '@weaving_the_web_twitter.repository.token' ] ]
             - [ 'setTranslator',                [ '@translator' ] ]
