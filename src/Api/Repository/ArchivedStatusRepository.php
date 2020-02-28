@@ -430,7 +430,6 @@ QUERY;
      * @param callable        $ensureMemberExists
      *
      * @return array
-     * @throws NotFoundMemberException
      * @throws ORMException
      * @throws OptimisticLockException
      */

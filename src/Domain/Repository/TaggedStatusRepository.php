@@ -81,8 +81,10 @@ class TaggedStatusRepository implements TaggedStatusRepositoryInterface
      * @param $hash
      *
      * @return bool
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
-    public function archivedStatusHavingHashExists($hash): bool
+    public function archivedStatusHavingHashExists(string $hash): bool
     {
         $queryBuilder = $this->entityManager
             ->getRepository(ArchivedStatus::class)
@@ -111,7 +113,7 @@ class TaggedStatusRepository implements TaggedStatusRepositoryInterface
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    public function statusHavingHashExists($hash): bool
+    public function statusHavingHashExists(string $hash): bool
     {
         if ($this->archivedStatusHavingHashExists($hash)) {
             return true;

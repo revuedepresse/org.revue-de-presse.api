@@ -1392,27 +1392,6 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         return'findNextMininum';
     }
 
-    /**
-     * @param $options
-     *
-     * @return object|null
-     * @throws ApiRateLimitingException
-     * @throws BadAuthenticationDataException
-     * @throws InconsistentTokenRepository
-     * @throws NoResultException
-     * @throws NonUniqueResultException
-     * @throws NotFoundMemberException
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @throws ProtectedAccountException
-     * @throws ReadOnlyApplicationException
-     * @throws ReflectionException
-     * @throws SkippableMessageException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws UnexpectedApiResponseException
-     * @throws InvalidMemberIdentifier
-     */
     private function beforeFetchingStatuses($options)
     {
         if ($this->isAboutToCollectLikesFromCriteria($options)) {

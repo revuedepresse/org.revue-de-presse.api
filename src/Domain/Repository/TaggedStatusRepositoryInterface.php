@@ -13,7 +13,7 @@ interface TaggedStatusRepositoryInterface
         ?Aggregate $aggregate
     ): StatusInterface;
 
-    public function archivedStatusHavingHashExists($hash): bool;
+    public function archivedStatusHavingHashExists(string $hash): bool;
 
-    public function statusHavingHashExists($hash): bool;
+    public function statusHavingHashExists(string $hash): bool;
 }
