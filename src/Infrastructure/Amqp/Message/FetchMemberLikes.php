@@ -16,7 +16,8 @@ class FetchMemberLikes extends FetchMemberStatuses
             $message->screenName(),
             $message->aggregateId(),
             $message->token(),
-            $message->before()
+            $message->shouldFetchLikes(),
+            $message->dateBeforeWhichStatusAreCollected()
         );
     }
 }

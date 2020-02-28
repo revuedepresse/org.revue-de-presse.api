@@ -246,18 +246,17 @@ class StatusRepository extends ArchivedStatusRepository
     }
 
     /**
-     * @param string         $screenName
-     * @param string         $direction
-     * @param DateTime|null $before
+     * @param string $screenName
+     * @param string $direction
+     * @param string $before
+     *
      * @return array
      * @throws NonUniqueResultException
-     * @throws OptimisticLockException
-     * @throws NotFoundMemberException
      */
     public function findNextExtremum(
         string $screenName,
-        string $direction = 'asc',
-        DateTime $before = null
+        string $direction = self::FINDING_IN_ASCENDING_ORDER,
+        ?string $before = null
     ): array {
         $nextExtremum = $this->archivedStatusRepository->findNextExtremum($screenName, $direction, $before);
 

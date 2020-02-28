@@ -15,7 +15,7 @@ class PublicationCollectionStrategy implements PublicationStrategyInterface
 {
     private string $screenName;
 
-    private ?bool $collectPublicationsPrecedingThoseAlreadyCollected = null;
+    private ?string $dateBeforeWhichPublicationsAreCollected = null;
 
     private ?string $listRestriction = null;
 
@@ -31,12 +31,14 @@ class PublicationCollectionStrategy implements PublicationStrategyInterface
 
     private bool $includeOwner = false;
 
+    private bool $fetchLikes = false;
+
     /**
-     * @return bool|null
+     * @return string|null
      */
-    public function collectPublicationsPrecedingThoseAlreadyCollected(): ?bool
+    public function dateBeforeWhichPublicationsAreCollected(): ?string
     {
-        return $this->collectPublicationsPrecedingThoseAlreadyCollected;
+        return $this->dateBeforeWhichPublicationsAreCollected;
     }
 
     /**
@@ -73,6 +75,23 @@ class PublicationCollectionStrategy implements PublicationStrategyInterface
     public function listRestriction(): bool
     {
         return !$this->noListRestriction();
+    }
+
+    /**
+     * @param bool $fetchLikes
+     *
+     * @return PublicationCollectionStrategy
+     */
+    public function willFetchLikes(bool $fetchLikes = false): self
+    {
+        $this->fetchLikes = $fetchLikes;
+
+        return $this;
+    }
+
+    public function shouldFetchLikes(): bool
+    {
+        return $this->fetchLikes;
     }
 
     /**
@@ -307,13 +326,13 @@ class PublicationCollectionStrategy implements PublicationStrategyInterface
     }
 
     /**
-     * @param bool|null $before
+     * @param string|null $date
      *
      * @return PublicationCollectionStrategy
      */
-    public function willCollectPublicationsPrecedingThoseAlreadyCollected(?bool $before): self
+    public function willCollectPublicationsPreceding(?string $date): self
     {
-        $this->collectPublicationsPrecedingThoseAlreadyCollected = $before;
+        $this->dateBeforeWhichPublicationsAreCollected = $date;
 
         return $this;
     }

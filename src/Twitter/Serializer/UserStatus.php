@@ -14,6 +14,7 @@ use App\Api\Entity\Aggregate;
 use App\Api\Entity\Token;
 use App\Api\Entity\TokenInterface;
 use App\Api\Entity\Whisperer;
+use App\Domain\Repository\StatusRepositoryInterface;
 use App\Domain\Status\StatusInterface;
 use App\Infrastructure\Amqp\Message\FetchMemberStatuses;
 use App\Infrastructure\DependencyInjection\ApiAccessorTrait;
@@ -28,6 +29,7 @@ use App\Membership\Entity\MemberInterface;
 use App\Membership\Exception\InvalidMemberIdentifier;
 use App\Operation\Collection\CollectionInterface;
 use App\Status\LikedStatusCollectionAwareInterface;
+use App\Status\Repository\ExtremumAwareInterface;
 use App\Status\Repository\LikedStatusRepository;
 use App\Twitter\Exception\BadAuthenticationDataException;
 use App\Twitter\Exception\InconsistentTokenRepository;
@@ -514,9 +516,9 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         }
 
         $options = $this->getExtremumOptions($options, $discoverPastTweets);
-        $updateMethod = $this->getExtremumUpdateMethod($discoverPastTweets);
 
-        $status = $this->findExtremum($options, $updateMethod);
+        $findingDirection = $this->getExtremumUpdateMethod($discoverPastTweets);
+        $status = $this->findExtremum($options, $findingDirection);
 
         $logPrefix = $this->getLogPrefix();
 
@@ -681,20 +683,12 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @param int|null $aggregateId
      *
      * @return int|null
-     * @throws ApiRateLimitingException
-     * @throws BadAuthenticationDataException
-     * @throws NoResultException
      * @throws NonUniqueResultException
      * @throws NotFoundMemberException
-     * @throws NotFoundStatusException
      * @throws OptimisticLockException
      * @throws ProtectedAccountException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
-     * @throws ReadOnlyApplicationException
-     * @throws UnexpectedApiResponseException
-     * @throws InconsistentTokenRepository
-     * @throws ReflectionException
      */
     protected function saveStatusesMatchingCriteria($options, int $aggregateId = null)
     {
@@ -723,8 +717,8 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         $firstStatusId = $statusesIds['min_id'];
         $lastStatusId = $statusesIds['max_id'];
         if (!$lookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow &&
-            !is_null($firstStatusId) &&
-            !is_null($lastStatusId) &&
+            $firstStatusId !== null &&
+            $lastStatusId !== null &&
             count($statuses) > 0 &&
             ($statuses[count($statuses) - 1]->id >= (int) $firstStatusId) &&
             ($statuses[0]->id <= (int) $lastStatusId)
@@ -1294,14 +1288,14 @@ class UserStatus implements LikedStatusCollectionAwareInterface
 
     /**
      * @param $options
-     * @param $updateMethod
+     * @param $findingDirection
      * @return array|mixed
      * @throws NonUniqueResultException
      */
-    private function findExtremum($options, $updateMethod)
+    private function findExtremum($options, $findingDirection)
     {
         if ($this->isAboutToCollectLikesFromCriteria($options)) {
-            return $this->findLikeExtremum($options, $updateMethod);
+            return $this->findLikeExtremum($options, $findingDirection);
         }
 
         if (!array_key_exists('before', $this->serializationOptions) ||
@@ -1313,17 +1307,19 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             );
         }
 
-
-        return $this->statusRepository->$updateMethod($options['screen_name']);
+        return $this->statusRepository->findNextExtremum(
+            $options['screen_name'],
+            $findingDirection
+        );
     }
 
     /**
      * @param $options
-     * @param $updateMethod
+     * @param $findingDirection
      * @return array|mixed
      * @throws NonUniqueResultException
      */
-    private function findLikeExtremum($options, $updateMethod)
+    private function findLikeExtremum($options, $findingDirection)
     {
         if (!array_key_exists('before', $this->serializationOptions) ||
             !$this->serializationOptions['before']
@@ -1334,8 +1330,10 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             );
         }
 
-
-        return $this->likedStatusRepository->$updateMethod($options['screen_name']);
+        return $this->likedStatusRepository->findNextExtremum
+            ($options['screen_name'],
+            $findingDirection
+        );
     }
 
     /**
@@ -1386,10 +1384,12 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     private function getExtremumUpdateMethod($discoverPastTweets): string
     {
         if ($discoverPastTweets) {
-            return 'findNextMaximum';
+            // next maximum
+            return ExtremumAwareInterface::FINDING_IN_ASCENDING_ORDER;
         }
 
-        return'findNextMininum';
+        // next minimum
+        return ExtremumAwareInterface::FINDING_IN_DESCENDING_ORDER;
     }
 
     private function beforeFetchingStatuses($options)

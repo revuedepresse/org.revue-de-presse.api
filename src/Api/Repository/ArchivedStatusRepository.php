@@ -16,7 +16,6 @@ use App\Infrastructure\DependencyInjection\PublicationRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Status\StatusLoggerTrait;
 use App\Infrastructure\DependencyInjection\TaggedStatusRepositoryTrait;
 use App\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
-use App\Infrastructure\Status\Exception\DocumentException;
 use App\Infrastructure\Twitter\Api\Normalizer\Normalizer;
 use App\Membership\Entity\MemberInterface;
 use App\Status\Entity\LikedStatus;
@@ -78,13 +77,10 @@ class ArchivedStatusRepository extends ResourceRepository implements
         $queryBuilder->select('COUNT(DISTINCT s.hash) as count_')
                      ->andWhere('s.screenName = :screenName');
 
-        if ($maxId < INF) {
-            $queryBuilder->andWhere('(s.statusId + 0) <= :maxId');
-        }
-
         $queryBuilder->setParameter('screenName', $screenName);
 
         if ($maxId < INF) {
+            $queryBuilder->andWhere('(s.statusId + 0) <= :maxId');
             $queryBuilder->setParameter('maxId', $maxId);
         }
 
@@ -119,16 +115,18 @@ class ArchivedStatusRepository extends ResourceRepository implements
 
     /**
      * @param string        $screenName
-     * @param DateTime|null $before
+     * @param string|null $before
      *
      * @return array
      * @throws NonUniqueResultException
      */
-    public function findLocalMaximum(string $screenName, DateTime $before = null): array
-    {
-        $direction = 'asc';
+    public function findLocalMaximum(
+        string $screenName,
+        ?string $before = null
+    ): array {
+        $direction = self::FINDING_IN_ASCENDING_ORDER;
         if ($before === null) {
-            $direction = 'desc';
+            $direction = self::FINDING_IN_DESCENDING_ORDER;
         }
 
         return $this->findNextExtremum($screenName, $direction, $before);
@@ -137,23 +135,27 @@ class ArchivedStatusRepository extends ResourceRepository implements
     /**
      * @param string        $screenName
      * @param string        $direction
-     * @param DateTime|null $before
+     * @param string $before
      *
      * @return array
      * @throws NonUniqueResultException
      */
     public function findNextExtremum(
         string $screenName,
-        string $direction = 'asc',
-        DateTime $before = null
+        string $direction = self::FINDING_IN_ASCENDING_ORDER,
+        ?string $before = null
     ): array {
-        $member = $this->memberRepository->findOneBy(['twitter_username' => $screenName]);
+        $member = $this->memberRepository->findOneBy([
+            'twitter_username' => $screenName
+        ]);
         if ($member instanceof MemberInterface) {
-            if ($direction === 'desc' && $member->maxStatusId !== null) {
+            if ($direction === self::FINDING_IN_DESCENDING_ORDER &&
+                $member->maxStatusId !== null) {
                 return ['statusId' => $member->maxStatusId];
             }
 
-            if ($direction === 'asc' && $member->minStatusId !== null) {
+            if ($direction === self::FINDING_IN_ASCENDING_ORDER &&
+                $member->minStatusId !== null) {
                 return ['statusId' => $member->minStatusId];
             }
         }
@@ -168,7 +170,7 @@ class ArchivedStatusRepository extends ResourceRepository implements
         $queryBuilder->setParameter('screenName', $screenName);
 
         if ($before) {
-            $queryBuilder->andWhere('DATE(s.createdAt) = :date');
+            $queryBuilder->andWhere('DATE(s.createdAt) <= :date');
             $queryBuilder->setParameter(
                 'date',
                 (new DateTime($before, new \DateTimeZone('UTC')))
@@ -179,34 +181,14 @@ class ArchivedStatusRepository extends ResourceRepository implements
         try {
             return $queryBuilder->getQuery()->getSingleResult();
         } catch (NoResultException $exception) {
-            if ($direction == 'asc') {
+            $this->appLogger->info($exception->getMessage());
+
+            if ($direction === self::FINDING_IN_ASCENDING_ORDER) {
                 return ['statusId' => +INF];
             }
 
             return ['statusId' => -INF];
         }
-    }
-
-    /**
-     * @param string $screenName
-     *
-     * @return array
-     * @throws NonUniqueResultException
-     */
-    public function findNextMaximum(string $screenName): array
-    {
-        return $this->findNextExtremum($screenName, 'asc');
-    }
-
-    /**
-     * @param string $screenName
-     *
-     * @return array
-     * @throws NonUniqueResultException
-     */
-    public function findNextMininum(string $screenName): array
-    {
-        return $this->findNextExtremum($screenName, 'desc');
     }
 
     /**
@@ -318,8 +300,6 @@ class ArchivedStatusRepository extends ResourceRepository implements
      * @param callable        $ensureMemberExists
      *
      * @return array
-     * @throws ORMException
-     * @throws OptimisticLockException
      */
     public function saveLikes(
         array $statuses,
@@ -439,7 +419,7 @@ class ArchivedStatusRepository extends ResourceRepository implements
 
         return $extracts;
     }
-    
+
     /**
      * @param EntityManagerInterface $entityManager
      */

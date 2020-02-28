@@ -65,7 +65,6 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
      * @throws ContinuePublicationException
      * @throws MembershipException
      * @throws StopPublicationException
-     * @throws UnexpectedApiResponseException
      */
     public function process(
         MemberIdentity $memberIdentity,
@@ -125,7 +124,8 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
             ),
             $token,
             $member,
-            $strategy->collectPublicationsPrecedingThoseAlreadyCollected()
+            $strategy->shouldFetchLikes(),
+            $strategy->dateBeforeWhichPublicationsAreCollected()
         );
 
         $this->dispatcher->dispatch($fetchMemberStatuses);

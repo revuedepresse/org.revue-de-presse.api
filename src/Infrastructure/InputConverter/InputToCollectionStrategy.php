@@ -26,6 +26,7 @@ class InputToCollectionStrategy
         self::memberRestriction($input, $strategy);
         self::ignoreWhispers($input, $strategy);
         self::includeOwner($input, $strategy);
+        self::shouldFetchLikes($input, $strategy);
 
         return $strategy;
     }
@@ -96,7 +97,7 @@ class InputToCollectionStrategy
             $input->hasOption(PublicationStrategyInterface::RULE_BEFORE)
             && $input->getOption(PublicationStrategyInterface::RULE_BEFORE) !== null
         ) {
-            $strategy->willCollectPublicationsPrecedingThoseAlreadyCollected(
+            $strategy->willCollectPublicationsPreceding(
                 $input->getOption(PublicationStrategyInterface::RULE_BEFORE)
             );
         }
@@ -183,6 +184,16 @@ class InputToCollectionStrategy
             && $input->getOption(PublicationStrategyInterface::RULE_INCLUDE_OWNER)
         ) {
             $strategy->willIncludeOwner($input->getOption(PublicationStrategyInterface::RULE_INCLUDE_OWNER));
+        }
+    }
+
+    private static function shouldFetchLikes(InputInterface $input, PublicationCollectionStrategy $strategy)
+    {
+        if (
+            $input->hasOption(PublicationStrategyInterface::RULE_FETCH_LIKES) &&
+            $input->getOption(PublicationStrategyInterface::RULE_FETCH_LIKES)
+        ) {
+            $strategy->willFetchLikes($input->getOption(PublicationStrategyInterface::RULE_FETCH_LIKES));
         }
     }
 }

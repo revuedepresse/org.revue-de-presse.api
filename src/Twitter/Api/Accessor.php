@@ -41,6 +41,7 @@ use stdClass;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Translation\Translator;
 use TwitterOAuth;
+use function array_key_exists;
 use function is_array;
 use function is_null;
 use function is_numeric;
@@ -451,17 +452,9 @@ class Accessor implements ApiAccessorInterface,
      */
     public function fetchStatuses(array $options)
     {
-        if (is_null($options) || (!is_object($options) && !is_array($options))) {
-            throw new Exception('Invalid options');
-        }
+        $parameters = $this->validateRequestOptions((object) $options);
 
-        if (is_array($options)) {
-            $options = (object) $options;
-        }
-
-        $parameters = $this->validateRequestOptions($options);
-
-        if ($this->isAboutToCollectLikesFromCriteria((array) $options)) {
+        if ($this->isAboutToCollectLikesFromCriteria($options)) {
             return $this->fetchLikes($parameters);
         }
 
@@ -1974,7 +1967,7 @@ class Accessor implements ApiAccessorInterface,
      *
      * @return array
      */
-    protected function validateRequestOptions($options)
+    protected function validateRequestOptions(\stdClass $options): array
     {
         $validatedOptions = [];
 
