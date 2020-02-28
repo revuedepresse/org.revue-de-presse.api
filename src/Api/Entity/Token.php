@@ -76,7 +76,7 @@ class Token implements TokenInterface
      *
      * @ORM\Column(name="consumer_key", type="string", length=255, nullable=true)
      */
-    public ?string $consumerKey;
+    public ?string $consumerKey = null;
 
     public function getConsumerKey(): string
     {
@@ -100,7 +100,7 @@ class Token implements TokenInterface
      *
      * @ORM\Column(name="consumer_secret", type="string", length=255, nullable=true)
      */
-    public ?string $consumerSecret;
+    public ?string $consumerSecret = null;
 
     public function getConsumerSecret(): string
     {

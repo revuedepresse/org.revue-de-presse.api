@@ -1,40 +1,30 @@
 <?php
+declare(strict_types=1);
 
 namespace App\StatusCollection\Mapping;
 
 use App\Accessor\Exception\NotFoundStatusException;
-use Psr\Log\LoggerInterface;
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\Status;
-use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
+use App\Infrastructure\DependencyInjection\ApiAccessorTrait;
+use App\Infrastructure\DependencyInjection\LoggerTrait;
+use App\Infrastructure\DependencyInjection\PublicationPersistenceTrait;
+use App\Infrastructure\DependencyInjection\StatusRepositoryTrait;
 use App\Twitter\Api\Accessor;
-use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
+use App\Twitter\Exception\NotFoundMemberException;
 
 class RefreshStatusMapping implements MappingAwareInterface
 {
-    /**
-     * @var Accessor
-     */
-    private $accessor;
+    use ApiAccessorTrait;
+    use LoggerTrait;
+    use PublicationPersistenceTrait;
+    use StatusRepositoryTrait;
 
-    /**
-     * @var LoggerInterface
-     */
-    public $logger;
-
-    /**
-     * @var StatusRepository
-     */
-    public $statusRepository;
-
-    /**
-     * @var array
-     */
-    private $oauthTokens;
+    private array $oauthTokens;
 
     public function __construct(Accessor $accessor)
     {
-        $this->accessor = $accessor;
+        $this->apiAccessor = $accessor;
     }
 
     /**
@@ -50,14 +40,14 @@ class RefreshStatusMapping implements MappingAwareInterface
      */
     protected function setupAccessor($oauthTokens)
     {
-        $this->accessor->propagateNotFoundStatuses = true;
+        $this->apiAccessor->propagateNotFoundStatuses = true;
 
-        $this->accessor->setUserToken($oauthTokens['token']);
-        $this->accessor->setUserSecret($oauthTokens['secret']);
+        $this->apiAccessor->setUserToken($oauthTokens['token']);
+        $this->apiAccessor->setUserSecret($oauthTokens['secret']);
 
         if (array_key_exists('consumer_token', $oauthTokens)) {
-            $this->accessor->setConsumerKey($oauthTokens['consumer_token']);
-            $this->accessor->setConsumerSecret($oauthTokens['consumer_secret']);
+            $this->apiAccessor->setConsumerKey($oauthTokens['consumer_token']);
+            $this->apiAccessor->setConsumerSecret($oauthTokens['consumer_secret']);
         }
     }
 
@@ -67,7 +57,7 @@ class RefreshStatusMapping implements MappingAwareInterface
      */
     public function apply(Status $status): Status {
         try {
-            $apiDocument = $this->accessor->showStatus($status->getStatusId());
+            $apiDocument = $this->apiAccessor->showStatus($status->getStatusId());
         } catch (NotFoundStatusException $exception) {
             return $status;
         } catch (\Exception $exception) {
@@ -84,15 +74,15 @@ class RefreshStatusMapping implements MappingAwareInterface
         }
 
         try {
-            $this->statusRepository->saveStatuses(
+            $this->publicationPersistence->persistStatusPublication(
                 [$apiDocument],
                 $status->getIdentifier(),
                 $aggregate,
                 $this->logger
             );
         } catch (NotFoundMemberException $exception) {
-            $this->accessor->ensureMemberHavingNameExists($exception->screenName);
-            $this->statusRepository->saveStatuses(
+            $this->apiAccessor->ensureMemberHavingNameExists($exception->screenName);
+            $this->publicationPersistence->persistStatusPublication(
                 [$apiDocument],
                 $status->getIdentifier(),
                 $aggregate,

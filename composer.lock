@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "64e190be9a9dd6038e07698a7d717d5f",
+    "content-hash": "b0ed24e8ac3280d8ad01a72b999038e2",
     "packages": [
         {
             "name": "auth0/auth0-php",
@@ -5781,6 +5781,63 @@
             "time": "2020-01-28T09:54:57+00:00"
         },
         {
+            "name": "symfony/proxy-manager-bridge",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/proxy-manager-bridge.git",
+                "reference": "5ff534d96e0108cac495c1c714ef4d2c44848a75"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/proxy-manager-bridge/zipball/5ff534d96e0108cac495c1c714ef4d2c44848a75",
+                "reference": "5ff534d96e0108cac495c1c714ef4d2c44848a75",
+                "shasum": ""
+            },
+            "require": {
+                "ocramius/proxy-manager": "~2.1",
+                "php": "^7.2.5",
+                "symfony/dependency-injection": "^5.0"
+            },
+            "conflict": {
+                "zendframework/zend-eventmanager": "2.6.0"
+            },
+            "require-dev": {
+                "symfony/config": "^4.4|^5.0"
+            },
+            "type": "symfony-bridge",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "5.1-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Bridge\\ProxyManager\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony ProxyManager Bridge",
+            "homepage": "https://symfony.com",
+            "time": "2020-01-04T14:20:45+00:00"
+        },
+        {
             "name": "symfony/redis-messenger",
             "version": "dev-master",
             "source": {
@@ -9236,6 +9293,7 @@
         "symfony/messenger": 20,
         "symfony/monolog-bundle": 20,
         "symfony/orm-pack": 20,
+        "symfony/proxy-manager-bridge": 20,
         "symfony/security-bundle": 20,
         "symfony/translation": 20,
         "symfony/validator": 20,

@@ -46,12 +46,12 @@ class MemberCollection implements StrictCollectionInterface
         return !$this->isEmpty();
     }
 
-    public function map(Closure $callable): array
+    public function map(Closure $callable): StrictCollectionInterface
     {
-        return array_map(
+        return self::fromArray(array_map(
             $callable,
             $this->members,
-        );
+        ));
     }
 
     /**
@@ -70,5 +70,24 @@ class MemberCollection implements StrictCollectionInterface
     public function toArray(): array
     {
         return $this->members;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function first(): ?int
+    {
+        if ($this->isEmpty()) {
+            return null;
+        }
+
+        return $this->members[0];
+    }
+
+    public function add($member): self
+    {
+        $this->members[] = $member;
+
+        return $this;
     }
 }

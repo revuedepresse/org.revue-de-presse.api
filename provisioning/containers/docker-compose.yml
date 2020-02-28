@@ -35,7 +35,6 @@ services:
         depends_on:
             - db_read
             - db_write
-            - messenger
 
     db_read:
         build: ./mysql
@@ -44,6 +43,8 @@ services:
             press-review-network:
                 aliases:
                     - read
+        env_file:
+            - ../../.env.local
         ports:
             - "127.0.0.1:3306:3306"
         volumes:

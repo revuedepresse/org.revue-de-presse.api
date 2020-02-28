@@ -10,7 +10,7 @@ services:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - 'App\Twitter\Entity\Publication'
         calls:
-            - [ 'setEntityManager', [ '@doctrine.orm.write_entity_manager' ] ]
+            - [ 'setEntityManager', [ '@doctrine.orm.entity_manager' ] ]
 
     repository.aggregate_subscription:
         class:      'App\Member\Repository\AggregateSubscriptionRepository'
@@ -169,8 +169,8 @@ services:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - '%weaving_the_web_api.entity.token.class%'
 
-    weaving_the_web_api.repository.whisperer:
-        class: '%weaving_the_web_api.repository.whisperer.class%'
+    repository.whisperer:
+        class: '%repository.whisperer.class%'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - '%weaving_the_web_api.entity.whisperer.class%'
