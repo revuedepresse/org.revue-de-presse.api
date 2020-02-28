@@ -48,6 +48,7 @@
         "symfony/messenger": "^5.1@dev",
         "symfony/monolog-bundle": "^3.0@dev",
         "symfony/orm-pack": "dev-master",
+        "symfony/proxy-manager-bridge": "^5.1@dev",
         "symfony/security-bundle": "^5.1@dev",
         "symfony/translation": "^5.1@dev",
         "symfony/validator": "^5.1@dev",

@@ -1,44 +1,46 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Aggregate\Repository;
 
 use App\Aggregate\Controller\SearchParams;
 use App\Aggregate\Entity\TimelyStatus;
+use App\Api\Entity\Aggregate;
+use App\Api\Repository\PublicationListRepository;
 use App\Conversation\ConversationAwareTrait;
+use App\Domain\Repository\StatusRepositoryInterface;
+use App\Domain\Status\StatusInterface;
+use App\Infrastructure\Repository\Status\TimelyStatusRepositoryInterface;
 use App\TimeRange\TimeRangeAwareInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\DBALException;
-use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\QueryBuilder;
-use App\Api\Entity\Aggregate;
-use App\Domain\Status\StatusInterface;
-use App\Api\Repository\PublicationListRepository;
-use Laminas\Service;
-use WeavingTheWeb\Bundle\ApiBundle\Repository\StatusRepository;
 
-class TimelyStatusRepository extends ServiceEntityRepository
+class TimelyStatusRepository extends ServiceEntityRepository implements TimelyStatusRepositoryInterface
 {
-    const TABLE_ALIAS = 't';
+    private const TABLE_ALIAS = 't';
 
     use PaginationAwareTrait;
     use ConversationAwareTrait;
 
     /**
-     * @var StatusRepository
+     * @var StatusRepositoryInterface
      */
-    public $statusRepository;
+    public StatusRepositoryInterface $statusRepository;
 
     /**
      * @var PublicationListRepository
      */
-    public $aggregateRepository;
+    public PublicationListRepository $aggregateRepository;
 
     /**
      * @param array $properties
-     * @return TimelyStatus|\App\TimeRange\TimeRangeAwareInterface
+     *
+     * @return TimelyStatus|TimeRangeAwareInterface
      * @throws OptimisticLockException
+     * @throws ORMException
      */
     public function fromArray(array $properties)
     {

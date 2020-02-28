@@ -12,7 +12,9 @@ interface StrictCollectionInterface extends CollectionInterface
      */
     public function count(): int;
 
-    public function map(Closure $callable): array;
+    public function map(Closure $callable): self;
+
+    public function add($item): self;
 
     /**
      * @param array $collection

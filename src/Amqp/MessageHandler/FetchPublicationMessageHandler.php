@@ -10,6 +10,7 @@ use App\Infrastructure\Amqp\Message\FetchMemberStatuses;
 use App\Api\Entity\Token;
 use App\Api\Entity\TokenInterface;
 use App\Api\AccessToken\Repository\TokenRepositoryInterface;
+use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\Repository\Membership\MemberRepository;
 use App\Operation\OperationClock;
 use App\Status\LikedStatusCollectionAwareInterface;
@@ -22,8 +23,8 @@ use App\Twitter\Serializer\UserStatus;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 use Exception;
-use Psr\Log\LoggerInterface;
 use ReflectionException;
 use Symfony\Component\Messenger\Handler\MessageSubscriberInterface;
 use function array_key_exists;
@@ -34,23 +35,12 @@ use function sprintf;
  */
 class FetchPublicationMessageHandler implements MessageSubscriberInterface
 {
+    use LoggerTrait;
+
     /**
      * @var OperationClock
      */
     public OperationClock $operationClock;
-
-    /**
-     * @var LoggerInterface
-     */
-    protected LoggerInterface $logger;
-
-    /**
-     * @param LoggerInterface $logger
-     */
-    public function setLogger(LoggerInterface $logger)
-    {
-        $this->logger = $logger;
-    }
 
     /**
      * @var UserStatus $serializer
@@ -90,7 +80,7 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
     : iterable
     {
         yield FetchMemberStatuses::class => [
-            'from_transport' => 'async'
+            'from_transport' => 'news_status'
         ];
     }
 
@@ -107,7 +97,7 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
      * @throws BadAuthenticationDataException
      * @throws InconsistentTokenRepository
      * @throws ReflectionException
-     * @throws \Doctrine\ORM\ORMException
+     * @throws ORMException
      */
     public function __invoke(FetchMemberStatuses $message)
     {

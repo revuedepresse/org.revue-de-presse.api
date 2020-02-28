@@ -3,9 +3,6 @@ declare(strict_types=1);
 
 namespace App\Api\Repository;
 
-use App\Aggregate\Repository\TimelyStatusRepository;
-use App\Api\AccessToken\AccessToken;
-use App\Api\Adapter\StatusToArray;
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;
@@ -13,20 +10,20 @@ use App\Api\Exception\InsertDuplicatesException;
 use App\Domain\Repository\StatusRepositoryInterface;
 use App\Domain\Status\StatusInterface;
 use App\Domain\Status\TaggedStatus;
+use App\Infrastructure\DependencyInjection\MemberRepositoryTrait;
+use App\Infrastructure\DependencyInjection\PublicationPersistenceTrait;
+use App\Infrastructure\DependencyInjection\PublicationRepositoryTrait;
 use App\Infrastructure\DependencyInjection\StatusLoggerTrait;
-use App\Infrastructure\DependencyInjection\StatusPersistorTrait;
 use App\Infrastructure\DependencyInjection\TaggedStatusRepositoryTrait;
-use App\Infrastructure\Repository\Membership\MemberRepository;
+use App\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
 use App\Infrastructure\Twitter\Api\Normalizer\Normalizer;
 use App\Membership\Entity\MemberInterface;
-use App\Operation\Collection\Collection;
 use App\Status\Entity\LikedStatus;
 use App\Status\Repository\ExtremumAwareInterface;
 use App\Status\Repository\LikedStatusRepository;
 use App\Twitter\Exception\NotFoundMemberException;
 use App\Twitter\Exception\ProtectedAccountException;
 use App\Twitter\Exception\SuspendedAccountException;
-use App\Twitter\Repository\PublicationRepositoryInterface;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\Connection;
@@ -36,6 +33,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -46,28 +44,26 @@ use const JSON_THROW_ON_ERROR;
 /**
  * @package App\Api\Repository
  */
-class ArchivedStatusRepository extends ResourceRepository implements ExtremumAwareInterface,
+class ArchivedStatusRepository extends ResourceRepository implements
+    ExtremumAwareInterface,
     StatusRepositoryInterface
 {
+    use MemberRepositoryTrait;
+    use PublicationRepositoryTrait;
     use StatusLoggerTrait;
-    use StatusPersistorTrait;
+    use PublicationPersistenceTrait;
     use TaggedStatusRepositoryTrait;
+    use TimelyStatusRepositoryTrait;
 
     public ManagerRegistry $registry;
 
     public LoggerInterface $appLogger;
-
-    public MemberRepository $memberManager;
-
-    public TimelyStatusRepository $timelyStatusRepository;
 
     public LikedStatusRepository $likedStatusRepository;
 
     public Connection $connection;
 
     public bool $shouldExtractProperties;
-
-    protected PublicationRepositoryInterface $publicationRepository;
 
     protected array $oauthTokens;
 
@@ -267,7 +263,7 @@ QUERY;
         string $direction = 'asc',
         DateTime $before = null
     ): array {
-        $member = $this->memberManager->findOneBy(['twitter_username' => $screenName]);
+        $member = $this->memberRepository->findOneBy(['twitter_username' => $screenName]);
         if ($member instanceof MemberInterface) {
             if ($direction = 'desc' && !is_null($member->maxStatusId)) {
                 return ['statusId' => $member->maxStatusId];
@@ -374,7 +370,7 @@ QUERY;
      */
     public function getIdsOfExtremeStatusesSavedForMemberHavingScreenName(string $memberName): array
     {
-        $member = $this->memberManager->findOneBy(['twitter_username' => $memberName]);
+        $member = $this->memberRepository->findOneBy(['twitter_username' => $memberName]);
 
         return [
             'min_id' => $member->minStatusId,
@@ -506,6 +502,7 @@ QUERY;
             }
 
             if ($memberStatus instanceof ArchivedStatus) {
+                // TODO Replace this method with statusPersistence->unarchiveStatus
                 $memberStatus = $this->unarchiveStatus($memberStatus, $entityManager);
             }
 
@@ -522,7 +519,8 @@ QUERY;
                 try {
                     $member = $ensureMemberExists($memberStatus->getScreenName());
                 } catch (ProtectedAccountException|SuspendedAccountException|NotFoundMemberException $exception) {
-                    $member = $this->memberManager->findOneBy(['twitter_username' => $memberStatus->getScreenName()]);
+                    $member =
+                        $this->memberRepository->findOneBy(['twitter_username' => $memberStatus->getScreenName()]);
                 }
 
                 if ($member instanceof MemberInterface) {
@@ -550,7 +548,7 @@ QUERY;
         $this->flushLikedStatuses($likedStatuses, $entityManager);
 
         if (count($extracts) > 0) {
-            $this->memberManager->incrementTotalLikesOfMemberWithName(
+            $this->memberRepository->incrementTotalLikesOfMemberWithName(
                 count($extracts),
                 $likedBy->getTwitterUsername()
             );
@@ -559,55 +557,11 @@ QUERY;
         return $extracts;
     }
 
-    /**
-     * @param array          $statuses
-     * @param AccessToken    $identifier
-     * @param Aggregate|null $aggregate
-     *
-     * @return array
-     * @throws Exception
-     */
-    public function saveStatuses(
-        array $statuses,
-        AccessToken $identifier,
-        Aggregate $aggregate = null
-    ): array {
-        $result           = $this->statusPersistor->persistAllStatuses(
-            $statuses,
-            $identifier,
-            $aggregate
-        );
-        $normalizedStatus = $result['extracts'];
-        $screenName       = $result['screen_name'];
-
-        $statusCollection = new Collection($result['statuses']);
-        $statusCollection = StatusToArray::fromStatusCollection($statusCollection);
-        $this->publicationRepository->persistPublications($statusCollection);
-
-        $statusCollection->map(fn(StatusInterface $status) => $status->markAsPublished());
-
-        $this->getEntityManager()->flush();
-
-        if (count($normalizedStatus) > 0) {
-            $this->memberManager->incrementTotalStatusesOfMemberWithName(
-                count($normalizedStatus),
-                $screenName
-            );
-        }
-
-        return $normalizedStatus;
-    }
-
     public function setOauthTokens($oauthTokens)
     {
         $this->oauthTokens = $oauthTokens;
 
         return $this;
-    }
-
-    public function setPublicationRepository(PublicationRepositoryInterface $publicationRepository)
-    {
-        $this->publicationRepository = $publicationRepository;
     }
 
     /**
@@ -642,9 +596,7 @@ QUERY;
     }
 
     /**
-     * @param bool $lastWeek
-     *
-     * @return \Doctrine\ORM\QueryBuilder
+     * @return QueryBuilder
      */
     protected function selectStatuses()
     {

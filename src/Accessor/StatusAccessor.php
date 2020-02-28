@@ -7,29 +7,31 @@ use App\Accessor\Exception\ApiRateLimitingException;
 use App\Accessor\Exception\ReadOnlyApplicationException;
 use App\Accessor\Exception\UnexpectedApiResponseException;
 use App\Api\AccessToken\AccessToken;
-use App\Domain\Status\StatusInterface;
-use App\Membership\Entity\MemberInterface;
-use App\Infrastructure\Repository\Membership\MemberRepository;
-use App\Membership\Exception\InvalidMemberIdentifier;
-use App\Status\Entity\NullStatus;
-use App\Status\Repository\NotFoundStatusRepository;
-use App\Twitter\Exception\BadAuthenticationDataException;
-use App\Twitter\Exception\InconsistentTokenRepository;
-use App\Twitter\Exception\ProtectedAccountException;
-use App\Twitter\Exception\SuspendedAccountException;
-use App\Twitter\Exception\UnavailableResourceException;
-use Doctrine\Common\Persistence\Mapping\MappingException;
-use Doctrine\ORM\EntityManager;
 use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;
 use App\Api\Repository\ArchivedStatusRepository;
 use App\Api\Repository\StatusRepository;
-use App\Twitter\Api\Accessor;
+use App\Domain\Status\StatusInterface;
+use App\Domain\Status\TaggedStatus;
+use App\Infrastructure\DependencyInjection\PublicationPersistenceTrait;
+use App\Infrastructure\Repository\Membership\MemberRepository;
+use App\Membership\Entity\MemberInterface;
+use App\Membership\Exception\InvalidMemberIdentifier;
+use App\Status\Entity\NullStatus;
+use App\Status\Repository\NotFoundStatusRepository;
+use App\Twitter\Api\ApiAccessorInterface;
+use App\Twitter\Exception\BadAuthenticationDataException;
+use App\Twitter\Exception\InconsistentTokenRepository;
 use App\Twitter\Exception\NotFoundMemberException;
+use App\Twitter\Exception\ProtectedAccountException;
+use App\Twitter\Exception\SuspendedAccountException;
+use App\Twitter\Exception\UnavailableResourceException;
+use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Exception;
+use Psr\Log\LoggerInterface;
 use ReflectionException;
 
 /**
@@ -37,49 +39,24 @@ use ReflectionException;
  */
 class StatusAccessor
 {
-    /**
-     * @var bool
-     */
-    public $accessingInternalApi = true;
+    use PublicationPersistenceTrait;
 
-    /**
-     * @var ArchivedStatusRepository
-     */
-    public $archivedStatusRepository;
+    public ArchivedStatusRepository $archivedStatusRepository;
 
-    /**
-     * @var EntityManager
-     */
-    public $entityManager;
+    public EntityManagerInterface $entityManager;
 
-    /**
-     * @var \Psr\Log\LoggerInterface
-     */
-    public $logger;
+    public LoggerInterface $logger;
 
-    /**
-     * @var NotFoundStatusRepository
-     */
-    public $notFoundStatusRepository;
+    public NotFoundStatusRepository $notFoundStatusRepository;
 
-    /**
-     * @var StatusRepository
-     */
     public StatusRepository $statusRepository;
 
-    /**
-     * @var MemberRepository
-     */
     public MemberRepository $userManager;
 
-    /**
-     * @var Accessor
-     */
-    public $accessor;
+    public ApiAccessorInterface $accessor;
 
     /**
      * @param string $identifier
-     * @throws OptimisticLockException
      */
     public function declareStatusNotFoundByIdentifier(string $identifier): void
     {
@@ -117,11 +94,8 @@ class StatusAccessor
      * @param bool   $skipExistingStatus
      * @param bool   $extractProperties
      *
-     * @return StatusInterface|NullStatus|array|null
-     * @throws OptimisticLockException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws MappingException
+     * @return StatusInterface|TaggedStatus|NullStatus|array|null
+     * @throws Exception
      */
     public function refreshStatusByIdentifier(
         string $identifier,
@@ -145,11 +119,13 @@ class StatusAccessor
         $this->entityManager->clear();
 
         try {
-            $this->statusRepository->saveStatuses(
+            $this->publicationPersistence->persistStatusPublications(
                 [$status],
                 new AccessToken($this->accessor->userToken)
             );
         } catch (NotFoundMemberException $notFoundMemberException) {
+            $this->logger->info($notFoundMemberException->getMessage());
+
             return $this->findStatusIdentifiedBy($identifier);
         } catch (Exception $exception) {
             $this->logger->info($exception->getMessage());

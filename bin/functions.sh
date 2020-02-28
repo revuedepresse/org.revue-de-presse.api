@@ -384,9 +384,9 @@ function install_php_dependencies {
     project_dir="$(get_project_dir)"
 
     local command
-    command=$(echo -n 'php /bin/bash -c "cd '"${project_dir}"' &&
+    command=$(echo -n '/bin/bash -c "cd '"${project_dir}"' &&
     source '"${project_dir}"'/bin/install-composer.sh &&
-    php '"${project_dir}"'/composer.phar install --prefer-dist"')
+    php '"${project_dir}"'/composer.phar install --prefer-dist -n"')
     echo "${command}" | make run-php
 }
 
@@ -872,27 +872,18 @@ function run_php_script() {
 }
 
 function run_php() {
-    local arguments="$(cat -)"
+    local arguments
+    arguments="$(cat -)"
 
     if [ -z "${arguments}" ];
     then
         arguments="${ARGUMENT}"
     fi
 
-    local suffix='-'"$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 32 2>> /dev/null)"
-
-    export SUFFIX="${suffix}"
-    local symfony_environment="$(get_symfony_environment)"
-
-    local network=`get_network_option`
-    local command=$(echo -n 'docker run '"${network}"'\
-    -e '"${symfony_environment}"' \
-    -v '`pwd`'/provisioning/containers/php/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini \
-    -v '`pwd`':/var/www/devobs \
-    --name=php'"${suffix}"' '"${arguments}")
+    local command
+    command=$(echo -n 'docker-compose -f ./provisioning/containers/docker-compose.yml exec -T worker '"${arguments}")
 
     echo 'About to execute '"${command}"
-
     /bin/bash -c "${command}"
 }
 

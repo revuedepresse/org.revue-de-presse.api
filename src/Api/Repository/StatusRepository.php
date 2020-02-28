@@ -110,7 +110,7 @@ class StatusRepository extends ArchivedStatusRepository
      */
     public function countHowManyStatusesFor($screenName): int
     {
-        $member = $this->memberManager->findOneBy(['twitter_username' => $screenName]);
+        $member = $this->memberRepository->findOneBy(['twitter_username' => $screenName]);
         if ($member instanceof MemberInterface && $member->totalStatuses !== 0) {
             $status = $this->findOneBy(['screenName' => $screenName], ['createdAt' => 'DESC']);
             $decodedStatusDocument = json_decode($status->getApiDocument(), true);
@@ -131,7 +131,7 @@ class StatusRepository extends ArchivedStatusRepository
         $totalStatuses = $queryBuilder->getQuery()->getSingleScalarResult();
         $totalStatuses = (int) $totalStatuses + $this->archivedStatusRepository->countHowManyStatusesFor($screenName);
 
-        $this->memberManager->declareTotalStatusesOfMemberWithName($totalStatuses, $screenName);
+        $this->memberRepository->declareTotalStatusesOfMemberWithName($totalStatuses, $screenName);
 
         return $totalStatuses;
     }
@@ -142,18 +142,16 @@ class StatusRepository extends ArchivedStatusRepository
      * @return MemberInterface
      * @throws DBALException
      * @throws NotFoundStatusException
-     * @throws ORMException
-     * @throws OptimisticLockException
      */
     public function updateLastStatusPublicationDate($screenName)
     {
         /** @var MemberInterface $member */
-        $member = $this->memberManager->findOneBy(['twitter_username' => $screenName]);
+        $member = $this->memberRepository->findOneBy(['twitter_username' => $screenName]);
 
         $lastStatus = $this->getLastKnownStatusFor($screenName);
         $member->lastStatusPublicationDate = $lastStatus->getCreatedAt();
 
-        return $this->memberManager->saveMember($member);
+        return $this->memberRepository->saveMember($member);
     }
 
     /**
@@ -287,7 +285,7 @@ class StatusRepository extends ArchivedStatusRepository
             if ($direction === 'asc') {
                 $nextMinimum = min((int) $extremum['statusId'], $nextExtremum['statusId']);
 
-                return ['statusId' => $this->memberManager->declareMinStatusIdForMemberWithScreenName(
+                return ['statusId' => $this->memberRepository->declareMinStatusIdForMemberWithScreenName(
                     "$nextMinimum",
                     $screenName
                 )->minStatusId];
@@ -295,7 +293,7 @@ class StatusRepository extends ArchivedStatusRepository
 
             $nextMaximum = max((int) $extremum['statusId'], $nextExtremum['statusId']);
 
-            return ['statusId' => $this->memberManager->declareMaxStatusIdForMemberWithScreenName(
+            return ['statusId' => $this->memberRepository->declareMaxStatusIdForMemberWithScreenName(
                 "$nextMaximum",
                 $screenName
             )->maxStatusId];
@@ -315,7 +313,7 @@ class StatusRepository extends ArchivedStatusRepository
     {
         $maxStatus = $status->id_str;
 
-        return $this->memberManager->declareMaxStatusIdForMemberWithScreenName(
+        return $this->memberRepository->declareMaxStatusIdForMemberWithScreenName(
             $maxStatus,
             $status->user->screen_name
         );
@@ -332,7 +330,7 @@ class StatusRepository extends ArchivedStatusRepository
     {
         $minStatus = $status->id_str;
 
-        return $this->memberManager->declareMinStatusIdForMemberWithScreenName(
+        return $this->memberRepository->declareMinStatusIdForMemberWithScreenName(
             $minStatus,
             $status->user->screen_name
         );
@@ -343,14 +341,12 @@ class StatusRepository extends ArchivedStatusRepository
      * @param string $memberName
      *
      * @return MemberInterface
-     * @throws OptimisticLockException
-     * @throws NotFoundMemberException
      */
     public function declareMaximumLikedStatusId($status, string $memberName)
     {
         $maxStatus = $status->id_str;
 
-        return $this->memberManager->declareMaxLikeIdForMemberWithScreenName(
+        return $this->memberRepository->declareMaxLikeIdForMemberWithScreenName(
             $maxStatus,
             $memberName
         );
@@ -361,14 +357,12 @@ class StatusRepository extends ArchivedStatusRepository
      * @param string $memberName
      *
      * @return MemberInterface
-     * @throws OptimisticLockException
-     * @throws NotFoundMemberException
      */
     public function declareMinimumLikedStatusId($status, string $memberName)
     {
         $minStatus = $status->id_str;
 
-        return $this->memberManager->declareMinLikeIdForMemberWithScreenName(
+        return $this->memberRepository->declareMinLikeIdForMemberWithScreenName(
             $minStatus,
             $memberName
         );
@@ -430,9 +424,8 @@ QUERY;
         $result = $statement->fetchAll();
 
         $criteria = ['id' => $result[0]['id']];
-        $lastStatus = $this->findOneBy($criteria);
 
-        return $lastStatus;
+        return $this->findOneBy($criteria);
     }
 
     /**

@@ -214,4 +214,14 @@ trait MemberTrait
     {
         return $this->description;
     }
+
+    public function totalStatus(): int
+    {
+        return 0;
+    }
+
+    public function setTotalStatus($totalStatus): MemberInterface
+    {
+        return $this;
+    }
 }

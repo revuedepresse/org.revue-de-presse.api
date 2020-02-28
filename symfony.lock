@@ -516,6 +516,9 @@
     "symfony/property-info": {
         "version": "5.1-dev"
     },
+    "symfony/proxy-manager-bridge": {
+        "version": "5.1-dev"
+    },
     "symfony/redis-messenger": {
         "version": "5.1-dev"
     },

@@ -81,8 +81,6 @@ class TaggedStatusRepository implements TaggedStatusRepositoryInterface
      * @param $hash
      *
      * @return bool
-     * @throws NoResultException
-     * @throws NonUniqueResultException
      */
     public function archivedStatusHavingHashExists($hash): bool
     {

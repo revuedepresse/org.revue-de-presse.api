@@ -406,7 +406,7 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
     ): MemberInterface {
         $member = $this->ensureMemberExists($memberName);
 
-        $member->totalStatuses = $member->totalStatuses + $statusesToBeAdded;
+        $member->setTotalStatus($member->totalStatus() + $statusesToBeAdded);
         $this->saveMember($member);
 
         return $member;
@@ -449,10 +449,10 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
     /**
      * @param string $memberName
      *
-     * @return object|null
+     * @return MemberInterface
      * @throws NotFoundMemberException
      */
-    private function ensureMemberExists(string $memberName)
+    private function ensureMemberExists(string $memberName): MemberInterface
     {
         $member = $this->findOneBy(['twitter_username' => $memberName]);
         if (!$member instanceof MemberInterface) {

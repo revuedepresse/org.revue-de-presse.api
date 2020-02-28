@@ -5,12 +5,13 @@ imports:
     - { resource: services/mapping.yml }
     - { resource: services/operation.yml }
     - { resource: services/repository.yml }
+    - { resource: services/persistence.yml }
     - { resource: services/security.yml }
 
 services:
     # default configuration for services in *this* file
     _defaults:
-        autowire: false      # Automatically injects dependencies in your services.
+        autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
 
     # makes classes in src/ available to be used as services
@@ -36,17 +37,17 @@ services:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - '%weaving_the_web_twitter.entity.status.class%'
         calls:
+            - [ 'setMemberRepository',       [ '@user_manager' ] ]
             - [ 'setPublicationRepository',  [ '@App\Twitter\Repository\PublicationRepository' ] ]
             - [ 'setStatusLogger',           [ '@App\Infrastructure\Log\StatusLogger' ] ]
             - [ 'setTaggedStatusRepository', [ '@App\Domain\Repository\TaggedStatusRepository' ] ]
+            - [ 'setTimelyStatusRepository', [ '@repository.timely_status' ] ]
         properties:
             appLogger:                '@logger'
-            archivedStatusRepository: '@weaving_the_web_twitter.repository.archived_status'
+            archivedStatusRepository: '@App\Api\Repository\ArchivedStatusRepository'
             connection:               '@doctrine.dbal.default_connection'
             likedStatusRepository:    '@repository.liked_status'
-            memberManager:            '@user_manager'
             registry:                 '@doctrine'
-            timelyStatusRepository:   '@repository.timely_status'
 
     App\Api\Repository\ArchivedStatusRepository:
         class:  '\App\Api\Repository\ArchivedStatusRepository'
@@ -54,16 +55,33 @@ services:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - '%weaving_the_web_twitter.entity.archived_status.class%'
         calls:
+            - [ 'setMemberRepository',       [ '@user_manager' ] ]
             - [ 'setPublicationRepository',  [ '@App\Twitter\Repository\PublicationRepository' ] ]
             - [ 'setStatusLogger',           [ '@App\Infrastructure\Log\StatusLogger' ] ]
-            - [ 'setStatusPersistor',        [ '@App\Infrastructure\Status\Persistor\StatusPersistor' ] ]
             - [ 'setTaggedStatusRepository', [ '@App\Domain\Repository\TaggedStatusRepository' ] ]
+            - [ 'setTimelyStatusRepository', [ '@repository.timely_status' ] ]
         properties:
             appLogger:              '@logger'
+            connection:             '@doctrine.dbal.default_connection'
             likedStatusRepository:  '@repository.liked_status'
-            memberManager:          '@user_manager'
             registry:               '@doctrine'
-            timelyStatusRepository: '@repository.timely_status'
+
+    weaving_the_web_twitter.repository.read.status:
+        class:  'App\Api\Repository\StatusRepository'
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - '%weaving_the_web_twitter.entity.status.class%'
+        calls:
+            - [ 'setOauthTokens',            [ [ '%weaving_the_web_twitter.oauth_token.default%' ] ] ]
+            - [ 'setMemberRepository',       [ '@user_manager' ] ]
+            - [ 'setPublicationRepository',  [ '@App\Twitter\Repository\PublicationRepository' ] ]
+            - [ 'setStatusLogger',           [ '@App\Infrastructure\Log\StatusLogger' ] ]
+            - [ 'setTaggedStatusRepository', [ '@App\Domain\Repository\TaggedStatusRepository' ] ]
+            - [ 'setTimelyStatusRepository', [ '@repository.timely_status' ] ]
+        properties:
+            likedStatusRepository:  '@repository.liked_status'
+            registry:               '@doctrine'
+            statusLogger:           '@monolog.logger.status'
             connection:             '@doctrine.dbal.default_connection'
 
     App\Infrastructure\Amqp\ResourceProcessor\MemberIdentityProcessor:
@@ -105,18 +123,6 @@ services:
         arguments:
             - '@doctrine.orm.entity_manager'
             - '@logger'
-
-    App\Infrastructure\Status\Persistor\StatusPersistor:
-        class: 'App\Infrastructure\Status\Persistor\StatusPersistor'
-        arguments:
-            - '@repository.timely_status'
-            - '@doctrine'
-            - '@doctrine.orm.entity_manager'
-            - '@logger'
-        calls:
-            - [ 'setStatusLogger',           [ '@App\Infrastructure\Log\StatusLogger' ] ]
-            - [ 'setTaggedStatusRepository', [ '@App\Domain\Repository\TaggedStatusRepository' ] ]
-        public: true
 
     app.cache.redis:
         class: '%redis_cache%'
@@ -163,7 +169,7 @@ services:
         class: 'App\Accessor\StatusAccessor'
         properties:
             accessor:                   '@weaving_the_web_twitter.api_accessor'
-            archivedStatusRepository:   '@weaving_the_web_twitter.repository.archived_status'
+            archivedStatusRepository:   '@App\Api\Repository\ArchivedStatusRepository'
             entityManager:              '@doctrine.orm.entity_manager'
             logger:                     '@monolog.logger.status'
             notFoundStatusRepository:   '@repository.not_found_status'
@@ -180,36 +186,6 @@ services:
             statusRepository:       '@App\Api\Repository\StatusRepository'
             timelyStatusRepository: '@repository.timely_status'
             likedStatusRepository:  '@repository.liked_status'
-
-    weaving_the_web_twitter.repository.archived_status:
-        class:  '%weaving_the_web_api.repository.archived_status.class%'
-        arguments:
-            - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - '%weaving_the_web_twitter.entity.archived_status.class%'
-        calls:
-            - [ 'setPublicationRepository', [ '@App\Twitter\Repository\PublicationRepository' ] ]
-        properties:
-            likedStatusRepository:  '@repository.liked_status'
-            memberManager:          '@user_manager'
-            registry:               '@doctrine'
-            statusLogger:           '@monolog.logger.status'
-            timelyStatusRepository: '@repository.timely_status'
-            connection:             '@doctrine.dbal.default_connection'
-
-    weaving_the_web_twitter.repository.read.status:
-        class:  'App\Api\Repository\StatusRepository'
-        arguments:
-            - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - '%weaving_the_web_twitter.entity.status.class%'
-        calls:
-            - [ 'setOauthTokens', [ [ '%weaving_the_web_twitter.oauth_token.default%' ] ] ]
-        properties:
-            likedStatusRepository:  '@repository.liked_status'
-            memberManager:          '@user_manager'
-            registry:               '@doctrine'
-            statusLogger:           '@monolog.logger.status'
-            timelyStatusRepository: '@repository.timely_status'
-            connection:             '@doctrine.dbal.default_connection'
 
     weaving_the_web_twitter.repository.token:
         class: '%weaving_the_web_twitter.repository.token.class%'
@@ -228,18 +204,18 @@ services:
         arguments:
             - '@?logger'
 
-    weaving_the_web_twitter.serializer.user_status:
-        class:  '%weaving_the_web_twitter.serializer.user_status.class%'
+    App\Twitter\Serializer\UserStatus:
+        class:  'App\Twitter\Serializer\UserStatus'
         calls:
-            - [ 'setAccessor', [ '@weaving_the_web_twitter.api_accessor' ] ]
-            - [ 'setLogger', [ '@monolog.logger.status' ] ]
-            - [ 'setAggregateRepository', [ '@weaving_the_web_twitter.repository.aggregate' ] ]
-            - [ 'setModerator', [ '@weaving_the_web_twitter.moderator.api_limit' ] ]
-            - [ 'setStatusRepository', [ '@App\Api\Repository\StatusRepository' ] ]
-            - [ 'setWhispererRepository', [ '@weaving_the_web_api.repository.whisperer' ] ]
-            - [ 'setTokenRepository', [ '@weaving_the_web_twitter.repository.token' ] ]
-            - [ 'setTranslator', [ '@translator' ] ]
-            - [ 'setWhispererRepository', [ '@weaving_the_web_api.repository.whisperer' ] ]
+            - [ 'setApiAccessor',               [ '@weaving_the_web_twitter.api_accessor' ] ]
+            - [ 'setLogger',                    [ '@monolog.logger.status' ] ]
+            - [ 'setAggregateRepository',       [ '@weaving_the_web_twitter.repository.aggregate' ] ]
+            - [ 'setModerator',                 [ '@weaving_the_web_twitter.moderator.api_limit' ] ]
+            - [ 'setPublicationPersistence',    [ '@App\Infrastructure\Status\Persistence\PublicationPersistence' ] ]
+            - [ 'setStatusRepository',          [ '@App\Api\Repository\StatusRepository' ] ]
+            - [ 'setTokenRepository',           [ '@weaving_the_web_twitter.repository.token' ] ]
+            - [ 'setTranslator',                [ '@translator' ] ]
+            - [ 'setWhispererRepository',       [ '@repository.whisperer' ] ]
         properties:
             twitterApiLogger:       '@monolog.logger.twitter_api'
             likedStatusRepository:  '@repository.liked_status'
@@ -283,8 +259,6 @@ parameters:
 
     weaving_the_web_twitter.repository.aggregate.class:           '%weaving_the_web_api.repository.aggregate.class%'
     weaving_the_web_twitter.repository.token.class:               '%weaving_the_web_api.repository.token.class%'
-
-    weaving_the_web_twitter.serializer.user_status.class:         'App\Twitter\Serializer\UserStatus'
 
     weaving_the_web_twitter.version:                              '%env(resolve:API_TWITTER_VERSION)%'
 

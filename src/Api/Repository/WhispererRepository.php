@@ -1,33 +1,27 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Api\Repository;
 
 use App\Api\Entity\Whisperer;
+use App\Infrastructure\Repository\Membership\WhispererRepositoryInterface;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
  * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
-class WhispererRepository extends ResourceRepository
+class WhispererRepository extends ResourceRepository implements WhispererRepositoryInterface
 {
     /**
-     * @param ManagerRegistry $managerRegistry
-     * @param string         $aggregate
-     */
-    public function __construct(
-        ManagerRegistry $managerRegistry,
-        string $aggregateClass
-    )
-    {
-        parent::__construct($managerRegistry, $aggregateClass);
-    }
-
-    /**
      * @param Whisperer $whisperer
+     *
      * @return Whisperer
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
-    public function declareWhisperer(Whisperer $whisperer)
+    public function declareWhisperer(Whisperer $whisperer): Whisperer
     {
         $preExistingWhisperer = $this->findOneBy(['name' => $whisperer->getName()]);
 
@@ -54,9 +48,10 @@ class WhispererRepository extends ResourceRepository
     /**
      * @param Whisperer $whisperer
      * @return Whisperer
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws OptimisticLockException
+     * @throws ORMException
      */
-    public function saveWhisperer(Whisperer $whisperer)
+    public function saveWhisperer(Whisperer $whisperer): Whisperer
     {
         $whisperer->setUpdatedAt(new \DateTime());
 
@@ -68,9 +63,10 @@ class WhispererRepository extends ResourceRepository
 
     /**
      * @param $whisperer
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws OptimisticLockException
+     * @throws ORMException
      */
-    public function forgetAboutWhisperer(Whisperer $whisperer)
+    public function forgetAboutWhisperer(Whisperer $whisperer): void
     {
         $this->getEntityManager()->remove($whisperer);
         $this->getEntityManager()->flush();

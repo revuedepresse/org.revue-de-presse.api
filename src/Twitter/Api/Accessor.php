@@ -714,7 +714,10 @@ class Accessor implements ApiAccessorInterface,
     }
 
     /**
-     * @deprecated
+     * @param string $token
+     *
+     * @return Accessor
+     * @deprecated in favor of ->setOAuthToken
      */
     public function setUserToken(string $token): self
     {

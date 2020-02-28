@@ -14,6 +14,7 @@ interface CollectionInterface
 
     public function map(Closure $callable);
 
+    public function add($item);
 
     public function isEmpty();
 

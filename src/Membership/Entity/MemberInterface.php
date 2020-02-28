@@ -121,4 +121,8 @@ interface MemberInterface extends UserInterface
      * @return string|null
      */
     public function getUrl(): ?string;
+
+    public function totalStatus(): int;
+
+    public function setTotalStatus($totalStatus): self;
 }
