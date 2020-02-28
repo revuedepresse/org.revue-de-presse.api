@@ -8,7 +8,7 @@ use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;
 use App\Domain\Status\StatusInterface;
 use App\Domain\Status\TaggedStatus;
-use App\Infrastructure\DependencyInjection\StatusRepositoryTrait;
+use App\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;

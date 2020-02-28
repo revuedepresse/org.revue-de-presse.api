@@ -11,7 +11,7 @@ use App\Api\Exception\InsertDuplicatesException;
 use App\Domain\Status\StatusCollection;
 use App\Domain\Status\StatusInterface;
 use App\Domain\Status\TaggedStatus;
-use App\Infrastructure\DependencyInjection\StatusLoggerTrait;
+use App\Infrastructure\DependencyInjection\Status\StatusLoggerTrait;
 use App\Infrastructure\DependencyInjection\TaggedStatusRepositoryTrait;
 use App\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
 use App\Infrastructure\Repository\Status\TimelyStatusRepositoryInterface;

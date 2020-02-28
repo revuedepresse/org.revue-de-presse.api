@@ -8,14 +8,17 @@ use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;
 use App\Api\Exception\InsertDuplicatesException;
 use App\Domain\Repository\StatusRepositoryInterface;
+use App\Domain\Status\Decorator\StatusDecorator;
 use App\Domain\Status\StatusInterface;
 use App\Domain\Status\TaggedStatus;
 use App\Infrastructure\DependencyInjection\MemberRepositoryTrait;
 use App\Infrastructure\DependencyInjection\PublicationPersistenceTrait;
 use App\Infrastructure\DependencyInjection\PublicationRepositoryTrait;
-use App\Infrastructure\DependencyInjection\StatusLoggerTrait;
+use App\Infrastructure\DependencyInjection\Status\StatusDecoratorTrait;
+use App\Infrastructure\DependencyInjection\Status\StatusLoggerTrait;
 use App\Infrastructure\DependencyInjection\TaggedStatusRepositoryTrait;
 use App\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
+use App\Infrastructure\Status\Exception\DocumentException;
 use App\Infrastructure\Twitter\Api\Normalizer\Normalizer;
 use App\Membership\Entity\MemberInterface;
 use App\Status\Entity\LikedStatus;
@@ -49,9 +52,9 @@ class ArchivedStatusRepository extends ResourceRepository implements
     StatusRepositoryInterface
 {
     use MemberRepositoryTrait;
+    use PublicationPersistenceTrait;
     use PublicationRepositoryTrait;
     use StatusLoggerTrait;
-    use PublicationPersistenceTrait;
     use TaggedStatusRepositoryTrait;
     use TimelyStatusRepositoryTrait;
 
@@ -119,17 +122,10 @@ class ArchivedStatusRepository extends ResourceRepository implements
         return (int) $totalStatuses;
     }
 
-    /**
-     * @param null $lastId
-     * @param null $aggregateName
-     * @param bool $rawSql
-     *
-     * @return mixed
-     */
     public function findLatest(
-        $lastId = null,
-        $aggregateName = null,
-        $rawSql = false
+        int $lastId = null,
+        ?string $aggregateName = null,
+        bool $rawSql = false
     ) {
         if ($rawSql) {
             return $this->findLatestForAggregate($aggregateName);
@@ -154,7 +150,7 @@ class ArchivedStatusRepository extends ResourceRepository implements
 
         $statuses = $queryBuilder->getQuery()->getResult();
 
-        return $this->highlightRetweets($statuses);
+        return StatusDecorator::decorateStatus($statuses);
     }
 
     public function findLatestForAggregate($aggregateName = null)
@@ -192,7 +188,7 @@ QUERY;
 
         $statuses = $statement->fetchAll();
 
-        return $this->highlightRetweets($statuses);
+        return StatusDecorator::decorateStatus($statuses);
     }
 
     public function findLikedStatuses($aggregateName = null)
@@ -230,7 +226,7 @@ QUERY;
 
         $statuses = $statement->fetchAll();
 
-        return $this->highlightRetweets($statuses);
+        return StatusDecorator::decorateStatus($statuses);
     }
 
     /**
@@ -243,7 +239,7 @@ QUERY;
     public function findLocalMaximum(string $screenName, DateTime $before = null): array
     {
         $direction = 'asc';
-        if (is_null($before)) {
+        if ($before === null) {
             $direction = 'desc';
         }
 
@@ -265,11 +261,11 @@ QUERY;
     ): array {
         $member = $this->memberRepository->findOneBy(['twitter_username' => $screenName]);
         if ($member instanceof MemberInterface) {
-            if ($direction = 'desc' && !is_null($member->maxStatusId)) {
+            if ($direction === 'desc' && $member->maxStatusId !== null) {
                 return ['statusId' => $member->maxStatusId];
             }
 
-            if ($direction = 'asc' && !is_null($member->minStatusId)) {
+            if ($direction === 'asc' && $member->minStatusId !== null) {
                 return ['statusId' => $member->minStatusId];
             }
         }
@@ -574,21 +570,33 @@ QUERY;
         array_walk(
             $statuses,
             function (&$status) {
-                $target = sprintf('user stream of id #%d', (int) $status['id']);
-                if (strlen($status['original_document']) > 0) {
-                    $decodedValue  = json_decode($status['original_document'], true);
-                    $lastJsonError = json_last_error();
-                    if (JSON_ERROR_NONE === $lastJsonError) {
-                        if (array_key_exists('retweeted_status', $decodedValue)) {
-                            $status['text'] = 'RT @' . $decodedValue['retweeted_status']['user']['screen_name'] . ': ' .
-                                $decodedValue['retweeted_status']['full_text'];
-                        }
-                    } else {
-                        throw new Exception(sprintf($lastJsonError . ' affecting ' . $target));
-                    }
-                } else {
-                    throw new Exception(sprintf('Empty JSON document for ' . $target));
+                $target = sprintf('status of id #%d', (int) $status['id']);
+                if ($status['original_document'] === '') {
+                    DocumentException::throwsEmptyDocumentException((int) $status['id']);
                 }
+
+                $decodedValue  = json_decode(
+                    $status['original_document'],
+                    true,
+                    512,
+                    JSON_THROW_ON_ERROR
+                );
+
+                $lastJsonError = json_last_error();
+
+                if (
+                    $lastJsonError === JSON_ERROR_NONE &&
+                    array_key_exists('retweeted_status', $decodedValue)
+                ) {
+                    $status['text'] = 'RT @' . $decodedValue['retweeted_status']['user']['screen_name'] . ': ' .
+                        $decodedValue['retweeted_status']['full_text'];
+                    return;
+                }
+
+                DocumentException::throwsDecodingException(
+                    $lastJsonError,
+                    (int) $status['id']
+                );
             }
         );
 

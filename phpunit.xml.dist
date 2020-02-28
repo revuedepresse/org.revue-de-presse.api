@@ -23,6 +23,7 @@
             <group>ownership</group>
             <group>persistence</group>
             <group>publication</group>
+            <group>status_decoration</group>
             <group>tagged_status</group>
             <group>unavailable_resource</group>
         </include>

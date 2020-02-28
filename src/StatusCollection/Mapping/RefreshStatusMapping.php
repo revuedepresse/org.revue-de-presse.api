@@ -9,7 +9,7 @@ use App\Api\Entity\Status;
 use App\Infrastructure\DependencyInjection\ApiAccessorTrait;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\DependencyInjection\PublicationPersistenceTrait;
-use App\Infrastructure\DependencyInjection\StatusRepositoryTrait;
+use App\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use App\Twitter\Api\Accessor;
 use App\Twitter\Exception\NotFoundMemberException;
 

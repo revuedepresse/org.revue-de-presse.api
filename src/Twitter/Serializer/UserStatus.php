@@ -20,7 +20,7 @@ use App\Infrastructure\DependencyInjection\ApiAccessorTrait;
 use App\Infrastructure\DependencyInjection\ApiLimitModeratorTrait;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\DependencyInjection\PublicationPersistenceTrait;
-use App\Infrastructure\DependencyInjection\StatusRepositoryTrait;
+use App\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use App\Infrastructure\DependencyInjection\TokenRepositoryTrait;
 use App\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Infrastructure\DependencyInjection\WhispererRepositoryTrait;
