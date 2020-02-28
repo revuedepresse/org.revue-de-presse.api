@@ -10,7 +10,7 @@ interface StatusLoggerInterface
 {
     public function logHowManyItemsHaveBeenFetched(array $statuses, string $screenName): void;
 
-    public function logIntentionWithRegardsToAggregate($options, ?string $aggregateId = null): void;
+    public function logIntentionWithRegardsToAggregate($options, ?int $aggregateId = null): void;
 
     public function logStatus(StatusInterface $status): void;
 }

@@ -1307,7 +1307,7 @@ class Accessor implements ApiAccessorInterface,
      *
      * @return bool
      */
-    public function shouldSkipSerializationForMemberWithScreenName(string $screenName)
+    public function shouldSkipCollectForMemberWithScreenName(string $screenName)
     {
         $member = $this->userRepository->findOneBy(['twitter_username' => $screenName]);
         if (!$member instanceof MemberInterface) {

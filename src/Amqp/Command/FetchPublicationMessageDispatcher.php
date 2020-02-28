@@ -10,7 +10,6 @@ use App\Amqp\Exception\SkippableOperationException;
 use App\Amqp\Exception\UnexpectedOwnershipException;
 use App\Api\Entity\Token;
 use App\Api\Exception\InvalidSerializedTokenException;
-use App\Domain\Collection\PublicationCollectionStrategy;
 use App\Domain\Collection\PublicationStrategyInterface;
 use App\Infrastructure\DependencyInjection\OwnershipAccessorTrait;
 use App\Infrastructure\DependencyInjection\Publication\PublicationMessageDispatcherTrait;
@@ -65,9 +64,9 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
     public SearchMatchingStatusRepository $searchMatchingStatusRepository;
 
     /**
-     * @var PublicationCollectionStrategy
+     * @var PublicationStrategyInterface
      */
-    private PublicationCollectionStrategy $collectionStrategy;
+    private PublicationStrategyInterface $collectionStrategy;
 
     public function configure()
     {

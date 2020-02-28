@@ -11,7 +11,7 @@ use function array_key_exists;
 use function count;
 use function sprintf;
 
-class PublicationCollectionStrategy implements PublicationStrategyInterface
+class PublicationStrategy implements PublicationStrategyInterface
 {
     private string $screenName;
 
@@ -80,7 +80,7 @@ class PublicationCollectionStrategy implements PublicationStrategyInterface
     /**
      * @param bool $fetchLikes
      *
-     * @return PublicationCollectionStrategy
+     * @return PublicationStrategyInterface
      */
     public function willFetchLikes(bool $fetchLikes = false): self
     {
@@ -280,7 +280,7 @@ class PublicationCollectionStrategy implements PublicationStrategyInterface
     /**
      * @param string|null $listRestriction
      *
-     * @return PublicationCollectionStrategy
+     * @return PublicationStrategyInterface
      */
     public function willApplyListRestrictionToAList(string $listRestriction): self
     {
@@ -292,7 +292,7 @@ class PublicationCollectionStrategy implements PublicationStrategyInterface
     /**
      * @param string $queryRestriction
      *
-     * @return PublicationCollectionStrategy
+     * @return PublicationStrategyInterface
      */
     public function willApplyQueryRestriction(string $queryRestriction): self
     {
@@ -304,7 +304,7 @@ class PublicationCollectionStrategy implements PublicationStrategyInterface
     /**
      * @param array $listCollectionRestriction
      *
-     * @return PublicationCollectionStrategy
+     * @return PublicationStrategyInterface
      */
     public function willApplyRestrictionToAListCollection(array $listCollectionRestriction): self
     {
@@ -316,7 +316,7 @@ class PublicationCollectionStrategy implements PublicationStrategyInterface
     /**
      * @param string $memberRestriction
      *
-     * @return PublicationCollectionStrategy
+     * @return PublicationStrategyInterface
      */
     public function willApplyRestrictionToAMember(string $memberRestriction): self
     {
@@ -328,7 +328,7 @@ class PublicationCollectionStrategy implements PublicationStrategyInterface
     /**
      * @param string|null $date
      *
-     * @return PublicationCollectionStrategy
+     * @return PublicationStrategyInterface
      */
     public function willCollectPublicationsPreceding(?string $date): self
     {
@@ -340,7 +340,7 @@ class PublicationCollectionStrategy implements PublicationStrategyInterface
     /**
      * @param bool $ignoreWhispers
      *
-     * @return PublicationCollectionStrategy
+     * @return PublicationStrategyInterface
      */
     public function willIgnoreWhispers(bool $ignoreWhispers): self
     {
@@ -372,7 +372,7 @@ class PublicationCollectionStrategy implements PublicationStrategyInterface
     /**
      * @param bool $priorityToAggregates
      *
-     * @return PublicationCollectionStrategy
+     * @return PublicationStrategyInterface
      */
     public function willPrioritizeAggregates(bool $priorityToAggregates): self
     {

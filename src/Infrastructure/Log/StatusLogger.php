@@ -195,10 +195,11 @@ class StatusLogger implements StatusLoggerInterface
 
     /**
      * @param             $options
-     * @param string|null $aggregateId
+     * @param int|null $aggregateId
      */
-    public function logIntentionWithRegardsToAggregate($options, ?string $aggregateId = null): void
-    {
+    public function logIntentionWithRegardsToAggregate(
+        $options, ?int $aggregateId = null
+    ): void {
         if ($aggregateId === null) {
             $this->logger->info(sprintf('No aggregate id for "%s"', $options['screen_name']));
 
