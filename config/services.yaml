@@ -3,6 +3,7 @@ imports:
     - { resource: services/command.yml }
     - { resource: services/controller.yml }
     - { resource: services/mapping.yml }
+    - { resource: services/membership.yml }
     - { resource: services/operation.yml }
     - { resource: services/repository.yml }
     - { resource: services/persistence.yml }
@@ -213,12 +214,13 @@ services:
             - [ 'setApiAccessor',               [ '@weaving_the_web_twitter.api_accessor' ] ]
             - [ 'setLogger',                    [ '@monolog.logger.status' ] ]
             - [ 'setModerator',                 [ '@weaving_the_web_twitter.moderator.api_limit' ] ]
-            - [ 'setPublicationPersistence',    [ '@App\Infrastructure\Status\Persistence\PublicationPersistence' ] ]
             - [ 'setPublicationListRepository', [ '@weaving_the_web_twitter.repository.aggregate' ] ]
+            - [ 'setPublicationPersistence',    [ '@App\Infrastructure\Status\Persistence\PublicationPersistence' ] ]
             - [ 'setStatusLogger',              [ '@App\Infrastructure\Log\StatusLogger' ] ]
             - [ 'setStatusRepository',          [ '@App\Api\Repository\StatusRepository' ] ]
             - [ 'setTokenRepository',           [ '@weaving_the_web_twitter.repository.token' ] ]
             - [ 'setTranslator',                [ '@translator' ] ]
+            - [ 'setWhispererIdentification',   [ '@App\Infrastructure\Identification\WhispererIdentification' ] ]
             - [ 'setWhispererRepository',       [ '@repository.whisperer' ] ]
         properties:
             twitterApiLogger:       '@monolog.logger.twitter_api'

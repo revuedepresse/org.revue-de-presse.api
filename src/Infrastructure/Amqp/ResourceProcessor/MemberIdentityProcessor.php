@@ -16,7 +16,7 @@ use App\Infrastructure\Amqp\Exception\ContinuePublicationException;
 use App\Infrastructure\Amqp\Exception\StopPublicationException;
 use App\Infrastructure\Amqp\Message\FetchMemberLikes;
 use App\Infrastructure\Amqp\Message\FetchMemberStatuses;
-use App\Infrastructure\DependencyInjection\MemberProfileAccessorTrait;
+use App\Infrastructure\DependencyInjection\Membership\MemberProfileAccessorTrait;
 use App\Infrastructure\Repository\PublicationList\PublicationListRepositoryInterface;
 use App\Infrastructure\Twitter\Api\Accessor\MemberProfileAccessorInterface;
 use Psr\Log\LoggerInterface;

@@ -10,7 +10,7 @@ use App\Api\Exception\InsertDuplicatesException;
 use App\Domain\Repository\StatusRepositoryInterface;
 use App\Domain\Status\StatusInterface;
 use App\Domain\Status\TaggedStatus;
-use App\Infrastructure\DependencyInjection\MemberRepositoryTrait;
+use App\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
 use App\Infrastructure\DependencyInjection\Publication\PublicationRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Status\StatusLoggerTrait;

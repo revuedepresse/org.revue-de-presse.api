@@ -21,13 +21,14 @@ use App\Infrastructure\Amqp\Message\FetchMemberStatuses;
 use App\Infrastructure\DependencyInjection\ApiAccessorTrait;
 use App\Infrastructure\DependencyInjection\ApiLimitModeratorTrait;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
+use App\Infrastructure\DependencyInjection\Membership\WhispererIdentificationTrait;
 use App\Infrastructure\DependencyInjection\Publication\PublicationListRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
 use App\Infrastructure\DependencyInjection\Status\StatusLoggerTrait;
 use App\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use App\Infrastructure\DependencyInjection\TokenRepositoryTrait;
 use App\Infrastructure\DependencyInjection\TranslatorTrait;
-use App\Infrastructure\DependencyInjection\WhispererRepositoryTrait;
+use App\Infrastructure\DependencyInjection\Membership\WhispererRepositoryTrait;
 use App\Infrastructure\Twitter\Collector\Exception\RateLimitedException;
 use App\Infrastructure\Twitter\Collector\Exception\SkipCollectException;
 use App\Membership\Entity\MemberInterface;
@@ -64,6 +65,7 @@ class PublicationCollector implements PublicationCollectorInterface
     use StatusRepositoryTrait;
     use TokenRepositoryTrait;
     use TranslatorTrait;
+    use WhispererIdentificationTrait;
     use WhispererRepositoryTrait;
 
     public const MAX_AVAILABLE_TWEETS_PER_USER = 3200;
@@ -191,39 +193,6 @@ class PublicationCollector implements PublicationCollectorInterface
         }
 
         return $success;
-    }
-
-    /**
-     * @param $screenName
-     * @param $lastCollectionBatchSize
-     * @param $totalCollectedStatuses
-     *
-     * @return bool
-     */
-    public function flagWhisperers(
-        $screenName,
-        $lastCollectionBatchSize,
-        $totalCollectedStatuses
-    ) {
-        $flaggedWhisperer = false;
-
-        if (!$this->justCollectedSomeStatuses($lastCollectionBatchSize)) {
-            $whisperer = new Whisperer($screenName, $totalCollectedStatuses);
-
-            $member = $this->apiAccessor->showUser($screenName);
-            $whisperer->setExpectedWhispers($member->statuses_count);
-
-            $this->whispererRepository->declareWhisperer($whisperer);
-            $whispererDeclarationMessage = $this->translator->trans(
-                'logs.info.whisperer_declared',
-                ['screen name' => $screenName],
-                'logs'
-            );
-            $this->logger->info($whispererDeclarationMessage);
-            $flaggedWhisperer = true;
-        }
-
-        return $flaggedWhisperer;
     }
 
     /**
@@ -1654,10 +1623,10 @@ class PublicationCollector implements PublicationCollectorInterface
                         $totalCollectedStatuses
                     );
 
-                    $this->flagWhisperers(
+                    $this->whispererIdentification->identifyWhisperer(
                         $options['screen_name'],
-                        $lastCollectionBatchSize,
-                        $totalCollectedStatuses
+                        $totalCollectedStatuses,
+                        $lastCollectionBatchSize
                     );
                 }
             }
