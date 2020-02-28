@@ -14,10 +14,12 @@ use App\Infrastructure\DependencyInjection\MemberRepositoryTrait;
 use App\Infrastructure\DependencyInjection\PublicationPersistenceTrait;
 use App\Infrastructure\DependencyInjection\PublicationRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Status\StatusLoggerTrait;
+use App\Infrastructure\DependencyInjection\Status\StatusPersistenceTrait;
 use App\Infrastructure\DependencyInjection\TaggedStatusRepositoryTrait;
 use App\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
 use App\Infrastructure\Twitter\Api\Normalizer\Normalizer;
 use App\Membership\Entity\MemberInterface;
+use App\Operation\Collection\CollectionInterface;
 use App\Status\Entity\LikedStatus;
 use App\Status\Repository\ExtremumAwareInterface;
 use App\Status\Repository\LikedStatusRepository;
@@ -31,7 +33,6 @@ use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\Persistence\ManagerRegistry;
 use Exception;
@@ -51,6 +52,7 @@ class ArchivedStatusRepository extends ResourceRepository implements
     use PublicationPersistenceTrait;
     use PublicationRepositoryTrait;
     use StatusLoggerTrait;
+    use StatusPersistenceTrait;
     use TaggedStatusRepositoryTrait;
     use TimelyStatusRepositoryTrait;
 
@@ -299,7 +301,7 @@ class ArchivedStatusRepository extends ResourceRepository implements
      * @param MemberInterface $likedBy
      * @param callable        $ensureMemberExists
      *
-     * @return array
+     * @return CollectionInterface
      */
     public function saveLikes(
         array $statuses,
@@ -308,42 +310,17 @@ class ArchivedStatusRepository extends ResourceRepository implements
         LoggerInterface $logger,
         MemberInterface $likedBy,
         callable $ensureMemberExists
-    ): array {
+    ): CollectionInterface {
         $this->appLogger = $logger;
 
-        $entityManager = $this->getEntityManager();
+        $statusIds = $this->getStatusIdentities($statuses);
 
-        $statusIds = array_map(
-            function ($status) {
-                return $status->id_str;
-            },
-            $statuses
-        );
-
-        $indexedStatuses = [];
-        if (count($statusIds) > 0) {
-            $queryBuilder = $this->createQueryBuilder('s');
-            $queryBuilder->andWhere('s.statusId in (:ids)');
-            $queryBuilder->setParameter('ids', $statusIds);
-            $existingStatuses = $queryBuilder->getQuery()->getResult();
-
-            array_walk(
-                $existingStatuses,
-                function (StatusInterface $existingStatus) use (&$indexedStatuses) {
-                    $indexedStatuses[$existingStatus->getStatusId()] = $existingStatus;
-                }
-            );
-        }
+        $indexedStatus = $this->createIndexOfExistingStatus($statusIds);
 
         $extracts = Normalizer::normalizeAll(
             $statuses,
-            function ($extract) use ($identifier, $indexedStatuses) {
+            function ($extract) use ($identifier, $indexedStatus) {
                 $extract['identifier'] = $identifier;
-
-                $extract['existing_status'] = null;
-                if (array_key_exists($extract['status_id'], $indexedStatuses)) {
-                    $extract['existing_status'] = $indexedStatuses[$extract['status_id']];
-                }
 
                 return $extract;
             },
@@ -352,10 +329,18 @@ class ArchivedStatusRepository extends ResourceRepository implements
 
         $likedStatuses = [];
 
+        $entityManager = $this->getEntityManager();
+
+        /** @var TaggedStatus $taggedStatus */
         foreach ($extracts->toArray() as $key => $taggedStatus) {
             $extract      = $taggedStatus->toLegacyProps();
-            $memberStatus = $extract['existing_status'];
-            if (!$memberStatus) {
+
+            $memberStatus = null;
+            if (array_key_exists($taggedStatus->documentId(), $indexedStatus)) {
+                $memberStatus = $indexedStatus[$taggedStatus->documentId()];
+            }
+
+            if (!($memberStatus instanceof StatusInterface)) {
                 $memberStatus = $this->taggedStatusRepository
                     ->convertPropsToStatus($extract, $aggregate);
             }
@@ -365,8 +350,10 @@ class ArchivedStatusRepository extends ResourceRepository implements
             }
 
             if ($memberStatus instanceof ArchivedStatus) {
-                // TODO Replace this method with statusPersistence->unarchiveStatus
-                $memberStatus = $this->unarchiveStatus($memberStatus, $entityManager);
+                $memberStatus = $this->statusPersistence->unarchiveStatus(
+                    $memberStatus,
+                    $entityManager
+                );
             }
 
             try {
@@ -421,6 +408,32 @@ class ArchivedStatusRepository extends ResourceRepository implements
     }
 
     /**
+     * @param array $statusIds
+     *
+     * @return array
+     */
+    private function createIndexOfExistingStatus(array $statusIds): array
+    {
+        $indexedStatuses = [];
+
+        if (count($statusIds) > 0) {
+            $queryBuilder = $this->createQueryBuilder('s');
+            $queryBuilder->andWhere('s.statusId in (:ids)');
+            $queryBuilder->setParameter('ids', $statusIds);
+            $existingStatuses = $queryBuilder->getQuery()->getResult();
+
+            array_walk(
+                $existingStatuses,
+                function (StatusInterface $existingStatus) use (&$indexedStatuses) {
+                    $indexedStatuses[$existingStatus->getStatusId()] = $existingStatus;
+                }
+            );
+        }
+
+        return $indexedStatuses;
+    }
+
+    /**
      * @param EntityManagerInterface $entityManager
      */
     private function flushAndResetManagerOnUniqueConstraintViolation(
@@ -451,6 +464,21 @@ class ArchivedStatusRepository extends ResourceRepository implements
 
         $this->flushAndResetManagerOnUniqueConstraintViolation(
             $entityManager
+        );
+    }
+
+    /**
+     * @param array $statuses
+     *
+     * @return array
+     */
+    private function getStatusIdentities(array $statuses): array
+    {
+        return array_map(
+            function ($status) {
+                return $status->id_str;
+            },
+            $statuses
         );
     }
 }

@@ -40,6 +40,7 @@ services:
             - [ 'setMemberRepository',       [ '@user_manager' ] ]
             - [ 'setPublicationRepository',  [ '@App\Twitter\Repository\PublicationRepository' ] ]
             - [ 'setStatusLogger',           [ '@App\Infrastructure\Log\StatusLogger' ] ]
+            - [ 'setStatusPersistence',      [ '@App\Infrastructure\Status\Persistence\StatusPersistence' ] ]
             - [ 'setTaggedStatusRepository', [ '@App\Domain\Repository\TaggedStatusRepository' ] ]
             - [ 'setTimelyStatusRepository', [ '@repository.timely_status' ] ]
         properties:
@@ -58,6 +59,7 @@ services:
             - [ 'setMemberRepository',       [ '@user_manager' ] ]
             - [ 'setPublicationRepository',  [ '@App\Twitter\Repository\PublicationRepository' ] ]
             - [ 'setStatusLogger',           [ '@App\Infrastructure\Log\StatusLogger' ] ]
+            - [ 'setStatusPersistence',      [ '@App\Infrastructure\Status\Persistence\StatusPersistence' ] ]
             - [ 'setTaggedStatusRepository', [ '@App\Domain\Repository\TaggedStatusRepository' ] ]
             - [ 'setTimelyStatusRepository', [ '@repository.timely_status' ] ]
         properties:

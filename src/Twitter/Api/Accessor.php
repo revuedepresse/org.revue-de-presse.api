@@ -821,7 +821,7 @@ class Accessor implements ApiAccessorInterface,
         if ($exception->getCode() === 0) {
             $emptyErrorCodeMessage   = $this->translator->trans(
                 'logs.info.empty_error_code',
-                ['{{ oauth token start }}' => $this->takeFirstTokenCharacters($token)],
+                ['oauth token start' => $this->takeFirstTokenCharacters($token)],
                 'logs'
             );
             $emptyErrorCodeException = EmptyErrorCodeException::encounteredWhenUsingToken(

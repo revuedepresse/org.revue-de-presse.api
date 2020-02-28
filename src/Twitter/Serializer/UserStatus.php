@@ -14,7 +14,6 @@ use App\Api\Entity\Aggregate;
 use App\Api\Entity\Token;
 use App\Api\Entity\TokenInterface;
 use App\Api\Entity\Whisperer;
-use App\Domain\Repository\StatusRepositoryInterface;
 use App\Domain\Status\StatusInterface;
 use App\Infrastructure\Amqp\Message\FetchMemberStatuses;
 use App\Infrastructure\DependencyInjection\ApiAccessorTrait;
@@ -26,7 +25,6 @@ use App\Infrastructure\DependencyInjection\TokenRepositoryTrait;
 use App\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Infrastructure\DependencyInjection\WhispererRepositoryTrait;
 use App\Membership\Entity\MemberInterface;
-use App\Membership\Exception\InvalidMemberIdentifier;
 use App\Operation\Collection\CollectionInterface;
 use App\Status\LikedStatusCollectionAwareInterface;
 use App\Status\Repository\ExtremumAwareInterface;
@@ -88,36 +86,77 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     protected array $serializationOptions = [];
 
     /**
-     * @param array $oauthTokens
-     *
-     * @return $this
+     * @var \App\Api\Repository\PublicationListRepository $aggregateRepository
      */
-    public function setupAccessor(array $oauthTokens)
+    protected $aggregateRepository;
+
+    /**
+     * @param $screenName
+     * @param $lastSerializationBatchSize
+     * @param $totalSerializedStatuses
+     *
+     * @return bool
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
+     * @throws Exception
+     */
+    public function flagWhisperers($screenName, $lastSerializationBatchSize, $totalSerializedStatuses)
     {
-        if (array_key_exists('authentication_header', $oauthTokens)) {
-            $this->apiAccessor->setAuthenticationHeader($oauthTokens['authentication_header']);
+        $flaggedWhisperer = false;
 
-            return $this;
+        if (!$this->justSerializedSomeStatuses($lastSerializationBatchSize)) {
+            $whisperer = new Whisperer($screenName, $totalSerializedStatuses);
+
+            $member = $this->apiAccessor->showUser($screenName);
+            $whisperer->setExpectedWhispers($member->statuses_count);
+
+            $this->whispererRepository->declareWhisperer($whisperer);
+            $whispererDeclarationMessage = $this->translator->trans(
+                'logs.info.whisperer_declared',
+                ['screen name' => $screenName],
+                'logs'
+            );
+            $this->logger->info($whispererDeclarationMessage);
+            $flaggedWhisperer = true;
         }
 
-        $token = new Token();
-        $token->setOAuthToken($oauthTokens[TokenInterface::FIELD_TOKEN]);
-        $token->setOAuthSecret($oauthTokens[TokenInterface::FIELD_SECRET]);
+        return $flaggedWhisperer;
+    }
 
-        $this->apiAccessor->setAccessToken($token);
+    /**
+     * @param $statuses
+     *
+     * @return bool
+     */
+    public function hitSerializationLimit($statuses): bool
+    {
+        return $statuses >= (self::MAX_AVAILABLE_TWEETS_PER_USER - 100);
+    }
 
-        /** @var Token token */
-        $token = $this->tokenRepository
-            ->findOneBy(['oauthToken' => $oauthTokens[TokenInterface::FIELD_TOKEN]]);
-
-        if (!$token instanceof Token) {
-            $token = $this->tokenRepository->findFirstUnfrozenToken();
+    /**
+     * @param array $criteria
+     *
+     * @return bool
+     */
+    public function isAboutToCollectLikesFromCriteria(array $criteria): bool
+    {
+        if (!array_key_exists(self::INTENT_TO_FETCH_LIKES, $criteria)) {
+            return false;
         }
 
-        $this->apiAccessor->setConsumerKey($token->consumerKey);
-        $this->apiAccessor->setConsumerSecret($token->consumerSecret);
+        return $criteria[self::INTENT_TO_FETCH_LIKES];
+    }
 
-        return $this;
+    /**
+     * @param $statuses
+     *
+     * @return bool
+     */
+    public function justSerializedSomeStatuses($statuses): bool
+    {
+        return !is_null($statuses) && $statuses > 0;
     }
 
     /**
@@ -166,8 +205,9 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             }
         }
 
-        if (!$this->isTwitterApiAvailable() &&
-            ($remainingItemsToCollect = $this->remainingItemsToCollect($options))
+        if (
+            !$this->isTwitterApiAvailable()
+            && ($remainingItemsToCollect = $this->remainingItemsToCollect($options))
         ) {
             $this->unlockAggregate();
 
@@ -196,8 +236,8 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         } catch (UnavailableResourceException $exception) {
             throw $exception;
         } catch (SuspendedAccountException
-            |NotFoundMemberException
-            |ProtectedAccountException $exception
+        |NotFoundMemberException
+        |ProtectedAccountException $exception
         ) {
             $this->handleUnavailableMemberException($exception, $options);
 
@@ -208,17 +248,553 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             $this->logger->critical($constraintViolationException->getMessage());
             $success = false;
         } catch (Exception $exception) {
-            $this->logger->error(sprintf(
-                '[from %s %s]',
-                __METHOD__ ,
-                $exception->getMessage()
-            ));
+            $this->logger->error(
+                sprintf(
+                    '[from %s %s]',
+                    __METHOD__,
+                    $exception->getMessage()
+                )
+            );
             $success = false;
         } finally {
             $this->unlockAggregate();
         }
 
         return $success;
+    }
+
+    /**
+     * @param $lastSerializationBatchSize
+     * @param $totalSerializedStatuses
+     *
+     * @return bool
+     */
+    public function serializedAllAvailableStatuses($lastSerializationBatchSize, $totalSerializedStatuses): bool
+    {
+        return !$this->justSerializedSomeStatuses($lastSerializationBatchSize)
+            && $this->hitSerializationLimit($totalSerializedStatuses);
+    }
+
+    /**
+     * @param $aggregateRepository
+     */
+    public function setAggregateRepository($aggregateRepository)
+    {
+        $this->aggregateRepository = $aggregateRepository;
+    }
+
+    /**
+     * @param array $oauthTokens
+     *
+     * @return $this
+     */
+    public function setupAccessor(array $oauthTokens)
+    {
+        if (array_key_exists('authentication_header', $oauthTokens)) {
+            $this->apiAccessor->setAuthenticationHeader($oauthTokens['authentication_header']);
+
+            return $this;
+        }
+
+        $token = new Token();
+        $token->setOAuthToken($oauthTokens[TokenInterface::FIELD_TOKEN]);
+        $token->setOAuthSecret($oauthTokens[TokenInterface::FIELD_SECRET]);
+
+        $this->apiAccessor->setAccessToken($token);
+
+        /** @var Token token */
+        $token = $this->tokenRepository
+            ->findOneBy(['oauthToken' => $oauthTokens[TokenInterface::FIELD_TOKEN]]);
+
+        if (!$token instanceof Token) {
+            $token = $this->tokenRepository->findFirstUnfrozenToken();
+        }
+
+        $this->apiAccessor->setConsumerKey($token->consumerKey);
+        $this->apiAccessor->setConsumerSecret($token->consumerSecret);
+
+        return $this;
+    }
+
+    /**
+     * @param      $options
+     * @param bool $discoverPastTweets
+     *
+     * @return array
+     * @throws ApiRateLimitingException
+     * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
+     * @throws NonUniqueResultException
+     * @throws NotFoundMemberException
+     * @throws NotFoundStatusException
+     * @throws OptimisticLockException
+     * @throws ProtectedAccountException
+     * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws UnexpectedApiResponseException
+     */
+    protected function fetchLatestStatuses($options, $discoverPastTweets = true): array
+    {
+        $options[self::INTENT_TO_FETCH_LIKES] = $this->isAboutToCollectLikesFromCriteria($this->serializationOptions);
+        $options                              = $this->removeSerializationOptions($options);
+        $options                              = $this->updateExtremum($options, $discoverPastTweets);
+
+        if (
+            array_key_exists('max_id', $options)
+            && array_key_exists('before', $options) // Looking into the past
+        ) {
+            unset($options['max_id']);
+        }
+
+        $statuses = $this->apiAccessor->fetchStatuses($options);
+
+        $discoverMoreRecentStatuses = false;
+        if (
+            count($statuses) > 0
+            && $this->statusRepository->findOneBy(
+                ['statusId' => $statuses[0]->id]
+            ) instanceof StatusInterface
+        ) {
+            $discoverMoreRecentStatuses = true;
+        }
+
+        if (
+            $discoverPastTweets
+            && (
+                $discoverMoreRecentStatuses
+                || (count($statuses) === 0))
+        ) {
+            if (array_key_exists('max_id', $options)) {
+                unset($options['max_id']);
+            }
+
+            $statuses = $this->fetchLatestStatuses(
+                $options,
+                $discoverPastTweets = false
+            );
+        }
+
+        return $statuses;
+    }
+
+    /**
+     * @return bool
+     * @throws OptimisticLockException
+     */
+    protected function isApiAvailable()
+    {
+        $availableApi = false;
+
+        if (!$this->apiAccessor->isApiLimitReached()) {
+            return true;
+        }
+
+        try {
+            if (!$this->apiAccessor->isApiRateLimitReached('/statuses/user_timeline')) {
+                $availableApi = true;
+            }
+        } catch (Exception $exception) {
+            $this->twitterApiLogger->info('[error message] Testing for API availability: ' . $exception->getMessage());
+            $this->twitterApiLogger->info('[error code] ' . (int) $exception->getCode());
+
+            if ($exception->getCode() === $this->apiAccessor->getEmptyReplyErrorCode()) {
+                $availableApi = true;
+            } else {
+                $this->tokenRepository->freezeToken($this->apiAccessor->userToken);
+            }
+        }
+
+        return $availableApi;
+    }
+
+    /**
+     * @param Token $token
+     *
+     * @return bool
+     * @throws OptimisticLockException
+     * @throws Exception
+     */
+    protected function isApiAvailableForToken(Token $token)
+    {
+        $this->setupAccessor(
+            [
+                TokenInterface::FIELD_TOKEN  => $token->getOauthToken(),
+                TokenInterface::FIELD_SECRET => $token->getOauthTokenSecret()
+            ]
+        );
+
+        return $this->isApiAvailable();
+    }
+
+    /**
+     * @return bool
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
+     * @throws Exception
+     */
+    protected function isTwitterApiAvailable()
+    {
+        $availableApi = false;
+
+        /**
+         * @var \App\Api\Entity\Token $token
+         */
+        $token = $this->tokenRepository->refreshFreezeCondition($this->apiAccessor->userToken, $this->logger);
+
+        if ($token->isNotFrozen()) {
+            $availableApi = $this->isApiAvailable();
+        }
+
+        $token = $this->tokenRepository->findFirstUnfrozenToken();
+
+        if (!$availableApi && !is_null($token)) {
+            $frozenUntil = $token->getFrozenUntil();
+            if (is_null($frozenUntil)) {
+                return true;
+            }
+
+            $now        = new \DateTime('now', new \DateTimeZone('UTC'));
+            $timeout    = $frozenUntil->getTimestamp() - $now->getTimestamp();
+            $oauthToken = $token->getOauthToken();
+
+            $availableApi = $this->isApiAvailableForToken($token);
+            while (!$availableApi && ($token = $this->tokenRepository->findFirstUnfrozenToken()) !== null) {
+                $availableApi = $this->isApiAvailableForToken($token);
+                if (!$availableApi) {
+                    $timeout = min(abs($timeout), abs($token->getFrozenUntil()->getTimestamp() - $now->getTimestamp()));
+                }
+
+                $oauthToken = $token->getOauthToken();
+            }
+
+            if (!$availableApi) {
+                $this->logger->info('The API is not available right now.');
+                $this->moderator->waitFor(
+                    $timeout,
+                    [
+                        '{{ token }}' => substr($oauthToken, 0, '8'),
+                    ]
+                );
+            }
+        }
+
+        if (!$availableApi) {
+            return $this->delayingConsumption();
+        }
+
+        return $availableApi;
+    }
+
+    /**
+     * @param $options
+     *
+     * @return mixed
+     * @throws NonUniqueResultException
+     */
+    protected function logHowManyItemsHaveBeenCollected($options)
+    {
+        $subjectInSingularForm = 'status';
+        $subjectInPluralForm   = 'statuses';
+        $countCollectedItems   = function ($memberName, $maxId) {
+            return $this->statusRepository->countCollectedStatuses($memberName, $maxId);
+        };
+        if ($this->isAboutToCollectLikesFromCriteria($options)) {
+            $subjectInSingularForm = 'like';
+            $subjectInPluralForm   = 'likes';
+            $countCollectedItems   = function ($memberName, $maxId) {
+                return $this->likedStatusRepository->countCollectedLikes($memberName, $maxId);
+            };
+        }
+
+        if (!array_key_exists('max_id', $options)) {
+            $options['max_id'] = INF;
+        }
+
+        $totalStatuses = $countCollectedItems(
+            $options['screen_name'],
+            $options['max_id']
+        );
+
+        if (is_infinite($options['max_id'])) {
+            $maxId = "+infinity";
+        } else {
+            $maxId = $options['max_id'];
+        }
+
+        $this->logger->info(
+            sprintf(
+                '%d %s older than %s of id #%d have been found for "%s"',
+                $totalStatuses,
+                $subjectInPluralForm,
+                $subjectInSingularForm,
+                $maxId,
+                $options['screen_name']
+            )
+        );
+
+        return $totalStatuses;
+    }
+
+    /**
+     * @param $options
+     * @param $lastSerializationBatchSize
+     * @param $totalSerializedStatuses
+     */
+    protected function logSerializationProgress(
+        $options,
+        $lastSerializationBatchSize,
+        $totalSerializedStatuses
+    ): void {
+        $subject = 'statuses';
+        if ($this->isAboutToCollectLikesFromCriteria($options)) {
+            $subject = 'likes';
+        }
+
+        if ($this->serializedAllAvailableStatuses($lastSerializationBatchSize, $totalSerializedStatuses)) {
+            $this->logger->info(
+                sprintf(
+                    'All available %s have most likely been fetched for "%s" or few %s are available (%d)',
+                    $subject,
+                    $options['screen_name'],
+                    $subject,
+                    $totalSerializedStatuses
+                )
+            );
+
+            return;
+        }
+
+        $this->logger->info(
+            sprintf(
+                '%d more %s in the past have been saved for "%s" in aggregate #%d',
+                $lastSerializationBatchSize,
+                $subject,
+                $options['screen_name'],
+                $this->serializationOptions['aggregate_id']
+            )
+        );
+    }
+
+    /**
+     * @param $options
+     *
+     * @return bool
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
+     * @throws Exception
+     */
+    protected function remainingItemsToCollect($options)
+    {
+        if ($this->isAboutToCollectLikesFromCriteria($options)) {
+            return $this->remainingLikes($options);
+        }
+
+        return $this->remainingStatuses($options);
+    }
+
+    /**
+     * @param $options
+     *
+     * @return bool
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
+     * @throws Exception
+     */
+    protected function remainingLikes($options)
+    {
+        $serializedLikesCount = $this->likedStatusRepository->countHowManyLikesFor($options['screen_name']);
+        $existingStatus       = $this->translator->trans(
+            'logs.info.likes_existing',
+            [
+                'total_likes' => $serializedLikesCount,
+                'count'       => $serializedLikesCount,
+                'member'      => $options['screen_name'],
+            ],
+            'logs'
+        );
+        $this->logger->info($existingStatus);
+
+        $member = $this->apiAccessor->showUser($options['screen_name']);
+        if (!isset($member->statuses_count)) {
+            $member->statuses_count = 0;
+        }
+
+        /**
+         * Twitter allows 3200 past tweets at most to be retrieved for any given user
+         */
+        $likesCount      = max($member->statuses_count, self::MAX_AVAILABLE_TWEETS_PER_USER);
+        $discoveredLikes = $this->translator->trans(
+            'logs.info.likes_discovered',
+            [
+                'total_likes' => $likesCount,
+                'member'      => $options['screen_name'],
+                'count'       => $likesCount,
+            ],
+            'logs'
+        );
+        $this->logger->info($discoveredLikes);
+
+        return $serializedLikesCount < $likesCount;
+    }
+
+    /**
+     * @param $options
+     *
+     * @return bool
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws NoResultException
+     */
+    protected function remainingStatuses($options)
+    {
+        $serializedStatusCount = $this->statusRepository->countHowManyStatusesFor($options['screen_name']);
+        $existingStatus        = $this->translator->trans(
+            'logs.info.status_existing',
+            [
+                'count'        => $serializedStatusCount,
+                'total_status' => $serializedStatusCount,
+                'member'       => $options['screen_name'],
+            ],
+            'logs'
+        );
+        $this->logger->info($existingStatus);
+
+        $user = $this->apiAccessor->showUser($options['screen_name']);
+        if (!isset($user->statuses_count)) {
+            $user->statuses_count = 0;
+        }
+
+        /**
+         * Twitter allows 3200 past tweets at most to be retrieved for any given user
+         */
+        $statusesCount    = max($user->statuses_count, self::MAX_AVAILABLE_TWEETS_PER_USER);
+        $discoveredStatus = $this->translator->trans(
+            'logs.info.status_discovered',
+            [
+                'member'       => $options['screen_name'],
+                'count'        => $statusesCount,
+                'total_status' => $statusesCount,
+            ],
+            'logs'
+        );
+        $this->logger->info($discoveredStatus);
+
+        return $serializedStatusCount < $statusesCount;
+    }
+
+    /**
+     * @param $options
+     *
+     * @return mixed
+     */
+    protected function removeSerializationOptions($options)
+    {
+        if (array_key_exists('before', $options)) {
+            unset($options['before']);
+        }
+        if (array_key_exists('aggregate_id', $options)) {
+            unset($options['aggregate_id']);
+        }
+
+        return $options;
+    }
+
+    /**
+     * @param          $options
+     * @param int|null $aggregateId
+     *
+     * @return int|null
+     * @throws NonUniqueResultException
+     * @throws NotFoundMemberException
+     * @throws OptimisticLockException
+     * @throws ProtectedAccountException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     */
+    protected function saveStatusesMatchingCriteria($options, int $aggregateId = null)
+    {
+        $options  = $this->declareOptionsToCollectStatuses($options);
+        $statuses = $this->apiAccessor->fetchStatuses($options);
+
+        if ($statuses instanceof \stdClass && isset($statuses->error)) {
+            throw new ProtectedAccountException(
+                $statuses->error,
+                $this->apiAccessor::ERROR_PROTECTED_ACCOUNT
+            );
+        }
+
+        $lookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow =
+            $this->isLookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow($options);
+
+        if (count($statuses) > 0) {
+            $this->safelyDeclareExtremum(
+                $statuses,
+                $lookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow,
+                $options['screen_name']
+            );
+        }
+
+        $statusesIds   = $this->getExtremeStatusesIdsFor($options);
+        $firstStatusId = $statusesIds['min_id'];
+        $lastStatusId  = $statusesIds['max_id'];
+        if (
+            !$lookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow
+            && $firstStatusId !== null
+            && $lastStatusId !== null
+            && count($statuses) > 0
+            && ($statuses[count($statuses) - 1]->id >= (int) $firstStatusId)
+            && ($statuses[0]->id <= (int) $lastStatusId)
+        ) {
+            return 0;
+        }
+
+        return $this->saveStatusesForScreenName(
+            $statuses,
+            $options['screen_name'],
+            $aggregateId
+        );
+    }
+
+    /**
+     * @param $options
+     *
+     * @return mixed
+     */
+    protected function setUpSerializationOptions($options)
+    {
+        $foundOption = false;
+
+        if (array_key_exists('aggregate_id', $options)) {
+            $this->serializationOptions['aggregate_id'] = $options['aggregate_id'];
+            $foundOption                                = true;
+        } else {
+            $this->serializationOptions['aggregate_id'] = null;
+        }
+
+        if (array_key_exists('before', $options)) {
+            $this->serializationOptions['before'] = $options['before'];
+            $foundOption                          = true;
+        } else {
+            $this->serializationOptions['before'] = null;
+        }
+
+        if (array_key_exists(self::INTENT_TO_FETCH_LIKES, $options)) {
+            $this->serializationOptions[self::INTENT_TO_FETCH_LIKES] = $options[self::INTENT_TO_FETCH_LIKES];
+        } else {
+            $this->serializationOptions[self::INTENT_TO_FETCH_LIKES] = false;
+        }
+
+        return $foundOption;
     }
 
     /**
@@ -244,9 +820,10 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      */
     protected function shouldSkipSerialization($options): bool
     {
-        if (!array_key_exists(FetchMemberStatuses::SCREEN_NAME, $options) ||
-            $options[FetchMemberStatuses::SCREEN_NAME] === null ||
-            $this->apiAccessor->shouldSkipSerializationForMemberWithScreenName(
+        if (
+            !array_key_exists(FetchMemberStatuses::SCREEN_NAME, $options)
+            || $options[FetchMemberStatuses::SCREEN_NAME] === null
+            || $this->apiAccessor->shouldSkipSerializationForMemberWithScreenName(
                 $options[FetchMemberStatuses::SCREEN_NAME]
             )
         ) {
@@ -260,9 +837,10 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             );
         }
 
-        if (($aggregate instanceof Aggregate) &&
-            $aggregate->isLocked() &&
-            !array_key_exists('before', $options)
+        if (
+            ($aggregate instanceof Aggregate)
+            && $aggregate->isLocked()
+            && !array_key_exists('before', $options)
         ) {
             $message = sprintf(
                 'Will skip message consumption for locked aggregate #%d',
@@ -322,10 +900,12 @@ class UserStatus implements LikedStatusCollectionAwareInterface
 
             if (!$atLeastOneStatusFetched || $hasLikedStatusBeenSavedBefore) {
                 $statuses = $this->fetchLatestStatuses($options, $discoverPastTweets = false);
-                if (count($statuses) > 0 ) {
-                    if ($this->statusRepository->hasBeenSavedBefore(
+                if (count($statuses) > 0) {
+                    if (
+                    $this->statusRepository->hasBeenSavedBefore(
                         [$statuses[0]]
-                    )) {
+                    )
+                    ) {
                         return true;
                     }
 
@@ -365,152 +945,20 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     }
 
     /**
-     * @param $screenName
-     * @param $lastSerializationBatchSize
-     * @param $totalSerializedStatuses
-     * @return bool
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
-     * @throws Exception
-     */
-    public function flagWhisperers($screenName, $lastSerializationBatchSize, $totalSerializedStatuses)
-    {
-        $flaggedWhisperer = false;
-
-        if (! $this->justSerializedSomeStatuses($lastSerializationBatchSize)) {
-            $whisperer = new Whisperer($screenName, $totalSerializedStatuses);
-
-            $member = $this->apiAccessor->showUser($screenName);
-            $whisperer->setExpectedWhispers($member->statuses_count);
-
-            $this->whispererRepository->declareWhisperer($whisperer);
-            $whispererDeclarationMessage = $this->translator->trans(
-                'logs.info.whisperer_declared',
-                ['{{ screen name }}' => $screenName],
-                'logs'
-            );
-            $this->logger->info($whispererDeclarationMessage);
-            $flaggedWhisperer = true;
-        }
-
-        return $flaggedWhisperer;
-    }
-
-    /**
-     * @return bool
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
-     * @throws Exception
-     */
-    protected function isTwitterApiAvailable()
-    {
-        $availableApi = false;
-
-        /**
-         * @var \App\Api\Entity\Token $token
-         */
-        $token = $this->tokenRepository->refreshFreezeCondition($this->apiAccessor->userToken, $this->logger);
-
-        if ($token->isNotFrozen()) {
-            $availableApi = $this->isApiAvailable();
-        }
-
-        $token = $this->tokenRepository->findFirstUnfrozenToken();
-
-        if (!$availableApi && !is_null($token)) {
-            $frozenUntil = $token->getFrozenUntil();
-            if (is_null($frozenUntil)) {
-                return true;
-            }
-
-            $now = new \DateTime('now', new \DateTimeZone('UTC'));
-            $timeout = $frozenUntil->getTimestamp() - $now->getTimestamp();
-            $oauthToken = $token->getOauthToken();
-
-            $availableApi = $this->isApiAvailableForToken($token);
-            while (!$availableApi && ($token = $this->tokenRepository->findFirstUnfrozenToken()) !== null) {
-                $availableApi = $this->isApiAvailableForToken($token);
-                if (!$availableApi) {
-                    $timeout = min(abs($timeout), abs($token->getFrozenUntil()->getTimestamp() - $now->getTimestamp()));
-                }
-
-                $oauthToken = $token->getOauthToken();
-            }
-
-            if (!$availableApi) {
-                $this->logger->info('The API is not available right now.');
-                $this->moderator->waitFor($timeout, [
-                    '{{ token }}' => substr($oauthToken, 0, '8'),
-                ]);
-            }
-        }
-
-        if (!$availableApi) {
-            return $this->delayingConsumption();
-        }
-
-        return $availableApi;
-    }
-
-    /**
-     * @param Token $token
-     * @return bool
-     * @throws OptimisticLockException
-     * @throws Exception
-     */
-    protected function isApiAvailableForToken(Token $token) {
-        $this->setupAccessor([
-            TokenInterface::FIELD_TOKEN => $token->getOauthToken(),
-            TokenInterface::FIELD_SECRET => $token->getOauthTokenSecret()]);
-
-        return $this->isApiAvailable();
-    }
-
-    /**
-     * @return bool
-     * @throws OptimisticLockException
-     */
-    protected function isApiAvailable()
-    {
-        $availableApi = false;
-
-        if (!$this->apiAccessor->isApiLimitReached()) {
-            return true;
-        }
-
-        try {
-            if (!$this->apiAccessor->isApiRateLimitReached('/statuses/user_timeline')) {
-                $availableApi = true;
-            }
-        } catch (Exception $exception) {
-            $this->twitterApiLogger->info('[error message] Testing for API availability: '.$exception->getMessage());
-            $this->twitterApiLogger->info('[error code] '.(int)$exception->getCode());
-
-            if ($exception->getCode() === $this->apiAccessor->getEmptyReplyErrorCode()) {
-                $availableApi = true;
-            } else {
-                $this->tokenRepository->freezeToken($this->apiAccessor->userToken);
-            }
-        }
-
-        return $availableApi;
-    }
-
-    /**
      * @param array $options
-     * @param bool $discoverPastTweets
+     * @param bool  $discoverPastTweets
+     *
      * @return mixed
      * @throws NonUniqueResultException
      */
     protected function updateExtremum(array $options, bool $discoverPastTweets = true)
     {
-        if (array_key_exists(
+        if (
+            array_key_exists(
                 FetchMemberStatuses::BEFORE,
                 $this->serializationOptions
-            ) &&
-            $this->serializationOptions[FetchMemberStatuses::BEFORE]
+            )
+            && $this->serializationOptions[FetchMemberStatuses::BEFORE]
         ) {
             $discoverPastTweets = true;
         }
@@ -518,13 +966,13 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         $options = $this->getExtremumOptions($options, $discoverPastTweets);
 
         $findingDirection = $this->getExtremumUpdateMethod($discoverPastTweets);
-        $status = $this->findExtremum($options, $findingDirection);
+        $status           = $this->findExtremum($options, $findingDirection);
 
         $logPrefix = $this->getLogPrefix();
 
         if ((count($status) === 1) && array_key_exists('statusId', $status)) {
             $option = $this->getExtremumOption($discoverPastTweets);
-            $shift = $this->getShiftFromExtremum($discoverPastTweets);
+            $shift  = $this->getShiftFromExtremum($discoverPastTweets);
 
             if ($status['statusId'] === '-INF' && $option === 'max_id') {
                 $status['statusId'] = 0;
@@ -532,10 +980,15 @@ class UserStatus implements LikedStatusCollectionAwareInterface
 
             $options[$option] = (int) $status['statusId'] + $shift;
 
-            $this->logger->info(sprintf(
-                'Extremum (%s%s) retrieved for "%s": #%s',
-                $logPrefix, $option, $options['screen_name'], $options[$option]
-            ));
+            $this->logger->info(
+                sprintf(
+                    'Extremum (%s%s) retrieved for "%s": #%s',
+                    $logPrefix,
+                    $option,
+                    $options['screen_name'],
+                    $options[$option]
+                )
+            );
 
             if ($options[$option] < 0 && $option === 'max_id') {
                 unset($options[$option]);
@@ -544,883 +997,15 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             return $options;
         }
 
-        $this->logger->info(sprintf(
-            '[No %s retrieved for "%s"] ',
-            $logPrefix . 'extremum', $options['screen_name']
-        ));
-
-        return $options;
-    }
-
-    /**
-     * @param $options
-     * @return bool
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws NoResultException
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
-     * @throws Exception
-     */
-    protected function remainingItemsToCollect($options)
-    {
-        if ($this->isAboutToCollectLikesFromCriteria($options)) {
-            return $this->remainingLikes($options);
-        }
-
-        return $this->remainingStatuses($options);
-    }
-
-    /**
-     * @param $options
-     * @return bool
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws NoResultException
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
-     * @throws Exception
-     */
-    protected function remainingLikes($options)
-    {
-        $serializedLikesCount = $this->likedStatusRepository->countHowManyLikesFor($options['screen_name']);
-        $existingStatus = $this->translator->trans(
-            'logs.info.likes_existing',
-            [
-                'total_likes' => $serializedLikesCount,
-                'count' => $serializedLikesCount,
-                'member' => $options['screen_name'],
-            ],
-            'logs'
-        );
-        $this->logger->info($existingStatus);
-
-        $member = $this->apiAccessor->showUser($options['screen_name']);
-        if (!isset($member->statuses_count)) {
-            $member->statuses_count = 0;
-        }
-
-        /**
-         * Twitter allows 3200 past tweets at most to be retrieved for any given user
-         */
-        $likesCount = max($member->statuses_count, self::MAX_AVAILABLE_TWEETS_PER_USER);
-        $discoveredLikes = $this->translator->trans(
-            'logs.info.likes_discovered',
-            [
-                'total_likes' => $likesCount,
-                'member' => $options['screen_name'],
-                'count' => $likesCount,
-            ],
-            'logs'
-        );
-        $this->logger->info($discoveredLikes);
-
-        return $serializedLikesCount < $likesCount;
-    }
-
-    /**
-     * @param $options
-     *
-     * @return bool
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws NoResultException
-     */
-    protected function remainingStatuses($options)
-    {
-        $serializedStatusCount = $this->statusRepository->countHowManyStatusesFor($options['screen_name']);
-        $existingStatus = $this->translator->trans(
-            'logs.info.status_existing',
-            [
-                'count' => $serializedStatusCount,
-                'total_status' => $serializedStatusCount,
-                'member' => $options['screen_name'],
-            ],
-            'logs'
-        );
-        $this->logger->info($existingStatus);
-
-        $user = $this->apiAccessor->showUser($options['screen_name']);
-        if (!isset($user->statuses_count)) {
-            $user->statuses_count = 0;
-        }
-
-        /**
-         * Twitter allows 3200 past tweets at most to be retrieved for any given user
-         */
-        $statusesCount = max($user->statuses_count, self::MAX_AVAILABLE_TWEETS_PER_USER);
-        $discoveredStatus = $this->translator->trans(
-            'logs.info.status_discovered',
-            [
-                'member' => $options['screen_name'],
-                'count' => $statusesCount,
-                'total_status' => $statusesCount,
-            ],
-            'logs'
-        );
-        $this->logger->info($discoveredStatus);
-
-        return $serializedStatusCount < $statusesCount;
-    }
-
-    /**
-     * @var \App\Api\Repository\PublicationListRepository $aggregateRepository
-     */
-    protected $aggregateRepository;
-
-    /**
-     * @param $aggregateRepository
-     */
-    public function setAggregateRepository($aggregateRepository)
-    {
-        $this->aggregateRepository = $aggregateRepository;
-    }
-
-    /**
-     * @param          $options
-     * @param int|null $aggregateId
-     *
-     * @return int|null
-     * @throws NonUniqueResultException
-     * @throws NotFoundMemberException
-     * @throws OptimisticLockException
-     * @throws ProtectedAccountException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     */
-    protected function saveStatusesMatchingCriteria($options, int $aggregateId = null)
-    {
-        $options = $this->declareOptionsToCollectStatuses($options);
-        $statuses = $this->apiAccessor->fetchStatuses($options);
-
-        if ($statuses instanceof \stdClass && isset($statuses->error)) {
-            throw new ProtectedAccountException(
-                $statuses->error,
-                $this->apiAccessor::ERROR_PROTECTED_ACCOUNT
-            );
-        }
-
-        $lookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow =
-            $this->isLookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow($options);
-
-        if (count($statuses) > 0) {
-            $this->safelyDeclareExtremum(
-                $statuses,
-                $lookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow,
-                $options['screen_name']
-            );
-        }
-
-        $statusesIds = $this->getExtremeStatusesIdsFor($options);
-        $firstStatusId = $statusesIds['min_id'];
-        $lastStatusId = $statusesIds['max_id'];
-        if (!$lookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow &&
-            $firstStatusId !== null &&
-            $lastStatusId !== null &&
-            count($statuses) > 0 &&
-            ($statuses[count($statuses) - 1]->id >= (int) $firstStatusId) &&
-            ($statuses[0]->id <= (int) $lastStatusId)
-        ) {
-            return 0;
-        }
-
-        return $this->saveStatusesForScreenName(
-            $statuses,
-            $options['screen_name'],
-            $aggregateId
-        );
-    }
-
-    /**
-     * @param $options
-     * @return mixed
-     */
-    private function declareOptionsToCollectStatuses($options)
-    {
-        if (array_key_exists('max_id', $options) && is_infinite($options['max_id'])) {
-            unset($options['max_id']);
-        }
-
-        $options[self::INTENT_TO_FETCH_LIKES] = $this->isAboutToCollectLikesFromCriteria($this->serializationOptions);
-
-        return $options;
-    }
-
-    /**
-     * @param array $criteria
-     * @return bool
-     */
-    public function isAboutToCollectLikesFromCriteria(array $criteria): bool
-    {
-        if (!array_key_exists(self::INTENT_TO_FETCH_LIKES, $criteria)) {
-            return false;
-        }
-
-        return $criteria[self::INTENT_TO_FETCH_LIKES];
-    }
-
-    /**
-     * @param $options
-     * @return bool
-     */
-    private function isLookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow($options): bool
-    {
-        if (array_key_exists('max_id', $options) && is_infinite($options['max_id'])) {
-            return true;
-        }
-
-        return false;
-    }
-
-    /**
-     * @param array  $statuses
-     * @param bool   $shouldDeclareMaximumStatusId
-     * @param string $memberName
-     * @return MemberInterface
-     * @throws NotFoundMemberException
-     * @throws OptimisticLockException
-     */
-    private function declareExtremumIdForMember(
-        array $statuses,
-        bool $shouldDeclareMaximumStatusId,
-        string $memberName
-    ) {
-        if (count($statuses) === 0) {
-            throw new \LogicException('There should be at least one status');
-        }
-
-        if ($this->isAboutToCollectLikesFromCriteria($this->serializationOptions)) {
-            if ($shouldDeclareMaximumStatusId) {
-                $lastStatusFetched = $statuses[0];
-
-                return $this->statusRepository->declareMaximumLikedStatusId(
-                    $lastStatusFetched,
-                    $memberName
-                );
-            }
-
-            $firstStatusFetched = $statuses[count($statuses) - 1];
-
-            return $this->statusRepository->declareMinimumLikedStatusId(
-                $firstStatusFetched,
-                $memberName
-            );
-        }
-
-        if ($shouldDeclareMaximumStatusId) {
-            $lastStatusFetched = $statuses[0];
-
-            return $this->statusRepository->declareMaximumStatusId($lastStatusFetched);
-        }
-
-        $firstStatusFetched = $statuses[count($statuses) - 1];
-
-        return $this->statusRepository->declareMinimumStatusId($firstStatusFetched);
-    }
-
-    /**
-     * @param $options
-     * @return mixed
-     */
-    protected function setUpSerializationOptions($options)
-    {
-        $foundOption = false;
-
-        if (array_key_exists('aggregate_id', $options)) {
-            $this->serializationOptions['aggregate_id'] = $options['aggregate_id'];
-            $foundOption = true;
-        } else {
-            $this->serializationOptions['aggregate_id'] = null;
-        }
-
-        if (array_key_exists('before', $options)) {
-            $this->serializationOptions['before'] = $options['before'];
-            $foundOption = true;
-        } else {
-            $this->serializationOptions['before'] = null;
-        }
-
-        if (array_key_exists(self::INTENT_TO_FETCH_LIKES, $options)) {
-            $this->serializationOptions[self::INTENT_TO_FETCH_LIKES] = $options[self::INTENT_TO_FETCH_LIKES];
-        } else {
-            $this->serializationOptions[self::INTENT_TO_FETCH_LIKES] = false;
-        }
-
-        return $foundOption;
-    }
-
-    /**
-     * @param $options
-     * @return mixed
-     */
-    protected function removeSerializationOptions($options)
-    {
-        if (array_key_exists('before', $options)) {
-            unset($options['before']);
-        }
-        if (array_key_exists('aggregate_id', $options)) {
-            unset($options['aggregate_id']);
-        }
-
-        return $options;
-    }
-
-    /**
-     * @param $options
-     * @return mixed
-     * @throws NonUniqueResultException
-     */
-    protected function logHowManyItemsHaveBeenCollected($options)
-    {
-        $subjectInSingularForm = 'status';
-        $subjectInPluralForm = 'statuses';
-        $countCollectedItems = function ($memberName, $maxId) {
-            return $this->statusRepository->countCollectedStatuses($memberName, $maxId);
-        };
-        if ($this->isAboutToCollectLikesFromCriteria($options)) {
-            $subjectInSingularForm = 'like';
-            $subjectInPluralForm = 'likes';
-            $countCollectedItems = function ($memberName, $maxId) {
-                return $this->likedStatusRepository->countCollectedLikes($memberName, $maxId);
-            };
-        }
-
-        if (!array_key_exists('max_id', $options)) {
-            $options['max_id'] = INF;
-        }
-
-        $totalStatuses = $countCollectedItems(
-            $options['screen_name'],
-            $options['max_id']
-        );
-
-        if (is_infinite($options['max_id'])) {
-            $maxId = "+infinity";
-        } else {
-            $maxId = $options['max_id'];
-        }
-
         $this->logger->info(
             sprintf(
-                '%d %s older than %s of id #%d have been found for "%s"',
-                $totalStatuses,
-                $subjectInPluralForm,
-                $subjectInSingularForm,
-                $maxId,
+                '[No %s retrieved for "%s"] ',
+                $logPrefix . 'extremum',
                 $options['screen_name']
             )
         );
 
-        return $totalStatuses;
-    }
-
-    /**
-     * @param $options
-     * @param $lastSerializationBatchSize
-     * @param $totalSerializedStatuses
-     */
-    protected function logSerializationProgress(
-        $options,
-        $lastSerializationBatchSize,
-        $totalSerializedStatuses
-    ): void {
-        $subject = 'statuses';
-        if ($this->isAboutToCollectLikesFromCriteria($options)) {
-            $subject = 'likes';
-        }
-
-        if ($this->serializedAllAvailableStatuses($lastSerializationBatchSize, $totalSerializedStatuses)) {
-            $this->logger->info(
-                sprintf(
-                    'All available %s have most likely been fetched for "%s" or few %s are available (%d)',
-                    $subject,
-                    $options['screen_name'],
-                    $subject,
-                    $totalSerializedStatuses
-                )
-            );
-            return;
-        }
-
-        $this->logger->info(
-            sprintf(
-                '%d more %s in the past have been saved for "%s" in aggregate #%d',
-                $lastSerializationBatchSize,
-                $subject,
-                $options['screen_name'],
-                $this->serializationOptions['aggregate_id']
-            )
-        );
-    }
-
-    /**
-     * @param $statuses
-     * @return bool
-     */
-    public function hitSerializationLimit($statuses): bool
-    {
-        return $statuses >= (self::MAX_AVAILABLE_TWEETS_PER_USER - 100);
-    }
-
-    /**
-     * @param $statuses
-     * @return bool
-     */
-    public function justSerializedSomeStatuses($statuses): bool
-    {
-        return ! is_null($statuses) && $statuses > 0;
-    }
-
-    /**
-     * @param $lastSerializationBatchSize
-     * @param $totalSerializedStatuses
-     * @return bool
-     */
-    public function serializedAllAvailableStatuses($lastSerializationBatchSize, $totalSerializedStatuses): bool
-    {
-        return ! $this->justSerializedSomeStatuses($lastSerializationBatchSize) &&
-            $this->hitSerializationLimit($totalSerializedStatuses);
-    }
-
-    /**
-     * @return bool
-     * @throws Exception
-     */
-    private function delayingConsumption(): bool
-    {
-        $token = $this->tokenRepository->findFirstFrozenToken();
-
-        /** @var \DateTime $frozenUntil */
-        $frozenUntil = $token->getFrozenUntil();
-        $now = new \DateTime('now', $frozenUntil->getTimezone());
-
-        $timeout = $frozenUntil->getTimestamp() - $now->getTimestamp();
-
-        $this->logger->info('The API is not available right now.');
-        $this->moderator->waitFor(
-            $timeout,
-            [
-                '{{ token }}' => substr($token->getOauthToken(), 0, '8'),
-            ]
-        );
-
-        return true;
-    }
-
-    /**
-     * @param array    $statuses
-     * @param string   $screenName
-     * @param int|null $aggregateId
-     *
-     * @return int|null
-     */
-    private function saveStatusesForScreenName(
-        array $statuses,
-        string $screenName,
-        int $aggregateId = null
-    ): ?int {
-        $success = null;
-
-        if (!is_array($statuses) || count($statuses) === 0) {
-            return $success;
-        }
-
-        $aggregate = null;
-        if ($aggregateId !== null) {
-            /** @var Aggregate $aggregate */
-            $aggregate = $this->aggregateRepository->findOneBy(['id' => $aggregateId]);
-        }
-
-        $this->logger->info(
-            sprintf(
-                'Fetched "%d" statuses for "%s"',
-                count($statuses),
-                $screenName
-            )
-        );
-
-        $likedBy = null;
-        if ($this->isAboutToCollectLikesFromCriteria($this->serializationOptions)) {
-            $likedBy = $this->apiAccessor->ensureMemberHavingNameExists($screenName);
-        }
-
-        $savedStatuses = $this->saveStatuses($statuses, $aggregate, $likedBy);
-
-        return $this->logHowManyItemsHaveBeenSaved(
-            $savedStatuses->count(),
-            $screenName
-        );
-    }
-
-    /**
-     * @param array                $statuses
-     * @param Aggregate|null       $aggregate
-     * @param MemberInterface|null $likedBy
-     *
-     * @return CollectionInterface
-     */
-    private function saveStatuses(
-        array $statuses,
-        Aggregate $aggregate = null,
-        MemberInterface $likedBy = null
-    ): CollectionInterface {
-        if ($this->isAboutToCollectLikesFromCriteria($this->serializationOptions)) {
-            return $this->statusRepository->saveLikes(
-                $statuses,
-                $this->apiAccessor->getOAuthToken(),
-                $aggregate,
-                $this->logger,
-                $likedBy,
-                function ($memberName) {
-                    return $this->apiAccessor->ensureMemberHavingNameExists($memberName);
-                }
-            );
-        }
-
-        return $this->publicationPersistence->persistStatusPublications(
-            $statuses,
-            new AccessToken($this->apiAccessor->getOAuthToken()),
-            $aggregate
-        );
-    }
-
-    /**
-     * @param      $options
-     * @param bool $discoverPastTweets
-     *
-     * @return array
-     * @throws ApiRateLimitingException
-     * @throws BadAuthenticationDataException
-     * @throws InconsistentTokenRepository
-     * @throws NonUniqueResultException
-     * @throws NotFoundMemberException
-     * @throws NotFoundStatusException
-     * @throws OptimisticLockException
-     * @throws ProtectedAccountException
-     * @throws ReadOnlyApplicationException
-     * @throws ReflectionException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws UnexpectedApiResponseException
-     */
-    protected function fetchLatestStatuses($options, $discoverPastTweets = true): array
-    {
-        $options[self::INTENT_TO_FETCH_LIKES] = $this->isAboutToCollectLikesFromCriteria($this->serializationOptions);
-        $options = $this->removeSerializationOptions($options);
-        $options = $this->updateExtremum($options, $discoverPastTweets);
-
-        if (array_key_exists('max_id', $options) &&
-            array_key_exists('before', $options) // Looking into the past
-        ) {
-            unset($options['max_id']);
-        }
-
-        $statuses = $this->apiAccessor->fetchStatuses($options);
-
-        $discoverMoreRecentStatuses = false;
-        if (count($statuses) > 0 &&
-            $this->statusRepository->findOneBy(
-                ['statusId' => $statuses[0]->id]) instanceof StatusInterface
-            ) {
-            $discoverMoreRecentStatuses = true;
-        }
-
-        if ($discoverPastTweets && (
-            $discoverMoreRecentStatuses ||
-            (count($statuses) === 0))
-        ) {
-            if (array_key_exists('max_id', $options)) {
-                unset($options['max_id']);
-            }
-
-            $statuses = $this->fetchLatestStatuses(
-                $options,
-                $discoverPastTweets = false
-            );
-        }
-
-        return $statuses;
-    }
-
-    /**
-     * @param $options
-     *
-     * @return int|null
-     */
-    private function extractAggregateIdFromOptions($options): ?int
-    {
-        if (!array_key_exists('aggregate_id', $options)) {
-            return null;
-        }
-
-        return $options['aggregate_id'];
-    }
-
-    private function ensureTargetAggregateIsNotLocked(): void
-    {
-        if ($this->isSerializingStatusesForAggregate()) {
-            $aggregate = $this->aggregateRepository->findOneBy(
-                ['id' => $this->serializationOptions['aggregate_id']]
-            );
-
-            if (!$aggregate instanceof Aggregate ) {
-                return;
-            }
-
-            if ($aggregate->isLocked()) {
-                $message = sprintf(
-                    'Won\'t process message for locked aggregate #%d',
-                    $aggregate->getId()
-                );
-                $this->logger->info($message);
-
-                throw new LockedAggregateException($message);
-            }
-
-            $this->logger->info(sprintf(
-                'About to lock processing of aggregate #%d',
-                $aggregate->getId()
-            ));
-
-            $this->aggregateRepository->lockAggregate($aggregate);
-        }
-    }
-
-    /**
-     * @return bool
-     */
-    private function isSerializingStatusesForAggregate(): bool
-    {
-        return array_key_exists('aggregate_id', $this->serializationOptions);
-    }
-
-    private function unlockAggregate(): void
-    {
-        if ($this->isSerializingStatusesForAggregate()) {
-            $aggregate = $this->aggregateRepository->findOneBy(
-                ['id' => $this->serializationOptions['aggregate_id']]
-            );
-            if ($aggregate instanceof Aggregate) {
-                $this->aggregateRepository->unlockAggregate($aggregate);
-                $this->logger->info(sprintf('Unlocked aggregate #%d', $aggregate->getId()));
-            }
-        }
-    }
-
-    /**
-     * @param Exception $exception
-     * @param            $options
-     * @throws ProtectedAccountException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     */
-    private function handleUnavailableMemberException(Exception $exception, array $options): void
-    {
-        $message = 'Skipping member with screen name "%s", which has not been found';
-
-        if ($exception instanceof SuspendedAccountException) {
-            $message = 'Skipping member with screen name "%s", which has been suspended';
-        }
-
-        if ($exception instanceof ProtectedAccountException) {
-            $message = 'Skipping member with screen name "%s", which is protected';
-            $this->logger->error(sprintf($message, $options['screen_name']));
-
-            throw $exception;
-        }
-
-        $message = sprintf($message, $options['screen_name']);
-        $this->logger->error($message);
-
-        throw new UnavailableResourceException($message, $exception->getCode(), $exception);
-    }
-
-    /**
-     * @param $options
-     */
-    private function logIntentionWithRegardsToAggregate($options): void
-    {
-        if (is_null($this->serializationOptions['aggregate_id'])) {
-            $this->logger->info(sprintf('No aggregate id for "%s"', $options['screen_name']));
-        } else {
-            $this->logger->info(sprintf(
-                'About to save status for "%s" in aggregate #%d',
-                $options['screen_name'],
-                $this->serializationOptions['aggregate_id']
-            ));
-        }
-    }
-
-    /**
-     * @param string $memberName
-     * @return bool
-     * @throws NotFoundMemberException
-     * @throws NoResultException
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
-     */
-    private function shouldLookUpFutureItems(string $memberName): bool
-    {
-        if ($this->isAboutToCollectLikesFromCriteria($this->serializationOptions)) {
-            return $this->likedStatusRepository->countHowManyLikesFor($memberName)
-                > self::MAX_AVAILABLE_TWEETS_PER_USER;
-        }
-
-        return $this->statusRepository->countHowManyStatusesFor($memberName)
-            > self::MAX_AVAILABLE_TWEETS_PER_USER;
-    }
-
-    /**
-     * @return string
-     */
-    private function getLogPrefix(): string
-    {
-        if (!array_key_exists('before', $this->serializationOptions)
-            || ! $this->serializationOptions['before']
-        ) {
-            return '';
-        }
-
-        return 'local ';
-    }
-
-    /**
-     * @param $options
-     * @param $findingDirection
-     * @return array|mixed
-     * @throws NonUniqueResultException
-     */
-    private function findExtremum($options, $findingDirection)
-    {
-        if ($this->isAboutToCollectLikesFromCriteria($options)) {
-            return $this->findLikeExtremum($options, $findingDirection);
-        }
-
-        if (!array_key_exists('before', $this->serializationOptions) ||
-            !$this->serializationOptions['before']
-        ) {
-            return $this->statusRepository->findLocalMaximum(
-                $options['screen_name'],
-                $this->serializationOptions['before']
-            );
-        }
-
-        return $this->statusRepository->findNextExtremum(
-            $options['screen_name'],
-            $findingDirection
-        );
-    }
-
-    /**
-     * @param $options
-     * @param $findingDirection
-     * @return array|mixed
-     * @throws NonUniqueResultException
-     */
-    private function findLikeExtremum($options, $findingDirection)
-    {
-        if (!array_key_exists('before', $this->serializationOptions) ||
-            !$this->serializationOptions['before']
-        ) {
-            return $this->likedStatusRepository->findLocalMaximum(
-                $options['screen_name'],
-                $this->serializationOptions['before']
-            );
-        }
-
-        return $this->likedStatusRepository->findNextExtremum
-            ($options['screen_name'],
-            $findingDirection
-        );
-    }
-
-    /**
-     * @param $options
-     * @param $discoverPastTweets
-     * @return string
-     */
-    private function getExtremumOption($discoverPastTweets): string
-    {
-        if ($discoverPastTweets) {
-            return 'max_id';
-        }
-
-        return 'since_id';
-    }
-
-    /**
-     * @param $options
-     * @param $discoverPastTweets
-     * @return array
-     */
-    private function getExtremumOptions($options, $discoverPastTweets): array
-    {
-        if (!$discoverPastTweets && array_key_exists('max_id', $options)) {
-            unset($options['max_id']);
-        }
-
         return $options;
-    }
-
-    /**
-     * @param $discoverPastTweets
-     * @return int
-     */
-    private function getShiftFromExtremum($discoverPastTweets): int
-    {
-        if ($discoverPastTweets) {
-            return -1;
-        }
-
-        return 1;
-    }
-
-    /**
-     * @param $discoverPastTweets
-     * @return string
-     */
-    private function getExtremumUpdateMethod($discoverPastTweets): string
-    {
-        if ($discoverPastTweets) {
-            // next maximum
-            return ExtremumAwareInterface::FINDING_IN_ASCENDING_ORDER;
-        }
-
-        // next minimum
-        return ExtremumAwareInterface::FINDING_IN_DESCENDING_ORDER;
-    }
-
-    private function beforeFetchingStatuses($options)
-    {
-        if ($this->isAboutToCollectLikesFromCriteria($options)) {
-            return null;
-        }
-
-        $whisperer = $this->whispererRepository->findOneBy(
-            ['name' => $options['screen_name']]
-        );
-        if (!$whisperer instanceof Whisperer) {
-            SkippableMessageException::continueMessageConsumption();
-        }
-
-        $whisperer->member = $this->apiAccessor->showUser($options['screen_name']);
-        $whispers = (int) $whisperer->member->statuses_count;
-
-        $storedWhispers = $this->statusRepository->countHowManyStatusesFor($options['screen_name']);
-
-        if ($storedWhispers === $whispers) {
-            SkippableMessageException::stopMessageConsumption();
-        }
-
-        if ($whispers >= self::MAX_AVAILABLE_TWEETS_PER_USER &&
-            $storedWhispers < self::MAX_AVAILABLE_TWEETS_PER_USER
-        ) {
-            SkippableMessageException::continueMessageConsumption();
-        }
-
-        return $whisperer;
     }
 
     /**
@@ -1428,14 +1013,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
      * @param array     $statuses
      * @param Whisperer $whisperer
      *
-     * @throws NoResultException
-     * @throws NonUniqueResultException
-     * @throws NotFoundMemberException
-     * @throws ORMException
-     * @throws OptimisticLockException
      * @throws SkippableMessageException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
      */
     private function afterCountingCollectedStatuses(
         array $options,
@@ -1444,16 +1022,18 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     ) {
         $aggregateId = $this->extractAggregateIdFromOptions($options);
 
-        if ($statuses === 0)  {
+        if ($statuses === 0) {
             SkippableMessageException::stopMessageConsumption();
         }
 
         if ($this->statusRepository->hasBeenSavedBefore($statuses)) {
-            $this->logger->info(sprintf(
-                'The item with id "%d" has already been saved in the past (skipping the whole batch from "%s")',
-                $statuses[0]->id_str,
-                $options['screen_name']
-            ));
+            $this->logger->info(
+                sprintf(
+                    'The item with id "%d" has already been saved in the past (skipping the whole batch from "%s")',
+                    $statuses[0]->id_str,
+                    $options['screen_name']
+                )
+            );
             SkippableMessageException::stopMessageConsumption();
         }
 
@@ -1478,6 +1058,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     /**
      * @param $options
      * @param $whisperer
+     *
      * @throws OptimisticLockException
      */
     private function afterUpdatingLastPublicationDate($options, Whisperer $whisperer): void
@@ -1500,102 +1081,41 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         $this->logger->info(sprintf('Skipping whisperer "%s"', $options['screen_name']));
     }
 
-    /**
-     * @param int    $statusesCount
-     * @param string $memberName
-     * @return int|null
-     */
-    private function logHowManyItemsHaveBeenSaved(int $statusesCount, string $memberName)
+    private function beforeFetchingStatuses($options)
     {
-        if ($statusesCount > 0) {
-            $success = $statusesCount;
-
-            $messageKey = 'logs.info.status_saved';
-            $total = 'total_status';
-            if ($this->isAboutToCollectLikesFromCriteria($this->serializationOptions)) {
-                $messageKey = 'logs.info.likes_saved';
-                $total = 'total_likes';
-            }
-
-            $savedTweets = $this->translator->trans(
-                $messageKey, [
-                    'count' => $statusesCount,
-                    'member' => $memberName,
-                    $total => $statusesCount,
-                ],
-                'logs'
-            );
-            $this->logger->info($savedTweets);
-
-            return $success;
+        if ($this->isAboutToCollectLikesFromCriteria($options)) {
+            return null;
         }
 
-        $this->logger->info(sprintf('Nothing new for "%s"', $memberName));
-
-        return null;
-
-    }
-
-    /**
-     * @param $options
-     * @return array
-     */
-    private function getExtremeStatusesIdsFor($options): array
-    {
-        if ($this->isAboutToCollectLikesFromCriteria($this->serializationOptions)) {
-            return $this->likedStatusRepository->getIdsOfExtremeStatusesSavedForMemberHavingScreenName(
-                $options['screen_name']
-            );
-        }
-
-        return $this->statusRepository->getIdsOfExtremeStatusesSavedForMemberHavingScreenName(
-            $options['screen_name']
+        $whisperer = $this->whispererRepository->findOneBy(
+            ['name' => $options['screen_name']]
         );
-    }
-
-    /**
-     * @param        $statuses
-     * @param        $shouldDeclareMaximumStatusId
-     * @param string $memberName
-     * @throws NotFoundMemberException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
-     */
-    private function safelyDeclareExtremum(
-        $statuses,
-        $shouldDeclareMaximumStatusId,
-        string $memberName
-    ): void {
-        try {
-            $this->declareExtremumIdForMember(
-                $statuses,
-                $shouldDeclareMaximumStatusId,
-                $memberName
-            );
-        } catch (NotFoundMemberException $exception) {
-            $this->apiAccessor->ensureMemberHavingNameExists($exception->screenName);
-
-            try {
-                $this->declareExtremumIdForMember(
-                    $statuses,
-                    $shouldDeclareMaximumStatusId,
-                    $memberName
-                );
-            } catch (NotFoundMemberException $exception) {
-                $this->apiAccessor->ensureMemberHavingNameExists($exception->screenName);
-                $this->declareExtremumIdForMember(
-                    $statuses,
-                    $shouldDeclareMaximumStatusId,
-                    $memberName
-                );
-            }
+        if (!$whisperer instanceof Whisperer) {
+            SkippableMessageException::continueMessageConsumption();
         }
+
+        $whisperer->member = $this->apiAccessor->showUser($options['screen_name']);
+        $whispers          = (int) $whisperer->member->statuses_count;
+
+        $storedWhispers = $this->statusRepository->countHowManyStatusesFor($options['screen_name']);
+
+        if ($storedWhispers === $whispers) {
+            SkippableMessageException::stopMessageConsumption();
+        }
+
+        if (
+            $whispers >= self::MAX_AVAILABLE_TWEETS_PER_USER
+            && $storedWhispers < self::MAX_AVAILABLE_TWEETS_PER_USER
+        ) {
+            SkippableMessageException::continueMessageConsumption();
+        }
+
+        return $whisperer;
     }
 
     /**
      * @param array $options
+     *
      * @throws ProtectedAccountException
      * @throws RateLimitedException
      * @throws SkipSerializationException
@@ -1644,6 +1164,551 @@ class UserStatus implements LikedStatusCollectionAwareInterface
     }
 
     /**
+     * @param array  $statuses
+     * @param bool   $shouldDeclareMaximumStatusId
+     * @param string $memberName
+     *
+     * @return MemberInterface
+     * @throws NotFoundMemberException
+     * @throws OptimisticLockException
+     */
+    private function declareExtremumIdForMember(
+        array $statuses,
+        bool $shouldDeclareMaximumStatusId,
+        string $memberName
+    ) {
+        if (count($statuses) === 0) {
+            throw new \LogicException('There should be at least one status');
+        }
+
+        if ($this->isAboutToCollectLikesFromCriteria($this->serializationOptions)) {
+            if ($shouldDeclareMaximumStatusId) {
+                $lastStatusFetched = $statuses[0];
+
+                return $this->statusRepository->declareMaximumLikedStatusId(
+                    $lastStatusFetched,
+                    $memberName
+                );
+            }
+
+            $firstStatusFetched = $statuses[count($statuses) - 1];
+
+            return $this->statusRepository->declareMinimumLikedStatusId(
+                $firstStatusFetched,
+                $memberName
+            );
+        }
+
+        if ($shouldDeclareMaximumStatusId) {
+            $lastStatusFetched = $statuses[0];
+
+            return $this->statusRepository->declareMaximumStatusId($lastStatusFetched);
+        }
+
+        $firstStatusFetched = $statuses[count($statuses) - 1];
+
+        return $this->statusRepository->declareMinimumStatusId($firstStatusFetched);
+    }
+
+    /**
+     * @param $options
+     *
+     * @return mixed
+     */
+    private function declareOptionsToCollectStatuses($options)
+    {
+        if (array_key_exists('max_id', $options) && is_infinite($options['max_id'])) {
+            unset($options['max_id']);
+        }
+
+        $options[self::INTENT_TO_FETCH_LIKES] = $this->isAboutToCollectLikesFromCriteria($this->serializationOptions);
+
+        return $options;
+    }
+
+    /**
+     * @return bool
+     * @throws Exception
+     */
+    private function delayingConsumption(): bool
+    {
+        $token = $this->tokenRepository->findFirstFrozenToken();
+
+        /** @var \DateTime $frozenUntil */
+        $frozenUntil = $token->getFrozenUntil();
+        $now         = new \DateTime('now', $frozenUntil->getTimezone());
+
+        $timeout = $frozenUntil->getTimestamp() - $now->getTimestamp();
+
+        $this->logger->info('The API is not available right now.');
+        $this->moderator->waitFor(
+            $timeout,
+            [
+                '{{ token }}' => substr($token->getOauthToken(), 0, '8'),
+            ]
+        );
+
+        return true;
+    }
+
+    private function ensureTargetAggregateIsNotLocked(): void
+    {
+        if ($this->isSerializingStatusesForAggregate()) {
+            $aggregate = $this->aggregateRepository->findOneBy(
+                ['id' => $this->serializationOptions['aggregate_id']]
+            );
+
+            if (!$aggregate instanceof Aggregate) {
+                return;
+            }
+
+            if ($aggregate->isLocked()) {
+                $message = sprintf(
+                    'Won\'t process message for locked aggregate #%d',
+                    $aggregate->getId()
+                );
+                $this->logger->info($message);
+
+                throw new LockedAggregateException($message);
+            }
+
+            $this->logger->info(
+                sprintf(
+                    'About to lock processing of aggregate #%d',
+                    $aggregate->getId()
+                )
+            );
+
+            $this->aggregateRepository->lockAggregate($aggregate);
+        }
+    }
+
+    /**
+     * @param $options
+     *
+     * @return int|null
+     */
+    private function extractAggregateIdFromOptions($options): ?int
+    {
+        if (!array_key_exists('aggregate_id', $options)) {
+            return null;
+        }
+
+        return $options['aggregate_id'];
+    }
+
+    /**
+     * @param $options
+     * @param $findingDirection
+     *
+     * @return array|mixed
+     * @throws NonUniqueResultException
+     */
+    private function findExtremum($options, $findingDirection)
+    {
+        if ($this->isAboutToCollectLikesFromCriteria($options)) {
+            return $this->findLikeExtremum($options, $findingDirection);
+        }
+
+        if (
+            !array_key_exists('before', $this->serializationOptions)
+            || !$this->serializationOptions['before']
+        ) {
+            return $this->statusRepository->findLocalMaximum(
+                $options['screen_name'],
+                $this->serializationOptions['before']
+            );
+        }
+
+        return $this->statusRepository->findNextExtremum(
+            $options['screen_name'],
+            $findingDirection
+        );
+    }
+
+    /**
+     * @param $options
+     * @param $findingDirection
+     *
+     * @return array|mixed
+     * @throws NonUniqueResultException
+     */
+    private function findLikeExtremum($options, $findingDirection)
+    {
+        if (
+            !array_key_exists('before', $this->serializationOptions)
+            || !$this->serializationOptions['before']
+        ) {
+            return $this->likedStatusRepository->findLocalMaximum(
+                $options['screen_name'],
+                $this->serializationOptions['before']
+            );
+        }
+
+        return $this->likedStatusRepository->findNextExtremum
+        (
+            $options['screen_name'],
+            $findingDirection
+        );
+    }
+
+    /**
+     * @param $options
+     *
+     * @return array
+     */
+    private function getExtremeStatusesIdsFor($options): array
+    {
+        if ($this->isAboutToCollectLikesFromCriteria($this->serializationOptions)) {
+            return $this->likedStatusRepository->getIdsOfExtremeStatusesSavedForMemberHavingScreenName(
+                $options['screen_name']
+            );
+        }
+
+        return $this->statusRepository->getIdsOfExtremeStatusesSavedForMemberHavingScreenName(
+            $options['screen_name']
+        );
+    }
+
+    /**
+     * @param $options
+     * @param $discoverPastTweets
+     *
+     * @return string
+     */
+    private function getExtremumOption($discoverPastTweets): string
+    {
+        if ($discoverPastTweets) {
+            return 'max_id';
+        }
+
+        return 'since_id';
+    }
+
+    /**
+     * @param $options
+     * @param $discoverPastTweets
+     *
+     * @return array
+     */
+    private function getExtremumOptions($options, $discoverPastTweets): array
+    {
+        if (!$discoverPastTweets && array_key_exists('max_id', $options)) {
+            unset($options['max_id']);
+        }
+
+        return $options;
+    }
+
+    /**
+     * @param $discoverPastTweets
+     *
+     * @return string
+     */
+    private function getExtremumUpdateMethod($discoverPastTweets): string
+    {
+        if ($discoverPastTweets) {
+            // next maximum
+            return ExtremumAwareInterface::FINDING_IN_ASCENDING_ORDER;
+        }
+
+        // next minimum
+        return ExtremumAwareInterface::FINDING_IN_DESCENDING_ORDER;
+    }
+
+    /**
+     * @return string
+     */
+    private function getLogPrefix(): string
+    {
+        if (
+            !array_key_exists('before', $this->serializationOptions)
+            || !$this->serializationOptions['before']
+        ) {
+            return '';
+        }
+
+        return 'local ';
+    }
+
+    /**
+     * @param $discoverPastTweets
+     *
+     * @return int
+     */
+    private function getShiftFromExtremum($discoverPastTweets): int
+    {
+        if ($discoverPastTweets) {
+            return -1;
+        }
+
+        return 1;
+    }
+
+    /**
+     * @param Exception  $exception
+     * @param            $options
+     *
+     * @throws ProtectedAccountException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     */
+    private function handleUnavailableMemberException(Exception $exception, array $options): void
+    {
+        $message = 'Skipping member with screen name "%s", which has not been found';
+
+        if ($exception instanceof SuspendedAccountException) {
+            $message = 'Skipping member with screen name "%s", which has been suspended';
+        }
+
+        if ($exception instanceof ProtectedAccountException) {
+            $message = 'Skipping member with screen name "%s", which is protected';
+            $this->logger->error(sprintf($message, $options['screen_name']));
+
+            throw $exception;
+        }
+
+        $message = sprintf($message, $options['screen_name']);
+        $this->logger->error($message);
+
+        throw new UnavailableResourceException($message, $exception->getCode(), $exception);
+    }
+
+    /**
+     * @param $options
+     *
+     * @return bool
+     */
+    private function isLookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow($options): bool
+    {
+        if (array_key_exists('max_id', $options) && is_infinite($options['max_id'])) {
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
+     * @return bool
+     */
+    private function isSerializingStatusesForAggregate(): bool
+    {
+        return array_key_exists('aggregate_id', $this->serializationOptions);
+    }
+
+    /**
+     * @param int    $statusesCount
+     * @param string $memberName
+     *
+     * @return int|null
+     */
+    private function logHowManyItemsHaveBeenSaved(int $statusesCount, string $memberName)
+    {
+        if ($statusesCount > 0) {
+            $success = $statusesCount;
+
+            $messageKey = 'logs.info.status_saved';
+            $total      = 'total_status';
+            if ($this->isAboutToCollectLikesFromCriteria($this->serializationOptions)) {
+                $messageKey = 'logs.info.likes_saved';
+                $total      = 'total_likes';
+            }
+
+            $savedTweets = $this->translator->trans(
+                $messageKey,
+                [
+                    'count'  => $statusesCount,
+                    'member' => $memberName,
+                    $total   => $statusesCount,
+                ],
+                'logs'
+            );
+            $this->logger->info($savedTweets);
+
+            return $success;
+        }
+
+        $this->logger->info(sprintf('Nothing new for "%s"', $memberName));
+
+        return null;
+    }
+
+    /**
+     * @param $options
+     */
+    private function logIntentionWithRegardsToAggregate($options): void
+    {
+        if (is_null($this->serializationOptions['aggregate_id'])) {
+            $this->logger->info(sprintf('No aggregate id for "%s"', $options['screen_name']));
+        } else {
+            $this->logger->info(
+                sprintf(
+                    'About to save status for "%s" in aggregate #%d',
+                    $options['screen_name'],
+                    $this->serializationOptions['aggregate_id']
+                )
+            );
+        }
+    }
+
+    /**
+     * @param        $statuses
+     * @param        $shouldDeclareMaximumStatusId
+     * @param string $memberName
+     *
+     * @throws NotFoundMemberException
+     * @throws UnavailableResourceException
+     * @throws OptimisticLockException
+     */
+    private function safelyDeclareExtremum(
+        $statuses,
+        $shouldDeclareMaximumStatusId,
+        string $memberName
+    ): void {
+        try {
+            $this->declareExtremumIdForMember(
+                $statuses,
+                $shouldDeclareMaximumStatusId,
+                $memberName
+            );
+        } catch (NotFoundMemberException $exception) {
+            $this->apiAccessor->ensureMemberHavingNameExists($exception->screenName);
+
+            try {
+                $this->declareExtremumIdForMember(
+                    $statuses,
+                    $shouldDeclareMaximumStatusId,
+                    $memberName
+                );
+            } catch (NotFoundMemberException $exception) {
+                $this->apiAccessor->ensureMemberHavingNameExists($exception->screenName);
+                $this->declareExtremumIdForMember(
+                    $statuses,
+                    $shouldDeclareMaximumStatusId,
+                    $memberName
+                );
+            }
+        }
+    }
+
+    /**
+     * @param array                $statuses
+     * @param Aggregate|null       $aggregate
+     * @param MemberInterface|null $likedBy
+     *
+     * @return CollectionInterface
+     */
+    private function saveStatuses(
+        array $statuses,
+        Aggregate $aggregate = null,
+        MemberInterface $likedBy = null
+    ): CollectionInterface {
+        if ($this->isAboutToCollectLikesFromCriteria($this->serializationOptions)) {
+            return $this->statusRepository->saveLikes(
+                $statuses,
+                $this->apiAccessor->getOAuthToken(),
+                $aggregate,
+                $this->logger,
+                $likedBy,
+                function ($memberName) {
+                    return $this->apiAccessor->ensureMemberHavingNameExists($memberName);
+                }
+            );
+        }
+
+        return $this->publicationPersistence->persistStatusPublications(
+            $statuses,
+            new AccessToken($this->apiAccessor->getOAuthToken()),
+            $aggregate
+        );
+    }
+
+    /**
+     * @param array    $statuses
+     * @param string   $screenName
+     * @param int|null $aggregateId
+     *
+     * @return int|null
+     */
+    private function saveStatusesForScreenName(
+        array $statuses,
+        string $screenName,
+        int $aggregateId = null
+    ): ?int {
+        $success = null;
+
+        if (!is_array($statuses) || count($statuses) === 0) {
+            return $success;
+        }
+
+        $aggregate = null;
+        if ($aggregateId !== null) {
+            /** @var Aggregate $aggregate */
+            $aggregate = $this->aggregateRepository->findOneBy(['id' => $aggregateId]);
+        }
+
+        $this->logger->info(
+            sprintf(
+                'Fetched "%d" statuses for "%s"',
+                count($statuses),
+                $screenName
+            )
+        );
+
+        $likedBy = null;
+        if ($this->isAboutToCollectLikesFromCriteria($this->serializationOptions)) {
+            $likedBy = $this->apiAccessor->ensureMemberHavingNameExists($screenName);
+        }
+
+        $savedStatuses = $this->saveStatuses($statuses, $aggregate, $likedBy);
+
+        return $this->logHowManyItemsHaveBeenSaved(
+            $savedStatuses->count(),
+            $screenName
+        );
+    }
+
+    /**
+     * @param Token $token
+     * @param       $options
+     *
+     * @return array
+     * @throws Exception
+     */
+    private function setUpAccessorWithFirstAvailableToken(Token $token, $options): array
+    {
+        $options[self::MESSAGE_OPTION_TOKEN] = $token->getOauthToken();
+        $this->setupAccessor(
+            [
+                TokenInterface::FIELD_TOKEN  => $options[self::MESSAGE_OPTION_TOKEN],
+                TokenInterface::FIELD_SECRET => $token->getOauthTokenSecret()
+            ]
+        );
+
+        return $options;
+    }
+
+    /**
+     * @param string $memberName
+     *
+     * @return bool
+     * @throws NotFoundMemberException
+     * @throws NoResultException
+     * @throws NonUniqueResultException
+     * @throws OptimisticLockException
+     */
+    private function shouldLookUpFutureItems(string $memberName): bool
+    {
+        if ($this->isAboutToCollectLikesFromCriteria($this->serializationOptions)) {
+            return $this->likedStatusRepository->countHowManyLikesFor($memberName)
+                > self::MAX_AVAILABLE_TWEETS_PER_USER;
+        }
+
+        return $this->statusRepository->countHowManyStatusesFor($memberName)
+            > self::MAX_AVAILABLE_TWEETS_PER_USER;
+    }
+
+    /**
      * @param $options
      * @param $greedy
      * @param $discoverPastTweets
@@ -1672,11 +1737,14 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             $options,
             $this->serializationOptions['aggregate_id']
         );
-        $success = true;
+        $success                    = true;
 
-        if ($discoverPastTweets || (
+        if (
+            $discoverPastTweets
+            || (
                 !is_null($lastSerializationBatchSize) && $lastSerializationBatchSize == self::MAX_BATCH_SIZE
-            )) {
+            )
+        ) {
             // When some of the last batch of statuses have been serialized for the first time,
             // and we should discover statuses in the past,
             // keep retrieving statuses in the past
@@ -1685,7 +1753,7 @@ class UserStatus implements LikedStatusCollectionAwareInterface
             $discoverPastTweets = !is_null($lastSerializationBatchSize) && $discoverPastTweets;
             if ($greedy) {
                 $options['aggregate_id'] = $this->serializationOptions['aggregate_id'];
-                $options['before'] = $this->serializationOptions['before'];
+                $options['before']       = $this->serializationOptions['before'];
 
                 $success = $this->serialize($options, $greedy, $discoverPastTweets);
 
@@ -1723,20 +1791,16 @@ class UserStatus implements LikedStatusCollectionAwareInterface
         return $success;
     }
 
-    /**
-     * @param Token $token
-     * @param       $options
-     * @return array
-     * @throws Exception
-     */
-    private function setUpAccessorWithFirstAvailableToken(Token $token, $options): array
+    private function unlockAggregate(): void
     {
-        $options[self::MESSAGE_OPTION_TOKEN] = $token->getOauthToken();
-        $this->setupAccessor([
-            TokenInterface::FIELD_TOKEN => $options[self::MESSAGE_OPTION_TOKEN],
-            TokenInterface::FIELD_SECRET => $token->getOauthTokenSecret()
-        ]);
-
-        return $options;
+        if ($this->isSerializingStatusesForAggregate()) {
+            $aggregate = $this->aggregateRepository->findOneBy(
+                ['id' => $this->serializationOptions['aggregate_id']]
+            );
+            if ($aggregate instanceof Aggregate) {
+                $this->aggregateRepository->unlockAggregate($aggregate);
+                $this->logger->info(sprintf('Unlocked aggregate #%d', $aggregate->getId()));
+            }
+        }
     }
 }

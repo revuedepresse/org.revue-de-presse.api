@@ -572,7 +572,7 @@ class Member extends MemberModel
     /**
      * @ORM\Column(name="url", type="text", nullable=true)
      */
-    public ?string $url;
+    public ?string $url = null;
 
     /**
      * @return string

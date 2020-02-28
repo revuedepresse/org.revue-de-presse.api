@@ -184,7 +184,7 @@ class StatusPersistence implements StatusPersistenceInterface
      *
      * @return Status
      */
-    private function unarchiveStatus(
+    public function unarchiveStatus(
         StatusInterface $status,
         EntityManagerInterface $entityManager
     ): StatusInterface {

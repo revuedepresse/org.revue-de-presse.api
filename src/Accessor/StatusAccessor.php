@@ -153,7 +153,7 @@ class StatusAccessor
 
         return $this->userManager->saveMember(
             $this->userManager->make(
-                $fetchedMember->id,
+                (string) $fetchedMember->id,
                 $memberName,
                 $protected = false,
                 $suspended = false,
@@ -229,10 +229,8 @@ class StatusAccessor
      * @param string          $memberName
      *
      * @return MemberInterface
-     * @throws NonUniqueResultException
+     * @throws ORMException
      * @throws OptimisticLockException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
      */
     private function ensureMemberHasBio(
         MemberInterface $member,
@@ -243,8 +241,8 @@ class StatusAccessor
             $member->hasNotBeenDeclaredAsNotFound()
         ;
 
-        $shouldTryToSaveDescription = is_null($member->getDescription()) && $memberBioIsAvailable;
-        $shouldTryToUrl = is_null($member->getUrl()) && $memberBioIsAvailable;
+        $shouldTryToSaveDescription = $member->getDescription() === null && $memberBioIsAvailable;
+        $shouldTryToUrl = $member->getUrl() === null && $memberBioIsAvailable;
 
         if ($shouldTryToSaveDescription || $shouldTryToUrl) {
             $fetchedMember = $this->accessor->showUser($memberName);
