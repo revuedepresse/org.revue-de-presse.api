@@ -41,4 +41,9 @@ class NullToken implements TokenInterface
     {
         return false;
     }
+
+    public function setFrozenUntil(\DateTimeInterface $frozenUntil): TokenInterface
+    {
+        return $this;
+    }
 }

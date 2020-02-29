@@ -25,7 +25,7 @@ services:
             - [ 'setAggregateRepository',           [ '@repository.publication_list'] ]
             - [ 'setDefaultSecret',                 [ '%weaving_the_web_twitter.oauth_secret.default%'] ]
             - [ 'setDefaultToken',                  [ '%weaving_the_web_twitter.oauth_token.default%'] ]
-            - [ 'setTokenRepository',               [ '@weaving_the_web_api.repository.token'] ]
+            - [ 'setTokenRepository',               [ '@repository.access_token'] ]
             - [ 'setPublicationMessageDispatcher',  [ '@App\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher'] ]
             - [ 'setTranslator',                    [ '@translator'] ]
             - [ 'setEntityManager',                 [ '@doctrine.orm.entity_manager'] ]
@@ -37,12 +37,12 @@ services:
     press_review.fetch_status:
         class:                        "%press_review.publication_message.handler%"
         calls:
-            - [ 'setSerializer',        [ '@App\Twitter\Serializer\UserStatus'] ]
+            - [ 'setCollector',         [ '@App\Infrastructure\Twitter\Collector\PublicationCollector'] ]
             - [ 'setLogger',            [ '@monolog.logger.status'] ]
             - [ 'setUserRepository',    [ '@user_manager'] ]
         properties:
             operationClock:             '@operation.clock'
-            tokenRepository:            '@weaving_the_web_api.repository.token'
+            tokenRepository:            '@repository.access_token'
         tags:
             -
                 name: messenger.message_handler
@@ -51,12 +51,12 @@ services:
     press_review.fetch_likes:
         class:                          "%press_review.publication_message.handler%"
         calls:
-            - [ 'setSerializer',        [ '@App\Twitter\Serializer\UserStatus'] ]
+            - [ 'setCollector',         [ '@App\Infrastructure\Twitter\Collector\PublicationCollector'] ]
             - [ 'setLogger',            [ '@monolog.logger.status'] ]
             - [ 'setUserRepository',    [ '@user_manager'] ]
         properties:
             operationClock:             '@operation.clock'
-            tokenRepository:            '@weaving_the_web_api.repository.token'
+            tokenRepository:            '@repository.access_token'
         tags:
             -
                 name: messenger.message_handler
@@ -89,8 +89,8 @@ services:
     command.add_members_to_aggregate:
         class:                      "%command.add_members_to_aggregate.class%"
         properties:
-            aggregateRepository:                '@weaving_the_web_twitter.repository.aggregate'
-            aggregateSubscriptionRepository:    '@repository.aggregate_subscription'
+            aggregateRepository:                '@weaving_the_web_twitter.repository.publication_list'
+            aggregateSubscriptionRepository:    '@repository.publication_list_subscription'
             accessor:                           '@weaving_the_web_twitter.api_accessor'
             logger:                             '@logger'
             userRepository:                     '@user_manager'
@@ -115,7 +115,7 @@ services:
         class:                                      'App\Aggregate\Command\ImportMemberAggregatesCommand'
         properties:
             accessor:                               '@weaving_the_web_twitter.api_accessor'
-            aggregateSubscriptionRepository:        '@repository.aggregate_subscription'
+            aggregateSubscriptionRepository:        '@repository.publication_list_subscription'
             logger:                                 '@logger'
             memberAggregateSubscriptionRepository:  '@repository.member_aggregate_subscription'
             networkRepository:                      '@repository.network'
@@ -158,7 +158,7 @@ services:
         class:                               'App\Member\Command\SubscribeToMemberTimelinesCommand'
         properties:
             accessor:                        '@weaving_the_web_twitter.api_accessor'
-            aggregateSubscriptionRepository: '@repository.aggregate_subscription'
+            aggregateSubscriptionRepository: '@repository.publication_list_subscription'
             logger:                          '@logger'
         tags:
             - { name: 'console.command' }
@@ -169,10 +169,10 @@ services:
             - [ 'setLogger',            [ '@monolog.logger.status'] ]
             - [ 'setUserRepository',    [ '@user_manager'] ]
         properties:
-            aggregateRepository:    '@weaving_the_web_twitter.repository.aggregate'
+            aggregateRepository:    '@weaving_the_web_twitter.repository.publication_list'
             entityManager:          '@doctrine.orm.entity_manager'
             operationClock:         '@operation.clock'
-            statusAccessor:         '@weaving_the_web.accessor.status'
+            statusAccessor:         '@App\Accessor\StatusAccessor'
             statusRepository:       '@App\Api\Repository\StatusRepository'
 
     weaving_the_web_amqp.consumer.timely_status:
@@ -181,9 +181,9 @@ services:
             - [ 'setLogger',            [ '@monolog.logger.status'] ]
             - [ 'setUserRepository',    [ '@user_manager'] ]
         properties:
-            aggregateRepository:    '@weaving_the_web_twitter.repository.aggregate'
+            aggregateRepository:    '@weaving_the_web_twitter.repository.publication_list'
             entityManager:          '@doctrine.orm.entity_manager'
-            statusAccessor:         '@weaving_the_web.accessor.status'
+            statusAccessor:         '@App\Accessor\StatusAccessor'
             timelyStatusRepository: '@repository.timely_status'
 
     weaving_the_web_amqp.consumer.network:
@@ -196,7 +196,7 @@ services:
         class:                       "%press_review.publication_message.handler%"
         properties:
             operationClock:          '@operation.clock'
-            tokenRepository:         '@weaving_the_web_api.repository.token'
+            tokenRepository:         '@repository.access_token'
         calls:
             - [ 'setLogger',            [ '@monolog.logger.status'] ]
 

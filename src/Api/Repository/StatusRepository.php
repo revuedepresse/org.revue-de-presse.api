@@ -6,12 +6,13 @@ namespace App\Api\Repository;
 use App\Accessor\Exception\NotFoundStatusException;
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\Status;
+use App\Domain\Collection\CollectionStrategyInterface;
 use App\Domain\Status\StatusInterface;
 use App\Domain\Status\TaggedStatus;
 use App\Membership\Entity\MemberInterface;
 use App\StatusCollection\Mapping\MappingAwareInterface;
 use App\Twitter\Exception\NotFoundMemberException;
-use App\Twitter\Serializer\UserStatus;
+use App\Infrastructure\Twitter\Collector\PublicationCollector;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\DBALException;
@@ -115,7 +116,7 @@ class StatusRepository extends ArchivedStatusRepository
             $status = $this->findOneBy(['screenName' => $screenName], ['createdAt' => 'DESC']);
             $decodedStatusDocument = json_decode($status->getApiDocument(), true);
 
-            if ($decodedStatusDocument['user']['statuses_count'] > UserStatus::MAX_AVAILABLE_TWEETS_PER_USER) {
+            if ($decodedStatusDocument['user']['statuses_count'] > CollectionStrategyInterface::MAX_AVAILABLE_TWEETS_PER_USER) {
                 return $decodedStatusDocument['user']['statuses_count'];
             }
 
@@ -246,20 +247,26 @@ class StatusRepository extends ArchivedStatusRepository
     }
 
     /**
-     * @param string         $screenName
-     * @param string         $direction
-     * @param DateTime|null $before
+     * For ascending order finding, the min status id can be found,
+     * whereas
+     * for descending order finding, the max status id can be found
+     *
+     * Both can be found at a specific date
+     *
+     * @param string $screenName
+     * @param string $direction
+     * @param string $before
+     *
      * @return array
      * @throws NonUniqueResultException
-     * @throws OptimisticLockException
-     * @throws NotFoundMemberException
      */
     public function findNextExtremum(
         string $screenName,
-        string $direction = 'asc',
-        DateTime $before = null
+        string $direction = self::FINDING_IN_ASCENDING_ORDER,
+        ?string $before = null
     ): array {
-        $nextExtremum = $this->archivedStatusRepository->findNextExtremum($screenName, $direction, $before);
+        $nextExtremum = $this->archivedStatusRepository
+            ->findNextExtremum($screenName, $direction, $before);
 
         $queryBuilder = $this->createQueryBuilder('s');
         $queryBuilder->select('s.statusId')

@@ -1,10 +1,11 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Status;
 
 interface LikedStatusCollectionAwareInterface
 {
-    const INTENT_TO_FETCH_LIKES = 'intent_to_fetch_likes';
+    public const INTENT_TO_FETCH_LIKES = 'fetch_likes';
 
     /**
      * @param array $options

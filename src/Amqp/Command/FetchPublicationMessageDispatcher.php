@@ -10,10 +10,9 @@ use App\Amqp\Exception\SkippableOperationException;
 use App\Amqp\Exception\UnexpectedOwnershipException;
 use App\Api\Entity\Token;
 use App\Api\Exception\InvalidSerializedTokenException;
-use App\Domain\Collection\PublicationCollectionStrategy;
 use App\Domain\Collection\PublicationStrategyInterface;
 use App\Infrastructure\DependencyInjection\OwnershipAccessorTrait;
-use App\Infrastructure\DependencyInjection\PublicationMessageDispatcherTrait;
+use App\Infrastructure\DependencyInjection\Publication\PublicationMessageDispatcherTrait;
 use App\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Infrastructure\InputConverter\InputToCollectionStrategy;
 use App\Operation\OperationClock;
@@ -40,6 +39,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
     private const OPTION_PRIORITY_TO_AGGREGATES = PublicationStrategyInterface::RULE_PRIORITY_TO_AGGREGATES;
     private const OPTION_LIST                   = PublicationStrategyInterface::RULE_LIST;
     private const OPTION_LISTS                  = PublicationStrategyInterface::RULE_LISTS;
+    private const OPTION_FETCH_LIKES            = PublicationStrategyInterface::RULE_FETCH_LIKES;
 
     private const OPTION_OAUTH_TOKEN  = 'oauth_token';
     private const OPTION_OAUTH_SECRET = 'oauth_secret';
@@ -64,9 +64,9 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
     public SearchMatchingStatusRepository $searchMatchingStatusRepository;
 
     /**
-     * @var PublicationCollectionStrategy
+     * @var PublicationStrategyInterface
      */
-    private PublicationCollectionStrategy $collectionStrategy;
+    private PublicationStrategyInterface $collectionStrategy;
 
     public function configure()
     {
@@ -129,6 +129,11 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
                 'iw',
                 InputOption::VALUE_NONE,
                 'Should ignore whispers (publication from members having not published anything for a month)'
+            )->addOption(
+                self::OPTION_FETCH_LIKES,
+                'fl',
+                InputOption::VALUE_NONE,
+                'Should fetch likes'
             )->setAliases(['pr:d-m-t-f-m-s']);
     }
 

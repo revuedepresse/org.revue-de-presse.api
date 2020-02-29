@@ -5,6 +5,12 @@ namespace App\Infrastructure\Repository\Membership;
 
 use App\Api\Entity\Whisperer;
 
+/**
+ * @method Whisperer|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Whisperer|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Whisperer[]    findAll()
+ * @method Whisperer[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ */
 interface WhispererRepositoryInterface
 {
     public function declareWhisperer(Whisperer $whisperer): Whisperer;
