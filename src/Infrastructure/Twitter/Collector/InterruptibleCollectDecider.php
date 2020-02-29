@@ -11,10 +11,11 @@ use App\Amqp\Exception\SkippableMessageException;
 use App\Api\Entity\Whisperer;
 use App\Domain\Collection\CollectionStrategyInterface;
 use App\Domain\Publication\PublicationListInterface;
-use App\Domain\Status\StatusInterface;
 use App\Infrastructure\Amqp\Message\FetchPublication;
-use App\Infrastructure\DependencyInjection\ApiAccessorTrait;
-use App\Infrastructure\DependencyInjection\ApiLimitModeratorTrait;
+use App\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
+use App\Infrastructure\DependencyInjection\Api\ApiLimitModeratorTrait;
+use App\Infrastructure\DependencyInjection\Api\StatusAccessorTrait;
+use App\Infrastructure\DependencyInjection\Collection\LikedStatusCollectDecider;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\DependencyInjection\Membership\WhispererRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Publication\PublicationListRepositoryTrait;
@@ -24,8 +25,6 @@ use App\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use App\Infrastructure\DependencyInjection\TokenRepositoryTrait;
 use App\Infrastructure\Twitter\Collector\Exception\RateLimitedException;
 use App\Infrastructure\Twitter\Collector\Exception\SkipCollectException;
-use App\Status\LikedStatusCollectionAwareInterface;
-use App\Status\Repository\ExtremumAwareInterface;
 use App\Twitter\Exception\BadAuthenticationDataException;
 use App\Twitter\Exception\InconsistentTokenRepository;
 use App\Twitter\Exception\NotFoundMemberException;
@@ -33,12 +32,10 @@ use App\Twitter\Exception\ProtectedAccountException;
 use App\Twitter\Exception\SuspendedAccountException;
 use App\Twitter\Exception\UnavailableResourceException;
 use DateTime;
-use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Exception;
 use ReflectionException;
-use stdClass;
 use function array_key_exists;
 use function count;
 use function sprintf;
@@ -49,7 +46,9 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
     use ApiAccessorTrait;
     use ApiLimitModeratorTrait;
     use LikedStatusRepositoryTrait;
+    use LikedStatusCollectDecider;
     use PublicationListRepositoryTrait;
+    use StatusAccessorTrait;
     use StatusRepositoryTrait;
     use StatusPersistenceTrait;
     use TokenRepositoryTrait;
@@ -114,7 +113,7 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
             );
 
             throw new SkipCollectException(
-                'Skipped because Twitter sent error message and codes never dealt with so far'
+                'Skipped because Twitter sent error message and code never dealt with so far'
             );
         }
     }
@@ -150,187 +149,6 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
         );
 
         return true;
-    }
-
-    /**
-     * @param array $options
-     * @param bool  $discoverPastTweets
-     *
-     * @return mixed
-     * @throws NonUniqueResultException
-     */
-    public function updateExtremum(
-        array $options,
-        bool $discoverPastTweets = true
-    ) {
-        if ($this->collectionStrategy->dateBeforeWhichStatusAreToBeCollected()) {
-            $discoverPastTweets = true;
-        }
-
-        $options = $this->getExtremumOptions($options, $discoverPastTweets);
-
-        $findingDirection = $this->getExtremumUpdateMethod($discoverPastTweets);
-        $status           = $this->findExtremum($options, $findingDirection);
-
-        $logPrefix = $this->getLogPrefix();
-
-        if (array_key_exists('statusId', $status) && (count($status) === 1)) {
-            $option = $this->getExtremumOption($discoverPastTweets);
-            $shift  = $this->getShiftFromExtremum($discoverPastTweets);
-
-            if ($status['statusId'] === '-INF' && $option === 'max_id') {
-                $status['statusId'] = 0;
-            }
-
-            $options[$option] = (int) $status['statusId'] + $shift;
-
-            $this->logger->info(
-                sprintf(
-                    'Extremum (%s%s) retrieved for "%s": #%s',
-                    $logPrefix,
-                    $option,
-                    $options[FetchPublication::SCREEN_NAME],
-                    $options[$option]
-                )
-            );
-
-            if ($options[$option] < 0 && $option === 'max_id') {
-                unset($options[$option]);
-            }
-
-            return $options;
-        }
-
-        $this->logger->info(
-            sprintf(
-                '[No %s retrieved for "%s"] ',
-                $logPrefix . 'extremum',
-                $options[FetchPublication::SCREEN_NAME]
-            )
-        );
-
-        return $options;
-    }
-
-    /**
-     * @param $discoverPastTweets
-     *
-     * @return int
-     */
-    private function getShiftFromExtremum($discoverPastTweets): int
-    {
-        if ($discoverPastTweets) {
-            return -1;
-        }
-
-        return 1;
-    }
-
-    /**
-     * @param $options
-     * @param $findingDirection
-     *
-     * @return array|mixed
-     * @throws NonUniqueResultException
-     */
-    private function findExtremum(
-        array $options,
-        $findingDirection
-    )
-    {
-        if ($this->collectionStrategy->fetchLikes()) {
-            return $this->findLikeExtremum($options, $findingDirection);
-        }
-
-        if (!$this->collectionStrategy->dateBeforeWhichStatusAreToBeCollected()) {
-            return $this->statusRepository->findLocalMaximum(
-                $options[FetchPublication::SCREEN_NAME],
-                $this->collectionStrategy->dateBeforeWhichStatusAreToBeCollected()
-            );
-        }
-
-        return $this->statusRepository->findNextExtremum(
-            $options[FetchPublication::SCREEN_NAME],
-            $findingDirection
-        );
-    }
-
-    /**
-     * @param $options
-     * @param $findingDirection
-     *
-     * @return array|mixed
-     */
-    private function findLikeExtremum($options, $findingDirection)
-    {
-        if (!$this->collectionStrategy->dateBeforeWhichStatusAreToBeCollected()) {
-            return $this->likedStatusRepository->findLocalMaximum(
-                $options[FetchPublication::SCREEN_NAME],
-                $this->collectionStrategy->dateBeforeWhichStatusAreToBeCollected()
-            );
-        }
-
-        return $this->likedStatusRepository->findNextExtremum
-        (
-            $options[FetchPublication::SCREEN_NAME],
-            $findingDirection
-        );
-    }
-
-    /**
-     * @param $discoverPastTweets
-     *
-     * @return string
-     */
-    private function getExtremumUpdateMethod($discoverPastTweets): string
-    {
-        if ($discoverPastTweets) {
-            // next maximum
-            return ExtremumAwareInterface::FINDING_IN_ASCENDING_ORDER;
-        }
-
-        // next minimum
-        return ExtremumAwareInterface::FINDING_IN_DESCENDING_ORDER;
-    }
-
-    /**
-     * @param $discoverPastTweets
-     *
-     * @return string
-     */
-    private function getExtremumOption($discoverPastTweets): string
-    {
-        if ($discoverPastTweets) {
-            return 'max_id';
-        }
-
-        return 'since_id';
-    }
-
-    /**
-     * @param $options
-     * @param $discoverPastTweets
-     *
-     * @return array
-     */
-    private function getExtremumOptions($options, $discoverPastTweets): array
-    {
-        if (!$discoverPastTweets && array_key_exists('max_id', $options)) {
-            unset($options['max_id']);
-        }
-
-        return $options;
-    }
-    /**
-     * @return string
-     */
-    private function getLogPrefix(): string
-    {
-        if (!$this->collectionStrategy->dateBeforeWhichStatusAreToBeCollected()) {
-            return '';
-        }
-
-        return 'local ';
     }
 
     /**
@@ -394,7 +212,11 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
             return $exception->shouldSkipMessageConsumption;
         }
 
-        $statuses = $this->fetchLatestStatuses($options);
+        $statuses = $this->statusAccessor->fetchLatestStatuses(
+            $this->collectionStrategy,
+            $options
+        );
+
         if ($whisperer instanceof Whisperer && count($statuses) > 0) {
             try {
                 $this->afterCountingCollectedStatuses(
@@ -408,66 +230,13 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
         }
 
         if ($this->collectionStrategy->fetchLikes()) {
-            $atLeastOneStatusFetched = count($statuses) > 0;
-
-            $hasLikedStatusBeenSavedBefore = $this->hasOneLikedStatusAtLeastBeenSavedBefore(
-                $options[FetchPublication::SCREEN_NAME],
-                $atLeastOneStatusFetched,
-                $publicationList,
-                $statuses[0]
-            );
-
-            if ($atLeastOneStatusFetched && !$hasLikedStatusBeenSavedBefore) {
-                // At this point, it should not skip further consumption
-                // for matching liked statuses
-                $this->statusPersistence->saveStatusForScreenName(
-                    $statuses,
-                    $options[FetchPublication::SCREEN_NAME],
-                    $this->collectionStrategy
-                );
-
-                $this->statusRepository->declareMinimumLikedStatusId(
-                    $statuses[count($statuses) - 1],
-                    $options[FetchPublication::SCREEN_NAME]
-                );
-            }
-
-            if (!$atLeastOneStatusFetched || $hasLikedStatusBeenSavedBefore) {
-                $statuses = $this->fetchLatestStatuses(
+            return $this->likedStatusCollectDecider
+                ->shouldSkipLikedStatusCollect(
                     $options,
-                    $discoverPastTweets = false
+                    $statuses,
+                    $this->collectionStrategy,
+                    $publicationList
                 );
-                if (count($statuses) > 0) {
-                    if (
-                    $this->statusRepository->hasBeenSavedBefore(
-                        [$statuses[0]]
-                    )
-                    ) {
-                        return true;
-                    }
-
-                    $this->collectionStrategy->optInToCollectStatusForPublicationListOfId(
-                        $options[FetchPublication::AGGREGATE_ID]
-                    );
-
-                    // At this point, it should not skip further consumption
-                    // for matching liked statuses
-                    $this->statusPersistence->saveStatusForScreenName(
-                        $statuses,
-                        $options[FetchPublication::SCREEN_NAME],
-                        $this->collectionStrategy
-                    );
-
-                    $this->statusRepository->declareMaximumLikedStatusId(
-                        $statuses[0],
-                        $options[FetchPublication::SCREEN_NAME]
-                    );
-                }
-
-                return true;
-            }
-
-            return false;
         }
 
         if (!$this->collectionStrategy->fetchLikes()) {
@@ -480,97 +249,12 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
             }
         }
 
-        if ($whisperer instanceof Whisperer) {
-            $this->afterUpdatingLastPublicationDate(
-                $options,
-                $whisperer
-            );
-        }
+        $this->afterUpdatingLastPublicationDate(
+            $options,
+            $whisperer
+        );
 
         return true;
-    }
-
-    /**
-     * @param array $options
-     * @param bool                        $discoverPastTweets
-     *
-     * @return array
-     * @throws ApiRateLimitingException
-     * @throws BadAuthenticationDataException
-     * @throws InconsistentTokenRepository
-     * @throws NonUniqueResultException
-     * @throws NotFoundMemberException
-     * @throws NotFoundStatusException
-     * @throws OptimisticLockException
-     * @throws ProtectedAccountException
-     * @throws ReadOnlyApplicationException
-     * @throws ReflectionException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws UnexpectedApiResponseException
-     */
-    protected function fetchLatestStatuses(
-        $options,
-        bool $discoverPastTweets = true
-    ): array {
-        $options[LikedStatusCollectionAwareInterface::INTENT_TO_FETCH_LIKES] = $this->collectionStrategy->fetchLikes();
-        $options = $this->removeCollectOptions($options);
-        $options = $this->updateExtremum($options, $discoverPastTweets);
-
-        if (
-            array_key_exists('max_id', $options)
-            && $this->collectionStrategy->dateBeforeWhichStatusAreToBeCollected() // Looking into the past
-        ) {
-            unset($options['max_id']);
-        }
-
-        $statuses = $this->apiAccessor->fetchStatuses($options);
-
-        $discoverMoreRecentStatuses = false;
-        if (
-            count($statuses) > 0
-            && $this->statusRepository->findOneBy(
-                ['statusId' => $statuses[0]->id]
-            ) instanceof StatusInterface
-        ) {
-            $discoverMoreRecentStatuses = true;
-        }
-
-        if (
-            $discoverPastTweets
-            && (
-                $discoverMoreRecentStatuses
-                || (count($statuses) === 0))
-        ) {
-            if (array_key_exists('max_id', $options)) {
-                unset($options['max_id']);
-            }
-
-            $statuses = $this->fetchLatestStatuses(
-                $options,
-                $discoverPastTweets = false
-            );
-        }
-
-        return $statuses;
-    }
-
-    /**
-     * @param array $options
-     *
-     * @return mixed
-     */
-    private function removeCollectOptions(
-        $options
-    ) {
-        if ($this->collectionStrategy->dateBeforeWhichStatusAreToBeCollected()) {
-            unset($options[FetchPublication::BEFORE]);
-        }
-        if (array_key_exists(FetchPublication::AGGREGATE_ID, $options)) {
-            unset($options[FetchPublication::AGGREGATE_ID]);
-        }
-
-        return $options;
     }
 
     /**
@@ -643,43 +327,17 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
     }
 
     /**
-     * @param string                        $screenNameOfMemberWhoLikedStatus
-     * @param bool                          $atLeastOneStatusFetched
-     * @param PublicationListInterface|null $publicationList
-     * @param stdClass                     $firstStatus
-     *
-     * @return bool
-     */
-    private function hasOneLikedStatusAtLeastBeenSavedBefore(
-        string $screenNameOfMemberWhoLikedStatus,
-        bool $atLeastOneStatusFetched,
-        ?PublicationListInterface $publicationList,
-        stdClass $firstStatus
-    ): bool {
-        if (!$atLeastOneStatusFetched) {
-            return false;
-        }
-
-        if (!($publicationList instanceof PublicationListInterface)) {
-            return false;
-        }
-
-        return $this->likedStatusRepository->hasBeenSavedBefore(
-            $firstStatus,
-            $publicationList->getName(),
-            $screenNameOfMemberWhoLikedStatus,
-            $firstStatus->user->screen_name
-        );
-    }
-
-    /**
-     * @param array $options
-     * @param Whisperer                   $whisperer
+     * @param array          $options
+     * @param Whisperer|null $whisperer
      */
     private function afterUpdatingLastPublicationDate(
         $options,
-        Whisperer $whisperer
+        ?Whisperer $whisperer
     ): void {
+        if (!($whisperer instanceof Whisperer)) {
+            return;
+        }
+
         if ($this->collectionStrategy->fetchLikes()) {
             return;
         }

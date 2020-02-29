@@ -13,9 +13,4 @@ interface InterruptibleCollectDeciderInterface
     );
 
     public function delayingConsumption(): bool;
-
-    public function updateExtremum(
-        array $options,
-        bool $discoverPastTweets = true
-    );
 }

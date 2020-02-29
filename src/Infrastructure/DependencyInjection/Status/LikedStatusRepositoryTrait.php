@@ -9,7 +9,7 @@ trait LikedStatusRepositoryTrait
 {
     private LikedStatusRepositoryInterface $likedStatusRepository;
 
-    public function setLikedStatusRepositoryTrait(
+    public function setLikedStatusRepository(
         LikedStatusRepositoryInterface $likedStatusRepository
     ): self
     {

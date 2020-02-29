@@ -12,7 +12,7 @@ use App\Domain\Collection\CollectionStrategyInterface;
 use App\Domain\Status\StatusCollection;
 use App\Domain\Status\StatusInterface;
 use App\Domain\Status\TaggedStatus;
-use App\Infrastructure\DependencyInjection\ApiAccessorTrait;
+use App\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\DependencyInjection\Publication\PublicationListRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;

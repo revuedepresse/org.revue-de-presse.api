@@ -172,7 +172,7 @@ services:
             aggregateRepository:    '@weaving_the_web_twitter.repository.publication_list'
             entityManager:          '@doctrine.orm.entity_manager'
             operationClock:         '@operation.clock'
-            statusAccessor:         '@weaving_the_web.accessor.status'
+            statusAccessor:         '@App\Accessor\StatusAccessor'
             statusRepository:       '@App\Api\Repository\StatusRepository'
 
     weaving_the_web_amqp.consumer.timely_status:
@@ -183,7 +183,7 @@ services:
         properties:
             aggregateRepository:    '@weaving_the_web_twitter.repository.publication_list'
             entityManager:          '@doctrine.orm.entity_manager'
-            statusAccessor:         '@weaving_the_web.accessor.status'
+            statusAccessor:         '@App\Accessor\StatusAccessor'
             timelyStatusRepository: '@repository.timely_status'
 
     weaving_the_web_amqp.consumer.network:

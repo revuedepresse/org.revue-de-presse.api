@@ -157,29 +157,33 @@ services:
             environment:          '%kernel.environment%'
             httpClient:           '%weaving_the_web_twitter.oauth_client.class%'
             twitterApiLogger:     '@monolog.logger.twitter_api'
-            statusAccessor:       '@weaving_the_web.accessor.status'
+            statusAccessor:       '@App\Accessor\StatusAccessor'
         calls:
-            - [ 'setMemberRepository', [ '@user_manager' ] ]
             - [ 'setClientClass', [ '\Goutte\Client' ] ]
             - [ 'setConsumerKey', [ '%weaving_the_web_twitter.consumer_key%' ] ]
             - [ 'setConsumerSecret', [ '%weaving_the_web_twitter.consumer_secret%' ] ]
             - [ 'setHttpClientClass', [ '%weaving_the_web_twitter.http_client.class%' ] ]
+            - [ 'setMemberRepository', [ '@user_manager' ] ]
             - [ 'setModerator', [ '@weaving_the_web_twitter.moderator.api_limit' ] ]
             - [ 'setTokenRepository', [ '@weaving_the_web_twitter.repository.token' ] ]
+            - [ 'setTranslator', [ '@translator' ] ]
             - [ 'setUserSecret', [ '%weaving_the_web_twitter.oauth_secret.default%' ] ]
             - [ 'setUserToken', [ '%weaving_the_web_twitter.oauth_token.default%' ] ]
-            - [ 'setTranslator', [ '@translator' ] ]
 
-    weaving_the_web.accessor.status:
+    App\Accessor\StatusAccessor:
         class: 'App\Accessor\StatusAccessor'
         properties:
-            accessor:                   '@weaving_the_web_twitter.api_accessor'
             archivedStatusRepository:   '@App\Api\Repository\ArchivedStatusRepository'
             entityManager:              '@doctrine.orm.entity_manager'
-            logger:                     '@monolog.logger.status'
             notFoundStatusRepository:   '@repository.not_found_status'
-            statusRepository:           '@App\Api\Repository\StatusRepository'
-            userManager:                '@user_manager'
+        calls:
+            - [ 'setApiAccessor',            [ '@weaving_the_web_twitter.api_accessor' ] ]
+            - [ 'setLogger',                 [ '@logger' ] ]
+            - [ 'setLikedStatusRepository',  [ '@repository.liked_status' ] ]
+            - [ 'setMemberRepository',       [ '@App\Infrastructure\Repository\Membership\MemberRepository' ] ]
+            - [ 'setPublicationPersistence', [ '@App\Infrastructure\Status\Persistence\PublicationPersistence' ] ]
+            - [ 'setStatusRepository',       [ '@App\Api\Repository\StatusRepository' ] ]
+        public: true
 
     weaving_the_web_twitter.repository.publication_list:
         class: '%weaving_the_web_twitter.repository.publication_list.class%'
@@ -215,11 +219,12 @@ services:
             - [ 'setApiAccessor',                           [ '@weaving_the_web_twitter.api_accessor' ] ]
             - [ 'setInterruptibleCollectDeciderInterface',  [ '@App\Infrastructure\Twitter\Collector\InterruptibleCollectDecider' ] ]
             - [ 'setLogger',                                [ '@monolog.logger.status' ] ]
-            - [ 'setLikedStatusRepositoryTrait',            [ '@repository.liked_status' ] ]
+            - [ 'setLikedStatusRepository',                 [ '@repository.liked_status' ] ]
             - [ 'setModerator',                             [ '@weaving_the_web_twitter.moderator.api_limit' ] ]
             - [ 'setPublicationListRepository',             [ '@weaving_the_web_twitter.repository.publication_list' ] ]
             - [ 'setPublicationPersistence',                [ '@App\Infrastructure\Status\Persistence\PublicationPersistence' ] ]
             - [ 'setStatusLogger',                          [ '@App\Infrastructure\Log\StatusLogger' ] ]
+            - [ 'setStatusAccessor',                        [ '@App\Accessor\StatusAccessor' ] ]
             - [ 'setStatusRepository',                      [ '@App\Api\Repository\StatusRepository' ] ]
             - [ 'setStatusPersistence',                     [ '@App\Infrastructure\Status\Persistence\StatusPersistence' ] ]
             - [ 'setTokenRepository',                       [ '@weaving_the_web_twitter.repository.token' ] ]

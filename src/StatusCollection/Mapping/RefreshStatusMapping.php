@@ -6,7 +6,7 @@ namespace App\StatusCollection\Mapping;
 use App\Accessor\Exception\NotFoundStatusException;
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\Status;
-use App\Infrastructure\DependencyInjection\ApiAccessorTrait;
+use App\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
 use App\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;

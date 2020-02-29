@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Infrastructure\DependencyInjection;
+namespace App\Infrastructure\DependencyInjection\Api;
 
 use App\Infrastructure\Api\Throttling\ApiLimitModeratorInterface;
 

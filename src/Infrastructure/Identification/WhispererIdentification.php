@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Identification;
 
 use App\Api\Entity\Whisperer;
-use App\Infrastructure\DependencyInjection\ApiAccessorTrait;
+use App\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\DependencyInjection\Membership\WhispererRepositoryTrait;
 use App\Infrastructure\DependencyInjection\TranslatorTrait;

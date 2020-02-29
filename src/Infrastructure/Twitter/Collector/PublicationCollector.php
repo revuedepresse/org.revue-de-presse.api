@@ -13,11 +13,11 @@ use App\Api\Entity\TokenInterface;
 use App\Domain\Collection\CollectionStrategy;
 use App\Domain\Collection\CollectionStrategyInterface;
 use App\Domain\Publication\PublicationListInterface;
-use App\Domain\Status\StatusInterface;
 use App\Infrastructure\Amqp\Message\FetchPublication;
+use App\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
+use App\Infrastructure\DependencyInjection\Api\ApiLimitModeratorTrait;
+use App\Infrastructure\DependencyInjection\Api\StatusAccessorTrait;
 use App\Infrastructure\DependencyInjection\Collection\InterruptibleCollectDeciderTrait;
-use App\Infrastructure\DependencyInjection\ApiAccessorTrait;
-use App\Infrastructure\DependencyInjection\ApiLimitModeratorTrait;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\DependencyInjection\Membership\WhispererIdentificationTrait;
 use App\Infrastructure\DependencyInjection\Membership\WhispererRepositoryTrait;
@@ -33,7 +33,6 @@ use App\Infrastructure\Twitter\Collector\Exception\RateLimitedException;
 use App\Infrastructure\Twitter\Collector\Exception\SkipCollectException;
 use App\Membership\Entity\MemberInterface;
 use App\Status\LikedStatusCollectionAwareInterface;
-use App\Status\Repository\ExtremumAwareInterface;
 use App\Twitter\Exception\BadAuthenticationDataException;
 use App\Twitter\Exception\InconsistentTokenRepository;
 use App\Twitter\Exception\NotFoundMemberException;
@@ -62,6 +61,7 @@ class PublicationCollector implements PublicationCollectorInterface
     use StatusLoggerTrait;
     use StatusPersistenceTrait;
     use LikedStatusRepositoryTrait;
+    use StatusAccessorTrait;
     use StatusRepositoryTrait;
     use TokenRepositoryTrait;
     use TranslatorTrait;
@@ -150,11 +150,11 @@ class PublicationCollector implements PublicationCollectorInterface
             $discoverPastTweets = false;
         }
 
-        $options = $this->interruptibleCollectDecider
-            ->updateExtremum(
-                $options,
-                $discoverPastTweets
-            );
+        $options = $this->statusAccessor->updateExtremum(
+            $this->collectionStrategy,
+            $options,
+            $discoverPastTweets
+        );
 
         try {
             $success = $this->tryCollectingFurther($options, $greedy, $discoverPastTweets);
@@ -940,10 +940,10 @@ class PublicationCollector implements PublicationCollectorInterface
                 ) {
                     unset($options[FetchPublication::AGGREGATE_ID]);
 
-                    $options = $this->interruptibleCollectDecider
-                        ->updateExtremum(
-                            $options,
-                            $discoverPastTweets = false
+                    $options = $this->statusAccessor->updateExtremum(
+                        $this->collectionStrategy,
+                        $options,
+                        $discoverPastTweets = false
                     );
                     $options = $this->apiAccessor->guessMaxId(
                         $options,

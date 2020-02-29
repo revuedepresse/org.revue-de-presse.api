@@ -19,6 +19,8 @@
             <group>api_access</group>
             <group>command</group>
             <group>conversation</group>
+            <group>interruptible_collect_decider</group>
+            <group>status_accessor</group>
             <group>membership</group>
             <group>ownership</group>
             <group>persistence</group>
@@ -45,6 +47,7 @@
             <directory suffix=".php">src/Infrastructure/Twitter/Api/Accessor/MemberProfileAccessor.php</directory>
             <directory suffix=".php">src/Infrastructure/Twitter/Api/Accessor/OwnershipAccessor.php</directory>
             <directory suffix=".php">src/Infrastructure/Twitter/Api/Normalizer/Normalizer.php</directory>
+            <directory suffix=".php">src/Infrastructure/Twitter/Collector/InterruptibleCollectDecider.php</directory>
         </whitelist>
     </filter>
 </phpunit>

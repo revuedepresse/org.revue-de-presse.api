@@ -247,6 +247,12 @@ class StatusRepository extends ArchivedStatusRepository
     }
 
     /**
+     * For ascending order finding, the min status id can be found,
+     * whereas
+     * for descending order finding, the max status id can be found
+     *
+     * Both can be found at a specific date
+     *
      * @param string $screenName
      * @param string $direction
      * @param string $before
@@ -259,7 +265,8 @@ class StatusRepository extends ArchivedStatusRepository
         string $direction = self::FINDING_IN_ASCENDING_ORDER,
         ?string $before = null
     ): array {
-        $nextExtremum = $this->archivedStatusRepository->findNextExtremum($screenName, $direction, $before);
+        $nextExtremum = $this->archivedStatusRepository
+            ->findNextExtremum($screenName, $direction, $before);
 
         $queryBuilder = $this->createQueryBuilder('s');
         $queryBuilder->select('s.statusId')
