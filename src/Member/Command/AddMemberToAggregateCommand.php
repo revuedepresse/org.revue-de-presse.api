@@ -27,7 +27,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use App\Api\Repository\PublicationListRepository;
 use App\Twitter\Api\Accessor;
-use App\Member\Repository\MemberRepository;
+use App\Infrastructure\Repository\Membership\MemberRepository;
 
 class AddMemberToAggregateCommand extends Command implements CommandReturnCodeAwareInterface
 {
