@@ -11,7 +11,7 @@ use App\Domain\Collection\PublicationStrategyInterface;
 use App\Domain\Resource\OwnershipCollection;
 use App\Domain\Resource\PublicationList;
 use App\Infrastructure\Amqp\ResourceProcessor\PublicationListProcessorInterface;
-use App\Infrastructure\DependencyInjection\PublicationListProcessorTrait;
+use App\Infrastructure\DependencyInjection\Publication\PublicationListProcessorTrait;
 use App\Infrastructure\DependencyInjection\TokenChangeTrait;
 use App\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Twitter\Api\ApiAccessorInterface;

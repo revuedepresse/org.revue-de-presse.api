@@ -22,7 +22,7 @@ services:
             router:                         '@router'
             redisCache:                     '@app.cache.redis'
             timelyStatusRepository:         '@repository.timely_status'
-            tokenRepository:                '@weaving_the_web_api.repository.token'
+            tokenRepository:                '@repository.access_token'
 
     controller.logged_in_member:
         public: true

@@ -7,12 +7,8 @@ use App\Api\Entity\Aggregate;
 use App\Api\Entity\TokenInterface;
 use App\Membership\Entity\MemberInterface;
 
-class FetchMemberStatuses
+class FetchMemberStatuses implements FetchPublication
 {
-    public const AGGREGATE_ID = 'aggregate_id';
-    public const SCREEN_NAME = 'screen_name';
-    public const BEFORE = 'before';
-
     /**
      * @var string
      */
@@ -31,24 +27,32 @@ class FetchMemberStatuses
     /**
      * @var bool
      */
-    private ?bool $before;
+    private ?bool $dateBeforeWhichStatusAreCollected;
+
+    /**
+     * @var bool
+     */
+    private bool $fetchLikes;
 
     /**
      * @param string         $screenName
      * @param int            $aggregateId
      * @param TokenInterface $token
-     * @param bool|null      $before
+     * @param bool|null      $fetchLikes
+     * @param string|null    $dateBeforeWhichStatusAreCollected
      */
     public function __construct(
         string $screenName,
         int $aggregateId,
         TokenInterface $token,
-        ?bool $before = null
+        bool $fetchLikes = null,
+        ?string $dateBeforeWhichStatusAreCollected = null
     ) {
         $this->screenName = $screenName;
         $this->aggregateId = $aggregateId;
-        $this->before = $before;
+        $this->dateBeforeWhichStatusAreCollected = $dateBeforeWhichStatusAreCollected;
         $this->token = $token;
+        $this->fetchLikes = (bool) $fetchLikes;
     }
 
     /**
@@ -68,11 +72,11 @@ class FetchMemberStatuses
     }
 
     /**
-     * @return bool|null
+     * @return string|null
      */
-    public function before(): ?bool
+    public function dateBeforeWhichStatusAreCollected(): ?string
     {
-        return $this->before;
+        return $this->dateBeforeWhichStatusAreCollected;
     }
 
     /**
@@ -83,11 +87,17 @@ class FetchMemberStatuses
         return $this->token;
     }
 
+    public function shouldFetchLikes(): bool
+    {
+        return $this->fetchLikes;
+    }
+
     /**
      * @param Aggregate       $aggregate
      * @param TokenInterface  $token
      * @param MemberInterface $member
-     * @param bool|null       $collectPublicationsPrecedingThoseAlreadyCollected
+     * @param bool|null       $fetchLikes
+     * @param string|null     $dateBeforeWhichStatusAreCollected
      *
      * @return FetchMemberStatuses
      */
@@ -95,13 +105,15 @@ class FetchMemberStatuses
         Aggregate $aggregate,
         TokenInterface $token,
         MemberInterface $member,
-        ?bool $collectPublicationsPrecedingThoseAlreadyCollected
+        bool $fetchLikes,
+        ?string $dateBeforeWhichStatusAreCollected
     ): FetchMemberStatuses {
         return new FetchMemberStatuses(
             $member->getTwitterUsername(),
             $aggregate->getId(),
             $token,
-            $collectPublicationsPrecedingThoseAlreadyCollected
+            $fetchLikes,
+            $dateBeforeWhichStatusAreCollected
         );
     }
 }

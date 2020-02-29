@@ -1,16 +1,20 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Status\Repository;
 
+use App\Api\Entity\Aggregate;
+use App\Domain\Status\LikedStatusRepositoryInterface;
+use App\Domain\Status\StatusInterface;
+use App\Infrastructure\Repository\Membership\MemberRepositoryInterface;
 use App\Membership\Entity\MemberInterface;
 use App\Status\Entity\LikedStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\EntityRepository;
+use Doctrine\DBAL\DBALException;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use App\Api\Entity\Aggregate;
-use App\Domain\Status\StatusInterface;
-use App\Member\Repository\MemberRepository;
-use Laminas\Service;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 
 /**
  * @method LikedStatus|null find($id, $lockMode = null, $lockVersion = null)
@@ -18,37 +22,19 @@ use Laminas\Service;
  * @method LikedStatus[]    findAll()
  * @method LikedStatus[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class LikedStatusRepository extends ServiceEntityRepository implements ExtremumAwareInterface
+class LikedStatusRepository extends ServiceEntityRepository implements ExtremumAwareInterface, LikedStatusRepositoryInterface
 {
     /**
-     * @var MemberRepository
+     * @var MemberRepositoryInterface
      */
-    public $memberRepository;
-
-    /**
-     * @param string $memberName
-     * @return int|mixed
-     * @throws NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     */
-    public function countHowManyLikesFor(string $memberName)
-    {
-        $member = $this->memberRepository->findOneBy(['twitter_username' => $memberName]);
-        if ($member instanceof MemberInterface && $member->totalLikes !== 0) {
-            return $member->totalLikes;
-        }
-
-        $totalLikes = $this->countCollectedLikes($memberName, INF);
-        $this->memberRepository->declareTotalLikesOfMemberWithName($totalLikes, $memberName);
-
-        return $totalLikes;
-    }
+    public MemberRepositoryInterface $memberRepository;
 
     /**
      * @param string $memberName
      * @param int    $maxId
+     *
      * @return array|int
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function countCollectedLikes(string $memberName, $maxId)
     {
@@ -56,8 +42,8 @@ class LikedStatusRepository extends ServiceEntityRepository implements ExtremumA
 
         $archiveStatusQueryBuilder = $this->createQueryBuilder('l');
         $archiveStatusQueryBuilder->select('COUNT(DISTINCT archivedStatus.hash) as count_')
-            ->join('l.archivedStatus', 'archivedStatus')
-            ->andWhere('l.likedByMemberName = :memberName');
+                                  ->join('l.archivedStatus', 'archivedStatus')
+                                  ->andWhere('l.likedByMemberName = :memberName');
         $archiveStatusQueryBuilder->setParameter('memberName', $memberName);
 
         if ($maxId < INF) {
@@ -75,85 +61,89 @@ class LikedStatusRepository extends ServiceEntityRepository implements ExtremumA
     }
 
     /**
-     * @param $memberName
-     * @param $maxId
-     * @return int
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @param string $memberName
+     *
+     * @return int|mixed
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
-    private function countLikedStatuses(string $memberName, $maxId): int
+    public function countHowManyLikesFor(string $memberName)
     {
-        return $this->countLikes($memberName, $maxId, 'status') +
-            $this->countLikes($memberName, $maxId, 'archivedStatus');
+        $member = $this->memberRepository->findOneBy(['twitter_username' => $memberName]);
+        if ($member instanceof MemberInterface && $member->totalLikes !== 0) {
+            return $member->totalLikes;
+        }
+
+        $totalLikes = $this->countCollectedLikes($memberName, INF);
+        $this->memberRepository->declareTotalLikesOfMemberWithName($totalLikes, $memberName);
+
+        return $totalLikes;
     }
 
     /**
-     * @param $memberName
-     * @param $maxId
-     * @return int
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @param MemberInterface $member
+     * @param StatusInterface $status
+     * @param MemberInterface $likedBy
+     * @param Aggregate       $aggregate
+     *
+     * @return LikedStatus
      */
-    private function countLikes(string $memberName, $maxId, string $joinColumn): int
-    {
-        $statusQueryBuilder = $this->createQueryBuilder('l');
-
-        $statusQueryBuilder->select('COUNT(DISTINCT status.hash) as count_')
-            ->join('l.'.$joinColumn, 'status')
-            ->andWhere('l.likedByMemberName = :memberName');
-        $statusQueryBuilder->setParameter('memberName', $memberName);
-
-        if ($maxId < INF) {
-            $statusQueryBuilder->andWhere('(status.statusId + 0) <= :maxId');
-            $statusQueryBuilder->setParameter('maxId', $maxId);
+    public function ensureMemberStatusHasBeenMarkedAsLikedBy(
+        MemberInterface $member,
+        StatusInterface $status,
+        MemberInterface $likedBy,
+        Aggregate $aggregate
+    ): LikedStatus {
+        $likedStatus = $this->findOneBy(
+            [
+                'status'    => $status,
+                'likedBy'   => $likedBy,
+                'member'    => $member,
+                'aggregate' => $aggregate
+            ]
+        );
+        if ($likedStatus instanceof LikedStatus) {
+            return $likedStatus;
         }
 
-        try {
-            $singleResult = $statusQueryBuilder->getQuery()->getSingleResult();
-
-            return $singleResult['count_'];
-        } catch (NoResultException $exception) {
-            return 0;
+        $likedStatus = $this->findOneBy(
+            [
+                'status'  => $status,
+                'likedBy' => $likedBy,
+                'member'  => $member
+            ]
+        );
+        if ($likedStatus instanceof LikedStatus) {
+            return $likedStatus->setAggregate($aggregate);
         }
+
+        return $this->fromMemberStatus(
+            $status,
+            $likedBy,
+            $member,
+            $aggregate
+        );
     }
 
-    /**
-     * @param string         $memberName
-     * @param \DateTime|null $before
-     * @return array
-     */
-    public function findLocalMaximum(string $memberName, \DateTime $before = null): array
-    {
+    public function findLocalMaximum(
+        string $memberName,
+        ?string $before = null
+    ): array {
         return $this->findNextExtremum($memberName, 'asc', $before);
     }
 
     /**
      * @param string $memberName
+     * @param string $direction
+     * @param string $before
+     *
      * @return array
-     */
-    public function findNextMinimum(string $memberName): array
-    {
-        return $this->findNextExtremum($memberName, 'desc');
-    }
-
-    /**
-     * @param string $memberName
-     * @return array
-     */
-    public function findNextMaximum(string $memberName): array
-    {
-        return $this->findNextExtremum($memberName, 'asc');
-    }
-
-    /**
-     * @param string         $memberName
-     * @param string         $direction
-     * @param \DateTime|null $before
-     * @return array
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function findNextExtremum(
         string $memberName,
         string $direction = 'asc',
-        \DateTime $before = null
+        ?string $before = null
     ): array {
         $nextExtremum = $this->findNextExtremumAmongArchivedStatuses(
             $memberName,
@@ -163,21 +153,21 @@ class LikedStatusRepository extends ServiceEntityRepository implements ExtremumA
 
         $member = $this->memberRepository->findOneBy(['twitter_username' => $memberName]);
         if ($member instanceof MemberInterface) {
-            if ($direction = 'desc' && !is_null($member->maxLikeId)) {
+            if ($direction === 'desc' && $member->maxLikeId !== null) {
                 return ['statusId' => $member->maxLikeId];
             }
 
-            if ($direction = 'asc' && !is_null($member->minLikeId)) {
+            if ($direction === 'asc' && $member->minLikeId !== null) {
                 return ['statusId' => $member->minLikeId];
             }
         }
 
         $queryBuilder = $this->createQueryBuilder('l');
         $queryBuilder->select('s.statusId')
-            ->join('l.status', 's')
-            ->andWhere('l.likedByMemberName = :memberName')
-            ->orderBy('s.statusId + 0', $direction)
-            ->setMaxResults(1);
+                     ->join('l.status', 's')
+                     ->andWhere('l.likedByMemberName = :memberName')
+                     ->orderBy('s.statusId + 0', $direction)
+                     ->setMaxResults(1);
 
         $queryBuilder->setParameter('memberName', $memberName);
 
@@ -196,18 +186,22 @@ class LikedStatusRepository extends ServiceEntityRepository implements ExtremumA
             if ($direction === 'asc') {
                 $nextMinimum = min((int) $extremum['statusId'], $nextExtremum['statusId']);
 
-                return ['statusId' => $this->memberRepository->declareMaxLikeIdForMemberWithScreenName(
-                    "$nextMinimum",
-                    $memberName
-                )->minStatusId];
+                return [
+                    'statusId' => $this->memberRepository->declareMaxLikeIdForMemberWithScreenName(
+                        "$nextMinimum",
+                        $memberName
+                    )->minStatusId
+                ];
             }
 
             $nextMaximum = max((int) $extremum['statusId'], $nextExtremum['statusId']);
 
-            return ['statusId' => $this->memberRepository->declareMaxLikeIdForMemberWithScreenName(
-                "$nextMaximum",
-                $memberName
-            )->maxStatusId];
+            return [
+                'statusId' => $this->memberRepository->declareMaxLikeIdForMemberWithScreenName(
+                    "$nextMaximum",
+                    $memberName
+                )->maxStatusId
+            ];
         } catch (NoResultException $exception) {
             if ($nextExtremum['statusId'] === -INF || $nextExtremum['statusId'] === +INF) {
                 return ['statusId' => null];
@@ -218,11 +212,128 @@ class LikedStatusRepository extends ServiceEntityRepository implements ExtremumA
     }
 
     /**
+     * @param string $memberName
+     *
+     * @return array
+     */
+    public function getIdsOfExtremeStatusesSavedForMemberHavingScreenName(string $memberName): array
+    {
+        $member = $this->memberRepository->findOneBy(['twitter_username' => $memberName]);
+
+        return [
+            'min_id' => $member->minLikeId,
+            'max_id' => $member->maxLikeId
+        ];
+    }
+
+    /**
+     * @param \stdClass $status
+     * @param string    $aggregateName
+     * @param string    $likedByMemberName
+     * @param string    $memberName
+     *
+     * @return bool
+     * @throws DBALException
+     */
+    public function hasBeenSavedBefore(
+        \stdClass $status,
+        string $aggregateName,
+        string $likedByMemberName,
+        string $memberName
+    ): bool {
+        $query = <<<QUERY
+            SELECT (count(*) > 0) status_has_been_saved_before
+            FROM liked_status
+            INNER JOIN weaving_status status
+            WHERE ust_status_id = :status_id
+            AND liked_status.status_id = status.ust_id
+            AND liked_by_member_name = :liked_by_member_name
+            AND aggregate_name = :aggregate_name
+            AND member_name = :member_name
+QUERY;
+
+        $connection = $this->getEntityManager()->getConnection();
+        $statement  = $connection->executeQuery(
+            strtr(
+                $query,
+                [
+                    ':status_id'            => (int) $status->id_str,
+                    ':aggregate_name'       => $connection->quote($aggregateName),
+                    ':liked_by_member_name' => $connection->quote($likedByMemberName),
+                    ':member_name'          => $connection->quote($memberName),
+                ]
+            )
+        );
+        $results    = $statement->fetchAll()[0];
+
+        return (bool) $results['status_has_been_saved_before'];
+    }
+
+    /**
+     * @param LikedStatus $likedStatus
+     *
+     * @return LikedStatus
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    public function save(LikedStatus $likedStatus)
+    {
+        $this->getEntityManager()->persist($likedStatus);
+        $this->getEntityManager()->flush();
+
+        return $likedStatus;
+    }
+
+    /**
+     * @param $memberName
+     * @param $maxId
+     *
+     * @return int
+     * @throws NonUniqueResultException
+     */
+    private function countLikedStatuses(string $memberName, $maxId): int
+    {
+        return $this->countLikes($memberName, $maxId, 'status') +
+            $this->countLikes($memberName, $maxId, 'archivedStatus');
+    }
+
+    /**
+     * @param $memberName
+     * @param $maxId
+     *
+     * @return int
+     * @throws NonUniqueResultException
+     */
+    private function countLikes(string $memberName, $maxId, string $joinColumn): int
+    {
+        $statusQueryBuilder = $this->createQueryBuilder('l');
+
+        $statusQueryBuilder->select('COUNT(DISTINCT status.hash) as count_')
+                           ->join('l.' . $joinColumn, 'status')
+                           ->andWhere('l.likedByMemberName = :memberName');
+        $statusQueryBuilder->setParameter('memberName', $memberName);
+
+        if ($maxId < INF) {
+            $statusQueryBuilder->andWhere('(status.statusId + 0) <= :maxId');
+            $statusQueryBuilder->setParameter('maxId', $maxId);
+        }
+
+        try {
+            $singleResult = $statusQueryBuilder->getQuery()->getSingleResult();
+
+            return $singleResult['count_'];
+        } catch (NoResultException $exception) {
+            return 0;
+        }
+    }
+
+    /**
      * @param string         $memberName
      * @param string         $direction
      * @param \DateTime|null $before
+     *
      * @return array
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     private function findNextExtremumAmongArchivedStatuses(
         string $memberName,
@@ -242,10 +353,10 @@ class LikedStatusRepository extends ServiceEntityRepository implements ExtremumA
 
         $queryBuilder = $this->createQueryBuilder('l');
         $queryBuilder->select('s.statusId')
-            ->join('l.archivedStatus', 's')
-            ->andWhere('l.likedByMemberName = :memberName')
-            ->orderBy('s.statusId + 0', $direction)
-            ->setMaxResults(1);
+                     ->join('l.archivedStatus', 's')
+                     ->andWhere('l.likedByMemberName = :memberName')
+                     ->orderBy('s.statusId + 0', $direction)
+                     ->setMaxResults(1);
 
         $queryBuilder->setParameter('memberName', $memberName);
 
@@ -270,64 +381,11 @@ class LikedStatusRepository extends ServiceEntityRepository implements ExtremumA
     }
 
     /**
-     * @param string $memberName
-     * @return array
-     */
-    public function getIdsOfExtremeStatusesSavedForMemberHavingScreenName(string $memberName): array
-    {
-        $member = $this->memberRepository->findOneBy(['twitter_username' => $memberName]);
-
-        return [
-            'min_id' => $member->minLikeId,
-            'max_id' => $member->maxLikeId
-        ];
-    }
-
-    /**
-     * @param MemberInterface $member
-     * @param StatusInterface $status
-     * @param MemberInterface $likedBy
-     * @param Aggregate       $aggregate
-     * @return LikedStatus
-     */
-    public function ensureMemberStatusHasBeenMarkedAsLikedBy(
-        MemberInterface $member,
-        StatusInterface $status,
-        MemberInterface $likedBy,
-        Aggregate $aggregate
-    ): LikedStatus {
-        $likedStatus = $this->findOneBy([
-            'status' => $status,
-            'likedBy' => $likedBy,
-            'member' => $member,
-            'aggregate' => $aggregate
-        ]);
-        if ($likedStatus instanceof LikedStatus) {
-            return $likedStatus;
-        }
-
-        $likedStatus = $this->findOneBy([
-            'status' => $status,
-            'likedBy' => $likedBy,
-            'member' => $member
-        ]);
-        if ($likedStatus instanceof LikedStatus) {
-            return $likedStatus->setAggregate($aggregate);
-        }
-
-        return $this->fromMemberStatus(
-            $status,
-            $likedBy,
-            $member,
-            $aggregate
-        );
-    }
-
-    /**
      * @param StatusInterface $memberStatus
      * @param MemberInterface $likedBy
      * @param MemberInterface $member
      * @param Aggregate       $aggregate
+     *
      * @return LikedStatus
      */
     private function fromMemberStatus(
@@ -337,63 +395,6 @@ class LikedStatusRepository extends ServiceEntityRepository implements ExtremumA
         Aggregate $aggregate
     ) {
         return new LikedStatus($memberStatus, $likedBy, $aggregate, $member);
-    }
-
-    /**
-     * @param LikedStatus $likedStatus
-     * @return LikedStatus
-     * @throws \Doctrine\ORM\OptimisticLockException
-     */
-    public function save(LikedStatus $likedStatus)
-    {
-        $this->getEntityManager()->persist($likedStatus);
-        $this->getEntityManager()->flush();
-
-        return $likedStatus;
-    }
-
-    /**
-     * @param \stdClass $status
-     * @param string    $aggregateName
-     * @param string    $likedByMemberName
-     * @param string    $memberName
-     * @return bool
-     * @throws \Doctrine\DBAL\DBALException
-     */
-    public function hasBeenSavedBefore(
-        \stdClass $status,
-        string $aggregateName,
-        string $likedByMemberName,
-        string $memberName
-    ): bool
-    {
-        $query = <<<QUERY
-            SELECT (count(*) > 0) status_has_been_saved_before
-            FROM liked_status
-            INNER JOIN weaving_status status
-            WHERE ust_status_id = :status_id
-            AND liked_status.status_id = status.ust_id
-            AND liked_by_member_name = :liked_by_member_name
-            AND aggregate_name = :aggregate_name
-            AND member_name = :member_name
-QUERY
-;
-
-        $connection = $this->getEntityManager()->getConnection();
-        $statement = $connection->executeQuery(
-            strtr(
-                $query,
-                [
-                    ':status_id' => (int) $status->id_str,
-                    ':aggregate_name' => $connection->quote($aggregateName),
-                    ':liked_by_member_name' => $connection->quote($likedByMemberName),
-                    ':member_name' => $connection->quote($memberName),
-                ]
-            )
-        );
-        $results = $statement->fetchAll()[0];
-
-        return boolval($results['status_has_been_saved_before']);
     }
 
 }

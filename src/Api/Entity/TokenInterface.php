@@ -23,6 +23,8 @@ interface TokenInterface
 
     public function toArray(): array;
 
+    public function setFrozenUntil(\DateTimeInterface $frozenUntil): self;
+
     /**
      * @param array $token
      *

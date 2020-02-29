@@ -3,31 +3,23 @@ declare(strict_types=1);
 
 namespace App\Amqp\MessageHandler;
 
-use App\Accessor\Exception\ApiRateLimitingException;
-use App\Accessor\Exception\ReadOnlyApplicationException;
-use App\Accessor\Exception\UnexpectedApiResponseException;
-use App\Infrastructure\Amqp\Message\FetchMemberStatuses;
+use App\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Api\Entity\Token;
 use App\Api\Entity\TokenInterface;
-use App\Api\AccessToken\Repository\TokenRepositoryInterface;
+use App\Infrastructure\Amqp\Message\FetchMemberLikes;
+use App\Infrastructure\Amqp\Message\FetchMemberStatuses;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\Repository\Membership\MemberRepository;
+use App\Infrastructure\Twitter\Collector\PublicationCollectorInterface;
 use App\Operation\OperationClock;
 use App\Status\LikedStatusCollectionAwareInterface;
 use App\Twitter\Api\TwitterErrorAwareInterface;
-use App\Twitter\Exception\BadAuthenticationDataException;
-use App\Twitter\Exception\InconsistentTokenRepository;
 use App\Twitter\Exception\ProtectedAccountException;
 use App\Twitter\Exception\UnavailableResourceException;
-use App\Twitter\Serializer\UserStatus;
-use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Exception;
-use ReflectionException;
 use Symfony\Component\Messenger\Handler\MessageSubscriberInterface;
-use function array_key_exists;
 use function sprintf;
 
 /**
@@ -38,27 +30,23 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
     use LoggerTrait;
 
     /**
-     * @var OperationClock
+     * @return iterable
      */
-    public OperationClock $operationClock;
-
-    /**
-     * @var UserStatus $serializer
-     */
-    protected UserStatus $serializer;
-
-    /**
-     * @param UserStatus $serializer
-     */
-    public function setSerializer(UserStatus $serializer)
+    public static function getHandledMessages(): iterable
     {
-        $this->serializer = $serializer;
+        yield FetchMemberStatuses::class => [
+            'from_transport' => 'news_status'
+        ];
+
+        yield FetchMemberLikes::class => [
+            'from_transport' => 'news_likes'
+        ];
     }
 
     /**
-     * @var MemberRepository
+     * @var OperationClock
      */
-    protected MemberRepository $userRepository;
+    public OperationClock $operationClock;
 
     /**
      * @var TokenRepositoryInterface
@@ -66,38 +54,21 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
     public TokenRepositoryInterface $tokenRepository;
 
     /**
-     * @param MemberRepository $userRepository
+     * @var PublicationCollectorInterface $collector
      */
-    public function setUserRepository(MemberRepository $userRepository)
-    {
-        $this->userRepository = $userRepository;
-    }
+    protected PublicationCollectorInterface $collector;
 
     /**
-     * @return iterable
+     * @var MemberRepository
      */
-    public static function getHandledMessages()
-    : iterable
-    {
-        yield FetchMemberStatuses::class => [
-            'from_transport' => 'news_status'
-        ];
-    }
+    protected MemberRepository $userRepository;
 
     /**
      * @param FetchMemberStatuses $message
      *
      * @return bool
-     * @throws NoResultException
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
-     * @throws ApiRateLimitingException
-     * @throws ReadOnlyApplicationException
-     * @throws UnexpectedApiResponseException
-     * @throws BadAuthenticationDataException
-     * @throws InconsistentTokenRepository
-     * @throws ReflectionException
      * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function __invoke(FetchMemberStatuses $message)
     {
@@ -110,16 +81,16 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
         }
 
         $options = [
-            LikedStatusCollectionAwareInterface::INTENT_TO_FETCH_LIKES => $this->extractIntentToCollectLikes($options),
+            LikedStatusCollectionAwareInterface::INTENT_TO_FETCH_LIKES => $message->shouldFetchLikes(),
             $message::AGGREGATE_ID                                     => $message->aggregateId(),
-            $message::BEFORE                                           => $message->before(),
+            $message::BEFORE                                           => $message->dateBeforeWhichStatusAreCollected(),
             'count'                                                    => 200,
             'oauth'                                                    => $options[TokenInterface::FIELD_TOKEN],
             $message::SCREEN_NAME                                      => $message->screenName(),
         ];
 
         try {
-            $success = $this->serializer->serialize($options, $greedy = true);
+            $success = $this->collector->collect($options, $greedy = true);
             if (!$success) {
                 $this->logger->info(
                     sprintf(
@@ -168,26 +139,29 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
      * @return array
      * @throws Exception
      */
-    public function processMessage(FetchMemberStatuses $message): array {
+    public function processMessage(FetchMemberStatuses $message): array
+    {
         $oauthToken = $this->extractOAuthToken($message);
 
-        $this->serializer->setupAccessor($oauthToken);
+        $this->collector->setupAccessor($oauthToken);
 
         return $oauthToken;
     }
 
     /**
-     * @param array $options
-     *
-     * @return bool
+     * @param PublicationCollectorInterface $collector
      */
-    protected function extractIntentToCollectLikes(array $options)
-    : bool {
-        if (!array_key_exists(LikedStatusCollectionAwareInterface::INTENT_TO_FETCH_LIKES, $options)) {
-            return false;
-        }
+    public function setCollector(PublicationCollectorInterface $collector)
+    {
+        $this->collector = $collector;
+    }
 
-        return $options[LikedStatusCollectionAwareInterface::INTENT_TO_FETCH_LIKES];
+    /**
+     * @param MemberRepository $userRepository
+     */
+    public function setUserRepository(MemberRepository $userRepository)
+    {
+        $this->userRepository = $userRepository;
     }
 
     /**
@@ -195,7 +169,8 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
      *
      * @return array
      */
-    private function extractOAuthToken(FetchMemberStatuses $message): array {
+    private function extractOAuthToken(FetchMemberStatuses $message): array
+    {
         $token = $message->token();
 
         if ($token->isValid()) {
@@ -209,7 +184,7 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
         $token = $this->tokenRepository->findFirstUnfrozenToken();
 
         return [
-            TokenInterface::FIELD_TOKEN => $token->getOAuthToken(),
+            TokenInterface::FIELD_TOKEN  => $token->getOAuthToken(),
             TokenInterface::FIELD_SECRET => $token->getOAuthSecret(),
         ];
     }

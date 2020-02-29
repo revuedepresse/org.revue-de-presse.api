@@ -1,0 +1,8 @@
+services:
+    App\Infrastructure\Identification\WhispererIdentification:
+        class: 'App\Infrastructure\Identification\WhispererIdentification'
+        calls:
+            - [ 'setApiAccessor', [ '@weaving_the_web_twitter.api_accessor' ] ]
+            - [ 'setLogger', [ '@logger' ] ]
+            - [ 'setTranslator', [ '@translator' ] ]
+            - [ 'setWhispererRepository', [ '@repository.whisperer' ] ]

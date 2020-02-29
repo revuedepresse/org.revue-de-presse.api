@@ -12,7 +12,13 @@ services:
         calls:
             - [ 'setEntityManager', [ '@doctrine.orm.entity_manager' ] ]
 
-    repository.aggregate_subscription:
+    repository.access_token:
+        class: '%repository.access_token.class%'
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - '%weaving_the_web_api.entity.token.class%'
+
+    repository.publication_list_subscription:
         class:      'App\Member\Repository\AggregateSubscriptionRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
@@ -71,7 +77,7 @@ services:
             logger:                 '@logger'
             statusRepository:       '@App\Api\Repository\StatusRepository'
             timelyStatusRepository: '@repository.timely_status'
-            tokenRepository:        '@weaving_the_web_api.repository.token'
+            tokenRepository:        '@repository.access_token'
             likedStatusRepository:  '@repository.liked_status'
 
     repository.keyword:
@@ -162,12 +168,6 @@ services:
             - 'App\Member\Entity\MemberSubscribee'
         properties:
             memberRepository: "@user_manager"
-
-    weaving_the_web_api.repository.token:
-        class: '%weaving_the_web_api.repository.token.class%'
-        arguments:
-            - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - '%weaving_the_web_api.entity.token.class%'
 
     repository.whisperer:
         class: '%repository.whisperer.class%'

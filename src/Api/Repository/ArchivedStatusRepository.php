@@ -10,14 +10,16 @@ use App\Api\Exception\InsertDuplicatesException;
 use App\Domain\Repository\StatusRepositoryInterface;
 use App\Domain\Status\StatusInterface;
 use App\Domain\Status\TaggedStatus;
-use App\Infrastructure\DependencyInjection\MemberRepositoryTrait;
-use App\Infrastructure\DependencyInjection\PublicationPersistenceTrait;
-use App\Infrastructure\DependencyInjection\PublicationRepositoryTrait;
-use App\Infrastructure\DependencyInjection\StatusLoggerTrait;
+use App\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
+use App\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
+use App\Infrastructure\DependencyInjection\Publication\PublicationRepositoryTrait;
+use App\Infrastructure\DependencyInjection\Status\StatusLoggerTrait;
+use App\Infrastructure\DependencyInjection\Status\StatusPersistenceTrait;
 use App\Infrastructure\DependencyInjection\TaggedStatusRepositoryTrait;
 use App\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
 use App\Infrastructure\Twitter\Api\Normalizer\Normalizer;
 use App\Membership\Entity\MemberInterface;
+use App\Operation\Collection\CollectionInterface;
 use App\Status\Entity\LikedStatus;
 use App\Status\Repository\ExtremumAwareInterface;
 use App\Status\Repository\LikedStatusRepository;
@@ -31,9 +33,7 @@ use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
-use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
-use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -49,9 +49,10 @@ class ArchivedStatusRepository extends ResourceRepository implements
     StatusRepositoryInterface
 {
     use MemberRepositoryTrait;
+    use PublicationPersistenceTrait;
     use PublicationRepositoryTrait;
     use StatusLoggerTrait;
-    use PublicationPersistenceTrait;
+    use StatusPersistenceTrait;
     use TaggedStatusRepositoryTrait;
     use TimelyStatusRepositoryTrait;
 
@@ -64,8 +65,6 @@ class ArchivedStatusRepository extends ResourceRepository implements
     public Connection $connection;
 
     public bool $shouldExtractProperties;
-
-    protected array $oauthTokens;
 
     /**
      * @param $screenName
@@ -80,13 +79,10 @@ class ArchivedStatusRepository extends ResourceRepository implements
         $queryBuilder->select('COUNT(DISTINCT s.hash) as count_')
                      ->andWhere('s.screenName = :screenName');
 
-        if ($maxId < INF) {
-            $queryBuilder->andWhere('(s.statusId + 0) <= :maxId');
-        }
-
         $queryBuilder->setParameter('screenName', $screenName);
 
         if ($maxId < INF) {
+            $queryBuilder->andWhere('(s.statusId + 0) <= :maxId');
             $queryBuilder->setParameter('maxId', $maxId);
         }
 
@@ -120,131 +116,19 @@ class ArchivedStatusRepository extends ResourceRepository implements
     }
 
     /**
-     * @param null $lastId
-     * @param null $aggregateName
-     * @param bool $rawSql
-     *
-     * @return mixed
-     */
-    public function findLatest(
-        $lastId = null,
-        $aggregateName = null,
-        $rawSql = false
-    ) {
-        if ($rawSql) {
-            return $this->findLatestForAggregate($aggregateName);
-        }
-
-        $queryBuilder = $this->selectStatuses();
-
-        if ($lastId !== null) {
-            $queryBuilder->andWhere('t.id < :lastId');
-            $queryBuilder->setParameter('lastId', $lastId);
-        }
-
-        if ($aggregateName !== null) {
-            $queryBuilder->join(
-                't.aggregates',
-                'a'
-            );
-            $queryBuilder->andWhere('a.name = :aggregate_name');
-            $queryBuilder->andWhere('a.screenName IS NOT NULL');
-            $queryBuilder->setParameter('aggregate_name', $aggregateName);
-        }
-
-        $statuses = $queryBuilder->getQuery()->getResult();
-
-        return $this->highlightRetweets($statuses);
-    }
-
-    public function findLatestForAggregate($aggregateName = null)
-    {
-        $queryTemplate = <<<QUERY
-            SELECT
-            `status`.ust_avatar AS author_avatar,
-            `status`.ust_text AS text,
-            `status`.ust_full_name AS screen_name,
-            `status`.ust_id AS id,
-            `status`.ust_status_id AS status_id,
-            `status`.ust_starred AS starred,
-            `status`.ust_api_document AS original_document,
-            `status`.ust_created_at AS publication_date
-            FROM :timely_status_table `timely_status`, :status_table `status`
-            WHERE `timely_status`.aggregate_name = ':aggregate'
-            AND `timely_status`.status_id = `status`.ust_id
-            ORDER BY `timely_status`.time_range ASC, `timely_status`.publication_date_time DESC
-            LIMIT :max_results
-        ;
-QUERY;
-
-        $query = strtr(
-            $queryTemplate,
-            [
-                ':aggregate'           => $aggregateName,
-                ':max_results'         => 50,
-                ':status_table'        => 'weaving_status',
-                ':timely_status_table' => 'timely_status',
-                ':aggregate_table'     => 'weaving_aggregate',
-            ]
-        );
-
-        $statement = $this->connection->executeQuery($query);
-
-        $statuses = $statement->fetchAll();
-
-        return $this->highlightRetweets($statuses);
-    }
-
-    public function findLikedStatuses($aggregateName = null)
-    {
-        $queryTemplate = <<<QUERY
-            SELECT
-            `status`.ust_avatar AS author_avatar,
-            `status`.ust_text AS text,
-            `status`.ust_full_name AS screen_name,
-            `status`.ust_id AS id,
-            `status`.ust_status_id AS status_id,
-            `status`.ust_starred AS starred,
-            `status`.ust_api_document AS original_document,
-            `status`.ust_created_at AS publication_date,
-            `liked_status`.liked_by_member_name AS liked_by
-            FROM :liked_status `liked_status`, :status_table `status`
-            WHERE `liked_status`.status_id = `status`.ust_id
-            ORDER BY `liked_status`.time_range ASC, `liked_status`.publication_date_time DESC
-            LIMIT :max_results
-        ;
-QUERY;
-
-        $query = strtr(
-            $queryTemplate,
-            [
-                ':aggregate'       => $aggregateName,
-                ':max_results'     => 500,
-                ':status_table'    => 'weaving_status',
-                ':liked_status'    => 'liked_status',
-                ':aggregate_table' => 'weaving_aggregate',
-            ]
-        );
-
-        $statement = $this->connection->executeQuery($query);
-
-        $statuses = $statement->fetchAll();
-
-        return $this->highlightRetweets($statuses);
-    }
-
-    /**
      * @param string        $screenName
-     * @param DateTime|null $before
+     * @param string|null $before
      *
      * @return array
      * @throws NonUniqueResultException
      */
-    public function findLocalMaximum(string $screenName, DateTime $before = null): array
-    {
-        $direction = 'asc';
-        if (is_null($before)) {
-            $direction = 'desc';
+    public function findLocalMaximum(
+        string $screenName,
+        ?string $before = null
+    ): array {
+        $direction = self::FINDING_IN_ASCENDING_ORDER;
+        if ($before === null) {
+            $direction = self::FINDING_IN_DESCENDING_ORDER;
         }
 
         return $this->findNextExtremum($screenName, $direction, $before);
@@ -253,23 +137,27 @@ QUERY;
     /**
      * @param string        $screenName
      * @param string        $direction
-     * @param DateTime|null $before
+     * @param string $before
      *
      * @return array
      * @throws NonUniqueResultException
      */
     public function findNextExtremum(
         string $screenName,
-        string $direction = 'asc',
-        DateTime $before = null
+        string $direction = self::FINDING_IN_ASCENDING_ORDER,
+        ?string $before = null
     ): array {
-        $member = $this->memberRepository->findOneBy(['twitter_username' => $screenName]);
+        $member = $this->memberRepository->findOneBy([
+            'twitter_username' => $screenName
+        ]);
         if ($member instanceof MemberInterface) {
-            if ($direction = 'desc' && !is_null($member->maxStatusId)) {
+            if ($direction === self::FINDING_IN_DESCENDING_ORDER &&
+                $member->maxStatusId !== null) {
                 return ['statusId' => $member->maxStatusId];
             }
 
-            if ($direction = 'asc' && !is_null($member->minStatusId)) {
+            if ($direction === self::FINDING_IN_ASCENDING_ORDER &&
+                $member->minStatusId !== null) {
                 return ['statusId' => $member->minStatusId];
             }
         }
@@ -284,7 +172,7 @@ QUERY;
         $queryBuilder->setParameter('screenName', $screenName);
 
         if ($before) {
-            $queryBuilder->andWhere('DATE(s.createdAt) = :date');
+            $queryBuilder->andWhere('DATE(s.createdAt) <= :date');
             $queryBuilder->setParameter(
                 'date',
                 (new DateTime($before, new \DateTimeZone('UTC')))
@@ -295,34 +183,14 @@ QUERY;
         try {
             return $queryBuilder->getQuery()->getSingleResult();
         } catch (NoResultException $exception) {
-            if ($direction == 'asc') {
+            $this->appLogger->info($exception->getMessage());
+
+            if ($direction === self::FINDING_IN_ASCENDING_ORDER) {
                 return ['statusId' => +INF];
             }
 
             return ['statusId' => -INF];
         }
-    }
-
-    /**
-     * @param string $screenName
-     *
-     * @return array
-     * @throws NonUniqueResultException
-     */
-    public function findNextMaximum(string $screenName): array
-    {
-        return $this->findNextExtremum($screenName, 'asc');
-    }
-
-    /**
-     * @param string $screenName
-     *
-     * @return array
-     * @throws NonUniqueResultException
-     */
-    public function findNextMininum(string $screenName): array
-    {
-        return $this->findNextExtremum($screenName, 'desc');
     }
 
     /**
@@ -433,10 +301,7 @@ QUERY;
      * @param MemberInterface $likedBy
      * @param callable        $ensureMemberExists
      *
-     * @return array
-     * @throws NotFoundMemberException
-     * @throws ORMException
-     * @throws OptimisticLockException
+     * @return CollectionInterface
      */
     public function saveLikes(
         array $statuses,
@@ -445,42 +310,17 @@ QUERY;
         LoggerInterface $logger,
         MemberInterface $likedBy,
         callable $ensureMemberExists
-    ): array {
+    ): CollectionInterface {
         $this->appLogger = $logger;
 
-        $entityManager = $this->getEntityManager();
+        $statusIds = $this->getStatusIdentities($statuses);
 
-        $statusIds = array_map(
-            function ($status) {
-                return $status->id_str;
-            },
-            $statuses
-        );
-
-        $indexedStatuses = [];
-        if (count($statusIds) > 0) {
-            $queryBuilder = $this->createQueryBuilder('s');
-            $queryBuilder->andWhere('s.statusId in (:ids)');
-            $queryBuilder->setParameter('ids', $statusIds);
-            $existingStatuses = $queryBuilder->getQuery()->getResult();
-
-            array_walk(
-                $existingStatuses,
-                function (StatusInterface $existingStatus) use (&$indexedStatuses) {
-                    $indexedStatuses[$existingStatus->getStatusId()] = $existingStatus;
-                }
-            );
-        }
+        $indexedStatus = $this->createIndexOfExistingStatus($statusIds);
 
         $extracts = Normalizer::normalizeAll(
             $statuses,
-            function ($extract) use ($identifier, $indexedStatuses) {
+            function ($extract) use ($identifier, $indexedStatus) {
                 $extract['identifier'] = $identifier;
-
-                $extract['existing_status'] = null;
-                if (array_key_exists($extract['status_id'], $indexedStatuses)) {
-                    $extract['existing_status'] = $indexedStatuses[$extract['status_id']];
-                }
 
                 return $extract;
             },
@@ -489,10 +329,18 @@ QUERY;
 
         $likedStatuses = [];
 
+        $entityManager = $this->getEntityManager();
+
+        /** @var TaggedStatus $taggedStatus */
         foreach ($extracts->toArray() as $key => $taggedStatus) {
             $extract      = $taggedStatus->toLegacyProps();
-            $memberStatus = $extract['existing_status'];
-            if (!$memberStatus) {
+
+            $memberStatus = null;
+            if (array_key_exists($taggedStatus->documentId(), $indexedStatus)) {
+                $memberStatus = $indexedStatus[$taggedStatus->documentId()];
+            }
+
+            if (!($memberStatus instanceof StatusInterface)) {
                 $memberStatus = $this->taggedStatusRepository
                     ->convertPropsToStatus($extract, $aggregate);
             }
@@ -502,8 +350,10 @@ QUERY;
             }
 
             if ($memberStatus instanceof ArchivedStatus) {
-                // TODO Replace this method with statusPersistence->unarchiveStatus
-                $memberStatus = $this->unarchiveStatus($memberStatus, $entityManager);
+                $memberStatus = $this->statusPersistence->unarchiveStatus(
+                    $memberStatus,
+                    $entityManager
+                );
             }
 
             try {
@@ -557,57 +407,30 @@ QUERY;
         return $extracts;
     }
 
-    public function setOauthTokens($oauthTokens)
-    {
-        $this->oauthTokens = $oauthTokens;
-
-        return $this;
-    }
-
     /**
-     * @param array $statuses
+     * @param array $statusIds
      *
-     * @return mixed
+     * @return array
      */
-    protected function highlightRetweets(array $statuses)
+    private function createIndexOfExistingStatus(array $statusIds): array
     {
-        array_walk(
-            $statuses,
-            function (&$status) {
-                $target = sprintf('user stream of id #%d', (int) $status['id']);
-                if (strlen($status['original_document']) > 0) {
-                    $decodedValue  = json_decode($status['original_document'], true);
-                    $lastJsonError = json_last_error();
-                    if (JSON_ERROR_NONE === $lastJsonError) {
-                        if (array_key_exists('retweeted_status', $decodedValue)) {
-                            $status['text'] = 'RT @' . $decodedValue['retweeted_status']['user']['screen_name'] . ': ' .
-                                $decodedValue['retweeted_status']['full_text'];
-                        }
-                    } else {
-                        throw new Exception(sprintf($lastJsonError . ' affecting ' . $target));
-                    }
-                } else {
-                    throw new Exception(sprintf('Empty JSON document for ' . $target));
+        $indexedStatuses = [];
+
+        if (count($statusIds) > 0) {
+            $queryBuilder = $this->createQueryBuilder('s');
+            $queryBuilder->andWhere('s.statusId in (:ids)');
+            $queryBuilder->setParameter('ids', $statusIds);
+            $existingStatuses = $queryBuilder->getQuery()->getResult();
+
+            array_walk(
+                $existingStatuses,
+                function (StatusInterface $existingStatus) use (&$indexedStatuses) {
+                    $indexedStatuses[$existingStatus->getStatusId()] = $existingStatus;
                 }
-            }
-        );
-
-        return $statuses;
-    }
-
-    /**
-     * @return QueryBuilder
-     */
-    protected function selectStatuses()
-    {
-        $queryBuilder = $this->timelyStatusRepository->selectStatuses();
-
-        if (!empty($this->oauthTokens)) {
-            $queryBuilder->andWhere('s.identifier IN (:identifier)');
-            $queryBuilder->setParameter('identifier', $this->oauthTokens);
+            );
         }
 
-        return $queryBuilder;
+        return $indexedStatuses;
     }
 
     /**
@@ -628,9 +451,6 @@ QUERY;
     /**
      * @param                        $likedStatuses
      * @param EntityManagerInterface $entityManager
-     *
-     * @throws ORMException
-     * @throws OptimisticLockException
      */
     private function flushLikedStatuses(
         $likedStatuses,
@@ -644,6 +464,21 @@ QUERY;
 
         $this->flushAndResetManagerOnUniqueConstraintViolation(
             $entityManager
+        );
+    }
+
+    /**
+     * @param array $statuses
+     *
+     * @return array
+     */
+    private function getStatusIdentities(array $statuses): array
+    {
+        return array_map(
+            function ($status) {
+                return $status->id_str;
+            },
+            $statuses
         );
     }
 }

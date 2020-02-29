@@ -4,22 +4,29 @@ declare(strict_types=1);
 namespace App\Accessor;
 
 use App\Accessor\Exception\ApiRateLimitingException;
+use App\Accessor\Exception\NotFoundStatusException;
 use App\Accessor\Exception\ReadOnlyApplicationException;
 use App\Accessor\Exception\UnexpectedApiResponseException;
 use App\Api\AccessToken\AccessToken;
 use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;
 use App\Api\Repository\ArchivedStatusRepository;
-use App\Api\Repository\StatusRepository;
+use App\Domain\Collection\CollectionStrategyInterface;
 use App\Domain\Status\StatusInterface;
 use App\Domain\Status\TaggedStatus;
-use App\Infrastructure\DependencyInjection\PublicationPersistenceTrait;
-use App\Infrastructure\Repository\Membership\MemberRepository;
+use App\Infrastructure\Amqp\Message\FetchPublication;
+use App\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
+use App\Infrastructure\DependencyInjection\LoggerTrait;
+use App\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
+use App\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
+use App\Infrastructure\DependencyInjection\Status\LikedStatusRepositoryTrait;
+use App\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
+use App\Infrastructure\Twitter\Api\Accessor\StatusAccessorInterface;
 use App\Membership\Entity\MemberInterface;
-use App\Membership\Exception\InvalidMemberIdentifier;
 use App\Status\Entity\NullStatus;
+use App\Status\LikedStatusCollectionAwareInterface;
+use App\Status\Repository\ExtremumAwareInterface;
 use App\Status\Repository\NotFoundStatusRepository;
-use App\Twitter\Api\ApiAccessorInterface;
 use App\Twitter\Exception\BadAuthenticationDataException;
 use App\Twitter\Exception\InconsistentTokenRepository;
 use App\Twitter\Exception\NotFoundMemberException;
@@ -29,31 +36,29 @@ use App\Twitter\Exception\UnavailableResourceException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
 use Exception;
-use Psr\Log\LoggerInterface;
 use ReflectionException;
+use function array_key_exists;
+use function count;
+use function sprintf;
 
 /**
  * @package App\Accessor
  */
-class StatusAccessor
+class StatusAccessor implements StatusAccessorInterface
 {
+    use ApiAccessorTrait;
     use PublicationPersistenceTrait;
+    use LikedStatusRepositoryTrait;
+    use LoggerTrait;
+    use StatusRepositoryTrait;
+    use MemberRepositoryTrait;
 
     public ArchivedStatusRepository $archivedStatusRepository;
 
     public EntityManagerInterface $entityManager;
 
-    public LoggerInterface $logger;
-
     public NotFoundStatusRepository $notFoundStatusRepository;
-
-    public StatusRepository $statusRepository;
-
-    public MemberRepository $userManager;
-
-    public ApiAccessorInterface $accessor;
 
     /**
      * @param string $identifier
@@ -61,25 +66,25 @@ class StatusAccessor
     public function declareStatusNotFoundByIdentifier(string $identifier): void
     {
         $status = $this->statusRepository->findOneBy(['statusId' => $identifier]);
-        if (is_null($status)) {
+        if ($status === null) {
             $status = $this->archivedStatusRepository
                 ->findOneBy(['statusId' => $identifier]);
         }
 
         $existingRecord = false;
         if ($status instanceof Status) {
-            $existingRecord = !is_null($this->notFoundStatusRepository->findOneBy(['status' => $status]));
+            $existingRecord = $this->notFoundStatusRepository->findOneBy(['status' => $status]) !== null;
         }
 
         if ($status instanceof ArchivedStatus) {
-            $existingRecord = !is_null($this->notFoundStatusRepository->findOneBy(['archivedStatus' => $status]));
+            $existingRecord = $this->notFoundStatusRepository->findOneBy(['archivedStatus' => $status]) !== null;
         }
 
         if ($existingRecord) {
             return;
         }
 
-        if (is_null($status)) {
+        if ($status === null) {
             return;
         }
 
@@ -113,15 +118,15 @@ class StatusAccessor
             return $status;
         }
 
-        $this->accessor->shouldRaiseExceptionOnApiLimit = true;
-        $status = $this->accessor->showStatus($identifier);
+        $this->apiAccessor->shouldRaiseExceptionOnApiLimit = true;
+        $status = $this->apiAccessor->showStatus($identifier);
 
         $this->entityManager->clear();
 
         try {
             $this->publicationPersistence->persistStatusPublications(
                 [$status],
-                new AccessToken($this->accessor->userToken)
+                new AccessToken($this->apiAccessor->userToken)
             );
         } catch (NotFoundMemberException $notFoundMemberException) {
             $this->logger->info($notFoundMemberException->getMessage());
@@ -136,24 +141,24 @@ class StatusAccessor
 
     public function ensureMemberHavingNameExists(string $memberName): MemberInterface
     {
-        $member = $this->userManager->findOneBy(['twitter_username' => $memberName]);
+        $member = $this->memberRepository->findOneBy(['twitter_username' => $memberName]);
         if ($member instanceof MemberInterface) {
             $this->ensureMemberHasBio($member, $memberName);
 
             return $member;
         }
 
-        $fetchedMember = $this->accessor->showUser($memberName);
-        $member = $this->userManager->findOneBy(['twitterID' => $fetchedMember->id]);
+        $fetchedMember = $this->apiAccessor->showUser($memberName);
+        $member = $this->memberRepository->findOneBy(['twitterID' => $fetchedMember->id]);
         if ($member instanceof MemberInterface) {
             $this->ensureMemberHasBio($member, $memberName);
 
             return $member;
         }
 
-        return $this->userManager->saveMember(
-            $this->userManager->make(
-                $fetchedMember->id,
+        return $this->memberRepository->saveMember(
+            $this->memberRepository->make(
+                (string) $fetchedMember->id,
                 $memberName,
                 $protected = false,
                 $suspended = false,
@@ -168,34 +173,20 @@ class StatusAccessor
      * @param string $id
      *
      * @return MemberInterface|null
-     * @throws BadAuthenticationDataException
-     * @throws ApiRateLimitingException
-     * @throws ReadOnlyApplicationException
-     * @throws UnexpectedApiResponseException
-     * @throws InconsistentTokenRepository
-     * @throws InvalidMemberIdentifier
-     * @throws NonUniqueResultException
-     * @throws NotFoundMemberException
-     * @throws ORMException
-     * @throws OptimisticLockException
-     * @throws ProtectedAccountException
-     * @throws ReflectionException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
      */
-    public function ensureMemberHavingIdExists(string $id)
+    public function ensureMemberHavingIdExists(string $id): ?MemberInterface
     {
-        $member = $this->userManager->findOneBy(['twitterID' => $id]);
+        $member = $this->memberRepository->findOneBy(['twitterID' => $id]);
         if ($member instanceof MemberInterface) {
             $this->ensureMemberHasBio($member, $member->getTwitterUsername());
 
             return $member;
         }
 
-        $member = $this->accessor->showUser((string) $id);
+        $member = $this->apiAccessor->showUser((string) $id);
 
-        return $this->userManager->saveMember(
-            $this->userManager->make(
+        return $this->memberRepository->saveMember(
+            $this->memberRepository->make(
                 (string) $id,
                 $member->screen_name,
                 $protected = false,
@@ -217,7 +208,7 @@ class StatusAccessor
     {
         $status = $this->statusRepository->findStatusIdentifiedBy($identifier);
 
-        if (is_null($status)) {
+        if ($status === null) {
             return new NullStatus();
         }
 
@@ -229,10 +220,6 @@ class StatusAccessor
      * @param string          $memberName
      *
      * @return MemberInterface
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
      */
     private function ensureMemberHasBio(
         MemberInterface $member,
@@ -243,11 +230,11 @@ class StatusAccessor
             $member->hasNotBeenDeclaredAsNotFound()
         ;
 
-        $shouldTryToSaveDescription = is_null($member->getDescription()) && $memberBioIsAvailable;
-        $shouldTryToUrl = is_null($member->getUrl()) && $memberBioIsAvailable;
+        $shouldTryToSaveDescription = $member->getDescription() === null && $memberBioIsAvailable;
+        $shouldTryToUrl = $member->getUrl() === null && $memberBioIsAvailable;
 
         if ($shouldTryToSaveDescription || $shouldTryToUrl) {
-            $fetchedMember = $this->accessor->showUser($memberName);
+            $fetchedMember = $this->apiAccessor->showUser($memberName);
 
             if ($shouldTryToSaveDescription) {
                 $member->description = $fetchedMember->description;
@@ -257,9 +244,300 @@ class StatusAccessor
                 $member->url = $fetchedMember->url;
             }
 
-            $this->userManager->saveMember($member);
+            $this->memberRepository->saveMember($member);
         }
 
         return $member;
+    }
+
+    /**
+     * @param CollectionStrategyInterface $collectionStrategy
+     * @param array                       $options
+     * @param bool                        $discoverPastTweets
+     *
+     * @return array
+     * @throws ApiRateLimitingException
+     * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
+     * @throws NonUniqueResultException
+     * @throws NotFoundMemberException
+     * @throws NotFoundStatusException
+     * @throws OptimisticLockException
+     * @throws ProtectedAccountException
+     * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
+     * @throws UnexpectedApiResponseException
+     */
+    public function fetchLatestStatuses(
+        CollectionStrategyInterface $collectionStrategy,
+        $options,
+        bool $discoverPastTweets = true
+    ): array {
+        $options[LikedStatusCollectionAwareInterface::INTENT_TO_FETCH_LIKES] = $collectionStrategy->fetchLikes();
+        $options = $this->removeCollectOptions($collectionStrategy, $options);
+        $options = $this->updateExtremum(
+            $collectionStrategy,
+            $options,
+            $discoverPastTweets
+        );
+
+        if (
+            array_key_exists('max_id', $options)
+            && $collectionStrategy->dateBeforeWhichStatusAreToBeCollected() // Looking into the past
+        ) {
+            unset($options['max_id']);
+        }
+
+        $statuses = $this->apiAccessor->fetchStatuses($options);
+
+        $discoverMoreRecentStatuses = false;
+        if (
+            count($statuses) > 0
+            && $this->statusRepository->findOneBy(
+                ['statusId' => $statuses[0]->id]
+            ) instanceof StatusInterface
+        ) {
+            $discoverMoreRecentStatuses = true;
+        }
+
+        if (
+            $discoverPastTweets
+            && (
+                $discoverMoreRecentStatuses
+                || (count($statuses) === 0))
+        ) {
+            if (array_key_exists('max_id', $options)) {
+                unset($options['max_id']);
+            }
+
+            $statuses = $this->fetchLatestStatuses(
+                $collectionStrategy,
+                $options,
+                $discoverPastTweets = false
+            );
+        }
+
+        return $statuses;
+    }
+
+    /**
+     * @param CollectionStrategyInterface $collectionStrategy
+     * @param array                       $options
+     * @param bool                        $discoverPastTweets
+     *
+     * @return mixed
+     * @throws NonUniqueResultException
+     */
+    public function updateExtremum(
+        CollectionStrategyInterface $collectionStrategy,
+        array $options,
+        bool $discoverPastTweets = true
+    ): array {
+        if ($collectionStrategy->dateBeforeWhichStatusAreToBeCollected()) {
+            $discoverPastTweets = true;
+        }
+
+        $options = $this->removeMaxIdFromOptions($options, $discoverPastTweets);
+
+        $findingDirection = $this->getExtremumUpdateMethod($discoverPastTweets);
+        $status           = $this->findExtremum(
+            $collectionStrategy,
+            $options,
+            $findingDirection
+        );
+
+        $logPrefix = $this->getLogPrefix($collectionStrategy);
+
+        if (array_key_exists('statusId', $status) && (count($status) === 1)) {
+            $option = $this->getExtremumOption($discoverPastTweets);
+            $shift  = $this->getShiftFromExtremum($discoverPastTweets);
+
+            if ($status['statusId'] === '-INF' && $option === 'max_id') {
+                $status['statusId'] = 0;
+            }
+
+            $options[$option] = (int) $status['statusId'] + $shift;
+
+            $this->logger->info(
+                sprintf(
+                    'Extremum (%s%s) retrieved for "%s": #%s',
+                    $logPrefix,
+                    $option,
+                    $options[FetchPublication::SCREEN_NAME],
+                    $options[$option]
+                )
+            );
+
+            if ($options[$option] < 0 && $option === 'max_id') {
+                unset($options[$option]);
+            }
+
+            return $options;
+        }
+
+        $this->logger->info(
+            sprintf(
+                '[No %s retrieved for "%s"] ',
+                $logPrefix . 'extremum',
+                $options[FetchPublication::SCREEN_NAME]
+            )
+        );
+
+        return $options;
+    }
+
+    /**
+     * @param $discoverPastTweets
+     *
+     * @return int
+     */
+    private function getShiftFromExtremum($discoverPastTweets): int
+    {
+        if ($discoverPastTweets) {
+            return -1;
+        }
+
+        return 1;
+    }
+
+    /**
+     * @param CollectionStrategyInterface $collectionStrategy
+     * @param array                       $options
+     * @param string                      $findingDirection
+     *
+     * @return array|mixed
+     */
+    private function findExtremum(
+        CollectionStrategyInterface $collectionStrategy,
+        array $options,
+        $findingDirection
+    ): array {
+        if ($collectionStrategy->fetchLikes()) {
+            return $this->findLikeExtremum(
+                $collectionStrategy,
+                $options,
+                $findingDirection
+            );
+        }
+
+        if (!$collectionStrategy->dateBeforeWhichStatusAreToBeCollected()) {
+            return $this->statusRepository->findLocalMaximum(
+                $options[FetchPublication::SCREEN_NAME],
+                $collectionStrategy->dateBeforeWhichStatusAreToBeCollected()
+            );
+        }
+
+        return $this->statusRepository->findNextExtremum(
+            $options[FetchPublication::SCREEN_NAME],
+            $findingDirection,
+            $collectionStrategy->dateBeforeWhichStatusAreToBeCollected()
+        );
+    }
+
+    /**
+     * @param CollectionStrategyInterface $collectionStrategy
+     * @param                             $options
+     * @param                             $findingDirection
+     *
+     * @return array|mixed
+     */
+    private function findLikeExtremum(
+        CollectionStrategyInterface $collectionStrategy,
+        $options,
+        $findingDirection
+    ): array {
+        if (!$collectionStrategy->dateBeforeWhichStatusAreToBeCollected()) {
+            return $this->likedStatusRepository->findLocalMaximum(
+                $options[FetchPublication::SCREEN_NAME],
+                $collectionStrategy->dateBeforeWhichStatusAreToBeCollected()
+            );
+        }
+
+        return $this->likedStatusRepository->findNextExtremum(
+            $options[FetchPublication::SCREEN_NAME],
+            $findingDirection,
+            $collectionStrategy->dateBeforeWhichStatusAreToBeCollected()
+        );
+    }
+
+    /**
+     * @param $discoverPastTweets
+     *
+     * @return string
+     */
+    private function getExtremumUpdateMethod($discoverPastTweets): string
+    {
+        if ($discoverPastTweets) {
+            // next maximum
+            return ExtremumAwareInterface::FINDING_IN_ASCENDING_ORDER;
+        }
+
+        // next minimum
+        return ExtremumAwareInterface::FINDING_IN_DESCENDING_ORDER;
+    }
+
+    /**
+     * @param $discoverPastTweets
+     *
+     * @return string
+     */
+    private function getExtremumOption($discoverPastTweets): string
+    {
+        if ($discoverPastTweets) {
+            return 'max_id';
+        }
+
+        return 'since_id';
+    }
+
+    /**
+     * @param $options
+     * @param $discoverPastTweets
+     *
+     * @return array
+     */
+    private function removeMaxIdFromOptions($options, $discoverPastTweets): array
+    {
+        if (!$discoverPastTweets && array_key_exists('max_id', $options)) {
+            unset($options['max_id']);
+        }
+
+        return $options;
+    }
+
+    /**
+     * @param CollectionStrategyInterface $collectionStrategy
+     *
+     * @return string
+     */
+    private function getLogPrefix(CollectionStrategyInterface $collectionStrategy): string
+    {
+        if (!$collectionStrategy->dateBeforeWhichStatusAreToBeCollected()) {
+            return '';
+        }
+
+        return 'local ';
+    }
+
+    /**
+     * @param CollectionStrategyInterface $collectionStrategy
+     * @param                             $options
+     *
+     * @return mixed
+     */
+    private function removeCollectOptions(
+        CollectionStrategyInterface $collectionStrategy,
+        $options
+    ) {
+        if ($collectionStrategy->dateBeforeWhichStatusAreToBeCollected()) {
+            unset($options[FetchPublication::BEFORE]);
+        }
+        if (array_key_exists(FetchPublication::AGGREGATE_ID, $options)) {
+            unset($options[FetchPublication::AGGREGATE_ID]);
+        }
+
+        return $options;
     }
 }

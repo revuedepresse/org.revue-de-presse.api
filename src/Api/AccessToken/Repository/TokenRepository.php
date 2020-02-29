@@ -17,6 +17,11 @@ use App\Api\Entity\Token,
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ *
+ * @method Token|null find($id, $lockMode = null, $lockVersion = null)
+ * @method Token|null findOneBy(array $criteria, array $orderBy = null)
+ * @method Token[]    findAll()
+ * @method Token[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class TokenRepository extends ServiceEntityRepository implements TokenRepositoryInterface
 {
@@ -214,7 +219,7 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
      * @return mixed|null
      * @throws NonUniqueResultException
      */
-    public function findFirstUnfrozenToken()
+    public function findFirstUnfrozenToken(): ?TokenInterface
     {
         $queryBuilder = $this->createQueryBuilder('t');
 
@@ -231,7 +236,7 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
      * @return mixed|null
      * @throws NonUniqueResultException
      */
-    public function findFirstFrozenToken()
+    public function findFirstFrozenToken(): ?TokenInterface
     {
         $queryBuilder = $this->createQueryBuilder('t');
 

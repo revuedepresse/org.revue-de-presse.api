@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Domain\Collection;
 
+use App\Status\LikedStatusCollectionAwareInterface;
+
 interface PublicationStrategyInterface
 {
     public const RULE_BEFORE                 = 'before';
@@ -14,8 +16,13 @@ interface PublicationStrategyInterface
     public const RULE_LISTS                  = 'lists';
     public const RULE_QUERY_RESTRICTION      = 'query_restriction';
     public const RULE_PRIORITY_TO_AGGREGATES = 'priority_to_aggregates';
+    public const RULE_FETCH_LIKES            = LikedStatusCollectionAwareInterface::INTENT_TO_FETCH_LIKES;
 
     public function shouldSearchByQuery(): bool;
 
     public function shouldNotSearchByQuery(): bool;
+
+    public function shouldFetchLikes(): bool;
+
+    public function dateBeforeWhichPublicationsAreCollected(): ?string;
 }

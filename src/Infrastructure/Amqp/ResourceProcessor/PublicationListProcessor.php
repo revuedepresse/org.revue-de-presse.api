@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Amqp\ResourceProcessor;
 
-use App\Api\Entity\Token;
 use App\Api\Entity\TokenInterface;
 use App\Api\Exception\InvalidSerializedTokenException;
 use App\Domain\Collection\PublicationStrategyInterface;
@@ -12,7 +11,7 @@ use App\Domain\Resource\MemberIdentity;
 use App\Domain\Resource\PublicationList;
 use App\Infrastructure\Amqp\Exception\ContinuePublicationException;
 use App\Infrastructure\Amqp\Exception\StopPublicationException;
-use App\Infrastructure\DependencyInjection\MemberIdentityProcessorTrait;
+use App\Infrastructure\DependencyInjection\Membership\MemberIdentityProcessorTrait;
 use App\Infrastructure\DependencyInjection\TokenChangeTrait;
 use App\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Twitter\Api\ApiAccessorInterface;

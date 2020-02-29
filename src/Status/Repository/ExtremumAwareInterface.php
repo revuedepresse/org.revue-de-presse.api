@@ -8,23 +8,29 @@ namespace App\Status\Repository;
  */
 interface ExtremumAwareInterface
 {
+    public const FINDING_IN_ASCENDING_ORDER = 'asc';
+    public const FINDING_IN_DESCENDING_ORDER = 'desc';
+
     /**
-     * @param string         $memberName
-     * @param \DateTime|null $before
+     * @param string      $memberName
+     * @param string|null $before
      * @return array
      */
-    public function findLocalMaximum(string $memberName, \DateTime $before = null): array;
+    public function findLocalMaximum(
+        string $memberName,
+        ?string $before = null
+    ): array;
 
     /**
      * @param string         $screenName
      * @param string         $direction
-     * @param \DateTime|null $before
+     * @param string|null $before
      * @return mixed
      */
     public function findNextExtremum(
         string $screenName,
-        string $direction = 'asc',
-        \DateTime $before = null
+        string $direction = self::FINDING_IN_ASCENDING_ORDER,
+        ?string $before = null
     ): array;
 
     /**

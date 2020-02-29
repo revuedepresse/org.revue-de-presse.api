@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Api\Entity;
 
+use App\Domain\Publication\PublicationListInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -18,7 +19,7 @@ use Doctrine\ORM\Mapping as ORM;
  *     }
  * )
  */
-class Aggregate
+class Aggregate implements PublicationListInterface
 {
     /**
      * @var integer

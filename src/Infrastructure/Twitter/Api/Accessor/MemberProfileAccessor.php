@@ -6,7 +6,7 @@ namespace App\Infrastructure\Twitter\Api\Accessor;
 use App\Accessor\Exception\UnexpectedApiResponseException;
 use App\Domain\Membership\Exception\MembershipException;
 use App\Domain\Resource\MemberIdentity;
-use App\Infrastructure\DependencyInjection\MemberRepositoryTrait;
+use App\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Infrastructure\Repository\Membership\MemberRepositoryInterface;
 use App\Infrastructure\Twitter\Api\UnavailableResource;
 use App\Infrastructure\Twitter\Api\UnavailableResourceHandlerInterface;

@@ -296,11 +296,15 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
      * @throws ORMException
      * @throws OptimisticLockException
      */
-    public function declareMinStatusIdForMemberWithScreenName(string $minStatusId, string $screenName)
-    {
+    public function declareMinStatusIdForMemberWithScreenName(
+        string $minStatusId,
+        string $screenName
+    ): MemberInterface {
         $member = $this->ensureMemberExists($screenName);
 
-        if (is_null($member->minStatusId) || ((int) $minStatusId < (int) $member->minStatusId)) {
+        if ($member->minStatusId === null
+            || ((int) $minStatusId < (int) $member->minStatusId)
+        ) {
             $member->minStatusId = $minStatusId;
         }
 

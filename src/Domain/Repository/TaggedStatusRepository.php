@@ -8,7 +8,7 @@ use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;
 use App\Domain\Status\StatusInterface;
 use App\Domain\Status\TaggedStatus;
-use App\Infrastructure\DependencyInjection\StatusRepositoryTrait;
+use App\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -81,8 +81,10 @@ class TaggedStatusRepository implements TaggedStatusRepositoryInterface
      * @param $hash
      *
      * @return bool
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
-    public function archivedStatusHavingHashExists($hash): bool
+    public function archivedStatusHavingHashExists(string $hash): bool
     {
         $queryBuilder = $this->entityManager
             ->getRepository(ArchivedStatus::class)
@@ -111,7 +113,7 @@ class TaggedStatusRepository implements TaggedStatusRepositoryInterface
      * @throws NoResultException
      * @throws NonUniqueResultException
      */
-    public function statusHavingHashExists($hash): bool
+    public function statusHavingHashExists(string $hash): bool
     {
         if ($this->archivedStatusHavingHashExists($hash)) {
             return true;

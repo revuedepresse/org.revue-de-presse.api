@@ -4,9 +4,14 @@ declare(strict_types=1);
 namespace App\Infrastructure\Log;
 
 use App\Api\Entity\Aggregate;
+use App\Domain\Collection\CollectionStrategyInterface;
 use App\Domain\Status\StatusInterface;
+use App\Infrastructure\DependencyInjection\TranslatorTrait;
+use App\Infrastructure\Twitter\Collector\PublicationCollector;
 use Psr\Log\LoggerInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use function array_key_exists;
+use function count;
 use function json_decode;
 use function json_last_error;
 use function sprintf;
@@ -16,14 +21,138 @@ use const JSON_THROW_ON_ERROR;
 
 class StatusLogger implements StatusLoggerInterface
 {
+    use TranslatorTrait;
+
     /**
      * @var LoggerInterface
      */
     private LoggerInterface $logger;
 
-    public function __construct(LoggerInterface $logger)
-    {
-        $this->logger = $logger;
+    public function __construct(
+        TranslatorInterface $translator,
+        LoggerInterface $logger
+    ) {
+        $this->translator = $translator;
+        $this->logger     = $logger;
+    }
+
+    /**
+     * @param CollectionStrategyInterface $collectionStrategy
+     * @param int                         $totalStatuses
+     * @param array                       $forms
+     * @param int                         $batchSize
+     *
+     * @return mixed
+     */
+    public function logHowManyItemsHaveBeenCollected(
+        CollectionStrategyInterface $collectionStrategy,
+        int $totalStatuses,
+        array $forms,
+        int $batchSize
+    ): void {
+        $maxStatusId = $collectionStrategy->maxStatusId();
+        if (is_infinite($collectionStrategy->maxStatusId())) {
+            $maxStatusId = '+infinity';
+        }
+
+        $this->logger->info(
+            sprintf(
+                '%d %s older than %s of id #%d have been found for "%s"',
+                $totalStatuses,
+                $forms['plural'],
+                $forms['singular'],
+                $maxStatusId,
+                $collectionStrategy->screenName()
+            )
+        );
+
+        $this->logCollectionProgress(
+            $collectionStrategy->screenName(),
+            $batchSize,
+            $totalStatuses
+        );
+    }
+
+    /**
+     * @param array  $statuses
+     * @param string $screenName
+     */
+    public function logHowManyItemsHaveBeenFetched(
+        array $statuses,
+        string $screenName
+    ): void {
+        $this->logger->info(
+            sprintf(
+                'Fetched "%d" statuses for "%s"',
+                count($statuses),
+                $screenName
+            )
+        );
+    }
+
+    /**
+     * @param int    $statusesCount
+     * @param string $memberName
+     * @param bool   $collectingLikes
+     *
+     * @return int
+     */
+    public function logHowManyItemsHaveBeenSaved(
+        int $statusesCount,
+        string $memberName,
+        bool $collectingLikes
+    ): int {
+        if ($statusesCount > 0) {
+            $messageKey = 'logs.info.status_saved';
+            $total      = 'total_status';
+            if ($collectingLikes) {
+                $messageKey = 'logs.info.likes_saved';
+                $total      = 'total_likes';
+            }
+
+            $savedTweets = $this->translator->trans(
+                $messageKey,
+                [
+                    'count'  => $statusesCount,
+                    'member' => $memberName,
+                    $total   => $statusesCount,
+                ],
+                'logs'
+            );
+
+            $this->logger->info($savedTweets);
+
+            return $statusesCount;
+        }
+
+        $this->logger->info(sprintf('Nothing new for "%s"', $memberName));
+
+        return 0;
+    }
+
+    /**
+     * @param                             $options
+     * @param CollectionStrategyInterface $collectionStrategy
+     */
+    public function logIntentionWithRegardsToAggregate(
+        $options,
+        CollectionStrategyInterface $collectionStrategy
+    ): void {
+        if ($collectionStrategy->publicationListId() === null) {
+            $this->logger->info(sprintf(
+                'No aggregate id for "%s"', $options['screen_name']
+            ));
+
+            return;
+        }
+
+        $this->logger->info(
+            sprintf(
+                'About to save status for "%s" in aggregate #%d',
+                $options['screen_name'],
+                $collectionStrategy->publicationListId()
+            )
+        );
     }
 
     public function logStatus(StatusInterface $status): void
@@ -41,14 +170,90 @@ class StatusLogger implements StatusLoggerInterface
                 $this->getStatusAggregate($status),
                 $status->getScreenName(),
                 $status->getText(),
-                implode([
-                    'https://twitter.com/',
-                    $status->getScreenName(),
-                    '/status/',
-                    $status->getStatusId()
-                ])
+                implode(
+                    [
+                        'https://twitter.com/',
+                        $status->getScreenName(),
+                        '/status/',
+                        $status->getStatusId()
+                    ]
+                )
             )
         );
+    }
+
+    /**
+     * @param string                      $screenName
+     * @param CollectionStrategyInterface $collectionStrategy
+     * @param                             $lastCollectionBatchSize
+     * @param                             $totalCollectedStatuses
+     */
+    private function logCollectionProgress(
+        string $screenName,
+        CollectionStrategyInterface $collectionStrategy,
+        int $lastCollectionBatchSize,
+        int $totalCollectedStatuses
+    ): void {
+        $subject = 'statuses';
+        if ($collectionStrategy->fetchLikes()) {
+            $subject = 'likes';
+        }
+
+        if ($this->collectedAllAvailableStatuses($lastCollectionBatchSize, $totalCollectedStatuses)) {
+            $this->logger->info(
+                sprintf(
+                    'All available %s have most likely been fetched for "%s" or few %s are available (%d)',
+                    $subject,
+                    $screenName,
+                    $subject,
+                    $totalCollectedStatuses
+                )
+            );
+
+            return;
+        }
+
+        $this->logger->info(
+            sprintf(
+                '%d more %s in the past have been saved for "%s" in aggregate #%d',
+                $lastCollectionBatchSize,
+                $subject,
+                $screenName,
+                $collectionStrategy->publicationListId()
+            )
+        );
+    }
+
+    /**
+     * @param $lastCollectionBatchSize
+     * @param $totalCollectedStatuses
+     *
+     * @return bool
+     */
+    public function collectedAllAvailableStatuses($lastCollectionBatchSize, $totalCollectedStatuses): bool
+    {
+        return $this->didNotCollectedAnyStatus($lastCollectionBatchSize)
+            && $this->hitCollectionLimit($totalCollectedStatuses);
+    }
+
+    /**
+     * @param $statuses
+     *
+     * @return bool
+     */
+    public function didNotCollectedAnyStatus($statuses): bool
+    {
+        return $statuses === null || $statuses === 0;
+    }
+
+    /**
+     * @param $statuses
+     *
+     * @return bool
+     */
+    public function hitCollectionLimit($statuses): bool
+    {
+        return $statuses >= (CollectionStrategyInterface::MAX_AVAILABLE_TWEETS_PER_USER - 100);
     }
 
     /**
@@ -56,7 +261,7 @@ class StatusLogger implements StatusLoggerInterface
      *
      * @return array
      */
-    public function extractReachOfStatus(StatusInterface $memberStatus): array
+    private function extractReachOfStatus(StatusInterface $memberStatus): array
     {
         $decodedApiResponse = json_decode(
             $memberStatus->getApiDocument(),

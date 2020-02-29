@@ -41,6 +41,7 @@ use stdClass;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Translation\Translator;
 use TwitterOAuth;
+use function array_key_exists;
 use function is_array;
 use function is_null;
 use function is_numeric;
@@ -451,17 +452,9 @@ class Accessor implements ApiAccessorInterface,
      */
     public function fetchStatuses(array $options)
     {
-        if (is_null($options) || (!is_object($options) && !is_array($options))) {
-            throw new Exception('Invalid options');
-        }
+        $parameters = $this->validateRequestOptions((object) $options);
 
-        if (is_array($options)) {
-            $options = (object) $options;
-        }
-
-        $parameters = $this->validateRequestOptions($options);
-
-        if ($this->isAboutToCollectLikesFromCriteria((array) $options)) {
+        if ($this->isAboutToCollectLikesFromCriteria($options)) {
             return $this->fetchLikes($parameters);
         }
 
@@ -828,7 +821,7 @@ class Accessor implements ApiAccessorInterface,
         if ($exception->getCode() === 0) {
             $emptyErrorCodeMessage   = $this->translator->trans(
                 'logs.info.empty_error_code',
-                ['{{ oauth token start }}' => $this->takeFirstTokenCharacters($token)],
+                ['oauth token start' => $this->takeFirstTokenCharacters($token)],
                 'logs'
             );
             $emptyErrorCodeException = EmptyErrorCodeException::encounteredWhenUsingToken(
@@ -1314,7 +1307,7 @@ class Accessor implements ApiAccessorInterface,
      *
      * @return bool
      */
-    public function shouldSkipSerializationForMemberWithScreenName(string $screenName)
+    public function shouldSkipCollectForMemberWithScreenName(string $screenName)
     {
         $member = $this->userRepository->findOneBy(['twitter_username' => $screenName]);
         if (!$member instanceof MemberInterface) {
@@ -1974,7 +1967,7 @@ class Accessor implements ApiAccessorInterface,
      *
      * @return array
      */
-    protected function validateRequestOptions($options)
+    protected function validateRequestOptions(\stdClass $options): array
     {
         $validatedOptions = [];
 
