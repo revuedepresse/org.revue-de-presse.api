@@ -450,7 +450,7 @@ class Accessor implements ApiAccessorInterface,
      * @throws UnavailableResourceException
      * @throws UnexpectedApiResponseException
      */
-    public function fetchStatuses(array $options)
+    public function fetchStatuses(array $options): array
     {
         $parameters = $this->validateRequestOptions((object) $options);
 
@@ -606,9 +606,19 @@ class Accessor implements ApiAccessorInterface,
      * @param $screenName
      *
      * @return \API|mixed|object|stdClass
+     * @throws ApiRateLimitingException
+     * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
+     * @throws NonUniqueResultException
+     * @throws NotFoundMemberException
+     * @throws NotFoundStatusException
+     * @throws OptimisticLockException
+     * @throws ProtectedAccountException
+     * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
-     * @throws OptimisticLockException
+     * @throws UnexpectedApiResponseException
      */
     public function getUserListSubscriptions($screenName)
     {

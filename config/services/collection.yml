@@ -19,5 +19,6 @@ services:
         class: 'App\Infrastructure\Twitter\Collector\LikedStatusCollectDecider'
         calls:
             - [ 'setLikedStatusRepository',      [ '@repository.liked_status' ] ]
+            - [ 'setStatusAccessor',             [ '@App\Accessor\StatusAccessor' ] ]
             - [ 'setStatusRepository',           [ '@App\Api\Repository\StatusRepository' ] ]
             - [ 'setStatusPersistence',          [ '@App\Infrastructure\Status\Persistence\StatusPersistence' ] ]

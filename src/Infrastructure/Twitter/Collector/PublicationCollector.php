@@ -14,20 +14,20 @@ use App\Domain\Collection\CollectionStrategy;
 use App\Domain\Collection\CollectionStrategyInterface;
 use App\Domain\Publication\PublicationListInterface;
 use App\Infrastructure\Amqp\Message\FetchPublication;
-use App\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
-use App\Infrastructure\DependencyInjection\Api\ApiLimitModeratorTrait;
-use App\Infrastructure\DependencyInjection\Api\StatusAccessorTrait;
-use App\Infrastructure\DependencyInjection\Collection\InterruptibleCollectDeciderTrait;
-use App\Infrastructure\DependencyInjection\LoggerTrait;
-use App\Infrastructure\DependencyInjection\Membership\WhispererIdentificationTrait;
-use App\Infrastructure\DependencyInjection\Membership\WhispererRepositoryTrait;
-use App\Infrastructure\DependencyInjection\Publication\PublicationListRepositoryTrait;
-use App\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
-use App\Infrastructure\DependencyInjection\Status\LikedStatusRepositoryTrait;
-use App\Infrastructure\DependencyInjection\Status\StatusLoggerTrait;
-use App\Infrastructure\DependencyInjection\Status\StatusPersistenceTrait;
-use App\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
-use App\Infrastructure\DependencyInjection\TokenRepositoryTrait;
+use App\Infrastructure\DependencyInjection\{Api\ApiAccessorTrait,
+    Api\ApiLimitModeratorTrait,
+    Api\StatusAccessorTrait,
+    Collection\InterruptibleCollectDeciderTrait,
+    LoggerTrait,
+    Membership\WhispererIdentificationTrait,
+    Membership\WhispererRepositoryTrait,
+    Publication\PublicationListRepositoryTrait,
+    Publication\PublicationPersistenceTrait,
+    Status\LikedStatusRepositoryTrait,
+    Status\StatusLoggerTrait,
+    Status\StatusPersistenceTrait,
+    Status\StatusRepositoryTrait,
+    TokenRepositoryTrait};
 use App\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Infrastructure\Twitter\Collector\Exception\RateLimitedException;
 use App\Infrastructure\Twitter\Collector\Exception\SkipCollectException;
@@ -97,6 +97,7 @@ class PublicationCollector implements PublicationCollectorInterface
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
      * @throws UnexpectedApiResponseException
+     * @throws Exception
      */
     public function collect(array $options, $greedy = false, $discoverPastTweets = true): bool
     {
@@ -121,8 +122,8 @@ class PublicationCollector implements PublicationCollectorInterface
 
         if ($this->collectionStrategy->oneOfTheOptionsIsActive()) {
             $options = $this->removeCollectOptions(
-                    $options
-                );
+                $options
+            );
 
             try {
                 $this->ensureTargetAggregateIsNotLocked();
@@ -166,12 +167,7 @@ class PublicationCollector implements PublicationCollectorInterface
 
             $options = $this->setUpAccessorWithFirstAvailableToken($token, $options);
             $success = $this->tryCollectingFurther($options, $greedy, $discoverPastTweets);
-        } catch (UnavailableResourceException $exception) {
-            throw $exception;
-        } catch (SuspendedAccountException
-        |NotFoundMemberException
-        |ProtectedAccountException $exception
-        ) {
+        } catch (SuspendedAccountException|NotFoundMemberException|ProtectedAccountException $exception) {
             UnavailableResourceException::handleUnavailableMemberException(
                 $exception,
                 $this->logger,
@@ -201,21 +197,15 @@ class PublicationCollector implements PublicationCollectorInterface
     }
 
     /**
-     * @param array $options
+     * @param $lastCollectionBatchSize
+     * @param $totalCollectedStatuses
      *
-     * @return mixed
+     * @return bool
      */
-    public function removeCollectOptions(
-        $options
-    ) {
-        if ($this->collectionStrategy->dateBeforeWhichStatusAreToBeCollected()) {
-            unset($options[FetchPublication::BEFORE]);
-        }
-        if (array_key_exists(FetchPublication::AGGREGATE_ID, $options)) {
-            unset($options[FetchPublication::AGGREGATE_ID]);
-        }
-
-        return $options;
+    public function collectedAllAvailableStatuses($lastCollectionBatchSize, $totalCollectedStatuses): bool
+    {
+        return !$this->justCollectedSomeStatuses($lastCollectionBatchSize)
+            && $this->hitCollectionLimit($totalCollectedStatuses);
     }
 
     /**
@@ -239,15 +229,21 @@ class PublicationCollector implements PublicationCollectorInterface
     }
 
     /**
-     * @param $lastCollectionBatchSize
-     * @param $totalCollectedStatuses
+     * @param array $options
      *
-     * @return bool
+     * @return mixed
      */
-    public function collectedAllAvailableStatuses($lastCollectionBatchSize, $totalCollectedStatuses): bool
-    {
-        return !$this->justCollectedSomeStatuses($lastCollectionBatchSize)
-            && $this->hitCollectionLimit($totalCollectedStatuses);
+    public function removeCollectOptions(
+        $options
+    ) {
+        if ($this->collectionStrategy->dateBeforeWhichStatusAreToBeCollected()) {
+            unset($options[FetchPublication::BEFORE]);
+        }
+        if (array_key_exists(FetchPublication::AGGREGATE_ID, $options)) {
+            unset($options[FetchPublication::AGGREGATE_ID]);
+        }
+
+        return $options;
     }
 
     /**
@@ -392,52 +388,6 @@ class PublicationCollector implements PublicationCollectorInterface
     }
 
     /**
-     * @param array $options
-     *
-     * @param int   $lastCollectionBatchSize
-     *
-     * @return mixed
-     */
-    private function logHowManyItemsHaveBeenCollected(
-        array $options,
-        int $lastCollectionBatchSize
-    )
-    {
-        $this->collectionStrategy->optInToCollectStatusFor($options[FetchPublication::SCREEN_NAME]);
-        $this->collectionStrategy->optInToCollectStatusWhichIdIsLessThan($options['max_id']);
-
-        $subjectInSingularForm = 'status';
-        $subjectInPluralForm   = 'statuses';
-        $countCollectedItems   = function ($memberName, $maxId) {
-            return $this->statusRepository->countCollectedStatuses($memberName, $maxId);
-        };
-        if ($this->collectionStrategy->fetchLikes()) {
-            $subjectInSingularForm = 'like';
-            $subjectInPluralForm   = 'likes';
-            $countCollectedItems   = function ($memberName, $maxId) {
-                return $this->likedStatusRepository->countCollectedLikes($memberName, $maxId);
-            };
-        }
-
-        $totalStatuses = $countCollectedItems(
-            $this->collectionStrategy->screenName(),
-            $options['max_id']
-        );
-
-        $this->collectStatusLogger->logHowManyItemsHaveBeenCollected(
-            $this->collectionStrategy,
-            (int) $totalStatuses,
-            [
-                'plural' => $subjectInPluralForm,
-                'singular' => $subjectInSingularForm
-            ],
-            $lastCollectionBatchSize
-        );
-
-        return $totalStatuses;
-    }
-
-    /**
      * @param $options
      * @param $lastCollectionBatchSize
      * @param $totalCollectedStatuses
@@ -510,7 +460,8 @@ class PublicationCollector implements PublicationCollectorInterface
      */
     protected function remainingLikes($options)
     {
-        $serializedLikesCount = $this->likedStatusRepository->countHowManyLikesFor($options[FetchPublication::SCREEN_NAME]);
+        $serializedLikesCount =
+            $this->likedStatusRepository->countHowManyLikesFor($options[FetchPublication::SCREEN_NAME]);
         $existingStatus       = $this->translator->trans(
             'logs.info.likes_existing',
             [
@@ -557,7 +508,8 @@ class PublicationCollector implements PublicationCollectorInterface
      */
     protected function remainingStatuses($options)
     {
-        $serializedStatusCount = $this->statusRepository->countHowManyStatusesFor($options[FetchPublication::SCREEN_NAME]);
+        $serializedStatusCount =
+            $this->statusRepository->countHowManyStatusesFor($options[FetchPublication::SCREEN_NAME]);
         $existingStatus        = $this->translator->trans(
             'logs.info.status_existing',
             [
@@ -616,13 +568,12 @@ class PublicationCollector implements PublicationCollectorInterface
             );
         }
 
-        $lookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow =
-            $this->isLookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow($options);
+        $betweenPublicationDateOfLastOneSavedAndNow = $this->isLookingBetweenPublicationDateOfLastOneSavedAndNow($options);
 
         if (count($statuses) > 0) {
             $this->safelyDeclareExtremum(
                 $statuses,
-                $lookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow,
+                $betweenPublicationDateOfLastOneSavedAndNow,
                 $options[FetchPublication::SCREEN_NAME]
             );
         }
@@ -630,8 +581,9 @@ class PublicationCollector implements PublicationCollectorInterface
         $statusesIds   = $this->getExtremeStatusesIdsFor($options);
         $firstStatusId = $statusesIds['min_id'];
         $lastStatusId  = $statusesIds['max_id'];
+
         if (
-            !$lookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow
+            !$betweenPublicationDateOfLastOneSavedAndNow
             && $firstStatusId !== null
             && $lastStatusId !== null
             && count($statuses) > 0
@@ -641,12 +593,11 @@ class PublicationCollector implements PublicationCollectorInterface
             return 0;
         }
 
-        $lastCollectionBatchSize = $this->statusPersistence
-            ->saveStatusForScreenName(
-                $statuses,
-                $options[FetchPublication::SCREEN_NAME],
-                $this->collectionStrategy
-            );
+        $lastCollectionBatchSize = $this->statusPersistence->saveStatusForScreenName(
+            $statuses,
+            $options[FetchPublication::SCREEN_NAME],
+            $collectionStrategy
+        );
 
         $totalCollectedStatuses = $this->logHowManyItemsHaveBeenCollected(
             $options,
@@ -790,13 +741,54 @@ class PublicationCollector implements PublicationCollectorInterface
      *
      * @return bool
      */
-    private function isLookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow($options): bool
+    private function isLookingBetweenPublicationDateOfLastOneSavedAndNow($options): bool
     {
-        if (array_key_exists('max_id', $options) && is_infinite($options['max_id'])) {
-            return true;
+        return array_key_exists('max_id', $options) && is_infinite($options['max_id']);
+    }
+
+    /**
+     * @param array $options
+     *
+     * @param int   $lastCollectionBatchSize
+     *
+     * @return mixed
+     */
+    private function logHowManyItemsHaveBeenCollected(
+        array $options,
+        ?int $lastCollectionBatchSize
+    ) {
+        $this->collectionStrategy->optInToCollectStatusFor($options[FetchPublication::SCREEN_NAME]);
+        $this->collectionStrategy->optInToCollectStatusWhichIdIsLessThan($options['max_id']);
+
+        $subjectInSingularForm = 'status';
+        $subjectInPluralForm   = 'statuses';
+        $countCollectedItems   = function ($memberName, $maxId) {
+            return $this->statusRepository->countCollectedStatuses($memberName, $maxId);
+        };
+        if ($this->collectionStrategy->fetchLikes()) {
+            $subjectInSingularForm = 'like';
+            $subjectInPluralForm   = 'likes';
+            $countCollectedItems   = function ($memberName, $maxId) {
+                return $this->likedStatusRepository->countCollectedLikes($memberName, $maxId);
+            };
         }
 
-        return false;
+        $totalStatuses = $countCollectedItems(
+            $this->collectionStrategy->screenName(),
+            $options['max_id']
+        );
+
+        $this->collectStatusLogger->logHowManyItemsHaveBeenCollected(
+            $this->collectionStrategy,
+            (int) $totalStatuses,
+            [
+                'plural'   => $subjectInPluralForm,
+                'singular' => $subjectInSingularForm
+            ],
+            (int) $lastCollectionBatchSize
+        );
+
+        return $totalStatuses;
     }
 
     /**
@@ -849,8 +841,7 @@ class PublicationCollector implements PublicationCollectorInterface
     private function setUpAccessorWithFirstAvailableToken(
         Token $token,
         array $options
-    ): array
-    {
+    ): array {
         $options[self::MESSAGE_OPTION_TOKEN] = $token->getOauthToken();
         $this->setupAccessor(
             [
@@ -930,13 +921,15 @@ class PublicationCollector implements PublicationCollectorInterface
             $discoverPastTweets = $lastCollectionBatchSize !== null && $discoverPastTweets;
             if ($greedy) {
                 $options[FetchPublication::AGGREGATE_ID] = $this->collectionStrategy->publicationListId();
-                $options[FetchPublication::BEFORE]       = $this->collectionStrategy->dateBeforeWhichStatusAreToBeCollected();
+                $options[FetchPublication::BEFORE]       =
+                    $this->collectionStrategy->dateBeforeWhichStatusAreToBeCollected();
 
                 $success = $this->collect($options, $greedy, $discoverPastTweets);
 
                 $justDiscoveredFutureTweets = !$discoverPastTweets;
-                if ($justDiscoveredFutureTweets &&
-                    $this->collectionStrategy->dateBeforeWhichStatusAreToBeCollected() === null
+                if (
+                    $justDiscoveredFutureTweets
+                    && $this->collectionStrategy->dateBeforeWhichStatusAreToBeCollected() === null
                 ) {
                     unset($options[FetchPublication::AGGREGATE_ID]);
 
@@ -969,10 +962,12 @@ class PublicationCollector implements PublicationCollectorInterface
             );
             if ($publicationList instanceof PublicationListInterface) {
                 $this->publicationListRepository->unlockAggregate($publicationList);
-                $this->logger->info(sprintf(
-                    'Unlocked publication list of id #%d',
-                    $publicationList->getId()
-                ));
+                $this->logger->info(
+                    sprintf(
+                        'Unlocked publication list of id #%d',
+                        $publicationList->getId()
+                    )
+                );
             }
         }
     }

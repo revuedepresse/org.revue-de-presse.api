@@ -6,7 +6,7 @@ namespace App\Infrastructure\Twitter\Collector;
 use App\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Api\Entity\Token;
 use App\Domain\Collection\CollectionStrategy;
-use App\Domain\Repository\StatusRepositoryInterface;
+use App\Infrastructure\Repository\Status\StatusRepositoryInterface;
 use App\Infrastructure\Amqp\Message\FetchPublication;
 use App\Infrastructure\Api\Throttling\ApiLimitModeratorInterface;
 use App\Status\Repository\ExtremumAwareInterface;

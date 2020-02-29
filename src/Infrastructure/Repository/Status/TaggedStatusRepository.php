@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Domain\Repository;
+namespace App\Infrastructure\Repository\Status;
 
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\ArchivedStatus;

@@ -5,7 +5,7 @@ namespace App\Tests\Accessor;
 
 use App\Accessor\StatusAccessor;
 use App\Domain\Collection\CollectionStrategy;
-use App\Domain\Repository\StatusRepositoryInterface;
+use App\Infrastructure\Repository\Status\StatusRepositoryInterface;
 use App\Infrastructure\Amqp\Message\FetchPublication;
 use App\Infrastructure\Twitter\Api\Accessor\StatusAccessorInterface;
 use App\Status\Repository\ExtremumAwareInterface;

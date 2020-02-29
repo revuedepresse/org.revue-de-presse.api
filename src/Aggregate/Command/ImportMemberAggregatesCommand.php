@@ -3,40 +3,27 @@ declare(strict_types=1);
 
 namespace App\Aggregate\Command;
 
-use App\Accessor\Exception\ApiRateLimitingException;
-use App\Accessor\Exception\NotFoundStatusException;
-use App\Accessor\Exception\ReadOnlyApplicationException;
-use App\Accessor\Exception\UnexpectedApiResponseException;
 use App\Aggregate\Repository\MemberAggregateSubscriptionRepository;
 use App\Console\AbstractCommand;
+use App\Domain\Resource\OwnershipCollection;
+use App\Infrastructure\Repository\Membership\MemberRepository;
 use App\Member\Entity\AggregateSubscription;
-use App\Membership\Entity\MemberInterface;
+use App\Member\Entity\ExceptionalMember;
 use App\Member\Repository\AggregateSubscriptionRepository;
 use App\Member\Repository\NetworkRepository;
+use App\Membership\Entity\MemberInterface;
 use App\Twitter\Api\ApiAccessorInterface;
-use App\Twitter\Api\Resource\OwnershipCollection;
-use App\Twitter\Exception\BadAuthenticationDataException;
-use App\Twitter\Exception\InconsistentTokenRepository;
-use App\Twitter\Exception\NotFoundMemberException;
-use App\Twitter\Exception\ProtectedAccountException;
-use App\Twitter\Exception\SuspendedAccountException;
-use App\Twitter\Exception\UnavailableResourceException;
-use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\OptimisticLockException;
-use ReflectionException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use App\Twitter\Api\Accessor;
-use App\Infrastructure\Repository\Membership\MemberRepository;
 
 class ImportMemberAggregatesCommand extends AbstractCommand
 {
-    const OPTION_MEMBER_NAME = 'member-name';
+    private const OPTION_MEMBER_NAME = 'member-name';
 
-    const OPTION_FIND_OWNERSHIP = 'find-ownerships';
+    private const OPTION_FIND_OWNERSHIP = 'find-ownerships';
 
-    const OPTION_LIST_RESTRICTION = 'list-restriction';
+    private const OPTION_LIST_RESTRICTION = 'list-restriction';
 
     /**
      * @var ApiAccessorInterface
@@ -100,19 +87,6 @@ class ImportMemberAggregatesCommand extends AbstractCommand
      * @param OutputInterface $output
      *
      * @return int|null|void
-     * @throws ApiRateLimitingException
-     * @throws BadAuthenticationDataException
-     * @throws InconsistentTokenRepository
-     * @throws NonUniqueResultException
-     * @throws NotFoundMemberException
-     * @throws NotFoundStatusException
-     * @throws OptimisticLockException
-     * @throws ProtectedAccountException
-     * @throws ReadOnlyApplicationException
-     * @throws ReflectionException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws UnexpectedApiResponseException
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
@@ -207,7 +181,7 @@ class ImportMemberAggregatesCommand extends AbstractCommand
                         $member = $this->getMemberByTwitterId($user, $membersIndexedByTwitterId);
 
                         $index = sprintf('%s-%d', $memberAggregateSubscription->getId(), $member->getId());
-                        if (!array_key_exists($index, $indexedMemberAggregateSubscriptions)) {
+                        if (!\array_key_exists($index, $indexedMemberAggregateSubscriptions)) {
                             $this->aggregateSubscriptionRepository->make($memberAggregateSubscription, $member);
                         }
                     }
@@ -224,11 +198,11 @@ class ImportMemberAggregatesCommand extends AbstractCommand
     /**
      * @param \stdClass $user
      * @param           $membersIndexedByTwitterId
-     * @return \App\Member\Entity\ExceptionalMember|MemberInterface|null|object
+     * @return ExceptionalMember|MemberInterface|null|object
      */
     public function getMemberByTwitterId(\stdClass $user, $membersIndexedByTwitterId)
     {
-        if (!array_key_exists($user->id_str, $membersIndexedByTwitterId)) {
+        if (!\array_key_exists($user->id_str, $membersIndexedByTwitterId)) {
             return $this->networkRepository->ensureMemberExists($user->id);
         }
 
@@ -239,19 +213,6 @@ class ImportMemberAggregatesCommand extends AbstractCommand
      * @param $memberName
      *
      * @return \API|mixed|object|\stdClass
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws ApiRateLimitingException
-     * @throws NotFoundStatusException
-     * @throws ReadOnlyApplicationException
-     * @throws UnexpectedApiResponseException
-     * @throws BadAuthenticationDataException
-     * @throws InconsistentTokenRepository
-     * @throws NotFoundMemberException
-     * @throws ProtectedAccountException
-     * @throws ReflectionException
      */
     private function findListSubscriptions($memberName): OwnershipCollection
     {
