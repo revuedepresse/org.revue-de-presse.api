@@ -44,7 +44,7 @@ services:
             - [ 'setPublicationRepository',  [ '@App\Twitter\Repository\PublicationRepository' ] ]
             - [ 'setStatusLogger',           [ '@App\Infrastructure\Log\StatusLogger' ] ]
             - [ 'setStatusPersistence',      [ '@App\Infrastructure\Status\Persistence\StatusPersistence' ] ]
-            - [ 'setTaggedStatusRepository', [ '@App\Domain\Repository\TaggedStatusRepository' ] ]
+            - [ 'setTaggedStatusRepository', [ '@App\Infrastructure\Repository\Status\TaggedStatusRepository' ] ]
             - [ 'setTimelyStatusRepository', [ '@repository.timely_status' ] ]
         properties:
             appLogger:                '@logger'
@@ -63,7 +63,7 @@ services:
             - [ 'setPublicationRepository',  [ '@App\Twitter\Repository\PublicationRepository' ] ]
             - [ 'setStatusLogger',           [ '@App\Infrastructure\Log\StatusLogger' ] ]
             - [ 'setStatusPersistence',      [ '@App\Infrastructure\Status\Persistence\StatusPersistence' ] ]
-            - [ 'setTaggedStatusRepository', [ '@App\Domain\Repository\TaggedStatusRepository' ] ]
+            - [ 'setTaggedStatusRepository', [ '@App\Infrastructure\Repository\Status\TaggedStatusRepository' ] ]
             - [ 'setTimelyStatusRepository', [ '@repository.timely_status' ] ]
         properties:
             appLogger:              '@logger'
@@ -81,7 +81,7 @@ services:
             - [ 'setMemberRepository',       [ '@user_manager' ] ]
             - [ 'setPublicationRepository',  [ '@App\Twitter\Repository\PublicationRepository' ] ]
             - [ 'setStatusLogger',           [ '@App\Infrastructure\Log\StatusLogger' ] ]
-            - [ 'setTaggedStatusRepository', [ '@App\Domain\Repository\TaggedStatusRepository' ] ]
+            - [ 'setTaggedStatusRepository', [ '@App\Infrastructure\Repository\Status\TaggedStatusRepository' ] ]
             - [ 'setTimelyStatusRepository', [ '@repository.timely_status' ] ]
         properties:
             likedStatusRepository:  '@repository.liked_status'
@@ -123,8 +123,8 @@ services:
             - '@user_manager'
             - '@logger'
 
-    App\Domain\Repository\TaggedStatusRepository:
-        class: 'App\Domain\Repository\TaggedStatusRepository'
+    App\Infrastructure\Repository\Status\TaggedStatusRepository:
+        class: 'App\Infrastructure\Repository\Status\TaggedStatusRepository'
         arguments:
             - '@doctrine.orm.entity_manager'
             - '@logger'

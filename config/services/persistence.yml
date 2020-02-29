@@ -22,5 +22,5 @@ services:
             - [ 'setPublicationListRepository', [ '@repository.publication_list' ] ]
             - [ 'setStatusLogger',              [ '@App\Infrastructure\Log\StatusLogger' ] ]
             - [ 'setStatusRepository',          [ '@App\Api\Repository\StatusRepository' ] ]
-            - [ 'setTaggedStatusRepository',    [ '@App\Domain\Repository\TaggedStatusRepository' ] ]
+            - [ 'setTaggedStatusRepository',    [ '@App\Infrastructure\Repository\Status\TaggedStatusRepository' ] ]
         public: true
