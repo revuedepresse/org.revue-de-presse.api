@@ -255,7 +255,7 @@ class PublicationCollector implements PublicationCollectorInterface
      *
      * @return $this
      */
-    public function setupAccessor(array $oauthTokens)
+    public function setupAccessor(array $oauthTokens): self
     {
         if (array_key_exists('authentication_header', $oauthTokens)) {
             $this->apiAccessor->setAuthenticationHeader($oauthTokens['authentication_header']);
@@ -324,8 +324,8 @@ class PublicationCollector implements PublicationCollectorInterface
     {
         $this->setupAccessor(
             [
-                TokenInterface::FIELD_TOKEN  => $token->getOauthToken(),
-                TokenInterface::FIELD_SECRET => $token->getOauthTokenSecret()
+                TokenInterface::FIELD_TOKEN  => $token->getOAuthToken(),
+                TokenInterface::FIELD_SECRET => $token->getOAuthSecret()
             ]
         );
 
@@ -426,7 +426,7 @@ class PublicationCollector implements PublicationCollectorInterface
 
         $this->collectStatusLogger->logHowManyItemsHaveBeenCollected(
             $this->collectionStrategy,
-            $totalStatuses,
+            (int) $totalStatuses,
             [
                 'plural' => $subjectInPluralForm,
                 'singular' => $subjectInSingularForm

@@ -11,3 +11,4 @@ services:
             - [ 'setStatusPersistence',          [ '@App\Infrastructure\Status\Persistence\StatusPersistence' ] ]
             - [ 'setTokenRepository',            [ '@repository.access_token' ] ]
             - [ 'setWhispererRepository',        [ '@repository.whisperer' ] ]
+        public: true

@@ -69,7 +69,7 @@ class Token implements TokenInterface
      *
      * @ORM\Column(name="secret", type="string", length=255, nullable=true)
      */
-    protected $oauthTokenSecret;
+    protected ?string $oauthTokenSecret;
 
     /**
      * @var string
@@ -255,11 +255,15 @@ class Token implements TokenInterface
     }
 
     /**
-     * @param \DateTime $frozenUntil
+     * @param \DateTimeInterface $frozenUntil
+     *
+     * @return $this
      */
-    public function setFrozenUntil($frozenUntil)
+    public function setFrozenUntil(\DateTimeInterface $frozenUntil): self
     {
         $this->frozenUntil = $frozenUntil;
+
+        return $this;
     }
 
     /**
@@ -275,7 +279,7 @@ class Token implements TokenInterface
      */
     public function __toString()
     {
-        return $this->getOauthToken();
+        return $this->getOAuthToken();
     }
 
     /**

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Tests\Builder;
 
 use App\Api\AccessToken\Repository\TokenRepositoryInterface;
+use App\Api\Entity\TokenInterface;
 use Prophecy\Prophet;
 
 class TokenRepositoryBuilder
@@ -26,7 +27,7 @@ class TokenRepositoryBuilder
         return $this->prophecy->reveal();
     }
 
-    public function willFindATokenOtherThan($excludedToken, $returnedToken)
+    public function willFindATokenOtherThan($excludedToken, $returnedToken): TokenRepositoryBuilder
     {
         $this->prophecy
             ->findTokenOtherThan($excludedToken)
@@ -35,7 +36,15 @@ class TokenRepositoryBuilder
         return $this;
     }
 
-    public function willReturnTheCountOfUnfrozenTokens($count)
+    public function willFindFirstFrozenToken(TokenInterface $token): TokenRepositoryBuilder
+    {
+        $this->prophecy->findFirstFrozenToken()
+             ->willReturn($token);
+
+         return $this;
+    }
+
+    public function willReturnTheCountOfUnfrozenTokens($count): TokenRepositoryBuilder
     {
         $this->prophecy
             ->howManyUnfrozenTokenAreThere()

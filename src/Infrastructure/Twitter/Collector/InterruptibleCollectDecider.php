@@ -141,7 +141,11 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
         $this->moderator->waitFor(
             $timeout,
             [
-                '{{ token }}' => substr($token->getOAuthToken(), 0, '8'),
+                '{{ token }}' => substr(
+                    $token->getOAuthToken(),
+                    0,
+                    8
+                ),
             ]
         );
 
