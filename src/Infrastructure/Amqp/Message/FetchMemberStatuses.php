@@ -7,12 +7,8 @@ use App\Api\Entity\Aggregate;
 use App\Api\Entity\TokenInterface;
 use App\Membership\Entity\MemberInterface;
 
-class FetchMemberStatuses
+class FetchMemberStatuses implements FetchPublication
 {
-    public const AGGREGATE_ID = 'aggregate_id';
-    public const SCREEN_NAME = 'screen_name';
-    public const BEFORE = 'before';
-
     /**
      * @var string
      */

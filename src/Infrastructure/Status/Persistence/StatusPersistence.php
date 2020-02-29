@@ -8,25 +8,42 @@ use App\Api\Entity\Aggregate;
 use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;
 use App\Api\Exception\InsertDuplicatesException;
+use App\Domain\Collection\CollectionStrategyInterface;
 use App\Domain\Status\StatusCollection;
 use App\Domain\Status\StatusInterface;
 use App\Domain\Status\TaggedStatus;
+use App\Infrastructure\DependencyInjection\ApiAccessorTrait;
+use App\Infrastructure\DependencyInjection\LoggerTrait;
+use App\Infrastructure\DependencyInjection\Publication\PublicationListRepositoryTrait;
+use App\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
 use App\Infrastructure\DependencyInjection\Status\StatusLoggerTrait;
+use App\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use App\Infrastructure\DependencyInjection\TaggedStatusRepositoryTrait;
 use App\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
 use App\Infrastructure\Repository\Status\TimelyStatusRepositoryInterface;
 use App\Infrastructure\Twitter\Api\Normalizer\Normalizer;
+use App\Membership\Entity\MemberInterface;
 use App\Operation\Collection\CollectionInterface;
+use Closure;
+use DateTime;
+use DateTimeZone;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\ORMException;
 use Doctrine\Persistence\ManagerRegistry;
 use Exception;
 use Psr\Log\LoggerInterface;
+use function count;
+use function is_array;
 
 class StatusPersistence implements StatusPersistenceInterface
 {
+    use ApiAccessorTrait;
+    use LoggerTrait;
+    use PublicationPersistenceTrait;
+    use PublicationListRepositoryTrait;
     use StatusLoggerTrait;
+    use StatusRepositoryTrait;
     use TaggedStatusRepositoryTrait;
     use TimelyStatusRepositoryTrait;
 
@@ -161,15 +178,15 @@ class StatusPersistence implements StatusPersistenceInterface
         if ($status->getId()) {
             try {
                 $status->setUpdatedAt(
-                    new \DateTime('now', new \DateTimeZone('UTC'))
+                    new DateTime('now', new DateTimeZone('UTC'))
                 );
-            } catch (\Exception $exception) {
+            } catch (Exception $exception) {
                 $this->appLogger->error($exception->getMessage());
             }
         }
     }
 
-    private function tokenSetter(AccessToken $accessToken): \Closure
+    private function tokenSetter(AccessToken $accessToken): Closure
     {
         return function ($extract) use ($accessToken) {
             $extract['identifier'] = $accessToken->accessToken();
@@ -198,5 +215,83 @@ class StatusPersistence implements StatusPersistenceInterface
         $entityManager->remove($archivedStatus);
 
         return $status;
+    }
+
+    public function saveStatusForScreenName(
+        array $statuses,
+        string $screenName,
+        CollectionStrategyInterface $collectionStrategy
+    ) {
+        $success = null;
+
+        if (!is_array($statuses) || count($statuses) === 0) {
+            return $success;
+        }
+
+        $publicationList = null;
+        $publicationListId = $collectionStrategy->publicationListId();
+        if ($publicationListId !== null) {
+            /** @var Aggregate $publicationList */
+            $publicationList = $this->publicationListRepository->findOneBy(
+                ['id' => $publicationListId]
+            );
+        }
+
+        $this->collectStatusLogger->logHowManyItemsHaveBeenFetched(
+            $statuses,
+            $screenName
+        );
+
+        $likedBy = null;
+        if ($collectionStrategy->fetchLikes()) {
+            $likedBy = $this->apiAccessor->ensureMemberHavingNameExists($screenName);
+        }
+
+        $savedStatuses = $this->saveStatuses(
+            $statuses,
+            $collectionStrategy,
+            $publicationList,
+            $likedBy
+        );
+
+        return $this->collectStatusLogger->logHowManyItemsHaveBeenSaved(
+            $savedStatuses->count(),
+            $screenName,
+            $collectionStrategy->fetchLikes()
+        );
+    }
+
+    /**
+     * @param array                       $statuses
+     * @param CollectionStrategyInterface $collectionStrategy
+     * @param Aggregate|null              $publicationList
+     * @param MemberInterface|null        $likedBy
+     *
+     * @return CollectionInterface
+     */
+    private function saveStatuses(
+        array $statuses,
+        CollectionStrategyInterface $collectionStrategy,
+        Aggregate $publicationList = null,
+        MemberInterface $likedBy = null
+    ): CollectionInterface {
+        if ($likedBy !== null && $collectionStrategy->fetchLikes()) {
+            return $this->statusRepository->saveLikes(
+                $statuses,
+                $this->apiAccessor->getOAuthToken(),
+                $publicationList,
+                $this->logger,
+                $likedBy,
+                function ($memberName) {
+                    return $this->apiAccessor->ensureMemberHavingNameExists($memberName);
+                }
+            );
+        }
+
+        return $this->publicationPersistence->persistStatusPublications(
+            $statuses,
+            new AccessToken($this->apiAccessor->getOAuthToken()),
+            $publicationList
+        );
     }
 }

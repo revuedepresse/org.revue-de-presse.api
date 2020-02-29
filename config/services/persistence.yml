@@ -17,6 +17,10 @@ services:
             - '@doctrine.orm.entity_manager'
             - '@logger'
         calls:
-            - [ 'setStatusLogger',           [ '@App\Infrastructure\Log\StatusLogger' ] ]
-            - [ 'setTaggedStatusRepository', [ '@App\Domain\Repository\TaggedStatusRepository' ] ]
+            - [ 'setApiAccessor',               [ '@weaving_the_web_twitter.api_accessor' ] ]
+            - [ 'setLogger',                    [ '@logger' ] ]
+            - [ 'setPublicationListRepository', [ '@repository.publication_list' ] ]
+            - [ 'setStatusLogger',              [ '@App\Infrastructure\Log\StatusLogger' ] ]
+            - [ 'setStatusRepository',          [ '@App\Api\Repository\StatusRepository' ] ]
+            - [ 'setTaggedStatusRepository',    [ '@App\Domain\Repository\TaggedStatusRepository' ] ]
         public: true

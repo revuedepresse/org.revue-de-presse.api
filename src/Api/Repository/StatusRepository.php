@@ -6,6 +6,7 @@ namespace App\Api\Repository;
 use App\Accessor\Exception\NotFoundStatusException;
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\Status;
+use App\Domain\Collection\CollectionStrategyInterface;
 use App\Domain\Status\StatusInterface;
 use App\Domain\Status\TaggedStatus;
 use App\Membership\Entity\MemberInterface;
@@ -115,7 +116,7 @@ class StatusRepository extends ArchivedStatusRepository
             $status = $this->findOneBy(['screenName' => $screenName], ['createdAt' => 'DESC']);
             $decodedStatusDocument = json_decode($status->getApiDocument(), true);
 
-            if ($decodedStatusDocument['user']['statuses_count'] > PublicationCollector::MAX_AVAILABLE_TWEETS_PER_USER) {
+            if ($decodedStatusDocument['user']['statuses_count'] > CollectionStrategyInterface::MAX_AVAILABLE_TWEETS_PER_USER) {
                 return $decodedStatusDocument['user']['statuses_count'];
             }
 

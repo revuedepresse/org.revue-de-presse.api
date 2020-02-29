@@ -1,0 +1,13 @@
+services:
+    App\Infrastructure\Twitter\Collector\InterruptibleCollectDecider:
+        class: 'App\Infrastructure\Twitter\Collector\InterruptibleCollectDecider'
+        calls:
+            - [ 'setApiAccessor',                [ '@weaving_the_web_twitter.api_accessor'] ]
+            - [ 'setLogger',                     [ '@logger' ] ]
+            - [ 'setLikedStatusRepositoryTrait', [ '@repository.liked_status' ] ]
+            - [ 'setModerator',                  [ '@weaving_the_web_twitter.moderator.api_limit' ] ]
+            - [ 'setPublicationListRepository',  [ '@repository.publication_list' ] ]
+            - [ 'setStatusRepository',           [ '@App\Api\Repository\StatusRepository' ] ]
+            - [ 'setStatusPersistence',          [ '@App\Infrastructure\Status\Persistence\StatusPersistence' ] ]
+            - [ 'setTokenRepository',            [ '@repository.access_token' ] ]
+            - [ 'setWhispererRepository',        [ '@repository.whisperer' ] ]

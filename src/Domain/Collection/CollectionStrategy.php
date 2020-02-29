@@ -5,6 +5,7 @@ namespace App\Domain\Collection;
 
 use App\Status\LikedStatusCollectionAwareInterface;
 use function array_key_exists;
+use const INF;
 
 class CollectionStrategy implements CollectionStrategyInterface
 {
@@ -13,6 +14,10 @@ class CollectionStrategy implements CollectionStrategyInterface
     private ?int $publicationListId = null;
 
     private bool $shouldFetchLikes = false;
+
+    private string $screenName;
+
+    private $maxStatusId;
 
     public function dateBeforeWhichStatusAreToBeCollected(): ?string
     {
@@ -79,5 +84,33 @@ class CollectionStrategy implements CollectionStrategyInterface
         }
 
         return $strategy;
+    }
+
+    public function screenName(): string
+    {
+        return $this->screenName;
+    }
+
+    public function optInToCollectStatusFor(string $screenName): CollectionStrategyInterface
+    {
+        $this->screenName = $screenName;
+
+        return $this;
+    }
+
+    public function maxStatusId()
+    {
+        if ($this->maxStatusId === null) {
+            return INF;
+        }
+
+        return $this->maxStatusId;
+    }
+
+    public function optInToCollectStatusWhichIdIsLessThan($maxStatusId): CollectionStrategyInterface
+    {
+        $this->maxStatusId = $maxStatusId;
+
+        return $this;
     }
 }

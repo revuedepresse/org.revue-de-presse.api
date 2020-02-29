@@ -5,13 +5,25 @@ namespace App\Domain\Collection;
 
 interface CollectionStrategyInterface
 {
+    public const MAX_AVAILABLE_TWEETS_PER_USER = 3200;
+
+    public const MAX_BATCH_SIZE = 200;
+
     public function dateBeforeWhichStatusAreToBeCollected(): ?string;
 
     public function publicationListId(): ?int;
 
     public function fetchLikes(): bool;
 
+    public function maxStatusId();
+
+    public function screenName(): string;
+
     public function oneOfTheOptionsIsActive(): bool;
+
+    public function optInToCollectStatusFor(string $screenName): self;
+
+    public function optInToCollectStatusWhichIdIsLessThan($maxId): self;
 
     public function optInToCollectStatusPublishedBefore(string $date): self;
 

@@ -9,6 +9,7 @@ use App\Aggregate\Repository\PaginationAwareTrait;
 use App\Aggregate\Repository\TimelyStatusRepository;
 use App\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Api\Entity\Aggregate;
+use App\Domain\Publication\PublicationListInterface;
 use App\Domain\Status\StatusInterface;
 use App\Infrastructure\Repository\PublicationList\PublicationListRepositoryInterface;
 use App\Membership\Entity\MemberInterface;
@@ -24,6 +25,12 @@ use stdClass;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ *
+ * @method PublicationListInterface|null find($id, $lockMode = null, $lockVersion = null)
+ * @method PublicationListInterface|null findOneBy(array $criteria, array $orderBy = null)
+ * @method PublicationListInterface[]    findAll()
+ * @method PublicationListInterface[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+
  */
 class PublicationListRepository extends ResourceRepository implements CapableOfDeletionInterface,
     PublicationListRepositoryInterface
@@ -104,7 +111,7 @@ class PublicationListRepository extends ResourceRepository implements CapableOfD
         $aggregates = $queryBuilder->getQuery()->getResult();
         array_walk(
             $aggregates,
-            function (Aggregate $aggregate) {
+            function (PublicationListInterface $aggregate) {
                 $aggregate->markAsDeleted();
             }
         );
@@ -194,7 +201,7 @@ class PublicationListRepository extends ResourceRepository implements CapableOfD
      * @throws ORMException
      * @throws OptimisticLockException
      */
-    public function lockAggregate(Aggregate $aggregate)
+    public function lockAggregate(PublicationListInterface $aggregate)
     {
         $aggregate->lock();
 
@@ -271,7 +278,7 @@ QUERY;
 
         array_walk(
             $aggregates,
-            function (Aggregate $aggregate) {
+            function (PublicationListInterface $aggregate) {
                 $messageBody['screen_name']  = $aggregate->screenName;
                 $messageBody['aggregate_id'] = $aggregate->getId();
                 $aggregate->totalStatuses    = 0;
@@ -296,7 +303,7 @@ QUERY;
         $aggregates = $this->findBy(['screenName' => $memberName]);
         array_walk(
             $aggregates,
-            function (Aggregate $aggregate) {
+            function (PublicationListInterface $aggregate) {
                 $aggregate->totalStatuses = 0;
 
                 $this->getEntityManager()->persist($aggregate);
@@ -345,7 +352,7 @@ QUERY;
      * @throws ORMException
      * @throws OptimisticLockException
      */
-    public function save(Aggregate $aggregate)
+    public function save(PublicationListInterface $aggregate)
     {
         $this->getEntityManager()->persist($aggregate);
         $this->getEntityManager()->flush();
@@ -379,16 +386,17 @@ QUERY;
     }
 
     /**
-     * @param Aggregate $aggregate
+     * @param PublicationListInterface $aggregate
      *
+     * @return PublicationListInterface
      * @throws ORMException
      * @throws OptimisticLockException
      */
-    public function unlockAggregate(Aggregate $aggregate)
+    public function unlockAggregate(PublicationListInterface $aggregate): PublicationListInterface
     {
         $aggregate->unlock();
 
-        $this->save($aggregate);
+        return $this->save($aggregate);
     }
 
     /**

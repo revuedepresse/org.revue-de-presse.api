@@ -8,41 +8,38 @@ use App\Accessor\Exception\NotFoundStatusException;
 use App\Accessor\Exception\ReadOnlyApplicationException;
 use App\Accessor\Exception\UnexpectedApiResponseException;
 use App\Aggregate\Exception\LockedAggregateException;
-use App\Amqp\Exception\SkippableMessageException;
-use App\Api\AccessToken\AccessToken;
-use App\Api\Entity\Aggregate;
 use App\Api\Entity\Token;
 use App\Api\Entity\TokenInterface;
-use App\Api\Entity\Whisperer;
 use App\Domain\Collection\CollectionStrategy;
 use App\Domain\Collection\CollectionStrategyInterface;
+use App\Domain\Publication\PublicationListInterface;
 use App\Domain\Status\StatusInterface;
-use App\Infrastructure\Amqp\Message\FetchMemberStatuses;
+use App\Infrastructure\Amqp\Message\FetchPublication;
+use App\Infrastructure\DependencyInjection\Collection\InterruptibleCollectDeciderTrait;
 use App\Infrastructure\DependencyInjection\ApiAccessorTrait;
 use App\Infrastructure\DependencyInjection\ApiLimitModeratorTrait;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\DependencyInjection\Membership\WhispererIdentificationTrait;
+use App\Infrastructure\DependencyInjection\Membership\WhispererRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Publication\PublicationListRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
+use App\Infrastructure\DependencyInjection\Status\LikedStatusRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Status\StatusLoggerTrait;
+use App\Infrastructure\DependencyInjection\Status\StatusPersistenceTrait;
 use App\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use App\Infrastructure\DependencyInjection\TokenRepositoryTrait;
 use App\Infrastructure\DependencyInjection\TranslatorTrait;
-use App\Infrastructure\DependencyInjection\Membership\WhispererRepositoryTrait;
 use App\Infrastructure\Twitter\Collector\Exception\RateLimitedException;
 use App\Infrastructure\Twitter\Collector\Exception\SkipCollectException;
 use App\Membership\Entity\MemberInterface;
-use App\Operation\Collection\CollectionInterface;
 use App\Status\LikedStatusCollectionAwareInterface;
 use App\Status\Repository\ExtremumAwareInterface;
-use App\Status\Repository\LikedStatusRepository;
 use App\Twitter\Exception\BadAuthenticationDataException;
 use App\Twitter\Exception\InconsistentTokenRepository;
 use App\Twitter\Exception\NotFoundMemberException;
 use App\Twitter\Exception\ProtectedAccountException;
 use App\Twitter\Exception\SuspendedAccountException;
 use App\Twitter\Exception\UnavailableResourceException;
-use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Exception\ConstraintViolationException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -50,34 +47,28 @@ use Doctrine\ORM\OptimisticLockException;
 use Exception;
 use Psr\Log\LoggerInterface;
 use ReflectionException;
+use stdClass;
 use function array_key_exists;
 use function count;
-use function is_array;
 
 class PublicationCollector implements PublicationCollectorInterface
 {
     use ApiAccessorTrait;
     use ApiLimitModeratorTrait;
     use LoggerTrait;
+    use InterruptibleCollectDeciderTrait;
     use PublicationListRepositoryTrait;
     use PublicationPersistenceTrait;
     use StatusLoggerTrait;
+    use StatusPersistenceTrait;
+    use LikedStatusRepositoryTrait;
     use StatusRepositoryTrait;
     use TokenRepositoryTrait;
     use TranslatorTrait;
     use WhispererIdentificationTrait;
     use WhispererRepositoryTrait;
 
-    public const MAX_AVAILABLE_TWEETS_PER_USER = 3200;
-
-    private const MAX_BATCH_SIZE = 200;
-
     private const MESSAGE_OPTION_TOKEN = 'oauth';
-
-    /**
-     * @var LikedStatusRepository
-     */
-    public LikedStatusRepository $likedStatusRepository;
 
     /**
      * @var LoggerInterface
@@ -114,7 +105,10 @@ class PublicationCollector implements PublicationCollectorInterface
         $this->collectionStrategy = CollectionStrategy::fromArray($options);
 
         try {
-            $this->decideWhetherCollectShouldBeSkipped($options);
+            $this->interruptibleCollectDecider->decideWhetherCollectShouldBeSkipped(
+                $this->collectionStrategy,
+                $options
+            );
         } catch (SkipCollectException $exception) {
             if ($exception instanceof RateLimitedException) {
                 unset($exception);
@@ -126,7 +120,9 @@ class PublicationCollector implements PublicationCollectorInterface
         }
 
         if ($this->collectionStrategy->oneOfTheOptionsIsActive()) {
-            $options = $this->removeCollectOptions($options);
+            $options = $this->removeCollectOptions(
+                    $options
+                );
 
             try {
                 $this->ensureTargetAggregateIsNotLocked();
@@ -145,15 +141,20 @@ class PublicationCollector implements PublicationCollectorInterface
 
             /**
              * Marks the collect as successful if there are no remaining status
+             * or when Twitter API is not available
              */
             return isset($remainingItemsToCollect) ?: false;
         }
 
-        if ($this->shouldLookUpFutureItems($options['screen_name'])) {
+        if ($this->shouldLookUpFutureItems($options[FetchPublication::SCREEN_NAME])) {
             $discoverPastTweets = false;
         }
 
-        $options = $this->updateExtremum($options, $discoverPastTweets);
+        $options = $this->interruptibleCollectDecider
+            ->updateExtremum(
+                $options,
+                $discoverPastTweets
+            );
 
         try {
             $success = $this->tryCollectingFurther($options, $greedy, $discoverPastTweets);
@@ -171,7 +172,11 @@ class PublicationCollector implements PublicationCollectorInterface
         |NotFoundMemberException
         |ProtectedAccountException $exception
         ) {
-            $this->handleUnavailableMemberException($exception, $options);
+            UnavailableResourceException::handleUnavailableMemberException(
+                $exception,
+                $this->logger,
+                $options
+            );
 
             // Figuring out a member is now protected, suspended or not found is considered to be a "success",
             // provided the workers would not call the API on behalf of them
@@ -196,13 +201,31 @@ class PublicationCollector implements PublicationCollectorInterface
     }
 
     /**
+     * @param array $options
+     *
+     * @return mixed
+     */
+    public function removeCollectOptions(
+        $options
+    ) {
+        if ($this->collectionStrategy->dateBeforeWhichStatusAreToBeCollected()) {
+            unset($options[FetchPublication::BEFORE]);
+        }
+        if (array_key_exists(FetchPublication::AGGREGATE_ID, $options)) {
+            unset($options[FetchPublication::AGGREGATE_ID]);
+        }
+
+        return $options;
+    }
+
+    /**
      * @param $statuses
      *
      * @return bool
      */
     public function hitCollectionLimit($statuses): bool
     {
-        return $statuses >= (self::MAX_AVAILABLE_TWEETS_PER_USER - 100);
+        return $statuses >= (CollectionStrategyInterface::MAX_AVAILABLE_TWEETS_PER_USER - 100);
     }
 
     /**
@@ -221,7 +244,7 @@ class PublicationCollector implements PublicationCollectorInterface
      *
      * @return bool
      */
-    public function serializedAllAvailableStatuses($lastCollectionBatchSize, $totalCollectedStatuses): bool
+    public function collectedAllAvailableStatuses($lastCollectionBatchSize, $totalCollectedStatuses): bool
     {
         return !$this->justCollectedSomeStatuses($lastCollectionBatchSize)
             && $this->hitCollectionLimit($totalCollectedStatuses);
@@ -262,71 +285,7 @@ class PublicationCollector implements PublicationCollectorInterface
     }
 
     /**
-     * @param      $options
-     * @param bool $discoverPastTweets
-     *
-     * @return array
-     * @throws ApiRateLimitingException
-     * @throws BadAuthenticationDataException
-     * @throws InconsistentTokenRepository
-     * @throws NonUniqueResultException
-     * @throws NotFoundMemberException
-     * @throws NotFoundStatusException
-     * @throws OptimisticLockException
-     * @throws ProtectedAccountException
-     * @throws ReadOnlyApplicationException
-     * @throws ReflectionException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws UnexpectedApiResponseException
-     */
-    protected function fetchLatestStatuses($options, bool $discoverPastTweets = true): array
-    {
-        $options[LikedStatusCollectionAwareInterface::INTENT_TO_FETCH_LIKES] = $this->collectionStrategy->fetchLikes();
-        $options                              = $this->removeCollectOptions($options);
-        $options                              = $this->updateExtremum($options, $discoverPastTweets);
-
-        if (
-            array_key_exists('max_id', $options)
-            && $this->collectionStrategy->dateBeforeWhichStatusAreToBeCollected() // Looking into the past
-        ) {
-            unset($options['max_id']);
-        }
-
-        $statuses = $this->apiAccessor->fetchStatuses($options);
-
-        $discoverMoreRecentStatuses = false;
-        if (
-            count($statuses) > 0
-            && $this->statusRepository->findOneBy(
-                ['statusId' => $statuses[0]->id]
-            ) instanceof StatusInterface
-        ) {
-            $discoverMoreRecentStatuses = true;
-        }
-
-        if (
-            $discoverPastTweets
-            && (
-                $discoverMoreRecentStatuses
-                || (count($statuses) === 0))
-        ) {
-            if (array_key_exists('max_id', $options)) {
-                unset($options['max_id']);
-            }
-
-            $statuses = $this->fetchLatestStatuses(
-                $options,
-                $discoverPastTweets = false
-            );
-        }
-
-        return $statuses;
-    }
-
-    /**
      * @return bool
-     * @throws OptimisticLockException
      */
     protected function isApiAvailable()
     {
@@ -426,20 +385,27 @@ class PublicationCollector implements PublicationCollectorInterface
         }
 
         if (!$availableApi) {
-            return $this->delayingConsumption();
+            return $this->interruptibleCollectDecider->delayingConsumption();
         }
 
         return $availableApi;
     }
 
     /**
-     * @param $options
+     * @param array $options
+     *
+     * @param int   $lastCollectionBatchSize
      *
      * @return mixed
-     * @throws NonUniqueResultException
      */
-    protected function logHowManyItemsHaveBeenCollected($options)
+    private function logHowManyItemsHaveBeenCollected(
+        array $options,
+        int $lastCollectionBatchSize
+    )
     {
+        $this->collectionStrategy->optInToCollectStatusFor($options[FetchPublication::SCREEN_NAME]);
+        $this->collectionStrategy->optInToCollectStatusWhichIdIsLessThan($options['max_id']);
+
         $subjectInSingularForm = 'status';
         $subjectInPluralForm   = 'statuses';
         $countCollectedItems   = function ($memberName, $maxId) {
@@ -453,30 +419,19 @@ class PublicationCollector implements PublicationCollectorInterface
             };
         }
 
-        if (!array_key_exists('max_id', $options)) {
-            $options['max_id'] = INF;
-        }
-
         $totalStatuses = $countCollectedItems(
-            $options['screen_name'],
+            $this->collectionStrategy->screenName(),
             $options['max_id']
         );
 
-        if (is_infinite($options['max_id'])) {
-            $maxId = "+infinity";
-        } else {
-            $maxId = $options['max_id'];
-        }
-
-        $this->logger->info(
-            sprintf(
-                '%d %s older than %s of id #%d have been found for "%s"',
-                $totalStatuses,
-                $subjectInPluralForm,
-                $subjectInSingularForm,
-                $maxId,
-                $options['screen_name']
-            )
+        $this->collectStatusLogger->logHowManyItemsHaveBeenCollected(
+            $this->collectionStrategy,
+            $totalStatuses,
+            [
+                'plural' => $subjectInPluralForm,
+                'singular' => $subjectInSingularForm
+            ],
+            $lastCollectionBatchSize
         );
 
         return $totalStatuses;
@@ -487,7 +442,7 @@ class PublicationCollector implements PublicationCollectorInterface
      * @param $lastCollectionBatchSize
      * @param $totalCollectedStatuses
      */
-    protected function logSerializationProgress(
+    protected function logCollectionProgress(
         $options,
         $lastCollectionBatchSize,
         $totalCollectedStatuses
@@ -497,12 +452,12 @@ class PublicationCollector implements PublicationCollectorInterface
             $subject = 'likes';
         }
 
-        if ($this->serializedAllAvailableStatuses($lastCollectionBatchSize, $totalCollectedStatuses)) {
+        if ($this->collectedAllAvailableStatuses($lastCollectionBatchSize, $totalCollectedStatuses)) {
             $this->logger->info(
                 sprintf(
                     'All available %s have most likely been fetched for "%s" or few %s are available (%d)',
                     $subject,
-                    $options['screen_name'],
+                    $options[FetchPublication::SCREEN_NAME],
                     $subject,
                     $totalCollectedStatuses
                 )
@@ -516,7 +471,7 @@ class PublicationCollector implements PublicationCollectorInterface
                 '%d more %s in the past have been saved for "%s" in aggregate #%d',
                 $lastCollectionBatchSize,
                 $subject,
-                $options['screen_name'],
+                $options[FetchPublication::SCREEN_NAME],
                 $this->collectionStrategy->publicationListId()
             )
         );
@@ -555,19 +510,19 @@ class PublicationCollector implements PublicationCollectorInterface
      */
     protected function remainingLikes($options)
     {
-        $serializedLikesCount = $this->likedStatusRepository->countHowManyLikesFor($options['screen_name']);
+        $serializedLikesCount = $this->likedStatusRepository->countHowManyLikesFor($options[FetchPublication::SCREEN_NAME]);
         $existingStatus       = $this->translator->trans(
             'logs.info.likes_existing',
             [
                 'total_likes' => $serializedLikesCount,
                 'count'       => $serializedLikesCount,
-                'member'      => $options['screen_name'],
+                'member'      => $options[FetchPublication::SCREEN_NAME],
             ],
             'logs'
         );
         $this->logger->info($existingStatus);
 
-        $member = $this->apiAccessor->showUser($options['screen_name']);
+        $member = $this->apiAccessor->showUser($options[FetchPublication::SCREEN_NAME]);
         if (!isset($member->statuses_count)) {
             $member->statuses_count = 0;
         }
@@ -575,12 +530,12 @@ class PublicationCollector implements PublicationCollectorInterface
         /**
          * Twitter allows 3200 past tweets at most to be retrieved for any given user
          */
-        $likesCount      = max($member->statuses_count, self::MAX_AVAILABLE_TWEETS_PER_USER);
+        $likesCount      = max($member->statuses_count, CollectionStrategyInterface::MAX_AVAILABLE_TWEETS_PER_USER);
         $discoveredLikes = $this->translator->trans(
             'logs.info.likes_discovered',
             [
                 'total_likes' => $likesCount,
-                'member'      => $options['screen_name'],
+                'member'      => $options[FetchPublication::SCREEN_NAME],
                 'count'       => $likesCount,
             ],
             'logs'
@@ -602,19 +557,19 @@ class PublicationCollector implements PublicationCollectorInterface
      */
     protected function remainingStatuses($options)
     {
-        $serializedStatusCount = $this->statusRepository->countHowManyStatusesFor($options['screen_name']);
+        $serializedStatusCount = $this->statusRepository->countHowManyStatusesFor($options[FetchPublication::SCREEN_NAME]);
         $existingStatus        = $this->translator->trans(
             'logs.info.status_existing',
             [
                 'count'        => $serializedStatusCount,
                 'total_status' => $serializedStatusCount,
-                'member'       => $options['screen_name'],
+                'member'       => $options[FetchPublication::SCREEN_NAME],
             ],
             'logs'
         );
         $this->logger->info($existingStatus);
 
-        $user = $this->apiAccessor->showUser($options['screen_name']);
+        $user = $this->apiAccessor->showUser($options[FetchPublication::SCREEN_NAME]);
         if (!isset($user->statuses_count)) {
             $user->statuses_count = 0;
         }
@@ -622,11 +577,11 @@ class PublicationCollector implements PublicationCollectorInterface
         /**
          * Twitter allows 3200 past tweets at most to be retrieved for any given user
          */
-        $statusesCount    = max($user->statuses_count, self::MAX_AVAILABLE_TWEETS_PER_USER);
+        $statusesCount    = max($user->statuses_count, CollectionStrategyInterface::MAX_AVAILABLE_TWEETS_PER_USER);
         $discoveredStatus = $this->translator->trans(
             'logs.info.status_discovered',
             [
-                'member'       => $options['screen_name'],
+                'member'       => $options[FetchPublication::SCREEN_NAME],
                 'count'        => $statusesCount,
                 'total_status' => $statusesCount,
             ],
@@ -638,40 +593,23 @@ class PublicationCollector implements PublicationCollectorInterface
     }
 
     /**
-     * @param $options
-     *
-     * @return mixed
-     */
-    protected function removeCollectOptions($options)
-    {
-        if ($this->collectionStrategy->dateBeforeWhichStatusAreToBeCollected()) {
-            unset($options['before']);
-        }
-        if (array_key_exists('aggregate_id', $options)) {
-            unset($options['aggregate_id']);
-        }
-
-        return $options;
-    }
-
-    /**
-     * @param          $options
-     * @param int|null $aggregateId
+     * @param                             $options
+     * @param CollectionStrategyInterface $collectionStrategy
      *
      * @return int|null
-     * @throws NonUniqueResultException
      * @throws NotFoundMemberException
      * @throws OptimisticLockException
      * @throws ProtectedAccountException
-     * @throws SuspendedAccountException
      * @throws UnavailableResourceException
      */
-    protected function saveStatusesMatchingCriteria($options, int $aggregateId = null)
-    {
+    protected function saveStatusesMatchingCriteria(
+        $options,
+        CollectionStrategyInterface $collectionStrategy
+    ): ?int {
         $options  = $this->declareOptionsToCollectStatuses($options);
         $statuses = $this->apiAccessor->fetchStatuses($options);
 
-        if ($statuses instanceof \stdClass && isset($statuses->error)) {
+        if ($statuses instanceof stdClass && isset($statuses->error)) {
             throw new ProtectedAccountException(
                 $statuses->error,
                 $this->apiAccessor::ERROR_PROTECTED_ACCOUNT
@@ -685,7 +623,7 @@ class PublicationCollector implements PublicationCollectorInterface
             $this->safelyDeclareExtremum(
                 $statuses,
                 $lookingForStatusesBetweenPublicationTimeOfLastOneSavedAndNow,
-                $options['screen_name']
+                $options[FetchPublication::SCREEN_NAME]
             );
         }
 
@@ -703,369 +641,23 @@ class PublicationCollector implements PublicationCollectorInterface
             return 0;
         }
 
-        return $this->saveStatusesForScreenName(
-            $statuses,
-            $options['screen_name'],
-            $aggregateId
-        );
-    }
-
-    /**
-     * @param $options
-     *
-     * @return bool
-     * @throws ApiRateLimitingException
-     * @throws BadAuthenticationDataException
-     * @throws DBALException
-     * @throws InconsistentTokenRepository
-     * @throws NonUniqueResultException
-     * @throws NotFoundMemberException
-     * @throws NotFoundStatusException
-     * @throws OptimisticLockException
-     * @throws ProtectedAccountException
-     * @throws ReadOnlyApplicationException
-     * @throws ReflectionException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws UnexpectedApiResponseException
-     */
-    protected function shouldSkipCollect($options): bool
-    {
-        if (
-            !array_key_exists(FetchMemberStatuses::SCREEN_NAME, $options)
-            || $options[FetchMemberStatuses::SCREEN_NAME] === null
-            || $this->apiAccessor->shouldSkipCollectForMemberWithScreenName(
-                $options[FetchMemberStatuses::SCREEN_NAME]
-            )
-        ) {
-            return true;
-        }
-
-        $aggregate = null;
-        if ($this->collectionStrategy->publicationListId()) {
-            $aggregate = $this->publicationListRepository->findOneBy(
-                ['id' => $this->collectionStrategy->publicationListId()]
-            );
-        }
-
-        if (
-            ($aggregate instanceof Aggregate)
-            && $aggregate->isLocked()
-            && !$this->collectionStrategy->dateBeforeWhichStatusAreToBeCollected()
-        ) {
-            $message = sprintf(
-                'Will skip message consumption for locked aggregate #%d',
-                $aggregate->getId()
-            );
-            $this->logger->info($message);
-
-            return true;
-        }
-
-        try {
-            $whisperer = $this->beforeFetchingStatuses($options);
-        } catch (SkippableMessageException $exception) {
-            return $exception->shouldSkipMessageConsumption;
-        }
-
-        $statuses = $this->fetchLatestStatuses($options);
-        if (count($statuses) > 0 && $whisperer instanceof Whisperer) {
-            try {
-                $this->afterCountingCollectedStatuses(
-                    $options,
-                    $statuses,
-                    $whisperer
-                );
-            } catch (SkippableMessageException $exception) {
-                return $exception->shouldSkipMessageConsumption;
-            }
-        }
-
-        if ($this->collectionStrategy->fetchLikes()) {
-            $atLeastOneStatusFetched = count($statuses) > 0;
-
-            $hasLikedStatusBeenSavedBefore = false;
-            if ($atLeastOneStatusFetched && $aggregate instanceof Aggregate) {
-                $hasLikedStatusBeenSavedBefore = $this->likedStatusRepository->hasBeenSavedBefore(
-                    $statuses[0],
-                    $aggregate->getName(),
-                    $options['screen_name'],
-                    $statuses[0]->user->screen_name
-                );
-            }
-
-            if ($atLeastOneStatusFetched && !$hasLikedStatusBeenSavedBefore) {
-                // At this point, it should not skip further consumption
-                // for matching liked statuses
-                $this->saveStatusesForScreenName(
-                    $statuses,
-                    $options['screen_name'],
-                    $options['aggregate_id']
-                );
-
-                $this->statusRepository->declareMinimumLikedStatusId(
-                    $statuses[count($statuses) - 1],
-                    $options['screen_name']
-                );
-            }
-
-            if (!$atLeastOneStatusFetched || $hasLikedStatusBeenSavedBefore) {
-                $statuses = $this->fetchLatestStatuses($options, $discoverPastTweets = false);
-                if (count($statuses) > 0) {
-                    if (
-                    $this->statusRepository->hasBeenSavedBefore(
-                        [$statuses[0]]
-                    )
-                    ) {
-                        return true;
-                    }
-
-                    // At this point, it should not skip further consumption
-                    // for matching liked statuses
-                    $this->saveStatusesForScreenName(
-                        $statuses,
-                        $options['screen_name'],
-                        $options['aggregate_id']
-                    );
-
-                    $this->statusRepository->declareMaximumLikedStatusId(
-                        $statuses[0],
-                        $options['screen_name']
-                    );
-                }
-
-                return true;
-            }
-
-            return false;
-        }
-
-        if (!$this->collectionStrategy->fetchLikes()) {
-            try {
-                $this->statusRepository->updateLastStatusPublicationDate($options['screen_name']);
-            } catch (NotFoundStatusException $exception) {
-                $this->logger->info($exception->getMessage());
-            }
-        }
-
-        if ($whisperer instanceof Whisperer) {
-            $this->afterUpdatingLastPublicationDate($options, $whisperer);
-        }
-
-        return true;
-    }
-
-    /**
-     * @param array $options
-     * @param bool  $discoverPastTweets
-     *
-     * @return mixed
-     * @throws NonUniqueResultException
-     */
-    protected function updateExtremum(array $options, bool $discoverPastTweets = true)
-    {
-        if ($this->collectionStrategy->dateBeforeWhichStatusAreToBeCollected()) {
-            $discoverPastTweets = true;
-        }
-
-        $options = $this->getExtremumOptions($options, $discoverPastTweets);
-
-        $findingDirection = $this->getExtremumUpdateMethod($discoverPastTweets);
-        $status           = $this->findExtremum($options, $findingDirection);
-
-        $logPrefix = $this->getLogPrefix();
-
-        if ((count($status) === 1) && array_key_exists('statusId', $status)) {
-            $option = $this->getExtremumOption($discoverPastTweets);
-            $shift  = $this->getShiftFromExtremum($discoverPastTweets);
-
-            if ($status['statusId'] === '-INF' && $option === 'max_id') {
-                $status['statusId'] = 0;
-            }
-
-            $options[$option] = (int) $status['statusId'] + $shift;
-
-            $this->logger->info(
-                sprintf(
-                    'Extremum (%s%s) retrieved for "%s": #%s',
-                    $logPrefix,
-                    $option,
-                    $options['screen_name'],
-                    $options[$option]
-                )
+        $lastCollectionBatchSize = $this->statusPersistence
+            ->saveStatusForScreenName(
+                $statuses,
+                $options[FetchPublication::SCREEN_NAME],
+                $this->collectionStrategy
             );
 
-            if ($options[$option] < 0 && $option === 'max_id') {
-                unset($options[$option]);
-            }
-
-            return $options;
-        }
-
-        $this->logger->info(
-            sprintf(
-                '[No %s retrieved for "%s"] ',
-                $logPrefix . 'extremum',
-                $options['screen_name']
-            )
+        $totalCollectedStatuses = $this->logHowManyItemsHaveBeenCollected(
+            $options,
+            $lastCollectionBatchSize
         );
 
-        return $options;
-    }
-
-    /**
-     * @param array     $options
-     * @param array     $statuses
-     * @param Whisperer $whisperer
-     *
-     * @throws SkippableMessageException
-     */
-    private function afterCountingCollectedStatuses(
-        array $options,
-        array $statuses,
-        Whisperer $whisperer
-    ) {
-        $aggregateId = $this->extractAggregateIdFromOptions($options);
-
-        if (count($statuses) === 0) {
-            SkippableMessageException::stopMessageConsumption();
-        }
-
-        if (
-            array_key_exists(0, $statuses) &&
-            $this->statusRepository->hasBeenSavedBefore($statuses)
-        ) {
-            $this->logger->info(
-                sprintf(
-                    'The item with id "%d" has already been saved in the past (skipping the whole batch from "%s")',
-                    $statuses[0]->id_str,
-                    $options['screen_name']
-                )
-            );
-            SkippableMessageException::stopMessageConsumption();
-        }
-
-        $savedItems = $this->saveStatusesForScreenName(
-            $statuses,
-            $options['screen_name'],
-            $aggregateId
+        $this->whispererIdentification->identifyWhisperer(
+            $options[FetchPublication::SCREEN_NAME],
+            $totalCollectedStatuses,
+            $lastCollectionBatchSize
         );
-
-        if (count($statuses) < self::MAX_BATCH_SIZE || is_null($savedItems)) {
-            SkippableMessageException::stopMessageConsumption();
-        }
-
-        $isNotAboutCollectingLikes = !$this->collectionStrategy->fetchLikes();
-        if ($isNotAboutCollectingLikes) {
-            $this->whispererRepository->forgetAboutWhisperer($whisperer);
-        }
-
-        SkippableMessageException::continueMessageConsumption();
-    }
-
-    /**
-     * @param $options
-     * @param $whisperer
-     *
-     * @throws OptimisticLockException
-     */
-    private function afterUpdatingLastPublicationDate($options, Whisperer $whisperer): void
-    {
-        if ($this->collectionStrategy->fetchLikes()) {
-            return;
-        }
-
-        if ($whisperer->getExpectedWhispers() === 0) {
-            $this->whispererRepository->declareWhisperer(
-                $whisperer->setExpectedWhispers(
-                    $whisperer->member->statuses_count
-                )
-            );
-        }
-
-        $whisperer->setExpectedWhispers($whisperer->member->statuses_count);
-        $this->whispererRepository->saveWhisperer($whisperer);
-
-        $this->logger->info(sprintf('Skipping whisperer "%s"', $options['screen_name']));
-    }
-
-    private function beforeFetchingStatuses($options)
-    {
-        if ($this->collectionStrategy->fetchLikes()) {
-            return null;
-        }
-
-        $whisperer = $this->whispererRepository->findOneBy(
-            ['name' => $options['screen_name']]
-        );
-        if (!$whisperer instanceof Whisperer) {
-            SkippableMessageException::continueMessageConsumption();
-        }
-
-        $whisperer->member = $this->apiAccessor->showUser($options['screen_name']);
-        $whispers          = (int) $whisperer->member->statuses_count;
-
-        $storedWhispers = $this->statusRepository->countHowManyStatusesFor($options['screen_name']);
-
-        if ($storedWhispers === $whispers) {
-            SkippableMessageException::stopMessageConsumption();
-        }
-
-        if (
-            $whispers >= self::MAX_AVAILABLE_TWEETS_PER_USER
-            && $storedWhispers < self::MAX_AVAILABLE_TWEETS_PER_USER
-        ) {
-            SkippableMessageException::continueMessageConsumption();
-        }
-
-        return $whisperer;
-    }
-
-    /**
-     * @param array $options
-     *
-     * @throws ProtectedAccountException
-     * @throws RateLimitedException
-     * @throws SkipCollectException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws NonUniqueResultException
-     */
-    private function decideWhetherCollectShouldBeSkipped(array $options): void
-    {
-        try {
-            if ($this->shouldSkipCollect($options)) {
-                throw new SkipCollectException('Skipped pretty naturally ^_^');
-            }
-        } catch (SuspendedAccountException|NotFoundMemberException|ProtectedAccountException $exception) {
-            $this->handleUnavailableMemberException($exception, $options);
-        } catch (SkipCollectException $exception) {
-            throw $exception;
-        } catch (BadAuthenticationDataException $exception) {
-            $this->logger->error(
-                sprintf(
-                    'The provided tokens have come to expire (%s).',
-                    $exception->getMessage()
-                )
-            );
-
-            throw new SkipCollectException('Skipped because of bad authentication credentials');
-        } catch (ApiRateLimitingException $exception) {
-            $this->delayingConsumption();
-
-            throw new RateLimitedException('No more call to the API can be made.');
-        } catch (UnavailableResourceException|Exception $exception) {
-            $this->logger->error(
-                sprintf(
-                    'An error occurred when checking if a collect could be skipped ("%s")',
-                    $exception->getMessage()
-                )
-            );
-
-            throw new SkipCollectException(
-                'Skipped because Twitter sent error message and codes never dealt with so far'
-            );
-        }
     }
 
     /**
@@ -1083,7 +675,9 @@ class PublicationCollector implements PublicationCollectorInterface
         string $memberName
     ) {
         if (count($statuses) === 0) {
-            throw new \LogicException('There should be at least one status');
+            throw new \LogicException(
+                'There should be at least one status'
+            );
         }
 
         if ($this->collectionStrategy->fetchLikes()) {
@@ -1131,124 +725,38 @@ class PublicationCollector implements PublicationCollectorInterface
         return $options;
     }
 
-    /**
-     * @return bool
-     * @throws Exception
-     */
-    private function delayingConsumption(): bool
-    {
-        $token = $this->tokenRepository->findFirstFrozenToken();
-
-        /** @var \DateTime $frozenUntil */
-        $frozenUntil = $token->getFrozenUntil();
-        $now         = new \DateTime('now', $frozenUntil->getTimezone());
-
-        $timeout = $frozenUntil->getTimestamp() - $now->getTimestamp();
-
-        $this->logger->info('The API is not available right now.');
-        $this->moderator->waitFor(
-            $timeout,
-            [
-                '{{ token }}' => substr($token->getOauthToken(), 0, '8'),
-            ]
-        );
-
-        return true;
-    }
-
     private function ensureTargetAggregateIsNotLocked(): void
     {
-        if ($this->isCollectingStatusesForAggregate()) {
-            $aggregate = $this->publicationListRepository->findOneBy(
-                ['id' => $this->collectionStrategy->publicationListId()]
-            );
-
-            if (!$aggregate instanceof Aggregate) {
-                return;
-            }
-
-            if ($aggregate->isLocked()) {
-                $message = sprintf(
-                    'Won\'t process message for locked aggregate #%d',
-                    $aggregate->getId()
-                );
-                $this->logger->info($message);
-
-                throw new LockedAggregateException($message);
-            }
-
-            $this->logger->info(
-                sprintf(
-                    'About to lock processing of aggregate #%d',
-                    $aggregate->getId()
-                )
-            );
-
-            $this->publicationListRepository->lockAggregate($aggregate);
-        }
-    }
-
-    /**
-     * @param $options
-     *
-     * @return int|null
-     */
-    private function extractAggregateIdFromOptions($options): ?int
-    {
-        if (!array_key_exists('aggregate_id', $options)) {
-            return null;
+        if (!$this->isCollectingStatusesForAggregate()) {
+            return;
         }
 
-        return $options['aggregate_id'];
-    }
-
-    /**
-     * @param $options
-     * @param $findingDirection
-     *
-     * @return array|mixed
-     * @throws NonUniqueResultException
-     */
-    private function findExtremum($options, $findingDirection)
-    {
-        if ($this->collectionStrategy->fetchLikes()) {
-            return $this->findLikeExtremum($options, $findingDirection);
-        }
-
-        if (!$this->collectionStrategy->dateBeforeWhichStatusAreToBeCollected()) {
-            return $this->statusRepository->findLocalMaximum(
-                $options['screen_name'],
-                $this->collectionStrategy->dateBeforeWhichStatusAreToBeCollected()
-            );
-        }
-
-        return $this->statusRepository->findNextExtremum(
-            $options['screen_name'],
-            $findingDirection
+        $publicationList = $this->publicationListRepository->findOneBy(
+            ['id' => $this->collectionStrategy->publicationListId()]
         );
-    }
 
-    /**
-     * @param $options
-     * @param $findingDirection
-     *
-     * @return array|mixed
-     * @throws NonUniqueResultException
-     */
-    private function findLikeExtremum($options, $findingDirection)
-    {
-        if (!$this->collectionStrategy->dateBeforeWhichStatusAreToBeCollected()) {
-            return $this->likedStatusRepository->findLocalMaximum(
-                $options['screen_name'],
-                $this->collectionStrategy->dateBeforeWhichStatusAreToBeCollected()
-            );
+        if (!$publicationList instanceof PublicationListInterface) {
+            return;
         }
 
-        return $this->likedStatusRepository->findNextExtremum
-        (
-            $options['screen_name'],
-            $findingDirection
+        if ($publicationList->isLocked()) {
+            $message = sprintf(
+                'Won\'t process message for locked aggregate #%d',
+                $publicationList->getId()
+            );
+            $this->logger->info($message);
+
+            throw new LockedAggregateException($message);
+        }
+
+        $this->logger->info(
+            sprintf(
+                'About to lock processing of aggregate #%d',
+                $publicationList->getId()
+            )
         );
+
+        $this->publicationListRepository->lockAggregate($publicationList);
     }
 
     /**
@@ -1260,114 +768,13 @@ class PublicationCollector implements PublicationCollectorInterface
     {
         if ($this->collectionStrategy->fetchLikes()) {
             return $this->likedStatusRepository->getIdsOfExtremeStatusesSavedForMemberHavingScreenName(
-                $options['screen_name']
+                $options[FetchPublication::SCREEN_NAME]
             );
         }
 
         return $this->statusRepository->getIdsOfExtremeStatusesSavedForMemberHavingScreenName(
-            $options['screen_name']
+            $options[FetchPublication::SCREEN_NAME]
         );
-    }
-
-    /**
-     * @param $options
-     * @param $discoverPastTweets
-     *
-     * @return string
-     */
-    private function getExtremumOption($discoverPastTweets): string
-    {
-        if ($discoverPastTweets) {
-            return 'max_id';
-        }
-
-        return 'since_id';
-    }
-
-    /**
-     * @param $options
-     * @param $discoverPastTweets
-     *
-     * @return array
-     */
-    private function getExtremumOptions($options, $discoverPastTweets): array
-    {
-        if (!$discoverPastTweets && array_key_exists('max_id', $options)) {
-            unset($options['max_id']);
-        }
-
-        return $options;
-    }
-
-    /**
-     * @param $discoverPastTweets
-     *
-     * @return string
-     */
-    private function getExtremumUpdateMethod($discoverPastTweets): string
-    {
-        if ($discoverPastTweets) {
-            // next maximum
-            return ExtremumAwareInterface::FINDING_IN_ASCENDING_ORDER;
-        }
-
-        // next minimum
-        return ExtremumAwareInterface::FINDING_IN_DESCENDING_ORDER;
-    }
-
-    /**
-     * @return string
-     */
-    private function getLogPrefix(): string
-    {
-        if (!$this->collectionStrategy->dateBeforeWhichStatusAreToBeCollected()) {
-            return '';
-        }
-
-        return 'local ';
-    }
-
-    /**
-     * @param $discoverPastTweets
-     *
-     * @return int
-     */
-    private function getShiftFromExtremum($discoverPastTweets): int
-    {
-        if ($discoverPastTweets) {
-            return -1;
-        }
-
-        return 1;
-    }
-
-    /**
-     * @param Exception  $exception
-     * @param            $options
-     *
-     * @throws ProtectedAccountException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     */
-    private function handleUnavailableMemberException(Exception $exception, array $options): void
-    {
-        $message = 'Skipping member with screen name "%s", which has not been found';
-
-        if ($exception instanceof SuspendedAccountException) {
-            $message = 'Skipping member with screen name "%s", which has been suspended';
-        }
-
-        if ($exception instanceof ProtectedAccountException) {
-            $message = 'Skipping member with screen name "%s", which is protected';
-            $this->logger->error(sprintf($message, $options['screen_name']));
-
-            throw $exception;
-        }
-
-        $message = sprintf($message, $options['screen_name']);
-        $this->logger->error($message);
-
-        throw new UnavailableResourceException($message, $exception->getCode(), $exception);
     }
 
     /**
@@ -1433,88 +840,16 @@ class PublicationCollector implements PublicationCollectorInterface
     }
 
     /**
-     * @param array                $statuses
-     * @param Aggregate|null       $aggregate
-     * @param MemberInterface|null $likedBy
-     *
-     * @return CollectionInterface
-     */
-    private function saveStatuses(
-        array $statuses,
-        Aggregate $aggregate = null,
-        MemberInterface $likedBy = null
-    ): CollectionInterface {
-        if ($this->collectionStrategy->fetchLikes()) {
-            return $this->statusRepository->saveLikes(
-                $statuses,
-                $this->apiAccessor->getOAuthToken(),
-                $aggregate,
-                $this->logger,
-                $likedBy,
-                function ($memberName) {
-                    return $this->apiAccessor->ensureMemberHavingNameExists($memberName);
-                }
-            );
-        }
-
-        return $this->publicationPersistence->persistStatusPublications(
-            $statuses,
-            new AccessToken($this->apiAccessor->getOAuthToken()),
-            $aggregate
-        );
-    }
-
-    /**
-     * @param array    $statuses
-     * @param string   $screenName
-     * @param int|null $aggregateId
-     *
-     * @return int|null
-     */
-    private function saveStatusesForScreenName(
-        array $statuses,
-        string $screenName,
-        int $aggregateId = null
-    ): ?int {
-        $success = null;
-
-        if (!is_array($statuses) || count($statuses) === 0) {
-            return $success;
-        }
-
-        $aggregate = null;
-        if ($aggregateId !== null) {
-            /** @var Aggregate $aggregate */
-            $aggregate = $this->publicationListRepository->findOneBy(['id' => $aggregateId]);
-        }
-
-        $this->collectStatusLogger->logHowManyItemsHaveBeenFetched(
-            $statuses,
-            $screenName
-        );
-
-        $likedBy = null;
-        if ($this->collectionStrategy->fetchLikes()) {
-            $likedBy = $this->apiAccessor->ensureMemberHavingNameExists($screenName);
-        }
-
-        $savedStatuses = $this->saveStatuses($statuses, $aggregate, $likedBy);
-
-        return $this->collectStatusLogger->logHowManyItemsHaveBeenSaved(
-            $savedStatuses->count(),
-            $screenName,
-            $this->collectionStrategy->fetchLikes()
-        );
-    }
-
-    /**
      * @param Token $token
-     * @param       $options
+     * @param array $options
      *
      * @return array
      * @throws Exception
      */
-    private function setUpAccessorWithFirstAvailableToken(Token $token, $options): array
+    private function setUpAccessorWithFirstAvailableToken(
+        Token $token,
+        array $options
+    ): array
     {
         $options[self::MESSAGE_OPTION_TOKEN] = $token->getOauthToken();
         $this->setupAccessor(
@@ -1538,11 +873,11 @@ class PublicationCollector implements PublicationCollectorInterface
     {
         if ($this->collectionStrategy->fetchLikes()) {
             return $this->likedStatusRepository->countHowManyLikesFor($memberName)
-                > self::MAX_AVAILABLE_TWEETS_PER_USER;
+                > CollectionStrategyInterface::MAX_AVAILABLE_TWEETS_PER_USER;
         }
 
         return $this->statusRepository->countHowManyStatusesFor($memberName)
-            > self::MAX_AVAILABLE_TWEETS_PER_USER;
+            > CollectionStrategyInterface::MAX_AVAILABLE_TWEETS_PER_USER;
     }
 
     /**
@@ -1572,19 +907,19 @@ class PublicationCollector implements PublicationCollectorInterface
 
         $this->collectStatusLogger->logIntentionWithRegardsToAggregate(
             $options,
-            $this->collectionStrategy->publicationListId()
+            $this->collectionStrategy
         );
 
         $lastCollectionBatchSize = $this->saveStatusesMatchingCriteria(
             $options,
-            $this->collectionStrategy->publicationListId()
+            $this->collectionStrategy
         );
 
         if (
             $discoverPastTweets
             || (
                 $lastCollectionBatchSize !== null
-                && $lastCollectionBatchSize === self::MAX_BATCH_SIZE
+                && $lastCollectionBatchSize === CollectionStrategyInterface::MAX_BATCH_SIZE
             )
         ) {
             // When some of the last batch of statuses have been serialized for the first time,
@@ -1594,8 +929,8 @@ class PublicationCollector implements PublicationCollectorInterface
             // which have been more recently published
             $discoverPastTweets = $lastCollectionBatchSize !== null && $discoverPastTweets;
             if ($greedy) {
-                $options['aggregate_id'] = $this->collectionStrategy->publicationListId();
-                $options['before']       = $this->collectionStrategy->dateBeforeWhichStatusAreToBeCollected();
+                $options[FetchPublication::AGGREGATE_ID] = $this->collectionStrategy->publicationListId();
+                $options[FetchPublication::BEFORE]       = $this->collectionStrategy->dateBeforeWhichStatusAreToBeCollected();
 
                 $success = $this->collect($options, $greedy, $discoverPastTweets);
 
@@ -1603,30 +938,21 @@ class PublicationCollector implements PublicationCollectorInterface
                 if ($justDiscoveredFutureTweets &&
                     $this->collectionStrategy->dateBeforeWhichStatusAreToBeCollected() === null
                 ) {
-                    unset($options['aggregate_id']);
+                    unset($options[FetchPublication::AGGREGATE_ID]);
 
-                    $options = $this->updateExtremum($options, $discoverPastTweets = false);
+                    $options = $this->interruptibleCollectDecider
+                        ->updateExtremum(
+                            $options,
+                            $discoverPastTweets = false
+                    );
                     $options = $this->apiAccessor->guessMaxId(
                         $options,
-                        $this->shouldLookUpFutureItems($options['screen_name'])
+                        $this->shouldLookUpFutureItems($options[FetchPublication::SCREEN_NAME])
                     );
 
-                    $lastCollectionBatchSize = $this->saveStatusesMatchingCriteria(
+                    $this->saveStatusesMatchingCriteria(
                         $options,
-                        $this->collectionStrategy->publicationListId()
-                    );
-
-                    $totalCollectedStatuses = $this->logHowManyItemsHaveBeenCollected($options);
-                    $this->logSerializationProgress(
-                        $options,
-                        $lastCollectionBatchSize,
-                        $totalCollectedStatuses
-                    );
-
-                    $this->whispererIdentification->identifyWhisperer(
-                        $options['screen_name'],
-                        $totalCollectedStatuses,
-                        $lastCollectionBatchSize
+                        $this->collectionStrategy
                     );
                 }
             }
@@ -1638,12 +964,15 @@ class PublicationCollector implements PublicationCollectorInterface
     private function unlockAggregate(): void
     {
         if ($this->isCollectingStatusesForAggregate()) {
-            $aggregate = $this->publicationListRepository->findOneBy(
+            $publicationList = $this->publicationListRepository->findOneBy(
                 ['id' => $this->collectionStrategy->publicationListId()]
             );
-            if ($aggregate instanceof Aggregate) {
-                $this->publicationListRepository->unlockAggregate($aggregate);
-                $this->logger->info(sprintf('Unlocked aggregate #%d', $aggregate->getId()));
+            if ($publicationList instanceof PublicationListInterface) {
+                $this->publicationListRepository->unlockAggregate($publicationList);
+                $this->logger->info(sprintf(
+                    'Unlocked publication list of id #%d',
+                    $publicationList->getId()
+                ));
             }
         }
     }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Status\Repository;
 
 use App\Api\Entity\Aggregate;
+use App\Domain\Status\LikedStatusRepositoryInterface;
 use App\Domain\Status\StatusInterface;
 use App\Infrastructure\Repository\Membership\MemberRepositoryInterface;
 use App\Membership\Entity\MemberInterface;
@@ -21,7 +22,7 @@ use Doctrine\ORM\ORMException;
  * @method LikedStatus[]    findAll()
  * @method LikedStatus[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class LikedStatusRepository extends ServiceEntityRepository implements ExtremumAwareInterface
+class LikedStatusRepository extends ServiceEntityRepository implements ExtremumAwareInterface, LikedStatusRepositoryInterface
 {
     /**
      * @var MemberRepositoryInterface

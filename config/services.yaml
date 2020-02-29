@@ -1,5 +1,6 @@
 imports:
     - { resource: services/api.yml }
+    - { resource: services/collection.yml }
     - { resource: services/command.yml }
     - { resource: services/controller.yml }
     - { resource: services/mapping.yml }
@@ -180,8 +181,8 @@ services:
             statusRepository:           '@App\Api\Repository\StatusRepository'
             userManager:                '@user_manager'
 
-    weaving_the_web_twitter.repository.aggregate:
-        class: '%weaving_the_web_twitter.repository.aggregate.class%'
+    weaving_the_web_twitter.repository.publication_list:
+        class: '%weaving_the_web_twitter.repository.publication_list.class%'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - '%weaving_the_web_twitter.entity.aggregate.class%'
@@ -211,20 +212,22 @@ services:
     App\Infrastructure\Twitter\Collector\PublicationCollector:
         class:  'App\Infrastructure\Twitter\Collector\PublicationCollector'
         calls:
-            - [ 'setApiAccessor',               [ '@weaving_the_web_twitter.api_accessor' ] ]
-            - [ 'setLogger',                    [ '@monolog.logger.status' ] ]
-            - [ 'setModerator',                 [ '@weaving_the_web_twitter.moderator.api_limit' ] ]
-            - [ 'setPublicationListRepository', [ '@weaving_the_web_twitter.repository.aggregate' ] ]
-            - [ 'setPublicationPersistence',    [ '@App\Infrastructure\Status\Persistence\PublicationPersistence' ] ]
-            - [ 'setStatusLogger',              [ '@App\Infrastructure\Log\StatusLogger' ] ]
-            - [ 'setStatusRepository',          [ '@App\Api\Repository\StatusRepository' ] ]
-            - [ 'setTokenRepository',           [ '@weaving_the_web_twitter.repository.token' ] ]
-            - [ 'setTranslator',                [ '@translator' ] ]
-            - [ 'setWhispererIdentification',   [ '@App\Infrastructure\Identification\WhispererIdentification' ] ]
-            - [ 'setWhispererRepository',       [ '@repository.whisperer' ] ]
+            - [ 'setApiAccessor',                           [ '@weaving_the_web_twitter.api_accessor' ] ]
+            - [ 'setInterruptibleCollectDeciderInterface',  [ '@App\Infrastructure\Twitter\Collector\InterruptibleCollectDecider' ] ]
+            - [ 'setLogger',                                [ '@monolog.logger.status' ] ]
+            - [ 'setLikedStatusRepositoryTrait',            [ '@repository.liked_status' ] ]
+            - [ 'setModerator',                             [ '@weaving_the_web_twitter.moderator.api_limit' ] ]
+            - [ 'setPublicationListRepository',             [ '@weaving_the_web_twitter.repository.publication_list' ] ]
+            - [ 'setPublicationPersistence',                [ '@App\Infrastructure\Status\Persistence\PublicationPersistence' ] ]
+            - [ 'setStatusLogger',                          [ '@App\Infrastructure\Log\StatusLogger' ] ]
+            - [ 'setStatusRepository',                      [ '@App\Api\Repository\StatusRepository' ] ]
+            - [ 'setStatusPersistence',                     [ '@App\Infrastructure\Status\Persistence\StatusPersistence' ] ]
+            - [ 'setTokenRepository',                       [ '@weaving_the_web_twitter.repository.token' ] ]
+            - [ 'setTranslator',                            [ '@translator' ] ]
+            - [ 'setWhispererIdentification',               [ '@App\Infrastructure\Identification\WhispererIdentification' ] ]
+            - [ 'setWhispererRepository',                   [ '@repository.whisperer' ] ]
         properties:
             twitterApiLogger:       '@monolog.logger.twitter_api'
-            likedStatusRepository:  '@repository.liked_status'
 
 # This file is the entry point to configure your own services.
 # Files in the packages/ subdirectory configure your dependencies.
@@ -263,8 +266,8 @@ parameters:
     weaving_the_web_twitter.entity.status.class:                  '%weaving_the_web_api.entity.status.class%'
     weaving_the_web_twitter.entity.token.class:                   '%weaving_the_web_api.entity.token.class%'
 
-    weaving_the_web_twitter.repository.aggregate.class:           '%weaving_the_web_api.repository.aggregate.class%'
-    weaving_the_web_twitter.repository.token.class:               '%weaving_the_web_api.repository.token.class%'
+    weaving_the_web_twitter.repository.publication_list.class:           '%weaving_the_web_api.repository.publication_list.class%'
+    weaving_the_web_twitter.repository.token.class:               '%repository.access_token.class%'
 
     weaving_the_web_twitter.version:                              '%env(resolve:API_TWITTER_VERSION)%'
 

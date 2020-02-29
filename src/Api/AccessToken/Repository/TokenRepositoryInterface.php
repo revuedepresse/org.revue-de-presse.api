@@ -16,5 +16,9 @@ interface TokenRepositoryInterface
 {
     public function findTokenOtherThan(string $token): ?TokenInterface;
 
+    public function findFirstUnfrozenToken(): ?TokenInterface;
+
+    public function findFirstFrozenToken(): ?TokenInterface;
+
     public function howManyUnfrozenTokenAreThere(): int;
 }

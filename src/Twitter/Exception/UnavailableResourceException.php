@@ -6,18 +6,53 @@ namespace App\Twitter\Exception;
 use App\Accessor\Exception\ApiRateLimitingException;
 use App\Accessor\Exception\NotFoundStatusException;
 use App\Accessor\Exception\ReadOnlyApplicationException;
+use App\Infrastructure\Amqp\Message\FetchPublication;
 use App\Twitter\Api\TwitterErrorAwareInterface;
 use Exception;
+use Psr\Log\LoggerInterface;
 use stdClass;
 use function is_array;
 use function is_object;
+use function sprintf;
 
 /**
  * @package App\Twitter\Exception
- * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
 class UnavailableResourceException extends Exception implements TwitterErrorAwareInterface
 {
+
+    /**
+     * @param Exception       $exception
+     * @param array           $options
+     *
+     * @param LoggerInterface $logger
+     *
+     * @throws ProtectedAccountException
+     * @throws UnavailableResourceException
+     */
+    public static function handleUnavailableMemberException(
+        Exception $exception,
+        LoggerInterface $logger,
+        array $options
+    ): void {
+        $message = self::logUnavailableMemberException(
+            $exception,
+            $logger,
+            $options
+        );
+
+        if ($exception instanceof ProtectedAccountException) {
+            throw $exception;
+        }
+
+        throw new self(
+            $message,
+            $exception->getCode(),
+            $exception
+        );
+    }
+
     /**
      * @param stdClass|array $content
      * @param string         $endpoint
@@ -91,9 +126,11 @@ class UnavailableResourceException extends Exception implements TwitterErrorAwar
             );
         }
 
-        if ($errorCode === self::ERROR_USER_NOT_FOUND ||
-            $errorCode === self::ERROR_CAN_NOT_FIND_SPECIFIED_USER ||
-            $errorCode === self::ERROR_NOT_FOUND) {
+        if (
+            $errorCode === self::ERROR_USER_NOT_FOUND
+            || $errorCode === self::ERROR_CAN_NOT_FIND_SPECIFIED_USER
+            || $errorCode === self::ERROR_NOT_FOUND
+        ) {
             throw new NotFoundMemberException(
                 $error->message,
                 $error->code
@@ -115,8 +152,46 @@ class UnavailableResourceException extends Exception implements TwitterErrorAwar
      */
     public static function containErrors($response): bool
     {
-        return is_object($response) && (
-                (isset($response->errors, $response->errors[0]) && is_array($response->errors))
+        return is_object($response)
+            && (
+                (isset($response->errors, $response->errors[0]) &&
+                is_array($response->errors))
                 || isset($response->error));
+    }
+
+    /**
+     * @param LoggerInterface $logger
+     * @param Exception       $exception
+     * @param array           $options
+     *
+     * @return string
+     */
+    private static function logUnavailableMemberException(
+        Exception $exception,
+        LoggerInterface $logger,
+        array $options
+    ): string {
+        $message = 'Skipping member with screen name "%s", which has not been found';
+
+        if ($exception instanceof SuspendedAccountException) {
+            $message = 'Skipping member with screen name "%s", which has been suspended';
+        }
+
+        if ($exception instanceof ProtectedAccountException) {
+            $message = 'Skipping member with screen name "%s", which is protected';
+            $logger->error(
+                sprintf(
+                    $message,
+                    $options[FetchPublication::SCREEN_NAME]
+                )
+            );
+
+            return $message;
+        }
+
+        $message = sprintf($message, $options[FetchPublication::SCREEN_NAME]);
+        $logger->error($message);
+
+        return $message;
     }
 }

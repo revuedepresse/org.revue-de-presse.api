@@ -9,9 +9,12 @@ trait PublicationListRepositoryTrait
 {
     private PublicationListRepositoryInterface $publicationListRepository;
 
-    public function setPublicationListRepository(PublicationListRepositoryInterface $publicationListRepository)
-    {
+    public function setPublicationListRepository(
+        PublicationListRepositoryInterface $publicationListRepository
+    ): self {
         $this->publicationListRepository = $publicationListRepository;
+
+        return $this;
     }
 
 }
