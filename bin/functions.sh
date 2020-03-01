@@ -113,6 +113,11 @@ function handle_messages {
         echo '[default memory limit] '$MEMORY_LIMIT
     fi
 
+    if [ -z "${TIME_LIMIT}" ]
+    then
+        TIME_LIMIT="300";
+    fi
+
     if [ -z "${PROJECT_DIR}" ];
     then
         export PROJECT_DIR='/var/www/devobs'
@@ -126,7 +131,7 @@ function handle_messages {
     rabbitmq_output_log="${PROJECT_DIR}/${rabbitmq_output_log}"
     rabbitmq_error_log="${PROJECT_DIR}/${rabbitmq_error_log}"
 
-    export SCRIPT="bin/console messenger:consume -m $MEMORY_LIMIT -l $MESSAGES "${command_suffix}" --time-limit 3000"
+    export SCRIPT="bin/console messenger:consume --time-limit=$TIME_LIMT -m $MEMORY_LIMIT -l $MESSAGES "${command_suffix}" --time-limit 3000"
 
     local symfony_environment
     symfony_environment="$(get_symfony_environment)"
