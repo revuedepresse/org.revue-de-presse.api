@@ -4,7 +4,11 @@ declare(strict_types=1);
 namespace App\Api\Entity;
 
 use App\Domain\Publication\PublicationListInterface;
+use DateTime;
+use DateTimeInterface;
+use DateTimeZone;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -43,89 +47,77 @@ class Aggregate implements PublicationListInterface
      *
      * @ORM\Column(name="name", type="string", length=255)
      */
-    protected $name;
+    protected string $name;
 
     /**
      * @var string
      *
      * @ORM\Column(name="screen_name", type="string", length=255, nullable=true)
      */
-    public $screenName;
+    public string $screenName;
 
     /**
      * @var bool
      * @ORM\Column(name="locked", type="boolean")
      */
-    public $locked;
+    public bool $locked;
 
     /**
-     * @var \DateTime
      * @ORM\Column(name="locked_at", type="datetime", nullable=true)
      */
-    public $lockedAt;
+    public DateTimeInterface $lockedAt;
 
     /**
-     * @var \DateTime
      * @ORM\Column(name="unlocked_at", type="datetime", nullable=true)
      */
-    public $unlockedAt;
+    public DateTimeInterface $unlockedAt;
 
     /**
-     * @var integer
-     *
      * @ORM\Column(name="list_id", type="string", nullable=true)
      */
-    public $listId;
+    public string $listId;
 
     /**
-     * @var integer
-     *
      * @ORM\Column(name="total_members", type="integer", options={"default": 0})
      */
-    public $totalMembers = 0;
+    public int $totalMembers = 0;
 
     /**
-     * @var integer
-     *
      * @ORM\Column(name="total_statuses", type="integer", options={"default": 0})
      */
-    public $totalStatuses = 0;
+    public int $totalStatuses = 0;
 
     /**
-     * @var \DateTime
      * @ORM\Column(name="deleted_at", type="datetime", nullable=true)
      */
-    private $deletedAt;
+    private DateTimeInterface $deletedAt;
 
-    /**
-     * @return $this
-     */
-    public function markAsDeleted()
+    public function markAsDeleted(): self
     {
-        $this->deletedAt = new \DateTime('now', new \DateTimeZone('UTC'));
+        $this->deletedAt = new DateTime('now', new DateTimeZone('UTC'));
 
         return $this;
     }
 
-    public function lock()
+    public function lock(): self
     {
         $this->locked = true;
-        $this->lockedAt = new \DateTime('now', new \DateTimeZone('UTC'));
+        $this->lockedAt = new DateTime('now', new DateTimeZone('UTC'));
         $this->unlockedAt = null;
 
         return $this;
     }
 
-    public function unlock()
+    public function unlock(): self
     {
         $this->locked = false;
         $this->lockedAt = null;
-        $this->unlockedAt = new \DateTime('now', new \DateTimeZone('UTC'));
+        $this->unlockedAt = new DateTime('now', new DateTimeZone('UTC'));
 
         return $this;
     }
 
-    public function isLocked()
+    public function isLocked(): bool
     {
         return $this->locked;
     }
@@ -133,37 +125,31 @@ class Aggregate implements PublicationListInterface
     /**
      * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
     /**
-     * @var \DateTime
-     *
      * @ORM\Column(name="created_at", type="datetime")
      */
-    protected $createdAt;
+    protected DateTimeInterface $createdAt;
 
     /**
      * Get createdAt
      *
-     * @return \DateTime
+     * @return DateTime
      */
     public function getCreatedAt()
     {
         return $this->createdAt;
     }
 
-    /**
-     * @param $screenName
-     * @param $listName
-     */
     public function __construct(string $screenName, string $listName)
     {
         $this->name = $listName;
         $this->screenName = $screenName;
-        $this->createdAt = new \DateTime();
+        $this->createdAt = new DateTime();
         $this->userStreams = new ArrayCollection();
         $this->locked = false;
     }
@@ -171,5 +157,5 @@ class Aggregate implements PublicationListInterface
     /**
      * @ORM\ManyToMany(targetEntity="Status", mappedBy="aggregates")
      */
-    protected $userStreams;
+    protected Collection $userStreams;
 }

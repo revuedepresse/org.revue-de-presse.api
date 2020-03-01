@@ -1,18 +1,17 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Console\EventSubscriber;
 
 use Doctrine\DBAL\Exception\ConnectionException;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\ConsoleEvents;
 use Symfony\Component\Console\Event\ConsoleErrorEvent;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 class ConsoleEventsSubscriber implements EventSubscriberInterface
 {
-    /**
-     * @var \Psr\Log\LoggerInterface
-     */
-    public $logger;
+    public LoggerInterface $logger;
 
     public static function getSubscribedEvents()
     {
@@ -25,7 +24,7 @@ class ConsoleEventsSubscriber implements EventSubscriberInterface
     }
 
 
-    public function logException(ConsoleErrorEvent $event)
+    public function logException(ConsoleErrorEvent $event): void
     {
         $exception = $event->getError();
         $this->logger->critical($exception->getMessage());
@@ -34,7 +33,7 @@ class ConsoleEventsSubscriber implements EventSubscriberInterface
     /**
      * @param ConsoleErrorEvent $event
      */
-    public function notifyException(ConsoleErrorEvent $event)
+    public function notifyException(ConsoleErrorEvent $event): void
     {
         $exception = $event->getError();
 
@@ -54,8 +53,6 @@ class ConsoleEventsSubscriber implements EventSubscriberInterface
                     $exception->getCode()
                 )
             );
-
-            return;
         }
     }
 }

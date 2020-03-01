@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Aggregate\Entity;
 
@@ -22,22 +23,22 @@ class MemberAggregateSubscription
     /**
      * @var MemberInterface
      */
-    private $member;
+    private MemberInterface $member;
 
     /**
      * @var string
      */
-    public $listId;
+    public string $listId;
 
     /**
      * @var string
      */
-    private $listName;
+    private string $listName;
 
     /**
      * @var string
      */
-    private $document;
+    private string $document;
 
     /**
      * @param MemberInterface $member
