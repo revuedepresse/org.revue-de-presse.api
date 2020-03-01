@@ -70,8 +70,10 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
      * @throws ORMException
      * @throws OptimisticLockException
      */
-    public function __invoke(FetchMemberStatuses $message)
+    public function __invoke(FetchMemberStatuses $message): bool
     {
+        $success = false;
+
         try {
             $options = $this->processMessage($message);
         } catch (Exception $exception) {
@@ -128,6 +130,11 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
                 $success = false;
                 $this->logger->error($unavailableResource->getMessage());
             }
+        } catch (\Exception $exception) {
+            $this->logger->critical(
+                $exception->getMessage(),
+                ['stacktrace' => $exception->getTraceAsString()]
+            );
         }
 
         return $success;
