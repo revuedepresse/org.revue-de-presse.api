@@ -166,13 +166,14 @@ function consume_amqp_messages_for_news_status {
 }
 
 function purge_queues() {
-    docker exec -ti rabbitmq rabbitmqctl purge_queue get-user-status -p /weaving_the_web
-    docker exec -ti rabbitmq rabbitmqctl purge_queue get-conversation-status -p /weaving_the_web
-    docker exec -ti rabbitmq rabbitmqctl purge_queue get-aggregates-status -p /weaving_the_web
-    docker exec -ti rabbitmq rabbitmqctl purge_queue get-aggregates-likes -p /weaving_the_web
-    docker exec -ti rabbitmq rabbitmqctl purge_queue get-news-status -p /weaving_the_web
-    docker exec -ti rabbitmq rabbitmqctl purge_queue get-network -p /weaving_the_web
-    docker exec -ti rabbitmq rabbitmqctl purge_queue get-timely-status -p /weaving_the_web
+    local rabbitmq_vhost
+    rabbitmq_vhost="$(cat <(cat .env.local | grep STATUS=amqp | sed -E 's#.+(/.+)/[^/]*$#\1#' | sed -E 's/\/%2f/\//g'))"
+    cd provisioning/containers || exit
+
+    docker-compose exec -d messenger rabbitmqctl purge_queue \
+    get-news-status -p "${rabbitmq_vhost}"
+    docker-compose exec -d messenger rabbitmqctl purge_queue \
+    get-news-likes -p "${rabbitmq_vhost}"
 }
 
 function execute_command () {
