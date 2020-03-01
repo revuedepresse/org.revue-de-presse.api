@@ -176,6 +176,12 @@ function purge_queues() {
     get-news-likes -p "${rabbitmq_vhost}"
 }
 
+function stop_workers() {
+    cd provisioning/containers || exit
+
+    docker-compose run --rm worker bin/console messenger:stop-workers
+}
+
 function execute_command () {
     local output_log="${1}"
     local error_log="${2}"
