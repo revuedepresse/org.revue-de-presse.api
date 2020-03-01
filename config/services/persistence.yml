@@ -7,6 +7,8 @@ services:
             - '@App\Twitter\Repository\PublicationRepository'
             - '@user_manager'
             - '@doctrine.orm.entity_manager'
+        calls:
+            - [ 'setStatusPersistence', [ '@App\Infrastructure\Status\Persistence\StatusPersistence' ] ]
         public: true
 
     App\Infrastructure\Status\Persistence\StatusPersistence:
