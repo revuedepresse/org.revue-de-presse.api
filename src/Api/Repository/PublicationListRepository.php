@@ -526,7 +526,10 @@ QUERY;
                 ]
             );
 
-            if (count($aggregates) > 1) {
+            if (\count($aggregates) > 1) {
+                /** @var PublicationListInterface $firstAggregate */
+                $firstAggregate = $aggregates[0];
+
                 foreach ($aggregates as $index => $aggregate) {
                     if ($index === 0) {
                         continue;
@@ -539,7 +542,7 @@ QUERY;
                     foreach ($statuses as $status) {
                         /** @var StatusInterface $status */
                         $status->removeFrom($aggregate);
-                        $status->addToAggregates($aggregates[0]);
+                        $status->addToAggregates($firstAggregate);
                     }
 
                     $timelyStatuses = $this->timelyStatusRepository
@@ -547,7 +550,7 @@ QUERY;
 
                     /** @var TimelyStatus $timelyStatus */
                     foreach ($timelyStatuses as $timelyStatus) {
-                        $timelyStatus->updateAggregate($aggregates[0]);
+                        $timelyStatus->updateAggregate($firstAggregate);
                     }
 
                     $likedStatuses = $this->likedStatusRepository
@@ -555,7 +558,7 @@ QUERY;
 
                     /** @var LikedStatus $likedStatus */
                     foreach ($likedStatuses as $likedStatus) {
-                        $likedStatus->setAggregate($aggregates[0]);
+                        $likedStatus->setAggregate($firstAggregate);
                     }
                 }
 
@@ -571,7 +574,7 @@ QUERY;
 
                 $this->getEntityManager()->flush();
 
-                $aggregate = $aggregates[0];
+                $aggregate = $firstAggregate;
             }
         }
 

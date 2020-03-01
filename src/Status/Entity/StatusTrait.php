@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Status\Entity;
 
 use App\Api\Entity\Aggregate;
+use App\Domain\Publication\PublicationListInterface;
 use App\Domain\Status\StatusInterface;
 use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -282,23 +283,27 @@ trait StatusTrait
     }
 
     /**
-     * @param Aggregate $aggregate
+     * @param PublicationListInterface $aggregate
      *
      * @return $this
      */
-    public function removeFrom(Aggregate $aggregate): StatusInterface
+    public function removeFrom(PublicationListInterface $aggregate): StatusInterface
     {
-        $this->aggregates->remove($aggregate);
+        if (!$this->aggregates->contains($aggregate)) {
+            return $this;
+        }
+
+        $this->aggregates->removeElement($aggregate);
 
         return $this;
     }
 
     /**
-     * @param Aggregate $aggregate
+     * @param PublicationListInterface $aggregate
      *
-     * @return ArrayCollection
+     * @return Collection
      */
-    public function addToAggregates(Aggregate $aggregate): ArrayCollection {
+    public function addToAggregates(PublicationListInterface $aggregate): Collection {
         $this->aggregates->add($aggregate);
 
         return $this->aggregates;

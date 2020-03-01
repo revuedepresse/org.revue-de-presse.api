@@ -178,7 +178,10 @@ class PublicationCollector implements PublicationCollectorInterface
             // provided the workers would not call the API on behalf of them
             $success = true;
         } catch (ConstraintViolationException $constraintViolationException) {
-            $this->logger->critical($constraintViolationException->getMessage());
+            $this->logger->critical(
+                $constraintViolationException->getMessage(),
+                ['stacktrace' => $constraintViolationException->getTraceAsString()]
+            );
             $success = false;
         } catch (Exception $exception) {
             $this->logger->error(
