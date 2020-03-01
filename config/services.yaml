@@ -282,5 +282,6 @@ parameters:
     redis_host:                                                   '%env(resolve:REDIS_HOST)%'
     redis_port:                                                   '%env(resolve:REDIS_PORT)%'
 
-    valid_audience:                                               '%env(resolve:VALID_AUDIENCE)%'
+    valid_audience:                                               '%env(resolve:VALID_AUDIENCE_DEVOBS)%'
+
     authorized_iss:                                               '%env(resolve:AUTHORIZED_ISS)%'

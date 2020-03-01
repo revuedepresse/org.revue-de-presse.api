@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Member\Repository;
 
@@ -7,18 +8,19 @@ use App\Member\Entity\AuthenticationToken;
 use Doctrine\ORM\EntityRepository;
 use App\Membership\Entity\Member;
 use App\Infrastructure\Repository\Membership\MemberRepository;
+use const JSON_THROW_ON_ERROR;
 
 class AuthenticationTokenRepository extends EntityRepository
 {
     /**
      * @var MemberRepository
      */
-    public $memberRepository;
+    public MemberRepository $memberRepository;
 
     /**
      * @var Authenticator
      */
-    public $authenticator;
+    public Authenticator $authenticator;
 
     /**
      * @param string $tokenId
@@ -36,12 +38,12 @@ class AuthenticationTokenRepository extends EntityRepository
         $token = $this->findOneBy(['token' => $tokenInfo['sub']]);
 
         if (!($token instanceof AuthenticationToken)) {
-            $defaultMember = new User();
-            $defaultMember->setTwitterUsername('revue_2_presse');
+            $defaultMember = new Member();
+            $defaultMember->setScreenName('revue_2_presse');
 
             return [
                 'member' => $defaultMember,
-                'granted_routes' => json_encode(['bucket']),
+                'granted_routes' => json_encode(['bucket'], JSON_THROW_ON_ERROR),
             ];
         }
 
