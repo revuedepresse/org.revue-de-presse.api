@@ -46,6 +46,8 @@ class CollectionStrategy implements CollectionStrategyInterface
 
     private $maxStatusId;
 
+    private $minStatusId;
+
     public function dateBeforeWhichStatusAreToBeCollected(): ?string
     {
         return $this->dateBeforeWhichStatusAreCollected;
@@ -63,6 +65,15 @@ class CollectionStrategy implements CollectionStrategyInterface
         }
 
         return $this->maxStatusId;
+    }
+
+    public function minStatusId()
+    {
+        if ($this->minStatusId === null) {
+            return -INF;
+        }
+
+        return $this->minStatusId;
     }
 
     public function oneOfTheOptionsIsActive(): bool
@@ -96,6 +107,13 @@ class CollectionStrategy implements CollectionStrategyInterface
     public function optInToCollectStatusWhichIdIsLessThan($maxStatusId): CollectionStrategyInterface
     {
         $this->maxStatusId = $maxStatusId;
+
+        return $this;
+    }
+
+    public function optInToCollectStatusWhichIdIsGreaterThan($minStatusId): CollectionStrategyInterface
+    {
+        $this->minStatusId = $minStatusId;
 
         return $this;
     }

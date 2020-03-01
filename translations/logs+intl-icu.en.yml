@@ -40,5 +40,5 @@ logs.info.status_saved: >-
         =1    {{total_status} new status has been saved for user "{member}".}
         other {{total_status} new status have been saved for user "{member}".}}
 
-logs.info.whisperer_declared: 'User with "{screen name}" screen name has been declared as being a whisperer.'
+logs.info.whisperer_declared: Member with "{screen_name}" screen name has been declared as being a whisperer.
 

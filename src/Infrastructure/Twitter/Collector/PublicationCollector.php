@@ -33,6 +33,7 @@ use App\Infrastructure\Twitter\Collector\Exception\RateLimitedException;
 use App\Infrastructure\Twitter\Collector\Exception\SkipCollectException;
 use App\Membership\Entity\MemberInterface;
 use App\Status\LikedStatusCollectionAwareInterface;
+use App\Status\Repository\ExtremumAwareInterface;
 use App\Twitter\Exception\BadAuthenticationDataException;
 use App\Twitter\Exception\InconsistentTokenRepository;
 use App\Twitter\Exception\NotFoundMemberException;
@@ -189,7 +190,8 @@ class PublicationCollector implements PublicationCollectorInterface
                     '[from %s %s]',
                     __METHOD__,
                     $exception->getMessage()
-                )
+                ),
+                ['stacktrace' => $exception->getTraceAsString()]
             );
             $success = false;
         } finally {
@@ -552,10 +554,7 @@ class PublicationCollector implements PublicationCollectorInterface
      * @param CollectionStrategyInterface $collectionStrategy
      *
      * @return int|null
-     * @throws NotFoundMemberException
-     * @throws OptimisticLockException
      * @throws ProtectedAccountException
-     * @throws UnavailableResourceException
      */
     protected function saveStatusesMatchingCriteria(
         $options,
@@ -573,6 +572,7 @@ class PublicationCollector implements PublicationCollectorInterface
 
         $betweenPublicationDateOfLastOneSavedAndNow = $this->isLookingBetweenPublicationDateOfLastOneSavedAndNow($options);
 
+        /** @var array $statuses */
         if (count($statuses) > 0) {
             $this->safelyDeclareExtremum(
                 $statuses,
@@ -602,16 +602,14 @@ class PublicationCollector implements PublicationCollectorInterface
             $collectionStrategy
         );
 
-        $totalCollectedStatuses = $this->logHowManyItemsHaveBeenCollected(
+        $this->whispererIdentification->identifyWhisperer(
+            $collectionStrategy,
             $options,
-            $lastCollectionBatchSize
+            $options[FetchPublicationInterface::SCREEN_NAME],
+            (int) $lastCollectionBatchSize
         );
 
-        $this->whispererIdentification->identifyWhisperer(
-            $options[FetchPublicationInterface::SCREEN_NAME],
-            $totalCollectedStatuses,
-            $lastCollectionBatchSize
-        );
+        return $lastCollectionBatchSize;
     }
 
     /**
@@ -620,14 +618,12 @@ class PublicationCollector implements PublicationCollectorInterface
      * @param string $memberName
      *
      * @return MemberInterface
-     * @throws NotFoundMemberException
-     * @throws OptimisticLockException
      */
     private function declareExtremumIdForMember(
         array $statuses,
         bool $shouldDeclareMaximumStatusId,
         string $memberName
-    ) {
+    ): MemberInterface {
         if (count($statuses) === 0) {
             throw new \LogicException(
                 'There should be at least one status'
@@ -750,58 +746,9 @@ class PublicationCollector implements PublicationCollectorInterface
     }
 
     /**
-     * @param array $options
-     *
-     * @param int   $lastCollectionBatchSize
-     *
-     * @return mixed
-     */
-    private function logHowManyItemsHaveBeenCollected(
-        array $options,
-        ?int $lastCollectionBatchSize
-    ) {
-        $this->collectionStrategy->optInToCollectStatusFor($options[FetchPublicationInterface::SCREEN_NAME]);
-        $this->collectionStrategy->optInToCollectStatusWhichIdIsLessThan($options['max_id']);
-
-        $subjectInSingularForm = 'status';
-        $subjectInPluralForm   = 'statuses';
-        $countCollectedItems   = function ($memberName, $maxId) {
-            return $this->statusRepository->countCollectedStatuses($memberName, $maxId);
-        };
-        if ($this->collectionStrategy->fetchLikes()) {
-            $subjectInSingularForm = 'like';
-            $subjectInPluralForm   = 'likes';
-            $countCollectedItems   = function ($memberName, $maxId) {
-                return $this->likedStatusRepository->countCollectedLikes($memberName, $maxId);
-            };
-        }
-
-        $totalStatuses = $countCollectedItems(
-            $this->collectionStrategy->screenName(),
-            $options['max_id']
-        );
-
-        $this->collectStatusLogger->logHowManyItemsHaveBeenCollected(
-            $this->collectionStrategy,
-            (int) $totalStatuses,
-            [
-                'plural'   => $subjectInPluralForm,
-                'singular' => $subjectInSingularForm
-            ],
-            (int) $lastCollectionBatchSize
-        );
-
-        return $totalStatuses;
-    }
-
-    /**
      * @param        $statuses
      * @param        $shouldDeclareMaximumStatusId
      * @param string $memberName
-     *
-     * @throws NotFoundMemberException
-     * @throws UnavailableResourceException
-     * @throws OptimisticLockException
      */
     private function safelyDeclareExtremum(
         $statuses,

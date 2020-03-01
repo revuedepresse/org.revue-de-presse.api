@@ -54,7 +54,7 @@ class Aggregate implements PublicationListInterface
      *
      * @ORM\Column(name="screen_name", type="string", length=255, nullable=true)
      */
-    public string $screenName;
+    public ?string $screenName;
 
     /**
      * @var bool
@@ -65,17 +65,17 @@ class Aggregate implements PublicationListInterface
     /**
      * @ORM\Column(name="locked_at", type="datetime", nullable=true)
      */
-    public DateTimeInterface $lockedAt;
+    public ?DateTimeInterface $lockedAt;
 
     /**
      * @ORM\Column(name="unlocked_at", type="datetime", nullable=true)
      */
-    public DateTimeInterface $unlockedAt;
+    public ?DateTimeInterface $unlockedAt;
 
     /**
      * @ORM\Column(name="list_id", type="string", nullable=true)
      */
-    public string $listId;
+    public ?string $listId;
 
     /**
      * @ORM\Column(name="total_members", type="integer", options={"default": 0})
@@ -90,7 +90,7 @@ class Aggregate implements PublicationListInterface
     /**
      * @ORM\Column(name="deleted_at", type="datetime", nullable=true)
      */
-    private DateTimeInterface $deletedAt;
+    private ?DateTimeInterface $deletedAt;
 
     public function markAsDeleted(): self
     {

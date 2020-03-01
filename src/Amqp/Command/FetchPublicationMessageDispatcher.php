@@ -183,7 +183,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
                     $exception->getMessage(),
                     ['stacktrace' => $exception->getTraceAsString()]
                 );
-            } catch (Exception $exception) {
+            } catch (\Throwable $exception) {
                 $this->logger->error(
                     $exception->getMessage(),
                     ['stacktrace' => $exception->getTraceAsString()]

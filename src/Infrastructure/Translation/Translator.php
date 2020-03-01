@@ -26,10 +26,18 @@ class Translator implements TranslatorInterface
         $this->translator = $translator;
     }
 
+    /**
+     * @param string      $id
+     * @param array       $parameters
+     * @param string|null $domain
+     * @param string|null $locale
+     *
+     * @return string
+     */
     public function trans(string $id, array $parameters = [], string $domain = null, string $locale = null)
     {
         try {
-            $this->translator->trans($id, $parameters, $domain, $locale);
+            return $this->translator->trans($id, $parameters, $domain, $locale);
         } catch (\Exception $exception) {
             $this->logger->error(
                 $exception->getMessage(),

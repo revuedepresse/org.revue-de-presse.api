@@ -1,5 +1,5 @@
 <?php
-
+declare(strict_types=1);
 
 namespace App\Status\Repository;
 
@@ -10,6 +10,9 @@ interface ExtremumAwareInterface
 {
     public const FINDING_IN_ASCENDING_ORDER = 'asc';
     public const FINDING_IN_DESCENDING_ORDER = 'desc';
+
+    public const EXTREMUM_FROM_MEMBER = 'fromMember';
+    public const EXTREMUM_STATUS_ID = 'statusId';
 
     /**
      * @param string      $memberName
