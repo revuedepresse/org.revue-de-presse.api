@@ -554,10 +554,7 @@ class PublicationCollector implements PublicationCollectorInterface
      * @param CollectionStrategyInterface $collectionStrategy
      *
      * @return int|null
-     * @throws NotFoundMemberException
-     * @throws OptimisticLockException
      * @throws ProtectedAccountException
-     * @throws UnavailableResourceException
      */
     protected function saveStatusesMatchingCriteria(
         $options,
@@ -575,6 +572,7 @@ class PublicationCollector implements PublicationCollectorInterface
 
         $betweenPublicationDateOfLastOneSavedAndNow = $this->isLookingBetweenPublicationDateOfLastOneSavedAndNow($options);
 
+        /** @var array $statuses */
         if (count($statuses) > 0) {
             $this->safelyDeclareExtremum(
                 $statuses,
@@ -620,14 +618,12 @@ class PublicationCollector implements PublicationCollectorInterface
      * @param string $memberName
      *
      * @return MemberInterface
-     * @throws NotFoundMemberException
-     * @throws OptimisticLockException
      */
     private function declareExtremumIdForMember(
         array $statuses,
         bool $shouldDeclareMaximumStatusId,
         string $memberName
-    ) {
+    ): MemberInterface {
         if (count($statuses) === 0) {
             throw new \LogicException(
                 'There should be at least one status'
@@ -753,10 +749,6 @@ class PublicationCollector implements PublicationCollectorInterface
      * @param        $statuses
      * @param        $shouldDeclareMaximumStatusId
      * @param string $memberName
-     *
-     * @throws NotFoundMemberException
-     * @throws UnavailableResourceException
-     * @throws OptimisticLockException
      */
     private function safelyDeclareExtremum(
         $statuses,

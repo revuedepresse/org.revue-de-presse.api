@@ -10,6 +10,7 @@ use App\Domain\Collection\CollectionStrategyInterface;
 use App\Domain\Status\StatusInterface;
 use App\Domain\Status\TaggedStatus;
 use App\Membership\Entity\MemberInterface;
+use App\Status\Repository\ExtremumAwareInterface;
 use App\StatusCollection\Mapping\MappingAwareInterface;
 use App\Twitter\Exception\NotFoundMemberException;
 use App\Infrastructure\Twitter\Collector\PublicationCollector;
@@ -23,6 +24,8 @@ use Doctrine\ORM\ORMException;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 use function array_key_exists;
+use function max;
+use function min;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
@@ -296,40 +299,52 @@ class StatusRepository extends ArchivedStatusRepository
         try {
             $extremum = $queryBuilder->getQuery()->getSingleResult();
 
-            if ($direction === 'asc') {
-                $nextMinimum = min(
-                    (int) $extremum[self::EXTREMUM_STATUS_ID],
-                    $nextExtremum[self::EXTREMUM_STATUS_ID]
-                );
+            return $this->declareMemberExtremum(
+                $screenName,
+                $extremum,
+                $nextExtremum,
+                $direction
+            );
+        } catch (NoResultException $exception) {
+            return [];
+        }
+    }
 
-                return [self::EXTREMUM_STATUS_ID => $this->memberRepository->declareMinStatusIdForMemberWithScreenName(
-                    "$nextMinimum",
-                    $screenName
-                )->minStatusId];
-            }
-
-            $nextMaximum = max(
+    public function declareMemberExtremum(
+        string $screenName,
+        array $extremum,
+        array $nextExtremum,
+        $direction = ExtremumAwareInterface::FINDING_IN_ASCENDING_ORDER
+    ): array {
+        if ($direction === 'asc') {
+            $nextMinimum = min(
                 (int) $extremum[self::EXTREMUM_STATUS_ID],
                 $nextExtremum[self::EXTREMUM_STATUS_ID]
             );
 
-            return [self::EXTREMUM_STATUS_ID => $this->memberRepository->declareMaxStatusIdForMemberWithScreenName(
-                "$nextMaximum",
+            return [self::EXTREMUM_STATUS_ID => $this->memberRepository->declareMinStatusIdForMemberWithScreenName(
+                (string) $nextMinimum,
                 $screenName
-            )->maxStatusId];
-        } catch (NoResultException $exception) {
-            return [];
+            )->minStatusId];
         }
+
+        $nextMaximum = max(
+            (int) $extremum[self::EXTREMUM_STATUS_ID],
+            $nextExtremum[self::EXTREMUM_STATUS_ID]
+        );
+
+        return [self::EXTREMUM_STATUS_ID => $this->memberRepository->declareMaxStatusIdForMemberWithScreenName(
+            (string) $nextMaximum,
+            $screenName
+        )->maxStatusId];
     }
 
     /**
      * @param $status
      *
      * @return MemberInterface
-     * @throws OptimisticLockException
-     * @throws NotFoundMemberException
      */
-    public function declareMaximumStatusId($status)
+    public function declareMaximumStatusId($status): MemberInterface
     {
         $maxStatus = $status->id_str;
 
@@ -343,10 +358,8 @@ class StatusRepository extends ArchivedStatusRepository
      * @param $status
      *
      * @return MemberInterface
-     * @throws OptimisticLockException
-     * @throws NotFoundMemberException
      */
-    public function declareMinimumStatusId($status)
+    public function declareMinimumStatusId($status): MemberInterface
     {
         $minStatus = $status->id_str;
 
@@ -362,8 +375,10 @@ class StatusRepository extends ArchivedStatusRepository
      *
      * @return MemberInterface
      */
-    public function declareMaximumLikedStatusId($status, string $memberName)
-    {
+    public function declareMaximumLikedStatusId(
+        $status,
+        string $memberName
+    ): MemberInterface {
         $maxStatus = $status->id_str;
 
         return $this->memberRepository->declareMaxLikeIdForMemberWithScreenName(
@@ -378,8 +393,10 @@ class StatusRepository extends ArchivedStatusRepository
      *
      * @return MemberInterface
      */
-    public function declareMinimumLikedStatusId($status, string $memberName)
-    {
+    public function declareMinimumLikedStatusId(
+        $status,
+        string $memberName
+    ): MemberInterface {
         $minStatus = $status->id_str;
 
         return $this->memberRepository->declareMinLikeIdForMemberWithScreenName(
