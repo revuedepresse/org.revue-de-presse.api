@@ -1195,3 +1195,8 @@ function today_statuses() {
 function follow_today_statuses() {
     tail -f var/logs/dev.log | awk '{$1=$2=$3="";print $0}' | sed -e 's/^\s\+//' | grep `date -I` | awk '{$1=$2="";print $0}'
 }
+
+function restart_web_server() {
+    cd ./provisioning/containers || exit
+    docker-compose restart web
+}
