@@ -1,0 +1,6 @@
+services:
+    App\Infrastructure\Amqp\MessageBus\PublicationListDispatcher:
+        class: 'App\Infrastructure\Amqp\MessageBus\PublicationListDispatcher'
+        calls:
+            - [ 'setPublicationListRepository', [ '@repository.aggregate' ] ]
+            - [ 'setMessageBus',                [ '@messenger.default_bus' ] ]

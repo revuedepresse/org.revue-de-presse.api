@@ -9,6 +9,7 @@ imports:
     - { resource: services/repository.yml }
     - { resource: services/persistence.yml }
     - { resource: services/security.yml }
+    - { resource: services/worker.yml }
 
 services:
     # default configuration for services in *this* file
@@ -250,6 +251,7 @@ parameters:
         - 'twitter_api'
         - 'status'
         - 'development'
+        - 'membership'
 
     redis_cache:                                                  'App\Cache\RedisCache'
 
@@ -277,7 +279,7 @@ parameters:
     weaving_the_web_twitter.entity.status.class:                  '%weaving_the_web_api.entity.status.class%'
     weaving_the_web_twitter.entity.token.class:                   '%weaving_the_web_api.entity.token.class%'
 
-    weaving_the_web_twitter.repository.publication_list.class:           '%weaving_the_web_api.repository.publication_list.class%'
+    weaving_the_web_twitter.repository.publication_list.class:    '%weaving_the_web_api.repository.publication_list.class%'
     weaving_the_web_twitter.repository.token.class:               '%repository.access_token.class%'
 
     weaving_the_web_twitter.version:                              '%env(resolve:API_TWITTER_VERSION)%'

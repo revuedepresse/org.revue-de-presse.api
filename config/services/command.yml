@@ -46,7 +46,7 @@ services:
         tags:
             -
                 name: messenger.message_handler
-                handles: App\Infrastructure\Amqp\Message\FetchMemberStatuses
+                handles: App\Infrastructure\Amqp\Message\FetchMemberStatus
 
     press_review.fetch_likes:
         class:                          "%press_review.publication_message.handler%"

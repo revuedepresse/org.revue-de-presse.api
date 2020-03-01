@@ -66,19 +66,13 @@ services:
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - 'App\Api\Entity\Aggregate'
-        properties:
-            #
-            #
-            # TODO
-            # Replace rabbimq bundle messager producer with
-            # symfony component message dispatcher
-            #
-            # amqpMessageProducer:    '@old_sound_rabbit_mq.weaving_the_web_amqp.twitter.aggregates_status_producer'
-            logger:                 '@logger'
-            statusRepository:       '@App\Api\Repository\StatusRepository'
-            timelyStatusRepository: '@repository.timely_status'
-            tokenRepository:        '@repository.access_token'
-            likedStatusRepository:  '@repository.liked_status'
+        calls:
+            - [ 'setLikedStatusRepository',     '@repository.liked_status' ]
+            - [ 'setLogger',                    '@App\Infrastructure\Log\StatusLogger' ]
+            - [ 'setPublicationListDispatcher', '@App\Infrastructure\Amqp\MessageBus\PublicationListDispatcher' ]
+            - [ 'setStatusRepository',          '@App\Api\Repository\StatusRepository' ]
+            - [ 'setTimelyStatusRepository',    '@repository.timely_status' ]
+            - [ 'setTokenRepository',           '@repository.access_token' ]
 
     repository.keyword:
         class: 'App\Status\Repository\KeywordRepository'

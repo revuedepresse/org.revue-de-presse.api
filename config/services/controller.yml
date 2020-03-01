@@ -14,13 +14,13 @@ services:
     controller.list:
         public: true
         class: 'App\Aggregate\Controller\ListController'
+        calls:
+            - [ 'setPublicationListDispatcher', ['@App\Amqp\Command\FetchPublicationMessageDispatcher']]
         properties:
             allowedOrigin:                  '%allowed.origin%'
             configDirectory:                '%kernel.project_dir%/config'
             authenticationTokenRepository:  '@repository.authentication_token'
-#            aggregateLikesProducer:         '@old_sound_rabbit_mq.weaving_the_web_amqp.producer.aggregates_likes_producer'
             aggregateRepository:            '@repository.publication_list'
-#            aggregateStatusesProducer:      '@old_sound_rabbit_mq.weaving_the_web_amqp.twitter.aggregates_status_producer'
             environment:                    '%kernel.environment%'
             highlightRepository:            '@repository.highlight'
             logger:                         '@logger'
@@ -56,3 +56,16 @@ services:
             allowedOrigin:     '%allowed.origin%'
             environment:       '%kernel.environment%'
             redisCache:        '@app.cache.redis'
+
+    controller.subscription:
+        class: 'App\Infrastructure\Subscription\Controller\SubscriptionController'
+        properties:
+            allowedOrigin:                  '%allowed.origin%'
+            environment:                    '%kernel.environment%'
+            httpAuthenticator:              '@app.security.http_authenticator'
+            logger:                         '@monolog.logger.membership'
+            memberRepository:               '@user_manager'
+            memberSubscriptionRepository:   '@repository.member_subscription'
+            messagePublisher:               '@status_collection.message_publisher'
+            redisCache:                     '@app.cache.redis'
+            tokenRepository:                '@repository.access_token'

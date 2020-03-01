@@ -1,11 +1,22 @@
 <?php
+declare(strict_types=1);
 
-namespace App\Security\Cors;
+namespace App\Infrastructure\Security\Cors;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 trait CorsHeadersAwareTrait
 {
+    private string $environment;
+
+    private string $allowedOrigin;
+
+    public function __construct($allowedOrigin, $environment)
+    {
+        $this->allowedOrigin = $allowedOrigin;
+        $this->environment = $environment;
+    }
+
     /**
      * @param string $environment
      * @param string $allowedOrigin

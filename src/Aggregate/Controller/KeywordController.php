@@ -4,8 +4,9 @@
 namespace App\Aggregate\Controller;
 
 use App\Cache\RedisCache;
-use App\Security\Cors\CorsHeadersAwareTrait;
+use App\Infrastructure\Security\Cors\CorsHeadersAwareTrait;
 use App\Status\Repository\KeywordRepository;
+use Doctrine\DBAL\DBALException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -14,29 +15,19 @@ class KeywordController
     use CorsHeadersAwareTrait;
 
     /**
-     * @var string
-     */
-    public $allowedOrigin;
-
-    /**
-     * @var string
-     */
-    public $environment;
-
-    /**
      * @var RedisCache
      */
-    public $redisCache;
+    public RedisCache $redisCache;
 
     /**
      * @var KeywordRepository
      */
-    public $keywordRepository;
+    public KeywordRepository $keywordRepository;
 
     /**
      * @param Request $request
      * @return JsonResponse
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      */
     public function getKeywords(Request $request)
     {

@@ -1,10 +1,11 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Member\Controller;
 
 use App\Membership\Entity\MemberInterface;
 use App\Member\Repository\AuthenticationTokenRepository;
-use App\Security\Cors\CorsHeadersAwareTrait;
+use App\Infrastructure\Security\Cors\CorsHeadersAwareTrait;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 

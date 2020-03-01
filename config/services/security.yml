@@ -11,3 +11,6 @@ services:
             authenticationTokenRepository:  '@repository.authentication_token'
             logger:                         '@monolog.logger.security'
             userRepository:                 '@user_manager'
+
+    App\Infrastructure\Security\Authentication\HttpAuthenticator:
+        class: 'App\Infrastructure\Security\Authentication\HttpAuthenticator'
