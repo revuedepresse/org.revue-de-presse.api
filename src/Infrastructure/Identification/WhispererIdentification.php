@@ -84,56 +84,31 @@ class WhispererIdentification implements WhispererIdentificationInterface
     ) {
         $collectionStrategy->optInToCollectStatusFor($options[FetchPublicationInterface::SCREEN_NAME]);
 
-        if (array_key_exists('max_id', $options)) {
-            $collectionStrategy->optInToCollectStatusWhichIdIsLessThan(
-                $options['max_id']
-            );
-        }
-
-        if (array_key_exists('since_id', $options)) {
-            $collectionStrategy->optInToCollectStatusWhichIdIsGreaterThan(
-                $options['since_id']
-            );
-        }
-
         $subjectInSingularForm = 'status';
         $subjectInPluralForm   = 'statuses';
         $countCollectedItems   = function (
-            string $memberName,
-            string $maxId,
-            string $findingDirection = ExtremumAwareInterface::FINDING_IN_ASCENDING_ORDER
+            string $memberName
         ) {
             return $this->statusRepository->countCollectedStatuses(
                 $memberName,
-                $maxId,
-                $findingDirection
+                $maxId = INF
             );
         };
         if ($collectionStrategy->fetchLikes()) {
             $subjectInSingularForm = 'like';
             $subjectInPluralForm   = 'likes';
             $countCollectedItems   = function (
-                string $memberName,
-                string $maxId,
-                string $findingDirection = ExtremumAwareInterface::FINDING_IN_ASCENDING_ORDER
+                string $memberName
             ) {
                 return $this->likedStatusRepository->countCollectedLikes(
                     $memberName,
-                    $maxId,
-                    $findingDirection
+                    $maxId = INF
                 );
             };
         }
 
-        $findingDirection = ExtremumAwareInterface::FINDING_IN_DESCENDING_ORDER;
-        if (array_key_exists('max_id', $options)) {
-            $findingDirection = ExtremumAwareInterface::FINDING_IN_ASCENDING_ORDER;
-        }
-
         $totalStatuses = $countCollectedItems(
             $collectionStrategy->screenName(),
-            (string) ($options['max_id'] ?? $options['since_id']),
-            $findingDirection
         );
 
         $this->collectStatusLogger->logHowManyItemsHaveBeenCollected(

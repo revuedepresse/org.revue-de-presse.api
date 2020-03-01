@@ -68,7 +68,7 @@ class ArchivedStatusRepository extends ResourceRepository implements
 
     public function countCollectedStatuses(
         string $screenName,
-        string $extremumId,
+        $extremumId,
         string $findingDirection = ExtremumAwareInterface::FINDING_IN_ASCENDING_ORDER
     ): ?int {
         $queryBuilder = $this->createQueryBuilder('s');

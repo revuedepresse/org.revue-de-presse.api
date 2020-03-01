@@ -40,7 +40,7 @@ class LikedStatusRepository extends ServiceEntityRepository implements ExtremumA
      */
     public function countCollectedLikes(
         string $memberName,
-        string $maxId,
+        $maxId,
         string $findingDirection = ExtremumAwareInterface::FINDING_IN_ASCENDING_ORDER
     )
     {
@@ -310,7 +310,7 @@ QUERY;
      */
     private function countLikedStatuses(
         string $memberName,
-        string $maxId,
+        $maxId,
         string $findingDirection = ExtremumAwareInterface::FINDING_IN_DESCENDING_ORDER
     ): int
     {
