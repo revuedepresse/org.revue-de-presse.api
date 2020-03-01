@@ -15,6 +15,7 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
+use const INF;
 
 /**
  * @method LikedStatus|null find($id, $lockMode = null, $lockVersion = null)
@@ -31,12 +32,17 @@ class LikedStatusRepository extends ServiceEntityRepository implements ExtremumA
 
     /**
      * @param string $memberName
-     * @param int    $maxId
+     * @param string $maxId
+     * @param string $findingDirection
      *
      * @return array|int
      * @throws NonUniqueResultException
      */
-    public function countCollectedLikes(string $memberName, $maxId)
+    public function countCollectedLikes(
+        string $memberName,
+        string $maxId,
+        string $findingDirection = ExtremumAwareInterface::FINDING_IN_ASCENDING_ORDER
+    )
     {
         $statusCount = $this->countLikedStatuses($memberName, $maxId);
 
@@ -46,8 +52,14 @@ class LikedStatusRepository extends ServiceEntityRepository implements ExtremumA
                                   ->andWhere('l.likedByMemberName = :memberName');
         $archiveStatusQueryBuilder->setParameter('memberName', $memberName);
 
-        if ($maxId < INF) {
+        if ($findingDirection === ExtremumAwareInterface::FINDING_IN_ASCENDING_ORDER &&
+            $maxId < INF) {
             $archiveStatusQueryBuilder->andWhere('(archivedStatus.statusId + 0) <= :maxId');
+            $archiveStatusQueryBuilder->setParameter('maxId', $maxId);
+        }
+
+        if ($findingDirection === ExtremumAwareInterface::FINDING_IN_DESCENDING_ORDER) {
+            $archiveStatusQueryBuilder->andWhere('(archivedStatus.statusId + 0) >= :maxId');
             $archiveStatusQueryBuilder->setParameter('maxId', $maxId);
         }
 
@@ -74,7 +86,10 @@ class LikedStatusRepository extends ServiceEntityRepository implements ExtremumA
             return $member->totalLikes;
         }
 
-        $totalLikes = $this->countCollectedLikes($memberName, INF);
+        $totalLikes = $this->countCollectedLikes(
+            $memberName,
+            INF
+        );
         $this->memberRepository->declareTotalLikesOfMemberWithName($totalLikes, $memberName);
 
         return $totalLikes;
@@ -285,27 +300,50 @@ QUERY;
     }
 
     /**
-     * @param $memberName
-     * @param $maxId
+     * @param string $memberName
+     * @param string $maxId
+     *
+     * @param string $findingDirection
      *
      * @return int
      * @throws NonUniqueResultException
      */
-    private function countLikedStatuses(string $memberName, $maxId): int
+    private function countLikedStatuses(
+        string $memberName,
+        string $maxId,
+        string $findingDirection = ExtremumAwareInterface::FINDING_IN_DESCENDING_ORDER
+    ): int
     {
-        return $this->countLikes($memberName, $maxId, 'status') +
-            $this->countLikes($memberName, $maxId, 'archivedStatus');
+        return $this->countLikes(
+            $memberName,
+            $maxId,
+            'status',
+            $findingDirection
+        ) +
+            $this->countLikes(
+                $memberName,
+                $maxId,
+                'archivedStatus',
+                $findingDirection
+            );
     }
 
     /**
-     * @param $memberName
-     * @param $maxId
+     * @param string $memberName
+     * @param        $maxId
+     *
+     * @param string $joinColumn
+     * @param string $findingDirection
      *
      * @return int
      * @throws NonUniqueResultException
      */
-    private function countLikes(string $memberName, $maxId, string $joinColumn): int
-    {
+    private function countLikes(
+        string $memberName,
+        $maxId,
+        string $joinColumn,
+        string $findingDirection = ExtremumAwareInterface::FINDING_IN_ASCENDING_ORDER
+    ): int {
         $statusQueryBuilder = $this->createQueryBuilder('l');
 
         $statusQueryBuilder->select('COUNT(DISTINCT status.hash) as count_')
@@ -313,8 +351,14 @@ QUERY;
                            ->andWhere('l.likedByMemberName = :memberName');
         $statusQueryBuilder->setParameter('memberName', $memberName);
 
-        if ($maxId < INF) {
+        if ($findingDirection === ExtremumAwareInterface::FINDING_IN_ASCENDING_ORDER &&
+            $maxId < INF) {
             $statusQueryBuilder->andWhere('(status.statusId + 0) <= :maxId');
+            $statusQueryBuilder->setParameter('maxId', $maxId);
+        }
+
+        if ($findingDirection === ExtremumAwareInterface::FINDING_IN_DESCENDING_ORDER) {
+            $statusQueryBuilder->andWhere('(status.statusId + 0) >= :maxId');
             $statusQueryBuilder->setParameter('maxId', $maxId);
         }
 

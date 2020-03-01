@@ -1813,14 +1813,7 @@ class Accessor implements ApiAccessorInterface,
             'tweet_mode=extended&include_entities=1&include_rts=1&exclude_replies=0&trim_user=0';
     }
 
-    /**
-     * @param $twitterUser
-     *
-     * @return bool
-     * @throws ProtectedAccountException
-     * @throws OptimisticLockException
-     */
-    protected function guardAgainstProtectedAccount($twitterUser)
+    protected function guardAgainstProtectedAccount(stdClass $twitterUser): ?bool
     {
         if (!isset($twitterUser->protected) || !$twitterUser->protected) {
             return true;
@@ -1970,7 +1963,7 @@ class Accessor implements ApiAccessorInterface,
      *
      * @return array
      */
-    protected function validateRequestOptions(\stdClass $options): array
+    protected function validateRequestOptions(stdClass $options): array
     {
         $validatedOptions = [];
 

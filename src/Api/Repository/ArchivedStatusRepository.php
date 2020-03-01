@@ -66,23 +66,25 @@ class ArchivedStatusRepository extends ResourceRepository implements
 
     public bool $shouldExtractProperties;
 
-    /**
-     * @param $screenName
-     * @param $maxId
-     *
-     * @return mixed
-     * @throws NonUniqueResultException
-     */
-    public function countCollectedStatuses($screenName, $maxId)
-    {
+    public function countCollectedStatuses(
+        string $screenName,
+        string $maxId,
+        string $findingDirection = ExtremumAwareInterface::FINDING_IN_ASCENDING_ORDER
+    ): array {
         $queryBuilder = $this->createQueryBuilder('s');
         $queryBuilder->select('COUNT(DISTINCT s.hash) as count_')
                      ->andWhere('s.screenName = :screenName');
 
         $queryBuilder->setParameter('screenName', $screenName);
 
-        if ($maxId < INF) {
+        if ($findingDirection === ExtremumAwareInterface::FINDING_IN_ASCENDING_ORDER &&
+            $maxId < INF) {
             $queryBuilder->andWhere('(s.statusId + 0) <= :maxId');
+            $queryBuilder->setParameter('maxId', $maxId);
+        }
+
+        if ($findingDirection === ExtremumAwareInterface::FINDING_IN_DESCENDING_ORDER) {
+            $queryBuilder->andWhere('(s.statusId + 0) >= :maxId');
             $queryBuilder->setParameter('maxId', $maxId);
         }
 

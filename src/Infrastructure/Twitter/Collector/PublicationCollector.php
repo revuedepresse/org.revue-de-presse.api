@@ -33,6 +33,7 @@ use App\Infrastructure\Twitter\Collector\Exception\RateLimitedException;
 use App\Infrastructure\Twitter\Collector\Exception\SkipCollectException;
 use App\Membership\Entity\MemberInterface;
 use App\Status\LikedStatusCollectionAwareInterface;
+use App\Status\Repository\ExtremumAwareInterface;
 use App\Twitter\Exception\BadAuthenticationDataException;
 use App\Twitter\Exception\InconsistentTokenRepository;
 use App\Twitter\Exception\NotFoundMemberException;
@@ -603,10 +604,17 @@ class PublicationCollector implements PublicationCollectorInterface
             $collectionStrategy
         );
 
-        $totalCollectedStatuses = $this->logHowManyItemsHaveBeenCollected(
-            $options,
-            $lastCollectionBatchSize
-        );
+        try {
+            $totalCollectedStatuses = $this->logHowManyItemsHaveBeenCollected(
+                $options,
+                $lastCollectionBatchSize
+            );
+        } catch (\Throwable $exception) {
+            $this->logger->error(
+                $exception->getMessage(),
+                ['stacktrack' => $exception->getTrace()]
+            );
+        }
 
         $this->whispererIdentification->identifyWhisperer(
             $options[FetchPublicationInterface::SCREEN_NAME],
@@ -762,24 +770,58 @@ class PublicationCollector implements PublicationCollectorInterface
         ?int $lastCollectionBatchSize
     ) {
         $this->collectionStrategy->optInToCollectStatusFor($options[FetchPublicationInterface::SCREEN_NAME]);
-        $this->collectionStrategy->optInToCollectStatusWhichIdIsLessThan($options['max_id']);
+
+        if (array_key_exists('max_id', $options)) {
+            $this->collectionStrategy->optInToCollectStatusWhichIdIsLessThan(
+                $options['max_id']
+            );
+        }
+
+        if (array_key_exists('since_id', $options)) {
+            $this->collectionStrategy->optInToCollectStatusWhichIdIsGreaterThan(
+                $options['since_id']
+            );
+        }
 
         $subjectInSingularForm = 'status';
         $subjectInPluralForm   = 'statuses';
-        $countCollectedItems   = function ($memberName, $maxId) {
-            return $this->statusRepository->countCollectedStatuses($memberName, $maxId);
+        $countCollectedItems   = function (
+            string $memberName,
+            string $maxId,
+            string $findingDirection = ExtremumAwareInterface::FINDING_IN_ASCENDING_ORDER
+        ) {
+            return $this->statusRepository->countCollectedStatuses(
+                $memberName,
+                $maxId,
+                $findingDirection
+            );
         };
         if ($this->collectionStrategy->fetchLikes()) {
             $subjectInSingularForm = 'like';
             $subjectInPluralForm   = 'likes';
-            $countCollectedItems   = function ($memberName, $maxId) {
-                return $this->likedStatusRepository->countCollectedLikes($memberName, $maxId);
+            $countCollectedItems   = function (
+                string $memberName,
+                string $maxId,
+                string $findingDirection = ExtremumAwareInterface::FINDING_IN_ASCENDING_ORDER
+
+            ) {
+                return $this->likedStatusRepository->countCollectedLikes(
+                    $memberName,
+                    $maxId,
+                    $findingDirection
+                );
             };
+        }
+
+        $findingDirection = ExtremumAwareInterface::FINDING_IN_DESCENDING_ORDER;
+        if (array_key_exists('max_id', $options)) {
+            $findingDirection = ExtremumAwareInterface::FINDING_IN_ASCENDING_ORDER;
         }
 
         $totalStatuses = $countCollectedItems(
             $this->collectionStrategy->screenName(),
-            $options['max_id'] ?? $options['since_id']
+            (string) ($options['max_id'] ?? $options['since_id']),
+            $findingDirection
         );
 
         $this->collectStatusLogger->logHowManyItemsHaveBeenCollected(
