@@ -17,11 +17,15 @@ interface CollectionStrategyInterface
 
     public function maxStatusId();
 
+    public function minStatusId();
+
     public function screenName(): string;
 
     public function oneOfTheOptionsIsActive(): bool;
 
     public function optInToCollectStatusFor(string $screenName): self;
+
+    public function optInToCollectStatusWhichIdIsGreaterThan($minId): self;
 
     public function optInToCollectStatusWhichIdIsLessThan($maxId): self;
 

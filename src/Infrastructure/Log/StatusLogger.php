@@ -12,6 +12,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use function array_key_exists;
 use function count;
+use function is_infinite;
 use function json_decode;
 use function json_last_error;
 use function sprintf;
@@ -50,9 +51,18 @@ class StatusLogger implements StatusLoggerInterface
         array $forms,
         int $batchSize
     ): void {
-        $maxStatusId = $collectionStrategy->maxStatusId();
-        if (is_infinite($collectionStrategy->maxStatusId())) {
-            $maxStatusId = '+infinity';
+        if ($collectionStrategy->minStatusId()) {
+            $extremumId = $collectionStrategy->minStatusId();
+            if (is_infinite($collectionStrategy->minStatusId())) {
+                $extremumId = '-infinity';
+            }
+        }
+
+        if ($collectionStrategy->maxStatusId()) {
+            $extremumId = $collectionStrategy->maxStatusId();
+            if (is_infinite($collectionStrategy->maxStatusId())) {
+                $extremumId = '+infinity';
+            }
         }
 
         $this->logger->info(
@@ -61,13 +71,13 @@ class StatusLogger implements StatusLoggerInterface
                 $totalStatuses,
                 $forms['plural'],
                 $forms['singular'],
-                $maxStatusId,
+                $extremumId,
                 $collectionStrategy->screenName()
             )
         );
 
         $this->logCollectionProgress(
-            $collectionStrategy->screenName(),
+            $collectionStrategy,
             $batchSize,
             $totalStatuses
         );
@@ -183,13 +193,11 @@ class StatusLogger implements StatusLoggerInterface
     }
 
     /**
-     * @param string                      $screenName
      * @param CollectionStrategyInterface $collectionStrategy
      * @param                             $lastCollectionBatchSize
      * @param                             $totalCollectedStatuses
      */
     private function logCollectionProgress(
-        string $screenName,
         CollectionStrategyInterface $collectionStrategy,
         int $lastCollectionBatchSize,
         int $totalCollectedStatuses
@@ -199,12 +207,15 @@ class StatusLogger implements StatusLoggerInterface
             $subject = 'likes';
         }
 
-        if ($this->collectedAllAvailableStatuses($lastCollectionBatchSize, $totalCollectedStatuses)) {
+        if ($this->collectedAllAvailableStatuses(
+            $lastCollectionBatchSize,
+            $totalCollectedStatuses)
+        ) {
             $this->logger->info(
                 sprintf(
                     'All available %s have most likely been fetched for "%s" or few %s are available (%d)',
                     $subject,
-                    $screenName,
+                    $collectionStrategy->screenName(),
                     $subject,
                     $totalCollectedStatuses
                 )
@@ -218,7 +229,7 @@ class StatusLogger implements StatusLoggerInterface
                 '%d more %s in the past have been saved for "%s" in aggregate #%d',
                 $lastCollectionBatchSize,
                 $subject,
-                $screenName,
+                $collectionStrategy->screenName(),
                 $collectionStrategy->publicationListId()
             )
         );
