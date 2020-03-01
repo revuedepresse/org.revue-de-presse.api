@@ -3,28 +3,25 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Subscription\Controller;
 
+use App\Api\Entity\Token;
 use App\Cache\RedisCache;
 use App\Domain\Membership\Exception\InvalidMemberException;
-use App\Http\PaginationParams;
-use App\Infrastructure\Amqp\MessageBus\PublicationListDispatcherInterface;
+use App\Domain\Publication\PublicationListIdentity;
+use App\Infrastructure\DependencyInjection\LoggerTrait;
+use App\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Publication\PublicationListDispatcherTrait;
-use App\Infrastructure\Repository\Membership\MemberRepositoryInterface;
-use App\Infrastructure\Repository\Subscription\MemberSubscriptionRepositoryInterface;
+use App\Infrastructure\DependencyInjection\Subscription\MemberSubscriptionRepositoryTrait;
+use App\Infrastructure\Http\PaginationParams;
 use App\Infrastructure\Security\Authentication\AuthenticationTokenValidationTrait;
+use App\Infrastructure\Security\Authentication\HttpAuthenticator;
 use App\Infrastructure\Security\Cors\CorsHeadersAwareTrait;
-use App\Member\MemberInterface;
-use App\Security\Exception\UnauthorizedRequestException;
-use App\Security\HttpAuthenticator;
-use App\StatusCollection\Messaging\Exception\InvalidMemberAggregate;
-use Psr\Log\LoggerInterface;
+use App\Infrastructure\Security\Exception\UnauthorizedRequestException;
+use App\Membership\Entity\MemberInterface;
+use App\Domain\Publication\Exception\InvalidMemberAggregate;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use WeavingTheWeb\Bundle\ApiBundle\Entity\AggregateIdentity;
-use WeavingTheWeb\Bundle\ApiBundle\Entity\Token;
 use function array_merge;
 use function array_walk;
-use function boolval;
-use function is_null;
 use function json_decode;
 use function json_encode;
 use function sprintf;
@@ -34,17 +31,14 @@ class SubscriptionController
 {
     use AuthenticationTokenValidationTrait;
     use CorsHeadersAwareTrait;
+    use LoggerTrait;
+    use MemberRepositoryTrait;
+    use MemberSubscriptionRepositoryTrait;
     use PublicationListDispatcherTrait;
 
     public RedisCache $redisCache;
 
-    public MemberRepositoryInterface $memberRepository;
-
-    public MemberSubscriptionRepositoryInterface $memberSubscriptionRepository;
-
     public HttpAuthenticator $httpAuthenticator;
-
-    public LoggerInterface $logger;
 
     public function getMemberSubscriptions(Request $request): JsonResponse
     {
@@ -102,7 +96,7 @@ class SubscriptionController
         Request $request
     ): string {
         $paginationParams  = PaginationParams::fromRequest($request);
-        $aggregateIdentity = AggregateIdentity::fromRequest($request);
+        $aggregateIdentity = PublicationListIdentity::fromRequest($request);
 
         return sprintf(
             '%s:%s:%s/%s',
@@ -121,7 +115,8 @@ class SubscriptionController
             return $memberOrJsonResponse;
         }
 
-        $memberSubscriptions = $this->memberSubscriptionRepository->getMemberSubscriptions($memberOrJsonResponse);
+        $memberSubscriptions = $this->memberSubscriptionRepository
+            ->getMemberSubscriptions($memberOrJsonResponse);
 
         /** @var Token $token */
         $token = $this->guardAgainstInvalidAuthenticationToken(
@@ -139,7 +134,7 @@ class SubscriptionController
                         $this->memberRepository,
                         $subscription['username']
                     );
-                    $this->messageDispatcher->dispatchMemberPublicationListMessage(
+                    $this->publicationListDispatcher->dispatchMemberPublicationListMessage(
                         $member,
                         $token
                     );
@@ -182,7 +177,7 @@ class SubscriptionController
             $request->headers->has('x-no-cache')
             && $request->headers->get('x-no-cache')
         ) {
-            $willCacheResponse = !boolval($request->headers->get('x-no-cache'));
+            $willCacheResponse = !(bool) $request->headers->get('x-no-cache');
         }
 
         return $willCacheResponse;
@@ -197,7 +192,7 @@ class SubscriptionController
             $client              = $this->redisCache->getClient();
             $cacheKey            = $this->getCacheKey($memberOrJsonResponse, $request);
             $memberSubscriptions = $client->get($cacheKey);
-            if (is_null($memberSubscriptions)) {
+            if ($memberSubscriptions === null) {
                 $memberSubscriptions = '';
             }
         }

@@ -11,5 +11,5 @@ interface PublicationListIdentityInterface
 
     public function __toString(): string;
 
-    public static function fromRequest(Request $request): ?self;
+    public static function fromRequest(Request $request): ?PublicationListInterface;
 }

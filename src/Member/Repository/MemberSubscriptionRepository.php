@@ -3,19 +3,19 @@ declare(strict_types=1);
 
 namespace App\Member\Repository;
 
-use App\Http\PaginationParams;
+use App\Domain\Publication\PublicationListIdentity;
+use App\Domain\Publication\PublicationListIdentityInterface;
+use App\Infrastructure\Http\PaginationParams;
 use App\Infrastructure\Repository\Membership\MemberRepositoryInterface;
+use App\Infrastructure\Repository\Subscription\MemberSubscriptionRepositoryInterface;
 use App\Member\Entity\MemberSubscription;
-use App\Member\MemberInterface;
+use App\Membership\Entity\MemberInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\DBALException;
-use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use JsonSchema\Exception\JsonDecodingException;
 use Symfony\Component\HttpFoundation\Request;
-use App\Domain\Publication\PublicationListIdentity;
-use App\Domain\Publication\PublicationListIdentityInterface;
 use function array_diff;
 use function array_key_exists;
 use function array_map;
@@ -30,7 +30,7 @@ use const JSON_ERROR_NONE;
 use const JSON_THROW_ON_ERROR;
 use const PHP_EOL;
 
-class MemberSubscriptionRepository extends ServiceEntityRepository
+class MemberSubscriptionRepository extends ServiceEntityRepository implements MemberSubscriptionRepositoryInterface
 {
     private const SORT_BY_ASCENDING_MEMBER_ID  = 'ORDER BY u.usr_id ASC';
     private const SORT_BY_DESCENDING_MEMBER_ID = 'ORDER BY u.usr_id DESC';
@@ -177,7 +177,6 @@ QUERY
                 ON a.screen_name = u.usr_twitter_username
                 AND a.screen_name IS NOT NULL 
                 WHERE member_id = :member_id 
-                AND ms.has_been_cancelled = 0
                 AND ms.subscription_id = u.usr_id
                 AND u.suspended = 0
                 AND u.protected = 0
@@ -355,7 +354,7 @@ QUERY;
      */
     private function emptyResults(array $results, $column): bool
     {
-        return !array_key_exists(0, $results) || !array_key_exists($column, $results[0]);
+        return !isset($results[0][$column]);
     }
 
     /**

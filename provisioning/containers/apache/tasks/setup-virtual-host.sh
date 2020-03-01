@@ -17,9 +17,6 @@ function init_virtual_host() {
     # Enable headers module for CORS
     a2enmod headers
 
-    # Enable HTTP2
-    a2enmod http2
-
     cd /etc/apache2 || exit
 
     local working_directory
