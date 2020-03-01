@@ -604,23 +604,14 @@ class PublicationCollector implements PublicationCollectorInterface
             $collectionStrategy
         );
 
-        try {
-            $totalCollectedStatuses = $this->logHowManyItemsHaveBeenCollected(
-                $options,
-                $lastCollectionBatchSize
-            );
-        } catch (\Throwable $exception) {
-            $this->logger->error(
-                $exception->getMessage(),
-                ['stacktrack' => $exception->getTrace()]
-            );
-        }
-
         $this->whispererIdentification->identifyWhisperer(
+            $collectionStrategy,
+            $options,
             $options[FetchPublicationInterface::SCREEN_NAME],
-            $totalCollectedStatuses,
-            $lastCollectionBatchSize
+            (int) $lastCollectionBatchSize
         );
+
+        return $lastCollectionBatchSize;
     }
 
     /**
@@ -756,85 +747,6 @@ class PublicationCollector implements PublicationCollectorInterface
     private function isLookingBetweenPublicationDateOfLastOneSavedAndNow($options): bool
     {
         return array_key_exists('max_id', $options) && is_infinite($options['max_id']);
-    }
-
-    /**
-     * @param array $options
-     *
-     * @param int   $lastCollectionBatchSize
-     *
-     * @return mixed
-     */
-    private function logHowManyItemsHaveBeenCollected(
-        array $options,
-        ?int $lastCollectionBatchSize
-    ) {
-        $this->collectionStrategy->optInToCollectStatusFor($options[FetchPublicationInterface::SCREEN_NAME]);
-
-        if (array_key_exists('max_id', $options)) {
-            $this->collectionStrategy->optInToCollectStatusWhichIdIsLessThan(
-                $options['max_id']
-            );
-        }
-
-        if (array_key_exists('since_id', $options)) {
-            $this->collectionStrategy->optInToCollectStatusWhichIdIsGreaterThan(
-                $options['since_id']
-            );
-        }
-
-        $subjectInSingularForm = 'status';
-        $subjectInPluralForm   = 'statuses';
-        $countCollectedItems   = function (
-            string $memberName,
-            string $maxId,
-            string $findingDirection = ExtremumAwareInterface::FINDING_IN_ASCENDING_ORDER
-        ) {
-            return $this->statusRepository->countCollectedStatuses(
-                $memberName,
-                $maxId,
-                $findingDirection
-            );
-        };
-        if ($this->collectionStrategy->fetchLikes()) {
-            $subjectInSingularForm = 'like';
-            $subjectInPluralForm   = 'likes';
-            $countCollectedItems   = function (
-                string $memberName,
-                string $maxId,
-                string $findingDirection = ExtremumAwareInterface::FINDING_IN_ASCENDING_ORDER
-
-            ) {
-                return $this->likedStatusRepository->countCollectedLikes(
-                    $memberName,
-                    $maxId,
-                    $findingDirection
-                );
-            };
-        }
-
-        $findingDirection = ExtremumAwareInterface::FINDING_IN_DESCENDING_ORDER;
-        if (array_key_exists('max_id', $options)) {
-            $findingDirection = ExtremumAwareInterface::FINDING_IN_ASCENDING_ORDER;
-        }
-
-        $totalStatuses = $countCollectedItems(
-            $this->collectionStrategy->screenName(),
-            (string) ($options['max_id'] ?? $options['since_id']),
-            $findingDirection
-        );
-
-        $this->collectStatusLogger->logHowManyItemsHaveBeenCollected(
-            $this->collectionStrategy,
-            (int) $totalStatuses,
-            [
-                'plural'   => $subjectInPluralForm,
-                'singular' => $subjectInSingularForm
-            ],
-            (int) $lastCollectionBatchSize
-        );
-
-        return $totalStatuses;
     }
 
     /**

@@ -68,9 +68,9 @@ class ArchivedStatusRepository extends ResourceRepository implements
 
     public function countCollectedStatuses(
         string $screenName,
-        string $maxId,
+        string $extremumId,
         string $findingDirection = ExtremumAwareInterface::FINDING_IN_ASCENDING_ORDER
-    ): array {
+    ): ?int {
         $queryBuilder = $this->createQueryBuilder('s');
         $queryBuilder->select('COUNT(DISTINCT s.hash) as count_')
                      ->andWhere('s.screenName = :screenName');
@@ -78,14 +78,14 @@ class ArchivedStatusRepository extends ResourceRepository implements
         $queryBuilder->setParameter('screenName', $screenName);
 
         if ($findingDirection === ExtremumAwareInterface::FINDING_IN_ASCENDING_ORDER &&
-            $maxId < INF) {
-            $queryBuilder->andWhere('(s.statusId + 0) <= :maxId');
-            $queryBuilder->setParameter('maxId', $maxId);
+            $extremumId < INF) {
+            $queryBuilder->andWhere('s.statusId <= :maxId');
+            $queryBuilder->setParameter('maxId', $extremumId);
         }
 
         if ($findingDirection === ExtremumAwareInterface::FINDING_IN_DESCENDING_ORDER) {
-            $queryBuilder->andWhere('(s.statusId + 0) >= :maxId');
-            $queryBuilder->setParameter('maxId', $maxId);
+            $queryBuilder->andWhere('s.statusId >= :sinceId');
+            $queryBuilder->setParameter('sinceId', $extremumId);
         }
 
         try {
