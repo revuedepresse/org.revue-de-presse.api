@@ -8,6 +8,7 @@ use App\Api\Entity\Token;
 use App\Api\Entity\TokenInterface;
 use App\Infrastructure\Amqp\Message\FetchMemberLikes;
 use App\Infrastructure\Amqp\Message\FetchMemberStatuses;
+use App\Infrastructure\Amqp\Message\FetchPublicationInterface;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\Repository\Membership\MemberRepository;
 use App\Infrastructure\Twitter\Collector\PublicationCollectorInterface;
@@ -64,13 +65,13 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
     protected MemberRepository $userRepository;
 
     /**
-     * @param FetchMemberStatuses $message
+     * @param FetchPublicationInterface $message
      *
      * @return bool
      * @throws ORMException
      * @throws OptimisticLockException
      */
-    public function __invoke(FetchMemberStatuses $message): bool
+    public function __invoke(FetchPublicationInterface $message): bool
     {
         $success = false;
 
@@ -141,12 +142,12 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
     }
 
     /**
-     * @param FetchMemberStatuses $message
+     * @param FetchPublicationInterface $message
      *
      * @return array
      * @throws Exception
      */
-    public function processMessage(FetchMemberStatuses $message): array
+    public function processMessage(FetchPublicationInterface $message): array
     {
         $oauthToken = $this->extractOAuthToken($message);
 
@@ -171,12 +172,7 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
         $this->userRepository = $userRepository;
     }
 
-    /**
-     * @param FetchMemberStatuses $message
-     *
-     * @return array
-     */
-    private function extractOAuthToken(FetchMemberStatuses $message): array
+    private function extractOAuthToken(FetchPublicationInterface $message): array
     {
         $token = $message->token();
 

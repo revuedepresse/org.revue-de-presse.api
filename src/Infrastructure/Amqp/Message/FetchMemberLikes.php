@@ -8,11 +8,11 @@ class FetchMemberLikes implements FetchPublicationInterface
     use FetchPublicationTrait;
 
     /**
-     * @param FetchMemberStatuses $message
+     * @param FetchPublicationInterface $message
      *
      * @return FetchMemberLikes
      */
-    public static function from(FetchMemberStatuses $message): self
+    public static function from(FetchPublicationInterface $message): self
     {
         return new self(
             $message->screenName(),
