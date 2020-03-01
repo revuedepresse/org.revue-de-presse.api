@@ -153,12 +153,18 @@ class ArchivedStatusRepository extends ResourceRepository implements
         if ($member instanceof MemberInterface) {
             if ($direction === self::FINDING_IN_DESCENDING_ORDER &&
                 $member->maxStatusId !== null) {
-                return ['statusId' => $member->maxStatusId];
+                return [
+                    self::EXTREMUM_STATUS_ID => $member->maxStatusId,
+                    self::EXTREMUM_FROM_MEMBER => true
+                ];
             }
 
             if ($direction === self::FINDING_IN_ASCENDING_ORDER &&
                 $member->minStatusId !== null) {
-                return ['statusId' => $member->minStatusId];
+                return [
+                    self::EXTREMUM_STATUS_ID => $member->minStatusId,
+                    self::EXTREMUM_FROM_MEMBER => true
+                ];
             }
         }
 
@@ -186,10 +192,10 @@ class ArchivedStatusRepository extends ResourceRepository implements
             $this->appLogger->info($exception->getMessage());
 
             if ($direction === self::FINDING_IN_ASCENDING_ORDER) {
-                return ['statusId' => +INF];
+                return [self::EXTREMUM_STATUS_ID => +INF];
             }
 
-            return ['statusId' => -INF];
+            return [self::EXTREMUM_STATUS_ID => -INF];
         }
     }
 

@@ -189,7 +189,8 @@ class PublicationCollector implements PublicationCollectorInterface
                     '[from %s %s]',
                     __METHOD__,
                     $exception->getMessage()
-                )
+                ),
+                ['stacktrace' => $exception->getTraceAsString()]
             );
             $success = false;
         } finally {

@@ -22,6 +22,7 @@ use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
+use function array_key_exists;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
@@ -268,6 +269,12 @@ class StatusRepository extends ArchivedStatusRepository
         $nextExtremum = $this->archivedStatusRepository
             ->findNextExtremum($screenName, $direction, $before);
 
+        if (array_key_exists(self::EXTREMUM_FROM_MEMBER, $nextExtremum)) {
+            return [
+                self::EXTREMUM_STATUS_ID => $nextExtremum[self::EXTREMUM_STATUS_ID]
+            ];
+        }
+
         $queryBuilder = $this->createQueryBuilder('s');
         $queryBuilder->select('s.statusId')
             ->andWhere('s.screenName = :screenName')
@@ -290,17 +297,23 @@ class StatusRepository extends ArchivedStatusRepository
             $extremum = $queryBuilder->getQuery()->getSingleResult();
 
             if ($direction === 'asc') {
-                $nextMinimum = min((int) $extremum['statusId'], $nextExtremum['statusId']);
+                $nextMinimum = min(
+                    (int) $extremum[self::EXTREMUM_STATUS_ID],
+                    $nextExtremum[self::EXTREMUM_STATUS_ID]
+                );
 
-                return ['statusId' => $this->memberRepository->declareMinStatusIdForMemberWithScreenName(
+                return [self::EXTREMUM_STATUS_ID => $this->memberRepository->declareMinStatusIdForMemberWithScreenName(
                     "$nextMinimum",
                     $screenName
                 )->minStatusId];
             }
 
-            $nextMaximum = max((int) $extremum['statusId'], $nextExtremum['statusId']);
+            $nextMaximum = max(
+                (int) $extremum[self::EXTREMUM_STATUS_ID],
+                $nextExtremum[self::EXTREMUM_STATUS_ID]
+            );
 
-            return ['statusId' => $this->memberRepository->declareMaxStatusIdForMemberWithScreenName(
+            return [self::EXTREMUM_STATUS_ID => $this->memberRepository->declareMaxStatusIdForMemberWithScreenName(
                 "$nextMaximum",
                 $screenName
             )->maxStatusId];
