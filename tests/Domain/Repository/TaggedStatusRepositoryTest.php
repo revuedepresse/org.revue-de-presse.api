@@ -5,7 +5,7 @@ namespace App\Tests\Domain\Repository;
 
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\Status;
-use App\Domain\Repository\TaggedStatusRepository;
+use App\Infrastructure\Repository\Status\TaggedStatusRepository;
 use Psr\Log\NullLogger;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 

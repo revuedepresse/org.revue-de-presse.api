@@ -7,7 +7,7 @@ use App\Api\Entity\Aggregate;
 use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;
 use App\Api\Exception\InsertDuplicatesException;
-use App\Domain\Repository\StatusRepositoryInterface;
+use App\Infrastructure\Repository\Status\StatusRepositoryInterface;
 use App\Domain\Status\StatusInterface;
 use App\Domain\Status\TaggedStatus;
 use App\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;

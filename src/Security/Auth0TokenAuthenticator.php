@@ -8,7 +8,7 @@ use App\Member\Repository\AuthenticationTokenRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
-use App\Member\Repository\MemberRepository;
+use App\Infrastructure\Repository\Membership\MemberRepository;
 
 class Auth0TokenAuthenticator extends TokenAuthenticator
 {

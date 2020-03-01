@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Domain\Repository;
+namespace App\Infrastructure\Repository\Status;
 
 use App\Domain\Status\StatusInterface;
 use App\Domain\Status\TaggedStatus;

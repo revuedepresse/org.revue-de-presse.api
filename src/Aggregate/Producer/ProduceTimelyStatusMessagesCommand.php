@@ -7,7 +7,7 @@ use App\TimeRange\TimeRangeAwareTrait;
 use Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Output\OutputInterface;
 
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 use App\Amqp\Command\AggregateAwareCommand;
 use App\Twitter\Exception\SuspendedAccountException;

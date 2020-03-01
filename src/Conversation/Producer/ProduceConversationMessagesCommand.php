@@ -9,7 +9,7 @@ use Symfony\Component\Console\Input\InputInterface,
 
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
-use Symfony\Component\Translation\TranslatorInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 use App\Amqp\Command\AggregateAwareCommand;
 use App\Twitter\Exception\SuspendedAccountException;

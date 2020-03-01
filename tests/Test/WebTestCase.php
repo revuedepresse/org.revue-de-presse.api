@@ -138,7 +138,7 @@ abstract class WebTestCase extends CommandTestCase
             $translation['locale'] = null;
         }
 
-        /** @var \Symfony\Component\Translation\Translator $translator */
+        /** @var \Symfony\Contracts\Translation\TranslatorInterface $translator */
         $translator = $this->get('translator');
         $failureMessage = $translator->trans(
             $translation['key'],

@@ -128,13 +128,17 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
             $strategy->dateBeforeWhichPublicationsAreCollected()
         );
 
-        $this->dispatcher->dispatch($fetchMemberStatuses);
+        if ($strategy->shouldFetchLikes()) {
+            $this->dispatcher->dispatch(
+                FetchMemberLikes::from(
+                    $fetchMemberStatuses
+                )
+            );
 
-        $this->dispatcher->dispatch(
-            FetchMemberLikes::from(
-                $fetchMemberStatuses
-            )
-        );
+            return;
+        }
+
+        $this->dispatcher->dispatch($fetchMemberStatuses);
     }
 
     /**
