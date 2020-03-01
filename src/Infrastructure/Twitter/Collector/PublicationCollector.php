@@ -779,7 +779,7 @@ class PublicationCollector implements PublicationCollectorInterface
 
         $totalStatuses = $countCollectedItems(
             $this->collectionStrategy->screenName(),
-            $options['max_id']
+            $options['max_id'] ?? $options['since_id']
         );
 
         $this->collectStatusLogger->logHowManyItemsHaveBeenCollected(
