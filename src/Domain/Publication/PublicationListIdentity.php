@@ -5,7 +5,7 @@ namespace App\Domain\Publication;
 
 use Symfony\Component\HttpFoundation\Request;
 
-final class PublicationListIdentity
+final class PublicationListIdentity implements PublicationListIdentityInterface
 {
     private int $id;
 
@@ -17,12 +17,12 @@ final class PublicationListIdentity
         $this->id = $id;
     }
 
-    public function __toString()
+    public function __toString(): string
     {
         return (string) $this->id;
     }
 
-    public static function fromRequest(Request $request): ?self
+    public static function fromRequest(Request $request): ?PublicationListInterface
     {
         $aggregateIdentity = null;
         if ($request->get('aggregateId')) {

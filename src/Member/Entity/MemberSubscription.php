@@ -4,23 +4,15 @@ declare(strict_types=1);
 namespace App\Member\Entity;
 
 use App\Membership\Entity\MemberInterface;
+use Ramsey\Uuid\UuidInterface;
 
 class MemberSubscription
 {
-    /**
-     * @var string
-     */
-    private $id;
+    private UuidInterface $id;
 
-    /**
-     * @var MemberInterface
-     */
-    private $member;
+    private MemberInterface $member;
 
-    /**
-     * @var MemberInterface
-     */
-    private $subscription;
+    private MemberInterface $subscription;
 
     /**
      * @param MemberInterface $member

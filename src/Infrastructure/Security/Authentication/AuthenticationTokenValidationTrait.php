@@ -4,13 +4,13 @@ declare(strict_types=1);
 namespace App\Infrastructure\Security\Authentication;
 
 use App\Aggregate\Controller\Exception\InvalidRequestException;
-use App\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Api\Entity\Token;
+use App\Infrastructure\DependencyInjection\TokenRepositoryTrait;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 trait AuthenticationTokenValidationTrait
 {
-    public TokenRepositoryInterface $tokenRepository;
+    use TokenRepositoryTrait;
 
     /**
      * @param $corsHeaders

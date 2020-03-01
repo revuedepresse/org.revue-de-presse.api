@@ -47,13 +47,13 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
     /**
      * @param mixed                 $credentials
      * @param UserProviderInterface $userProvider
-     * @return null|User|MemberInterface
+     * @return null|MemberInterface
      */
     public function getUser($credentials, UserProviderInterface $userProvider)
     {
         $apiKey = $credentials['token'];
 
-        if (null === $apiKey) {
+        if ($apiKey === null) {
             return null;
         }
 

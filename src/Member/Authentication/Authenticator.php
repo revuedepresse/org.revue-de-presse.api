@@ -1,35 +1,29 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Member\Authentication;
 
 use App\Member\Entity\AuthenticationToken;
 use App\Member\Repository\AuthenticationTokenRepository;
+use Auth0\SDK\Exception\CoreException;
+use Auth0\SDK\Exception\InvalidTokenException;
 use Auth0\SDK\JWTVerifier;
 
 class Authenticator
 {
-    /**
-     * @var AuthenticationTokenRepository
-     */
-    public $authenticationTokenRepository;
+    public AuthenticationTokenRepository $authenticationTokenRepository;
 
-    /**
-     * @var string
-     */
-    public $authorizedIss;
+    public string $authorizedIss;
 
-    /**
-     * @var string
-     */
-    public $validAudience;
+    public string $validAudience;
 
     /**
      * @param string $token
      * @return array|null
-     * @throws \Auth0\SDK\Exception\CoreException
-     * @throws \Auth0\SDK\Exception\InvalidTokenException
+     * @throws CoreException
+     * @throws InvalidTokenException
      */
-    public function authenticate(string $token): ?array
+    public function authenticate(?string $token): ?array
     {
         $verifier = new JWTVerifier([
             'supported_algs' => ['RS256'],

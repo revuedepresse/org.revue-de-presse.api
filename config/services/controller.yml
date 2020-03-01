@@ -3,10 +3,11 @@ services:
         public: true
         class: 'App\Member\Authentication\Controller\AuthenticationController'
         properties:
-            authenticator:        '@app.authenticator'
+            authenticator: '@app.authenticator'
 
     controller.healthcheck:
-        class: 'App\Healthcheck\Controller\HealthcheckController'
+        public: true
+        class: 'App\Infrastructure\Healthcheck\Controller\HealthcheckController'
         arguments:
             - '%allowed.origin%'
             - '%kernel.environment%'
@@ -68,11 +69,11 @@ services:
             - '%allowed.origin%'
             - '%kernel.environment%'
         calls:
-            - [ 'setPublicationListDispatcher', [ '@App\Infrastructure\Amqp\MessageBus\PublicationListDispatcher' ] ]
+            - [ 'setLogger',                       [ '@monolog.logger.membership' ] ]
+            - [ 'setMemberSubscriptionRepository', [ '@repository.member_subscription' ] ]
+            - [ 'setMemberRepository',             [ '@App\Infrastructure\Repository\Membership\MemberRepository' ] ]
+            - [ 'setPublicationListDispatcher',    [ '@App\Infrastructure\Amqp\MessageBus\PublicationListDispatcher' ] ]
+            - [ 'setTokenRepository',              [ '@repository.access_token' ] ]
         properties:
             httpAuthenticator:              '@App\Infrastructure\Security\Authentication\HttpAuthenticator'
-            logger:                         '@monolog.logger.membership'
-            memberRepository:               '@user_manager'
-            memberSubscriptionRepository:   '@repository.member_subscription'
             redisCache:                     '@app.cache.redis'
-            tokenRepository:                '@repository.access_token'

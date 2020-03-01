@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Member\Authentication\Controller;
 
@@ -12,7 +13,7 @@ class AuthenticationController
     /**
      * @var Authenticator
      */
-    public $authenticator;
+    public Authenticator $authenticator;
 
     /**
      * @param Request $request

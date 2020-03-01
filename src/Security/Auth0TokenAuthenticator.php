@@ -54,16 +54,16 @@ class Auth0TokenAuthenticator extends TokenAuthenticator
     public function getUser($credentials, UserProviderInterface $userProvider)
     {
         $apiKey = null;
-        if (array_key_exists('token', $credentials)) {
+        if (\array_key_exists('token', $credentials)) {
             $apiKey = $credentials['token'];
         }
 
-        if (is_null($apiKey) && !array_key_exists('token_info', $credentials)) {
+        if ($apiKey === null && !\array_key_exists('token_info', $credentials)) {
             return null;
         }
 
         $tokenInfo = $this->decodeTokenInfo($credentials, $apiKey);
-        if (is_null($tokenInfo)) {
+        if ($tokenInfo === null) {
             return null;
         }
 
