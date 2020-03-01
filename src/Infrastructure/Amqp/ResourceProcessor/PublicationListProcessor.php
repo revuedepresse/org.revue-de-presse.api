@@ -127,13 +127,12 @@ class PublicationListProcessor implements PublicationListProcessorInterface
         /** @var MemberIdentity $memberIdentity */
         foreach ($members->toArray() as $memberIdentity) {
             try {
-                $this->memberIdentityProcessor->process(
+                $publishedMessages += $this->memberIdentityProcessor->process(
                     $memberIdentity,
                     $strategy,
                     $token,
                     $list
                 );
-                $publishedMessages++;
             } catch (ContinuePublicationException $exception) {
                 $this->logger->info($exception->getMessage());
 
