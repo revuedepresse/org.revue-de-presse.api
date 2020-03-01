@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Aggregate\Repository;
 
-use App\Aggregate\Controller\SearchParams;
+use App\Infrastructure\Http\SearchParams;
 use App\Aggregate\Entity\TimelyStatus;
 use App\Api\Entity\Aggregate;
 use App\Api\Repository\PublicationListRepository;

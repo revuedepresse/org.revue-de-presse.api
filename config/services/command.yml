@@ -46,7 +46,7 @@ services:
         tags:
             -
                 name: messenger.message_handler
-                handles: App\Infrastructure\Amqp\Message\FetchMemberStatuses
+                handles: App\Infrastructure\Amqp\Message\FetchMemberStatus
 
     press_review.fetch_likes:
         class:                          "%press_review.publication_message.handler%"
@@ -89,7 +89,7 @@ services:
     command.add_members_to_aggregate:
         class:                      "%command.add_members_to_aggregate.class%"
         properties:
-            aggregateRepository:                '@weaving_the_web_twitter.repository.publication_list'
+            aggregateRepository:                '@repository.publication_list'
             aggregateSubscriptionRepository:    '@repository.publication_list_subscription'
             accessor:                           '@weaving_the_web_twitter.api_accessor'
             logger:                             '@logger'
@@ -169,7 +169,7 @@ services:
             - [ 'setLogger',            [ '@monolog.logger.status'] ]
             - [ 'setUserRepository',    [ '@user_manager'] ]
         properties:
-            aggregateRepository:    '@weaving_the_web_twitter.repository.publication_list'
+            aggregateRepository:    '@repository.publication_list'
             entityManager:          '@doctrine.orm.entity_manager'
             operationClock:         '@operation.clock'
             statusAccessor:         '@App\Accessor\StatusAccessor'
@@ -181,7 +181,7 @@ services:
             - [ 'setLogger',            [ '@monolog.logger.status'] ]
             - [ 'setUserRepository',    [ '@user_manager'] ]
         properties:
-            aggregateRepository:    '@weaving_the_web_twitter.repository.publication_list'
+            aggregateRepository:    '@repository.publication_list'
             entityManager:          '@doctrine.orm.entity_manager'
             statusAccessor:         '@App\Accessor\StatusAccessor'
             timelyStatusRepository: '@repository.timely_status'

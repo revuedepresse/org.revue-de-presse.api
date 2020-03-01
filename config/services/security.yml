@@ -1,13 +1,19 @@
 services:
     app.token_authenticator:
-        class:              'App\Security\TokenAuthenticator'
-        properties:
-            userRepository: '@user_manager'
+        class: 'App\Security\TokenAuthenticator'
+        calls:
+            - [ 'setMemberRepository', [ '@App\Infrastructure\Repository\Membership\MemberRepository' ] ]
 
     app.auth0_token_authenticator:
-        class:              'App\Security\Auth0TokenAuthenticator'
+        class: 'App\Security\Auth0TokenAuthenticator'
+        calls:
+            - [ 'setMemberRepository', [ '@App\Infrastructure\Repository\Membership\MemberRepository' ] ]
+            - [ 'setLogger', [ '@monolog.logger.security' ] ]
         properties:
             authenticator:                  '@app.authenticator'
             authenticationTokenRepository:  '@repository.authentication_token'
-            logger:                         '@monolog.logger.security'
-            userRepository:                 '@user_manager'
+
+    App\Infrastructure\Security\Authentication\HttpAuthenticator:
+        class: 'App\Infrastructure\Security\Authentication\HttpAuthenticator'
+        properties:
+            authenticationTokenRepository:  '@repository.authentication_token'

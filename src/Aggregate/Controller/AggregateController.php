@@ -3,7 +3,7 @@
 namespace App\Aggregate\Controller;
 
 use App\Cache\RedisCache;
-use App\Security\Cors\CorsHeadersAwareTrait;
+use App\Infrastructure\Security\Cors\CorsHeadersAwareTrait;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use App\Api\Repository\PublicationListRepository;
@@ -15,22 +15,12 @@ class AggregateController
     /**
      * @var PublicationListRepository
      */
-    public $aggregateRepository;
-
-    /**
-     * @var string
-     */
-    public $environment;
-
-    /**
-     * @var string
-     */
-    public $allowedOrigin;
+    public PublicationListRepository $aggregateRepository;
 
     /**
      * @var RedisCache
      */
-    public $redisCache;
+    public RedisCache $redisCache;
 
     /**
      * @param Request $request

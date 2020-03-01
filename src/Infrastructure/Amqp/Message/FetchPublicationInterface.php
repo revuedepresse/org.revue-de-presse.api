@@ -27,7 +27,7 @@ interface FetchPublicationInterface
         Aggregate $aggregate,
         TokenInterface $token,
         MemberInterface $member,
-        bool $fetchLikes,
-        ?string $dateBeforeWhichStatusAreCollected
+        ?string $dateBeforeWhichStatusAreCollected,
+        bool $fetchLikes = false
     ): self;
 }

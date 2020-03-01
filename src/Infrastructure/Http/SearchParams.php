@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Http;
 
-use App\Http\PaginationParams;
 use Symfony\Component\HttpFoundation\Request;
 use function array_key_exists;
 use function array_keys;
@@ -55,7 +54,7 @@ class SearchParams
      * @param Request $request
      * @param array   $params
      *
-     * @return \App\Http\SearchParams
+     * @return SearchParams
      */
     public static function fromRequest(Request $request, array $params = []): self
     {

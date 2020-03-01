@@ -46,7 +46,7 @@ services:
         env_file:
             - ../../.env.local
         ports:
-            - "127.0.0.1:3306:3306"
+            - "3306:3306"
         volumes:
             - ../volumes/mysql:/var/lib/mysql
 
@@ -54,7 +54,7 @@ services:
         build: ./mariadb
         restart: always
         ports:
-            - "127.0.0.1:3307:3306"
+            - "3307:3306"
         env_file:
             - ../../.env.local
         networks:

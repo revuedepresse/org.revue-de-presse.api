@@ -1,42 +1,38 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Security;
 
+use App\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Membership\Entity\MemberInterface;
-use Symfony\Component\HttpFoundation\Request;
+use App\Membership\Model\Member;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Security\Core\User\UserInterface;
-use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
+use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;
-use App\Membership\Model\Member;
-use App\Infrastructure\Repository\Membership\MemberRepository;
-use Symfony\Component\Security\Guard\Token\PostAuthenticationGuardToken;
+use Symfony\Component\Security\Guard\AbstractGuardAuthenticator;
 
 class TokenAuthenticator extends AbstractGuardAuthenticator
 {
-    /**
-     * @var MemberRepository
-     */
-    public $userRepository;
+    use MemberRepositoryTrait;
 
-    public function supports(Request $request)
+    public function supports(Request $request): bool
     {
         return true;
     }
 
     /**
      * @param Request $request
+     *
      * @return array|mixed|null
-     * @throws \Doctrine\ORM\NoResultException
-     * @throws \Doctrine\ORM\NonUniqueResultException
      */
     public function getCredentials(Request $request)
     {
         if ($request->isMethod('OPTIONS')) {
-            $member = $this->userRepository->getMemberHavingApiKey();
+            $member = $this->memberRepository->getMemberHavingApiKey();
 
             return ['token' => $member->getApiKey()];
         }

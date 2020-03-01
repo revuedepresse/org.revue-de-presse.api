@@ -105,8 +105,8 @@ trait FetchPublicationTrait
         Aggregate $aggregate,
         TokenInterface $token,
         MemberInterface $member,
-        bool $fetchLikes,
-        ?string $dateBeforeWhichStatusAreCollected
+        ?string $dateBeforeWhichStatusAreCollected,
+        bool $fetchLikes = false
     ): self {
         return new self(
             $member->getTwitterUsername(),

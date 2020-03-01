@@ -94,7 +94,6 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
         $memberOwnership = $this->ownershipAccessor->getOwnershipsForMemberHavingScreenNameAndToken(
             $strategy->onBehalfOfWhom(),
             $token
-
         );
 
         $ownerships = $this->guardAgainstInvalidListName(

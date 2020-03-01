@@ -1,9 +1,9 @@
 #!/bin/bash
 
 function init_virtual_host() {
-    cd /etc/apache2
+    cd /etc/apache2 || exit
 
-    if [ ! -e /etc/apache2/sites-available ];
+    if [ ! -e /etc/apache2/sites-available/press-review.conf ];
     then
         ln -s /templates/sites-enabled/press-review.conf /etc/apache2/sites-available
     fi
@@ -20,11 +20,24 @@ function init_virtual_host() {
     # Enable HTTP2
     a2enmod http2
 
-    cd /etc/apache2
-    ln -s `pwd`/sites-available/press-review.conf `pwd`/sites-enabled
+    cd /etc/apache2 || exit
 
-    rm `pwd`/mods-enabled/deflate.conf
-    ln -s /templates/mods-enabled/deflate.conf `pwd`/mods-enabled
+    local working_directory
+    working_directory="$(pwd)"
+
+    if [ -L "${working_directory}"/sites-enabled/press-review.conf ];
+    then
+        rm "${working_directory}"/sites-enabled/press-review.conf
+    fi
+
+    ln -s "${working_directory}"/sites-available/press-review.conf "${working_directory}"/sites-enabled
+
+    if [ -L "${working_directory}"/mods-enabled/deflate.conf ];
+    then
+        rm "${working_directory}"/mods-enabled/deflate.conf
+    fi
+
+    ln -s /templates/mods-enabled/deflate.conf "${working_directory}"/mods-enabled
 
     /etc/init.d/blackfire-agent restart
 
