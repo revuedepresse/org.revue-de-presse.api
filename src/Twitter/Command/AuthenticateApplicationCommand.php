@@ -66,7 +66,7 @@ class AuthenticateApplicationCommand extends ContainerAwareCommand
             $key = $authenticationResult['consumer_key'];
 
             /**
-             * @var \Symfony\Component\Translation\Translator $translator
+             * @var \Symfony\Contracts\Translation\TranslatorInterface $translator
              */
             $translator = $this->getContainer()->get('translator');
             $output->writeln($translator->trans('twitter.success.authentication', ['{{ consumer_key }}' => $key]));

@@ -31,7 +31,7 @@ services:
     App\Infrastructure\Log\StatusLogger:
         class: 'App\Infrastructure\Log\StatusLogger'
         arguments:
-            - '@translator'
+            - '@App\Infrastructure\Translation\Translator'
             - '@monolog.logger.status'
 
     App\Api\Repository\StatusRepository:
@@ -104,7 +104,7 @@ services:
             - [ 'setTokenChange',             [ '@App\Api\AccessToken\TokenChange'] ]
         arguments:
             - '@weaving_the_web_twitter.api_accessor'
-            - '@translator'
+            - '@App\Infrastructure\Translation\Translator'
             - '@logger'
 
     App\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher:
@@ -115,7 +115,7 @@ services:
             - '@App\Infrastructure\Amqp\ResourceProcessor\PublicationListProcessor'
             - '@App\Api\AccessToken\TokenChange'
             - '@logger'
-            - '@translator'
+            - '@App\Infrastructure\Translation\Translator'
 
     App\Infrastructure\Twitter\Api\UnavailableResourceHandler:
         class: 'App\Infrastructure\Twitter\Api\UnavailableResourceHandler'
@@ -166,7 +166,7 @@ services:
             - [ 'setMemberRepository', [ '@user_manager' ] ]
             - [ 'setModerator', [ '@weaving_the_web_twitter.moderator.api_limit' ] ]
             - [ 'setTokenRepository', [ '@weaving_the_web_twitter.repository.token' ] ]
-            - [ 'setTranslator', [ '@translator' ] ]
+            - [ 'setTranslator', [ '@App\Infrastructure\Translation\Translator' ] ]
             - [ 'setUserSecret', [ '%weaving_the_web_twitter.oauth_secret.default%' ] ]
             - [ 'setUserToken', [ '%weaving_the_web_twitter.oauth_token.default%' ] ]
 
@@ -228,11 +228,17 @@ services:
             - [ 'setStatusRepository',                      [ '@App\Api\Repository\StatusRepository' ] ]
             - [ 'setStatusPersistence',                     [ '@App\Infrastructure\Status\Persistence\StatusPersistence' ] ]
             - [ 'setTokenRepository',                       [ '@weaving_the_web_twitter.repository.token' ] ]
-            - [ 'setTranslator',                            [ '@translator' ] ]
+            - [ 'setTranslator',                            [ '@App\Infrastructure\Translation\Translator' ] ]
             - [ 'setWhispererIdentification',               [ '@App\Infrastructure\Identification\WhispererIdentification' ] ]
             - [ 'setWhispererRepository',                   [ '@repository.whisperer' ] ]
         properties:
             twitterApiLogger:       '@monolog.logger.twitter_api'
+
+    App\Infrastructure\Translation\Translator:
+        class: 'App\Infrastructure\Translation\Translator'
+        arguments:
+            - '@translator'
+            - '@logger'
 
 # This file is the entry point to configure your own services.
 # Files in the packages/ subdirectory configure your dependencies.

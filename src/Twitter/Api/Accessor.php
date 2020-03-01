@@ -39,7 +39,7 @@ use Psr\Log\LoggerInterface;
 use ReflectionException;
 use stdClass;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Translation\Translator;
+use Symfony\Contracts\Translation\TranslatorInterface;
 use TwitterOAuth;
 use function array_key_exists;
 use function is_array;
@@ -127,15 +127,9 @@ class Accessor implements ApiAccessorInterface,
 
     protected TokenRepositoryInterface $tokenRepository;
 
-    /**
-     * @var Translator $translator
-     */
-    protected Translator $translator;
+    protected TranslatorInterface $translator;
 
-    /**
-     * @var boolean
-     */
-    protected $apiLimitReached = false;
+    protected bool $apiLimitReached = false;
 
     /**
      * @var MemberRepository
