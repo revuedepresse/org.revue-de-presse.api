@@ -6,7 +6,7 @@ use App\Member\Entity\MemberSubscribee;
 use App\Membership\Entity\MemberInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityRepository;
-use App\Member\Repository\MemberRepository;
+use App\Infrastructure\Repository\Membership\MemberRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 class MemberSubscribeeRepository extends ServiceEntityRepository

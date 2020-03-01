@@ -14,9 +14,13 @@ interface TokenInterface
     public const FIELD_SECRET = 'secret';
 
     public function getOAuthToken(): string;
+
     public function getOAuthSecret(): string;
+
     public function getConsumerKey(): string;
+
     public function getConsumerSecret(): string;
+
     public function hasConsumerKey(): bool;
 
     public function isValid(): bool;
@@ -25,12 +29,5 @@ interface TokenInterface
 
     public function setFrozenUntil(\DateTimeInterface $frozenUntil): self;
 
-    /**
-     * @param array $token
-     *
-     * @throws InvalidSerializedTokenException
-     *
-     * @return static
-     */
     public static function fromArray(array $token): self;
 }

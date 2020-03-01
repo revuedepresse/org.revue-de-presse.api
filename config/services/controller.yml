@@ -5,6 +5,12 @@ services:
         properties:
             authenticator:        '@app.authenticator'
 
+    controller.healthcheck:
+        class: 'App\Healthcheck\Controller\HealthcheckController'
+        properties:
+            allowedOrigin:                  '%allowed.origin%'
+            environment:                    '%kernel.environment%'
+
     controller.list:
         public: true
         class: 'App\Aggregate\Controller\ListController'

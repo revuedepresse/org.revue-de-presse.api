@@ -136,6 +136,9 @@ handle-news-messages: ## Consume twitter API news messages
 keep-php-container-running: ## Keep a running container having PHP
 		@/bin/bash -c 'source ./bin/functions.sh && keep_php_container_running'
 
+stop-workers: ## Stop workers
+		@/bin/bash -c 'source ./bin/functions.sh && stop_workers'
+
 today-statuses: ## Filter the statuses for today from the log file
 		@/bin/bash -c 'source ./bin/functions.sh && today_statuses'
 

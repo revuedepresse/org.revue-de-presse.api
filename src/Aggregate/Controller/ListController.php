@@ -21,7 +21,7 @@ use App\Api\Entity\Aggregate;
 use App\Api\Entity\Token;
 use App\Api\Repository\PublicationListRepository;
 use WeavingTheWeb\Bundle\ApiBundle\Repository\TokenRepository;
-use App\Member\Repository\MemberRepository;
+use App\Infrastructure\Repository\Membership\MemberRepository;
 use Kreait\Firebase\Factory;
 use Kreait\Firebase\ServiceAccount;
 

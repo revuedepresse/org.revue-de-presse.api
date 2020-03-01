@@ -179,9 +179,15 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
                 );
                 $returnStatus = self::RETURN_STATUS_SUCCESS;
             } catch (UnexpectedOwnershipException|OverCapacityException $exception) {
-                $this->logger->error($exception->getMessage());
+                $this->logger->error(
+                    $exception->getMessage(),
+                    ['stacktrace' => $exception->getTraceAsString()]
+                );
             } catch (Exception $exception) {
-                $this->logger->error($exception->getMessage());
+                $this->logger->error(
+                    $exception->getMessage(),
+                    ['stacktrace' => $exception->getTraceAsString()]
+                );
             } finally {
                 return $returnStatus;
             }

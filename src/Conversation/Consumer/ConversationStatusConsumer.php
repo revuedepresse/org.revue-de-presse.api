@@ -74,7 +74,7 @@ class ConversationStatusConsumer
     public $statusRepository;
 
     /**
-     * @var \App\Member\Repository\MemberRepository
+     * @var \App\Infrastructure\Repository\Membership\MemberRepository
      */
     protected $userRepository;
 

@@ -12,7 +12,7 @@ use App\Twitter\Api\Accessor;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\ProtectedAccountException;
 use WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException;
-use App\Member\Repository\MemberRepository;
+use App\Infrastructure\Repository\Membership\MemberRepository;
 
 class NetworkRepository
 {

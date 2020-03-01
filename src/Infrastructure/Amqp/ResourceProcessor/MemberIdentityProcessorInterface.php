@@ -16,7 +16,7 @@ interface MemberIdentityProcessorInterface
      * @param TokenInterface               $token
      * @param PublicationList              $list
      *
-     * @return int
+     * @return void
      */
     public function process(
         MemberIdentity $memberIdentity,

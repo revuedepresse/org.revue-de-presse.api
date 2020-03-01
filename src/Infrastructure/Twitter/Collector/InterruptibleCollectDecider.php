@@ -11,7 +11,7 @@ use App\Amqp\Exception\SkippableMessageException;
 use App\Api\Entity\Whisperer;
 use App\Domain\Collection\CollectionStrategyInterface;
 use App\Domain\Publication\PublicationListInterface;
-use App\Infrastructure\Amqp\Message\FetchPublication;
+use App\Infrastructure\Amqp\Message\FetchPublicationInterface;
 use App\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Infrastructure\DependencyInjection\Api\ApiLimitModeratorTrait;
 use App\Infrastructure\DependencyInjection\Api\StatusAccessorTrait;
@@ -174,10 +174,10 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
     ): bool
     {
         if (
-            !array_key_exists(FetchPublication::SCREEN_NAME, $options)
-            || $options[FetchPublication::SCREEN_NAME] === null
+            !array_key_exists(FetchPublicationInterface::SCREEN_NAME, $options)
+            || $options[FetchPublicationInterface::SCREEN_NAME] === null
             || $this->apiAccessor->shouldSkipCollectForMemberWithScreenName(
-                $options[FetchPublication::SCREEN_NAME]
+                $options[FetchPublicationInterface::SCREEN_NAME]
             )
         ) {
             return true;
@@ -242,7 +242,7 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
         if (!$this->collectionStrategy->fetchLikes()) {
             try {
                 $this->statusRepository->updateLastStatusPublicationDate(
-                    $options[FetchPublication::SCREEN_NAME]
+                    $options[FetchPublicationInterface::SCREEN_NAME]
                 );
             } catch (NotFoundStatusException $exception) {
                 $this->logger->info($exception->getMessage());
@@ -283,7 +283,7 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
                 sprintf(
                     'The item with id "%d" has already been saved in the past (skipping the whole batch from "%s")',
                     $statuses[0]->id_str,
-                    $options[FetchPublication::SCREEN_NAME]
+                    $options[FetchPublicationInterface::SCREEN_NAME]
                 )
             );
             SkippableMessageException::stopMessageConsumption();
@@ -291,7 +291,7 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
 
         $savedItems = $this->statusPersistence->saveStatusForScreenName(
             $statuses,
-            $options[FetchPublication::SCREEN_NAME],
+            $options[FetchPublicationInterface::SCREEN_NAME],
             $this->collectionStrategy
         );
 
@@ -317,13 +317,13 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
     private function extractAggregateIdFromOptions(
         $options
     ): ?int {
-        if (!array_key_exists(FetchPublication::AGGREGATE_ID, $options)) {
+        if (!array_key_exists(FetchPublicationInterface::AGGREGATE_ID, $options)) {
             return null;
         }
 
-        $this->collectionStrategy->optInToCollectStatusForPublicationListOfId($options[FetchPublication::AGGREGATE_ID]);
+        $this->collectionStrategy->optInToCollectStatusForPublicationListOfId($options[FetchPublicationInterface::AGGREGATE_ID]);
 
-        return $options[FetchPublication::AGGREGATE_ID];
+        return $options[FetchPublicationInterface::AGGREGATE_ID];
     }
 
     /**
@@ -354,7 +354,7 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
         $this->whispererRepository->saveWhisperer($whisperer);
 
         $this->logger->info(sprintf(
-            'Skipping whisperer "%s"', $options[FetchPublication::SCREEN_NAME]
+            'Skipping whisperer "%s"', $options[FetchPublicationInterface::SCREEN_NAME]
         ));
     }
 
@@ -372,18 +372,18 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
         }
 
         $whisperer = $this->whispererRepository->findOneBy(
-            ['name' => $options[FetchPublication::SCREEN_NAME]]
+            ['name' => $options[FetchPublicationInterface::SCREEN_NAME]]
         );
         if (!$whisperer instanceof Whisperer) {
             SkippableMessageException::continueMessageConsumption();
         }
 
         $whisperer->member = $this->apiAccessor->showUser(
-            $options[FetchPublication::SCREEN_NAME]
+            $options[FetchPublicationInterface::SCREEN_NAME]
         );
         $whispers          = (int) $whisperer->member->statuses_count;
 
-        $storedWhispers = $this->statusRepository->countHowManyStatusesFor($options[FetchPublication::SCREEN_NAME]);
+        $storedWhispers = $this->statusRepository->countHowManyStatusesFor($options[FetchPublicationInterface::SCREEN_NAME]);
 
         if ($storedWhispers === $whispers) {
             SkippableMessageException::stopMessageConsumption();

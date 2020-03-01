@@ -6,7 +6,7 @@ use App\Member\Authentication\Authenticator;
 use App\Member\Entity\AuthenticationToken;
 use Doctrine\ORM\EntityRepository;
 use App\Membership\Entity\Member;
-use App\Member\Repository\MemberRepository;
+use App\Infrastructure\Repository\Membership\MemberRepository;
 
 class AuthenticationTokenRepository extends EntityRepository
 {

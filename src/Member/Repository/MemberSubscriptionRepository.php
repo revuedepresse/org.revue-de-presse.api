@@ -1,30 +1,31 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Member\Repository;
 
+use App\Infrastructure\Repository\Membership\MemberRepositoryInterface;
 use App\Member\Entity\MemberSubscription;
 use App\Membership\Entity\MemberInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\EntityRepository;
-use App\Member\Repository\MemberRepository;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 
 class MemberSubscriptionRepository extends ServiceEntityRepository
 {
-    /**
-     * @var MemberRepository
-     */
-    public $memberRepository;
+    public MemberRepositoryInterface $memberRepository;
 
     /**
      * @param MemberInterface $member
      * @param MemberInterface $subscription
+     *
      * @return MemberSubscription
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function saveMemberSubscription(
         MemberInterface $member,
         MemberInterface $subscription
-    ) {
+    ): MemberSubscription {
         $memberSubscription = $this->findOneBy(['member' => $member, 'subscription' => $subscription]);
 
         if (!($memberSubscription instanceof MemberSubscription)) {

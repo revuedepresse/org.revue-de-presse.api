@@ -4,5 +4,5 @@ services:
         calls:
             - [ 'setApiAccessor', [ '@weaving_the_web_twitter.api_accessor' ] ]
             - [ 'setLogger', [ '@logger' ] ]
-            - [ 'setTranslator', [ '@translator' ] ]
+            - [ 'setTranslator', [ '@App\Infrastructure\Translation\Translator' ] ]
             - [ 'setWhispererRepository', [ '@repository.whisperer' ] ]

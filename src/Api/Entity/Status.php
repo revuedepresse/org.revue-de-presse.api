@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Api\Entity;
 
+use App\Domain\Publication\PublicationListInterface;
 use App\Domain\Status\StatusInterface;
 use App\Status\Entity\StatusTrait;
 use DateTimeInterface;
@@ -173,7 +174,7 @@ class Status implements StatusInterface
 
         if ($archivedStatus->belongsToAList()) {
             $archivedStatus->getAggregates()->map(
-                function (Aggregate $aggregate) use ($status) {
+                function (PublicationListInterface $aggregate) use ($status) {
                     $status->addToAggregates($aggregate);
                 }
             );

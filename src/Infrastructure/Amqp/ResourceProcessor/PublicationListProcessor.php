@@ -54,7 +54,7 @@ class PublicationListProcessor implements PublicationListProcessorInterface
      * @param PublicationStrategyInterface $strategy
      *
      * @return int
-     * @throws InvalidSerializedTokenException
+     * @throws Exception
      */
     public function processPublicationList(
         PublicationList $list,
@@ -108,12 +108,13 @@ class PublicationListProcessor implements PublicationListProcessorInterface
     }
 
     /**
-     * @param MemberCollection $members
-     * @param PublicationList  $list
-     * @param TokenInterface   $token
+     * @param MemberCollection             $members
+     * @param PublicationList              $list
+     * @param TokenInterface               $token
+     *
+     * @param PublicationStrategyInterface $strategy
      *
      * @return int
-     * @throws Exception
      */
     private function processMemberOriginatingFromListWithToken(
         MemberCollection $members,
@@ -141,6 +142,16 @@ class PublicationListProcessor implements PublicationListProcessorInterface
                 $this->logger->error($exception->getMessage());
 
                 break;
+            }  catch (Exception $exception) {
+                $this->logger->error(
+                    $exception->getMessage(),
+                    [
+                        'screen_name' => $memberIdentity->screenName(),
+                        'stacktrace' => $exception->getTraceAsString()
+                    ]
+                );
+
+                continue;
             }
         }
 

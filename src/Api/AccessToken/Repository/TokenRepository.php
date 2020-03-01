@@ -5,11 +5,14 @@ namespace App\Api\AccessToken\Repository;
 
 use App\Api\Entity\TokenInterface;
 use App\Api\Exception\UnavailableTokenException;
+use DateTime;
+use DateTimeZone;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\NoResultException;
 
+use Exception;
 use Psr\Log\LoggerInterface;
 
 use App\Api\Entity\Token,
@@ -29,13 +32,13 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
      * @param $properties
      *
      * @return Token
-     * @throws \Exception
+     * @throws Exception
      */
     public function makeToken($properties)
     {
         $token = new Token();
 
-        $now = new \DateTime();
+        $now = new DateTime();
         $token->setCreatedAt($now);
         $token->setUpdatedAt($now);
 
@@ -64,7 +67,7 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
          * @var \App\Api\Entity\Token $token
          */
         $token = $this->findOneBy(['oauthToken' => $oauthToken]);
-        $token->setFrozenUntil(new \DateTime($until));
+        $token->setFrozenUntil(new DateTime($until));
 
         $entityManager->persist($token);
         $entityManager->flush($token);
@@ -110,13 +113,15 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
 
     /**
      * @param Token $token
+     *
      * @return bool
+     * @throws Exception
      */
-    protected function isTokenFrozen(Token $token)
+    protected function isTokenFrozen(Token $token): bool
     {
-        return !is_null($token->getFrozenUntil()) &&
+        return $token->getFrozenUntil() !== null &&
             $token->getFrozenUntil()->getTimestamp() >
-                (new \DateTime('now', new \DateTimeZone('UTC')))
+                (new DateTime('now', new DateTimeZone('UTC')))
                     ->getTimestamp();
     }
 
@@ -206,7 +211,7 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
         $token->setOauthToken($applicationToken);
         $token->setOauthTokenSecret($accessToken);
         $token->setType($tokenType);
-        $token->setCreatedAt(new \DateTime());
+        $token->setCreatedAt(new DateTime());
 
         $entityManager = $this->getEntityManager();
         $entityManager->persist($token);
@@ -251,7 +256,7 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
         $queryBuilder->andWhere('t.frozenUntil > :now');
         $queryBuilder->setParameter(
             'now',
-            new \DateTime('now', new \DateTimeZone('UTC'))
+            new DateTime('now', new DateTimeZone('UTC'))
         );
 
         $queryBuilder->setMaxResults(1);
@@ -277,7 +282,7 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
         $queryBuilder->setParameter('token', $token);
 
         $queryBuilder->andWhere('t.frozenUntil < :now');
-        $queryBuilder->setParameter('now', new \DateTime('now', new \DateTimeZone('UTC')));
+        $queryBuilder->setParameter('now', new DateTime('now', new DateTimeZone('UTC')));
 
         $queryBuilder->setMaxResults(1);
 

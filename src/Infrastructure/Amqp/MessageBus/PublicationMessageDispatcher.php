@@ -124,7 +124,10 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
             } catch (EmptyListException $exception) {
                 $this->logger->info($exception->getMessage());
             } catch (Exception $exception) {
-                $this->logger->critical($exception->getMessage());
+                $this->logger->critical(
+                    $exception->getMessage(),
+                    ['stacktrace' => $exception->getTraceAsString()]
+                );
                 UnexpectedOwnershipException::throws($exception->getMessage());
             }
         }

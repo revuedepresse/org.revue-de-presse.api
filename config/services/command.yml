@@ -27,7 +27,7 @@ services:
             - [ 'setDefaultToken',                  [ '%weaving_the_web_twitter.oauth_token.default%'] ]
             - [ 'setTokenRepository',               [ '@repository.access_token'] ]
             - [ 'setPublicationMessageDispatcher',  [ '@App\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher'] ]
-            - [ 'setTranslator',                    [ '@translator'] ]
+            - [ 'setTranslator',                    [ '@App\Infrastructure\Translation\Translator'] ]
             - [ 'setEntityManager',                 [ '@doctrine.orm.entity_manager'] ]
             - [ 'setLogger',                        [ '@logger'] ]
         tags:

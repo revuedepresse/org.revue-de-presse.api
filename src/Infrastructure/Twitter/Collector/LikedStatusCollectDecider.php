@@ -5,7 +5,7 @@ namespace App\Infrastructure\Twitter\Collector;
 
 use App\Domain\Collection\CollectionStrategyInterface;
 use App\Domain\Publication\PublicationListInterface;
-use App\Infrastructure\Amqp\Message\FetchPublication;
+use App\Infrastructure\Amqp\Message\FetchPublicationInterface;
 use App\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Infrastructure\DependencyInjection\Api\StatusAccessorTrait;
 use App\Infrastructure\DependencyInjection\Status\LikedStatusRepositoryTrait;
@@ -31,7 +31,7 @@ class LikedStatusCollectDecider implements LikedStatusCollectDeciderInterface
         $atLeastOneStatusFetched = count($statuses) > 0;
 
         $hasLikedStatusBeenSavedBefore = $this->hasOneLikedStatusAtLeastBeenSavedBefore(
-            $options[FetchPublication::SCREEN_NAME],
+            $options[FetchPublicationInterface::SCREEN_NAME],
             $atLeastOneStatusFetched,
             $publicationList,
             $statuses[0]
@@ -42,13 +42,13 @@ class LikedStatusCollectDecider implements LikedStatusCollectDeciderInterface
             // for matching liked statuses
             $this->statusPersistence->saveStatusForScreenName(
                 $statuses,
-                $options[FetchPublication::SCREEN_NAME],
+                $options[FetchPublicationInterface::SCREEN_NAME],
                 $collectionStrategy
             );
 
             $this->statusRepository->declareMinimumLikedStatusId(
                 $statuses[count($statuses) - 1],
-                $options[FetchPublication::SCREEN_NAME]
+                $options[FetchPublicationInterface::SCREEN_NAME]
             );
         }
 
@@ -68,20 +68,20 @@ class LikedStatusCollectDecider implements LikedStatusCollectDeciderInterface
                 }
 
                 $collectionStrategy->optInToCollectStatusForPublicationListOfId(
-                    $options[FetchPublication::AGGREGATE_ID]
+                    $options[FetchPublicationInterface::AGGREGATE_ID]
                 );
 
                 // At this point, it should not skip further consumption
                 // for matching liked statuses
                 $this->statusPersistence->saveStatusForScreenName(
                     $statuses,
-                    $options[FetchPublication::SCREEN_NAME],
+                    $options[FetchPublicationInterface::SCREEN_NAME],
                     $collectionStrategy
                 );
 
                 $this->statusRepository->declareMaximumLikedStatusId(
                     $statuses[0],
-                    $options[FetchPublication::SCREEN_NAME]
+                    $options[FetchPublicationInterface::SCREEN_NAME]
                 );
             }
 
