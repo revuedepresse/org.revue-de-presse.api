@@ -58,7 +58,7 @@ class WhispererIdentification implements WhispererIdentificationInterface
 
             $whispererDeclarationMessage = $this->translator->trans(
                 'logs.info.whisperer_declared',
-                ['screen name' => $screenName],
+                ['screen_name' => $screenName],
                 'logs'
             );
             $this->logger->info($whispererDeclarationMessage);
