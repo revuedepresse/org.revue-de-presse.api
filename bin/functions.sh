@@ -128,9 +128,10 @@ function handle_messages {
 
     export SCRIPT="bin/console messenger:consume -m $MEMORY_LIMIT -l $MESSAGES "${command_suffix}" --time-limit 3000"
 
-    local symfony_environment="$(get_symfony_environment)"
+    local symfony_environment
+    symfony_environment="$(get_symfony_environment)"
 
-    cd "${PROJECT_DIR}/provisioning/containers"
+    cd "${PROJECT_DIR}/provisioning/containers" || exit
 
     command="docker-compose exec -d worker ${SCRIPT}"
     echo 'Executing command: "'$command'"'
