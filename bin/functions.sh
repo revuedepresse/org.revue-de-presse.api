@@ -113,6 +113,11 @@ function handle_messages {
         echo '[default memory limit] '$MEMORY_LIMIT
     fi
 
+    if [ -z "${TIME_LIMIT}" ]
+    then
+        TIME_LIMIT="300";
+    fi
+
     if [ -z "${PROJECT_DIR}" ];
     then
         export PROJECT_DIR='/var/www/devobs'
@@ -126,11 +131,12 @@ function handle_messages {
     rabbitmq_output_log="${PROJECT_DIR}/${rabbitmq_output_log}"
     rabbitmq_error_log="${PROJECT_DIR}/${rabbitmq_error_log}"
 
-    export SCRIPT="bin/console messenger:consume -m $MEMORY_LIMIT -l $MESSAGES "${command_suffix}" --time-limit 3000"
+    export SCRIPT="bin/console messenger:consume --time-limit=$TIME_LIMT -m $MEMORY_LIMIT -l $MESSAGES "${command_suffix}" --time-limit 3000"
 
-    local symfony_environment="$(get_symfony_environment)"
+    local symfony_environment
+    symfony_environment="$(get_symfony_environment)"
 
-    cd "${PROJECT_DIR}/provisioning/containers"
+    cd "${PROJECT_DIR}/provisioning/containers" || exit
 
     command="docker-compose exec -d worker ${SCRIPT}"
     echo 'Executing command: "'$command'"'
@@ -1188,4 +1194,9 @@ function today_statuses() {
 
 function follow_today_statuses() {
     tail -f var/logs/dev.log | awk '{$1=$2=$3="";print $0}' | sed -e 's/^\s\+//' | grep `date -I` | awk '{$1=$2="";print $0}'
+}
+
+function restart_web_server() {
+    cd ./provisioning/containers || exit
+    docker-compose restart web
 }

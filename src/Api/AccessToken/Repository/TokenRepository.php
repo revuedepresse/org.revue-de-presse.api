@@ -9,6 +9,8 @@ use DateTime;
 use DateTimeZone;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\NoResultException;
 
@@ -34,7 +36,7 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
      * @return Token
      * @throws Exception
      */
-    public function makeToken($properties)
+    public function makeToken($properties): TokenInterface
     {
         $token = new Token();
 
@@ -55,9 +57,11 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
     }
 
     /**
-     * @param $oauthToken
+     * @param        $oauthToken
      * @param string $until
-     * @throws \Doctrine\ORM\OptimisticLockException
+     *
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function freezeToken($oauthToken, $until = 'now + 15min')
     {
@@ -74,19 +78,23 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
     }
 
     /**
-     * @param $oauthToken
+     * @param                      $oauthToken
      * @param LoggerInterface|null $logger
+     *
      * @return Token
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
-    public function refreshFreezeCondition($oauthToken, LoggerInterface $logger = null)
-    {
+    public function refreshFreezeCondition(
+        string $oauthToken,
+        LoggerInterface $logger = null
+    ): TokenInterface {
         $frozen = false;
 
         /** @var \App\Api\Entity\Token $token */
         $token = $this->findOneBy(['oauthToken' => $oauthToken]);
 
-        if (is_null($token)) {
+        if ($token === null) {
             $token = $this->makeToken(['oauth_token' => $oauthToken, 'oauth_token_secret' => '']);
 
             $entityManager = $this->getEntityManager();
@@ -199,8 +207,10 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
     /**
      * @param $applicationToken
      * @param $accessToken
+     *
      * @return Token
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function persistBearerToken($applicationToken, $accessToken)
     {

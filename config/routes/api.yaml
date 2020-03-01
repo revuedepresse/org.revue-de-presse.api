@@ -2,6 +2,10 @@ authentication_verify:
     path:     '/api/authentication/verify'
     defaults: { _controller: controller.authentication:verify }
 
+healthcheck:
+    path:     '/api/healthcheck'
+    defaults: { _controller: controller.healthcheck:areServicesHealthy }
+
 highlight:
     path:     '/api/twitter/highlights'
     defaults: { _controller: controller.list:getHighlights }
@@ -56,3 +60,7 @@ collect_statuses:
 keywords:
     path:     '/api/twitter/admin/keywords'
     defaults: { _controller: controller.keyword:getKeywords }
+
+subscriptions:
+    path:     '/api/twitter/admin/member-subscriptions'
+    defaults: { _controller: controller.subscription:getMemberSubscriptions }

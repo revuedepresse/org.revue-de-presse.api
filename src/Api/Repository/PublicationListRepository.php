@@ -3,25 +3,33 @@ declare(strict_types=1);
 
 namespace App\Api\Repository;
 
-use App\Aggregate\Controller\SearchParams;
+use App\Infrastructure\Http\SearchParams;
 use App\Aggregate\Entity\TimelyStatus;
 use App\Aggregate\Repository\PaginationAwareTrait;
-use App\Aggregate\Repository\TimelyStatusRepository;
-use App\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Api\Entity\Aggregate;
+use App\Api\Entity\TokenInterface;
 use App\Domain\Publication\PublicationListInterface;
 use App\Domain\Status\StatusInterface;
+use App\Infrastructure\DependencyInjection\LoggerTrait;
+use App\Infrastructure\DependencyInjection\Publication\PublicationListDispatcherTrait;
+use App\Infrastructure\DependencyInjection\Status\LikedStatusRepositoryTrait;
+use App\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
+use App\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
+use App\Infrastructure\DependencyInjection\TokenRepositoryTrait;
 use App\Infrastructure\Repository\PublicationList\PublicationListRepositoryInterface;
+use App\Membership\Entity\Member;
 use App\Membership\Entity\MemberInterface;
 use App\Operation\CapableOfDeletionInterface;
 use App\Status\Entity\LikedStatus;
-use App\Status\Repository\LikedStatusRepository;
+use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\QueryBuilder;
-use Doctrine\Persistence\ManagerRegistry;
+use Exception;
 use stdClass;
+use function array_map;
+use function array_sum;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
@@ -30,56 +38,34 @@ use stdClass;
  * @method PublicationListInterface|null findOneBy(array $criteria, array $orderBy = null)
  * @method PublicationListInterface[]    findAll()
  * @method PublicationListInterface[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
-
  */
 class PublicationListRepository extends ResourceRepository implements CapableOfDeletionInterface,
     PublicationListRepositoryInterface
 {
+    use StatusRepositoryTrait;
+    use LikedStatusRepositoryTrait;
+    use LoggerTrait;
+    use PaginationAwareTrait;
+    use PublicationListDispatcherTrait;
+    use TimelyStatusRepositoryTrait;
+    use TokenRepositoryTrait;
+
     private const TABLE_ALIAS = 'a';
 
-    use PaginationAwareTrait;
-
-    public TimelyStatusRepository $timelyStatusRepository;
-
-    public LikedStatusRepository $likedStatusRepository;
-
-    public StatusRepository $statusRepository;
-
-    /**
-     * TODO replace deprecated message producer with message bus
-     */
-//    public $amqpMessageProducer;
-
-    public TokenRepositoryInterface $tokenRepository;
-
-    /**
-     * @var \Psr\Log\LoggerInterface
-     */
-    public $logger;
-
-    /**
-     * @param ManagerRegistry $managerRegistry
-     * @param string          $aggregateClass
-     */
-    public function __construct(
-        ManagerRegistry $managerRegistry,
-        string $aggregateClass
-    ) {
-        parent::__construct($managerRegistry, $aggregateClass);
-    }
+    private const PREFIX_MEMBER_AGGREGATE = 'user :: ';
 
     /**
      * @param MemberInterface $member
-     * @param stdClass       $list
+     * @param stdClass        $list
      *
-     * @return Aggregate
+     * @return PublicationListInterface
      * @throws ORMException
      * @throws OptimisticLockException
      */
     public function addMemberToList(
         MemberInterface $member,
         stdClass $list
-    ) {
+    ): PublicationListInterface {
         $aggregate = $this->findOneBy(
             [
                 'name'       => $list->name,
@@ -166,10 +152,8 @@ class PublicationListRepository extends ResourceRepository implements CapableOfD
         $aggregates = array_map(
             function (array $aggregate) {
                 $existingAggregate = null;
-                if (($aggregate['totalStatuses'] === 0) ||
-                    // TODO Cover this block to remove
-                    ($aggregate['totalMembers'] === 0 || true)) {
-                    /** @var Aggregate $existingAggregate */
+                if ($aggregate['totalStatuses'] === 0) {
+                    /** @var PublicationListInterface $existingAggregate */
                     $existingAggregate = $this->findOneBy(['id' => $aggregate['id']]);
                     if (!($existingAggregate instanceof Aggregate)) {
                         return $aggregate;
@@ -188,7 +172,7 @@ class PublicationListRepository extends ResourceRepository implements CapableOfD
 
         try {
             $this->getEntityManager()->flush();
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             $this->logger->critical($exception);
         }
 
@@ -196,7 +180,57 @@ class PublicationListRepository extends ResourceRepository implements CapableOfD
     }
 
     /**
-     * @param Aggregate $aggregate
+     * @param string      $screenName
+     * @param string      $listName
+     * @param string|null $listId
+     *
+     * @return PublicationListInterface|object|null
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    public function getListAggregateByName(
+        string $screenName,
+        string $listName,
+        string $listId = null
+    ) {
+        $aggregate = $this->make(
+            $screenName,
+            $listName
+        );
+
+        $this->getEntityManager()->persist($aggregate);
+
+        if ($listId !== null) {
+            $aggregate->listId = $listId;
+        }
+
+        $this->getEntityManager()->flush();
+
+        return $aggregate;
+    }
+
+    /**
+     * @param string $username
+     *
+     * @return PublicationListInterface
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    public function getMemberAggregateByUsername(string $username): PublicationListInterface
+    {
+        $aggregate = $this->make(
+            $username,
+            self::PREFIX_MEMBER_AGGREGATE . $username
+        );
+
+        $this->getEntityManager()->persist($aggregate);
+        $this->getEntityManager()->flush();
+
+        return $aggregate;
+    }
+
+    /**
+     * @param PublicationListInterface $aggregate
      *
      * @throws ORMException
      * @throws OptimisticLockException
@@ -212,18 +246,18 @@ class PublicationListRepository extends ResourceRepository implements CapableOfD
      * @param string $screenName
      * @param string $listName
      *
-     * @return Aggregate
+     * @return PublicationListInterface
      * @throws ORMException
      * @throws OptimisticLockException
      */
-    public function make(string $screenName, string $listName): Aggregate
+    public function make(string $screenName, string $listName): PublicationListInterface
     {
         $aggregate = $this->findByRemovingDuplicates(
             $screenName,
             $listName
         );
 
-        if ($aggregate instanceof Aggregate) {
+        if ($aggregate instanceof PublicationListInterface) {
             return $aggregate;
         }
 
@@ -232,8 +266,10 @@ class PublicationListRepository extends ResourceRepository implements CapableOfD
 
     /**
      * @param array $aggregateIds
+     *
+     * @return int
      */
-    public function publishStatusesForAggregates(array $aggregateIds)
+    public function publishStatusesForAggregates(array $aggregateIds): int
     {
         $query        = <<<QUERY
             SELECT id, screen_name
@@ -246,13 +282,7 @@ class PublicationListRepository extends ResourceRepository implements CapableOfD
             )
 QUERY;
         $connection   = $this->getEntityManager()->getConnection();
-        $aggregateIds = implode(
-            array_map(
-                'intval',
-                $aggregateIds
-            ),
-            ','
-        );
+        $aggregateIds = $this->castIds($aggregateIds);
 
         try {
             $statement = $connection->executeQuery(
@@ -264,8 +294,9 @@ QUERY;
                 )
             );
             $records   = $statement->fetchAll();
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             $this->logger->critical($exception->getMessage());
+            $records = [];
         }
 
         $aggregateIds = array_map(
@@ -276,27 +307,34 @@ QUERY;
         );
         $aggregates   = $this->findBy(['id' => $aggregateIds]);
 
-        array_walk(
-            $aggregates,
+        $dispatchedMessages = array_map(
             function (PublicationListInterface $aggregate) {
-                $messageBody['screen_name']  = $aggregate->screenName;
                 $messageBody['aggregate_id'] = $aggregate->getId();
                 $aggregate->totalStatuses    = 0;
                 $aggregate->totalMembers     = 0;
 
                 $this->save($aggregate);
 
-//                $this->amqpMessageProducer->setContentType('application/json');
-//                $this->amqpMessageProducer->publish(serialize(json_encode($messageBody)));
-            }
+                $token = $this->tokenRepository->findFirstFrozenToken();
+                if ($token instanceof TokenInterface) {
+                    $this->publicationListDispatcher->dispatchMemberPublicationListMessage(
+                        (new Member())->setScreenName($aggregate->screenName),
+                        $token
+                    );
+
+                    return 1;
+                }
+
+                return 0;
+            },
+            $aggregates
         );
+
+        return array_sum($dispatchedMessages);
     }
 
     /**
      * @param string $memberName
-     *
-     * @throws ORMException
-     * @throws OptimisticLockException
      */
     public function resetTotalStatusesForAggregateRelatedToScreenName(string $memberName)
     {
@@ -323,12 +361,10 @@ QUERY;
             WHERE id in (:ids)
 QUERY;
         $connection   = $this->getEntityManager()->getConnection();
-        $aggregateIds = implode(
-            array_map(
-                'intval',
-                $aggregateIds
-            ),
-            ','
+        $aggregateIds = $this->castIds($aggregateIds);
+        $aggregateIdsParams = implode(
+            ',',
+            $aggregateIds
         );
 
         try {
@@ -336,19 +372,19 @@ QUERY;
                 strtr(
                     $query,
                     [
-                        ':ids' => $aggregateIds
+                        ':ids' => $aggregateIdsParams
                     ]
                 )
             );
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             $this->logger->critical($exception->getMessage());
         }
     }
 
     /**
-     * @param Aggregate $aggregate
+     * @param PublicationListInterface $aggregate
      *
-     * @return Aggregate
+     * @return PublicationListInterface
      * @throws ORMException
      * @throws OptimisticLockException
      */
@@ -362,7 +398,7 @@ QUERY;
 
     /**
      * @return array
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      */
     public function selectAggregatesForWhichNoStatusHasBeenCollected(): array
     {
@@ -400,17 +436,17 @@ QUERY;
     }
 
     /**
-     * @param array          $aggregate
-     * @param Aggregate|null $matchingAggregate
-     * @param bool           $includeRelatedAggregates
+     * @param array                         $aggregate
+     * @param PublicationListInterface|null $matchingAggregate
+     * @param bool                          $includeRelatedAggregates
      *
      * @return array
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      * @throws ORMException
      */
     public function updateTotalStatuses(
         array $aggregate,
-        Aggregate $matchingAggregate = null,
+        ?PublicationListInterface $matchingAggregate = null,
         bool $includeRelatedAggregates = true
     ): array {
         if ($aggregate['totalStatuses'] <= 0) {
@@ -456,16 +492,16 @@ QUERY;
     }
 
     /**
-     * @param array          $aggregate
-     * @param Aggregate|null $matchingAggregate
+     * @param array                         $aggregate
+     * @param PublicationListInterface|null $matchingAggregate
      *
      * @return array
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      * @throws ORMException
      */
     public function updateTotalStatusesByExcludingRelatedAggregates(
         array $aggregate,
-        Aggregate $matchingAggregate = null
+        PublicationListInterface $matchingAggregate = null
     ): array {
         return $this->updateTotalStatuses($aggregate, $matchingAggregate, $includeRelatedAggregates = false);
     }
@@ -497,6 +533,19 @@ QUERY;
                 )
             );
         }
+    }
+
+    /**
+     * @param array $aggregateIds
+     *
+     * @return array
+     */
+    private function castIds(array $aggregateIds): array
+    {
+        return array_map(
+            fn($aggregateId) => (int) $aggregateId,
+            $aggregateIds
+        );
     }
 
     /**
@@ -582,16 +631,16 @@ QUERY;
     }
 
     /**
-     * @param array          $aggregate
-     * @param Aggregate|null $matchingAggregate
+     * @param array                         $aggregate
+     * @param PublicationListInterface|null $matchingAggregate
      *
      * @return array
-     * @throws \Doctrine\DBAL\DBALException
+     * @throws DBALException
      * @throws ORMException
      */
     private function updateTotalMembers(
         array $aggregate,
-        Aggregate $matchingAggregate = null
+        PublicationListInterface $matchingAggregate = null
     ): array {
         if ($aggregate['totalMembers'] === 0) {
             $query      = <<<QUERY
@@ -618,36 +667,6 @@ QUERY;
 
             $this->getEntityManager()->persist($matchingAggregate);
         }
-
-        return $aggregate;
-    }
-
-    /**
-     * @param string      $screenName
-     * @param string      $listName
-     * @param string|null $listId
-     *
-     * @return Aggregate|object|null
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
-    public function getListAggregateByName(
-        string $screenName,
-        string $listName,
-        string $listId = null
-    ) {
-        $aggregate = $this->make(
-            $screenName,
-            $listName
-        );
-
-        $this->getEntityManager()->persist($aggregate);
-
-        if ($listId !== null) {
-            $aggregate->listId = $listId;
-        }
-
-        $this->getEntityManager()->flush();
 
         return $aggregate;
     }

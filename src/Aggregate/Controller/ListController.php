@@ -1,88 +1,75 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Aggregate\Controller;
 
 use App\Aggregate\Controller\Exception\InvalidRequestException;
 use App\Aggregate\Repository\TimelyStatusRepository;
+use App\Api\AccessToken\Repository\TokenRepository;
+use App\Api\Entity\Aggregate;
+use App\Api\Entity\Token;
+use App\Api\Entity\TokenInterface;
+use App\Api\Repository\PublicationListRepository;
 use App\Cache\RedisCache;
-use App\Membership\Entity\MemberInterface;
+use App\Infrastructure\DependencyInjection\Publication\PublicationListDispatcherTrait;
+use App\Infrastructure\Http\SearchParams;
+use App\Infrastructure\Repository\Membership\MemberRepository;
+use App\Infrastructure\Security\Cors\CorsHeadersAwareTrait;
 use App\Member\Repository\AuthenticationTokenRepository;
-use App\Security\Cors\CorsHeadersAwareTrait;
+use App\Membership\Entity\Member;
+use App\Membership\Entity\MemberInterface;
 use App\Status\Repository\HighlightRepository;
 use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\NonUniqueResultException;
-use OldSound\RabbitMqBundle\RabbitMq\Producer;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
+use Kreait\Firebase\Factory;
+use Kreait\Firebase\ServiceAccount;
 use Predis\Client;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RouterInterface;
-use App\Api\Entity\Aggregate;
-use App\Api\Entity\Token;
-use App\Api\Repository\PublicationListRepository;
-use WeavingTheWeb\Bundle\ApiBundle\Repository\TokenRepository;
-use App\Infrastructure\Repository\Membership\MemberRepository;
-use Kreait\Firebase\Factory;
-use Kreait\Firebase\ServiceAccount;
 
 class ListController
 {
     use CorsHeadersAwareTrait;
+    use PublicationListDispatcherTrait;
 
     /**
      * @var AuthenticationTokenRepository
      */
-    public $authenticationTokenRepository;
+    public AuthenticationTokenRepository $authenticationTokenRepository;
 
     /**
      * @var TokenRepository
      */
-    public $tokenRepository;
+    public TokenRepository $tokenRepository;
 
     /**
      * @var PublicationListRepository
      */
-    public $aggregateRepository;
+    public PublicationListRepository $aggregateRepository;
 
     /**
      * @var MemberRepository
      */
-    public $memberRepository;
+    public MemberRepository $memberRepository;
 
     /**
      * @var HighlightRepository
      */
-    public $highlightRepository;
+    public HighlightRepository $highlightRepository;
 
     /**
      * @var TimelyStatusRepository
      */
-    public $timelyStatusRepository;
-
-    /**
-     * @var Producer
-     */
-    public $aggregateStatusesProducer;
-
-    /**
-     * @var Producer
-     */
-    public $aggregateLikesProducer;
+    public TimelyStatusRepository $timelyStatusRepository;
 
     /**
      * @var string
      */
-    public $environment;
-
-    /**
-     * @var string
-     */
-    public $configDirectory;
-
-    /**
-     * @var string
-     */
-    public $allowedOrigin;
+    public string $configDirectory;
 
     /**
      * @var LoggerInterface
@@ -242,7 +229,7 @@ class ListController
             $tokenId = $request->headers->get('x-auth-admin-token');
             $memberProperties = $this->authenticationTokenRepository->findByTokenIdentifier($tokenId);
 
-            if (!array_key_exists('member', $memberProperties) ||
+            if (!\array_key_exists('member', $memberProperties) ||
                 !($memberProperties['member'] instanceof MemberInterface)) {
                 return $unauthorizedJsonResponse;
             }
@@ -437,17 +424,17 @@ class ListController
      */
     private function invalidHighlightsSearchParams(SearchParams $searchParams): bool
     {
-        return !array_key_exists('startDate', $searchParams->getParams()) ||
+        return !\array_key_exists('startDate', $searchParams->getParams()) ||
             (!($searchParams->getParams()['startDate'] instanceof \DateTime)) ||
-            !array_key_exists('endDate', $searchParams->getParams()) ||
+            !\array_key_exists('endDate', $searchParams->getParams()) ||
             (!($searchParams->getParams()['endDate'] instanceof \DateTime)) ||
-            !array_key_exists('includeRetweets', $searchParams->getParams());
+            !\array_key_exists('includeRetweets', $searchParams->getParams());
     }
 
     /**
      * @param Request $request
+     *
      * @return int|null|JsonResponse
-     * @throws NonUniqueResultException
      * @throws DBALException
      */
     public function getMembers(Request $request)
@@ -465,7 +452,7 @@ class ListController
                     $totalPages = null;
                 }
 
-                if (is_null($totalPages)) {
+                if ($totalPages === null) {
                     $totalPages = $this->memberRepository->countTotalPages($searchParams);
                     $client->set($key, $totalPages);
                 }
@@ -613,10 +600,10 @@ class ListController
 
     /**
      * @param Request $request
+     *
      * @return array|JsonResponse
+     * @throws InvalidRequestException
      * @throws NonUniqueResultException
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function bulkCollectAggregatesStatuses(Request $request)
     {
@@ -642,7 +629,10 @@ class ListController
                 ];
                 $this->aggregateRepository->resetTotalStatusesForAggregateRelatedToScreenName($memberName);
 
-                $this->produceCollectionRequestFromRequirements($requirements);
+                $this->publicationListDispatcher->dispatchMemberPublicationListMessage(
+                    (new Member())->setScreenName($memberName),
+                    $requirements['token']
+                );
             }
         );
 
@@ -651,7 +641,9 @@ class ListController
 
     /**
      * @param Request $request
+     *
      * @return JsonResponse
+     * @throws InvalidRequestException
      * @throws NonUniqueResultException
      */
     public function requestCollection(Request $request)
@@ -668,17 +660,22 @@ class ListController
             return $requirementsOrJsonResponse;
         }
 
-        $this->produceCollectionRequestFromRequirements($requirementsOrJsonResponse);
+        $this->publicationListDispatcher->dispatchMemberPublicationListMessage(
+            (new Member)->setScreenName($requirementsOrJsonResponse['member_name']),
+            $requirementsOrJsonResponse['token']
+        );
 
         return $this->makeJsonResponse();
     }
 
     /**
      * @param Request $request
+     *
      * @return array|JsonResponse
+     * @throws InvalidRequestException
      * @throws NonUniqueResultException
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function unlockAggregate(Request $request)
     {
@@ -720,7 +717,9 @@ class ListController
 
     /**
      * @param Request $request
+     *
      * @return array|JsonResponse
+     * @throws InvalidRequestException
      * @throws NonUniqueResultException
      */
     private function guardAgainstMissingRequirementsForStatusCollection(Request $request)
@@ -742,7 +741,9 @@ class ListController
 
     /**
      * @param Request $request
+     *
      * @return array|JsonResponse
+     * @throws InvalidRequestException
      * @throws NonUniqueResultException
      */
     private function guardAgainstMissingRequirementsForBulkStatusCollection(Request $request)
@@ -767,7 +768,9 @@ class ListController
     /**
      * @param $decodedContent
      * @param $corsHeaders
+     *
      * @return int
+     * @throws InvalidRequestException
      */
     private function guardAgainstMissingAggregateId($decodedContent, $corsHeaders): int
     {
@@ -788,11 +791,13 @@ class ListController
     /**
      * @param $decodedContent
      * @param $corsHeaders
+     *
      * @return mixed
+     * @throws InvalidRequestException
      */
     private function guardAgainstMissingMemberName($decodedContent, $corsHeaders): string
     {
-        if (!array_key_exists('memberName', $decodedContent['params'])) {
+        if (!\array_key_exists('memberName', $decodedContent['params'])) {
             $exceptionMessage = 'Invalid member name';
             $jsonResponse = new JsonResponse(
                 $exceptionMessage,
@@ -808,7 +813,9 @@ class ListController
     /**
      * @param $decodedContent
      * @param $corsHeaders
+     *
      * @return mixed
+     * @throws InvalidRequestException
      */
     private function guardAgainstMissingMembersNames($decodedContent, $corsHeaders): array
     {
@@ -828,7 +835,9 @@ class ListController
     /**
      * @param Request $request
      * @param         $corsHeaders
+     *
      * @return mixed
+     * @throws InvalidRequestException
      */
     private function guardAgainstInvalidParametersEncoding(Request $request, $corsHeaders): array
     {
@@ -850,7 +859,9 @@ class ListController
     /**
      * @param $decodedContent
      * @param $corsHeaders
+     *
      * @return mixed
+     * @throws InvalidRequestException
      */
     private function guardAgainstInvalidParameters($decodedContent, $corsHeaders): array
     {
@@ -870,10 +881,12 @@ class ListController
 
     /**
      * @param $corsHeaders
+     *
      * @return Token
+     * @throws InvalidRequestException
      * @throws NonUniqueResultException
      */
-    private function guardAgainstInvalidAuthenticationToken($corsHeaders): Token
+    private function guardAgainstInvalidAuthenticationToken($corsHeaders): TokenInterface
     {
         $token = $this->tokenRepository->findFirstUnfrozenToken();
         if (!($token instanceof Token)) {
@@ -887,31 +900,6 @@ class ListController
         }
 
         return $token;
-    }
-
-    /**
-     * @param $requirementsOrJsonResponse
-     */
-    private function produceCollectionRequestFromRequirements($requirementsOrJsonResponse): void
-    {
-        /** @var Token $token */
-        $token = $requirementsOrJsonResponse['token'];
-
-        $messageBody = [
-            'token' => $token->getOauthToken(),
-            'secret' => $token->getOauthTokenSecret(),
-            'consumer_token' => $token->consumerKey,
-            'consumer_secret' => $token->consumerSecret
-        ];
-        $messageBody['screen_name'] = $requirementsOrJsonResponse['member_name'];
-        $messageBody['aggregate_id'] = $requirementsOrJsonResponse['aggregate_id'];
-
-
-        $this->aggregateLikesProducer->setContentType('application/json');
-        $this->aggregateLikesProducer->publish(serialize(json_encode($messageBody)));
-
-        $this->aggregateStatusesProducer->setContentType('application/json');
-        $this->aggregateStatusesProducer->publish(serialize(json_encode($messageBody)));
     }
 
     /**

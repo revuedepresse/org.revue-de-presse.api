@@ -7,7 +7,7 @@ use App\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Api\Entity\Token;
 use App\Api\Entity\TokenInterface;
 use App\Infrastructure\Amqp\Message\FetchMemberLikes;
-use App\Infrastructure\Amqp\Message\FetchMemberStatuses;
+use App\Infrastructure\Amqp\Message\FetchMemberStatus;
 use App\Infrastructure\Amqp\Message\FetchPublicationInterface;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\Repository\Membership\MemberRepository;
@@ -35,7 +35,7 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
      */
     public static function getHandledMessages(): iterable
     {
-        yield FetchMemberStatuses::class => [
+        yield FetchMemberStatus::class => [
             'from_transport' => 'news_status'
         ];
 

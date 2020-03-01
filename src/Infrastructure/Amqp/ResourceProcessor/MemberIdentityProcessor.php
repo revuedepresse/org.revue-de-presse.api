@@ -15,7 +15,7 @@ use App\Domain\Resource\PublicationList;
 use App\Infrastructure\Amqp\Exception\ContinuePublicationException;
 use App\Infrastructure\Amqp\Exception\StopPublicationException;
 use App\Infrastructure\Amqp\Message\FetchMemberLikes;
-use App\Infrastructure\Amqp\Message\FetchMemberStatuses;
+use App\Infrastructure\Amqp\Message\FetchMemberStatus;
 use App\Infrastructure\DependencyInjection\Membership\MemberProfileAccessorTrait;
 use App\Infrastructure\Repository\PublicationList\PublicationListRepositoryInterface;
 use App\Infrastructure\Twitter\Api\Accessor\MemberProfileAccessorInterface;
@@ -116,7 +116,7 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
         MemberFacingStrategy::guardAgainstProtectedMember($member, $memberIdentity);
         MemberFacingStrategy::guardAgainstSuspendedMember($member, $memberIdentity);
 
-        $fetchMemberStatuses = FetchMemberStatuses::makeMemberIdentityCard(
+        $FetchMemberStatus = FetchMemberStatus::makeMemberIdentityCard(
             $this->aggregateRepository->getListAggregateByName(
                 $member->getTwitterUsername(),
                 $list->name(),
@@ -124,21 +124,21 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
             ),
             $token,
             $member,
-            $strategy->shouldFetchLikes(),
-            $strategy->dateBeforeWhichPublicationsAreCollected()
+            $strategy->dateBeforeWhichPublicationsAreCollected(),
+            $strategy->shouldFetchLikes()
         );
 
         if ($strategy->shouldFetchLikes()) {
             $this->dispatcher->dispatch(
                 FetchMemberLikes::from(
-                    $fetchMemberStatuses
+                    $FetchMemberStatus
                 )
             );
 
             return;
         }
 
-        $this->dispatcher->dispatch($fetchMemberStatuses);
+        $this->dispatcher->dispatch($FetchMemberStatus);
     }
 
     /**

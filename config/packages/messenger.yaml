@@ -7,5 +7,5 @@ framework:
 
         routing:
             # Route your messages to the transports
-            'App\Infrastructure\Amqp\Message\FetchMemberStatuses': news_status
+            'App\Infrastructure\Amqp\Message\FetchMemberStatus': news_status
             'App\Infrastructure\Amqp\Message\FetchMemberLikes':  news_likes

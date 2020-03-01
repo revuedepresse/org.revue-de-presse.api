@@ -3,26 +3,23 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Repository\Membership;
 
-use App\Aggregate\Controller\SearchParams;
+use App\Infrastructure\Http\SearchParams;
 use App\Aggregate\Repository\PaginationAwareTrait;
-use App\Api\Entity\Status;
+use App\Api\Repository\PublicationListRepository;
 use App\Domain\Resource\MemberIdentity;
+use App\Membership\Entity\Member;
 use App\Membership\Entity\MemberInterface;
 use App\Membership\Exception\InvalidMemberIdentifier;
+use App\Twitter\Exception\NotFoundMemberException;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
-
 use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\QueryBuilder;
-use App\Api\Repository\PublicationListRepository;
-use App\Twitter\Exception\NotFoundMemberException;
-use App\Membership\Entity\Member;
 use Psr\Log\LoggerInterface;
-use stdClass;
 use function is_numeric;
 use function sprintf;
 

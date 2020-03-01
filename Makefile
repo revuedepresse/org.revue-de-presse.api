@@ -150,3 +150,6 @@ run-php-unit-tests: ## Run unit tests with PHPUnit
 
 run-composer: # Run composer
 		@/bin/bash -c 'source ./bin/functions.sh && run_composer'
+
+restart-web-server: # Restart web Server
+		@/bin/bash -c 'source ./bin/functions.sh && restart_web_server'

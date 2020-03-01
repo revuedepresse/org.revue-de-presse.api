@@ -25,5 +25,7 @@ WORKDIR /var/www/devobs
 
 ADD ./tasks /tasks
 
+ADD ./templates /templates
+
 CMD /bin/bash -c "source /tasks/setup-virtual-host.sh && tail -f /var/www/devobs/var/logs/apache*.log"
 

@@ -3,23 +3,13 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Healthcheck\Controller;
 
-use App\Security\Cors\CorsHeadersAwareTrait;
+use App\Infrastructure\Security\Cors\CorsHeadersAwareTrait;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
 class HealthcheckController
 {
     use CorsHeadersAwareTrait;
-
-    private string $environment;
-
-    private string $allowedOrigin;
-
-    public function __construct($allowedOrigin, $environment)
-    {
-        $this->allowedOrigin = $allowedOrigin;
-        $this->environment = $environment;
-    }
 
     public function areServicesHealthy(Request $request): JsonResponse
     {

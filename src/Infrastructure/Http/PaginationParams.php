@@ -7,9 +7,9 @@ use Symfony\Component\HttpFoundation\Request;
 
 class PaginationParams
 {
-    public int $pageIndex;
+    public int $pageIndex = 1;
 
-    public int $pageSize;
+    public int $pageSize = 0;
 
     /**
      * @param int $pageIndex
@@ -17,7 +17,7 @@ class PaginationParams
      */
     public function __construct(int $pageIndex, int $pageSize)
     {
-        if ($this->pageSize < 0) {
+        if ($pageSize < 0) {
             throw new \LogicException('A page size should be greater than 0');
         }
 
@@ -28,7 +28,7 @@ class PaginationParams
     /**
      * @param Request $request
      *
-     * @return \App\Http\PaginationParams
+     * @return PaginationParams
      */
     public static function fromRequest(Request $request): self
     {

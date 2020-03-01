@@ -10,7 +10,7 @@ trait LoggerTrait
     /**
      * @var LoggerInterface
      */
-    protected LoggerInterface $logger;
+    private LoggerInterface $logger;
 
     /**
      * @param LoggerInterface $logger

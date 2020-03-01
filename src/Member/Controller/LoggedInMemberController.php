@@ -1,10 +1,12 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Member\Controller;
 
 use App\Membership\Entity\MemberInterface;
 use App\Member\Repository\AuthenticationTokenRepository;
-use App\Security\Cors\CorsHeadersAwareTrait;
+use App\Infrastructure\Security\Cors\CorsHeadersAwareTrait;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 
@@ -12,25 +14,12 @@ class LoggedInMemberController
 {
     use CorsHeadersAwareTrait;
 
-    /**
-     * @var \Psr\Log\LoggerInterface
-     */
-    public $logger;
+    public LoggerInterface $logger;
 
     /**
      * @var AuthenticationTokenRepository
      */
-    public $authenticationTokenRepository;
-
-    /**
-     * @var string
-     */
-    public $environment;
-
-    /**
-     * @var string
-     */
-    public $allowedOrigin;
+    public AuthenticationTokenRepository $authenticationTokenRepository;
 
     /**
      * @param Request $request
@@ -48,7 +37,6 @@ class LoggedInMemberController
         $tokenId = $request->request->get(
             'tokenId',
             $request->headers->get('x-auth-admin-token'),
-            null
         );
 
         $corsHeaders = $this->getAccessControlOriginHeaders(
