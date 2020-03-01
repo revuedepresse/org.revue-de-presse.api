@@ -2,7 +2,7 @@
 
 namespace App\Status\Repository;
 
-use App\Aggregate\Controller\SearchParams;
+use App\Infrastructure\Http\SearchParams;
 use Doctrine\ORM\QueryBuilder;
 
 interface PaginationAwareRepositoryInterface

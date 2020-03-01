@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Api\Repository;
 
-use App\Aggregate\Controller\SearchParams;
+use App\Infrastructure\Http\SearchParams;
 use App\Aggregate\Entity\TimelyStatus;
 use App\Aggregate\Repository\PaginationAwareTrait;
 use App\Api\Entity\Aggregate;
@@ -21,7 +21,6 @@ use App\Membership\Entity\Member;
 use App\Membership\Entity\MemberInterface;
 use App\Operation\CapableOfDeletionInterface;
 use App\Status\Entity\LikedStatus;
-use App\Tests\Builder\TokenRepositoryBuilder;
 use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
@@ -43,11 +42,11 @@ use function array_sum;
 class PublicationListRepository extends ResourceRepository implements CapableOfDeletionInterface,
     PublicationListRepositoryInterface
 {
-    use PublicationListDispatcherTrait;
     use StatusRepositoryTrait;
     use LikedStatusRepositoryTrait;
     use LoggerTrait;
     use PaginationAwareTrait;
+    use PublicationListDispatcherTrait;
     use TimelyStatusRepositoryTrait;
     use TokenRepositoryTrait;
 

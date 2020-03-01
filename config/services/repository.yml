@@ -67,12 +67,12 @@ services:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - 'App\Api\Entity\Aggregate'
         calls:
-            - [ 'setLikedStatusRepository',     '@repository.liked_status' ]
-            - [ 'setLogger',                    '@App\Infrastructure\Log\StatusLogger' ]
-            - [ 'setPublicationListDispatcher', '@App\Infrastructure\Amqp\MessageBus\PublicationListDispatcher' ]
-            - [ 'setStatusRepository',          '@App\Api\Repository\StatusRepository' ]
-            - [ 'setTimelyStatusRepository',    '@repository.timely_status' ]
-            - [ 'setTokenRepository',           '@repository.access_token' ]
+            - [ 'setLikedStatusRepository',     [ '@repository.liked_status' ] ]
+            - [ 'setLogger',                    [ '@logger' ] ]
+            - [ 'setPublicationListDispatcher', [ '@App\Infrastructure\Amqp\MessageBus\PublicationListDispatcher' ] ]
+            - [ 'setStatusRepository',          [ '@App\Api\Repository\StatusRepository' ] ]
+            - [ 'setTimelyStatusRepository',    [ '@repository.timely_status' ] ]
+            - [ 'setTokenRepository',           [ '@repository.access_token' ] ]
 
     repository.keyword:
         class: 'App\Status\Repository\KeywordRepository'

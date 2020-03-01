@@ -2,5 +2,5 @@ services:
     App\Infrastructure\Amqp\MessageBus\PublicationListDispatcher:
         class: 'App\Infrastructure\Amqp\MessageBus\PublicationListDispatcher'
         calls:
-            - [ 'setPublicationListRepository', [ '@repository.aggregate' ] ]
+            - [ 'setPublicationListRepository', [ '@repository.publication_list' ] ]
             - [ 'setMessageBus',                [ '@messenger.default_bus' ] ]

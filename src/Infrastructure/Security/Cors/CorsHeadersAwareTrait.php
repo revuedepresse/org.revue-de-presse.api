@@ -25,7 +25,7 @@ trait CorsHeadersAwareTrait
     private function getAccessControlOriginHeaders(
         string $environment,
         string $allowedOrigin
-    ) {
+    ): array {
         if ($environment === 'prod') {
             return ['Access-Control-Allow-Origin' => $allowedOrigin];
         }

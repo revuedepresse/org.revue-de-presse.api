@@ -5,28 +5,31 @@ namespace App\Aggregate\Controller;
 
 use App\Aggregate\Controller\Exception\InvalidRequestException;
 use App\Aggregate\Repository\TimelyStatusRepository;
+use App\Api\AccessToken\Repository\TokenRepository;
+use App\Api\Entity\Aggregate;
+use App\Api\Entity\Token;
 use App\Api\Entity\TokenInterface;
+use App\Api\Repository\PublicationListRepository;
 use App\Cache\RedisCache;
 use App\Infrastructure\DependencyInjection\Publication\PublicationListDispatcherTrait;
+use App\Infrastructure\Http\SearchParams;
+use App\Infrastructure\Repository\Membership\MemberRepository;
+use App\Infrastructure\Security\Cors\CorsHeadersAwareTrait;
+use App\Member\Repository\AuthenticationTokenRepository;
 use App\Membership\Entity\Member;
 use App\Membership\Entity\MemberInterface;
-use App\Member\Repository\AuthenticationTokenRepository;
-use App\Infrastructure\Security\Cors\CorsHeadersAwareTrait;
 use App\Status\Repository\HighlightRepository;
 use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\OptimisticLockException;use Doctrine\ORM\ORMException;use Predis\Client;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
+use Kreait\Firebase\Factory;
+use Kreait\Firebase\ServiceAccount;
+use Predis\Client;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\RouterInterface;
-use App\Api\Entity\Aggregate;
-use App\Api\Entity\Token;
-use App\Api\Repository\PublicationListRepository;
-use WeavingTheWeb\Bundle\ApiBundle\Repository\TokenRepository;
-use App\Infrastructure\Repository\Membership\MemberRepository;
-use Kreait\Firebase\Factory;
-use Kreait\Firebase\ServiceAccount;
 
 class ListController
 {
@@ -62,11 +65,6 @@ class ListController
      * @var TimelyStatusRepository
      */
     public TimelyStatusRepository $timelyStatusRepository;
-
-    /**
-     * @var string
-     */
-    public string $environment;
 
     /**
      * @var string
@@ -231,7 +229,7 @@ class ListController
             $tokenId = $request->headers->get('x-auth-admin-token');
             $memberProperties = $this->authenticationTokenRepository->findByTokenIdentifier($tokenId);
 
-            if (!array_key_exists('member', $memberProperties) ||
+            if (!\array_key_exists('member', $memberProperties) ||
                 !($memberProperties['member'] instanceof MemberInterface)) {
                 return $unauthorizedJsonResponse;
             }
@@ -426,11 +424,11 @@ class ListController
      */
     private function invalidHighlightsSearchParams(SearchParams $searchParams): bool
     {
-        return !array_key_exists('startDate', $searchParams->getParams()) ||
+        return !\array_key_exists('startDate', $searchParams->getParams()) ||
             (!($searchParams->getParams()['startDate'] instanceof \DateTime)) ||
-            !array_key_exists('endDate', $searchParams->getParams()) ||
+            !\array_key_exists('endDate', $searchParams->getParams()) ||
             (!($searchParams->getParams()['endDate'] instanceof \DateTime)) ||
-            !array_key_exists('includeRetweets', $searchParams->getParams());
+            !\array_key_exists('includeRetweets', $searchParams->getParams());
     }
 
     /**

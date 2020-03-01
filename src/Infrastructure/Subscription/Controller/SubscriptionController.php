@@ -1,12 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Infrastructure\Controller\Subscription\Controller;
+namespace App\Infrastructure\Subscription\Controller;
 
 use App\Cache\RedisCache;
 use App\Domain\Membership\Exception\InvalidMemberException;
 use App\Http\PaginationParams;
 use App\Infrastructure\Amqp\MessageBus\PublicationListDispatcherInterface;
+use App\Infrastructure\DependencyInjection\Publication\PublicationListDispatcherTrait;
 use App\Infrastructure\Repository\Membership\MemberRepositoryInterface;
 use App\Infrastructure\Repository\Subscription\MemberSubscriptionRepositoryInterface;
 use App\Infrastructure\Security\Authentication\AuthenticationTokenValidationTrait;
@@ -31,16 +32,15 @@ use const JSON_THROW_ON_ERROR;
 
 class SubscriptionController
 {
-    use CorsHeadersAwareTrait;
     use AuthenticationTokenValidationTrait;
+    use CorsHeadersAwareTrait;
+    use PublicationListDispatcherTrait;
 
     public RedisCache $redisCache;
 
     public MemberRepositoryInterface $memberRepository;
 
     public MemberSubscriptionRepositoryInterface $memberSubscriptionRepository;
-
-    public PublicationListDispatcherInterface $messageDispatcher;
 
     public HttpAuthenticator $httpAuthenticator;
 

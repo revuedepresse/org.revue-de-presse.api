@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Member\Entity;
 
@@ -9,12 +10,12 @@ class AuthenticationToken
     /**
      * @var string
      */
-    private $id;
+    private string $id;
 
     /**
      * @var string
      */
-    private $token;
+    private string $token;
 
     /**
      * @return string
@@ -27,7 +28,7 @@ class AuthenticationToken
     /**
      * @var string
      */
-    private $grantedRoutes;
+    private string $grantedRoutes;
 
     /**
      * @return string
@@ -40,7 +41,7 @@ class AuthenticationToken
     /**
      * @var MemberInterface
      */
-    private $member;
+    private MemberInterface $member;
 
     /**
      * @return MemberInterface

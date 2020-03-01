@@ -7,6 +7,7 @@ use App\Http\PaginationParams;
 use App\Infrastructure\Repository\Membership\MemberRepositoryInterface;
 use App\Member\Entity\MemberSubscription;
 use App\Member\MemberInterface;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\OptimisticLockException;
@@ -29,7 +30,7 @@ use const JSON_ERROR_NONE;
 use const JSON_THROW_ON_ERROR;
 use const PHP_EOL;
 
-class MemberSubscriptionRepository extends EntityRepository
+class MemberSubscriptionRepository extends ServiceEntityRepository
 {
     private const SORT_BY_ASCENDING_MEMBER_ID  = 'ORDER BY u.usr_id ASC';
     private const SORT_BY_DESCENDING_MEMBER_ID = 'ORDER BY u.usr_id DESC';

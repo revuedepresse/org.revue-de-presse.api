@@ -7,21 +7,22 @@ services:
 
     controller.healthcheck:
         class: 'App\Healthcheck\Controller\HealthcheckController'
-        properties:
-            allowedOrigin:                  '%allowed.origin%'
-            environment:                    '%kernel.environment%'
+        arguments:
+            - '%allowed.origin%'
+            - '%kernel.environment%'
 
     controller.list:
         public: true
         class: 'App\Aggregate\Controller\ListController'
+        arguments:
+            - '%allowed.origin%'
+            - '%kernel.environment%'
         calls:
-            - [ 'setPublicationListDispatcher', ['@App\Amqp\Command\FetchPublicationMessageDispatcher']]
+            - [ 'setPublicationListDispatcher', ['@App\Infrastructure\Amqp\MessageBus\PublicationListDispatcher']]
         properties:
-            allowedOrigin:                  '%allowed.origin%'
             configDirectory:                '%kernel.project_dir%/config'
             authenticationTokenRepository:  '@repository.authentication_token'
             aggregateRepository:            '@repository.publication_list'
-            environment:                    '%kernel.environment%'
             highlightRepository:            '@repository.highlight'
             logger:                         '@logger'
             memberRepository:               '@user_manager'
@@ -33,39 +34,45 @@ services:
     controller.logged_in_member:
         public: true
         class: 'App\Member\Controller\LoggedInMemberController'
+        arguments:
+            - '%allowed.origin%'
+            - '%kernel.environment%'
         properties:
             logger:                        '@logger'
             authenticationTokenRepository: '@repository.authentication_token'
-            allowedOrigin:                 '%allowed.origin%'
-            environment:                   '%kernel.environment%'
 
     controller.aggregate:
         public: true
         class: 'App\Aggregate\Controller\AggregateController'
+        arguments:
+            - '%allowed.origin%'
+            - '%kernel.environment%'
         properties:
             aggregateRepository: '@repository.publication_list'
-            allowedOrigin:       '%allowed.origin%'
-            environment:         '%kernel.environment%'
             redisCache:          '@app.cache.redis'
 
     controller.keyword:
         public: true
         class: 'App\Aggregate\Controller\KeywordController'
+        arguments:
+            - '%allowed.origin%'
+            - '%kernel.environment%'
         properties:
             keywordRepository: '@repository.keyword'
-            allowedOrigin:     '%allowed.origin%'
-            environment:       '%kernel.environment%'
             redisCache:        '@app.cache.redis'
 
     controller.subscription:
+        public: true
         class: 'App\Infrastructure\Subscription\Controller\SubscriptionController'
+        arguments:
+            - '%allowed.origin%'
+            - '%kernel.environment%'
+        calls:
+            - [ 'setPublicationListDispatcher', [ '@App\Infrastructure\Amqp\MessageBus\PublicationListDispatcher' ] ]
         properties:
-            allowedOrigin:                  '%allowed.origin%'
-            environment:                    '%kernel.environment%'
-            httpAuthenticator:              '@app.security.http_authenticator'
+            httpAuthenticator:              '@App\Infrastructure\Security\Authentication\HttpAuthenticator'
             logger:                         '@monolog.logger.membership'
             memberRepository:               '@user_manager'
             memberSubscriptionRepository:   '@repository.member_subscription'
-            messagePublisher:               '@status_collection.message_publisher'
             redisCache:                     '@app.cache.redis'
             tokenRepository:                '@repository.access_token'
