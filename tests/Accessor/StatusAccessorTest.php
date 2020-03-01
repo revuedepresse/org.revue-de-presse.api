@@ -6,7 +6,7 @@ namespace App\Tests\Accessor;
 use App\Accessor\StatusAccessor;
 use App\Domain\Collection\CollectionStrategy;
 use App\Infrastructure\Repository\Status\StatusRepositoryInterface;
-use App\Infrastructure\Amqp\Message\FetchPublication;
+use App\Infrastructure\Amqp\Message\FetchPublicationInterface;
 use App\Infrastructure\Twitter\Api\Accessor\StatusAccessorInterface;
 use App\Status\Repository\ExtremumAwareInterface;
 use Prophecy\Prophecy\ObjectProphecy;
@@ -38,8 +38,8 @@ class StatusAccessorTest extends KernelTestCase
     {
         $strategy = CollectionStrategy::fromArray(
             [
-                FetchPublication::BEFORE       => '2010-01-01',
-                FetchPublication::AGGREGATE_ID => 1
+                FetchPublicationInterface::BEFORE       => '2010-01-01',
+                FetchPublicationInterface::AGGREGATE_ID => 1
             ]
         );
 
@@ -49,7 +49,7 @@ class StatusAccessorTest extends KernelTestCase
         $options = $this->accessor->updateExtremum(
             $strategy,
             [
-                FetchPublication::SCREEN_NAME => 'pierrec'
+                FetchPublicationInterface::SCREEN_NAME => 'pierrec'
             ],
             false
         );
@@ -67,7 +67,7 @@ class StatusAccessorTest extends KernelTestCase
     {
         $strategy = CollectionStrategy::fromArray(
             [
-                FetchPublication::AGGREGATE_ID => 1
+                FetchPublicationInterface::AGGREGATE_ID => 1
             ]
         );
 
@@ -77,7 +77,7 @@ class StatusAccessorTest extends KernelTestCase
         $options = $this->accessor->updateExtremum(
             $strategy,
             [
-                FetchPublication::SCREEN_NAME => 'pierrec'
+                FetchPublicationInterface::SCREEN_NAME => 'pierrec'
             ],
             false
         );

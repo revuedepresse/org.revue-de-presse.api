@@ -13,7 +13,7 @@ use App\Api\Entity\TokenInterface;
 use App\Domain\Collection\CollectionStrategy;
 use App\Domain\Collection\CollectionStrategyInterface;
 use App\Domain\Publication\PublicationListInterface;
-use App\Infrastructure\Amqp\Message\FetchPublication;
+use App\Infrastructure\Amqp\Message\FetchPublicationInterface;
 use App\Infrastructure\DependencyInjection\{Api\ApiAccessorTrait,
     Api\ApiLimitModeratorTrait,
     Api\StatusAccessorTrait,
@@ -147,7 +147,7 @@ class PublicationCollector implements PublicationCollectorInterface
             return isset($remainingItemsToCollect) ?: false;
         }
 
-        if ($this->shouldLookUpFutureItems($options[FetchPublication::SCREEN_NAME])) {
+        if ($this->shouldLookUpFutureItems($options[FetchPublicationInterface::SCREEN_NAME])) {
             $discoverPastTweets = false;
         }
 
@@ -240,10 +240,10 @@ class PublicationCollector implements PublicationCollectorInterface
         $options
     ) {
         if ($this->collectionStrategy->dateBeforeWhichStatusAreToBeCollected()) {
-            unset($options[FetchPublication::BEFORE]);
+            unset($options[FetchPublicationInterface::BEFORE]);
         }
-        if (array_key_exists(FetchPublication::AGGREGATE_ID, $options)) {
-            unset($options[FetchPublication::AGGREGATE_ID]);
+        if (array_key_exists(FetchPublicationInterface::AGGREGATE_ID, $options)) {
+            unset($options[FetchPublicationInterface::AGGREGATE_ID]);
         }
 
         return $options;
@@ -410,7 +410,7 @@ class PublicationCollector implements PublicationCollectorInterface
                 sprintf(
                     'All available %s have most likely been fetched for "%s" or few %s are available (%d)',
                     $subject,
-                    $options[FetchPublication::SCREEN_NAME],
+                    $options[FetchPublicationInterface::SCREEN_NAME],
                     $subject,
                     $totalCollectedStatuses
                 )
@@ -424,7 +424,7 @@ class PublicationCollector implements PublicationCollectorInterface
                 '%d more %s in the past have been saved for "%s" in aggregate #%d',
                 $lastCollectionBatchSize,
                 $subject,
-                $options[FetchPublication::SCREEN_NAME],
+                $options[FetchPublicationInterface::SCREEN_NAME],
                 $this->collectionStrategy->publicationListId()
             )
         );
@@ -464,19 +464,19 @@ class PublicationCollector implements PublicationCollectorInterface
     protected function remainingLikes($options)
     {
         $serializedLikesCount =
-            $this->likedStatusRepository->countHowManyLikesFor($options[FetchPublication::SCREEN_NAME]);
+            $this->likedStatusRepository->countHowManyLikesFor($options[FetchPublicationInterface::SCREEN_NAME]);
         $existingStatus       = $this->translator->trans(
             'logs.info.likes_existing',
             [
                 'total_likes' => $serializedLikesCount,
                 'count'       => $serializedLikesCount,
-                'member'      => $options[FetchPublication::SCREEN_NAME],
+                'member'      => $options[FetchPublicationInterface::SCREEN_NAME],
             ],
             'logs'
         );
         $this->logger->info($existingStatus);
 
-        $member = $this->apiAccessor->showUser($options[FetchPublication::SCREEN_NAME]);
+        $member = $this->apiAccessor->showUser($options[FetchPublicationInterface::SCREEN_NAME]);
         if (!isset($member->statuses_count)) {
             $member->statuses_count = 0;
         }
@@ -489,7 +489,7 @@ class PublicationCollector implements PublicationCollectorInterface
             'logs.info.likes_discovered',
             [
                 'total_likes' => $likesCount,
-                'member'      => $options[FetchPublication::SCREEN_NAME],
+                'member'      => $options[FetchPublicationInterface::SCREEN_NAME],
                 'count'       => $likesCount,
             ],
             'logs'
@@ -512,19 +512,19 @@ class PublicationCollector implements PublicationCollectorInterface
     protected function remainingStatuses($options)
     {
         $serializedStatusCount =
-            $this->statusRepository->countHowManyStatusesFor($options[FetchPublication::SCREEN_NAME]);
+            $this->statusRepository->countHowManyStatusesFor($options[FetchPublicationInterface::SCREEN_NAME]);
         $existingStatus        = $this->translator->trans(
             'logs.info.status_existing',
             [
                 'count'        => $serializedStatusCount,
                 'total_status' => $serializedStatusCount,
-                'member'       => $options[FetchPublication::SCREEN_NAME],
+                'member'       => $options[FetchPublicationInterface::SCREEN_NAME],
             ],
             'logs'
         );
         $this->logger->info($existingStatus);
 
-        $user = $this->apiAccessor->showUser($options[FetchPublication::SCREEN_NAME]);
+        $user = $this->apiAccessor->showUser($options[FetchPublicationInterface::SCREEN_NAME]);
         if (!isset($user->statuses_count)) {
             $user->statuses_count = 0;
         }
@@ -536,7 +536,7 @@ class PublicationCollector implements PublicationCollectorInterface
         $discoveredStatus = $this->translator->trans(
             'logs.info.status_discovered',
             [
-                'member'       => $options[FetchPublication::SCREEN_NAME],
+                'member'       => $options[FetchPublicationInterface::SCREEN_NAME],
                 'count'        => $statusesCount,
                 'total_status' => $statusesCount,
             ],
@@ -577,7 +577,7 @@ class PublicationCollector implements PublicationCollectorInterface
             $this->safelyDeclareExtremum(
                 $statuses,
                 $betweenPublicationDateOfLastOneSavedAndNow,
-                $options[FetchPublication::SCREEN_NAME]
+                $options[FetchPublicationInterface::SCREEN_NAME]
             );
         }
 
@@ -598,7 +598,7 @@ class PublicationCollector implements PublicationCollectorInterface
 
         $lastCollectionBatchSize = $this->statusPersistence->saveStatusForScreenName(
             $statuses,
-            $options[FetchPublication::SCREEN_NAME],
+            $options[FetchPublicationInterface::SCREEN_NAME],
             $collectionStrategy
         );
 
@@ -608,7 +608,7 @@ class PublicationCollector implements PublicationCollectorInterface
         );
 
         $this->whispererIdentification->identifyWhisperer(
-            $options[FetchPublication::SCREEN_NAME],
+            $options[FetchPublicationInterface::SCREEN_NAME],
             $totalCollectedStatuses,
             $lastCollectionBatchSize
         );
@@ -722,12 +722,12 @@ class PublicationCollector implements PublicationCollectorInterface
     {
         if ($this->collectionStrategy->fetchLikes()) {
             return $this->likedStatusRepository->getIdsOfExtremeStatusesSavedForMemberHavingScreenName(
-                $options[FetchPublication::SCREEN_NAME]
+                $options[FetchPublicationInterface::SCREEN_NAME]
             );
         }
 
         return $this->statusRepository->getIdsOfExtremeStatusesSavedForMemberHavingScreenName(
-            $options[FetchPublication::SCREEN_NAME]
+            $options[FetchPublicationInterface::SCREEN_NAME]
         );
     }
 
@@ -760,7 +760,7 @@ class PublicationCollector implements PublicationCollectorInterface
         array $options,
         ?int $lastCollectionBatchSize
     ) {
-        $this->collectionStrategy->optInToCollectStatusFor($options[FetchPublication::SCREEN_NAME]);
+        $this->collectionStrategy->optInToCollectStatusFor($options[FetchPublicationInterface::SCREEN_NAME]);
         $this->collectionStrategy->optInToCollectStatusWhichIdIsLessThan($options['max_id']);
 
         $subjectInSingularForm = 'status';
@@ -923,8 +923,8 @@ class PublicationCollector implements PublicationCollectorInterface
             // which have been more recently published
             $discoverPastTweets = $lastCollectionBatchSize !== null && $discoverPastTweets;
             if ($greedy) {
-                $options[FetchPublication::AGGREGATE_ID] = $this->collectionStrategy->publicationListId();
-                $options[FetchPublication::BEFORE]       =
+                $options[FetchPublicationInterface::AGGREGATE_ID] = $this->collectionStrategy->publicationListId();
+                $options[FetchPublicationInterface::BEFORE]       =
                     $this->collectionStrategy->dateBeforeWhichStatusAreToBeCollected();
 
                 $success = $this->collect($options, $greedy, $discoverPastTweets);
@@ -934,7 +934,7 @@ class PublicationCollector implements PublicationCollectorInterface
                     $justDiscoveredFutureTweets
                     && $this->collectionStrategy->dateBeforeWhichStatusAreToBeCollected() === null
                 ) {
-                    unset($options[FetchPublication::AGGREGATE_ID]);
+                    unset($options[FetchPublicationInterface::AGGREGATE_ID]);
 
                     $options = $this->statusAccessor->updateExtremum(
                         $this->collectionStrategy,
@@ -943,7 +943,7 @@ class PublicationCollector implements PublicationCollectorInterface
                     );
                     $options = $this->apiAccessor->guessMaxId(
                         $options,
-                        $this->shouldLookUpFutureItems($options[FetchPublication::SCREEN_NAME])
+                        $this->shouldLookUpFutureItems($options[FetchPublicationInterface::SCREEN_NAME])
                     );
 
                     $this->saveStatusesMatchingCriteria(

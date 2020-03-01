@@ -3,8 +3,10 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Amqp\Message;
 
-class FetchMemberLikes extends FetchMemberStatuses
+class FetchMemberLikes implements FetchPublicationInterface
 {
+    use FetchPublicationTrait;
+
     /**
      * @param FetchMemberStatuses $message
      *

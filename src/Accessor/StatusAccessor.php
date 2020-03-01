@@ -14,7 +14,7 @@ use App\Api\Repository\ArchivedStatusRepository;
 use App\Domain\Collection\CollectionStrategyInterface;
 use App\Domain\Status\StatusInterface;
 use App\Domain\Status\TaggedStatus;
-use App\Infrastructure\Amqp\Message\FetchPublication;
+use App\Infrastructure\Amqp\Message\FetchPublicationInterface;
 use App\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
@@ -365,7 +365,7 @@ class StatusAccessor implements StatusAccessorInterface
                     'Extremum (%s%s) retrieved for "%s": #%s',
                     $logPrefix,
                     $option,
-                    $options[FetchPublication::SCREEN_NAME],
+                    $options[FetchPublicationInterface::SCREEN_NAME],
                     $options[$option]
                 )
             );
@@ -381,7 +381,7 @@ class StatusAccessor implements StatusAccessorInterface
             sprintf(
                 '[No %s retrieved for "%s"] ',
                 $logPrefix . 'extremum',
-                $options[FetchPublication::SCREEN_NAME]
+                $options[FetchPublicationInterface::SCREEN_NAME]
             )
         );
 
@@ -424,13 +424,13 @@ class StatusAccessor implements StatusAccessorInterface
 
         if (!$collectionStrategy->dateBeforeWhichStatusAreToBeCollected()) {
             return $this->statusRepository->findLocalMaximum(
-                $options[FetchPublication::SCREEN_NAME],
+                $options[FetchPublicationInterface::SCREEN_NAME],
                 $collectionStrategy->dateBeforeWhichStatusAreToBeCollected()
             );
         }
 
         return $this->statusRepository->findNextExtremum(
-            $options[FetchPublication::SCREEN_NAME],
+            $options[FetchPublicationInterface::SCREEN_NAME],
             $findingDirection,
             $collectionStrategy->dateBeforeWhichStatusAreToBeCollected()
         );
@@ -450,13 +450,13 @@ class StatusAccessor implements StatusAccessorInterface
     ): array {
         if (!$collectionStrategy->dateBeforeWhichStatusAreToBeCollected()) {
             return $this->likedStatusRepository->findLocalMaximum(
-                $options[FetchPublication::SCREEN_NAME],
+                $options[FetchPublicationInterface::SCREEN_NAME],
                 $collectionStrategy->dateBeforeWhichStatusAreToBeCollected()
             );
         }
 
         return $this->likedStatusRepository->findNextExtremum(
-            $options[FetchPublication::SCREEN_NAME],
+            $options[FetchPublicationInterface::SCREEN_NAME],
             $findingDirection,
             $collectionStrategy->dateBeforeWhichStatusAreToBeCollected()
         );
@@ -532,10 +532,10 @@ class StatusAccessor implements StatusAccessorInterface
         $options
     ) {
         if ($collectionStrategy->dateBeforeWhichStatusAreToBeCollected()) {
-            unset($options[FetchPublication::BEFORE]);
+            unset($options[FetchPublicationInterface::BEFORE]);
         }
-        if (array_key_exists(FetchPublication::AGGREGATE_ID, $options)) {
-            unset($options[FetchPublication::AGGREGATE_ID]);
+        if (array_key_exists(FetchPublicationInterface::AGGREGATE_ID, $options)) {
+            unset($options[FetchPublicationInterface::AGGREGATE_ID]);
         }
 
         return $options;
