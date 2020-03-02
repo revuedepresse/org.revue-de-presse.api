@@ -15,6 +15,7 @@ use App\Api\Moderator\ApiLimitModerator;
 use App\Domain\Resource\MemberCollection;
 use App\Domain\Resource\OwnershipCollection;
 use App\Infrastructure\Repository\Membership\MemberRepository;
+use App\Infrastructure\Translation\Translator;
 use App\Member\Entity\AggregateSubscription;
 use App\Membership\Entity\MemberInterface;
 use App\Membership\Exception\InvalidMemberIdentifier;
@@ -537,14 +538,6 @@ class Accessor implements ApiAccessorInterface,
         }
     }
 
-    /**
-     * @return int
-     */
-    public function getMemberNotFoundErrorCode()
-    {
-        return self::ERROR_NOT_FOUND;
-    }
-
     public function getMemberOwnerships(
         string $screenName,
         int $cursor = -1,
@@ -1025,6 +1018,8 @@ class Accessor implements ApiAccessorInterface,
      * @param Token|null $token
      *
      * @return UnavailableResourceException
+     * @throws ApiRateLimitingException
+     * @throws InconsistentTokenRepository
      * @throws NonUniqueResultException
      * @throws OptimisticLockException
      */
@@ -1173,7 +1168,7 @@ class Accessor implements ApiAccessorInterface,
 
         if ($token->hasConsumerKey()) {
             $this->setConsumerKey($token->getConsumerKey());
-            $this->setConsumerSecret($token->getConsumerKey());
+            $this->setConsumerSecret($token->getConsumerSecret());
         }
     }
 
@@ -1287,10 +1282,7 @@ class Accessor implements ApiAccessorInterface,
         return $this;
     }
 
-    /**
-     * @param Translator $translator
-     */
-    public function setTranslator($translator)
+    public function setTranslator(Translator $translator)
     {
         $this->translator = $translator;
     }

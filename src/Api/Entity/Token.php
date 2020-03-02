@@ -104,7 +104,7 @@ class Token implements TokenInterface
 
     public function getConsumerSecret(): string
     {
-        $this->consumerSecret;
+        return $this->consumerSecret;
     }
 
     public function setConsumerSecret(?string $consumerSecret): self
