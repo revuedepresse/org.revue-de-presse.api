@@ -22,7 +22,7 @@ final class PublicationListIdentity implements PublicationListIdentityInterface
         return (string) $this->id;
     }
 
-    public static function fromRequest(Request $request): ?PublicationListInterface
+    public static function fromRequest(Request $request): ?PublicationListIdentityInterface
     {
         $aggregateIdentity = null;
         if ($request->get('aggregateId')) {
