@@ -5,7 +5,7 @@ namespace App\Infrastructure\Amqp\ResourceProcessor;
 
 use App\Accessor\Exception\UnexpectedApiResponseException;
 use App\Aggregate\AggregateAwareTrait;
-use App\Amqp\SkippableMemberException;
+use App\Amqp\Exception\SkippableMemberException;
 use App\Api\Entity\TokenInterface;
 use App\Domain\Collection\PublicationStrategyInterface;
 use App\Domain\Membership\Exception\MembershipException;
@@ -61,7 +61,7 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
      * @param TokenInterface               $token
      * @param PublicationList              $list
      *
-     * @return void
+     * @return int
      * @throws ContinuePublicationException
      * @throws MembershipException
      * @throws StopPublicationException
@@ -71,11 +71,15 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
         PublicationStrategyInterface $strategy,
         TokenInterface $token,
         PublicationList $list
-    ): void {
+    ): int {
         try {
             $this->dispatchPublications($memberIdentity, $strategy, $token, $list);
+
+            return 1;
         } catch (SkippableMemberException $exception) {
             $this->logger->info($exception->getMessage());
+
+            return 0;
         } catch (MembershipException $exception) {
             if (MemberFacingStrategy::shouldBreakPublication($exception)) {
                 $this->logger->info($exception->getMessage());

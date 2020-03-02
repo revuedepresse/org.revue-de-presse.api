@@ -4,6 +4,32 @@ parameters:
     weaving_the_web_api.entity.whisperer.class:     'App\Api\Entity\Whisperer'
 
 services:
+    App\Infrastructure\Repository\Membership\MemberRepository:
+        class: 'App\Infrastructure\Repository\Membership\MemberRepository'
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - 'App\Membership\Entity\Member'
+        properties:
+            aggregateRepository: '@App\Api\Repository\PublicationListRepository'
+        tags:
+            - { name: 'doctrine.repository_service' }
+
+    App\Api\Repository\PublicationListRepository:
+        public: true
+        class:  'App\Api\Repository\PublicationListRepository'
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - 'App\Api\Entity\Aggregate'
+        calls:
+            - [ 'setLikedStatusRepository',     [ '@repository.liked_status' ] ]
+            - [ 'setLogger',                    [ '@logger' ] ]
+            - [ 'setPublicationListDispatcher', [ '@App\Infrastructure\Amqp\MessageBus\PublicationListDispatcher' ] ]
+            - [ 'setStatusRepository',          [ '@App\Api\Repository\StatusRepository' ] ]
+            - [ 'setTimelyStatusRepository',    [ '@repository.timely_status' ] ]
+            - [ 'setTokenRepository',           [ '@repository.access_token' ] ]
+        tags:
+            - { name: 'doctrine.repository_service' }
+
     App\Twitter\Repository\PublicationRepository:
         class: 'App\Twitter\Repository\PublicationRepository'
         arguments:
@@ -11,6 +37,8 @@ services:
             - 'App\Twitter\Entity\Publication'
         calls:
             - [ 'setEntityManager', [ '@doctrine.orm.entity_manager' ] ]
+        tags:
+            - { name: 'doctrine.repository_service' }
 
     repository.access_token:
         class: '%repository.access_token.class%'
@@ -45,7 +73,7 @@ services:
         arguments:
             - 'App\Media\Entity\Owner'
         properties:
-             logger: '@logger'
+            logger: '@logger'
 
     repository.media:
         factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
@@ -60,19 +88,6 @@ services:
         class: 'App\Aggregate\Repository\MemberAggregateSubscriptionRepository'
         arguments:
             - 'App\Aggregate\Entity\MemberAggregateSubscription'
-
-    repository.publication_list:
-        class: 'App\Api\Repository\PublicationListRepository'
-        arguments:
-            - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Api\Entity\Aggregate'
-        calls:
-            - [ 'setLikedStatusRepository',     [ '@repository.liked_status' ] ]
-            - [ 'setLogger',                    [ '@logger' ] ]
-            - [ 'setPublicationListDispatcher', [ '@App\Infrastructure\Amqp\MessageBus\PublicationListDispatcher' ] ]
-            - [ 'setStatusRepository',          [ '@App\Api\Repository\StatusRepository' ] ]
-            - [ 'setTimelyStatusRepository',    [ '@repository.timely_status' ] ]
-            - [ 'setTokenRepository',           [ '@repository.access_token' ] ]
 
     repository.keyword:
         class: 'App\Status\Repository\KeywordRepository'
@@ -137,15 +152,6 @@ services:
         properties:
             memberRepository: "@user_manager"
             statusRepository: '@App\Api\Repository\StatusRepository'
-
-    App\Infrastructure\Repository\Membership\MemberRepository:
-        class: 'App\Infrastructure\Repository\Membership\MemberRepository'
-        arguments:
-            - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Membership\Entity\Member'
-        properties:
-            aggregateRepository: "@repository.publication_list"
-        tags: [ 'doctrine.repository_service' ]
 
     repository.member_subscription:
         class: 'App\Member\Repository\MemberSubscriptionRepository'

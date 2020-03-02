@@ -10,6 +10,7 @@ use App\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Infrastructure\Repository\Membership\MemberRepositoryInterface;
 use App\Infrastructure\Twitter\Api\UnavailableResource;
 use App\Infrastructure\Twitter\Api\UnavailableResourceHandlerInterface;
+use App\Domain\Membership\Exception\InvalidMemberException;
 use App\Membership\Entity\MemberInterface;
 use App\Membership\Model\Member;
 use App\Twitter\Api\ApiAccessorInterface;
@@ -83,5 +84,55 @@ class MemberProfileAccessor implements MemberProfileAccessorInterface
         $member = $member->setTwitterUsername($memberIdentity->screenName());
 
         return $this->memberRepository->declareMemberAsFound($member);
+    }
+
+    /**
+     * @param string $username
+     *
+     * @return MemberInterface
+     * @throws InvalidMemberException
+     */
+    public function refresh(string $username): MemberInterface
+    {
+        $fetchedMember = $this->accessor->showUser($username);
+        $member = $this->memberRepository->findOneBy(['twitterID' => $fetchedMember->id]);
+        if ($member instanceof MemberInterface) {
+            $this->ensureMemberProfileIsUpToDate($member, $username, $fetchedMember);
+
+            return $member;
+        }
+
+        InvalidMemberException::guardAgainstInvalidUsername($username);
+    }
+
+    /**
+     * @param MemberInterface $member
+     * @param string          $memberName
+     * @param \stdClass|null  $remoteMember
+     *
+     * @return MemberInterface
+     */
+    public function ensureMemberProfileIsUpToDate(
+        MemberInterface $member,
+        string $memberName,
+        \stdClass $remoteMember = null
+    ): MemberInterface {
+        $memberBioIsAvailable = $member->isNotSuspended() &&
+            $member->isNotProtected() &&
+            $member->hasNotBeenDeclaredAsNotFound()
+        ;
+
+        if (!$memberBioIsAvailable) {
+            return $member;
+        }
+
+        if ($remoteMember === null) {
+            $remoteMember = $this->accessor->showUser($memberName);
+        }
+
+        $member->description = $remoteMember->description;
+        $member->url = $remoteMember->url;
+
+        return $this->memberRepository->saveMember($member);
     }
 }
