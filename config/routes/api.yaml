@@ -1,6 +1,15 @@
+aggregate:
+    path:     '/api/twitter/admin/lists'
+    defaults: { _controller: controller.list:getAggregates }
+
 authentication_verify:
     path:     '/api/authentication/verify'
     defaults: { _controller: controller.authentication:verify }
+
+collect_statuses:
+    path:     '/api/twitter/admin/aggregate/collect-statuses'
+    defaults: { _controller: controller.aggregate:collectAggregatesStatuses }
+    methods:  [POST, OPTIONS]
 
 healthcheck:
     path:     '/api/healthcheck'
@@ -10,9 +19,9 @@ highlight:
     path:     '/api/twitter/highlights'
     defaults: { _controller: controller.list:getHighlights }
 
-aggregate:
-    path:     '/api/twitter/admin/lists'
-    defaults: { _controller: controller.list:getAggregates }
+keywords:
+    path:     '/api/twitter/admin/keywords'
+    defaults: { _controller: controller.keyword:getKeywords }
 
 member:
     path:     '/api/twitter/admin/members'
@@ -32,14 +41,14 @@ collect:
     defaults: { _controller: controller.list:requestCollection }
     methods:  [POST, OPTIONS]
 
-unlock:
-    path:     '/api/twitter/admin/unlock-aggregate'
-    defaults: { _controller: controller.list:unlockAggregate }
-    methods:  [POST, OPTIONS]
-
 logged_in_member_profile:
     path:     '/api/twitter/admin/logged-in-member/profile'
     defaults: { _controller: controller.logged_in_member:getProfile }
+    methods:  [POST, OPTIONS]
+
+refresh_member_profile:
+    path:     '/api/twitter/admin/member/refresh-profile'
+    defaults: { _controller: controller.member:refreshProfile }
     methods:  [POST, OPTIONS]
 
 remove_aggregate:
@@ -52,15 +61,11 @@ reset_total_members_for_aggregate:
     defaults: { _controller: controller.aggregate:resetTotalStatusesForAggregates }
     methods:  [POST, OPTIONS]
 
-collect_statuses:
-    path:     '/api/twitter/admin/aggregate/collect-statuses'
-    defaults: { _controller: controller.aggregate:collectAggregatesStatuses }
-    methods:  [POST, OPTIONS]
-
-keywords:
-    path:     '/api/twitter/admin/keywords'
-    defaults: { _controller: controller.keyword:getKeywords }
-
 subscriptions:
     path:     '/api/twitter/admin/member-subscriptions'
     defaults: { _controller: controller.subscription:getMemberSubscriptions }
+
+unlock:
+    path:     '/api/twitter/admin/unlock-aggregate'
+    defaults: { _controller: controller.list:unlockAggregate }
+    methods:  [POST, OPTIONS]

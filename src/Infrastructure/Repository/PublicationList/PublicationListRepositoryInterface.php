@@ -16,4 +16,10 @@ interface PublicationListRepositoryInterface
     public function make(string $screenName, string $listName);
 
     public function unlockAggregate(PublicationListInterface $publicationList);
+
+    public function updateTotalStatuses(
+        array $aggregate,
+        ?PublicationListInterface $matchingAggregate = null,
+        bool $includeRelatedAggregates = true
+    ): array;
 }

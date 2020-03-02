@@ -21,7 +21,7 @@ services:
         calls:
             - [ 'setApiAccessor',               [ '@weaving_the_web_twitter.api_accessor' ] ]
             - [ 'setLogger',                    [ '@logger' ] ]
-            - [ 'setPublicationListRepository', [ '@repository.publication_list' ] ]
+            - [ 'setPublicationListRepository', [ '@App\Api\Repository\PublicationListRepository' ] ]
             - [ 'setPublicationPersistence',    [ '@App\Infrastructure\Status\Persistence\PublicationPersistence' ] ]
             - [ 'setStatusLogger',              [ '@App\Infrastructure\Log\StatusLogger' ] ]
             - [ 'setStatusRepository',          [ '@App\Api\Repository\StatusRepository' ] ]

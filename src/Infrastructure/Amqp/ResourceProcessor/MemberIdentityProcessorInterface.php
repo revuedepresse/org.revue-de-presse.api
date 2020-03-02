@@ -16,12 +16,12 @@ interface MemberIdentityProcessorInterface
      * @param TokenInterface               $token
      * @param PublicationList              $list
      *
-     * @return void
+     * @return int
      */
     public function process(
         MemberIdentity $memberIdentity,
         PublicationStrategyInterface $strategy,
         TokenInterface $token,
         PublicationList $list
-    ): void;
+    ): int;
 }

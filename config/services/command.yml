@@ -22,7 +22,7 @@ services:
             searchMatchingStatusRepository: '@repository.search_matching_status'
         calls:
             - [ 'setAccessor',                      [ '@weaving_the_web_twitter.api_accessor'] ]
-            - [ 'setAggregateRepository',           [ '@repository.publication_list'] ]
+            - [ 'setAggregateRepository',           [ '@App\Api\Repository\PublicationListRepository'] ]
             - [ 'setDefaultSecret',                 [ '%weaving_the_web_twitter.oauth_secret.default%'] ]
             - [ 'setDefaultToken',                  [ '%weaving_the_web_twitter.oauth_token.default%'] ]
             - [ 'setTokenRepository',               [ '@repository.access_token'] ]
@@ -89,7 +89,7 @@ services:
     command.add_members_to_aggregate:
         class:                      "%command.add_members_to_aggregate.class%"
         properties:
-            aggregateRepository:                '@repository.publication_list'
+            aggregateRepository:                '@App\Api\Repository\PublicationListRepository'
             aggregateSubscriptionRepository:    '@repository.publication_list_subscription'
             accessor:                           '@weaving_the_web_twitter.api_accessor'
             logger:                             '@logger'
@@ -169,7 +169,7 @@ services:
             - [ 'setLogger',            [ '@monolog.logger.status'] ]
             - [ 'setUserRepository',    [ '@user_manager'] ]
         properties:
-            aggregateRepository:    '@repository.publication_list'
+            aggregateRepository:    '@App\Api\Repository\PublicationListRepository'
             entityManager:          '@doctrine.orm.entity_manager'
             operationClock:         '@operation.clock'
             statusAccessor:         '@App\Accessor\StatusAccessor'
@@ -181,7 +181,7 @@ services:
             - [ 'setLogger',            [ '@monolog.logger.status'] ]
             - [ 'setUserRepository',    [ '@user_manager'] ]
         properties:
-            aggregateRepository:    '@repository.publication_list'
+            aggregateRepository:    '@App\Api\Repository\PublicationListRepository'
             entityManager:          '@doctrine.orm.entity_manager'
             statusAccessor:         '@App\Accessor\StatusAccessor'
             timelyStatusRepository: '@repository.timely_status'

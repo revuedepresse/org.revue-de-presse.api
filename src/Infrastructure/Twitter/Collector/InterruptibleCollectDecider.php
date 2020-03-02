@@ -155,19 +155,6 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
      * @param array $options
      *
      * @return bool
-     * @throws ApiRateLimitingException
-     * @throws BadAuthenticationDataException
-     * @throws InconsistentTokenRepository
-     * @throws NonUniqueResultException
-     * @throws NotFoundMemberException
-     * @throws NotFoundStatusException
-     * @throws OptimisticLockException
-     * @throws ProtectedAccountException
-     * @throws ReadOnlyApplicationException
-     * @throws ReflectionException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws UnexpectedApiResponseException
      */
     private function shouldSkipCollect(
         array $options

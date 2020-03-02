@@ -17,7 +17,7 @@
             <property
                 name="aggregateRepository"
                 type="service"
-                id="repository.publication_list" />
+                id="App\Api\Repository\PublicationListRepository" />
         </service>
     </services>
 </container>
