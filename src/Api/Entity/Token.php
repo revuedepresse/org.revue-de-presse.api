@@ -5,6 +5,7 @@ namespace App\Api\Entity;
 
 use App\Api\Exception\InvalidSerializedTokenException;
 use App\Membership\Entity\Member;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -115,35 +116,31 @@ class Token implements TokenInterface
     }
 
     /**
-     * @var \DateTime
-     *
      * @ORM\Column(name="frozen_until", type="datetime", nullable=true)
      */
-    protected $frozenUntil;
+    protected ?DateTimeInterface $frozenUntil;
 
     /**
      * @var \DateTime
      *
      * @ORM\Column(name="created_at", type="datetime")
      */
-    protected $createdAt;
+    protected DateTimeInterface $createdAt;
 
     /**
-     * @var \DateTime
-     *
      * @ORM\Column(name="updated_at", type="datetime", nullable=true)
      */
-    protected $updatedAt;
+    protected ?DateTimeInterface $updatedAt;
 
     /**
      * @ORM\ManyToMany(targetEntity="App\Membership\Entity\Member", mappedBy="tokens")
      */
-    protected $users;
+    protected Collection $users;
 
     /**
      * @var boolean
      */
-    protected $frozen;
+    protected bool $frozen;
 
     /**
      * @return integer
@@ -255,11 +252,11 @@ class Token implements TokenInterface
     }
 
     /**
-     * @param \DateTimeInterface $frozenUntil
+     * @param DateTimeInterface $frozenUntil
      *
      * @return $this
      */
-    public function setFrozenUntil(\DateTimeInterface $frozenUntil): self
+    public function setFrozenUntil(DateTimeInterface $frozenUntil): self
     {
         $this->frozenUntil = $frozenUntil;
 
