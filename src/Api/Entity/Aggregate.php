@@ -83,9 +83,23 @@ class Aggregate implements PublicationListInterface
     public int $totalMembers = 0;
 
     /**
+     * @deprecated in favor of setter / getter
+     *
      * @ORM\Column(name="total_statuses", type="integer", options={"default": 0})
      */
     public int $totalStatuses = 0;
+
+    public function totalStatus(): int
+    {
+        return $this->totalStatuses;
+    }
+
+    public function setTotalStatus(int $totalStatus): self
+    {
+        $this->totalStatuses = $totalStatus;
+
+        return $this;
+    }
 
     /**
      * @ORM\Column(name="deleted_at", type="datetime", nullable=true)

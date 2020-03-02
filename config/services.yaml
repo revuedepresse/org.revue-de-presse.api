@@ -95,7 +95,7 @@ services:
         arguments:
             - '@messenger.default_bus'
             - '@App\Infrastructure\Twitter\Api\Accessor\MemberProfileAccessor'
-            - '@repository.publication_list'
+            - '@App\Api\Repository\PublicationListRepository'
             - '@logger'
 
     App\Infrastructure\Amqp\ResourceProcessor\PublicationListProcessor:
@@ -211,7 +211,7 @@ services:
             - [ 'setLogger',                                [ '@monolog.logger.status' ] ]
             - [ 'setLikedStatusRepository',                 [ '@repository.liked_status' ] ]
             - [ 'setModerator',                             [ '@weaving_the_web_twitter.moderator.api_limit' ] ]
-            - [ 'setPublicationListRepository',             [ '@repository.publication_list' ] ]
+            - [ 'setPublicationListRepository',             [ '@App\Api\Repository\PublicationListRepository' ] ]
             - [ 'setPublicationPersistence',                [ '@App\Infrastructure\Status\Persistence\PublicationPersistence' ] ]
             - [ 'setStatusLogger',                          [ '@App\Infrastructure\Log\StatusLogger' ] ]
             - [ 'setStatusAccessor',                        [ '@App\Accessor\StatusAccessor' ] ]
@@ -268,7 +268,7 @@ parameters:
     weaving_the_web_twitter.entity.status.class:                  '%weaving_the_web_api.entity.status.class%'
     weaving_the_web_twitter.entity.token.class:                   '%weaving_the_web_api.entity.token.class%'
 
-    repository.publication_list.class:    '%weaving_the_web_api.repository.publication_list.class%'
+    repository.publication_list.class:                            '%weaving_the_web_api.repository.publication_list.class%'
     weaving_the_web_twitter.repository.token.class:               '%repository.access_token.class%'
 
     weaving_the_web_twitter.version:                              '%env(resolve:API_TWITTER_VERSION)%'

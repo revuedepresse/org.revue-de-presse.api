@@ -23,7 +23,7 @@ services:
         properties:
             configDirectory:                '%kernel.project_dir%/config'
             authenticationTokenRepository:  '@repository.authentication_token'
-            aggregateRepository:            '@repository.publication_list'
+            aggregateRepository:            '@App\Api\Repository\PublicationListRepository'
             highlightRepository:            '@repository.highlight'
             logger:                         '@logger'
             memberRepository:               '@user_manager'
@@ -49,7 +49,7 @@ services:
             - '%allowed.origin%'
             - '%kernel.environment%'
         properties:
-            aggregateRepository: '@repository.publication_list'
+            aggregateRepository: '@App\Api\Repository\PublicationListRepository'
             redisCache:          '@app.cache.redis'
 
     controller.keyword:
@@ -61,6 +61,18 @@ services:
         properties:
             keywordRepository: '@repository.keyword'
             redisCache:        '@app.cache.redis'
+
+    controller.member:
+        public: true
+        class: 'App\Infrastructure\Membership\Controller\MemberController'
+        arguments:
+            - '%allowed.origin%'
+            - '%kernel.environment%'
+        calls:
+            - [ 'setLogger',   [ '@logger' ] ]
+        properties:
+            httpAuthenticator:      '@App\Infrastructure\Security\Authentication\HttpAuthenticator'
+            memberProfileAccessor:  '@App\Infrastructure\Twitter\Api\Accessor\MemberProfileAccessor'
 
     controller.subscription:
         public: true

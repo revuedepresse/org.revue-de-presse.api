@@ -453,14 +453,14 @@ QUERY;
             $connection = $this->getEntityManager()->getConnection();
 
             $query = <<< QUERY
-                SELECT count(*) as total_statuses
+                SELECT count(*) as total_status
                 FROM weaving_status_aggregate
                 WHERE aggregate_id = ?;
 QUERY;
 
             if ($includeRelatedAggregates) {
                 $query = <<< QUERY
-                    SELECT count(*) as total_statuses
+                    SELECT count(*) as total_status
                     FROM weaving_status_aggregate
                     WHERE aggregate_id in (
                       SELECT am.id
@@ -478,32 +478,17 @@ QUERY;
                 [\PDO::PARAM_INT]
             );
 
-            $aggregate['totalStatuses'] = (int) $statement->fetchAll([0]['total_statuses']);
+            $aggregate['totalStatuses'] = (int) $statement->fetchAll()[0]['total_status'];
 
-            $matchingAggregate->totalStatuses = $aggregate['totalStatuses'];
+            $matchingAggregate->setTotalStatus($aggregate['totalStatuses']);
             if ($aggregate['totalStatuses'] === 0) {
-                $matchingAggregate->totalStatuses = -1;
+                $matchingAggregate->setTotalStatus(-1);
             }
 
             $this->getEntityManager()->persist($matchingAggregate);
         }
 
         return $aggregate;
-    }
-
-    /**
-     * @param array                         $aggregate
-     * @param PublicationListInterface|null $matchingAggregate
-     *
-     * @return array
-     * @throws DBALException
-     * @throws ORMException
-     */
-    public function updateTotalStatusesByExcludingRelatedAggregates(
-        array $aggregate,
-        PublicationListInterface $matchingAggregate = null
-    ): array {
-        return $this->updateTotalStatuses($aggregate, $matchingAggregate, $includeRelatedAggregates = false);
     }
 
     /**

@@ -5,13 +5,13 @@ namespace App\Membership\Entity;
 
 use App\Api\Entity\Token;
 use App\Membership\Model\Member as MemberModel;
-
 use DateTime;
 use Doctrine\Common\Collections\Selectable;
 use Doctrine\ORM\Mapping as ORM;
+use const JSON_THROW_ON_ERROR;
 
 /**
- * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
  *
  * @ORM\Table(
  *      name="weaving_user",
@@ -40,6 +40,74 @@ use Doctrine\ORM\Mapping as ORM;
 class Member extends MemberModel
 {
     /**
+     * @ORM\Column(name="usr_api_key", type="string", nullable=true)
+     */
+    public ?string $apiKey;
+
+    /**
+     * @ORM\Column(name="max_status_id", type="string", length=255, nullable=true)
+     */
+    public ?string $maxStatusId;
+
+    /**
+     * @ORM\Column(name="min_status_id", type="string", length=255, nullable=true)
+     */
+    public ?string $minStatusId;
+
+    /**
+     * @ORM\Column(name="max_like_id", type="string", length=255, nullable=true)
+     */
+    public ?string $maxLikeId;
+
+    /**
+     * @ORM\Column(name="min_like_id", type="string", length=255, nullable=true)
+     */
+    public ?string $minLikeId;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="total_statuses", type="integer", options={"default": 0})
+     */
+    public int $totalStatuses = 0;
+
+    /**
+     * @var integer
+     *
+     * @ORM\Column(name="total_likes", type="integer", options={"default": 0})
+     */
+    public $totalLikes = 0;
+
+    /**
+     * @ORM\Column(name="description", type="text", nullable=true)
+     */
+    public ?string $description = '';
+
+    /**
+     * @ORM\Column(name="url", type="text", nullable=true)
+     */
+    public ?string $url = null;
+
+    /**
+     * @var DateTime
+     *
+     * @ORM\Column(name="last_status_publication_date", type="datetime", nullable=true)
+     */
+    public ?DateTime $lastStatusPublicationDate = null;
+
+    /**
+     * @var integer
+     * @ORM\Column(name="total_subscribees", type="integer", options={"default": 0})
+     */
+    public $totalSubscribees = 0;
+
+    /**
+     * @var integer
+     * @ORM\Column(name="total_subscriptions", type="integer", options={"default": 0})
+     */
+    public $totalSubscriptions = 0;
+
+    /**
      * @var integer
      *
      * @ORM\Id
@@ -49,10 +117,10 @@ class Member extends MemberModel
     protected ?int $id;
 
     /**
-    * @var string
-    *
-    * @ORM\Column(name="usr_twitter_id", type="string", length=255, nullable=true)
-    */
+     * @var string
+     *
+     * @ORM\Column(name="usr_twitter_id", type="string", length=255, nullable=true)
+     */
     protected ?string $twitterID;
 
     /**
@@ -133,9 +201,79 @@ class Member extends MemberModel
     protected Selectable $tokens;
 
     /**
-     * @ORM\Column(name="usr_api_key", type="string", nullable=true)
+     * Protected status according to Twitter
+     *
+     * @var boolean
+     * @ORM\Column(name="protected", type="boolean", options={"default": false}, nullable=true)
      */
-    public ?string $apiKey;
+    protected ?bool $protected = false;
+
+    /**
+     * Suspended status according to Twitter
+     *
+     * @ORM\Column(name="suspended", type="boolean", options={"default": false})
+     */
+    protected bool $suspended = false;
+
+    /**
+     * NotFound status according to Twitter
+     *
+     * @ORM\Column(name="not_found", type="boolean", options={"default": false})
+     */
+    protected bool $notFound = false;
+
+    private bool $locked;
+
+    public function __construct()
+    {
+        parent::__construct();
+
+        $this->tokens = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+     * Add tokens
+     *
+     * @param \App\Api\Entity\Token $tokens
+     *
+     * @return MemberInterface
+     */
+    public function addToken(Token $tokens)
+    {
+        $this->tokens[] = $tokens;
+
+        return $this;
+    }
+
+    /**
+     * @return false|string
+     */
+    public function encodeAsJson(): string
+    {
+        $jsonEncodedMember = json_encode(
+            [
+                'id'          => $this->id,
+                'username'    => $this->twitter_username,
+                'description' => $this->description,
+                'url'         => $this->url,
+            ],
+            JSON_THROW_ON_ERROR
+        );
+
+        if (!$jsonEncodedMember) {
+            return json_encode(
+                [
+                    'id'          => 0,
+                    'username'    => '',
+                    'description' => '',
+                    'url'         => '',
+                ],
+                JSON_THROW_ON_ERROR
+            );
+        }
+
+        return $jsonEncodedMember;
+    }
 
     /**
      * @return string
@@ -146,19 +284,11 @@ class Member extends MemberModel
     }
 
     /**
-     * @return int|null
+     * @return string
      */
-    public function getId(): ?int
+    public function getAvatar(): string
     {
-        return $this->id;
-    }
-
-    /**
-     * @return string|null
-     */
-    public function getUsername(): ?string
-    {
-        return $this->username;
+        return $this->avatar;
     }
 
     /**
@@ -174,22 +304,77 @@ class Member extends MemberModel
     }
 
     /**
-     * @return string
+     * @return null|string
      */
-    public function getAvatar(): string
+    public function getDescription(): ?string
     {
-        return $this->avatar;
+        return $this->description;
     }
 
     /**
-     * Set password
+     * Get enabled
      *
-     * @param  string $password
-     * @return Member
+     * @return boolean
      */
-    public function setPassword(string $password): self
+    public function getEnabled()
     {
-        $this->password = $password;
+        return $this->enabled;
+    }
+
+    /**
+     * Get expired
+     *
+     * @return boolean
+     */
+    public function getExpired()
+    {
+        return $this->expired;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFullName(): string
+    {
+        return $this->fullName;
+    }
+
+    /**
+     * @param string $fullName
+     *
+     * @return MemberInterface
+     * @deprecated in favor of ->setName
+     *
+     */
+    public function setFullName(string $fullName): MemberInterface
+    {
+        return $this->setName($fullName);
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    /**
+     * @return bool
+     */
+    public function getLocked(): bool
+    {
+        return $this->locked;
+    }
+
+    /**
+     * @param $locked
+     *
+     * @return self
+     */
+    public function setLocked($locked): self
+    {
+        $this->locked = $locked;
 
         return $this;
     }
@@ -205,44 +390,13 @@ class Member extends MemberModel
     }
 
     /**
-     * @param string $twitterId
-     * @return MemberInterface
-     */
-    public function setTwitterID(string $twitterId): MemberInterface
-    {
-      $this->twitterID = $twitterId;
-
-      return $this;
-    }
-
-    /**
-     * @deprecated in favor of ->setScreenName
+     * Get tokens
      *
-     * @param $twitterUsername
-     * @return $this
+     * @return \Doctrine\Common\Collections\Collection
      */
-    public function setTwitterUsername(string $twitterUsername): MemberInterface
+    public function getTokens()
     {
-        $this->twitter_username = $twitterUsername;
-
-        return $this;
-    }
-
-    /**
-     * @param string $screenName
-     *
-     * @return MemberInterface
-     */
-    public function setScreenName(string $screenName): MemberInterface
-    {
-        $this->twitter_username = $screenName;
-
-        return $this;
-    }
-
-    public function getTwitterUsername(): ?string
-    {
-      return $this->twitter_username;
+        return $this->tokens;
     }
 
     /**
@@ -254,244 +408,50 @@ class Member extends MemberModel
     }
 
     /**
-     * @deprecated in favor of ->setName
+     * @param string $twitterId
      *
-     * @param string $fullName
      * @return MemberInterface
      */
-    public function setFullName(string $fullName): MemberInterface
+    public function setTwitterID(string $twitterId): MemberInterface
     {
-        return $this->setName($fullName);
-    }
-
-    public function setName(string $name): MemberInterface
-    {
-        $this->fullName = $name;
+        $this->twitterID = $twitterId;
 
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getFullName(): string
+    public function getTwitterUsername(): ?string
     {
-        return $this->fullName;
-    }
-
-    private bool $locked;
-
-    /**
-     * @param $locked
-     *
-     * @return self
-     */
-    public function setLocked($locked): self
-    {
-        $this->locked = $locked;
-
-        return $this;
+        return $this->twitter_username;
     }
 
     /**
-     * @return bool
-     */
-    public function getLocked(): bool
-    {
-        return $this->locked;
-    }
-
-    /**
-     * @param bool $expired
+     * @param $twitterUsername
      *
      * @return $this
+     * @deprecated in favor of ->setScreenName
+     *
      */
-    public function setExpired(bool $expired): self
+    public function setTwitterUsername(string $twitterUsername): MemberInterface
     {
-        $this->expired = $expired;
+        $this->twitter_username = $twitterUsername;
 
         return $this;
     }
 
     /**
-     * Get expired
-     *
-     * @return boolean
-     */
-    public function getExpired()
-    {
-        return $this->expired;
-    }
-
-    /**
-     * Set confirmationToken
-     *
-     * @param  string $confirmationToken
-     * @return User
-     */
-    public function setConfirmationToken($confirmationToken)
-    {
-        $this->confirmationToken = $confirmationToken;
-
-        return $this;
-    }
-
-    /**
-     * Get confirmationToken
-     *
      * @return string
      */
-    public function getConfirmationToken()
+    public function getUrl(): ?string
     {
-        return $this->confirmationToken;
-    }
-
-    public function __construct()
-    {
-        parent::__construct();
-
-        $this->tokens = new \Doctrine\Common\Collections\ArrayCollection();
+        return $this->url;
     }
 
     /**
-     * Get enabled
-     *
-     * @return boolean 
+     * @return string|null
      */
-    public function getEnabled()
+    public function getUsername(): ?string
     {
-        return $this->enabled;
-    }
-
-    /**
-     * Add tokens
-     *
-     * @param \App\Api\Entity\Token $tokens
-     * @return User
-     */
-    public function addToken(Token $tokens)
-    {
-        $this->tokens[] = $tokens;
-    
-        return $this;
-    }
-
-    /**
-     * Remove tokens
-     *
-     * @param \App\Api\Entity\Token $tokens
-     */
-    public function removeToken(Token $tokens)
-    {
-        $this->tokens->removeElement($tokens);
-    }
-
-    /**
-     * Get tokens
-     *
-     * @return \Doctrine\Common\Collections\Collection 
-     */
-    public function getTokens()
-    {
-        return $this->tokens;
-    }
-
-    /**
-     * Protected status according to Twitter
-     *
-     * @var boolean
-     * @ORM\Column(name="protected", type="boolean", options={"default": false}, nullable=true)
-     */
-    protected ?bool $protected = false;
-
-    /**
-     * @param  boolean $protected
-     * @return User
-     */
-    public function setProtected(bool $protected): MemberInterface
-    {
-        $this->protected = $protected;
-
-        return $this;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function isProtected(): bool
-    {
-        return $this->protected;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function isNotProtected(): bool
-    {
-        return !$this->isProtected();
-    }
-
-    /**
-     * Suspended status according to Twitter
-     *
-     * @var boolean
-     * @ORM\Column(name="suspended", type="boolean", options={"default": false})
-     */
-    protected $suspended = false;
-
-    /**
-     * @param bool $suspended
-     * @return MemberInterface
-     */
-    public function setSuspended(bool $suspended): MemberInterface
-    {
-        $this->suspended = $suspended;
-
-        return $this;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function isSuspended(): bool
-    {
-        return $this->suspended;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function isNotSuspended(): bool
-    {
-        return !$this->isSuspended();
-    }
-
-    /**
-     * NotFound status according to Twitter
-     *
-     * @var boolean
-     * @ORM\Column(name="not_found", type="boolean", options={"default": false})
-     */
-    protected $notFound = false;
-
-    /**
-     * @param bool $notFound
-     * @return MemberInterface
-     */
-    public function setNotFound(bool $notFound): MemberInterface
-    {
-        $this->notFound = $notFound;
-
-        return $this;
-    }
-
-    /**
-     * @return boolean
-     * @deprecated in favor of ->hasBeenDeclaredAsNotFound
-     */
-    public function isNotFound(): bool
-    {
-        return $this->hasBeenDeclaredAsNotFound();
+        return $this->username;
     }
 
     /**
@@ -511,35 +471,162 @@ class Member extends MemberModel
     }
 
     /**
-     * @ORM\Column(name="max_status_id", type="string", length=255, nullable=true)
+     * @return bool
+     * @throws \Exception
      */
-    public ?string $maxStatusId;
-
-    /**
-     * @ORM\Column(name="min_status_id", type="string", length=255, nullable=true)
-     */
-    public ?string $minStatusId;
-
-    /**
-     * @ORM\Column(name="max_like_id", type="string", length=255, nullable=true)
-     */
-    public ?string $maxLikeId;
-
-    /**
-     * @ORM\Column(name="min_like_id", type="string", length=255, nullable=true)
-     */
-    public ?string $minLikeId;
-
-    /**
-     * @var integer
-     *
-     * @ORM\Column(name="total_statuses", type="integer", options={"default": 0})
-     */
-    public int $totalStatuses = 0;
-
-    public function totalStatus(): int
+    public function isAWhisperer(): bool
     {
-        return $this->totalStatuses;
+        $oneMonthAgo = new DateTime('now', new \DateTimeZone('UTC'));
+        $oneMonthAgo->modify('-1 month');
+
+        return !is_null($this->lastStatusPublicationDate)
+            && ($this->lastStatusPublicationDate < $oneMonthAgo);
+    }
+
+    /**
+     * @return boolean
+     * @deprecated in favor of ->hasBeenDeclaredAsNotFound
+     */
+    public function isNotFound(): bool
+    {
+        return $this->hasBeenDeclaredAsNotFound();
+    }
+
+    /**
+     * @param bool $notFound
+     *
+     * @return MemberInterface
+     */
+    public function setNotFound(bool $notFound): MemberInterface
+    {
+        $this->notFound = $notFound;
+
+        return $this;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isNotProtected(): bool
+    {
+        return !$this->isProtected();
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isNotSuspended(): bool
+    {
+        return !$this->isSuspended();
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isProtected(): bool
+    {
+        return $this->protected;
+    }
+
+    /**
+     * @param boolean $protected
+     *
+     * @return MemberInterface
+     */
+    public function setProtected(bool $protected): MemberInterface
+    {
+        $this->protected = $protected;
+
+        return $this;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isSuspended(): bool
+    {
+        return $this->suspended;
+    }
+
+    /**
+     * @param bool $suspended
+     *
+     * @return MemberInterface
+     */
+    public function setSuspended(bool $suspended): MemberInterface
+    {
+        $this->suspended = $suspended;
+
+        return $this;
+    }
+
+    /**
+     * Remove tokens
+     *
+     * @param \App\Api\Entity\Token $tokens
+     */
+    public function removeToken(Token $tokens)
+    {
+        $this->tokens->removeElement($tokens);
+    }
+
+    /**
+     * Set confirmationToken
+     *
+     * @param string $confirmationToken
+     *
+     * @return MemberInterface
+     */
+    public function setConfirmationToken($confirmationToken)
+    {
+        $this->confirmationToken = $confirmationToken;
+
+        return $this;
+    }
+
+    /**
+     * @param bool $expired
+     *
+     * @return $this
+     */
+    public function setExpired(bool $expired): self
+    {
+        $this->expired = $expired;
+
+        return $this;
+    }
+
+    public function setName(string $name): MemberInterface
+    {
+        $this->fullName = $name;
+
+        return $this;
+    }
+
+    /**
+     * Set password
+     *
+     * @param string $password
+     *
+     * @return Member
+     */
+    public function setPassword(string $password): self
+    {
+        $this->password = $password;
+
+        return $this;
+    }
+
+    /**
+     * @param string $screenName
+     *
+     * @return MemberInterface
+     */
+    public function setScreenName(string $screenName): MemberInterface
+    {
+        $this->twitter_username = $screenName;
+
+        return $this;
     }
 
     public function setTotalStatus($totalStatus): self
@@ -549,67 +636,8 @@ class Member extends MemberModel
         return $this;
     }
 
-    /**
-     * @var integer
-     *
-     * @ORM\Column(name="total_likes", type="integer", options={"default": 0})
-     */
-    public $totalLikes = 0;
-
-    /**
-     * @ORM\Column(name="description", type="text", nullable=true)
-     */
-    public ?string $description = '';
-
-    /**
-     * @return null|string
-     */
-    public function getDescription(): ?string
+    public function totalStatus(): int
     {
-        return $this->description;
-    }
-
-    /**
-     * @ORM\Column(name="url", type="text", nullable=true)
-     */
-    public ?string $url = null;
-
-    /**
-     * @return string
-     */
-    public function getUrl(): ?string {
-        return $this->url;
-    }
-
-    /**
-     * @var DateTime
-     *
-     * @ORM\Column(name="last_status_publication_date", type="datetime", nullable=true)
-     */
-    public ?DateTime $lastStatusPublicationDate = null;
-
-    /**
-     * @var integer
-     * @ORM\Column(name="total_subscribees", type="integer", options={"default": 0})
-     */
-    public $totalSubscribees = 0;
-
-    /**
-     * @var integer
-     * @ORM\Column(name="total_subscriptions", type="integer", options={"default": 0})
-     */
-    public $totalSubscriptions = 0;
-
-    /**
-     * @return bool
-     * @throws \Exception
-     */
-    public function isAWhisperer(): bool
-    {
-        $oneMonthAgo = new DateTime('now', new \DateTimeZone('UTC'));
-        $oneMonthAgo->modify('-1 month');
-
-        return !is_null($this->lastStatusPublicationDate) &&
-            ($this->lastStatusPublicationDate < $oneMonthAgo);
+        return $this->totalStatuses;
     }
 }
