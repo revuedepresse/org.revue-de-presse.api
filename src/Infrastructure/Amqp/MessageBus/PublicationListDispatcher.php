@@ -4,13 +4,13 @@ declare(strict_types=1);
 namespace App\Infrastructure\Amqp\MessageBus;
 
 use App\Api\Entity\TokenInterface;
+use App\Domain\Publication\PublicationListInterface;
 use App\Infrastructure\Amqp\Message\FetchMemberLikes;
 use App\Infrastructure\Amqp\Message\FetchMemberStatus;
 use App\Infrastructure\DependencyInjection\MessageBusTrait;
 use App\Infrastructure\DependencyInjection\Publication\PublicationListRepositoryTrait;
 use App\Membership\Entity\MemberInterface;
-use App\StatusCollection\Messaging\Exception\InvalidMemberAggregate;
-use WeavingTheWeb\Bundle\ApiBundle\Entity\Aggregate;
+use App\Domain\Publication\Exception\InvalidMemberAggregate;
 
 class PublicationListDispatcher implements PublicationListDispatcherInterface
 {
@@ -26,7 +26,7 @@ class PublicationListDispatcher implements PublicationListDispatcherInterface
         $aggregate = $this->publicationListRepository
             ->getMemberAggregateByUsername($username);
 
-        if (!($aggregate instanceof Aggregate)) {
+        if (!($aggregate instanceof PublicationListInterface)) {
             InvalidMemberAggregate::guardAgainstInvalidUsername($username);
         }
 

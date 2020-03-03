@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Collection;
 
-use App\Amqp\SkippableMemberException;
+use App\Amqp\Exception\SkippableMemberException;
 use App\Membership\Entity\MemberInterface;
 use App\Domain\Resource\MemberIdentity;
 use App\Domain\Resource\PublicationList;

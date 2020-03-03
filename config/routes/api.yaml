@@ -6,9 +6,19 @@ authentication_verify:
     path:     '/api/authentication/verify'
     defaults: { _controller: controller.authentication:verify }
 
+bulk_collect_statuses:
+    path:     '/api/twitter/admin/bulk-collect-statuses'
+    defaults: { _controller: controller.list:bulkCollectAggregatesStatuses }
+    methods:  [POST, OPTIONS]
+
+collect:
+    path:     '/api/twitter/admin/collect'
+    defaults: { _controller: controller.list:requestCollection }
+    methods:  [POST, OPTIONS]
+
 collect_statuses:
     path:     '/api/twitter/admin/aggregate/collect-statuses'
-    defaults: { _controller: controller.aggregate:collectAggregatesStatuses }
+    defaults: { _controller: controller.publication_list:collectAggregatesStatuses }
     methods:  [POST, OPTIONS]
 
 healthcheck:
@@ -31,16 +41,6 @@ status:
     path:     '/api/twitter/admin/statuses'
     defaults: { _controller: controller.list:getStatuses }
 
-bulk_collect_statuses:
-    path:     '/api/twitter/admin/bulk-collect-statuses'
-    defaults: { _controller: controller.list:bulkCollectAggregatesStatuses }
-    methods:  [POST, OPTIONS]
-
-collect:
-    path:     '/api/twitter/admin/collect'
-    defaults: { _controller: controller.list:requestCollection }
-    methods:  [POST, OPTIONS]
-
 logged_in_member_profile:
     path:     '/api/twitter/admin/logged-in-member/profile'
     defaults: { _controller: controller.logged_in_member:getProfile }
@@ -53,17 +53,21 @@ refresh_member_profile:
 
 remove_aggregate:
     path:     '/api/twitter/admin/aggregate'
-    defaults: { _controller: controller.aggregate:bulkRemoveAggregates }
+    defaults: { _controller: controller.publication_list:bulkRemoveAggregates }
     methods:  [POST, OPTIONS]
 
 reset_total_members_for_aggregate:
     path:     '/api/twitter/admin/aggregate/reset-total-statuses'
-    defaults: { _controller: controller.aggregate:resetTotalStatusesForAggregates }
+    defaults: { _controller: controller.publication_list:resetTotalStatusesForAggregates }
     methods:  [POST, OPTIONS]
 
-subscriptions:
+member_subscriptions:
     path:     '/api/twitter/admin/member-subscriptions'
     defaults: { _controller: controller.subscription:getMemberSubscriptions }
+
+publication_lists:
+    path:     '/api/twitter/admin/publication-lists'
+    defaults: { _controller: controller.publication_list:getPublicationLists }
 
 unlock:
     path:     '/api/twitter/admin/unlock-aggregate'

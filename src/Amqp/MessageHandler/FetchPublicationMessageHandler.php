@@ -77,7 +77,7 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
 
         try {
             $options = $this->processMessage($message);
-        } catch (Exception $exception) {
+        } catch (\Throwable $exception) {
             $this->logger->critical($exception->getMessage());
 
             return false;
@@ -131,7 +131,7 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
                 $success = false;
                 $this->logger->error($unavailableResource->getMessage());
             }
-        } catch (\Exception $exception) {
+        } catch (\Throwable $exception) {
             $this->logger->critical(
                 $exception->getMessage(),
                 ['stacktrace' => $exception->getTraceAsString()]
