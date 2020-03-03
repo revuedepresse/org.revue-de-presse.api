@@ -22,12 +22,15 @@ use App\Membership\Entity\MemberInterface;
 use App\Operation\CapableOfDeletionInterface;
 use App\Status\Entity\LikedStatus;
 use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\FetchMode;
+use Doctrine\DBAL\ParameterType;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\QueryBuilder;
 use Exception;
 use stdClass;
+use Symfony\Component\HttpFoundation\Request;
 use function array_map;
 use function array_sum;
 
@@ -289,7 +292,7 @@ QUERY;
                 strtr(
                     $query,
                     [
-                        ':ids' => $aggregateIds
+                        ':ids' => implode(',', $aggregateIds)
                     ]
                 )
             );
@@ -310,12 +313,12 @@ QUERY;
         $dispatchedMessages = array_map(
             function (PublicationListInterface $aggregate) {
                 $messageBody['aggregate_id'] = $aggregate->getId();
-                $aggregate->totalStatuses    = 0;
+                $aggregate->setTotalStatus(0);
                 $aggregate->totalMembers     = 0;
 
                 $this->save($aggregate);
 
-                $token = $this->tokenRepository->findFirstFrozenToken();
+                $token = $this->tokenRepository->findFirstUnfrozenToken();
                 if ($token instanceof TokenInterface) {
                     $this->publicationListDispatcher->dispatchMemberPublicationListMessage(
                         (new Member())->setScreenName($aggregate->screenName),
@@ -654,5 +657,29 @@ QUERY;
         }
 
         return $aggregate;
+    }
+
+    public function getAllPublicationLists(Request $request = null): array {
+        $connection = $this->getEntityManager()->getConnection();
+
+        $getMemberSubscription = <<<'QUERY'
+            SELECT 
+            id,
+            name,
+            total_members,
+            total_statuses as total_status
+            FROM weaving_aggregate
+            WHERE screen_name IS NULL
+            AND name not like ?
+            ORDER BY name
+QUERY;
+
+        $statement = $connection->executeQuery(
+            $getMemberSubscription,
+            [self::PREFIX_MEMBER_AGGREGATE.'%'],
+            [ParameterType::STRING]
+        );
+
+        return $statement->fetchAll(FetchMode::ASSOCIATIVE);
     }
 }

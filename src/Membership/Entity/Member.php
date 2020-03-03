@@ -6,6 +6,7 @@ namespace App\Membership\Entity;
 use App\Api\Entity\Token;
 use App\Membership\Model\Member as MemberModel;
 use DateTime;
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Selectable;
 use Doctrine\ORM\Mapping as ORM;
 use const JSON_THROW_ON_ERROR;
@@ -228,7 +229,7 @@ class Member extends MemberModel
     {
         parent::__construct();
 
-        $this->tokens = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->tokens = new ArrayCollection();
     }
 
     /**

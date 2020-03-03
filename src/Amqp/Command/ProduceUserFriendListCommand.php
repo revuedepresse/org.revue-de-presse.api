@@ -2,7 +2,7 @@
 
 namespace App\Amqp\Command;
 
-use App\Amqp\SkippableMemberException;
+use App\Amqp\Exception\SkippableMemberException;
 use App\Api\Entity\Token;
 use App\Api\Exception\InvalidSerializedTokenException;
 use App\Membership\Entity\MemberInterface;

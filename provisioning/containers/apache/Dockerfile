@@ -25,7 +25,7 @@ WORKDIR /var/www/devobs
 
 ADD ./tasks /tasks
 
-ADD ./templates /templates
+ADD templates/extensions.ini.dist /usr/local/etc/php/conf.d/extensions.ini
 
 CMD /bin/bash -c "source /tasks/setup-virtual-host.sh && tail -f /var/www/devobs/var/logs/apache*.log"
 

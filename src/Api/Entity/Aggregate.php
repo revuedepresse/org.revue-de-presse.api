@@ -82,6 +82,13 @@ class Aggregate implements PublicationListInterface
      */
     public int $totalMembers = 0;
 
+    public function setTotalMembers(int $totalMembers): self
+    {
+        $this->totalMembers = $totalMembers;
+
+        return $this;
+    }
+
     /**
      * @deprecated in favor of setter / getter
      *

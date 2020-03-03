@@ -42,16 +42,6 @@ services:
             logger:                        '@logger'
             authenticationTokenRepository: '@repository.authentication_token'
 
-    controller.aggregate:
-        public: true
-        class: 'App\Aggregate\Controller\AggregateController'
-        arguments:
-            - '%allowed.origin%'
-            - '%kernel.environment%'
-        properties:
-            aggregateRepository: '@App\Api\Repository\PublicationListRepository'
-            redisCache:          '@app.cache.redis'
-
     controller.keyword:
         public: true
         class: 'App\Aggregate\Controller\KeywordController'
@@ -69,10 +59,22 @@ services:
             - '%allowed.origin%'
             - '%kernel.environment%'
         calls:
-            - [ 'setLogger',   [ '@logger' ] ]
+            - [ 'setLogger',            [ '@logger' ] ]
+            - [ 'setHttpAuthenticator', [ '@App\Infrastructure\Security\Authentication\HttpAuthenticator' ] ]
         properties:
-            httpAuthenticator:      '@App\Infrastructure\Security\Authentication\HttpAuthenticator'
             memberProfileAccessor:  '@App\Infrastructure\Twitter\Api\Accessor\MemberProfileAccessor'
+
+    controller.publication_list:
+        public: true
+        class: 'App\Aggregate\Controller\PublicationListController'
+        arguments:
+            - '%allowed.origin%'
+            - '%kernel.environment%'
+        calls:
+            - [ 'setHttpAuthenticator', [ '@App\Infrastructure\Security\Authentication\HttpAuthenticator' ] ]
+            - [ 'setPublicationListRepository', [ '@App\Api\Repository\PublicationListRepository' ]]
+        properties:
+            redisCache:          '@app.cache.redis'
 
     controller.subscription:
         public: true
@@ -81,11 +83,11 @@ services:
             - '%allowed.origin%'
             - '%kernel.environment%'
         calls:
+            - [ 'setHttpAuthenticator',            [ '@App\Infrastructure\Security\Authentication\HttpAuthenticator' ] ]
             - [ 'setLogger',                       [ '@monolog.logger.membership' ] ]
             - [ 'setMemberSubscriptionRepository', [ '@repository.member_subscription' ] ]
             - [ 'setMemberRepository',             [ '@App\Infrastructure\Repository\Membership\MemberRepository' ] ]
             - [ 'setPublicationListDispatcher',    [ '@App\Infrastructure\Amqp\MessageBus\PublicationListDispatcher' ] ]
             - [ 'setTokenRepository',              [ '@repository.access_token' ] ]
         properties:
-            httpAuthenticator:              '@App\Infrastructure\Security\Authentication\HttpAuthenticator'
             redisCache:                     '@app.cache.redis'

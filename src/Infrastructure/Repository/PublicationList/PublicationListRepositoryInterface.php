@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Repository\PublicationList;
 
 use App\Domain\Publication\PublicationListInterface;
+use Symfony\Component\HttpFoundation\Request;
 
 /**
  * @method PublicationListInterface|null find($id, $lockMode = null, $lockVersion = null)
@@ -13,6 +14,10 @@ use App\Domain\Publication\PublicationListInterface;
  */
 interface PublicationListRepositoryInterface
 {
+    public function getAllPublicationLists(
+        Request $request
+    );
+
     public function make(string $screenName, string $listName);
 
     public function unlockAggregate(PublicationListInterface $publicationList);
