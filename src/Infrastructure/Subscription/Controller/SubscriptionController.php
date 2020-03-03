@@ -6,6 +6,7 @@ namespace App\Infrastructure\Subscription\Controller;
 use App\Api\Entity\Token;
 use App\Cache\RedisCache;
 use App\Domain\Membership\Exception\InvalidMemberException;
+use App\Domain\Publication\Exception\InvalidMemberAggregate;
 use App\Domain\Publication\PublicationListIdentity;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
@@ -13,11 +14,8 @@ use App\Infrastructure\DependencyInjection\Publication\PublicationListDispatcher
 use App\Infrastructure\DependencyInjection\Subscription\MemberSubscriptionRepositoryTrait;
 use App\Infrastructure\Http\PaginationParams;
 use App\Infrastructure\Security\Authentication\AuthenticationTokenValidationTrait;
-use App\Infrastructure\Security\Authentication\HttpAuthenticator;
 use App\Infrastructure\Security\Cors\CorsHeadersAwareTrait;
-use App\Infrastructure\Security\Exception\UnauthorizedRequestException;
 use App\Membership\Entity\MemberInterface;
-use App\Domain\Publication\Exception\InvalidMemberAggregate;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use function array_merge;
@@ -37,8 +35,6 @@ class SubscriptionController
     use PublicationListDispatcherTrait;
 
     public RedisCache $redisCache;
-
-    public HttpAuthenticator $httpAuthenticator;
 
     public function getMemberSubscriptions(Request $request): JsonResponse
     {
@@ -145,29 +141,6 @@ class SubscriptionController
         );
 
         return new JsonResponse('', 204, []);
-    }
-
-    private function authenticateMember(Request $request)
-    {
-        if ($request->isMethod('OPTIONS')) {
-            return $this->getCorsOptionsResponse(
-                $this->environment,
-                $this->allowedOrigin
-            );
-        }
-
-        $corsHeaders              = $this->getAccessControlOriginHeaders($this->environment, $this->allowedOrigin);
-        $unauthorizedJsonResponse = new JsonResponse(
-            'Unauthorized request',
-            403,
-            $corsHeaders
-        );
-
-        try {
-            return $this->httpAuthenticator->authenticateMember($request);
-        } catch (UnauthorizedRequestException $exception) {
-            return $unauthorizedJsonResponse;
-        }
     }
 
     private function willCacheResponse(Request $request): bool

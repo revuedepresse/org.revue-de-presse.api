@@ -20,8 +20,6 @@ class MemberController
     use RequestParametersValidationTrait;
     use LoggerTrait;
 
-    public HttpAuthenticator $httpAuthenticator;
-
     public MemberProfileAccessor $memberProfileAccessor;
 
     public function refreshProfile(Request $request): JsonResponse

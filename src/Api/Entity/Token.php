@@ -121,11 +121,9 @@ class Token implements TokenInterface
     protected ?DateTimeInterface $frozenUntil;
 
     /**
-     * @var \DateTime
-     *
      * @ORM\Column(name="created_at", type="datetime")
      */
-    protected DateTimeInterface $createdAt;
+    protected ?DateTimeInterface $createdAt;
 
     /**
      * @ORM\Column(name="updated_at", type="datetime", nullable=true)
@@ -140,7 +138,7 @@ class Token implements TokenInterface
     /**
      * @var boolean
      */
-    protected bool $frozen;
+    protected ?bool $frozen;
 
     /**
      * @return integer

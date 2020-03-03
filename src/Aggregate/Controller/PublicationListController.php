@@ -1,21 +1,26 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Aggregate\Controller;
 
 use App\Cache\RedisCache;
+use App\Infrastructure\DependencyInjection\Publication\PublicationListRepositoryTrait;
 use App\Infrastructure\Security\Cors\CorsHeadersAwareTrait;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use App\Api\Repository\PublicationListRepository;
+use function array_key_exists;
+use function is_array;
+use const JSON_THROW_ON_ERROR;
 
-class AggregateController
+class PublicationListController
 {
     use CorsHeadersAwareTrait;
+    use PublicationListRepositoryTrait;
 
     /**
      * @var PublicationListRepository
      */
-    public PublicationListRepository $aggregateRepository;
 
     /**
      * @var RedisCache
@@ -31,7 +36,7 @@ class AggregateController
         return $this->applyToAggregateCollection(
             $request,
             function ($aggregateIds) {
-                $this->aggregateRepository->bulkRemoveAggregates($aggregateIds);
+                $this->publicationListRepository->bulkRemoveAggregates($aggregateIds);
                 $client = $this->redisCache->getClient();
                 $client->set('aggregates.recent_delete', json_encode($aggregateIds));
             }
@@ -42,14 +47,17 @@ class AggregateController
      * @param Request $request
      * @return JsonResponse
      */
-    public function collectAggregatesStatuses(Request $request)
+    public function collectAggregatesStatuses(Request $request): JsonResponse
     {
         return $this->applyToAggregateCollection(
             $request,
             function ($aggregateIds) {
-                $this->aggregateRepository->publishStatusesForAggregates($aggregateIds);
+                $this->publicationListRepository->publishStatusesForAggregates($aggregateIds);
                 $client = $this->redisCache->getClient();
-                $client->set('aggregates.recent_statuses_collect', json_encode($aggregateIds));
+                $client->set(
+                    'aggregates.recent_statuses_collect',
+                    \json_encode($aggregateIds, JSON_THROW_ON_ERROR)
+                );
             }
         );
     }
@@ -63,10 +71,30 @@ class AggregateController
         return $this->applyToAggregateCollection(
             $request,
             function ($aggregateIds) {
-                $this->aggregateRepository->resetTotalStatusesForAggregates($aggregateIds);
+                $this->publicationListRepository->resetTotalStatusesForAggregates($aggregateIds);
                 $client = $this->redisCache->getClient();
                 $client->set('aggregates.total_statuses_reset', json_encode($aggregateIds));
             }
+        );
+    }
+
+    public function getPublicationLists(Request $request): JsonResponse
+    {
+        $memberOrJsonResponse = $this->authenticateMember($request);
+        if ($memberOrJsonResponse instanceof JsonResponse) {
+            return $memberOrJsonResponse;
+        }
+
+        $publicationLists = $this->publicationListRepository
+            ->getAllPublicationLists($request);
+
+        return new JsonResponse(
+            $publicationLists,
+            200,
+            $this->getAccessControlOriginHeaders(
+                $this->environment,
+                $this->allowedOrigin
+            )
         );
     }
 
@@ -75,8 +103,10 @@ class AggregateController
      * @param callable $apply
      * @return JsonResponse
      */
-    private function applyToAggregateCollection(Request $request, callable $apply): JsonResponse
-    {
+    private function applyToAggregateCollection(
+        Request $request,
+        callable $apply
+    ): JsonResponse {
         if ($request->isMethod('OPTIONS')) {
             return $this->getCorsOptionsResponse(
                 $this->environment,
@@ -89,11 +119,16 @@ class AggregateController
             $this->allowedOrigin
         );
 
-        $decodedContent = json_decode($request->getContent(), $decodeAsAssociativeArray = true);
-        if (json_last_error() !== JSON_ERROR_NONE ||
-            !is_array($decodedContent) ||
+        $decodedContent = \json_decode(
+            $request->getContent(),
+            $decodeAsAssociativeArray = true,
+            512,
+            JSON_THROW_ON_ERROR
+        );
+        if (!is_array($decodedContent) ||
             !array_key_exists('params', $decodedContent) ||
-            !array_key_exists('aggregateIds', $decodedContent['params'])
+            !array_key_exists('aggregateIds', $decodedContent['params']) ||
+            json_last_error() !== JSON_ERROR_NONE
         ) {
             return new JsonResponse(
                 'Could not process aggregates without valid identifiers',
@@ -102,7 +137,7 @@ class AggregateController
             );
         }
 
-        if (count($decodedContent['params']['aggregateIds']) > 0) {
+        if (\count($decodedContent['params']['aggregateIds']) > 0) {
             $apply($decodedContent['params']['aggregateIds']);
         }
 

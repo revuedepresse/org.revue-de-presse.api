@@ -3,10 +3,15 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Security\Cors;
 
+use App\Infrastructure\DependencyInjection\Security\Authentication\HttpAuthenticatorTrait;
+use App\Infrastructure\Security\Exception\UnauthorizedRequestException;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 
 trait CorsHeadersAwareTrait
 {
+    use HttpAuthenticatorTrait;
+
     private string $environment;
 
     private string $allowedOrigin;
@@ -15,6 +20,29 @@ trait CorsHeadersAwareTrait
     {
         $this->allowedOrigin = $allowedOrigin;
         $this->environment = $environment;
+    }
+
+    private function authenticateMember(Request $request)
+    {
+        if ($request->isMethod('OPTIONS')) {
+            return $this->getCorsOptionsResponse(
+                $this->environment,
+                $this->allowedOrigin
+            );
+        }
+
+        $corsHeaders              = $this->getAccessControlOriginHeaders($this->environment, $this->allowedOrigin);
+        $unauthorizedJsonResponse = new JsonResponse(
+            'Unauthorized request',
+            403,
+            $corsHeaders
+        );
+
+        try {
+            return $this->httpAuthenticator->authenticateMember($request);
+        } catch (UnauthorizedRequestException $exception) {
+            return $unauthorizedJsonResponse;
+        }
     }
 
     /**

@@ -1311,8 +1311,7 @@ class Accessor implements ApiAccessorInterface,
 
         return $member->isProtected()
             || $member->hasBeenDeclaredAsNotFound()
-            || $member->isSuspended()
-            || $member->isAWhisperer();
+            || $member->isSuspended();
     }
 
     /**
