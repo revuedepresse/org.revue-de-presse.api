@@ -1,5 +1,5 @@
 [program:handle_news_messages]
-command=/bin/bash -c 'cd /data/repositories/press-review && make handle-news-messages'
+command=/bin/bash -c 'export PROJECT_NAME=press-review && cd /data/repositories/press-review && make handle-news-messages'
 numprocs=8
 numprocs_start=0
 process_name=%(program_name)s_%(process_num)02d
