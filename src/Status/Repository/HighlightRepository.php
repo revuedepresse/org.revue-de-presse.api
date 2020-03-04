@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Status\Repository;
 
@@ -8,37 +9,28 @@ use App\Conversation\ConversationAwareTrait;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Types\Type;
-use Doctrine\ORM\EntityRepository;
-use Doctrine\ORM\Mapping\ClassMetadata;
+use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
+use Psr\Log\LoggerInterface;
 
 class HighlightRepository extends ServiceEntityRepository implements PaginationAwareRepositoryInterface
 {
     use PaginationAwareTrait;
     use ConversationAwareTrait;
 
-    /**
-     * @var string
-     */
-    public $aggregate;
+    public string $aggregate;
 
-    /**
-     * @var string
-     */
-    public $adminRouteName;
+    public string $adminRouteName;
 
-    /**
-     * @var \Psr\Log\LoggerInterface
-     */
-    public $logger;
+    public LoggerInterface $logger;
 
-    const TABLE_ALIAS = 'h';
+    private const TABLE_ALIAS = 'h';
 
     /**
      * @param SearchParams $searchParams
      * @return int
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     * @throws NonUniqueResultException
      */
     public function countTotalPages(SearchParams $searchParams): int
     {
