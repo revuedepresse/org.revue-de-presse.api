@@ -45,16 +45,16 @@ services:
                     - read
         env_file:
             - ../../.env.local
-        ports:
-            - "3306:3306"
+        expose:
+            - "3306"
         volumes:
             - ../volumes/mysql:/var/lib/mysql
 
     db_write:
         build: ./mariadb
         restart: always
-        ports:
-            - "3307:3306"
+        expose:
+            - "3306"
         env_file:
             - ../../.env.local
         networks:
@@ -69,8 +69,6 @@ services:
         build: ./rabbitmq
         expose:
             - "5672"
-        ports:
-            - "127.0.0.1:15672:15672"
         networks:
             press-review-network:
                 aliases:
