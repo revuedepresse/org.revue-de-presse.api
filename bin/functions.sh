@@ -138,7 +138,13 @@ function handle_messages {
 
     cd "${PROJECT_DIR}/provisioning/containers" || exit
 
-    command="docker-compose exec -d worker ${SCRIPT}"
+    local project_name
+    project_name=''
+    if [ -n "${PROJECT_NAME}" ]; then
+        project_name='-p '"$PROJECT_NAME"
+    fi
+
+    command="docker-compose ${project_name} exec -d worker ${SCRIPT}"
     echo 'Executing command: "'$command'"'
     echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
     echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
