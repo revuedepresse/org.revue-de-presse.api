@@ -889,8 +889,11 @@ function run_php_script() {
     local network
     network=`get_network_option`
 
+    local project_name
+    project_name="$(get_project_name)"
+
     local command
-    command=$(echo -n 'docker-compose exec'"${option_detached}"' worker '"${script}")
+    command=$(echo -n 'docker-compose '"${project_name}"' exec'"${option_detached}"' worker '"${script}")
 
     echo 'About to execute "'"${command}"'"'
 
