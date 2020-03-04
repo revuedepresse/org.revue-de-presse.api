@@ -1109,6 +1109,8 @@ function dispatch_messages_for_news_list {
         query_restriction='--query_restriction='"${QUERY_RESTRICTION}"
     fi
 
+    local list_option
+    list_option=''
     if [ -n "${list_name}" ];
     then
         local list_option='--list='"'${list_name}'"
@@ -1117,6 +1119,8 @@ function dispatch_messages_for_news_list {
             list_option='--lists='"'${multiple_lists}'"
         fi
     fi
+
+    cd ./provisioning/containers || exit
 
     local arguments="${priority_option}"'--screen_name='"${username}"' '"${list_option}"' '"${query_restriction}"
     run_command 'bin/console press-review:dispatch-messages-to-fetch-member-statuses '"${arguments}"
