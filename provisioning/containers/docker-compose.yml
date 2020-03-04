@@ -19,8 +19,6 @@ services:
             - mysql
         depends_on:
             - cache
-            - db_read
-            - db_write
             - worker
 
     worker:
@@ -32,9 +30,6 @@ services:
         volumes:
             - ../containers/php/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini
             - ../../:/var/www/devobs
-        depends_on:
-            - db_read
-            - db_write
 
     db_read:
         build: ./mysql
@@ -98,4 +93,4 @@ networks:
         driver: bridge
         ipam:
             config:
-                - subnet: 192.169.195.0/20
+                - subnet: 192.169.194.0/25
