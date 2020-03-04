@@ -1,6 +1,6 @@
 [program:handle_news_messages]
-command=/data/repositories/daily-press-review/bin/consume_twitter_api_for_news.sh
-numprocs=4
+command=/bin/bash -c 'cd /data/repositories/press-review && make handle-news-messages'
+numprocs=8
 numprocs_start=0
 process_name=%(program_name)s_%(process_num)02d
 priority=999
@@ -14,10 +14,10 @@ stopwaitsecs=10
 killasgroup=false
 user=weaver
 redirect_stderr=false
-stdout_logfile=/data/repositories/daily-press-review/var/logs/consume_twitter_api.out
+stdout_logfile=/data/repositories/press-review/var/logs/consume_twitter_api.out
 stdout_logfile_maxbytes=250MB
 stdout_logfile_backups=10
-stderr_logfile=/data/repositories/daily-press-review/var/logs/consume_twitter_api.err
+stderr_logfile=/data/repositories/press-review/var/logs/consume_twitter_api.err
 stderr_logfile_maxbytes=250MB
 stderr_logfile_backups=10
-environment=MAX_PROCESSES=4,MEMORY_LIMIT=128M,MESSAGES=10,PROJECT_DIR="/data/repositories/daily-press-review"
+environment=MEMORY_LIMIT=128M,MESSAGES=500,TIME_LIMIT=300,PROJECT_DIR="/data/repositories/press-review"
