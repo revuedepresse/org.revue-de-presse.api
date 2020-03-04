@@ -4,6 +4,16 @@ function get_docker_network() {
     echo 'press-review-network'
 }
 
+function get_project_name() {
+    local project_name
+    project_name=''
+    if [ -n "${PROJECT_NAME}" ]; then
+        project_name='-p '"$PROJECT_NAME"
+    fi
+
+    echo "${project_name}"
+}
+
 function create_network() {
     local network
     network=`get_docker_network`
@@ -139,11 +149,7 @@ function handle_messages {
     cd "${PROJECT_DIR}/provisioning/containers" || exit
 
     local project_name
-    project_name=''
-    if [ -n "${PROJECT_NAME}" ]; then
-        project_name='-p '"$PROJECT_NAME"
-    fi
-
+    project_name=$(get_project_name)
     command="docker-compose ${project_name} exec -d worker ${SCRIPT}"
     echo 'Executing command: "'$command'"'
     echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
@@ -654,7 +660,10 @@ function list_amqp_queues() {
     local rabbitmq_vhost
     rabbitmq_vhost="$(cat <(cat .env.local | grep STATUS=amqp | sed -E 's#.+(/.+)/[^/]*$#\1#' | sed -E 's/\/%2f/\//g'))"
     cd provisioning/containers || exit
-    docker-compose exec messenger watch -n1 'rabbitmqctl list_queues -p '"${rabbitmq_vhost}"
+
+    local project_name
+    project_name="$(get_project_name)"
+    /bin/bash -c "docker-compose ${project_name} exec messenger watch -n1 'rabbitmqctl list_queues -p ${rabbitmq_vhost}'"
 }
 
 function set_permissions_in_apache_container() {
