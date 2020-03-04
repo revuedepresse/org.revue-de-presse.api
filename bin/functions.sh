@@ -1097,14 +1097,6 @@ function dispatch_messages_for_news_list {
         return
     fi
 
-    if [ -z "${list_name}" ] && [ -z "${QUERY_RESTRICTION}" ];
-    then
-        echo 'Please export a valid list_name: export list_name="news :: France"'
-        echo 'Otherwise export a restriction query : export QUERY_RESTRICTION="Topic"'
-
-        return
-    fi
-
     local priority_option=''
     if [ -n "${in_priority}" ];
     then
@@ -1117,10 +1109,13 @@ function dispatch_messages_for_news_list {
         query_restriction='--query_restriction='"${QUERY_RESTRICTION}"
     fi
 
-    local list_option='--list='"'${list_name}'"
-    if [ -n "${multiple_lists}" ];
+    if [ -n "${list_name}" ];
     then
-        list_option='--lists='"'${multiple_lists}'"
+        local list_option='--list='"'${list_name}'"
+        if [ -n "${multiple_lists}" ];
+        then
+            list_option='--lists='"'${multiple_lists}'"
+        fi
     fi
 
     local arguments="${priority_option}"'--screen_name='"${username}"' '"${list_option}"' '"${query_restriction}"
