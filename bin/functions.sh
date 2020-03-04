@@ -911,6 +911,8 @@ function run_php() {
         arguments="${ARGUMENT}"
     fi
 
+    cd ./provisioning/containers || exit
+
     local command
     command=$(echo -n 'docker-compose -f ./provisioning/containers/docker-compose.yml exec -T worker '"${arguments}")
 
@@ -1119,8 +1121,6 @@ function dispatch_messages_for_news_list {
             list_option='--lists='"'${multiple_lists}'"
         fi
     fi
-
-    cd ./provisioning/containers || exit
 
     local arguments="${priority_option}"'--screen_name='"${username}"' '"${list_option}"' '"${query_restriction}"
     run_command 'bin/console press-review:dispatch-messages-to-fetch-member-statuses '"${arguments}"
