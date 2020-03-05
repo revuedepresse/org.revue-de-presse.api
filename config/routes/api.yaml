@@ -65,6 +65,13 @@ member_subscriptions:
     path:     '/api/twitter/admin/member-subscriptions'
     defaults: { _controller: controller.subscription:getMemberSubscriptions }
 
+publication:
+    path:     '/api/twitter/publication/{publicationId}'
+    defaults:       { _controller: controller.publication:getPublication }
+    methods:        [GET, OPTIONS]
+    requirements:
+        status_id: \d+
+
 publication_lists:
     path:     '/api/twitter/admin/publication-lists'
     defaults: { _controller: controller.publication_list:getPublicationLists }

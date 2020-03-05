@@ -64,6 +64,17 @@ services:
         properties:
             memberProfileAccessor:  '@App\Infrastructure\Twitter\Api\Accessor\MemberProfileAccessor'
 
+    controller.publication:
+        public: true
+        class: 'App\Infrastructure\Publication\Controller\PublicationController'
+        arguments:
+            - '%allowed.origin%'
+            - '%kernel.environment%'
+        calls:
+            - [ 'setLogger',            [ '@logger' ] ]
+            - [ 'setStatusAccessor',    [ '@App\Accessor\StatusAccessor' ]]
+            - [ 'setStatusRepository',  [ '@App\Api\Repository\StatusRepository' ]]
+
     controller.publication_list:
         public: true
         class: 'App\Aggregate\Controller\PublicationListController'
