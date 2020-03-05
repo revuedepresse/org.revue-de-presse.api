@@ -26,11 +26,6 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
     use ConversationAwareTrait;
 
     /**
-     * @var StatusRepositoryInterface
-     */
-    public StatusRepositoryInterface $statusRepository;
-
-    /**
      * @var PublicationListRepository
      */
     public PublicationListRepository $aggregateRepository;

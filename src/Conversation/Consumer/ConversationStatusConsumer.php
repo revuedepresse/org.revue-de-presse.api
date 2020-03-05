@@ -7,6 +7,7 @@ use App\Accessor\StatusAccessor;
 use App\Aggregate\AggregateAwareTrait;
 use App\Amqp\AmqpMessageAwareTrait;
 use App\Conversation\ConversationAwareTrait;
+use App\Infrastructure\Repository\Membership\MemberRepository;
 use App\Membership\Entity\MemberInterface;
 use App\Operation\OperationClock;
 use App\Twitter\Exception\SuspendedAccountException;
@@ -35,25 +36,15 @@ class ConversationStatusConsumer
 
     const ERROR_CODE_USER_NOT_FOUND = 100;
 
-    /**
-     * @var OperationClock
-     */
-    public $operationClock;
+    public OperationClock $operationClock;
 
-    /**
-     * @var EntityManager
-     */
     public EntityManagerInterface $entityManager;
 
-    /**
-     * @var PublicationListRepository
-     */
     public PublicationListRepository $aggregateRepository;
 
-    /**
-     * @var LoggerInterface
-     */
-    protected $logger;
+    protected LoggerInterface $logger;
+
+    protected MemberRepository $userRepository;
 
     /**
      * @param \Psr\Log\LoggerInterface $logger
@@ -62,21 +53,6 @@ class ConversationStatusConsumer
     {
         $this->logger = $logger;
     }
-
-    /**
-     * @var StatusAccessor
-     */
-    public $statusAccessor;
-
-    /**
-     * @var StatusRepository
-     */
-    public $statusRepository;
-
-    /**
-     * @var \App\Infrastructure\Repository\Membership\MemberRepository
-     */
-    protected $userRepository;
 
     /**
      * @param EntityRepository $userRepository

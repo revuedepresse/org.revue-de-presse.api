@@ -95,7 +95,7 @@ class StatusAccessor implements StatusAccessorInterface
     }
 
     /**
-     * @param string $identifier
+     * @param string $statusId
      * @param bool   $skipExistingStatus
      * @param bool   $extractProperties
      *
@@ -103,7 +103,7 @@ class StatusAccessor implements StatusAccessorInterface
      * @throws Exception
      */
     public function refreshStatusByIdentifier(
-        string $identifier,
+        ?string $statusId,
         bool $skipExistingStatus = false,
         bool $extractProperties = true
     ) {
@@ -111,7 +111,8 @@ class StatusAccessor implements StatusAccessorInterface
 
         $status = null;
         if (!$skipExistingStatus) {
-            $status = $this->statusRepository->findStatusIdentifiedBy($identifier);
+            $status = $this->statusRepository
+                ->findStatusIdentifiedBy($statusId);
         }
 
         if ($status !== null && !empty($status)) {
@@ -119,7 +120,7 @@ class StatusAccessor implements StatusAccessorInterface
         }
 
         $this->apiAccessor->shouldRaiseExceptionOnApiLimit = true;
-        $status = $this->apiAccessor->showStatus($identifier);
+        $status = $this->apiAccessor->showStatus($statusId);
 
         $this->entityManager->clear();
 
@@ -131,12 +132,12 @@ class StatusAccessor implements StatusAccessorInterface
         } catch (NotFoundMemberException $notFoundMemberException) {
             $this->logger->info($notFoundMemberException->getMessage());
 
-            return $this->findStatusIdentifiedBy($identifier);
+            return $this->findStatusIdentifiedBy($statusId);
         } catch (Exception $exception) {
             $this->logger->info($exception->getMessage());
         }
 
-        return $this->findStatusIdentifiedBy($identifier);
+        return $this->findStatusIdentifiedBy($statusId);
     }
 
     public function ensureMemberHavingNameExists(string $memberName): MemberInterface
@@ -206,7 +207,9 @@ class StatusAccessor implements StatusAccessorInterface
      */
     private function findStatusIdentifiedBy(string $identifier)
     {
-        $status = $this->statusRepository->findStatusIdentifiedBy($identifier);
+        $status = $this->statusRepository->findStatusIdentifiedBy(
+            $identifier
+        );
 
         if ($status === null) {
             return new NullStatus();

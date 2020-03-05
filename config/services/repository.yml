@@ -116,8 +116,8 @@ services:
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - 'App\Aggregate\Entity\TimelyStatus'
-        properties:
-            statusRepository:    '@App\Api\Repository\StatusRepository'
+        calls:
+            - [ 'setStatusRepository', [ '@App\Api\Repository\StatusRepository' ] ]
 
     repository.network:
         class:                            'App\Member\Repository\NetworkRepository'

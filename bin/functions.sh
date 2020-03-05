@@ -4,6 +4,16 @@ function get_docker_network() {
     echo 'press-review-network'
 }
 
+function get_project_name() {
+    local project_name
+    project_name=''
+    if [ -n "${PROJECT_NAME}" ]; then
+        project_name='-p '"$PROJECT_NAME"
+    fi
+
+    echo "${project_name}"
+}
+
 function create_network() {
     local network
     network=`get_docker_network`
@@ -138,7 +148,9 @@ function handle_messages {
 
     cd "${PROJECT_DIR}/provisioning/containers" || exit
 
-    command="docker-compose exec -d worker ${SCRIPT}"
+    local project_name
+    project_name=$(get_project_name)
+    command="docker-compose ${project_name} exec -d worker ${SCRIPT}"
     echo 'Executing command: "'$command'"'
     echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
     echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
@@ -648,7 +660,10 @@ function list_amqp_queues() {
     local rabbitmq_vhost
     rabbitmq_vhost="$(cat <(cat .env.local | grep STATUS=amqp | sed -E 's#.+(/.+)/[^/]*$#\1#' | sed -E 's/\/%2f/\//g'))"
     cd provisioning/containers || exit
-    docker-compose exec messenger watch -n1 'rabbitmqctl list_queues -p '"${rabbitmq_vhost}"
+
+    local project_name
+    project_name="$(get_project_name)"
+    /bin/bash -c "docker-compose ${project_name} exec messenger watch -n1 'rabbitmqctl list_queues -p ${rabbitmq_vhost}'"
 }
 
 function set_permissions_in_apache_container() {
@@ -874,8 +889,11 @@ function run_php_script() {
     local network
     network=`get_network_option`
 
+    local project_name
+    project_name="$(get_project_name)"
+
     local command
-    command=$(echo -n 'docker-compose exec'"${option_detached}"' worker '"${script}")
+    command=$(echo -n 'docker-compose '"${project_name}"' exec'"${option_detached}"' worker '"${script}")
 
     echo 'About to execute "'"${command}"'"'
 
@@ -892,6 +910,8 @@ function run_php() {
     then
         arguments="${ARGUMENT}"
     fi
+
+    cd ./provisioning/containers || exit
 
     local command
     command=$(echo -n 'docker-compose -f ./provisioning/containers/docker-compose.yml exec -T worker '"${arguments}")
@@ -1079,14 +1099,6 @@ function dispatch_messages_for_news_list {
         return
     fi
 
-    if [ -z "${list_name}" ] && [ -z "${QUERY_RESTRICTION}" ];
-    then
-        echo 'Please export a valid list_name: export list_name="news :: France"'
-        echo 'Otherwise export a restriction query : export QUERY_RESTRICTION="Topic"'
-
-        return
-    fi
-
     local priority_option=''
     if [ -n "${in_priority}" ];
     then
@@ -1099,10 +1111,15 @@ function dispatch_messages_for_news_list {
         query_restriction='--query_restriction='"${QUERY_RESTRICTION}"
     fi
 
-    local list_option='--list='"'${list_name}'"
-    if [ -n "${multiple_lists}" ];
+    local list_option
+    list_option=''
+    if [ -n "${list_name}" ];
     then
-        list_option='--lists='"'${multiple_lists}'"
+        local list_option='--list='"'${list_name}'"
+        if [ -n "${multiple_lists}" ];
+        then
+            list_option='--lists='"'${multiple_lists}'"
+        fi
     fi
 
     local arguments="${priority_option}"'--screen_name='"${username}"' '"${list_option}"' '"${query_restriction}"

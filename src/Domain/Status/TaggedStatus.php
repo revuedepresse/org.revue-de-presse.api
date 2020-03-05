@@ -263,15 +263,16 @@ class TaggedStatus
     public function toLegacyProps(): array
     {
         return [
-            'hash'         => $this->hash,
-            'text'         => $this->text,
-            'screen_name'  => $this->screenName,
-            'name'         => $this->name,
-            'user_avatar'  => $this->avatarUrl,
-            'status_id'    => $this->documentId,
-            'api_document' => $this->document,
-            'created_at'   => $this->publishedAt,
-            'identifier'   => $this->token,
+            'hash'              => $this->hash,
+            'text'              => $this->text,
+            'screen_name'       => $this->screenName,
+            'name'              => $this->name,
+            'user_avatar'       => $this->avatarUrl,
+            'status_id'         => $this->documentId,
+            'api_document'      => $this->document,
+            'original_document' => $this->document,
+            'created_at'        => $this->publishedAt,
+            'identifier'        => $this->token,
         ];
     }
 

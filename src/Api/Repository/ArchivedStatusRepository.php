@@ -227,8 +227,14 @@ class ArchivedStatusRepository extends ResourceRepository implements
 
         return Normalizer::normalizeAll(
             [$statusDocument],
-            function ($properties) {
-                return $properties;
+            function ($properties) use ($status) {
+                return array_merge(
+                    $properties,
+                    [
+                        'identifier' => $status->getIdentifier(),
+                        'api_document' => $status->getApiDocument(),
+                    ]
+                );
             },
             $this->appLogger
         )->first()->toLegacyProps();
