@@ -167,13 +167,13 @@ services:
         class:                        "%weaving_the_web_amqp.consumer.conversation_status.class%"
         calls:
             - [ 'setLogger',            [ '@monolog.logger.status'] ]
+            - [ 'setStatusAccessor',    [ '@App\Accessor\StatusAccessor' ] ]
+            - [ 'setStatusRepository',  [ '@App\Api\Repository\StatusRepository' ] ]
             - [ 'setUserRepository',    [ '@user_manager'] ]
         properties:
             aggregateRepository:    '@App\Api\Repository\PublicationListRepository'
             entityManager:          '@doctrine.orm.entity_manager'
             operationClock:         '@operation.clock'
-            statusAccessor:         '@App\Accessor\StatusAccessor'
-            statusRepository:       '@App\Api\Repository\StatusRepository'
 
     weaving_the_web_amqp.consumer.timely_status:
         class:                        "%weaving_the_web_amqp.consumer.timely_status.class%"
