@@ -3,9 +3,10 @@ declare(strict_types=1);
 
 namespace App\Status\Repository;
 
-use App\Infrastructure\Http\SearchParams;
 use App\Aggregate\Repository\PaginationAwareTrait;
 use App\Conversation\ConversationAwareTrait;
+use App\Infrastructure\DependencyInjection\LoggerTrait;
+use App\Infrastructure\Http\SearchParams;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Types\Type;
@@ -18,12 +19,11 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
 {
     use PaginationAwareTrait;
     use ConversationAwareTrait;
+    use LoggerTrait;
 
     public string $aggregate;
 
     public string $adminRouteName;
-
-    public LoggerInterface $logger;
 
     private const TABLE_ALIAS = 'h';
 
@@ -414,13 +414,15 @@ QUERY;
                     $extractedProperties['status']['favorite_count'] = $decodedDocument['retweeted_status']['favorite_count'];
                 }
 
-                unset($status['total_retweets']);
-                unset($status['total_favorites']);
-                unset($status['original_document']);
-                unset($status['screen_name']);
-                unset($status['author_avatar']);
-                unset($status['status_id']);
-                unset($status['last_update']);
+                unset(
+                    $status['total_retweets'],
+                    $status['total_favorites'],
+                    $status['original_document'],
+                    $status['screen_name'],
+                    $status['author_avatar'],
+                    $status['status_id'],
+                    $status['last_update']
+                );
 
                 return array_merge($status, $extractedProperties);
             },

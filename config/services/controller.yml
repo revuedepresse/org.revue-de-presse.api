@@ -66,12 +66,14 @@ services:
 
     controller.publication:
         public: true
-        class: 'App\Infrastructure\Publication\Controller\PublicationController'
+        class: 'App\Infrastructure\Status\Controller\PublicationController'
         arguments:
             - '%allowed.origin%'
             - '%kernel.environment%'
         calls:
+            - [ 'setCache',                 [ '@app.cache.redis' ]]
             - [ 'setLogger',            [ '@logger' ] ]
+            - [ 'setPublicationRepository', [ '@App\Twitter\Repository\PublicationRepository' ]]
             - [ 'setStatusAccessor',    [ '@App\Accessor\StatusAccessor' ]]
             - [ 'setStatusRepository',  [ '@App\Api\Repository\StatusRepository' ]]
 

@@ -35,6 +35,13 @@ services:
             - '@App\Infrastructure\Translation\Translator'
             - '@monolog.logger.status'
 
+    App\Infrastructure\Status\Formatter\PublicationFormatter:
+        public: true
+        class: 'App\Infrastructure\Status\Formatter\PublicationFormatter'
+        calls:
+            - [ 'setStatusAccessor',   [ '@App\Accessor\StatusAccessor' ] ]
+            - [ 'setStatusRepository', [ '@App\Api\Repository\StatusRepository' ] ]
+
     App\Api\Repository\StatusRepository:
         class:  '\App\Api\Repository\StatusRepository'
         arguments:

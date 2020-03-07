@@ -72,6 +72,10 @@ publication:
     requirements:
         status_id: \d+
 
+publications:
+    path:     '/api/twitter/admin/publications'
+    defaults: { _controller: controller.publication:getPublications }
+
 publication_lists:
     path:     '/api/twitter/admin/publication-lists'
     defaults: { _controller: controller.publication_list:getPublicationLists }
