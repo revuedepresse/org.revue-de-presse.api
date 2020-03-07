@@ -108,7 +108,9 @@ class StatusPersistence implements StatusPersistenceInterface
         $this->flushAndResetManagerOnUniqueConstraintViolation($this->entityManager);
 
         $firstStatus = $statusCollection->first();
-        $screenName  = $firstStatus instanceof StatusInterface ? $firstStatus->getScreenName() : null;
+        $screenName  = $firstStatus instanceof StatusInterface ?
+            $firstStatus->getScreenName() :
+            $statuses['screen_name'];
 
         return [
             self::PROPERTY_NORMALIZED_STATUS => $propertiesCollection,
