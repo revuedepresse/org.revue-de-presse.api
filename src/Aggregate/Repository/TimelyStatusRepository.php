@@ -3,13 +3,12 @@ declare(strict_types=1);
 
 namespace App\Aggregate\Repository;
 
-use App\Infrastructure\Http\SearchParams;
 use App\Aggregate\Entity\TimelyStatus;
 use App\Api\Entity\Aggregate;
 use App\Api\Repository\PublicationListRepository;
 use App\Conversation\ConversationAwareTrait;
 use App\Domain\Status\StatusInterface;
-use App\Infrastructure\Repository\Status\StatusRepositoryInterface;
+use App\Infrastructure\Http\SearchParams;
 use App\Infrastructure\Repository\Status\TimelyStatusRepositoryInterface;
 use App\TimeRange\TimeRangeAwareInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -22,8 +21,10 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
 {
     private const TABLE_ALIAS = 't';
 
-    use PaginationAwareTrait;
     use ConversationAwareTrait;
+
+    /**
+    use PaginationAwareTrait;
 
     /**
      * @var PublicationListRepository

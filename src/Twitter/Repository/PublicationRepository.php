@@ -7,6 +7,7 @@ use App\Api\Adapter\StatusToArray;
 use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;
 use App\Domain\Status\StatusInterface;
+use App\Infrastructure\DependencyInjection\Formatter\PublicationFormatterTrait;
 use App\Operation\Collection\Collection;
 use App\Operation\Collection\CollectionInterface;
 use App\Twitter\Entity\Publication;
@@ -21,6 +22,10 @@ use Doctrine\ORM\EntityRepository;
  */
 class PublicationRepository extends ServiceEntityRepository implements PublicationRepositoryInterface
 {
+    use PublicationFormatterTrait;
+
+    private const TABLE_ALIAS = 'p';
+
     public EntityManagerInterface $entityManager;
 
     public function setEntityManager(EntityManagerInterface $entityManager): void
@@ -202,5 +207,16 @@ QUERY
 
             $statuses = $this->findLastBatchOfStatus();
         }
+    }
+
+    public function getLatestPublications(): Collection
+    {
+        $queryBuilder = $this->createQueryBuilder(self::TABLE_ALIAS);
+        $queryBuilder->setMaxResults(100);
+        $queryBuilder->orderBy(self::TABLE_ALIAS.'.publishedAt',  'desc');
+
+        $result = $queryBuilder->getQuery()->getResult();
+
+        return $this->publicationFormatter->format(new Collection($result));
     }
 }

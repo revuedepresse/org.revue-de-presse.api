@@ -6,35 +6,33 @@ use App\Accessor\Exception\NotFoundStatusException;
 use App\Accessor\StatusAccessor;
 use App\Aggregate\AggregateAwareTrait;
 use App\Amqp\AmqpMessageAwareTrait;
-use App\Conversation\ConversationAwareTrait;
-use App\Infrastructure\Repository\Membership\MemberRepository;
-use App\Membership\Entity\MemberInterface;
-use App\Operation\OperationClock;
-use App\Twitter\Exception\SuspendedAccountException;
-use Doctrine\Common\Persistence\Mapping\MappingException;
-use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityRepository;
-
-use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\OptimisticLockException;
-
-use Psr\Log\LoggerInterface;
-
 use App\Api\Entity\Status;
 use App\Api\Repository\PublicationListRepository;
 use App\Api\Repository\StatusRepository;
-use App\Twitter\Exception\NotFoundMemberException;
-use App\Twitter\Exception\UnavailableResourceException;
+use App\Conversation\ConversationAwareTrait;
+use App\Infrastructure\DependencyInjection\LoggerTrait;
+use App\Infrastructure\Repository\Membership\MemberRepository;
 use App\Membership\Entity\Member;
+use App\Membership\Entity\MemberInterface;
+use App\Operation\OperationClock;
+use App\Twitter\Exception\NotFoundMemberException;
+use App\Twitter\Exception\SuspendedAccountException;
+use App\Twitter\Exception\UnavailableResourceException;
+use Doctrine\Common\Persistence\Mapping\MappingException;
+use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\OptimisticLockException;
+use Psr\Log\LoggerInterface;
 
 class ConversationStatusConsumer
 {
     use AggregateAwareTrait;
-    use ConversationAwareTrait;
     use AmqpMessageAwareTrait;
+    use ConversationAwareTrait;
+    use LoggerTrait;
 
-    const ERROR_CODE_USER_NOT_FOUND = 100;
+    private const ERROR_CODE_USER_NOT_FOUND = 100;
 
     public OperationClock $operationClock;
 
@@ -42,17 +40,7 @@ class ConversationStatusConsumer
 
     public PublicationListRepository $aggregateRepository;
 
-    protected LoggerInterface $logger;
-
     protected MemberRepository $userRepository;
-
-    /**
-     * @param \Psr\Log\LoggerInterface $logger
-     */
-    public function setLogger($logger)
-    {
-        $this->logger = $logger;
-    }
 
     /**
      * @param EntityRepository $userRepository
@@ -64,11 +52,13 @@ class ConversationStatusConsumer
 
     /**
      * @param AmqpMessage $message
+     *
      * @return bool|mixed
-     * @throws \Doctrine\ORM\NoResultException
+     * @throws MappingException
      * @throws NonUniqueResultException
      * @throws OptimisticLockException
-     * @throws \Exception
+     * @throws SuspendedAccountException
+     * @throws UnavailableResourceException
      */
     public function execute(AmqpMessage $message)
     {
@@ -217,10 +207,8 @@ class ConversationStatusConsumer
      * @param Status $status
      *
      * @return Member
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws NonUniqueResultException
      * @throws OptimisticLockException
+     * @throws \Doctrine\ORM\ORMException
      */
     private function ensureStatusAuthorExists(Status $status): Member
     {

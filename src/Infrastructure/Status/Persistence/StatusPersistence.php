@@ -110,7 +110,7 @@ class StatusPersistence implements StatusPersistenceInterface
         $firstStatus = $statusCollection->first();
         $screenName  = $firstStatus instanceof StatusInterface ?
             $firstStatus->getScreenName() :
-            $statuses['screen_name'];
+            null;
 
         return [
             self::PROPERTY_NORMALIZED_STATUS => $propertiesCollection,

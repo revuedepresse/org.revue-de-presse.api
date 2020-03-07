@@ -10,6 +10,7 @@ use App\Domain\Status\StatusInterface;
 use App\Infrastructure\DependencyInjection\Api\StatusAccessorTrait;
 use App\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use App\Twitter\Exception\NotFoundMemberException;
+use App\Twitter\Repository\PublicationInterface;
 use function array_key_exists;
 use function json_decode;
 
@@ -136,6 +137,15 @@ trait ConversationAwareTrait
                         'status_id'         => $status->getStatusId(),
                         'text'              => $status->getText(),
                         'original_document' => $status->getApiDocument(),
+                    ];
+                }
+
+                if ($status instanceof PublicationInterface) {
+                    $status = [
+                        'screen_name'       => $status->getScreenName(),
+                        'status_id'         => $status->getDocumentId(),
+                        'text'              => $status->getText(),
+                        'original_document' => $status->getDocument(),
                     ];
                 }
 
