@@ -148,6 +148,12 @@ doctrine:
                         is_bundle:  false
                         prefix:     App\Aggregate\Entity
                         type:       xml
+                    CollectPublicationEvent:
+                        alias:      'CollectPublicationEvent'
+                        dir:        '%kernel.project_dir%/config/model/collection'
+                        is_bundle:  false
+                        prefix:     App\Domain\Collection\Entity\CollectPublicationEvent
+                        type:       xml
                     Member:
                         alias:      'Member'
                         dir:        '%kernel.project_dir%/config/model/member'
