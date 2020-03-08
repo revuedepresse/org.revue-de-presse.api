@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Repository;
 
 use App\Api\Adapter\StatusToArray;
+use App\Api\Entity\Aggregate;
 use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;
 use App\Domain\Status\StatusInterface;
@@ -16,6 +17,7 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\Query\Expr\Join;
 
 /**
  * @package App\Twitter\Entity
@@ -217,9 +219,21 @@ QUERY
         $queryBuilder->select(self::TABLE_ALIAS);
         $queryBuilder->addSelect('
             JSON_EXTRACT('.self::TABLE_ALIAS.".document, '$.retweet_count') AS totalRetweets, 
-            JSON_EXTRACT(".self::TABLE_ALIAS.".document, '$.favorite_count') AS favoriteCount
+            JSON_EXTRACT(".self::TABLE_ALIAS.".document, '$.favorite_count') AS favoriteCount,
+            a.name as aggregateName
         ");
+        $queryBuilder->innerJoin(
+            Status::class,
+            's',
+            Join::WITH,
+            self::TABLE_ALIAS.'.documentId = s.statusId'
+        );
+        $queryBuilder->join(
+            's.aggregates',
+            'a'
+        );
         $queryBuilder->andWhere('DATE('.self::TABLE_ALIAS.'.publishedAt) = DATE(NOW())');
+        $queryBuilder->having('totalRetweets < 100');
         $queryBuilder->orderBy('totalRetweets',  'desc');
         $queryBuilder->setMaxResults(100);
 
