@@ -37,15 +37,18 @@ class OwnershipAccessor implements OwnershipAccessorInterface
     }
 
     /**
-     * @param string         $screenName
-     * @param TokenInterface $token
+     * @param string                $screenName
+     * @param TokenInterface        $token
+     *
+     * @param MemberOwnerships|null $memberOwnership
      *
      * @return MemberOwnerships
      * @throws OverCapacityException
      */
     public function getOwnershipsForMemberHavingScreenNameAndToken(
         string $screenName,
-        TokenInterface $token
+        TokenInterface $token,
+        MemberOwnerships $memberOwnership = null
     ): MemberOwnerships {
         $activeToken = $token;
         $totalUnfrozenToken = $this->tokenRepository->howManyUnfrozenTokenAreThere();
@@ -55,7 +58,15 @@ class OwnershipAccessor implements OwnershipAccessorInterface
         // or there is no token left to access the Twitter API
         while ($totalUnfrozenToken > 0 && $ownershipCollection->isEmpty()) {
             try {
-                $ownershipCollection = $this->accessor->getMemberOwnerships($screenName);
+                $nextPage = -1;
+                if ($memberOwnership instanceof MemberOwnerships) {
+                    $nextPage = $memberOwnership->ownershipCollection()->nextPage();
+                }
+
+                $ownershipCollection = $this->accessor->getMemberOwnerships(
+                    $screenName,
+                    $nextPage
+                );
             } catch (UnavailableResourceException $exception) {
                 $this->logger->info($exception->getMessage());
                 if ($ownershipCollection->isEmpty()) {

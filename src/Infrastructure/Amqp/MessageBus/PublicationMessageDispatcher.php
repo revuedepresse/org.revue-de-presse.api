@@ -148,6 +148,14 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
         }
 
         $listRestriction = $this->strategy->forWhichList();
+
+        // Try to find publication list by following the next cursor
+        if ($this->targetListHasNotBeenFound($ownerships, $listRestriction) &&
+            $ownerships->nextPage() !== -1) {
+            return $this->findNextBatchOfListOwnerships($ownerships);
+        }
+
+        // Change tokens
         if ($this->targetListHasNotBeenFound($ownerships, $listRestriction)) {
             $ownerships = $this->guardAgainstInvalidToken(
                 $ownerships,
@@ -155,6 +163,7 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
             );
         }
 
+        // Give up on the list
         if ($this->targetListHasNotBeenFound($ownerships, $listRestriction)) {
             $message = sprintf(
                 'Invalid list name ("%s"). Could not be found',
