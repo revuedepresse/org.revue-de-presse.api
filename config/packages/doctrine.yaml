@@ -110,6 +110,7 @@ parameters:
             substring_index: DoctrineExtensions\Query\Mysql\SubstringIndex
             unhex: DoctrineExtensions\Query\Mysql\Unhex
             uuid_short: DoctrineExtensions\Query\Mysql\UuidShort
+            json_extract: Scienta\DoctrineJsonFunctions\Query\AST\Functions\Mysql\JsonExtract
 
 doctrine:
     dbal:
