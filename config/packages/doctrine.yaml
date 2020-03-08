@@ -122,7 +122,7 @@ doctrine:
                 logging: false
             write:
                 url: '%env(resolve:DATABASE_WRITE_URL)%'
-                server_version: 'mariadb-10.3.22'
+                server_version: '5.7'
                 charset: utf8mb4
                 logging: false
         types:
