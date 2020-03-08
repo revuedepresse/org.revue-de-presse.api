@@ -200,7 +200,8 @@ QUERY
 
             $this->persistPublications(
                 new Collection(
-                    StatusToArray::fromStatusCollection($statuses)->toArray()
+                    StatusToArray::fromStatusCollection($statuses)
+                        ->toArray()
                 )
             );
             $this->markStatusAsPublished($ids);
@@ -212,10 +213,23 @@ QUERY
     public function getLatestPublications(): Collection
     {
         $queryBuilder = $this->createQueryBuilder(self::TABLE_ALIAS);
+
+        $queryBuilder->select(self::TABLE_ALIAS);
+        $queryBuilder->addSelect('
+            JSON_EXTRACT('.self::TABLE_ALIAS.".document, '$.retweet_count') AS totalRetweets, 
+            JSON_EXTRACT(".self::TABLE_ALIAS.".document, '$.favorite_count') AS favoriteCount
+        ");
+        $queryBuilder->andWhere('DATE('.self::TABLE_ALIAS.'.publishedAt) = DATE(NOW())');
+        $queryBuilder->orderBy('totalRetweets',  'desc');
         $queryBuilder->setMaxResults(100);
-        $queryBuilder->orderBy(self::TABLE_ALIAS.'.publishedAt',  'desc');
 
         $result = $queryBuilder->getQuery()->getResult();
+        $result = array_map(
+            function ($row) {
+                return $row[0];
+            },
+            $result
+        );
 
         return $this->publicationFormatter->format(new Collection($result));
     }
