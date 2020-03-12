@@ -23,6 +23,10 @@ class CollectionStrategy implements CollectionStrategyInterface
             $strategy->optInToCollectStatusPublishedBefore($options['before']);
         }
 
+        if (array_key_exists('screen_name', $options) && $options['screen_name']) {
+            $strategy->optInToCollectStatusFor($options['screen_name']);
+        }
+
         if (
             array_key_exists(
                 LikedStatusCollectionAwareInterface::INTENT_TO_FETCH_LIKES,

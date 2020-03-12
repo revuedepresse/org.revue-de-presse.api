@@ -18,6 +18,7 @@ use App\Infrastructure\DependencyInjection\{Api\ApiAccessorTrait,
     Api\ApiLimitModeratorTrait,
     Api\StatusAccessorTrait,
     Collection\InterruptibleCollectDeciderTrait,
+    Collection\PublicationBatchCollectedEventRepositoryTrait,
     LoggerTrait,
     Membership\WhispererIdentificationTrait,
     Membership\WhispererRepositoryTrait,
@@ -33,7 +34,6 @@ use App\Infrastructure\Twitter\Collector\Exception\RateLimitedException;
 use App\Infrastructure\Twitter\Collector\Exception\SkipCollectException;
 use App\Membership\Entity\MemberInterface;
 use App\Status\LikedStatusCollectionAwareInterface;
-use App\Status\Repository\ExtremumAwareInterface;
 use App\Twitter\Exception\BadAuthenticationDataException;
 use App\Twitter\Exception\InconsistentTokenRepository;
 use App\Twitter\Exception\NotFoundMemberException;
@@ -57,6 +57,7 @@ class PublicationCollector implements PublicationCollectorInterface
     use ApiLimitModeratorTrait;
     use LoggerTrait;
     use InterruptibleCollectDeciderTrait;
+    use PublicationBatchCollectedEventRepositoryTrait;
     use PublicationListRepositoryTrait;
     use PublicationPersistenceTrait;
     use StatusLoggerTrait;
@@ -561,7 +562,8 @@ class PublicationCollector implements PublicationCollectorInterface
         CollectionStrategyInterface $collectionStrategy
     ): ?int {
         $options  = $this->declareOptionsToCollectStatuses($options);
-        $statuses = $this->apiAccessor->fetchStatuses($options);
+        $statuses = $this->publicationBatchCollectedEventRepository
+            ->collectedPublicationBatch($collectionStrategy, $options);
 
         if ($statuses instanceof stdClass && isset($statuses->error)) {
             throw new ProtectedAccountException(
@@ -570,7 +572,8 @@ class PublicationCollector implements PublicationCollectorInterface
             );
         }
 
-        $betweenPublicationDateOfLastOneSavedAndNow = $this->isLookingBetweenPublicationDateOfLastOneSavedAndNow($options);
+        $betweenPublicationDateOfLastOneSavedAndNow =
+            $this->isLookingBetweenPublicationDateOfLastOneSavedAndNow($options);
 
         /** @var array $statuses */
         if (count($statuses) > 0) {

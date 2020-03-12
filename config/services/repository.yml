@@ -14,6 +14,18 @@ services:
         tags:
             - { name: 'doctrine.repository_service' }
 
+    App\Infrastructure\Collection\Repository\PublicationBatchCollectedEventRepository:
+        class: 'App\Infrastructure\Collection\Repository\PublicationBatchCollectedEventRepository'
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - 'App\Domain\Collection\Entity\PublicationBatchCollectedEvent'
+        calls:
+            - [ 'setLogger',           [ '@logger' ] ]
+            - [ 'setMemberRepository', [ '@App\Infrastructure\Repository\Membership\MemberRepository' ] ]
+            - [ 'setApiAccessor',      [ '@weaving_the_web_twitter.api_accessor' ] ]
+        tags:
+            - { name: 'doctrine.repository_service' }
+
     App\Api\Repository\PublicationListRepository:
         public: true
         class:  'App\Api\Repository\PublicationListRepository'
