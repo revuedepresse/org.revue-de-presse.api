@@ -185,12 +185,13 @@ services:
             entityManager:              '@doctrine.orm.entity_manager'
             notFoundStatusRepository:   '@repository.not_found_status'
         calls:
-            - [ 'setApiAccessor',            [ '@weaving_the_web_twitter.api_accessor' ] ]
-            - [ 'setLogger',                 [ '@logger' ] ]
-            - [ 'setLikedStatusRepository',  [ '@repository.liked_status' ] ]
-            - [ 'setMemberRepository',       [ '@App\Infrastructure\Repository\Membership\MemberRepository' ] ]
-            - [ 'setPublicationPersistence', [ '@App\Infrastructure\Status\Persistence\PublicationPersistence' ] ]
-            - [ 'setStatusRepository',       [ '@App\Api\Repository\StatusRepository' ] ]
+            - [ 'setApiAccessor',                               [ '@weaving_the_web_twitter.api_accessor' ] ]
+            - [ 'setLogger',                                    [ '@logger' ] ]
+            - [ 'setLikedStatusRepository',                     [ '@repository.liked_status' ] ]
+            - [ 'setMemberRepository',                          [ '@App\Infrastructure\Repository\Membership\MemberRepository' ] ]
+            - [ 'setPublicationPersistence',                    [ '@App\Infrastructure\Status\Persistence\PublicationPersistence' ] ]
+            - [ 'setStatusRepository',                          [ '@App\Api\Repository\StatusRepository' ] ]
+            - [ 'setPublicationBatchCollectedEventRepository',  [ '@App\Infrastructure\Collection\Repository\PublicationBatchCollectedEventRepository' ] ]
         public: true
 
     weaving_the_web_twitter.repository.token:
@@ -213,21 +214,22 @@ services:
     App\Infrastructure\Twitter\Collector\PublicationCollector:
         class:  'App\Infrastructure\Twitter\Collector\PublicationCollector'
         calls:
-            - [ 'setApiAccessor',                           [ '@weaving_the_web_twitter.api_accessor' ] ]
-            - [ 'setInterruptibleCollectDeciderInterface',  [ '@App\Infrastructure\Twitter\Collector\InterruptibleCollectDecider' ] ]
-            - [ 'setLogger',                                [ '@monolog.logger.status' ] ]
-            - [ 'setLikedStatusRepository',                 [ '@repository.liked_status' ] ]
-            - [ 'setModerator',                             [ '@weaving_the_web_twitter.moderator.api_limit' ] ]
-            - [ 'setPublicationListRepository',             [ '@App\Api\Repository\PublicationListRepository' ] ]
-            - [ 'setPublicationPersistence',                [ '@App\Infrastructure\Status\Persistence\PublicationPersistence' ] ]
-            - [ 'setStatusLogger',                          [ '@App\Infrastructure\Log\StatusLogger' ] ]
-            - [ 'setStatusAccessor',                        [ '@App\Accessor\StatusAccessor' ] ]
-            - [ 'setStatusRepository',                      [ '@App\Api\Repository\StatusRepository' ] ]
-            - [ 'setStatusPersistence',                     [ '@App\Infrastructure\Status\Persistence\StatusPersistence' ] ]
-            - [ 'setTokenRepository',                       [ '@weaving_the_web_twitter.repository.token' ] ]
-            - [ 'setTranslator',                            [ '@App\Infrastructure\Translation\Translator' ] ]
-            - [ 'setWhispererIdentification',               [ '@App\Infrastructure\Identification\WhispererIdentification' ] ]
-            - [ 'setWhispererRepository',                   [ '@repository.whisperer' ] ]
+            - [ 'setApiAccessor',                               [ '@weaving_the_web_twitter.api_accessor' ] ]
+            - [ 'setInterruptibleCollectDeciderInterface',      [ '@App\Infrastructure\Twitter\Collector\InterruptibleCollectDecider' ] ]
+            - [ 'setLogger',                                    [ '@monolog.logger.status' ] ]
+            - [ 'setLikedStatusRepository',                     [ '@repository.liked_status' ] ]
+            - [ 'setModerator',                                 [ '@weaving_the_web_twitter.moderator.api_limit' ] ]
+            - [ 'setPublicationBatchCollectedEventRepository',  [ '@App\Infrastructure\Collection\Repository\PublicationBatchCollectedEventRepository' ] ]
+            - [ 'setPublicationListRepository',                 [ '@App\Api\Repository\PublicationListRepository' ] ]
+            - [ 'setPublicationPersistence',                    [ '@App\Infrastructure\Status\Persistence\PublicationPersistence' ] ]
+            - [ 'setStatusLogger',                              [ '@App\Infrastructure\Log\StatusLogger' ] ]
+            - [ 'setStatusAccessor',                            [ '@App\Accessor\StatusAccessor' ] ]
+            - [ 'setStatusRepository',                          [ '@App\Api\Repository\StatusRepository' ] ]
+            - [ 'setStatusPersistence',                         [ '@App\Infrastructure\Status\Persistence\StatusPersistence' ] ]
+            - [ 'setTokenRepository',                           [ '@weaving_the_web_twitter.repository.token' ] ]
+            - [ 'setTranslator',                                [ '@App\Infrastructure\Translation\Translator' ] ]
+            - [ 'setWhispererIdentification',                   [ '@App\Infrastructure\Identification\WhispererIdentification' ] ]
+            - [ 'setWhispererRepository',                       [ '@repository.whisperer' ] ]
         properties:
             twitterApiLogger:       '@monolog.logger.twitter_api'
 

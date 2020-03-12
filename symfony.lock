@@ -290,6 +290,9 @@
     "rize/uri-template": {
         "version": "0.3.2"
     },
+    "scienta/doctrine-json-functions": {
+        "version": "4.1-dev"
+    },
     "sebastian/code-unit-reverse-lookup": {
         "version": "1.0.1"
     },
