@@ -9,6 +9,8 @@ use App\Domain\Resource\OwnershipCollection;
 
 interface ApiAccessorInterface
 {
+    public const MAX_OWNERSHIPS = 800;
+
     public function setAccessToken(TokenInterface $token);
 
     public function setConsumerKey(string $secret): self;
@@ -18,7 +20,7 @@ interface ApiAccessorInterface
     public function getMemberOwnerships(
         string $screenName,
         int $cursor = -1,
-        int $count = 800
+        int $count = self::MAX_OWNERSHIPS
     ): OwnershipCollection;
 
     public function getListMembers(string $listId): MemberCollection;

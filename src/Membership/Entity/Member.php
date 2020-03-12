@@ -7,6 +7,7 @@ use App\Api\Entity\Token;
 use App\Membership\Model\Member as MemberModel;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Selectable;
 use Doctrine\ORM\Mapping as ORM;
 use const JSON_THROW_ON_ERROR;
@@ -225,6 +226,14 @@ class Member extends MemberModel
 
     private bool $locked;
 
+    /**
+     * @ORM\OneToMany(
+     *      targetEntity="\App\Domain\Collection\Entity\PublicationBatchCollectedEvent",
+     *      mappedBy="member"
+     * )
+     */
+    protected Collection $publicationBatchCollectedEvents;
+
     public function __construct()
     {
         parent::__construct();
@@ -235,7 +244,7 @@ class Member extends MemberModel
     /**
      * Add tokens
      *
-     * @param \App\Api\Entity\Token $tokens
+     * @param Token $tokens
      *
      * @return MemberInterface
      */
@@ -564,7 +573,7 @@ class Member extends MemberModel
     /**
      * Remove tokens
      *
-     * @param \App\Api\Entity\Token $tokens
+     * @param Token $tokens
      */
     public function removeToken(Token $tokens)
     {

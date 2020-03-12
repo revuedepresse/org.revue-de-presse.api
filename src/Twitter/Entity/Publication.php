@@ -5,6 +5,8 @@ namespace App\Twitter\Entity;
 
 use App\Twitter\Repository\PublicationInterface;
 use DateTimeInterface;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Ramsey\Uuid\UuidInterface;
 
@@ -112,6 +114,8 @@ class Publication implements PublicationInterface
         $this->documentId  = $documentId;
         $this->document    = $document;
         $this->publishedAt = $publishedAt;
+
+        $this->collectPublicationEvents = new ArrayCollection();
     }
 
     public function getAvatarUrl(): string

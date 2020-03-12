@@ -10,6 +10,7 @@ interface OwnershipAccessorInterface
 {
     public function getOwnershipsForMemberHavingScreenNameAndToken(
         string $screenName,
-        TokenInterface $token
+        TokenInterface $token,
+        MemberOwnerships $memberOwnership = null
     ): MemberOwnerships;
 }

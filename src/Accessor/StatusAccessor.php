@@ -12,10 +12,12 @@ use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;
 use App\Api\Repository\ArchivedStatusRepository;
 use App\Domain\Collection\CollectionStrategyInterface;
+use App\Domain\Collection\Entity\PublicationBatchCollectedEvent;
 use App\Domain\Status\StatusInterface;
 use App\Domain\Status\TaggedStatus;
 use App\Infrastructure\Amqp\Message\FetchPublicationInterface;
 use App\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
+use App\Infrastructure\DependencyInjection\Collection\PublicationBatchCollectedEventRepositoryTrait;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
@@ -41,6 +43,7 @@ use ReflectionException;
 use function array_key_exists;
 use function count;
 use function sprintf;
+use const JSON_THROW_ON_ERROR;
 
 /**
  * @package App\Accessor
@@ -53,6 +56,7 @@ class StatusAccessor implements StatusAccessorInterface
     use LoggerTrait;
     use StatusRepositoryTrait;
     use MemberRepositoryTrait;
+    use PublicationBatchCollectedEventRepositoryTrait;
 
     public ArchivedStatusRepository $archivedStatusRepository;
 
@@ -293,7 +297,11 @@ class StatusAccessor implements StatusAccessorInterface
             unset($options['max_id']);
         }
 
-        $statuses = $this->apiAccessor->fetchStatuses($options);
+        $statuses = $this->publicationBatchCollectedEventRepository
+            ->collectedPublicationBatch(
+                $collectionStrategy,
+                $options
+            );
 
         $discoverMoreRecentStatuses = false;
         if (

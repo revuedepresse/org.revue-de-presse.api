@@ -558,7 +558,10 @@ class Accessor implements ApiAccessorInterface,
             )
         );
 
-        return OwnershipCollection::fromArray($ownerships->lists);
+        return OwnershipCollection::fromArray(
+            $ownerships->lists,
+            $ownerships->next_cursor
+        );
     }
 
     /**

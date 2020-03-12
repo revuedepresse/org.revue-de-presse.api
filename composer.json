@@ -42,6 +42,7 @@
         "ocramius/proxy-manager": "2.2.3",
         "predis/predis": "^2.0@dev",
         "ramsey/uuid-doctrine": "dev-master",
+        "scienta/doctrine-json-functions": "~4.1",
         "sensio/framework-extra-bundle": "^5.5@dev",
         "symfony/console": "^5.1@dev",
         "symfony/flex": "^1.5@dev",
