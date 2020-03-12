@@ -88,7 +88,10 @@ class ApiAccessorBuilder
         string $screenName
     ): self {
         $this->prophecy
-            ->getMemberOwnerships($screenName)
+            ->getMemberOwnerships(
+                $screenName,
+                -1
+            )
             ->willReturn($ownershipCollection);
 
         return $this;
@@ -98,7 +101,10 @@ class ApiAccessorBuilder
         string $screenName
     ): self {
         $this->prophecy
-            ->getMemberOwnerships($screenName)
+            ->getMemberOwnerships(
+                $screenName,
+                -1
+            )
             ->willThrow(new UnavailableResourceException());
 
         return $this;
@@ -111,7 +117,10 @@ class ApiAccessorBuilder
         static $calls = 0;
 
         $this->prophecy
-            ->getMemberOwnerships($screenName)
+            ->getMemberOwnerships(
+                $screenName,
+                -1
+            )
             ->will(function () use (&$calls, $ownershipCollection) {
                 if ($calls === 0) {
                     $calls++;
