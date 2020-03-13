@@ -24,4 +24,12 @@ class MemberIdentity
     {
         return $this->screenName;
     }
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'screen_name' => $this->screenName,
+        ];
+    }
 }

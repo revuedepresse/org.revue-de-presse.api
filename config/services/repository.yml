@@ -26,6 +26,17 @@ services:
         tags:
             - { name: 'doctrine.repository_service' }
 
+    App\Infrastructure\Collection\Repository\PublicationListCollectedEventRepository:
+        class: 'App\Infrastructure\Collection\Repository\PublicationListCollectedEventRepository'
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - 'App\Domain\Collection\Entity\PublicationListCollectedEvent'
+        calls:
+            - [ 'setLogger',           [ '@logger' ] ]
+            - [ 'setApiAccessor',      [ '@weaving_the_web_twitter.api_accessor' ] ]
+        tags:
+            - { name: 'doctrine.repository_service' }
+
     App\Infrastructure\Collection\Repository\OwnershipBatchCollectedEventRepository:
         class: 'App\Infrastructure\Collection\Repository\OwnershipBatchCollectedEventRepository'
         arguments:
