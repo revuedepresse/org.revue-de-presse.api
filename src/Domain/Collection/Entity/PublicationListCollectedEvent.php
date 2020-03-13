@@ -6,7 +6,7 @@ namespace App\Domain\Collection\Entity;
 use DateTimeInterface;
 use Ramsey\Uuid\UuidInterface;
 
-class OwnershipBatchCollectedEvent
+class PublicationListCollectedEvent
 {
     private UuidInterface $id;
 
@@ -14,20 +14,24 @@ class OwnershipBatchCollectedEvent
 
     private DateTimeInterface $occurredAt;
 
-    private string $screenName;
+    private int $listId;
 
     private DateTimeInterface $startedAt;
 
     private ?DateTimeInterface $endedAt;
 
+    private string $listName;
+
     public function __construct(
-        string $screenName,
+        int $listId,
+        string $listName,
         DateTimeInterface $occurredAt,
         DateTimeInterface $startedAt,
         ?string $payload = null,
         ?DateTimeInterface $endedAt = null
     ) {
-        $this->screenName     = $screenName;
+        $this->listId     = $listId;
+        $this->listName     = $listName;
         $this->payload    = $payload;
         $this->occurredAt = $occurredAt;
         $this->startedAt  = $startedAt;
@@ -39,9 +43,14 @@ class OwnershipBatchCollectedEvent
         return $this->id;
     }
 
-    public function screenName(): string
+    public function listId(): int
     {
-        return $this->screenName;
+        return $this->listId;
+    }
+
+    public function listName(): string
+    {
+        return $this->listName;
     }
 
     public function occurredAt(): DateTimeInterface

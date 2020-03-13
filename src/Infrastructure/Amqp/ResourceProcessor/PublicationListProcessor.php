@@ -4,13 +4,13 @@ declare(strict_types=1);
 namespace App\Infrastructure\Amqp\ResourceProcessor;
 
 use App\Api\Entity\TokenInterface;
-use App\Api\Exception\InvalidSerializedTokenException;
 use App\Domain\Collection\PublicationStrategyInterface;
 use App\Domain\Resource\MemberCollection;
 use App\Domain\Resource\MemberIdentity;
 use App\Domain\Resource\PublicationList;
 use App\Infrastructure\Amqp\Exception\ContinuePublicationException;
 use App\Infrastructure\Amqp\Exception\StopPublicationException;
+use App\Infrastructure\DependencyInjection\Collection\PublicationListCollectedEventRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Membership\MemberIdentityProcessorTrait;
 use App\Infrastructure\DependencyInjection\TokenChangeTrait;
 use App\Infrastructure\DependencyInjection\TranslatorTrait;
@@ -25,6 +25,7 @@ use function sprintf;
 class PublicationListProcessor implements PublicationListProcessorInterface
 {
     use MemberIdentityProcessorTrait;
+    use PublicationListCollectedEventRepositoryTrait;
     use TokenChangeTrait;
     use TranslatorTrait;
 
@@ -62,7 +63,14 @@ class PublicationListProcessor implements PublicationListProcessorInterface
         PublicationStrategyInterface $strategy
     ): int {
         if ($strategy->shouldProcessList($list)) {
-            $memberCollection = $this->accessor->getListMembers($list->id());
+            $eventRepository = $this->publicationListCollectedEventRepository;
+            $memberCollection = $eventRepository->collectedPublicationList(
+                $this->accessor,
+                [
+                    $eventRepository::OPTION_PUBLICATION_LIST_ID => $list->id(),
+                    $eventRepository::OPTION_PUBLICATION_LIST_NAME => $list->name()
+                ]
+            );
             $memberCollection = $this->addOwnerToListOptionally(
                 $memberCollection,
                 $strategy
