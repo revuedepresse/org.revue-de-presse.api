@@ -34,33 +34,16 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
     use TokenChangeTrait;
     use TranslatorTrait;
 
-    /**
-     * @var LoggerInterface
-     */
     private LoggerInterface $logger;
 
-    /**
-     * @var OwnershipAccessorInterface
-     */
     private OwnershipAccessorInterface $ownershipAccessor;
 
     private ApiAccessorInterface $accessor;
 
     private Closure $writer;
 
-    /**
-     * @var PublicationStrategyInterface
-     */
     private PublicationStrategyInterface $strategy;
 
-    /**
-     * @param ApiAccessorInterface              $accessor
-     * @param OwnershipAccessorInterface        $ownershipAccessor
-     * @param PublicationListProcessorInterface $publicationListProcessor
-     * @param TokenChangeInterface              $tokenChange
-     * @param LoggerInterface                   $logger
-     * @param TranslatorInterface               $translator
-     */
     public function __construct(
         ApiAccessorInterface $accessor,
         OwnershipAccessorInterface $ownershipAccessor,
