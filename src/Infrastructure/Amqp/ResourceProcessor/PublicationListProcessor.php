@@ -10,6 +10,7 @@ use App\Domain\Resource\MemberIdentity;
 use App\Domain\Resource\PublicationList;
 use App\Infrastructure\Amqp\Exception\ContinuePublicationException;
 use App\Infrastructure\Amqp\Exception\StopPublicationException;
+use App\Infrastructure\DependencyInjection\Collection\MemberProfileCollectedEventRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Collection\PublicationListCollectedEventRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Membership\MemberIdentityProcessorTrait;
 use App\Infrastructure\DependencyInjection\TokenChangeTrait;
@@ -25,6 +26,7 @@ use function sprintf;
 class PublicationListProcessor implements PublicationListProcessorInterface
 {
     use MemberIdentityProcessorTrait;
+    use MemberProfileCollectedEventRepositoryTrait;
     use PublicationListCollectedEventRepositoryTrait;
     use TokenChangeTrait;
     use TranslatorTrait;
@@ -178,8 +180,10 @@ class PublicationListProcessor implements PublicationListProcessorInterface
     {
         $members = $memberCollection->toArray();
         if ($strategy->shouldIncludeOwner()) {
-            $additionalMember = $this->accessor->getMemberProfile(
-                $strategy->onBehalfOfWhom()
+            $eventRepository = $this->memberProfileCollectedEventRepository;
+            $additionalMember = $eventRepository->collectedMemberProfile(
+                $this->accessor,
+                [$eventRepository::OPTION_SCREEN_NAME => $strategy->onBehalfOfWhom()]
             );
             array_unshift($members, $additionalMember);
             $strategy->willIncludeOwner(false);
