@@ -21,3 +21,5 @@ services:
             - '@weaving_the_web_twitter.api_accessor'
             - '@user_manager'
             - '@App\Infrastructure\Twitter\Api\UnavailableResourceHandler'
+        calls:
+            - [ 'setMemberProfileCollectedEventRepository', [ '@App\Infrastructure\Collection\Repository\MemberProfileCollectedEventRepository'] ]

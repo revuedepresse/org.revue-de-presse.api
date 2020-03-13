@@ -8,6 +8,6 @@ services:
     #
     # test.App\Service\MyService: '@App\Service\MyService'
 
-    test.event_repository.ownership_batch_collected:
-        alias: App\Infrastructure\Collection\Repository\OwnershipBatchCollectedEventRepository
-        public: true
+    test.event_repository.ownership_batch_collected: '@App\Infrastructure\Collection\Repository\OwnershipBatchCollectedEventRepository'
+
+    test.event_repository.member_profile_collected: '@App\Infrastructure\Collection\Repository\MemberProfileCollectedEventRepository'
