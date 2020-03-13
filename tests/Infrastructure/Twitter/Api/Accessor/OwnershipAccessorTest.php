@@ -6,6 +6,8 @@ namespace App\Tests\Infrastructure\Twitter\Api\Accessor;
 use App\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Api\Entity\Token;
 use App\Api\Exception\InvalidSerializedTokenException;
+use App\Infrastructure\Collection\Repository\OwnershipBatchCollectedEventRepository;
+use App\Infrastructure\Collection\Repository\OwnershipBatchCollectedEventRepositoryInterface;
 use App\Tests\Builder\ApiAccessorBuilder;
 use App\Tests\Builder\TokenChangeBuilder;
 use App\Tests\Builder\TokenRepositoryBuilder;
@@ -13,20 +15,30 @@ use App\Infrastructure\Twitter\Api\Accessor\OwnershipAccessor;
 use App\Domain\Resource\MemberOwnerships;
 use App\Twitter\Exception\OverCapacityException;
 use Exception;
-use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /**
  * @package App\Tests\Twitter\Api
  * @group   ownership
  */
-class OwnershipAccessorTest extends TestCase
+class OwnershipAccessorTest extends KernelTestCase
 {
     private const MEMBER_SCREEN_NAME = 'mcurie';
     private const TOKEN              = 'token';
     private const SECRET             = 'secret';
     private const REPLACEMENT_TOKEN  = 'replacement-token';
     private const REPLACEMENT_SECRET = 'replacement-secret';
+
+    private OwnershipBatchCollectedEventRepositoryInterface $eventRepository;
+
+    protected function setUp(): void
+    {
+        self::$kernel = self::bootKernel();
+        self::$container = self::$kernel->getContainer();
+
+        $this->eventRepository = self::$container->get('test.event_repository.ownership_batch_collected');
+    }
 
     /**
      * @throws
@@ -49,6 +61,10 @@ class OwnershipAccessorTest extends TestCase
             $this->makeTokenRepository(1),
             $this->makeTokenChange(),
             new NullLogger()
+        );
+
+        $ownershipAccessor->setOwnershipBatchCollectedEventRepository(
+            $this->eventRepository
         );
 
         $activeToken = $this->getActiveToken();
@@ -88,6 +104,10 @@ class OwnershipAccessorTest extends TestCase
             $this->makeTokenRepository(2),
             $this->makeTokenChange(),
             new NullLogger()
+        );
+
+        $ownershipAccessor->setOwnershipBatchCollectedEventRepository(
+            $this->eventRepository
         );
 
         $activeToken = $this->getActiveToken();
@@ -132,6 +152,10 @@ class OwnershipAccessorTest extends TestCase
             $this->makeTokenRepository(1),
             $this->makeTokenChange(),
             new NullLogger()
+        );
+
+        $ownershipAccessor->setOwnershipBatchCollectedEventRepository(
+            $this->eventRepository
         );
 
         try {

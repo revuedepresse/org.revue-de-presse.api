@@ -8,6 +8,7 @@ use App\Api\AccessToken\TokenChangeInterface;
 use App\Api\Entity\TokenInterface;
 use App\Domain\Resource\MemberOwnerships;
 use App\Domain\Resource\OwnershipCollection;
+use App\Infrastructure\DependencyInjection\Collection\OwnershipBatchCollectedEventRepositoryTrait;
 use App\Twitter\Api\ApiAccessorInterface;
 use App\Twitter\Exception\OverCapacityException;
 use App\Twitter\Exception\UnavailableResourceException;
@@ -15,6 +16,8 @@ use Psr\Log\LoggerInterface;
 
 class OwnershipAccessor implements OwnershipAccessorInterface
 {
+    use OwnershipBatchCollectedEventRepositoryTrait;
+
     private ApiAccessorInterface $accessor;
 
     private TokenRepositoryInterface $tokenRepository;
@@ -54,6 +57,8 @@ class OwnershipAccessor implements OwnershipAccessorInterface
         $totalUnfrozenToken = $this->tokenRepository->howManyUnfrozenTokenAreThere();
         $ownershipCollection = OwnershipCollection::fromArray([]);
 
+        $eventRepository = $this->ownershipBatchCollectedEventRepository;
+
         // Leave the loop as soon as there are some ownerships to process
         // or there is no token left to access the Twitter API
         while ($totalUnfrozenToken > 0 && $ownershipCollection->isEmpty()) {
@@ -63,9 +68,12 @@ class OwnershipAccessor implements OwnershipAccessorInterface
                     $nextPage = $memberOwnership->ownershipCollection()->nextPage();
                 }
 
-                $ownershipCollection = $this->accessor->getMemberOwnerships(
-                    $screenName,
-                    $nextPage
+                $ownershipCollection = $eventRepository->collectedOwnershipBatch(
+                    $this->accessor,
+                    [
+                        $eventRepository::OPTION_SCREEN_NAME => $screenName,
+                        $eventRepository::OPTION_NEXT_PAGE => $nextPage
+                    ]
                 );
             } catch (UnavailableResourceException $exception) {
                 $this->logger->info($exception->getMessage());

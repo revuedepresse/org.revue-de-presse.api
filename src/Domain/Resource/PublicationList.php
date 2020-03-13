@@ -18,19 +18,21 @@ class PublicationList
         $this->name = $name;
     }
 
-    /**
-     * @return string
-     */
     public function name(): string
     {
         return $this->name;
     }
 
-    /**
-     * @return string
-     */
     public function id(): string
     {
         return $this->id;
+    }
+
+    public function toArray(): array
+    {
+        return [
+           'id' => $this->id,
+           'name' => $this->name
+        ];
     }
 }
