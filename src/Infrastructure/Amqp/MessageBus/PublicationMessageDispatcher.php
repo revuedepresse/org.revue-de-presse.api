@@ -11,6 +11,7 @@ use App\Domain\Collection\PublicationStrategyInterface;
 use App\Domain\Resource\OwnershipCollection;
 use App\Domain\Resource\PublicationList;
 use App\Infrastructure\Amqp\ResourceProcessor\PublicationListProcessorInterface;
+use App\Infrastructure\DependencyInjection\Collection\OwnershipBatchCollectedEventRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Publication\PublicationListProcessorTrait;
 use App\Infrastructure\DependencyInjection\TokenChangeTrait;
 use App\Infrastructure\DependencyInjection\TranslatorTrait;
@@ -28,37 +29,21 @@ use function sprintf;
 
 class PublicationMessageDispatcher implements PublicationMessageDispatcherInterface
 {
+    use OwnershipBatchCollectedEventRepositoryTrait;
     use PublicationListProcessorTrait;
     use TokenChangeTrait;
     use TranslatorTrait;
 
-    /**
-     * @var LoggerInterface
-     */
     private LoggerInterface $logger;
 
-    /**
-     * @var OwnershipAccessorInterface
-     */
     private OwnershipAccessorInterface $ownershipAccessor;
 
     private ApiAccessorInterface $accessor;
 
     private Closure $writer;
 
-    /**
-     * @var PublicationStrategyInterface
-     */
     private PublicationStrategyInterface $strategy;
 
-    /**
-     * @param ApiAccessorInterface              $accessor
-     * @param OwnershipAccessorInterface        $ownershipAccessor
-     * @param PublicationListProcessorInterface $publicationListProcessor
-     * @param TokenChangeInterface              $tokenChange
-     * @param LoggerInterface                   $logger
-     * @param TranslatorInterface               $translator
-     */
     public function __construct(
         ApiAccessorInterface $accessor,
         OwnershipAccessorInterface $ownershipAccessor,
@@ -208,10 +193,15 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
     ): OwnershipCollection {
         $previousCursor = -1;
 
+        $eventRepository = $this->ownershipBatchCollectedEventRepository;
+
         if ($this->strategy->listRestriction()) {
-            return $this->accessor->getMemberOwnerships(
-                $this->strategy->onBehalfOfWhom(),
-                $ownerships->nextPage()
+            return $eventRepository->collectedOwnershipBatch(
+                $this->accessor,
+                [
+                    $eventRepository::OPTION_SCREEN_NAME => $this->strategy->onBehalfOfWhom(),
+                    $eventRepository::OPTION_NEXT_PAGE => $ownerships->nextPage()
+                ]
             );
         }
 
@@ -219,9 +209,12 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
             $ownerships,
             $this->strategy->forWhichList()
         )) {
-            $ownerships = $this->accessor->getMemberOwnerships(
-                $this->strategy->onBehalfOfWhom(),
-                $ownerships->nextPage()
+            $ownerships = $eventRepository->collectedOwnershipBatch(
+                $this->accessor,
+                [
+                    $eventRepository::OPTION_SCREEN_NAME => $this->strategy->onBehalfOfWhom(),
+                    $eventRepository::OPTION_NEXT_PAGE => $ownerships->nextPage()
+                ]
             );
 
             if (!$ownerships->nextPage() || $previousCursor === $ownerships->nextPage()) {

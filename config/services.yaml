@@ -124,6 +124,8 @@ services:
             - '@App\Api\AccessToken\TokenChange'
             - '@logger'
             - '@App\Infrastructure\Translation\Translator'
+        calls:
+            - [ 'setOwnershipBatchCollectedEventRepository', [ '@App\Infrastructure\Collection\Repository\OwnershipBatchCollectedEventRepository' ] ]
 
     App\Infrastructure\Twitter\Api\UnavailableResourceHandler:
         class: 'App\Infrastructure\Twitter\Api\UnavailableResourceHandler'
