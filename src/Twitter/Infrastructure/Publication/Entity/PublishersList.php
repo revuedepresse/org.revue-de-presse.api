@@ -12,7 +12,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="App\Twitter\Infrastructure\Api\Repository\PublishersListRepository")
+ * @ORM\Entity(repositoryClass="App\Twitter\Infrastructure\Http\Repository\PublishersListRepository")
  * @ORM\Table(
  *     name="publishers_list",
  *     indexes={

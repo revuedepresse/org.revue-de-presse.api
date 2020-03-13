@@ -5,9 +5,9 @@ namespace App\PublishersList\Controller;
 
 use App\NewsReview\Domain\Repository\PopularPublicationRepositoryInterface;
 use App\PublishersList\Controller\Exception\InvalidRequestException;
-use App\Twitter\Infrastructure\Api\AccessToken\Repository\TokenRepository;
-use App\Twitter\Infrastructure\Api\Entity\Token;
-use App\Twitter\Infrastructure\Api\Entity\TokenInterface;
+use App\Twitter\Infrastructure\Http\AccessToken\Repository\TokenRepository;
+use App\Twitter\Infrastructure\Http\Entity\Token;
+use App\Twitter\Infrastructure\Http\Entity\TokenInterface;
 use App\Twitter\Infrastructure\Cache\RedisCache;
 use App\Twitter\Infrastructure\Http\SearchParams;
 use App\Twitter\Infrastructure\Publication\Repository\HighlightRepository;

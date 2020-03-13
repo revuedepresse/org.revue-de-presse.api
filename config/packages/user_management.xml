@@ -11,7 +11,7 @@
             <property
                 name="aggregateRepository"
                 type="service"
-                id="App\Twitter\Infrastructure\Api\Repository\PublishersListRepository" />
+                id="App\Twitter\Infrastructure\Http\Repository\PublishersListRepository" />
         </service>
     </services>
 </container>

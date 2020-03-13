@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Domain\Publication;
 
 use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
-use App\Twitter\Infrastructure\Api\Entity\Status;
+use App\Twitter\Infrastructure\Http\Entity\Status;
 use App\Twitter\Domain\Publication\Exception\InvalidTagPropertyException;
 use DateTimeInterface;
 use Doctrine\Common\Inflector\Inflector;

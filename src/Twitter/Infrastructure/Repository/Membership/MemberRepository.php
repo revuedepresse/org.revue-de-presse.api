@@ -5,7 +5,7 @@ namespace App\Twitter\Infrastructure\Repository\Membership;
 
 use App\PublishersList\Repository\PaginationAwareTrait;
 use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
-use App\Twitter\Infrastructure\Api\Repository\PublishersListRepository;
+use App\Twitter\Infrastructure\Http\Repository\PublishersListRepository;
 use App\Twitter\Domain\Membership\Exception\InvalidMemberException;
 use App\Twitter\Domain\Resource\MemberIdentity;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;

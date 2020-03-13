@@ -10,8 +10,6 @@ services:
     #
     # test.App\Service\MyService: '@App\Service\MyService'
 
-    test.event_repository.ownership_batch_collected: '@App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository'
-
     test.event_repository.member_profile_collected: '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository'
 
     test.App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository: '@App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository'

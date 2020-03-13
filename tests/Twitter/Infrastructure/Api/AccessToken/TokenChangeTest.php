@@ -3,15 +3,15 @@ declare(strict_types=1);
 
 namespace App\Tests\Twitter\Infrastructure\Api\AccessToken;
 
-use App\Twitter\Infrastructure\Api\AccessToken\Repository\TokenRepositoryInterface;
-use App\Twitter\Infrastructure\Api\AccessToken\TokenChange;
-use App\Twitter\Infrastructure\Api\Entity\Token;
-use App\Twitter\Infrastructure\Api\Entity\TokenInterface;
-use App\Twitter\Infrastructure\Api\Exception\InvalidSerializedTokenException;
-use App\Twitter\Infrastructure\Api\Exception\UnavailableTokenException;
+use App\Twitter\Infrastructure\Http\AccessToken\Repository\TokenRepositoryInterface;
+use App\Twitter\Infrastructure\Http\AccessToken\TokenChange;
+use App\Twitter\Infrastructure\Http\Entity\Token;
+use App\Twitter\Infrastructure\Http\Entity\TokenInterface;
+use App\Twitter\Infrastructure\Http\Exception\InvalidSerializedTokenException;
+use App\Twitter\Infrastructure\Http\Exception\UnavailableTokenException;
 use App\Tests\Twitter\Infrastructure\Api\AccessToken\Builder\Repository\SimpleTokenRepositoryBuilder;
 use App\Tests\Twitter\Infrastructure\Api\AccessToken\Builder\Repository\TokenRepositoryBuilder;
-use App\Twitter\Infrastructure\Api\Accessor;
+use App\Twitter\Infrastructure\Http\Accessor;
 use App\Twitter\Domain\Api\ApiAccessorInterface;
 use Exception;
 use PHPUnit\Framework\TestCase;

@@ -12,7 +12,7 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Psr\Log\LoggerInterface;
-use App\Twitter\Infrastructure\Api\Accessor;
+use App\Twitter\Infrastructure\Http\Accessor;
 
 class AggregateSubscriptionRepository extends ServiceEntityRepository
 {

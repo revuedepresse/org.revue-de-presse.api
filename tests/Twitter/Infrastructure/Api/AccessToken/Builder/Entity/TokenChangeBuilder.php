@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Twitter\Infrastructure\Api\AccessToken\Builder\Entity;
 
-use App\Twitter\Infrastructure\Api\AccessToken\TokenChangeInterface;
-use App\Twitter\Infrastructure\Api\Entity\TokenInterface;
+use App\Twitter\Infrastructure\Http\AccessToken\TokenChangeInterface;
+use App\Twitter\Infrastructure\Http\Entity\TokenInterface;
 use App\Twitter\Domain\Api\ApiAccessorInterface;
 use Prophecy\Argument;
 use Prophecy\Prophet;

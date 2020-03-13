@@ -3,8 +3,8 @@ declare (strict_types=1);
 
 namespace App\Tests\Twitter\Infrastructure\Api\Builder\Accessor;
 
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\FriendsListAccessor;
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\ListAccessorInterface;
+use App\Twitter\Infrastructure\Http\Accessor\FriendsListAccessor;
+use App\Twitter\Infrastructure\Http\Accessor\ListAccessorInterface;
 use App\Twitter\Domain\Api\ApiAccessorInterface;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;

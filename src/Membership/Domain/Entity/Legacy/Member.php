@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Membership\Domain\Entity\Legacy;
 
-use App\Twitter\Infrastructure\Api\Entity\Token;
+use App\Twitter\Infrastructure\Http\Entity\Token;
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Membership\Domain\Model\Member as MemberModel;
 use DateTime;
@@ -192,7 +192,7 @@ class Member extends MemberModel
 
     /**
      * @ORM\ManyToMany(
-     *      targetEntity="\App\Twitter\Infrastructure\Api\Entity\Token",
+     *      targetEntity="\App\Twitter\Infrastructure\Http\Entity\Token",
      *      inversedBy="users",
      *      fetch="EAGER"
      * )

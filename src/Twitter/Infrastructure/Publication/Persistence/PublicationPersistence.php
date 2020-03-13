@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Publication\Persistence;
 
 use App\Twitter\Domain\Publication\PublishersListInterface;
-use App\Twitter\Infrastructure\Api\AccessToken\AccessToken;
-use App\Twitter\Infrastructure\Api\Adapter\StatusToArray;
+use App\Twitter\Infrastructure\Http\AccessToken\AccessToken;
+use App\Twitter\Infrastructure\Http\Adapter\StatusToArray;
 use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;

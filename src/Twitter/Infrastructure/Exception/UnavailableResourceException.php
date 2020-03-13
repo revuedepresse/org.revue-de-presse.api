@@ -4,9 +4,9 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Exception;
 
 use App\Twitter\Domain\Api\TwitterErrorAwareInterface;
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\ApiRateLimitingException;
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\ReadOnlyApplicationException;
+use App\Twitter\Infrastructure\Http\Accessor\Exception\ApiRateLimitingException;
+use App\Twitter\Infrastructure\Http\Accessor\Exception\NotFoundStatusException;
+use App\Twitter\Infrastructure\Http\Accessor\Exception\ReadOnlyApplicationException;
 use Exception;
 use stdClass;
 use function is_array;

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Twitter\Domain\Curation\Repository;
 
 use App\Twitter\Domain\Curation\Entity\ListCollectedEvent;
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\ListAccessorInterface;
-use App\Twitter\Infrastructure\Twitter\Api\Resource\ResourceList;
-use App\Twitter\Infrastructure\Twitter\Api\Selector\ListSelector;
+use App\Twitter\Infrastructure\Http\Accessor\ListAccessorInterface;
+use App\Twitter\Infrastructure\Http\Resource\ResourceList;
+use App\Twitter\Infrastructure\Http\Selector\ListSelector;
 
 /**
  * @method ListCollectedEvent|null find($id, $lockMode = null, $lockVersion = null)

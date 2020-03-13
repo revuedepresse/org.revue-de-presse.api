@@ -5,7 +5,7 @@ namespace App\Twitter\Infrastructure\Publication\Persistence;
 
 use App\Twitter\Domain\Publication\PublishersListInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
-use App\Twitter\Infrastructure\Api\AccessToken\AccessToken;
+use App\Twitter\Infrastructure\Http\AccessToken\AccessToken;
 use Doctrine\ORM\EntityManagerInterface;
 
 interface StatusPersistenceInterface
