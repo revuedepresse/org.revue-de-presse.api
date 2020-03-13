@@ -108,8 +108,9 @@ services:
     App\Infrastructure\Amqp\ResourceProcessor\PublicationListProcessor:
         class: 'App\Infrastructure\Amqp\ResourceProcessor\PublicationListProcessor'
         calls:
-            - [ 'setMemberIdentityProcessor', [ '@App\Infrastructure\Amqp\ResourceProcessor\MemberIdentityProcessor'] ]
-            - [ 'setTokenChange',             [ '@App\Api\AccessToken\TokenChange'] ]
+            - [ 'setMemberIdentityProcessor',                 [ '@App\Infrastructure\Amqp\ResourceProcessor\MemberIdentityProcessor'] ]
+            - [ 'setPublicationListCollectedEventRepository', [ '@App\Infrastructure\Collection\Repository\PublicationListCollectedEventRepository'] ]
+            - [ 'setTokenChange',                             [ '@App\Api\AccessToken\TokenChange'] ]
         arguments:
             - '@weaving_the_web_twitter.api_accessor'
             - '@App\Infrastructure\Translation\Translator'
