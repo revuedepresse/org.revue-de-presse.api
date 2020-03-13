@@ -109,6 +109,7 @@ services:
         class: 'App\Infrastructure\Amqp\ResourceProcessor\PublicationListProcessor'
         calls:
             - [ 'setMemberIdentityProcessor',                 [ '@App\Infrastructure\Amqp\ResourceProcessor\MemberIdentityProcessor'] ]
+            - [ 'setMemberProfileCollectedEventRepository',   [ '@App\Infrastructure\Collection\Repository\MemberProfileCollectedEventRepository'] ]
             - [ 'setPublicationListCollectedEventRepository', [ '@App\Infrastructure\Collection\Repository\PublicationListCollectedEventRepository'] ]
             - [ 'setTokenChange',                             [ '@App\Api\AccessToken\TokenChange'] ]
         arguments:

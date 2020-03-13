@@ -5,6 +5,7 @@ namespace App\Tests\Infrastructure\Twitter\Api\Accessor;
 
 use App\Accessor\Exception\UnexpectedApiResponseException;
 use App\Domain\Resource\MemberIdentity;
+use App\Infrastructure\Collection\Repository\MemberProfileCollectedEventRepository;
 use App\Infrastructure\Twitter\Api\Accessor\MemberProfileAccessor;
 use App\Infrastructure\Twitter\Api\UnavailableResourceHandler;
 use App\Infrastructure\Twitter\Api\UnavailableResourceHandlerInterface;
@@ -15,14 +16,25 @@ use App\Twitter\Api\ApiAccessorInterface;
 use App\Twitter\Api\TwitterErrorAwareInterface;
 use App\Twitter\Exception\UnavailableResourceException;
 use Exception;
-use PHPUnit\Framework\TestCase;
+use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /**
  * @package App\Tests\Infrastructure\Twitter\Api\Accessor
  * @group membership
  */
-class MemberProfileAccessorTest extends TestCase
+class MemberProfileAccessorTest extends KernelTestCase
 {
+    /** @var MemberProfileCollectedEventRepository */
+    private $eventRepository;
+
+    protected function setUp(): void
+    {
+        self::$kernel = self::bootKernel();
+        self::$container = self::$kernel->getContainer();
+
+        $this->eventRepository = self::$container->get('test.event_repository.member_profile_collected');
+    }
+
     /**
      * @test
      *
@@ -47,6 +59,10 @@ class MemberProfileAccessorTest extends TestCase
             $this->prophesizeApiAccessor((object) ['screen_name' => 'mariec']),
             $memberRepository,
             $this->prophesizeUnavailableResourceHandler()
+        );
+
+        $memberProfileAccessor->setMemberProfileCollectedEventRepository(
+           $this->eventRepository
         );
 
         // Act
@@ -85,6 +101,10 @@ class MemberProfileAccessorTest extends TestCase
             $this->prophesizeUnavailableResourceHandler()
         );
 
+        $memberProfileAccessor->setMemberProfileCollectedEventRepository(
+            $this->eventRepository
+        );
+
         // Act
 
         try {
@@ -121,6 +141,10 @@ class MemberProfileAccessorTest extends TestCase
             $this->prophesizeApiAccessor((object) ['screen_name' => 'existing_member']),
             $memberRepository,
             $this->prophesizeUnavailableResourceHandler()
+        );
+
+        $memberProfileAccessor->setMemberProfileCollectedEventRepository(
+            $this->eventRepository
         );
 
         // Act
@@ -165,6 +189,10 @@ class MemberProfileAccessorTest extends TestCase
             $this->prophesizeApiAccessor((object) ['screen_name' => 'existing_member']),
             $memberRepository,
             $this->prophesizeUnavailableResourceHandler()
+        );
+
+        $memberProfileAccessor->setMemberProfileCollectedEventRepository(
+            $this->eventRepository
         );
 
         // Act

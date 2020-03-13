@@ -6,6 +6,7 @@ namespace App\Infrastructure\Twitter\Api\Accessor;
 use App\Accessor\Exception\UnexpectedApiResponseException;
 use App\Domain\Membership\Exception\MembershipException;
 use App\Domain\Resource\MemberIdentity;
+use App\Infrastructure\DependencyInjection\Collection\MemberProfileCollectedEventRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Infrastructure\Repository\Membership\MemberRepositoryInterface;
 use App\Infrastructure\Twitter\Api\UnavailableResource;
@@ -18,6 +19,7 @@ use App\Twitter\Exception\UnavailableResourceException;
 
 class MemberProfileAccessor implements MemberProfileAccessorInterface
 {
+    use MemberProfileCollectedEventRepositoryTrait;
     use MemberRepositoryTrait;
 
     private ApiAccessorInterface $accessor;
@@ -55,8 +57,10 @@ class MemberProfileAccessor implements MemberProfileAccessorInterface
         }
 
         try {
-            $twitterMember = $this->accessor->getMemberProfile(
-                $memberIdentity->screenName()
+            $eventRepository = $this->memberProfileCollectedEventRepository;
+            $twitterMember = $eventRepository->collectedMemberProfile(
+                $this->accessor,
+                [$eventRepository::OPTION_SCREEN_NAME => $memberIdentity->screenName()]
             );
         } catch (UnavailableResourceException $exception) {
             $this->unavailableResourceHandler->handle(
