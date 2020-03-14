@@ -22,7 +22,7 @@ interface StatusPersistenceInterface
         EntityManagerInterface $entityManager
     ): StatusInterface;
 
-    public function saveStatusForScreenName(
+    public function savePublicationsForScreenName(
         array $statuses,
         string $screenName,
         CollectionStrategyInterface $collectionStrategy

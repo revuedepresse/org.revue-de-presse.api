@@ -3,8 +3,6 @@ declare(strict_types=1);
 
 namespace App\Api\Entity;
 
-use App\Api\Exception\InvalidSerializedTokenException;
-
 /**
  * @package App\Api\Entity
  */
@@ -24,6 +22,8 @@ interface TokenInterface
     public function hasConsumerKey(): bool;
 
     public function isValid(): bool;
+
+    public function isNotFrozen(): bool;
 
     public function toArray(): array;
 

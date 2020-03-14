@@ -39,7 +39,7 @@ class StatusAccessorTest extends KernelTestCase
         $strategy = CollectionStrategy::fromArray(
             [
                 FetchPublicationInterface::BEFORE       => '2010-01-01',
-                FetchPublicationInterface::AGGREGATE_ID => 1
+                FetchPublicationInterface::PUBLICATION_LIST_ID => 1
             ]
         );
 
@@ -67,7 +67,7 @@ class StatusAccessorTest extends KernelTestCase
     {
         $strategy = CollectionStrategy::fromArray(
             [
-                FetchPublicationInterface::AGGREGATE_ID => 1
+                FetchPublicationInterface::PUBLICATION_LIST_ID => 1
             ]
         );
 

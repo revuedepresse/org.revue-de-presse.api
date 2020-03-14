@@ -56,6 +56,11 @@ class Member extends MemberModel
      */
     public ?string $minStatusId;
 
+    public function getMinStatusId(): int
+    {
+        return (int) $this->minStatusId;
+    }
+
     /**
      * @ORM\Column(name="max_like_id", type="string", length=255, nullable=true)
      */

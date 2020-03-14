@@ -43,7 +43,7 @@ class NotFoundMember implements MemberInterface
     public function make(string $screenName, int $id): MemberInterface
     {
         $member = new Member();
-        $member->setTwitterUsername($screenName);
+        $member->setScreenName($screenName);
         $member->setTwitterID($id);
         $member->setEmail('@'.$screenName);
         $member->setNotFound(true);

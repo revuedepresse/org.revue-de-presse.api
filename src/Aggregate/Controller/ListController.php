@@ -710,7 +710,7 @@ class ListController
             );
         }
 
-        $this->aggregateRepository->unlockAggregate($aggregate);
+        $this->aggregateRepository->unlockPublicationList($aggregate);
 
         return $this->makeJsonResponse();
     }

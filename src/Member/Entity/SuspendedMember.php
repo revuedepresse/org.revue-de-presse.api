@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Member\Entity;
 
@@ -43,8 +44,8 @@ class SuspendedMember implements MemberInterface
     public function make(string $screenName, int $id): MemberInterface
     {
         $member = new Member();
-        $member->setTwitterUsername($screenName);
-        $member->setTwitterID($id);
+        $member->setScreenName($screenName);
+        $member->setTwitterID((string) $id);
         $member->setEmail('@'.$screenName);
         $member->setSuspended(true);
 
