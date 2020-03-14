@@ -270,7 +270,7 @@ class StatusAccessor implements StatusAccessorInterface
     /**
      * @param CollectionStrategyInterface $collectionStrategy
      * @param array                       $options
-     * @param bool                        $discoverPastTweets
+     * @param bool                        $discoverPublicationWithMaxId
      *
      * @return array
      * @throws ApiRateLimitingException
@@ -290,14 +290,14 @@ class StatusAccessor implements StatusAccessorInterface
     public function fetchPublications(
         CollectionStrategyInterface $collectionStrategy,
         $options,
-        bool $discoverPastTweets = true
+        bool $discoverPublicationWithMaxId = true
     ): array {
         $options[LikedStatusCollectionAwareInterface::INTENT_TO_FETCH_LIKES] = $collectionStrategy->fetchLikes();
         $options = $this->removeCollectOptions($collectionStrategy, $options);
         $options = $this->updateExtremum(
             $collectionStrategy,
             $options,
-            $discoverPastTweets
+            $discoverPublicationWithMaxId
         );
 
         // When there is an upper bound and a date before which publications
@@ -326,7 +326,7 @@ class StatusAccessor implements StatusAccessorInterface
         }
 
         if (
-            $discoverPastTweets
+            $discoverPublicationWithMaxId
             && (
                 $discoverMoreRecentStatuses
                 || (count($statuses) === 0))
@@ -338,7 +338,7 @@ class StatusAccessor implements StatusAccessorInterface
             $statuses = $this->fetchPublications(
                 $collectionStrategy,
                 $options,
-                $discoverPastTweets = false
+                $discoverPublicationWithMaxId = false
             );
         }
 
@@ -478,13 +478,13 @@ class StatusAccessor implements StatusAccessorInterface
     }
 
     /**
-     * @param $discoverPastTweets
+     * @param $discoverPublicationWithMaxId
      *
      * @return string
      */
-    private function getExtremumUpdateMethod($discoverPastTweets): string
+    private function getExtremumUpdateMethod($discoverPublicationWithMaxId): string
     {
-        if ($discoverPastTweets) {
+        if ($discoverPublicationWithMaxId) {
             // next maximum
             return ExtremumAwareInterface::FINDING_IN_ASCENDING_ORDER;
         }
@@ -494,13 +494,13 @@ class StatusAccessor implements StatusAccessorInterface
     }
 
     /**
-     * @param $discoverPastTweets
+     * @param $discoverPublicationWithMaxId
      *
      * @return string
      */
-    private function getExtremumOption($discoverPastTweets): string
+    private function getExtremumOption($discoverPublicationWithMaxId): string
     {
-        if ($discoverPastTweets) {
+        if ($discoverPublicationWithMaxId) {
             return 'max_id';
         }
 
