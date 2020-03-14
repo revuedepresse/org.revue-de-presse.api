@@ -66,7 +66,7 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
         string $description = null,
         int $totalSubscriptions = 0,
         int $totalSubscribees = 0
-    ) {
+    ): MemberInterface {
         $member = new Member();
 
         if (is_numeric($twitterId)) {
@@ -79,7 +79,7 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
             $member->setTwitterID($twitterId);
         }
 
-        $member->setTwitterUsername($screenName);
+        $member->setScreenName($screenName);
 
         $member->setEnabled(false);
         $member->setLocked(false);
@@ -193,7 +193,7 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
     {
         $user->setNotFound(true);
 
-        return $this->saveUser($user);
+        return $this->saveMember($user);
     }
 
     /**

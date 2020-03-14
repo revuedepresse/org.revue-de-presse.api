@@ -5,6 +5,7 @@ namespace App\Amqp\Command;
 
 use App\Api\Entity\TokenInterface;
 use App\Api\AccessToken\Repository\TokenRepositoryInterface;
+use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Api\ApiAccessorInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Command\Command;
@@ -16,6 +17,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 abstract class AccessorAwareCommand extends Command
 {
+    use LoggerTrait;
+
     private const OPTION_OAUTH_SECRET = 'oauth_secret';
     private const OPTION_OAUTH_TOKEN  = 'oauth_token';
 
@@ -31,22 +34,11 @@ abstract class AccessorAwareCommand extends Command
      */
     protected string $defaultToken;
 
-    /**
-     * @var LoggerInterface $logger
-     */
-    protected LoggerInterface $logger;
-
     protected TokenRepositoryInterface $tokenRepository;
 
-    /**
-     * @var InputInterface
-     */
-    protected $input;
+    protected InputInterface $input;
 
-    /**
-     * @var OutputInterface
-     */
-    protected $output;
+    protected OutputInterface $output;
 
     public function setAccessor(ApiAccessorInterface $accessor): self
     {
@@ -55,39 +47,16 @@ abstract class AccessorAwareCommand extends Command
         return $this;
     }
 
-    /**
-     * @param string $secret
-     */
-    public function setDefaultSecret(string $secret)
+    public function setDefaultSecret(string $secret): void
     {
         $this->defaultSecret = $secret;
     }
 
-    /**
-     * @param string $token
-     */
-    public function setDefaultToken(string $token)
+    public function setDefaultToken(string $token): void
     {
         $this->defaultToken = $token;
     }
 
-    /**
-     * @param LoggerInterface $logger
-     *
-     * @return $this
-     */
-    public function setLogger(LoggerInterface $logger): self
-    {
-        $this->logger = $logger;
-
-        return $this;
-    }
-
-    /**
-     * @param TokenRepositoryInterface $tokenRepository
-     *
-     * @return $this
-     */
     public function setTokenRepository(TokenRepositoryInterface $tokenRepository): self
     {
         $this->tokenRepository = $tokenRepository;
@@ -121,9 +90,6 @@ abstract class AccessorAwareCommand extends Command
         return $token;
     }
 
-    /**
-     * @return array
-     */
     protected function getTokensFromInputOrFallback(): array
     {
         return [
@@ -132,9 +98,6 @@ abstract class AccessorAwareCommand extends Command
         ];
     }
 
-    /**
-     * @return bool
-     */
     private function hasOAuthSecretBeenPassedAsOption(): bool
     {
         return $this->input->hasOption(self::OPTION_OAUTH_SECRET)
@@ -147,9 +110,6 @@ abstract class AccessorAwareCommand extends Command
         // TODO remove all 5 calls to this method
     }
 
-    /**
-     * @return bool
-     */
     private function hasOAuthTokenBeenPassedAsOption(): bool
     {
         return $this->input->hasOption(self::OPTION_OAUTH_TOKEN) &&

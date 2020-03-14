@@ -1494,7 +1494,7 @@ class Accessor implements ApiAccessorInterface,
      * @throws UnavailableResourceException
      * @throws UnexpectedApiResponseException
      */
-    public function showUserFriends(string $screenName)
+    public function getFriendsOfMemberHavingScreenName(string $screenName)
     {
         $showUserFriendEndpoint = $this->getShowUserFriendsEndpoint();
 
@@ -1506,10 +1506,10 @@ class Accessor implements ApiAccessorInterface,
             $this->userRepository->declareUserAsNotFoundByUsername($screenName);
         } catch (ProtectedAccountException $exception) {
             $this->userRepository->declareUserAsProtected($screenName);
-        } finally {
-            if (isset($exception)) {
-                return (object) ['ids' => []];
-            }
+        }
+
+        if (isset($exception)) {
+            return (object) ['ids' => []];
         }
     }
 
@@ -1519,15 +1519,17 @@ class Accessor implements ApiAccessorInterface,
      * @return stdClass
      * @throws ApiRateLimitingException
      * @throws BadAuthenticationDataException
+     * @throws InconsistentTokenRepository
      * @throws NonUniqueResultException
      * @throws NotFoundMemberException
      * @throws NotFoundStatusException
      * @throws OptimisticLockException
      * @throws ProtectedAccountException
      * @throws ReadOnlyApplicationException
+     * @throws ReflectionException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
-     * @throws ReflectionException
+     * @throws UnexpectedApiResponseException
      */
     public function subscribeToMemberTimeline(AggregateSubscription $subscription)
     {
@@ -2108,7 +2110,7 @@ class Accessor implements ApiAccessorInterface,
                 );
             }
 
-            if ($member->isNotFound()) {
+            if ($member->hasNotBeenDeclaredAsNotFound()) {
                 $this->logNotFoundMemberMessage($member->getTwitterUsername());
                 NotFoundMemberException::raiseExceptionAboutNotFoundMemberHavingScreenName(
                     $member->getTwitterUsername(),

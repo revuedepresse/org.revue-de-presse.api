@@ -163,7 +163,7 @@ class NetworkRepository
             function (string $member) {
                 $member = $this->accessor->ensureMemberHavingNameExists($member);
 
-                $friends = $this->accessor->showUserFriends($member->getTwitterUsername());
+                $friends = $this->accessor->getFriendsOfMemberHavingScreenName($member->getTwitterUsername());
                 if ($member instanceof MemberInterface) {
                     $this->saveMemberSubscriptions($member, $friends->ids);
                 }
