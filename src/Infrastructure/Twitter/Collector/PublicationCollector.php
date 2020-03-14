@@ -173,7 +173,11 @@ class PublicationCollector implements PublicationCollectorInterface
         );
 
         try {
-            $success = $this->tryCollectingFurther($options, $greedy, $discoverPublicationsWithMaxId);
+            $success = $this->tryCollectingFurther(
+                $options,
+                $greedy,
+                $discoverPublicationsWithMaxId
+            );
         } catch (BadAuthenticationDataException $exception) {
             $token = $this->tokenRepository->findFirstUnfrozenToken();
             if (!($token instanceof Token)) {
