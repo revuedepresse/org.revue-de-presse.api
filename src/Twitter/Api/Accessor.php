@@ -1090,7 +1090,6 @@ class Accessor implements ApiAccessorInterface,
      * @return Token|null
      * @throws ApiRateLimitingException
      * @throws InconsistentTokenRepository
-     * @throws NonUniqueResultException
      * @throws OptimisticLockException
      */
     public function preEndpointContact(string $endpoint): ?Token
@@ -1305,7 +1304,7 @@ class Accessor implements ApiAccessorInterface,
      *
      * @return bool
      */
-    public function shouldSkipCollectForMemberWithScreenName(string $screenName)
+    public function shouldSkipCollectForMemberWithScreenName(string $screenName): bool
     {
         $member = $this->userRepository->findOneBy(['twitter_username' => $screenName]);
         if (!$member instanceof MemberInterface) {
@@ -1479,38 +1478,16 @@ class Accessor implements ApiAccessorInterface,
     }
 
     /**
-     * @param $identifier
-     *
-     * @return stdClass
-     * @throws ApiRateLimitingException
-     * @throws BadAuthenticationDataException
-     * @throws InconsistentTokenRepository
-     * @throws NonUniqueResultException
-     * @throws NotFoundMemberException
-     * @throws OptimisticLockException
-     * @throws ProtectedAccountException
-     * @throws ReadOnlyApplicationException
-     * @throws ReflectionException
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws UnexpectedApiResponseException
-     * @throws InvalidMemberIdentifier
-     * @throws ORMException
-     */
-    public function showUser(string $identifier): stdClass
-    {
-       return $this->getMemberProfile($identifier);
-    }
-
-    /**
      * @param string $screenName
      *
      * @return array|object|stdClass
      * @throws ApiRateLimitingException
      * @throws BadAuthenticationDataException
      * @throws InconsistentTokenRepository
+     * @throws InvalidMemberIdentifier
      * @throws NonUniqueResultException
      * @throws NotFoundStatusException
+     * @throws ORMException
      * @throws OptimisticLockException
      * @throws ReadOnlyApplicationException
      * @throws ReflectionException

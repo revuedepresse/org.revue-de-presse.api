@@ -7,21 +7,21 @@ use App\Api\Entity\Whisperer;
 use App\Domain\Collection\CollectionStrategyInterface;
 use App\Infrastructure\Amqp\Message\FetchPublicationInterface;
 use App\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
+use App\Infrastructure\DependencyInjection\Collection\MemberProfileCollectedEventRepositoryTrait;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\DependencyInjection\Membership\WhispererRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Status\LikedStatusRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Status\StatusLoggerTrait;
 use App\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use App\Infrastructure\DependencyInjection\TranslatorTrait;
-use App\Status\Repository\ExtremumAwareInterface;
-use function array_key_exists;
 
 class WhispererIdentification implements WhispererIdentificationInterface
 {
     use ApiAccessorTrait;
-    use StatusLoggerTrait;
     use LikedStatusRepositoryTrait;
     use LoggerTrait;
+    use MemberProfileCollectedEventRepositoryTrait;
+    use StatusLoggerTrait;
     use StatusRepositoryTrait;
     use TranslatorTrait;
     use WhispererRepositoryTrait;
@@ -32,41 +32,43 @@ class WhispererIdentification implements WhispererIdentificationInterface
         string $screenName,
         ?int $lastCollectionBatchSize
     ): bool {
-        $flaggedWhisperer = false;
-
-        if (!$this->justCollectedSomeStatuses($lastCollectionBatchSize)) {
-            $member = $this->apiAccessor->showUser($screenName);
-
-            $totalCollectedStatuses = 0;
-            try {
-                $totalCollectedStatuses = $this->logHowManyItemsHaveBeenCollected(
-                    $collectionStrategy,
-                    $options,
-                    $lastCollectionBatchSize
-                );
-            } catch (\Throwable $exception) {
-                $this->logger->error(
-                    $exception->getMessage(),
-                    ['stacktrack' => $exception->getTrace()]
-                );
-            }
-
-            $whisperer = new Whisperer($screenName, $totalCollectedStatuses);
-            $whisperer->setExpectedWhispers($member->statuses_count);
-
-            $this->whispererRepository->declareWhisperer($whisperer);
-
-            $whispererDeclarationMessage = $this->translator->trans(
-                'logs.info.whisperer_declared',
-                ['screen_name' => $screenName],
-                'logs'
-            );
-            $this->logger->info($whispererDeclarationMessage);
-
-            $flaggedWhisperer = true;
+        if ($this->justCollectedSomeStatuses($lastCollectionBatchSize)) {
+            return false;
         }
 
-        return $flaggedWhisperer;
+        $eventRepository = $this->memberProfileCollectedEventRepository;
+        $member = $eventRepository->collectedMemberProfile(
+            $this->apiAccessor,
+            [$eventRepository::OPTION_SCREEN_NAME => $screenName]
+        );
+
+        $totalCollectedStatuses = 0;
+        try {
+            $totalCollectedStatuses = $this->logHowManyItemsHaveBeenCollected(
+                $collectionStrategy,
+                $options,
+                $lastCollectionBatchSize
+            );
+        } catch (\Throwable $exception) {
+            $this->logger->error(
+                $exception->getMessage(),
+                ['stacktrack' => $exception->getTrace()]
+            );
+        }
+
+        $whisperer = new Whisperer($screenName, $totalCollectedStatuses);
+        $whisperer->setExpectedWhispers($member->statuses_count);
+
+        $this->whispererRepository->declareWhisperer($whisperer);
+
+        $whispererDeclarationMessage = $this->translator->trans(
+            'logs.info.whisperer_declared',
+            ['screen_name' => $screenName],
+            'logs'
+        );
+        $this->logger->info($whispererDeclarationMessage);
+
+        return true;
     }
 
     /**

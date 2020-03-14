@@ -26,6 +26,7 @@ use Exception;
 use function array_key_exists;
 use function max;
 use function min;
+use const JSON_THROW_ON_ERROR;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
@@ -109,16 +110,18 @@ class StatusRepository extends ArchivedStatusRepository
      * @return int
      * @throws NoResultException
      * @throws NonUniqueResultException
-     * @throws NotFoundMemberException
-     * @throws ORMException
-     * @throws OptimisticLockException
      */
     public function countHowManyStatusesFor($screenName): int
     {
         $member = $this->memberRepository->findOneBy(['twitter_username' => $screenName]);
         if ($member instanceof MemberInterface && $member->totalStatuses !== 0) {
             $status = $this->findOneBy(['screenName' => $screenName], ['createdAt' => 'DESC']);
-            $decodedStatusDocument = json_decode($status->getApiDocument(), true);
+            $decodedStatusDocument = json_decode(
+                $status->getApiDocument(),
+                true,
+                512,
+                JSON_THROW_ON_ERROR
+            );
 
             if ($decodedStatusDocument['user']['statuses_count'] > CollectionStrategyInterface::MAX_AVAILABLE_TWEETS_PER_USER) {
                 return $decodedStatusDocument['user']['statuses_count'];

@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace App\Domain\Collection;
 
+use App\Domain\Status\LikedStatusRepositoryInterface;
+use App\Infrastructure\Repository\Membership\MemberRepositoryInterface;
+use App\Infrastructure\Repository\Status\StatusRepositoryInterface;
 use App\Status\LikedStatusCollectionAwareInterface;
 use function array_key_exists;
 use const INF;
@@ -52,7 +55,29 @@ class CollectionStrategy implements CollectionStrategyInterface
 
     private $minStatusId;
 
-    public function dateBeforeWhichStatusAreToBeCollected(): ?string
+    public function shouldLookUpPublicationsWithMinId(
+        LikedStatusRepositoryInterface $likedStatusRepository,
+        StatusRepositoryInterface $statusRepository,
+        MemberRepositoryInterface $memberRepository
+    ): bool {
+        if ($this->fetchLikes()) {
+            return $likedStatusRepository->countHowManyLikesFor($this->screenName())
+                > self::MAX_AVAILABLE_TWEETS_PER_USER;
+        }
+
+        $minPublicationId = $memberRepository->getMinPublicationIdForMemberHavingScreenName(
+            $this->screenName()
+        );
+
+        if ($minPublicationId) {
+            return true;
+        }
+
+        return $statusRepository->countHowManyStatusesFor($this->screenName())
+            > self::MAX_AVAILABLE_TWEETS_PER_USER;
+    }
+
+    public function dateBeforeWhichPublicationsAreToBeCollected(): ?string
     {
         return $this->dateBeforeWhichStatusAreCollected;
     }
@@ -83,7 +108,7 @@ class CollectionStrategy implements CollectionStrategyInterface
     public function oneOfTheOptionsIsActive(): bool
     {
         return $this->publicationListId()
-            || $this->dateBeforeWhichStatusAreToBeCollected();
+            || $this->dateBeforeWhichPublicationsAreToBeCollected();
     }
 
     public function optInToCollectStatusFor(string $screenName): CollectionStrategyInterface

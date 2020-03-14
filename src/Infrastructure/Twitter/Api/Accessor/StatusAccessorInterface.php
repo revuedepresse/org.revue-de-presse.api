@@ -10,6 +10,6 @@ interface StatusAccessorInterface
     public function updateExtremum(
         CollectionStrategyInterface $collectionStrategy,
         array $options,
-        bool $discoverPastTweets = true
+        bool $discoverPublicationWithMaxId = true
     ): array;
 }

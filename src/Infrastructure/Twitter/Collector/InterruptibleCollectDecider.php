@@ -5,17 +5,18 @@ namespace App\Infrastructure\Twitter\Collector;
 
 use App\Accessor\Exception\ApiRateLimitingException;
 use App\Accessor\Exception\NotFoundStatusException;
-use App\Accessor\Exception\ReadOnlyApplicationException;
-use App\Accessor\Exception\UnexpectedApiResponseException;
 use App\Amqp\Exception\SkippableMessageException;
 use App\Api\Entity\Whisperer;
 use App\Domain\Collection\CollectionStrategyInterface;
+use App\Domain\Membership\Exception\MembershipException;
+use App\Domain\Publication\Exception\LockedPublicationListException;
 use App\Domain\Publication\PublicationListInterface;
 use App\Infrastructure\Amqp\Message\FetchPublicationInterface;
 use App\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Infrastructure\DependencyInjection\Api\ApiLimitModeratorTrait;
 use App\Infrastructure\DependencyInjection\Api\StatusAccessorTrait;
 use App\Infrastructure\DependencyInjection\Collection\LikedStatusCollectDecider;
+use App\Infrastructure\DependencyInjection\Collection\MemberProfileCollectedEventRepositoryTrait;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\DependencyInjection\Membership\WhispererRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Publication\PublicationListRepositoryTrait;
@@ -26,16 +27,12 @@ use App\Infrastructure\DependencyInjection\TokenRepositoryTrait;
 use App\Infrastructure\Twitter\Collector\Exception\RateLimitedException;
 use App\Infrastructure\Twitter\Collector\Exception\SkipCollectException;
 use App\Twitter\Exception\BadAuthenticationDataException;
-use App\Twitter\Exception\InconsistentTokenRepository;
 use App\Twitter\Exception\NotFoundMemberException;
 use App\Twitter\Exception\ProtectedAccountException;
 use App\Twitter\Exception\SuspendedAccountException;
 use App\Twitter\Exception\UnavailableResourceException;
 use DateTime;
-use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\OptimisticLockException;
 use Exception;
-use ReflectionException;
 use function array_key_exists;
 use function count;
 use function sprintf;
@@ -47,6 +44,7 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
     use ApiLimitModeratorTrait;
     use LikedStatusRepositoryTrait;
     use LikedStatusCollectDecider;
+    use MemberProfileCollectedEventRepositoryTrait;
     use PublicationListRepositoryTrait;
     use StatusAccessorTrait;
     use StatusRepositoryTrait;
@@ -154,11 +152,9 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
     /**
      * @param array $options
      *
-     * @return bool
+     * @throws MembershipException
      */
-    private function shouldSkipCollect(
-        array $options
-    ): bool
+    private function guardAgainstExceptionalMember(array $options): void
     {
         if (
             !array_key_exists(FetchPublicationInterface::SCREEN_NAME, $options)
@@ -167,9 +163,14 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
                 $options[FetchPublicationInterface::SCREEN_NAME]
             )
         ) {
-            return true;
+            throw new MembershipException(
+                'Skipping collect when encountering exceptional member',
+            );
         }
+    }
 
+    private function guardAgainstLockedPublicationList(): ?PublicationListInterface
+    {
         $publicationList = null;
         if ($this->collectionStrategy->publicationListId() !== null) {
             $publicationList = $this->publicationListRepository->findOneBy(
@@ -180,26 +181,38 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
         if (
             ($publicationList instanceof PublicationListInterface)
             && $publicationList->isLocked()
-            && !$this->collectionStrategy->dateBeforeWhichStatusAreToBeCollected()
+            && !$this->collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected()
         ) {
-            $message = sprintf(
+            LockedPublicationListException::throws(
                 'Will skip message consumption for locked aggregate #%d',
-                $publicationList->getId()
+                $publicationList
             );
-            $this->logger->info($message);
-
-            return true;
         }
 
+        return $publicationList;
+    }
+
+    /**
+     * @param array $options
+     *
+     * @return bool
+     */
+    private function shouldSkipCollect(
+        array $options
+    ): bool {
         try {
-            $whisperer = $this->beforeFetchingStatuses(
-                $options
-            );
+            $this->guardAgainstExceptionalMember($options);
+            $publicationList = $this->guardAgainstLockedPublicationList();
+            $whisperer = $this->beforeFetchingStatuses($options);
+        } catch (MembershipException|LockedPublicationListException $exception) {
+            $this->logger->info($exception->getMessage());
+
+            return true;
         } catch (SkippableMessageException $exception) {
             return $exception->shouldSkipMessageConsumption;
         }
 
-        $statuses = $this->statusAccessor->fetchLatestStatuses(
+        $statuses = $this->statusAccessor->fetchPublications(
             $this->collectionStrategy,
             $options
         );
@@ -276,7 +289,7 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
             SkippableMessageException::stopMessageConsumption();
         }
 
-        $savedItems = $this->statusPersistence->saveStatusForScreenName(
+        $savedItems = $this->statusPersistence->savePublicationsForScreenName(
             $statuses,
             $options[FetchPublicationInterface::SCREEN_NAME],
             $this->collectionStrategy
@@ -304,13 +317,13 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
     private function extractAggregateIdFromOptions(
         $options
     ): ?int {
-        if (!array_key_exists(FetchPublicationInterface::AGGREGATE_ID, $options)) {
+        if (!array_key_exists(FetchPublicationInterface::PUBLICATION_LIST_ID, $options)) {
             return null;
         }
 
-        $this->collectionStrategy->optInToCollectStatusForPublicationListOfId($options[FetchPublicationInterface::AGGREGATE_ID]);
+        $this->collectionStrategy->optInToCollectStatusForPublicationListOfId($options[FetchPublicationInterface::PUBLICATION_LIST_ID]);
 
-        return $options[FetchPublicationInterface::AGGREGATE_ID];
+        return $options[FetchPublicationInterface::PUBLICATION_LIST_ID];
     }
 
     /**
@@ -365,8 +378,10 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
             SkippableMessageException::continueMessageConsumption();
         }
 
-        $whisperer->member = $this->apiAccessor->showUser(
-            $options[FetchPublicationInterface::SCREEN_NAME]
+        $eventRepository = $this->memberProfileCollectedEventRepository;
+        $whisperer->member = $eventRepository->collectedMemberProfile(
+            $this->apiAccessor,
+            [$eventRepository::OPTION_SCREEN_NAME => $options[FetchPublicationInterface::SCREEN_NAME]]
         );
         $whispers          = (int) $whisperer->member->statuses_count;
 

@@ -5,5 +5,9 @@ namespace App\Infrastructure\Twitter\Collector;
 
 interface PublicationCollectorInterface
 {
-    public function collect(array $options, $greedy = false, $discoverPastTweets = true): bool;
+    public function collect(
+        array $options,
+        $greedy = false,
+        $discoverPublicationsWithMaxId = true
+    ): bool;
 }

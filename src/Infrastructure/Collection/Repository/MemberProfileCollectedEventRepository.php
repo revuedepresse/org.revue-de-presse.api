@@ -23,7 +23,7 @@ class MemberProfileCollectedEventRepository extends ServiceEntityRepository impl
     ): stdClass {
         $screenName = $options[self::OPTION_SCREEN_NAME];
 
-        $event               = $this->startCollectOfOwnershipBatch($screenName);
+        $event = $this->startCollectOfOwnershipBatch($screenName);
 
         $twitterMember = $accessor->getMemberProfile($screenName);
 

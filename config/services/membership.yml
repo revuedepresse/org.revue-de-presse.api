@@ -2,10 +2,11 @@ services:
     App\Infrastructure\Identification\WhispererIdentification:
         class: 'App\Infrastructure\Identification\WhispererIdentification'
         calls:
-            - [ 'setApiAccessor',           [ '@weaving_the_web_twitter.api_accessor' ] ]
-            - [ 'setLikedStatusRepository', [ '@repository.liked_status' ] ]
-            - [ 'setStatusLogger',          [ '@App\Infrastructure\Log\StatusLogger' ] ]
-            - [ 'setStatusRepository',      [ '@App\Api\Repository\StatusRepository' ] ]
-            - [ 'setLogger',                [ '@logger' ] ]
-            - [ 'setTranslator',            [ '@App\Infrastructure\Translation\Translator' ] ]
-            - [ 'setWhispererRepository',   [ '@repository.whisperer' ] ]
+            - [ 'setApiAccessor',                           [ '@weaving_the_web_twitter.api_accessor' ] ]
+            - [ 'setLikedStatusRepository',                 [ '@repository.liked_status' ] ]
+            - [ 'setMemberProfileCollectedEventRepository', [ '@App\Infrastructure\Collection\Repository\MemberProfileCollectedEventRepository' ] ]
+            - [ 'setStatusLogger',                          [ '@App\Infrastructure\Log\StatusLogger' ] ]
+            - [ 'setStatusRepository',                      [ '@App\Api\Repository\StatusRepository' ] ]
+            - [ 'setLogger',                                [ '@logger' ] ]
+            - [ 'setTranslator',                            [ '@App\Infrastructure\Translation\Translator' ] ]
+            - [ 'setWhispererRepository',                   [ '@repository.whisperer' ] ]

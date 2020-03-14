@@ -40,7 +40,7 @@ class LikedStatusCollectDecider implements LikedStatusCollectDeciderInterface
         if ($atLeastOneStatusFetched && !$hasLikedStatusBeenSavedBefore) {
             // At this point, it should not skip further consumption
             // for matching liked statuses
-            $this->statusPersistence->saveStatusForScreenName(
+            $this->statusPersistence->savePublicationsForScreenName(
                 $statuses,
                 $options[FetchPublicationInterface::SCREEN_NAME],
                 $collectionStrategy
@@ -53,7 +53,7 @@ class LikedStatusCollectDecider implements LikedStatusCollectDeciderInterface
         }
 
         if (!$atLeastOneStatusFetched || $hasLikedStatusBeenSavedBefore) {
-            $statuses = $this->statusAccessor->fetchLatestStatuses(
+            $statuses = $this->statusAccessor->fetchPublications(
                 $collectionStrategy,
                 $options,
                 $discoverPastTweets = false
@@ -68,12 +68,12 @@ class LikedStatusCollectDecider implements LikedStatusCollectDeciderInterface
                 }
 
                 $collectionStrategy->optInToCollectStatusForPublicationListOfId(
-                    $options[FetchPublicationInterface::AGGREGATE_ID]
+                    $options[FetchPublicationInterface::PUBLICATION_LIST_ID]
                 );
 
                 // At this point, it should not skip further consumption
                 // for matching liked statuses
-                $this->statusPersistence->saveStatusForScreenName(
+                $this->statusPersistence->savePublicationsForScreenName(
                     $statuses,
                     $options[FetchPublicationInterface::SCREEN_NAME],
                     $collectionStrategy

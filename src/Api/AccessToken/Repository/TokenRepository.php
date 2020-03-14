@@ -23,10 +23,10 @@ use App\Api\Entity\Token,
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  *
- * @method Token|null find($id, $lockMode = null, $lockVersion = null)
- * @method Token|null findOneBy(array $criteria, array $orderBy = null)
- * @method Token[]    findAll()
- * @method Token[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method TokenInterface|null find($id, $lockMode = null, $lockVersion = null)
+ * @method TokenInterface|null findOneBy(array $criteria, array $orderBy = null)
+ * @method TokenInterface[]    findAll()
+ * @method TokenInterface[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class TokenRepository extends ServiceEntityRepository implements TokenRepositoryInterface
 {
@@ -46,7 +46,7 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
 
         $tokenRepository = $this->getEntityManager()->getRepository('Api:TokenType');
 
-        /** @var \App\Api\Entity\TokenType $tokenType */
+        /** @var TokenType $tokenType */
         $tokenType = $tokenRepository->findOneBy(['name' => TokenType::USER]);
         $token->setType($tokenType);
 
@@ -78,20 +78,19 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
     }
 
     /**
-     * @param                      $oauthToken
-     * @param LoggerInterface|null $logger
+     * @param string          $oauthToken
+     * @param LoggerInterface $logger
      *
-     * @return Token
+     * @return TokenInterface
      * @throws ORMException
      * @throws OptimisticLockException
      */
     public function refreshFreezeCondition(
         string $oauthToken,
-        LoggerInterface $logger = null
+        LoggerInterface $logger
     ): TokenInterface {
         $frozen = false;
 
-        /** @var \App\Api\Entity\Token $token */
         $token = $this->findOneBy(['oauthToken' => $oauthToken]);
 
         if ($token === null) {

@@ -219,7 +219,7 @@ class StatusPersistence implements StatusPersistenceInterface
         return $status;
     }
 
-    public function saveStatusForScreenName(
+    public function savePublicationsForScreenName(
         array $statuses,
         string $screenName,
         CollectionStrategyInterface $collectionStrategy
