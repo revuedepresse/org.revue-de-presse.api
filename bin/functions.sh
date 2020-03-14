@@ -141,7 +141,7 @@ function handle_messages {
     rabbitmq_output_log="${PROJECT_DIR}/${rabbitmq_output_log}"
     rabbitmq_error_log="${PROJECT_DIR}/${rabbitmq_error_log}"
 
-    export SCRIPT="bin/console messenger:consume --time-limit=$TIME_LIMT -m $MEMORY_LIMIT -l $MESSAGES "${command_suffix}" --time-limit 3000"
+    export SCRIPT="bin/console messenger:consume --time-limit=$TIME_LIMIT -m $MEMORY_LIMIT -l $MESSAGES "${command_suffix}
 
     local symfony_environment
     symfony_environment="$(get_symfony_environment)"
