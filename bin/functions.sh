@@ -156,7 +156,6 @@ function handle_messages {
     echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
     /bin/bash -c "$command >> ${rabbitmq_output_log} 2>> ${rabbitmq_error_log}"
     cd "../../"
-    sleep 3000
 }
 
 function consume_amqp_lively_status_messages {
