@@ -140,7 +140,7 @@ class PublicationCollector implements PublicationCollectorInterface
             !$this->isTwitterApiAvailable()
             && ($remainingItemsToCollect = $this->remainingItemsToCollect($options))
         ) {
-            $this->unlockAggregate();
+            $this->unlockPublicationList();
 
             /**
              * Marks the collect as successful if there are no remaining status
@@ -196,7 +196,7 @@ class PublicationCollector implements PublicationCollectorInterface
             );
             $success = false;
         } finally {
-            $this->unlockAggregate();
+            $this->unlockPublicationList();
         }
 
         return $success;
@@ -907,14 +907,14 @@ class PublicationCollector implements PublicationCollectorInterface
         return $success;
     }
 
-    private function unlockAggregate(): void
+    private function unlockPublicationList(): void
     {
         if ($this->isCollectingStatusesForAggregate()) {
             $publicationList = $this->publicationListRepository->findOneBy(
                 ['id' => $this->collectionStrategy->publicationListId()]
             );
             if ($publicationList instanceof PublicationListInterface) {
-                $this->publicationListRepository->unlockAggregate($publicationList);
+                $this->publicationListRepository->unlockPublicationList($publicationList);
                 $this->logger->info(
                     sprintf(
                         'Unlocked publication list of id #%d',

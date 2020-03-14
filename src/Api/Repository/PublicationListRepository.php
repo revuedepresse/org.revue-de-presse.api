@@ -431,7 +431,7 @@ QUERY;
      * @throws ORMException
      * @throws OptimisticLockException
      */
-    public function unlockAggregate(PublicationListInterface $aggregate): PublicationListInterface
+    public function unlockPublicationList(PublicationListInterface $aggregate): PublicationListInterface
     {
         $aggregate->unlock();
 

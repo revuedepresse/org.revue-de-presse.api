@@ -20,7 +20,7 @@ interface PublicationListRepositoryInterface
 
     public function make(string $screenName, string $listName);
 
-    public function unlockAggregate(PublicationListInterface $publicationList);
+    public function unlockPublicationList(PublicationListInterface $publicationList);
 
     public function updateTotalStatuses(
         array $aggregate,
