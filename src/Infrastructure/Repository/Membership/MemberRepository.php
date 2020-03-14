@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Repository\Membership;
 
+use App\Domain\Membership\Exception\InvalidMemberException;
 use App\Infrastructure\Http\SearchParams;
 use App\Aggregate\Repository\PaginationAwareTrait;
 use App\Api\Repository\PublicationListRepository;
@@ -835,5 +836,24 @@ QUERY;
             $protected = false,
             $suspended = true
         );
+    }
+
+    /**
+     * @param string $screenName
+     *
+     * @return int|null
+     * @throws InvalidMemberException
+     */
+    public function getMinPublicationIdForMemberHavingScreenName(string $screenName): ?int
+    {
+        $member = $this->findOneBy(['twitter_username' => $screenName]);
+        if (!($member instanceof MemberInterface)) {
+            throw new InvalidMemberException(sprintf(
+                'Member with screen name "%s" can not be found',
+                $screenName
+            ));
+        }
+
+        return $member->getMinStatusId();
     }
 }

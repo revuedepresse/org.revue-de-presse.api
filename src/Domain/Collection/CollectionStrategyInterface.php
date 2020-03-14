@@ -9,7 +9,7 @@ interface CollectionStrategyInterface
 
     public const MAX_BATCH_SIZE = 200;
 
-    public function dateBeforeWhichStatusAreToBeCollected(): ?string;
+    public function dateBeforeWhichPublicationsAreToBeCollected(): ?string;
 
     public function publicationListId(): ?int;
 

@@ -17,4 +17,6 @@ interface MemberRepositoryInterface
     public function saveProtectedMember(MemberIdentity $memberIdentity): MemberInterface;
 
     public function saveSuspendedMember(MemberIdentity $memberIdentity): MemberInterface;
+
+    public function getMinPublicationIdForMemberHavingScreenName(string $screenName): ?int;
 }

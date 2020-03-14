@@ -9,9 +9,9 @@ use App\Membership\Entity\MemberInterface;
 
 interface FetchPublicationInterface
 {
-    public const AGGREGATE_ID = 'aggregate_id';
-    public const SCREEN_NAME = 'screen_name';
     public const BEFORE = 'before';
+    public const PUBLICATION_LIST_ID = 'aggregate_id';
+    public const SCREEN_NAME         = 'screen_name';
 
     public function aggregateId(): int;
 

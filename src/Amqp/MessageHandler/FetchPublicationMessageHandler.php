@@ -85,7 +85,7 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
 
         $options = [
             LikedStatusCollectionAwareInterface::INTENT_TO_FETCH_LIKES => $message->shouldFetchLikes(),
-            $message::AGGREGATE_ID                                     => $message->aggregateId(),
+            $message::PUBLICATION_LIST_ID                              => $message->aggregateId(),
             $message::BEFORE                                           => $message->dateBeforeWhichStatusAreCollected(),
             'count'                                                    => 200,
             'oauth'                                                    => $options[TokenInterface::FIELD_TOKEN],
@@ -93,7 +93,10 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
         ];
 
         try {
-            $success = $this->collector->collect($options, $greedy = true);
+            $success = $this->collector->collect(
+                $options,
+                $greedy = true
+            );
             if (!$success) {
                 $this->logger->info(
                     sprintf(

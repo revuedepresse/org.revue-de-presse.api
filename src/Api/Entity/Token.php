@@ -312,7 +312,7 @@ class Token implements TokenInterface
     /**
      * @return bool
      */
-    public function isFrozen()
+    public function isFrozen(): bool
     {
         return $this->frozen;
     }
@@ -320,7 +320,7 @@ class Token implements TokenInterface
     /**
      * @return bool
      */
-    public function isNotFrozen()
+    public function isNotFrozen(): bool
     {
         return !$this->isFrozen();
     }

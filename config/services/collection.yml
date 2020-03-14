@@ -2,17 +2,18 @@ services:
     App\Infrastructure\Twitter\Collector\InterruptibleCollectDecider:
         class: 'App\Infrastructure\Twitter\Collector\InterruptibleCollectDecider'
         calls:
-            - [ 'setApiAccessor',                [ '@weaving_the_web_twitter.api_accessor'] ]
-            - [ 'setLogger',                     [ '@logger' ] ]
-            - [ 'setLikedStatusRepository',      [ '@repository.liked_status' ] ]
-            - [ 'setLikedStatusCollectDecider',  [ '@App\Infrastructure\Twitter\Collector\LikedStatusCollectDecider' ] ]
-            - [ 'setModerator',                  [ '@weaving_the_web_twitter.moderator.api_limit' ] ]
-            - [ 'setPublicationListRepository',  [ '@App\Api\Repository\PublicationListRepository' ] ]
-            - [ 'setStatusAccessor',             [ '@App\Accessor\StatusAccessor' ] ]
-            - [ 'setStatusRepository',           [ '@App\Api\Repository\StatusRepository' ] ]
-            - [ 'setStatusPersistence',          [ '@App\Infrastructure\Status\Persistence\StatusPersistence' ] ]
-            - [ 'setTokenRepository',            [ '@repository.access_token' ] ]
-            - [ 'setWhispererRepository',        [ '@repository.whisperer' ] ]
+            - [ 'setApiAccessor',                           [ '@weaving_the_web_twitter.api_accessor'] ]
+            - [ 'setLogger',                                [ '@logger' ] ]
+            - [ 'setLikedStatusRepository',                 [ '@repository.liked_status' ] ]
+            - [ 'setLikedStatusCollectDecider',             [ '@App\Infrastructure\Twitter\Collector\LikedStatusCollectDecider' ] ]
+            - [ 'setMemberProfileCollectedEventRepository', [ '@App\Infrastructure\Collection\Repository\MemberProfileCollectedEventRepository' ] ]
+            - [ 'setModerator',                             [ '@weaving_the_web_twitter.moderator.api_limit' ] ]
+            - [ 'setPublicationListRepository',             [ '@App\Api\Repository\PublicationListRepository' ] ]
+            - [ 'setStatusAccessor',                        [ '@App\Accessor\StatusAccessor' ] ]
+            - [ 'setStatusRepository',                      [ '@App\Api\Repository\StatusRepository' ] ]
+            - [ 'setStatusPersistence',                     [ '@App\Infrastructure\Status\Persistence\StatusPersistence' ] ]
+            - [ 'setTokenRepository',                       [ '@repository.access_token' ] ]
+            - [ 'setWhispererRepository',                   [ '@repository.whisperer' ] ]
         public: true
 
     App\Infrastructure\Twitter\Collector\LikedStatusCollectDecider:

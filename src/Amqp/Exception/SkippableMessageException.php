@@ -13,7 +13,7 @@ class SkippableMessageException extends \Exception
     /**
      * @throws SkippableMessageException
      */
-    public static function stopMessageConsumption()
+    public static function stopMessageConsumption(): void
     {
         $exception = new self();
         $exception->shouldSkipMessageConsumption = true;
@@ -24,7 +24,7 @@ class SkippableMessageException extends \Exception
     /**
      * @throws SkippableMessageException
      */
-    public static function continueMessageConsumption()
+    public static function continueMessageConsumption(): void
     {
         $exception = new self();
         $exception->shouldSkipMessageConsumption = false;

@@ -9,6 +9,7 @@ use App\Membership\Entity\MemberInterface;
 use App\Operation\OperationClock;
 
 use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 use Exception;
 use Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Input\InputOption,
@@ -298,20 +299,18 @@ class ProduceUserFriendListCommand extends AggregateAwareCommand
     /**
      * @param $twitterUserId
      * @param $prexistingMember
-     * @return User
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
-     * @throws \Doctrine\ORM\NonUniqueResultException
+     *
+     * @return Member
      * @throws OptimisticLockException
-     * @throws Exception
-     * @throws \WeavingTheWeb\Bundle\ApiBundle\Exception\InvalidTokenException
+     * @throws UnavailableResourceException
+     * @throws ORMException
      */
     private function saveMemberWithTwitterId($twitterUserId, $prexistingMember): Member
     {
-        $twitterUser = $this->accessor->showUser($twitterUserId);
+        $twitterUser = $this->accessor->getMemberProfile($twitterUserId);
 
         if (isset($twitterUser->screen_name)) {
-            $member = new User();
+            $member = new Member();
 
             if ($prexistingMember instanceof MemberInterface) {
                 $member = $prexistingMember;

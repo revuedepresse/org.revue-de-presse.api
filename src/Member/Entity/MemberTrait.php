@@ -127,10 +127,6 @@ trait MemberTrait
         return '';
     }
 
-    /**
-     * @param bool $protected
-     * @return MemberInterface
-     */
     public function setProtected(bool $protected): MemberInterface
     {
         return $this;
@@ -223,5 +219,10 @@ trait MemberTrait
     public function setTotalStatus($totalStatus): MemberInterface
     {
         return $this;
+    }
+
+    public function getMinStatusId(): int
+    {
+        return 0;
     }
 }

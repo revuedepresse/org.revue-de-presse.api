@@ -12,11 +12,11 @@ use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;
 use App\Api\Repository\ArchivedStatusRepository;
 use App\Domain\Collection\CollectionStrategyInterface;
-use App\Domain\Collection\Entity\PublicationBatchCollectedEvent;
 use App\Domain\Status\StatusInterface;
 use App\Domain\Status\TaggedStatus;
 use App\Infrastructure\Amqp\Message\FetchPublicationInterface;
 use App\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
+use App\Infrastructure\DependencyInjection\Collection\MemberProfileCollectedEventRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Collection\PublicationBatchCollectedEventRepositoryTrait;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
@@ -43,7 +43,6 @@ use ReflectionException;
 use function array_key_exists;
 use function count;
 use function sprintf;
-use const JSON_THROW_ON_ERROR;
 
 /**
  * @package App\Accessor
@@ -51,6 +50,7 @@ use const JSON_THROW_ON_ERROR;
 class StatusAccessor implements StatusAccessorInterface
 {
     use ApiAccessorTrait;
+    use MemberProfileCollectedEventRepositoryTrait;
     use PublicationPersistenceTrait;
     use LikedStatusRepositoryTrait;
     use LoggerTrait;
@@ -153,7 +153,7 @@ class StatusAccessor implements StatusAccessorInterface
             return $member;
         }
 
-        $fetchedMember = $this->apiAccessor->showUser($memberName);
+        $fetchedMember = $this->collectMemberProfile($memberName);
         $member = $this->memberRepository->findOneBy(['twitterID' => $fetchedMember->id]);
         if ($member instanceof MemberInterface) {
             $this->ensureMemberHasBio($member, $memberName);
@@ -188,7 +188,7 @@ class StatusAccessor implements StatusAccessorInterface
             return $member;
         }
 
-        $member = $this->apiAccessor->showUser((string) $id);
+        $member = $this->collectMemberProfile($id);
 
         return $this->memberRepository->saveMember(
             $this->memberRepository->make(
@@ -200,6 +200,16 @@ class StatusAccessor implements StatusAccessorInterface
                 $member->friends_count,
                 $member->followers_count
             )
+        );
+    }
+
+    private function collectMemberProfile(string $screenName): \stdClass
+    {
+        $eventRepository = $this->memberProfileCollectedEventRepository;
+
+        return $eventRepository->collectedMemberProfile(
+            $this->apiAccessor,
+            [$eventRepository::OPTION_SCREEN_NAME => $screenName]
         );
     }
 
@@ -241,7 +251,7 @@ class StatusAccessor implements StatusAccessorInterface
         $shouldTryToUrl = $member->getUrl() === null && $memberBioIsAvailable;
 
         if ($shouldTryToSaveDescription || $shouldTryToUrl) {
-            $fetchedMember = $this->apiAccessor->showUser($memberName);
+            $fetchedMember = $this->collectMemberProfile($memberName);
 
             if ($shouldTryToSaveDescription) {
                 $member->description = $fetchedMember->description;
@@ -277,7 +287,7 @@ class StatusAccessor implements StatusAccessorInterface
      * @throws UnavailableResourceException
      * @throws UnexpectedApiResponseException
      */
-    public function fetchLatestStatuses(
+    public function fetchPublications(
         CollectionStrategyInterface $collectionStrategy,
         $options,
         bool $discoverPastTweets = true
@@ -290,9 +300,11 @@ class StatusAccessor implements StatusAccessorInterface
             $discoverPastTweets
         );
 
+        // When there is an upper bound and a date before which publications
+        // are to be collected, pick the date over the upper bound for collection
         if (
             array_key_exists('max_id', $options)
-            && $collectionStrategy->dateBeforeWhichStatusAreToBeCollected() // Looking into the past
+            && $collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected() // Looking into the past
         ) {
             unset($options['max_id']);
         }
@@ -323,7 +335,7 @@ class StatusAccessor implements StatusAccessorInterface
                 unset($options['max_id']);
             }
 
-            $statuses = $this->fetchLatestStatuses(
+            $statuses = $this->fetchPublications(
                 $collectionStrategy,
                 $options,
                 $discoverPastTweets = false
@@ -333,27 +345,19 @@ class StatusAccessor implements StatusAccessorInterface
         return $statuses;
     }
 
-    /**
-     * @param CollectionStrategyInterface $collectionStrategy
-     * @param array                       $options
-     * @param bool                        $discoverPastTweets
-     *
-     * @return mixed
-     * @throws NonUniqueResultException
-     */
     public function updateExtremum(
         CollectionStrategyInterface $collectionStrategy,
         array $options,
-        bool $discoverPastTweets = true
+        bool $discoverPublicationsWithMaxId = true
     ): array {
-        if ($collectionStrategy->dateBeforeWhichStatusAreToBeCollected()) {
-            $discoverPastTweets = true;
+        if ($collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected()) {
+            $discoverPublicationsWithMaxId = true;
         }
 
-        $options = $this->removeMaxIdFromOptions($options, $discoverPastTweets);
+        $options = $this->removeMaxIdFromOptions($options, $discoverPublicationsWithMaxId);
 
-        $findingDirection = $this->getExtremumUpdateMethod($discoverPastTweets);
-        $status           = $this->findExtremum(
+        $findingDirection = $this->getExtremumUpdateMethod($discoverPublicationsWithMaxId);
+        $extremum           = $this->findExtremum(
             $collectionStrategy,
             $options,
             $findingDirection
@@ -361,15 +365,15 @@ class StatusAccessor implements StatusAccessorInterface
 
         $logPrefix = $this->getLogPrefix($collectionStrategy);
 
-        if (array_key_exists('statusId', $status) && (count($status) === 1)) {
-            $option = $this->getExtremumOption($discoverPastTweets);
-            $shift  = $this->getShiftFromExtremum($discoverPastTweets);
+        if (array_key_exists('statusId', $extremum) && (count($extremum) === 1)) {
+            $option = $this->getExtremumOption($discoverPublicationsWithMaxId);
+            $shift  = $this->getShiftFromExtremum($discoverPublicationsWithMaxId);
 
-            if ($status['statusId'] === '-INF' && $option === 'max_id') {
-                $status['statusId'] = 0;
+            if ($extremum['statusId'] === '-INF' && $option === 'max_id') {
+                $extremum['statusId'] = 0;
             }
 
-            $options[$option] = (int) $status['statusId'] + $shift;
+            $options[$option] = (int) $extremum['statusId'] + $shift;
 
             $this->logger->info(
                 sprintf(
@@ -400,13 +404,13 @@ class StatusAccessor implements StatusAccessorInterface
     }
 
     /**
-     * @param $discoverPastTweets
+     * @param $discoverPublicationsWithMaxId
      *
      * @return int
      */
-    private function getShiftFromExtremum($discoverPastTweets): int
+    private function getShiftFromExtremum($discoverPublicationsWithMaxId): int
     {
-        if ($discoverPastTweets) {
+        if ($discoverPublicationsWithMaxId) {
             return -1;
         }
 
@@ -433,17 +437,17 @@ class StatusAccessor implements StatusAccessorInterface
             );
         }
 
-        if (!$collectionStrategy->dateBeforeWhichStatusAreToBeCollected()) {
-            return $this->statusRepository->findLocalMaximum(
+        if ($collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected()) {
+            return $this->statusRepository->findNextExtremum(
                 $options[FetchPublicationInterface::SCREEN_NAME],
-                $collectionStrategy->dateBeforeWhichStatusAreToBeCollected()
+                $findingDirection,
+                $collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected()
             );
         }
 
-        return $this->statusRepository->findNextExtremum(
+        return $this->statusRepository->findLocalMaximum(
             $options[FetchPublicationInterface::SCREEN_NAME],
-            $findingDirection,
-            $collectionStrategy->dateBeforeWhichStatusAreToBeCollected()
+            $collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected()
         );
     }
 
@@ -459,17 +463,17 @@ class StatusAccessor implements StatusAccessorInterface
         $options,
         $findingDirection
     ): array {
-        if (!$collectionStrategy->dateBeforeWhichStatusAreToBeCollected()) {
+        if (!$collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected()) {
             return $this->likedStatusRepository->findLocalMaximum(
                 $options[FetchPublicationInterface::SCREEN_NAME],
-                $collectionStrategy->dateBeforeWhichStatusAreToBeCollected()
+                $collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected()
             );
         }
 
         return $this->likedStatusRepository->findNextExtremum(
             $options[FetchPublicationInterface::SCREEN_NAME],
             $findingDirection,
-            $collectionStrategy->dateBeforeWhichStatusAreToBeCollected()
+            $collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected()
         );
     }
 
@@ -503,15 +507,12 @@ class StatusAccessor implements StatusAccessorInterface
         return 'since_id';
     }
 
-    /**
-     * @param $options
-     * @param $discoverPastTweets
-     *
-     * @return array
-     */
-    private function removeMaxIdFromOptions($options, $discoverPastTweets): array
+    private function removeMaxIdFromOptions(
+        array $options,
+        bool $discoverPublicationsWithMaxId
+    ): array
     {
-        if (!$discoverPastTweets && array_key_exists('max_id', $options)) {
+        if (!$discoverPublicationsWithMaxId && array_key_exists('max_id', $options)) {
             unset($options['max_id']);
         }
 
@@ -525,7 +526,7 @@ class StatusAccessor implements StatusAccessorInterface
      */
     private function getLogPrefix(CollectionStrategyInterface $collectionStrategy): string
     {
-        if (!$collectionStrategy->dateBeforeWhichStatusAreToBeCollected()) {
+        if (!$collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected()) {
             return '';
         }
 
@@ -542,11 +543,11 @@ class StatusAccessor implements StatusAccessorInterface
         CollectionStrategyInterface $collectionStrategy,
         $options
     ) {
-        if ($collectionStrategy->dateBeforeWhichStatusAreToBeCollected()) {
+        if ($collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected()) {
             unset($options[FetchPublicationInterface::BEFORE]);
         }
-        if (array_key_exists(FetchPublicationInterface::AGGREGATE_ID, $options)) {
-            unset($options[FetchPublicationInterface::AGGREGATE_ID]);
+        if (array_key_exists(FetchPublicationInterface::PUBLICATION_LIST_ID, $options)) {
+            unset($options[FetchPublicationInterface::PUBLICATION_LIST_ID]);
         }
 
         return $options;

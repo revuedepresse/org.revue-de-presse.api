@@ -5,12 +5,13 @@ namespace App\Api\AccessToken\Repository;
 
 use App\Api\Entity\Token;
 use App\Api\Entity\TokenInterface;
+use Psr\Log\LoggerInterface;
 
 /**
- * @method Token|null find($id, $lockMode = null, $lockVersion = null)
- * @method Token|null findOneBy(array $criteria, array $orderBy = null)
- * @method Token[]    findAll()
- * @method Token[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method TokenInterface|null find($id, $lockMode = null, $lockVersion = null)
+ * @method TokenInterface|null findOneBy(array $criteria, array $orderBy = null)
+ * @method TokenInterface[]    findAll()
+ * @method TokenInterface[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 interface TokenRepositoryInterface
 {
@@ -21,4 +22,9 @@ interface TokenRepositoryInterface
     public function findFirstFrozenToken(): ?TokenInterface;
 
     public function howManyUnfrozenTokenAreThere(): int;
+
+    public function refreshFreezeCondition(
+        string $oauthToken,
+        LoggerInterface $logger
+    ): TokenInterface;
 }
