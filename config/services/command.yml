@@ -34,6 +34,23 @@ services:
             - { name: 'console.command' }
         public: true
 
+    App\Amqp\Command\FetchMemberSubscriptionTimelineMessageDispatcher:
+        class: 'App\Amqp\Command\FetchMemberSubscriptionTimelineMessageDispatcher'
+        calls:
+            - [ 'setAccessor',                              [ '@weaving_the_web_twitter.api_accessor'] ]
+            - [ 'setAggregateRepository',                   [ '@App\Api\Repository\PublicationListRepository'] ]
+            - [ 'setDefaultSecret',                         [ '%weaving_the_web_twitter.oauth_secret.default%'] ]
+            - [ 'setDefaultToken',                          [ '%weaving_the_web_twitter.oauth_token.default%'] ]
+            - [ 'setEntityManager',                         [ '@doctrine.orm.entity_manager'] ]
+            - [ 'setLogger',                                [ '@logger'] ]
+            - [ 'setMemberProfileCollectedEventRepository', [ '@App\Infrastructure\Collection\Repository\MemberProfileCollectedEventRepository'] ]
+            - [ 'setMemberRepository',                      [ '@App\Infrastructure\Repository\Membership\MemberRepository'] ]
+            - [ 'setMessageBus',                            [ '@messenger.default_bus'] ]
+            - [ 'setTranslator',                            [ '@translator'] ]
+        tags:
+            - { name: 'console.command' }
+        public: true
+
     press_review.fetch_status:
         class:                        "%press_review.publication_message.handler%"
         calls:

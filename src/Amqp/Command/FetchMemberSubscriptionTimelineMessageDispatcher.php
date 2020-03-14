@@ -1,13 +1,21 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Amqp\Command;
 
 use App\Amqp\Exception\SkippableMemberException;
 use App\Api\Entity\Token;
 use App\Api\Exception\InvalidSerializedTokenException;
+use App\Infrastructure\Amqp\Message\FetchMemberStatus;
+use App\Infrastructure\DependencyInjection\Collection\MemberProfileCollectedEventRepositoryTrait;
+use App\Infrastructure\DependencyInjection\LoggerTrait;
+use App\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
+use App\Infrastructure\DependencyInjection\MessageBusTrait;
+use App\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Membership\Entity\MemberInterface;
 use App\Operation\OperationClock;
 
+use App\Twitter\Exception\NotFoundMemberException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Exception;
@@ -21,114 +29,82 @@ use App\Twitter\Exception\ProtectedAccountException,
 use App\Twitter\Exception\SuspendedAccountException;
 
 use App\Membership\Entity\Member;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use function array_key_exists;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
-class ProduceUserFriendListCommand extends AggregateAwareCommand
+class FetchMemberSubscriptionTimelineMessageDispatcher extends AggregateAwareCommand
 {
-    /**
-     * @var string
-     */
-    private $routingKey;
+    use MemberProfileCollectedEventRepositoryTrait;
+    use MemberRepositoryTrait;
+    use MessageBusTrait;
+    use TranslatorTrait;
 
-    private $producer;
-
-    /**
-     * @var TranslatorInterface
-     */
-    private $translator;
-
-    /**
-     * @var OperationClock
-     */
-    public $operationClock;
-
-    public function configure()
+    public function configure(): void
     {
-        $this->setName('weaving_the_web:amqp:produce:user_timeline')
+        $this->setName('weaving_the_web:amqp:dispatch:member_subscription_timeline_message')
             ->setDescription('Produce a message to get a user timeline')
             ->addOption(
-            'oauth_token',
-            null,
-            InputOption::VALUE_OPTIONAL,
-            'A token is required'
-        )->addOption(
-            'oauth_secret',
-            null,
-            InputOption::VALUE_OPTIONAL,
-            'A secret is required'
-        )->addOption(
             'screen_name',
             null,
             InputOption::VALUE_REQUIRED,
             'The screen name of a user'
-        )->addOption(
-            'routing_key',
-            null,
-            InputOption::VALUE_OPTIONAL,
-            'A producer key'
-        )
-        ->addOption(
-            'producer',
-            null,
-            InputOption::VALUE_OPTIONAL,
-            'A producer key',
-            'twitter.user_status'
-        )->setAliases(array('wtw:amqp:tw:prd:utl'));
+            )->setAliases(['wtw:amqp:d:m']);
     }
 
     /**
      * @param InputInterface  $input
      * @param OutputInterface $output
+     *
      * @return int|mixed|null
-     * @throws SuspendedAccountException
-     * @throws UnavailableResourceException
+     * @throws InvalidSerializedTokenException
+     * @throws ORMException
      * @throws OptimisticLockException
-     * @throws Exception
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        if ($this->getContainer()->get('operation.clock')->shouldSkipOperation()) {
-            return self::RETURN_STATUS_SUCCESS;
-        }
-
         $this->input = $input;
         $this->output = $output;
 
-        $messageBody = $this->getTokensFromInputOrFallback();
-
-        if (array_key_exists('screen_name', $messageBody)) {
-            $assumedScreenName = $messageBody['screen_name'];
-        } else {
-            $assumedScreenName = null;
-        }
 
         $this->setUpDependencies();
 
-        $invalidUsers = 0;
+        $exceptionalMembers = 0;
+        $messageBody = $this->getTokensFromInputOrFallback();
+        $screenName = $this->input->getOption('screen_name');
 
-        $friends = $this->accessor->showUserFriends($this->input->getOption('screen_name'));
+        $friends = $this->accessor->getFriendsOfMemberHavingScreenName($screenName);
         foreach ($friends->ids as $twitterUserId) {
-            $foundMember = $this->userRepository->findOneBy(['twitterID' => $twitterUserId]);
+            $foundMember = $this->memberRepository->findOneBy(['twitterID' => $twitterUserId]);
             $preExistingMember = $foundMember instanceof MemberInterface;
 
-            if ($preExistingMember && !$foundMember->isNotFound()) {
+            if ($preExistingMember && !$foundMember->hasBeenDeclaredAsNotFound()) {
                 $member = $foundMember;
             } else {
                 try {
-                    $member = $this->saveMemberWithTwitterId($twitterUserId, $foundMember);
+                    $member = $this->saveMemberWithTwitterId(
+                        (string) $twitterUserId,
+                        $foundMember
+                    );
                 } catch (SuspendedAccountException $exception) {
-                    $this->handleSuspendedMemberException($twitterUserId, $assumedScreenName, $exception);
+                    $this->handleSuspendedMemberException($twitterUserId, $screenName, $exception);
 
-                    $invalidUsers++;
+                    $exceptionalMembers++;
 
                     continue;
                 } catch (ProtectedAccountException $exception) {
-                    $this->handleProtectedMemberException($twitterUserId, $assumedScreenName, $exception);
+                    $this->handleProtectedMemberException($twitterUserId, $screenName, $exception);
 
-                    $invalidUsers++;
+                    $exceptionalMembers++;
+
+                    continue;
+                } catch (NotFoundMemberException $exception) {
+                    $this->handleNotFoundMemberException($twitterUserId, $screenName, $exception);
+
+                    $exceptionalMembers++;
 
                     continue;
                 } catch (UnavailableResourceException $exception) {
@@ -140,7 +116,11 @@ class ProduceUserFriendListCommand extends AggregateAwareCommand
 
             if (isset($member)) {
                 try {
-                    $this->handlePreExistingMember($member, $member->getTwitterUsername(), $messageBody);
+                    $this->handlePreExistingMember(
+                        $member,
+                        $member->getTwitterUsername(),
+                        $messageBody
+                    );
                 } catch (SkippableMemberException $exception) {
                     continue;
                 }
@@ -150,7 +130,7 @@ class ProduceUserFriendListCommand extends AggregateAwareCommand
         $output->writeln(
             $this->translator->trans(
                 'amqp.production.friendlist.success',
-                ['{{ count }}' => count($friends->ids) - $invalidUsers],
+                ['{{ count }}' => count($friends->ids) - $exceptionalMembers],
                 'messages'
             )
         );
@@ -167,63 +147,50 @@ class ProduceUserFriendListCommand extends AggregateAwareCommand
         $this->logger->$level($exception->getMessage());
     }
 
-    private function extractRoutingKeyFromOptions(): void
-    {
-        if ($this->input->hasOption('routing_key') && !is_null($this->input->getOption('routing_key'))) {
-            $this->routingKey = $this->input->getOption('routing_key');
-        } else {
-            $this->routingKey = '';
-        }
-    }
-
-    private function setProducer(): void
-    {
-        $producerKey = $this->input->getOption('producer');
-
-        /** @var \OldSound\RabbitMqBundle\RabbitMq\Producer $producer */
-        $this->producer = $this->getContainer()->get(sprintf(
-            'old_sound_rabbit_mq.weaving_the_web_amqp.%s_producer', $producerKey
-        ));
-    }
-
     /**
      * @throws InvalidSerializedTokenException
      */
-    private function setUpDependencies()
+    private function setUpDependencies(): void
     {
-        $this->setProducer();
-        $this->extractRoutingKeyFromOptions();
-
         $tokens = $this->getTokensFromInputOrFallback();
 
-        $this->setUpLogger();
 
         $this->accessor->setAccessToken(Token::fromArray($tokens));
 
+        // noop
+        $this->setUpLogger();
         $this->setupAggregateRepository();
-
-        $this->translator = $this->getContainer()->get('translator');
     }
 
     /**
      * @param $member
-     * @param $assumedScreenName
+     * @param $screenName
      * @param $messageBody
      * @throws SkippableMemberException
      */
-    private function handlePreExistingMember(Member $member, $assumedScreenName, $messageBody)
-    {
+    private function handlePreExistingMember(
+        MemberInterface $member,
+        $screenName,
+        $messageBody
+    ): void {
         $twitterUsername = $member->getTwitterUsername();
 
-        $this->guardAgainstMembersWhichShouldBeSkipped($member, $assumedScreenName);
+        $this->guardAgainstMembersWhichShouldBeSkipped($member, $screenName);
 
         $aggregate = $this->getListAggregateByName($twitterUsername, 'user :: ' . $twitterUsername);
 
         $messageBody['aggregate_id'] = $aggregate->getId();
         $messageBody['screen_name'] = $twitterUsername;
 
-        $this->producer->setContentType('application/json');
-        $this->producer->publish(serialize(json_encode($messageBody)), $this->routingKey);
+        $message = new FetchMemberStatus(
+            $twitterUsername,
+            $aggregate->getId(),
+            (new Token)
+                ->setOAuthToken($this->getOAuthToken())
+                ->setOAuthSecret($this->getOAuthSecret())
+        );
+
+        $this->dispatcher->dispatch($message);
 
         $publishedMessage = $this->translator->trans(
             'amqp.info.message_published',
@@ -234,16 +201,21 @@ class ProduceUserFriendListCommand extends AggregateAwareCommand
     }
 
     /**
-     * @param $twitterUserId
-     * @param $assumedScreenName
-     * @param $exception
+     * @param string $twitterUserId
+     * @param string $screenName
+     * @param        $exception
+     *
+     * @throws ORMException
      * @throws OptimisticLockException
      */
-    private function handleProtectedMemberException($twitterUserId, $assumedScreenName, $exception)
-    {
-        $member = $this->userRepository->make(
+    private function handleProtectedMemberException(
+        string $twitterUserId,
+        string $screenName,
+        $exception
+    ): void {
+        $member = $this->memberRepository->make(
             $twitterUserId,
-            $screenName = $assumedScreenName,
+            $screenName,
             $protected = true
         );
         $this->entityManager->persist($member);
@@ -258,11 +230,44 @@ class ProduceUserFriendListCommand extends AggregateAwareCommand
     }
 
     /**
+     * @param string $twitterUserId
+     * @param string $screenName
+     * @param        $exception
+     *
+     * @throws ORMException
+     * @throws OptimisticLockException
+     */
+    private function handleNotFoundMemberException(
+        string $twitterUserId,
+        string $screenName,
+        $exception
+    ): void {
+        $member = $this->memberRepository->make(
+            $twitterUserId,
+            $screenName
+        );
+
+        $this->entityManager->persist($member);
+        $this->entityManager->flush();
+
+        $this->memberRepository->declareMemberAsNotFound($member);
+
+        $protectedAccount = $this->translator->trans(
+            'amqp.output.not_found_member',
+            ['{{ user }}' => $twitterUserId],
+            'messages'
+        );
+        $this->sendMessage($protectedAccount, 'info', $exception);
+    }
+
+    /**
      * @param $twitterUserId
      * @param $exception
      */
-    private function handleUnavailableResourceException($twitterUserId, $exception): void
-    {
+    private function handleUnavailableResourceException(
+        $twitterUserId,
+        $exception
+    ): void {
         $unavailableResource = $this->translator->trans(
             'amqp.output.unavailable_resource',
             ['{{ user }}' => $twitterUserId],
@@ -273,15 +278,20 @@ class ProduceUserFriendListCommand extends AggregateAwareCommand
 
     /**
      * @param $twitterUserId
-     * @param $assumedScreenName
+     * @param $screenName
      * @param $exception
+     *
+     * @throws ORMException
      * @throws OptimisticLockException
      */
-    private function handleSuspendedMemberException($twitterUserId, $assumedScreenName, $exception)
-    {
-        $member = $this->userRepository->make(
+    private function handleSuspendedMemberException(
+        $twitterUserId,
+        $screenName,
+        $exception
+    ): void {
+        $member = $this->memberRepository->make(
             $twitterUserId,
-            $screenName = $assumedScreenName,
+            $screenName,
             $protected = false,
             $suspended = true
         );
@@ -297,19 +307,25 @@ class ProduceUserFriendListCommand extends AggregateAwareCommand
     }
 
     /**
-     * @param $twitterUserId
-     * @param $prexistingMember
+     * @param string $memberIdentifier
+     * @param        $prexistingMember
      *
-     * @return Member
+     * @return MemberInterface
+     * @throws ORMException
      * @throws OptimisticLockException
      * @throws UnavailableResourceException
-     * @throws ORMException
      */
-    private function saveMemberWithTwitterId($twitterUserId, $prexistingMember): Member
-    {
-        $twitterUser = $this->accessor->getMemberProfile($twitterUserId);
+    private function saveMemberWithTwitterId(
+        string $memberIdentifier,
+        $prexistingMember
+    ): MemberInterface {
+        $eventRepository = $this->memberProfileCollectedEventRepository;
+        $twitterMember = $eventRepository->collectedMemberProfile(
+            $this->accessor,
+            [$eventRepository::OPTION_SCREEN_NAME => $memberIdentifier]
+        );
 
-        if (isset($twitterUser->screen_name)) {
+        if (isset($twitterMember->screen_name)) {
             $member = new Member();
 
             if ($prexistingMember instanceof MemberInterface) {
@@ -317,50 +333,51 @@ class ProduceUserFriendListCommand extends AggregateAwareCommand
                 $member->setNotFound(false);
             }
 
-            $member->setTwitterUsername($twitterUser->screen_name);
-            $member->setTwitterID($twitterUserId);
+            $member->setTwitterUsername($twitterMember->screen_name);
+            $member->setTwitterID($memberIdentifier);
             $member->setEnabled(false);
             $member->setLocked(false);
-            $member->setEmail('@' . $twitterUser->screen_name);
+            $member->setEmail('@' . $twitterMember->screen_name);
             $member->setEnabled(false);
 
             $this->entityManager->persist($member);
             $this->entityManager->flush();
             $publishedMessage = $this->translator->trans(
                 'amqp.info.user_persisted',
-                ['{{ user }}' => $twitterUser->screen_name],
+                ['{{ user }}' => $twitterMember->screen_name],
                 'messages'
             );
             $this->logger->info($publishedMessage);
         } else {
-            throw new UnavailableResourceException(serialize($twitterUser), 1);
+            throw new UnavailableResourceException(serialize($twitterMember), 1);
         }
 
         return $member;
     }
 
     /**
-     * @param User $member
-     * @param      $assumedScreenName
+     * @param MemberInterface $member
+     * @param string          $screenName
+     *
      * @throws SkippableMemberException
      */
-    private function guardAgainstMembersWhichShouldBeSkipped(Member $member, $assumedScreenName): void
-    {
+    private function guardAgainstMembersWhichShouldBeSkipped(
+        MemberInterface $member,
+        string $screenName
+    ): void {
         if ($member->isAWhisperer()) {
             $skippedWhispererMessage = $this->translator->trans(
                 'amqp.info.skipped_whisperer',
-                ['{{ user }}' => $assumedScreenName],
+                ['{{ user }}' => $screenName],
                 'messages'
             );
             $this->logger->info($skippedWhispererMessage);
-
-            throw new SkippableMemberException($skippedWhispererMessage);
         }
 
         if ($member->isProtected()) {
             $protectedAccount = $this->translator->trans(
                 'amqp.info.skipped_protected_account',
-                ['{{ user }}' => $assumedScreenName],
+                ['{{ user }}' => $screenName],
                 'messages'
             );
             $this->logger->info($protectedAccount);
@@ -371,7 +388,7 @@ class ProduceUserFriendListCommand extends AggregateAwareCommand
         if ($member->isSuspended()) {
             $suspendedAccount = $this->translator->trans(
                 'amqp.info.skipped_suspended_account',
-                ['{{ user }}' => $assumedScreenName],
+                ['{{ user }}' => $screenName],
                 'messages'
             );
             $this->logger->info($suspendedAccount);

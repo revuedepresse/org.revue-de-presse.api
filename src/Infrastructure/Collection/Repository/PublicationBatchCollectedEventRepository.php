@@ -67,6 +67,7 @@ class PublicationBatchCollectedEventRepository extends ServiceEntityRepository i
 
         try {
             $entityManager->persist($event);
+
             $entityManager->flush();
         } catch (Throwable $exception) {
             $this->logger->error($exception->getMessage());

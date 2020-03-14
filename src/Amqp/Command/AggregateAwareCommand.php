@@ -16,16 +16,8 @@ abstract class AggregateAwareCommand extends AccessorAwareCommand implements Com
 {
     use AggregateAwareTrait;
 
-    /**
-     * @var PublicationListRepository
-     */
     protected PublicationListRepository $aggregateRepository;
 
-    /**
-     * @param PublicationListRepository $aggregateRepository
-     *
-     * @return $this
-     */
     public function setAggregateRepository(PublicationListRepository $aggregateRepository): self
     {
         $this->aggregateRepository = $aggregateRepository;
@@ -33,16 +25,8 @@ abstract class AggregateAwareCommand extends AccessorAwareCommand implements Com
         return $this;
     }
 
-    /**
-     * @var EntityManager
-     */
     protected EntityManager $entityManager;
 
-    /**
-     * @param EntityManager $entityManager
-     *
-     * @return $this
-     */
     public function setEntityManager(EntityManager $entityManager): self
     {
         $this->entityManager = $entityManager;

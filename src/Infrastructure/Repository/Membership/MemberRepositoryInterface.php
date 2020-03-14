@@ -10,6 +10,8 @@ interface MemberRepositoryInterface
 {
     public function declareMemberAsFound(MemberInterface $member): MemberInterface;
 
+    public function declareMemberAsNotFound(MemberInterface $member): MemberInterface;
+
     public function findOneBy(array $criteria, ?array $orderBy = null);
 
     public function saveMemberFromIdentity(MemberIdentity $memberIdentity): MemberInterface;
