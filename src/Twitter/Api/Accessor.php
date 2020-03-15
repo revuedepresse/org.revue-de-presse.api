@@ -643,7 +643,7 @@ class Accessor implements ApiAccessorInterface,
      * @throws UnavailableResourceException
      * @throws UnexpectedApiResponseException
      */
-    public function getUserListSubscriptions($screenName)
+    public function getMemberPublicationListSubscriptions($screenName)
     {
         return $this->contactEndpoint(
             strtr(
@@ -673,37 +673,6 @@ class Accessor implements ApiAccessorInterface,
                 ]
             )
         );
-    }
-
-    /**
-     * @return int
-     */
-    public function getUserNotFoundErrorCode()
-    {
-        return self::ERROR_USER_NOT_FOUND;
-    }
-
-    /**
-     * @param string $screenName
-     * @param int    $cursor
-     * @param int    $count
-     *
-     * @return OwnershipCollection
-     */
-    public function getUserOwnerships(
-        string $screenName,
-        int $cursor = -1,
-        int $count = 800
-    ): OwnershipCollection {
-        return $this->getMemberOwnerships($screenName, $cursor, $count);
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getUserSecret()
-    {
-        return $this->userSecret;
     }
 
     /**
@@ -2163,7 +2132,7 @@ class Accessor implements ApiAccessorInterface,
      */
     private function getMemberListSubscriptionsEndpoint($version = '1.1')
     {
-        return $this->getApiBaseUrl($version) . '/lists/subscriptions.json?count=1000&screen_name={{ screenName }}';
+        return $this->getApiBaseUrl($version) . '/lists/subscriptions.json?cursor=-1&count=800&screen_name={{ screenName }}';
     }
 
     /**

@@ -5,19 +5,23 @@ namespace App\Aggregate\Command;
 
 use App\Aggregate\Repository\MemberAggregateSubscriptionRepository;
 use App\Console\AbstractCommand;
-use App\Domain\Resource\OwnershipCollection;
 use App\Infrastructure\Repository\Membership\MemberRepository;
 use App\Member\Entity\AggregateSubscription;
-use App\Member\Entity\ExceptionalMember;
 use App\Member\Repository\AggregateSubscriptionRepository;
 use App\Member\Repository\NetworkRepository;
 use App\Membership\Entity\MemberInterface;
 use App\Twitter\Api\ApiAccessorInterface;
+use App\Twitter\Exception\NotFoundMemberException;
+use App\Twitter\Exception\ProtectedAccountException;
+use App\Twitter\Exception\SuspendedAccountException;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ImportMemberAggregatesCommand extends AbstractCommand
+class ImportMemberPublicationListsCommand extends AbstractCommand
 {
     private const OPTION_MEMBER_NAME = 'member-name';
 
@@ -25,42 +29,21 @@ class ImportMemberAggregatesCommand extends AbstractCommand
 
     private const OPTION_LIST_RESTRICTION = 'list-restriction';
 
-    /**
-     * @var ApiAccessorInterface
-     */
     public ApiAccessorInterface $accessor;
 
-    /**
-     * @var string
-     */
-    public $listRestriction;
+    public string $listRestriction;
 
-    /**
-     * @var AggregateSubscriptionRepository
-     */
-    public $aggregateSubscriptionRepository;
+    public AggregateSubscriptionRepository $aggregateSubscriptionRepository;
 
-    /**
-     * @var MemberAggregateSubscriptionRepository
-     */
-    public $memberAggregateSubscriptionRepository;
+    public MemberAggregateSubscriptionRepository $memberAggregateSubscriptionRepository;
 
-    /**
-     * @var NetworkRepository
-     */
-    public $networkRepository;
+    public NetworkRepository $networkRepository;
 
-    /**
-     * @var MemberRepository
-     */
-    public $memberRepository;
+    public MemberRepository $memberRepository;
 
-    /**
-     * @var \Psr\Log\LoggerInterface
-     */
-    public $logger;
+    public LoggerInterface $logger;
 
-    public function configure()
+    public function configure(): void
     {
         $this->setName('import-aggregates')
             ->addOption(
@@ -116,15 +99,15 @@ class ImportMemberAggregatesCommand extends AbstractCommand
                     return;
                 }
 
-                $list = $this->accessor->getListMembers(
-                    (int) $memberAggregateSubscription->listId
+                $memberPublicationList = $this->accessor->getListMembers(
+                    (string) $memberAggregateSubscription->listId
                 );
 
                 $ids = array_map(
                     function (\stdClass $user) {
                         return $user->id_str;
                     },
-                    $list->toArray()
+                    $memberPublicationList->toArray()
                 );
 
                 $members = $this->memberRepository->createQueryBuilder('m')
@@ -169,8 +152,9 @@ class ImportMemberAggregatesCommand extends AbstractCommand
                     }
                 );
 
+                $publicationLists = $memberPublicationList->toArray();
                 array_walk(
-                    $list->toArray(),
+                    $publicationLists,
                     function (
                         \stdClass $user
                     ) use (
@@ -193,12 +177,20 @@ class ImportMemberAggregatesCommand extends AbstractCommand
             'All list subscriptions have be saved for member with name "%s"',
             $memberName
         ));
+
+        return self::RETURN_STATUS_SUCCESS;
     }
 
     /**
      * @param \stdClass $user
      * @param           $membersIndexedByTwitterId
-     * @return ExceptionalMember|MemberInterface|null|object
+     *
+     * @return MemberInterface|object|null
+     * @throws NotFoundMemberException
+     * @throws ProtectedAccountException
+     * @throws SuspendedAccountException
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function getMemberByTwitterId(\stdClass $user, $membersIndexedByTwitterId)
     {
@@ -212,16 +204,16 @@ class ImportMemberAggregatesCommand extends AbstractCommand
     /**
      * @param $memberName
      *
-     * @return \API|mixed|object|\stdClass
+     * @return mixed
      */
-    private function findListSubscriptions($memberName): OwnershipCollection
+    private function findListSubscriptions($memberName)
     {
         if ($this->input->hasOption(self::OPTION_FIND_OWNERSHIP) &&
             $this->input->getOption(self::OPTION_FIND_OWNERSHIP)
         ) {
-            return $this->accessor->getUserOwnerships($memberName);
+            return $this->accessor->getMemberOwnerships($memberName);
         }
 
-        return $this->accessor->getUserListSubscriptions($memberName);
+        return $this->accessor->getMemberPublicationListSubscriptions($memberName);
     }
 }

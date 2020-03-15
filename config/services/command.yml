@@ -128,8 +128,8 @@ services:
         tags:
             - { name: 'console.command' }
 
-    command.import_member_aggregates:
-        class:                                      'App\Aggregate\Command\ImportMemberAggregatesCommand'
+    App\Aggregate\Command\ImportMemberPublicationListsCommand:
+        class:                                      'App\Aggregate\Command\ImportMemberPublicationListsCommand'
         properties:
             accessor:                               '@App\Twitter\Api\Accessor'
             aggregateSubscriptionRepository:        '@repository.publication_list_subscription'

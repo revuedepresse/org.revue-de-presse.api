@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Member\Repository;
 
@@ -7,50 +8,38 @@ use App\Member\Entity\NotFoundMember;
 use App\Member\Entity\ProtectedMember;
 use App\Member\Entity\SuspendedMember;
 use App\Membership\Entity\MemberInterface;
+use App\Twitter\Api\ApiAccessorInterface;
+use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManager;
 use App\Twitter\Api\Accessor;
-use WeavingTheWeb\Bundle\TwitterBundle\Exception\NotFoundMemberException;
-use WeavingTheWeb\Bundle\TwitterBundle\Exception\ProtectedAccountException;
-use WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException;
+use App\Twitter\Exception\NotFoundMemberException;
+use App\Twitter\Exception\ProtectedAccountException;
+use App\Twitter\Exception\SuspendedAccountException;
 use App\Infrastructure\Repository\Membership\MemberRepository;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
+use Psr\Log\LoggerInterface;
 
 class NetworkRepository
 {
+    public MemberSubscribeeRepository $memberSubscribeeRepository;
 
-    /**
-     * @var MemberSubscribeeRepository
-     */
-    public $memberSubscribeeRepository;
+    public MemberSubscriptionRepository $memberSubscriptionRepository;
 
-    /**
-     * @var MemberSubscriptionRepository
-     */
-    public $memberSubscriptionRepository;
+    public MemberRepository $memberRepository;
 
-    /**
-     * @var MemberRepository
-     */
-    public $memberRepository;
+    public EntityManager $entityManager;
 
-    /**
-     * @var EntityManager
-     */
-    public $entityManager;
+    public ApiAccessorInterface $accessor;
 
-    /**
-     * @var Accessor
-     */
-    public $accessor;
-
-    /**
-     * @var \Psr\Log\LoggerInterface
-     */
-    public $logger;
+    public LoggerInterface $logger;
 
     /**
      * @param MemberInterface $member
      * @param array           $subscriptions
-     * @return array
+     *
+     * @return bool
+     * @throws DBALException
      */
     private function saveMemberSubscriptions(MemberInterface $member, array $subscriptions)
     {
@@ -96,7 +85,9 @@ class NetworkRepository
     /**
      * @param MemberInterface $member
      * @param array           $subscribees
-     * @return array
+     *
+     * @return bool
+     * @throws DBALException
      */
     private function saveMemberSubscribees(MemberInterface $member, array $subscribees)
     {
@@ -141,7 +132,13 @@ class NetworkRepository
 
     /**
      * @param string $memberId
-     * @return ExceptionalMember|MemberInterface|null|object
+     *
+     * @return MemberInterface|object|null
+     * @throws NotFoundMemberException
+     * @throws ORMException
+     * @throws OptimisticLockException
+     * @throws ProtectedAccountException
+     * @throws SuspendedAccountException
      */
     public function ensureMemberExists(string $memberId)
     {
@@ -179,8 +176,13 @@ class NetworkRepository
     /**
      * @param callable $doing
      * @param string   $memberId
+     *
      * @return MemberInterface|null|object
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws NotFoundMemberException
+     * @throws ProtectedAccountException
+     * @throws SuspendedAccountException
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function guardAgainstExceptionalMemberWhenLookingForOne(
         callable $doing,
