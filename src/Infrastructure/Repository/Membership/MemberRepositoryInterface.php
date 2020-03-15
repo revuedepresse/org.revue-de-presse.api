@@ -21,4 +21,6 @@ interface MemberRepositoryInterface
     public function saveSuspendedMember(MemberIdentity $memberIdentity): MemberInterface;
 
     public function getMinPublicationIdForMemberHavingScreenName(string $screenName): ?int;
+
+    public function hasBeenUpdatedBetween7HoursAgoAndNow(string $screenName): bool;
 }

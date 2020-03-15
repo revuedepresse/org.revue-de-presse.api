@@ -18,6 +18,7 @@ use App\Infrastructure\DependencyInjection\Api\StatusAccessorTrait;
 use App\Infrastructure\DependencyInjection\Collection\LikedStatusCollectDecider;
 use App\Infrastructure\DependencyInjection\Collection\MemberProfileCollectedEventRepositoryTrait;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
+use App\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Membership\WhispererRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Publication\PublicationListRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Status\LikedStatusRepositoryTrait;
@@ -44,6 +45,7 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
     use ApiLimitModeratorTrait;
     use LikedStatusRepositoryTrait;
     use LikedStatusCollectDecider;
+    use MemberRepositoryTrait;
     use MemberProfileCollectedEventRepositoryTrait;
     use PublicationListRepositoryTrait;
     use StatusAccessorTrait;
@@ -210,6 +212,17 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
             return true;
         } catch (SkippableMessageException $exception) {
             return $exception->shouldSkipMessageConsumption;
+        }
+
+        if ($this->memberRepository->hasBeenUpdatedBetween7HoursAgoAndNow(
+            $this->collectionStrategy->screenName()
+        )) {
+            $this->logger->info(sprintf(
+                'Publications have been recently collected for %s',
+                $this->collectionStrategy->screenName()
+            ));
+
+            return true;
         }
 
         $statuses = $this->statusAccessor->fetchPublications(

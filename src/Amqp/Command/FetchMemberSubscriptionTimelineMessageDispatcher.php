@@ -134,6 +134,8 @@ class FetchMemberSubscriptionTimelineMessageDispatcher extends AggregateAwareCom
                 'messages'
             )
         );
+
+        return self::RETURN_STATUS_SUCCESS;
     }
 
     /**

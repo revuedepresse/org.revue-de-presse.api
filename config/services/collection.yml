@@ -7,6 +7,7 @@ services:
             - [ 'setLikedStatusRepository',                 [ '@repository.liked_status' ] ]
             - [ 'setLikedStatusCollectDecider',             [ '@App\Infrastructure\Twitter\Collector\LikedStatusCollectDecider' ] ]
             - [ 'setMemberProfileCollectedEventRepository', [ '@App\Infrastructure\Collection\Repository\MemberProfileCollectedEventRepository' ] ]
+            - [ 'setMemberRepository',                      [ '@App\Infrastructure\Repository\Membership\MemberRepository' ] ]
             - [ 'setModerator',                             [ '@weaving_the_web_twitter.moderator.api_limit' ] ]
             - [ 'setPublicationListRepository',             [ '@App\Api\Repository\PublicationListRepository' ] ]
             - [ 'setStatusAccessor',                        [ '@App\Accessor\StatusAccessor' ] ]

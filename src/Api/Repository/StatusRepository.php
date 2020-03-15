@@ -151,7 +151,7 @@ class StatusRepository extends ArchivedStatusRepository
      * @throws DBALException
      * @throws NotFoundStatusException
      */
-    public function updateLastStatusPublicationDate($screenName)
+    public function updateLastStatusPublicationDate($screenName): MemberInterface
     {
         /** @var MemberInterface $member */
         $member = $this->memberRepository->findOneBy(['twitter_username' => $screenName]);
