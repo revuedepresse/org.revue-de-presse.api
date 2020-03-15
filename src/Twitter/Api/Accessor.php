@@ -151,18 +151,18 @@ class Accessor implements ApiAccessorInterface,
     private TwitterClient $twitterClient;
 
     /**
-     * @param LoggerInterface|null $logger
      * @param string               $consumerKey
      * @param string               $consumerSecret
      * @param string               $accessTokenKey
      * @param string               $accessTokenSecret
+     * @param LoggerInterface|null $logger
      */
     public function __construct(
-        LoggerInterface $logger = null,
         string $consumerKey,
         string $consumerSecret,
         string $accessTokenKey,
-        string $accessTokenSecret
+        string $accessTokenSecret,
+        LoggerInterface $logger = null
     ) {
         $this->setUpTwitterClient(
             $consumerKey,
@@ -316,6 +316,13 @@ class Accessor implements ApiAccessorInterface,
         string $endpoint,
         Token $token
     ) {
+        $this->setUpTwitterClient(
+            $token->getConsumerKey(),
+            $token->getConsumerSecret(),
+            $token->getOAuthToken(),
+            $token->getOAuthSecret(),
+        );
+
         try {
             $content = $this->connectToEndpoint($endpoint);
             $this->checkApiLimit();
@@ -1239,16 +1246,7 @@ class Accessor implements ApiAccessorInterface,
                 $token->getOAuthToken(),
                 $token->getOAuthSecret()
             );
-
-            return;
         }
-
-        $this->setUpTwitterClient(
-            $this->consumerKey,
-            $this->consumerSecret,
-            $token->getOAuthToken(),
-            $token->getOAuthSecret()
-        );
     }
 
     /**

@@ -144,11 +144,11 @@ services:
     App\Twitter\Api\Accessor:
         class: 'App\Twitter\Api\Accessor'
         arguments:
-            - '@logger'
             - '%weaving_the_web_twitter.consumer_key%'
             - '%weaving_the_web_twitter.consumer_secret%'
             - '%weaving_the_web_twitter.oauth_token.default%'
             - '%weaving_the_web_twitter.oauth_secret.default%'
+            - '@logger'
         properties:
             environment:          '%kernel.environment%'
             twitterApiLogger:     '@monolog.logger.twitter_api'
