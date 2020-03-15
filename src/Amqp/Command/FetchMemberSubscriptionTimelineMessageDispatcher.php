@@ -7,31 +7,23 @@ use App\Amqp\Exception\SkippableMemberException;
 use App\Api\Entity\Token;
 use App\Api\Exception\InvalidSerializedTokenException;
 use App\Infrastructure\Amqp\Message\FetchMemberStatus;
+use App\Infrastructure\DependencyInjection\Collection\MemberFriendsCollectedEventRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Collection\MemberProfileCollectedEventRepositoryTrait;
-use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Infrastructure\DependencyInjection\MessageBusTrait;
 use App\Infrastructure\DependencyInjection\TranslatorTrait;
+use App\Membership\Entity\Member;
 use App\Membership\Entity\MemberInterface;
-use App\Operation\OperationClock;
-
 use App\Twitter\Exception\NotFoundMemberException;
+use App\Twitter\Exception\ProtectedAccountException;
+use App\Twitter\Exception\SuspendedAccountException;
+use App\Twitter\Exception\UnavailableResourceException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Exception;
-use Symfony\Component\Console\Input\InputInterface,
-    Symfony\Component\Console\Input\InputOption,
-    Symfony\Component\Console\Output\OutputInterface;
-
-use App\Twitter\Exception\ProtectedAccountException,
-    App\Twitter\Exception\UnavailableResourceException;
-
-use App\Twitter\Exception\SuspendedAccountException;
-
-use App\Membership\Entity\Member;
-use Symfony\Component\Messenger\MessageBusInterface;
-use Symfony\Contracts\Translation\TranslatorInterface;
-use function array_key_exists;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Input\InputOption;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
@@ -39,6 +31,7 @@ use function array_key_exists;
 class FetchMemberSubscriptionTimelineMessageDispatcher extends AggregateAwareCommand
 {
     use MemberProfileCollectedEventRepositoryTrait;
+    use MemberFriendsCollectedEventRepositoryTrait;
     use MemberRepositoryTrait;
     use MessageBusTrait;
     use TranslatorTrait;
@@ -76,7 +69,12 @@ class FetchMemberSubscriptionTimelineMessageDispatcher extends AggregateAwareCom
         $messageBody = $this->getTokensFromInputOrFallback();
         $screenName = $this->input->getOption('screen_name');
 
-        $friends = $this->accessor->getFriendsOfMemberHavingScreenName($screenName);
+        $eventRepository = $this->memberFriendsCollectedEventRepository;
+        $friends = $eventRepository->collectedMemberFriends(
+            $this->accessor,
+            [$eventRepository::OPTION_SCREEN_NAME => $screenName]
+        );
+
         foreach ($friends->ids as $twitterUserId) {
             $foundMember = $this->memberRepository->findOneBy(['twitterID' => $twitterUserId]);
             $preExistingMember = $foundMember instanceof MemberInterface;

@@ -171,14 +171,14 @@ class UnavailableResourceException extends Exception implements TwitterErrorAwar
         LoggerInterface $logger,
         array $options
     ): string {
-        $message = 'Skipping member with screen name "%s", which has not been found';
+        $message = 'Skipping member with screen name "%s", who has not been found';
 
         if ($exception instanceof SuspendedAccountException) {
-            $message = 'Skipping member with screen name "%s", which has been suspended';
+            $message = 'Skipping member with screen name "%s", who has been suspended';
         }
 
         if ($exception instanceof ProtectedAccountException) {
-            $message = 'Skipping member with screen name "%s", which is protected';
+            $message = 'Skipping member with screen name "%s", who is protected';
             $logger->error(
                 sprintf(
                     $message,

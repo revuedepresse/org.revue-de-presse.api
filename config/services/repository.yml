@@ -16,6 +16,17 @@ services:
         tags:
             - { name: 'doctrine.repository_service' }
 
+    App\Infrastructure\Collection\Repository\MemberFriendsCollectedEventRepository:
+        class: 'App\Infrastructure\Collection\Repository\MemberFriendsCollectedEventRepository'
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - 'App\Domain\Collection\Entity\MemberProfileCollectedEvent'
+        calls:
+            - [ 'setLogger',           [ '@logger' ] ]
+            - [ 'setApiAccessor',      [ '@App\Twitter\Api\Accessor' ] ]
+        tags:
+            - { name: 'doctrine.repository_service' }
+
     App\Infrastructure\Collection\Repository\MemberProfileCollectedEventRepository:
         class: 'App\Infrastructure\Collection\Repository\MemberProfileCollectedEventRepository'
         arguments:
