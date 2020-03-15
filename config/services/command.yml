@@ -137,6 +137,9 @@ services:
             memberAggregateSubscriptionRepository:  '@repository.member_aggregate_subscription'
             networkRepository:                      '@repository.network'
             memberRepository:                       '@user_manager'
+        calls:
+            - [ 'setOwnershipBatchCollectedEventRepository',  [ '@App\Infrastructure\Collection\Repository\OwnershipBatchCollectedEventRepository' ] ]
+            - [ 'setPublicationListCollectedEventRepository', [ '@App\Infrastructure\Collection\Repository\PublicationListCollectedEventRepository' ] ]
         tags:
             - { name: 'console.command' }
 

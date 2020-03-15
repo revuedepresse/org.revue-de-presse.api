@@ -643,12 +643,12 @@ class Accessor implements ApiAccessorInterface,
      * @throws UnavailableResourceException
      * @throws UnexpectedApiResponseException
      */
-    public function getMemberPublicationListSubscriptions($screenName)
+    public function getMemberPublicationListSubscriptions(int $memberId)
     {
         return $this->contactEndpoint(
             strtr(
                 $this->getMemberListSubscriptionsEndpoint(),
-                ['{{ screenName }}' => $screenName]
+                ['{{ userId }}' => $memberId]
             )
         );
     }
@@ -1704,7 +1704,7 @@ class Accessor implements ApiAccessorInterface,
      *
      * @return string
      */
-    protected function getListMembersEndpoint($version = '1.1')
+    protected function getListMembersEndpoint($version = '1.1'): string
     {
         return $this->getApiBaseUrl($version) . '/lists/members.json?count=5000&list_id={{ id }}';
     }
@@ -1714,7 +1714,7 @@ class Accessor implements ApiAccessorInterface,
      *
      * @return string
      */
-    protected function getRateLimitStatusEndpoint($version = '1.1')
+    protected function getRateLimitStatusEndpoint($version = '1.1'): string
     {
         return $this->getApiBaseUrl($version) . '/application/rate_limit_status.json?' .
             'resources=favorites,statuses,users,lists,friends,friendships,followers';
@@ -1725,7 +1725,7 @@ class Accessor implements ApiAccessorInterface,
      *
      * @return string
      */
-    protected function getSearchEndpoint($version = '1.1')
+    protected function getSearchEndpoint($version = '1.1'): string
     {
         return $this->getApiBaseUrl($version) . '/search/tweets.json?tweet_mode=extended&';
     }
@@ -2130,9 +2130,9 @@ class Accessor implements ApiAccessorInterface,
      *
      * @return string
      */
-    private function getMemberListSubscriptionsEndpoint($version = '1.1')
+    private function getMemberListSubscriptionsEndpoint($version = '1.1'): string
     {
-        return $this->getApiBaseUrl($version) . '/lists/subscriptions.json?cursor=-1&count=800&screen_name={{ screenName }}';
+        return $this->getApiBaseUrl($version) . '/lists/subscriptions.json?cursor=-1&count=800&user_id={{ userId }}';
     }
 
     /**
