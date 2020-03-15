@@ -23,6 +23,10 @@ use Ramsey\Uuid\UuidInterface;
  *          @ORM\Index(
  *              name="idx_publication",
  *              columns={"hash", "screen_name", "document_id", "published_at"}
+ *          ),
+ *          @ORM\Index(
+ *              name="idx_legacy",
+ *              columns={"legacy_id", "document_id", "published_at"}
  *          )
  *      }
  * )
