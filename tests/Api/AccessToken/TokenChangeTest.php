@@ -105,7 +105,13 @@ class TokenChangeTest extends TestCase
 
     protected function setUp(): void
     {
-        $this->accessor = new Accessor();
+        $this->accessor = new Accessor(
+            'consumer_key',
+            'consumer_secret',
+            'access_token',
+            'access_token_secret',
+            new NullLogger()
+        );
     }
 
     /**

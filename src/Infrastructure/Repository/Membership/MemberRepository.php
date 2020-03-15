@@ -420,7 +420,7 @@ QUERY;
                     $screenName
                 )
             );
-        } catch (\Exception $exception) {
+        } catch (\Throwable $exception) {
             $this->logger->error($exception->getMessage());
 
             return false;

@@ -4,8 +4,62 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "65ae5cbfe7ffe48aec05ff22517f1836",
+    "content-hash": "e0f1337b5ac4c446c20aa21164f1d5f9",
     "packages": [
+        {
+            "name": "abraham/twitteroauth",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/abraham/twitteroauth.git",
+                "reference": "bd225538be8303a6607182e6ad6355912610cbd2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/abraham/twitteroauth/zipball/bd225538be8303a6607182e6ad6355912610cbd2",
+                "reference": "bd225538be8303a6607182e6ad6355912610cbd2",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "php": "^7.2 || ^7.3 || ^7.4"
+            },
+            "require-dev": {
+                "phpmd/phpmd": "~2.6",
+                "phpunit/phpunit": "~5.7",
+                "squizlabs/php_codesniffer": "~3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Abraham\\TwitterOAuth\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Abraham Williams",
+                    "email": "abraham@abrah.am",
+                    "homepage": "https://abrah.am",
+                    "role": "Developer"
+                }
+            ],
+            "description": "The most popular PHP library for use with the Twitter OAuth REST API.",
+            "homepage": "https://twitteroauth.com",
+            "keywords": [
+                "Twitter API",
+                "Twitter oAuth",
+                "api",
+                "oauth",
+                "rest",
+                "social",
+                "twitter"
+            ],
+            "time": "2019-12-16T03:18:22+00:00"
+        },
         {
             "name": "auth0/auth0-php",
             "version": "5.7.0",
@@ -2209,34 +2263,6 @@
                 "sql"
             ],
             "time": "2015-08-30T16:36:01+00:00"
-        },
-        {
-            "name": "kertz/twitteroauth",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/thierrymarianne/twitteroauth.git",
-                "reference": "559bbd9af4500126a79d57c7875795fd6a2c15cb"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/thierrymarianne/twitteroauth/zipball/559bbd9af4500126a79d57c7875795fd6a2c15cb",
-                "reference": "559bbd9af4500126a79d57c7875795fd6a2c15cb",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.3.0"
-            },
-            "type": "library",
-            "autoload": {
-                "classmap": [
-                    "twitteroauth"
-                ]
-            },
-            "support": {
-                "source": "https://github.com/thierrymarianne/twitteroauth/tree/master"
-            },
-            "time": "2013-10-20T07:20:36+00:00"
         },
         {
             "name": "kreait/clock",
@@ -7026,48 +7052,6 @@
             ],
             "description": "PHP core functions that throw exceptions instead of returning FALSE on error",
             "time": "2020-02-05T16:07:03+00:00"
-        },
-        {
-            "name": "themattharris/tmhoauth",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/themattharris/tmhOAuth.git",
-                "reference": "455552d6c57549632644b6c9ac9204766be2b5ee"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/themattharris/tmhOAuth/zipball/455552d6c57549632644b6c9ac9204766be2b5ee",
-                "reference": "455552d6c57549632644b6c9ac9204766be2b5ee",
-                "shasum": ""
-            },
-            "require": {
-                "ext-curl": "*",
-                "php": ">=5.3.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-0": {
-                    "tmhOAuth": ""
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "Apache-2.0"
-            ],
-            "authors": [
-                {
-                    "name": "themattharris",
-                    "email": "matt@themattharris.com",
-                    "role": "Developer"
-                }
-            ],
-            "description": "An OAuth library written in PHP by @themattharris",
-            "keywords": [
-                "oauth",
-                "twitter"
-            ],
-            "time": "2014-08-06T22:29:35+00:00"
         }
     ],
     "packages-dev": [
@@ -7201,6 +7185,34 @@
                 "persistence"
             ],
             "time": "2019-11-27T05:47:56+00:00"
+        },
+        {
+            "name": "kertz/twitteroauth",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/thierrymarianne/twitteroauth.git",
+                "reference": "559bbd9af4500126a79d57c7875795fd6a2c15cb"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/thierrymarianne/twitteroauth/zipball/559bbd9af4500126a79d57c7875795fd6a2c15cb",
+                "reference": "559bbd9af4500126a79d57c7875795fd6a2c15cb",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "twitteroauth"
+                ]
+            },
+            "support": {
+                "source": "https://github.com/thierrymarianne/twitteroauth/tree/master"
+            },
+            "time": "2013-10-20T07:20:36+00:00"
         },
         {
             "name": "myclabs/deep-copy",
@@ -9343,10 +9355,10 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
+        "abraham/twitteroauth": 20,
         "beberlei/doctrineextensions": 20,
         "fabpot/goutte": 20,
         "fzaninotto/faker": 20,
-        "kertz/twitteroauth": 20,
         "predis/predis": 20,
         "ramsey/uuid-doctrine": 20,
         "sensio/framework-extra-bundle": 20,
@@ -9360,7 +9372,6 @@
         "symfony/translation": 20,
         "symfony/validator": 20,
         "thecodingmachine/safe": 20,
-        "themattharris/tmhoauth": 20,
         "doctrine/doctrine-fixtures-bundle": 20,
         "symfony/dotenv": 20,
         "symfony/maker-bundle": 20,
