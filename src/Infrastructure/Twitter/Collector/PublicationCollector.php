@@ -129,6 +129,8 @@ class PublicationCollector implements PublicationCollectorInterface
             }
 
             return true;
+        } finally {
+            $this->updateLastStatusPublicationDate($options);
         }
 
         if ($this->collectionStrategy->oneOfTheOptionsIsActive()) {
@@ -202,7 +204,7 @@ class PublicationCollector implements PublicationCollectorInterface
                 ['stacktrace' => $constraintViolationException->getTraceAsString()]
             );
             $success = false;
-        } catch (Exception $exception) {
+        } catch (\Throwable $exception) {
             $this->logger->error(
                 sprintf(
                     '[from %s %s]',
@@ -217,6 +219,22 @@ class PublicationCollector implements PublicationCollectorInterface
         }
 
         return $success;
+    }
+
+    /**
+     * @param array $options
+     */
+    private function updateLastStatusPublicationDate(array $options): void
+    {
+        if (!$this->collectionStrategy->fetchLikes()) {
+            try {
+                $this->statusRepository->updateLastStatusPublicationDate(
+                    $options[FetchPublicationInterface::SCREEN_NAME]
+                );
+            } catch (NotFoundStatusException $exception) {
+                $this->logger->info($exception->getMessage());
+            }
+        }
     }
 
     /**

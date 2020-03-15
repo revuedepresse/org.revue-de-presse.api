@@ -252,16 +252,6 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
                 );
         }
 
-        if (!$this->collectionStrategy->fetchLikes()) {
-            try {
-                $this->statusRepository->updateLastStatusPublicationDate(
-                    $options[FetchPublicationInterface::SCREEN_NAME]
-                );
-            } catch (NotFoundStatusException $exception) {
-                $this->logger->info($exception->getMessage());
-            }
-        }
-
         $this->afterUpdatingLastPublicationDate(
             $options,
             $whisperer

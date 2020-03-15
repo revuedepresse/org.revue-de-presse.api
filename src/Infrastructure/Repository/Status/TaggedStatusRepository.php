@@ -55,19 +55,7 @@ class TaggedStatusRepository implements TaggedStatusRepositoryInterface
         $taggedStatus = TaggedStatus::fromLegacyProps($properties);
 
         if ($this->statusHavingHashExists($taggedStatus->hash())) {
-            $status = $this->statusRepository->reviseDocument($taggedStatus);
-
-            if ($this->logger) {
-                $this->logger->info(
-                    sprintf(
-                        'Updating response body of status with hash "%s" for member with screen_name "%s"',
-                        $taggedStatus->hash(),
-                        $taggedStatus->screenName()
-                    )
-                );
-            }
-
-            return $status;
+            return $this->statusRepository->reviseDocument($taggedStatus);
         }
 
         return $taggedStatus->toStatus(
@@ -95,14 +83,6 @@ class TaggedStatusRepository implements TaggedStatusRepositoryInterface
         $queryBuilder->setParameter('hash', $hash);
         $count = (int) $queryBuilder->getQuery()->getSingleScalarResult();
 
-        $this->logger->info(
-            sprintf(
-                '%d statuses already collected for "%s"',
-                $count,
-                $hash
-            )
-        );
-
         return $count > 0;
     }
 
@@ -127,14 +107,6 @@ class TaggedStatusRepository implements TaggedStatusRepositoryInterface
 
         $queryBuilder->setParameter('hash', $hash);
         $count = (int) $queryBuilder->getQuery()->getSingleScalarResult();
-
-        $this->logger->info(
-            sprintf(
-                '%d statuses already collected for "%s"',
-                $count,
-                $hash
-            )
-        );
 
         return $count > 0;
     }

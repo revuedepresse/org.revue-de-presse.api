@@ -1,14 +1,16 @@
 <?php
+declare(strict_types=1);
 
 namespace App\Media\Repository;
 
 use App\Media\Entity\Owner;
 use Doctrine\ORM\EntityRepository;
+use Psr\Log\LoggerInterface;
 
 class OwnerRepository extends EntityRepository
 {
     /**
-     * @var \Psr\Log\LoggerInterface
+     * @var LoggerInterface
      */
     public $logger;
 

@@ -1,4 +1,7 @@
 {
+    "abraham/twitteroauth": {
+        "version": "dev-master"
+    },
     "auth0/auth0-php": {
         "version": "5.7.0"
     },
@@ -646,9 +649,6 @@
     },
     "thecodingmachine/safe": {
         "version": "0.1-dev"
-    },
-    "themattharris/tmhoauth": {
-        "version": "dev-master"
     },
     "theseer/tokenizer": {
         "version": "1.1.3"

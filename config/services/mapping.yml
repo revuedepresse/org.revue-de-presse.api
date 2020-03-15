@@ -5,7 +5,7 @@ services:
     mapping.refresh_status:
         class: 'App\StatusCollection\Mapping\RefreshStatusMapping'
         arguments:
-            - '@weaving_the_web_twitter.api_accessor'
+            - '@App\Twitter\Api\Accessor'
         calls:
             - [ 'setLogger', [ '@monolog.logger.status'  ] ]
             - [ 'setPublicationPersistence', [ '@App\Infrastructure\Status\Persistence\PublicationPersistence'  ] ]
