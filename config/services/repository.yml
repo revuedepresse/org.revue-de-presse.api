@@ -9,6 +9,8 @@ services:
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - 'App\Membership\Entity\Member'
+        calls:
+            - [ 'setLogger', [ '@logger'] ]
         properties:
             aggregateRepository: '@App\Api\Repository\PublicationListRepository'
         tags:
