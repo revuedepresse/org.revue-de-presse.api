@@ -5,21 +5,26 @@ namespace App\Aggregate\Repository;
 use App\Aggregate\Entity\MemberAggregateSubscription;
 use App\Membership\Entity\MemberInterface;
 use Doctrine\ORM\EntityRepository;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
+use const JSON_THROW_ON_ERROR;
 
 class MemberAggregateSubscriptionRepository extends EntityRepository
 {
     /**
      * @param MemberInterface $member
      * @param array           $list
+     *
      * @return MemberAggregateSubscription
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function make(
         MemberInterface $member,
         array $list
-    ) {
-        if (!array_key_exists('name', $list) ||
-            !array_key_exists('id', $list)) {
+    ): MemberAggregateSubscription {
+        if (!\array_key_exists('name', $list) ||
+            !\array_key_exists('id', $list)) {
             throw new \LogicException(
                 'A list should have a "name" property and an "id" property'
             );
@@ -31,6 +36,12 @@ class MemberAggregateSubscriptionRepository extends EntityRepository
             'member' => $member
         ]);
 
+        if ($memberAggregateSubscription instanceof MemberAggregateSubscription) {
+            $memberAggregateSubscription->setDocument(
+                json_encode($list, JSON_THROW_ON_ERROR)
+            );
+        }
+
         if (!($memberAggregateSubscription instanceof MemberAggregateSubscription)) {
             $memberAggregateSubscription = new MemberAggregateSubscription($member, $list);
         }
@@ -40,11 +51,14 @@ class MemberAggregateSubscriptionRepository extends EntityRepository
 
     /**
      * @param MemberAggregateSubscription $memberAggregateSubscription
+     *
      * @return MemberAggregateSubscription
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws OptimisticLockException
+     * @throws ORMException
      */
-    public function saveMemberAggregateSubscription(MemberAggregateSubscription $memberAggregateSubscription)
-    {
+    public function saveMemberAggregateSubscription(
+        MemberAggregateSubscription $memberAggregateSubscription
+    ): MemberAggregateSubscription {
         $this->getEntityManager()->persist($memberAggregateSubscription);
         $this->getEntityManager()->flush();
 

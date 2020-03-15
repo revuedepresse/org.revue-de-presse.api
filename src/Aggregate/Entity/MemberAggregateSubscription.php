@@ -4,41 +4,47 @@ declare(strict_types=1);
 namespace App\Aggregate\Entity;
 
 use App\Membership\Entity\MemberInterface;
+use Ramsey\Uuid\UuidInterface;
+use const JSON_THROW_ON_ERROR;
 
 class MemberAggregateSubscription
 {
-    /**
-     * @var string
-     */
-    private $id;
+    private UuidInterface $id;
 
-    /**
-     * @return int
-     */
-    public function getId()
+    public function getId(): UuidInterface
     {
         return $this->id;
     }
 
-    /**
-     * @var MemberInterface
-     */
     private MemberInterface $member;
 
-    /**
-     * @var string
-     */
+    public function member(): MemberInterface
+    {
+        return $this->member;
+    }
+
     public string $listId;
 
-    /**
-     * @var string
-     */
+    public function listId(): string
+    {
+        return $this->listId;
+    }
+
     private string $listName;
 
-    /**
-     * @var string
-     */
+    public function listName(): string
+    {
+        return $this->listName;
+    }
+
     private string $document;
+
+    public function setDocument(string $document): self
+    {
+        $this->document = $document;
+
+        return $this;
+    }
 
     /**
      * @param MemberInterface $member
@@ -47,7 +53,7 @@ class MemberAggregateSubscription
     public function __construct(MemberInterface $member, array $document)
     {
         $this->member = $member;
-        $this->document = json_encode($document);
+        $this->document = json_encode($document, JSON_THROW_ON_ERROR);
         $this->listName = $document['name'];
         $this->listId = $document['id'];
     }

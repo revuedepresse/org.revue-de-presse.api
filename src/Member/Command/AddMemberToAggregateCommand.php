@@ -158,7 +158,7 @@ class AddMemberToAggregateCommand extends Command implements CommandReturnCodeAw
     private function findListToWhichMembersShouldBeAddedTo(): stdClass
     {
         $memberName = $this->input->getOption(self::OPTION_MEMBER_NAME);
-        $ownershipsLists = $this->accessor->getUserOwnerships($memberName);
+        $ownershipsLists = $this->accessor->getMemberOwnerships($memberName);
 
         $aggregateName = $this->input->getOption(self::OPTION_AGGREGATE_NAME);
         $filteredLists = array_filter(

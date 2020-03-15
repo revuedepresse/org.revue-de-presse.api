@@ -42,6 +42,7 @@ services:
             - [ 'setDefaultToken',                          [ '%weaving_the_web_twitter.oauth_token.default%'] ]
             - [ 'setEntityManager',                         [ '@doctrine.orm.entity_manager'] ]
             - [ 'setLogger',                                [ '@logger'] ]
+            - [ 'setMemberFriendsCollectedEventRepository', [ '@App\Infrastructure\Collection\Repository\MemberFriendsCollectedEventRepository'] ]
             - [ 'setMemberProfileCollectedEventRepository', [ '@App\Infrastructure\Collection\Repository\MemberProfileCollectedEventRepository'] ]
             - [ 'setMemberRepository',                      [ '@App\Infrastructure\Repository\Membership\MemberRepository'] ]
             - [ 'setMessageBus',                            [ '@messenger.default_bus'] ]
@@ -127,8 +128,8 @@ services:
         tags:
             - { name: 'console.command' }
 
-    command.import_member_aggregates:
-        class:                                      'App\Aggregate\Command\ImportMemberAggregatesCommand'
+    App\Aggregate\Command\ImportMemberPublicationListsCommand:
+        class:                                      'App\Aggregate\Command\ImportMemberPublicationListsCommand'
         properties:
             accessor:                               '@App\Twitter\Api\Accessor'
             aggregateSubscriptionRepository:        '@repository.publication_list_subscription'
@@ -136,6 +137,9 @@ services:
             memberAggregateSubscriptionRepository:  '@repository.member_aggregate_subscription'
             networkRepository:                      '@repository.network'
             memberRepository:                       '@user_manager'
+        calls:
+            - [ 'setOwnershipBatchCollectedEventRepository',  [ '@App\Infrastructure\Collection\Repository\OwnershipBatchCollectedEventRepository' ] ]
+            - [ 'setPublicationListCollectedEventRepository', [ '@App\Infrastructure\Collection\Repository\PublicationListCollectedEventRepository' ] ]
         tags:
             - { name: 'console.command' }
 

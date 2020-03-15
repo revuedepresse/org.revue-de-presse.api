@@ -643,12 +643,12 @@ class Accessor implements ApiAccessorInterface,
      * @throws UnavailableResourceException
      * @throws UnexpectedApiResponseException
      */
-    public function getUserListSubscriptions($screenName)
+    public function getMemberPublicationListSubscriptions(int $memberId)
     {
         return $this->contactEndpoint(
             strtr(
                 $this->getMemberListSubscriptionsEndpoint(),
-                ['{{ screenName }}' => $screenName]
+                ['{{ userId }}' => $memberId]
             )
         );
     }
@@ -673,37 +673,6 @@ class Accessor implements ApiAccessorInterface,
                 ]
             )
         );
-    }
-
-    /**
-     * @return int
-     */
-    public function getUserNotFoundErrorCode()
-    {
-        return self::ERROR_USER_NOT_FOUND;
-    }
-
-    /**
-     * @param string $screenName
-     * @param int    $cursor
-     * @param int    $count
-     *
-     * @return OwnershipCollection
-     */
-    public function getUserOwnerships(
-        string $screenName,
-        int $cursor = -1,
-        int $count = 800
-    ): OwnershipCollection {
-        return $this->getMemberOwnerships($screenName, $cursor, $count);
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getUserSecret()
-    {
-        return $this->userSecret;
     }
 
     /**
@@ -1735,7 +1704,7 @@ class Accessor implements ApiAccessorInterface,
      *
      * @return string
      */
-    protected function getListMembersEndpoint($version = '1.1')
+    protected function getListMembersEndpoint($version = '1.1'): string
     {
         return $this->getApiBaseUrl($version) . '/lists/members.json?count=5000&list_id={{ id }}';
     }
@@ -1745,7 +1714,7 @@ class Accessor implements ApiAccessorInterface,
      *
      * @return string
      */
-    protected function getRateLimitStatusEndpoint($version = '1.1')
+    protected function getRateLimitStatusEndpoint($version = '1.1'): string
     {
         return $this->getApiBaseUrl($version) . '/application/rate_limit_status.json?' .
             'resources=favorites,statuses,users,lists,friends,friendships,followers';
@@ -1756,7 +1725,7 @@ class Accessor implements ApiAccessorInterface,
      *
      * @return string
      */
-    protected function getSearchEndpoint($version = '1.1')
+    protected function getSearchEndpoint($version = '1.1'): string
     {
         return $this->getApiBaseUrl($version) . '/search/tweets.json?tweet_mode=extended&';
     }
@@ -2161,9 +2130,9 @@ class Accessor implements ApiAccessorInterface,
      *
      * @return string
      */
-    private function getMemberListSubscriptionsEndpoint($version = '1.1')
+    private function getMemberListSubscriptionsEndpoint($version = '1.1'): string
     {
-        return $this->getApiBaseUrl($version) . '/lists/subscriptions.json?count=1000&screen_name={{ screenName }}';
+        return $this->getApiBaseUrl($version) . '/lists/subscriptions.json?cursor=-1&count=800&user_id={{ userId }}';
     }
 
     /**
