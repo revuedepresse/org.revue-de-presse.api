@@ -23,7 +23,7 @@ services:
             - 'App\Domain\Collection\Entity\MemberProfileCollectedEvent'
         calls:
             - [ 'setLogger',           [ '@logger' ] ]
-            - [ 'setApiAccessor',      [ '@weaving_the_web_twitter.api_accessor' ] ]
+            - [ 'setApiAccessor',      [ '@App\Twitter\Api\Accessor' ] ]
         tags:
             - { name: 'doctrine.repository_service' }
 
@@ -35,7 +35,7 @@ services:
         calls:
             - [ 'setLogger',           [ '@logger' ] ]
             - [ 'setMemberRepository', [ '@App\Infrastructure\Repository\Membership\MemberRepository' ] ]
-            - [ 'setApiAccessor',      [ '@weaving_the_web_twitter.api_accessor' ] ]
+            - [ 'setApiAccessor',      [ '@App\Twitter\Api\Accessor' ] ]
         tags:
             - { name: 'doctrine.repository_service' }
 
@@ -46,7 +46,7 @@ services:
             - 'App\Domain\Collection\Entity\PublicationListCollectedEvent'
         calls:
             - [ 'setLogger',           [ '@logger' ] ]
-            - [ 'setApiAccessor',      [ '@weaving_the_web_twitter.api_accessor' ] ]
+            - [ 'setApiAccessor',      [ '@App\Twitter\Api\Accessor' ] ]
         tags:
             - { name: 'doctrine.repository_service' }
 
@@ -57,7 +57,7 @@ services:
             - 'App\Domain\Collection\Entity\OwnershipBatchCollectedEvent'
         calls:
             - [ 'setLogger',           [ '@logger' ] ]
-            - [ 'setApiAccessor',      [ '@weaving_the_web_twitter.api_accessor' ] ]
+            - [ 'setApiAccessor',      [ '@App\Twitter\Api\Accessor' ] ]
         tags:
             - { name: 'doctrine.repository_service' }
 
@@ -100,7 +100,7 @@ services:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - 'App\Member\Entity\AggregateSubscription'
         properties:
-            accessor:                               '@weaving_the_web_twitter.api_accessor'
+            accessor:                               '@App\Twitter\Api\Accessor'
             logger:                                 '@logger'
             memberAggregateSubscriptionRepository:  '@repository.member_aggregate_subscription'
             memberSubscriptionRepository:           '@repository.member_subscription'
@@ -174,7 +174,7 @@ services:
     repository.network:
         class:                            'App\Member\Repository\NetworkRepository'
         properties:
-            accessor:                     '@weaving_the_web_twitter.api_accessor'
+            accessor:                     '@App\Twitter\Api\Accessor'
             entityManager:                "@doctrine.orm.entity_manager"
             logger:                       "@logger"
             memberRepository:             "@user_manager"

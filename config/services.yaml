@@ -113,14 +113,14 @@ services:
             - [ 'setPublicationListCollectedEventRepository', [ '@App\Infrastructure\Collection\Repository\PublicationListCollectedEventRepository'] ]
             - [ 'setTokenChange',                             [ '@App\Api\AccessToken\TokenChange'] ]
         arguments:
-            - '@weaving_the_web_twitter.api_accessor'
+            - '@App\Twitter\Api\Accessor'
             - '@App\Infrastructure\Translation\Translator'
             - '@logger'
 
     App\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher:
         class: 'App\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher'
         arguments:
-            - '@weaving_the_web_twitter.api_accessor'
+            - '@App\Twitter\Api\Accessor'
             - '@App\Infrastructure\Twitter\Api\Accessor\OwnershipAccessor'
             - '@App\Infrastructure\Amqp\ResourceProcessor\PublicationListProcessor'
             - '@App\Api\AccessToken\TokenChange'
@@ -140,6 +140,46 @@ services:
         arguments:
             - '@doctrine.orm.entity_manager'
             - '@logger'
+
+    App\Twitter\Api\Accessor:
+        class: 'App\Twitter\Api\Accessor'
+        arguments:
+            - '@logger'
+            - '%weaving_the_web_twitter.consumer_key%'
+            - '%weaving_the_web_twitter.consumer_secret%'
+            - '%weaving_the_web_twitter.oauth_token.default%'
+            - '%weaving_the_web_twitter.oauth_secret.default%'
+        properties:
+            environment:          '%kernel.environment%'
+            twitterApiLogger:     '@monolog.logger.twitter_api'
+            statusAccessor:       '@App\Accessor\StatusAccessor'
+        calls:
+            - [ 'setClientClass', [ '\Goutte\Client' ] ]
+            - [ 'setConsumerKey', [ '%weaving_the_web_twitter.consumer_key%' ] ]
+            - [ 'setConsumerSecret', [ '%weaving_the_web_twitter.consumer_secret%' ] ]
+            - [ 'setMemberRepository', [ '@user_manager' ] ]
+            - [ 'setModerator', [ '@weaving_the_web_twitter.moderator.api_limit' ] ]
+            - [ 'setTokenRepository', [ '@weaving_the_web_twitter.repository.token' ] ]
+            - [ 'setTranslator', [ '@App\Infrastructure\Translation\Translator' ] ]
+            - [ 'setUserSecret', [ '%weaving_the_web_twitter.oauth_secret.default%' ] ]
+            - [ 'setUserToken', [ '%weaving_the_web_twitter.oauth_token.default%' ] ]
+
+    App\Accessor\StatusAccessor:
+        class: 'App\Accessor\StatusAccessor'
+        properties:
+            archivedStatusRepository:   '@App\Api\Repository\ArchivedStatusRepository'
+            entityManager:              '@doctrine.orm.entity_manager'
+            notFoundStatusRepository:   '@repository.not_found_status'
+        calls:
+            - [ 'setApiAccessor',                               [ '@App\Twitter\Api\Accessor' ] ]
+            - [ 'setLogger',                                    [ '@logger' ] ]
+            - [ 'setLikedStatusRepository',                     [ '@repository.liked_status' ] ]
+            - [ 'setMemberRepository',                          [ '@App\Infrastructure\Repository\Membership\MemberRepository' ] ]
+            - [ 'setMemberProfileCollectedEventRepository',     [ '@App\Infrastructure\Collection\Repository\MemberProfileCollectedEventRepository' ] ]
+            - [ 'setPublicationPersistence',                    [ '@App\Infrastructure\Status\Persistence\PublicationPersistence' ] ]
+            - [ 'setStatusRepository',                          [ '@App\Api\Repository\StatusRepository' ] ]
+            - [ 'setPublicationBatchCollectedEventRepository',  [ '@App\Infrastructure\Collection\Repository\PublicationBatchCollectedEventRepository' ] ]
+        public: true
 
     app.cache.redis:
         class: '%redis_cache%'
@@ -161,44 +201,6 @@ services:
         tags:
             - { name: 'kernel.event_subscriber' }
 
-    weaving_the_web_twitter.api_accessor:
-        class: '%weaving_the_web_twitter.api_accessor.class%'
-        arguments:
-            - '@logger'
-        properties:
-            environment:          '%kernel.environment%'
-            httpClient:           '%weaving_the_web_twitter.oauth_client.class%'
-            twitterApiLogger:     '@monolog.logger.twitter_api'
-            statusAccessor:       '@App\Accessor\StatusAccessor'
-        calls:
-            - [ 'setClientClass', [ '\Goutte\Client' ] ]
-            - [ 'setConsumerKey', [ '%weaving_the_web_twitter.consumer_key%' ] ]
-            - [ 'setConsumerSecret', [ '%weaving_the_web_twitter.consumer_secret%' ] ]
-            - [ 'setHttpClientClass', [ '%weaving_the_web_twitter.http_client.class%' ] ]
-            - [ 'setMemberRepository', [ '@user_manager' ] ]
-            - [ 'setModerator', [ '@weaving_the_web_twitter.moderator.api_limit' ] ]
-            - [ 'setTokenRepository', [ '@weaving_the_web_twitter.repository.token' ] ]
-            - [ 'setTranslator', [ '@App\Infrastructure\Translation\Translator' ] ]
-            - [ 'setUserSecret', [ '%weaving_the_web_twitter.oauth_secret.default%' ] ]
-            - [ 'setUserToken', [ '%weaving_the_web_twitter.oauth_token.default%' ] ]
-
-    App\Accessor\StatusAccessor:
-        class: 'App\Accessor\StatusAccessor'
-        properties:
-            archivedStatusRepository:   '@App\Api\Repository\ArchivedStatusRepository'
-            entityManager:              '@doctrine.orm.entity_manager'
-            notFoundStatusRepository:   '@repository.not_found_status'
-        calls:
-            - [ 'setApiAccessor',                               [ '@weaving_the_web_twitter.api_accessor' ] ]
-            - [ 'setLogger',                                    [ '@logger' ] ]
-            - [ 'setLikedStatusRepository',                     [ '@repository.liked_status' ] ]
-            - [ 'setMemberRepository',                          [ '@App\Infrastructure\Repository\Membership\MemberRepository' ] ]
-            - [ 'setMemberProfileCollectedEventRepository',     [ '@App\Infrastructure\Collection\Repository\MemberProfileCollectedEventRepository' ] ]
-            - [ 'setPublicationPersistence',                    [ '@App\Infrastructure\Status\Persistence\PublicationPersistence' ] ]
-            - [ 'setStatusRepository',                          [ '@App\Api\Repository\StatusRepository' ] ]
-            - [ 'setPublicationBatchCollectedEventRepository',  [ '@App\Infrastructure\Collection\Repository\PublicationBatchCollectedEventRepository' ] ]
-        public: true
-
     weaving_the_web_twitter.repository.token:
         class: '%weaving_the_web_twitter.repository.token.class%'
         arguments:
@@ -219,7 +221,7 @@ services:
     App\Infrastructure\Twitter\Collector\PublicationCollector:
         class:  'App\Infrastructure\Twitter\Collector\PublicationCollector'
         calls:
-            - [ 'setApiAccessor',                               [ '@weaving_the_web_twitter.api_accessor' ] ]
+            - [ 'setApiAccessor',                               [ '@App\Twitter\Api\Accessor' ] ]
             - [ 'setInterruptibleCollectDeciderInterface',      [ '@App\Infrastructure\Twitter\Collector\InterruptibleCollectDecider' ] ]
             - [ 'setLogger',                                    [ '@monolog.logger.status' ] ]
             - [ 'setLikedStatusRepository',                     [ '@repository.liked_status' ] ]
@@ -260,7 +262,6 @@ parameters:
 
     redis_cache:                                                  'App\Cache\RedisCache'
 
-    weaving_the_web_twitter.api_accessor.class:                   'App\Twitter\Api\Accessor'
     weaving_the_web_twitter.api_host:                             'api.twitter.com'
 
     weaving_the_web_twitter.moderator.api_limit.class:            'App\Api\Moderator\ApiLimitModerator'
@@ -275,7 +276,6 @@ parameters:
 
     weaving_the_web_twitter.http_client.class:                    '\GuzzleHttp\Client'
 
-    weaving_the_web_twitter.oauth_client.class:                   'TwitterOAuth'
     weaving_the_web_twitter.oauth_token.default:                  '%env(resolve:API_TWITTER_USER_TOKEN)%'
     weaving_the_web_twitter.oauth_secret.default:                 '%env(resolve:API_TWITTER_USER_SECRET)%'
 

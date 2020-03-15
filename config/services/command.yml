@@ -20,7 +20,7 @@ services:
             savedSearchRepository:          '@repository.saved_search'
             searchMatchingStatusRepository: '@repository.search_matching_status'
         calls:
-            - [ 'setAccessor',                      [ '@weaving_the_web_twitter.api_accessor'] ]
+            - [ 'setAccessor',                      [ '@App\Twitter\Api\Accessor'] ]
             - [ 'setAggregateRepository',           [ '@App\Api\Repository\PublicationListRepository'] ]
             - [ 'setDefaultSecret',                 [ '%weaving_the_web_twitter.oauth_secret.default%'] ]
             - [ 'setDefaultToken',                  [ '%weaving_the_web_twitter.oauth_token.default%'] ]
@@ -36,7 +36,7 @@ services:
     App\Amqp\Command\FetchMemberSubscriptionTimelineMessageDispatcher:
         class: 'App\Amqp\Command\FetchMemberSubscriptionTimelineMessageDispatcher'
         calls:
-            - [ 'setAccessor',                              [ '@weaving_the_web_twitter.api_accessor'] ]
+            - [ 'setAccessor',                              [ '@App\Twitter\Api\Accessor'] ]
             - [ 'setAggregateRepository',                   [ '@App\Api\Repository\PublicationListRepository'] ]
             - [ 'setDefaultSecret',                         [ '%weaving_the_web_twitter.oauth_secret.default%'] ]
             - [ 'setDefaultToken',                          [ '%weaving_the_web_twitter.oauth_token.default%'] ]
@@ -107,7 +107,7 @@ services:
         properties:
             aggregateRepository:                '@App\Api\Repository\PublicationListRepository'
             aggregateSubscriptionRepository:    '@repository.publication_list_subscription'
-            accessor:                           '@weaving_the_web_twitter.api_accessor'
+            accessor:                           '@App\Twitter\Api\Accessor'
             logger:                             '@logger'
             userRepository:                     '@user_manager'
         tags:
@@ -130,7 +130,7 @@ services:
     command.import_member_aggregates:
         class:                                      'App\Aggregate\Command\ImportMemberAggregatesCommand'
         properties:
-            accessor:                               '@weaving_the_web_twitter.api_accessor'
+            accessor:                               '@App\Twitter\Api\Accessor'
             aggregateSubscriptionRepository:        '@repository.publication_list_subscription'
             logger:                                 '@logger'
             memberAggregateSubscriptionRepository:  '@repository.member_aggregate_subscription'
@@ -173,7 +173,7 @@ services:
     command.subscribe_to_member_timelines:
         class:                               'App\Member\Command\SubscribeToMemberTimelinesCommand'
         properties:
-            accessor:                        '@weaving_the_web_twitter.api_accessor'
+            accessor:                        '@App\Twitter\Api\Accessor'
             aggregateSubscriptionRepository: '@repository.publication_list_subscription'
             logger:                          '@logger'
         tags:

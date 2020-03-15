@@ -15,10 +15,6 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "git@github.com:thierrymarianne/twitteroauth.git"
-        },
-        {
-            "type": "vcs",
             "url": "git@github.com:WeavingTheWeb/DoctrineExtensions.git"
         }
     ],
@@ -29,6 +25,7 @@
         "ext-mbstring": "*",
         "ext-mysqli": "*",
         "ext-pdo": "*",
+        "abraham/twitteroauth": "dev-master",
         "auth0/auth0-php": "~5.0",
         "beberlei/DoctrineExtensions": "dev-master",
         "doctrine/inflector": "*",
@@ -37,7 +34,6 @@
         "fzaninotto/faker": "^1.9@dev",
         "guzzle/guzzle": "3.3.1",
         "incenteev/composer-parameter-handler": "~2.0",
-        "kertz/twitteroauth": "dev-master",
         "kreait/firebase-php": "~4.18",
         "ocramius/proxy-manager": "2.2.3",
         "predis/predis": "^2.0@dev",
@@ -53,8 +49,7 @@
         "symfony/security-bundle": "^5.1@dev",
         "symfony/translation": "^5.1@dev",
         "symfony/validator": "^5.1@dev",
-        "thecodingmachine/safe": "^0.1.0@dev",
-        "themattharris/tmhOAuth": "dev-master"
+        "thecodingmachine/safe": "^0.1.0@dev"
     },
     "require-dev": {
         "doctrine/doctrine-fixtures-bundle": "^3.3@dev",

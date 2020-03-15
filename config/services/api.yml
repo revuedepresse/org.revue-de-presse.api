@@ -8,7 +8,7 @@ services:
     App\Infrastructure\Twitter\Api\Accessor\OwnershipAccessor:
         class: 'App\Infrastructure\Twitter\Api\Accessor\OwnershipAccessor'
         arguments:
-            - '@weaving_the_web_twitter.api_accessor'
+            - '@App\Twitter\Api\Accessor'
             - '@weaving_the_web_twitter.repository.token'
             - '@App\Api\AccessToken\TokenChange'
             - '@logger'
@@ -18,7 +18,7 @@ services:
     App\Infrastructure\Twitter\Api\Accessor\MemberProfileAccessor:
         class: 'App\Infrastructure\Twitter\Api\Accessor\MemberProfileAccessor'
         arguments:
-            - '@weaving_the_web_twitter.api_accessor'
+            - '@App\Twitter\Api\Accessor'
             - '@user_manager'
             - '@App\Infrastructure\Twitter\Api\UnavailableResourceHandler'
         calls:

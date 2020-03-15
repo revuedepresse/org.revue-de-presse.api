@@ -19,7 +19,7 @@ services:
             - '@doctrine.orm.entity_manager'
             - '@logger'
         calls:
-            - [ 'setApiAccessor',               [ '@weaving_the_web_twitter.api_accessor' ] ]
+            - [ 'setApiAccessor',               [ '@App\Twitter\Api\Accessor' ] ]
             - [ 'setLogger',                    [ '@logger' ] ]
             - [ 'setPublicationListRepository', [ '@App\Api\Repository\PublicationListRepository' ] ]
             - [ 'setPublicationPersistence',    [ '@App\Infrastructure\Status\Persistence\PublicationPersistence' ] ]

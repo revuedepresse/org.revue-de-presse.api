@@ -2,7 +2,7 @@ services:
     App\Infrastructure\Twitter\Collector\InterruptibleCollectDecider:
         class: 'App\Infrastructure\Twitter\Collector\InterruptibleCollectDecider'
         calls:
-            - [ 'setApiAccessor',                           [ '@weaving_the_web_twitter.api_accessor'] ]
+            - [ 'setApiAccessor',                           [ '@App\Twitter\Api\Accessor'] ]
             - [ 'setLogger',                                [ '@logger' ] ]
             - [ 'setLikedStatusRepository',                 [ '@repository.liked_status' ] ]
             - [ 'setLikedStatusCollectDecider',             [ '@App\Infrastructure\Twitter\Collector\LikedStatusCollectDecider' ] ]
