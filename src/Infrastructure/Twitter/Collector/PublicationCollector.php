@@ -204,7 +204,7 @@ class PublicationCollector implements PublicationCollectorInterface
                 ['stacktrace' => $constraintViolationException->getTraceAsString()]
             );
             $success = false;
-        } catch (Exception $exception) {
+        } catch (\Throwable $exception) {
             $this->logger->error(
                 sprintf(
                     '[from %s %s]',
