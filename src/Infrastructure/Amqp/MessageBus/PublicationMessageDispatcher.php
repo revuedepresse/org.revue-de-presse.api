@@ -8,6 +8,7 @@ use App\Amqp\Exception\UnexpectedOwnershipException;
 use App\Api\AccessToken\TokenChangeInterface;
 use App\Api\Entity\TokenInterface;
 use App\Domain\Collection\PublicationStrategyInterface;
+use App\Domain\Resource\MemberOwnerships;
 use App\Domain\Resource\OwnershipCollection;
 use App\Domain\Resource\PublicationList;
 use App\Infrastructure\Amqp\ResourceProcessor\PublicationListProcessorInterface;
@@ -76,43 +77,53 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
         $this->writer = $writer;
         $this->strategy = $strategy;
 
-        $memberOwnership = $this->ownershipAccessor->getOwnershipsForMemberHavingScreenNameAndToken(
-            $strategy->onBehalfOfWhom(),
-            $token
-        );
+        $memberOwnership = null;
 
-        $ownerships = $this->guardAgainstInvalidListName(
-            $memberOwnership->ownershipCollection(),
-            $token
-        );
-
-        foreach ($ownerships->toArray() as $list) {
-            try {
-                $publishedMessages = $this->publicationListProcessor->processPublicationList(
-                    $list,
-                    $memberOwnership->token(),
-                    $strategy
+        while ($memberOwnership === null ||
+            ($memberOwnership instanceof MemberOwnerships &&
+            $memberOwnership->ownershipCollection()->isNotEmpty())
+        ) {
+            $memberOwnership = $this->ownershipAccessor
+                ->getOwnershipsForMemberHavingScreenNameAndToken(
+                    $strategy->onBehalfOfWhom(),
+                    $token,
+                    $memberOwnership
                 );
 
-                if ($publishedMessages) {
-                    $writer(
-                        $this->translator->trans(
-                            'amqp.production.list_members.success',
-                            [
-                                '{{ count }}' => $publishedMessages,
-                                '{{ list }}'  => $list->name(),
-                            ]
-                        )
+            $ownerships = $this->guardAgainstInvalidListName(
+                $memberOwnership->ownershipCollection(),
+                $token
+            );
+
+            foreach ($ownerships->toArray() as $list) {
+                try {
+                    $publishedMessages = $this->publicationListProcessor
+                        ->processPublicationList(
+                            $list,
+                            $memberOwnership->token(),
+                            $strategy
+                        );
+
+                    if ($publishedMessages) {
+                        $writer(
+                            $this->translator->trans(
+                                'amqp.production.list_members.success',
+                                [
+                                    '{{ count }}' => $publishedMessages,
+                                    '{{ list }}'  => $list->name(),
+                                ]
+                            )
+                        );
+                    }
+                } catch (EmptyListException $exception) {
+                    $this->logger->info($exception->getMessage());
+                } catch (Exception $exception) {
+                    $this->logger->critical(
+                        $exception->getMessage(),
+                        ['stacktrace' => $exception->getTraceAsString()]
                     );
+                    UnexpectedOwnershipException::throws($exception->getMessage());
                 }
-            } catch (EmptyListException $exception) {
-                $this->logger->info($exception->getMessage());
-            } catch (Exception $exception) {
-                $this->logger->critical(
-                    $exception->getMessage(),
-                    ['stacktrace' => $exception->getTraceAsString()]
-                );
-                UnexpectedOwnershipException::throws($exception->getMessage());
             }
         }
     }
