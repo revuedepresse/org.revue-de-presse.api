@@ -8,8 +8,8 @@ Easing observation of Twitter lists to publish a daily press review
 
 ## Installation
 
-The shell scripts written to install the project dependencies have been tested under Ubuntu 16.04.5 LTS.
-My guess about running them from another OS would be that it simply won't terminate as expected.
+The shell scripts written to install the project dependencies
+have been tested under Ubuntu 19.10.
 
 ### Requirements
 
