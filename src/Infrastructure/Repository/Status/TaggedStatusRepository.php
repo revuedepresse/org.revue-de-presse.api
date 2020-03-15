@@ -97,7 +97,7 @@ class TaggedStatusRepository implements TaggedStatusRepositoryInterface
 
         $this->logger->info(
             sprintf(
-                '%d statuses already collected for "%s"',
+                '%d archived publications already collected for "%s"',
                 $count,
                 $hash
             )
@@ -130,7 +130,7 @@ class TaggedStatusRepository implements TaggedStatusRepositoryInterface
 
         $this->logger->info(
             sprintf(
-                '%d statuses already collected for "%s"',
+                '%d publications already collected for "%s"',
                 $count,
                 $hash
             )
