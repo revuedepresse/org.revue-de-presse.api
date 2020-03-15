@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Collection\Repository;
 
-use App\Domain\Collection\Entity\MemberProfileCollectedEvent;
+use App\Domain\Collection\Entity\MemberFriendsCollectedEvent;
 use App\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Api\ApiAccessorInterface;
@@ -12,46 +12,46 @@ use stdClass;
 use Throwable;
 use const JSON_THROW_ON_ERROR;
 
-class MemberProfileCollectedEventRepository extends ServiceEntityRepository implements MemberProfileCollectedEventRepositoryInterface
+class MemberFriendsCollectedEventRepository extends ServiceEntityRepository implements MemberFriendsCollectedEventRepositoryInterface
 {
     use LoggerTrait;
     use ApiAccessorTrait;
 
-    public function collectedMemberProfile(
+    public function collectedMemberFriends(
         ApiAccessorInterface $accessor,
         array $options
     ): stdClass {
         $screenName = $options[self::OPTION_SCREEN_NAME];
 
-        $event = $this->startCollectOfMemberProfile($screenName);
+        $event = $this->startCollectOfMemberFriends($screenName);
 
-        $twitterMember = $accessor->getMemberProfile($screenName);
+        $friends = $accessor->getFriendsOfMemberHavingScreenName($screenName);
 
-        $this->finishCollectOfMemberProfile(
+        $this->finishCollectOfMemberFriends(
             $event,
             json_encode(
                 [
-                    'method'   => 'getMemberProfile',
+                    'method'   => 'getFriendsOfMemberHavingScreenName',
                     'options'  => $options,
-                    'response' => (array) $twitterMember,
+                    'response' => (array) $friends,
                 ],
                 JSON_THROW_ON_ERROR
             )
         );
 
-        return $twitterMember;
+        return $friends;
     }
 
-    private function finishCollectOfMemberProfile(
-        MemberProfileCollectedEvent $event,
+    private function finishCollectOfMemberFriends(
+        MemberFriendsCollectedEvent $event,
         string $payload
-    ): MemberProfileCollectedEvent {
+    ): MemberFriendsCollectedEvent {
         $event->finishCollect($payload);
 
         return $this->save($event);
     }
 
-    private function save(MemberProfileCollectedEvent $event): MemberProfileCollectedEvent
+    private function save(MemberFriendsCollectedEvent $event): MemberFriendsCollectedEvent
     {
         $entityManager = $this->getEntityManager();
 
@@ -65,12 +65,12 @@ class MemberProfileCollectedEventRepository extends ServiceEntityRepository impl
         return $event;
     }
 
-    private function startCollectOfMemberProfile(
+    private function startCollectOfMemberFriends(
         string $screenName
-    ): MemberProfileCollectedEvent {
+    ): MemberFriendsCollectedEvent {
         $now = new \DateTimeImmutable();
 
-        $event = new MemberProfileCollectedEvent(
+        $event = new MemberFriendsCollectedEvent(
             $screenName,
             $now,
             $now

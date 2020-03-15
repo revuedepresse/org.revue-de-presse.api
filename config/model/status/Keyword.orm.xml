@@ -54,7 +54,7 @@
             name="keyword"
             column="keyword"
             type="string"
-            length="255"
+            length="511"
         />
 
         <field
