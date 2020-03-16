@@ -40,6 +40,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
     private const OPTION_LIST                   = PublicationStrategyInterface::RULE_LIST;
     private const OPTION_LISTS                  = PublicationStrategyInterface::RULE_LISTS;
     private const OPTION_FETCH_LIKES            = PublicationStrategyInterface::RULE_FETCH_LIKES;
+    private const OPTION_CURSOR                 = PublicationStrategyInterface::RULE_CURSOR;
 
     private const OPTION_OAUTH_TOKEN  = 'oauth_token';
     private const OPTION_OAUTH_SECRET = 'oauth_secret';
@@ -109,6 +110,12 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
                 'qr',
                 InputOption::VALUE_OPTIONAL,
                 'Query to search statuses against'
+            )
+            ->addOption(
+                self::OPTION_CURSOR,
+                'c',
+                InputOption::VALUE_OPTIONAL,
+                'Cursor from which ownership are to be fetched'
             )->addOption(
                self::OPTION_MEMBER_RESTRICTION,
                'mr',
@@ -142,9 +149,6 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
      * @param OutputInterface $output
      *
      * @return int
-     * @throws NoResultException
-     * @throws NonUniqueResultException
-     * @throws OptimisticLockException
      */
     public function execute(InputInterface $input, OutputInterface $output): int
     {

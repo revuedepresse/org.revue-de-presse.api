@@ -27,6 +27,7 @@ class InputToCollectionStrategy
         self::ignoreWhispers($input, $strategy);
         self::includeOwner($input, $strategy);
         self::shouldFetchLikes($input, $strategy);
+        self::fromCursor($input, $strategy);
 
         return $strategy;
     }
@@ -178,7 +179,7 @@ class InputToCollectionStrategy
     private static function includeOwner(
         InputInterface $input,
         PublicationStrategyInterface $strategy
-    ) {
+    ): void {
         if (
             $input->hasOption(PublicationStrategyInterface::RULE_INCLUDE_OWNER)
             && $input->getOption(PublicationStrategyInterface::RULE_INCLUDE_OWNER)
@@ -187,13 +188,25 @@ class InputToCollectionStrategy
         }
     }
 
-    private static function shouldFetchLikes(InputInterface $input, PublicationStrategyInterface $strategy)
+    private static function shouldFetchLikes(InputInterface $input, PublicationStrategyInterface $strategy): void
     {
         if (
             $input->hasOption(PublicationStrategyInterface::RULE_FETCH_LIKES) &&
             $input->getOption(PublicationStrategyInterface::RULE_FETCH_LIKES)
         ) {
             $strategy->willFetchLikes($input->getOption(PublicationStrategyInterface::RULE_FETCH_LIKES));
+        }
+    }
+
+    private static function fromCursor(InputInterface $input, PublicationStrategyInterface $strategy): void
+    {
+        if (
+            $input->hasOption(PublicationStrategyInterface::RULE_CURSOR) &&
+            $input->getOption(PublicationStrategyInterface::RULE_CURSOR)
+        ) {
+            $strategy->fromCursor(
+                (int) $input->getOption(PublicationStrategyInterface::RULE_CURSOR)
+            );
         }
     }
 }
