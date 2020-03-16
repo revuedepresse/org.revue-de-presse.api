@@ -30,7 +30,7 @@ class ApiLimitModerator implements ApiLimitModeratorInterface
      */
     public function waitFor($seconds, array $parameters = []): void
     {
-        if (!is_null($this->logger)) {
+        if ($this->logger !== null) {
             if ($seconds < 60) {
                 $humanlyReadableWaitTime = $seconds.' more seconds';
             } else {

@@ -46,7 +46,7 @@ class PublicationStrategy implements PublicationStrategyInterface
      *
      * @return $this
      */
-    public function forMemberHavingScreenName(string $screenName): self
+    public function forMemberHavingScreenName(string $screenName): PublicationStrategyInterface
     {
         $this->screenName = $screenName;
 
@@ -82,7 +82,7 @@ class PublicationStrategy implements PublicationStrategyInterface
      *
      * @return PublicationStrategyInterface
      */
-    public function willFetchLikes(bool $fetchLikes = false): self
+    public function willFetchLikes(bool $fetchLikes = false): PublicationStrategyInterface
     {
         $this->fetchLikes = $fetchLikes;
 
@@ -282,7 +282,7 @@ class PublicationStrategy implements PublicationStrategyInterface
      *
      * @return PublicationStrategyInterface
      */
-    public function willApplyListRestrictionToAList(string $listRestriction): self
+    public function willApplyListRestrictionToAList(string $listRestriction): PublicationStrategyInterface
     {
         $this->listRestriction = $listRestriction;
 
@@ -294,7 +294,7 @@ class PublicationStrategy implements PublicationStrategyInterface
      *
      * @return PublicationStrategyInterface
      */
-    public function willApplyQueryRestriction(string $queryRestriction): self
+    public function willApplyQueryRestriction(string $queryRestriction): PublicationStrategyInterface
     {
         $this->queryRestriction = $queryRestriction;
 
@@ -306,7 +306,7 @@ class PublicationStrategy implements PublicationStrategyInterface
      *
      * @return PublicationStrategyInterface
      */
-    public function willApplyRestrictionToAListCollection(array $listCollectionRestriction): self
+    public function willApplyRestrictionToAListCollection(array $listCollectionRestriction): PublicationStrategyInterface
     {
         $this->listCollectionRestriction = $listCollectionRestriction;
 
@@ -318,7 +318,7 @@ class PublicationStrategy implements PublicationStrategyInterface
      *
      * @return PublicationStrategyInterface
      */
-    public function willApplyRestrictionToAMember(string $memberRestriction): self
+    public function willApplyRestrictionToAMember(string $memberRestriction): PublicationStrategyInterface
     {
         $this->memberRestriction = $memberRestriction;
 
@@ -330,7 +330,7 @@ class PublicationStrategy implements PublicationStrategyInterface
      *
      * @return PublicationStrategyInterface
      */
-    public function willCollectPublicationsPreceding(?string $date): self
+    public function willCollectPublicationsPreceding(?string $date): PublicationStrategyInterface
     {
         $this->dateBeforeWhichPublicationsAreCollected = $date;
 
@@ -342,7 +342,7 @@ class PublicationStrategy implements PublicationStrategyInterface
      *
      * @return PublicationStrategyInterface
      */
-    public function willIgnoreWhispers(bool $ignoreWhispers): self
+    public function willIgnoreWhispers(bool $ignoreWhispers): PublicationStrategyInterface
     {
         $this->ignoreWhispers = $ignoreWhispers;
 
@@ -354,7 +354,7 @@ class PublicationStrategy implements PublicationStrategyInterface
      *
      * @return $this
      */
-    public function willIncludeOwner(bool $includeOwner): self
+    public function willIncludeOwner(bool $includeOwner): PublicationStrategyInterface
     {
         $this->includeOwner = $includeOwner;
 
@@ -372,9 +372,9 @@ class PublicationStrategy implements PublicationStrategyInterface
     /**
      * @param bool $priorityToAggregates
      *
-     * @return PublicationStrategyInterface
+     * @return PublicationStrategy
      */
-    public function willPrioritizeAggregates(bool $priorityToAggregates): self
+    public function willPrioritizeAggregates(bool $priorityToAggregates): PublicationStrategyInterface
     {
         $this->weightedAggregates = $priorityToAggregates;
 
