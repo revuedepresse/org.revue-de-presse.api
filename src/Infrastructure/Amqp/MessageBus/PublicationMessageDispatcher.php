@@ -22,7 +22,6 @@ use App\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Twitter\Api\ApiAccessorInterface;
 use App\Twitter\Exception\EmptyListException;
 use Closure;
-use DateTime;
 use DateTimeImmutable;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -78,14 +77,13 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
         $this->writer   = $writer;
         $this->strategy = $strategy;
 
+        $cursor = $this->strategy->shouldFetchPublicationsFromCursor();
+
         $memberOwnership = null;
 
-        while ($memberOwnership === null
-            || ($memberOwnership instanceof MemberOwnerships
-                && $memberOwnership->ownershipCollection()->isNotEmpty())
-        ) {
-            $memberOwnership = $this->guardAgainstTokenFreeze(
-                function (TokenInterface  $token) use ($strategy, $memberOwnership) {
+        while ($this->keepDispatching($memberOwnership)) {
+            $nextMemberOwnership = $this->guardAgainstTokenFreeze(
+                function (TokenInterface $token) use ($strategy, $memberOwnership) {
                     return $this->ownershipAccessor
                         ->getOwnershipsForMemberHavingScreenNameAndToken(
                             $strategy->onBehalfOfWhom(),
@@ -96,8 +94,15 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
                 $token
             );
 
+            if ($this->shouldSkipDispatch($cursor, $memberOwnership)) {
+                $memberOwnership = $nextMemberOwnership;
+                continue;
+            }
+
+            $memberOwnership = $nextMemberOwnership;
+
             /** @var MemberOwnerships $memberOwnership */
-            $token = $memberOwnership->token();
+            $token      = $memberOwnership->token();
             $ownerships = $this->guardAgainstInvalidListName(
                 $memberOwnership->ownershipCollection(),
                 $token
@@ -287,6 +292,18 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
     }
 
     /**
+     * @param $memberOwnership
+     *
+     * @return bool
+     */
+    private function keepDispatching($memberOwnership): bool
+    {
+        return $memberOwnership === null
+            || ($memberOwnership instanceof MemberOwnerships
+                && $memberOwnership->ownershipCollection()->isNotEmpty());
+    }
+
+    /**
      * @param $ownerships
      *
      * @return array
@@ -297,6 +314,20 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
             fn(PublicationList $list) => $list->name(),
             $ownerships->toArray()
         );
+    }
+
+    /**
+     * @param int|null              $cursor
+     * @param MemberOwnerships|null $memberOwnership
+     *
+     * @return bool
+     */
+    private function shouldSkipDispatch(?int $cursor, ?MemberOwnerships $memberOwnership): bool
+    {
+        return $cursor !== -1
+            && ($memberOwnership === null
+                || ($memberOwnership instanceof MemberOwnerships
+                    && $memberOwnership->ownershipCollection()->nextPage() !== $cursor));
     }
 
     /**
