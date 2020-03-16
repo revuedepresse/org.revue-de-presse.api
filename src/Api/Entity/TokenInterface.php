@@ -27,7 +27,11 @@ interface TokenInterface
 
     public function toArray(): array;
 
+    public function getFrozenUntil(): \DateTimeInterface;
+
     public function setFrozenUntil(\DateTimeInterface $frozenUntil): self;
+
+    public function firstIdentifierCharacters(): string;
 
     public static function fromArray(array $token): self;
 }

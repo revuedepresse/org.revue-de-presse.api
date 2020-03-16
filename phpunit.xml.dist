@@ -26,6 +26,7 @@
             <group>ownership</group>
             <group>persistence</group>
             <group>publication</group>
+            <group>publication_message_dispatcher</group>
             <group>repository_publication_list</group>
             <group>status_decoration</group>
             <group>tagged_status</group>
