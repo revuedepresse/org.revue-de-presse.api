@@ -108,6 +108,7 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
                 $token
             );
 
+            /** @var PublicationList $list */
             foreach ($ownerships->toArray() as $list) {
                 try {
                     $publishedMessages = $this->guardAgainstTokenFreeze(
