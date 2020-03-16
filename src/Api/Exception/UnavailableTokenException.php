@@ -9,12 +9,12 @@ use function is_callable;
 
 class UnavailableTokenException extends RuntimeException
 {
-    public static ?TokenInterface $firstTokenToBeAvailable = null;
+    public static ?\Closure $getFirstAvailableToken = null;
 
     public static function throws(?Callable $getFirstTokenToBeAvailable = null): void
     {
         if (is_callable($getFirstTokenToBeAvailable)) {
-            self::$firstTokenToBeAvailable = $getFirstTokenToBeAvailable();
+            self::$getFirstAvailableToken = $getFirstTokenToBeAvailable;
         }
 
         throw new self('There is no access token available.');
@@ -22,6 +22,6 @@ class UnavailableTokenException extends RuntimeException
 
     public static function firstTokenToBeAvailable(): ?TokenInterface
     {
-        return self::$firstTokenToBeAvailable;
+        return (self::$getFirstAvailableToken)();
     }
 }
