@@ -4,9 +4,9 @@ declare(strict_types=1);
 namespace App\Domain\Collection;
 
 use App\Amqp\Exception\SkippableMemberException;
-use App\Membership\Entity\MemberInterface;
 use App\Domain\Resource\MemberIdentity;
 use App\Domain\Resource\PublicationList;
+use App\Membership\Entity\MemberInterface;
 use function array_key_exists;
 use function count;
 use function sprintf;
@@ -32,6 +32,16 @@ class PublicationStrategy implements PublicationStrategyInterface
     private bool $includeOwner = false;
 
     private bool $fetchLikes = false;
+
+    private int $cursor = -1;
+
+    /**
+     * @return bool
+     */
+    public function allListsAreEquivalent(): bool
+    {
+        return !$this->shouldPrioritizeLists();
+    }
 
     /**
      * @return string|null
@@ -62,130 +72,6 @@ class PublicationStrategy implements PublicationStrategyInterface
     }
 
     /**
-     * @return bool
-     */
-    public function noListRestriction(): bool
-    {
-        return $this->listRestriction === null;
-    }
-
-    /**
-     * @return bool
-     */
-    public function listRestriction(): bool
-    {
-        return !$this->noListRestriction();
-    }
-
-    /**
-     * @param bool $fetchLikes
-     *
-     * @return PublicationStrategyInterface
-     */
-    public function willFetchLikes(bool $fetchLikes = false): PublicationStrategyInterface
-    {
-        $this->fetchLikes = $fetchLikes;
-
-        return $this;
-    }
-
-    public function shouldFetchLikes(): bool
-    {
-        return $this->fetchLikes;
-    }
-
-    /**
-     * @return bool
-     */
-    private function emptyListCollection(): bool
-    {
-        return count($this->listCollectionRestriction) === 0;
-    }
-
-    /**
-     * @return bool
-     */
-    public function shouldApplyListCollectionRestriction(): bool
-    {
-        return !$this->emptyListCollection();
-    }
-
-    /**
-     * @return bool
-     */
-    private function noMemberRestriction(): bool
-    {
-        return $this->forSpecificMember() === null;
-    }
-
-    /**
-     * @return bool
-     */
-    private function shouldNotApplyListRestriction(): bool
-    {
-        return $this->noListRestriction()
-            && $this->emptyListCollection();
-    }
-
-    /**
-     * @param $list
-     *
-     * @return bool
-     */
-    private function applyListRestriction(PublicationList $list): bool
-    {
-        return $list->name() === $this->listRestriction;
-    }
-
-    /**
-     * @param $list
-     *
-     * @return bool
-     */
-    private function applyListRestrictionAmongOthers(PublicationList $list): bool
-    {
-        return array_key_exists(
-            $list->name(),
-            $this->listCollectionRestriction
-        );
-    }
-
-    /**
-     * @param $list
-     *
-     * @return bool
-     */
-    public function shouldProcessList(PublicationList $list): bool
-    {
-        return $this->shouldNotApplyListRestriction()
-            || $this->applyListRestriction($list)
-            || $this->applyListRestrictionAmongOthers($list);
-    }
-
-    /**
-     * @return string
-     */
-    private function forSpecificMember(): ?string
-    {
-        return $this->memberRestriction;
-    }
-
-    /**
-     * @param MemberIdentity $memberIdentity
-     *
-     *
-     * @return bool
-     */
-    public function restrictDispatchToSpecificMember(MemberIdentity $memberIdentity): bool
-    {
-        if ($this->noMemberRestriction()) {
-            return false;
-        }
-
-        return $memberIdentity->screenName() !== $this->forSpecificMember();
-    }
-
-    /**
      * @return string|null
      */
     public function forWhichQuery(): ?string
@@ -193,57 +79,16 @@ class PublicationStrategy implements PublicationStrategyInterface
         return $this->queryRestriction;
     }
 
-    /**
-     * @return bool
-     */
-    public function shouldSearchByQuery(): bool {
-        return $this->queryRestriction !== null;
-    }
-
-    /**
-     * @return bool
-     */
-    public function shouldNotSearchByQuery(): bool {
-        return !$this->shouldSearchByQuery();
-    }
-
-    /**
-     * @return bool
-     */
-    public function noQueryRestriction(): bool
+    public function fromCursor(int $cursor): PublicationStrategyInterface
     {
-        return $this->forWhichQuery() === null;
-    }
+        $this->cursor = $cursor;
 
-    /**
-     * @return string
-     */
-    public function onBehalfOfWhom(): string
-    {
-        return $this->screenName;
-    }
-
-    /**
-     * @return bool
-     */
-    public function shouldIgnoreWhispers(): bool
-    {
-        return $this->ignoreWhispers;
+        return $this;
     }
 
     /**
      * @param MemberInterface $member
-     *
-     * @return bool
-     */
-    public function shouldIgnoreMemberWhenWhispering(MemberInterface $member): bool
-    {
-        return $this->shouldIgnoreWhispers() && $member->isAWhisperer();
-    }
-
-    /**
-     * @param MemberInterface $member
-     * @param MemberIdentity               $memberIdentity
+     * @param MemberIdentity  $memberIdentity
      *
      * @throws SkippableMemberException
      */
@@ -264,17 +109,128 @@ class PublicationStrategy implements PublicationStrategyInterface
     /**
      * @return bool
      */
+    public function listRestriction(): bool
+    {
+        return !$this->noListRestriction();
+    }
+
+    /**
+     * @return bool
+     */
+    public function noListRestriction(): bool
+    {
+        return $this->listRestriction === null;
+    }
+
+    /**
+     * @return bool
+     */
+    public function noQueryRestriction(): bool
+    {
+        return $this->forWhichQuery() === null;
+    }
+
+    /**
+     * @return string
+     */
+    public function onBehalfOfWhom(): string
+    {
+        return $this->screenName;
+    }
+
+    /**
+     * @param MemberIdentity $memberIdentity
+     *
+     *
+     * @return bool
+     */
+    public function restrictDispatchToSpecificMember(MemberIdentity $memberIdentity): bool
+    {
+        if ($this->noMemberRestriction()) {
+            return false;
+        }
+
+        return $memberIdentity->screenName() !== $this->forSpecificMember();
+    }
+
+    /**
+     * @return bool
+     */
+    public function shouldApplyListCollectionRestriction(): bool
+    {
+        return !$this->emptyListCollection();
+    }
+
+    public function shouldFetchLikes(): bool
+    {
+        return $this->fetchLikes;
+    }
+
+    public function shouldFetchPublicationsFromCursor(): ?int
+    {
+        return $this->cursor;
+    }
+
+    /**
+     * @param MemberInterface $member
+     *
+     * @return bool
+     */
+    public function shouldIgnoreMemberWhenWhispering(MemberInterface $member): bool
+    {
+        return $this->shouldIgnoreWhispers() && $member->isAWhisperer();
+    }
+
+    /**
+     * @return bool
+     */
+    public function shouldIgnoreWhispers(): bool
+    {
+        return $this->ignoreWhispers;
+    }
+
+    /**
+     * @return bool
+     */
+    public function shouldIncludeOwner(): bool
+    {
+        return $this->includeOwner;
+    }
+
+    /**
+     * @return bool
+     */
+    public function shouldNotSearchByQuery(): bool
+    {
+        return !$this->shouldSearchByQuery();
+    }
+
+    /**
+     * @return bool
+     */
     public function shouldPrioritizeLists(): bool
     {
         return $this->weightedAggregates;
     }
 
     /**
+     * @param $list
+     *
      * @return bool
      */
-    public function allListsAreEquivalent(): bool
+    public function shouldProcessList(PublicationList $list): bool
     {
-        return !$this->shouldPrioritizeLists();
+        return $this->shouldNotApplyListRestriction()
+            || $this->applyListRestriction($list)
+            || $this->applyListRestrictionAmongOthers($list);
+    }
+
+    /**
+     * @return bool
+     */
+    public function shouldSearchByQuery(): bool
+    {
+        return $this->queryRestriction !== null;
     }
 
     /**
@@ -306,8 +262,8 @@ class PublicationStrategy implements PublicationStrategyInterface
      *
      * @return PublicationStrategyInterface
      */
-    public function willApplyRestrictionToAListCollection(array $listCollectionRestriction): PublicationStrategyInterface
-    {
+    public function willApplyRestrictionToAListCollection(array $listCollectionRestriction
+    ): PublicationStrategyInterface {
         $this->listCollectionRestriction = $listCollectionRestriction;
 
         return $this;
@@ -338,6 +294,18 @@ class PublicationStrategy implements PublicationStrategyInterface
     }
 
     /**
+     * @param bool $fetchLikes
+     *
+     * @return PublicationStrategyInterface
+     */
+    public function willFetchLikes(bool $fetchLikes = false): PublicationStrategyInterface
+    {
+        $this->fetchLikes = $fetchLikes;
+
+        return $this;
+    }
+
+    /**
      * @param bool $ignoreWhispers
      *
      * @return PublicationStrategyInterface
@@ -362,14 +330,6 @@ class PublicationStrategy implements PublicationStrategyInterface
     }
 
     /**
-     * @return bool
-     */
-    public function shouldIncludeOwner(): bool
-    {
-        return $this->includeOwner;
-    }
-
-    /**
      * @param bool $priorityToAggregates
      *
      * @return PublicationStrategy
@@ -379,5 +339,61 @@ class PublicationStrategy implements PublicationStrategyInterface
         $this->weightedAggregates = $priorityToAggregates;
 
         return $this;
+    }
+
+    /**
+     * @param $list
+     *
+     * @return bool
+     */
+    private function applyListRestriction(PublicationList $list): bool
+    {
+        return $list->name() === $this->listRestriction;
+    }
+
+    /**
+     * @param $list
+     *
+     * @return bool
+     */
+    private function applyListRestrictionAmongOthers(PublicationList $list): bool
+    {
+        return array_key_exists(
+            $list->name(),
+            $this->listCollectionRestriction
+        );
+    }
+
+    /**
+     * @return bool
+     */
+    private function emptyListCollection(): bool
+    {
+        return count($this->listCollectionRestriction) === 0;
+    }
+
+    /**
+     * @return string
+     */
+    private function forSpecificMember(): ?string
+    {
+        return $this->memberRestriction;
+    }
+
+    /**
+     * @return bool
+     */
+    private function noMemberRestriction(): bool
+    {
+        return $this->forSpecificMember() === null;
+    }
+
+    /**
+     * @return bool
+     */
+    private function shouldNotApplyListRestriction(): bool
+    {
+        return $this->noListRestriction()
+            && $this->emptyListCollection();
     }
 }
