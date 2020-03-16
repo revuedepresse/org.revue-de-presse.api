@@ -43,7 +43,9 @@ class TokenChange implements TokenChangeInterface
         if (!($token instanceof TokenInterface) ||
             $token instanceof NullToken
         ) {
-            UnavailableTokenException::throws();
+            UnavailableTokenException::throws(function () {
+                return $this->tokenRepository->findFirstFrozenToken();
+            });
         }
 
         $accessor->setAccessToken($token);

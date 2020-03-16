@@ -261,10 +261,7 @@ class Token implements TokenInterface
         return $this;
     }
 
-    /**
-     * @return \DateTime
-     */
-    public function getFrozenUntil(): \DateTime
+    public function getFrozenUntil(): \DateTimeInterface
     {
         return $this->frozenUntil;
     }
@@ -278,7 +275,7 @@ class Token implements TokenInterface
     }
 
     /**
-     * @param \App\Api\Entity\TokenType $type
+     * @param TokenType $type
      *
      * @return Token
      */
@@ -377,5 +374,10 @@ class Token implements TokenInterface
     {
         return $this->getOAuthToken() !== null
             && $this->getOAuthSecret() !== null;
+    }
+
+    public function firstIdentifierCharacters(): string
+    {
+        return substr($this->getOAuthToken(), 0, 8);
     }
 }

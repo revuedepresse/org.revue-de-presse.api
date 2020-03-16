@@ -51,4 +51,14 @@ class NullToken implements TokenInterface
     {
         return $this;
     }
+
+    public function getFrozenUntil(): \DateTimeInterface
+    {
+        return new \DateTimeImmutable();
+    }
+
+    public function firstIdentifierCharacters(): string
+    {
+        return '';
+    }
 }

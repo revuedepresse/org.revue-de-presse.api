@@ -121,12 +121,13 @@ services:
         class: 'App\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher'
         arguments:
             - '@App\Twitter\Api\Accessor'
-            - '@App\Infrastructure\Twitter\Api\Accessor\OwnershipAccessor'
             - '@App\Infrastructure\Amqp\ResourceProcessor\PublicationListProcessor'
             - '@App\Api\AccessToken\TokenChange'
             - '@logger'
             - '@App\Infrastructure\Translation\Translator'
         calls:
+            - [ 'setModerator',                              [ '@App\Api\Moderator\ApiLimitModerator' ] ]
+            - [ 'setOwnershipAccessor',                      [ '@App\Infrastructure\Twitter\Api\Accessor\OwnershipAccessor' ] ]
             - [ 'setOwnershipBatchCollectedEventRepository', [ '@App\Infrastructure\Collection\Repository\OwnershipBatchCollectedEventRepository' ] ]
 
     App\Infrastructure\Twitter\Api\UnavailableResourceHandler:
@@ -158,7 +159,7 @@ services:
             - [ 'setConsumerKey', [ '%weaving_the_web_twitter.consumer_key%' ] ]
             - [ 'setConsumerSecret', [ '%weaving_the_web_twitter.consumer_secret%' ] ]
             - [ 'setMemberRepository', [ '@user_manager' ] ]
-            - [ 'setModerator', [ '@weaving_the_web_twitter.moderator.api_limit' ] ]
+            - [ 'setModerator', [ '@App\Api\Moderator\ApiLimitModerator' ] ]
             - [ 'setTokenRepository', [ '@weaving_the_web_twitter.repository.token' ] ]
             - [ 'setTranslator', [ '@App\Infrastructure\Translation\Translator' ] ]
             - [ 'setUserSecret', [ '%weaving_the_web_twitter.oauth_secret.default%' ] ]
@@ -213,8 +214,8 @@ services:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - '%weaving_the_web_twitter.entity.token.class%'
 
-    weaving_the_web_twitter.moderator.api_limit:
-        class:  '%weaving_the_web_twitter.moderator.api_limit.class%'
+    App\Api\Moderator\ApiLimitModerator:
+        class:  'App\Api\Moderator\ApiLimitModerator'
         arguments:
             - '@?logger'
 
@@ -227,7 +228,7 @@ services:
             - [ 'setLikedStatusRepository',                     [ '@repository.liked_status' ] ]
             - [ 'setMemberProfileCollectedEventRepository',     [ '@App\Infrastructure\Collection\Repository\MemberProfileCollectedEventRepository' ] ]
             - [ 'setMemberRepository',                          [ '@App\Infrastructure\Repository\Membership\MemberRepository' ] ]
-            - [ 'setModerator',                                 [ '@weaving_the_web_twitter.moderator.api_limit' ] ]
+            - [ 'setModerator',                                 [ '@App\Api\Moderator\ApiLimitModerator' ] ]
             - [ 'setPublicationBatchCollectedEventRepository',  [ '@App\Infrastructure\Collection\Repository\PublicationBatchCollectedEventRepository' ] ]
             - [ 'setPublicationListRepository',                 [ '@App\Api\Repository\PublicationListRepository' ] ]
             - [ 'setPublicationPersistence',                    [ '@App\Infrastructure\Status\Persistence\PublicationPersistence' ] ]
@@ -263,8 +264,6 @@ parameters:
     redis_cache:                                                  'App\Cache\RedisCache'
 
     weaving_the_web_twitter.api_host:                             'api.twitter.com'
-
-    weaving_the_web_twitter.moderator.api_limit.class:            'App\Api\Moderator\ApiLimitModerator'
 
     weaving_the_web_twitter.authenticate_application.class:       'App\Twitter\Command\AuthenticateApplicationCommand'
     weaving_the_web_twitter.authentication_uri:                   '/oauth2/token'
