@@ -189,9 +189,12 @@ function purge_queues() {
     rabbitmq_vhost="$(cat <(cat .env.local | grep STATUS=amqp | sed -E 's#.+(/.+)/[^/]*$#\1#' | sed -E 's/\/%2f/\//g'))"
     cd provisioning/containers || exit
 
-    docker-compose exec -d messenger rabbitmqctl purge_queue \
+    local project_name
+    project_name="$(get_project_name)"
+
+    docker-compose "${project_name}" exec -d messenger rabbitmqctl purge_queue \
     get-news-status -p "${rabbitmq_vhost}"
-    docker-compose exec -d messenger rabbitmqctl purge_queue \
+    docker-compose "${project_name}" exec -d messenger rabbitmqctl purge_queue \
     get-news-likes -p "${rabbitmq_vhost}"
 }
 
