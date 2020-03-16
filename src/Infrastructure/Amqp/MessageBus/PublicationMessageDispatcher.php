@@ -287,7 +287,7 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
                 ['{{ token }}' => $token->firstIdentifierCharacters()]
             );
 
-            return $callable($token);
+            return $this->guardAgainstTokenFreeze($callable, $token);
         }
     }
 

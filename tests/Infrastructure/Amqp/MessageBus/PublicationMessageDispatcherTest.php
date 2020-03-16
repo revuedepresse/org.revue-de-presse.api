@@ -6,6 +6,7 @@ namespace App\Tests\Infrastructure\Amqp\MessageBus;
 use App\Api\Entity\Token;
 use App\Api\Exception\UnavailableTokenException;
 use App\Domain\Collection\PublicationStrategy;
+use App\Domain\Collection\PublicationStrategyInterface;
 use App\Domain\Resource\MemberOwnerships;
 use App\Domain\Resource\OwnershipCollection;
 use App\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher;
@@ -67,6 +68,8 @@ class PublicationMessageDispatcherTest extends KernelTestCase
         $publicationStrategy = $this->prophesize(
             PublicationStrategy::class
         );
+
+        /** @var PublicationStrategyInterface $publicationStrategy */
         $publicationStrategy->onBehalfOfWhom()->willReturn('test_member');
         $publicationStrategy->noListRestriction()->willReturn(true);
         $publicationStrategy->shouldFetchPublicationsFromCursor()->willReturn(-1);
