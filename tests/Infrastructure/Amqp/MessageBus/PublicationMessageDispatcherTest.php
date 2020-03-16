@@ -69,6 +69,7 @@ class PublicationMessageDispatcherTest extends KernelTestCase
         );
         $publicationStrategy->onBehalfOfWhom()->willReturn('test_member');
         $publicationStrategy->noListRestriction()->willReturn(true);
+        $publicationStrategy->shouldFetchPublicationsFromCursor()->willReturn(-1);
 
         $dispatcher->dispatchPublicationMessages(
             $publicationStrategy->reveal(),
