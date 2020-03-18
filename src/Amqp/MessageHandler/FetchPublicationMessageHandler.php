@@ -10,6 +10,7 @@ use App\Infrastructure\Amqp\Message\FetchMemberLikes;
 use App\Infrastructure\Amqp\Message\FetchMemberStatus;
 use App\Infrastructure\Amqp\Message\FetchPublicationInterface;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
+use App\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Infrastructure\Repository\Membership\MemberRepository;
 use App\Infrastructure\Twitter\Collector\PublicationCollectorInterface;
 use App\Operation\OperationClock;
@@ -29,6 +30,7 @@ use function sprintf;
 class FetchPublicationMessageHandler implements MessageSubscriberInterface
 {
     use LoggerTrait;
+    use MemberRepositoryTrait;
 
     /**
      * @return iterable
@@ -45,11 +47,6 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
     }
 
     /**
-     * @var OperationClock
-     */
-    public OperationClock $operationClock;
-
-    /**
      * @var TokenRepositoryInterface
      */
     public TokenRepositoryInterface $tokenRepository;
@@ -60,16 +57,9 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
     protected PublicationCollectorInterface $collector;
 
     /**
-     * @var MemberRepository
-     */
-    protected MemberRepository $userRepository;
-
-    /**
      * @param FetchPublicationInterface $message
      *
      * @return bool
-     * @throws ORMException
-     * @throws OptimisticLockException
      */
     public function __invoke(FetchPublicationInterface $message): bool
     {
@@ -109,7 +99,7 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
         } catch (UnavailableResourceException $unavailableResource) {
             $userNotFound = $unavailableResource->getCode() === TwitterErrorAwareInterface::ERROR_USER_NOT_FOUND;
             if ($userNotFound) {
-                $this->userRepository->declareUserAsNotFoundByUsername($options['screen_name']);
+                $this->memberRepository->declareUserAsNotFoundByUsername($options['screen_name']);
             }
 
             if (
@@ -165,14 +155,6 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
     public function setCollector(PublicationCollectorInterface $collector)
     {
         $this->collector = $collector;
-    }
-
-    /**
-     * @param MemberRepository $userRepository
-     */
-    public function setUserRepository(MemberRepository $userRepository)
-    {
-        $this->userRepository = $userRepository;
     }
 
     private function extractOAuthToken(FetchPublicationInterface $message): array

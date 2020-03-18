@@ -59,11 +59,16 @@ class OwnershipAccessor implements OwnershipAccessorInterface
 
         $eventRepository = $this->ownershipBatchCollectedEventRepository;
 
+        $nextPage = -1;
+
         // Leave the loop as soon as there are some ownerships to process
         // or there is no token left to access the Twitter API
-        while ($totalUnfrozenToken > 0 && $ownershipCollection->isEmpty()) {
+        while (
+            $totalUnfrozenToken > 0 &&
+            $ownershipCollection->isEmpty()
+            && $nextPage !== 0
+        ) {
             try {
-                $nextPage = -1;
                 if ($memberOwnership instanceof MemberOwnerships) {
                     $nextPage = $memberOwnership->ownershipCollection()->nextPage();
                 }
@@ -88,7 +93,7 @@ class OwnershipAccessor implements OwnershipAccessorInterface
             }
         }
 
-        if ($ownershipCollection->isEmpty()) {
+        if ($nextPage !== 0 && $ownershipCollection->isEmpty()) {
             throw new OverCapacityException(
                 'Over capacity usage of all available tokens.'
             );
