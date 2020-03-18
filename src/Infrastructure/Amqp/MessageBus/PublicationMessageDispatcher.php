@@ -79,7 +79,7 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
         $memberOwnerships = $this->fetchMemberOwnerships($strategy, $token);
 
         /** @var PublicationList $list */
-        foreach ($memberOwnerships->ownershipCollection() as $list) {
+        foreach ($memberOwnerships->ownershipCollection()->toArray() as $list) {
             try {
                 $publishedMessages = $this->guardAgainstTokenFreeze(
                     function (TokenInterface $token) use ($list, $strategy) {
