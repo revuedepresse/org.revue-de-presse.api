@@ -20,10 +20,16 @@ class OwnershipCollection implements StrictCollectionInterface
     {
         $this->nextPage = $nextPage;
         $this->ownerships = array_map(
-            fn($ownership) => new PublicationList(
-                $ownership->id_str,
-                $ownership->name
-            ),
+            function ($ownership) {
+                if ($ownership instanceof PublicationList) {
+                    return $ownership;
+                }
+
+                return new PublicationList(
+                    $ownership->id_str,
+                    $ownership->name
+                );
+            },
             $ownerships
         );
     }
