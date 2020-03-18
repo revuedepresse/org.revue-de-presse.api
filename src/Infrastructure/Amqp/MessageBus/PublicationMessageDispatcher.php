@@ -27,6 +27,7 @@ use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use function array_map;
+use function count;
 use function implode;
 use function in_array;
 use function sprintf;
@@ -66,8 +67,6 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
      * @param PublicationStrategyInterface $strategy
      * @param TokenInterface               $token
      * @param Closure                      $writer
-     *
-     * @throws InvalidListNameException
      */
     public function dispatchPublicationMessages(
         PublicationStrategyInterface $strategy,
@@ -77,9 +76,54 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
         $this->writer   = $writer;
         $this->strategy = $strategy;
 
+        $memberOwnerships = $this->fetchMemberOwnerships($strategy, $token);
+
+        /** @var PublicationList $list */
+        foreach ($memberOwnerships->ownershipCollection() as $list) {
+            try {
+                $publishedMessages = $this->guardAgainstTokenFreeze(
+                    function (TokenInterface $token) use ($list, $strategy) {
+                        return $this->publicationListProcessor
+                            ->processPublicationList(
+                                $list,
+                                $token,
+                                $strategy
+                            );
+                    },
+                    $memberOwnerships->token()
+                );
+
+                if ($publishedMessages) {
+                    $writer(
+                        $this->translator->trans(
+                            'amqp.production.list_members.success',
+                            [
+                                '{{ count }}' => $publishedMessages,
+                                '{{ list }}'  => $list->name(),
+                            ]
+                        )
+                    );
+                }
+            } catch (EmptyListException $exception) {
+                $this->logger->info($exception->getMessage());
+            } catch (Exception $exception) {
+                $this->logger->critical(
+                    $exception->getMessage(),
+                    ['stacktrace' => $exception->getTraceAsString()]
+                );
+                UnexpectedOwnershipException::throws($exception->getMessage());
+            }
+        }
+    }
+
+    private function fetchMemberOwnerships(
+        PublicationStrategyInterface $strategy,
+        TokenInterface $token
+    ): MemberOwnerships {
         $cursor = $this->strategy->shouldFetchPublicationsFromCursor();
 
         $memberOwnership = null;
+        $allOwnerships   = [[]];
 
         while ($this->keepDispatching($memberOwnership)) {
             $nextMemberOwnership = $this->guardAgainstTokenFreeze(
@@ -102,49 +146,33 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
             $memberOwnership = $nextMemberOwnership;
 
             /** @var MemberOwnerships $memberOwnership */
-            $token      = $memberOwnership->token();
             $ownerships = $this->guardAgainstInvalidListName(
                 $memberOwnership->ownershipCollection(),
-                $token
+                $memberOwnership->token()
             );
 
-            /** @var PublicationList $list */
-            foreach ($ownerships->toArray() as $list) {
-                try {
-                    $publishedMessages = $this->guardAgainstTokenFreeze(
-                        function (TokenInterface $token) use ($list, $strategy) {
-                            return $this->publicationListProcessor
-                                ->processPublicationList(
-                                    $list,
-                                    $token,
-                                    $strategy
-                                );
-                        },
-                        $memberOwnership->token()
-                    );
+            $mergeResult = array_merge(
+                $allOwnerships[count($allOwnerships) - 1],
+                $ownerships->toArray()
+            );
 
-                    if ($publishedMessages) {
-                        $writer(
-                            $this->translator->trans(
-                                'amqp.production.list_members.success',
-                                [
-                                    '{{ count }}' => $publishedMessages,
-                                    '{{ list }}'  => $list->name(),
-                                ]
-                            )
-                        );
-                    }
-                } catch (EmptyListException $exception) {
-                    $this->logger->info($exception->getMessage());
-                } catch (Exception $exception) {
-                    $this->logger->critical(
-                        $exception->getMessage(),
-                        ['stacktrace' => $exception->getTraceAsString()]
-                    );
-                    UnexpectedOwnershipException::throws($exception->getMessage());
-                }
+            if ($mergeResult !== $allOwnerships[count($allOwnerships) - 1]) {
+                $allOwnerships[] = $mergeResult;
             }
         }
+
+        $allOwnerships = $allOwnerships[count($allOwnerships) - 1];
+        usort(
+            $allOwnerships,
+            function (PublicationList $leftPublicationList, PublicationList $rightPublicationList) {
+                return $leftPublicationList->id() <=> $rightPublicationList->id();
+            }
+        );
+
+        return MemberOwnerships::from(
+            $memberOwnership->token(),
+            OwnershipCollection::fromArray($allOwnerships)
+        );
     }
 
     /**

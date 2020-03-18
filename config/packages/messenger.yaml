@@ -1,9 +1,12 @@
 framework:
     messenger:
+        failure_transport: failed
+
         transports:
             # https://symfony.com/doc/current/messenger.html#transport-configuration
-            news_status: '%env(MESSENGER_TRANSPORT_DSN_STATUS)%'
-            news_likes: '%env(MESSENGER_TRANSPORT_DSN_LIKES)%'
+            news_status:    '%env(MESSENGER_TRANSPORT_DSN_STATUS)%'
+            news_likes:     '%env(MESSENGER_TRANSPORT_DSN_LIKES)%'
+            failed:         '%env(MESSENGER_TRANSPORT_DSN_FAILURES)%'
 
         routing:
             # Route your messages to the transports

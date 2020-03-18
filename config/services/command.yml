@@ -56,9 +56,8 @@ services:
         calls:
             - [ 'setCollector',         [ '@App\Infrastructure\Twitter\Collector\PublicationCollector'] ]
             - [ 'setLogger',            [ '@monolog.logger.status'] ]
-            - [ 'setUserRepository',    [ '@user_manager'] ]
+            - [ 'setMemberRepository',  [ '@App\Infrastructure\Repository\Membership\MemberRepository'] ]
         properties:
-            operationClock:             '@operation.clock'
             tokenRepository:            '@repository.access_token'
         tags:
             -
@@ -70,9 +69,8 @@ services:
         calls:
             - [ 'setCollector',         [ '@App\Infrastructure\Twitter\Collector\PublicationCollector'] ]
             - [ 'setLogger',            [ '@monolog.logger.status'] ]
-            - [ 'setUserRepository',    [ '@user_manager'] ]
+            - [ 'setMemberRepository',  [ '@App\Infrastructure\Repository\Membership\MemberRepository'] ]
         properties:
-            operationClock:             '@operation.clock'
             tokenRepository:            '@repository.access_token'
         tags:
             -
