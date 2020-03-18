@@ -192,10 +192,8 @@ function purge_queues() {
     local project_name
     project_name="$(get_project_name)"
 
-    docker-compose "${project_name}" exec -d messenger rabbitmqctl purge_queue \
-    get-news-status -p "${rabbitmq_vhost}"
-    docker-compose "${project_name}" exec -d messenger rabbitmqctl purge_queue \
-    get-news-likes -p "${rabbitmq_vhost}"
+    /bin/bash -c "docker-compose ${project_name} exec -d messenger rabbitmqctl purge_queue get-news-status -p ${rabbitmq_vhost}"
+    /bin/bash -c "docker-compose ${project_name} exec -d messenger rabbitmqctl purge_queue get-news-likes -p ${rabbitmq_vhost}"
 }
 
 function stop_workers() {
@@ -1126,7 +1124,16 @@ function dispatch_messages_for_news_list {
         fi
     fi
 
-    local arguments="${priority_option}"'--screen_name='"${username}"' '"${list_option}"' '"${query_restriction}"
+    local cursor_argument
+    cursor_argument=''
+    if [ -n "${CURSOR}" ];
+    then
+        cursor_argument=' --cursor='"${CURSOR}"
+    fi
+
+    local arguments
+    arguments="${priority_option}"'--screen_name='"${username}"' '"${list_option}"' '"${query_restriction}"
+    arguments="${arguments}${cursor_argument}"
     run_command 'bin/console press-review:dispatch-messages-to-fetch-member-statuses '"${arguments}"
 }
 
