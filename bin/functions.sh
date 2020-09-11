@@ -916,7 +916,7 @@ function run_php() {
     cd ./provisioning/containers || exit
 
     local command
-    command=$(echo -n 'docker-compose -f ./provisioning/containers/docker-compose.yml exec -T worker '"${arguments}")
+    command=$(echo -n 'docker-compose -f docker-compose.yml exec -T worker '"${arguments}")
 
     echo 'About to execute '"${command}"
     /bin/bash -c "${command}"
