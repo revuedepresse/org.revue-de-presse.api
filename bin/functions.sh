@@ -1208,7 +1208,7 @@ function run_redis_container() {
     local network=`get_network_option`
     local command="docker run --name redis -d \
     --restart=always \
-    --hostname reddis ${network} \
+    --hostname cache ${network} \
     -v ${redis_volume_path}:/data \
     redis redis-server \
     --appendonly yes "
