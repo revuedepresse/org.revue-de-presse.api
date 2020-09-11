@@ -717,56 +717,6 @@ function ensure_blackfire_configuration_files_are_present() {
     fi
 }
 
-function run_apache() {
-    remove_apache_container
-
-    local port
-    port='80'
-
-    if [ -n "${PRESS_REVIEW_APACHE_PORT}" ];
-    then
-        port="${PRESS_REVIEW_APACHE_PORT}"
-    fi
-
-    local host
-    host='127.0.0.1'
-
-    if [ -n "${PRESS_REVIEW_APACHE_HOST}" ];
-    then
-        host="${PRESS_REVIEW_APACHE_HOST}"
-    fi
-
-    host="${host}:"
-
-    local symfony_environment="$(get_symfony_environment)"
-
-    local extensions=`pwd`"/provisioning/containers/apache/templates/extensions.ini.dist";
-    local extensions_volume="-v ${extensions}:/usr/local/etc/php/conf.d/extensions.ini"
-
-    local network
-    network=`get_network_option`
-
-    ensure_blackfire_configuration_files_are_present
-
-    local command=$(echo -n 'docker run '"${network}"' \
---restart=always \
--d -p '${host}''${port}':80 \
--e '"${symfony_environment}"' '"${extensions_volume}"' \
--v '`pwd`'/provisioning/containers/apache/templates:/templates \
--v '`pwd`'/provisioning/containers/apache/tasks:/tasks \
--v '`pwd`'/provisioning/containers/apache/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini \
--v '`pwd`'/provisioning/containers/apache/templates/blackfire/zz-blackfire.ini:/usr/local/etc/php/conf.d/zz-blackfire.ini \
--v '`pwd`'/provisioning/containers/apache/templates/blackfire/.blackfire.ini:/root/.blackfire.ini \
--v '`pwd`'/provisioning/containers/apache/templates/blackfire/agent:/etc/blackfire/agent \
--v '`pwd`':/var/www/devobs \
---name=apache apache /bin/bash -c "cd /tasks && source setup-virtual-host.sh && tail -f /dev/null"'
-)
-
-    echo 'About to execute "'"${command}"'"'
-
-    /bin/bash -c "${command}"
-}
-
 function build_php_fpm_container() {
     cd provisioning/containers/php-fpm
     docker build -t php-fpm .
@@ -923,13 +873,13 @@ function run_php() {
 }
 
 function run_stack() {
-    cd provisioning/containers
+    cd provisioning/containers || exit
     docker-compose up
     cd ../..
 }
 
 function run_worker() {
-    cd provisioning/containers
+    cd provisioning/containers || exit
     docker-compose up worker
     cd ../..
 }
@@ -1199,21 +1149,6 @@ function remove_redis_container {
     then
         docker rm -f `docker ps -a | grep redis | awk '{print $1}'`
     fi
-}
-
-function run_redis_container() {
-    remove_redis_container
-
-    local redis_volume_path=`pwd`'/provisioning/volumes/redis'
-    local network=`get_network_option`
-    local command="docker run --name redis -d \
-    --restart=always \
-    --hostname cache ${network} \
-    -v ${redis_volume_path}:/data \
-    redis redis-server \
-    --appendonly yes "
-
-    /bin/bash -c "${command}"
 }
 
 function today_statuses() {
