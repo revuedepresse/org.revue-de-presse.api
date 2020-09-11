@@ -728,7 +728,7 @@ function run_apache() {
         port="${PRESS_REVIEW_APACHE_PORT}"
     fi
 
-    host host
+    local host
     host='127.0.0.1'
 
     if [ -n "${PRESS_REVIEW_APACHE_HOST}" ];
