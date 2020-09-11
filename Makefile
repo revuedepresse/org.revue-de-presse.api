@@ -25,9 +25,6 @@ get-apache-interactive-shell: ## Get Apache interactive shell
 remove-apache-container: ## Remove Apache container
 		@/bin/bash -c 'source ./bin/functions.sh && remove_apache_container'
 
-run-apache-container: ## Run Apache container
-		@/bin/bash -c 'source ./bin/functions.sh && run_apache'
-
 run-mysql-container: ## Run MySQL container (https://hub.docker.com/_/mysql/)
 		@/bin/bash -c 'source ./bin/functions.sh && run_mysql_container'
 
@@ -123,9 +120,6 @@ remove-rabbitmq-container: ## Remove RabbitMQ container
 
 refresh-statuses: ## Refresh statuses
 		@/bin/bash -c 'source ./bin/functions.sh && refresh_statuses'
-
-run-redis-container: ## Run Redis container (https://hub.docker.com/_/redis/)
-		@/bin/bash -c 'source ./bin/functions.sh && run_redis_container'
 
 handle-messages: ## Consume twitter API messages
 		@/bin/bash -c 'export PROJECT_DIR=`pwd` DOCKER_MODE=1 && cd "${PROJECT_DIR}" && source bin/consume_twitter_api.sh'
