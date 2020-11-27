@@ -6,6 +6,7 @@ provisioning/containers/mysql/templates/mysql/my.cnf
 provisioning/volumes/mysql/*
 provisioning/volumes/mysql*/*
 vendor
+public/graphs
 
 ###> symfony/framework-bundle ###
 /.env.local
