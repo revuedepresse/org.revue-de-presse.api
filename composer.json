@@ -51,16 +51,15 @@
         "symfony/validator": "^5.1@dev",
         "thecodingmachine/safe": "^0.1.0@dev",
         "ocramius/package-versions": "^1.9",
-        "symfony/dotenv": "^5.1@dev"
+        "symfony/dotenv": "^5.1@dev",
+        "symfony/profiler-pack": "dev-main",
+        "symfony/twig-pack": "dev-main"
     },
     "require-dev": {
         "doctrine/doctrine-fixtures-bundle": "^3.3@dev",
         "phpunit/phpunit": "7.1.5",
-
         "symfony/maker-bundle": "^1.0@dev",
-        "symfony/profiler-pack": "dev-main",
-        "symfony/test-pack": "dev-main",
-        "symfony/twig-pack": "dev-main"
+        "symfony/test-pack": "dev-main"
     },
     "scripts": {
         "auto-scripts": {
