@@ -36,7 +36,7 @@ use const JSON_THROW_ON_ERROR;
  * @ORM\Entity(repositoryClass="App\Infrastructure\Repository\Membership\MemberRepository")
  * @ORM\InheritanceType("SINGLE_TABLE")
  * @ORM\DiscriminatorColumn(name="usr_position_in_hierarchy", type="integer")
- * @ORM\DiscriminatorMap({"1" = "Member", "0" = "\App\Tests\Security\Core\Member\Member"})
+ * @ORM\DiscriminatorMap({"1" = "Member"})
  * @package App\Membership\Entity
  */
 class Member extends MemberModel
