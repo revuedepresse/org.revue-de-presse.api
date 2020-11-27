@@ -15,7 +15,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "git@github.com:WeavingTheWeb/DoctrineExtensions.git"
+            "url": "https://github.com/WeavingTheWeb/DoctrineExtensions.git"
         }
     ],
     "require": {
@@ -25,9 +25,9 @@
         "ext-mbstring": "*",
         "ext-mysqli": "*",
         "ext-pdo": "*",
-        "abraham/twitteroauth": "dev-master",
+        "abraham/twitteroauth": "dev-main",
         "auth0/auth0-php": "~5.0",
-        "beberlei/DoctrineExtensions": "dev-master",
+        "beberlei/doctrineextensions": "dev-master",
         "doctrine/inflector": "*",
         "doctrine/orm": "~2.4,>=2.4.5",
         "fabpot/goutte": "^3.2@dev",
@@ -41,24 +41,25 @@
         "scienta/doctrine-json-functions": "~4.1",
         "sensio/framework-extra-bundle": "^5.5@dev",
         "symfony/console": "^5.1@dev",
-        "symfony/flex": "^1.5@dev",
+        "symfony/flex": "^1.10",
         "symfony/messenger": "^5.1@dev",
         "symfony/monolog-bundle": "^3.0@dev",
-        "symfony/orm-pack": "dev-master",
+        "symfony/orm-pack": "dev-main",
         "symfony/proxy-manager-bridge": "^5.1@dev",
         "symfony/security-bundle": "^5.1@dev",
         "symfony/translation": "^5.1@dev",
         "symfony/validator": "^5.1@dev",
-        "thecodingmachine/safe": "^0.1.0@dev"
+        "thecodingmachine/safe": "^0.1.0@dev",
+        "ocramius/package-versions": "^1.9",
+        "symfony/dotenv": "^5.1@dev",
+        "symfony/profiler-pack": "dev-main",
+        "symfony/twig-pack": "dev-main"
     },
     "require-dev": {
         "doctrine/doctrine-fixtures-bundle": "^3.3@dev",
         "phpunit/phpunit": "7.1.5",
-        "symfony/dotenv": "^5.1@dev",
         "symfony/maker-bundle": "^1.0@dev",
-        "symfony/profiler-pack": "dev-master",
-        "symfony/test-pack": "dev-master",
-        "symfony/twig-pack": "dev-master"
+        "symfony/test-pack": "dev-main"
     },
     "scripts": {
         "auto-scripts": {
@@ -87,7 +88,7 @@
             "file": "app/config/parameters.yml"
         },
         "branch-alias": {
-            "dev-master": "5.0-dev"
+            "dev-main": "5.0-dev"
         }
     }
 }
