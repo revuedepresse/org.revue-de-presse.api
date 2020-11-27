@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install wget unzip libcurl4-openssl-dev -y && \
     phpize . && ./configure --with-php-config=`which php-config` && \
     make && make install && \
     docker-php-ext-install sockets && \
-    pecl install apcu-5.1.12 && \
+    pecl install apcu-5.1.19 && \
     docker-php-ext-enable apcu && \
     apt install -y gnupg2 && wget -q -O - https://packages.blackfire.io/gpg.key | apt-key add - && \
     echo "deb http://packages.blackfire.io/debian any main" | tee /etc/apt/sources.list.d/blackfire.list && \
