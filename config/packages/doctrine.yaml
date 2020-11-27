@@ -184,11 +184,6 @@ doctrine:
                         is_bundle:  false
                         prefix:     App\Status\Entity
                         type:       xml
-                    TestMembership:
-                        dir:        '%kernel.project_dir%/tests/Security/Core/Member'
-                        is_bundle:  false
-                        prefix:     App\Tests\Security\Core\Member
-                        type:       annotation
                     Publication:
                         alias:      'Publication'
                         dir:        '%kernel.project_dir%/src/Twitter/Entity'
