@@ -29,3 +29,6 @@ vendor
 .phpunit.result.cache
 /phpunit.xml
 ###< symfony/phpunit-bridge ###
+
+web/emoji-data/
+
