@@ -1,4 +1,7 @@
 bin/phpunit
+bin/php-parse
+bin/simple-phpunit
+
 build/*
 !build/.gitignore
 composer.phar

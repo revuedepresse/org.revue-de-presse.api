@@ -7,6 +7,7 @@ DATABASE_URL=mysql://root:${MYSQL_PASSWORD}@127.0.0.1:3306/test?serverVersion=5.
 DATABASE_WRITE_URL=mysql://root:${MYSQL_PASSWORD}@127.0.0.1:3306/test?serverVersion=5.7
 ###< doctrine/doctrine-bundle ###
 
+MESSENGER_TRANSPORT_DSN_FAILURES=amqp://guest:guest@127.0.0.1:5672/%2f/failures
 MESSENGER_TRANSPORT_DSN_STATUS=amqp://guest:guest@127.0.0.1:5672/%2f/get-news-status
 MESSENGER_TRANSPORT_DSN_LIKES=amqp://guest:guest@127.0.0.1:5672/%2f/get-news-likes
 
