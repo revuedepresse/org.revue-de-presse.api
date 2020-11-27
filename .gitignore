@@ -31,5 +31,6 @@ public/graphs
 /phpunit.xml
 ###< symfony/phpunit-bridge ###
 
-web/emoji-data/
+public/emoji-data/
+
 
