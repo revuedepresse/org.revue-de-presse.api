@@ -798,7 +798,7 @@ function run_php_script() {
 
     if [ -z "${interactive_mode}" ];
     then
-      interactive_mode=true;
+      interactive_mode="${INTERACTIVE_MODE}";
     fi
 
     if [ -z "${script}" ];
