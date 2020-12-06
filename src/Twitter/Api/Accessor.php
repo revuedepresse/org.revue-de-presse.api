@@ -80,7 +80,7 @@ class Accessor implements ApiAccessorInterface,
     public string $environment = 'dev';
 
     /**
-     * @var LoggerInterface;
+     * @var LoggerInterface
      */
     public LoggerInterface $twitterApiLogger;
 
@@ -162,6 +162,7 @@ class Accessor implements ApiAccessorInterface,
         string $consumerSecret,
         string $accessTokenKey,
         string $accessTokenSecret,
+        TokenRepositoryInterface $tokenRepository,
         LoggerInterface $logger = null
     ) {
         $this->setUpTwitterClient(
@@ -169,6 +170,15 @@ class Accessor implements ApiAccessorInterface,
             $consumerSecret,
             $accessTokenKey,
             $accessTokenSecret
+        );
+
+        $this->tokenRepository = $tokenRepository;
+
+        $this->tokenRepository->ensureTokenExists(
+            $accessTokenKey,
+            $accessTokenSecret,
+            $consumerKey,
+            $consumerSecret
         );
 
         $this->setLogger($logger);
@@ -1300,18 +1310,6 @@ class Accessor implements ApiAccessorInterface,
     public function setModerator(ApiLimitModerator $moderator = null): self
     {
         $this->moderator = $moderator;
-
-        return $this;
-    }
-
-    /**
-     * @param TokenRepositoryInterface $tokenRepository
-     *
-     * @return $this
-     */
-    public function setTokenRepository(TokenRepositoryInterface $tokenRepository)
-    {
-        $this->tokenRepository = $tokenRepository;
 
         return $this;
     }

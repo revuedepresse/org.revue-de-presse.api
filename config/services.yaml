@@ -150,6 +150,7 @@ services:
             - '%weaving_the_web_twitter.consumer_secret%'
             - '%weaving_the_web_twitter.oauth_token.default%'
             - '%weaving_the_web_twitter.oauth_secret.default%'
+            - '@repository.access_token'
             - '@logger'
         properties:
             environment:          '%kernel.environment%'
@@ -161,7 +162,6 @@ services:
             - [ 'setConsumerSecret', [ '%weaving_the_web_twitter.consumer_secret%' ] ]
             - [ 'setMemberRepository', [ '@user_manager' ] ]
             - [ 'setModerator', [ '@App\Api\Moderator\ApiLimitModerator' ] ]
-            - [ 'setTokenRepository', [ '@weaving_the_web_twitter.repository.token' ] ]
             - [ 'setTranslator', [ '@App\Infrastructure\Translation\Translator' ] ]
             - [ 'setUserSecret', [ '%weaving_the_web_twitter.oauth_secret.default%' ] ]
             - [ 'setUserToken', [ '%weaving_the_web_twitter.oauth_token.default%' ] ]
