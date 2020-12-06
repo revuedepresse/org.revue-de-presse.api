@@ -23,6 +23,7 @@
             <group>interruptible_collect_decider</group>
             <group>status_accessor</group>
             <group>membership</group>
+            <group>member_subscription</group>
             <group>ownership</group>
             <group>persistence</group>
             <group>publication</group>

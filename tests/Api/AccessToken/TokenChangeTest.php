@@ -10,6 +10,7 @@ use App\Api\Entity\TokenInterface;
 use App\Api\Exception\InvalidSerializedTokenException;
 use App\Api\Exception\UnavailableTokenException;
 use App\Tests\Builder\TokenRepositoryBuilder;
+use App\Tests\Builder\Api\AccessToken\Repository\TokenRepositoryBuilder as Builder;
 use App\Twitter\Api\Accessor;
 use App\Twitter\Api\ApiAccessorInterface;
 use Exception;
@@ -110,6 +111,7 @@ class TokenChangeTest extends TestCase
             'consumer_secret',
             'access_token',
             'access_token_secret',
+            Builder::make(),
             new NullLogger()
         );
     }

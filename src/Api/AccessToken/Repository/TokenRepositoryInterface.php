@@ -23,6 +23,13 @@ interface TokenRepositoryInterface
 
     public function howManyUnfrozenTokenAreThere(): int;
 
+    public function ensureTokenExists(
+        string $oauthToken,
+        string $oauthTokenSecret,
+        string $consumerKey,
+        string $consumerSecret
+    ): void;
+
     public function refreshFreezeCondition(
         string $oauthToken,
         LoggerInterface $logger

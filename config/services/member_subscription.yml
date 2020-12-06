@@ -1,0 +1,9 @@
+services:
+    App\Domain\Subscription\Console\ListMemberSubscriptionsCommand:
+        class: 'App\Domain\Subscription\Console\ListMemberSubscriptionsCommand'
+        calls:
+            - [ 'setAccessor', ['@App\Infrastructure\Twitter\Api\Accessor\FriendsAccessor'] ]
+        tags:
+            - { name: 'console.command' }
+        public: true
+

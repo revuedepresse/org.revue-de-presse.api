@@ -2,18 +2,24 @@ services:
     App\Api\AccessToken\TokenChange:
         class: 'App\Api\AccessToken\TokenChange'
         arguments:
-            - '@weaving_the_web_twitter.repository.token'
+            - '@repository.access_token'
             - '@logger'
 
     App\Infrastructure\Twitter\Api\Accessor\OwnershipAccessor:
         class: 'App\Infrastructure\Twitter\Api\Accessor\OwnershipAccessor'
         arguments:
             - '@App\Twitter\Api\Accessor'
-            - '@weaving_the_web_twitter.repository.token'
+            - '@repository.access_token'
             - '@App\Api\AccessToken\TokenChange'
             - '@logger'
         calls:
             - [ 'setOwnershipBatchCollectedEventRepository', [ '@App\Infrastructure\Collection\Repository\OwnershipBatchCollectedEventRepository'] ]
+
+    App\Infrastructure\Twitter\Api\Accessor\FriendsAccessor:
+        class: 'App\Infrastructure\Twitter\Api\Accessor\FriendsAccessor'
+        arguments:
+            - '@App\Twitter\Api\Accessor'
+            - '@logger'
 
     App\Infrastructure\Twitter\Api\Accessor\MemberProfileAccessor:
         class: 'App\Infrastructure\Twitter\Api\Accessor\MemberProfileAccessor'

@@ -5,6 +5,7 @@ imports:
     - { resource: services/controller.yml }
     - { resource: services/mapping.yml }
     - { resource: services/membership.yml }
+    - { resource: services/member_subscription.yml }
     - { resource: services/operation.yml }
     - { resource: services/repository.yml }
     - { resource: services/persistence.yml }
@@ -149,6 +150,7 @@ services:
             - '%weaving_the_web_twitter.consumer_secret%'
             - '%weaving_the_web_twitter.oauth_token.default%'
             - '%weaving_the_web_twitter.oauth_secret.default%'
+            - '@repository.access_token'
             - '@logger'
         properties:
             environment:          '%kernel.environment%'
@@ -160,7 +162,6 @@ services:
             - [ 'setConsumerSecret', [ '%weaving_the_web_twitter.consumer_secret%' ] ]
             - [ 'setMemberRepository', [ '@user_manager' ] ]
             - [ 'setModerator', [ '@App\Api\Moderator\ApiLimitModerator' ] ]
-            - [ 'setTokenRepository', [ '@weaving_the_web_twitter.repository.token' ] ]
             - [ 'setTranslator', [ '@App\Infrastructure\Translation\Translator' ] ]
             - [ 'setUserSecret', [ '%weaving_the_web_twitter.oauth_secret.default%' ] ]
             - [ 'setUserToken', [ '%weaving_the_web_twitter.oauth_token.default%' ] ]
@@ -202,18 +203,6 @@ services:
         tags:
             - { name: 'kernel.event_subscriber' }
 
-    weaving_the_web_twitter.repository.token:
-        class: '%weaving_the_web_twitter.repository.token.class%'
-        arguments:
-            - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - '%weaving_the_web_twitter.entity.token.class%'
-
-    weaving_the_web_twitter.repository.read.token:
-        class: '%weaving_the_web_twitter.repository.token.class%'
-        arguments:
-            - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - '%weaving_the_web_twitter.entity.token.class%'
-
     App\Api\Moderator\ApiLimitModerator:
         class:  'App\Api\Moderator\ApiLimitModerator'
         arguments:
@@ -236,7 +225,7 @@ services:
             - [ 'setStatusAccessor',                            [ '@App\Accessor\StatusAccessor' ] ]
             - [ 'setStatusRepository',                          [ '@App\Api\Repository\StatusRepository' ] ]
             - [ 'setStatusPersistence',                         [ '@App\Infrastructure\Status\Persistence\StatusPersistence' ] ]
-            - [ 'setTokenRepository',                           [ '@weaving_the_web_twitter.repository.token' ] ]
+            - [ 'setTokenRepository',                           [ '@repository.access_token' ] ]
             - [ 'setTranslator',                                [ '@App\Infrastructure\Translation\Translator' ] ]
             - [ 'setWhispererIdentification',                   [ '@App\Infrastructure\Identification\WhispererIdentification' ] ]
             - [ 'setWhispererRepository',                       [ '@repository.whisperer' ] ]
@@ -284,7 +273,6 @@ parameters:
     weaving_the_web_twitter.entity.token.class:                   '%weaving_the_web_api.entity.token.class%'
 
     repository.publication_list.class:                            '%weaving_the_web_api.repository.publication_list.class%'
-    weaving_the_web_twitter.repository.token.class:               '%repository.access_token.class%'
 
     weaving_the_web_twitter.version:                              '%env(resolve:API_TWITTER_VERSION)%'
 

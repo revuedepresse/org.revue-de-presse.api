@@ -71,7 +71,7 @@ run-php: ## Run PHP with arguments
 		@/bin/bash -c 'source ./bin/functions.sh && run_php'
 
 run-php-script: ## Run PHP script
-		@/bin/bash -c 'source ./bin/functions.sh && run_php_script ${1}'
+		@/bin/bash -c 'source ./bin/functions.sh && run_php_script'
 
 run-stack: ## Run stack and its dependencies
 		@/bin/bash -c 'source ./bin/functions.sh && run_stack'
