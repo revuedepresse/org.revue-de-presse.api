@@ -2,14 +2,14 @@ services:
     App\Api\AccessToken\TokenChange:
         class: 'App\Api\AccessToken\TokenChange'
         arguments:
-            - '@weaving_the_web_twitter.repository.token'
+            - '@repository.access_token'
             - '@logger'
 
     App\Infrastructure\Twitter\Api\Accessor\OwnershipAccessor:
         class: 'App\Infrastructure\Twitter\Api\Accessor\OwnershipAccessor'
         arguments:
             - '@App\Twitter\Api\Accessor'
-            - '@weaving_the_web_twitter.repository.token'
+            - '@repository.access_token'
             - '@App\Api\AccessToken\TokenChange'
             - '@logger'
         calls:

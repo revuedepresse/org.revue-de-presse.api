@@ -203,18 +203,6 @@ services:
         tags:
             - { name: 'kernel.event_subscriber' }
 
-    weaving_the_web_twitter.repository.token:
-        class: '%weaving_the_web_twitter.repository.token.class%'
-        arguments:
-            - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - '%weaving_the_web_twitter.entity.token.class%'
-
-    weaving_the_web_twitter.repository.read.token:
-        class: '%weaving_the_web_twitter.repository.token.class%'
-        arguments:
-            - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - '%weaving_the_web_twitter.entity.token.class%'
-
     App\Api\Moderator\ApiLimitModerator:
         class:  'App\Api\Moderator\ApiLimitModerator'
         arguments:
@@ -237,7 +225,7 @@ services:
             - [ 'setStatusAccessor',                            [ '@App\Accessor\StatusAccessor' ] ]
             - [ 'setStatusRepository',                          [ '@App\Api\Repository\StatusRepository' ] ]
             - [ 'setStatusPersistence',                         [ '@App\Infrastructure\Status\Persistence\StatusPersistence' ] ]
-            - [ 'setTokenRepository',                           [ '@weaving_the_web_twitter.repository.token' ] ]
+            - [ 'setTokenRepository',                           [ '@repository.access_token' ] ]
             - [ 'setTranslator',                                [ '@App\Infrastructure\Translation\Translator' ] ]
             - [ 'setWhispererIdentification',                   [ '@App\Infrastructure\Identification\WhispererIdentification' ] ]
             - [ 'setWhispererRepository',                       [ '@repository.whisperer' ] ]
@@ -285,7 +273,6 @@ parameters:
     weaving_the_web_twitter.entity.token.class:                   '%weaving_the_web_api.entity.token.class%'
 
     repository.publication_list.class:                            '%weaving_the_web_api.repository.publication_list.class%'
-    weaving_the_web_twitter.repository.token.class:               '%repository.access_token.class%'
 
     weaving_the_web_twitter.version:                              '%env(resolve:API_TWITTER_VERSION)%'
 
