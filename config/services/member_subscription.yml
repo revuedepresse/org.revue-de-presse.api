@@ -1,0 +1,7 @@
+services:
+    App\Domain\Subscription\Console\ListMemberSubscriptionsCommand:
+        class: 'App\Domain\Subscription\Console\ListMemberSubscriptionsCommand'
+        tags:
+            - { name: 'console.command' }
+        public: true
+
