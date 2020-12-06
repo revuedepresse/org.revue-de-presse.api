@@ -62,6 +62,8 @@ class Accessor implements ApiAccessorInterface,
 {
     public const ERROR_PROTECTED_ACCOUNT = 2048;
 
+    private const TWITTER_API_VERSION_1_1 = '1.1';
+
     private const MAX_RETRIES = 5;
 
     private const BASE_URL = 'https://api.twitter.com/1.1/';
@@ -105,7 +107,7 @@ class Accessor implements ApiAccessorInterface,
     protected string $apiHost = 'api.twitter.com';
 
     /**
-     * @var LoggerInterface;
+     * @var LoggerInterface|null
      */
     protected ?LoggerInterface $logger;
 
@@ -120,12 +122,12 @@ class Accessor implements ApiAccessorInterface,
     protected string $userSecret;
 
     /**
-     * @var string
+     * @var string|null
      */
     protected ?string $consumerKey;
 
     /**
-     * @var string
+     * @var string|null
      */
     protected ?string $consumerSecret;
 
@@ -151,10 +153,11 @@ class Accessor implements ApiAccessorInterface,
     private TwitterClient $twitterClient;
 
     /**
-     * @param string               $consumerKey
-     * @param string               $consumerSecret
-     * @param string               $accessTokenKey
-     * @param string               $accessTokenSecret
+     * @param string $consumerKey
+     * @param string $consumerSecret
+     * @param string $accessTokenKey
+     * @param string $accessTokenSecret
+     * @param TokenRepositoryInterface $tokenRepository
      * @param LoggerInterface|null $logger
      */
     public function __construct(
@@ -182,6 +185,11 @@ class Accessor implements ApiAccessorInterface,
         );
 
         $this->setLogger($logger);
+    }
+
+    public function getApiBaseUrl(string $version = self::TWITTER_API_VERSION_1_1): string
+    {
+        return 'https://' . $this->apiHost . '/' . $version;
     }
 
     /**
@@ -1623,6 +1631,17 @@ class Accessor implements ApiAccessorInterface,
                     )
                 );
 
+                $this->twitterApiLogger->info(
+                    sprintf(
+                        '[Limit reset expected at %s]',
+                        (new \DateTime())
+                            ->setTimezone(
+                                new \DateTimeZone('Europe/Paris')
+                            )->setTimestamp((int) $lastXHeaders['x_rate_limit_reset'])
+                            ->format('Y-m-d H:i')
+                    )
+                );
+
                 $this->apiLimitReached = $this->lessRemainingCallsThanTenPercentOfLimit(
                     $remainingCalls,
                     $limit
@@ -1640,16 +1659,6 @@ class Accessor implements ApiAccessorInterface,
     {
         return $this->getApiBaseUrl($version) . '/lists/members/create_all.json' .
             '?';
-    }
-
-    /**
-     * @param string $version
-     *
-     * @return string
-     */
-    protected function getApiBaseUrl($version = '1.1')
-    {
-        return 'https://' . $this->apiHost . '/' . $version;
     }
 
     /**
@@ -2065,7 +2074,7 @@ class Accessor implements ApiAccessorInterface,
     }
 
     /**
-     * @param string   $endpoint
+     * @param string $endpoint
      * @param callable $fetchContent
      *
      * @return stdClass|array

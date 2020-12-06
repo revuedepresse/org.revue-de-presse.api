@@ -15,6 +15,12 @@ services:
         calls:
             - [ 'setOwnershipBatchCollectedEventRepository', [ '@App\Infrastructure\Collection\Repository\OwnershipBatchCollectedEventRepository'] ]
 
+    App\Infrastructure\Twitter\Api\Accessor\FriendsAccessor:
+        class: 'App\Infrastructure\Twitter\Api\Accessor\FriendsAccessor'
+        arguments:
+            - '@App\Twitter\Api\Accessor'
+            - '@logger'
+
     App\Infrastructure\Twitter\Api\Accessor\MemberProfileAccessor:
         class: 'App\Infrastructure\Twitter\Api\Accessor\MemberProfileAccessor'
         arguments:
