@@ -5,6 +5,7 @@ namespace App\Api\AccessToken\Repository;
 
 use App\Api\Entity\TokenInterface;
 use App\Api\Exception\UnavailableTokenException;
+use App\Infrastructure\DependencyInjection\LoggerTrait;
 use DateTime;
 use DateTimeZone;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -30,11 +31,12 @@ use App\Api\Entity\Token,
  */
 class TokenRepository extends ServiceEntityRepository implements TokenRepositoryInterface
 {
+    use LoggerTrait;
+
     /**
      * @param $properties
      *
      * @return Token
-     * @throws Exception
      */
     public function makeToken($properties): TokenInterface
     {
@@ -53,28 +55,45 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
         $token->setOauthToken($properties['oauth_token']);
         $token->setOauthTokenSecret($properties['oauth_token_secret']);
 
+        // Ensure the newly created token is not frozen yet
+        // equivalent to setting the frozen until date in the past
+        $token->setFrozenUntil(new DateTime('now - 15min'));
+
         return $token;
     }
 
-    /**
-     * @param        $oauthToken
-     * @param string $until
-     *
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
-    public function freezeToken($oauthToken, $until = 'now + 15min')
-    {
-        $entityManager = $this->getEntityManager();
+    public function ensureTokenExists(
+        $oauthToken,
+        $oauthTokenSecret,
+        $consumerKey,
+        $consumerSecret
+    ): void {
+        if ($this->findOneBy(['oauthToken' => $oauthToken]) !== null) {
+            return;
+        }
 
-        /**
-         * @var \App\Api\Entity\Token $token
-         */
+        $token = $this->makeToken([
+            'oauth_token' => $oauthToken,
+            'oauth_token_secret' => $oauthTokenSecret
+        ]);
+        $token->setConsumerKey($consumerKey);
+        $token->setConsumerSecret($consumerSecret);
+
+        $this->save($token);
+    }
+
+    /**
+     * @param $oauthToken
+     * @param string $until
+     * @throws Exception
+     */
+    public function freezeToken($oauthToken, $until = 'now + 15min'): void
+    {
+        /** @var Token $token */
         $token = $this->findOneBy(['oauthToken' => $oauthToken]);
         $token->setFrozenUntil(new DateTime($until));
 
-        $entityManager->persist($token);
-        $entityManager->flush($token);
+        $this->save($token);
     }
 
     /**
@@ -95,10 +114,7 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
 
         if ($token === null) {
             $token = $this->makeToken(['oauth_token' => $oauthToken, 'oauth_token_secret' => '']);
-
-            $entityManager = $this->getEntityManager();
-            $entityManager->persist($token);
-            $entityManager->flush();
+            $this->save($token);
 
             $logger->info('[token creation] ' . $token->getOauthToken());
         } elseif ($this->isTokenFrozen($token)) {
@@ -222,9 +238,7 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
         $token->setType($tokenType);
         $token->setCreatedAt(new DateTime());
 
-        $entityManager = $this->getEntityManager();
-        $entityManager->persist($token);
-        $entityManager->flush();
+        $this->save($token);
 
         return $token;
     }
@@ -296,5 +310,17 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
         $queryBuilder->setMaxResults(1);
 
         return $queryBuilder->getQuery()->getSingleResult();
+    }
+
+    private function save(Token $token): void
+    {
+        $entityManager = $this->getEntityManager();
+
+        try {
+            $entityManager->persist($token);
+            $entityManager->flush();
+        } catch (\Throwable $exception) {
+            $this->logger->error($exception->getMessage(), ['token' => $token->getOAuthToken()]);
+        }
     }
 }

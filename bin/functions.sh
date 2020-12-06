@@ -796,13 +796,18 @@ function run_php_script() {
     local interactive_mode
     interactive_mode="${2}"
 
+    if [ -z "${interactive_mode}" ];
+    then
+      interactive_mode="${INTERACTIVE_MODE}";
+    fi
+
     if [ -z "${script}" ];
     then
       if [ -z "${SCRIPT}" ];
       then
         echo 'Please pass a valid path to a script by export an environment variable'
         echo 'e.g.'
-        echo 'export SCRIPT=bin/console cache:clear'
+        echo 'export SCRIPT="bin/console cache:clear"'
         return
       fi
 

@@ -12,6 +12,8 @@ interface ApiAccessorInterface
 {
     public const MAX_OWNERSHIPS = 800;
 
+    public function getApiBaseUrl(): string;
+
     public function setAccessToken(TokenInterface $token);
 
     public function setConsumerKey(string $secret): self;
@@ -27,4 +29,6 @@ interface ApiAccessorInterface
     public function getListMembers(string $listId): MemberCollection;
 
     public function getMemberProfile(string $identifier): stdClass;
+
+    public function contactEndpoint(string $endpoint);
 }

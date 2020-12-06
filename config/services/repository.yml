@@ -104,6 +104,8 @@ services:
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - '%weaving_the_web_api.entity.token.class%'
+        calls:
+            - [ 'setLogger', [ '@logger' ] ]
 
     repository.publication_list_subscription:
         class:      'App\Member\Repository\AggregateSubscriptionRepository'
