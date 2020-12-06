@@ -4,7 +4,7 @@ declare (strict_types=1);
 namespace App\Tests\Domain\Subscription\Console;
 
 use App\Domain\Subscription\Console\ListMemberSubscriptionsCommand;
-use App\Tests\Test\Builder\Twitter\Api\Accessor\FriendsAccessorBuilder;
+use App\Tests\Builder\Twitter\Api\Accessor\FriendsAccessorBuilder;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Tester\CommandTester;

@@ -1,7 +1,7 @@
 <?php
 declare (strict_types=1);
 
-namespace App\Tests\Test\Builder\Twitter\Api\Accessor;
+namespace App\Tests\Builder\Twitter\Api\Accessor;
 
 use App\Infrastructure\Twitter\Api\Accessor\FriendsAccessor;
 use App\Infrastructure\Twitter\Api\Accessor\FriendsAccessorInterface;
@@ -15,7 +15,7 @@ class FriendsAccessorBuilder extends TestCase
     /**
      * @return FriendsAccessorInterface
      */
-    public static function make()
+    public static function make(): FriendsAccessorInterface
     {
         $testCase = new self();
 
@@ -27,16 +27,16 @@ class FriendsAccessorBuilder extends TestCase
                 $endpoint = $arguments[0];
 
                 if (strpos($endpoint, 'cursor=-1') !== false) {
-                    $resourcePath = '../../../../../Resources/FriendsList-1-2.b64';
+                    $resourcePath = '../../../../Resources/FriendsList-1-2.b64';
                 } else if (strpos($endpoint, 'cursor=1558953799112594071') !== false) {
-                    $resourcePath = '../../../../../Resources/FriendsList-2-2.b64';
+                    $resourcePath = '../../../../Resources/FriendsList-2-2.b64';
                 } else {
                     return [];
                 }
 
                 return unserialize(
                     base64_decode(
-                        file_get_contents(__DIR__.'/'.$resourcePath)
+                        file_get_contents(__DIR__ . 'FriendsAccessorBuilder.php/' .$resourcePath)
                     )
                 );
             });

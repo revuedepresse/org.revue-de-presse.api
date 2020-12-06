@@ -4,7 +4,7 @@ declare (strict_types=1);
 namespace App\Tests\Infrastructure\Twitter\Api;
 
 use App\Infrastructure\Twitter\Api\Accessor\FriendsAccessor;
-use App\Tests\Test\Builder\Twitter\Api\Accessor\FriendsAccessorBuilder;
+use App\Tests\Builder\Twitter\Api\Accessor\FriendsAccessorBuilder;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /**
