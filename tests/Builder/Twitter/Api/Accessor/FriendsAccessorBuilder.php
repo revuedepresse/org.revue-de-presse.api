@@ -36,7 +36,7 @@ class FriendsAccessorBuilder extends TestCase
 
                 return unserialize(
                     base64_decode(
-                        file_get_contents(__DIR__ . 'FriendsAccessorBuilder.php/' .$resourcePath)
+                        file_get_contents(__DIR__ . '/' .$resourcePath)
                     )
                 );
             });
