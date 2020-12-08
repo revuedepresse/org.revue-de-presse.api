@@ -4,6 +4,7 @@ declare (strict_types=1);
 namespace App\Domain\Subscription\Console;
 
 use App\Console\AbstractCommand;
+use App\Infrastructure\Collection\Repository\MemberFriendsListCollectedEventRepositoryInterface;
 use App\Infrastructure\DependencyInjection\MissingDependency;
 use App\Infrastructure\Twitter\Api\Accessor\FriendsAccessorInterface;
 use stdClass;
@@ -16,10 +17,19 @@ class ListMemberSubscriptionsCommand extends AbstractCommand
     private const ARGUMENT_SCREEN_NAME = 'screen_name';
 
     public FriendsAccessorInterface $accessor;
+    /**
+     * @var MemberFriendsListCollectedEventRepositoryInterface
+     */
+    private MemberFriendsListCollectedEventRepositoryInterface $repository;
 
     public function setAccessor(FriendsAccessorInterface $accessor): void
     {
         $this->accessor = $accessor;
+    }
+
+    public function setRepository(MemberFriendsListCollectedEventRepositoryInterface $repository): void
+    {
+        $this->repository = $repository;
     }
 
     public function configure(): void
@@ -38,8 +48,10 @@ class ListMemberSubscriptionsCommand extends AbstractCommand
         $this->guardAgainstMissingDependency();
 
         $screenName = $input->getArgument(self::ARGUMENT_SCREEN_NAME);
-        $friendsList = $this->accessor->getMemberFriendsList($screenName)
-            ->getFriendsList();
+        $friendsList = $this->repository->aggregatedMemberFriendsLists(
+            $this->accessor,
+            $screenName
+        )->getFriendsList();
 
         array_walk(
             $friendsList,
@@ -63,6 +75,15 @@ class ListMemberSubscriptionsCommand extends AbstractCommand
                 sprintf(
                     'Dependency of type "%s" is missing',
                     FriendsAccessorInterface::class
+                )
+            );
+        }
+
+        if (!($this->repository instanceof MemberFriendsListCollectedEventRepositoryInterface)) {
+            throw new MissingDependency(
+                sprintf(
+                    'Dependency of type "%s" is missing',
+                    MemberFriendsListCollectedEventRepositoryInterface::class
                 )
             );
         }

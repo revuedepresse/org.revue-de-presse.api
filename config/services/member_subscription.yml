@@ -3,7 +3,16 @@ services:
         class: 'App\Domain\Subscription\Console\ListMemberSubscriptionsCommand'
         calls:
             - [ 'setAccessor', ['@App\Infrastructure\Twitter\Api\Accessor\FriendsAccessor'] ]
+            - [ 'setRepository', ['@App\Infrastructure\Collection\Repository\MemberFriendsListCollectedEventRepository'] ]
         tags:
             - { name: 'console.command' }
-        public: true
 
+    App\Infrastructure\Collection\Repository\MemberFriendsListCollectedEventRepository:
+        class: 'App\Infrastructure\Collection\Repository\MemberFriendsListCollectedEventRepository'
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - 'App\Domain\Collection\Entity\MemberFriendsListCollectedEvent'
+        calls:
+            - [ 'setLogger',           [ '@logger' ] ]
+        tags:
+            - { name: 'doctrine.repository_service' }

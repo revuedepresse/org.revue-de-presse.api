@@ -13,3 +13,7 @@ services:
     test.event_repository.member_profile_collected: '@App\Infrastructure\Collection\Repository\MemberProfileCollectedEventRepository'
 
     test.App\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher: '@App\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher'
+
+    test.App\Domain\Subscription\Console\ListMemberSubscriptionsCommand: '@App\Domain\Subscription\Console\ListMemberSubscriptionsCommand'
+
+    test.App\Infrastructure\Collection\Repository\MemberFriendsListCollectedEventRepository: '@App\Infrastructure\Collection\Repository\MemberFriendsListCollectedEventRepository'
