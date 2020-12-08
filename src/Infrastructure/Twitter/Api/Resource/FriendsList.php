@@ -11,7 +11,10 @@ class FriendsList
 
     private string $nextCursor;
 
+    private string $rawList;
+
     public function __construct(array $list, string $nextCursor)
+
     {
         $this->list = $list;
         $this->nextCursor = $nextCursor;

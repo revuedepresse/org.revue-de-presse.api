@@ -5,6 +5,7 @@ namespace App\Infrastructure\Twitter\Api\Accessor;
 
 use App\Infrastructure\Twitter\Api\Resource\FriendsList;
 use App\Twitter\Api\ApiAccessorInterface;
+use Closure;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
@@ -23,20 +24,22 @@ class FriendsAccessor implements FriendsAccessorInterface
 
     /**
      * @param string $screenName
+     * @param Closure|null $onFinishCollection
      * @return FriendsList
      * @throws Throwable
      */
-    public function getMemberFriendsListAtDefaultCursor(string $screenName): FriendsList {
-        return $this->getMemberFriendsListAtCursor($screenName, '-1');
+    public function getMemberFriendsListAtDefaultCursor(string $screenName, Closure $onFinishCollection = null): FriendsList {
+        return $this->getMemberFriendsListAtCursor($screenName, '-1', $onFinishCollection);
     }
 
     /**
      * @param string $screenName
      * @param string $cursor
+     * @param Closure|null $onFinishCollection
      * @return FriendsList
      * @throws Throwable
      */
-    public function getMemberFriendsListAtCursor(string $screenName, string $cursor): FriendsList {
+    public function getMemberFriendsListAtCursor(string $screenName, string $cursor, Closure $onFinishCollection = null): FriendsList {
         try {
             $friendsListEndpoint = $this->getFriendsListEndpoint();
 
@@ -48,7 +51,13 @@ class FriendsAccessor implements FriendsAccessorInterface
                 ]
             );
 
-            return FriendsList::fromResponse((array) $this->accessor->contactEndpoint($endpoint));
+            $friendsList = (array) $this->accessor->contactEndpoint($endpoint);
+
+            if (is_callable($onFinishCollection)) {
+                $onFinishCollection($friendsList);
+            }
+
+            return FriendsList::fromResponse($friendsList);
         } catch (Throwable $exception) {
             $this->logger->error(
                 $exception->getMessage(),
