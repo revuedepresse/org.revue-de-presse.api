@@ -24,7 +24,7 @@ abstract class AbstractCommand extends Command implements CommandReturnCodeAware
      * @param OutputInterface $output
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->input = $input;
         $this->output = $output;

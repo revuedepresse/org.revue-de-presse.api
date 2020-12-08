@@ -48,7 +48,7 @@ class ImportMemberPublicationListsCommand extends AbstractCommand
 
     public LoggerInterface $logger;
 
-    public function configure(): void
+    protected function configure(): void
     {
         $this->setName('import-aggregates')
              ->addOption(
@@ -71,7 +71,7 @@ class ImportMemberPublicationListsCommand extends AbstractCommand
      *
      * @return int|null|void
      */
-    public function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         parent::execute($input, $output);
 

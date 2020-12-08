@@ -32,7 +32,7 @@ class ListMemberSubscriptionsCommand extends AbstractCommand
         $this->repository = $repository;
     }
 
-    public function configure(): void
+    protected function configure(): void
     {
         $this->setName('press-review:list-member-subscriptions')
             ->setDescription('List the subscriptions of a member')
@@ -43,7 +43,7 @@ class ListMemberSubscriptionsCommand extends AbstractCommand
             )->setAliases(['pr:lm']);
     }
 
-    public function execute(InputInterface $input, OutputInterface $output): int
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->guardAgainstMissingDependency();
 
