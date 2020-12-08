@@ -17,3 +17,5 @@ services:
     test.App\Domain\Subscription\Console\ListMemberSubscriptionsCommand: '@App\Domain\Subscription\Console\ListMemberSubscriptionsCommand'
 
     test.App\Infrastructure\Collection\Repository\MemberFriendsListCollectedEventRepository: '@App\Infrastructure\Collection\Repository\MemberFriendsListCollectedEventRepository'
+
+    test.App\Domain\Subscription\Console\UnfollowInactiveMembersCommand: '@App\Domain\Subscription\Console\UnfollowInactiveMembersCommand'

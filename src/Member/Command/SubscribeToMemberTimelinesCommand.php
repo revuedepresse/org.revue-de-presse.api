@@ -25,7 +25,7 @@ class SubscribeToMemberTimelinesCommand extends AbstractCommand
      */
     public $logger;
 
-    public function configure()
+    protected function configure()
     {
         $this->setName('subscribe-to-member-timelines')
             ->setDescription('Subscribe to member timelines.')
@@ -49,7 +49,7 @@ class SubscribeToMemberTimelinesCommand extends AbstractCommand
      * @param OutputInterface $output
      * @return int
      */
-    public function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output)
     {
         parent::execute($input, $output);
 
