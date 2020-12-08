@@ -89,7 +89,7 @@ class FriendsAccessor implements FriendsAccessorInterface
             $this->accessor->getApiBaseUrl(),
             '/friends/list.json?',
             'count=200',
-            '&skip_status=true',
+            '&skip_status=false',
             '&cursor={{ cursor }}',
             '&screen_name={{ screen_name }}'
         ]);
