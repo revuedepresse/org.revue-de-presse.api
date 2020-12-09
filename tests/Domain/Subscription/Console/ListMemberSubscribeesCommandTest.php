@@ -3,21 +3,19 @@ declare (strict_types=1);
 
 namespace App\Tests\Domain\Subscription\Console;
 
-use App\Domain\Subscription\Console\ListMemberSubscriptionsCommand;
-use App\Infrastructure\Collection\Repository\FriendsListCollectedEventRepository;
-use App\Tests\Builder\Infrastructure\Collection\Repository\FriendsListCollectedEventRepositoryBuilder;
-use App\Tests\Builder\Twitter\Api\Accessor\FriendsListAccessorBuilder;
+use App\Domain\Subscription\Console\ListMemberSubscribeesCommand;
+use App\Tests\Builder\Infrastructure\Collection\Repository\FollowersListCollectedEventRepositoryBuilder;
+use App\Tests\Builder\Twitter\Api\Accessor\FollowersListAccessorBuilder;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Tester\CommandTester;
-use Symfony\Component\Console\Command\Command;
 
 /**
- * @group member_subscription
+ * @group member_subscribee
  */
-class ListMemberSubscriptionsCommandTest extends KernelTestCase
+class ListMemberSubscribeesCommandTest extends KernelTestCase
 {
-    private ListMemberSubscriptionsCommand $command;
+    private ListMemberSubscribeesCommand $command;
 
     private CommandTester $commandTester;
 
@@ -27,14 +25,14 @@ class ListMemberSubscriptionsCommandTest extends KernelTestCase
 
         self::$container = $kernel->getContainer();
 
-        /** @var ListMemberSubscriptionsCommand $command */
-        $command = self::$container->get('test.'.ListMemberSubscriptionsCommand::class);
+        /** @var ListMemberSubscribeesCommand $command */
+        $command = self::$container->get('test.'.ListMemberSubscribeesCommand::class);
 
         $application = new Application($kernel);
 
-        $this->command = $application->find('press-review:list-member-subscriptions');
-        $this->command->setAccessor(FriendsListAccessorBuilder::make());
-        $this->command->setRepository(FriendsListCollectedEventRepositoryBuilder::make());
+        $this->command = $application->find('press-review:list-member-subscribees');
+        $this->command->setAccessor(FollowersListAccessorBuilder::make());
+        $this->command->setRepository(FollowersListCollectedEventRepositoryBuilder::make());
 
         $this->commandTester = new CommandTester($command);
     }
@@ -42,10 +40,10 @@ class ListMemberSubscriptionsCommandTest extends KernelTestCase
     /**
      * @test
      */
-    public function it_lists_member_subscriptions(): void
+    public function it_lists_member_subscribees(): void
     {
         $this->commandTester->execute([
-            'screen_name' => 'mipsytipsy'
+            'screen_name' => 'thierrymarianne'
         ]);
 
         self::assertEquals(

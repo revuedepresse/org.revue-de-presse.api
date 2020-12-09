@@ -6,7 +6,7 @@ namespace App\Domain\Collection\Entity;
 use DateTimeInterface;
 use Ramsey\Uuid\UuidInterface;
 
-class MemberFriendsListCollectedEvent
+class FriendsListCollectedEvent implements ListCollectedEvent
 {
     private UuidInterface $id;
 

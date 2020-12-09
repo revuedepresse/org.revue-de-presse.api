@@ -5,7 +5,7 @@ namespace App\Infrastructure\Twitter\Api\Resource;
 
 use InvalidArgumentException;
 
-class FriendsList implements ResourceList
+class FollowersList implements ResourceList
 {
     private array $list;
 

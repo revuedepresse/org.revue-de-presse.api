@@ -1619,6 +1619,7 @@ class Accessor implements ApiAccessorInterface,
                 $lastApiPath
             )
         );
+
         if (isset($lastXHeaders)) {
             if (array_key_exists('x_rate_limit_limit', $lastXHeaders)) {
                 $limit          = (int) $lastXHeaders['x_rate_limit_limit'];

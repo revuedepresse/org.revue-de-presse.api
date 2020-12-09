@@ -12,7 +12,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ListMemberSubscriptionsCommand extends AbstractCommand
+class ListMemberSubscribeesCommand extends AbstractCommand
 {
     private const ARGUMENT_SCREEN_NAME = 'screen_name';
 
@@ -34,13 +34,13 @@ class ListMemberSubscriptionsCommand extends AbstractCommand
 
     protected function configure(): void
     {
-        $this->setName('press-review:list-member-subscriptions')
-            ->setDescription('List the subscriptions of a member')
+        $this->setName('press-review:list-member-subscribees')
+            ->setDescription('List the subscribees of a member')
             ->addArgument(
                 self::ARGUMENT_SCREEN_NAME,
                 InputArgument::REQUIRED,
                 'The screen name of a member'
-            )->setAliases(['pr:lmsubp']);
+            )->setAliases(['pr:lmsubb']);
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int

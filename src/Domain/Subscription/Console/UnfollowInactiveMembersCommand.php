@@ -4,10 +4,10 @@ declare (strict_types=1);
 namespace App\Domain\Subscription\Console;
 
 use App\Console\AbstractCommand;
-use App\Domain\Collection\Entity\MemberFriendsListCollectedEvent;
+use App\Domain\Collection\Entity\FriendsListCollectedEvent;
 use App\Domain\Resource\MemberCollection;
 use App\Domain\Resource\MemberIdentity;
-use App\Infrastructure\Collection\Repository\MemberFriendsListCollectedEventRepositoryInterface;
+use App\Infrastructure\Collection\Repository\ListCollectedEventRepositoryInterface;
 use App\Infrastructure\Twitter\Api\Mutator\FriendshipMutatorInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -18,15 +18,15 @@ class UnfollowInactiveMembersCommand extends AbstractCommand
     private const ARGUMENT_SCREEN_NAME = 'screen_name';
 
     /**
-     * @var MemberFriendsListCollectedEventRepositoryInterface
+     * @var ListCollectedEventRepositoryInterface
      */
-    private MemberFriendsListCollectedEventRepositoryInterface $repository;
+    private ListCollectedEventRepositoryInterface $repository;
     /**
      * @var FriendshipMutatorInterface
      */
     private FriendshipMutatorInterface $mutator;
 
-    public function setRepository(MemberFriendsListCollectedEventRepositoryInterface $repository): void
+    public function setRepository(ListCollectedEventRepositoryInterface $repository): void
     {
         $this->repository = $repository;
     }
@@ -66,45 +66,50 @@ class UnfollowInactiveMembersCommand extends AbstractCommand
 
         array_walk(
             $memberFriendsListCollectedEvents,
-            function (MemberFriendsListCollectedEvent $event) {
-                $decodedPayload = json_decode($event->payload(), true);
-
-                $memberIdentities = array_filter(
-                    array_map(
-                        static function ($userAttributes) {
-                            if (!array_key_exists('status', $userAttributes)) {
-                                return new MemberIdentity(
-                                    $userAttributes['screen_name'],
-                                    $userAttributes['id_str'],
-                                );
-                            }
-
-                            $thisYear = (new \DateTime('now'))
-                                    ->format('Y');
-                            $lastPublicationYear = (int) (new \DateTime($userAttributes['status']['created_at']))
-                                    ->format('Y');
-
-                            if ($lastPublicationYear < (int) $thisYear) {
-                                return new MemberIdentity(
-                                    $userAttributes['screen_name'],
-                                    $userAttributes['id_str'],
-                                );
-                            }
-
-                            return null;
-                        },
-                        $decodedPayload['response']['users']
-                    )
-                );
-
-                $coll = MemberCollection::fromArray($memberIdentities);
-
-                if ($coll instanceof MemberCollection) {
-                    $this->mutator->unfollowMembers($coll);
-                }
-            }
+            [$this, 'processMemberFriendList']
         );
 
         return self::SUCCESS;
+    }
+
+    private function processMemberFriendList(FriendsListCollectedEvent $event): void
+    {
+        $decodedPayload = json_decode($event->payload(), true);
+
+        $memberIdentities = array_filter(
+            array_map(
+                [$this, 'convertUserAttributesToMemberIdentity'],
+                $decodedPayload['response']['users']
+            )
+        );
+
+        $coll = MemberCollection::fromArray($memberIdentities);
+
+        if ($coll instanceof MemberCollection) {
+            $this->mutator->unfollowMembers($coll);
+        }
+    }
+
+    private function convertUserAttributesToMemberIdentity(array $userAttributes): ?MemberIdentity {
+        if (!array_key_exists('status', $userAttributes)) {
+            return new MemberIdentity(
+                $userAttributes['screen_name'],
+                $userAttributes['id_str'],
+            );
+        }
+
+        $thisYear = (new \DateTime('now'))
+            ->format('Y');
+        $lastPublicationYear = (int) (new \DateTime($userAttributes['status']['created_at']))
+            ->format('Y');
+
+        if ($lastPublicationYear < (int) $thisYear) {
+            return new MemberIdentity(
+                $userAttributes['screen_name'],
+                $userAttributes['id_str'],
+            );
+        }
+
+        return null;
     }
 }
