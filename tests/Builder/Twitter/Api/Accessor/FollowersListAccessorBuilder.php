@@ -3,19 +3,19 @@ declare (strict_types=1);
 
 namespace App\Tests\Builder\Twitter\Api\Accessor;
 
-use App\Infrastructure\Twitter\Api\Accessor\FriendsAccessor;
-use App\Infrastructure\Twitter\Api\Accessor\FriendsAccessorInterface;
+use App\Infrastructure\Twitter\Api\Accessor\FollowersListAccessor;
+use App\Infrastructure\Twitter\Api\Accessor\ListAccessorInterface;
 use App\Twitter\Api\ApiAccessorInterface;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Psr\Log\NullLogger;
 
-class FriendsAccessorBuilder extends TestCase
+class FollowersListAccessorBuilder extends TestCase
 {
     /**
-     * @return FriendsAccessorInterface
+     * @return ListAccessorInterface
      */
-    public static function make(): FriendsAccessorInterface
+    public static function make(): ListAccessorInterface
     {
         $testCase = new self();
 
@@ -27,9 +27,9 @@ class FriendsAccessorBuilder extends TestCase
                 $endpoint = $arguments[0];
 
                 if (strpos($endpoint, 'cursor=-1') !== false) {
-                    $resourcePath = '../../../../Resources/FriendsList-1-2.b64';
-                } else if (strpos($endpoint, 'cursor=1558953799112594071') !== false) {
-                    $resourcePath = '../../../../Resources/FriendsList-2-2.b64';
+                    $resourcePath = '../../../../Resources/FollowersList-1-2.b64';
+                } else if (strpos($endpoint, 'cursor=1645049967345751374') !== false) {
+                    $resourcePath = '../../../../Resources/FollowersList-2-2.b64';
                 } else {
                     return [];
                 }
@@ -41,7 +41,7 @@ class FriendsAccessorBuilder extends TestCase
                 );
             });
 
-        return new FriendsAccessor(
+        return new FollowersListAccessor(
             $apiAccessor->reveal(),
             new NullLogger()
         );

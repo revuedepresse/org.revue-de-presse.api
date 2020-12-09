@@ -4,7 +4,7 @@ declare (strict_types=1);
 namespace App\Tests\Domain\Subscription\Console;
 
 use App\Domain\Subscription\Console\UnfollowInactiveMembersCommand;
-use App\Tests\Builder\Infrastructure\Collection\Repository\MemberFriendsListCollectedEventRepositoryBuilder;
+use App\Tests\Builder\Infrastructure\Collection\Repository\FriendsListCollectedEventRepositoryBuilder;
 use App\Tests\Builder\Twitter\Api\Mutator\FriendshipMutatorBuilder;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -31,7 +31,7 @@ class UnfollowInactiveMembersCommandTest extends KernelTestCase
         $application = new Application($kernel);
 
         $this->command = $application->find('press-review:unfollow-inactive-members');
-        $this->command->setRepository(MemberFriendsListCollectedEventRepositoryBuilder::make());
+        $this->command->setRepository(FriendsListCollectedEventRepositoryBuilder::make());
         $this->command->setMutator(FriendshipMutatorBuilder::make());
 
         $this->commandTester = new CommandTester($command);

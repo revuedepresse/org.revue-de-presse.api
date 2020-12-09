@@ -4,51 +4,59 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Collection\Repository;
 
-use App\Domain\Collection\Entity\MemberFriendsListCollectedEvent;
+use App\Domain\Collection\Entity\FriendsListCollectedEvent;
+use App\Domain\Collection\Entity\ListCollectedEvent;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
-use App\Infrastructure\Twitter\Api\Accessor\FriendsAccessorInterface;
+use App\Infrastructure\Twitter\Api\Accessor\ListAccessorInterface;
 use App\Infrastructure\Twitter\Api\Resource\FriendsList;
+use App\Infrastructure\Twitter\Api\Resource\ResourceList;
 use Closure;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use InvalidArgumentException;
 use Throwable;
 use function json_encode;
 
-class MemberFriendsListCollectedEventRepository extends ServiceEntityRepository implements MemberFriendsListCollectedEventRepositoryInterface
+/**
+ * @method FriendsListCollectedEvent|null find($id, $lockMode = null, $lockVersion = null)
+ * @method FriendsListCollectedEvent|null findOneBy(array $criteria, array $orderBy = null)
+ * @method FriendsListCollectedEvent[]    findAll()
+ * @method FriendsListCollectedEvent[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ */
+class FriendsListCollectedEventRepository extends ServiceEntityRepository implements ListCollectedEventRepositoryInterface
 {
     use LoggerTrait;
 
-    public function aggregatedMemberFriendsLists(
-        FriendsAccessorInterface $accessor,
+    public function aggregatedLists(
+        ListAccessorInterface $accessor,
         string $screenName
-    ): FriendsList {
-            $friendsList = $this->collectedMemberFriendsList(
+    ): ResourceList {
+            $list = $this->collectedList(
                 $accessor,
                 [self::OPTION_SCREEN_NAME => $screenName]
             );
-            $nextFriendsList = $friendsList;
+            $nextList = $list;
 
-            while ($nextFriendsList->count() === 200 && $nextFriendsList->nextCursor() !== -1) {
-                $nextFriendsList = $this->collectedMemberFriendsList(
+            while ($nextList->count() === 200 && $nextList->nextCursor() !== -1) {
+                $nextList = $this->collectedList(
                     $accessor,
                     [
                         self::OPTION_SCREEN_NAME => $screenName,
-                        self::OPTION_CURSOR => $friendsList->nextCursor()
+                        self::OPTION_CURSOR => $list->nextCursor()
                     ]
                 );
-                $friendsList = FriendsList::fromResponse(array_merge(
-                    ['users' => array_merge($friendsList->getFriendsList(), $nextFriendsList->getFriendsList())],
-                    ['next_cursor_str' => $nextFriendsList->nextCursor()]
+                $list = FriendsList::fromResponse(array_merge(
+                    ['users' => array_merge($list->getList(), $nextList->getList())],
+                    ['next_cursor_str' => $nextList->nextCursor()]
                 ));
             }
 
-            return $friendsList;
+            return $list;
     }
 
-    public function collectedMemberFriendsList(
-        FriendsAccessorInterface $accessor,
+    public function collectedList(
+        ListAccessorInterface $accessor,
         array $options
-    ): FriendsList {
+    ): ResourceList {
         if (!array_key_exists(self::OPTION_SCREEN_NAME, $options)) {
             throw new InvalidArgumentException(
                 sprintf(
@@ -61,41 +69,41 @@ class MemberFriendsListCollectedEventRepository extends ServiceEntityRepository 
         $screenName = $options[self::OPTION_SCREEN_NAME];
 
         if (!array_key_exists(self::OPTION_CURSOR, $options)) {
-            $friendsList = $accessor->getMemberFriendsListAtDefaultCursor(
+            $list = $accessor->getListAtDefaultCursor(
                 $screenName,
                 $this->onFinishCollection(
-                    $this->startCollectOfMemberFriends($screenName),
-                    'getMemberFriendsListAtDefaultCursor',
+                    $this->startCollectOfFriends($screenName),
+                    'getListAtDefaultCursor',
                     $options
                 )
             );
         } else {
             $cursor = $options[self::OPTION_CURSOR];
 
-            $friendsList = $accessor->getMemberFriendsListAtCursor(
+            $list = $accessor->getListAtCursor(
                 $screenName,
                 $cursor,
                 $this->onFinishCollection(
-                    $this->startCollectOfMemberFriends($screenName, $cursor),
-                    'getMemberFriendsListAtCursor',
+                    $this->startCollectOfFriends($screenName, $cursor),
+                    'getListAtCursor',
                     $options
                 )
             );
         }
 
-        return $friendsList;
+        return $list;
     }
 
     private function finishCollectOfMemberFriendsList(
-        MemberFriendsListCollectedEvent $event,
+        ListCollectedEvent $event,
         string $payload
-    ): MemberFriendsListCollectedEvent {
+    ): ListCollectedEvent {
         $event->finishCollect($payload);
 
         return $this->save($event);
     }
 
-    private function save(MemberFriendsListCollectedEvent $event): MemberFriendsListCollectedEvent
+    private function save(ListCollectedEvent $event): ListCollectedEvent
     {
         $entityManager = $this->getEntityManager();
 
@@ -109,13 +117,13 @@ class MemberFriendsListCollectedEventRepository extends ServiceEntityRepository 
         return $event;
     }
 
-    private function startCollectOfMemberFriends(
+    private function startCollectOfFriends(
         string $screenName,
         string $cursor = '-1'
-    ): MemberFriendsListCollectedEvent {
+    ): ListCollectedEvent {
         $now = new \DateTimeImmutable();
 
-        $event = new MemberFriendsListCollectedEvent(
+        $event = new FriendsListCollectedEvent(
             $screenName,
             $cursor,
             $now,
@@ -126,24 +134,24 @@ class MemberFriendsListCollectedEventRepository extends ServiceEntityRepository 
     }
 
     /**
-     * @param MemberFriendsListCollectedEvent $event
+     * @param ListCollectedEvent $event
      * @param string $method
      * @param array $options
      * @return Closure
      */
     private function onFinishCollection(
-        MemberFriendsListCollectedEvent $event,
+        ListCollectedEvent $event,
         string $method,
         array $options
     ): Closure {
-        return function (array $friendsList) use ($event, $method, $options) {
+        return function (array $list) use ($event, $method, $options) {
             $this->finishCollectOfMemberFriendsList(
                 $event,
                 json_encode(
                     [
                         'method' => $method,
                         'options' => $options,
-                        'response' => $friendsList,
+                        'response' => $list,
                     ],
                     JSON_THROW_ON_ERROR
                 )
