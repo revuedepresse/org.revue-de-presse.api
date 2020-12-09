@@ -37,6 +37,16 @@ services:
         tags:
             - { name: 'doctrine.repository_service' }
 
+    App\Infrastructure\Collection\Repository\FollowersListCollectedEventRepository:
+        class: 'App\Infrastructure\Collection\Repository\FollowersListCollectedEventRepository'
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - 'App\Domain\Collection\Entity\FollowersListCollectedEvent'
+        calls:
+            - [ 'setLogger',           [ '@logger' ] ]
+        tags:
+            - { name: 'doctrine.repository_service' }
+
     App\Infrastructure\Collection\Repository\MemberProfileCollectedEventRepository:
         class: 'App\Infrastructure\Collection\Repository\MemberProfileCollectedEventRepository'
         arguments:

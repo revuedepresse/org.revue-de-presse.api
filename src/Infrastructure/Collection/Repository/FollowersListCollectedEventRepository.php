@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Collection\Repository;
 
+use App\Domain\Collection\Entity\FollowersListCollectedEvent;
 use App\Domain\Collection\Entity\FriendsListCollectedEvent;
 use App\Domain\Collection\Entity\ListCollectedEvent;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\Twitter\Api\Accessor\ListAccessorInterface;
-use App\Infrastructure\Twitter\Api\Resource\FriendsList;
+use App\Infrastructure\Twitter\Api\Resource\FollowersList;
 use App\Infrastructure\Twitter\Api\Resource\ResourceList;
 use Closure;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -17,12 +18,12 @@ use Throwable;
 use function json_encode;
 
 /**
- * @method FriendsListCollectedEvent|null find($id, $lockMode = null, $lockVersion = null)
- * @method FriendsListCollectedEvent|null findOneBy(array $criteria, array $orderBy = null)
- * @method FriendsListCollectedEvent[]    findAll()
- * @method FriendsListCollectedEvent[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method FollowersListCollectedEvent|null find($id, $lockMode = null, $lockVersion = null)
+ * @method FollowersListCollectedEvent|null findOneBy(array $criteria, array $orderBy = null)
+ * @method FollowersListCollectedEvent[]    findAll()
+ * @method FollowersListCollectedEvent[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class FriendsListCollectedEventRepository extends ServiceEntityRepository implements ListCollectedEventRepositoryInterface
+class FollowersListCollectedEventRepository extends ServiceEntityRepository implements ListCollectedEventRepositoryInterface
 {
     use LoggerTrait;
 
@@ -44,7 +45,7 @@ class FriendsListCollectedEventRepository extends ServiceEntityRepository implem
                         self::OPTION_CURSOR => $list->nextCursor()
                     ]
                 );
-                $list = FriendsList::fromResponse(array_merge(
+                $list = FollowersList::fromResponse(array_merge(
                     ['users' => array_merge($list->getList(), $nextList->getList())],
                     ['next_cursor_str' => $nextList->nextCursor()]
                 ));
@@ -72,7 +73,7 @@ class FriendsListCollectedEventRepository extends ServiceEntityRepository implem
             $list = $accessor->getListAtDefaultCursor(
                 $screenName,
                 $this->onFinishCollection(
-                    $this->startCollectOfFriends($screenName),
+                    $this->startCollectOfFollowers($screenName),
                     'getListAtDefaultCursor',
                     $options
                 )
@@ -84,7 +85,7 @@ class FriendsListCollectedEventRepository extends ServiceEntityRepository implem
                 $screenName,
                 $cursor,
                 $this->onFinishCollection(
-                    $this->startCollectOfFriends($screenName, $cursor),
+                    $this->startCollectOfFollowers($screenName, $cursor),
                     'getListAtCursor',
                     $options
                 )
@@ -94,7 +95,7 @@ class FriendsListCollectedEventRepository extends ServiceEntityRepository implem
         return $list;
     }
 
-    private function finishCollectOfMemberFriendsList(
+    private function finishCollectOfFollowersList(
         ListCollectedEvent $event,
         string $payload
     ): ListCollectedEvent {
@@ -117,13 +118,13 @@ class FriendsListCollectedEventRepository extends ServiceEntityRepository implem
         return $event;
     }
 
-    private function startCollectOfFriends(
+    private function startCollectOfFollowers(
         string $screenName,
         string $cursor = '-1'
     ): ListCollectedEvent {
         $now = new \DateTimeImmutable();
 
-        $event = new FriendsListCollectedEvent(
+        $event = new FollowersListCollectedEvent(
             $screenName,
             $cursor,
             $now,
@@ -145,7 +146,7 @@ class FriendsListCollectedEventRepository extends ServiceEntityRepository implem
         array $options
     ): Closure {
         return function (array $list) use ($event, $method, $options) {
-            $this->finishCollectOfMemberFriendsList(
+            $this->finishCollectOfFollowersList(
                 $event,
                 json_encode(
                     [

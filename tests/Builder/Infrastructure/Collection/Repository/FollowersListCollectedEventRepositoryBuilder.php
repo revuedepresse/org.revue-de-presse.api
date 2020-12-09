@@ -3,14 +3,14 @@ declare (strict_types=1);
 
 namespace App\Tests\Builder\Infrastructure\Collection\Repository;
 
-use App\Infrastructure\Collection\Repository\FriendsListCollectedEventRepository;
+use App\Infrastructure\Collection\Repository\FollowersListCollectedEventRepository;
 use App\Infrastructure\Collection\Repository\ListCollectedEventRepositoryInterface;
 use App\Infrastructure\Twitter\Api\Accessor\ListAccessorInterface;
-use App\Tests\Builder\Twitter\Api\Accessor\FriendsListAccessorBuilder;
+use App\Tests\Builder\Twitter\Api\Accessor\FollowersListAccessorBuilder;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 
-class FriendsListCollectedEventRepositoryBuilder extends TestCase
+class FollowersListCollectedEventRepositoryBuilder extends TestCase
 {
     /**
      * @return ListCollectedEventRepositoryInterface
@@ -18,14 +18,14 @@ class FriendsListCollectedEventRepositoryBuilder extends TestCase
     public static function make(): ListCollectedEventRepositoryInterface
     {
         $testCase = new self();
-        $prophecy = $testCase->prophesize(FriendsListCollectedEventRepository::class);
+        $prophecy = $testCase->prophesize(FollowersListCollectedEventRepository::class);
         $prophecy->aggregatedLists(
             Argument::type(ListAccessorInterface::class),
             Argument::type('string')
         )->will(function ($arguments) {
-            $friendsListAccessor = FriendsListAccessorBuilder::make();
+            $followersListAccessor = FollowersListAccessorBuilder::make();
 
-            return $friendsListAccessor->getListAtDefaultCursor($arguments[1]);
+            return $followersListAccessor->getListAtDefaultCursor($arguments[1]);
         });
 
         return $prophecy->reveal();

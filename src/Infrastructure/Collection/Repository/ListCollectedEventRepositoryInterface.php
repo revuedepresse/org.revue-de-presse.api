@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Collection\Repository;
 
-use App\Domain\Collection\Entity\FriendsListCollectedEvent;
+use App\Domain\Collection\Entity\ListCollectedEvent;
 use App\Infrastructure\Twitter\Api\Accessor\ListAccessorInterface;
 use App\Infrastructure\Twitter\Api\Resource\ResourceList;
 
 /**
- * @method FriendsListCollectedEvent|null find($id, $lockMode = null, $lockVersion = null)
- * @method FriendsListCollectedEvent|null findOneBy(array $criteria, array $orderBy = null)
- * @method FriendsListCollectedEvent[]    findAll()
- * @method FriendsListCollectedEvent[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method ListCollectedEvent|null find($id, $lockMode = null, $lockVersion = null)
+ * @method ListCollectedEvent|null findOneBy(array $criteria, array $orderBy = null)
+ * @method ListCollectedEvent[]    findAll()
+ * @method ListCollectedEvent[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 interface ListCollectedEventRepositoryInterface
 {

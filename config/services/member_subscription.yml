@@ -1,4 +1,15 @@
 services:
+    App\Infrastructure\Twitter\Api\Accessor\FriendsListAccessor:
+        class: 'App\Infrastructure\Twitter\Api\Accessor\FriendsListAccessor'
+        arguments:
+            - '@App\Twitter\Api\Accessor'
+            - '@logger'
+
+    App\Infrastructure\Twitter\Api\Mutator\FriendshipMutator:
+        class: 'App\Infrastructure\Twitter\Api\Mutator\FriendshipMutator'
+        calls:
+            - [ 'setApiAccessor', [ '@App\Twitter\Api\Accessor' ] ]
+
     App\Domain\Subscription\Console\ListMemberSubscriptionsCommand:
         class: 'App\Domain\Subscription\Console\ListMemberSubscriptionsCommand'
         calls:

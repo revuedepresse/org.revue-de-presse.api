@@ -3,14 +3,14 @@ declare (strict_types=1);
 
 namespace App\Infrastructure\Twitter\Api\Accessor;
 
-use App\Infrastructure\Twitter\Api\Resource\FriendsList;
+use App\Infrastructure\Twitter\Api\Resource\FollowersList;
 use App\Infrastructure\Twitter\Api\Resource\ResourceList;
 use App\Twitter\Api\ApiAccessorInterface;
 use Closure;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
-class FriendsListAccessor implements ListAccessorInterface
+class FollowersListAccessor implements ListAccessorInterface
 {
     private ApiAccessorInterface $accessor;
     private LoggerInterface $logger;
@@ -49,23 +49,23 @@ class FriendsListAccessor implements ListAccessorInterface
         Closure $onFinishCollection = null
     ): ResourceList {
         try {
-            $friendsListEndpoint = $this->getFriendsListEndpoint();
+            $followersListEndpoint = $this->getFollowersListEndpoint();
 
             $endpoint = strtr(
-                $friendsListEndpoint,
+                $followersListEndpoint,
                 [
                     '{{ screen_name }}' => $screenName,
                     '{{ cursor }}' => $cursor,
                 ]
             );
 
-            $friendsList = (array) $this->accessor->contactEndpoint($endpoint);
+            $followersList = (array) $this->accessor->contactEndpoint($endpoint);
 
             if (is_callable($onFinishCollection)) {
-                $onFinishCollection($friendsList);
+                $onFinishCollection($followersList);
             }
 
-            return FriendsList::fromResponse($friendsList);
+            return FollowersList::fromResponse($followersList);
         } catch (Throwable $exception) {
             $this->logger->error(
                 $exception->getMessage(),
@@ -76,10 +76,10 @@ class FriendsListAccessor implements ListAccessorInterface
         }
     }
 
-    private function getFriendsListEndpoint(): string {
+    private function getFollowersListEndpoint(): string {
         return implode([
             $this->accessor->getApiBaseUrl(),
-            '/friends/list.json?',
+            '/followers/list.json?',
             'count=200',
             '&skip_status=false',
             '&cursor={{ cursor }}',
