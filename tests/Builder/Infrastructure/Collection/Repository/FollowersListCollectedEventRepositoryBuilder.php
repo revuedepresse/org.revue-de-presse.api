@@ -6,9 +6,12 @@ namespace App\Tests\Builder\Infrastructure\Collection\Repository;
 use App\Infrastructure\Collection\Repository\FollowersListCollectedEventRepository;
 use App\Infrastructure\Collection\Repository\ListCollectedEventRepositoryInterface;
 use App\Infrastructure\Twitter\Api\Accessor\ListAccessorInterface;
+use App\Infrastructure\Twitter\Api\Selector\FollowersListSelector;
+use App\Infrastructure\Twitter\Api\Selector\ListSelector;
 use App\Tests\Builder\Twitter\Api\Accessor\FollowersListAccessorBuilder;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Ramsey\Uuid\Rfc4122\UuidV4;
 
 class FollowersListCollectedEventRepositoryBuilder extends TestCase
 {
@@ -25,7 +28,12 @@ class FollowersListCollectedEventRepositoryBuilder extends TestCase
         )->will(function ($arguments) {
             $followersListAccessor = FollowersListAccessorBuilder::make();
 
-            return $followersListAccessor->getListAtDefaultCursor($arguments[1]);
+            return $followersListAccessor->getListAtCursor(
+                new FollowersListSelector(
+                    UuidV4::uuid4(),
+                    $arguments[1],
+                )
+            );
         });
 
         return $prophecy->reveal();

@@ -3,19 +3,19 @@ declare (strict_types=1);
 
 namespace App\Tests\Domain\Subscription\Console;
 
-use App\Domain\Subscription\Console\UnfollowInactiveMembersCommand;
+use App\Domain\Subscription\Console\DiffSubscriptionsSubscribeesCommand;
+use App\Tests\Builder\Infrastructure\Collection\Repository\FollowersListCollectedEventRepositoryBuilder;
 use App\Tests\Builder\Infrastructure\Collection\Repository\FriendsListCollectedEventRepositoryBuilder;
-use App\Tests\Builder\Twitter\Api\Mutator\FriendshipMutatorBuilder;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Tester\CommandTester;
 
 /**
- * @group member_subscription
+ * @group diffing
  */
-class UnfollowInactiveMembersCommandTest extends KernelTestCase
+class DiffSubscriptionsSubscribeesCommandTest extends KernelTestCase
 {
-    private UnfollowInactiveMembersCommand $command;
+    private DiffSubscriptionsSubscribeesCommand $command;
 
     private CommandTester $commandTester;
 
@@ -25,14 +25,14 @@ class UnfollowInactiveMembersCommandTest extends KernelTestCase
 
         self::$container = $kernel->getContainer();
 
-        /** @var UnfollowInactiveMembersCommand $command */
-        $command = self::$container->get('test.'.UnfollowInactiveMembersCommand::class);
+        /** @var DiffSubscriptionsSubscribeesCommand $command */
+        $command = self::$container->get('test.'.DiffSubscriptionsSubscribeesCommand::class);
 
         $application = new Application($kernel);
 
-        $this->command = $application->find('press-review:unfollow-inactive-members');
-        $this->command->setRepository(FriendsListCollectedEventRepositoryBuilder::make());
-        $this->command->setMutator(FriendshipMutatorBuilder::make());
+        $this->command = $application->find('press-review:diff-subscriptions-subscribees');
+        $this->command->setSubscriptionsRepository(FriendsListCollectedEventRepositoryBuilder::make());
+        $this->command->setSubscribeesRepository(FollowersListCollectedEventRepositoryBuilder::make());
 
         $this->commandTester = new CommandTester($command);
     }
@@ -40,7 +40,7 @@ class UnfollowInactiveMembersCommandTest extends KernelTestCase
     /**
      * @test
      */
-    public function it_unfollows_inactive_members(): void
+    public function it_diffs_subscriptions_and_subscribees(): void
     {
         $this->commandTester->execute(['screen_name' => 'thierrymarianne']);
 

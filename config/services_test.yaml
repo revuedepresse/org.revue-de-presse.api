@@ -20,4 +20,6 @@ services:
 
     test.App\Infrastructure\Collection\Repository\FriendsListCollectedEventRepository: '@App\Infrastructure\Collection\Repository\FriendsListCollectedEventRepository'
 
+    test.App\Infrastructure\Collection\Repository\FollowersListCollectedEventRepository: '@App\Infrastructure\Collection\Repository\FollowersListCollectedEventRepository'
+
     test.App\Domain\Subscription\Console\UnfollowInactiveMembersCommand: '@App\Domain\Subscription\Console\UnfollowInactiveMembersCommand'

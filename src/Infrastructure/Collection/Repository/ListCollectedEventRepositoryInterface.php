@@ -7,6 +7,7 @@ namespace App\Infrastructure\Collection\Repository;
 use App\Domain\Collection\Entity\ListCollectedEvent;
 use App\Infrastructure\Twitter\Api\Accessor\ListAccessorInterface;
 use App\Infrastructure\Twitter\Api\Resource\ResourceList;
+use App\Infrastructure\Twitter\Api\Selector\ListSelector;
 
 /**
  * @method ListCollectedEvent|null find($id, $lockMode = null, $lockVersion = null)
@@ -16,9 +17,6 @@ use App\Infrastructure\Twitter\Api\Resource\ResourceList;
  */
 interface ListCollectedEventRepositoryInterface
 {
-    public const OPTION_SCREEN_NAME = 'screen_name';
-    public const OPTION_CURSOR = 'cursor';
-
     public function aggregatedLists(
         ListAccessorInterface $accessor,
         string $screenName
@@ -26,6 +24,6 @@ interface ListCollectedEventRepositoryInterface
 
     public function collectedList(
         ListAccessorInterface $accessor,
-        array $options
+        ListSelector $selector
     ): ResourceList;
 }
