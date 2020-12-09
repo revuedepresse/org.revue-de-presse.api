@@ -4,9 +4,9 @@ declare (strict_types=1);
 namespace App\Tests\Domain\Subscription\Console;
 
 use App\Domain\Subscription\Console\ListMemberSubscriptionsCommand;
-use App\Infrastructure\Collection\Repository\MemberFriendsListCollectedEventRepository;
-use App\Tests\Builder\Infrastructure\Collection\Repository\MemberFriendsListCollectedEventRepositoryBuilder;
-use App\Tests\Builder\Twitter\Api\Accessor\FriendsAccessorBuilder;
+use App\Infrastructure\Collection\Repository\FriendsListCollectedEventRepository;
+use App\Tests\Builder\Infrastructure\Collection\Repository\FriendsListCollectedEventRepositoryBuilder;
+use App\Tests\Builder\Twitter\Api\Accessor\FriendsListAccessorBuilder;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -33,8 +33,8 @@ class ListMemberSubscriptionsCommandTest extends KernelTestCase
         $application = new Application($kernel);
 
         $this->command = $application->find('press-review:list-member-subscriptions');
-        $this->command->setAccessor(FriendsAccessorBuilder::make());
-        $this->command->setRepository(MemberFriendsListCollectedEventRepositoryBuilder::make());
+        $this->command->setAccessor(FriendsListAccessorBuilder::make());
+        $this->command->setRepository(FriendsListCollectedEventRepositoryBuilder::make());
 
         $this->commandTester = new CommandTester($command);
     }

@@ -9,7 +9,7 @@ use Closure;
 use Psr\Log\LoggerInterface;
 use Throwable;
 
-class FriendsAccessor implements FriendsAccessorInterface
+class FriendsListAccessor implements ListAccessorInterface
 {
     private ApiAccessorInterface $accessor;
     private LoggerInterface $logger;
@@ -28,8 +28,8 @@ class FriendsAccessor implements FriendsAccessorInterface
      * @return FriendsList
      * @throws Throwable
      */
-    public function getMemberFriendsListAtDefaultCursor(string $screenName, Closure $onFinishCollection = null): FriendsList {
-        return $this->getMemberFriendsListAtCursor($screenName, '-1', $onFinishCollection);
+    public function getListAtDefaultCursor(string $screenName, Closure $onFinishCollection = null): FriendsList {
+        return $this->getListAtCursor($screenName, '-1', $onFinishCollection);
     }
 
     /**
@@ -39,7 +39,7 @@ class FriendsAccessor implements FriendsAccessorInterface
      * @return FriendsList
      * @throws Throwable
      */
-    public function getMemberFriendsListAtCursor(string $screenName, string $cursor, Closure $onFinishCollection = null): FriendsList {
+    public function getListAtCursor(string $screenName, string $cursor, Closure $onFinishCollection = null): FriendsList {
         try {
             $friendsListEndpoint = $this->getFriendsListEndpoint();
 
@@ -70,13 +70,13 @@ class FriendsAccessor implements FriendsAccessorInterface
 
     public function getMemberFriendsList(string $screenName): FriendsList
     {
-        $friendsList = $this->getMemberFriendsListAtDefaultCursor($screenName);
+        $friendsList = $this->getListAtDefaultCursor($screenName);
         $nextFriendsList = $friendsList;
 
         while ($nextFriendsList->count() === 200 && $nextFriendsList->nextCursor() !== -1) {
-            $nextFriendsList = $this->getMemberFriendsListAtCursor($screenName, $friendsList->nextCursor());
+            $nextFriendsList = $this->getListAtCursor($screenName, $friendsList->nextCursor());
             $friendsList = FriendsList::fromResponse(array_merge(
-                ['users' => array_merge($friendsList->getFriendsList(), $nextFriendsList->getFriendsList())],
+                ['users' => array_merge($friendsList->getList(), $nextFriendsList->getList())],
                 ['next_cursor_str' => $nextFriendsList->nextCursor()]
             ));
         }

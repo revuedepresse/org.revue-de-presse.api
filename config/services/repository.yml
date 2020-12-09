@@ -27,11 +27,11 @@ services:
         tags:
             - { name: 'doctrine.repository_service' }
 
-    App\Infrastructure\Collection\Repository\MemberFriendsListCollectedEventRepository:
-        class: 'App\Infrastructure\Collection\Repository\MemberFriendsListCollectedEventRepository'
+    App\Infrastructure\Collection\Repository\FriendsListCollectedEventRepository:
+        class: 'App\Infrastructure\Collection\Repository\FriendsListCollectedEventRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Domain\Collection\Entity\MemberFriendsListCollectedEvent'
+            - 'App\Domain\Collection\Entity\FriendsListCollectedEvent'
         calls:
             - [ 'setLogger',           [ '@logger' ] ]
         tags:

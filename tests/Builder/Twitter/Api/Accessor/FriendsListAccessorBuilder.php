@@ -3,19 +3,19 @@ declare (strict_types=1);
 
 namespace App\Tests\Builder\Twitter\Api\Accessor;
 
-use App\Infrastructure\Twitter\Api\Accessor\FriendsAccessor;
-use App\Infrastructure\Twitter\Api\Accessor\FriendsAccessorInterface;
+use App\Infrastructure\Twitter\Api\Accessor\FriendsListAccessor;
+use App\Infrastructure\Twitter\Api\Accessor\ListAccessorInterface;
 use App\Twitter\Api\ApiAccessorInterface;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Psr\Log\NullLogger;
 
-class FriendsAccessorBuilder extends TestCase
+class FriendsListAccessorBuilder extends TestCase
 {
     /**
-     * @return FriendsAccessorInterface
+     * @return ListAccessorInterface
      */
-    public static function make(): FriendsAccessorInterface
+    public static function make(): ListAccessorInterface
     {
         $testCase = new self();
 
@@ -41,7 +41,7 @@ class FriendsAccessorBuilder extends TestCase
                 );
             });
 
-        return new FriendsAccessor(
+        return new FriendsListAccessor(
             $apiAccessor->reveal(),
             new NullLogger()
         );

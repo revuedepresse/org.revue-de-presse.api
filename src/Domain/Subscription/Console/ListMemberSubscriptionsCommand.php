@@ -4,9 +4,9 @@ declare (strict_types=1);
 namespace App\Domain\Subscription\Console;
 
 use App\Console\AbstractCommand;
-use App\Infrastructure\Collection\Repository\MemberFriendsListCollectedEventRepositoryInterface;
+use App\Infrastructure\Collection\Repository\ListCollectedEventRepositoryInterface;
 use App\Infrastructure\DependencyInjection\MissingDependency;
-use App\Infrastructure\Twitter\Api\Accessor\FriendsAccessorInterface;
+use App\Infrastructure\Twitter\Api\Accessor\ListAccessorInterface;
 use stdClass;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -16,18 +16,18 @@ class ListMemberSubscriptionsCommand extends AbstractCommand
 {
     private const ARGUMENT_SCREEN_NAME = 'screen_name';
 
-    public FriendsAccessorInterface $accessor;
+    public ListAccessorInterface $accessor;
     /**
-     * @var MemberFriendsListCollectedEventRepositoryInterface
+     * @var ListCollectedEventRepositoryInterface
      */
-    private MemberFriendsListCollectedEventRepositoryInterface $repository;
+    private ListCollectedEventRepositoryInterface $repository;
 
-    public function setAccessor(FriendsAccessorInterface $accessor): void
+    public function setAccessor(ListAccessorInterface $accessor): void
     {
         $this->accessor = $accessor;
     }
 
-    public function setRepository(MemberFriendsListCollectedEventRepositoryInterface $repository): void
+    public function setRepository(ListCollectedEventRepositoryInterface $repository): void
     {
         $this->repository = $repository;
     }
@@ -48,10 +48,10 @@ class ListMemberSubscriptionsCommand extends AbstractCommand
         $this->guardAgainstMissingDependency();
 
         $screenName = $input->getArgument(self::ARGUMENT_SCREEN_NAME);
-        $friendsList = $this->repository->aggregatedMemberFriendsLists(
+        $friendsList = $this->repository->aggregatedLists(
             $this->accessor,
             $screenName
-        )->getFriendsList();
+        )->getList();
 
         array_walk(
             $friendsList,
@@ -70,20 +70,20 @@ class ListMemberSubscriptionsCommand extends AbstractCommand
      */
     private function guardAgainstMissingDependency(): void
     {
-        if (!($this->accessor instanceof FriendsAccessorInterface)) {
+        if (!($this->accessor instanceof ListAccessorInterface)) {
             throw new MissingDependency(
                 sprintf(
                     'Dependency of type "%s" is missing',
-                    FriendsAccessorInterface::class
+                    ListAccessorInterface::class
                 )
             );
         }
 
-        if (!($this->repository instanceof MemberFriendsListCollectedEventRepositoryInterface)) {
+        if (!($this->repository instanceof ListCollectedEventRepositoryInterface)) {
             throw new MissingDependency(
                 sprintf(
                     'Dependency of type "%s" is missing',
-                    MemberFriendsListCollectedEventRepositoryInterface::class
+                    ListCollectedEventRepositoryInterface::class
                 )
             );
         }

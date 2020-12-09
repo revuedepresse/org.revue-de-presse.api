@@ -4,10 +4,10 @@ declare (strict_types=1);
 namespace App\Domain\Subscription\Console;
 
 use App\Console\AbstractCommand;
-use App\Domain\Collection\Entity\MemberFriendsListCollectedEvent;
+use App\Domain\Collection\Entity\FriendsListCollectedEvent;
 use App\Domain\Resource\MemberCollection;
 use App\Domain\Resource\MemberIdentity;
-use App\Infrastructure\Collection\Repository\MemberFriendsListCollectedEventRepositoryInterface;
+use App\Infrastructure\Collection\Repository\ListCollectedEventRepositoryInterface;
 use App\Infrastructure\Twitter\Api\Mutator\FriendshipMutatorInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -18,15 +18,15 @@ class UnfollowInactiveMembersCommand extends AbstractCommand
     private const ARGUMENT_SCREEN_NAME = 'screen_name';
 
     /**
-     * @var MemberFriendsListCollectedEventRepositoryInterface
+     * @var ListCollectedEventRepositoryInterface
      */
-    private MemberFriendsListCollectedEventRepositoryInterface $repository;
+    private ListCollectedEventRepositoryInterface $repository;
     /**
      * @var FriendshipMutatorInterface
      */
     private FriendshipMutatorInterface $mutator;
 
-    public function setRepository(MemberFriendsListCollectedEventRepositoryInterface $repository): void
+    public function setRepository(ListCollectedEventRepositoryInterface $repository): void
     {
         $this->repository = $repository;
     }
@@ -72,7 +72,7 @@ class UnfollowInactiveMembersCommand extends AbstractCommand
         return self::SUCCESS;
     }
 
-    private function processMemberFriendList(MemberFriendsListCollectedEvent $event): void
+    private function processMemberFriendList(FriendsListCollectedEvent $event): void
     {
         $decodedPayload = json_decode($event->payload(), true);
 

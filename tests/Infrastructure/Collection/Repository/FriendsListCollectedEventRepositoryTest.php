@@ -3,24 +3,24 @@ declare (strict_types=1);
 
 namespace App\Tests\Infrastructure\Collection\Repository;
 
-use App\Infrastructure\Collection\Repository\MemberFriendsListCollectedEventRepository;
-use App\Tests\Builder\Twitter\Api\Accessor\FriendsAccessorBuilder;
+use App\Infrastructure\Collection\Repository\FriendsListCollectedEventRepository;
+use App\Tests\Builder\Twitter\Api\Accessor\FriendsListAccessorBuilder;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /**
  * @group member_subscription
  */
-class MemberFriendsListCollectedEventRepositoryTest extends KernelTestCase
+class FriendsListCollectedEventRepositoryTest extends KernelTestCase
 {
     private const SCREEN_NAME = 'mipsytipsy';
 
-    private MemberFriendsListCollectedEventRepository $repository;
+    private FriendsListCollectedEventRepository $repository;
 
     public function setUp(): void
     {
         self::$kernel = self::bootKernel();
         self::$container = self::$kernel->getContainer();
-        $this->repository = self::$container->get('test.'.MemberFriendsListCollectedEventRepository::class);
+        $this->repository = self::$container->get('test.'.FriendsListCollectedEventRepository::class);
 
         $this->truncateEventStore();
     }
@@ -30,9 +30,9 @@ class MemberFriendsListCollectedEventRepositoryTest extends KernelTestCase
      */
     public function it_should_collect_friends_list_of_a_member(): void
     {
-        $accessor = FriendsAccessorBuilder::make();
+        $accessor = FriendsListAccessorBuilder::make();
 
-        $friendsList = $this->repository->collectedMemberFriendsList(
+        $friendsList = $this->repository->collectedList(
             $accessor,
             [$this->repository::OPTION_SCREEN_NAME => self::SCREEN_NAME]
         );

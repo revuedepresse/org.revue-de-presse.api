@@ -5,13 +5,11 @@ namespace App\Infrastructure\Twitter\Api\Resource;
 
 use InvalidArgumentException;
 
-class FriendsList
+class FriendsList implements ResourceList
 {
     private array $list;
 
     private string $nextCursor;
-
-    private string $rawList;
 
     public function __construct(array $list, string $nextCursor)
 
@@ -20,7 +18,7 @@ class FriendsList
         $this->nextCursor = $nextCursor;
     }
 
-    public function getFriendsList(): array
+    public function getList(): array
     {
         return $this->list;
     }
