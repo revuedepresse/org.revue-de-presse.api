@@ -60,7 +60,7 @@ class UnfollowDiffSubscriptionsSubscribeesCommand extends AbstractCommand
                 InputArgument::REQUIRED,
                 'The screen name of a member'
             )
-            ->setAliases(['pr:diff-sbp-sbb'])
+            ->setAliases(['pr:undiff-sbp-sbb'])
         ;
     }
 
