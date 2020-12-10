@@ -82,7 +82,12 @@ class UnfollowDiffSubscriptionsSubscribeesCommand extends AbstractCommand
                     function (string $id) {
                         $member = $this->networkRepository->ensureMemberExists($id);
 
-                        if (!($member instanceof MemberInterface)) {
+                        if (
+                            !($member instanceof MemberInterface) ||
+                            $member->hasBeenDeclaredAsNotFound() ||
+                            $member->isSuspended() ||
+                            $member->isProtected()
+                        ) {
                             return null;
                         }
 
