@@ -18,6 +18,8 @@ services:
 
     test.App\Domain\Subscription\Console\ListMemberSubscribeesCommand: '@App\Domain\Subscription\Console\ListMemberSubscribeesCommand'
 
+    test.App\Domain\Subscription\Console\UnfollowDiffSubscriptionsSubscribeesCommand: '@App\Domain\Subscription\Console\UnfollowDiffSubscriptionsSubscribeesCommand'
+
     test.App\Infrastructure\Collection\Repository\FriendsListCollectedEventRepository: '@App\Infrastructure\Collection\Repository\FriendsListCollectedEventRepository'
 
     test.App\Infrastructure\Collection\Repository\FollowersListCollectedEventRepository: '@App\Infrastructure\Collection\Repository\FollowersListCollectedEventRepository'

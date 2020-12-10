@@ -19,6 +19,7 @@
             <group>api_access</group>
             <group>command</group>
             <group>conversation</group>
+            <group>diffing</group>
             <group>formatter</group>
             <group>interruptible_collect_decider</group>
             <group>status_accessor</group>

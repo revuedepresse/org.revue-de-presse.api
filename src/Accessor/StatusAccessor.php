@@ -248,16 +248,16 @@ class StatusAccessor implements StatusAccessorInterface
         ;
 
         $shouldTryToSaveDescription = $member->getDescription() === null && $memberBioIsAvailable;
-        $shouldTryToUrl = $member->getUrl() === null && $memberBioIsAvailable;
+        $shouldTryToSaveUrl = $member->getUrl() === null && $memberBioIsAvailable;
 
-        if ($shouldTryToSaveDescription || $shouldTryToUrl) {
+        if ($shouldTryToSaveDescription || $shouldTryToSaveUrl) {
             $fetchedMember = $this->collectMemberProfile($memberName);
 
             if ($shouldTryToSaveDescription) {
                 $member->description = $fetchedMember->description;
             }
 
-            if ($shouldTryToUrl) {
+            if ($shouldTryToSaveUrl) {
                 $member->url = $fetchedMember->url;
             }
 

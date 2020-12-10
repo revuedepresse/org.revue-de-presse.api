@@ -22,6 +22,18 @@ class FollowersListCollectedEventRepositoryBuilder extends TestCase
     {
         $testCase = new self();
         $prophecy = $testCase->prophesize(FollowersListCollectedEventRepository::class);
+
+        $prophecy->findBy(Argument::type('array'))
+            ->will(function ($arguments) {
+                $resourcePath = '../../../../Resources/Subscribees.b64';
+
+                return unserialize(
+                    base64_decode(
+                        file_get_contents(__DIR__.'/'.$resourcePath)
+                    )
+                );
+            });
+
         $prophecy->aggregatedLists(
             Argument::type(ListAccessorInterface::class),
             Argument::type('string')
