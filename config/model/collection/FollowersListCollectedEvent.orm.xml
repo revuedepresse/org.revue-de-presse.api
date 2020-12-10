@@ -11,12 +11,19 @@
 
         <indexes>
             <index name="occurrence_idx" columns="screen_name,at_cursor,occurred_at"/>
+            <index name="correlation_idx" columns="screen_name,correlation_id"/>
         </indexes>
 
         <id name="id" column="id" type="uuid">
             <generator strategy="CUSTOM"/>
             <custom-id-generator class="Ramsey\Uuid\Doctrine\UuidGenerator"/>
         </id>
+
+        <field
+            name="correlationId"
+            column="correlation_id"
+            type="uuid"
+        />
 
         <field
             name="screenName"

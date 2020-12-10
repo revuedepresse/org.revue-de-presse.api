@@ -20,7 +20,7 @@ use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Psr\Log\LoggerInterface;
 
-class NetworkRepository
+class NetworkRepository implements NetworkRepositoryInterface
 {
     public MemberSubscribeeRepository $memberSubscribeeRepository;
 
@@ -140,7 +140,7 @@ class NetworkRepository
      * @throws ProtectedAccountException
      * @throws SuspendedAccountException
      */
-    public function ensureMemberExists(string $memberId)
+    public function ensureMemberExists(string $memberId): ?MemberInterface
     {
         return $this->guardAgainstExceptionalMemberWhenLookingForOne(
             function (string $memberId) {

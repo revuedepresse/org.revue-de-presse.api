@@ -3,14 +3,14 @@ declare(strict_types=1);
 
 namespace App\Domain\Collection\Entity;
 
+use App\Infrastructure\Twitter\Api\Selector\ListSelector;
 use DateTimeInterface;
 use Ramsey\Uuid\UuidInterface;
 
 interface ListCollectedEvent
 {
     public function __construct(
-        string $screenName,
-        string $atCursor,
+        ListSelector $selector,
         DateTimeInterface $occurredAt,
         DateTimeInterface $startedAt,
         ?string $payload = null,
@@ -18,6 +18,7 @@ interface ListCollectedEvent
     );
 
     public function id(): UuidInterface;
+    public function correlationId(): UuidInterface;
     public function screenName(): string;
     public function atCursor(): string;
     public function payload(): string;

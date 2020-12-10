@@ -3,12 +3,15 @@ declare(strict_types=1);
 
 namespace App\Domain\Collection\Entity;
 
+use App\Infrastructure\Twitter\Api\Selector\ListSelector;
 use DateTimeInterface;
 use Ramsey\Uuid\UuidInterface;
 
 class FriendsListCollectedEvent implements ListCollectedEvent
 {
     private UuidInterface $id;
+
+    private UuidInterface $correlationId;
 
     private ?string $payload;
 
@@ -23,24 +26,29 @@ class FriendsListCollectedEvent implements ListCollectedEvent
     private ?DateTimeInterface $endedAt;
 
     public function __construct(
-        string $screenName,
-        string $atCursor,
+        ListSelector $selector,
         DateTimeInterface $occurredAt,
         DateTimeInterface $startedAt,
         ?string $payload = null,
         ?DateTimeInterface $endedAt = null
     ) {
-        $this->screenName = $screenName;
-        $this->atCursor   = $atCursor;
-        $this->payload    = $payload;
-        $this->occurredAt = $occurredAt;
-        $this->startedAt  = $startedAt;
-        $this->endedAt    = $endedAt;
+        $this->correlationId = $selector->correlationId();
+        $this->screenName    = $selector->screenName();
+        $this->atCursor      = $selector->cursor();
+        $this->payload       = $payload;
+        $this->occurredAt    = $occurredAt;
+        $this->startedAt     = $startedAt;
+        $this->endedAt       = $endedAt;
     }
 
     public function id(): UuidInterface
     {
         return $this->id;
+    }
+
+    public function correlationId(): UuidInterface
+    {
+        return $this->correlationId;
     }
 
     public function screenName(): string

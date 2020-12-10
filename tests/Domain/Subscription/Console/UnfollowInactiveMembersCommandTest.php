@@ -40,7 +40,7 @@ class UnfollowInactiveMembersCommandTest extends KernelTestCase
     /**
      * @test
      */
-    public function it_unfollow_inactive_members(): void
+    public function it_unfollows_inactive_members(): void
     {
         $this->commandTester->execute(['screen_name' => 'thierrymarianne']);
 

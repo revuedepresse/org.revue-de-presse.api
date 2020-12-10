@@ -6,6 +6,7 @@ namespace App\Infrastructure\Twitter\Api\Mutator;
 use App\Domain\Resource\MemberCollection;
 use App\Domain\Resource\MemberIdentity;
 use App\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
+use App\Operation\Collection\CollectionInterface;
 
 class FriendshipMutator implements FriendshipMutatorInterface
 {
@@ -13,8 +14,8 @@ class FriendshipMutator implements FriendshipMutatorInterface
 
     public function unfollowMembers(
         MemberCollection $memberCollection
-    ): void {
-        $memberCollection->map(function(MemberIdentity $identity) {
+    ): CollectionInterface {
+        return $memberCollection->map(function(MemberIdentity $identity) {
             $this->apiAccessor->contactEndpoint(
                 $this->getDestroyFriendshipsEndpoint($identity->screenName())
             );

@@ -10,9 +10,12 @@ use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\Twitter\Api\Accessor\ListAccessorInterface;
 use App\Infrastructure\Twitter\Api\Resource\FriendsList;
 use App\Infrastructure\Twitter\Api\Resource\ResourceList;
+use App\Infrastructure\Twitter\Api\Selector\FollowersListSelector;
+use App\Infrastructure\Twitter\Api\Selector\FriendsListSelector;
+use App\Infrastructure\Twitter\Api\Selector\ListSelector;
 use Closure;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use InvalidArgumentException;
+use Ramsey\Uuid\Rfc4122\UuidV4;
 use Throwable;
 use function json_encode;
 
@@ -30,68 +33,53 @@ class FriendsListCollectedEventRepository extends ServiceEntityRepository implem
         ListAccessorInterface $accessor,
         string $screenName
     ): ResourceList {
-            $list = $this->collectedList(
-                $accessor,
-                [self::OPTION_SCREEN_NAME => $screenName]
+        $correlationId = UuidV4::uuid4();
+
+        $selector = new FriendsListSelector(
+            $correlationId,
+            $screenName,
+            ListSelector::DEFAULT_CURSOR
+        );
+
+        $list = $this->collectedList(
+            $accessor,
+            $selector
+        );
+        $nextList = $list;
+
+        while ($nextList->count() === 200 && $nextList->nextCursor() !== -1) {
+            $selector = new FollowersListSelector(
+                $correlationId,
+                $screenName,
+                $nextList->nextCursor()
             );
-            $nextList = $list;
 
-            while ($nextList->count() === 200 && $nextList->nextCursor() !== -1) {
-                $nextList = $this->collectedList(
-                    $accessor,
-                    [
-                        self::OPTION_SCREEN_NAME => $screenName,
-                        self::OPTION_CURSOR => $list->nextCursor()
-                    ]
-                );
-                $list = FriendsList::fromResponse(array_merge(
-                    ['users' => array_merge($list->getList(), $nextList->getList())],
-                    ['next_cursor_str' => $nextList->nextCursor()]
-                ));
-            }
+            $nextList = $this->collectedList(
+                $accessor,
+                $selector
+            );
 
-            return $list;
+            $list = FriendsList::fromResponse(array_merge(
+                ['users' => array_merge($list->getList(), $nextList->getList())],
+                ['next_cursor_str' => $nextList->nextCursor()]
+            ));
+        }
+
+        return $list;
     }
 
     public function collectedList(
         ListAccessorInterface $accessor,
-        array $options
+        ListSelector $selector
     ): ResourceList {
-        if (!array_key_exists(self::OPTION_SCREEN_NAME, $options)) {
-            throw new InvalidArgumentException(
-                sprintf(
-                    'Missing "%s" option',
-                    self::OPTION_SCREEN_NAME
-                )
-            );
-        }
-
-        $screenName = $options[self::OPTION_SCREEN_NAME];
-
-        if (!array_key_exists(self::OPTION_CURSOR, $options)) {
-            $list = $accessor->getListAtDefaultCursor(
-                $screenName,
-                $this->onFinishCollection(
-                    $this->startCollectOfFriends($screenName),
-                    'getListAtDefaultCursor',
-                    $options
-                )
-            );
-        } else {
-            $cursor = $options[self::OPTION_CURSOR];
-
-            $list = $accessor->getListAtCursor(
-                $screenName,
-                $cursor,
-                $this->onFinishCollection(
-                    $this->startCollectOfFriends($screenName, $cursor),
-                    'getListAtCursor',
-                    $options
-                )
-            );
-        }
-
-        return $list;
+        return $accessor->getListAtCursor(
+            $selector,
+            $this->onFinishCollection(
+                $this->startCollectOfFriends($selector),
+                $selector,
+                'getListAtCursor'
+            )
+        );
     }
 
     private function finishCollectOfMemberFriendsList(
@@ -117,15 +105,11 @@ class FriendsListCollectedEventRepository extends ServiceEntityRepository implem
         return $event;
     }
 
-    private function startCollectOfFriends(
-        string $screenName,
-        string $cursor = '-1'
-    ): ListCollectedEvent {
+    private function startCollectOfFriends(ListSelector $selector): ListCollectedEvent {
         $now = new \DateTimeImmutable();
 
         $event = new FriendsListCollectedEvent(
-            $screenName,
-            $cursor,
+            $selector,
             $now,
             $now
         );
@@ -133,24 +117,22 @@ class FriendsListCollectedEventRepository extends ServiceEntityRepository implem
         return $this->save($event);
     }
 
-    /**
-     * @param ListCollectedEvent $event
-     * @param string $method
-     * @param array $options
-     * @return Closure
-     */
     private function onFinishCollection(
         ListCollectedEvent $event,
-        string $method,
-        array $options
+        ListSelector $selector,
+        string $method
     ): Closure {
-        return function (array $list) use ($event, $method, $options) {
+        return function (array $list) use ($event, $method, $selector) {
             $this->finishCollectOfMemberFriendsList(
                 $event,
                 json_encode(
                     [
                         'method' => $method,
-                        'options' => $options,
+                        'options' => [
+                            'screen_name' => $selector->screenName(),
+                            'cursor' => $selector->cursor(),
+                            'correlation_id' => $selector->correlationId(),
+                        ],
                         'response' => $list,
                     ],
                     JSON_THROW_ON_ERROR
