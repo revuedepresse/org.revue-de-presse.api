@@ -17,6 +17,7 @@ class FriendshipMutatorBuilder extends TestCase
         $testCase = new self();
 
         $mutator = $testCase->prophesize(FriendshipMutator::class);
+
         $mutator->unfollowMembers(
             Argument::type(MemberCollection::class)
         )->will(function ($arguments) {

@@ -13,6 +13,17 @@ parameters:
     press_review.fetch_member_status.class:                                     'App\Amqp\Command\FetchPublicationMessageDispatcher'
 
 services:
+    App\Domain\Subscription\Console\UnfollowDiffSubscriptionsSubscribeesCommand:
+        class: 'App\Domain\Subscription\Console\UnfollowDiffSubscriptionsSubscribeesCommand'
+        tags:
+            - { name: 'console.command' }
+        calls:
+            - [ 'setLogger', ['@logger'] ]
+            - [ 'setMutator', ['@App\Infrastructure\Twitter\Api\Mutator\FriendshipMutator'] ]
+            - [ 'setNetworkRepository', ['@repository.network'] ]
+            - [ 'setSubscribeesRepository', ['@App\Infrastructure\Collection\Repository\FollowersListCollectedEventRepository'] ]
+            - [ 'setSubscriptionsRepository', ['@App\Infrastructure\Collection\Repository\FriendsListCollectedEventRepository'] ]
+
     App\Amqp\Command\FetchPublicationMessageDispatcher:
         class:                              "%press_review.fetch_member_status.class%"
         properties:
