@@ -254,11 +254,11 @@ class StatusAccessor implements StatusAccessorInterface
             $fetchedMember = $this->collectMemberProfile($memberName);
 
             if ($shouldTryToSaveDescription) {
-                $member->description = $fetchedMember->description;
+                $member->description = $fetchedMember->description ?? '';
             }
 
             if ($shouldTryToSaveUrl) {
-                $member->url = $fetchedMember->url;
+                $member->url = $fetchedMember->url ?? '';
             }
 
             $this->memberRepository->saveMember($member);

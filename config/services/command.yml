@@ -19,6 +19,8 @@ services:
             - { name: 'console.command' }
         calls:
             - [ 'setLogger', ['@logger'] ]
+            - [ 'setMemberRepository', ['@App\Infrastructure\Repository\Membership\MemberRepository'] ]
+            - [ 'setMemberSubscriptionRepository', ['@repository.member_subscription'] ]
             - [ 'setMutator', ['@App\Infrastructure\Twitter\Api\Mutator\FriendshipMutator'] ]
             - [ 'setNetworkRepository', ['@repository.network'] ]
             - [ 'setSubscribeesRepository', ['@App\Infrastructure\Collection\Repository\FollowersListCollectedEventRepository'] ]

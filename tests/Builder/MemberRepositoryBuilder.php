@@ -67,6 +67,14 @@ class MemberRepositoryBuilder
         return $this;
     }
 
+    public function willFindAMemberByTwitterScreenName(string $screenName, MemberInterface $member): self
+    {
+        $this->prophecy->findOneBy(['twitter_username' => $screenName])
+            ->willReturn($member);
+
+        return $this;
+    }
+
     public function willDeclareAMemberAsFound(MemberInterface $member): self
     {
         $this->prophecy->declareMemberAsFound($member)

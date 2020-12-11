@@ -8,25 +8,27 @@ use App\Domain\Collection\Entity\FriendsListCollectedEvent;
 use App\Domain\Resource\MemberCollection;
 use App\Domain\Resource\MemberIdentity;
 use App\Infrastructure\Collection\Repository\ListCollectedEventRepositoryInterface;
+use App\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
+use App\Infrastructure\Repository\Membership\MemberRepositoryInterface;
 use App\Infrastructure\Twitter\Api\Mutator\FriendshipMutatorInterface;
+use App\Membership\Entity\MemberInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class UnfollowInactiveMembersCommand extends AbstractCommand
 {
+    use MemberRepositoryTrait;
+
     private const ARGUMENT_SCREEN_NAME = 'screen_name';
 
-    /**
-     * @var ListCollectedEventRepositoryInterface
-     */
     private ListCollectedEventRepositoryInterface $repository;
-    /**
-     * @var FriendshipMutatorInterface
-     */
+
     private FriendshipMutatorInterface $mutator;
 
-    public function setRepository(ListCollectedEventRepositoryInterface $repository): void
+    private MemberInterface $subscriber;
+
+    public function setListCollectedEventRepository(ListCollectedEventRepositoryInterface $repository): void
     {
         $this->repository = $repository;
     }
@@ -56,8 +58,14 @@ class UnfollowInactiveMembersCommand extends AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $screenName = $input->getArgument(self::ARGUMENT_SCREEN_NAME);
+
         $memberFriendsListCollectedEvents = $this->repository->findBy(
-            ['screenName' => $input->getArgument(self::ARGUMENT_SCREEN_NAME)]
+            ['screenName' => $screenName]
+        );
+
+        $this->subscriber = $this->memberRepository->findOneBy(
+            ['twitter_username' => $screenName]
         );
 
         if ($memberFriendsListCollectedEvents === null) {
@@ -86,7 +94,7 @@ class UnfollowInactiveMembersCommand extends AbstractCommand
         $coll = MemberCollection::fromArray($memberIdentities);
 
         if ($coll instanceof MemberCollection) {
-            $this->mutator->unfollowMembers($coll);
+            $this->mutator->unfollowMembers($coll, $this->subscriber);
         }
     }
 

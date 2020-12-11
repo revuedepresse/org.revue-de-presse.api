@@ -10,7 +10,10 @@ use App\Domain\Resource\MemberCollection;
 use App\Domain\Resource\MemberIdentity;
 use App\Infrastructure\Collection\Repository\ListCollectedEventRepositoryInterface;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
+use App\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
+use App\Infrastructure\DependencyInjection\Subscription\MemberSubscriptionRepositoryTrait;
 use App\Infrastructure\Twitter\Api\Mutator\FriendshipMutatorInterface;
+use App\Member\Entity\MemberSubscription;
 use App\Member\Repository\NetworkRepositoryInterface;
 use App\Membership\Entity\MemberInterface;
 use Symfony\Component\Console\Input\InputArgument;
@@ -20,6 +23,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 class UnfollowDiffSubscriptionsSubscribeesCommand extends AbstractCommand
 {
     use LoggerTrait;
+    use MemberRepositoryTrait;
+    use MemberSubscriptionRepositoryTrait;
 
     private const ARGUMENT_SCREEN_NAME = 'screen_name';
 
@@ -60,13 +65,16 @@ class UnfollowDiffSubscriptionsSubscribeesCommand extends AbstractCommand
                 InputArgument::REQUIRED,
                 'The screen name of a member'
             )
-            ->setAliases(['pr:diff-sbp-sbb'])
+            ->setAliases(['pr:undiff-sbp-sbb'])
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $screenName = $input->getArgument(self::ARGUMENT_SCREEN_NAME);
+        $subscriber = $this->memberRepository->findOneBy(
+            ['twitter_username' => $screenName]
+        );
 
         $subscriptions = $this->subscriptionsRepository->findBy(['screenName' => $screenName]);
         $subscribees = $this->subscribeesRepository->findBy(['screenName' => $screenName]);
@@ -74,7 +82,8 @@ class UnfollowDiffSubscriptionsSubscribeesCommand extends AbstractCommand
         $subscriptionsIds = $this->pluckSubscriptionIds($subscriptions);
         $subscribeesIds = $this->pluckSubscribeesIds($subscribees);
 
-        $subscriptionsDifference = array_diff($subscriptionsIds, $subscribeesIds);
+        $cancelledSubscriptionsIds = $this->memberSubscriptionRepository->getCancelledMemberSubscriptions($subscriber);
+        $subscriptionsDifference = array_diff($subscriptionsIds, $subscribeesIds, $cancelledSubscriptionsIds);
 
         $memberCollection = MemberCollection::fromArray(
             array_filter(
@@ -82,7 +91,11 @@ class UnfollowDiffSubscriptionsSubscribeesCommand extends AbstractCommand
                     function (string $id) {
                         $member = $this->networkRepository->ensureMemberExists($id);
 
-                        if (!($member instanceof MemberInterface)) {
+                        if (
+                            !($member instanceof MemberInterface) ||
+                            $member->hasBeenDeclaredAsNotFound() ||
+                            $member->isSuspended()
+                        ) {
                             return null;
                         }
 
@@ -96,7 +109,7 @@ class UnfollowDiffSubscriptionsSubscribeesCommand extends AbstractCommand
             )
         );
 
-        $this->mutator->unfollowMembers($memberCollection);
+        $this->mutator->unfollowMembers($memberCollection, $subscriber);
 
         return self::RETURN_STATUS_SUCCESS;
     }
