@@ -14,6 +14,8 @@ class MemberSubscription
 
     private MemberInterface $subscription;
 
+    private bool $hasBeenCancelled = false;
+
     /**
      * @param MemberInterface $member
      * @param MemberInterface $subscription
@@ -24,5 +26,24 @@ class MemberSubscription
     ) {
         $this->member = $member;
         $this->subscription = $subscription;
+    }
+
+    public function getSubscription(): MemberInterface
+    {
+        return $this->subscription;
+    }
+
+    public function markAsCancelled(): self
+    {
+        $this->hasBeenCancelled = true;
+
+        return $this;
+    }
+
+    public function markAsNotBeingCancelled(): self
+    {
+        $this->hasBeenCancelled = false;
+
+        return $this;
     }
 }

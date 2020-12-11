@@ -9,6 +9,9 @@ services:
         class: 'App\Infrastructure\Twitter\Api\Mutator\FriendshipMutator'
         calls:
             - [ 'setApiAccessor', [ '@App\Twitter\Api\Accessor' ] ]
+            - [ 'setLogger', [ '@logger' ] ]
+            - [ 'setMemberRepository', [ '@App\Infrastructure\Repository\Membership\MemberRepository' ] ]
+            - [ 'setMemberSubscriptionRepository', [ '@repository.member_subscription' ] ]
 
     App\Domain\Subscription\Console\ListMemberSubscriptionsCommand:
         class: 'App\Domain\Subscription\Console\ListMemberSubscriptionsCommand'
@@ -22,6 +25,7 @@ services:
         class: 'App\Domain\Subscription\Console\UnfollowInactiveMembersCommand'
         calls:
             - [ 'setMutator', [ '@App\Infrastructure\Twitter\Api\Mutator\FriendshipMutator' ] ]
-            - [ 'setRepository', [ '@App\Infrastructure\Collection\Repository\FriendsListCollectedEventRepository' ] ]
+            - [ 'setListCollectedEventRepository', [ '@App\Infrastructure\Collection\Repository\FriendsListCollectedEventRepository' ] ]
+            - [ 'setMemberRepository', [ '@App\Infrastructure\Repository\Membership\MemberRepository' ] ]
         tags:
             - { name: 'console.command' }

@@ -44,6 +44,12 @@
             />
         </many-to-one>
 
+        <field
+            name="hasBeenCancelled"
+            column="has_been_cancelled"
+            type="boolean"
+        />
+
     </entity>
 
 </doctrine-mapping>

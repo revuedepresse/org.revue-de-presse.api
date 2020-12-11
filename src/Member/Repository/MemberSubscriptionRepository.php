@@ -272,7 +272,7 @@ QUERY;
     public function saveMemberSubscription(
         MemberInterface $member,
         MemberInterface $subscription
-    ) {
+    ): MemberSubscription {
         $memberSubscription = $this->findOneBy(['member' => $member, 'subscription' => $subscription]);
 
         if (!($memberSubscription instanceof MemberSubscription)) {
@@ -280,6 +280,46 @@ QUERY;
         }
 
         $this->getEntityManager()->persist($memberSubscription->markAsNotBeingCancelled());
+        $this->getEntityManager()->flush();
+
+        return $memberSubscription;
+    }
+
+    public function getCancelledMemberSubscriptions(MemberInterface $subscriber): array
+    {
+        $queryCancelledMemberSubscriptionsIds =<<<QUERY
+            SELECT DISTINCT subscription.usr_twitter_id as subscription_id
+            FROM member_subscription
+            LEFT JOIN weaving_user subscriber
+            ON subscriber.usr_id = member_subscription.member_id
+            AND subscriber.usr_twitter_username = :screen_name
+            INNER JOIN weaving_user subscription
+            ON subscription.usr_id = member_subscription.subscription_id
+            AND member_subscription.has_been_cancelled = true;
+QUERY
+;
+
+        $connection = $this->getEntityManager()->getConnection();
+        $statement = $connection->executeQuery(
+            $queryCancelledMemberSubscriptionsIds,
+            ['screen_name' => $subscriber->getTwitterUsername()]
+        );
+
+        $cancelledSubscriptions = $statement->fetchAll();
+
+        return array_map(
+            static fn (array $subscription) => (string) $subscription['subscription_id'],
+            $cancelledSubscriptions
+        );
+    }
+
+    public function cancelMemberSubscription(
+        MemberInterface $member,
+        MemberInterface $subscription
+    ): MemberSubscription {
+        $memberSubscription = $this->saveMemberSubscription($member, $subscription);
+
+        $this->getEntityManager()->persist($memberSubscription->markAsCancelled());
         $this->getEntityManager()->flush();
 
         return $memberSubscription;
