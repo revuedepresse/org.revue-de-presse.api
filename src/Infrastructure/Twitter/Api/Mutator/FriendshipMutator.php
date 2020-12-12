@@ -3,6 +3,7 @@ declare (strict_types=1);
 
 namespace App\Infrastructure\Twitter\Api\Mutator;
 
+use Abraham\TwitterOAuth\TwitterOAuthException;
 use App\Domain\Resource\MemberCollection;
 use App\Domain\Resource\MemberIdentity;
 use App\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
@@ -27,16 +28,16 @@ class FriendshipMutator implements FriendshipMutatorInterface
         return $memberCollection->map(function(MemberIdentity $identity) use ($subscriber) {
             try {
                 $this->apiAccessor->contactEndpoint(
-                    $this->getDestroyFriendshipsEndpoint($identity->screenName())
+                    $this->getDestroyFriendshipEndpointForMemberHavingId($identity->id())
                 );
 
                 $this->memberSubscriptionRepository->cancelMemberSubscription(
                     $subscriber,
                     $this->memberRepository->findOneBy([
-                        'twitter_username' => $identity->screenName()
+                        'twitterID' => $identity->id()
                     ])
                 );
-            } catch (UnavailableResourceException $e) {
+            } catch (UnavailableResourceException|TwitterOAuthException $e) {
                 $this->logger->error($e->getMessage());
             }
 
@@ -44,11 +45,19 @@ class FriendshipMutator implements FriendshipMutatorInterface
         });
     }
 
-    private function getDestroyFriendshipsEndpoint(string $screenName): string
+    private function getDestroyFriendshipEndpoint(string $screenName): string
     {
         return strtr(
             $this->apiAccessor->getApiBaseUrl() . '/friendships/destroy.json?screen_name={{ screen_name }}',
             ['{{ screen_name }}' => $screenName]
+        );
+    }
+
+    private function getDestroyFriendshipEndpointForMemberHavingId(string $id): string
+    {
+        return strtr(
+            $this->apiAccessor->getApiBaseUrl() . '/friendships/destroy.json?user_id={{ user_id }}',
+            ['{{ user_id }}' => $id]
         );
     }
 }

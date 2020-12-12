@@ -17,6 +17,7 @@ class FriendshipMutatorBuilder extends TestCase
     {
         $testCase = new self();
 
+        /** @var FriendshipMutatorInterface $mutator */
         $mutator = $testCase->prophesize(FriendshipMutator::class);
 
         $mutator->unfollowMembers(

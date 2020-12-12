@@ -67,11 +67,6 @@ class ListController
     public TimelyStatusRepository $timelyStatusRepository;
 
     /**
-     * @var string
-     */
-    public string $configDirectory;
-
-    /**
      * @var LoggerInterface
      */
     public LoggerInterface $logger;
@@ -85,6 +80,10 @@ class ListController
      * @var RouterInterface
      */
     public RouterInterface $router;
+
+    public string $serviceAccountConfig;
+
+    public string $databaseUri;
 
     /**
      * @param Request $request
@@ -361,19 +360,13 @@ class ListController
      */
     public function getFirebaseDatabase()
     {
-        $serviceAccount = ServiceAccount::fromJsonFile(
-            $this->configDirectory . '/google-service-account.json'
-        );
-
-        $firebase = (new Factory)
-            ->withServiceAccount($serviceAccount)
+        return (new Factory)
+            ->withServiceAccount($this->serviceAccountConfig)
             // The following line is optional if the project id in your credentials file
             // is identical to the subdomain of your Firebase project. If you need it,
             // make sure to replace the URL with the URL of your project.
-            ->withDatabaseUri('https://weaving-the-web-6fe11.firebaseio.com')
-            ->create();
-
-        return $firebase->getDatabase();
+            ->withDatabaseUri($this->databaseUri)
+            ->createDatabase();
     }
 
     /**

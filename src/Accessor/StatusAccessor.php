@@ -174,11 +174,6 @@ class StatusAccessor implements StatusAccessorInterface
         );
     }
 
-    /**
-     * @param string $id
-     *
-     * @return MemberInterface|null
-     */
     public function ensureMemberHavingIdExists(string $id): ?MemberInterface
     {
         $member = $this->memberRepository->findOneBy(['twitterID' => $id]);
@@ -192,7 +187,7 @@ class StatusAccessor implements StatusAccessorInterface
 
         return $this->memberRepository->saveMember(
             $this->memberRepository->make(
-                (string) $id,
+                $id,
                 $member->screen_name,
                 $protected = false,
                 $suspended = false,
