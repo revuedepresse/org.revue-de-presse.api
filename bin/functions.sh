@@ -410,10 +410,17 @@ function install_php_dependencies {
     local project_dir
     project_dir="$(get_project_dir)"
 
+    local production_option
+    production_option=''
+    if [ -n "${APP_ENV}" ] && [ "${APP_ENV}" = 'prod' ];
+    then
+        production_option='--apcu-autoloader'
+    fi
+
     local command
     command=$(echo -n '/bin/bash -c "cd '"${project_dir}"' &&
     source '"${project_dir}"'/bin/install-composer.sh &&
-    php '"${project_dir}"'/composer.phar install --prefer-dist -n"')
+    php '"${project_dir}"'/composer.phar install '"${production_option}"' --prefer-dist -n"')
     echo "${command}" | make run-php
 }
 
