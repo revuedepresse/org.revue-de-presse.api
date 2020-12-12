@@ -8,8 +8,20 @@
     "beberlei/doctrineextensions": {
         "version": "dev-master"
     },
+    "behat/behat": {
+        "version": "3.8.x-dev"
+    },
+    "behat/gherkin": {
+        "version": "v4.6.2"
+    },
+    "behat/transliterator": {
+        "version": "v1.3.0"
+    },
     "brick/math": {
         "version": "0.8.12"
+    },
+    "composer/ca-bundle": {
+        "version": "1.x-dev"
     },
     "doctrine/annotations": {
         "version": "1.0",
@@ -102,6 +114,9 @@
     "doctrine/reflection": {
         "version": "1.2.x-dev"
     },
+    "doctrine/sql-formatter": {
+        "version": "1.x-dev"
+    },
     "fabpot/goutte": {
         "version": "v3.3.0"
     },
@@ -179,6 +194,9 @@
     },
     "league/flysystem": {
         "version": "1.1-dev"
+    },
+    "league/mime-type-detection": {
+        "version": "1.5.1"
     },
     "monolog/monolog": {
         "version": "2.x-dev"
@@ -271,6 +289,9 @@
     },
     "ralouphie/getallheaders": {
         "version": "3.0.3"
+    },
+    "ramsey/collection": {
+        "version": "1.1.1"
     },
     "ramsey/uuid": {
         "version": "4.x-dev"
@@ -441,6 +462,9 @@
             "src/Kernel.php"
         ]
     },
+    "symfony/http-client-contracts": {
+        "version": "2.3-dev"
+    },
     "symfony/http-foundation": {
         "version": "5.1-dev"
     },
@@ -510,11 +534,26 @@
     "symfony/polyfill-ctype": {
         "version": "1.14-dev"
     },
+    "symfony/polyfill-intl-grapheme": {
+        "version": "1.21-dev"
+    },
+    "symfony/polyfill-intl-idn": {
+        "version": "1.21-dev"
+    },
+    "symfony/polyfill-intl-normalizer": {
+        "version": "1.21-dev"
+    },
     "symfony/polyfill-mbstring": {
         "version": "1.14-dev"
     },
+    "symfony/polyfill-php72": {
+        "version": "1.21-dev"
+    },
     "symfony/polyfill-php73": {
         "version": "1.14-dev"
+    },
+    "symfony/polyfill-php80": {
+        "version": "1.21-dev"
     },
     "symfony/profiler-pack": {
         "version": "dev-master"
@@ -574,6 +613,9 @@
     },
     "symfony/stopwatch": {
         "version": "5.1-dev"
+    },
+    "symfony/string": {
+        "version": "5.x-dev"
     },
     "symfony/test-pack": {
         "version": "dev-master"
@@ -667,5 +709,11 @@
     },
     "webmozart/assert": {
         "version": "1.6.0"
+    },
+    "zendframework/zend-code": {
+        "version": "3.5.x-dev"
+    },
+    "zendframework/zend-eventmanager": {
+        "version": "3.3-dev"
     }
 }

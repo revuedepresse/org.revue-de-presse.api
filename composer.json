@@ -57,6 +57,7 @@
         "thecodingmachine/safe": "^0.1.0@dev"
     },
     "require-dev": {
+        "behat/behat": "^3.8",
         "doctrine/doctrine-fixtures-bundle": "^3.3@dev",
         "phpunit/phpunit": "7.1.5",
         "roave/security-advisories": "dev-latest",

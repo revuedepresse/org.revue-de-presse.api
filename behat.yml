@@ -1,0 +1,8 @@
+default:
+    autoload:
+      '': "%paths.base%/tests/Features/Bootstrap"
+    suites:
+        default:
+            contexts: [App\Tests\Features\Bootstrap\HighlightsContext]
+            paths:
+                - "%paths.base%/tests/Features"
