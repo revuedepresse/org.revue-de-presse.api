@@ -21,7 +21,8 @@ services:
         calls:
             - [ 'setPublicationListDispatcher', ['@App\Infrastructure\Amqp\MessageBus\PublicationListDispatcher']]
         properties:
-            configDirectory:                '%kernel.project_dir%/config'
+            serviceAccountConfig:           "%kernel.project_dir%/config/%env(resolve:FIREBASE_SERVICE_ACCOUNT_CONFIG)%"
+            databaseUri:                    "%env(resolve:FIREBASE_DATABASE_URI)%"
             authenticationTokenRepository:  '@repository.authentication_token'
             aggregateRepository:            '@App\Api\Repository\PublicationListRepository'
             highlightRepository:            '@repository.highlight'
