@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Domain\Curation;
 
 use App\Twitter\Domain\Publication\Repository\LikedStatusRepositoryInterface;
-use App\Twitter\Infrastructure\Repository\Membership\MemberRepositoryInterface;
+use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use App\Twitter\Domain\Publication\Repository\StatusRepositoryInterface;
 use App\Twitter\Domain\Curation\LikedStatusCollectionAwareInterface;
 use function array_key_exists;

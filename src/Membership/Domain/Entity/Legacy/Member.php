@@ -45,7 +45,7 @@ class Member extends MemberModel
     /**
      * @ORM\Column(name="usr_api_key", type="string", nullable=true)
      */
-    public ?string $apiKey;
+    public ?string $apiKey = null;
 
     /**
      * @ORM\Column(name="max_status_id", type="string", length=255, nullable=true)
@@ -291,10 +291,7 @@ class Member extends MemberModel
         return $jsonEncodedMember;
     }
 
-    /**
-     * @return string
-     */
-    public function getApiKey(): string
+    public function getApiKey(): ?string
     {
         return $this->apiKey;
     }

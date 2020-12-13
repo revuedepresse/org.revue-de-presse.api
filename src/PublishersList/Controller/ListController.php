@@ -3,6 +3,9 @@ declare(strict_types=1);
 
 namespace App\PublishersList\Controller;
 
+use App\Membership\Domain\Entity\Legacy\Member;
+use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Infrastructure\Repository\AuthenticationTokenRepository;
 use App\PublishersList\Controller\Exception\InvalidRequestException;
 use App\PublishersList\Repository\TimelyStatusRepository;
 use App\Twitter\Infrastructure\Api\AccessToken\Repository\TokenRepository;
@@ -13,18 +16,15 @@ use App\Twitter\Infrastructure\Api\Repository\PublishersListRepository;
 use App\Twitter\Infrastructure\Cache\RedisCache;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublishersListDispatcherTrait;
 use App\Twitter\Infrastructure\Http\SearchParams;
+use App\Twitter\Infrastructure\Publication\Repository\HighlightRepository;
 use App\Twitter\Infrastructure\Repository\Membership\MemberRepository;
 use App\Twitter\Infrastructure\Security\Cors\CorsHeadersAwareTrait;
-use App\Membership\Infrastructure\Repository\AuthenticationTokenRepository;
-use App\Membership\Domain\Entity\Legacy\Member;
-use App\Membership\Domain\Entity\MemberInterface;
-use App\Twitter\Infrastructure\Publication\Repository\HighlightRepository;
-use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
+use Exception;
+use Kreait\Firebase\Database;
 use Kreait\Firebase\Factory;
-use Kreait\Firebase\ServiceAccount;
 use Predis\Client;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -88,7 +88,7 @@ class ListController
     /**
      * @param Request $request
      * @return JsonResponse
-     * @throws DBALException
+     * @throws Exception
      */
     public function getAggregates(Request $request)
     {
@@ -177,7 +177,7 @@ class ListController
     /**
      * @param Request $request
      * @return JsonResponse
-     * @throws DBALException
+     * @throws Exception
      */
     public function getHighlights(Request $request)
     {
@@ -254,7 +254,7 @@ class ListController
     /**
      * @param $searchParams
      * @return array|mixed
-     * @throws DBALException
+     * @throws Exception
      */
     private function getHighlightsFromSearchParams(SearchParams $searchParams) {
         if ($this->invalidHighlightsSearchParams($searchParams)) {
@@ -291,7 +291,7 @@ class ListController
      * @param              $snapshot
      * @param              $client
      * @return array
-     * @throws DBALException
+     * @throws Exception
      */
     private function getHighlightsFromFirebaseSnapshot(SearchParams $searchParams, $snapshot, Client $client): array
     {
@@ -356,9 +356,9 @@ class ListController
     }
 
     /**
-     * @return mixed
+     * @return Database
      */
-    public function getFirebaseDatabase()
+    public function getFirebaseDatabase(): Database
     {
         return (new Factory)
             ->withServiceAccount($this->serviceAccountConfig)
@@ -428,7 +428,7 @@ class ListController
      * @param Request $request
      *
      * @return int|null|JsonResponse
-     * @throws DBALException
+     * @throws Exception
      */
     public function getMembers(Request $request)
     {
@@ -489,7 +489,7 @@ class ListController
     /**
      * @param Request $request
      * @return JsonResponse
-     * @throws DBALException
+     * @throws Exception
      */
     public function getStatuses(Request $request)
     {
@@ -511,7 +511,7 @@ class ListController
      * @param callable $finder
      * @param array    $params
      * @return JsonResponse
-     * @throws DBALException
+     * @throws Exception
      */
     private function getCollection(
         Request $request,

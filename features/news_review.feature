@@ -1,6 +1,6 @@
 Feature: Daily press review
 
   Scenario: I can see a daily press review
-    Given publications have been collected from French press media accounts
+    Given there are new publications
     When I access the daily press review
     Then I can see highlights for today

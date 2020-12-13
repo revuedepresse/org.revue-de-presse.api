@@ -16,6 +16,8 @@ services:
         tags:
             - { name: 'doctrine.repository_service' }
 
+    App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface: '@App\Twitter\Infrastructure\Repository\Membership\MemberRepository'
+
     App\Twitter\Infrastructure\Curation\Repository\MemberFriendsCollectedEventRepository:
         class: 'App\Twitter\Infrastructure\Curation\Repository\MemberFriendsCollectedEventRepository'
         arguments:
