@@ -12,8 +12,8 @@ use App\Infrastructure\DependencyInjection\Collection\MemberProfileCollectedEven
 use App\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Infrastructure\DependencyInjection\MessageBusTrait;
 use App\Infrastructure\DependencyInjection\TranslatorTrait;
-use App\Membership\Entity\Member;
-use App\Membership\Entity\MemberInterface;
+use App\Membership\Domain\Entity\Legacy\Member;
+use App\Membership\Domain\Entity\MemberInterface;
 use App\Twitter\Exception\NotFoundMemberException;
 use App\Twitter\Exception\ProtectedAccountException;
 use App\Twitter\Exception\SuspendedAccountException;

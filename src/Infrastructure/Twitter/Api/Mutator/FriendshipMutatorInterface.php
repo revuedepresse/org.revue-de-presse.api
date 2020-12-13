@@ -4,7 +4,7 @@ declare (strict_types=1);
 namespace App\Infrastructure\Twitter\Api\Mutator;
 
 use App\Domain\Resource\MemberCollection;
-use App\Membership\Entity\MemberInterface;
+use App\Membership\Domain\Entity\MemberInterface;
 use App\Infrastructure\Operation\Collection\CollectionInterface;
 
 interface FriendshipMutatorInterface

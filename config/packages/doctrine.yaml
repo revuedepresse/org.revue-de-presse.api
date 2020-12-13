@@ -146,19 +146,19 @@ doctrine:
                         alias:      'Member'
                         dir:        '%kernel.project_dir%/config/model/member'
                         is_bundle:  false
-                        prefix:     App\Member\Entity
+                        prefix:     App\Membership\Domain\Entity
                         type:       xml
                     Membership:
                         alias:      'Membership'
-                        dir:        '%kernel.project_dir%/src/Membership/Entity'
+                        dir:        '%kernel.project_dir%/src/Membership/Domain/Entity'
                         is_bundle:  false
-                        prefix:     App\Membership\Entity
+                        prefix:     App\Membership\Domain\Entity\Legacy
                         type:       annotation
                     Media:
                         alias:      'Media'
                         dir:        '%kernel.project_dir%/config/model/media'
                         is_bundle:  false
-                        prefix:     App\Media\Entity
+                        prefix:     App\PressMedia\Entity
                         type:       xml
                     Popularity:
                         alias:      'Popularity'

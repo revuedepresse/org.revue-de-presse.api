@@ -8,7 +8,7 @@ use App\Domain\Collection\Entity\PublicationBatchCollectedEvent;
 use App\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
-use App\Membership\Entity\MemberInterface;
+use App\Membership\Domain\Entity\MemberInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Throwable;
 use const JSON_THROW_ON_ERROR;

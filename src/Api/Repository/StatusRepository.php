@@ -9,7 +9,7 @@ use App\Api\Entity\Status;
 use App\Domain\Collection\CollectionStrategyInterface;
 use App\Domain\Publication\StatusInterface;
 use App\Domain\Publication\TaggedStatus;
-use App\Membership\Entity\MemberInterface;
+use App\Membership\Domain\Entity\MemberInterface;
 use App\Domain\Publication\Repository\ExtremumAwareInterface;
 use App\Infrastructure\Publication\Mapping\MappingAwareInterface;
 use App\Twitter\Exception\NotFoundMemberException;

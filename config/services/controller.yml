@@ -1,7 +1,7 @@
 services:
     controller.authentication:
         public: true
-        class: 'App\Member\Authentication\Controller\AuthenticationController'
+        class: 'App\Membership\Infrastructure\Security\Authentication\Controller\AuthenticationController'
         properties:
             authenticator: '@app.authenticator'
 
@@ -35,7 +35,7 @@ services:
 
     controller.logged_in_member:
         public: true
-        class: 'App\Member\Controller\LoggedInMemberController'
+        class: 'App\Membership\Infrastructure\Controller\LoggedInMemberController'
         arguments:
             - '%allowed.origin%'
             - '%kernel.environment%'

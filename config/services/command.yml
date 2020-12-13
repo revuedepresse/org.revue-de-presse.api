@@ -2,14 +2,14 @@ parameters:
     command.map_aggregate_status_collection.class:                              'App\Infrastructure\Publication\Mapping\Command\MapAggregateStatusCollectionCommand'
     command.map_status_collection.class:                                        'App\Infrastructure\Publication\Mapping\Command\MapStatusCollectionCommand'
     command.select_status_collection.class:                                     'App\Infrastructure\Publication\Command\QueryPublicationCollectionCommand'
-    command.add_members_to_aggregate.class:                                     'App\Member\Command\AddMemberToAggregateCommand'
-    command.import_network.class:                                               'App\Member\Command\ImportNetworkCommand'
+    command.add_members_to_aggregate.class:                                     'App\Membership\Infrastructure\Command\AddMemberToAggregateCommand'
+    command.import_network.class:                                               'App\Membership\Infrastructure\Command\ImportNetworkCommand'
 
     weaving_the_web_amqp.consumer.conversation_status.class:                    'App\Conversation\Consumer\ConversationStatusConsumer'
     weaving_the_web_amqp.producer.produce_conversation_messages_command.class:  'App\Conversation\Producer\ProduceConversationMessagesCommand'
     weaving_the_web_amqp.producer.produce_timely_status_messages_command.class: 'App\PublicationList\Producer\ProduceTimelyStatusMessagesCommand'
     weaving_the_web_amqp.producer.produce_member_messages_command.class:        'App\Conversation\Producer\ProduceMemberMessagesCommand'
-    weaving_the_web_amqp.consumer.network.class:                                'App\Member\Consumer\NetworkConsumer'
+    weaving_the_web_amqp.consumer.network.class:                                'App\Membership\Infrastructure\Consumer\NetworkConsumer'
 
     press_review.publication_message.handler.class:                             'App\Infrastructure\Amqp\MessageHandler\FetchPublicationMessageHandler'
     press_review.fetch_member_status.class:                                     'App\Infrastructure\Amqp\Command\FetchPublicationMessageDispatcher'
@@ -100,7 +100,7 @@ services:
             - { name: 'console.command' }
 
     command.import_media_relationships:
-        class: 'App\Media\Command\ImportMediaRelationshipsCommand'
+        class: 'App\PressMedia\Command\ImportMediaRelationshipsCommand'
         properties:
             logger:          '@logger'
             mediasDirectory: '%kernel.project_dir%/../src/App/Resources/medias'
@@ -188,7 +188,7 @@ services:
             - { name: 'console.command' }
 
     command.subscribe_to_member_timelines:
-        class:                               'App\Member\Command\SubscribeToMemberTimelinesCommand'
+        class:                               'App\Membership\Infrastructure\Command\SubscribeToMemberTimelinesCommand'
         properties:
             accessor:                        '@App\Twitter\Api\Accessor'
             aggregateSubscriptionRepository: '@repository.publication_list_subscription'

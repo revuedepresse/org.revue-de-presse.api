@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Repository\Membership;
 
 use App\Domain\Resource\MemberIdentity;
-use App\Membership\Entity\MemberInterface;
+use App\Membership\Domain\Entity\MemberInterface;
 
 interface MemberRepositoryInterface
 {

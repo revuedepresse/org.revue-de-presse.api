@@ -23,7 +23,7 @@ use App\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
 use App\Infrastructure\DependencyInjection\Status\LikedStatusRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
-use App\Membership\Entity\MemberInterface;
+use App\Membership\Domain\Entity\MemberInterface;
 use App\Domain\Publication\Entity\NullStatus;
 use App\Domain\Collection\LikedStatusCollectionAwareInterface;
 use App\Domain\Publication\Repository\ExtremumAwareInterface;

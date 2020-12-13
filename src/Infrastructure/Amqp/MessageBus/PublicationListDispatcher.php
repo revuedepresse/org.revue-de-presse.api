@@ -9,7 +9,7 @@ use App\Infrastructure\Amqp\Message\FetchMemberLikes;
 use App\Infrastructure\Amqp\Message\FetchMemberStatus;
 use App\Infrastructure\DependencyInjection\MessageBusTrait;
 use App\Infrastructure\DependencyInjection\Publication\PublicationListRepositoryTrait;
-use App\Membership\Entity\MemberInterface;
+use App\Membership\Domain\Entity\MemberInterface;
 use App\Domain\Publication\Exception\InvalidMemberAggregate;
 
 class PublicationListDispatcher implements PublicationListDispatcherInterface

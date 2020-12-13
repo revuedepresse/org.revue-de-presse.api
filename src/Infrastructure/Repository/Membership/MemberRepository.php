@@ -9,9 +9,9 @@ use App\Domain\Membership\Exception\InvalidMemberException;
 use App\Domain\Resource\MemberIdentity;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\Http\SearchParams;
-use App\Membership\Entity\Member;
-use App\Membership\Entity\MemberInterface;
-use App\Membership\Exception\InvalidMemberIdentifier;
+use App\Membership\Domain\Entity\Legacy\Member;
+use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Infrastructure\Repository\Exception\InvalidMemberIdentifier;
 use App\Twitter\Exception\NotFoundMemberException;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
@@ -26,7 +26,7 @@ use function is_numeric;
 use function sprintf;
 
 /**
- * @package App\Membership\Repository
+ * @package App\Membership\Infrastructure\Repository
  *
  * @method MemberInterface|null find($id, $lockMode = null, $lockVersion = null)
  * @method MemberInterface|null findOneBy(array $criteria, array $orderBy = null)

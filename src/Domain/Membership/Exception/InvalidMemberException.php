@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Membership\Exception;
 
-use App\Membership\Entity\MemberInterface;
+use App\Membership\Domain\Entity\MemberInterface;
 use App\Infrastructure\Repository\Membership\MemberRepository;
 use function sprintf;
 

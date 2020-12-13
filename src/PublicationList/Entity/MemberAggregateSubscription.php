@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\PublicationList\Entity;
 
-use App\Membership\Entity\MemberInterface;
+use App\Membership\Domain\Entity\MemberInterface;
 use Ramsey\Uuid\UuidInterface;
 use const JSON_THROW_ON_ERROR;
 

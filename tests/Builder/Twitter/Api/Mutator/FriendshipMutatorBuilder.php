@@ -7,7 +7,7 @@ use App\Domain\Resource\MemberCollection;
 use App\Domain\Resource\MemberIdentity;
 use App\Infrastructure\Twitter\Api\Mutator\FriendshipMutator;
 use App\Infrastructure\Twitter\Api\Mutator\FriendshipMutatorInterface;
-use App\Membership\Entity\MemberInterface;
+use App\Membership\Domain\Entity\MemberInterface;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 

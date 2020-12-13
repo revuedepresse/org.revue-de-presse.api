@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Collection\Entity;
 
-use App\Membership\Entity\MemberInterface;
+use App\Membership\Domain\Entity\MemberInterface;
 use DateTimeInterface;
 use Ramsey\Uuid\UuidInterface;
 

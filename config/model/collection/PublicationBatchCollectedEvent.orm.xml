@@ -19,7 +19,7 @@
         </id>
 
         <many-to-one
-            target-entity="App\Membership\Entity\Member"
+            target-entity="App\Membership\Domain\Entity\Legacy\Member"
             field="member"
             inversed-by="PublicationBatchCollectedEvents"
         >

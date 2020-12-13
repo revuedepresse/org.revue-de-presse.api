@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Repository\Subscription;
 
-use App\Member\Entity\MemberSubscription;
-use App\Membership\Entity\MemberInterface;
+use App\Membership\Domain\Entity\MemberSubscription;
+use App\Membership\Domain\Entity\MemberInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 /**

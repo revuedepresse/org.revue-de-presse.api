@@ -5,7 +5,7 @@ namespace App\Infrastructure\Twitter\Api\Accessor;
 
 use App\Domain\Membership\Exception\ExceptionalMemberInterface;
 use App\Domain\Resource\MemberIdentity;
-use App\Membership\Entity\MemberInterface;
+use App\Membership\Domain\Entity\MemberInterface;
 
 interface MemberProfileAccessorInterface extends ExceptionalMemberInterface
 {

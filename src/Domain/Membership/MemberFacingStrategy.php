@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Domain\Membership;
 
 use App\Infrastructure\Amqp\Exception\SkippableMemberException;
-use App\Membership\Entity\MemberInterface;
+use App\Membership\Domain\Entity\MemberInterface;
 use App\Domain\Resource\MemberIdentity;
 use Exception;
 use function sprintf;

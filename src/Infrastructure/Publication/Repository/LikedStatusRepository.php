@@ -9,7 +9,7 @@ use App\Domain\Publication\Repository\LikedStatusRepositoryInterface;
 use App\Domain\Publication\Repository\ExtremumAwareInterface;
 use App\Domain\Publication\StatusInterface;
 use App\Infrastructure\Repository\Membership\MemberRepositoryInterface;
-use App\Membership\Entity\MemberInterface;
+use App\Membership\Domain\Entity\MemberInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;

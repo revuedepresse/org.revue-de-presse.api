@@ -3,7 +3,7 @@
 namespace App\PublicationList\Repository;
 
 use App\PublicationList\Entity\MemberAggregateSubscription;
-use App\Membership\Entity\MemberInterface;
+use App\Membership\Domain\Entity\MemberInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;

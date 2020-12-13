@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Amqp\MessageBus;
 
 use App\Api\Entity\TokenInterface;
-use App\Membership\Entity\MemberInterface;
+use App\Membership\Domain\Entity\MemberInterface;
 
 interface PublicationListDispatcherInterface
 {

@@ -15,7 +15,7 @@ use App\Infrastructure\DependencyInjection\Subscription\MemberSubscriptionReposi
 use App\Infrastructure\Http\PaginationParams;
 use App\Infrastructure\Security\Authentication\AuthenticationTokenValidationTrait;
 use App\Infrastructure\Security\Cors\CorsHeadersAwareTrait;
-use App\Membership\Entity\MemberInterface;
+use App\Membership\Domain\Entity\MemberInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use function array_merge;

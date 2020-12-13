@@ -5,8 +5,8 @@ namespace App\Tests\Builder;
 
 use App\Domain\Resource\MemberIdentity;
 use App\Infrastructure\Repository\Membership\MemberRepositoryInterface;
-use App\Membership\Entity\Member;
-use App\Membership\Entity\MemberInterface;
+use App\Membership\Domain\Entity\Legacy\Member;
+use App\Membership\Domain\Entity\MemberInterface;
 use Prophecy\Argument;
 use Prophecy\Prophecy\ObjectProphecy;
 use Prophecy\Prophet;

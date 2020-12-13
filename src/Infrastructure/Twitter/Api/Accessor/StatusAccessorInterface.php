@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Twitter\Api\Accessor;
 
 use App\Domain\Collection\CollectionStrategyInterface;
-use App\Membership\Entity\MemberInterface;
+use App\Membership\Domain\Entity\MemberInterface;
 
 interface StatusAccessorInterface
 {

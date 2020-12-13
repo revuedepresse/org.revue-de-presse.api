@@ -22,7 +22,7 @@ use App\Infrastructure\DependencyInjection\TaggedStatusRepositoryTrait;
 use App\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
 use App\Domain\Publication\Repository\TimelyStatusRepositoryInterface;
 use App\Infrastructure\Twitter\Api\Normalizer\Normalizer;
-use App\Membership\Entity\MemberInterface;
+use App\Membership\Domain\Entity\MemberInterface;
 use App\Infrastructure\Operation\Collection\CollectionInterface;
 use Closure;
 use DateTime;

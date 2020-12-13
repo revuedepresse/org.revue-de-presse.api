@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Publication\Entity;
 
-use App\Membership\Entity\MemberInterface;
+use App\Membership\Domain\Entity\MemberInterface;
 use Predis\Configuration\Option\Aggregate;
 use App\Domain\Publication\StatusInterface;
 

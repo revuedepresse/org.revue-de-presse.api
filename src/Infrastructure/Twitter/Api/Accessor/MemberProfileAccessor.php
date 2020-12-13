@@ -12,8 +12,8 @@ use App\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Infrastructure\Repository\Membership\MemberRepositoryInterface;
 use App\Infrastructure\Twitter\Api\UnavailableResource;
 use App\Infrastructure\Twitter\Api\UnavailableResourceHandlerInterface;
-use App\Membership\Entity\MemberInterface;
-use App\Membership\Model\Member;
+use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\Member;
 use App\Twitter\Api\ApiAccessorInterface;
 use App\Twitter\Exception\UnavailableResourceException;
 

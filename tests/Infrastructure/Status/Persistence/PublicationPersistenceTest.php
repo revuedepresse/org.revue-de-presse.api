@@ -7,8 +7,8 @@ use App\Api\AccessToken\AccessToken;
 use App\Domain\Publication\TaggedStatus;
 use App\Infrastructure\Publication\Persistence\PublicationPersistence;
 use App\Infrastructure\Publication\Persistence\PublicationPersistenceInterface;
-use App\Membership\Entity\Member;
-use App\Membership\Entity\MemberInterface;
+use App\Membership\Domain\Entity\Legacy\Member;
+use App\Membership\Domain\Entity\MemberInterface;
 use App\Infrastructure\Operation\Collection\CollectionInterface;
 use DateTimeInterface;
 use DateTimeZone;
@@ -25,7 +25,7 @@ class PublicationPersistenceTest extends KernelTestCase
         /** @var EntityManagerInterface $entityManager */
         $entityManager = self::$container->get('doctrine.orm.entity_manager');
 
-        $memberRepository = $entityManager->getRepository('App\Membership\Entity\Member');
+        $memberRepository = $entityManager->getRepository('App\Membership\Domain\Entity\Legacy\Member');
         $members = $memberRepository->findBy(['twitter_username' => 'mariec']);
 
         array_map(

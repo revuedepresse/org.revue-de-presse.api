@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Tests\Security\Core\Member;
 
 use Doctrine\ORM\Mapping as ORM;
-use App\Membership\Entity\Member as BaseMember;
+use App\Membership\Domain\Entity\Legacy\Member as BaseMember;
 
 /**
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>

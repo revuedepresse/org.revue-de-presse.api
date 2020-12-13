@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace App\Infrastructure\Security\Authentication;
 
 use App\Infrastructure\Security\Exception\UnauthorizedRequestException;
-use App\Membership\Entity\MemberInterface;
-use App\Member\Repository\AuthenticationTokenRepository;
+use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Infrastructure\Repository\AuthenticationTokenRepository;
 use Symfony\Component\HttpFoundation\Request;
 use function array_key_exists;
 

@@ -5,8 +5,8 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="App\Media\Entity\Owner"
-            repository-class="App\Media\Repository\OwnerRepository"
+    <entity name="App\PressMedia\Entity\Owner"
+            repository-class="App\PressMedia\Repository\OwnerRepository"
             table="media_owner">
 
         <indexes>
@@ -33,7 +33,7 @@
 
         <one-to-many
             field="ownerships"
-            target-entity="App\Media\Entity\Ownership"
+            target-entity="App\PressMedia\Entity\Ownership"
             mapped-by="owner"
         />
 

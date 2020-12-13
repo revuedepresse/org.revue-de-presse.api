@@ -5,8 +5,8 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="App\Media\Entity\Media"
-            repository-class="App\Media\Repository\MediaRepository"
+    <entity name="App\PressMedia\Entity\Media"
+            repository-class="App\PressMedia\Repository\MediaRepository"
             table="media">
 
         <indexes>
@@ -60,7 +60,7 @@
 
         <one-to-one
             field="member"
-            target-entity="App\Membership\Entity\Member"
+            target-entity="App\Membership\Domain\Entity\Legacy\Member"
         >
             <join-column
                 name="member_id"
@@ -70,7 +70,7 @@
 
         <one-to-many
             field="ownerships"
-            target-entity="App\Media\Entity\Ownership"
+            target-entity="App\PressMedia\Entity\Ownership"
             mapped-by="media"
         />
 

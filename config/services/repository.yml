@@ -8,7 +8,7 @@ services:
         class: 'App\Infrastructure\Repository\Membership\MemberRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Membership\Entity\Member'
+            - 'App\Membership\Domain\Entity\Legacy\Member'
         calls:
             - [ 'setLogger', [ '@logger'] ]
         properties:
@@ -128,10 +128,10 @@ services:
             - [ 'setLogger', [ '@logger' ] ]
 
     repository.publication_list_subscription:
-        class:      'App\Member\Repository\AggregateSubscriptionRepository'
+        class:      'App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Member\Entity\AggregateSubscription'
+            - 'App\Membership\Domain\Entity\AggregateSubscription'
         properties:
             accessor:                               '@App\Twitter\Api\Accessor'
             logger:                                 '@logger'
@@ -141,26 +141,26 @@ services:
 
     repository.authentication_token:
         factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
-        class:   'App\Member\Repository\AuthenticationTokenRepository'
+        class:   'App\Membership\Infrastructure\Repository\AuthenticationTokenRepository'
         arguments:
-            - 'App\Member\Entity\AuthenticationToken'
+            - 'App\Membership\Domain\Entity\AuthenticationToken'
         properties:
             memberRepository: "@user_manager"
             authenticator:    "@app.authenticator"
 
     repository.owner:
         factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
-        class: 'App\Media\Repository\OwnerRepository'
+        class: 'App\PressMedia\Repository\OwnerRepository'
         arguments:
-            - 'App\Media\Entity\Owner'
+            - 'App\PressMedia\Entity\Owner'
         properties:
             logger: '@logger'
 
     repository.media:
         factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
-        class: 'App\Media\Repository\MediaRepository'
+        class: 'App\PressMedia\Repository\MediaRepository'
         arguments:
-            - 'App\Media\Entity\Media'
+            - 'App\PressMedia\Entity\Media'
         properties:
             logger: '@logger'
 
@@ -205,7 +205,7 @@ services:
             - [ 'setStatusRepository',  [ '@App\Api\Repository\StatusRepository'] ]
 
     repository.network:
-        class:                            'App\Member\Repository\NetworkRepository'
+        class:                            'App\Membership\Infrastructure\Repository\NetworkRepository'
         properties:
             accessor:                     '@App\Twitter\Api\Accessor'
             entityManager:                "@doctrine.orm.entity_manager"
@@ -239,18 +239,18 @@ services:
             statusRepository: '@App\Api\Repository\StatusRepository'
 
     repository.member_subscription:
-        class: 'App\Member\Repository\MemberSubscriptionRepository'
+        class: 'App\Membership\Infrastructure\Repository\MemberSubscriptionRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Member\Entity\MemberSubscription'
+            - 'App\Membership\Domain\Entity\MemberSubscription'
         properties:
             memberRepository: "@user_manager"
 
     repository.member_subscribee:
-        class: 'App\Member\Repository\MemberSubscribeeRepository'
+        class: 'App\Membership\Infrastructure\Repository\MemberSubscribeeRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Member\Entity\MemberSubscribee'
+            - 'App\Membership\Domain\Entity\MemberSubscribee'
         properties:
             memberRepository: "@user_manager"
 

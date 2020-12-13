@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace App\Infrastructure\Security\Authentication;
 
 use App\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
-use App\Membership\Entity\MemberInterface;
-use App\Membership\Model\Member;
+use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\Member;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;

@@ -11,7 +11,7 @@ use App\Infrastructure\Collection\Repository\ListCollectedEventRepositoryInterfa
 use App\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Infrastructure\Repository\Membership\MemberRepositoryInterface;
 use App\Infrastructure\Twitter\Api\Mutator\FriendshipMutatorInterface;
-use App\Membership\Entity\MemberInterface;
+use App\Membership\Domain\Entity\MemberInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;

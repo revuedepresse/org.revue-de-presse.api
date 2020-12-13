@@ -6,7 +6,7 @@ namespace App\Domain\Collection;
 use App\Infrastructure\Amqp\Exception\SkippableMemberException;
 use App\Domain\Resource\MemberIdentity;
 use App\Domain\Resource\PublicationList;
-use App\Membership\Entity\MemberInterface;
+use App\Membership\Domain\Entity\MemberInterface;
 use function array_key_exists;
 use function count;
 use function sprintf;

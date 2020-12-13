@@ -4,9 +4,9 @@ declare(strict_types=1);
 namespace App\Infrastructure\Security\Authentication;
 
 use App\Infrastructure\DependencyInjection\LoggerTrait;
-use App\Member\Authentication\Authenticator;
-use App\Member\Repository\AuthenticationTokenRepository;
-use App\Membership\Entity\MemberInterface;
+use App\Membership\Infrastructure\Security\Authentication\Authenticator;
+use App\Membership\Infrastructure\Repository\AuthenticationTokenRepository;
+use App\Membership\Domain\Entity\MemberInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;

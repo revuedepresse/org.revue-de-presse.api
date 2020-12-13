@@ -5,7 +5,7 @@ namespace App\Infrastructure\Amqp\Message;
 
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\TokenInterface;
-use App\Membership\Entity\MemberInterface;
+use App\Membership\Domain\Entity\MemberInterface;
 
 interface FetchPublicationInterface
 {

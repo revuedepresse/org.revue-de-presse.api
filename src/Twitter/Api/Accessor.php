@@ -17,9 +17,9 @@ use App\Domain\Resource\MemberCollection;
 use App\Domain\Resource\OwnershipCollection;
 use App\Infrastructure\Repository\Membership\MemberRepository;
 use App\Infrastructure\Translation\Translator;
-use App\Member\Entity\AggregateSubscription;
-use App\Membership\Entity\MemberInterface;
-use App\Membership\Exception\InvalidMemberIdentifier;
+use App\Membership\Domain\Entity\AggregateSubscription;
+use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Infrastructure\Repository\Exception\InvalidMemberIdentifier;
 use App\Domain\Collection\LikedStatusCollectionAwareInterface;
 use App\Twitter\Exception\BadAuthenticationDataException;
 use App\Twitter\Exception\EmptyErrorCodeException;
@@ -1370,7 +1370,7 @@ class Accessor implements ApiAccessorInterface,
      * @param string $screenName
      * @param int    $cursor
      *
-     * @return \API|mixed|object|stdClass
+     * @return mixed|object|stdClass
      * @throws ApiRateLimitingException
      * @throws BadAuthenticationDataException
      * @throws InconsistentTokenRepository

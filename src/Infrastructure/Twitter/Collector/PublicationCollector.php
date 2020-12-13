@@ -35,7 +35,7 @@ use App\Infrastructure\DependencyInjection\{Api\ApiAccessorTrait,
 use App\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Infrastructure\Twitter\Collector\Exception\RateLimitedException;
 use App\Infrastructure\Twitter\Collector\Exception\SkipCollectException;
-use App\Membership\Entity\MemberInterface;
+use App\Membership\Domain\Entity\MemberInterface;
 use App\Domain\Collection\LikedStatusCollectionAwareInterface;
 use App\Twitter\Exception\BadAuthenticationDataException;
 use App\Twitter\Exception\InconsistentTokenRepository;

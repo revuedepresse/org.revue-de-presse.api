@@ -5,8 +5,8 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="App\Member\Entity\AggregateSubscription"
-            repository-class="App\Member\Repository\AggregateSubscriptionRepository"
+    <entity name="App\Membership\Domain\Entity\AggregateSubscription"
+            repository-class="App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository"
             table="aggregate_subscription">
 
         <indexes>
@@ -33,7 +33,7 @@
         </many-to-one>
 
         <many-to-one
-            target-entity="App\Membership\Entity\Member"
+            target-entity="App\Membership\Domain\Entity\Legacy\Member"
             field="subscription"
         >
             <join-column

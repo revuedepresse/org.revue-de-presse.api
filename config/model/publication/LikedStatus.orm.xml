@@ -38,13 +38,13 @@
 
         <many-to-one
             field="member"
-            target-entity="App\Membership\Entity\Member">
+            target-entity="App\Membership\Domain\Entity\Legacy\Member">
             <join-column name="member_id" referenced-column-name="usr_id" />
         </many-to-one>
 
         <many-to-one
             field="likedBy"
-            target-entity="App\Membership\Entity\Member">
+            target-entity="App\Membership\Domain\Entity\Legacy\Member">
             <join-column
                 name="liked_by"
                 referenced-column-name="usr_id"

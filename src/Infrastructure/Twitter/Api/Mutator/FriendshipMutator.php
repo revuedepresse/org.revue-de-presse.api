@@ -10,7 +10,7 @@ use App\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Subscription\MemberSubscriptionRepositoryTrait;
-use App\Membership\Entity\MemberInterface;
+use App\Membership\Domain\Entity\MemberInterface;
 use App\Infrastructure\Operation\Collection\CollectionInterface;
 use App\Twitter\Exception\UnavailableResourceException;
 

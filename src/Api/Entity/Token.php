@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Api\Entity;
 
 use App\Api\Exception\InvalidSerializedTokenException;
-use App\Membership\Entity\Member;
+use App\Membership\Domain\Entity\Legacy\Member;
 use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -131,7 +131,7 @@ class Token implements TokenInterface
     protected ?DateTimeInterface $updatedAt;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Membership\Entity\Member", mappedBy="tokens")
+     * @ORM\ManyToMany(targetEntity="App\Membership\Domain\Entity\Legacy\Member", mappedBy="tokens")
      */
     protected Collection $users;
 

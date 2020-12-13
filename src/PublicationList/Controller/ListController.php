@@ -15,9 +15,9 @@ use App\Infrastructure\DependencyInjection\Publication\PublicationListDispatcher
 use App\Infrastructure\Http\SearchParams;
 use App\Infrastructure\Repository\Membership\MemberRepository;
 use App\Infrastructure\Security\Cors\CorsHeadersAwareTrait;
-use App\Member\Repository\AuthenticationTokenRepository;
-use App\Membership\Entity\Member;
-use App\Membership\Entity\MemberInterface;
+use App\Membership\Infrastructure\Repository\AuthenticationTokenRepository;
+use App\Membership\Domain\Entity\Legacy\Member;
+use App\Membership\Domain\Entity\MemberInterface;
 use App\Infrastructure\Publication\Repository\HighlightRepository;
 use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\NonUniqueResultException;

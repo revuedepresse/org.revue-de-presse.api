@@ -4,7 +4,7 @@ namespace App\Domain\Publication\Entity;
 
 use App\Api\Entity\Status;
 use App\Domain\Publication\PublicationListInterface;
-use App\Membership\Entity\MemberInterface;
+use App\Membership\Domain\Entity\MemberInterface;
 use App\Domain\Publication\StatusInterface;
 use DateTime;
 
@@ -23,7 +23,7 @@ class Highlight
     private $status;
 
     /**
-     * App\Membership\Entity\Member
+     * App\Membership\Domain\Entity\Legacy\Member
      */
     private $member;
 

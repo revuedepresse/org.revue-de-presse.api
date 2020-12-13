@@ -191,7 +191,7 @@ services:
             - "%redis_port%"
 
     app.authenticator:
-        class: 'App\Member\Authentication\Authenticator'
+        class: 'App\Membership\Infrastruture\Security\Authentication\Authenticator'
         properties:
             authenticationTokenRepository:  '@repository.authentication_token'
             authorizedIss:                  '%authorized_iss%'

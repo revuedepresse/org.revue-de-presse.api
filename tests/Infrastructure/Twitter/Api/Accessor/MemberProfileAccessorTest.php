@@ -9,8 +9,8 @@ use App\Infrastructure\Collection\Repository\MemberProfileCollectedEventReposito
 use App\Infrastructure\Twitter\Api\Accessor\MemberProfileAccessor;
 use App\Infrastructure\Twitter\Api\UnavailableResourceHandler;
 use App\Infrastructure\Twitter\Api\UnavailableResourceHandlerInterface;
-use App\Membership\Entity\Member;
-use App\Membership\Entity\MemberInterface;
+use App\Membership\Domain\Entity\Legacy\Member;
+use App\Membership\Domain\Entity\MemberInterface;
 use App\Tests\Builder\MemberRepositoryBuilder;
 use App\Twitter\Api\ApiAccessorInterface;
 use App\Twitter\Api\TwitterErrorAwareInterface;
