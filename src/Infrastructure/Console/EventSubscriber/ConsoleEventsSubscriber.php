@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Console\EventSubscriber;
+namespace App\Infrastructure\Console\EventSubscriber;
 
 use Doctrine\DBAL\Exception\ConnectionException;
 use Psr\Log\LoggerInterface;

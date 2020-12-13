@@ -3,7 +3,7 @@
 namespace App\Member\Command;
 
 use App\Accessor\Exception\ReadOnlyApplicationException;
-use App\Console\AbstractCommand;
+use App\Infrastructure\Console\AbstractCommand;
 use App\Member\Repository\AggregateSubscriptionRepository;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;

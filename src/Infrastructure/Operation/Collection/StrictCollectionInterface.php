@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Operation\Collection;
+namespace App\Infrastructure\Operation\Collection;
 
 use Closure;
 

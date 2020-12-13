@@ -6,7 +6,7 @@ use App\Accessor\Exception\ApiRateLimitingException;
 use App\Accessor\Exception\NotFoundStatusException;
 use App\Accessor\Exception\ReadOnlyApplicationException;
 use App\Accessor\Exception\UnexpectedApiResponseException;
-use App\Console\CommandReturnCodeAwareInterface;
+use App\Infrastructure\Console\CommandReturnCodeAwareInterface;
 use App\Member\Entity\AggregateSubscription;
 use App\Membership\Entity\MemberInterface;
 use App\Member\Repository\AggregateSubscriptionRepository;

@@ -2,7 +2,7 @@
 
 namespace App\Conversation\Producer;
 
-use App\Operation\OperationClock;
+use App\Infrastructure\Operation\OperationClock;
 use Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Input\InputOption,
     Symfony\Component\Console\Output\OutputInterface;

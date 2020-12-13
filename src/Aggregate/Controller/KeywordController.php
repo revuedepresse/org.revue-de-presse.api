@@ -3,7 +3,7 @@
 
 namespace App\Aggregate\Controller;
 
-use App\Cache\RedisCache;
+use App\Infrastructure\Cache\RedisCache;
 use App\Infrastructure\Security\Cors\CorsHeadersAwareTrait;
 use App\Status\Repository\KeywordRepository;
 use Doctrine\DBAL\DBALException;

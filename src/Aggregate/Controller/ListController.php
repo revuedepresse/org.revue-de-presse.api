@@ -10,7 +10,7 @@ use App\Api\Entity\Aggregate;
 use App\Api\Entity\Token;
 use App\Api\Entity\TokenInterface;
 use App\Api\Repository\PublicationListRepository;
-use App\Cache\RedisCache;
+use App\Infrastructure\Cache\RedisCache;
 use App\Infrastructure\DependencyInjection\Publication\PublicationListDispatcherTrait;
 use App\Infrastructure\Http\SearchParams;
 use App\Infrastructure\Repository\Membership\MemberRepository;

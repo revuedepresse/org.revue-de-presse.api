@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Operation\Collection;
+namespace App\Infrastructure\Operation\Collection;
 
 use Doctrine\Common\Collections\ArrayCollection;
 
 /**
- * @package App\Operation\Collection
+ * @package App\Infrastructure\Operation\Collection
  */
 class Collection extends ArrayCollection implements CollectionInterface
 {

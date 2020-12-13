@@ -4,7 +4,7 @@ namespace App\StatusCollection\Mapping\Command;
 
 use App\Aggregate\Entity\SearchMatchingStatus;
 use App\Aggregate\Repository\SearchMatchingStatusRepository;
-use App\Console\CommandReturnCodeAwareInterface;
+use App\Infrastructure\Console\CommandReturnCodeAwareInterface;
 use App\StatusCollection\Mapping\RefreshStatusMapping;
 use Doctrine\Common\Collections\ArrayCollection;
 use Psr\Log\LoggerInterface;

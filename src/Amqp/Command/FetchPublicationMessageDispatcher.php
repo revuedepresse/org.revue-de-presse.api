@@ -15,7 +15,7 @@ use App\Infrastructure\DependencyInjection\OwnershipAccessorTrait;
 use App\Infrastructure\DependencyInjection\Publication\PublicationMessageDispatcherTrait;
 use App\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Infrastructure\InputConverter\InputToCollectionStrategy;
-use App\Operation\OperationClock;
+use App\Infrastructure\Operation\OperationClock;
 use App\Twitter\Exception\OverCapacityException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;

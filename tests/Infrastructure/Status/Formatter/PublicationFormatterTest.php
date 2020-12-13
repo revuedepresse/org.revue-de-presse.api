@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Tests\Infrastructure\Status\Formatter;
 
 use App\Infrastructure\Status\Formatter\PublicationFormatter;
-use App\Operation\Collection\Collection;
+use App\Infrastructure\Operation\Collection\Collection;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /**

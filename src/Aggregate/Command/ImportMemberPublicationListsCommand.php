@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Aggregate\Command;
 
 use App\Aggregate\Repository\MemberAggregateSubscriptionRepository;
-use App\Console\AbstractCommand;
+use App\Infrastructure\Console\AbstractCommand;
 use App\Domain\Resource\MemberIdentity;
 use App\Domain\Resource\PublicationList;
 use App\Infrastructure\DependencyInjection\Collection\OwnershipBatchCollectedEventRepositoryTrait;

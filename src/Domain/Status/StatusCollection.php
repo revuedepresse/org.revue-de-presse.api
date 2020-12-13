@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Status;
 
-use App\Operation\Collection\StrictCollectionInterface;
+use App\Infrastructure\Operation\Collection\StrictCollectionInterface;
 use Closure;
 use function count;
 

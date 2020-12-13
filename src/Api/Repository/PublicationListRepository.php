@@ -19,7 +19,7 @@ use App\Infrastructure\DependencyInjection\TokenRepositoryTrait;
 use App\Infrastructure\Repository\PublicationList\PublicationListRepositoryInterface;
 use App\Membership\Entity\Member;
 use App\Membership\Entity\MemberInterface;
-use App\Operation\CapableOfDeletionInterface;
+use App\Infrastructure\Operation\CapableOfDeletionInterface;
 use App\Domain\Status\Entity\LikedStatus;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\FetchMode;

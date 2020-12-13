@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Status\Formatter;
 
 use App\Conversation\ConversationAwareTrait;
-use App\Operation\Collection\Collection;
+use App\Infrastructure\Operation\Collection\Collection;
 use App\Twitter\Repository\PublicationInterface;
 
 class PublicationFormatter implements PublicationFormatterInterface

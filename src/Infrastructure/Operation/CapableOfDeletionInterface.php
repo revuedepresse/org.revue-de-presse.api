@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Operation;
+namespace App\Infrastructure\Operation;
 
 use Doctrine\ORM\QueryBuilder;
 

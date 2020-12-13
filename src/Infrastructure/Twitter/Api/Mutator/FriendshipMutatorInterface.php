@@ -5,7 +5,7 @@ namespace App\Infrastructure\Twitter\Api\Mutator;
 
 use App\Domain\Resource\MemberCollection;
 use App\Membership\Entity\MemberInterface;
-use App\Operation\Collection\CollectionInterface;
+use App\Infrastructure\Operation\Collection\CollectionInterface;
 
 interface FriendshipMutatorInterface
 {

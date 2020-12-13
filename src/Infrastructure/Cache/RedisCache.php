@@ -1,13 +1,14 @@
 <?php
 
-namespace App\Cache;
+namespace App\Infrastructure\Cache;
 
+use Predis\Client;
 use Symfony\Component\Cache\Adapter\RedisAdapter;
 
 class RedisCache
 {
     /**
-     * @var \Predis\Client|\Redis
+     * @var Client
      */
     private $client;
 

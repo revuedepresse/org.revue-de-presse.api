@@ -198,7 +198,7 @@ services:
             validAudience:                  '%valid_audience%'
 
     app.event_subscriber.console:
-        class: 'App\Console\EventSubscriber\ConsoleEventsSubscriber'
+        class: 'App\Infrastructure\Console\EventSubscriber\ConsoleEventsSubscriber'
         properties:
             logger: '@logger'
         tags:
@@ -251,7 +251,7 @@ parameters:
         - 'development'
         - 'membership'
 
-    redis_cache:                                                  'App\Cache\RedisCache'
+    redis_cache:                                                  'App\Infrastructure\Cache\RedisCache'
 
     weaving_the_web_twitter.api_host:                             'api.twitter.com'
 

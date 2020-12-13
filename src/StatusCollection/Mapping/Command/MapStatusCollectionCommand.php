@@ -4,7 +4,7 @@
 namespace App\StatusCollection\Mapping\Command;
 
 
-use App\Console\CommandReturnCodeAwareInterface;
+use App\Infrastructure\Console\CommandReturnCodeAwareInterface;
 use App\StatusCollection\Mapping\RefreshStatusMapping;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Console\Command\Command;

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Command;
 
-use App\Console\CommandReturnCodeAwareInterface;
+use App\Infrastructure\Console\CommandReturnCodeAwareInterface;
 use App\Twitter\Repository\PublicationRepositoryInterface;
 use Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Output\OutputInterface;

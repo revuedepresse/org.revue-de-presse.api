@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Twitter\Repository;
 
-use App\Operation\Collection\Collection;
-use App\Operation\Collection\CollectionInterface;
+use App\Infrastructure\Operation\Collection\Collection;
+use App\Infrastructure\Operation\Collection\CollectionInterface;
 
 interface PublicationRepositoryInterface
 {

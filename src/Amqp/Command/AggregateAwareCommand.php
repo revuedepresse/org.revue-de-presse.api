@@ -5,7 +5,7 @@ namespace App\Amqp\Command;
 
 use App\Aggregate\AggregateAwareTrait;
 use App\Api\Repository\PublicationListRepository;
-use App\Console\CommandReturnCodeAwareInterface;
+use App\Infrastructure\Console\CommandReturnCodeAwareInterface;
 use App\Domain\Membership\MemberFacingStrategyInterface;
 use Doctrine\ORM\EntityManager;
 

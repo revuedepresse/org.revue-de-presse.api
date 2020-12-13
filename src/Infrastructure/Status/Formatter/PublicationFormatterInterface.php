@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Status\Formatter;
 
-use App\Operation\Collection\Collection;
+use App\Infrastructure\Operation\Collection\Collection;
 
 interface PublicationFormatterInterface
 {

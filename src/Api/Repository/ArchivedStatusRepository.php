@@ -19,7 +19,7 @@ use App\Infrastructure\DependencyInjection\TaggedStatusRepositoryTrait;
 use App\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
 use App\Infrastructure\Twitter\Api\Normalizer\Normalizer;
 use App\Membership\Entity\MemberInterface;
-use App\Operation\Collection\CollectionInterface;
+use App\Infrastructure\Operation\Collection\CollectionInterface;
 use App\Domain\Status\Entity\LikedStatus;
 use App\Domain\Status\Repository\ExtremumAwareInterface;
 use App\Status\Repository\LikedStatusRepository;

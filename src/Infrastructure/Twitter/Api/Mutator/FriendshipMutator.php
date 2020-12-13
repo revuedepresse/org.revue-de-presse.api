@@ -11,7 +11,7 @@ use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Subscription\MemberSubscriptionRepositoryTrait;
 use App\Membership\Entity\MemberInterface;
-use App\Operation\Collection\CollectionInterface;
+use App\Infrastructure\Operation\Collection\CollectionInterface;
 use App\Twitter\Exception\UnavailableResourceException;
 
 class FriendshipMutator implements FriendshipMutatorInterface

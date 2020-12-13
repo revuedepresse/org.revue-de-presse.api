@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Status\Controller;
 
 use App\Accessor\Exception\NotFoundStatusException;
-use App\Cache\RedisCache;
+use App\Infrastructure\Cache\RedisCache;
 use App\Conversation\ConversationAwareTrait;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\DependencyInjection\Publication\PublicationRepositoryTrait;

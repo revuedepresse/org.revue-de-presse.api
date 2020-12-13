@@ -2,7 +2,7 @@
 
 namespace App\Media\Command;
 
-use App\Console\CommandReturnCodeAwareInterface;
+use App\Infrastructure\Console\CommandReturnCodeAwareInterface;
 use App\Media\Entity\Media;
 use App\Media\Entity\Owner;
 use App\Media\Repository\MediaRepository;

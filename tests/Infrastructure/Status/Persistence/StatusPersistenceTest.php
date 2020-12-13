@@ -12,7 +12,7 @@ use App\Domain\Status\StatusInterface;
 use App\Domain\Status\TaggedStatus;
 use App\Infrastructure\Status\Persistence\StatusPersistence;
 use App\Infrastructure\Status\Persistence\StatusPersistenceInterface;
-use App\Operation\Collection\CollectionInterface;
+use App\Infrastructure\Operation\Collection\CollectionInterface;
 use DateTime;
 use DateTimeInterface;
 use DateTimeZone;

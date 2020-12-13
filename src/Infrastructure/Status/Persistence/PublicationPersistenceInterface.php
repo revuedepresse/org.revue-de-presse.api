@@ -5,7 +5,7 @@ namespace App\Infrastructure\Status\Persistence;
 
 use App\Api\AccessToken\AccessToken;
 use App\Api\Entity\Aggregate;
-use App\Operation\Collection\CollectionInterface;
+use App\Infrastructure\Operation\Collection\CollectionInterface;
 
 interface PublicationPersistenceInterface
 {

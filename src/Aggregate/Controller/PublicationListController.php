@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Aggregate\Controller;
 
-use App\Cache\RedisCache;
+use App\Infrastructure\Cache\RedisCache;
 use App\Infrastructure\DependencyInjection\Publication\PublicationListRepositoryTrait;
 use App\Infrastructure\Security\Cors\CorsHeadersAwareTrait;
 use Symfony\Component\HttpFoundation\JsonResponse;

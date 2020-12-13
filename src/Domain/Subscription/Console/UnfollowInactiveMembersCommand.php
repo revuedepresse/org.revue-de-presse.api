@@ -3,7 +3,7 @@ declare (strict_types=1);
 
 namespace App\Domain\Subscription\Console;
 
-use App\Console\AbstractCommand;
+use App\Infrastructure\Console\AbstractCommand;
 use App\Domain\Collection\Entity\FriendsListCollectedEvent;
 use App\Domain\Resource\MemberCollection;
 use App\Domain\Resource\MemberIdentity;

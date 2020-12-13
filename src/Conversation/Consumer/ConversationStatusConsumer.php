@@ -14,7 +14,7 @@ use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\Repository\Membership\MemberRepository;
 use App\Membership\Entity\Member;
 use App\Membership\Entity\MemberInterface;
-use App\Operation\OperationClock;
+use App\Infrastructure\Operation\OperationClock;
 use App\Twitter\Exception\NotFoundMemberException;
 use App\Twitter\Exception\SuspendedAccountException;
 use App\Twitter\Exception\UnavailableResourceException;

@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace App\Infrastructure\Twitter\Api\Normalizer;
 
 use App\Domain\Status\TaggedStatus;
-use App\Operation\Collection\Collection;
-use App\Operation\Collection\CollectionInterface;
+use App\Infrastructure\Operation\Collection\Collection;
+use App\Infrastructure\Operation\Collection\CollectionInterface;
 use Closure;
 use DateTime;
 use Exception;

@@ -9,7 +9,7 @@ use App\Infrastructure\Status\Persistence\PublicationPersistence;
 use App\Infrastructure\Status\Persistence\PublicationPersistenceInterface;
 use App\Membership\Entity\Member;
 use App\Membership\Entity\MemberInterface;
-use App\Operation\Collection\CollectionInterface;
+use App\Infrastructure\Operation\Collection\CollectionInterface;
 use DateTimeInterface;
 use DateTimeZone;
 use Doctrine\ORM\EntityManagerInterface;

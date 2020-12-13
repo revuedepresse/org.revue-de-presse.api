@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Security;
+namespace App\Infrastructure\Security\Authentication;
 
 use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Member\Authentication\Authenticator;
