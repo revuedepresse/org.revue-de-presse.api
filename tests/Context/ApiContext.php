@@ -38,17 +38,18 @@ class ApiContext implements Context
     }
 
     /**
-     * @Given there are new publications
+     * @When there are publications on a given day
      */
-    public function thereAreNewPublications()
+    public function thereArePublicationsOnAGivenDay()
     {
         // Replace realtime database
     }
 
+
     /**
-     * @When I access the daily press review
+     * @And a news review is requested by an authenticated consumer
      */
-    public function iAccessTheDailyPressReview()
+    public function andANewsReviewIsRequestedByAnAuthenticatedConsumer()
     {
         $request = Request::create(
             $this->highlightPath,
@@ -66,9 +67,17 @@ class ApiContext implements Context
     }
 
     /**
-     * @Then I can see highlights for today
+     * @When publications for this day have been sorted by popularity
      */
-    public function iCanSeeHighlightsForToday()
+    public function publicationsForThisDayHaveBeenSortedByPopularity()
+    {
+        throw new PendingException();
+    }
+
+    /**
+     * @Then these publications are ready to be served
+     */
+    public function thesePublicationsAreReadyToBeServed()
     {
         throw new PendingException();
     }

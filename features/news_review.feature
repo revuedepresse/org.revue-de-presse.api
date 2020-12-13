@@ -1,6 +1,7 @@
-Feature: Daily press review
+Feature: News review
 
-  Scenario: I can see a daily press review
-    Given there are new publications
-    When I access the daily press review
-    Then I can see highlights for today
+  Scenario: Real-time access to news review
+    Given there are publications on a given day
+    And a news review is requested by an authenticated consumer
+    When publications for this day have been sorted by popularity
+    Then these publications are ready to be served
