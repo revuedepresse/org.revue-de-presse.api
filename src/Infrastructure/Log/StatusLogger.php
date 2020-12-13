@@ -5,7 +5,7 @@ namespace App\Infrastructure\Log;
 
 use App\Api\Entity\Aggregate;
 use App\Domain\Collection\CollectionStrategyInterface;
-use App\Domain\Status\StatusInterface;
+use App\Domain\Publication\StatusInterface;
 use App\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Infrastructure\Twitter\Collector\PublicationCollector;
 use Psr\Log\LoggerInterface;

@@ -115,7 +115,7 @@ services:
             - 'App\Twitter\Entity\Publication'
         calls:
             - [ 'setEntityManager', [ '@doctrine.orm.entity_manager' ] ]
-            - [ 'setPublicationFormatter', [ '@App\Infrastructure\Status\Formatter\PublicationFormatter' ] ]
+            - [ 'setPublicationFormatter', [ '@App\Infrastructure\Publication\Formatter\PublicationFormatter' ] ]
         tags:
             - { name: 'doctrine.repository_service' }
 
@@ -171,16 +171,16 @@ services:
             - 'App\Aggregate\Entity\MemberAggregateSubscription'
 
     repository.keyword:
-        class: 'App\Status\Repository\KeywordRepository'
+        class: 'App\Infrastructure\Publication\Repository\KeywordRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Domain\Status\Entity\Keyword'
+            - 'App\Domain\Publication\Entity\Keyword'
 
     repository.highlight:
-        class: 'App\Status\Repository\HighlightRepository'
+        class: 'App\Infrastructure\Publication\Repository\HighlightRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Domain\Status\Entity\Highlight'
+            - 'App\Domain\Publication\Entity\Highlight'
         calls:
             - [ 'setLogger',  [ '@logger' ] ]
             - [ 'setStatusAccessor', [ '@App\Infrastructure\Twitter\Api\Accessor\StatusAccessor'] ]
@@ -190,10 +190,10 @@ services:
             adminRouteName: '%admin_route_name%'
 
     repository.not_found_status:
-        class: 'App\Status\Repository\NotFoundStatusRepository'
+        class: 'App\Infrastructure\Publication\Repository\NotFoundStatusRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Domain\Status\Entity\NotFoundStatus'
+            - 'App\Domain\Publication\Entity\NotFoundStatus'
 
     repository.timely_status:
         class: 'App\Aggregate\Repository\TimelyStatusRepository'
@@ -230,10 +230,10 @@ services:
             logger:           "@logger"
 
     repository.liked_status:
-        class: 'App\Status\Repository\LikedStatusRepository'
+        class: 'App\Infrastructure\Publication\Repository\LikedStatusRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Domain\Status\Entity\LikedStatus'
+            - 'App\Domain\Publication\Entity\LikedStatus'
         properties:
             memberRepository: "@user_manager"
             statusRepository: '@App\Api\Repository\StatusRepository'

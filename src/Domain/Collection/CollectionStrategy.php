@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace App\Domain\Collection;
 
-use App\Domain\Status\Repository\LikedStatusRepositoryInterface;
+use App\Domain\Publication\Repository\LikedStatusRepositoryInterface;
 use App\Infrastructure\Repository\Membership\MemberRepositoryInterface;
-use App\Domain\Status\Repository\StatusRepositoryInterface;
+use App\Domain\Publication\Repository\StatusRepositoryInterface;
 use App\Domain\Collection\LikedStatusCollectionAwareInterface;
 use function array_key_exists;
 use const INF;

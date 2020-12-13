@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\DependencyInjection\Publication;
 
-use App\Infrastructure\Status\Persistence\PublicationPersistenceInterface;
+use App\Infrastructure\Publication\Persistence\PublicationPersistenceInterface;
 
 trait PublicationPersistenceTrait
 {

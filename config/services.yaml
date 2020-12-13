@@ -37,9 +37,9 @@ services:
             - '@App\Infrastructure\Translation\Translator'
             - '@monolog.logger.status'
 
-    App\Infrastructure\Status\Formatter\PublicationFormatter:
+    App\Infrastructure\Publication\Formatter\PublicationFormatter:
         public: true
-        class: 'App\Infrastructure\Status\Formatter\PublicationFormatter'
+        class: 'App\Infrastructure\Publication\Formatter\PublicationFormatter'
         calls:
             - [ 'setStatusAccessor',   [ '@App\Infrastructure\Twitter\Api\Accessor\StatusAccessor' ] ]
             - [ 'setStatusRepository', [ '@App\Api\Repository\StatusRepository' ] ]
@@ -53,7 +53,7 @@ services:
             - [ 'setMemberRepository',       [ '@user_manager' ] ]
             - [ 'setPublicationRepository',  [ '@App\Twitter\Repository\PublicationRepository' ] ]
             - [ 'setStatusLogger',           [ '@App\Infrastructure\Log\StatusLogger' ] ]
-            - [ 'setStatusPersistence',      [ '@App\Infrastructure\Status\Persistence\StatusPersistence' ] ]
+            - [ 'setStatusPersistence',      [ '@App\Infrastructure\Publication\Persistence\StatusPersistence' ] ]
             - [ 'setTaggedStatusRepository', [ '@App\Infrastructure\Repository\Status\TaggedStatusRepository' ] ]
             - [ 'setTimelyStatusRepository', [ '@repository.timely_status' ] ]
         properties:
@@ -72,7 +72,7 @@ services:
             - [ 'setMemberRepository',       [ '@user_manager' ] ]
             - [ 'setPublicationRepository',  [ '@App\Twitter\Repository\PublicationRepository' ] ]
             - [ 'setStatusLogger',           [ '@App\Infrastructure\Log\StatusLogger' ] ]
-            - [ 'setStatusPersistence',      [ '@App\Infrastructure\Status\Persistence\StatusPersistence' ] ]
+            - [ 'setStatusPersistence',      [ '@App\Infrastructure\Publication\Persistence\StatusPersistence' ] ]
             - [ 'setTaggedStatusRepository', [ '@App\Infrastructure\Repository\Status\TaggedStatusRepository' ] ]
             - [ 'setTimelyStatusRepository', [ '@repository.timely_status' ] ]
         properties:
@@ -179,7 +179,7 @@ services:
             - [ 'setLikedStatusRepository',                     [ '@repository.liked_status' ] ]
             - [ 'setMemberRepository',                          [ '@App\Infrastructure\Repository\Membership\MemberRepository' ] ]
             - [ 'setMemberProfileCollectedEventRepository',     [ '@App\Infrastructure\Collection\Repository\MemberProfileCollectedEventRepository' ] ]
-            - [ 'setPublicationPersistence',                    [ '@App\Infrastructure\Status\Persistence\PublicationPersistence' ] ]
+            - [ 'setPublicationPersistence',                    [ '@App\Infrastructure\Publication\Persistence\PublicationPersistence' ] ]
             - [ 'setStatusRepository',                          [ '@App\Api\Repository\StatusRepository' ] ]
             - [ 'setPublicationBatchCollectedEventRepository',  [ '@App\Infrastructure\Collection\Repository\PublicationBatchCollectedEventRepository' ] ]
         public: true
@@ -221,11 +221,11 @@ services:
             - [ 'setModerator',                                 [ '@App\Api\Moderator\ApiLimitModerator' ] ]
             - [ 'setPublicationBatchCollectedEventRepository',  [ '@App\Infrastructure\Collection\Repository\PublicationBatchCollectedEventRepository' ] ]
             - [ 'setPublicationListRepository',                 [ '@App\Api\Repository\PublicationListRepository' ] ]
-            - [ 'setPublicationPersistence',                    [ '@App\Infrastructure\Status\Persistence\PublicationPersistence' ] ]
+            - [ 'setPublicationPersistence',                    [ '@App\Infrastructure\Publication\Persistence\PublicationPersistence' ] ]
             - [ 'setStatusLogger',                              [ '@App\Infrastructure\Log\StatusLogger' ] ]
             - [ 'setStatusAccessor',                            [ '@App\Infrastructure\Twitter\Api\Accessor\StatusAccessor' ] ]
             - [ 'setStatusRepository',                          [ '@App\Api\Repository\StatusRepository' ] ]
-            - [ 'setStatusPersistence',                         [ '@App\Infrastructure\Status\Persistence\StatusPersistence' ] ]
+            - [ 'setStatusPersistence',                         [ '@App\Infrastructure\Publication\Persistence\StatusPersistence' ] ]
             - [ 'setTokenRepository',                           [ '@repository.access_token' ] ]
             - [ 'setTranslator',                                [ '@App\Infrastructure\Translation\Translator' ] ]
             - [ 'setWhispererIdentification',                   [ '@App\Infrastructure\Identification\WhispererIdentification' ] ]

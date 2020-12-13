@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\DependencyInjection\Formatter;
 
-use App\Infrastructure\Status\Formatter\PublicationFormatterInterface;
+use App\Infrastructure\Publication\Formatter\PublicationFormatterInterface;
 
 trait PublicationFormatterTrait
 {

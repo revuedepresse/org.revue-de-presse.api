@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Popularity\Entity;
 
-use App\Domain\Status\StatusInterface;
+use App\Domain\Publication\StatusInterface;
 
 class StatusPopularity
 {

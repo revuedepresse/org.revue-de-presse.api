@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Amqp\MessageBus;
 
-use App\Amqp\Exception\InvalidListNameException;
-use App\Amqp\Exception\UnexpectedOwnershipException;
+use App\Infrastructure\Amqp\Exception\InvalidListNameException;
+use App\Infrastructure\Amqp\Exception\UnexpectedOwnershipException;
 use App\Api\AccessToken\TokenChangeInterface;
 use App\Api\Entity\TokenInterface;
 use App\Api\Exception\UnavailableTokenException;

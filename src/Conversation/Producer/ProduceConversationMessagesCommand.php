@@ -11,7 +11,7 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-use App\Amqp\Command\AggregateAwareCommand;
+use App\Infrastructure\Amqp\Command\AggregateAwareCommand;
 use App\Twitter\Exception\SuspendedAccountException;
 
 

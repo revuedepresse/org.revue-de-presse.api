@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Domain\Status\Decorator;
 
-use App\Domain\Status\Decorator\StatusDecorator;
-use App\Infrastructure\Status\Exception\DocumentException;
+use App\Domain\Publication\Decorator\StatusDecorator;
+use App\Infrastructure\Publication\Exception\DocumentException;
 use PHPUnit\Framework\TestCase;
 use function json_encode;
 use const JSON_THROW_ON_ERROR;

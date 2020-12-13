@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Amqp\Command;
 
-use App\Amqp\Command\FetchPublicationMessageDispatcher;
+use App\Infrastructure\Amqp\Command\FetchPublicationMessageDispatcher;
 use App\Api\Entity\TokenInterface;
 use App\Domain\Collection\PublicationStrategyInterface;
 use App\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher;

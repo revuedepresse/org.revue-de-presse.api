@@ -5,7 +5,7 @@ namespace App\Aggregate\Controller;
 
 use App\Infrastructure\Cache\RedisCache;
 use App\Infrastructure\Security\Cors\CorsHeadersAwareTrait;
-use App\Status\Repository\KeywordRepository;
+use App\Infrastructure\Publication\Repository\KeywordRepository;
 use Doctrine\DBAL\DBALException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;

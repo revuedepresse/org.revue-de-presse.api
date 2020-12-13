@@ -5,7 +5,7 @@ namespace App\Infrastructure\Twitter\Collector;
 
 use App\Infrastructure\Twitter\Api\Accessor\Exception\ApiRateLimitingException;
 use App\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
-use App\Amqp\Exception\SkippableMessageException;
+use App\Infrastructure\Amqp\Exception\SkippableMessageException;
 use App\Api\Entity\Whisperer;
 use App\Domain\Collection\CollectionStrategyInterface;
 use App\Domain\Membership\Exception\MembershipException;

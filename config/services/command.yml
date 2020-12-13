@@ -1,16 +1,18 @@
 parameters:
-    command.map_aggregate_status_collection.class:                              'App\StatusCollection\Mapping\Command\MapAggregateStatusCollectionCommand'
-    command.map_status_collection.class:                                        'App\StatusCollection\Mapping\Command\MapStatusCollectionCommand'
-    command.select_status_collection.class:                                     'App\StatusCollection\Command\SelectStatusCollectionCommand'
+    command.map_aggregate_status_collection.class:                              'App\Infrastructure\Publication\Mapping\Command\MapAggregateStatusCollectionCommand'
+    command.map_status_collection.class:                                        'App\Infrastructure\Publication\Mapping\Command\MapStatusCollectionCommand'
+    command.select_status_collection.class:                                     'App\Infrastructure\Publication\Command\QueryPublicationCollectionCommand'
     command.add_members_to_aggregate.class:                                     'App\Member\Command\AddMemberToAggregateCommand'
     command.import_network.class:                                               'App\Member\Command\ImportNetworkCommand'
+
     weaving_the_web_amqp.consumer.conversation_status.class:                    'App\Conversation\Consumer\ConversationStatusConsumer'
     weaving_the_web_amqp.producer.produce_conversation_messages_command.class:  'App\Conversation\Producer\ProduceConversationMessagesCommand'
     weaving_the_web_amqp.producer.produce_timely_status_messages_command.class: 'App\Aggregate\Producer\ProduceTimelyStatusMessagesCommand'
     weaving_the_web_amqp.producer.produce_member_messages_command.class:        'App\Conversation\Producer\ProduceMemberMessagesCommand'
-    press_review.publication_message.handler:                                   'App\Amqp\MessageHandler\FetchPublicationMessageHandler'
     weaving_the_web_amqp.consumer.network.class:                                'App\Member\Consumer\NetworkConsumer'
-    press_review.fetch_member_status.class:                                     'App\Amqp\Command\FetchPublicationMessageDispatcher'
+
+    press_review.publication_message.handler.class:                             'App\Infrastructure\Amqp\MessageHandler\FetchPublicationMessageHandler'
+    press_review.fetch_member_status.class:                                     'App\Infrastructure\Amqp\Command\FetchPublicationMessageDispatcher'
 
 services:
     App\Domain\Subscription\Console\UnfollowDiffSubscriptionsSubscribeesCommand:
@@ -26,7 +28,7 @@ services:
             - [ 'setSubscribeesRepository', ['@App\Infrastructure\Collection\Repository\FollowersListCollectedEventRepository'] ]
             - [ 'setSubscriptionsRepository', ['@App\Infrastructure\Collection\Repository\FriendsListCollectedEventRepository'] ]
 
-    App\Amqp\Command\FetchPublicationMessageDispatcher:
+    App\Infrastructure\Amqp\Command\FetchPublicationMessageDispatcher:
         class:                              "%press_review.fetch_member_status.class%"
         properties:
             operationClock:                 '@operation.clock'
@@ -46,8 +48,8 @@ services:
             - { name: 'console.command' }
         public: true
 
-    App\Amqp\Command\FetchMemberSubscriptionTimelineMessageDispatcher:
-        class: 'App\Amqp\Command\FetchMemberSubscriptionTimelineMessageDispatcher'
+    App\Infrastructure\Amqp\Command\FetchMemberSubscriptionTimelineMessageDispatcher:
+        class: 'App\Infrastructure\Amqp\Command\FetchMemberSubscriptionTimelineMessageDispatcher'
         calls:
             - [ 'setAccessor',                              [ '@App\Twitter\Api\Accessor'] ]
             - [ 'setAggregateRepository',                   [ '@App\Api\Repository\PublicationListRepository'] ]
@@ -65,7 +67,7 @@ services:
         public: true
 
     press_review.fetch_status:
-        class:                        "%press_review.publication_message.handler%"
+        class:                          "%press_review.publication_message.handler.class%"
         calls:
             - [ 'setCollector',         [ '@App\Infrastructure\Twitter\Collector\PublicationCollector'] ]
             - [ 'setLogger',            [ '@monolog.logger.status'] ]
@@ -78,7 +80,7 @@ services:
                 handles: App\Infrastructure\Amqp\Message\FetchMemberStatus
 
     press_review.fetch_likes:
-        class:                          "%press_review.publication_message.handler%"
+        class:                          "%press_review.publication_message.handler.class%"
         calls:
             - [ 'setCollector',         [ '@App\Infrastructure\Twitter\Collector\PublicationCollector'] ]
             - [ 'setLogger',            [ '@monolog.logger.status'] ]
@@ -206,14 +208,8 @@ services:
             entityManager:          '@doctrine.orm.entity_manager'
             operationClock:         '@operation.clock'
 
-    weaving_the_web_amqp.consumer.network:
-        class:                      "%weaving_the_web_amqp.consumer.network.class%"
-        properties:
-            networkRepository:      '@repository.network'
-            logger:                 '@logger'
-
     weaving_the_web_amqp.twitter:
-        class:                       "%press_review.publication_message.handler%"
+        class:                       "%press_review.publication_message.handler.class%"
         properties:
             operationClock:          '@operation.clock'
             tokenRepository:         '@repository.access_token'

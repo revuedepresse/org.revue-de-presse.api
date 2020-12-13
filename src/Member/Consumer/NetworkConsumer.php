@@ -2,7 +2,7 @@
 
 namespace App\Member\Consumer;
 
-use App\Amqp\AmqpMessageAwareTrait;
+use App\Infrastructure\Amqp\AmqpMessageAwareTrait;
 use App\Member\Repository\NetworkRepository;
 use OldSound\RabbitMqBundle\RabbitMq\ConsumerInterface;
 use PhpAmqpLib\Message\AMQPMessage;

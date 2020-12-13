@@ -6,7 +6,7 @@ namespace App\Conversation;
 use App\Conversation\Consistency\StatusConsistency;
 use App\Conversation\Exception\InvalidStatusException;
 use App\Conversation\Validation\StatusValidator;
-use App\Domain\Status\StatusInterface;
+use App\Domain\Publication\StatusInterface;
 use App\Infrastructure\DependencyInjection\Api\StatusAccessorTrait;
 use App\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use App\Twitter\Exception\NotFoundMemberException;

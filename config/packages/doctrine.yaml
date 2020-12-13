@@ -178,13 +178,13 @@ doctrine:
                         is_bundle:  false
                         prefix:     App\Popularity\Entity
                         type:       xml
-                    Status:
-                        alias:      'Status'
-                        dir:        '%kernel.project_dir%/config/model/status'
-                        is_bundle:  false
-                        prefix:     App\Domain\Status\Entity
-                        type:       xml
                     Publication:
+                        alias:      'Publication'
+                        dir:        '%kernel.project_dir%/config/model/publication'
+                        is_bundle:  false
+                        prefix:     App\Domain\Publication\Entity
+                        type:       xml
+                    TwitterPublication:
                         alias:      'Publication'
                         dir:        '%kernel.project_dir%/src/Twitter/Entity'
                         is_bundle:  false

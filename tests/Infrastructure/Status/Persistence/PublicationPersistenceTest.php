@@ -4,9 +4,9 @@ declare(strict_types=1);
 namespace App\Tests\Infrastructure\Status\Persistence;
 
 use App\Api\AccessToken\AccessToken;
-use App\Domain\Status\TaggedStatus;
-use App\Infrastructure\Status\Persistence\PublicationPersistence;
-use App\Infrastructure\Status\Persistence\PublicationPersistenceInterface;
+use App\Domain\Publication\TaggedStatus;
+use App\Infrastructure\Publication\Persistence\PublicationPersistence;
+use App\Infrastructure\Publication\Persistence\PublicationPersistenceInterface;
 use App\Membership\Entity\Member;
 use App\Membership\Entity\MemberInterface;
 use App\Infrastructure\Operation\Collection\CollectionInterface;

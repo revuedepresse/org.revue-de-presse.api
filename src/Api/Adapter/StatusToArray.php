@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Api\Adapter;
 
-use App\Domain\Status\StatusInterface;
+use App\Domain\Publication\StatusInterface;
 use App\Infrastructure\Operation\Collection\CollectionInterface;
 use function hash;
 

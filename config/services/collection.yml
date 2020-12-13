@@ -12,7 +12,7 @@ services:
             - [ 'setPublicationListRepository',             [ '@App\Api\Repository\PublicationListRepository' ] ]
             - [ 'setStatusAccessor',                        [ '@App\Infrastructure\Twitter\Api\Accessor\StatusAccessor' ] ]
             - [ 'setStatusRepository',                      [ '@App\Api\Repository\StatusRepository' ] ]
-            - [ 'setStatusPersistence',                     [ '@App\Infrastructure\Status\Persistence\StatusPersistence' ] ]
+            - [ 'setStatusPersistence',                     [ '@App\Infrastructure\Publication\Persistence\StatusPersistence' ] ]
             - [ 'setTokenRepository',                       [ '@repository.access_token' ] ]
             - [ 'setWhispererRepository',                   [ '@repository.whisperer' ] ]
         public: true
@@ -23,4 +23,4 @@ services:
             - [ 'setLikedStatusRepository',      [ '@repository.liked_status' ] ]
             - [ 'setStatusAccessor',             [ '@App\Infrastructure\Twitter\Api\Accessor\StatusAccessor' ] ]
             - [ 'setStatusRepository',           [ '@App\Api\Repository\StatusRepository' ] ]
-            - [ 'setStatusPersistence',          [ '@App\Infrastructure\Status\Persistence\StatusPersistence' ] ]
+            - [ 'setStatusPersistence',          [ '@App\Infrastructure\Publication\Persistence\StatusPersistence' ] ]

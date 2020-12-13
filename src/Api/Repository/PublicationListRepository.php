@@ -9,7 +9,7 @@ use App\Aggregate\Repository\PaginationAwareTrait;
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\TokenInterface;
 use App\Domain\Publication\PublicationListInterface;
-use App\Domain\Status\StatusInterface;
+use App\Domain\Publication\StatusInterface;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\DependencyInjection\Publication\PublicationListDispatcherTrait;
 use App\Infrastructure\DependencyInjection\Status\LikedStatusRepositoryTrait;
@@ -20,7 +20,7 @@ use App\Infrastructure\Repository\PublicationList\PublicationListRepositoryInter
 use App\Membership\Entity\Member;
 use App\Membership\Entity\MemberInterface;
 use App\Infrastructure\Operation\CapableOfDeletionInterface;
-use App\Domain\Status\Entity\LikedStatus;
+use App\Domain\Publication\Entity\LikedStatus;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\FetchMode;
 use Doctrine\DBAL\ParameterType;

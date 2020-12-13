@@ -1,18 +1,18 @@
 services:
 
-    App\Infrastructure\Status\Persistence\PublicationPersistence:
-        class: 'App\Infrastructure\Status\Persistence\PublicationPersistence'
+    App\Infrastructure\Publication\Persistence\PublicationPersistence:
+        class: 'App\Infrastructure\Publication\Persistence\PublicationPersistence'
         arguments:
-            - '@App\Infrastructure\Status\Persistence\StatusPersistence'
+            - '@App\Infrastructure\Publication\Persistence\StatusPersistence'
             - '@App\Twitter\Repository\PublicationRepository'
             - '@user_manager'
             - '@doctrine.orm.entity_manager'
         calls:
-            - [ 'setStatusPersistence', [ '@App\Infrastructure\Status\Persistence\StatusPersistence' ] ]
+            - [ 'setStatusPersistence', [ '@App\Infrastructure\Publication\Persistence\StatusPersistence' ] ]
         public: true
 
-    App\Infrastructure\Status\Persistence\StatusPersistence:
-        class: 'App\Infrastructure\Status\Persistence\StatusPersistence'
+    App\Infrastructure\Publication\Persistence\StatusPersistence:
+        class: 'App\Infrastructure\Publication\Persistence\StatusPersistence'
         arguments:
             - '@repository.timely_status'
             - '@doctrine'
@@ -22,7 +22,7 @@ services:
             - [ 'setApiAccessor',               [ '@App\Twitter\Api\Accessor' ] ]
             - [ 'setLogger',                    [ '@logger' ] ]
             - [ 'setPublicationListRepository', [ '@App\Api\Repository\PublicationListRepository' ] ]
-            - [ 'setPublicationPersistence',    [ '@App\Infrastructure\Status\Persistence\PublicationPersistence' ] ]
+            - [ 'setPublicationPersistence',    [ '@App\Infrastructure\Publication\Persistence\PublicationPersistence' ] ]
             - [ 'setStatusLogger',              [ '@App\Infrastructure\Log\StatusLogger' ] ]
             - [ 'setStatusRepository',          [ '@App\Api\Repository\StatusRepository' ] ]
             - [ 'setTaggedStatusRepository',    [ '@App\Infrastructure\Repository\Status\TaggedStatusRepository' ] ]

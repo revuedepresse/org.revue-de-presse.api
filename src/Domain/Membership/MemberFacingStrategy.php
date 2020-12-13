@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Membership;
 
-use App\Amqp\Exception\SkippableMemberException;
+use App\Infrastructure\Amqp\Exception\SkippableMemberException;
 use App\Membership\Entity\MemberInterface;
 use App\Domain\Resource\MemberIdentity;
 use Exception;

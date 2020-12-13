@@ -9,7 +9,7 @@ use Symfony\Component\Console\Input\InputInterface,
 
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-use App\Amqp\Command\AggregateAwareCommand;
+use App\Infrastructure\Amqp\Command\AggregateAwareCommand;
 use App\Twitter\Exception\SuspendedAccountException;
 
 

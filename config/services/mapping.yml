@@ -1,12 +1,12 @@
 services:
     mapping.identity:
-        class: 'App\StatusCollection\Mapping\IdentityMapping'
+        class: 'App\Infrastructure\Publication\Mapping\IdentityMapping'
 
     mapping.refresh_status:
-        class: 'App\StatusCollection\Mapping\RefreshStatusMapping'
+        class: 'App\Infrastructure\Publication\Mapping\RefreshStatusMapping'
         arguments:
             - '@App\Twitter\Api\Accessor'
         calls:
             - [ 'setLogger', [ '@monolog.logger.status'  ] ]
-            - [ 'setPublicationPersistence', [ '@App\Infrastructure\Status\Persistence\PublicationPersistence'  ] ]
+            - [ 'setPublicationPersistence', [ '@App\Infrastructure\Publication\Persistence\PublicationPersistence'  ] ]
             - [ 'setStatusRepository', [ '@App\Api\Repository\StatusRepository'  ] ]

@@ -67,7 +67,7 @@ services:
 
     controller.publication:
         public: true
-        class: 'App\Infrastructure\Status\Controller\PublicationController'
+        class: 'App\Infrastructure\Publication\Controller\PublicationController'
         arguments:
             - '%allowed.origin%'
             - '%kernel.environment%'

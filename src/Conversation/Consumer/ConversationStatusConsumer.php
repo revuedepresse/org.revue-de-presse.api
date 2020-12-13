@@ -2,28 +2,24 @@
 
 namespace App\Conversation\Consumer;
 
-use App\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
-use App\Infrastructure\Twitter\Api\Accessor\StatusAccessor;
 use App\Aggregate\AggregateAwareTrait;
-use App\Amqp\AmqpMessageAwareTrait;
 use App\Api\Entity\Status;
 use App\Api\Repository\PublicationListRepository;
-use App\Api\Repository\StatusRepository;
 use App\Conversation\ConversationAwareTrait;
+use App\Infrastructure\Amqp\AmqpMessageAwareTrait;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
+use App\Infrastructure\Operation\OperationClock;
 use App\Infrastructure\Repository\Membership\MemberRepository;
+use App\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
 use App\Membership\Entity\Member;
 use App\Membership\Entity\MemberInterface;
-use App\Infrastructure\Operation\OperationClock;
 use App\Twitter\Exception\NotFoundMemberException;
 use App\Twitter\Exception\SuspendedAccountException;
 use App\Twitter\Exception\UnavailableResourceException;
-use Doctrine\Common\Persistence\Mapping\MappingException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
-use Psr\Log\LoggerInterface;
 
 class ConversationStatusConsumer
 {
@@ -162,7 +158,6 @@ class ConversationStatusConsumer
      * @throws OptimisticLockException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
-     * @throws MappingException
      */
     private function handleMemberNotFoundException(
         NotFoundMemberException $notFoundMemberException,

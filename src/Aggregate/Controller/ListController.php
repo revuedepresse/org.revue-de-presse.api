@@ -18,7 +18,7 @@ use App\Infrastructure\Security\Cors\CorsHeadersAwareTrait;
 use App\Member\Repository\AuthenticationTokenRepository;
 use App\Membership\Entity\Member;
 use App\Membership\Entity\MemberInterface;
-use App\Status\Repository\HighlightRepository;
+use App\Infrastructure\Publication\Repository\HighlightRepository;
 use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;

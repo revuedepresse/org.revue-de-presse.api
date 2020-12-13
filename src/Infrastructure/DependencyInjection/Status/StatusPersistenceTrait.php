@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\DependencyInjection\Status;
 
-use App\Infrastructure\Status\Persistence\StatusPersistenceInterface;
+use App\Infrastructure\Publication\Persistence\StatusPersistenceInterface;
 
 trait StatusPersistenceTrait
 {

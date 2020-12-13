@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Twitter\Api\Normalizer;
 
-use App\Domain\Status\TaggedStatus;
+use App\Domain\Publication\TaggedStatus;
 
 interface NormalizerInterface
 {

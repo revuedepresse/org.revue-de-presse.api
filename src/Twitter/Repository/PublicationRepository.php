@@ -7,7 +7,7 @@ use App\Api\Adapter\StatusToArray;
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;
-use App\Domain\Status\StatusInterface;
+use App\Domain\Publication\StatusInterface;
 use App\Infrastructure\DependencyInjection\Formatter\PublicationFormatterTrait;
 use App\Infrastructure\Operation\Collection\Collection;
 use App\Infrastructure\Operation\Collection\CollectionInterface;

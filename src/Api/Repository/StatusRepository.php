@@ -7,11 +7,11 @@ use App\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\Status;
 use App\Domain\Collection\CollectionStrategyInterface;
-use App\Domain\Status\StatusInterface;
-use App\Domain\Status\TaggedStatus;
+use App\Domain\Publication\StatusInterface;
+use App\Domain\Publication\TaggedStatus;
 use App\Membership\Entity\MemberInterface;
-use App\Domain\Status\Repository\ExtremumAwareInterface;
-use App\StatusCollection\Mapping\MappingAwareInterface;
+use App\Domain\Publication\Repository\ExtremumAwareInterface;
+use App\Infrastructure\Publication\Mapping\MappingAwareInterface;
 use App\Twitter\Exception\NotFoundMemberException;
 use App\Infrastructure\Twitter\Collector\PublicationCollector;
 use DateTime;
@@ -196,7 +196,7 @@ class StatusRepository extends ArchivedStatusRepository
      * @param DateTime $latestDate
      * @return ArrayCollection
      */
-    public function selectStatusCollection(
+    public function queryPublicationCollection(
         string $memberScreenName,
         DateTime $earliestDate,
         DateTime $latestDate
