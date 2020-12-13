@@ -4,7 +4,7 @@
     - the member is protected,
     - the member has been declared as not found,
     - the member is suspended,
-    - the publication list has been locked or
+    - the publishers list has been locked or
     - the member is a whisperer
     (a member who has not published anything for quite some time).
 

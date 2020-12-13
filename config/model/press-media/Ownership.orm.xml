@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xmlns:gedmo="http://gediminasm.org/schemas/orm/doctrine-extensions-mapping"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                  http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\PressMedia\Entity\Ownership"
+            repository-class="App\PressMedia\Repository\OwnershipRepository"
+            table="media_ownership">
+
+        <indexes>
+            <index name="ownership_idx" columns="media_id,owner_id"/>
+        </indexes>
+
+        <id name="id" column="id" type="uuid">
+            <generator strategy="CUSTOM"/>
+            <custom-id-generator class="Ramsey\Uuid\Doctrine\UuidGenerator"/>
+        </id>
+
+        <field
+            name="shares"
+            column="shares"
+            type="decimal"
+            nullable="true"
+            precision="5"
+            scale="2"
+        />
+
+        <field
+            name="ownershipLevel"
+            column="ownership_level"
+            nullable="true"
+        />
+
+        <many-to-one field="owner" target-entity="App\PressMedia\Entity\Owner" inversed-by="ownerships">
+            <join-column name="owner_id" />
+        </many-to-one>
+
+        <many-to-one field="media" target-entity="App\PressMedia\Entity\Media" inversed-by="ownerships">
+            <join-column name="media_id" />
+        </many-to-one>
+
+    </entity>
+
+</doctrine-mapping>

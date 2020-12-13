@@ -5,8 +5,8 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="App\Member\Entity\MemberSubscribee"
-            repository-class="App\Member\Repository\MemberSubscribeeRepository"
+    <entity name="App\Membership\Domain\Entity\MemberSubscribee"
+            repository-class="App\Membership\Infrastructure\Repository\MemberSubscribeeRepository"
             table="member_subscribee">
 
         <indexes>
@@ -24,7 +24,7 @@
 
         <many-to-one
             field="member"
-            target-entity="App\Membership\Entity\Member"
+            target-entity="App\Membership\Domain\Entity\Legacy\Member"
             inversed-by="subscribee"
         >
             <join-column
@@ -34,7 +34,7 @@
         </many-to-one>
 
         <many-to-one
-            target-entity="App\Membership\Entity\Member"
+            target-entity="App\Membership\Domain\Entity\Legacy\Member"
             field="subscribee"
             inversed-by="subscriber"
         >

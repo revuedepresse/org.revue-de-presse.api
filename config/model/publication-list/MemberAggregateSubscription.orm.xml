@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xmlns:gedmo="http://gediminasm.org/schemas/orm/doctrine-extensions-mapping"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                  http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\PublishersList\Entity\MemberAggregateSubscription"
+            repository-class="App\PublishersList\Repository\MemberAggregateSubscriptionRepository"
+            table="member_aggregate_subscription">
+
+        <indexes>
+            <index name="member_aggregate_subscription" columns="id,member_id,list_id" />
+        </indexes>
+
+        <unique-constraints>
+            <unique-constraint columns="member_id,list_id" name="unique_aggregate_subscription" />
+        </unique-constraints>
+
+        <id name="id" column="id" type="uuid">
+            <generator strategy="CUSTOM"/>
+            <custom-id-generator class="Ramsey\Uuid\Doctrine\UuidGenerator" />
+        </id>
+
+        <many-to-one
+            field="member"
+            target-entity="App\Membership\Domain\Entity\Legacy\Member"
+        >
+            <join-column
+                name="member_id"
+                referenced-column-name="usr_id"
+            />
+        </many-to-one>
+
+        <field
+            name="listName"
+            column="list_name"
+            type="string"
+            length="255"
+        />
+
+        <field
+            name="listId"
+            column="list_id"
+            type="string"
+            length="255"
+        />
+
+        <field
+            name="document"
+            column="document"
+            type="text"
+        />
+
+    </entity>
+
+</doctrine-mapping>

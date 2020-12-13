@@ -18,7 +18,7 @@ collect:
 
 collect_statuses:
     path:     '/api/twitter/admin/aggregate/collect-statuses'
-    defaults: { _controller: controller.publication_list:collectAggregatesStatuses }
+    defaults: { _controller: controller.publishers_list:collectAggregatesStatuses }
     methods:  [POST, OPTIONS]
 
 healthcheck:
@@ -53,12 +53,12 @@ refresh_member_profile:
 
 remove_aggregate:
     path:     '/api/twitter/admin/aggregate'
-    defaults: { _controller: controller.publication_list:bulkRemoveAggregates }
+    defaults: { _controller: controller.publishers_list:bulkRemoveAggregates }
     methods:  [POST, OPTIONS]
 
 reset_total_members_for_aggregate:
     path:     '/api/twitter/admin/aggregate/reset-total-statuses'
-    defaults: { _controller: controller.publication_list:resetTotalStatusesForAggregates }
+    defaults: { _controller: controller.publishers_list:resetTotalStatusesForAggregates }
     methods:  [POST, OPTIONS]
 
 member_subscriptions:
@@ -76,9 +76,9 @@ publications:
     path:     '/api/twitter/admin/publications'
     defaults: { _controller: controller.publication:getPublications }
 
-publication_lists:
+publishers_lists:
     path:     '/api/twitter/admin/publication-lists'
-    defaults: { _controller: controller.publication_list:getPublicationLists }
+    defaults: { _controller: controller.publishers_list:getPublishersLists }
 
 unlock:
     path:     '/api/twitter/admin/unlock-aggregate'

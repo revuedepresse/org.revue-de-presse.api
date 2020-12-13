@@ -64,7 +64,7 @@ dispatch-messages-from-timely-statuses: ## Produce messages for timely statuses
 remove-php-container: ## Remove PHP container
 		@/bin/bash -c 'source ./bin/functions.sh && remove_php_container'
 
-install-php-dependencies: ## Install PHP dependencies
+install-php-dependencies: ## Install PHP dependencies (APP_ENV=prod)
 		@/bin/bash -c 'source ./bin/functions.sh && install_php_dependencies'
 
 run-php: ## Run PHP with arguments

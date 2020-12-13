@@ -2,28 +2,24 @@
 
 namespace App\Conversation\Consumer;
 
-use App\Accessor\Exception\NotFoundStatusException;
-use App\Accessor\StatusAccessor;
-use App\Aggregate\AggregateAwareTrait;
-use App\Amqp\AmqpMessageAwareTrait;
-use App\Api\Entity\Status;
-use App\Api\Repository\PublicationListRepository;
-use App\Api\Repository\StatusRepository;
+use App\PublishersList\AggregateAwareTrait;
+use App\Twitter\Infrastructure\Api\Entity\Status;
+use App\Twitter\Infrastructure\Api\Repository\PublishersListRepository;
 use App\Conversation\ConversationAwareTrait;
-use App\Infrastructure\DependencyInjection\LoggerTrait;
-use App\Infrastructure\Repository\Membership\MemberRepository;
-use App\Membership\Entity\Member;
-use App\Membership\Entity\MemberInterface;
-use App\Operation\OperationClock;
-use App\Twitter\Exception\NotFoundMemberException;
-use App\Twitter\Exception\SuspendedAccountException;
-use App\Twitter\Exception\UnavailableResourceException;
-use Doctrine\Common\Persistence\Mapping\MappingException;
+use App\Twitter\Infrastructure\Amqp\AmqpMessageAwareTrait;
+use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
+use App\Twitter\Infrastructure\Operation\OperationClock;
+use App\Twitter\Infrastructure\Repository\Membership\MemberRepository;
+use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
+use App\Membership\Domain\Entity\Legacy\Member;
+use App\Membership\Domain\Entity\MemberInterface;
+use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
+use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
+use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
-use Psr\Log\LoggerInterface;
 
 class ConversationStatusConsumer
 {
@@ -38,7 +34,7 @@ class ConversationStatusConsumer
 
     public EntityManagerInterface $entityManager;
 
-    public PublicationListRepository $aggregateRepository;
+    public PublishersListRepository $aggregateRepository;
 
     protected MemberRepository $userRepository;
 
@@ -162,7 +158,6 @@ class ConversationStatusConsumer
      * @throws OptimisticLockException
      * @throws SuspendedAccountException
      * @throws UnavailableResourceException
-     * @throws MappingException
      */
     private function handleMemberNotFoundException(
         NotFoundMemberException $notFoundMemberException,

@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xmlns:gedmo="http://gediminasm.org/schemas/orm/doctrine-extensions-mapping"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                  http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\Twitter\Domain\Curation\Entity\LikedStatus"
+            repository-class="App\Twitter\Infrastructure\Publication\Repository\LikedStatusRepository"
+            table="liked_status">
+
+        <indexes>
+            <index name="status_idx" columns="member_name,aggregate_name,aggregate_id,liked_by_member_name,liked_by,is_archived_status,status_id,archived_status_id,publication_date_time,time_range"/>
+        </indexes>
+
+        <id name="id" column="id" type="uuid">
+            <generator strategy="CUSTOM"/>
+            <custom-id-generator class="Ramsey\Uuid\Doctrine\UuidGenerator"/>
+        </id>
+
+        <many-to-one
+            field="status"
+            target-entity="App\Twitter\Infrastructure\Api\Entity\Status">
+            <join-column
+                name="status_id"
+                referenced-column-name="ust_id"
+            />
+        </many-to-one>
+
+        <many-to-one
+            field="archivedStatus"
+            target-entity="App\Twitter\Infrastructure\Api\Entity\ArchivedStatus">
+            <join-column
+                name="archived_status_id"
+                referenced-column-name="ust_id"
+            />
+        </many-to-one>
+
+        <many-to-one
+            field="member"
+            target-entity="App\Membership\Domain\Entity\Legacy\Member">
+            <join-column name="member_id" referenced-column-name="usr_id" />
+        </many-to-one>
+
+        <many-to-one
+            field="likedBy"
+            target-entity="App\Membership\Domain\Entity\Legacy\Member">
+            <join-column
+                name="liked_by"
+                referenced-column-name="usr_id"
+            />
+        </many-to-one>
+
+        <many-to-one
+                target-entity="App\Twitter\Infrastructure\Api\Entity\Aggregate"
+                field="aggregate"
+                inversed-by="timelyStatuses"
+        />
+
+        <field
+            name="isArchivedStatus"
+            column="is_archived_status"
+            type="boolean"
+        />
+
+        <field
+                name="aggregateName"
+                column="aggregate_name"
+                type="string"
+                length="100"
+        />
+
+        <field
+            name="memberName"
+            column="member_name"
+            type="string"
+            length="100"
+        />
+
+        <field
+            name="likedByMemberName"
+            column="liked_by_member_name"
+            type="string"
+            length="100"
+        />
+
+        <field
+            name="publicationDateTime"
+            column="publication_date_time"
+            type="datetime"
+        />
+
+        <field
+            name="timeRange"
+            column="time_range"
+            type="integer"
+        />
+    </entity>
+
+</doctrine-mapping>

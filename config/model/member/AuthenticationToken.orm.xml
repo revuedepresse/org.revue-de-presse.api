@@ -5,8 +5,8 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="App\Member\Entity\AuthenticationToken"
-            repository-class="App\Member\Repository\AuthenticationTokenRepository"
+    <entity name="App\Membership\Domain\Entity\AuthenticationToken"
+            repository-class="App\Membership\Infrastructure\Repository\AuthenticationTokenRepository"
             table="authentication_token">
 
         <unique-constraints>
@@ -20,7 +20,7 @@
 
         <one-to-one
             field="member"
-            target-entity="App\Membership\Entity\Member"
+            target-entity="App\Membership\Domain\Entity\Legacy\Member"
         >
             <join-column
                 name="member_id"

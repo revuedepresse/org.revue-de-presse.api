@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xmlns:gedmo="http://gediminasm.org/schemas/orm/doctrine-extensions-mapping"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                  http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\PressMedia\Entity\Owner"
+            repository-class="App\PressMedia\Repository\OwnerRepository"
+            table="media_owner">
+
+        <indexes>
+            <index name="owner_idx" columns="source_id,name"/>
+        </indexes>
+
+        <id name="id" column="id" type="uuid">
+            <generator strategy="CUSTOM"/>
+            <custom-id-generator class="Ramsey\Uuid\Doctrine\UuidGenerator"/>
+        </id>
+
+        <field
+            name="sourceId"
+            column="source_id"
+            type="integer"
+            unique="true"
+        />
+
+        <field
+            name="name"
+            column="name"
+            length="255"
+        />
+
+        <one-to-many
+            field="ownerships"
+            target-entity="App\PressMedia\Entity\Ownership"
+            mapped-by="owner"
+        />
+
+    </entity>
+
+</doctrine-mapping>

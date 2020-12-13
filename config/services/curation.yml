@@ -1,0 +1,26 @@
+services:
+    App\Twitter\Infrastructure\Twitter\Collector\InterruptibleCollectDecider:
+        class: 'App\Twitter\Infrastructure\Twitter\Collector\InterruptibleCollectDecider'
+        calls:
+            - [ 'setApiAccessor',                           [ '@App\Twitter\Infrastructure\Api\Accessor'] ]
+            - [ 'setLogger',                                [ '@logger' ] ]
+            - [ 'setLikedStatusRepository',                 [ '@repository.liked_status' ] ]
+            - [ 'setLikedStatusCollectDecider',             [ '@App\Twitter\Infrastructure\Twitter\Collector\LikedStatusCollectDecider' ] ]
+            - [ 'setMemberProfileCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository' ] ]
+            - [ 'setMemberRepository',                      [ '@App\Twitter\Infrastructure\Repository\Membership\MemberRepository' ] ]
+            - [ 'setModerator',                             [ '@App\Twitter\Infrastructure\Api\Moderator\ApiLimitModerator' ] ]
+            - [ 'setPublishersListRepository',             [ '@App\Twitter\Infrastructure\Api\Repository\PublishersListRepository' ] ]
+            - [ 'setStatusAccessor',                        [ '@App\Twitter\Infrastructure\Twitter\Api\Accessor\StatusAccessor' ] ]
+            - [ 'setStatusRepository',                      [ '@App\Twitter\Infrastructure\Api\Repository\StatusRepository' ] ]
+            - [ 'setStatusPersistence',                     [ '@App\Twitter\Infrastructure\Publication\Persistence\StatusPersistence' ] ]
+            - [ 'setTokenRepository',                       [ '@repository.access_token' ] ]
+            - [ 'setWhispererRepository',                   [ '@repository.whisperer' ] ]
+        public: true
+
+    App\Twitter\Infrastructure\Twitter\Collector\LikedStatusCollectDecider:
+        class: 'App\Twitter\Infrastructure\Twitter\Collector\LikedStatusCollectDecider'
+        calls:
+            - [ 'setLikedStatusRepository',      [ '@repository.liked_status' ] ]
+            - [ 'setStatusAccessor',             [ '@App\Twitter\Infrastructure\Twitter\Api\Accessor\StatusAccessor' ] ]
+            - [ 'setStatusRepository',           [ '@App\Twitter\Infrastructure\Api\Repository\StatusRepository' ] ]
+            - [ 'setStatusPersistence',          [ '@App\Twitter\Infrastructure\Publication\Persistence\StatusPersistence' ] ]

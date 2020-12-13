@@ -1,30 +1,30 @@
 services:
     controller.authentication:
         public: true
-        class: 'App\Member\Authentication\Controller\AuthenticationController'
+        class: 'App\Membership\Infrastructure\Security\Authentication\Controller\AuthenticationController'
         properties:
             authenticator: '@app.authenticator'
 
     controller.healthcheck:
         public: true
-        class: 'App\Infrastructure\Healthcheck\Controller\HealthcheckController'
+        class: 'App\Twitter\Infrastructure\Healthcheck\Controller\HealthcheckController'
         arguments:
             - '%allowed.origin%'
             - '%kernel.environment%'
 
     controller.list:
         public: true
-        class: 'App\Aggregate\Controller\ListController'
+        class: 'App\PublishersList\Controller\ListController'
         arguments:
             - '%allowed.origin%'
             - '%kernel.environment%'
         calls:
-            - [ 'setPublicationListDispatcher', ['@App\Infrastructure\Amqp\MessageBus\PublicationListDispatcher']]
+            - [ 'setPublishersListDispatcher', ['@App\Twitter\Infrastructure\Amqp\MessageBus\PublishersListDispatcher']]
         properties:
             serviceAccountConfig:           "%kernel.project_dir%/config/%env(resolve:FIREBASE_SERVICE_ACCOUNT_CONFIG)%"
             databaseUri:                    "%env(resolve:FIREBASE_DATABASE_URI)%"
             authenticationTokenRepository:  '@repository.authentication_token'
-            aggregateRepository:            '@App\Api\Repository\PublicationListRepository'
+            aggregateRepository:            '@App\Twitter\Infrastructure\Api\Repository\PublishersListRepository'
             highlightRepository:            '@repository.highlight'
             logger:                         '@logger'
             memberRepository:               '@user_manager'
@@ -35,7 +35,7 @@ services:
 
     controller.logged_in_member:
         public: true
-        class: 'App\Member\Controller\LoggedInMemberController'
+        class: 'App\Membership\Infrastructure\Controller\LoggedInMemberController'
         arguments:
             - '%allowed.origin%'
             - '%kernel.environment%'
@@ -45,7 +45,7 @@ services:
 
     controller.keyword:
         public: true
-        class: 'App\Aggregate\Controller\KeywordController'
+        class: 'App\PublishersList\Controller\KeywordController'
         arguments:
             - '%allowed.origin%'
             - '%kernel.environment%'
@@ -55,53 +55,53 @@ services:
 
     controller.member:
         public: true
-        class: 'App\Infrastructure\Membership\Controller\MemberController'
+        class: 'App\Twitter\Infrastructure\Membership\Controller\MemberController'
         arguments:
             - '%allowed.origin%'
             - '%kernel.environment%'
         calls:
             - [ 'setLogger',            [ '@logger' ] ]
-            - [ 'setHttpAuthenticator', [ '@App\Infrastructure\Security\Authentication\HttpAuthenticator' ] ]
+            - [ 'setHttpAuthenticator', [ '@App\Twitter\Infrastructure\Security\Authentication\HttpAuthenticator' ] ]
         properties:
-            memberProfileAccessor:  '@App\Infrastructure\Twitter\Api\Accessor\MemberProfileAccessor'
+            memberProfileAccessor:  '@App\Twitter\Infrastructure\Twitter\Api\Accessor\MemberProfileAccessor'
 
     controller.publication:
         public: true
-        class: 'App\Infrastructure\Status\Controller\PublicationController'
+        class: 'App\Twitter\Infrastructure\Publication\Controller\PublicationController'
         arguments:
             - '%allowed.origin%'
             - '%kernel.environment%'
         calls:
             - [ 'setCache',                 [ '@app.cache.redis' ]]
             - [ 'setLogger',            [ '@logger' ] ]
-            - [ 'setPublicationRepository', [ '@App\Twitter\Repository\PublicationRepository' ]]
-            - [ 'setStatusAccessor',    [ '@App\Accessor\StatusAccessor' ]]
-            - [ 'setStatusRepository',  [ '@App\Api\Repository\StatusRepository' ]]
+            - [ 'setPublicationRepository', [ '@App\Twitter\Infrastructure\Publication\Repository\PublicationRepository' ]]
+            - [ 'setStatusAccessor',    [ '@App\Twitter\Infrastructure\Twitter\Api\Accessor\StatusAccessor' ]]
+            - [ 'setStatusRepository',  [ '@App\Twitter\Infrastructure\Api\Repository\StatusRepository' ]]
 
-    controller.publication_list:
+    controller.publishers_list:
         public: true
-        class: 'App\Aggregate\Controller\PublicationListController'
+        class: 'App\PublishersList\Controller\PublishersListController'
         arguments:
             - '%allowed.origin%'
             - '%kernel.environment%'
         calls:
-            - [ 'setHttpAuthenticator', [ '@App\Infrastructure\Security\Authentication\HttpAuthenticator' ] ]
-            - [ 'setPublicationListRepository', [ '@App\Api\Repository\PublicationListRepository' ]]
+            - [ 'setHttpAuthenticator', [ '@App\Twitter\Infrastructure\Security\Authentication\HttpAuthenticator' ] ]
+            - [ 'setPublishersListRepository', [ '@App\Twitter\Infrastructure\Api\Repository\PublishersListRepository' ]]
         properties:
             redisCache:          '@app.cache.redis'
 
     controller.subscription:
         public: true
-        class: 'App\Infrastructure\Subscription\Controller\SubscriptionController'
+        class: 'App\Twitter\Infrastructure\Subscription\Controller\SubscriptionController'
         arguments:
             - '%allowed.origin%'
             - '%kernel.environment%'
         calls:
-            - [ 'setHttpAuthenticator',            [ '@App\Infrastructure\Security\Authentication\HttpAuthenticator' ] ]
+            - [ 'setHttpAuthenticator',            [ '@App\Twitter\Infrastructure\Security\Authentication\HttpAuthenticator' ] ]
             - [ 'setLogger',                       [ '@monolog.logger.membership' ] ]
             - [ 'setMemberSubscriptionRepository', [ '@repository.member_subscription' ] ]
-            - [ 'setMemberRepository',             [ '@App\Infrastructure\Repository\Membership\MemberRepository' ] ]
-            - [ 'setPublicationListDispatcher',    [ '@App\Infrastructure\Amqp\MessageBus\PublicationListDispatcher' ] ]
+            - [ 'setMemberRepository',             [ '@App\Twitter\Infrastructure\Repository\Membership\MemberRepository' ] ]
+            - [ 'setPublishersListDispatcher',    [ '@App\Twitter\Infrastructure\Amqp\MessageBus\PublishersListDispatcher' ] ]
             - [ 'setTokenRepository',              [ '@repository.access_token' ] ]
         properties:
             redisCache:                     '@app.cache.redis'

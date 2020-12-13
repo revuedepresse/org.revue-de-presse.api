@@ -30,7 +30,7 @@
             <group>persistence</group>
             <group>publication</group>
             <group>publication_message_dispatcher</group>
-            <group>repository_publication_list</group>
+            <group>repository_publishers_list</group>
             <group>status_decoration</group>
             <group>tagged_status</group>
             <group>unavailable_resource</group>
@@ -48,12 +48,12 @@
             <directory suffix=".php">src/Amqp/Command/FetchMemberStatusMessageDispatcher.php</directory>
             <directory suffix=".php">src/Api/AccessToken/TokenChange.php</directory>
             <directory suffix=".php">src/Conversation/Consistency/StatusConsistency.php</directory>
-            <directory suffix=".php">src/Infrastructure/Status/Persistence/StatusPersistence.php</directory>
-            <directory suffix=".php">src/Infrastructure/Status/Persistence/PublicationPersistence.php</directory>
-            <directory suffix=".php">src/Infrastructure/Twitter/Api/Accessor/MemberProfileAccessor.php</directory>
-            <directory suffix=".php">src/Infrastructure/Twitter/Api/Accessor/OwnershipAccessor.php</directory>
-            <directory suffix=".php">src/Infrastructure/Twitter/Api/Normalizer/Normalizer.php</directory>
-            <directory suffix=".php">src/Infrastructure/Twitter/Collector/InterruptibleCollectDecider.php</directory>
+            <directory suffix=".php">src/Twitter/Infrastructure/Status/Persistence/StatusPersistence.php</directory>
+            <directory suffix=".php">src/Twitter/Infrastructure/Status/Persistence/PublicationPersistence.php</directory>
+            <directory suffix=".php">src/Twitter/Infrastructure/Twitter/Api/Accessor/MemberProfileAccessor.php</directory>
+            <directory suffix=".php">src/Twitter/Infrastructure/Twitter/Api/Accessor/OwnershipAccessor.php</directory>
+            <directory suffix=".php">src/Twitter/Infrastructure/Twitter/Api/Normalizer/Normalizer.php</directory>
+            <directory suffix=".php">src/Twitter/Infrastructure/Twitter/Collector/InterruptibleCollectDecider.php</directory>
         </whitelist>
     </filter>
 </phpunit>
