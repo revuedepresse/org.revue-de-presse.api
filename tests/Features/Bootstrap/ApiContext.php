@@ -5,7 +5,7 @@ namespace App\Tests\Features\Bootstrap;
 use Behat\Behat\Tester\Exception\PendingException;
 use Behat\Behat\Context\Context;
 
-class HighlightsContext implements Context
+class ApiContext implements Context
 {
     public function __construct()
     {

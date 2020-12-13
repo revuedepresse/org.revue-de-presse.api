@@ -3,6 +3,6 @@ default:
       '': "%paths.base%/tests/Features/Bootstrap"
     suites:
         default:
-            contexts: [App\Tests\Features\Bootstrap\HighlightsContext]
+            contexts: [App\Tests\Features\Bootstrap\ApiContext]
             paths:
                 - "%paths.base%/tests/Features"
