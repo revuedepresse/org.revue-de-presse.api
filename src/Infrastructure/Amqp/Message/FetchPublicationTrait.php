@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Amqp\Message;
 
-use App\Api\Entity\Aggregate;
-use App\Api\Entity\TokenInterface;
+use App\Infrastructure\Api\Entity\Aggregate;
+use App\Infrastructure\Api\Entity\TokenInterface;
 use App\Membership\Domain\Entity\MemberInterface;
 
 trait FetchPublicationTrait

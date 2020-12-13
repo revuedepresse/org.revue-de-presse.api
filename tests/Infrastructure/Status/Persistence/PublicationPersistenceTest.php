@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Infrastructure\Status\Persistence;
 
-use App\Api\AccessToken\AccessToken;
+use App\Infrastructure\Api\AccessToken\AccessToken;
 use App\Domain\Publication\TaggedStatus;
 use App\Infrastructure\Publication\Persistence\PublicationPersistence;
 use App\Infrastructure\Publication\Persistence\PublicationPersistenceInterface;

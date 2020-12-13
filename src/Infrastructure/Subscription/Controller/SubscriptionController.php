@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Subscription\Controller;
 
-use App\Api\Entity\Token;
+use App\Infrastructure\Api\Entity\Token;
 use App\Infrastructure\Cache\RedisCache;
 use App\Domain\Membership\Exception\InvalidMemberException;
 use App\Domain\Publication\Exception\InvalidMemberAggregate;

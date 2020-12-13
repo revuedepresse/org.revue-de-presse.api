@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Builder;
 
-use App\Api\AccessToken\Repository\TokenRepositoryInterface;
-use App\Api\Entity\TokenInterface;
+use App\Infrastructure\Api\AccessToken\Repository\TokenRepositoryInterface;
+use App\Infrastructure\Api\Entity\TokenInterface;
 use Prophecy\Prophet;
 
 class TokenRepositoryBuilder

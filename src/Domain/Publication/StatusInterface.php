@@ -8,7 +8,7 @@ use DateTimeInterface;
 use Doctrine\Common\Collections\Collection;
 
 /**
- * @package App\Api\Entity
+ * @package App\Infrastructure\Api\Entity
  */
 interface StatusInterface
 {

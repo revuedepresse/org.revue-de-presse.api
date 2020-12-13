@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Api;
 
-use App\Api\Entity\TokenInterface;
+use App\Infrastructure\Api\Entity\TokenInterface;
 use App\Domain\Resource\MemberCollection;
 use App\Domain\Resource\OwnershipCollection;
 use stdClass;

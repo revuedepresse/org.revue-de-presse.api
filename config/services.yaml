@@ -42,10 +42,10 @@ services:
         class: 'App\Infrastructure\Publication\Formatter\PublicationFormatter'
         calls:
             - [ 'setStatusAccessor',   [ '@App\Infrastructure\Twitter\Api\Accessor\StatusAccessor' ] ]
-            - [ 'setStatusRepository', [ '@App\Api\Repository\StatusRepository' ] ]
+            - [ 'setStatusRepository', [ '@App\Infrastructure\Api\Repository\StatusRepository' ] ]
 
-    App\Api\Repository\StatusRepository:
-        class:  '\App\Api\Repository\StatusRepository'
+    App\Infrastructure\Api\Repository\StatusRepository:
+        class:  '\App\Infrastructure\Api\Repository\StatusRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - '%weaving_the_web_twitter.entity.status.class%'
@@ -58,13 +58,13 @@ services:
             - [ 'setTimelyStatusRepository', [ '@repository.timely_status' ] ]
         properties:
             appLogger:                '@logger'
-            archivedStatusRepository: '@App\Api\Repository\ArchivedStatusRepository'
+            archivedStatusRepository: '@App\Infrastructure\Api\Repository\ArchivedStatusRepository'
             connection:               '@doctrine.dbal.default_connection'
             likedStatusRepository:    '@repository.liked_status'
             registry:                 '@doctrine'
 
-    App\Api\Repository\ArchivedStatusRepository:
-        class:  '\App\Api\Repository\ArchivedStatusRepository'
+    App\Infrastructure\Api\Repository\ArchivedStatusRepository:
+        class:  '\App\Infrastructure\Api\Repository\ArchivedStatusRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - '%weaving_the_web_twitter.entity.archived_status.class%'
@@ -82,7 +82,7 @@ services:
             registry:               '@doctrine'
 
     weaving_the_web_twitter.repository.read.status:
-        class:  'App\Api\Repository\StatusRepository'
+        class:  'App\Infrastructure\Api\Repository\StatusRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - '%weaving_the_web_twitter.entity.status.class%'
@@ -104,7 +104,7 @@ services:
         arguments:
             - '@messenger.default_bus'
             - '@App\Infrastructure\Twitter\Api\Accessor\MemberProfileAccessor'
-            - '@App\Api\Repository\PublicationListRepository'
+            - '@App\Infrastructure\Api\Repository\PublicationListRepository'
             - '@logger'
 
     App\Infrastructure\Amqp\ResourceProcessor\PublicationListProcessor:
@@ -113,7 +113,7 @@ services:
             - [ 'setMemberIdentityProcessor',                 [ '@App\Infrastructure\Amqp\ResourceProcessor\MemberIdentityProcessor'] ]
             - [ 'setMemberProfileCollectedEventRepository',   [ '@App\Infrastructure\Collection\Repository\MemberProfileCollectedEventRepository'] ]
             - [ 'setPublicationListCollectedEventRepository', [ '@App\Infrastructure\Collection\Repository\PublicationListCollectedEventRepository'] ]
-            - [ 'setTokenChange',                             [ '@App\Api\AccessToken\TokenChange'] ]
+            - [ 'setTokenChange',                             [ '@App\Infrastructure\Api\AccessToken\TokenChange'] ]
         arguments:
             - '@App\Twitter\Api\Accessor'
             - '@App\Infrastructure\Translation\Translator'
@@ -124,11 +124,11 @@ services:
         arguments:
             - '@App\Twitter\Api\Accessor'
             - '@App\Infrastructure\Amqp\ResourceProcessor\PublicationListProcessor'
-            - '@App\Api\AccessToken\TokenChange'
+            - '@App\Infrastructure\Api\AccessToken\TokenChange'
             - '@logger'
             - '@App\Infrastructure\Translation\Translator'
         calls:
-            - [ 'setModerator',                              [ '@App\Api\Moderator\ApiLimitModerator' ] ]
+            - [ 'setModerator',                              [ '@App\Infrastructure\Api\Moderator\ApiLimitModerator' ] ]
             - [ 'setOwnershipAccessor',                      [ '@App\Infrastructure\Twitter\Api\Accessor\OwnershipAccessor' ] ]
             - [ 'setOwnershipBatchCollectedEventRepository', [ '@App\Infrastructure\Collection\Repository\OwnershipBatchCollectedEventRepository' ] ]
 
@@ -162,7 +162,7 @@ services:
             - [ 'setConsumerKey', [ '%weaving_the_web_twitter.consumer_key%' ] ]
             - [ 'setConsumerSecret', [ '%weaving_the_web_twitter.consumer_secret%' ] ]
             - [ 'setMemberRepository', [ '@user_manager' ] ]
-            - [ 'setModerator', [ '@App\Api\Moderator\ApiLimitModerator' ] ]
+            - [ 'setModerator', [ '@App\Infrastructure\Api\Moderator\ApiLimitModerator' ] ]
             - [ 'setTranslator', [ '@App\Infrastructure\Translation\Translator' ] ]
             - [ 'setUserSecret', [ '%weaving_the_web_twitter.oauth_secret.default%' ] ]
             - [ 'setUserToken', [ '%weaving_the_web_twitter.oauth_token.default%' ] ]
@@ -170,7 +170,7 @@ services:
     App\Infrastructure\Twitter\Api\Accessor\StatusAccessor:
         class: 'App\Infrastructure\Twitter\Api\Accessor\StatusAccessor'
         properties:
-            archivedStatusRepository:   '@App\Api\Repository\ArchivedStatusRepository'
+            archivedStatusRepository:   '@App\Infrastructure\Api\Repository\ArchivedStatusRepository'
             entityManager:              '@doctrine.orm.entity_manager'
             notFoundStatusRepository:   '@repository.not_found_status'
         calls:
@@ -180,7 +180,7 @@ services:
             - [ 'setMemberRepository',                          [ '@App\Infrastructure\Repository\Membership\MemberRepository' ] ]
             - [ 'setMemberProfileCollectedEventRepository',     [ '@App\Infrastructure\Collection\Repository\MemberProfileCollectedEventRepository' ] ]
             - [ 'setPublicationPersistence',                    [ '@App\Infrastructure\Publication\Persistence\PublicationPersistence' ] ]
-            - [ 'setStatusRepository',                          [ '@App\Api\Repository\StatusRepository' ] ]
+            - [ 'setStatusRepository',                          [ '@App\Infrastructure\Api\Repository\StatusRepository' ] ]
             - [ 'setPublicationBatchCollectedEventRepository',  [ '@App\Infrastructure\Collection\Repository\PublicationBatchCollectedEventRepository' ] ]
         public: true
 
@@ -204,8 +204,8 @@ services:
         tags:
             - { name: 'kernel.event_subscriber' }
 
-    App\Api\Moderator\ApiLimitModerator:
-        class:  'App\Api\Moderator\ApiLimitModerator'
+    App\Infrastructure\Api\Moderator\ApiLimitModerator:
+        class:  'App\Infrastructure\Api\Moderator\ApiLimitModerator'
         arguments:
             - '@?logger'
 
@@ -218,13 +218,13 @@ services:
             - [ 'setLikedStatusRepository',                     [ '@repository.liked_status' ] ]
             - [ 'setMemberProfileCollectedEventRepository',     [ '@App\Infrastructure\Collection\Repository\MemberProfileCollectedEventRepository' ] ]
             - [ 'setMemberRepository',                          [ '@App\Infrastructure\Repository\Membership\MemberRepository' ] ]
-            - [ 'setModerator',                                 [ '@App\Api\Moderator\ApiLimitModerator' ] ]
+            - [ 'setModerator',                                 [ '@App\Infrastructure\Api\Moderator\ApiLimitModerator' ] ]
             - [ 'setPublicationBatchCollectedEventRepository',  [ '@App\Infrastructure\Collection\Repository\PublicationBatchCollectedEventRepository' ] ]
-            - [ 'setPublicationListRepository',                 [ '@App\Api\Repository\PublicationListRepository' ] ]
+            - [ 'setPublicationListRepository',                 [ '@App\Infrastructure\Api\Repository\PublicationListRepository' ] ]
             - [ 'setPublicationPersistence',                    [ '@App\Infrastructure\Publication\Persistence\PublicationPersistence' ] ]
             - [ 'setStatusLogger',                              [ '@App\Infrastructure\Log\StatusLogger' ] ]
             - [ 'setStatusAccessor',                            [ '@App\Infrastructure\Twitter\Api\Accessor\StatusAccessor' ] ]
-            - [ 'setStatusRepository',                          [ '@App\Api\Repository\StatusRepository' ] ]
+            - [ 'setStatusRepository',                          [ '@App\Infrastructure\Api\Repository\StatusRepository' ] ]
             - [ 'setStatusPersistence',                         [ '@App\Infrastructure\Publication\Persistence\StatusPersistence' ] ]
             - [ 'setTokenRepository',                           [ '@repository.access_token' ] ]
             - [ 'setTranslator',                                [ '@App\Infrastructure\Translation\Translator' ] ]
@@ -268,7 +268,7 @@ parameters:
     weaving_the_web_twitter.oauth_token.default:                  '%env(resolve:API_TWITTER_USER_TOKEN)%'
     weaving_the_web_twitter.oauth_secret.default:                 '%env(resolve:API_TWITTER_USER_SECRET)%'
 
-    weaving_the_web_twitter.entity.archived_status.class:         'App\Api\Entity\ArchivedStatus'
+    weaving_the_web_twitter.entity.archived_status.class:         'App\Infrastructure\Api\Entity\ArchivedStatus'
     weaving_the_web_twitter.entity.aggregate.class:               '%weaving_the_web_api.entity.aggregate.class%'
     weaving_the_web_twitter.entity.status.class:                  '%weaving_the_web_api.entity.status.class%'
     weaving_the_web_twitter.entity.token.class:                   '%weaving_the_web_api.entity.token.class%'

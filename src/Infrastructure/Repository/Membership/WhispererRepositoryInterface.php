@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Repository\Membership;
 
-use App\Api\Entity\Whisperer;
+use App\Infrastructure\Api\Entity\Whisperer;
 
 /**
  * @method Whisperer|null find($id, $lockMode = null, $lockVersion = null)

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Api\Repository;
 
-use App\Api\Repository\PublicationListRepository;
+use App\Infrastructure\Api\Repository\PublicationListRepository;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DBALException as DBALExceptionAlias;
 use Doctrine\DBAL\ParameterType;

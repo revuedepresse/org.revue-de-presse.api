@@ -6,9 +6,9 @@ namespace App\Domain\Publication\Entity;
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Infrastructure\Clock\TimeRange\TimeRangeAwareTrait;
 use App\Infrastructure\Clock\TimeRange\TimeRangeAwareInterface;
-use App\Api\Entity\Aggregate;
-use App\Api\Entity\ArchivedStatus;
-use App\Api\Entity\Status;
+use App\Infrastructure\Api\Entity\Aggregate;
+use App\Infrastructure\Api\Entity\ArchivedStatus;
+use App\Infrastructure\Api\Entity\Status;
 use App\Domain\Publication\StatusInterface;
 
 class LikedStatus implements TimeRangeAwareInterface

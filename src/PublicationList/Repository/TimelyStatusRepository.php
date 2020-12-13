@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace App\PublicationList\Repository;
 
 use App\PublicationList\Entity\TimelyStatus;
-use App\Api\Entity\Aggregate;
-use App\Api\Repository\PublicationListRepository;
+use App\Infrastructure\Api\Entity\Aggregate;
+use App\Infrastructure\Api\Repository\PublicationListRepository;
 use App\Conversation\ConversationAwareTrait;
 use App\Domain\Publication\StatusInterface;
 use App\Infrastructure\Http\SearchParams;

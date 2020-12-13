@@ -1,6 +1,6 @@
 services:
-    App\Api\AccessToken\TokenChange:
-        class: 'App\Api\AccessToken\TokenChange'
+    App\Infrastructure\Api\AccessToken\TokenChange:
+        class: 'App\Infrastructure\Api\AccessToken\TokenChange'
         arguments:
             - '@repository.access_token'
             - '@logger'
@@ -10,7 +10,7 @@ services:
         arguments:
             - '@App\Twitter\Api\Accessor'
             - '@repository.access_token'
-            - '@App\Api\AccessToken\TokenChange'
+            - '@App\Infrastructure\Api\AccessToken\TokenChange'
             - '@logger'
         calls:
             - [ 'setOwnershipBatchCollectedEventRepository', [ '@App\Infrastructure\Collection\Repository\OwnershipBatchCollectedEventRepository'] ]

@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace App\Infrastructure\Publication\Mapping;
 
 use App\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
-use App\Api\Entity\Aggregate;
-use App\Api\Entity\Status;
+use App\Infrastructure\Api\Entity\Aggregate;
+use App\Infrastructure\Api\Entity\Status;
 use App\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;

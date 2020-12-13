@@ -9,4 +9,4 @@ services:
         calls:
             - [ 'setLogger', [ '@monolog.logger.status'  ] ]
             - [ 'setPublicationPersistence', [ '@App\Infrastructure\Publication\Persistence\PublicationPersistence'  ] ]
-            - [ 'setStatusRepository', [ '@App\Api\Repository\StatusRepository'  ] ]
+            - [ 'setStatusRepository', [ '@App\Infrastructure\Api\Repository\StatusRepository'  ] ]

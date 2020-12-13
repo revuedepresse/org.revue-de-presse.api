@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Amqp\MessageHandler;
 
-use App\Api\AccessToken\Repository\TokenRepositoryInterface;
-use App\Api\Entity\Token;
-use App\Api\Entity\TokenInterface;
+use App\Infrastructure\Api\AccessToken\Repository\TokenRepositoryInterface;
+use App\Infrastructure\Api\Entity\Token;
+use App\Infrastructure\Api\Entity\TokenInterface;
 use App\Infrastructure\Amqp\Message\FetchMemberLikes;
 use App\Infrastructure\Amqp\Message\FetchMemberStatus;
 use App\Infrastructure\Amqp\Message\FetchPublicationInterface;

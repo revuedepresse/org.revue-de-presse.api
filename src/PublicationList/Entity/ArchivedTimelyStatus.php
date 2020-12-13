@@ -2,8 +2,8 @@
 
 namespace App\PublicationList\Entity;
 
-use App\Api\Entity\Aggregate;
-use App\Api\Entity\ArchivedStatus;
+use App\Infrastructure\Api\Entity\Aggregate;
+use App\Infrastructure\Api\Entity\ArchivedStatus;
 
 class ArchivedTimelyStatus
 {

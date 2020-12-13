@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Identification;
 
-use App\Api\Entity\Whisperer;
+use App\Infrastructure\Api\Entity\Whisperer;
 use App\Domain\Collection\CollectionStrategyInterface;
 use App\Infrastructure\Amqp\Message\FetchPublicationInterface;
 use App\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;

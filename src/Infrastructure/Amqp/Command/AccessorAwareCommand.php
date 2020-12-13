@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Amqp\Command;
 
-use App\Api\AccessToken\Repository\TokenRepositoryInterface;
+use App\Infrastructure\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Api\ApiAccessorInterface;
 use Symfony\Component\Console\Command\Command;

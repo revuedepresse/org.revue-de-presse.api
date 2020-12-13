@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace App\Tests\Infrastructure\Twitter\Api\Accessor;
 
-use App\Api\AccessToken\Repository\TokenRepositoryInterface;
-use App\Api\Entity\Token;
-use App\Api\Exception\InvalidSerializedTokenException;
+use App\Infrastructure\Api\AccessToken\Repository\TokenRepositoryInterface;
+use App\Infrastructure\Api\Entity\Token;
+use App\Infrastructure\Api\Exception\InvalidSerializedTokenException;
 use App\Infrastructure\Collection\Repository\OwnershipBatchCollectedEventRepository;
 use App\Infrastructure\Collection\Repository\OwnershipBatchCollectedEventRepositoryInterface;
 use App\Tests\Builder\ApiAccessorBuilder;

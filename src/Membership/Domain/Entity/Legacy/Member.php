@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Membership\Domain\Entity\Legacy;
 
-use App\Api\Entity\Token;
+use App\Infrastructure\Api\Entity\Token;
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Membership\Domain\Model\Member as MemberModel;
 use DateTime;
@@ -193,7 +193,7 @@ class Member extends MemberModel
 
     /**
      * @ORM\ManyToMany(
-     *      targetEntity="\App\Api\Entity\Token",
+     *      targetEntity="\App\Infrastructure\Api\Entity\Token",
      *      inversedBy="users",
      *      fetch="EAGER"
      * )

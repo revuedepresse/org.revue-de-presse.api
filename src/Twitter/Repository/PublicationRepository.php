@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace App\Twitter\Repository;
 
-use App\Api\Adapter\StatusToArray;
-use App\Api\Entity\Aggregate;
-use App\Api\Entity\ArchivedStatus;
-use App\Api\Entity\Status;
+use App\Infrastructure\Api\Adapter\StatusToArray;
+use App\Infrastructure\Api\Entity\Aggregate;
+use App\Infrastructure\Api\Entity\ArchivedStatus;
+use App\Infrastructure\Api\Entity\Status;
 use App\Domain\Publication\StatusInterface;
 use App\Infrastructure\DependencyInjection\Formatter\PublicationFormatterTrait;
 use App\Infrastructure\Operation\Collection\Collection;

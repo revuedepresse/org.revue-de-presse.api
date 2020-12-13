@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Clock\TimeRange;
 
-use App\Api\Entity\Status;
+use App\Infrastructure\Api\Entity\Status;
 use DateTime;
 use Exception;
 

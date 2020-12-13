@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Publication;
 
-use App\Api\Entity\Aggregate;
+use App\Infrastructure\Api\Entity\Aggregate;
 
 class Tag
 {

@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Publication\Persistence;
 
-use App\Api\AccessToken\AccessToken;
-use App\Api\Entity\Aggregate;
-use App\Api\Entity\ArchivedStatus;
-use App\Api\Entity\Status;
-use App\Api\Exception\InsertDuplicatesException;
+use App\Infrastructure\Api\AccessToken\AccessToken;
+use App\Infrastructure\Api\Entity\Aggregate;
+use App\Infrastructure\Api\Entity\ArchivedStatus;
+use App\Infrastructure\Api\Entity\Status;
+use App\Infrastructure\Api\Exception\InsertDuplicatesException;
 use App\Domain\Collection\CollectionStrategyInterface;
 use App\Domain\Publication\StatusCollection;
 use App\Domain\Publication\StatusInterface;

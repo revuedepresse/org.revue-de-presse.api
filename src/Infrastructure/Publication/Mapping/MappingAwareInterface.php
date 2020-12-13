@@ -2,7 +2,7 @@
 
 namespace App\Infrastructure\Publication\Mapping;
 
-use App\Api\Entity\Status;
+use App\Infrastructure\Api\Entity\Status;
 
 interface MappingAwareInterface
 {

@@ -5,11 +5,11 @@ namespace App\PublicationList\Controller;
 
 use App\PublicationList\Controller\Exception\InvalidRequestException;
 use App\PublicationList\Repository\TimelyStatusRepository;
-use App\Api\AccessToken\Repository\TokenRepository;
-use App\Api\Entity\Aggregate;
-use App\Api\Entity\Token;
-use App\Api\Entity\TokenInterface;
-use App\Api\Repository\PublicationListRepository;
+use App\Infrastructure\Api\AccessToken\Repository\TokenRepository;
+use App\Infrastructure\Api\Entity\Aggregate;
+use App\Infrastructure\Api\Entity\Token;
+use App\Infrastructure\Api\Entity\TokenInterface;
+use App\Infrastructure\Api\Repository\PublicationListRepository;
 use App\Infrastructure\Cache\RedisCache;
 use App\Infrastructure\DependencyInjection\Publication\PublicationListDispatcherTrait;
 use App\Infrastructure\Http\SearchParams;

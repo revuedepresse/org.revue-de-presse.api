@@ -6,7 +6,7 @@ services:
             - [ 'setLikedStatusRepository',                 [ '@repository.liked_status' ] ]
             - [ 'setMemberProfileCollectedEventRepository', [ '@App\Infrastructure\Collection\Repository\MemberProfileCollectedEventRepository' ] ]
             - [ 'setStatusLogger',                          [ '@App\Infrastructure\Log\StatusLogger' ] ]
-            - [ 'setStatusRepository',                      [ '@App\Api\Repository\StatusRepository' ] ]
+            - [ 'setStatusRepository',                      [ '@App\Infrastructure\Api\Repository\StatusRepository' ] ]
             - [ 'setLogger',                                [ '@logger' ] ]
             - [ 'setTranslator',                            [ '@App\Infrastructure\Translation\Translator' ] ]
             - [ 'setWhispererRepository',                   [ '@repository.whisperer' ] ]

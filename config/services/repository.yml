@@ -1,7 +1,7 @@
 parameters:
 
-    weaving_the_web_api.entity.token.class:         'App\Api\Entity\Token'
-    weaving_the_web_api.entity.whisperer.class:     'App\Api\Entity\Whisperer'
+    weaving_the_web_api.entity.token.class:         'App\Infrastructure\Api\Entity\Token'
+    weaving_the_web_api.entity.whisperer.class:     'App\Infrastructure\Api\Entity\Whisperer'
 
 services:
     App\Infrastructure\Repository\Membership\MemberRepository:
@@ -12,7 +12,7 @@ services:
         calls:
             - [ 'setLogger', [ '@logger'] ]
         properties:
-            aggregateRepository: '@App\Api\Repository\PublicationListRepository'
+            aggregateRepository: '@App\Infrastructure\Api\Repository\PublicationListRepository'
         tags:
             - { name: 'doctrine.repository_service' }
 
@@ -92,17 +92,17 @@ services:
         tags:
             - { name: 'doctrine.repository_service' }
 
-    App\Api\Repository\PublicationListRepository:
+    App\Infrastructure\Api\Repository\PublicationListRepository:
         public: true
-        class:  'App\Api\Repository\PublicationListRepository'
+        class:  'App\Infrastructure\Api\Repository\PublicationListRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Api\Entity\Aggregate'
+            - 'App\Infrastructure\Api\Entity\Aggregate'
         calls:
             - [ 'setLikedStatusRepository',     [ '@repository.liked_status' ] ]
             - [ 'setLogger',                    [ '@logger' ] ]
             - [ 'setPublicationListDispatcher', [ '@App\Infrastructure\Amqp\MessageBus\PublicationListDispatcher' ] ]
-            - [ 'setStatusRepository',          [ '@App\Api\Repository\StatusRepository' ] ]
+            - [ 'setStatusRepository',          [ '@App\Infrastructure\Api\Repository\StatusRepository' ] ]
             - [ 'setTimelyStatusRepository',    [ '@repository.timely_status' ] ]
             - [ 'setTokenRepository',           [ '@repository.access_token' ] ]
         tags:
@@ -184,7 +184,7 @@ services:
         calls:
             - [ 'setLogger',  [ '@logger' ] ]
             - [ 'setStatusAccessor', [ '@App\Infrastructure\Twitter\Api\Accessor\StatusAccessor'] ]
-            - [ 'setStatusRepository', [ '@App\Api\Repository\StatusRepository'] ]
+            - [ 'setStatusRepository', [ '@App\Infrastructure\Api\Repository\StatusRepository'] ]
         properties:
             aggregate:      '%highlight_aggregate_default%'
             adminRouteName: '%admin_route_name%'
@@ -202,7 +202,7 @@ services:
             - 'App\PublicationList\Entity\TimelyStatus'
         calls:
             - [ 'setStatusAccessor',    [ '@App\Infrastructure\Twitter\Api\Accessor\StatusAccessor'] ]
-            - [ 'setStatusRepository',  [ '@App\Api\Repository\StatusRepository'] ]
+            - [ 'setStatusRepository',  [ '@App\Infrastructure\Api\Repository\StatusRepository'] ]
 
     repository.network:
         class:                            'App\Membership\Infrastructure\Repository\NetworkRepository'
@@ -226,7 +226,7 @@ services:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - 'App\PublicationList\Entity\SearchMatchingStatus'
         properties:
-            statusRepository: '@App\Api\Repository\StatusRepository'
+            statusRepository: '@App\Infrastructure\Api\Repository\StatusRepository'
             logger:           "@logger"
 
     repository.liked_status:
@@ -236,7 +236,7 @@ services:
             - 'App\Domain\Publication\Entity\LikedStatus'
         properties:
             memberRepository: "@user_manager"
-            statusRepository: '@App\Api\Repository\StatusRepository'
+            statusRepository: '@App\Infrastructure\Api\Repository\StatusRepository'
 
     repository.member_subscription:
         class: 'App\Membership\Infrastructure\Repository\MemberSubscriptionRepository'

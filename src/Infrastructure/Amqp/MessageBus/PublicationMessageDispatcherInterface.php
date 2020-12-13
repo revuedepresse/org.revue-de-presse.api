@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Amqp\MessageBus;
 
 use App\Infrastructure\Amqp\Exception\InvalidListNameException;
-use App\Api\Entity\TokenInterface;
+use App\Infrastructure\Api\Entity\TokenInterface;
 use App\Domain\Collection\PublicationStrategyInterface;
 use Closure;
 

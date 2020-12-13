@@ -5,9 +5,9 @@ namespace App\Infrastructure\Amqp\MessageBus;
 
 use App\Infrastructure\Amqp\Exception\InvalidListNameException;
 use App\Infrastructure\Amqp\Exception\UnexpectedOwnershipException;
-use App\Api\AccessToken\TokenChangeInterface;
-use App\Api\Entity\TokenInterface;
-use App\Api\Exception\UnavailableTokenException;
+use App\Infrastructure\Api\AccessToken\TokenChangeInterface;
+use App\Infrastructure\Api\Entity\TokenInterface;
+use App\Infrastructure\Api\Exception\UnavailableTokenException;
 use App\Domain\Collection\PublicationStrategyInterface;
 use App\Domain\Resource\MemberOwnerships;
 use App\Domain\Resource\OwnershipCollection;

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\DependencyInjection;
 
-use App\Api\AccessToken\TokenChangeInterface;
+use App\Infrastructure\Api\AccessToken\TokenChangeInterface;
 
 trait TokenChangeTrait
 {

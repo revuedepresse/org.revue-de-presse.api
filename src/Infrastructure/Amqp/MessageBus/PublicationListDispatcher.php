@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Amqp\MessageBus;
 
-use App\Api\Entity\TokenInterface;
+use App\Infrastructure\Api\Entity\TokenInterface;
 use App\Domain\Publication\PublicationListInterface;
 use App\Infrastructure\Amqp\Message\FetchMemberLikes;
 use App\Infrastructure\Amqp\Message\FetchMemberStatus;

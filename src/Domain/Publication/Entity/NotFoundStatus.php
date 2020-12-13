@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Domain\Publication\Entity;
 
-use App\Api\Entity\ArchivedStatus;
-use App\Api\Entity\Status;
+use App\Infrastructure\Api\Entity\ArchivedStatus;
+use App\Infrastructure\Api\Entity\Status;
 use App\Domain\Publication\StatusInterface;
 use Ramsey\Uuid\UuidInterface;
 

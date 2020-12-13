@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Twitter\Collector;
 
-use App\Api\AccessToken\Repository\TokenRepositoryInterface;
-use App\Api\Entity\Token;
+use App\Infrastructure\Api\AccessToken\Repository\TokenRepositoryInterface;
+use App\Infrastructure\Api\Entity\Token;
 use App\Infrastructure\Api\Throttling\ApiLimitModeratorInterface;
 use App\Tests\Builder\TokenRepositoryBuilder;
 use Prophecy\Argument;

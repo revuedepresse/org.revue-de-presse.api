@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Infrastructure\Amqp\MessageBus;
 
-use App\Api\Entity\Token;
-use App\Api\Exception\UnavailableTokenException;
+use App\Infrastructure\Api\Entity\Token;
+use App\Infrastructure\Api\Exception\UnavailableTokenException;
 use App\Domain\Collection\PublicationStrategy;
 use App\Domain\Collection\PublicationStrategyInterface;
 use App\Domain\Resource\MemberOwnerships;

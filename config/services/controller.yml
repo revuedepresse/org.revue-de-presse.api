@@ -24,7 +24,7 @@ services:
             serviceAccountConfig:           "%kernel.project_dir%/config/%env(resolve:FIREBASE_SERVICE_ACCOUNT_CONFIG)%"
             databaseUri:                    "%env(resolve:FIREBASE_DATABASE_URI)%"
             authenticationTokenRepository:  '@repository.authentication_token'
-            aggregateRepository:            '@App\Api\Repository\PublicationListRepository'
+            aggregateRepository:            '@App\Infrastructure\Api\Repository\PublicationListRepository'
             highlightRepository:            '@repository.highlight'
             logger:                         '@logger'
             memberRepository:               '@user_manager'
@@ -76,7 +76,7 @@ services:
             - [ 'setLogger',            [ '@logger' ] ]
             - [ 'setPublicationRepository', [ '@App\Twitter\Repository\PublicationRepository' ]]
             - [ 'setStatusAccessor',    [ '@App\Infrastructure\Twitter\Api\Accessor\StatusAccessor' ]]
-            - [ 'setStatusRepository',  [ '@App\Api\Repository\StatusRepository' ]]
+            - [ 'setStatusRepository',  [ '@App\Infrastructure\Api\Repository\StatusRepository' ]]
 
     controller.publication_list:
         public: true
@@ -86,7 +86,7 @@ services:
             - '%kernel.environment%'
         calls:
             - [ 'setHttpAuthenticator', [ '@App\Infrastructure\Security\Authentication\HttpAuthenticator' ] ]
-            - [ 'setPublicationListRepository', [ '@App\Api\Repository\PublicationListRepository' ]]
+            - [ 'setPublicationListRepository', [ '@App\Infrastructure\Api\Repository\PublicationListRepository' ]]
         properties:
             redisCache:          '@app.cache.redis'
 

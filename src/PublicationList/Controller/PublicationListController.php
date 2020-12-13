@@ -8,7 +8,7 @@ use App\Infrastructure\DependencyInjection\Publication\PublicationListRepository
 use App\Infrastructure\Security\Cors\CorsHeadersAwareTrait;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use App\Api\Repository\PublicationListRepository;
+use App\Infrastructure\Api\Repository\PublicationListRepository;
 use function array_key_exists;
 use function is_array;
 use const JSON_THROW_ON_ERROR;

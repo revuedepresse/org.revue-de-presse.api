@@ -3,8 +3,8 @@
 namespace App\Conversation\Consumer;
 
 use App\PublicationList\AggregateAwareTrait;
-use App\Api\Entity\Status;
-use App\Api\Repository\PublicationListRepository;
+use App\Infrastructure\Api\Entity\Status;
+use App\Infrastructure\Api\Repository\PublicationListRepository;
 use App\Conversation\ConversationAwareTrait;
 use App\Infrastructure\Amqp\AmqpMessageAwareTrait;
 use App\Infrastructure\DependencyInjection\LoggerTrait;

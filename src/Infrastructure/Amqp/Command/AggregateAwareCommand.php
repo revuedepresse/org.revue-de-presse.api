@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Amqp\Command;
 
 use App\PublicationList\AggregateAwareTrait;
-use App\Api\Repository\PublicationListRepository;
+use App\Infrastructure\Api\Repository\PublicationListRepository;
 use App\Infrastructure\Console\CommandReturnCodeAwareInterface;
 use Doctrine\ORM\EntityManager;
 

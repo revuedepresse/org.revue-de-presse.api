@@ -139,8 +139,8 @@ doctrine:
                     Api:
                         alias:      'Api'
                         is_bundle:  false
-                        dir:        '%kernel.project_dir%/src/Api/Entity'
-                        prefix:     'App\Api\Entity'
+                        dir:        '%kernel.project_dir%/src/Infrastructure/Api/Entity'
+                        prefix:     'App\Infrastructure\Api\Entity'
                         type:       annotation
                     Member:
                         alias:      'Member'

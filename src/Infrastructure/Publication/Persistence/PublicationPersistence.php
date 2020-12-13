@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Publication\Persistence;
 
-use App\Api\AccessToken\AccessToken;
-use App\Api\Adapter\StatusToArray;
-use App\Api\Entity\Aggregate;
+use App\Infrastructure\Api\AccessToken\AccessToken;
+use App\Infrastructure\Api\Adapter\StatusToArray;
+use App\Infrastructure\Api\Entity\Aggregate;
 use App\Domain\Publication\StatusInterface;
 use App\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Publication\PublicationRepositoryTrait;

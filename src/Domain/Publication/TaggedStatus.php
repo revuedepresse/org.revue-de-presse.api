@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Domain\Publication;
 
-use App\Api\Entity\Aggregate;
-use App\Api\Entity\Status;
+use App\Infrastructure\Api\Entity\Aggregate;
+use App\Infrastructure\Api\Entity\Status;
 use App\Domain\Publication\Exception\InvalidTagPropertyException;
 use DateTimeInterface;
 use Doctrine\Common\Inflector\Inflector;

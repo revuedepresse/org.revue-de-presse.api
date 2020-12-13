@@ -4,7 +4,7 @@ namespace App\PublicationList\Entity;
 
 use App\Infrastructure\Clock\TimeRange\TimeRangeAwareInterface;
 use App\Infrastructure\Clock\TimeRange\TimeRangeAwareTrait;
-use App\Api\Entity\Status;
+use App\Infrastructure\Api\Entity\Status;
 use App\Domain\Publication\StatusInterface;
 
 class SearchMatchingStatus implements TimeRangeAwareInterface

@@ -6,7 +6,7 @@ namespace App\Infrastructure\Amqp\ResourceProcessor;
 use App\Infrastructure\Twitter\Api\Accessor\Exception\UnexpectedApiResponseException;
 use App\PublicationList\AggregateAwareTrait;
 use App\Infrastructure\Amqp\Exception\SkippableMemberException;
-use App\Api\Entity\TokenInterface;
+use App\Infrastructure\Api\Entity\TokenInterface;
 use App\Domain\Collection\PublicationStrategyInterface;
 use App\Domain\Membership\Exception\MembershipException;
 use App\Domain\Membership\MemberFacingStrategy;

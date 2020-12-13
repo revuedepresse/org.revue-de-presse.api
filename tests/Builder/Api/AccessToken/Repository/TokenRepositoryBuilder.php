@@ -3,7 +3,7 @@ declare (strict_types=1);
 
 namespace App\Tests\Builder\Api\AccessToken\Repository;
 
-use App\Api\AccessToken\Repository\TokenRepositoryInterface;
+use App\Infrastructure\Api\AccessToken\Repository\TokenRepositoryInterface;
 use PHPUnit\Framework\TestCase;
 
 class TokenRepositoryBuilder extends TestCase

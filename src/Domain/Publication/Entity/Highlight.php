@@ -2,7 +2,7 @@
 
 namespace App\Domain\Publication\Entity;
 
-use App\Api\Entity\Status;
+use App\Infrastructure\Api\Entity\Status;
 use App\Domain\Publication\PublicationListInterface;
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Domain\Publication\StatusInterface;

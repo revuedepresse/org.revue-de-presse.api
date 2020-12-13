@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace App\Infrastructure\Amqp\Command;
 
 use App\Infrastructure\Amqp\Exception\SkippableMemberException;
-use App\Api\Entity\Token;
-use App\Api\Exception\InvalidSerializedTokenException;
+use App\Infrastructure\Api\Entity\Token;
+use App\Infrastructure\Api\Exception\InvalidSerializedTokenException;
 use App\Infrastructure\Amqp\Message\FetchMemberStatus;
 use App\Infrastructure\DependencyInjection\Collection\MemberFriendsCollectedEventRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Collection\MemberProfileCollectedEventRepositoryTrait;

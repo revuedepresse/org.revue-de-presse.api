@@ -3,12 +3,12 @@ declare(strict_types=1);
 
 namespace App\Tests\Api\AccessToken;
 
-use App\Api\AccessToken\Repository\TokenRepositoryInterface;
-use App\Api\AccessToken\TokenChange;
-use App\Api\Entity\Token;
-use App\Api\Entity\TokenInterface;
-use App\Api\Exception\InvalidSerializedTokenException;
-use App\Api\Exception\UnavailableTokenException;
+use App\Infrastructure\Api\AccessToken\Repository\TokenRepositoryInterface;
+use App\Infrastructure\Api\AccessToken\TokenChange;
+use App\Infrastructure\Api\Entity\Token;
+use App\Infrastructure\Api\Entity\TokenInterface;
+use App\Infrastructure\Api\Exception\InvalidSerializedTokenException;
+use App\Infrastructure\Api\Exception\UnavailableTokenException;
 use App\Tests\Builder\TokenRepositoryBuilder;
 use App\Tests\Builder\Api\AccessToken\Repository\TokenRepositoryBuilder as Builder;
 use App\Twitter\Api\Accessor;

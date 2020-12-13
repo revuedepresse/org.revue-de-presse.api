@@ -4,8 +4,8 @@ namespace App\Infrastructure\Publication\Repository;
 
 use App\Domain\Publication\Entity\NotFoundStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use App\Api\Entity\ArchivedStatus;
-use App\Api\Entity\Status;
+use App\Infrastructure\Api\Entity\ArchivedStatus;
+use App\Infrastructure\Api\Entity\Status;
 use App\Domain\Publication\StatusInterface;
 
 class NotFoundStatusRepository extends ServiceEntityRepository

@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace App\Tests\Infrastructure\Status\Persistence;
 
-use App\Api\AccessToken\AccessToken;
-use App\Api\Entity\ArchivedStatus;
-use App\Api\Entity\Status;
+use App\Infrastructure\Api\AccessToken\AccessToken;
+use App\Infrastructure\Api\Entity\ArchivedStatus;
+use App\Infrastructure\Api\Entity\Status;
 use App\Domain\Publication\Repository\TaggedStatusRepositoryInterface;
 use App\Domain\Publication\StatusCollection;
 use App\Domain\Publication\StatusInterface;
@@ -308,7 +308,7 @@ class StatusPersistenceTest extends KernelTestCase
     private function removeUnarchivedStatus(): void
     {
         $entityManager = self::$container->get('doctrine.orm.entity_manager');
-        $statusRepository = $entityManager->getRepository('App\Api\Entity\Status');
+        $statusRepository = $entityManager->getRepository('App\Infrastructure\Api\Entity\Status');
         $status = $statusRepository->findOneBy(['hash' => self::ARCHIVE_STATUS_HASH]);
         if ($status instanceof StatusInterface) {
             $entityManager->remove($status);
