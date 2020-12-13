@@ -1,10 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Aggregate\Controller;
+namespace App\PublicationList\Controller;
 
-use App\Aggregate\Controller\Exception\InvalidRequestException;
-use App\Aggregate\Repository\TimelyStatusRepository;
+use App\PublicationList\Controller\Exception\InvalidRequestException;
+use App\PublicationList\Repository\TimelyStatusRepository;
 use App\Api\AccessToken\Repository\TokenRepository;
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\Token;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Amqp\ResourceProcessor;
 
 use App\Infrastructure\Twitter\Api\Accessor\Exception\UnexpectedApiResponseException;
-use App\Aggregate\AggregateAwareTrait;
+use App\PublicationList\AggregateAwareTrait;
 use App\Infrastructure\Amqp\Exception\SkippableMemberException;
 use App\Api\Entity\TokenInterface;
 use App\Domain\Collection\PublicationStrategyInterface;

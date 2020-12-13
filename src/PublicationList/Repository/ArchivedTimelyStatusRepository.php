@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Aggregate\Repository;
+namespace App\PublicationList\Repository;
 
 class ArchivedTimelyStatusRepository extends TimelyStatusRepository
 {

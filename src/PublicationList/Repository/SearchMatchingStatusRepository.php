@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Aggregate\Repository;
+namespace App\PublicationList\Repository;
 
-use App\Aggregate\Entity\SavedSearch;
-use App\Aggregate\Entity\SearchMatchingStatus;
+use App\PublicationList\Entity\SavedSearch;
+use App\PublicationList\Entity\SearchMatchingStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityRepository;

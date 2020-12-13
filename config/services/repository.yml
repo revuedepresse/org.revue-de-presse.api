@@ -166,9 +166,9 @@ services:
 
     repository.member_aggregate_subscription:
         factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
-        class: 'App\Aggregate\Repository\MemberAggregateSubscriptionRepository'
+        class: 'App\PublicationList\Repository\MemberAggregateSubscriptionRepository'
         arguments:
-            - 'App\Aggregate\Entity\MemberAggregateSubscription'
+            - 'App\PublicationList\Entity\MemberAggregateSubscription'
 
     repository.keyword:
         class: 'App\Infrastructure\Publication\Repository\KeywordRepository'
@@ -196,10 +196,10 @@ services:
             - 'App\Domain\Publication\Entity\NotFoundStatus'
 
     repository.timely_status:
-        class: 'App\Aggregate\Repository\TimelyStatusRepository'
+        class: 'App\PublicationList\Repository\TimelyStatusRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Aggregate\Entity\TimelyStatus'
+            - 'App\PublicationList\Entity\TimelyStatus'
         calls:
             - [ 'setStatusAccessor',    [ '@App\Infrastructure\Twitter\Api\Accessor\StatusAccessor'] ]
             - [ 'setStatusRepository',  [ '@App\Api\Repository\StatusRepository'] ]
@@ -215,16 +215,16 @@ services:
             memberSubscriptionRepository: "@repository.member_subscription"
 
     repository.saved_search:
-        class: 'App\Aggregate\Repository\SavedSearchRepository'
+        class: 'App\PublicationList\Repository\SavedSearchRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Aggregate\Entity\SavedSearch'
+            - 'App\PublicationList\Entity\SavedSearch'
 
     repository.search_matching_status:
-        class: 'App\Aggregate\Repository\SearchMatchingStatusRepository'
+        class: 'App\PublicationList\Repository\SearchMatchingStatusRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Aggregate\Entity\SearchMatchingStatus'
+            - 'App\PublicationList\Entity\SearchMatchingStatus'
         properties:
             statusRepository: '@App\Api\Repository\StatusRepository'
             logger:           "@logger"

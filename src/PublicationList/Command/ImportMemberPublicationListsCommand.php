@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Aggregate\Command;
+namespace App\PublicationList\Command;
 
-use App\Aggregate\Repository\MemberAggregateSubscriptionRepository;
+use App\PublicationList\Repository\MemberAggregateSubscriptionRepository;
 use App\Infrastructure\Console\AbstractCommand;
 use App\Domain\Resource\MemberIdentity;
 use App\Domain\Resource\PublicationList;

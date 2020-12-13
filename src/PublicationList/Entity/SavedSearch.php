@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Aggregate\Entity;
+namespace App\PublicationList\Entity;
 
 class SavedSearch
 {

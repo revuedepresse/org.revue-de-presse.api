@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace App\Api\Repository;
 
 use App\Infrastructure\Http\SearchParams;
-use App\Aggregate\Entity\TimelyStatus;
-use App\Aggregate\Repository\PaginationAwareTrait;
+use App\PublicationList\Entity\TimelyStatus;
+use App\PublicationList\Repository\PaginationAwareTrait;
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\TokenInterface;
 use App\Domain\Publication\PublicationListInterface;

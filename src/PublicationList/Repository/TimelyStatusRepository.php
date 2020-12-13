@@ -1,9 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Aggregate\Repository;
+namespace App\PublicationList\Repository;
 
-use App\Aggregate\Entity\TimelyStatus;
+use App\PublicationList\Entity\TimelyStatus;
 use App\Api\Entity\Aggregate;
 use App\Api\Repository\PublicationListRepository;
 use App\Conversation\ConversationAwareTrait;

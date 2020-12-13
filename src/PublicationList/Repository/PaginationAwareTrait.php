@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Aggregate\Repository;
+namespace App\PublicationList\Repository;
 
 use App\Infrastructure\Http\SearchParams;
 use Doctrine\ORM\NoResultException;

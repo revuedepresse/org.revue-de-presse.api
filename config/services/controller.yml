@@ -14,7 +14,7 @@ services:
 
     controller.list:
         public: true
-        class: 'App\Aggregate\Controller\ListController'
+        class: 'App\PublicationList\Controller\ListController'
         arguments:
             - '%allowed.origin%'
             - '%kernel.environment%'
@@ -45,7 +45,7 @@ services:
 
     controller.keyword:
         public: true
-        class: 'App\Aggregate\Controller\KeywordController'
+        class: 'App\PublicationList\Controller\KeywordController'
         arguments:
             - '%allowed.origin%'
             - '%kernel.environment%'
@@ -80,7 +80,7 @@ services:
 
     controller.publication_list:
         public: true
-        class: 'App\Aggregate\Controller\PublicationListController'
+        class: 'App\PublicationList\Controller\PublicationListController'
         arguments:
             - '%allowed.origin%'
             - '%kernel.environment%'

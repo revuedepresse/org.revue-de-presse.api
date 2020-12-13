@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Repository\Membership;
 
-use App\Aggregate\Repository\PaginationAwareTrait;
+use App\PublicationList\Repository\PaginationAwareTrait;
 use App\Api\Repository\PublicationListRepository;
 use App\Domain\Membership\Exception\InvalidMemberException;
 use App\Domain\Resource\MemberIdentity;

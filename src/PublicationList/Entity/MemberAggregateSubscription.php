@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Aggregate\Entity;
+namespace App\PublicationList\Entity;
 
 use App\Membership\Entity\MemberInterface;
 use Ramsey\Uuid\UuidInterface;

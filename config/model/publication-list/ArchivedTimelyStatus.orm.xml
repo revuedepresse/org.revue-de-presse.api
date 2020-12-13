@@ -5,9 +5,9 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="App\Aggregate\Entity\TimelyStatus"
-            repository-class="App\Aggregate\Repository\TimelyStatusRepository"
-            table="timely_status">
+    <entity name="App\PublicationList\Entity\ArchivedTimelyStatus"
+            repository-class="App\PublicationList\Repository\ArchivedTimelyStatusRepository"
+            table="archived_timely_status">
 
         <indexes>
             <index name="publication_idx" columns="publication_date_time"/>
@@ -20,14 +20,14 @@
             <custom-id-generator class="Ramsey\Uuid\Doctrine\UuidGenerator"/>
         </id>
 
-        <many-to-one
+        <one-to-one
                 field="status"
-                target-entity="App\Api\Entity\Status">
+                target-entity="App\Api\Entity\ArchivedStatus">
             <join-column
                 name="status_id"
                 referenced-column-name="ust_id"
             />
-        </many-to-one>
+        </one-to-one>
 
         <many-to-one
             target-entity="App\Api\Entity\Aggregate"

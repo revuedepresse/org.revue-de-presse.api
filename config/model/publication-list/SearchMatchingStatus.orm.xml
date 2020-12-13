@@ -5,47 +5,45 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="App\Aggregate\Entity\ArchivedTimelyStatus"
-            repository-class="App\Aggregate\Repository\ArchivedTimelyStatusRepository"
-            table="archived_timely_status">
+    <entity name="App\PublicationList\Entity\SearchMatchingStatus"
+            repository-class="App\PublicationList\Repository\SearchMatchingStatusRepository"
+            table="search_matching_status">
 
         <indexes>
-            <index name="publication_idx" columns="publication_date_time"/>
-            <index name="status_idx" columns="status_id,publication_date_time,time_range,aggregate_id,aggregate_name"/>
-            <index name="member_name" columns="member_name"/>
+            <index name="status_idx" columns="status_id,publication_date_time,time_range,member_name"/>
         </indexes>
+
+        <unique-constraints>
+            <unique-constraint columns="status_id,saved_search_id" name="unique_status" />
+        </unique-constraints>
 
         <id name="id" column="id" type="uuid">
             <generator strategy="CUSTOM"/>
             <custom-id-generator class="Ramsey\Uuid\Doctrine\UuidGenerator"/>
         </id>
 
-        <one-to-one
+        <many-to-one
                 field="status"
-                target-entity="App\Api\Entity\ArchivedStatus">
+                target-entity="App\Api\Entity\Status">
             <join-column
                 name="status_id"
                 referenced-column-name="ust_id"
             />
-        </one-to-one>
+        </many-to-one>
 
         <many-to-one
-            target-entity="App\Api\Entity\Aggregate"
-            field="aggregate"
-            inversed-by="timelyStatuses"
-        />
+                field="savedSearch"
+                target-entity="App\PublicationList\Entity\SavedSearch">
+            <join-column
+                name="saved_search_id"
+                referenced-column-name="id"
+            />
+        </many-to-one>
 
         <field
             name="publicationDateTime"
             column="publication_date_time"
             type="datetime"
-        />
-
-        <field
-            name="aggregateName"
-            column="aggregate_name"
-            type="string"
-            length="100"
         />
 
         <field

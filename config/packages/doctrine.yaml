@@ -142,18 +142,6 @@ doctrine:
                         dir:        '%kernel.project_dir%/src/Api/Entity'
                         prefix:     'App\Api\Entity'
                         type:       annotation
-                    Aggregate:
-                        alias:      'Aggregate'
-                        dir:        '%kernel.project_dir%/config/model/aggregate'
-                        is_bundle:  false
-                        prefix:     App\Aggregate\Entity
-                        type:       xml
-                    PublicationBatchCollectedEvent:
-                        alias:      'PublicationBatchCollectedEvent'
-                        dir:        '%kernel.project_dir%/config/model/collection'
-                        is_bundle:  false
-                        prefix:     App\Domain\Collection\Entity
-                        type:       xml
                     Member:
                         alias:      'Member'
                         dir:        '%kernel.project_dir%/config/model/member'
@@ -183,6 +171,18 @@ doctrine:
                         dir:        '%kernel.project_dir%/config/model/publication'
                         is_bundle:  false
                         prefix:     App\Domain\Publication\Entity
+                        type:       xml
+                    PublicationBatchCollectedEvent:
+                        alias:      'PublicationBatchCollectedEvent'
+                        dir:        '%kernel.project_dir%/config/model/collection'
+                        is_bundle:  false
+                        prefix:     App\Domain\Collection\Entity
+                        type:       xml
+                    PublicationList:
+                        alias:      'PublicationList'
+                        dir:        '%kernel.project_dir%/config/model/publication-list'
+                        is_bundle:  false
+                        prefix:     App\PublicationList\Entity
                         type:       xml
                     TwitterPublication:
                         alias:      'Publication'

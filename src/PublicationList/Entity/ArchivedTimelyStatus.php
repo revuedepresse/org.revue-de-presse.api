@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Aggregate\Entity;
+namespace App\PublicationList\Entity;
 
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\ArchivedStatus;

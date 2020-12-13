@@ -28,7 +28,7 @@ services:
     # controllers are imported separately to make sure services can be injected
     # as action arguments even if you don't extend any base controller class
     App\Controller\:
-        resource: '../src/Aggregate/Controller/.*.php'
+        resource: '../src/PublicationList/Controller/.*.php'
         tags: ['controller.service_arguments']
 
     App\Infrastructure\Log\StatusLogger:

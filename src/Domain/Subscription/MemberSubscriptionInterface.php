@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Subscription;
 
-use App\Aggregate\Entity\MemberAggregateSubscription;
+use App\PublicationList\Entity\MemberAggregateSubscription;
 
 interface MemberSubscriptionInterface
 {

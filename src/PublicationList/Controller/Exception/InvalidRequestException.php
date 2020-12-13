@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Aggregate\Controller\Exception;
+namespace App\PublicationList\Controller\Exception;
 
 use Symfony\Component\HttpFoundation\JsonResponse;
 

@@ -1,7 +1,7 @@
 <?php
 
 
-namespace App\Aggregate\Controller;
+namespace App\PublicationList\Controller;
 
 use App\Infrastructure\Cache\RedisCache;
 use App\Infrastructure\Security\Cors\CorsHeadersAwareTrait;

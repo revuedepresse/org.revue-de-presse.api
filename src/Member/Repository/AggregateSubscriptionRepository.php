@@ -2,8 +2,8 @@
 
 namespace App\Member\Repository;
 
-use App\Aggregate\Entity\MemberAggregateSubscription;
-use App\Aggregate\Repository\MemberAggregateSubscriptionRepository;
+use App\PublicationList\Entity\MemberAggregateSubscription;
+use App\PublicationList\Repository\MemberAggregateSubscriptionRepository;
 use App\Api\Entity\Aggregate;
 use App\Member\Entity\AggregateSubscription;
 use App\Member\Entity\MemberSubscription;

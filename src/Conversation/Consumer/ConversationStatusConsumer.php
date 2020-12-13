@@ -2,7 +2,7 @@
 
 namespace App\Conversation\Consumer;
 
-use App\Aggregate\AggregateAwareTrait;
+use App\PublicationList\AggregateAwareTrait;
 use App\Api\Entity\Status;
 use App\Api\Repository\PublicationListRepository;
 use App\Conversation\ConversationAwareTrait;

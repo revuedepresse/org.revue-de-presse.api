@@ -7,7 +7,7 @@ parameters:
 
     weaving_the_web_amqp.consumer.conversation_status.class:                    'App\Conversation\Consumer\ConversationStatusConsumer'
     weaving_the_web_amqp.producer.produce_conversation_messages_command.class:  'App\Conversation\Producer\ProduceConversationMessagesCommand'
-    weaving_the_web_amqp.producer.produce_timely_status_messages_command.class: 'App\Aggregate\Producer\ProduceTimelyStatusMessagesCommand'
+    weaving_the_web_amqp.producer.produce_timely_status_messages_command.class: 'App\PublicationList\Producer\ProduceTimelyStatusMessagesCommand'
     weaving_the_web_amqp.producer.produce_member_messages_command.class:        'App\Conversation\Producer\ProduceMemberMessagesCommand'
     weaving_the_web_amqp.consumer.network.class:                                'App\Member\Consumer\NetworkConsumer'
 
@@ -141,8 +141,8 @@ services:
         tags:
             - { name: 'console.command' }
 
-    App\Aggregate\Command\ImportMemberPublicationListsCommand:
-        class:                                      'App\Aggregate\Command\ImportMemberPublicationListsCommand'
+    App\PublicationList\Command\ImportMemberPublicationListsCommand:
+        class:                                      'App\PublicationList\Command\ImportMemberPublicationListsCommand'
         properties:
             accessor:                               '@App\Twitter\Api\Accessor'
             aggregateSubscriptionRepository:        '@repository.publication_list_subscription'

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Aggregate\Controller;
+namespace App\PublicationList\Controller;
 
 use App\Infrastructure\Cache\RedisCache;
 use App\Infrastructure\DependencyInjection\Publication\PublicationListRepositoryTrait;

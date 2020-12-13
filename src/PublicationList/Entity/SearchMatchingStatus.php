@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Aggregate\Entity;
+namespace App\PublicationList\Entity;
 
 use App\Infrastructure\Clock\TimeRange\TimeRangeAwareInterface;
 use App\Infrastructure\Clock\TimeRange\TimeRangeAwareTrait;
