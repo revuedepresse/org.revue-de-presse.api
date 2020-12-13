@@ -139,56 +139,50 @@ doctrine:
                     Api:
                         alias:      'Api'
                         is_bundle:  false
-                        dir:        '%kernel.project_dir%/src/Api/Entity'
-                        prefix:     'App\Api\Entity'
+                        dir:        '%kernel.project_dir%/src/Twitter/Infrastructure/Api/Entity'
+                        prefix:     'App\Twitter\Infrastructure\Api\Entity'
                         type:       annotation
-                    Aggregate:
-                        alias:      'Aggregate'
-                        dir:        '%kernel.project_dir%/config/model/aggregate'
-                        is_bundle:  false
-                        prefix:     App\Aggregate\Entity
-                        type:       xml
-                    PublicationBatchCollectedEvent:
-                        alias:      'PublicationBatchCollectedEvent'
-                        dir:        '%kernel.project_dir%/config/model/collection'
-                        is_bundle:  false
-                        prefix:     App\Domain\Collection\Entity
-                        type:       xml
                     Member:
                         alias:      'Member'
                         dir:        '%kernel.project_dir%/config/model/member'
                         is_bundle:  false
-                        prefix:     App\Member\Entity
+                        prefix:     App\Membership\Domain\Entity
                         type:       xml
                     Membership:
                         alias:      'Membership'
-                        dir:        '%kernel.project_dir%/src/Membership/Entity'
+                        dir:        '%kernel.project_dir%/src/Membership/Domain/Entity/Legacy'
                         is_bundle:  false
-                        prefix:     App\Membership\Entity
+                        prefix:     App\Membership\Domain\Entity\Legacy
                         type:       annotation
-                    Media:
-                        alias:      'Media'
-                        dir:        '%kernel.project_dir%/config/model/media'
+                    PressMedia:
+                        alias:      'PressMedia'
+                        dir:        '%kernel.project_dir%/config/model/press-media'
                         is_bundle:  false
-                        prefix:     App\Media\Entity
+                        prefix:     App\PressMedia\Entity
                         type:       xml
                     Popularity:
                         alias:      'Popularity'
                         dir:        '%kernel.project_dir%/config/model/popularity'
                         is_bundle:  false
-                        prefix:     App\Popularity\Entity
+                        prefix:     App\PublicationPopularity\Entity
                         type:       xml
-                    Status:
-                        alias:      'Status'
-                        dir:        '%kernel.project_dir%/config/model/status'
+                    PublicationBatchCollectedEvent:
+                        alias:      'PublicationBatchCollectedEvent'
+                        dir:        '%kernel.project_dir%/config/model/curation'
                         is_bundle:  false
-                        prefix:     App\Status\Entity
+                        prefix:     App\Twitter\Domain\Curation\Entity
+                        type:       xml
+                    PublishersList:
+                        alias:      'PublishersList'
+                        dir:        '%kernel.project_dir%/config/model/publication-list'
+                        is_bundle:  false
+                        prefix:     App\PublishersList\Entity
                         type:       xml
                     Publication:
                         alias:      'Publication'
-                        dir:        '%kernel.project_dir%/src/Twitter/Entity'
+                        dir:        '%kernel.project_dir%/src/Twitter/Domain/Publication/Entity'
                         is_bundle:  false
-                        prefix:     App\Twitter\Entity
+                        prefix:     App\Twitter\Domain\Publication\Entity
                         type:       annotation
             write:
                 naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware

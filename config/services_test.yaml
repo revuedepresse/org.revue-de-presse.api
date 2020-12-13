@@ -8,20 +8,20 @@ services:
     #
     # test.App\Service\MyService: '@App\Service\MyService'
 
-    test.event_repository.ownership_batch_collected: '@App\Infrastructure\Collection\Repository\OwnershipBatchCollectedEventRepository'
+    test.event_repository.ownership_batch_collected: '@App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository'
 
-    test.event_repository.member_profile_collected: '@App\Infrastructure\Collection\Repository\MemberProfileCollectedEventRepository'
+    test.event_repository.member_profile_collected: '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository'
 
-    test.App\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher: '@App\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher'
+    test.App\Twitter\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher: '@App\Twitter\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher'
 
-    test.App\Domain\Subscription\Console\ListMemberSubscriptionsCommand: '@App\Domain\Subscription\Console\ListMemberSubscriptionsCommand'
+    test.App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscriptionsCommand: '@App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscriptionsCommand'
 
-    test.App\Domain\Subscription\Console\ListMemberSubscribeesCommand: '@App\Domain\Subscription\Console\ListMemberSubscribeesCommand'
+    test.App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscribeesCommand: '@App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscribeesCommand'
 
-    test.App\Domain\Subscription\Console\UnfollowDiffSubscriptionsSubscribeesCommand: '@App\Domain\Subscription\Console\UnfollowDiffSubscriptionsSubscribeesCommand'
+    test.App\Twitter\Infrastructure\Subscription\Console\UnfollowDiffSubscriptionsSubscribeesCommand: '@App\Twitter\Infrastructure\Subscription\Console\UnfollowDiffSubscriptionsSubscribeesCommand'
 
-    test.App\Infrastructure\Collection\Repository\FriendsListCollectedEventRepository: '@App\Infrastructure\Collection\Repository\FriendsListCollectedEventRepository'
+    test.App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository: '@App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository'
 
-    test.App\Infrastructure\Collection\Repository\FollowersListCollectedEventRepository: '@App\Infrastructure\Collection\Repository\FollowersListCollectedEventRepository'
+    test.App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository: '@App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository'
 
-    test.App\Domain\Subscription\Console\UnfollowInactiveMembersCommand: '@App\Domain\Subscription\Console\UnfollowInactiveMembersCommand'
+    test.App\Twitter\Infrastructure\Subscription\Console\UnfollowInactiveMembersCommand: '@App\Twitter\Infrastructure\Subscription\Console\UnfollowInactiveMembersCommand'

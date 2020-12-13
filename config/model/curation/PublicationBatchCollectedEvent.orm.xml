@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xmlns:gedmo="http://gediminasm.org/schemas/orm/doctrine-extensions-mapping"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                  http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\Twitter\Domain\Curation\Entity\PublicationBatchCollectedEvent"
+            repository-class="App\Twitter\Infrastructure\Curation\Repository\PublicationBatchCollectedEventRepository"
+            table="publication_batch_collected_event">
+
+        <indexes>
+            <index name="occurrence_idx" columns="member_id,occurred_at"/>
+        </indexes>
+
+        <id name="id" column="id" type="uuid">
+            <generator strategy="CUSTOM"/>
+            <custom-id-generator class="Ramsey\Uuid\Doctrine\UuidGenerator"/>
+        </id>
+
+        <many-to-one
+            target-entity="App\Membership\Domain\Entity\Legacy\Member"
+            field="member"
+            inversed-by="PublicationBatchCollectedEvents"
+        >
+            <join-column
+                name="member_id"
+                referenced-column-name="usr_id"
+                nullable="true"
+            />
+        </many-to-one>
+
+        <field
+            name="payload"
+            column="payload"
+            type="text"
+            nullable="true"
+        />
+
+        <field
+            name="occurredAt"
+            column="occurred_at"
+            type="datetime"
+        />
+
+        <field
+            name="startedAt"
+            column="started_at"
+            type="datetime"
+        />
+
+        <field
+            name="endedAt"
+            column="ended_at"
+            type="datetime"
+            nullable="true"
+        />
+
+    </entity>
+
+</doctrine-mapping>

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Recommendation\Command;
 
-use App\Console\CommandReturnCodeAwareInterface;
+use App\Twitter\Infrastructure\Console\CommandReturnCodeAwareInterface;
 use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Console\Command\Command;

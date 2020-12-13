@@ -1,12 +1,12 @@
 services:
-    App\Infrastructure\Identification\WhispererIdentification:
-        class: 'App\Infrastructure\Identification\WhispererIdentification'
+    App\Twitter\Infrastructure\Identification\WhispererIdentification:
+        class: 'App\Twitter\Infrastructure\Identification\WhispererIdentification'
         calls:
-            - [ 'setApiAccessor',                           [ '@App\Twitter\Api\Accessor' ] ]
+            - [ 'setApiAccessor',                           [ '@App\Twitter\Infrastructure\Api\Accessor' ] ]
             - [ 'setLikedStatusRepository',                 [ '@repository.liked_status' ] ]
-            - [ 'setMemberProfileCollectedEventRepository', [ '@App\Infrastructure\Collection\Repository\MemberProfileCollectedEventRepository' ] ]
-            - [ 'setStatusLogger',                          [ '@App\Infrastructure\Log\StatusLogger' ] ]
-            - [ 'setStatusRepository',                      [ '@App\Api\Repository\StatusRepository' ] ]
+            - [ 'setMemberProfileCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository' ] ]
+            - [ 'setStatusLogger',                          [ '@App\Twitter\Infrastructure\Log\StatusLogger' ] ]
+            - [ 'setStatusRepository',                      [ '@App\Twitter\Infrastructure\Api\Repository\StatusRepository' ] ]
             - [ 'setLogger',                                [ '@logger' ] ]
-            - [ 'setTranslator',                            [ '@App\Infrastructure\Translation\Translator' ] ]
+            - [ 'setTranslator',                            [ '@App\Twitter\Infrastructure\Translation\Translator' ] ]
             - [ 'setWhispererRepository',                   [ '@repository.whisperer' ] ]

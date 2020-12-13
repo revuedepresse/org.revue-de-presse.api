@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xmlns:gedmo="http://gediminasm.org/schemas/orm/doctrine-extensions-mapping"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                  http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\Twitter\Domain\Curation\Entity\OwnershipBatchCollectedEvent"
+            repository-class="App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository"
+            table="ownership_batch_collected_event">
+
+        <indexes>
+            <index name="occurrence_idx" columns="screen_name,occurred_at"/>
+        </indexes>
+
+        <id name="id" column="id" type="uuid">
+            <generator strategy="CUSTOM"/>
+            <custom-id-generator class="Ramsey\Uuid\Doctrine\UuidGenerator"/>
+        </id>
+
+        <field
+            name="screenName"
+            column="screen_name"
+            type="string"
+            length="255"
+        />
+
+        <field
+            name="payload"
+            column="payload"
+            type="text"
+            nullable="true"
+        />
+
+        <field
+            name="occurredAt"
+            column="occurred_at"
+            type="datetime"
+        />
+
+        <field
+            name="startedAt"
+            column="started_at"
+            type="datetime"
+        />
+
+        <field
+            name="endedAt"
+            column="ended_at"
+            type="datetime"
+            nullable="true"
+        />
+
+    </entity>
+
+</doctrine-mapping>
