@@ -5,8 +5,8 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="App\PublicationList\Entity\MemberAggregateSubscription"
-            repository-class="App\PublicationList\Repository\MemberAggregateSubscriptionRepository"
+    <entity name="App\PublishersList\Entity\MemberAggregateSubscription"
+            repository-class="App\PublishersList\Repository\MemberAggregateSubscriptionRepository"
             table="member_aggregate_subscription">
 
         <indexes>

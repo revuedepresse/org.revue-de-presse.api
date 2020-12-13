@@ -1,6 +1,6 @@
 services:
-    App\Infrastructure\Amqp\MessageBus\PublicationListDispatcher:
-        class: 'App\Infrastructure\Amqp\MessageBus\PublicationListDispatcher'
+    App\Infrastructure\Amqp\MessageBus\PublishersListDispatcher:
+        class: 'App\Infrastructure\Amqp\MessageBus\PublishersListDispatcher'
         calls:
-            - [ 'setPublicationListRepository', [ '@App\Infrastructure\Api\Repository\PublicationListRepository' ] ]
+            - [ 'setPublishersListRepository', [ '@App\Infrastructure\Api\Repository\PublishersListRepository' ] ]
             - [ 'setMessageBus',                [ '@messenger.default_bus' ] ]

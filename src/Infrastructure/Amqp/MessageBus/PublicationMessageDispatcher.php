@@ -11,12 +11,12 @@ use App\Infrastructure\Api\Exception\UnavailableTokenException;
 use App\Domain\Collection\PublicationStrategyInterface;
 use App\Domain\Resource\MemberOwnerships;
 use App\Domain\Resource\OwnershipCollection;
-use App\Domain\Resource\PublicationList;
-use App\Infrastructure\Amqp\ResourceProcessor\PublicationListProcessorInterface;
+use App\Domain\Resource\PublishersList;
+use App\Infrastructure\Amqp\ResourceProcessor\PublishersListProcessorInterface;
 use App\Infrastructure\DependencyInjection\Api\ApiLimitModeratorTrait;
 use App\Infrastructure\DependencyInjection\Collection\OwnershipBatchCollectedEventRepositoryTrait;
 use App\Infrastructure\DependencyInjection\OwnershipAccessorTrait;
-use App\Infrastructure\DependencyInjection\Publication\PublicationListProcessorTrait;
+use App\Infrastructure\DependencyInjection\Publication\PublishersListProcessorTrait;
 use App\Infrastructure\DependencyInjection\TokenChangeTrait;
 use App\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Twitter\Api\ApiAccessorInterface;
@@ -37,7 +37,7 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
     use ApiLimitModeratorTrait;
     use OwnershipBatchCollectedEventRepositoryTrait;
     use OwnershipAccessorTrait;
-    use PublicationListProcessorTrait;
+    use PublishersListProcessorTrait;
     use TokenChangeTrait;
     use TranslatorTrait;
 
@@ -51,13 +51,13 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
 
     public function __construct(
         ApiAccessorInterface $accessor,
-        PublicationListProcessorInterface $publicationListProcessor,
+        PublishersListProcessorInterface $publishersListProcessor,
         TokenChangeInterface $tokenChange,
         LoggerInterface $logger,
         TranslatorInterface $translator
     ) {
         $this->accessor                 = $accessor;
-        $this->publicationListProcessor = $publicationListProcessor;
+        $this->publishersListProcessor = $publishersListProcessor;
         $this->tokenChange              = $tokenChange;
         $this->translator               = $translator;
         $this->logger                   = $logger;
@@ -78,13 +78,13 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
 
         $memberOwnerships = $this->fetchMemberOwnerships($strategy, $token);
 
-        /** @var PublicationList $list */
+        /** @var PublishersList $list */
         foreach ($memberOwnerships->ownershipCollection()->toArray() as $list) {
             try {
                 $publishedMessages = $this->guardAgainstTokenFreeze(
                     function (TokenInterface $token) use ($list, $strategy) {
-                        return $this->publicationListProcessor
-                            ->processPublicationList(
+                        return $this->publishersListProcessor
+                            ->processPublishersList(
                                 $list,
                                 $token,
                                 $strategy
@@ -164,8 +164,8 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
         $allOwnerships = $allOwnerships[count($allOwnerships) - 1];
         usort(
             $allOwnerships,
-            function (PublicationList $leftPublicationList, PublicationList $rightPublicationList) {
-                return $leftPublicationList->id() <=> $rightPublicationList->id();
+            function (PublishersList $leftPublishersList, PublishersList $rightPublishersList) {
+                return $leftPublishersList->id() <=> $rightPublishersList->id();
             }
         );
 
@@ -248,7 +248,7 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
 
         $listRestriction = $this->strategy->forWhichList();
 
-        // Try to find publication list by following the next cursor
+        // Try to find publishers list by following the next cursor
         if (
             $this->targetListHasNotBeenFound($ownerships, $listRestriction)
             && $ownerships->nextPage() !== -1
@@ -340,7 +340,7 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
     private function mapOwnershipsLists(OwnershipCollection $ownerships): array
     {
         return array_map(
-            fn(PublicationList $list) => $list->name(),
+            fn(PublishersList $list) => $list->name(),
             $ownerships->toArray()
         );
     }

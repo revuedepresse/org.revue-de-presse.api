@@ -9,7 +9,7 @@ services:
             - [ 'setMemberProfileCollectedEventRepository', [ '@App\Infrastructure\Collection\Repository\MemberProfileCollectedEventRepository' ] ]
             - [ 'setMemberRepository',                      [ '@App\Infrastructure\Repository\Membership\MemberRepository' ] ]
             - [ 'setModerator',                             [ '@App\Infrastructure\Api\Moderator\ApiLimitModerator' ] ]
-            - [ 'setPublicationListRepository',             [ '@App\Infrastructure\Api\Repository\PublicationListRepository' ] ]
+            - [ 'setPublishersListRepository',             [ '@App\Infrastructure\Api\Repository\PublishersListRepository' ] ]
             - [ 'setStatusAccessor',                        [ '@App\Infrastructure\Twitter\Api\Accessor\StatusAccessor' ] ]
             - [ 'setStatusRepository',                      [ '@App\Infrastructure\Api\Repository\StatusRepository' ] ]
             - [ 'setStatusPersistence',                     [ '@App\Infrastructure\Publication\Persistence\StatusPersistence' ] ]

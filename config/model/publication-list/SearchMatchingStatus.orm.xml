@@ -5,8 +5,8 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="App\PublicationList\Entity\SearchMatchingStatus"
-            repository-class="App\PublicationList\Repository\SearchMatchingStatusRepository"
+    <entity name="App\PublishersList\Entity\SearchMatchingStatus"
+            repository-class="App\PublishersList\Repository\SearchMatchingStatusRepository"
             table="search_matching_status">
 
         <indexes>
@@ -33,7 +33,7 @@
 
         <many-to-one
                 field="savedSearch"
-                target-entity="App\PublicationList\Entity\SavedSearch">
+                target-entity="App\PublishersList\Entity\SavedSearch">
             <join-column
                 name="saved_search_id"
                 referenced-column-name="id"

@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Repository\Membership;
 
-use App\PublicationList\Repository\PaginationAwareTrait;
-use App\Infrastructure\Api\Repository\PublicationListRepository;
+use App\PublishersList\Repository\PaginationAwareTrait;
+use App\Infrastructure\Api\Repository\PublishersListRepository;
 use App\Domain\Membership\Exception\InvalidMemberException;
 use App\Domain\Resource\MemberIdentity;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
@@ -39,8 +39,8 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
 
     private const TABLE_ALIAS = 'm';
 
-    /** @var PublicationListRepository */
-    public PublicationListRepository $aggregateRepository;
+    /** @var PublishersListRepository */
+    public PublishersListRepository $aggregateRepository;
 
     use PaginationAwareTrait;
 

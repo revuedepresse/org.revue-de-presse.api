@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Publication\Repository;
 
-use App\PublicationList\Repository\PaginationAwareTrait;
+use App\PublishersList\Repository\PaginationAwareTrait;
 use App\Conversation\ConversationAwareTrait;
 use App\Domain\Publication\Repository\PaginationAwareRepositoryInterface;
 use App\Infrastructure\DependencyInjection\LoggerTrait;

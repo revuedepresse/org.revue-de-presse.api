@@ -540,8 +540,8 @@ class StatusAccessor implements StatusAccessorInterface
         if ($collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected()) {
             unset($options[FetchPublicationInterface::BEFORE]);
         }
-        if (array_key_exists(FetchPublicationInterface::PUBLICATION_LIST_ID, $options)) {
-            unset($options[FetchPublicationInterface::PUBLICATION_LIST_ID]);
+        if (array_key_exists(FetchPublicationInterface::publishers_list_ID, $options)) {
+            unset($options[FetchPublicationInterface::publishers_list_ID]);
         }
 
         return $options;

@@ -11,7 +11,7 @@ interface CollectionStrategyInterface
 
     public function dateBeforeWhichPublicationsAreToBeCollected(): ?string;
 
-    public function publicationListId(): ?int;
+    public function PublishersListId(): ?int;
 
     public function fetchLikes(): bool;
 
@@ -31,8 +31,8 @@ interface CollectionStrategyInterface
 
     public function optInToCollectStatusPublishedBefore(string $date): self;
 
-    public function optInToCollectStatusForPublicationListOfId(
-        ?int $publicationList = null
+    public function optInToCollectStatusForPublishersListOfId(
+        ?int $publishersList = null
     ): self;
 
     public function optInToFetchLikes(bool $fetchLikes = false): self;

@@ -148,7 +148,7 @@ class StatusLogger implements StatusLoggerInterface
         $options,
         CollectionStrategyInterface $collectionStrategy
     ): void {
-        if ($collectionStrategy->publicationListId() === null) {
+        if ($collectionStrategy->publishersListId() === null) {
             $this->logger->info(sprintf(
                 'No aggregate id for "%s"', $options['screen_name']
             ));
@@ -160,7 +160,7 @@ class StatusLogger implements StatusLoggerInterface
             sprintf(
                 'About to save status for "%s" in aggregate #%d',
                 $options['screen_name'],
-                $collectionStrategy->publicationListId()
+                $collectionStrategy->publishersListId()
             )
         );
     }
@@ -230,7 +230,7 @@ class StatusLogger implements StatusLoggerInterface
                 $lastCollectionBatchSize,
                 $subject,
                 $collectionStrategy->screenName(),
-                $collectionStrategy->publicationListId()
+                $collectionStrategy->publishersListId()
             )
         );
     }

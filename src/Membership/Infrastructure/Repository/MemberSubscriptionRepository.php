@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Membership\Infrastructure\Repository;
 
-use App\Domain\Publication\PublicationListIdentity;
-use App\Domain\Publication\PublicationListIdentityInterface;
+use App\Domain\Publication\PublishersListIdentity;
+use App\Domain\Publication\PublishersListIdentityInterface;
 use App\Infrastructure\Http\PaginationParams;
 use App\Infrastructure\Repository\Membership\MemberRepositoryInterface;
 use App\Infrastructure\Repository\Subscription\MemberSubscriptionRepositoryInterface;
@@ -152,17 +152,17 @@ QUERY;
         return $remainingSubscriptions;
     }
 
-    public function getConstraints(PublicationListIdentityInterface $publicationListIdentity = null)
+    public function getConstraints(PublishersListIdentityInterface $publishersListIdentity = null)
     {
         $restrictionByAggregate = '';
 
-        if ($publicationListIdentity) {
+        if ($publishersListIdentity) {
             $restrictionByAggregate = sprintf(
                 <<<QUERY
                 AND a.name IN ( SELECT name FROM weaving_aggregate WHERE id = %d)
 QUERY
                 ,
-                (int) ((string) $publicationListIdentity)
+                (int) ((string) $publishersListIdentity)
             );
         }
 
@@ -207,10 +207,10 @@ QUERY
         $memberSubscriptions = [];
 
         $paginationParams        = null;
-        $publicationListIdentity = null;
+        $publishersListIdentity = null;
         if ($request instanceof Request) {
             $paginationParams        = PaginationParams::fromRequest($request);
-            $publicationListIdentity = PublicationListIdentity::fromRequest($request);
+            $publishersListIdentity = PublishersListIdentity::fromRequest($request);
         }
 
         $totalSubscriptions = $this->countMemberSubscriptions($member);
@@ -218,7 +218,7 @@ QUERY
             $memberSubscriptions = $this->selectMemberSubscriptions(
                 $member,
                 $paginationParams,
-                $publicationListIdentity
+                $publishersListIdentity
             );
         }
 
@@ -327,7 +327,7 @@ QUERY
     /**
      * @param MemberInterface                       $member
      * @param PaginationParams|null                 $paginationParams
-     * @param PublicationListIdentityInterface|null $publicationListIdentity
+     * @param PublishersListIdentityInterface|null $publishersListIdentity
      *
      * @return array
      * @throws \Exception
@@ -335,10 +335,10 @@ QUERY
     public function selectMemberSubscriptions(
         MemberInterface $member,
         PaginationParams $paginationParams = null,
-        PublicationListIdentityInterface $publicationListIdentity = null
+        PublishersListIdentityInterface $publishersListIdentity = null
     ): array {
         $queryTemplate = $this->queryMemberSubscriptions(
-            $publicationListIdentity,
+            $publishersListIdentity,
             $paginationParams,
             $selection = '',
             $group = '',
@@ -360,7 +360,7 @@ QUERY
                 ':member_id'    => $member->getId(),
                 ':offset'       => $offset,
                 ':page_size'    => $pageSize,
-                ':aggregate_id' => (string) $publicationListIdentity
+                ':aggregate_id' => (string) $publishersListIdentity
             ]
         );
         $statement = $connection->executeQuery($query);
@@ -426,7 +426,7 @@ QUERY
 QUERY
             ,
             $this->queryMemberSubscriptions(
-                $publicationListIdentity = null,
+                $publishersListIdentity = null,
                 $paginationParams,
                 'a.name, a.id'
             )
@@ -459,7 +459,7 @@ QUERY
     }
 
     /**
-     * @param PublicationListIdentityInterface|null $publicationListIdentity
+     * @param PublishersListIdentityInterface|null $publishersListIdentity
      * @param PaginationParams|null                 $paginationParams
      * @param string                                $selection
      * @param string                                $group
@@ -468,7 +468,7 @@ QUERY
      * @return string
      */
     private function queryMemberSubscriptions(
-        PublicationListIdentityInterface $publicationListIdentity = null,
+        PublishersListIdentityInterface $publishersListIdentity = null,
         PaginationParams $paginationParams = null,
         string $selection = '',
         string $group = '',
@@ -487,7 +487,7 @@ QUERY;
             $queryTemplate,
             [
                 '{selection}'   => $selection ?: $this->getSelection(),
-                '{constraints}' => $this->getConstraints($publicationListIdentity),
+                '{constraints}' => $this->getConstraints($publishersListIdentity),
                 '{group}'       => $group ?: 'GROUP BY u.usr_twitter_username',
                 '{sort}'        => $sort ?: self::SORT_BY_ASCENDING_MEMBER_ID,
                 '{limit}'       => $paginationParams instanceof PaginationParams ? 'LIMIT :offset, :page_size' : '',

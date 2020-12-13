@@ -3,7 +3,7 @@
 namespace App\Domain\Publication\Entity;
 
 use App\Infrastructure\Api\Entity\Status;
-use App\Domain\Publication\PublicationListInterface;
+use App\Domain\Publication\PublishersListInterface;
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Domain\Publication\StatusInterface;
 use DateTime;
@@ -33,7 +33,7 @@ class Highlight
     private $isRetweet;
 
     /**
-     * @var PublicationListInterface
+     * @var PublishersListInterface
      */
     private $aggregate;
 

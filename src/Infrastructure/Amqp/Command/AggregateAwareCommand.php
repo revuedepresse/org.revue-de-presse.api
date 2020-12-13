@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Amqp\Command;
 
-use App\PublicationList\AggregateAwareTrait;
-use App\Infrastructure\Api\Repository\PublicationListRepository;
+use App\PublishersList\AggregateAwareTrait;
+use App\Infrastructure\Api\Repository\PublishersListRepository;
 use App\Infrastructure\Console\CommandReturnCodeAwareInterface;
 use Doctrine\ORM\EntityManager;
 
@@ -15,9 +15,9 @@ abstract class AggregateAwareCommand extends AccessorAwareCommand implements Com
 {
     use AggregateAwareTrait;
 
-    protected PublicationListRepository $aggregateRepository;
+    protected PublishersListRepository $aggregateRepository;
 
-    public function setAggregateRepository(PublicationListRepository $aggregateRepository): self
+    public function setAggregateRepository(PublishersListRepository $aggregateRepository): self
     {
         $this->aggregateRepository = $aggregateRepository;
 

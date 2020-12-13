@@ -12,7 +12,7 @@ services:
         calls:
             - [ 'setLogger', [ '@logger'] ]
         properties:
-            aggregateRepository: '@App\Infrastructure\Api\Repository\PublicationListRepository'
+            aggregateRepository: '@App\Infrastructure\Api\Repository\PublishersListRepository'
         tags:
             - { name: 'doctrine.repository_service' }
 
@@ -70,11 +70,11 @@ services:
         tags:
             - { name: 'doctrine.repository_service' }
 
-    App\Infrastructure\Collection\Repository\PublicationListCollectedEventRepository:
-        class: 'App\Infrastructure\Collection\Repository\PublicationListCollectedEventRepository'
+    App\Infrastructure\Collection\Repository\PublishersListCollectedEventRepository:
+        class: 'App\Infrastructure\Collection\Repository\PublishersListCollectedEventRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Domain\Collection\Entity\PublicationListCollectedEvent'
+            - 'App\Domain\Collection\Entity\PublishersListCollectedEvent'
         calls:
             - [ 'setLogger',           [ '@logger' ] ]
             - [ 'setApiAccessor',      [ '@App\Twitter\Api\Accessor' ] ]
@@ -92,16 +92,16 @@ services:
         tags:
             - { name: 'doctrine.repository_service' }
 
-    App\Infrastructure\Api\Repository\PublicationListRepository:
+    App\Infrastructure\Api\Repository\PublishersListRepository:
         public: true
-        class:  'App\Infrastructure\Api\Repository\PublicationListRepository'
+        class:  'App\Infrastructure\Api\Repository\PublishersListRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - 'App\Infrastructure\Api\Entity\Aggregate'
         calls:
             - [ 'setLikedStatusRepository',     [ '@repository.liked_status' ] ]
             - [ 'setLogger',                    [ '@logger' ] ]
-            - [ 'setPublicationListDispatcher', [ '@App\Infrastructure\Amqp\MessageBus\PublicationListDispatcher' ] ]
+            - [ 'setPublishersListDispatcher', [ '@App\Infrastructure\Amqp\MessageBus\PublishersListDispatcher' ] ]
             - [ 'setStatusRepository',          [ '@App\Infrastructure\Api\Repository\StatusRepository' ] ]
             - [ 'setTimelyStatusRepository',    [ '@repository.timely_status' ] ]
             - [ 'setTokenRepository',           [ '@repository.access_token' ] ]
@@ -127,7 +127,7 @@ services:
         calls:
             - [ 'setLogger', [ '@logger' ] ]
 
-    repository.publication_list_subscription:
+    repository.publishers_list_subscription:
         class:      'App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
@@ -166,9 +166,9 @@ services:
 
     repository.member_aggregate_subscription:
         factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
-        class: 'App\PublicationList\Repository\MemberAggregateSubscriptionRepository'
+        class: 'App\PublishersList\Repository\MemberAggregateSubscriptionRepository'
         arguments:
-            - 'App\PublicationList\Entity\MemberAggregateSubscription'
+            - 'App\PublishersList\Entity\MemberAggregateSubscription'
 
     repository.keyword:
         class: 'App\Infrastructure\Publication\Repository\KeywordRepository'
@@ -196,10 +196,10 @@ services:
             - 'App\Domain\Publication\Entity\NotFoundStatus'
 
     repository.timely_status:
-        class: 'App\PublicationList\Repository\TimelyStatusRepository'
+        class: 'App\PublishersList\Repository\TimelyStatusRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\PublicationList\Entity\TimelyStatus'
+            - 'App\PublishersList\Entity\TimelyStatus'
         calls:
             - [ 'setStatusAccessor',    [ '@App\Infrastructure\Twitter\Api\Accessor\StatusAccessor'] ]
             - [ 'setStatusRepository',  [ '@App\Infrastructure\Api\Repository\StatusRepository'] ]
@@ -215,16 +215,16 @@ services:
             memberSubscriptionRepository: "@repository.member_subscription"
 
     repository.saved_search:
-        class: 'App\PublicationList\Repository\SavedSearchRepository'
+        class: 'App\PublishersList\Repository\SavedSearchRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\PublicationList\Entity\SavedSearch'
+            - 'App\PublishersList\Entity\SavedSearch'
 
     repository.search_matching_status:
-        class: 'App\PublicationList\Repository\SearchMatchingStatusRepository'
+        class: 'App\PublishersList\Repository\SearchMatchingStatusRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\PublicationList\Entity\SearchMatchingStatus'
+            - 'App\PublishersList\Entity\SearchMatchingStatus'
         properties:
             statusRepository: '@App\Infrastructure\Api\Repository\StatusRepository'
             logger:           "@logger"

@@ -25,7 +25,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use App\Infrastructure\Api\Repository\PublicationListRepository;
+use App\Infrastructure\Api\Repository\PublishersListRepository;
 use App\Twitter\Api\Accessor;
 use App\Infrastructure\Repository\Membership\MemberRepository;
 
@@ -60,7 +60,7 @@ class AddMemberToAggregateCommand extends Command implements CommandReturnCodeAw
     public $logger;
 
     /**
-     * @var PublicationListRepository
+     * @var PublishersListRepository
      */
     public $aggregateRepository;
 

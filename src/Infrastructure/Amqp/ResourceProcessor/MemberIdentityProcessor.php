@@ -4,20 +4,20 @@ declare(strict_types=1);
 namespace App\Infrastructure\Amqp\ResourceProcessor;
 
 use App\Infrastructure\Twitter\Api\Accessor\Exception\UnexpectedApiResponseException;
-use App\PublicationList\AggregateAwareTrait;
+use App\PublishersList\AggregateAwareTrait;
 use App\Infrastructure\Amqp\Exception\SkippableMemberException;
 use App\Infrastructure\Api\Entity\TokenInterface;
 use App\Domain\Collection\PublicationStrategyInterface;
 use App\Domain\Membership\Exception\MembershipException;
 use App\Domain\Membership\MemberFacingStrategy;
 use App\Domain\Resource\MemberIdentity;
-use App\Domain\Resource\PublicationList;
+use App\Domain\Resource\PublishersList;
 use App\Infrastructure\Amqp\Exception\ContinuePublicationException;
 use App\Infrastructure\Amqp\Exception\StopPublicationException;
 use App\Infrastructure\Amqp\Message\FetchMemberLikes;
 use App\Infrastructure\Amqp\Message\FetchMemberStatus;
 use App\Infrastructure\DependencyInjection\Membership\MemberProfileAccessorTrait;
-use App\Infrastructure\Repository\PublicationList\PublicationListRepositoryInterface;
+use App\Domain\PublishersList\Repository\PublishersListRepositoryInterface;
 use App\Infrastructure\Twitter\Api\Accessor\MemberProfileAccessorInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
@@ -39,14 +39,14 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
     private LoggerInterface $logger;
 
     /**
-     * @var PublicationListRepositoryInterface
+     * @var PublishersListRepositoryInterface
      */
-    private PublicationListRepositoryInterface $aggregateRepository;
+    private PublishersListRepositoryInterface $aggregateRepository;
 
     public function __construct(
         MessageBusInterface $dispatcher,
         MemberProfileAccessorInterface $memberProfileAccessor,
-        PublicationListRepositoryInterface $aggregateRepository,
+        PublishersListRepositoryInterface $aggregateRepository,
         LoggerInterface $logger
     ) {
         $this->dispatcher                 = $dispatcher;
@@ -59,7 +59,7 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
      * @param MemberIdentity               $memberIdentity
      * @param PublicationStrategyInterface $strategy
      * @param TokenInterface               $token
-     * @param PublicationList              $list
+     * @param PublishersList              $list
      *
      * @return int
      * @throws ContinuePublicationException
@@ -70,7 +70,7 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
         MemberIdentity $memberIdentity,
         PublicationStrategyInterface $strategy,
         TokenInterface $token,
-        PublicationList $list
+        PublishersList $list
     ): int {
         try {
             $this->dispatchPublications($memberIdentity, $strategy, $token, $list);
@@ -99,7 +99,7 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
      * @param MemberIdentity               $memberIdentity
      * @param PublicationStrategyInterface $strategy
      * @param TokenInterface               $token
-     * @param PublicationList              $list
+     * @param PublishersList              $list
      *
      * @throws SkippableMemberException
      */
@@ -107,7 +107,7 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
         MemberIdentity $memberIdentity,
         PublicationStrategyInterface $strategy,
         TokenInterface $token,
-        PublicationList $list
+        PublishersList $list
     ): void {
         $this->skipUnrestrictedMember($memberIdentity, $strategy);
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Twitter\Collector;
 
 use App\Domain\Collection\CollectionStrategyInterface;
-use App\Domain\Publication\PublicationListInterface;
+use App\Domain\Publication\PublishersListInterface;
 
 interface LikedStatusCollectDeciderInterface
 {
@@ -12,6 +12,6 @@ interface LikedStatusCollectDeciderInterface
         array $options,
         array $statuses,
         CollectionStrategyInterface $collectionStrategy,
-        ?PublicationListInterface $publicationList
+        ?PublishersListInterface $publishersList
     ): bool;
 }

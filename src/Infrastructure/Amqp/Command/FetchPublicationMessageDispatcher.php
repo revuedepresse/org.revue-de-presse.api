@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Amqp\Command;
 
-use App\PublicationList\Entity\SavedSearch;
-use App\PublicationList\Repository\SavedSearchRepository;
-use App\PublicationList\Repository\SearchMatchingStatusRepository;
+use App\PublishersList\Entity\SavedSearch;
+use App\PublishersList\Repository\SavedSearchRepository;
+use App\PublishersList\Repository\SearchMatchingStatusRepository;
 use App\Infrastructure\Amqp\Exception\SkippableOperationException;
 use App\Infrastructure\Amqp\Exception\UnexpectedOwnershipException;
 use App\Infrastructure\Api\Entity\Token;

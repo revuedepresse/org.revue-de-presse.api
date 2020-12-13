@@ -5,8 +5,8 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="App\PublicationList\Entity\TimelyStatus"
-            repository-class="App\PublicationList\Repository\TimelyStatusRepository"
+    <entity name="App\PublishersList\Entity\TimelyStatus"
+            repository-class="App\PublishersList\Repository\TimelyStatusRepository"
             table="timely_status">
 
         <indexes>

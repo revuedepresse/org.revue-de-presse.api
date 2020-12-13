@@ -7,7 +7,7 @@ parameters:
 
     weaving_the_web_amqp.consumer.conversation_status.class:                    'App\Conversation\Consumer\ConversationStatusConsumer'
     weaving_the_web_amqp.producer.produce_conversation_messages_command.class:  'App\Conversation\Producer\ProduceConversationMessagesCommand'
-    weaving_the_web_amqp.producer.produce_timely_status_messages_command.class: 'App\PublicationList\Producer\ProduceTimelyStatusMessagesCommand'
+    weaving_the_web_amqp.producer.produce_timely_status_messages_command.class: 'App\PublishersList\Producer\ProduceTimelyStatusMessagesCommand'
     weaving_the_web_amqp.producer.produce_member_messages_command.class:        'App\Conversation\Producer\ProduceMemberMessagesCommand'
     weaving_the_web_amqp.consumer.network.class:                                'App\Membership\Infrastructure\Consumer\NetworkConsumer'
 
@@ -36,7 +36,7 @@ services:
             searchMatchingStatusRepository: '@repository.search_matching_status'
         calls:
             - [ 'setAccessor',                      [ '@App\Twitter\Api\Accessor'] ]
-            - [ 'setAggregateRepository',           [ '@App\Infrastructure\Api\Repository\PublicationListRepository'] ]
+            - [ 'setAggregateRepository',           [ '@App\Infrastructure\Api\Repository\PublishersListRepository'] ]
             - [ 'setDefaultSecret',                 [ '%weaving_the_web_twitter.oauth_secret.default%'] ]
             - [ 'setDefaultToken',                  [ '%weaving_the_web_twitter.oauth_token.default%'] ]
             - [ 'setTokenRepository',               [ '@repository.access_token'] ]
@@ -52,7 +52,7 @@ services:
         class: 'App\Infrastructure\Amqp\Command\FetchMemberSubscriptionTimelineMessageDispatcher'
         calls:
             - [ 'setAccessor',                              [ '@App\Twitter\Api\Accessor'] ]
-            - [ 'setAggregateRepository',                   [ '@App\Infrastructure\Api\Repository\PublicationListRepository'] ]
+            - [ 'setAggregateRepository',                   [ '@App\Infrastructure\Api\Repository\PublishersListRepository'] ]
             - [ 'setDefaultSecret',                         [ '%weaving_the_web_twitter.oauth_secret.default%'] ]
             - [ 'setDefaultToken',                          [ '%weaving_the_web_twitter.oauth_token.default%'] ]
             - [ 'setEntityManager',                         [ '@doctrine.orm.entity_manager'] ]
@@ -119,8 +119,8 @@ services:
     command.add_members_to_aggregate:
         class:                      "%command.add_members_to_aggregate.class%"
         properties:
-            aggregateRepository:                '@App\Infrastructure\Api\Repository\PublicationListRepository'
-            aggregateSubscriptionRepository:    '@repository.publication_list_subscription'
+            aggregateRepository:                '@App\Infrastructure\Api\Repository\PublishersListRepository'
+            aggregateSubscriptionRepository:    '@repository.publishers_list_subscription'
             accessor:                           '@App\Twitter\Api\Accessor'
             logger:                             '@logger'
             userRepository:                     '@user_manager'
@@ -141,18 +141,18 @@ services:
         tags:
             - { name: 'console.command' }
 
-    App\PublicationList\Command\ImportMemberPublicationListsCommand:
-        class:                                      'App\PublicationList\Command\ImportMemberPublicationListsCommand'
+    App\PublishersList\Command\ImportMemberPublishersListsCommand:
+        class:                                      'App\PublishersList\Command\ImportMemberPublishersListsCommand'
         properties:
             accessor:                               '@App\Twitter\Api\Accessor'
-            aggregateSubscriptionRepository:        '@repository.publication_list_subscription'
+            aggregateSubscriptionRepository:        '@repository.publishers_list_subscription'
             logger:                                 '@logger'
             memberAggregateSubscriptionRepository:  '@repository.member_aggregate_subscription'
             networkRepository:                      '@repository.network'
             memberRepository:                       '@user_manager'
         calls:
             - [ 'setOwnershipBatchCollectedEventRepository',  [ '@App\Infrastructure\Collection\Repository\OwnershipBatchCollectedEventRepository' ] ]
-            - [ 'setPublicationListCollectedEventRepository', [ '@App\Infrastructure\Collection\Repository\PublicationListCollectedEventRepository' ] ]
+            - [ 'setPublishersListCollectedEventRepository', [ '@App\Infrastructure\Collection\Repository\PublishersListCollectedEventRepository' ] ]
         tags:
             - { name: 'console.command' }
 
@@ -191,7 +191,7 @@ services:
         class:                               'App\Membership\Infrastructure\Command\SubscribeToMemberTimelinesCommand'
         properties:
             accessor:                        '@App\Twitter\Api\Accessor'
-            aggregateSubscriptionRepository: '@repository.publication_list_subscription'
+            aggregateSubscriptionRepository: '@repository.publishers_list_subscription'
             logger:                          '@logger'
         tags:
             - { name: 'console.command' }
@@ -204,7 +204,7 @@ services:
             - [ 'setStatusRepository',  [ '@App\Infrastructure\Api\Repository\StatusRepository' ] ]
             - [ 'setUserRepository',    [ '@user_manager'] ]
         properties:
-            aggregateRepository:    '@App\Infrastructure\Api\Repository\PublicationListRepository'
+            aggregateRepository:    '@App\Infrastructure\Api\Repository\PublishersListRepository'
             entityManager:          '@doctrine.orm.entity_manager'
             operationClock:         '@operation.clock'
 

@@ -21,7 +21,7 @@ services:
         calls:
             - [ 'setApiAccessor',               [ '@App\Twitter\Api\Accessor' ] ]
             - [ 'setLogger',                    [ '@logger' ] ]
-            - [ 'setPublicationListRepository', [ '@App\Infrastructure\Api\Repository\PublicationListRepository' ] ]
+            - [ 'setPublishersListRepository', [ '@App\Infrastructure\Api\Repository\PublishersListRepository' ] ]
             - [ 'setPublicationPersistence',    [ '@App\Infrastructure\Publication\Persistence\PublicationPersistence' ] ]
             - [ 'setStatusLogger',              [ '@App\Infrastructure\Log\StatusLogger' ] ]
             - [ 'setStatusRepository',          [ '@App\Infrastructure\Api\Repository\StatusRepository' ] ]

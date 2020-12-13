@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Twitter\Collector;
 
 use App\Domain\Collection\CollectionStrategyInterface;
-use App\Domain\Publication\PublicationListInterface;
+use App\Domain\Publication\PublishersListInterface;
 use App\Infrastructure\Amqp\Message\FetchPublicationInterface;
 use App\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Infrastructure\DependencyInjection\Api\StatusAccessorTrait;
@@ -26,14 +26,14 @@ class LikedStatusCollectDecider implements LikedStatusCollectDeciderInterface
         array $options,
         array $statuses,
         CollectionStrategyInterface $collectionStrategy,
-        ?PublicationListInterface $publicationList
+        ?PublishersListInterface $publishersList
     ): bool {
         $atLeastOneStatusFetched = count($statuses) > 0;
 
         $hasLikedStatusBeenSavedBefore = $this->hasOneLikedStatusAtLeastBeenSavedBefore(
             $options[FetchPublicationInterface::SCREEN_NAME],
             $atLeastOneStatusFetched,
-            $publicationList,
+            $publishersList,
             $statuses[0]
         );
 
@@ -67,8 +67,8 @@ class LikedStatusCollectDecider implements LikedStatusCollectDeciderInterface
                     return true;
                 }
 
-                $collectionStrategy->optInToCollectStatusForPublicationListOfId(
-                    $options[FetchPublicationInterface::PUBLICATION_LIST_ID]
+                $collectionStrategy->optInToCollectStatusForPublishersListOfId(
+                    $options[FetchPublicationInterface::publishers_list_ID]
                 );
 
                 // At this point, it should not skip further consumption
@@ -94,7 +94,7 @@ class LikedStatusCollectDecider implements LikedStatusCollectDeciderInterface
     /**
      * @param string                        $screenNameOfMemberWhoLikedStatus
      * @param bool                          $atLeastOneStatusFetched
-     * @param PublicationListInterface|null $publicationList
+     * @param PublishersListInterface|null $publishersList
      * @param stdClass                     $firstStatus
      *
      * @return bool
@@ -102,20 +102,20 @@ class LikedStatusCollectDecider implements LikedStatusCollectDeciderInterface
     private function hasOneLikedStatusAtLeastBeenSavedBefore(
         string $screenNameOfMemberWhoLikedStatus,
         bool $atLeastOneStatusFetched,
-        ?PublicationListInterface $publicationList,
+        ?PublishersListInterface $publishersList,
         stdClass $firstStatus
     ): bool {
         if (!$atLeastOneStatusFetched) {
             return false;
         }
 
-        if (!($publicationList instanceof PublicationListInterface)) {
+        if (!($publishersList instanceof PublishersListInterface)) {
             return false;
         }
 
         return $this->likedStatusRepository->hasBeenSavedBefore(
             $firstStatus,
-            $publicationList->getName(),
+            $publishersList->getName(),
             $screenNameOfMemberWhoLikedStatus,
             $firstStatus->user->screen_name
         );

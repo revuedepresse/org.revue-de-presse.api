@@ -661,7 +661,7 @@ class Accessor implements ApiAccessorInterface,
      * @throws UnavailableResourceException
      * @throws UnexpectedApiResponseException
      */
-    public function getMemberPublicationListSubscriptions(int $memberId)
+    public function getMemberPublishersListSubscriptions(int $memberId)
     {
         return $this->contactEndpoint(
             strtr(

@@ -178,11 +178,11 @@ doctrine:
                         is_bundle:  false
                         prefix:     App\Domain\Collection\Entity
                         type:       xml
-                    PublicationList:
-                        alias:      'PublicationList'
+                    PublishersList:
+                        alias:      'PublishersList'
                         dir:        '%kernel.project_dir%/config/model/publication-list'
                         is_bundle:  false
-                        prefix:     App\PublicationList\Entity
+                        prefix:     App\PublishersList\Entity
                         type:       xml
                     TwitterPublication:
                         alias:      'Publication'

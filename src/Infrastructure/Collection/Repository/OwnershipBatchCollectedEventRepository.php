@@ -5,7 +5,7 @@ namespace App\Infrastructure\Collection\Repository;
 
 use App\Domain\Collection\Entity\OwnershipBatchCollectedEvent;
 use App\Domain\Resource\OwnershipCollection;
-use App\Domain\Resource\PublicationList;
+use App\Domain\Resource\PublishersList;
 use App\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Api\ApiAccessorInterface;
@@ -37,7 +37,7 @@ class OwnershipBatchCollectedEventRepository extends ServiceEntityRepository imp
                     'method'   => 'getMemberOwnerships',
                     'options'  => $options,
                     'response' => array_map(
-                        fn (PublicationList $ownership) => $ownership->toArray(),
+                        fn (PublishersList $ownership) => $ownership->toArray(),
                         $ownershipCollection->toArray()
                     )
                 ],

@@ -12,8 +12,8 @@ use App\Infrastructure\Api\Entity\TokenInterface;
 use App\Domain\Collection\CollectionStrategy;
 use App\Domain\Collection\CollectionStrategyInterface;
 use App\Domain\Collection\Exception\NoRemainingPublicationException;
-use App\Domain\Publication\Exception\LockedPublicationListException;
-use App\Domain\Publication\PublicationListInterface;
+use App\Domain\Publication\Exception\LockedPublishersListException;
+use App\Domain\Publication\PublishersListInterface;
 use App\Infrastructure\Amqp\Message\FetchPublicationInterface;
 use App\Infrastructure\DependencyInjection\{Api\ApiAccessorTrait,
     Api\ApiLimitModeratorTrait,
@@ -25,7 +25,7 @@ use App\Infrastructure\DependencyInjection\{Api\ApiAccessorTrait,
     Membership\MemberRepositoryTrait,
     Membership\WhispererIdentificationTrait,
     Membership\WhispererRepositoryTrait,
-    Publication\PublicationListRepositoryTrait,
+    Publication\PublishersListRepositoryTrait,
     Publication\PublicationPersistenceTrait,
     Status\LikedStatusRepositoryTrait,
     Status\StatusLoggerTrait,
@@ -64,7 +64,7 @@ class PublicationCollector implements PublicationCollectorInterface
     use MemberProfileCollectedEventRepositoryTrait;
     use MemberRepositoryTrait;
     use PublicationBatchCollectedEventRepositoryTrait;
-    use PublicationListRepositoryTrait;
+    use PublishersListRepositoryTrait;
     use PublicationPersistenceTrait;
     use StatusLoggerTrait;
     use StatusPersistenceTrait;
@@ -139,8 +139,8 @@ class PublicationCollector implements PublicationCollectorInterface
             );
 
             try {
-                $this->lockPublicationList();
-            } catch (LockedPublicationListException $exception) {
+                $this->lockPublishersList();
+            } catch (LockedPublishersListException $exception) {
                 $this->logger->info($exception->getMessage());
 
                 return true;
@@ -151,7 +151,7 @@ class PublicationCollector implements PublicationCollectorInterface
             !$this->isTwitterApiAvailable()
             && ($remainingItemsToCollect = $this->remainingItemsToCollect($options))
         ) {
-            $this->unlockPublicationList();
+            $this->unlockPublishersList();
 
             /**
              * Marks the collect as successful when there is no remaining status
@@ -215,7 +215,7 @@ class PublicationCollector implements PublicationCollectorInterface
             );
             $success = false;
         } finally {
-            $this->unlockPublicationList();
+            $this->unlockPublishersList();
         }
 
         return $success;
@@ -282,8 +282,8 @@ class PublicationCollector implements PublicationCollectorInterface
         if ($this->collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected()) {
             unset($options[FetchPublicationInterface::BEFORE]);
         }
-        if (array_key_exists(FetchPublicationInterface::PUBLICATION_LIST_ID, $options)) {
-            unset($options[FetchPublicationInterface::PUBLICATION_LIST_ID]);
+        if (array_key_exists(FetchPublicationInterface::publishers_list_ID, $options)) {
+            unset($options[FetchPublicationInterface::publishers_list_ID]);
         }
 
         return $options;
@@ -687,35 +687,35 @@ class PublicationCollector implements PublicationCollectorInterface
         return $options;
     }
 
-    private function lockPublicationList(): void
+    private function lockPublishersList(): void
     {
         if (!$this->isCollectingStatusesForAggregate()) {
             return;
         }
 
-        $publicationList = $this->publicationListRepository->findOneBy(
-            ['id' => $this->collectionStrategy->publicationListId()]
+        $publishersList = $this->publishersListRepository->findOneBy(
+            ['id' => $this->collectionStrategy->publishersListId()]
         );
 
-        if (!$publicationList instanceof PublicationListInterface) {
+        if (!$publishersList instanceof PublishersListInterface) {
             return;
         }
 
-        if ($publicationList->isLocked()) {
-            throw new LockedPublicationListException(
+        if ($publishersList->isLocked()) {
+            throw new LockedPublishersListException(
                 'Won\'t process message for already locked aggregate #%d',
-                $publicationList
+                $publishersList
             );
         }
 
         $this->logger->info(
             sprintf(
-                'About to lock processing of publication list #%d',
-                $publicationList->getId()
+                'About to lock processing of publishers list #%d',
+                $publishersList->getId()
             )
         );
 
-        $this->publicationListRepository->lockAggregate($publicationList);
+        $this->publishersListRepository->lockAggregate($publishersList);
     }
 
     /**
@@ -741,7 +741,7 @@ class PublicationCollector implements PublicationCollectorInterface
      */
     private function isCollectingStatusesForAggregate(): bool
     {
-        return $this->collectionStrategy->publicationListId() !== null;
+        return $this->collectionStrategy->publishersListId() !== null;
     }
 
     /**
@@ -867,7 +867,7 @@ class PublicationCollector implements PublicationCollectorInterface
                 $discoverPublicationsWithMaxId;
 
             if ($greedy) {
-                $options[FetchPublicationInterface::PUBLICATION_LIST_ID] = $this->collectionStrategy->publicationListId();
+                $options[FetchPublicationInterface::publishers_list_ID] = $this->collectionStrategy->publishersListId();
                 $options[FetchPublicationInterface::BEFORE]              =
                     $this->collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected();
 
@@ -882,7 +882,7 @@ class PublicationCollector implements PublicationCollectorInterface
                     $discoverPublicationWithMinId
                     && $this->collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected() === null
                 ) {
-                    unset($options[FetchPublicationInterface::PUBLICATION_LIST_ID]);
+                    unset($options[FetchPublicationInterface::publishers_list_ID]);
 
                     $options = $this->statusAccessor->updateExtremum(
                         $this->collectionStrategy,
@@ -909,18 +909,18 @@ class PublicationCollector implements PublicationCollectorInterface
         return $success;
     }
 
-    private function unlockPublicationList(): void
+    private function unlockPublishersList(): void
     {
         if ($this->isCollectingStatusesForAggregate()) {
-            $publicationList = $this->publicationListRepository->findOneBy(
-                ['id' => $this->collectionStrategy->publicationListId()]
+            $publishersList = $this->publishersListRepository->findOneBy(
+                ['id' => $this->collectionStrategy->publishersListId()]
             );
-            if ($publicationList instanceof PublicationListInterface) {
-                $this->publicationListRepository->unlockPublicationList($publicationList);
+            if ($publishersList instanceof PublishersListInterface) {
+                $this->publishersListRepository->unlockPublishersList($publishersList);
                 $this->logger->info(
                     sprintf(
-                        'Unlocked publication list of id #%d',
-                        $publicationList->getId()
+                        'Unlocked publishers list of id #%d',
+                        $publishersList->getId()
                     )
                 );
             }

@@ -14,17 +14,17 @@ services:
 
     controller.list:
         public: true
-        class: 'App\PublicationList\Controller\ListController'
+        class: 'App\PublishersList\Controller\ListController'
         arguments:
             - '%allowed.origin%'
             - '%kernel.environment%'
         calls:
-            - [ 'setPublicationListDispatcher', ['@App\Infrastructure\Amqp\MessageBus\PublicationListDispatcher']]
+            - [ 'setPublishersListDispatcher', ['@App\Infrastructure\Amqp\MessageBus\PublishersListDispatcher']]
         properties:
             serviceAccountConfig:           "%kernel.project_dir%/config/%env(resolve:FIREBASE_SERVICE_ACCOUNT_CONFIG)%"
             databaseUri:                    "%env(resolve:FIREBASE_DATABASE_URI)%"
             authenticationTokenRepository:  '@repository.authentication_token'
-            aggregateRepository:            '@App\Infrastructure\Api\Repository\PublicationListRepository'
+            aggregateRepository:            '@App\Infrastructure\Api\Repository\PublishersListRepository'
             highlightRepository:            '@repository.highlight'
             logger:                         '@logger'
             memberRepository:               '@user_manager'
@@ -45,7 +45,7 @@ services:
 
     controller.keyword:
         public: true
-        class: 'App\PublicationList\Controller\KeywordController'
+        class: 'App\PublishersList\Controller\KeywordController'
         arguments:
             - '%allowed.origin%'
             - '%kernel.environment%'
@@ -78,15 +78,15 @@ services:
             - [ 'setStatusAccessor',    [ '@App\Infrastructure\Twitter\Api\Accessor\StatusAccessor' ]]
             - [ 'setStatusRepository',  [ '@App\Infrastructure\Api\Repository\StatusRepository' ]]
 
-    controller.publication_list:
+    controller.publishers_list:
         public: true
-        class: 'App\PublicationList\Controller\PublicationListController'
+        class: 'App\PublishersList\Controller\PublishersListController'
         arguments:
             - '%allowed.origin%'
             - '%kernel.environment%'
         calls:
             - [ 'setHttpAuthenticator', [ '@App\Infrastructure\Security\Authentication\HttpAuthenticator' ] ]
-            - [ 'setPublicationListRepository', [ '@App\Infrastructure\Api\Repository\PublicationListRepository' ]]
+            - [ 'setPublishersListRepository', [ '@App\Infrastructure\Api\Repository\PublishersListRepository' ]]
         properties:
             redisCache:          '@app.cache.redis'
 
@@ -101,7 +101,7 @@ services:
             - [ 'setLogger',                       [ '@monolog.logger.membership' ] ]
             - [ 'setMemberSubscriptionRepository', [ '@repository.member_subscription' ] ]
             - [ 'setMemberRepository',             [ '@App\Infrastructure\Repository\Membership\MemberRepository' ] ]
-            - [ 'setPublicationListDispatcher',    [ '@App\Infrastructure\Amqp\MessageBus\PublicationListDispatcher' ] ]
+            - [ 'setPublishersListDispatcher',    [ '@App\Infrastructure\Amqp\MessageBus\PublishersListDispatcher' ] ]
             - [ 'setTokenRepository',              [ '@repository.access_token' ] ]
         properties:
             redisCache:                     '@app.cache.redis'

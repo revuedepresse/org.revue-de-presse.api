@@ -21,11 +21,11 @@ class OwnershipCollection implements StrictCollectionInterface
         $this->nextPage = $nextPage;
         $this->ownerships = array_map(
             function ($ownership) {
-                if ($ownership instanceof PublicationList) {
+                if ($ownership instanceof PublishersList) {
                     return $ownership;
                 }
 
-                return new PublicationList(
+                return new PublishersList(
                     $ownership->id_str,
                     $ownership->name
                 );
@@ -77,7 +77,7 @@ class OwnershipCollection implements StrictCollectionInterface
     }
 
     /**
-     * @return PublicationList
+     * @return PublishersList
      */
     public function first()
     {

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Security\Authentication;
 
-use App\PublicationList\Controller\Exception\InvalidRequestException;
+use App\PublishersList\Controller\Exception\InvalidRequestException;
 use App\Infrastructure\Api\Entity\Token;
 use App\Infrastructure\DependencyInjection\TokenRepositoryTrait;
 use Symfony\Component\HttpFoundation\JsonResponse;

@@ -28,7 +28,7 @@ services:
     # controllers are imported separately to make sure services can be injected
     # as action arguments even if you don't extend any base controller class
     App\Controller\:
-        resource: '../src/PublicationList/Controller/.*.php'
+        resource: '../src/PublishersList/Controller/.*.php'
         tags: ['controller.service_arguments']
 
     App\Infrastructure\Log\StatusLogger:
@@ -104,15 +104,15 @@ services:
         arguments:
             - '@messenger.default_bus'
             - '@App\Infrastructure\Twitter\Api\Accessor\MemberProfileAccessor'
-            - '@App\Infrastructure\Api\Repository\PublicationListRepository'
+            - '@App\Infrastructure\Api\Repository\PublishersListRepository'
             - '@logger'
 
-    App\Infrastructure\Amqp\ResourceProcessor\PublicationListProcessor:
-        class: 'App\Infrastructure\Amqp\ResourceProcessor\PublicationListProcessor'
+    App\Infrastructure\Amqp\ResourceProcessor\PublishersListProcessor:
+        class: 'App\Infrastructure\Amqp\ResourceProcessor\PublishersListProcessor'
         calls:
             - [ 'setMemberIdentityProcessor',                 [ '@App\Infrastructure\Amqp\ResourceProcessor\MemberIdentityProcessor'] ]
             - [ 'setMemberProfileCollectedEventRepository',   [ '@App\Infrastructure\Collection\Repository\MemberProfileCollectedEventRepository'] ]
-            - [ 'setPublicationListCollectedEventRepository', [ '@App\Infrastructure\Collection\Repository\PublicationListCollectedEventRepository'] ]
+            - [ 'setPublishersListCollectedEventRepository', [ '@App\Infrastructure\Collection\Repository\PublishersListCollectedEventRepository'] ]
             - [ 'setTokenChange',                             [ '@App\Infrastructure\Api\AccessToken\TokenChange'] ]
         arguments:
             - '@App\Twitter\Api\Accessor'
@@ -123,7 +123,7 @@ services:
         class: 'App\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher'
         arguments:
             - '@App\Twitter\Api\Accessor'
-            - '@App\Infrastructure\Amqp\ResourceProcessor\PublicationListProcessor'
+            - '@App\Infrastructure\Amqp\ResourceProcessor\PublishersListProcessor'
             - '@App\Infrastructure\Api\AccessToken\TokenChange'
             - '@logger'
             - '@App\Infrastructure\Translation\Translator'
@@ -220,7 +220,7 @@ services:
             - [ 'setMemberRepository',                          [ '@App\Infrastructure\Repository\Membership\MemberRepository' ] ]
             - [ 'setModerator',                                 [ '@App\Infrastructure\Api\Moderator\ApiLimitModerator' ] ]
             - [ 'setPublicationBatchCollectedEventRepository',  [ '@App\Infrastructure\Collection\Repository\PublicationBatchCollectedEventRepository' ] ]
-            - [ 'setPublicationListRepository',                 [ '@App\Infrastructure\Api\Repository\PublicationListRepository' ] ]
+            - [ 'setPublishersListRepository',                 [ '@App\Infrastructure\Api\Repository\PublishersListRepository' ] ]
             - [ 'setPublicationPersistence',                    [ '@App\Infrastructure\Publication\Persistence\PublicationPersistence' ] ]
             - [ 'setStatusLogger',                              [ '@App\Infrastructure\Log\StatusLogger' ] ]
             - [ 'setStatusAccessor',                            [ '@App\Infrastructure\Twitter\Api\Accessor\StatusAccessor' ] ]
@@ -273,7 +273,7 @@ parameters:
     weaving_the_web_twitter.entity.status.class:                  '%weaving_the_web_api.entity.status.class%'
     weaving_the_web_twitter.entity.token.class:                   '%weaving_the_web_api.entity.token.class%'
 
-    repository.publication_list.class:                            '%weaving_the_web_api.repository.publication_list.class%'
+    repository.publishers_list.class:                            '%weaving_the_web_api.repository.publishers_list.class%'
 
     weaving_the_web_twitter.version:                              '%env(resolve:API_TWITTER_VERSION)%'
 

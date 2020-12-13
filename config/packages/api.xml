@@ -7,7 +7,7 @@
     <parameters>
         <parameter key="weaving_the_web_api.entity.aggregate.class">App\Infrastructure\Api\Entity\Aggregate</parameter>
         <parameter key="weaving_the_web_api.entity.status.class">App\Infrastructure\Api\Entity\Status</parameter>
-        <parameter key="weaving_the_web_api.repository.publication_list.class">App\Infrastructure\Api\Repository\PublicationListRepository</parameter>
+        <parameter key="weaving_the_web_api.repository.publishers_list.class">App\Infrastructure\Api\Repository\PublishersListRepository</parameter>
         <parameter key="repository.access_token.class">App\Infrastructure\Api\AccessToken\Repository\TokenRepository</parameter>
         <parameter key="weaving_the_web_api.repository.archived_status.class">App\Infrastructure\Api\Repository\ArchivedStatusRepository</parameter>
         <parameter key="repository.whisperer.class">App\Infrastructure\Api\Repository\WhispererRepository</parameter>

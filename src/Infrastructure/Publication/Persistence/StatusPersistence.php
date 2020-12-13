@@ -14,7 +14,7 @@ use App\Domain\Publication\StatusInterface;
 use App\Domain\Publication\TaggedStatus;
 use App\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
-use App\Infrastructure\DependencyInjection\Publication\PublicationListRepositoryTrait;
+use App\Infrastructure\DependencyInjection\Publication\PublishersListRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
 use App\Infrastructure\DependencyInjection\Status\StatusLoggerTrait;
 use App\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
@@ -41,7 +41,7 @@ class StatusPersistence implements StatusPersistenceInterface
     use ApiAccessorTrait;
     use LoggerTrait;
     use PublicationPersistenceTrait;
-    use PublicationListRepositoryTrait;
+    use PublishersListRepositoryTrait;
     use StatusLoggerTrait;
     use StatusRepositoryTrait;
     use TaggedStatusRepositoryTrait;
@@ -230,12 +230,12 @@ class StatusPersistence implements StatusPersistenceInterface
             return $success;
         }
 
-        $publicationList = null;
-        $publicationListId = $collectionStrategy->publicationListId();
-        if ($publicationListId !== null) {
-            /** @var Aggregate $publicationList */
-            $publicationList = $this->publicationListRepository->findOneBy(
-                ['id' => $publicationListId]
+        $publishersList = null;
+        $publishersListId = $collectionStrategy->publishersListId();
+        if ($publishersListId !== null) {
+            /** @var Aggregate $publishersList */
+            $publishersList = $this->publishersListRepository->findOneBy(
+                ['id' => $publishersListId]
             );
         }
 
@@ -252,7 +252,7 @@ class StatusPersistence implements StatusPersistenceInterface
         $savedStatuses = $this->saveStatuses(
             $statuses,
             $collectionStrategy,
-            $publicationList,
+            $publishersList,
             $likedBy
         );
 
@@ -266,7 +266,7 @@ class StatusPersistence implements StatusPersistenceInterface
     /**
      * @param array                       $statuses
      * @param CollectionStrategyInterface $collectionStrategy
-     * @param Aggregate|null              $publicationList
+     * @param Aggregate|null              $publishersList
      * @param MemberInterface|null        $likedBy
      *
      * @return CollectionInterface
@@ -274,14 +274,14 @@ class StatusPersistence implements StatusPersistenceInterface
     private function saveStatuses(
         array $statuses,
         CollectionStrategyInterface $collectionStrategy,
-        Aggregate $publicationList = null,
+        Aggregate $publishersList = null,
         MemberInterface $likedBy = null
     ): CollectionInterface {
         if ($likedBy !== null && $collectionStrategy->fetchLikes()) {
             return $this->statusRepository->saveLikes(
                 $statuses,
                 $this->apiAccessor->getOAuthToken(),
-                $publicationList,
+                $publishersList,
                 $this->logger,
                 $likedBy,
                 function ($memberName) {
@@ -293,7 +293,7 @@ class StatusPersistence implements StatusPersistenceInterface
         return $this->publicationPersistence->persistStatusPublications(
             $statuses,
             new AccessToken($this->apiAccessor->getOAuthToken()),
-            $publicationList
+            $publishersList
         );
     }
 }

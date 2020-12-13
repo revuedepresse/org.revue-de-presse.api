@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\DependencyInjection\Validation;
 
-use App\PublicationList\Controller\Exception\InvalidRequestException;
+use App\PublishersList\Controller\Exception\InvalidRequestException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use const JSON_ERROR_NONE;

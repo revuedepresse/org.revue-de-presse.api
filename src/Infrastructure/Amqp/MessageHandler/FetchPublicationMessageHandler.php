@@ -71,7 +71,7 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
 
         $options = [
             LikedStatusCollectionAwareInterface::INTENT_TO_FETCH_LIKES => $message->shouldFetchLikes(),
-            $message::PUBLICATION_LIST_ID                              => $message->aggregateId(),
+            $message::publishers_list_ID                              => $message->aggregateId(),
             $message::BEFORE                                           => $message->dateBeforeWhichStatusAreCollected(),
             'count'                                                    => 200,
             'oauth'                                                    => $options[TokenInterface::FIELD_TOKEN],

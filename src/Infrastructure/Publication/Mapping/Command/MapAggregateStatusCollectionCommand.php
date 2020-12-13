@@ -2,8 +2,8 @@
 
 namespace App\Infrastructure\Publication\Mapping\Command;
 
-use App\PublicationList\Entity\SearchMatchingStatus;
-use App\PublicationList\Repository\SearchMatchingStatusRepository;
+use App\PublishersList\Entity\SearchMatchingStatus;
+use App\PublishersList\Repository\SearchMatchingStatusRepository;
 use App\Infrastructure\Console\CommandReturnCodeAwareInterface;
 use App\Infrastructure\Publication\Mapping\RefreshStatusMapping;
 use Doctrine\Common\Collections\ArrayCollection;

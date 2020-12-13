@@ -10,7 +10,7 @@ use App\Membership\Domain\Entity\MemberInterface;
 interface FetchPublicationInterface
 {
     public const BEFORE = 'before';
-    public const PUBLICATION_LIST_ID = 'aggregate_id';
+    public const publishers_list_ID = 'aggregate_id';
     public const SCREEN_NAME         = 'screen_name';
 
     public function aggregateId(): int;

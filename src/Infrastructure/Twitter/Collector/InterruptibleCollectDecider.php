@@ -9,8 +9,8 @@ use App\Infrastructure\Amqp\Exception\SkippableMessageException;
 use App\Infrastructure\Api\Entity\Whisperer;
 use App\Domain\Collection\CollectionStrategyInterface;
 use App\Domain\Membership\Exception\MembershipException;
-use App\Domain\Publication\Exception\LockedPublicationListException;
-use App\Domain\Publication\PublicationListInterface;
+use App\Domain\Publication\Exception\LockedPublishersListException;
+use App\Domain\Publication\PublishersListInterface;
 use App\Infrastructure\Amqp\Message\FetchPublicationInterface;
 use App\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Infrastructure\DependencyInjection\Api\ApiLimitModeratorTrait;
@@ -20,7 +20,7 @@ use App\Infrastructure\DependencyInjection\Collection\MemberProfileCollectedEven
 use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Membership\WhispererRepositoryTrait;
-use App\Infrastructure\DependencyInjection\Publication\PublicationListRepositoryTrait;
+use App\Infrastructure\DependencyInjection\Publication\PublishersListRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Status\LikedStatusRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Status\StatusPersistenceTrait;
 use App\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
@@ -47,7 +47,7 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
     use LikedStatusCollectDecider;
     use MemberRepositoryTrait;
     use MemberProfileCollectedEventRepositoryTrait;
-    use PublicationListRepositoryTrait;
+    use PublishersListRepositoryTrait;
     use StatusAccessorTrait;
     use StatusRepositoryTrait;
     use StatusPersistenceTrait;
@@ -171,27 +171,27 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
         }
     }
 
-    private function guardAgainstLockedPublicationList(): ?PublicationListInterface
+    private function guardAgainstLockedPublishersList(): ?PublishersListInterface
     {
-        $publicationList = null;
-        if ($this->collectionStrategy->publicationListId() !== null) {
-            $publicationList = $this->publicationListRepository->findOneBy(
-                ['id' => $this->collectionStrategy->publicationListId()]
+        $publishersList = null;
+        if ($this->collectionStrategy->publishersListId() !== null) {
+            $publishersList = $this->publishersListRepository->findOneBy(
+                ['id' => $this->collectionStrategy->publishersListId()]
             );
         }
 
         if (
-            ($publicationList instanceof PublicationListInterface)
-            && $publicationList->isLocked()
+            ($publishersList instanceof PublishersListInterface)
+            && $publishersList->isLocked()
             && !$this->collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected()
         ) {
-            LockedPublicationListException::throws(
+            LockedPublishersListException::throws(
                 'Will skip message consumption for locked aggregate #%d',
-                $publicationList
+                $publishersList
             );
         }
 
-        return $publicationList;
+        return $publishersList;
     }
 
     /**
@@ -204,9 +204,9 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
     ): bool {
         try {
             $this->guardAgainstExceptionalMember($options);
-            $publicationList = $this->guardAgainstLockedPublicationList();
+            $publishersList = $this->guardAgainstLockedPublishersList();
             $whisperer = $this->beforeFetchingStatuses($options);
-        } catch (MembershipException|LockedPublicationListException $exception) {
+        } catch (MembershipException|LockedPublishersListException $exception) {
             $this->logger->info($exception->getMessage());
 
             return true;
@@ -248,7 +248,7 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
                     $options,
                     $statuses,
                     $this->collectionStrategy,
-                    $publicationList
+                    $publishersList
                 );
         }
 
@@ -320,13 +320,13 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
     private function extractAggregateIdFromOptions(
         $options
     ): ?int {
-        if (!array_key_exists(FetchPublicationInterface::PUBLICATION_LIST_ID, $options)) {
+        if (!array_key_exists(FetchPublicationInterface::publishers_list_ID, $options)) {
             return null;
         }
 
-        $this->collectionStrategy->optInToCollectStatusForPublicationListOfId($options[FetchPublicationInterface::PUBLICATION_LIST_ID]);
+        $this->collectionStrategy->optInToCollectStatusForPublishersListOfId($options[FetchPublicationInterface::publishers_list_ID]);
 
-        return $options[FetchPublicationInterface::PUBLICATION_LIST_ID];
+        return $options[FetchPublicationInterface::publishers_list_ID];
     }
 
     /**

@@ -7,10 +7,10 @@ use App\Infrastructure\Api\Entity\Token;
 use App\Infrastructure\Cache\RedisCache;
 use App\Domain\Membership\Exception\InvalidMemberException;
 use App\Domain\Publication\Exception\InvalidMemberAggregate;
-use App\Domain\Publication\PublicationListIdentity;
+use App\Domain\Publication\PublishersListIdentity;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
-use App\Infrastructure\DependencyInjection\Publication\PublicationListDispatcherTrait;
+use App\Infrastructure\DependencyInjection\Publication\PublishersListDispatcherTrait;
 use App\Infrastructure\DependencyInjection\Subscription\MemberSubscriptionRepositoryTrait;
 use App\Infrastructure\Http\PaginationParams;
 use App\Infrastructure\Security\Authentication\AuthenticationTokenValidationTrait;
@@ -32,7 +32,7 @@ class SubscriptionController
     use LoggerTrait;
     use MemberRepositoryTrait;
     use MemberSubscriptionRepositoryTrait;
-    use PublicationListDispatcherTrait;
+    use PublishersListDispatcherTrait;
 
     public RedisCache $redisCache;
 
@@ -92,7 +92,7 @@ class SubscriptionController
         Request $request
     ): string {
         $paginationParams  = PaginationParams::fromRequest($request);
-        $aggregateIdentity = PublicationListIdentity::fromRequest($request);
+        $aggregateIdentity = PublishersListIdentity::fromRequest($request);
 
         return sprintf(
             '%s:%s:%s/%s',
@@ -130,7 +130,7 @@ class SubscriptionController
                         $this->memberRepository,
                         $subscription['username']
                     );
-                    $this->publicationListDispatcher->dispatchMemberPublicationListMessage(
+                    $this->publishersListDispatcher->dispatchMemberPublishersListMessage(
                         $member,
                         $token
                     );

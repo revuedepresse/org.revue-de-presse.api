@@ -2,9 +2,9 @@
 
 namespace App\Conversation\Consumer;
 
-use App\PublicationList\AggregateAwareTrait;
+use App\PublishersList\AggregateAwareTrait;
 use App\Infrastructure\Api\Entity\Status;
-use App\Infrastructure\Api\Repository\PublicationListRepository;
+use App\Infrastructure\Api\Repository\PublishersListRepository;
 use App\Conversation\ConversationAwareTrait;
 use App\Infrastructure\Amqp\AmqpMessageAwareTrait;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
@@ -34,7 +34,7 @@ class ConversationStatusConsumer
 
     public EntityManagerInterface $entityManager;
 
-    public PublicationListRepository $aggregateRepository;
+    public PublishersListRepository $aggregateRepository;
 
     protected MemberRepository $userRepository;
 

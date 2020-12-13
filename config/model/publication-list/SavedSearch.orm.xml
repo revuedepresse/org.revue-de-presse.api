@@ -5,8 +5,8 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="App\PublicationList\Entity\SavedSearch"
-            repository-class="App\PublicationList\Repository\SavedSearchRepository"
+    <entity name="App\PublishersList\Entity\SavedSearch"
+            repository-class="App\PublishersList\Repository\SavedSearchRepository"
             table="saved_search">
 
         <indexes>

@@ -17,7 +17,7 @@ class CollectionStrategy implements CollectionStrategyInterface
         $strategy = new self();
 
         if (array_key_exists('aggregate_id', $options) && $options['aggregate_id']) {
-            $strategy->optInToCollectStatusForPublicationListOfId(
+            $strategy->optInToCollectStatusForPublishersListOfId(
                 $options['aggregate_id']
             );
         }
@@ -45,7 +45,7 @@ class CollectionStrategy implements CollectionStrategyInterface
 
     private ?string $dateBeforeWhichStatusAreCollected = null;
 
-    private ?int $publicationListId = null;
+    private ?int $publishersListId = null;
 
     private bool $shouldFetchLikes = false;
 
@@ -107,7 +107,7 @@ class CollectionStrategy implements CollectionStrategyInterface
 
     public function oneOfTheOptionsIsActive(): bool
     {
-        return $this->publicationListId()
+        return $this->publishersListId()
             || $this->dateBeforeWhichPublicationsAreToBeCollected();
     }
 
@@ -118,10 +118,10 @@ class CollectionStrategy implements CollectionStrategyInterface
         return $this;
     }
 
-    public function optInToCollectStatusForPublicationListOfId(
-        ?int $publicationListId = null
+    public function optInToCollectStatusForPublishersListOfId(
+        ?int $publishersListId = null
     ): self {
-        $this->publicationListId = $publicationListId;
+        $this->publishersListId = $publishersListId;
 
         return $this;
     }
@@ -154,9 +154,9 @@ class CollectionStrategy implements CollectionStrategyInterface
         return $this;
     }
 
-    public function publicationListId(): ?int
+    public function PublishersListId(): ?int
     {
-        return $this->publicationListId;
+        return $this->publishersListId;
     }
 
     public function screenName(): string

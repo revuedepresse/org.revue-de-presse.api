@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Api\Entity;
 
-use App\Domain\Publication\PublicationListInterface;
+use App\Domain\Publication\PublishersListInterface;
 use DateTime;
 use DateTimeInterface;
 use DateTimeZone;
@@ -12,7 +12,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="App\Infrastructure\Api\Repository\PublicationListRepository")
+ * @ORM\Entity(repositoryClass="App\Infrastructure\Api\Repository\PublishersListRepository")
  * @ORM\Table(
  *     name="weaving_aggregate",
  *     indexes={
@@ -23,7 +23,7 @@ use Doctrine\ORM\Mapping as ORM;
  *     }
  * )
  */
-class Aggregate implements PublicationListInterface
+class Aggregate implements PublishersListInterface
 {
     /**
      * @var integer

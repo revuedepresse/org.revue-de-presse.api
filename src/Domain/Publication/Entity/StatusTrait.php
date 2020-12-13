@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Publication\Entity;
 
-use App\Domain\Publication\PublicationListInterface;
+use App\Domain\Publication\PublishersListInterface;
 use App\Domain\Publication\StatusInterface;
 use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -282,11 +282,11 @@ trait StatusTrait
     }
 
     /**
-     * @param PublicationListInterface $aggregate
+     * @param PublishersListInterface $aggregate
      *
      * @return $this
      */
-    public function removeFrom(PublicationListInterface $aggregate): StatusInterface
+    public function removeFrom(PublishersListInterface $aggregate): StatusInterface
     {
         if (!$this->aggregates->contains($aggregate)) {
             return $this;
@@ -298,11 +298,11 @@ trait StatusTrait
     }
 
     /**
-     * @param PublicationListInterface $aggregate
+     * @param PublishersListInterface $aggregate
      *
      * @return Collection
      */
-    public function addToAggregates(PublicationListInterface $aggregate): Collection {
+    public function addToAggregates(PublishersListInterface $aggregate): Collection {
         $this->aggregates->add($aggregate);
 
         return $this->aggregates;

@@ -6,7 +6,7 @@ namespace App\Infrastructure\Amqp\ResourceProcessor;
 use App\Infrastructure\Api\Entity\TokenInterface;
 use App\Domain\Collection\PublicationStrategyInterface;
 use App\Domain\Resource\MemberIdentity;
-use App\Domain\Resource\PublicationList;
+use App\Domain\Resource\PublishersList;
 
 interface MemberIdentityProcessorInterface
 {
@@ -14,7 +14,7 @@ interface MemberIdentityProcessorInterface
      * @param MemberIdentity               $memberIdentity
      * @param PublicationStrategyInterface $strategy
      * @param TokenInterface               $token
-     * @param PublicationList              $list
+     * @param PublishersList              $list
      *
      * @return int
      */
@@ -22,6 +22,6 @@ interface MemberIdentityProcessorInterface
         MemberIdentity $memberIdentity,
         PublicationStrategyInterface $strategy,
         TokenInterface $token,
-        PublicationList $list
+        PublishersList $list
     ): int;
 }

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Domain\Publication;
 
-use App\Domain\Publication\PublicationListInterface;
+use App\Domain\Publication\PublishersListInterface;
 use DateTimeInterface;
 use Doctrine\Common\Collections\Collection;
 
@@ -155,16 +155,16 @@ interface StatusInterface
     public function getAggregates(): Collection;
 
     /**
-     * @param PublicationListInterface $aggregate
+     * @param PublishersListInterface $aggregate
      * @return self
      */
-    public function removeFrom(PublicationListInterface $aggregate): StatusInterface;
+    public function removeFrom(PublishersListInterface $aggregate): StatusInterface;
 
     /**
-     * @param PublicationListInterface $aggregate
+     * @param PublishersListInterface $aggregate
      * @return mixed
      */
-    public function addToAggregates(PublicationListInterface $aggregate): Collection;
+    public function addToAggregates(PublishersListInterface $aggregate): Collection;
 
     /**
      * @return bool

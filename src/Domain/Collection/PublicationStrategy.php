@@ -5,7 +5,7 @@ namespace App\Domain\Collection;
 
 use App\Infrastructure\Amqp\Exception\SkippableMemberException;
 use App\Domain\Resource\MemberIdentity;
-use App\Domain\Resource\PublicationList;
+use App\Domain\Resource\PublishersList;
 use App\Membership\Domain\Entity\MemberInterface;
 use function array_key_exists;
 use function count;
@@ -218,7 +218,7 @@ class PublicationStrategy implements PublicationStrategyInterface
      *
      * @return bool
      */
-    public function shouldProcessList(PublicationList $list): bool
+    public function shouldProcessList(PublishersList $list): bool
     {
         return $this->shouldNotApplyListRestriction()
             || $this->applyListRestriction($list)
@@ -346,7 +346,7 @@ class PublicationStrategy implements PublicationStrategyInterface
      *
      * @return bool
      */
-    private function applyListRestriction(PublicationList $list): bool
+    private function applyListRestriction(PublishersList $list): bool
     {
         return $list->name() === $this->listRestriction;
     }
@@ -356,7 +356,7 @@ class PublicationStrategy implements PublicationStrategyInterface
      *
      * @return bool
      */
-    private function applyListRestrictionAmongOthers(PublicationList $list): bool
+    private function applyListRestrictionAmongOthers(PublishersList $list): bool
     {
         return array_key_exists(
             $list->name(),
