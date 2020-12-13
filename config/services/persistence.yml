@@ -4,7 +4,7 @@ services:
         class: 'App\Infrastructure\Publication\Persistence\PublicationPersistence'
         arguments:
             - '@App\Infrastructure\Publication\Persistence\StatusPersistence'
-            - '@App\Twitter\Repository\PublicationRepository'
+            - '@App\Infrastructure\Publication\Repository\PublicationRepository'
             - '@user_manager'
             - '@doctrine.orm.entity_manager'
         calls:

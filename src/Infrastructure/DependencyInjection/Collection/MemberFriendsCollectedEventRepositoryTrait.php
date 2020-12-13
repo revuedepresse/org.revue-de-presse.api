@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\DependencyInjection\Collection;
 
-use App\Infrastructure\Collection\Repository\MemberFriendsCollectedEventRepositoryInterface;
+use App\Infrastructure\Curation\Repository\MemberFriendsCollectedEventRepositoryInterface;
 
 trait MemberFriendsCollectedEventRepositoryTrait
 {

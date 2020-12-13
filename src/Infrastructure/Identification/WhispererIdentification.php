@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Identification;
 
 use App\Infrastructure\Api\Entity\Whisperer;
-use App\Domain\Collection\CollectionStrategyInterface;
+use App\Domain\Curation\CollectionStrategyInterface;
 use App\Infrastructure\Amqp\Message\FetchPublicationInterface;
 use App\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Infrastructure\DependencyInjection\Collection\MemberProfileCollectedEventRepositoryTrait;

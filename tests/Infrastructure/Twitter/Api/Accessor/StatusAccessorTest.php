@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Tests\Infrastructure\Twitter\Api\Accessor;
 
 use App\Infrastructure\Twitter\Api\Accessor\StatusAccessor;
-use App\Domain\Collection\CollectionStrategy;
+use App\Domain\Curation\CollectionStrategy;
 use App\Domain\Publication\Repository\StatusRepositoryInterface;
 use App\Infrastructure\Amqp\Message\FetchPublicationInterface;
 use App\Infrastructure\Twitter\Api\Accessor\StatusAccessorInterface;

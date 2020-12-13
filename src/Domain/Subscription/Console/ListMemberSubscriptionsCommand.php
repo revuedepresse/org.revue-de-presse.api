@@ -4,7 +4,7 @@ declare (strict_types=1);
 namespace App\Domain\Subscription\Console;
 
 use App\Infrastructure\Console\AbstractCommand;
-use App\Infrastructure\Collection\Repository\ListCollectedEventRepositoryInterface;
+use App\Domain\Curation\Repository\ListCollectedEventRepositoryInterface;
 use App\Infrastructure\DependencyInjection\MissingDependency;
 use App\Infrastructure\Twitter\Api\Accessor\ListAccessorInterface;
 use stdClass;

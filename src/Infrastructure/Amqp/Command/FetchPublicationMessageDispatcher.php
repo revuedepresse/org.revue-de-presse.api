@@ -10,7 +10,7 @@ use App\Infrastructure\Amqp\Exception\SkippableOperationException;
 use App\Infrastructure\Amqp\Exception\UnexpectedOwnershipException;
 use App\Infrastructure\Api\Entity\Token;
 use App\Infrastructure\Api\Exception\InvalidSerializedTokenException;
-use App\Domain\Collection\PublicationStrategyInterface;
+use App\Domain\Curation\PublicationStrategyInterface;
 use App\Infrastructure\DependencyInjection\OwnershipAccessorTrait;
 use App\Infrastructure\DependencyInjection\Publication\PublicationMessageDispatcherTrait;
 use App\Infrastructure\DependencyInjection\TranslatorTrait;

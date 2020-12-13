@@ -5,7 +5,7 @@ namespace App\Tests\Infrastructure\Twitter\Api\Accessor;
 
 use App\Infrastructure\Twitter\Api\Accessor\Exception\UnexpectedApiResponseException;
 use App\Domain\Resource\MemberIdentity;
-use App\Infrastructure\Collection\Repository\MemberProfileCollectedEventRepository;
+use App\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository;
 use App\Infrastructure\Twitter\Api\Accessor\MemberProfileAccessor;
 use App\Infrastructure\Twitter\Api\UnavailableResourceHandler;
 use App\Infrastructure\Twitter\Api\UnavailableResourceHandlerInterface;

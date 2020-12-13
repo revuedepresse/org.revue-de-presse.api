@@ -7,7 +7,7 @@ use App\Infrastructure\Twitter\Api\Accessor\Exception\ApiRateLimitingException;
 use App\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
 use App\Infrastructure\Amqp\Exception\SkippableMessageException;
 use App\Infrastructure\Api\Entity\Whisperer;
-use App\Domain\Collection\CollectionStrategyInterface;
+use App\Domain\Curation\CollectionStrategyInterface;
 use App\Domain\Membership\Exception\MembershipException;
 use App\Domain\Publication\Exception\LockedPublishersListException;
 use App\Domain\Publication\PublishersListInterface;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Command;
 
 use App\Infrastructure\Console\CommandReturnCodeAwareInterface;
-use App\Twitter\Repository\PublicationRepositoryInterface;
+use App\Domain\Publication\Repository\PublicationRepositoryInterface;
 use Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Command\Command;

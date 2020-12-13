@@ -43,6 +43,13 @@ class PublicationFormatterTest extends KernelTestCase
                 'media'           => [],
                 'in_conversation' => null,
                 'retweet'         => false,
+                'original_document' => unserialize(
+                    base64_decode(
+                        file_get_contents(
+                            __DIR__ . '/../../../Resources/Status.b64'
+                        )
+                    )
+                )
             ],
             $publications[0]
         );
@@ -52,10 +59,15 @@ class PublicationFormatterTest extends KernelTestCase
     {
         $this->publications = new Collection(
             unserialize(
-                base64_decode(
-                    file_get_contents(
-                        __DIR__ . '/../../../Resources/Publications.b64'
-                    )
+                strtr(
+                    base64_decode(
+                        file_get_contents(
+                            __DIR__ . '/../../../Resources/Publications.b64'
+                        )
+                    ),
+                    [
+                        '30:"App\Twitter\Entity\Publication' => '41:"App\Domain\Publication\Entity\Publication',
+                    ]
                 )
             )
         );

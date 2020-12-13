@@ -5,7 +5,7 @@ namespace App\Infrastructure\Publication\Persistence;
 
 use App\Infrastructure\Api\AccessToken\AccessToken;
 use App\Infrastructure\Api\Entity\Aggregate;
-use App\Domain\Collection\CollectionStrategyInterface;
+use App\Domain\Curation\CollectionStrategyInterface;
 use App\Domain\Publication\StatusInterface;
 use Doctrine\ORM\EntityManagerInterface;
 

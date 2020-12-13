@@ -3,13 +3,12 @@ declare (strict_types=1);
 
 namespace App\Domain\Subscription\Console;
 
-use App\Infrastructure\Console\AbstractCommand;
-use App\Domain\Collection\Entity\FriendsListCollectedEvent;
+use App\Domain\Curation\Entity\FriendsListCollectedEvent;
+use App\Domain\Curation\Repository\ListCollectedEventRepositoryInterface;
 use App\Domain\Resource\MemberCollection;
 use App\Domain\Resource\MemberIdentity;
-use App\Infrastructure\Collection\Repository\ListCollectedEventRepositoryInterface;
+use App\Infrastructure\Console\AbstractCommand;
 use App\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
-use App\Infrastructure\Repository\Membership\MemberRepositoryInterface;
 use App\Infrastructure\Twitter\Api\Mutator\FriendshipMutatorInterface;
 use App\Membership\Domain\Entity\MemberInterface;
 use Symfony\Component\Console\Input\InputArgument;

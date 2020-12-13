@@ -6,8 +6,8 @@ namespace App\Tests\Infrastructure\Twitter\Api;
 use App\Infrastructure\Twitter\Api\Accessor\ListAccessorInterface;
 use App\Infrastructure\Twitter\Api\Selector\FollowersListSelector;
 use App\Infrastructure\Twitter\Api\Selector\FriendsListSelector;
-use App\Tests\Builder\Twitter\Api\Accessor\FollowersListAccessorBuilder;
-use App\Tests\Builder\Twitter\Api\Accessor\FriendsListAccessorBuilder;
+use App\Tests\Builder\Infrastructure\Twitter\Api\Accessor\FollowersListAccessorBuilder;
+use App\Tests\Builder\Infrastructure\Twitter\Api\Accessor\FriendsListAccessorBuilder;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 

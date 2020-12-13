@@ -3,7 +3,7 @@ declare (strict_types=1);
 
 namespace App\NewsReview\Domain\Entity;
 
-use App\Domain\Publication\Entity\Highlight;
+use App\Domain\Curation\Entity\Highlight;
 
 class HighlightsCollection
 {

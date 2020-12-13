@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Publication\Repository;
 
 use App\Infrastructure\Api\Entity\Aggregate;
-use App\Domain\Publication\Entity\LikedStatus;
+use App\Domain\Curation\Entity\LikedStatus;
 use App\Domain\Publication\Repository\LikedStatusRepositoryInterface;
 use App\Domain\Publication\Repository\ExtremumAwareInterface;
 use App\Domain\Publication\StatusInterface;

@@ -16,53 +16,53 @@ services:
         tags:
             - { name: 'doctrine.repository_service' }
 
-    App\Infrastructure\Collection\Repository\MemberFriendsCollectedEventRepository:
-        class: 'App\Infrastructure\Collection\Repository\MemberFriendsCollectedEventRepository'
+    App\Infrastructure\Curation\Repository\MemberFriendsCollectedEventRepository:
+        class: 'App\Infrastructure\Curation\Repository\MemberFriendsCollectedEventRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Domain\Collection\Entity\MemberProfileCollectedEvent'
+            - 'App\Domain\Curation\Entity\MemberProfileCollectedEvent'
         calls:
             - [ 'setLogger',           [ '@logger' ] ]
             - [ 'setApiAccessor',      [ '@App\Twitter\Api\Accessor' ] ]
         tags:
             - { name: 'doctrine.repository_service' }
 
-    App\Infrastructure\Collection\Repository\FriendsListCollectedEventRepository:
-        class: 'App\Infrastructure\Collection\Repository\FriendsListCollectedEventRepository'
+    App\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository:
+        class: 'App\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Domain\Collection\Entity\FriendsListCollectedEvent'
+            - 'App\Domain\Curation\Entity\FriendsListCollectedEvent'
         calls:
             - [ 'setLogger',           [ '@logger' ] ]
         tags:
             - { name: 'doctrine.repository_service' }
 
-    App\Infrastructure\Collection\Repository\FollowersListCollectedEventRepository:
-        class: 'App\Infrastructure\Collection\Repository\FollowersListCollectedEventRepository'
+    App\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository:
+        class: 'App\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Domain\Collection\Entity\FollowersListCollectedEvent'
+            - 'App\Domain\Curation\Entity\FollowersListCollectedEvent'
         calls:
             - [ 'setLogger',           [ '@logger' ] ]
         tags:
             - { name: 'doctrine.repository_service' }
 
-    App\Infrastructure\Collection\Repository\MemberProfileCollectedEventRepository:
-        class: 'App\Infrastructure\Collection\Repository\MemberProfileCollectedEventRepository'
+    App\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository:
+        class: 'App\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Domain\Collection\Entity\MemberProfileCollectedEvent'
+            - 'App\Domain\Curation\Entity\MemberProfileCollectedEvent'
         calls:
             - [ 'setLogger',           [ '@logger' ] ]
             - [ 'setApiAccessor',      [ '@App\Twitter\Api\Accessor' ] ]
         tags:
             - { name: 'doctrine.repository_service' }
 
-    App\Infrastructure\Collection\Repository\PublicationBatchCollectedEventRepository:
-        class: 'App\Infrastructure\Collection\Repository\PublicationBatchCollectedEventRepository'
+    App\Infrastructure\Curation\Repository\PublicationBatchCollectedEventRepository:
+        class: 'App\Infrastructure\Curation\Repository\PublicationBatchCollectedEventRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Domain\Collection\Entity\PublicationBatchCollectedEvent'
+            - 'App\Domain\Curation\Entity\PublicationBatchCollectedEvent'
         calls:
             - [ 'setLogger',           [ '@logger' ] ]
             - [ 'setMemberRepository', [ '@App\Infrastructure\Repository\Membership\MemberRepository' ] ]
@@ -70,22 +70,22 @@ services:
         tags:
             - { name: 'doctrine.repository_service' }
 
-    App\Infrastructure\Collection\Repository\PublishersListCollectedEventRepository:
-        class: 'App\Infrastructure\Collection\Repository\PublishersListCollectedEventRepository'
+    App\Infrastructure\Curation\Repository\PublishersListCollectedEventRepository:
+        class: 'App\Infrastructure\Curation\Repository\PublishersListCollectedEventRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Domain\Collection\Entity\PublishersListCollectedEvent'
+            - 'App\Domain\Curation\Entity\PublishersListCollectedEvent'
         calls:
             - [ 'setLogger',           [ '@logger' ] ]
             - [ 'setApiAccessor',      [ '@App\Twitter\Api\Accessor' ] ]
         tags:
             - { name: 'doctrine.repository_service' }
 
-    App\Infrastructure\Collection\Repository\OwnershipBatchCollectedEventRepository:
-        class: 'App\Infrastructure\Collection\Repository\OwnershipBatchCollectedEventRepository'
+    App\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository:
+        class: 'App\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Domain\Collection\Entity\OwnershipBatchCollectedEvent'
+            - 'App\Domain\Curation\Entity\OwnershipBatchCollectedEvent'
         calls:
             - [ 'setLogger',           [ '@logger' ] ]
             - [ 'setApiAccessor',      [ '@App\Twitter\Api\Accessor' ] ]
@@ -108,11 +108,11 @@ services:
         tags:
             - { name: 'doctrine.repository_service' }
 
-    App\Twitter\Repository\PublicationRepository:
-        class: 'App\Twitter\Repository\PublicationRepository'
+    App\Infrastructure\Publication\Repository\PublicationRepository:
+        class: 'App\Infrastructure\Publication\Repository\PublicationRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Twitter\Entity\Publication'
+            - 'App\Domain\Publication\Entity\Publication'
         calls:
             - [ 'setEntityManager', [ '@doctrine.orm.entity_manager' ] ]
             - [ 'setPublicationFormatter', [ '@App\Infrastructure\Publication\Formatter\PublicationFormatter' ] ]
@@ -174,13 +174,13 @@ services:
         class: 'App\Infrastructure\Publication\Repository\KeywordRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Domain\Publication\Entity\Keyword'
+            - 'App\Domain\Curation\Entity\Keyword'
 
     repository.highlight:
         class: 'App\Infrastructure\Publication\Repository\HighlightRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Domain\Publication\Entity\Highlight'
+            - 'App\Domain\Curation\Entity\Highlight'
         calls:
             - [ 'setLogger',  [ '@logger' ] ]
             - [ 'setStatusAccessor', [ '@App\Infrastructure\Twitter\Api\Accessor\StatusAccessor'] ]
@@ -193,7 +193,7 @@ services:
         class: 'App\Infrastructure\Publication\Repository\NotFoundStatusRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Domain\Publication\Entity\NotFoundStatus'
+            - 'App\Domain\Curation\Entity\NotFoundStatus'
 
     repository.timely_status:
         class: 'App\PublishersList\Repository\TimelyStatusRepository'
@@ -233,7 +233,7 @@ services:
         class: 'App\Infrastructure\Publication\Repository\LikedStatusRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Domain\Publication\Entity\LikedStatus'
+            - 'App\Domain\Curation\Entity\LikedStatus'
         properties:
             memberRepository: "@user_manager"
             statusRepository: '@App\Infrastructure\Api\Repository\StatusRepository'

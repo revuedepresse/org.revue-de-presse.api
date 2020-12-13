@@ -4,7 +4,7 @@ services:
         calls:
             - [ 'setApiAccessor',                           [ '@App\Twitter\Api\Accessor' ] ]
             - [ 'setLikedStatusRepository',                 [ '@repository.liked_status' ] ]
-            - [ 'setMemberProfileCollectedEventRepository', [ '@App\Infrastructure\Collection\Repository\MemberProfileCollectedEventRepository' ] ]
+            - [ 'setMemberProfileCollectedEventRepository', [ '@App\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository' ] ]
             - [ 'setStatusLogger',                          [ '@App\Infrastructure\Log\StatusLogger' ] ]
             - [ 'setStatusRepository',                      [ '@App\Infrastructure\Api\Repository\StatusRepository' ] ]
             - [ 'setLogger',                                [ '@logger' ] ]

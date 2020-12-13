@@ -74,7 +74,7 @@ services:
         calls:
             - [ 'setCache',                 [ '@app.cache.redis' ]]
             - [ 'setLogger',            [ '@logger' ] ]
-            - [ 'setPublicationRepository', [ '@App\Twitter\Repository\PublicationRepository' ]]
+            - [ 'setPublicationRepository', [ '@App\Infrastructure\Publication\Repository\PublicationRepository' ]]
             - [ 'setStatusAccessor',    [ '@App\Infrastructure\Twitter\Api\Accessor\StatusAccessor' ]]
             - [ 'setStatusRepository',  [ '@App\Infrastructure\Api\Repository\StatusRepository' ]]
 

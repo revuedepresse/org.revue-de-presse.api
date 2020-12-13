@@ -5,8 +5,8 @@ namespace App\Tests\Infrastructure\Amqp\MessageBus;
 
 use App\Infrastructure\Api\Entity\Token;
 use App\Infrastructure\Api\Exception\UnavailableTokenException;
-use App\Domain\Collection\PublicationStrategy;
-use App\Domain\Collection\PublicationStrategyInterface;
+use App\Domain\Curation\PublicationStrategy;
+use App\Domain\Curation\PublicationStrategyInterface;
 use App\Domain\Resource\MemberOwnerships;
 use App\Domain\Resource\OwnershipCollection;
 use App\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher;

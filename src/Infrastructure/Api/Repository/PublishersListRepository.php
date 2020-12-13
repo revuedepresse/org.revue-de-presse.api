@@ -20,7 +20,7 @@ use App\Domain\PublishersList\Repository\PublishersListRepositoryInterface;
 use App\Membership\Domain\Entity\Legacy\Member;
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Infrastructure\Operation\CapableOfDeletionInterface;
-use App\Domain\Publication\Entity\LikedStatus;
+use App\Domain\Curation\Entity\LikedStatus;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\FetchMode;
 use Doctrine\DBAL\ParameterType;

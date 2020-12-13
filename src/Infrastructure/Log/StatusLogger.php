@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Infrastructure\Log;
 
 use App\Infrastructure\Api\Entity\Aggregate;
-use App\Domain\Collection\CollectionStrategyInterface;
+use App\Domain\Curation\CollectionStrategyInterface;
 use App\Domain\Publication\StatusInterface;
 use App\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Infrastructure\Twitter\Collector\PublicationCollector;

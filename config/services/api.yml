@@ -13,7 +13,7 @@ services:
             - '@App\Infrastructure\Api\AccessToken\TokenChange'
             - '@logger'
         calls:
-            - [ 'setOwnershipBatchCollectedEventRepository', [ '@App\Infrastructure\Collection\Repository\OwnershipBatchCollectedEventRepository'] ]
+            - [ 'setOwnershipBatchCollectedEventRepository', [ '@App\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository'] ]
 
     App\Infrastructure\Twitter\Api\Accessor\MemberProfileAccessor:
         class: 'App\Infrastructure\Twitter\Api\Accessor\MemberProfileAccessor'
@@ -22,4 +22,4 @@ services:
             - '@user_manager'
             - '@App\Infrastructure\Twitter\Api\UnavailableResourceHandler'
         calls:
-            - [ 'setMemberProfileCollectedEventRepository', [ '@App\Infrastructure\Collection\Repository\MemberProfileCollectedEventRepository'] ]
+            - [ 'setMemberProfileCollectedEventRepository', [ '@App\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository'] ]

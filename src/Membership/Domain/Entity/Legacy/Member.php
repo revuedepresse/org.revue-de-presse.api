@@ -234,7 +234,7 @@ class Member extends MemberModel
 
     /**
      * @ORM\OneToMany(
-     *      targetEntity="\App\Domain\Collection\Entity\PublicationBatchCollectedEvent",
+     *      targetEntity="\App\Domain\Curation\Entity\PublicationBatchCollectedEvent",
      *      mappedBy="member"
      * )
      */

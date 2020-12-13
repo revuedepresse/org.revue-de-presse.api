@@ -13,7 +13,7 @@ use App\Infrastructure\DependencyInjection\Status\StatusPersistenceTrait;
 use App\Infrastructure\Repository\Membership\MemberRepositoryInterface;
 use App\Infrastructure\Operation\Collection\Collection;
 use App\Infrastructure\Operation\Collection\CollectionInterface;
-use App\Twitter\Repository\PublicationRepositoryInterface;
+use App\Domain\Publication\Repository\PublicationRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use function count;
 

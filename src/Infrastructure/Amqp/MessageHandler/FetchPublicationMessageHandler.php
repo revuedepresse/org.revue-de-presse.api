@@ -12,7 +12,7 @@ use App\Infrastructure\Amqp\Message\FetchPublicationInterface;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Infrastructure\Twitter\Collector\PublicationCollectorInterface;
-use App\Domain\Collection\LikedStatusCollectionAwareInterface;
+use App\Domain\Curation\LikedStatusCollectionAwareInterface;
 use App\Twitter\Api\TwitterErrorAwareInterface;
 use App\Twitter\Exception\ProtectedAccountException;
 use App\Twitter\Exception\UnavailableResourceException;

@@ -5,7 +5,7 @@ namespace App\Infrastructure\Amqp\MessageBus;
 
 use App\Infrastructure\Amqp\Exception\InvalidListNameException;
 use App\Infrastructure\Api\Entity\TokenInterface;
-use App\Domain\Collection\PublicationStrategyInterface;
+use App\Domain\Curation\PublicationStrategyInterface;
 use Closure;
 
 interface PublicationMessageDispatcherInterface

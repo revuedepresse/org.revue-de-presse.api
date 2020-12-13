@@ -10,7 +10,7 @@ use App\Domain\Publication\StatusInterface;
 use App\Infrastructure\DependencyInjection\Api\StatusAccessorTrait;
 use App\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use App\Twitter\Exception\NotFoundMemberException;
-use App\Twitter\Repository\PublicationInterface;
+use App\Domain\Publication\Repository\PublicationInterface;
 use function array_key_exists;
 use function json_decode;
 

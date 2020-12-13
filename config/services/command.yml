@@ -25,8 +25,8 @@ services:
             - [ 'setMemberSubscriptionRepository', ['@repository.member_subscription'] ]
             - [ 'setMutator', ['@App\Infrastructure\Twitter\Api\Mutator\FriendshipMutator'] ]
             - [ 'setNetworkRepository', ['@repository.network'] ]
-            - [ 'setSubscribeesRepository', ['@App\Infrastructure\Collection\Repository\FollowersListCollectedEventRepository'] ]
-            - [ 'setSubscriptionsRepository', ['@App\Infrastructure\Collection\Repository\FriendsListCollectedEventRepository'] ]
+            - [ 'setSubscribeesRepository', ['@App\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository'] ]
+            - [ 'setSubscriptionsRepository', ['@App\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository'] ]
 
     App\Infrastructure\Amqp\Command\FetchPublicationMessageDispatcher:
         class:                              "%press_review.fetch_member_status.class%"
@@ -57,8 +57,8 @@ services:
             - [ 'setDefaultToken',                          [ '%weaving_the_web_twitter.oauth_token.default%'] ]
             - [ 'setEntityManager',                         [ '@doctrine.orm.entity_manager'] ]
             - [ 'setLogger',                                [ '@logger'] ]
-            - [ 'setMemberFriendsCollectedEventRepository', [ '@App\Infrastructure\Collection\Repository\MemberFriendsCollectedEventRepository'] ]
-            - [ 'setMemberProfileCollectedEventRepository', [ '@App\Infrastructure\Collection\Repository\MemberProfileCollectedEventRepository'] ]
+            - [ 'setMemberFriendsCollectedEventRepository', [ '@App\Infrastructure\Curation\Repository\MemberFriendsCollectedEventRepository'] ]
+            - [ 'setMemberProfileCollectedEventRepository', [ '@App\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository'] ]
             - [ 'setMemberRepository',                      [ '@App\Infrastructure\Repository\Membership\MemberRepository'] ]
             - [ 'setMessageBus',                            [ '@messenger.default_bus'] ]
             - [ 'setTranslator',                            [ '@translator'] ]
@@ -95,7 +95,7 @@ services:
     App\Twitter\Command\MigrateStatusToPublicationsCommand:
         class:  '\App\Twitter\Command\MigrateStatusToPublicationsCommand'
         calls:
-            - [ 'setPublicationRepository', [ '@App\Twitter\Repository\PublicationRepository' ] ]
+            - [ 'setPublicationRepository', [ '@App\Infrastructure\Publication\Repository\PublicationRepository' ] ]
         tags:
             - { name: 'console.command' }
 
@@ -151,8 +151,8 @@ services:
             networkRepository:                      '@repository.network'
             memberRepository:                       '@user_manager'
         calls:
-            - [ 'setOwnershipBatchCollectedEventRepository',  [ '@App\Infrastructure\Collection\Repository\OwnershipBatchCollectedEventRepository' ] ]
-            - [ 'setPublishersListCollectedEventRepository', [ '@App\Infrastructure\Collection\Repository\PublishersListCollectedEventRepository' ] ]
+            - [ 'setOwnershipBatchCollectedEventRepository',  [ '@App\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository' ] ]
+            - [ 'setPublishersListCollectedEventRepository', [ '@App\Infrastructure\Curation\Repository\PublishersListCollectedEventRepository' ] ]
         tags:
             - { name: 'console.command' }
 

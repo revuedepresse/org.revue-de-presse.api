@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\DependencyInjection\Publication;
 
-use App\Twitter\Repository\PublicationRepositoryInterface;
+use App\Domain\Publication\Repository\PublicationRepositoryInterface;
 
 trait PublicationRepositoryTrait
 {

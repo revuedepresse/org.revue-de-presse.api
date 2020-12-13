@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\DependencyInjection\Collection;
 
-use App\Infrastructure\Collection\Repository\PublishersListCollectedEventRepositoryInterface;
+use App\Domain\Curation\Repository\PublishersListCollectedEventRepositoryInterface;
 
 trait PublishersListCollectedEventRepositoryTrait
 {

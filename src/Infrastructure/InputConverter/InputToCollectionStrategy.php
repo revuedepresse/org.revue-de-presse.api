@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\InputConverter;
 
-use App\Domain\Collection\PublicationStrategy;
-use App\Domain\Collection\PublicationStrategyInterface;
+use App\Domain\Curation\PublicationStrategy;
+use App\Domain\Curation\PublicationStrategyInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use function array_walk;
 use function explode;

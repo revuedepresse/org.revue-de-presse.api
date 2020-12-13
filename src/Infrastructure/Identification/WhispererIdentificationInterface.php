@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Identification;
 
-use App\Domain\Collection\CollectionStrategyInterface;
+use App\Domain\Curation\CollectionStrategyInterface;
 
 interface WhispererIdentificationInterface
 {

@@ -6,7 +6,7 @@ namespace App\Infrastructure\Api\Repository;
 use App\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
 use App\Infrastructure\Api\Entity\Aggregate;
 use App\Infrastructure\Api\Entity\Status;
-use App\Domain\Collection\CollectionStrategyInterface;
+use App\Domain\Curation\CollectionStrategyInterface;
 use App\Domain\Publication\StatusInterface;
 use App\Domain\Publication\TaggedStatus;
 use App\Membership\Domain\Entity\MemberInterface;

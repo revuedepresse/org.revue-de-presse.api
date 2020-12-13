@@ -9,6 +9,6 @@ services:
         class: 'App\Domain\Subscription\Console\ListMemberSubscribeesCommand'
         calls:
             - [ 'setAccessor', ['@App\Infrastructure\Twitter\Api\Accessor\FollowersListAccessor'] ]
-            - [ 'setRepository', ['@App\Infrastructure\Collection\Repository\FollowersListCollectedEventRepository'] ]
+            - [ 'setRepository', ['@App\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository'] ]
         tags:
             - { name: 'console.command' }

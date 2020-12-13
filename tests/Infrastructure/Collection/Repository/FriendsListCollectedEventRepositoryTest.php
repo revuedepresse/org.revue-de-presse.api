@@ -3,9 +3,9 @@ declare (strict_types=1);
 
 namespace App\Tests\Infrastructure\Collection\Repository;
 
-use App\Infrastructure\Collection\Repository\FriendsListCollectedEventRepository;
+use App\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository;
 use App\Infrastructure\Twitter\Api\Selector\FriendsListSelector;
-use App\Tests\Builder\Twitter\Api\Accessor\FriendsListAccessorBuilder;
+use App\Tests\Builder\Infrastructure\Twitter\Api\Accessor\FriendsListAccessorBuilder;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 

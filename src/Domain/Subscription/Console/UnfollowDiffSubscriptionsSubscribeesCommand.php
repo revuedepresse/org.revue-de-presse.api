@@ -3,11 +3,11 @@ declare (strict_types=1);
 
 namespace App\Domain\Subscription\Console;
 
-use App\Domain\Collection\Entity\FollowersListCollectedEvent;
-use App\Domain\Collection\Entity\FriendsListCollectedEvent;
+use App\Domain\Curation\Entity\FollowersListCollectedEvent;
+use App\Domain\Curation\Entity\FriendsListCollectedEvent;
 use App\Domain\Resource\MemberCollection;
 use App\Domain\Resource\MemberIdentity;
-use App\Infrastructure\Collection\Repository\ListCollectedEventRepositoryInterface;
+use App\Domain\Curation\Repository\ListCollectedEventRepositoryInterface;
 use App\Infrastructure\Console\AbstractCommand;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;

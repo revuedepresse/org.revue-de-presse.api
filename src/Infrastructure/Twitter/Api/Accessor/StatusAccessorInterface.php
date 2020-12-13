@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Twitter\Api\Accessor;
 
-use App\Domain\Collection\CollectionStrategyInterface;
+use App\Domain\Curation\CollectionStrategyInterface;
 use App\Membership\Domain\Entity\MemberInterface;
 
 interface StatusAccessorInterface

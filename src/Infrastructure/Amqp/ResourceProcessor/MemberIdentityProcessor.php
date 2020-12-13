@@ -7,7 +7,7 @@ use App\Infrastructure\Twitter\Api\Accessor\Exception\UnexpectedApiResponseExcep
 use App\PublishersList\AggregateAwareTrait;
 use App\Infrastructure\Amqp\Exception\SkippableMemberException;
 use App\Infrastructure\Api\Entity\TokenInterface;
-use App\Domain\Collection\PublicationStrategyInterface;
+use App\Domain\Curation\PublicationStrategyInterface;
 use App\Domain\Membership\Exception\MembershipException;
 use App\Domain\Membership\MemberFacingStrategy;
 use App\Domain\Resource\MemberIdentity;

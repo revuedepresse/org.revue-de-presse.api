@@ -20,7 +20,7 @@ use App\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
 use App\Infrastructure\Twitter\Api\Normalizer\Normalizer;
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Infrastructure\Operation\Collection\CollectionInterface;
-use App\Domain\Publication\Entity\LikedStatus;
+use App\Domain\Curation\Entity\LikedStatus;
 use App\Domain\Publication\Repository\ExtremumAwareInterface;
 use App\Infrastructure\Publication\Repository\LikedStatusRepository;
 use App\Twitter\Exception\NotFoundMemberException;

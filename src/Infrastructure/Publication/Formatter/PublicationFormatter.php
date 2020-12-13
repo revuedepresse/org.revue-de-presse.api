@@ -5,7 +5,7 @@ namespace App\Infrastructure\Publication\Formatter;
 
 use App\Conversation\ConversationAwareTrait;
 use App\Infrastructure\Operation\Collection\Collection;
-use App\Twitter\Repository\PublicationInterface;
+use App\Domain\Publication\Repository\PublicationInterface;
 
 class PublicationFormatter implements PublicationFormatterInterface
 {
@@ -18,7 +18,7 @@ class PublicationFormatter implements PublicationFormatterInterface
                 $extractedProperties                       = $this->extractStatusProperties(
                     [$publication]
                 )[0];
-                $extractedPropertiesZ['original_document'] = $publication->getDocument();
+                $extractedProperties['original_document'] = $publication->getDocument();
 
                 return $extractedProperties;
             }

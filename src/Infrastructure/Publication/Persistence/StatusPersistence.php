@@ -8,7 +8,7 @@ use App\Infrastructure\Api\Entity\Aggregate;
 use App\Infrastructure\Api\Entity\ArchivedStatus;
 use App\Infrastructure\Api\Entity\Status;
 use App\Infrastructure\Api\Exception\InsertDuplicatesException;
-use App\Domain\Collection\CollectionStrategyInterface;
+use App\Domain\Curation\CollectionStrategyInterface;
 use App\Domain\Publication\StatusCollection;
 use App\Domain\Publication\StatusInterface;
 use App\Domain\Publication\TaggedStatus;

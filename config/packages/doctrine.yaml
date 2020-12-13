@@ -150,13 +150,13 @@ doctrine:
                         type:       xml
                     Membership:
                         alias:      'Membership'
-                        dir:        '%kernel.project_dir%/src/Membership/Domain/Entity'
+                        dir:        '%kernel.project_dir%/src/Membership/Domain/Entity/Legacy'
                         is_bundle:  false
                         prefix:     App\Membership\Domain\Entity\Legacy
                         type:       annotation
-                    Media:
-                        alias:      'Media'
-                        dir:        '%kernel.project_dir%/config/model/media'
+                    PressMedia:
+                        alias:      'PressMedia'
+                        dir:        '%kernel.project_dir%/config/model/press-media'
                         is_bundle:  false
                         prefix:     App\PressMedia\Entity
                         type:       xml
@@ -166,17 +166,11 @@ doctrine:
                         is_bundle:  false
                         prefix:     App\PublicationPopularity\Entity
                         type:       xml
-                    Publication:
-                        alias:      'Publication'
-                        dir:        '%kernel.project_dir%/config/model/publication'
-                        is_bundle:  false
-                        prefix:     App\Domain\Publication\Entity
-                        type:       xml
                     PublicationBatchCollectedEvent:
                         alias:      'PublicationBatchCollectedEvent'
-                        dir:        '%kernel.project_dir%/config/model/collection'
+                        dir:        '%kernel.project_dir%/config/model/curation'
                         is_bundle:  false
-                        prefix:     App\Domain\Collection\Entity
+                        prefix:     App\Domain\Curation\Entity
                         type:       xml
                     PublishersList:
                         alias:      'PublishersList'
@@ -184,11 +178,11 @@ doctrine:
                         is_bundle:  false
                         prefix:     App\PublishersList\Entity
                         type:       xml
-                    TwitterPublication:
+                    Publication:
                         alias:      'Publication'
-                        dir:        '%kernel.project_dir%/src/Twitter/Entity'
+                        dir:        '%kernel.project_dir%/src/Domain/Publication/Entity'
                         is_bundle:  false
-                        prefix:     App\Twitter\Entity
+                        prefix:     App\Domain\Publication\Entity
                         type:       annotation
             write:
                 naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware

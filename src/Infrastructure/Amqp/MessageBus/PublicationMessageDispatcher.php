@@ -8,7 +8,7 @@ use App\Infrastructure\Amqp\Exception\UnexpectedOwnershipException;
 use App\Infrastructure\Api\AccessToken\TokenChangeInterface;
 use App\Infrastructure\Api\Entity\TokenInterface;
 use App\Infrastructure\Api\Exception\UnavailableTokenException;
-use App\Domain\Collection\PublicationStrategyInterface;
+use App\Domain\Curation\PublicationStrategyInterface;
 use App\Domain\Resource\MemberOwnerships;
 use App\Domain\Resource\OwnershipCollection;
 use App\Domain\Resource\PublishersList;
