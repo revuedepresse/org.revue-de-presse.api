@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Tests\Infrastructure\Persistence;
+namespace App\Tests\Infrastructure\Status\Persistence;
 
 use App\Api\AccessToken\AccessToken;
 use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;
-use App\Infrastructure\Repository\Status\TaggedStatusRepositoryInterface;
+use App\Domain\Status\Repository\TaggedStatusRepositoryInterface;
 use App\Domain\Status\StatusCollection;
 use App\Domain\Status\StatusInterface;
 use App\Domain\Status\TaggedStatus;

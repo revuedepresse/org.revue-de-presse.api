@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Status\Entity;
+namespace App\Domain\Status\Entity;
 
 use App\Api\Entity\Status;
 

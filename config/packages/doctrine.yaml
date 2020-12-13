@@ -182,7 +182,7 @@ doctrine:
                         alias:      'Status'
                         dir:        '%kernel.project_dir%/config/model/status'
                         is_bundle:  false
-                        prefix:     App\Status\Entity
+                        prefix:     App\Domain\Status\Entity
                         type:       xml
                     Publication:
                         alias:      'Publication'

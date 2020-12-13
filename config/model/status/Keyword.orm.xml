@@ -5,7 +5,7 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="App\Status\Entity\Keyword"
+    <entity name="App\Domain\Status\Entity\Keyword"
             repository-class="App\Status\Repository\KeywordRepository"
             table="keyword">
 

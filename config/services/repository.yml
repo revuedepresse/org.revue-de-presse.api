@@ -174,13 +174,13 @@ services:
         class: 'App\Status\Repository\KeywordRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Status\Entity\Keyword'
+            - 'App\Domain\Status\Entity\Keyword'
 
     repository.highlight:
         class: 'App\Status\Repository\HighlightRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Status\Entity\Highlight'
+            - 'App\Domain\Status\Entity\Highlight'
         calls:
             - [ 'setLogger',  [ '@logger' ] ]
             - [ 'setStatusAccessor', [ '@App\Accessor\StatusAccessor'] ]
@@ -193,7 +193,7 @@ services:
         class: 'App\Status\Repository\NotFoundStatusRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Status\Entity\NotFoundStatus'
+            - 'App\Domain\Status\Entity\NotFoundStatus'
 
     repository.timely_status:
         class: 'App\Aggregate\Repository\TimelyStatusRepository'
@@ -233,7 +233,7 @@ services:
         class: 'App\Status\Repository\LikedStatusRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Status\Entity\LikedStatus'
+            - 'App\Domain\Status\Entity\LikedStatus'
         properties:
             memberRepository: "@user_manager"
             statusRepository: '@App\Api\Repository\StatusRepository'

@@ -20,7 +20,7 @@ use App\Infrastructure\Translation\Translator;
 use App\Member\Entity\AggregateSubscription;
 use App\Membership\Entity\MemberInterface;
 use App\Membership\Exception\InvalidMemberIdentifier;
-use App\Status\LikedStatusCollectionAwareInterface;
+use App\Domain\Collection\LikedStatusCollectionAwareInterface;
 use App\Twitter\Exception\BadAuthenticationDataException;
 use App\Twitter\Exception\EmptyErrorCodeException;
 use App\Twitter\Exception\InconsistentTokenRepository;

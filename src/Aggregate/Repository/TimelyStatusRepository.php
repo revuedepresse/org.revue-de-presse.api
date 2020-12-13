@@ -9,10 +9,9 @@ use App\Api\Repository\PublicationListRepository;
 use App\Conversation\ConversationAwareTrait;
 use App\Domain\Status\StatusInterface;
 use App\Infrastructure\Http\SearchParams;
-use App\Infrastructure\Repository\Status\TimelyStatusRepositoryInterface;
+use App\Domain\Status\Repository\TimelyStatusRepositoryInterface;
 use App\TimeRange\TimeRangeAwareInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\QueryBuilder;
@@ -156,7 +155,7 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
     /**
      * @param SearchParams $searchParams
      * @return array
-     * @throws DBALException
+     * @throws \Exception
      */
     public function findStatuses(SearchParams $searchParams): array
     {
@@ -193,7 +192,7 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
     /**
      * @param QueryBuilder $queryBuilder
      * @param SearchParams $searchParams
-     * @throws DBALException
+     * @throws \Exception
      */
     private function applyCriteria(
         QueryBuilder $queryBuilder,

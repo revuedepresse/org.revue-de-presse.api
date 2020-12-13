@@ -1,11 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Infrastructure\Repository\Status;
+namespace App\Domain\Status\Repository;
 
 use App\Domain\Status\StatusInterface;
 use App\Domain\Status\TaggedStatus;
-use App\Status\Repository\ExtremumAwareInterface;
 use Doctrine\Persistence\ObjectRepository;
 
 interface StatusRepositoryInterface extends ObjectRepository, ExtremumAwareInterface

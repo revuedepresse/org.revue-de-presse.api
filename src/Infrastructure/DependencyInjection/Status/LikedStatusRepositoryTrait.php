@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\DependencyInjection\Status;
 
-use App\Domain\Status\LikedStatusRepositoryInterface;
+use App\Domain\Status\Repository\LikedStatusRepositoryInterface;
 
 trait LikedStatusRepositoryTrait
 {

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Status;
+namespace App\Domain\Collection;
 
 interface LikedStatusCollectionAwareInterface
 {

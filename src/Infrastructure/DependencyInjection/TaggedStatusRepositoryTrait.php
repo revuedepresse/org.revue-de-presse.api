@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\DependencyInjection;
 
-use App\Infrastructure\Repository\Status\TaggedStatusRepositoryInterface;
+use App\Domain\Status\Repository\TaggedStatusRepositoryInterface;
 
 trait TaggedStatusRepositoryTrait
 {

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Infrastructure\Repository\Status;
+namespace App\Domain\Status\Repository;
 
 use App\Api\Entity\Aggregate;
 use App\Domain\Status\StatusInterface;

@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace App\Domain\Collection;
 
-use App\Domain\Status\LikedStatusRepositoryInterface;
+use App\Domain\Status\Repository\LikedStatusRepositoryInterface;
 use App\Infrastructure\Repository\Membership\MemberRepositoryInterface;
-use App\Infrastructure\Repository\Status\StatusRepositoryInterface;
-use App\Status\LikedStatusCollectionAwareInterface;
+use App\Domain\Status\Repository\StatusRepositoryInterface;
+use App\Domain\Collection\LikedStatusCollectionAwareInterface;
 use function array_key_exists;
 use const INF;
 

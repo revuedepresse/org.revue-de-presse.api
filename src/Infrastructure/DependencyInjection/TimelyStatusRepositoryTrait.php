@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\DependencyInjection;
 
-use App\Infrastructure\Repository\Status\TimelyStatusRepositoryInterface;
+use App\Domain\Status\Repository\TimelyStatusRepositoryInterface;
 
 trait TimelyStatusRepositoryTrait
 {

@@ -2,7 +2,7 @@
 
 namespace App\Status\Repository;
 
-use App\Status\Entity\NotFoundStatus;
+use App\Domain\Status\Entity\NotFoundStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;

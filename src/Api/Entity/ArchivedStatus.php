@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Api\Entity;
 
 use App\Domain\Status\StatusInterface;
-use App\Status\Entity\StatusTrait;
+use App\Domain\Status\Entity\StatusTrait;
 use DateTimeInterface;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;

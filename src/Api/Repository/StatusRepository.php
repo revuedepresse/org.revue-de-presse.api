@@ -10,7 +10,7 @@ use App\Domain\Collection\CollectionStrategyInterface;
 use App\Domain\Status\StatusInterface;
 use App\Domain\Status\TaggedStatus;
 use App\Membership\Entity\MemberInterface;
-use App\Status\Repository\ExtremumAwareInterface;
+use App\Domain\Status\Repository\ExtremumAwareInterface;
 use App\StatusCollection\Mapping\MappingAwareInterface;
 use App\Twitter\Exception\NotFoundMemberException;
 use App\Infrastructure\Twitter\Collector\PublicationCollector;

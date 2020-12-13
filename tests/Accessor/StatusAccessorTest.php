@@ -5,10 +5,10 @@ namespace App\Tests\Accessor;
 
 use App\Accessor\StatusAccessor;
 use App\Domain\Collection\CollectionStrategy;
-use App\Infrastructure\Repository\Status\StatusRepositoryInterface;
+use App\Domain\Status\Repository\StatusRepositoryInterface;
 use App\Infrastructure\Amqp\Message\FetchPublicationInterface;
 use App\Infrastructure\Twitter\Api\Accessor\StatusAccessorInterface;
-use App\Status\Repository\ExtremumAwareInterface;
+use App\Domain\Status\Repository\ExtremumAwareInterface;
 use Prophecy\Prophecy\ObjectProphecy;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 

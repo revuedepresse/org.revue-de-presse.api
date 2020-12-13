@@ -4,13 +4,13 @@ declare(strict_types=1);
 namespace App\Status\Repository;
 
 use App\Api\Entity\Aggregate;
-use App\Domain\Status\LikedStatusRepositoryInterface;
+use App\Domain\Status\Entity\LikedStatus;
+use App\Domain\Status\Repository\LikedStatusRepositoryInterface;
+use App\Domain\Status\Repository\ExtremumAwareInterface;
 use App\Domain\Status\StatusInterface;
 use App\Infrastructure\Repository\Membership\MemberRepositoryInterface;
 use App\Membership\Entity\MemberInterface;
-use App\Status\Entity\LikedStatus;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
@@ -248,7 +248,7 @@ class LikedStatusRepository extends ServiceEntityRepository implements ExtremumA
      * @param string    $memberName
      *
      * @return bool
-     * @throws DBALException
+     * @throws \Exception
      */
     public function hasBeenSavedBefore(
         \stdClass $status,

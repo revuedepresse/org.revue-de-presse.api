@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Status\Repository;
+namespace App\Domain\Status\Repository;
 
 use App\Infrastructure\Http\SearchParams;
 use Doctrine\ORM\QueryBuilder;

@@ -5,7 +5,7 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="App\Status\Entity\NotFoundStatus"
+    <entity name="App\Domain\Status\Entity\NotFoundStatus"
             repository-class="App\Status\Repository\NotFoundStatusRepository"
             table="status_not_found">
         <id name="id" column="id" type="uuid">

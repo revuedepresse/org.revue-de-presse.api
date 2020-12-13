@@ -1,9 +1,8 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Status\Entity;
+namespace App\Domain\Status\Entity;
 
-use App\Api\Entity\Aggregate;
 use App\Domain\Publication\PublicationListInterface;
 use App\Domain\Status\StatusInterface;
 use DateTimeInterface;
@@ -11,7 +10,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
 /**
- * @package App\Status\Entity
+ * @package App\Domain\Status\Entity
  */
 trait StatusTrait
 {

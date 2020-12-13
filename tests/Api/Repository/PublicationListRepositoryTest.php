@@ -215,6 +215,10 @@ QUERY;
         );
 
         $this->connection->executeQuery(
+            'DELETE FROM timely_status WHERE 1'
+        );
+
+        $this->connection->executeQuery(
             'DELETE FROM weaving_status WHERE 1'
         );
     }

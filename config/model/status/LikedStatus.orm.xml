@@ -5,7 +5,7 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="App\Status\Entity\LikedStatus"
+    <entity name="App\Domain\Status\Entity\LikedStatus"
             repository-class="App\Status\Repository\LikedStatusRepository"
             table="liked_status">
 

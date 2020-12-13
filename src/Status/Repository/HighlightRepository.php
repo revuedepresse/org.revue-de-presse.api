@@ -5,6 +5,7 @@ namespace App\Status\Repository;
 
 use App\Aggregate\Repository\PaginationAwareTrait;
 use App\Conversation\ConversationAwareTrait;
+use App\Domain\Status\Repository\PaginationAwareRepositoryInterface;
 use App\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Infrastructure\Http\SearchParams;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -13,7 +14,6 @@ use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
-use Psr\Log\LoggerInterface;
 
 class HighlightRepository extends ServiceEntityRepository implements PaginationAwareRepositoryInterface
 {

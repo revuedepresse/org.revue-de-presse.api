@@ -20,7 +20,7 @@ use App\Infrastructure\DependencyInjection\Status\StatusLoggerTrait;
 use App\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use App\Infrastructure\DependencyInjection\TaggedStatusRepositoryTrait;
 use App\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
-use App\Infrastructure\Repository\Status\TimelyStatusRepositoryInterface;
+use App\Domain\Status\Repository\TimelyStatusRepositoryInterface;
 use App\Infrastructure\Twitter\Api\Normalizer\Normalizer;
 use App\Membership\Entity\MemberInterface;
 use App\Operation\Collection\CollectionInterface;

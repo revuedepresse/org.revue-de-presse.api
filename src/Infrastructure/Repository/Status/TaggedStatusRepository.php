@@ -6,6 +6,7 @@ namespace App\Infrastructure\Repository\Status;
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;
+use App\Domain\Status\Repository\TaggedStatusRepositoryInterface;
 use App\Domain\Status\StatusInterface;
 use App\Domain\Status\TaggedStatus;
 use App\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
@@ -14,7 +15,6 @@ use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Exception;
 use Psr\Log\LoggerInterface;
-use function sprintf;
 
 class TaggedStatusRepository implements TaggedStatusRepositoryInterface
 {

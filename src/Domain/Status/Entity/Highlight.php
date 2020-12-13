@@ -1,22 +1,24 @@
 <?php
 
-namespace App\Status\Entity;
+namespace App\Domain\Status\Entity;
 
+use App\Api\Entity\Status;
+use App\Domain\Publication\PublicationListInterface;
 use App\Membership\Entity\MemberInterface;
-use Predis\Configuration\Option\Aggregate;
 use App\Domain\Status\StatusInterface;
+use DateTime;
 
 class Highlight
 {
     private $id;
 
     /**
-     * @var \DateTime
+     * @var DateTime
      */
     private $publicationDateTime;
 
     /**
-     * @var \App\Api\Entity\Status
+     * @var Status
      */
     private $status;
 
@@ -31,7 +33,7 @@ class Highlight
     private $isRetweet;
 
     /**
-     * @var Aggregate
+     * @var PublicationListInterface
      */
     private $aggregate;
 
@@ -41,7 +43,7 @@ class Highlight
     private $aggregateName;
 
     /**
-     * @var \DateTime
+     * @var DateTime
      */
     private $retweetedStatusPublicationDate;
 
@@ -58,7 +60,7 @@ class Highlight
     public function __construct(
         MemberInterface $member,
         StatusInterface $status,
-        \DateTime $publicationDateTime
+        DateTime $publicationDateTime
     ) {
         $this->publicationDateTime = $publicationDateTime;
         $this->member = $member;

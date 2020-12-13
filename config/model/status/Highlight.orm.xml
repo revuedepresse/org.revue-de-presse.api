@@ -5,7 +5,7 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="App\Status\Entity\Highlight"
+    <entity name="App\Domain\Status\Entity\Highlight"
             repository-class="App\Status\Repository\HighlightRepository"
             table="highlight">
 
