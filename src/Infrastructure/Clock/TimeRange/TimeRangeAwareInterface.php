@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\TimeRange;
+namespace App\Infrastructure\Clock\TimeRange;
 
 interface TimeRangeAwareInterface
 {

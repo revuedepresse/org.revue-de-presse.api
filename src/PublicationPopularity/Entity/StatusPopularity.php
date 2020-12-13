@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Popularity\Entity;
+namespace App\PublicationPopularity\Entity;
 
 use App\Domain\Publication\StatusInterface;
 

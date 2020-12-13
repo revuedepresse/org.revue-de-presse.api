@@ -10,7 +10,7 @@ use App\Conversation\ConversationAwareTrait;
 use App\Domain\Publication\StatusInterface;
 use App\Infrastructure\Http\SearchParams;
 use App\Domain\Publication\Repository\TimelyStatusRepositoryInterface;
-use App\TimeRange\TimeRangeAwareInterface;
+use App\Infrastructure\Clock\TimeRange\TimeRangeAwareInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;

@@ -2,8 +2,8 @@
 
 namespace App\Aggregate\Entity;
 
-use App\TimeRange\TimeRangeAwareInterface;
-use App\TimeRange\TimeRangeAwareTrait;
+use App\Infrastructure\Clock\TimeRange\TimeRangeAwareInterface;
+use App\Infrastructure\Clock\TimeRange\TimeRangeAwareTrait;
 use App\Api\Entity\Status;
 use App\Domain\Publication\StatusInterface;
 

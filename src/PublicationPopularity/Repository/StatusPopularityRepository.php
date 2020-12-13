@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Popularity\Repository;
+namespace App\PublicationPopularity\Repository;
 
 use Doctrine\ORM\EntityRepository;
 

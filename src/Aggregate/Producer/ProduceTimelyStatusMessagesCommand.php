@@ -2,8 +2,8 @@
 
 namespace App\Aggregate\Producer;
 
-use App\TimeRange\TimeRangeAwareInterface;
-use App\TimeRange\TimeRangeAwareTrait;
+use App\Infrastructure\Clock\TimeRange\TimeRangeAwareInterface;
+use App\Infrastructure\Clock\TimeRange\TimeRangeAwareTrait;
 use Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Output\OutputInterface;
 

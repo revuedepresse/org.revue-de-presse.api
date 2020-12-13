@@ -1,15 +1,12 @@
 <?php
+declare(strict_types=1);
 
-
-namespace App\TimeRange;
+namespace App\Infrastructure\Clock\TimeRange;
 
 use App\Api\Entity\Status;
 use DateTime;
 use Exception;
 
-/**
- * @package App\Status
- */
 trait TimeRangeAwareTrait
 {
     /**

@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace App\Domain\Publication\Entity;
 
 use App\Membership\Entity\MemberInterface;
-use App\TimeRange\TimeRangeAwareTrait;
-use App\TimeRange\TimeRangeAwareInterface;
+use App\Infrastructure\Clock\TimeRange\TimeRangeAwareTrait;
+use App\Infrastructure\Clock\TimeRange\TimeRangeAwareInterface;
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;
