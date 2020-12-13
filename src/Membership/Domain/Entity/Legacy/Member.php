@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Membership\Domain\Entity\Legacy;
 
-use App\Infrastructure\Api\Entity\Token;
+use App\Twitter\Infrastructure\Api\Entity\Token;
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Membership\Domain\Model\Member as MemberModel;
 use DateTime;
@@ -34,7 +34,7 @@ use const JSON_THROW_ON_ERROR;
  *          })
  *      }
  * )
- * @ORM\Entity(repositoryClass="App\Infrastructure\Repository\Membership\MemberRepository")
+ * @ORM\Entity(repositoryClass="App\Twitter\Infrastructure\Repository\Membership\MemberRepository")
  * @ORM\InheritanceType("SINGLE_TABLE")
  * @ORM\DiscriminatorColumn(name="usr_position_in_hierarchy", type="integer")
  * @ORM\DiscriminatorMap({"1" = "Member"})
@@ -193,7 +193,7 @@ class Member extends MemberModel
 
     /**
      * @ORM\ManyToMany(
-     *      targetEntity="\App\Infrastructure\Api\Entity\Token",
+     *      targetEntity="\App\Twitter\Infrastructure\Api\Entity\Token",
      *      inversedBy="users",
      *      fetch="EAGER"
      * )
@@ -234,7 +234,7 @@ class Member extends MemberModel
 
     /**
      * @ORM\OneToMany(
-     *      targetEntity="\App\Domain\Curation\Entity\PublicationBatchCollectedEvent",
+     *      targetEntity="\App\Twitter\Domain\Curation\Entity\PublicationBatchCollectedEvent",
      *      mappedBy="member"
      * )
      */

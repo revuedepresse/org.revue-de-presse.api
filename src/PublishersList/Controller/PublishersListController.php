@@ -3,12 +3,12 @@ declare(strict_types=1);
 
 namespace App\PublishersList\Controller;
 
-use App\Infrastructure\Cache\RedisCache;
-use App\Infrastructure\DependencyInjection\Publication\PublishersListRepositoryTrait;
-use App\Infrastructure\Security\Cors\CorsHeadersAwareTrait;
+use App\Twitter\Infrastructure\Cache\RedisCache;
+use App\Twitter\Infrastructure\DependencyInjection\Publication\PublishersListRepositoryTrait;
+use App\Twitter\Infrastructure\Security\Cors\CorsHeadersAwareTrait;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
-use App\Infrastructure\Api\Repository\PublishersListRepository;
+use App\Twitter\Infrastructure\Api\Repository\PublishersListRepository;
 use function array_key_exists;
 use function is_array;
 use const JSON_THROW_ON_ERROR;

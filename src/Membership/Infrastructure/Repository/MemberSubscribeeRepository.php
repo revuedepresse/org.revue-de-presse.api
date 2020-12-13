@@ -6,7 +6,7 @@ use App\Membership\Domain\Entity\MemberSubscribee;
 use App\Membership\Domain\Entity\MemberInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityRepository;
-use App\Infrastructure\Repository\Membership\MemberRepository;
+use App\Twitter\Infrastructure\Repository\Membership\MemberRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 class MemberSubscribeeRepository extends ServiceEntityRepository

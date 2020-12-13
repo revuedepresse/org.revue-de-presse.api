@@ -5,8 +5,8 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="App\Domain\Curation\Entity\PublicationBatchCollectedEvent"
-            repository-class="App\Infrastructure\Curation\Repository\PublicationBatchCollectedEventRepository"
+    <entity name="App\Twitter\Domain\Curation\Entity\PublicationBatchCollectedEvent"
+            repository-class="App\Twitter\Infrastructure\Curation\Repository\PublicationBatchCollectedEventRepository"
             table="publication_batch_collected_event">
 
         <indexes>

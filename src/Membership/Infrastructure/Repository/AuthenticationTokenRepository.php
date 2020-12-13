@@ -7,7 +7,7 @@ use App\Membership\Infrastructure\Security\Authentication\Authenticator;
 use App\Membership\Domain\Entity\AuthenticationToken;
 use Doctrine\ORM\EntityRepository;
 use App\Membership\Domain\Entity\Legacy\Member;
-use App\Infrastructure\Repository\Membership\MemberRepository;
+use App\Twitter\Infrastructure\Repository\Membership\MemberRepository;
 use const JSON_THROW_ON_ERROR;
 
 class AuthenticationTokenRepository extends EntityRepository

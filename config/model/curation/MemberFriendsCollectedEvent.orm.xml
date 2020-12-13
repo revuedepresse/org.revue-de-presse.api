@@ -5,8 +5,8 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="App\Domain\Curation\Entity\MemberFriendsCollectedEvent"
-            repository-class="App\Infrastructure\Curation\Repository\MemberFriendsCollectedEventRepository"
+    <entity name="App\Twitter\Domain\Curation\Entity\MemberFriendsCollectedEvent"
+            repository-class="App\Twitter\Infrastructure\Curation\Repository\MemberFriendsCollectedEventRepository"
             table="member_friends_collected_event">
 
         <indexes>

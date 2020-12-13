@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\PublicationPopularity\Entity;
 
-use App\Domain\Publication\StatusInterface;
+use App\Twitter\Domain\Publication\StatusInterface;
 
 class StatusPopularity
 {

@@ -139,8 +139,8 @@ doctrine:
                     Api:
                         alias:      'Api'
                         is_bundle:  false
-                        dir:        '%kernel.project_dir%/src/Infrastructure/Api/Entity'
-                        prefix:     'App\Infrastructure\Api\Entity'
+                        dir:        '%kernel.project_dir%/src/Twitter/Infrastructure/Api/Entity'
+                        prefix:     'App\Twitter\Infrastructure\Api\Entity'
                         type:       annotation
                     Member:
                         alias:      'Member'
@@ -170,7 +170,7 @@ doctrine:
                         alias:      'PublicationBatchCollectedEvent'
                         dir:        '%kernel.project_dir%/config/model/curation'
                         is_bundle:  false
-                        prefix:     App\Domain\Curation\Entity
+                        prefix:     App\Twitter\Domain\Curation\Entity
                         type:       xml
                     PublishersList:
                         alias:      'PublishersList'
@@ -180,9 +180,9 @@ doctrine:
                         type:       xml
                     Publication:
                         alias:      'Publication'
-                        dir:        '%kernel.project_dir%/src/Domain/Publication/Entity'
+                        dir:        '%kernel.project_dir%/src/Twitter/Domain/Publication/Entity'
                         is_bundle:  false
-                        prefix:     App\Domain\Publication\Entity
+                        prefix:     App\Twitter\Domain\Publication\Entity
                         type:       annotation
             write:
                 naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware

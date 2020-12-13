@@ -2,7 +2,7 @@
 
 namespace App\Membership\Infrastructure\Consumer;
 
-use App\Infrastructure\Amqp\AmqpMessageAwareTrait;
+use App\Twitter\Infrastructure\Amqp\AmqpMessageAwareTrait;
 use App\Membership\Infrastructure\Repository\NetworkRepository;
 use OldSound\RabbitMqBundle\RabbitMq\ConsumerInterface;
 use PhpAmqpLib\Message\AMQPMessage;

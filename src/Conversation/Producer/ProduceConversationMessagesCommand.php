@@ -2,7 +2,7 @@
 
 namespace App\Conversation\Producer;
 
-use App\Infrastructure\Operation\OperationClock;
+use App\Twitter\Infrastructure\Operation\OperationClock;
 use Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Input\InputOption,
     Symfony\Component\Console\Output\OutputInterface;
@@ -11,8 +11,8 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Finder\Finder;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-use App\Infrastructure\Amqp\Command\AggregateAwareCommand;
-use App\Twitter\Exception\SuspendedAccountException;
+use App\Twitter\Infrastructure\Amqp\Command\AggregateAwareCommand;
+use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
 
 
 /**

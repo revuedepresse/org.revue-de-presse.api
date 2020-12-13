@@ -4,7 +4,7 @@ namespace App\Membership\Infrastructure\Repository;
 
 use App\PublishersList\Entity\MemberAggregateSubscription;
 use App\PublishersList\Repository\MemberAggregateSubscriptionRepository;
-use App\Infrastructure\Api\Entity\Aggregate;
+use App\Twitter\Infrastructure\Api\Entity\Aggregate;
 use App\Membership\Domain\Entity\AggregateSubscription;
 use App\Membership\Domain\Entity\MemberSubscription;
 use App\Membership\Domain\Entity\MemberInterface;
@@ -12,7 +12,7 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Psr\Log\LoggerInterface;
-use App\Twitter\Api\Accessor;
+use App\Twitter\Infrastructure\Api\Accessor;
 
 class AggregateSubscriptionRepository extends ServiceEntityRepository
 {

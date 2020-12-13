@@ -5,8 +5,8 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="App\Domain\Curation\Entity\LikedStatus"
-            repository-class="App\Infrastructure\Publication\Repository\LikedStatusRepository"
+    <entity name="App\Twitter\Domain\Curation\Entity\LikedStatus"
+            repository-class="App\Twitter\Infrastructure\Publication\Repository\LikedStatusRepository"
             table="liked_status">
 
         <indexes>
@@ -20,7 +20,7 @@
 
         <many-to-one
             field="status"
-            target-entity="App\Infrastructure\Api\Entity\Status">
+            target-entity="App\Twitter\Infrastructure\Api\Entity\Status">
             <join-column
                 name="status_id"
                 referenced-column-name="ust_id"
@@ -29,7 +29,7 @@
 
         <many-to-one
             field="archivedStatus"
-            target-entity="App\Infrastructure\Api\Entity\ArchivedStatus">
+            target-entity="App\Twitter\Infrastructure\Api\Entity\ArchivedStatus">
             <join-column
                 name="archived_status_id"
                 referenced-column-name="ust_id"
@@ -52,7 +52,7 @@
         </many-to-one>
 
         <many-to-one
-                target-entity="App\Infrastructure\Api\Entity\Aggregate"
+                target-entity="App\Twitter\Infrastructure\Api\Entity\Aggregate"
                 field="aggregate"
                 inversed-by="timelyStatuses"
         />

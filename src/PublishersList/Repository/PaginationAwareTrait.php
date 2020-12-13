@@ -2,7 +2,7 @@
 
 namespace App\PublishersList\Repository;
 
-use App\Infrastructure\Http\SearchParams;
+use App\Twitter\Infrastructure\Http\SearchParams;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\QueryBuilder;
 

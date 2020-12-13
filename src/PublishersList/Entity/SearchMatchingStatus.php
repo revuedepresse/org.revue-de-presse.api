@@ -2,10 +2,10 @@
 
 namespace App\PublishersList\Entity;
 
-use App\Infrastructure\Clock\TimeRange\TimeRangeAwareInterface;
-use App\Infrastructure\Clock\TimeRange\TimeRangeAwareTrait;
-use App\Infrastructure\Api\Entity\Status;
-use App\Domain\Publication\StatusInterface;
+use App\Twitter\Infrastructure\Clock\TimeRange\TimeRangeAwareInterface;
+use App\Twitter\Infrastructure\Clock\TimeRange\TimeRangeAwareTrait;
+use App\Twitter\Infrastructure\Api\Entity\Status;
+use App\Twitter\Domain\Publication\StatusInterface;
 
 class SearchMatchingStatus implements TimeRangeAwareInterface
 {

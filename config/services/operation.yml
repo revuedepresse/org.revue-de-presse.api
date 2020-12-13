@@ -1,6 +1,6 @@
 services:
     operation.clock:
-        class:                                 'App\Infrastructure\Operation\OperationClock'
+        class:                                 'App\Twitter\Infrastructure\Operation\OperationClock'
         properties:
             timeAfterWhichOperationIsSkipped:  '%env(resolve:OPERATIONS_SKIPPED_AFTER)%'
             timeBeforeWhichOperationIsSkipped: '%env(resolve:OPERATIONS_SKIPPED_BEFORE)%'

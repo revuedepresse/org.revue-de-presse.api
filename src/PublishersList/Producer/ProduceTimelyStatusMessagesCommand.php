@@ -2,15 +2,15 @@
 
 namespace App\PublishersList\Producer;
 
-use App\Infrastructure\Clock\TimeRange\TimeRangeAwareInterface;
-use App\Infrastructure\Clock\TimeRange\TimeRangeAwareTrait;
+use App\Twitter\Infrastructure\Clock\TimeRange\TimeRangeAwareInterface;
+use App\Twitter\Infrastructure\Clock\TimeRange\TimeRangeAwareTrait;
 use Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Output\OutputInterface;
 
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-use App\Infrastructure\Amqp\Command\AggregateAwareCommand;
-use App\Twitter\Exception\SuspendedAccountException;
+use App\Twitter\Infrastructure\Amqp\Command\AggregateAwareCommand;
+use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
 
 
 /**

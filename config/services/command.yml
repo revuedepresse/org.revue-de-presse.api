@@ -1,7 +1,7 @@
 parameters:
-    command.map_aggregate_status_collection.class:                              'App\Infrastructure\Publication\Mapping\Command\MapAggregateStatusCollectionCommand'
-    command.map_status_collection.class:                                        'App\Infrastructure\Publication\Mapping\Command\MapStatusCollectionCommand'
-    command.select_status_collection.class:                                     'App\Infrastructure\Publication\Command\QueryPublicationCollectionCommand'
+    command.map_aggregate_status_collection.class:                              'App\Twitter\Infrastructure\Publication\Mapping\Command\MapAggregateStatusCollectionCommand'
+    command.map_status_collection.class:                                        'App\Twitter\Infrastructure\Publication\Mapping\Command\MapStatusCollectionCommand'
+    command.select_status_collection.class:                                     'App\Twitter\Infrastructure\Publication\Command\QueryPublicationCollectionCommand'
     command.add_members_to_aggregate.class:                                     'App\Membership\Infrastructure\Command\AddMemberToAggregateCommand'
     command.import_network.class:                                               'App\Membership\Infrastructure\Command\ImportNetworkCommand'
 
@@ -11,55 +11,55 @@ parameters:
     weaving_the_web_amqp.producer.produce_member_messages_command.class:        'App\Conversation\Producer\ProduceMemberMessagesCommand'
     weaving_the_web_amqp.consumer.network.class:                                'App\Membership\Infrastructure\Consumer\NetworkConsumer'
 
-    press_review.publication_message.handler.class:                             'App\Infrastructure\Amqp\MessageHandler\FetchPublicationMessageHandler'
-    press_review.fetch_member_status.class:                                     'App\Infrastructure\Amqp\Command\FetchPublicationMessageDispatcher'
+    press_review.publication_message.handler.class:                             'App\Twitter\Infrastructure\Amqp\MessageHandler\FetchPublicationMessageHandler'
+    press_review.fetch_member_status.class:                                     'App\Twitter\Infrastructure\Amqp\Command\FetchPublicationMessageDispatcher'
 
 services:
-    App\Domain\Subscription\Console\UnfollowDiffSubscriptionsSubscribeesCommand:
-        class: 'App\Domain\Subscription\Console\UnfollowDiffSubscriptionsSubscribeesCommand'
+    App\Twitter\Infrastructure\Subscription\Console\UnfollowDiffSubscriptionsSubscribeesCommand:
+        class: 'App\Twitter\Infrastructure\Subscription\Console\UnfollowDiffSubscriptionsSubscribeesCommand'
         tags:
             - { name: 'console.command' }
         calls:
             - [ 'setLogger', ['@logger'] ]
-            - [ 'setMemberRepository', ['@App\Infrastructure\Repository\Membership\MemberRepository'] ]
+            - [ 'setMemberRepository', ['@App\Twitter\Infrastructure\Repository\Membership\MemberRepository'] ]
             - [ 'setMemberSubscriptionRepository', ['@repository.member_subscription'] ]
-            - [ 'setMutator', ['@App\Infrastructure\Twitter\Api\Mutator\FriendshipMutator'] ]
+            - [ 'setMutator', ['@App\Twitter\Infrastructure\Twitter\Api\Mutator\FriendshipMutator'] ]
             - [ 'setNetworkRepository', ['@repository.network'] ]
-            - [ 'setSubscribeesRepository', ['@App\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository'] ]
-            - [ 'setSubscriptionsRepository', ['@App\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository'] ]
+            - [ 'setSubscribeesRepository', ['@App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository'] ]
+            - [ 'setSubscriptionsRepository', ['@App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository'] ]
 
-    App\Infrastructure\Amqp\Command\FetchPublicationMessageDispatcher:
+    App\Twitter\Infrastructure\Amqp\Command\FetchPublicationMessageDispatcher:
         class:                              "%press_review.fetch_member_status.class%"
         properties:
             operationClock:                 '@operation.clock'
             savedSearchRepository:          '@repository.saved_search'
             searchMatchingStatusRepository: '@repository.search_matching_status'
         calls:
-            - [ 'setAccessor',                      [ '@App\Twitter\Api\Accessor'] ]
-            - [ 'setAggregateRepository',           [ '@App\Infrastructure\Api\Repository\PublishersListRepository'] ]
+            - [ 'setAccessor',                      [ '@App\Twitter\Infrastructure\Api\Accessor'] ]
+            - [ 'setAggregateRepository',           [ '@App\Twitter\Infrastructure\Api\Repository\PublishersListRepository'] ]
             - [ 'setDefaultSecret',                 [ '%weaving_the_web_twitter.oauth_secret.default%'] ]
             - [ 'setDefaultToken',                  [ '%weaving_the_web_twitter.oauth_token.default%'] ]
             - [ 'setTokenRepository',               [ '@repository.access_token'] ]
-            - [ 'setPublicationMessageDispatcher',  [ '@App\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher'] ]
-            - [ 'setTranslator',                    [ '@App\Infrastructure\Translation\Translator'] ]
+            - [ 'setPublicationMessageDispatcher',  [ '@App\Twitter\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher'] ]
+            - [ 'setTranslator',                    [ '@App\Twitter\Infrastructure\Translation\Translator'] ]
             - [ 'setEntityManager',                 [ '@doctrine.orm.entity_manager'] ]
             - [ 'setLogger',                        [ '@logger'] ]
         tags:
             - { name: 'console.command' }
         public: true
 
-    App\Infrastructure\Amqp\Command\FetchMemberSubscriptionTimelineMessageDispatcher:
-        class: 'App\Infrastructure\Amqp\Command\FetchMemberSubscriptionTimelineMessageDispatcher'
+    App\Twitter\Infrastructure\Amqp\Command\FetchMemberSubscriptionTimelineMessageDispatcher:
+        class: 'App\Twitter\Infrastructure\Amqp\Command\FetchMemberSubscriptionTimelineMessageDispatcher'
         calls:
-            - [ 'setAccessor',                              [ '@App\Twitter\Api\Accessor'] ]
-            - [ 'setAggregateRepository',                   [ '@App\Infrastructure\Api\Repository\PublishersListRepository'] ]
+            - [ 'setAccessor',                              [ '@App\Twitter\Infrastructure\Api\Accessor'] ]
+            - [ 'setAggregateRepository',                   [ '@App\Twitter\Infrastructure\Api\Repository\PublishersListRepository'] ]
             - [ 'setDefaultSecret',                         [ '%weaving_the_web_twitter.oauth_secret.default%'] ]
             - [ 'setDefaultToken',                          [ '%weaving_the_web_twitter.oauth_token.default%'] ]
             - [ 'setEntityManager',                         [ '@doctrine.orm.entity_manager'] ]
             - [ 'setLogger',                                [ '@logger'] ]
-            - [ 'setMemberFriendsCollectedEventRepository', [ '@App\Infrastructure\Curation\Repository\MemberFriendsCollectedEventRepository'] ]
-            - [ 'setMemberProfileCollectedEventRepository', [ '@App\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository'] ]
-            - [ 'setMemberRepository',                      [ '@App\Infrastructure\Repository\Membership\MemberRepository'] ]
+            - [ 'setMemberFriendsCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\MemberFriendsCollectedEventRepository'] ]
+            - [ 'setMemberProfileCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository'] ]
+            - [ 'setMemberRepository',                      [ '@App\Twitter\Infrastructure\Repository\Membership\MemberRepository'] ]
             - [ 'setMessageBus',                            [ '@messenger.default_bus'] ]
             - [ 'setTranslator',                            [ '@translator'] ]
         tags:
@@ -69,33 +69,33 @@ services:
     press_review.fetch_status:
         class:                          "%press_review.publication_message.handler.class%"
         calls:
-            - [ 'setCollector',         [ '@App\Infrastructure\Twitter\Collector\PublicationCollector'] ]
+            - [ 'setCollector',         [ '@App\Twitter\Infrastructure\Twitter\Collector\PublicationCollector'] ]
             - [ 'setLogger',            [ '@monolog.logger.status'] ]
-            - [ 'setMemberRepository',  [ '@App\Infrastructure\Repository\Membership\MemberRepository'] ]
+            - [ 'setMemberRepository',  [ '@App\Twitter\Infrastructure\Repository\Membership\MemberRepository'] ]
         properties:
             tokenRepository:            '@repository.access_token'
         tags:
             -
                 name: messenger.message_handler
-                handles: App\Infrastructure\Amqp\Message\FetchMemberStatus
+                handles: App\Twitter\Infrastructure\Amqp\Message\FetchMemberStatus
 
     press_review.fetch_likes:
         class:                          "%press_review.publication_message.handler.class%"
         calls:
-            - [ 'setCollector',         [ '@App\Infrastructure\Twitter\Collector\PublicationCollector'] ]
+            - [ 'setCollector',         [ '@App\Twitter\Infrastructure\Twitter\Collector\PublicationCollector'] ]
             - [ 'setLogger',            [ '@monolog.logger.status'] ]
-            - [ 'setMemberRepository',  [ '@App\Infrastructure\Repository\Membership\MemberRepository'] ]
+            - [ 'setMemberRepository',  [ '@App\Twitter\Infrastructure\Repository\Membership\MemberRepository'] ]
         properties:
             tokenRepository:            '@repository.access_token'
         tags:
             -
                 name: messenger.message_handler
-                handles: App\Infrastructure\Amqp\Message\FetchMemberLikes
+                handles: App\Twitter\Infrastructure\Amqp\Message\FetchMemberLikes
 
-    App\Twitter\Command\MigrateStatusToPublicationsCommand:
-        class:  '\App\Twitter\Command\MigrateStatusToPublicationsCommand'
+    App\Twitter\Infrastructure\Console\MigrateStatusToPublicationsCommand:
+        class:  'App\Twitter\Infrastructure\Console\MigrateStatusToPublicationsCommand'
         calls:
-            - [ 'setPublicationRepository', [ '@App\Infrastructure\Publication\Repository\PublicationRepository' ] ]
+            - [ 'setPublicationRepository', [ '@App\Twitter\Infrastructure\Publication\Repository\PublicationRepository' ] ]
         tags:
             - { name: 'console.command' }
 
@@ -112,16 +112,16 @@ services:
     command.select_status_collection:
         class:                      "%command.select_status_collection.class%"
         properties:
-            statusRepository: '@App\Infrastructure\Api\Repository\StatusRepository'
+            statusRepository: '@App\Twitter\Infrastructure\Api\Repository\StatusRepository'
         tags:
             - { name: 'console.command' }
 
     command.add_members_to_aggregate:
         class:                      "%command.add_members_to_aggregate.class%"
         properties:
-            aggregateRepository:                '@App\Infrastructure\Api\Repository\PublishersListRepository'
+            aggregateRepository:                '@App\Twitter\Infrastructure\Api\Repository\PublishersListRepository'
             aggregateSubscriptionRepository:    '@repository.publishers_list_subscription'
-            accessor:                           '@App\Twitter\Api\Accessor'
+            accessor:                           '@App\Twitter\Infrastructure\Api\Accessor'
             logger:                             '@logger'
             userRepository:                     '@user_manager'
         tags:
@@ -144,22 +144,22 @@ services:
     App\PublishersList\Command\ImportMemberPublishersListsCommand:
         class:                                      'App\PublishersList\Command\ImportMemberPublishersListsCommand'
         properties:
-            accessor:                               '@App\Twitter\Api\Accessor'
+            accessor:                               '@App\Twitter\Infrastructure\Api\Accessor'
             aggregateSubscriptionRepository:        '@repository.publishers_list_subscription'
             logger:                                 '@logger'
             memberAggregateSubscriptionRepository:  '@repository.member_aggregate_subscription'
             networkRepository:                      '@repository.network'
             memberRepository:                       '@user_manager'
         calls:
-            - [ 'setOwnershipBatchCollectedEventRepository',  [ '@App\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository' ] ]
-            - [ 'setPublishersListCollectedEventRepository', [ '@App\Infrastructure\Curation\Repository\PublishersListCollectedEventRepository' ] ]
+            - [ 'setOwnershipBatchCollectedEventRepository',  [ '@App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository' ] ]
+            - [ 'setPublishersListCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\PublishersListCollectedEventRepository' ] ]
         tags:
             - { name: 'console.command' }
 
     command.map_status_collection:
         class:                      "%command.map_status_collection.class%"
         properties:
-            statusRepository:       '@App\Infrastructure\Api\Repository\StatusRepository'
+            statusRepository:       '@App\Twitter\Infrastructure\Api\Repository\StatusRepository'
             refreshStatusMapping:   '@mapping.refresh_status'
             oauthToken:             "%weaving_the_web_twitter.oauth_token.default%"
             oauthSecret:            "%weaving_the_web_twitter.oauth_secret.default%"
@@ -170,7 +170,7 @@ services:
         class:                      "%command.map_aggregate_status_collection.class%"
         properties:
             logger:                             '@monolog.logger.status'
-            statusRepository:                   '@App\Infrastructure\Api\Repository\StatusRepository'
+            statusRepository:                   '@App\Twitter\Infrastructure\Api\Repository\StatusRepository'
             refreshStatusMapping:               '@mapping.refresh_status'
             oauthToken:                         "%weaving_the_web_twitter.oauth_token.default%"
             oauthSecret:                        "%weaving_the_web_twitter.oauth_secret.default%"
@@ -190,7 +190,7 @@ services:
     command.subscribe_to_member_timelines:
         class:                               'App\Membership\Infrastructure\Command\SubscribeToMemberTimelinesCommand'
         properties:
-            accessor:                        '@App\Twitter\Api\Accessor'
+            accessor:                        '@App\Twitter\Infrastructure\Api\Accessor'
             aggregateSubscriptionRepository: '@repository.publishers_list_subscription'
             logger:                          '@logger'
         tags:
@@ -200,11 +200,11 @@ services:
         class:                        "%weaving_the_web_amqp.consumer.conversation_status.class%"
         calls:
             - [ 'setLogger',            [ '@monolog.logger.status'] ]
-            - [ 'setStatusAccessor',    [ '@App\Infrastructure\Twitter\Api\Accessor\StatusAccessor' ] ]
-            - [ 'setStatusRepository',  [ '@App\Infrastructure\Api\Repository\StatusRepository' ] ]
+            - [ 'setStatusAccessor',    [ '@App\Twitter\Infrastructure\Twitter\Api\Accessor\StatusAccessor' ] ]
+            - [ 'setStatusRepository',  [ '@App\Twitter\Infrastructure\Api\Repository\StatusRepository' ] ]
             - [ 'setUserRepository',    [ '@user_manager'] ]
         properties:
-            aggregateRepository:    '@App\Infrastructure\Api\Repository\PublishersListRepository'
+            aggregateRepository:    '@App\Twitter\Infrastructure\Api\Repository\PublishersListRepository'
             entityManager:          '@doctrine.orm.entity_manager'
             operationClock:         '@operation.clock'
 

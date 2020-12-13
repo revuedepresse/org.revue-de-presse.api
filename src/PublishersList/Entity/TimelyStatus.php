@@ -2,11 +2,11 @@
 
 namespace App\PublishersList\Entity;
 
-use App\Infrastructure\Clock\TimeRange\TimeRangeAwareTrait;
-use App\Infrastructure\Clock\TimeRange\TimeRangeAwareInterface;
-use App\Infrastructure\Api\Entity\Aggregate;
-use App\Infrastructure\Api\Entity\Status;
-use App\Domain\Publication\StatusInterface;
+use App\Twitter\Infrastructure\Clock\TimeRange\TimeRangeAwareTrait;
+use App\Twitter\Infrastructure\Clock\TimeRange\TimeRangeAwareInterface;
+use App\Twitter\Infrastructure\Api\Entity\Aggregate;
+use App\Twitter\Infrastructure\Api\Entity\Status;
+use App\Twitter\Domain\Publication\StatusInterface;
 use DateTimeInterface;
 use Ramsey\Uuid\UuidInterface;
 

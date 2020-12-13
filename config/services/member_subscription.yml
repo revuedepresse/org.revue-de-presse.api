@@ -1,31 +1,31 @@
 services:
-    App\Infrastructure\Twitter\Api\Accessor\FriendsListAccessor:
-        class: 'App\Infrastructure\Twitter\Api\Accessor\FriendsListAccessor'
+    App\Twitter\Infrastructure\Twitter\Api\Accessor\FriendsListAccessor:
+        class: 'App\Twitter\Infrastructure\Twitter\Api\Accessor\FriendsListAccessor'
         arguments:
-            - '@App\Twitter\Api\Accessor'
+            - '@App\Twitter\Infrastructure\Api\Accessor'
             - '@logger'
 
-    App\Infrastructure\Twitter\Api\Mutator\FriendshipMutator:
-        class: 'App\Infrastructure\Twitter\Api\Mutator\FriendshipMutator'
+    App\Twitter\Infrastructure\Twitter\Api\Mutator\FriendshipMutator:
+        class: 'App\Twitter\Infrastructure\Twitter\Api\Mutator\FriendshipMutator'
         calls:
-            - [ 'setApiAccessor', [ '@App\Twitter\Api\Accessor' ] ]
+            - [ 'setApiAccessor', [ '@App\Twitter\Infrastructure\Api\Accessor' ] ]
             - [ 'setLogger', [ '@logger' ] ]
-            - [ 'setMemberRepository', [ '@App\Infrastructure\Repository\Membership\MemberRepository' ] ]
+            - [ 'setMemberRepository', [ '@App\Twitter\Infrastructure\Repository\Membership\MemberRepository' ] ]
             - [ 'setMemberSubscriptionRepository', [ '@repository.member_subscription' ] ]
 
-    App\Domain\Subscription\Console\ListMemberSubscriptionsCommand:
-        class: 'App\Domain\Subscription\Console\ListMemberSubscriptionsCommand'
+    App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscriptionsCommand:
+        class: 'App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscriptionsCommand'
         calls:
-            - [ 'setAccessor', ['@App\Infrastructure\Twitter\Api\Accessor\FriendsListAccessor'] ]
-            - [ 'setRepository', ['@App\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository'] ]
+            - [ 'setAccessor', ['@App\Twitter\Infrastructure\Twitter\Api\Accessor\FriendsListAccessor'] ]
+            - [ 'setRepository', ['@App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository'] ]
         tags:
             - { name: 'console.command' }
 
-    App\Domain\Subscription\Console\UnfollowInactiveMembersCommand:
-        class: 'App\Domain\Subscription\Console\UnfollowInactiveMembersCommand'
+    App\Twitter\Infrastructure\Subscription\Console\UnfollowInactiveMembersCommand:
+        class: 'App\Twitter\Infrastructure\Subscription\Console\UnfollowInactiveMembersCommand'
         calls:
-            - [ 'setMutator', [ '@App\Infrastructure\Twitter\Api\Mutator\FriendshipMutator' ] ]
-            - [ 'setListCollectedEventRepository', [ '@App\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository' ] ]
-            - [ 'setMemberRepository', [ '@App\Infrastructure\Repository\Membership\MemberRepository' ] ]
+            - [ 'setMutator', [ '@App\Twitter\Infrastructure\Twitter\Api\Mutator\FriendshipMutator' ] ]
+            - [ 'setListCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository' ] ]
+            - [ 'setMemberRepository', [ '@App\Twitter\Infrastructure\Repository\Membership\MemberRepository' ] ]
         tags:
             - { name: 'console.command' }

@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace App\Membership\Infrastructure\Repository;
 
-use App\Domain\Publication\PublishersListIdentity;
-use App\Domain\Publication\PublishersListIdentityInterface;
-use App\Infrastructure\Http\PaginationParams;
-use App\Infrastructure\Repository\Membership\MemberRepositoryInterface;
-use App\Infrastructure\Repository\Subscription\MemberSubscriptionRepositoryInterface;
+use App\Twitter\Domain\Publication\PublishersListIdentity;
+use App\Twitter\Domain\Publication\PublishersListIdentityInterface;
+use App\Twitter\Infrastructure\Http\PaginationParams;
+use App\Twitter\Infrastructure\Repository\Membership\MemberRepositoryInterface;
+use App\Twitter\Infrastructure\Repository\Subscription\MemberSubscriptionRepositoryInterface;
 use App\Membership\Domain\Entity\MemberSubscription;
 use App\Membership\Domain\Entity\MemberInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;

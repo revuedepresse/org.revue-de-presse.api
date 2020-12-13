@@ -3,17 +3,17 @@ declare(strict_types=1);
 
 namespace App\Membership\Infrastructure\Repository;
 
-use App\Infrastructure\Repository\Membership\MemberRepository;
+use App\Twitter\Infrastructure\Repository\Membership\MemberRepository;
 use App\Membership\Domain\Repository\NetworkRepositoryInterface;
 use App\Membership\Domain\Entity\ExceptionalMember;
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Membership\Domain\Entity\NotFoundMember;
 use App\Membership\Domain\Entity\ProtectedMember;
 use App\Membership\Domain\Entity\SuspendedMember;
-use App\Twitter\Api\ApiAccessorInterface;
-use App\Twitter\Exception\NotFoundMemberException;
-use App\Twitter\Exception\ProtectedAccountException;
-use App\Twitter\Exception\SuspendedAccountException;
+use App\Twitter\Domain\Api\ApiAccessorInterface;
+use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
+use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
+use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
 use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\OptimisticLockException;

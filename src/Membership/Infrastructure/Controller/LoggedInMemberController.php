@@ -5,7 +5,7 @@ namespace App\Membership\Infrastructure\Controller;
 
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Membership\Infrastructure\Repository\AuthenticationTokenRepository;
-use App\Infrastructure\Security\Cors\CorsHeadersAwareTrait;
+use App\Twitter\Infrastructure\Security\Cors\CorsHeadersAwareTrait;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;

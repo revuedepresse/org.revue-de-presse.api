@@ -2,20 +2,20 @@
 
 namespace App\Membership\Infrastructure\Command;
 
-use App\Infrastructure\Twitter\Api\Accessor\Exception\ApiRateLimitingException;
-use App\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
-use App\Infrastructure\Twitter\Api\Accessor\Exception\ReadOnlyApplicationException;
-use App\Infrastructure\Twitter\Api\Accessor\Exception\UnexpectedApiResponseException;
-use App\Infrastructure\Console\CommandReturnCodeAwareInterface;
+use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\ApiRateLimitingException;
+use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
+use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\ReadOnlyApplicationException;
+use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\UnexpectedApiResponseException;
+use App\Twitter\Infrastructure\Console\CommandReturnCodeAwareInterface;
 use App\Membership\Domain\Entity\AggregateSubscription;
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository;
-use App\Twitter\Exception\BadAuthenticationDataException;
-use App\Twitter\Exception\InconsistentTokenRepository;
-use App\Twitter\Exception\NotFoundMemberException;
-use App\Twitter\Exception\ProtectedAccountException;
-use App\Twitter\Exception\SuspendedAccountException;
-use App\Twitter\Exception\UnavailableResourceException;
+use App\Twitter\Infrastructure\Exception\BadAuthenticationDataException;
+use App\Twitter\Infrastructure\Exception\InconsistentTokenRepository;
+use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
+use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
+use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
+use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Psr\Log\LoggerInterface;
@@ -25,9 +25,9 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use App\Infrastructure\Api\Repository\PublishersListRepository;
-use App\Twitter\Api\Accessor;
-use App\Infrastructure\Repository\Membership\MemberRepository;
+use App\Twitter\Infrastructure\Api\Repository\PublishersListRepository;
+use App\Twitter\Infrastructure\Api\Accessor;
+use App\Twitter\Infrastructure\Repository\Membership\MemberRepository;
 
 class AddMemberToAggregateCommand extends Command implements CommandReturnCodeAwareInterface
 {

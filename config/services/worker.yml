@@ -1,6 +1,6 @@
 services:
-    App\Infrastructure\Amqp\MessageBus\PublishersListDispatcher:
-        class: 'App\Infrastructure\Amqp\MessageBus\PublishersListDispatcher'
+    App\Twitter\Infrastructure\Amqp\MessageBus\PublishersListDispatcher:
+        class: 'App\Twitter\Infrastructure\Amqp\MessageBus\PublishersListDispatcher'
         calls:
-            - [ 'setPublishersListRepository', [ '@App\Infrastructure\Api\Repository\PublishersListRepository' ] ]
+            - [ 'setPublishersListRepository', [ '@App\Twitter\Infrastructure\Api\Repository\PublishersListRepository' ] ]
             - [ 'setMessageBus',                [ '@messenger.default_bus' ] ]

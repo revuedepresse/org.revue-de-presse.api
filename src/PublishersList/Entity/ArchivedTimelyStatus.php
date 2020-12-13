@@ -2,8 +2,8 @@
 
 namespace App\PublishersList\Entity;
 
-use App\Infrastructure\Api\Entity\Aggregate;
-use App\Infrastructure\Api\Entity\ArchivedStatus;
+use App\Twitter\Infrastructure\Api\Entity\Aggregate;
+use App\Twitter\Infrastructure\Api\Entity\ArchivedStatus;
 
 class ArchivedTimelyStatus
 {

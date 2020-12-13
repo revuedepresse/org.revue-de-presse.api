@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Conversation\Producer;
 
-use App\Infrastructure\Amqp\Command\AggregateAwareCommand;
-use App\Infrastructure\Operation\OperationClock;
+use App\Twitter\Infrastructure\Amqp\Command\AggregateAwareCommand;
+use App\Twitter\Infrastructure\Operation\OperationClock;
 use Exception;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;

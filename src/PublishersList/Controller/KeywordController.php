@@ -2,9 +2,9 @@
 
 namespace App\PublishersList\Controller;
 
-use App\Infrastructure\Cache\RedisCache;
-use App\Infrastructure\Security\Cors\CorsHeadersAwareTrait;
-use App\Infrastructure\Publication\Repository\KeywordRepository;
+use App\Twitter\Infrastructure\Cache\RedisCache;
+use App\Twitter\Infrastructure\Security\Cors\CorsHeadersAwareTrait;
+use App\Twitter\Infrastructure\Publication\Repository\KeywordRepository;
 use Doctrine\DBAL\DBALException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;

@@ -2,7 +2,7 @@
 
 namespace App\Membership\Infrastructure\Command;
 
-use App\Infrastructure\Console\CommandReturnCodeAwareInterface;
+use App\Twitter\Infrastructure\Console\CommandReturnCodeAwareInterface;
 use App\Membership\Infrastructure\Repository\NetworkRepository;
 use OldSound\RabbitMqBundle\RabbitMq\ProducerInterface;
 use Symfony\Component\Console\Command\Command;

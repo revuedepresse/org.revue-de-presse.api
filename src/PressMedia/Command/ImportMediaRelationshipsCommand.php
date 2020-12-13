@@ -2,7 +2,7 @@
 
 namespace App\PressMedia\Command;
 
-use App\Infrastructure\Console\CommandReturnCodeAwareInterface;
+use App\Twitter\Infrastructure\Console\CommandReturnCodeAwareInterface;
 use App\PressMedia\Repository\MediaRepository;
 use App\PressMedia\Repository\OwnerRepository;
 use Symfony\Component\Console\Command\Command;
