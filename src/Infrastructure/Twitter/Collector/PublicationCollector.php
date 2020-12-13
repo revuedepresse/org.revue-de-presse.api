@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Twitter\Collector;
 
-use App\Accessor\Exception\ApiRateLimitingException;
-use App\Accessor\Exception\NotFoundStatusException;
-use App\Accessor\Exception\ReadOnlyApplicationException;
-use App\Accessor\Exception\UnexpectedApiResponseException;
+use App\Infrastructure\Twitter\Api\Accessor\Exception\ApiRateLimitingException;
+use App\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
+use App\Infrastructure\Twitter\Api\Accessor\Exception\ReadOnlyApplicationException;
+use App\Infrastructure\Twitter\Api\Accessor\Exception\UnexpectedApiResponseException;
 use App\Api\Entity\Token;
 use App\Api\Entity\TokenInterface;
 use App\Domain\Collection\CollectionStrategy;

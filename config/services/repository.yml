@@ -183,7 +183,7 @@ services:
             - 'App\Domain\Status\Entity\Highlight'
         calls:
             - [ 'setLogger',  [ '@logger' ] ]
-            - [ 'setStatusAccessor', [ '@App\Accessor\StatusAccessor'] ]
+            - [ 'setStatusAccessor', [ '@App\Infrastructure\Twitter\Api\Accessor\StatusAccessor'] ]
             - [ 'setStatusRepository', [ '@App\Api\Repository\StatusRepository'] ]
         properties:
             aggregate:      '%highlight_aggregate_default%'
@@ -201,7 +201,7 @@ services:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - 'App\Aggregate\Entity\TimelyStatus'
         calls:
-            - [ 'setStatusAccessor',    [ '@App\Accessor\StatusAccessor'] ]
+            - [ 'setStatusAccessor',    [ '@App\Infrastructure\Twitter\Api\Accessor\StatusAccessor'] ]
             - [ 'setStatusRepository',  [ '@App\Api\Repository\StatusRepository'] ]
 
     repository.network:

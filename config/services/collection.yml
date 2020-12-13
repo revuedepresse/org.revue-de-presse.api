@@ -10,7 +10,7 @@ services:
             - [ 'setMemberRepository',                      [ '@App\Infrastructure\Repository\Membership\MemberRepository' ] ]
             - [ 'setModerator',                             [ '@App\Api\Moderator\ApiLimitModerator' ] ]
             - [ 'setPublicationListRepository',             [ '@App\Api\Repository\PublicationListRepository' ] ]
-            - [ 'setStatusAccessor',                        [ '@App\Accessor\StatusAccessor' ] ]
+            - [ 'setStatusAccessor',                        [ '@App\Infrastructure\Twitter\Api\Accessor\StatusAccessor' ] ]
             - [ 'setStatusRepository',                      [ '@App\Api\Repository\StatusRepository' ] ]
             - [ 'setStatusPersistence',                     [ '@App\Infrastructure\Status\Persistence\StatusPersistence' ] ]
             - [ 'setTokenRepository',                       [ '@repository.access_token' ] ]
@@ -21,6 +21,6 @@ services:
         class: 'App\Infrastructure\Twitter\Collector\LikedStatusCollectDecider'
         calls:
             - [ 'setLikedStatusRepository',      [ '@repository.liked_status' ] ]
-            - [ 'setStatusAccessor',             [ '@App\Accessor\StatusAccessor' ] ]
+            - [ 'setStatusAccessor',             [ '@App\Infrastructure\Twitter\Api\Accessor\StatusAccessor' ] ]
             - [ 'setStatusRepository',           [ '@App\Api\Repository\StatusRepository' ] ]
             - [ 'setStatusPersistence',          [ '@App\Infrastructure\Status\Persistence\StatusPersistence' ] ]

@@ -4,11 +4,11 @@ declare(strict_types=1);
 namespace App\Twitter\Api;
 
 use Abraham\TwitterOAuth\TwitterOAuth as TwitterClient;
-use App\Accessor\Exception\ApiRateLimitingException;
-use App\Accessor\Exception\NotFoundStatusException;
-use App\Accessor\Exception\ReadOnlyApplicationException;
-use App\Accessor\Exception\UnexpectedApiResponseException;
-use App\Accessor\StatusAccessor;
+use App\Infrastructure\Twitter\Api\Accessor\Exception\ApiRateLimitingException;
+use App\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
+use App\Infrastructure\Twitter\Api\Accessor\Exception\ReadOnlyApplicationException;
+use App\Infrastructure\Twitter\Api\Accessor\Exception\UnexpectedApiResponseException;
+use App\Infrastructure\Twitter\Api\Accessor\StatusAccessor;
 use App\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Api\Entity\Token;
 use App\Api\Entity\TokenInterface;

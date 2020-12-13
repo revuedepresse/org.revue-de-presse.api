@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Accessor\Exception;
+namespace App\Infrastructure\Twitter\Api\Accessor\Exception;
 
 class UnexpectedApiResponseException extends \Exception
 {

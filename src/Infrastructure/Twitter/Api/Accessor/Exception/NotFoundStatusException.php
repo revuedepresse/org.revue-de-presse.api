@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Accessor\Exception;
+namespace App\Infrastructure\Twitter\Api\Accessor\Exception;
 
 use App\Twitter\Exception\UnavailableResourceException;
 
 /**
- * @package App\Accessor\Exception
+ * @package App\Infrastructure\Twitter\Api\Accessor\Exception
  */
 class NotFoundStatusException extends UnavailableResourceException
 {

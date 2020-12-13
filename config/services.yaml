@@ -41,7 +41,7 @@ services:
         public: true
         class: 'App\Infrastructure\Status\Formatter\PublicationFormatter'
         calls:
-            - [ 'setStatusAccessor',   [ '@App\Accessor\StatusAccessor' ] ]
+            - [ 'setStatusAccessor',   [ '@App\Infrastructure\Twitter\Api\Accessor\StatusAccessor' ] ]
             - [ 'setStatusRepository', [ '@App\Api\Repository\StatusRepository' ] ]
 
     App\Api\Repository\StatusRepository:
@@ -156,7 +156,7 @@ services:
         properties:
             environment:          '%kernel.environment%'
             twitterApiLogger:     '@monolog.logger.twitter_api'
-            statusAccessor:       '@App\Accessor\StatusAccessor'
+            statusAccessor:       '@App\Infrastructure\Twitter\Api\Accessor\StatusAccessor'
         calls:
             - [ 'setClientClass', [ '\Goutte\Client' ] ]
             - [ 'setConsumerKey', [ '%weaving_the_web_twitter.consumer_key%' ] ]
@@ -167,8 +167,8 @@ services:
             - [ 'setUserSecret', [ '%weaving_the_web_twitter.oauth_secret.default%' ] ]
             - [ 'setUserToken', [ '%weaving_the_web_twitter.oauth_token.default%' ] ]
 
-    App\Accessor\StatusAccessor:
-        class: 'App\Accessor\StatusAccessor'
+    App\Infrastructure\Twitter\Api\Accessor\StatusAccessor:
+        class: 'App\Infrastructure\Twitter\Api\Accessor\StatusAccessor'
         properties:
             archivedStatusRepository:   '@App\Api\Repository\ArchivedStatusRepository'
             entityManager:              '@doctrine.orm.entity_manager'
@@ -223,7 +223,7 @@ services:
             - [ 'setPublicationListRepository',                 [ '@App\Api\Repository\PublicationListRepository' ] ]
             - [ 'setPublicationPersistence',                    [ '@App\Infrastructure\Status\Persistence\PublicationPersistence' ] ]
             - [ 'setStatusLogger',                              [ '@App\Infrastructure\Log\StatusLogger' ] ]
-            - [ 'setStatusAccessor',                            [ '@App\Accessor\StatusAccessor' ] ]
+            - [ 'setStatusAccessor',                            [ '@App\Infrastructure\Twitter\Api\Accessor\StatusAccessor' ] ]
             - [ 'setStatusRepository',                          [ '@App\Api\Repository\StatusRepository' ] ]
             - [ 'setStatusPersistence',                         [ '@App\Infrastructure\Status\Persistence\StatusPersistence' ] ]
             - [ 'setTokenRepository',                           [ '@repository.access_token' ] ]

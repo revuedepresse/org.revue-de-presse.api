@@ -198,7 +198,7 @@ services:
         class:                        "%weaving_the_web_amqp.consumer.conversation_status.class%"
         calls:
             - [ 'setLogger',            [ '@monolog.logger.status'] ]
-            - [ 'setStatusAccessor',    [ '@App\Accessor\StatusAccessor' ] ]
+            - [ 'setStatusAccessor',    [ '@App\Infrastructure\Twitter\Api\Accessor\StatusAccessor' ] ]
             - [ 'setStatusRepository',  [ '@App\Api\Repository\StatusRepository' ] ]
             - [ 'setUserRepository',    [ '@user_manager'] ]
         properties:

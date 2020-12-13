@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Accessor\Exception;
+namespace App\Infrastructure\Twitter\Api\Accessor\Exception;
 
 class ReadOnlyApplicationException extends \Exception
 {

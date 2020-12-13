@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Accessor;
 
-use App\Accessor\StatusAccessor;
+use App\Infrastructure\Twitter\Api\Accessor\StatusAccessor;
 use App\Domain\Collection\CollectionStrategy;
 use App\Domain\Status\Repository\StatusRepositoryInterface;
 use App\Infrastructure\Amqp\Message\FetchPublicationInterface;

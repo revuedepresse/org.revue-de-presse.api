@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Infrastructure\Twitter\Api\Accessor;
 
-use App\Accessor\Exception\UnexpectedApiResponseException;
+use App\Infrastructure\Twitter\Api\Accessor\Exception\UnexpectedApiResponseException;
 use App\Domain\Resource\MemberIdentity;
 use App\Infrastructure\Collection\Repository\MemberProfileCollectedEventRepository;
 use App\Infrastructure\Twitter\Api\Accessor\MemberProfileAccessor;

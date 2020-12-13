@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Api\Repository;
 
-use App\Accessor\Exception\NotFoundStatusException;
+use App\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
 use App\Api\Entity\Aggregate;
 use App\Api\Entity\Status;
 use App\Domain\Collection\CollectionStrategyInterface;

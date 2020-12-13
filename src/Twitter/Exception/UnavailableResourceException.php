@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace App\Twitter\Exception;
 
-use App\Accessor\Exception\ApiRateLimitingException;
-use App\Accessor\Exception\NotFoundStatusException;
-use App\Accessor\Exception\ReadOnlyApplicationException;
+use App\Infrastructure\Twitter\Api\Accessor\Exception\ApiRateLimitingException;
+use App\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
+use App\Infrastructure\Twitter\Api\Accessor\Exception\ReadOnlyApplicationException;
 use App\Infrastructure\Amqp\Message\FetchPublicationInterface;
 use App\Twitter\Api\TwitterErrorAwareInterface;
 use Exception;

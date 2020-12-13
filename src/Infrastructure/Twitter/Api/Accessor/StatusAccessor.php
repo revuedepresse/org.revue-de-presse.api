@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Accessor;
+namespace App\Infrastructure\Twitter\Api\Accessor;
 
-use App\Accessor\Exception\ApiRateLimitingException;
-use App\Accessor\Exception\NotFoundStatusException;
-use App\Accessor\Exception\ReadOnlyApplicationException;
-use App\Accessor\Exception\UnexpectedApiResponseException;
+use App\Infrastructure\Twitter\Api\Accessor\Exception\ApiRateLimitingException;
+use App\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
+use App\Infrastructure\Twitter\Api\Accessor\Exception\ReadOnlyApplicationException;
+use App\Infrastructure\Twitter\Api\Accessor\Exception\UnexpectedApiResponseException;
 use App\Api\AccessToken\AccessToken;
 use App\Api\Entity\ArchivedStatus;
 use App\Api\Entity\Status;
@@ -23,7 +23,6 @@ use App\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
 use App\Infrastructure\DependencyInjection\Status\LikedStatusRepositoryTrait;
 use App\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
-use App\Infrastructure\Twitter\Api\Accessor\StatusAccessorInterface;
 use App\Membership\Entity\MemberInterface;
 use App\Domain\Status\Entity\NullStatus;
 use App\Domain\Collection\LikedStatusCollectionAwareInterface;

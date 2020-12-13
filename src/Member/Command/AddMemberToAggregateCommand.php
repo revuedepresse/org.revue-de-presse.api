@@ -2,10 +2,10 @@
 
 namespace App\Member\Command;
 
-use App\Accessor\Exception\ApiRateLimitingException;
-use App\Accessor\Exception\NotFoundStatusException;
-use App\Accessor\Exception\ReadOnlyApplicationException;
-use App\Accessor\Exception\UnexpectedApiResponseException;
+use App\Infrastructure\Twitter\Api\Accessor\Exception\ApiRateLimitingException;
+use App\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
+use App\Infrastructure\Twitter\Api\Accessor\Exception\ReadOnlyApplicationException;
+use App\Infrastructure\Twitter\Api\Accessor\Exception\UnexpectedApiResponseException;
 use App\Infrastructure\Console\CommandReturnCodeAwareInterface;
 use App\Member\Entity\AggregateSubscription;
 use App\Membership\Entity\MemberInterface;

@@ -2,8 +2,8 @@
 
 namespace App\Conversation\Consumer;
 
-use App\Accessor\Exception\NotFoundStatusException;
-use App\Accessor\StatusAccessor;
+use App\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
+use App\Infrastructure\Twitter\Api\Accessor\StatusAccessor;
 use App\Aggregate\AggregateAwareTrait;
 use App\Amqp\AmqpMessageAwareTrait;
 use App\Api\Entity\Status;

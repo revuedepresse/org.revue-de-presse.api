@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Infrastructure\Twitter\Api\Accessor;
 
-use App\Accessor\Exception\UnexpectedApiResponseException;
+use App\Infrastructure\Twitter\Api\Accessor\Exception\UnexpectedApiResponseException;
 use App\Domain\Membership\Exception\InvalidMemberException;
 use App\Domain\Membership\Exception\MembershipException;
 use App\Domain\Resource\MemberIdentity;
