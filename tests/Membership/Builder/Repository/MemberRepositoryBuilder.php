@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Tests\Membership\Builder\Repository;
 
 use App\Twitter\Domain\Resource\MemberIdentity;
-use App\Twitter\Infrastructure\Repository\Membership\MemberRepositoryInterface;
+use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use App\Membership\Domain\Entity\Legacy\Member;
 use App\Membership\Domain\Entity\MemberInterface;
 use Prophecy\Argument;

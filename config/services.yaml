@@ -185,10 +185,12 @@ services:
         public: true
 
     app.cache.redis:
-        class: '%redis_cache%'
+        class: '%redis_cache.class%'
         arguments:
             - "%redis_host%"
             - "%redis_port%"
+
+    App\Twitter\Infrastructure\Cache\RedisCache: '@app.cache.redis'
 
     app.authenticator:
         class: 'App\Membership\Infrastructure\Security\Authentication\Authenticator'
@@ -251,7 +253,7 @@ parameters:
         - 'development'
         - 'membership'
 
-    redis_cache:                                                  'App\Twitter\Infrastructure\Cache\RedisCache'
+    redis_cache.class:                                                  'App\Twitter\Infrastructure\Cache\RedisCache'
 
     weaving_the_web_twitter.api_host:                             'api.twitter.com'
 

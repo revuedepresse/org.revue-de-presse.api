@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Repository\Membership;
 
 use App\PublishersList\Repository\PaginationAwareTrait;
+use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use App\Twitter\Infrastructure\Api\Repository\PublishersListRepository;
 use App\Twitter\Domain\Membership\Exception\InvalidMemberException;
 use App\Twitter\Domain\Resource\MemberIdentity;
@@ -21,7 +22,6 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\QueryBuilder;
-use Psr\Log\LoggerInterface;
 use function is_numeric;
 use function sprintf;
 
@@ -451,6 +451,7 @@ QUERY;
         $member = $this->ensureMemberExists($memberName);
 
         $member->totalLikes = $member->totalLikes + $likesToBeAdded;
+
         $this->saveMember($member);
 
         return $member;
@@ -530,14 +531,7 @@ QUERY;
         return $member;
     }
 
-    /**
-     * @param MemberInterface $member
-     *
-     * @return MemberInterface
-     * @throws OptimisticLockException*
-     * @throws ORMException
-     */
-    public function saveMember(MemberInterface $member)
+    public function saveMember(MemberInterface $member): MemberInterface
     {
         $entityManager = $this->getEntityManager();
 
@@ -545,6 +539,28 @@ QUERY;
         $entityManager->flush();
 
         return $member;
+    }
+
+    public function saveApiConsumer(
+        MemberIdentity $memberIdentity,
+        string $apiKey
+    ): MemberInterface {
+        $member = $this->findOneBy([
+            'twitter_username' => $memberIdentity->screenName(),
+            'twitterID' => $memberIdentity->id(),
+        ]);
+
+        if (!$member instanceof MemberInterface) {
+            $member = $this->saveMemberWithAdditionalProps($memberIdentity);
+        }
+
+        if ($member->getApiKey() === $apiKey) {
+            return $member;
+        }
+
+        $member->apiKey = $apiKey;
+
+        return $this->saveMember($member);
     }
 
     /**
@@ -615,11 +631,11 @@ QUERY;
 
         $member = new Member();
         $member->setTwitterUsername($screenName);
-        $member->setTwitterID(0);
+        $member->setTwitterID('0');
         $member->setEnabled(false);
         $member->setLocked(false);
         $member->setEmail('@' . $screenName);
-        $member->setEnabled(0);
+        $member->setEnabled(false);
         $member->setProtected(false);
         $member->setSuspended(true);
 
@@ -902,9 +918,6 @@ QUERY;
             $suspended
         );
 
-        $this->getEntityManager()->persist($member);
-        $this->getEntityManager()->flush();
-
-        return $member;
+        return $this->saveMember($member);
     }
 }

@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Publication\Repository;
 
+use App\NewsReview\Domain\Repository\SearchParamsInterface;
 use App\PublishersList\Repository\PaginationAwareTrait;
 use App\Conversation\ConversationAwareTrait;
 use App\Twitter\Domain\Publication\Repository\PaginationAwareRepositoryInterface;
@@ -385,12 +386,7 @@ QUERY;
             $searchParams->getParams()['endDate']->format('Y-m-d');
     }
 
-    /**
-     * @param SearchParams $searchParams
-     * @param              $results
-     * @return array
-     */
-    public function mapStatuses(SearchParams $searchParams, $results): array
+    public function mapStatuses(SearchParamsInterface $searchParams, $results): array
     {
         return array_map(
             function ($status) use ($searchParams) {

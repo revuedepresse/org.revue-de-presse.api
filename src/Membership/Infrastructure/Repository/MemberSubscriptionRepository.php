@@ -6,7 +6,7 @@ namespace App\Membership\Infrastructure\Repository;
 use App\Twitter\Domain\Publication\PublishersListIdentity;
 use App\Twitter\Domain\Publication\PublishersListIdentityInterface;
 use App\Twitter\Infrastructure\Http\PaginationParams;
-use App\Twitter\Infrastructure\Repository\Membership\MemberRepositoryInterface;
+use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use App\Twitter\Infrastructure\Repository\Subscription\MemberSubscriptionRepositoryInterface;
 use App\Membership\Domain\Entity\MemberSubscription;
 use App\Membership\Domain\Entity\MemberInterface;
