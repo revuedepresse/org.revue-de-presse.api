@@ -21,8 +21,6 @@ services:
         calls:
             - [ 'setPublishersListDispatcher', ['@App\Twitter\Infrastructure\Amqp\MessageBus\PublishersListDispatcher']]
         properties:
-            serviceAccountConfig:           "%kernel.project_dir%/config/%env(resolve:FIREBASE_SERVICE_ACCOUNT_CONFIG)%"
-            databaseUri:                    "%env(resolve:FIREBASE_DATABASE_URI)%"
             authenticationTokenRepository:  '@repository.authentication_token'
             aggregateRepository:            '@App\Twitter\Infrastructure\Api\Repository\PublishersListRepository'
             highlightRepository:            '@repository.highlight'
@@ -32,6 +30,9 @@ services:
             redisCache:                     '@app.cache.redis'
             timelyStatusRepository:         '@repository.timely_status'
             tokenRepository:                '@repository.access_token'
+            popularPublicationRepository:   '@App\NewsReview\Infrastructure\Repository\PopularPublicationRepository'
+
+    App\PublishersList\Controller\ListController: '@controller.list'
 
     controller.logged_in_member:
         public: true

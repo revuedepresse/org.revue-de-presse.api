@@ -5,7 +5,7 @@ namespace App\Tests\Twitter\Infrastructure\Subscription\Console;
 
 use App\Twitter\Domain\Resource\MemberCollection;
 use App\Twitter\Infrastructure\Subscription\Console\UnfollowDiffSubscriptionsSubscribeesCommand;
-use App\Twitter\Infrastructure\Repository\Membership\MemberRepositoryInterface;
+use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use App\Twitter\Infrastructure\Twitter\Api\Mutator\FriendshipMutatorInterface;
 use App\Membership\Domain\Repository\NetworkRepositoryInterface;
 use App\Membership\Domain\Entity\MemberInterface;

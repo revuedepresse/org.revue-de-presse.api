@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Http;
 
+use App\NewsReview\Domain\Repository\SearchParamsInterface;
 use Symfony\Component\HttpFoundation\Request;
 use function array_key_exists;
 use function array_keys;
@@ -16,7 +17,7 @@ use function serialize;
 use function sha1;
 use function trim;
 
-class SearchParams
+class SearchParams implements SearchParamsInterface
 {
     public const PARAM_AGGREGATE_IDS = 'aggregateIds';
 

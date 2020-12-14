@@ -4,7 +4,7 @@ declare (strict_types=1);
 namespace App\Tests\Twitter\Infrastructure\Subscription\Console;
 
 use App\Twitter\Infrastructure\Subscription\Console\UnfollowInactiveMembersCommand;
-use App\Twitter\Infrastructure\Repository\Membership\MemberRepositoryInterface;
+use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use App\Membership\Domain\Entity\Legacy\Member;
 use App\Tests\Twitter\Domain\Curation\Infrastructure\Builder\Repository\FriendsListCollectedEventRepositoryBuilder;
 use App\Tests\Membership\Builder\Repository\MemberRepositoryBuilder;

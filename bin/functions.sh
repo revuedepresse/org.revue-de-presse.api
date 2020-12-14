@@ -1156,6 +1156,10 @@ function run_php_unit_tests() {
     bin/phpunit -c ./phpunit.xml.dist --verbose --debug
 }
 
+function run_php_features_tests() {
+    bin/behat -c ./behat.yml
+}
+
 function remove_redis_container {
     if [ `docker ps -a | grep redis | grep -c ''` -gt 0 ];
     then

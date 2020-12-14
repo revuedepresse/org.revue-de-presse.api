@@ -5,7 +5,7 @@ namespace App\Twitter\Infrastructure\Twitter\Api;
 
 use App\Twitter\Domain\Membership\Exception\MembershipException;
 use App\Twitter\Domain\Resource\MemberIdentity;
-use App\Twitter\Infrastructure\Repository\Membership\MemberRepositoryInterface;
+use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use Psr\Log\LoggerInterface;
 use function sprintf;
 

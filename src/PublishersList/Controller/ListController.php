@@ -3,6 +3,10 @@ declare(strict_types=1);
 
 namespace App\PublishersList\Controller;
 
+use App\Membership\Domain\Entity\Legacy\Member;
+use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Infrastructure\Repository\AuthenticationTokenRepository;
+use App\NewsReview\Domain\Repository\PopularPublicationRepositoryInterface;
 use App\PublishersList\Controller\Exception\InvalidRequestException;
 use App\PublishersList\Repository\TimelyStatusRepository;
 use App\Twitter\Infrastructure\Api\AccessToken\Repository\TokenRepository;
@@ -13,18 +17,13 @@ use App\Twitter\Infrastructure\Api\Repository\PublishersListRepository;
 use App\Twitter\Infrastructure\Cache\RedisCache;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublishersListDispatcherTrait;
 use App\Twitter\Infrastructure\Http\SearchParams;
+use App\Twitter\Infrastructure\Publication\Repository\HighlightRepository;
 use App\Twitter\Infrastructure\Repository\Membership\MemberRepository;
 use App\Twitter\Infrastructure\Security\Cors\CorsHeadersAwareTrait;
-use App\Membership\Infrastructure\Repository\AuthenticationTokenRepository;
-use App\Membership\Domain\Entity\Legacy\Member;
-use App\Membership\Domain\Entity\MemberInterface;
-use App\Twitter\Infrastructure\Publication\Repository\HighlightRepository;
-use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
-use Kreait\Firebase\Factory;
-use Kreait\Firebase\ServiceAccount;
+use Exception;
 use Predis\Client;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -36,59 +35,30 @@ class ListController
     use CorsHeadersAwareTrait;
     use PublishersListDispatcherTrait;
 
-    /**
-     * @var AuthenticationTokenRepository
-     */
     public AuthenticationTokenRepository $authenticationTokenRepository;
 
-    /**
-     * @var TokenRepository
-     */
     public TokenRepository $tokenRepository;
 
-    /**
-     * @var PublishersListRepository
-     */
     public PublishersListRepository $aggregateRepository;
 
-    /**
-     * @var MemberRepository
-     */
     public MemberRepository $memberRepository;
 
-    /**
-     * @var HighlightRepository
-     */
     public HighlightRepository $highlightRepository;
 
-    /**
-     * @var TimelyStatusRepository
-     */
     public TimelyStatusRepository $timelyStatusRepository;
 
-    /**
-     * @var LoggerInterface
-     */
     public LoggerInterface $logger;
 
-    /**
-     * @var RedisCache
-     */
     public RedisCache $redisCache;
 
-    /**
-     * @var RouterInterface
-     */
     public RouterInterface $router;
 
-    public string $serviceAccountConfig;
-
-    public string $databaseUri;
+    public PopularPublicationRepositoryInterface $popularPublicationRepository;
 
     /**
      * @param Request $request
      * @return JsonResponse
-     * @throws DBALException
+     * @throws Exception
      */
     public function getAggregates(Request $request)
     {
@@ -177,7 +147,7 @@ class ListController
     /**
      * @param Request $request
      * @return JsonResponse
-     * @throws DBALException
+     * @throws Exception
      */
     public function getHighlights(Request $request)
     {
@@ -251,126 +221,26 @@ class ListController
         return $totalPages;
     }
 
-    /**
-     * @param $searchParams
-     * @return array|mixed
-     * @throws DBALException
-     */
-    private function getHighlightsFromSearchParams(SearchParams $searchParams) {
+    private function getHighlightsFromSearchParams(SearchParams $searchParams): array {
         if ($this->invalidHighlightsSearchParams($searchParams)) {
             return [];
         }
 
-        $queriedRouteAccess = $searchParams->hasParam('routeName');
-
-        $hasChild = false;
-        if (!$searchParams->hasParam('selectedAggregates') && !$queriedRouteAccess) {
-            $snapshot = $this->getFirebaseDatabaseSnapshot($searchParams);
-            $hasChild = $snapshot->hasChildren();
-        }
-
-        $client = $this->redisCache->getClient();
-
-        if (!$hasChild) {
-            $key = $this->getCacheKey('highlights.items', $searchParams);
-
-            $highlights = $client->get($key);
-            if (!$highlights || $this->notInProduction()) {
-                $highlights = json_encode($this->highlightRepository->findHighlights($searchParams));
-                $client->setex($key, 3600, $highlights);
-            }
-
-            return json_decode($highlights, true);
-        }
-
-        return $this->getHighlightsFromFirebaseSnapshot($searchParams, $snapshot, $client);
-    }
-
-    /**
-     * @param SearchParams $searchParams
-     * @param              $snapshot
-     * @param              $client
-     * @return array
-     * @throws DBALException
-     */
-    private function getHighlightsFromFirebaseSnapshot(SearchParams $searchParams, $snapshot, Client $client): array
-    {
         $key = $this->getCacheKey('highlights.items', $searchParams);
+        $client = $this->redisCache->getClient();
+        $cachedHighlights = $client->get($key);
 
-        $highlights = array_reverse($snapshot->getValue());
-        $highlights = array_map(function (array $highlight) {
-            return [
-                'original_document' => $highlight['json'],
-                'id' => $highlight['id'],
-                'publicationDateTime' => $highlight['publishedAt'],
-                'screen_name' => $highlight['username'],
-                'last_update' => $highlight['checkedAt'],
-                'total_retweets' => $highlight['totalRetweets'],
-                'total_favorites' => $highlight['totalFavorites'],
-            ];
-        }, $highlights);
-        $statuses = $this->highlightRepository->mapStatuses($searchParams, $highlights);
+        if (!$cachedHighlights) {
+            $highlights = $this->popularPublicationRepository->findBy($searchParams);
+            $client->setex($key, 3600, json_encode($highlights, JSON_THROW_ON_ERROR));
 
-        $cachedHighlights = [
-            'aggregates' => [],
-            'statuses' => $statuses,
-        ];
-        $client->setex($key, 3600, json_encode($cachedHighlights));
-
-        return $cachedHighlights;
-    }
-
-    /**
-     * @param SearchParams $searchParams
-     * @return mixed
-     */
-    private function getFirebaseDatabaseSnapshot(SearchParams $searchParams)
-    {
-        $database = $this->getFirebaseDatabase();
-
-        $aggregateId = null;
-        if ($searchParams->hasParam('aggregate')) {
-            $aggregateId = $this->aggregateRepository->findOneBy([
-                'name' => $searchParams->getParams()['aggregate']
-            ]);
-        }
-        if (is_null($aggregateId)) {
-            $aggregateId = 1;
+            return $highlights;
         }
 
-        $path = '/'.implode(
-            '/',
-            [
-                'highlights',
-                $aggregateId,
-                $searchParams->getParams()['startDate']->format('Y-m-d'),
-                $searchParams->getParams()['includeRetweets'] ? 'retweet' : 'status'
-            ]
-        );
-        $this->logger->info(sprintf('Firebase Path: %s', $path));
-        $reference = $database->getReference($path);
-
-        return $reference
-            ->orderByChild('totalRetweets')
-            ->getSnapshot();
+        return json_decode($cachedHighlights, true, 512, JSON_THROW_ON_ERROR);
     }
 
     /**
-     * @return mixed
-     */
-    public function getFirebaseDatabase()
-    {
-        return (new Factory)
-            ->withServiceAccount($this->serviceAccountConfig)
-            // The following line is optional if the project id in your credentials file
-            // is identical to the subdomain of your Firebase project. If you need it,
-            // make sure to replace the URL with the URL of your project.
-            ->withDatabaseUri($this->databaseUri)
-            ->createDatabase();
-    }
-
-    /**
-     * @param $this
      * @return bool
      */
     private function notInProduction(): bool
@@ -428,7 +298,7 @@ class ListController
      * @param Request $request
      *
      * @return int|null|JsonResponse
-     * @throws DBALException
+     * @throws Exception
      */
     public function getMembers(Request $request)
     {
@@ -489,7 +359,7 @@ class ListController
     /**
      * @param Request $request
      * @return JsonResponse
-     * @throws DBALException
+     * @throws Exception
      */
     public function getStatuses(Request $request)
     {
@@ -511,7 +381,7 @@ class ListController
      * @param callable $finder
      * @param array    $params
      * @return JsonResponse
-     * @throws DBALException
+     * @throws Exception
      */
     private function getCollection(
         Request $request,

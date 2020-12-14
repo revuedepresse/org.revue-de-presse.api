@@ -10,7 +10,7 @@ interface MemberInterface extends UserInterface
     /**
      * @return string
      */
-    public function getApiKey(): string;
+    public function getApiKey(): ?string;
 
     /**
      * @return int

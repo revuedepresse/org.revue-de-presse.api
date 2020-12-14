@@ -59,6 +59,7 @@
     "require-dev": {
         "behat/behat": "^3.8",
         "doctrine/doctrine-fixtures-bundle": "^3.3@dev",
+        "friends-of-behat/symfony-extension": "^2.0",
         "phpunit/phpunit": "7.1.5",
         "roave/security-advisories": "dev-latest",
         "symfony/maker-bundle": "^1.0@dev",

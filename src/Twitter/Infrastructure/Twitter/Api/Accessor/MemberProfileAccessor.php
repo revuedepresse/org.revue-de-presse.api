@@ -9,7 +9,7 @@ use App\Twitter\Domain\Membership\Exception\MembershipException;
 use App\Twitter\Domain\Resource\MemberIdentity;
 use App\Twitter\Infrastructure\DependencyInjection\Collection\MemberProfileCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
-use App\Twitter\Infrastructure\Repository\Membership\MemberRepositoryInterface;
+use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use App\Twitter\Infrastructure\Twitter\Api\UnavailableResource;
 use App\Twitter\Infrastructure\Twitter\Api\UnavailableResourceHandlerInterface;
 use App\Membership\Domain\Entity\MemberInterface;
