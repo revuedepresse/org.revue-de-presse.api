@@ -30,3 +30,6 @@ services:
     test.App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository: '@App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository'
 
     test.App\Twitter\Infrastructure\Subscription\Console\UnfollowInactiveMembersCommand: '@App\Twitter\Infrastructure\Subscription\Console\UnfollowInactiveMembersCommand'
+
+    App\Tests\NewsReview\Infrastructure\Repository\InMemoryPopularPublicationRepository:
+        class: 'App\Tests\NewsReview\Infrastructure\Repository\InMemoryPopularPublicationRepository'
