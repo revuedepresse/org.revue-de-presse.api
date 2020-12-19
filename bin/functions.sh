@@ -117,9 +117,11 @@ function handle_messages {
         echo '[default count of messages] '$MESSAGES
     fi
 
+    local default_memory_limit
+    default_memory_limit='128M'
     if [ -z "${MEMORY_LIMIT}" ]
     then
-        MEMORY_LIMIT="64M";
+        MEMORY_LIMIT="${default_memory_limit}"
         echo '[default memory limit] '$MEMORY_LIMIT
     fi
 
@@ -141,7 +143,14 @@ function handle_messages {
     rabbitmq_output_log="${PROJECT_DIR}/${rabbitmq_output_log}"
     rabbitmq_error_log="${PROJECT_DIR}/${rabbitmq_error_log}"
 
-    export SCRIPT="bin/console messenger:consume --time-limit=$TIME_LIMIT -m $MEMORY_LIMIT -l $MESSAGES "${command_suffix}
+    local php_directives
+    php_directives=''
+    if [ "${MEMORY_LIMIT}" != '128M' ];
+    then
+        php_directives='php -dmemory_limit='"${MEMORY_LIMIT}"' '
+    fi
+
+    export SCRIPT="${php_directives}bin/console messenger:consume --time-limit=$TIME_LIMIT -m $MEMORY_LIMIT -l $MESSAGES "${command_suffix}
 
     local symfony_environment
     symfony_environment="$(get_symfony_environment)"
