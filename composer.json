@@ -28,6 +28,7 @@
         "abraham/twitteroauth": "dev-main",
         "auth0/auth0-php": "~5.0",
         "beberlei/doctrineextensions": "dev-master",
+        "doctrine/doctrine-bundle": "^2.2",
         "doctrine/inflector": "*",
         "doctrine/orm": "^2.8",
         "fabpot/goutte": "^3.2@dev",
