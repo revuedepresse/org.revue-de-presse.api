@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8ec78b4395e8d1184692b38dd5077701",
+    "content-hash": "278b5e80095236c50229849d27ee211a",
     "packages": [
         {
             "name": "abraham/twitteroauth",
@@ -1473,16 +1473,16 @@
         },
         {
             "name": "doctrine/orm",
-            "version": "2.8.x-dev",
+            "version": "2.8.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/doctrine/orm.git",
-                "reference": "3d46e078875263370565beb28733931fce7a4a9f"
+                "reference": "242cf1a33df1b8bc5e1b86c3ebd01db07851c833"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/doctrine/orm/zipball/3d46e078875263370565beb28733931fce7a4a9f",
-                "reference": "3d46e078875263370565beb28733931fce7a4a9f",
+                "url": "https://api.github.com/repos/doctrine/orm/zipball/242cf1a33df1b8bc5e1b86c3ebd01db07851c833",
+                "reference": "242cf1a33df1b8bc5e1b86c3ebd01db07851c833",
                 "shasum": ""
             },
             "require": {
@@ -1559,9 +1559,9 @@
             ],
             "support": {
                 "issues": "https://github.com/doctrine/orm/issues",
-                "source": "https://github.com/doctrine/orm/tree/2.8.x"
+                "source": "https://github.com/doctrine/orm/tree/2.8.1"
             },
-            "time": "2020-11-15T12:24:31+00:00"
+            "time": "2020-12-04T19:53:07+00:00"
         },
         {
             "name": "doctrine/persistence",
@@ -6235,16 +6235,16 @@
         },
         {
             "name": "symfony/messenger",
-            "version": "v5.2.0",
+            "version": "v5.2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/messenger.git",
-                "reference": "ae14385879e5b14d5dae94d5b30502a617ef6b06"
+                "reference": "3fc7766f5fa6c21096fa962a01684868b68f1f3c"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/messenger/zipball/ae14385879e5b14d5dae94d5b30502a617ef6b06",
-                "reference": "ae14385879e5b14d5dae94d5b30502a617ef6b06",
+                "url": "https://api.github.com/repos/symfony/messenger/zipball/3fc7766f5fa6c21096fa962a01684868b68f1f3c",
+                "reference": "3fc7766f5fa6c21096fa962a01684868b68f1f3c",
                 "shasum": ""
             },
             "require": {
@@ -6303,7 +6303,7 @@
             "description": "Symfony Messenger Component",
             "homepage": "https://symfony.com",
             "support": {
-                "source": "https://github.com/symfony/messenger/tree/v5.2.0"
+                "source": "https://github.com/symfony/messenger/tree/v5.2.1"
             },
             "funding": [
                 {
@@ -6319,7 +6319,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2020-11-10T06:17:22+00:00"
+            "time": "2020-12-18T07:27:35+00:00"
         },
         {
             "name": "symfony/monolog-bridge",
@@ -12125,7 +12125,7 @@
         "symfony/maker-bundle": 20,
         "symfony/test-pack": 20
     },
-    "prefer-stable": false,
+    "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": ">=7.2.9",

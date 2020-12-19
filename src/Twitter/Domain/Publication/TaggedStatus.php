@@ -8,6 +8,7 @@ use App\Twitter\Infrastructure\Api\Entity\Status;
 use App\Twitter\Domain\Publication\Exception\InvalidTagPropertyException;
 use DateTimeInterface;
 use Doctrine\Common\Inflector\Inflector;
+use Doctrine\Inflector\InflectorFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -315,8 +316,11 @@ class TaggedStatus
         $fieldNames       = $entityManager->getClassMetadata($entity)->getFieldNames();
         $missedProperties = [];
 
+        $inflectorFactory = InflectorFactory::create();
+        $inflector = $inflectorFactory->build();
+
         foreach ($properties as $name => $value) {
-            $classifiedName = Inflector::classify($name);
+            $classifiedName = $inflector->classify($name);
 
             if (in_array(lcfirst($classifiedName), $fieldNames, true)) {
                 $method = 'set' . $classifiedName;
