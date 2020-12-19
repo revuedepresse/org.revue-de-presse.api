@@ -136,7 +136,7 @@ function handle_messages {
     fi
 
     local minimum_execution_time=10
-    if [ -z "${MINIMUM_EXECUTION_TIME}" ];
+    if [ ! -z "${MINIMUM_EXECUTION_TIME}" ];
     then
         minimum_execution_time="${MINIMUM_EXECUTION_TIME}"
     fi
