@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use Doctrine\Inflector\InflectorFactory;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Doctrine\Common\Inflector\Inflector;
 use FOS\RestBundle\Request\ParamFetcherInterface;
@@ -17,13 +18,16 @@ abstract class ResourceController extends Controller
     {
         $classifiedResources = [];
 
-        if (count($jsonResources) > 0) {
+        $inflectorFactory = InflectorFactory::create();
+        $inflector = $inflectorFactory->build();
+
+        if (!empty($jsonResources)) {
             $columnNames         = $this->getEntityColumnNames($jsonResources[0]);
-            $mapper              = function ($jsonResource) use ($columnNames) {
+            $mapper              = function ($jsonResource) use ($columnNames, $inflector) {
                 foreach ($columnNames as $columnName) {
-                    $classifiedColumnName                         = Inflector::classify($columnName);
+                    $classifiedColumnName                         = $inflector->classify($columnName);
                     $getter                                       = 'get' . $classifiedColumnName;
-                    $properties[Inflector::tableize($columnName)] = $jsonResource->$getter();
+                    $properties[$inflector->tableize($columnName)] = $jsonResource->$getter();
                 }
 
                 return $properties;
