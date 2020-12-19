@@ -1,4 +1,4 @@
-FROM rabbitmq:3.7-management
+FROM rabbitmq:3.8.9-management
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 

@@ -1629,13 +1629,6 @@ class Accessor implements ApiAccessorInterface,
 
                 $this->twitterApiLogger->info(
                     sprintf(
-                        '[X-Rate-Limit-Remaining] %s',
-                        $lastXHeaders['x_rate_limit_remaining']
-                    )
-                );
-
-                $this->twitterApiLogger->info(
-                    sprintf(
                         '[Limit reset expected at %s]',
                         (new \DateTime())
                             ->setTimezone(
