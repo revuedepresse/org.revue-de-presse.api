@@ -135,6 +135,12 @@ function handle_messages {
         export PROJECT_DIR='/var/www/devobs'
     fi
 
+    local minimum_execution_time=10
+    if [ -z "${MINIMUM_EXECUTION_TIME}" ];
+    then
+        minimum_execution_time="${MINIMUM_EXECUTION_TIME}"
+    fi
+
     remove_exited_containers
 
     local rabbitmq_output_log="./var/logs/rabbitmq."${NAMESPACE}".out.log"
@@ -166,7 +172,7 @@ function handle_messages {
     /bin/bash -c "$command >> ${rabbitmq_output_log} 2>> ${rabbitmq_error_log}"
     cd "../../"
 
-    sleep $TIME_LIMIT
+    /bin/bash -c "sleep ${minimum_execution_time}"
 }
 
 function consume_amqp_lively_status_messages {

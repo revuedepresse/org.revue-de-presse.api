@@ -1044,8 +1044,6 @@ class Accessor implements ApiAccessorInterface,
                 }
             }
 
-            $this->logger->info(json_encode($rateLimitStatus));
-
             if (!is_null($endpoint) && isset($rateLimitStatus->resources->$resourceType)) {
                 $limit = $rateLimitStatus->resources->$resourceType->$endpoint->limit;
 
