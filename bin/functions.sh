@@ -165,7 +165,7 @@ function handle_messages {
 
     local project_name
     project_name=$(get_project_name)
-    command="docker-compose ${project_name} exec -e ${symfony_environment} -d worker ${SCRIPT}"
+    command="docker-compose ${project_name} exec -T -e ${symfony_environment} worker ${SCRIPT}"
     echo 'Executing command: "'$command'"'
     echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
     echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
