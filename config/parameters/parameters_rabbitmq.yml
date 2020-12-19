@@ -1,6 +1,0 @@
-parameters:
-    rabbitmq_user:              %rabbitmq.user%
-    rabbitmq_password:          %rabbitmq.password%
-    rabbitmq_port:              %rabbitmq.port%
-    rabbitmq_host:              %rabbitmq.host%
-    rabbitmq_vhost:             %rabbitmq.vhost%

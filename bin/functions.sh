@@ -117,9 +117,11 @@ function handle_messages {
         echo '[default count of messages] '$MESSAGES
     fi
 
+    local default_memory_limit
+    default_memory_limit='128M'
     if [ -z "${MEMORY_LIMIT}" ]
     then
-        MEMORY_LIMIT="64M";
+        MEMORY_LIMIT="${default_memory_limit}"
         echo '[default memory limit] '$MEMORY_LIMIT
     fi
 
@@ -141,16 +143,23 @@ function handle_messages {
     rabbitmq_output_log="${PROJECT_DIR}/${rabbitmq_output_log}"
     rabbitmq_error_log="${PROJECT_DIR}/${rabbitmq_error_log}"
 
-    export SCRIPT="bin/console messenger:consume --time-limit=$TIME_LIMIT -m $MEMORY_LIMIT -l $MESSAGES "${command_suffix}
+    local php_directives
+    php_directives=''
+    if [ "${MEMORY_LIMIT}" != '128M' ];
+    then
+        php_directives='php -dmemory_limit='"${MEMORY_LIMIT}"' '
+    fi
+
+    export SCRIPT="${php_directives}bin/console messenger:consume --time-limit=${TIME_LIMIT} -m ${MEMORY_LIMIT} -l ${MESSAGES} "${command_suffix}
+
+    cd "${PROJECT_DIR}/provisioning/containers" || exit
 
     local symfony_environment
     symfony_environment="$(get_symfony_environment)"
 
-    cd "${PROJECT_DIR}/provisioning/containers" || exit
-
     local project_name
     project_name=$(get_project_name)
-    command="docker-compose ${project_name} exec -d worker ${SCRIPT}"
+    command="docker-compose ${project_name} exec -e ${symfony_environment} -d worker ${SCRIPT}"
     echo 'Executing command: "'$command'"'
     echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
     echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
@@ -750,7 +759,8 @@ function run_php_fpm() {
         mount="${PRESS_REVIEW_PHP_FPM_MOUNT}"
     fi
 
-    local symfony_environment="$(get_symfony_environment)"
+    local symfony_environment
+    symfony_environment="$(get_symfony_environment)"
 
     if [ ! -e "`pwd`/provisioning/containers/php-fpm/templates/.blackfire.ini" ]
     then
@@ -762,11 +772,17 @@ function run_php_fpm() {
         /bin/bash -c "cp `pwd`/provisioning/containers/php-fpm/templates/zz-blackfire.ini{.dist,}";
     fi
 
-    local extensions=`pwd`"/provisioning/containers/php-fpm/templates/extensions.ini.dist";
-    local extensions_volume="-v ${extensions}:/usr/local/etc/php/conf.d/extensions.ini"
+    local extensions
+    extensions=`pwd`"/provisioning/containers/php-fpm/templates/extensions.ini.dist";
 
-    local network=`get_network_option`
-    local command=$(echo -n 'docker run '"${network}"' \
+    local extensions_volume
+    extensions_volume="-v ${extensions}:/usr/local/etc/php/conf.d/extensions.ini"
+
+    local network
+    network=`get_network_option`
+
+    local command
+    command=$(echo -n 'docker run '"${network}"' \
 --restart=always \
 -d -p '${host}''${port}':9000 \
 -e '"${symfony_environment}"' '"${extensions_volume}"' \
@@ -851,7 +867,7 @@ function run_php_script() {
     fi
 
     local network
-    network=`get_network_option`
+    network="$(get_network_option)"
 
     local project_name=''
     project_name="$(get_project_name)"
@@ -1120,9 +1136,11 @@ function refresh_statuses() {
         return
     fi
 
-    local php_command='bin/console press-review:map-aggregate-status-collection --aggregate-name="'"${aggregate_name}"'" -vvv'
+    local php_command
+    php_command='bin/console press-review:map-aggregate-status-collection --aggregate-name="'"${aggregate_name}"'" -vvv'
 
-    local symfony_environment="$(get_symfony_environment)"
+    local symfony_environment
+    symfony_environment="$(get_symfony_environment)"
 
     if [ -z "${DOCKER_MODE}" ];
     then

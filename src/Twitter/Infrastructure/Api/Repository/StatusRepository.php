@@ -458,6 +458,7 @@ QUERY;
                 WHERE s.ust_full_name = ?
               ) select_
               ORDER BY select_.publication_date_time DESC
+              LIMIT 1
 QUERY;
 
         $statement = $connection->executeQuery($query, [$screenName], [\PDO::PARAM_STR]);
