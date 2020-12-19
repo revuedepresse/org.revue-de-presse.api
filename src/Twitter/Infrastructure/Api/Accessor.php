@@ -640,7 +640,7 @@ class Accessor implements ApiAccessorInterface,
      */
     public function getTwitterErrorCodes()
     {
-        $reflection = new \ReflectionClass(__NAMESPACE__ . '\TwitterErrorAwareInterface');
+        $reflection = new \ReflectionClass(TwitterErrorAwareInterface::class);
 
         return $reflection->getConstants();
     }

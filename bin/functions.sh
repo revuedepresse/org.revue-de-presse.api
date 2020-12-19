@@ -8,7 +8,7 @@ function get_project_name() {
     local project_name
     project_name=''
     if [ -n "${PROJECT_NAME}" ]; then
-        project_name='-p '"$PROJECT_NAME"
+        project_name='-p '"$PROJECT_NAME "
     fi
 
     echo "${project_name}"
@@ -847,23 +847,20 @@ function run_php_script() {
     option_detached=''
     if [ -z "${interactive_mode}" ];
     then
-        option_detached=' -d'
+        option_detached='-d '
     fi
 
     local network
     network=`get_network_option`
 
-    local project_name
+    local project_name=''
     project_name="$(get_project_name)"
 
     local command
-    command=$(echo -n 'docker-compose '"${project_name}"' exec'"${option_detached}"' worker '"${script}")
+    command="$(echo -n 'cd provisioning/containers && docker-compose '"${project_name}"'exec '"${option_detached}"'worker '"${script}")"
 
     echo 'About to execute "'"${command}"'"'
-
-    cd provisioning/containers || exit
     /bin/bash -c "${command}"
-    cd ../..
 }
 
 function run_php() {
