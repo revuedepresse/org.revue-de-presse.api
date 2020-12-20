@@ -72,7 +72,12 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
             $searchParams->getParams()['includeRetweets']
          );
 
-        $highlights = array_reverse($snapshot->getValue());
+        $col = $snapshot->getValue();
+        if ($col === null) {
+            $col = [];
+        }
+
+        $highlights = array_reverse($col);
         $highlights = array_map(function (array $highlight) {
             return [
                 'original_document' => $highlight['json'],
