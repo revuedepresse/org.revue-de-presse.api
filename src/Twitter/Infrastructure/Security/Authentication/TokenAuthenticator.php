@@ -100,6 +100,14 @@ class TokenAuthenticator extends AbstractGuardAuthenticator
     {
         $data = ['message' => strtr($exception->getMessageKey(), $exception->getMessageData())];
 
+        if ($request->getPathInfo() === '/api/healthcheck') {
+            return new Response(
+                null,
+                Response::HTTP_NO_CONTENT,
+                ['status' => 'Everything is ok ^_^']
+            );
+        }
+
         return new JsonResponse($data, Response::HTTP_FORBIDDEN);
     }
 
