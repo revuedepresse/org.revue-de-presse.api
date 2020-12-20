@@ -32,20 +32,40 @@ trait ConversationAwareTrait
         bool $includeRepliedToStatuses = false
     ): array {
         $status['media'] = [];
+
+        $extendedMedia = [];
+        if (
+            array_key_exists('extended_entities', $decodedDocument)
+            && array_key_exists('media', $decodedDocument['extended_entities'])
+        ) {
+            $extendedMedia = array_map(
+                function ($media) {
+                    if (isset($media['additional_media_info']['title'])) {
+                        return $media['additional_media_info']['title'];
+                    }
+
+                    return '';
+                },
+                $decodedDocument['extended_entities']['media']
+            );
+        }
+
         if (
             array_key_exists('entities', $decodedDocument)
             && array_key_exists('media', $decodedDocument['entities'])
         ) {
             $status['media'] = array_map(
-                function ($media) {
+                static function ($media, $index) use ($extendedMedia) {
                     if (array_key_exists('media_url_https', $media)) {
                         return [
                             'sizes' => $media['sizes'],
                             'url'   => $media['media_url_https'],
+                            'title' => $extendedMedia[$index] ?? $media['type'],
                         ];
                     }
                 },
-                $decodedDocument['entities']['media']
+                $decodedDocument['entities']['media'],
+                range(0, count($decodedDocument['entities']['media']) - 1)
             );
         }
 

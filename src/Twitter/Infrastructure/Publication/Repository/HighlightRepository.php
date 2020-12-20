@@ -399,6 +399,7 @@ QUERY;
                 $decodedDocument = json_decode($status['original_document'], true);
                 $decodedDocument['retweets_count'] = (int) $status['total_retweets'];
                 $decodedDocument['favorites_count'] = (int) $status['total_favorites'];
+
                 $extractedProperties['status']['retweet_count'] = (int) $status['total_retweets'];
                 $extractedProperties['status']['favorite_count'] = (int) $status['total_favorites'];
                 $extractedProperties['status']['original_document'] = json_encode($decodedDocument);
