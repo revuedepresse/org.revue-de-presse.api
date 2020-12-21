@@ -900,7 +900,15 @@ function run_php_script() {
     container_name="$(echo "${script}" | sha256sum | awk '{print $1}')"
 
     local command
-    command="$(echo -n 'cd provisioning/containers && docker-compose '"${project_name}"'run -T --rm --name='"${container_name}"' '"${option_detached}"'worker '"${script}")"
+
+    if [ -z "${interactive_mode}" ];
+    then
+        command="$(echo -n 'cd provisioning/containers && \
+        docker-compose '"${project_name}"'run -T --rm --name='"${container_name}"' '"${option_detached}"'worker '"${script}")"
+    else
+        command="$(echo -n 'cd provisioning/containers && \
+        docker-compose '"${project_name}"'exec '"${option_detached}"'worker '"${script}")"
+    fi
 
     echo 'About to execute "'"${command}"'"'
     /bin/bash -c "${command}"

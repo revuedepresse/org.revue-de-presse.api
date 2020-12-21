@@ -5,6 +5,7 @@ namespace App\Twitter\Infrastructure\Api\AccessToken\Repository;
 
 use App\Twitter\Infrastructure\Api\Entity\TokenInterface;
 use App\Twitter\Infrastructure\Api\Exception\UnavailableTokenException;
+use App\Twitter\Infrastructure\Database\Connection\ConnectionAwareInterface;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use DateTime;
 use DateTimeZone;
@@ -29,7 +30,7 @@ use App\Twitter\Infrastructure\Api\Entity\Token,
  * @method TokenInterface[]    findAll()
  * @method TokenInterface[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
-class TokenRepository extends ServiceEntityRepository implements TokenRepositoryInterface
+class TokenRepository extends ServiceEntityRepository implements TokenRepositoryInterface, ConnectionAwareInterface
 {
     use LoggerTrait;
 
@@ -322,5 +323,10 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
         } catch (\Throwable $exception) {
             $this->logger->error($exception->getMessage(), ['token' => $token->getOAuthToken()]);
         }
+    }
+
+    public function reconnect(): void {
+        $entityManager = $this->getEntityManager();
+        $entityManager->getConnection()->connect();
     }
 }
