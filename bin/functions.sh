@@ -95,6 +95,21 @@ function kill_existing_consumers {
     done
 }
 
+function stop_workers() {
+    local project_name
+    project_name=$(get_project_name)
+
+    local symfony_environment
+    symfony_environment="$(get_symfony_environment)"
+
+    local script
+    script='bin/console messenger:stop-workers -e prod'
+    command="docker-compose ${project_name} exec -T -e ${symfony_environment} worker ${script}"
+
+    echo '=> About to stop consumers'
+    /bin/bash -c "${command}"
+}
+
 function handle_messages {
     local command_suffix
     command_suffix="${1}"
@@ -156,6 +171,8 @@ function handle_messages {
         php_directives='php -dmemory_limit='"${MEMORY_LIMIT}"' '
     fi
 
+    trap stop_workers SIGINT SIGTERM
+
     export SCRIPT="${php_directives}bin/console messenger:consume --time-limit=${TIME_LIMIT} -m ${MEMORY_LIMIT} -l ${MESSAGES} "${command_suffix}
 
     cd "${PROJECT_DIR}/provisioning/containers" || exit
@@ -165,7 +182,7 @@ function handle_messages {
 
     local project_name
     project_name=$(get_project_name)
-    command="docker-compose ${project_name} exec -T -e ${symfony_environment} worker ${SCRIPT}"
+    command="docker-compose ${project_name} run --rm --name ${SUPERVISOR_PROCESS_NAME} -T -e ${symfony_environment} worker ${SCRIPT}"
     echo 'Executing command: "'$command'"'
     echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
     echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
@@ -209,6 +226,7 @@ function purge_queues() {
 
     /bin/bash -c "docker-compose ${project_name} exec -d messenger rabbitmqctl purge_queue get-news-status -p ${rabbitmq_vhost}"
     /bin/bash -c "docker-compose ${project_name} exec -d messenger rabbitmqctl purge_queue get-news-likes -p ${rabbitmq_vhost}"
+    /bin/bash -c "docker-compose ${project_name} exec -d messenger rabbitmqctl purge_queue failures -p ${rabbitmq_vhost}"
 }
 
 function stop_workers() {
@@ -878,8 +896,11 @@ function run_php_script() {
     local project_name=''
     project_name="$(get_project_name)"
 
+    local container_name
+    container_name="$(echo "${script}" | sha256sum | awk '{print $1}')"
+
     local command
-    command="$(echo -n 'cd provisioning/containers && docker-compose '"${project_name}"'exec '"${option_detached}"'worker '"${script}")"
+    command="$(echo -n 'cd provisioning/containers && docker-compose '"${project_name}"'run -T --rm --name='"${container_name}"' '"${option_detached}"'worker '"${script}")"
 
     echo 'About to execute "'"${command}"'"'
     /bin/bash -c "${command}"
