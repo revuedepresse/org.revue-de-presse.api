@@ -4,25 +4,18 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Api;
 
 use Abraham\TwitterOAuth\TwitterOAuth as TwitterClient;
+use App\Membership\Domain\Entity\AggregateSubscription;
+use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Infrastructure\Repository\Exception\InvalidMemberIdentifier;
 use App\Twitter\Domain\Api\ApiAccessorInterface;
 use App\Twitter\Domain\Api\TwitterErrorAwareInterface;
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\ApiRateLimitingException;
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\ReadOnlyApplicationException;
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\UnexpectedApiResponseException;
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\StatusAccessor;
+use App\Twitter\Domain\Curation\LikedStatusCollectionAwareInterface;
+use App\Twitter\Domain\Resource\MemberCollection;
+use App\Twitter\Domain\Resource\OwnershipCollection;
 use App\Twitter\Infrastructure\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Twitter\Infrastructure\Api\Entity\Token;
 use App\Twitter\Infrastructure\Api\Entity\TokenInterface;
 use App\Twitter\Infrastructure\Api\Moderator\ApiLimitModerator;
-use App\Twitter\Domain\Resource\MemberCollection;
-use App\Twitter\Domain\Resource\OwnershipCollection;
-use App\Twitter\Infrastructure\Repository\Membership\MemberRepository;
-use App\Twitter\Infrastructure\Translation\Translator;
-use App\Membership\Domain\Entity\AggregateSubscription;
-use App\Membership\Domain\Entity\MemberInterface;
-use App\Membership\Infrastructure\Repository\Exception\InvalidMemberIdentifier;
-use App\Twitter\Domain\Curation\LikedStatusCollectionAwareInterface;
 use App\Twitter\Infrastructure\Exception\BadAuthenticationDataException;
 use App\Twitter\Infrastructure\Exception\EmptyErrorCodeException;
 use App\Twitter\Infrastructure\Exception\InconsistentTokenRepository;
@@ -33,6 +26,16 @@ use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
 use App\Twitter\Infrastructure\Exception\UnknownApiAccessException;
+use App\Twitter\Infrastructure\Repository\Membership\MemberRepository;
+use App\Twitter\Infrastructure\Translation\Translator;
+use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\ApiRateLimitingException;
+use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
+use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\ReadOnlyApplicationException;
+use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\UnexpectedApiResponseException;
+use App\Twitter\Infrastructure\Twitter\Api\Accessor\StatusAccessor;
+use Doctrine\DBAL\Driver\Exception as DriverException;
+use Doctrine\DBAL\Exception\ConnectionException;
+use Doctrine\DBAL\Exception\ConnectionLost;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
@@ -270,10 +273,16 @@ class Accessor implements ApiAccessorInterface,
      */
     public function contactEndpoint(string $endpoint)
     {
-        $response = null;
-
         $fetchContent = function ($endpoint) {
             try {
+                return $this->fetchContent($endpoint);
+            } catch (ConnectionException $exception) {
+                $this->logger->info(
+                    'Reconnecting after having lost connection',
+                    ['message' => $exception->getMessage()]
+                );
+                $this->tokenRepository->reconnect();
+
                 return $this->fetchContent($endpoint);
             } catch (ConnectException | Exception $exception) {
                 $this->logger->error($exception->getMessage(), $exception->getTrace());
