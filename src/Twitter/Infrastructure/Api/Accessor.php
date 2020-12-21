@@ -33,9 +33,7 @@ use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusExce
 use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\ReadOnlyApplicationException;
 use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\UnexpectedApiResponseException;
 use App\Twitter\Infrastructure\Twitter\Api\Accessor\StatusAccessor;
-use Doctrine\DBAL\Driver\Exception as DriverException;
 use Doctrine\DBAL\Exception\ConnectionException;
-use Doctrine\DBAL\Exception\ConnectionLost;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
