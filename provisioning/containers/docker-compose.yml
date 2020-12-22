@@ -1,0 +1,105 @@
+version: '3'
+services:
+
+    # https://doc.traefik.io/traefik/getting-started/quick-start/
+    reverse-proxy:
+        image: traefik:v2.3
+        command:
+            - "--configFile=/etc/traefik/traefik.toml"
+        networks:
+            devobs-network:
+                aliases:
+                    - reverse-proxy
+        ports:
+            - "127.0.0.1:443:443"
+            - "127.0.0.1:8080:8080"
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock
+            - ./reverse-proxy/templates/traefik.toml:/etc/traefik/traefik.toml
+            - ./reverse-proxy/templates/dynamic-config:/etc/traefik/dynamic-config
+            - ./reverse-proxy/certificates:/certificates
+
+    web:
+        build: ./apache
+        networks:
+            - devobs-network
+        expose:
+            - "80"
+        volumes:
+            - ../containers/apache/templates:/templates
+            - ../containers/apache/tasks:/tasks
+            - ../containers/apache/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini
+            - ../containers/apache/templates/blackfire/zz-blackfire.ini:/usr/local/etc/php/conf.d/zz-blackfire.ini
+            - ../containers/apache/templates/blackfire/.blackfire.ini:/root/.blackfire.ini
+            - ../containers/apache/templates/blackfire/agent:/etc/blackfire/agent
+            - ../../:/var/www/api
+        depends_on:
+            - cache
+            - worker
+            - reverse-proxy
+        labels:
+            - "traefik.enable=true"
+            - "traefik.docker.network=docker-network"
+            - "traefik.http.routers.web.rule=Host(`api.local.devobs.app`)"
+            - "traefik.http.routers.web.entrypoints=websecure"
+
+    worker:
+        build: ./php
+        networks:
+            devobs-network:
+                aliases:
+                    - worker
+        volumes:
+            - ../containers/php/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini
+            - ../../:/var/www/api
+        depends_on:
+            - messenger
+
+    database:
+        build: ./postgres
+        networks:
+            devobs-network:
+                aliases:
+                    - database
+        restart: always
+        env_file:
+            - ../../.env.local
+        ports:
+            - "127.0.0.1:5432:5432"
+        volumes:
+            - ../volumes/postgres:/var/lib/postgresql/data
+
+    messenger:
+        build: ./rabbitmq
+        expose:
+            - "5672"
+        networks:
+            devobs-network:
+                aliases:
+                    - messenger
+        restart: always
+        env_file:
+            - ../../.env.local
+        volumes:
+            - ../volumes/rabbitmq:/var/lib/rabbitmq
+
+    cache:
+        image: redis
+        command:
+            redis-server --appendonly yes
+        expose:
+            - "6379"
+        restart: always
+        networks:
+            devobs-network:
+                aliases:
+                    - cache
+        volumes:
+            - ../volumes/redis:/data
+
+networks:
+    devobs-network:
+        driver: bridge
+        ipam:
+            config:
+                - subnet: 192.169.193.0/28

@@ -1,27 +1,53 @@
 #!/bin/bash
 
-cd /etc/apache2
+function init_virtual_host() {
+    cd /etc/apache2 || exit
 
-ln -s /templates/sites-enabled/press-review.conf /etc/apache2/sites-available
+    if [ ! -e /var/www/api/var/logs/apache.error.api.log ];
+    then
+        touch /var/www/api/var/logs/apache.error.api.log
+    fi
 
-# Disable default virtual host
-a2dissite 000-default.conf
+    if [ ! -e /var/www/api/var/logs/apache.access.api.log ];
+    then
+        touch /var/www/api/var/logs/apache.access.api.log
+    fi
 
-# Enable rewrite module
-a2enmod rewrite
+    if [ ! -e /etc/apache2/sites-available/devobs.conf ];
+    then
+        ln -s /templates/sites-enabled/devobs.conf /etc/apache2/sites-available
+    fi
 
-# Enable headers module for CORS
-a2enmod headers
+    # Disable default virtual host
+    a2dissite 000-default.conf
 
-# Enable HTTP2
-a2enmod http2
+    # Enable rewrite module
+    a2enmod rewrite
 
-cd /etc/apache2
-ln -s `pwd`/sites-available/press-review.conf `pwd`/sites-enabled
+    # Enable headers module for CORS
+    a2enmod headers
 
-rm `pwd`/mods-enabled/deflate.conf
-ln -s /templates/mods-enabled/deflate.conf `pwd`/mods-enabled
+    cd /etc/apache2 || exit
 
-/etc/init.d/blackfire-agent restart
+    local working_directory
+    working_directory="$(pwd)"
 
-apache2-foreground &
+    if [ -L "${working_directory}"/sites-enabled/devobs.conf ];
+    then
+        rm "${working_directory}"/sites-enabled/devobs.conf
+    fi
+
+    ln -s "${working_directory}"/sites-available/devobs.conf "${working_directory}"/sites-enabled
+
+    if [ -L "${working_directory}"/mods-enabled/deflate.conf ];
+    then
+        rm "${working_directory}"/mods-enabled/deflate.conf
+    fi
+
+    ln -s /templates/mods-enabled/deflate.conf "${working_directory}"/mods-enabled
+
+    /etc/init.d/blackfire-agent restart
+
+    apache2-foreground &
+}
+init_virtual_host

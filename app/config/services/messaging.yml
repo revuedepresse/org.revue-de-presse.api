@@ -1,8 +1,0 @@
-services:
-
-    status_collection.message_publisher:
-        class: 'App\StatusCollection\Messaging\MessagePublisher'
-        properties:
-            aggregateLikesProducer:         '@old_sound_rabbit_mq.weaving_the_web_amqp.producer.aggregates_likes_producer'
-            aggregateRepository:            '@repository.aggregate'
-            aggregateStatusesProducer:      '@old_sound_rabbit_mq.weaving_the_web_amqp.twitter.aggregates_status_producer'

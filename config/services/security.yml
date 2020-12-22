@@ -1,0 +1,19 @@
+services:
+    app.token_authenticator:
+        class: 'App\Twitter\Infrastructure\Security\Authentication\TokenAuthenticator'
+        calls:
+            - [ 'setMemberRepository', [ '@App\Twitter\Infrastructure\Repository\Membership\MemberRepository' ] ]
+
+    app.auth0_token_authenticator:
+        class: 'App\Twitter\Infrastructure\Security\Authentication\Auth0TokenAuthenticator'
+        calls:
+            - [ 'setMemberRepository', [ '@App\Twitter\Infrastructure\Repository\Membership\MemberRepository' ] ]
+            - [ 'setLogger', [ '@monolog.logger.security' ] ]
+        properties:
+            authenticator:                  '@app.authenticator'
+            authenticationTokenRepository:  '@repository.authentication_token'
+
+    App\Twitter\Infrastructure\Security\Authentication\HttpAuthenticator:
+        class: 'App\Twitter\Infrastructure\Security\Authentication\HttpAuthenticator'
+        properties:
+            authenticationTokenRepository:  '@repository.authentication_token'

@@ -1,7 +1,0 @@
-services:
-    operation.clock:
-        class:                                 'App\Operation\OperationClock'
-        properties:
-            timeAfterWhichOperationIsSkipped:  '%operations_skipped_after%'
-            timeBeforeWhichOperationIsSkipped: '%operations_skipped_before%'
-            logger:                            '@monolog.logger.twitter_api'

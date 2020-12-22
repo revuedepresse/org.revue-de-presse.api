@@ -1,0 +1,10 @@
+services:
+    operation.clock:
+        class:                                 'App\Twitter\Infrastructure\Operation\OperationClock'
+        properties:
+            timeAfterWhichOperationIsSkipped:  '%env(resolve:OPERATIONS_SKIPPED_AFTER)%'
+            timeBeforeWhichOperationIsSkipped: '%env(resolve:OPERATIONS_SKIPPED_BEFORE)%'
+            logger:                            '@monolog.logger.twitter_api'
+
+    monolog.json_formatter:
+        class:                                  'Monolog\Formatter\JsonFormatter'

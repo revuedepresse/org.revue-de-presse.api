@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 function install_composer() {
     EXPECTED_SIGNATURE="$(wget -q -O - https://composer.github.io/installer.sig)"
@@ -15,6 +15,7 @@ function install_composer() {
     php composer-setup.php
     RESULT=$?
     rm composer-setup.php
+
     return $RESULT
 }
 

@@ -1,137 +1,67 @@
-# Devobs
+# DevObs
 
-[![Build Status](https://travis-ci.org/thierrymarianne/devobs-api.svg?branch=master)](https://travis-ci.org/thierrymarianne/devobs-api)
-
-[![Codeship Status for thierrymarianne/devobs-api](https://app.codeship.com/projects/beea8780-6695-0137-8a94-5e66d93e8e29/status?branch=master)](https://app.codeship.com/projects/345349)
+[![Codeship Status for thierrymarianne/devobs-api](https://app.codeship.com/projects/beea8780-6695-0137-8a94-5e66d93e8e29/status?branch=main)](https://app.codeship.com/projects/345349)
 
 Easing observation of Twitter lists related to software development
 
 ## Installation
 
-The shell scripts written to install the project dependencies have been tested under Ubuntu 16.04.5 LTS.
-My guess about running them from another OS would be that it simply won't terminate as expected.
+The shell scripts written to install the project dependencies
+have been tested under Ubuntu 20.04.
 
 ### Requirements
 
 Install git by following instructions from the [official documentation](https://git-scm.org/).
 
+Install mkcert by folllowing instructions from [https://mkcert.dev/](https://mkcert.dev/)
+
 Install Docker by following instructions from the [official documentation](https://docs.docker.com/install/linux/docker-ce/ubuntu/).
 
-### PHP
+Install Docker compose by following instructions from the [official documentation](https://docs.docker.com/compose/install/).
 
-Build a PHP container image
+Intall all PHP vendors
 
-```
-make build-php-container
-```
-
-### MySQL
-
-Initialize MySQL from `app/config/parameters.yml`
-
-```
-# Provide with access to a shell in a mysql container 
-# where access have been granted from credentials in parameters.yml
-make initialize-mysql-volume
+```shell
+make install-php-dependencies
 ```
 
-```
-# Generate queries to be executed
-# when the project data model has been modified
-make diff-schema
-```
+Generate TLS certificates
 
-### RabbitMQ
-
-Configure RabbitMQ privileges
-
-```
-make configure-rabbitmq-user-privileges
+```shell
+make install-local-ca-store
+make generate-development-tls-certificate-and-key
 ```
 
-Set up AMQP fabric
+Build Docker images
 
-```
-make setup-amqp-fabric
-```
-
-List AMQP messages
-
-```
-make list-amqp-messages
+```shell
+make build-stack-images
 ```
 
-## Running containers
+## Run development stack
 
-Run MySQL container
-
-```
-make run-mysql-container
+```shell
+make run-stack
 ```
 
-Run Redis container
+## Run test suites
 
+Create test database
+
+```shell
+# requires granting privileges to a test user
+# See provisioning/containers/postgres/templates/grant_privileges.sql
+make create-test-database
 ```
-make run-redis-container
-```
-
-Run RabbitMQ container
-
-```
-make run-rabbitmq-container
-```
-
-Produce messages from lists of members
-
-```
-make produce-amqp-messages-from-members-lists
-```
-
-Consume Twitter API from messages
-
-```
-make consume-twitter-api-messages
-```
-
-## Available commands
-
-Add members to a list
-
-```
-app/console add-members-to-aggregate -e prod \
---member-name="username-of-list-owner" \
---aggregate-name="list-name" \
---member-list="member-username"
-```
-
-Import subscriptions related to a list
-
-```
-app/console import-aggregates -e prod \
---member-name="username-of-list-owner" \
---find-ownerships
-```
-
-Add members from a list to another list 
-(requires importing source list beforehand)
-
-```
-app/console add-members-to-aggregate -e prod \
---member-name="username-of-list-owner" \
---aggregate-name="name-of-destination-list" 
---list="name-of-source-list"
-```
-
-## Testing
-
-Create the test database schema
-
-```
-make create-database-schema-test
-``` 
 
 Run unit tests with PHPUnit 
 
-```
+```shell
 make run-php-unit-tests
 ```
+
+Run features tests with Behat
+
+```shell
+make run-php-features-tests
+``` 

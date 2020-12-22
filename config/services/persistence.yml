@@ -1,0 +1,29 @@
+services:
+
+    App\Twitter\Infrastructure\Publication\Persistence\PublicationPersistence:
+        class: 'App\Twitter\Infrastructure\Publication\Persistence\PublicationPersistence'
+        arguments:
+            - '@App\Twitter\Infrastructure\Publication\Persistence\StatusPersistence'
+            - '@App\Twitter\Infrastructure\Publication\Repository\PublicationRepository'
+            - '@user_manager'
+            - '@doctrine.orm.entity_manager'
+        calls:
+            - [ 'setStatusPersistence', [ '@App\Twitter\Infrastructure\Publication\Persistence\StatusPersistence' ] ]
+        public: true
+
+    App\Twitter\Infrastructure\Publication\Persistence\StatusPersistence:
+        class: 'App\Twitter\Infrastructure\Publication\Persistence\StatusPersistence'
+        arguments:
+            - '@repository.timely_status'
+            - '@doctrine'
+            - '@doctrine.orm.entity_manager'
+            - '@logger'
+        calls:
+            - [ 'setApiAccessor',               [ '@App\Twitter\Infrastructure\Api\Accessor' ] ]
+            - [ 'setLogger',                    [ '@logger' ] ]
+            - [ 'setPublishersListRepository', [ '@App\Twitter\Infrastructure\Api\Repository\PublishersListRepository' ] ]
+            - [ 'setPublicationPersistence',    [ '@App\Twitter\Infrastructure\Publication\Persistence\PublicationPersistence' ] ]
+            - [ 'setStatusLogger',              [ '@App\Twitter\Infrastructure\Log\StatusLogger' ] ]
+            - [ 'setStatusRepository',          [ '@App\Twitter\Infrastructure\Api\Repository\StatusRepository' ] ]
+            - [ 'setTaggedStatusRepository',    [ '@App\Twitter\Infrastructure\Repository\Status\TaggedStatusRepository' ] ]
+        public: true

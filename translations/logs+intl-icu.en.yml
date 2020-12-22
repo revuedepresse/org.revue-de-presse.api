@@ -1,0 +1,45 @@
+logs.info.account_protected: 'Account of user "{user}" is protected and thus its status cannot be discovered.'
+logs.info.calls_remaining: >-
+    {count, plural,
+        =0    {{remaining_calls} is remaining for token "{identifier}" and endpoint {endpoint}.}
+        =1    {{remaining_calls} is remaining for token "{identifier}" and endpoint {endpoint}.}
+        other {{remaining_calls} calls are remaining for token "{identifier}" and endpoint {endpoint}.}
+    }
+logs.info.empty_error_code: 'Response with empty error code received, assuming rate limit has been exceeded for token starting with "{oauth token start}".'
+logs.info.likes_discovered: >-
+    {count, plural,
+        =0    {No like publication has been discovered for user "{member}".}
+        =1    {{total_likes} liked publication has been discovered for user "{member}".}
+        other {{total_likes} likes publications have been discovered for user "{member}".}
+    }
+logs.info.likes_existing: >-
+    {count, plural,
+        =0    {No liked publication exist in the database for user "{member}".}
+        =1    {{total_likes} liked publication exists in the database for user "{member}".}
+        other {{total_likes} liked publications exist in the database for user "{member}".}
+    }
+logs.info.likes_saved: >-
+    {count, plural,
+        =1    {{total_likes} new liked publication has been saved for user "{member}".}
+        other {{total_likes} new liked publications have been saved for user "{member}".}
+    }
+logs.info.status_discovered: >-
+    {count, plural,
+        =0    {No publication has been discovered for user "{member}".}
+        =1    {{total_status} publication has been discovered for user "{member}".}
+        other {{total_status} publications have been discovered for user "{member}".}
+    }
+logs.info.status_existing: >-
+    {count, plural,
+        =0    {No publication exists in the database for user "{{ user }}".}
+        =1    {{total_count} publication exists in the database for user "{member}".}
+        other {{total_count} publications exist in the database for user "{member}".}
+    }
+logs.info.status_saved: >-
+    {count, plural,
+        =0    {{total_status} no publication has been saved for user "{member}".}
+        =1    {{total_status} new publication has been saved for user "{member}".}
+        other {{total_status} new publications have been saved for user "{member}".}}
+
+logs.info.whisperer_declared: Member with "{screen_name}" screen name has been declared as being a whisperer.
+

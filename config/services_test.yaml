@@ -1,0 +1,35 @@
+services:
+    _defaults:
+        public: true
+        autowire: true
+        autoconfigure: true
+
+    # If you need to access services in a test, create an alias
+    # and then fetch that alias from the container. As a convention,
+    # aliases are prefixed with test. For example:
+    #
+    # test.App\Service\MyService: '@App\Service\MyService'
+
+    App\Tests\Context\:
+        resource: '../tests/Context/*'
+
+    test.event_repository.ownership_batch_collected: '@App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository'
+
+    test.event_repository.member_profile_collected: '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository'
+
+    test.App\Twitter\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher: '@App\Twitter\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher'
+
+    test.App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscriptionsCommand: '@App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscriptionsCommand'
+
+    test.App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscribeesCommand: '@App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscribeesCommand'
+
+    test.App\Twitter\Infrastructure\Subscription\Console\UnfollowDiffSubscriptionsSubscribeesCommand: '@App\Twitter\Infrastructure\Subscription\Console\UnfollowDiffSubscriptionsSubscribeesCommand'
+
+    test.App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository: '@App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository'
+
+    test.App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository: '@App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository'
+
+    test.App\Twitter\Infrastructure\Subscription\Console\UnfollowInactiveMembersCommand: '@App\Twitter\Infrastructure\Subscription\Console\UnfollowInactiveMembersCommand'
+
+    App\Tests\NewsReview\Infrastructure\Repository\InMemoryPopularPublicationRepository:
+        class: 'App\Tests\NewsReview\Infrastructure\Repository\InMemoryPopularPublicationRepository'

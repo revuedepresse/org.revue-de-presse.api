@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xmlns:gedmo="http://gediminasm.org/schemas/orm/doctrine-extensions-mapping"
+                  xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
+                  http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\Membership\Domain\Entity\MemberSubscribee"
+            repository-class="App\Membership\Infrastructure\Repository\MemberSubscribeeRepository"
+            table="member_subscribee">
+
+        <indexes>
+            <index name="subscribee_idx" columns="member_id,subscribee_id"/>
+        </indexes>
+
+        <unique-constraints>
+            <unique-constraint columns="member_id,subscribee_id" name="unique_subscribee" />
+        </unique-constraints>
+
+        <id name="id" column="id" type="uuid">
+            <generator strategy="CUSTOM"/>
+            <custom-id-generator class="Ramsey\Uuid\Doctrine\UuidGenerator"/>
+        </id>
+
+        <many-to-one
+            field="member"
+            target-entity="App\Membership\Domain\Entity\Legacy\Member"
+            inversed-by="subscribee"
+        >
+            <join-column
+                name="member_id"
+                referenced-column-name="usr_id"
+            />
+        </many-to-one>
+
+        <many-to-one
+            target-entity="App\Membership\Domain\Entity\Legacy\Member"
+            field="subscribee"
+            inversed-by="subscriber"
+        >
+            <join-column
+                name="subscribee_id"
+                referenced-column-name="usr_id"
+            />
+        </many-to-one>
+
+    </entity>
+
+</doctrine-mapping>

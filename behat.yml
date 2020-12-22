@@ -1,0 +1,11 @@
+default:
+
+    suites:
+        default:
+            contexts:
+                - App\Tests\Context\ApiContext
+            paths:
+                - "%paths.base%/features"
+
+    extensions:
+        FriendsOfBehat\SymfonyExtension: ~

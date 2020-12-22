@@ -1,0 +1,25 @@
+services:
+    App\Twitter\Infrastructure\Api\AccessToken\TokenChange:
+        class: 'App\Twitter\Infrastructure\Api\AccessToken\TokenChange'
+        arguments:
+            - '@repository.access_token'
+            - '@logger'
+
+    App\Twitter\Infrastructure\Twitter\Api\Accessor\OwnershipAccessor:
+        class: 'App\Twitter\Infrastructure\Twitter\Api\Accessor\OwnershipAccessor'
+        arguments:
+            - '@App\Twitter\Infrastructure\Api\Accessor'
+            - '@repository.access_token'
+            - '@App\Twitter\Infrastructure\Api\AccessToken\TokenChange'
+            - '@logger'
+        calls:
+            - [ 'setOwnershipBatchCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository'] ]
+
+    App\Twitter\Infrastructure\Twitter\Api\Accessor\MemberProfileAccessor:
+        class: 'App\Twitter\Infrastructure\Twitter\Api\Accessor\MemberProfileAccessor'
+        arguments:
+            - '@App\Twitter\Infrastructure\Api\Accessor'
+            - '@user_manager'
+            - '@App\Twitter\Infrastructure\Twitter\Api\UnavailableResourceHandler'
+        calls:
+            - [ 'setMemberProfileCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository'] ]

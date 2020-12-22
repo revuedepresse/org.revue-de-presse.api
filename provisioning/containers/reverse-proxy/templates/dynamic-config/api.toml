@@ -1,0 +1,3 @@
+[[tls.certificates]]
+  certFile = "/certificates/api.local.devobs.app.pem"
+  keyFile = "/certificates/api.local.devobs.app-key.pem"

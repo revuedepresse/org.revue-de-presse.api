@@ -1,5 +1,0 @@
-parameters:
-    monolog_main_logging_handler:
-        type:     stream
-        path:     "%kernel.logs_dir%/%kernel.environment%.log"
-        level:    "%main_log_level%"

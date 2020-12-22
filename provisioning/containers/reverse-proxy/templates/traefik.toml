@@ -1,0 +1,28 @@
+defaultEntryPoints = ["https"]
+
+[api]
+  insecure = true
+
+[providers.docker]
+  exposedByDefault = false
+
+[entryPoints]
+  [entryPoints.web]
+    address = ":80"
+
+  [entryPoints.web.http]
+    [entryPoints.web.http.redirections]
+      [entryPoints.web.http.redirections.entryPoint]
+        to = "websecure"
+        scheme = "https"
+
+  [entryPoints.websecure]
+    address = ":443"
+    [entryPoints.websecure.http.tls]
+      [[entryPoints.websecure.http.tls.domains]]
+        main = "app.local.devobs.app"
+
+[providers]
+  [providers.file]
+    filename = "/etc/traefik/dynamic-config/api.toml"
+    watch = true

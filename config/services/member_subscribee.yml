@@ -1,0 +1,14 @@
+services:
+    App\Twitter\Infrastructure\Twitter\Api\Accessor\FollowersListAccessor:
+        class: 'App\Twitter\Infrastructure\Twitter\Api\Accessor\FollowersListAccessor'
+        arguments:
+            - '@App\Twitter\Infrastructure\Api\Accessor'
+            - '@logger'
+
+    App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscribeesCommand:
+        class: 'App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscribeesCommand'
+        calls:
+            - [ 'setAccessor', ['@App\Twitter\Infrastructure\Twitter\Api\Accessor\FollowersListAccessor'] ]
+            - [ 'setRepository', ['@App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository'] ]
+        tags:
+            - { name: 'console.command' }

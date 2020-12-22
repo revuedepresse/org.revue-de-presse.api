@@ -1,0 +1,23 @@
+<?xml version="1.0" ?>
+
+<container xmlns="http://symfony.com/schema/dic/services"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
+
+    <parameters>
+        <parameter key="security.authentication.listener.basic.class">WTW\UserBundle\EventListener\BasicAuthenticationListener</parameter>
+        <parameter key="user_manager.class">App\Twitter\Infrastructure\Repository\Membership\MemberRepository</parameter>
+        <parameter key="wtw_user.entity.user.class">App\Membership\Domain\Entity\Legacy\Member</parameter>
+    </parameters>
+
+    <services>
+        <service id="user_manager" class="%user_manager.class%">
+            <argument type="service" id="Doctrine\Common\Persistence\ManagerRegistry" />
+            <argument type="string">%wtw_user.entity.user.class%</argument>
+            <property
+                name="aggregateRepository"
+                type="service"
+                id="App\Twitter\Infrastructure\Api\Repository\PublishersListRepository" />
+        </service>
+    </services>
+</container>

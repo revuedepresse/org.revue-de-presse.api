@@ -1,0 +1,3 @@
+doctrine_migrations:
+    migrations_paths:
+        'App\Twitter\Infrastructure\Database\Migrations': '%kernel.project_dir%/src/Twitter/Infrastructure/Database/Migrations'
