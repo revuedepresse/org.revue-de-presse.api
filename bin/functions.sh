@@ -861,12 +861,6 @@ function run_php_script() {
       script="${SCRIPT}"
     fi
 
-    local memory=''
-    if [ -n "${PHP_MEMORY_LIMIT}" ];
-    then
-        memory="${PHP_MEMORY_LIMIT}"
-    fi
-
     local namespace=
     namespace=''
     if [ -n "${NAMESPACE}" ];
