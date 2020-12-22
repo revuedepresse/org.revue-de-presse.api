@@ -14,7 +14,7 @@ use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
 
 
 /**
- * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
+ * @deprecated
  */
 class ProduceTimelyStatusMessagesCommand extends AggregateAwareCommand implements TimeRangeAwareInterface
 {
@@ -46,17 +46,12 @@ class ProduceTimelyStatusMessagesCommand extends AggregateAwareCommand implement
      * @param InputInterface  $input
      * @param OutputInterface $output
      * @return int|mixed|null
-     * @throws SuspendedAccountException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \Exception
-     * @throws \WeavingTheWeb\Bundle\ApiBundle\Exception\InvalidTokenException
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $this->input = $input;
         $this->output = $output;
 
-        /** @var \OldSound\RabbitMqBundle\RabbitMq\Producer $producer */
         $this->producer = $this->getContainer()->get(
             'old_sound_rabbit_mq.weaving_the_web_amqp.producer.timely_status_producer'
         );

@@ -71,7 +71,7 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
      *
      * @return int|null|void
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         parent::execute($input, $output);
 

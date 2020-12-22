@@ -35,11 +35,10 @@ use const JSON_THROW_ON_ERROR;
  *          })
  *      }
  * )
- * @ORM\Entity(repositoryClass="App\Twitter\Infrastructure\Repository\Membership\MemberRepository")
+ * @ORM\Entity
  * @ORM\InheritanceType("SINGLE_TABLE")
  * @ORM\DiscriminatorColumn(name="usr_position_in_hierarchy", type="integer")
  * @ORM\DiscriminatorMap({"1" = "Member"})
- * @package App\Membership\Domain\Entity
  */
 class Member extends MemberModel implements JsonEncodingAwareInterface
 {

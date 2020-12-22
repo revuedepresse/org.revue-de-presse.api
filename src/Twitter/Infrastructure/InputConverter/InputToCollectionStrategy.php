@@ -22,11 +22,9 @@ class InputToCollectionStrategy
         self::listCollectionRestriction($input, $strategy);
         self::collectionSchedule($input, $strategy);
         self::aggregatePriority($input, $strategy);
-        self::queryRestriction($input, $strategy);
         self::memberRestriction($input, $strategy);
         self::ignoreWhispers($input, $strategy);
         self::includeOwner($input, $strategy);
-        self::shouldFetchLikes($input, $strategy);
         self::fromCursor($input, $strategy);
 
         return $strategy;
@@ -124,22 +122,6 @@ class InputToCollectionStrategy
      * @param InputInterface               $input
      * @param PublicationStrategyInterface $strategy
      */
-    private static function queryRestriction(
-        InputInterface $input,
-        PublicationStrategyInterface $strategy
-    ): void {
-        if (
-            $input->hasOption(PublicationStrategyInterface::RULE_QUERY_RESTRICTION)
-            && $input->getOption(PublicationStrategyInterface::RULE_QUERY_RESTRICTION)
-        ) {
-            $strategy->willApplyQueryRestriction($input->getOption(PublicationStrategyInterface::RULE_QUERY_RESTRICTION));
-        }
-    }
-
-    /**
-     * @param InputInterface               $input
-     * @param PublicationStrategyInterface $strategy
-     */
     private static function memberRestriction(
         InputInterface $input,
         PublicationStrategyInterface $strategy
@@ -185,16 +167,6 @@ class InputToCollectionStrategy
             && $input->getOption(PublicationStrategyInterface::RULE_INCLUDE_OWNER)
         ) {
             $strategy->willIncludeOwner($input->getOption(PublicationStrategyInterface::RULE_INCLUDE_OWNER));
-        }
-    }
-
-    private static function shouldFetchLikes(InputInterface $input, PublicationStrategyInterface $strategy): void
-    {
-        if (
-            $input->hasOption(PublicationStrategyInterface::RULE_FETCH_LIKES) &&
-            $input->getOption(PublicationStrategyInterface::RULE_FETCH_LIKES)
-        ) {
-            $strategy->willFetchLikes($input->getOption(PublicationStrategyInterface::RULE_FETCH_LIKES));
         }
     }
 

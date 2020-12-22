@@ -216,21 +216,6 @@ services:
             memberSubscribeeRepository:   "@repository.member_subscribee"
             memberSubscriptionRepository: "@repository.member_subscription"
 
-    repository.saved_search:
-        class: 'App\PublishersList\Repository\SavedSearchRepository'
-        arguments:
-            - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\PublishersList\Entity\SavedSearch'
-
-    repository.search_matching_status:
-        class: 'App\PublishersList\Repository\SearchMatchingStatusRepository'
-        arguments:
-            - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\PublishersList\Entity\SearchMatchingStatus'
-        properties:
-            statusRepository: '@App\Twitter\Infrastructure\Api\Repository\StatusRepository'
-            logger:           "@logger"
-
     repository.liked_status:
         class: 'App\Twitter\Infrastructure\Publication\Repository\LikedStatusRepository'
         arguments:

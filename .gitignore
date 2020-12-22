@@ -8,12 +8,11 @@ build/*
 !build/.gitignore
 composer.phar
 provisioning/containers/mysql/templates/mysql/my.cnf
-provisioning/volumes/mysql/*
-provisioning/volumes/mysql*/*
+provisioning/volumes/postgres/*
+provisioning/volumes/postgres*
 vendor
 public/graphs
 
-###> symfony/framework-bundle ###
 /.env.local
 /.env.local.php
 /.env.*.local
@@ -23,17 +22,8 @@ public/graphs
 /var/cache
 /var/logs
 /vendor/
-###< symfony/framework-bundle ###
 
-###> phpunit/phpunit ###
 /phpunit.xml
 .phpunit.result.cache
-###< phpunit/phpunit ###
-
-###> symfony/phpunit-bridge ###
-.phpunit
-.phpunit.result.cache
-/phpunit.xml
-###< symfony/phpunit-bridge ###
 
 public/emoji-data/

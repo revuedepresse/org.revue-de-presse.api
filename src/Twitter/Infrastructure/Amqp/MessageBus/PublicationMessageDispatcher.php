@@ -6,7 +6,7 @@ namespace App\Twitter\Infrastructure\Amqp\MessageBus;
 use App\Twitter\Infrastructure\Amqp\Exception\InvalidListNameException;
 use App\Twitter\Infrastructure\Amqp\Exception\UnexpectedOwnershipException;
 use App\Twitter\Infrastructure\Api\AccessToken\TokenChangeInterface;
-use App\Twitter\Infrastructure\Api\Entity\TokenInterface;
+use App\Twitter\Domain\Api\Model\TokenInterface;
 use App\Twitter\Infrastructure\Api\Exception\UnavailableTokenException;
 use App\Twitter\Domain\Curation\PublicationStrategyInterface;
 use App\Twitter\Domain\Resource\MemberOwnerships;

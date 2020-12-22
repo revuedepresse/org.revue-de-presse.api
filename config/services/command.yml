@@ -1,5 +1,4 @@
 parameters:
-    command.map_aggregate_status_collection.class:                              'App\Twitter\Infrastructure\Publication\Mapping\Command\MapAggregateStatusCollectionCommand'
     command.map_status_collection.class:                                        'App\Twitter\Infrastructure\Publication\Mapping\Command\MapStatusCollectionCommand'
     command.select_status_collection.class:                                     'App\Twitter\Infrastructure\Publication\Command\QueryPublicationCollectionCommand'
     command.add_members_to_aggregate.class:                                     'App\Membership\Infrastructure\Command\AddMemberToAggregateCommand'
@@ -32,8 +31,6 @@ services:
         class:                              "%press_review.fetch_member_status.class%"
         properties:
             operationClock:                 '@operation.clock'
-            savedSearchRepository:          '@repository.saved_search'
-            searchMatchingStatusRepository: '@repository.search_matching_status'
         calls:
             - [ 'setAccessor',                      [ '@App\Twitter\Infrastructure\Api\Accessor'] ]
             - [ 'setAggregateRepository',           [ '@App\Twitter\Infrastructure\Api\Repository\PublishersListRepository'] ]
@@ -150,20 +147,6 @@ services:
             refreshStatusMapping:   '@mapping.refresh_status'
             oauthToken:             "%weaving_the_web_twitter.oauth_token.default%"
             oauthSecret:            "%weaving_the_web_twitter.oauth_secret.default%"
-        tags:
-            - { name: 'console.command' }
-
-    command.map_aggregate_status_collection:
-        class:                      "%command.map_aggregate_status_collection.class%"
-        properties:
-            logger:                             '@monolog.logger.status'
-            statusRepository:                   '@App\Twitter\Infrastructure\Api\Repository\StatusRepository'
-            refreshStatusMapping:               '@mapping.refresh_status'
-            oauthToken:                         "%weaving_the_web_twitter.oauth_token.default%"
-            oauthSecret:                        "%weaving_the_web_twitter.oauth_secret.default%"
-            searchMatchingStatusRepository:     '@repository.search_matching_status'
-            timeAfterWhichOperationIsSkipped:   '%env(resolve:OPERATIONS_SKIPPED_AFTER)%'
-            timeBeforeWhichOperationIsSkipped:  '%env(resolve:OPERATIONS_SKIPPED_BEFORE)%'
         tags:
             - { name: 'console.command' }
 

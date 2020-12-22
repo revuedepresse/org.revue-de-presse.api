@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Twitter\Api\Accessor;
 
-use App\Twitter\Infrastructure\Api\AccessToken\Repository\TokenRepositoryInterface;
+use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Twitter\Infrastructure\Api\AccessToken\TokenChangeInterface;
-use App\Twitter\Infrastructure\Api\Entity\TokenInterface;
+use App\Twitter\Domain\Api\Model\TokenInterface;
 use App\Twitter\Domain\Resource\MemberOwnerships;
 use App\Twitter\Domain\Resource\OwnershipCollection;
 use App\Twitter\Infrastructure\DependencyInjection\Collection\OwnershipBatchCollectedEventRepositoryTrait;

@@ -556,7 +556,7 @@ function dispatch_fetch_publications_messages {
     local arguments
     arguments="${priority_option}"'--screen_name='"${username}"' '"${list_option}"' '"${query_restriction}"
     arguments="${arguments}${cursor_argument}"
-    run_command 'bin/console press-review:dispatch-messages-to-fetch-member-statuses '"${arguments}"
+    run_command 'bin/console devobs:dispatch-messages-to-fetch-member-statuses '"${arguments}"
 }
 
 function run_php_unit_tests() {
@@ -612,4 +612,11 @@ function create_test_database() {
   export SCRIPT='php bin/console doc:database:create -e test --if-not-exists -vvvv' && make run-php-script && \
   export SCRIPT='php bin/console doc:mig:diff -n -e test -vvvv' && make run-php-script && \
   export SCRIPT='php bin/console doc:mig:mig -n -e test -vvvv' && make run-php-script
+}
+
+function load_production_fixtures() {
+  local script
+  script='php bin/console devobs:load-production-fixtures -vvvv'
+
+  run_php_script "${script}" 'interactive_mode'
 }

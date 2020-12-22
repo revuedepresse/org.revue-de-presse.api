@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Security\Authentication;
 
 use App\PublishersList\Controller\Exception\InvalidRequestException;
-use App\Twitter\Infrastructure\Api\AccessToken\Repository\TokenRepositoryInterface;
-use App\Twitter\Infrastructure\Api\Entity\TokenInterface;
+use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
+use App\Twitter\Domain\Api\Model\TokenInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 trait AuthenticationTokenValidationTrait

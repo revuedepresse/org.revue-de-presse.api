@@ -37,7 +37,7 @@ class UnfollowInactiveMembersCommand extends AbstractCommand
         $this->mutator = $mutator;
     }
 
-    public function __construct($name = 'press-review:unfollow-inactive-members')
+    public function __construct($name = 'devobs:unfollow-inactive-members')
     {
         parent::__construct($name);
     }
@@ -55,7 +55,7 @@ class UnfollowInactiveMembersCommand extends AbstractCommand
             ->setAliases(['pr:ufw']);
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $screenName = $input->getArgument(self::ARGUMENT_SCREEN_NAME);
 

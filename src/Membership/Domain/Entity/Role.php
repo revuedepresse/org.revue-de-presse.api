@@ -11,7 +11,6 @@ use Doctrine\Common\Collections\Collection;
  * @ORM\Table(name="weaving_role")
  *
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
- * @package WeavingTheWeb\Bundle\UserBundle\Entity
  */
 class Role implements RoleInterface
 {

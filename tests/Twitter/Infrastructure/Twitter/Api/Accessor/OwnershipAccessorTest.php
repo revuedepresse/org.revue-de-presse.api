@@ -5,7 +5,7 @@ namespace App\Tests\Twitter\Infrastructure\Twitter\Api\Accessor;
 
 use App\Twitter\Domain\Curation\Repository\OwnershipBatchCollectedEventRepositoryInterface;
 use App\Twitter\Domain\Resource\MemberOwnerships;
-use App\Twitter\Infrastructure\Api\AccessToken\Repository\TokenRepositoryInterface;
+use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Twitter\Infrastructure\Api\Entity\Token;
 use App\Twitter\Infrastructure\Api\Exception\InvalidSerializedTokenException;
 use App\Twitter\Infrastructure\Twitter\Api\Accessor\OwnershipAccessor;

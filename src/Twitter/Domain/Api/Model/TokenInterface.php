@@ -1,11 +1,8 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Twitter\Infrastructure\Api\Entity;
+namespace App\Twitter\Domain\Api\Model;
 
-/**
- * @package App\Twitter\Infrastructure\Api\Entity
- */
 interface TokenInterface
 {
     public const FIELD_TOKEN = 'token';

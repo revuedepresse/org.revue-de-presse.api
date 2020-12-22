@@ -10,12 +10,10 @@ use DateTimeZone;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
-use Exception;
 use InvalidArgumentException;
-use WeavingTheWeb\Bundle\ApiBundle\Repository\AggregateRepository;
 
 /**
- * @ORM\Entity(repositoryClass="App\Twitter\Infrastructure\Api\Repository\PublishersListRepository")
+ * @ORM\Entity
  * @ORM\Table(
  *     name="weaving_aggregate",
  *     options={"collate":"utf8mb4_general_ci", "charset":"utf8mb4"},

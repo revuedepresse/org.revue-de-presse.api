@@ -7,7 +7,7 @@ use App\Twitter\Infrastructure\Http\SearchParams;
 use App\PublishersList\Entity\TimelyStatus;
 use App\PublishersList\Repository\PaginationAwareTrait;
 use App\Twitter\Infrastructure\Api\Entity\Aggregate;
-use App\Twitter\Infrastructure\Api\Entity\TokenInterface;
+use App\Twitter\Domain\Api\Model\TokenInterface;
 use App\Twitter\Domain\Publication\PublishersListInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;

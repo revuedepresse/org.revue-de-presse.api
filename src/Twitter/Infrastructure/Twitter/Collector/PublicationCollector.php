@@ -8,7 +8,7 @@ use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusExce
 use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\ReadOnlyApplicationException;
 use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\UnexpectedApiResponseException;
 use App\Twitter\Infrastructure\Api\Entity\Token;
-use App\Twitter\Infrastructure\Api\Entity\TokenInterface;
+use App\Twitter\Domain\Api\Model\TokenInterface;
 use App\Twitter\Domain\Curation\CollectionStrategy;
 use App\Twitter\Domain\Curation\CollectionStrategyInterface;
 use App\Twitter\Domain\Curation\Exception\NoRemainingPublicationException;

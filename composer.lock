@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b3068a2a48d565a19f5e82c4f13d6ba3",
+    "content-hash": "5d63a047a46f30d41eaf1c85ee1be610",
     "packages": [
         {
             "name": "abraham/twitteroauth",
@@ -122,42 +122,37 @@
         },
         {
             "name": "beberlei/doctrineextensions",
-            "version": "dev-master",
+            "version": "v1.3.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/revuedepresse/DoctrineExtensions.git",
-                "reference": "eeb920132de0953ec552912a9c00c12bb09730f7"
+                "url": "https://github.com/beberlei/DoctrineExtensions.git",
+                "reference": "008f162f191584a6c37c03a803f718802ba9dd9a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/revuedepresse/DoctrineExtensions/zipball/eeb920132de0953ec552912a9c00c12bb09730f7",
-                "reference": "eeb920132de0953ec552912a9c00c12bb09730f7",
+                "url": "https://api.github.com/repos/beberlei/DoctrineExtensions/zipball/008f162f191584a6c37c03a803f718802ba9dd9a",
+                "reference": "008f162f191584a6c37c03a803f718802ba9dd9a",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.4"
+                "doctrine/orm": "^2.7",
+                "php": "^7.2 || ^8.0"
             },
             "require-dev": {
-                "doctrine/orm": "^2.5",
-                "friendsofphp/php-cs-fixer": "^2.2.19",
+                "friendsofphp/php-cs-fixer": "^2.14",
                 "nesbot/carbon": "*",
-                "phpunit/phpunit": "^4.5",
-                "symfony/yaml": "^3.4.19",
+                "phpunit/phpunit": "^7.0 || ^8.0 || ^9.0",
+                "symfony/yaml": "^4.2 || ^5.0",
                 "zf1/zend-date": "^1.12",
                 "zf1/zend-registry": "^1.12"
             },
-            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
                     "DoctrineExtensions\\": "src/"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "DoctrineExtensions\\Tests\\": "tests/"
-                }
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause"
             ],
@@ -168,19 +163,19 @@
                 },
                 {
                     "name": "Steve Lacey",
-                    "email": "steve@stevelacey.net"
+                    "email": "steve@steve.ly"
                 }
             ],
-            "description": "A set of extensions to Doctrine 2 that add support for additional query functions available in MySQL and Oracle.",
+            "description": "A set of extensions to Doctrine 2 that add support for additional query functions available in MySQL, Oracle, PostgreSQL and SQLite.",
             "keywords": [
                 "database",
                 "doctrine",
                 "orm"
             ],
             "support": {
-                "source": "https://github.com/revuedepresse/DoctrineExtensions/tree/master"
+                "source": "https://github.com/beberlei/DoctrineExtensions/tree/v1.3.0"
             },
-            "time": "2020-11-27T09:30:59+00:00"
+            "time": "2020-11-29T07:37:23+00:00"
         },
         {
             "name": "brick/math",
@@ -12183,7 +12178,6 @@
     "minimum-stability": "dev",
     "stability-flags": {
         "abraham/twitteroauth": 20,
-        "beberlei/doctrineextensions": 20,
         "fabpot/goutte": 20,
         "fzaninotto/faker": 20,
         "predis/predis": 20,
@@ -12197,7 +12191,7 @@
         "symfony/maker-bundle": 20,
         "symfony/test-pack": 20
     },
-    "prefer-stable": false,
+    "prefer-stable": true,
     "prefer-lowest": false,
     "platform": {
         "php": ">=7.2.9",

@@ -75,9 +75,6 @@ class ProduceConversationMessagesCommand extends AggregateAwareCommand
      * @param OutputInterface $output
      * @return int|mixed|null
      * @throws SuspendedAccountException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \Exception
-     * @throws \WeavingTheWeb\Bundle\ApiBundle\Exception\InvalidTokenException
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {

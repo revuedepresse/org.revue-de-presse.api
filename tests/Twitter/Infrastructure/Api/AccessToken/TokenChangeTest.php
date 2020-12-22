@@ -3,10 +3,10 @@ declare(strict_types=1);
 
 namespace App\Tests\Twitter\Infrastructure\Api\AccessToken;
 
-use App\Twitter\Infrastructure\Api\AccessToken\Repository\TokenRepositoryInterface;
+use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Twitter\Infrastructure\Api\AccessToken\TokenChange;
 use App\Twitter\Infrastructure\Api\Entity\Token;
-use App\Twitter\Infrastructure\Api\Entity\TokenInterface;
+use App\Twitter\Domain\Api\Model\TokenInterface;
 use App\Twitter\Infrastructure\Api\Exception\InvalidSerializedTokenException;
 use App\Twitter\Infrastructure\Api\Exception\UnavailableTokenException;
 use App\Tests\Twitter\Infrastructure\Api\AccessToken\Builder\Repository\SimpleTokenRepositoryBuilder;

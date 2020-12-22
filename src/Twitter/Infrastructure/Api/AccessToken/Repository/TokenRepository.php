@@ -3,7 +3,8 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Api\AccessToken\Repository;
 
-use App\Twitter\Infrastructure\Api\Entity\TokenInterface;
+use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
+use App\Twitter\Domain\Api\Model\TokenInterface;
 use App\Twitter\Infrastructure\Api\Exception\UnavailableTokenException;
 use App\Twitter\Infrastructure\Database\Connection\ConnectionAwareInterface;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
@@ -23,8 +24,6 @@ use App\Twitter\Infrastructure\Api\Entity\Token,
     App\Twitter\Infrastructure\Api\Entity\TokenType;
 
 /**
- * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
- *
  * @method TokenInterface|null find($id, $lockMode = null, $lockVersion = null)
  * @method TokenInterface|null findOneBy(array $criteria, array $orderBy = null)
  * @method TokenInterface[]    findAll()
@@ -69,11 +68,6 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
         $consumerKey,
         $consumerSecret
     ): void {
-        $entityManager = $this->getEntityManager();
-        if (!$entityManager->getConnection()->isConnected()) {
-            return;
-        }
-
         if ($this->findOneBy(['oauthToken' => $oauthToken]) !== null) {
             return;
         }
@@ -214,8 +208,10 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
      */
     private function applyUnfrozenTokenCriteria(QueryBuilder $queryBuilder): QueryBuilder {
         $queryBuilder->andWhere('t.type = :type');
-        $tokenRepository = $this->getEntityManager()->getRepository('Api:TokenType');
-        $tokenType = $tokenRepository->findOneBy(['name' => TokenType::USER]);
+
+        $tokenTypeRepository = $this->getEntityManager()->getRepository('Api:TokenType');
+
+        $tokenType = $tokenTypeRepository->findOneBy(['name' => TokenType::USER]);
         $queryBuilder->setParameter('type', $tokenType);
 
         $queryBuilder->andWhere('t.oauthTokenSecret IS NOT NULL');

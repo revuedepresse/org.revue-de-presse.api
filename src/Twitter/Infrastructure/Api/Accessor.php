@@ -12,9 +12,9 @@ use App\Twitter\Domain\Api\TwitterErrorAwareInterface;
 use App\Twitter\Domain\Curation\LikedStatusCollectionAwareInterface;
 use App\Twitter\Domain\Resource\MemberCollection;
 use App\Twitter\Domain\Resource\OwnershipCollection;
-use App\Twitter\Infrastructure\Api\AccessToken\Repository\TokenRepositoryInterface;
+use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Twitter\Infrastructure\Api\Entity\Token;
-use App\Twitter\Infrastructure\Api\Entity\TokenInterface;
+use App\Twitter\Domain\Api\Model\TokenInterface;
 use App\Twitter\Infrastructure\Api\Moderator\ApiLimitModerator;
 use App\Twitter\Infrastructure\Exception\BadAuthenticationDataException;
 use App\Twitter\Infrastructure\Exception\EmptyErrorCodeException;
@@ -179,13 +179,6 @@ class Accessor implements ApiAccessorInterface,
         );
 
         $this->tokenRepository = $tokenRepository;
-
-        $this->tokenRepository->ensureTokenExists(
-            $accessTokenKey,
-            $accessTokenSecret,
-            $consumerKey,
-            $consumerSecret
-        );
 
         $this->setLogger($logger);
     }

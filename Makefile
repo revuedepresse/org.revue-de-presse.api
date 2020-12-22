@@ -60,3 +60,6 @@ generate-development-tls-certificate-and-key: ## Generate TLS certificate and ke
 
 create-test-database: ## Create test database
 		@/bin/bash -c 'source ./bin/console.sh && create_test_database'
+
+load-production-fixtures: ## Load production fixtures
+		@/bin/bash -c 'source ./bin/console.sh && load_production_fixtures'

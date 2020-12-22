@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Api\Entity;
 
+use App\Twitter\Domain\Api\Model\TokenInterface;
 use App\Twitter\Infrastructure\Api\Exception\InvalidSerializedTokenException;
 use App\Membership\Domain\Entity\Legacy\Member;
 use DateTimeInterface;
@@ -12,10 +13,8 @@ use Doctrine\ORM\Mapping as ORM;
 use function array_key_exists;
 
 /**
- * @package App\Twitter\Infrastructure\Api\Entity
- *
  * @ORM\Table(name="weaving_access_token")
- * @ORM\Entity(repositoryClass="App\Twitter\Infrastructure\Api\AccessToken\Repository\TokenRepositoryInterface")
+ * @ORM\Entity
  */
 class Token implements TokenInterface
 {

@@ -109,9 +109,6 @@ class AddMemberToAggregateCommand extends Command implements CommandReturnCodeAw
      * @return int
      * @throws NonUniqueResultException
      * @throws OptimisticLockException
-     * @throws \WeavingTheWeb\Bundle\ApiBundle\Exception\InvalidTokenException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
@@ -178,8 +175,6 @@ class AddMemberToAggregateCommand extends Command implements CommandReturnCodeAw
     /**
      * @param stdClass $targetList
      * @throws OptimisticLockException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
      */
     private function addMembersToList(
         stdClass $targetList

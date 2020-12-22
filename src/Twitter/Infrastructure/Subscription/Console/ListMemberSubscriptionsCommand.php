@@ -34,7 +34,7 @@ class ListMemberSubscriptionsCommand extends AbstractCommand
 
     protected function configure(): void
     {
-        $this->setName('press-review:list-member-subscriptions')
+        $this->setName('devobs:list-member-subscriptions')
             ->setDescription('List the subscriptions of a member')
             ->addArgument(
                 self::ARGUMENT_SCREEN_NAME,

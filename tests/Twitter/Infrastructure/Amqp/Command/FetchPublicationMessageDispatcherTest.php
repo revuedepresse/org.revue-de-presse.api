@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Tests\Twitter\Infrastructure\Amqp\Command;
 
 use App\Twitter\Infrastructure\Amqp\Command\FetchPublicationMessageDispatcher;
-use App\Twitter\Infrastructure\Api\Entity\TokenInterface;
+use App\Twitter\Domain\Api\Model\TokenInterface;
 use App\Twitter\Domain\Curation\PublicationStrategyInterface;
 use App\Twitter\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher;
 use App\Tests\Twitter\Infrastructure\Twitter\Api\Builder\ApiAccessorBuilder;
@@ -54,6 +54,8 @@ class FetchPublicationMessageDispatcherTest extends KernelTestCase
 
     protected function setUp(): void
     {
+        // Arrange
+
         $kernel = static::bootKernel();
 
         self::$container = $kernel->getContainer();
@@ -63,7 +65,7 @@ class FetchPublicationMessageDispatcherTest extends KernelTestCase
 
         $application = new Application($kernel);
 
-        $this->command = $application->find('press-review:dispatch-messages-to-fetch-member-statuses');
+        $this->command = $application->find('devobs:dispatch-messages-to-fetch-member-statuses');
 
         $this->commandTester = new CommandTester($command);
     }

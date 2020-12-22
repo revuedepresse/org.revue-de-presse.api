@@ -10,7 +10,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="App\Twitter\Infrastructure\Api\Repository\ArchivedStatusRepository")
+ * @ORM\Entity
  * @ORM\Table(
  *      name="weaving_archived_status",
  *      uniqueConstraints={

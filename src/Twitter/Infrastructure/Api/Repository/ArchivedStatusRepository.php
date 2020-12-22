@@ -17,6 +17,7 @@ use App\Twitter\Infrastructure\DependencyInjection\Status\StatusLoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusPersistenceTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TaggedStatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
+use App\Twitter\Infrastructure\Publication\Mapping\MappingAwareInterface;
 use App\Twitter\Infrastructure\Twitter\Api\Normalizer\Normalizer;
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Twitter\Infrastructure\Operation\Collection\CollectionInterface;
@@ -27,6 +28,7 @@ use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
@@ -269,7 +271,7 @@ class ArchivedStatusRepository extends ResourceRepository implements
     public function hasBeenSavedBefore(array $statuses): bool
     {
         if (count($statuses) === 0) {
-            throw new \Exception('There should be one item at least');
+            throw new Exception('There should be one item at least');
         }
 
         $identifier         = '';
@@ -494,5 +496,29 @@ class ArchivedStatusRepository extends ResourceRepository implements
             },
             $statuses
         );
+    }
+
+    public function mapStatusCollectionToService(
+        MappingAwareInterface $service,
+        ArrayCollection $statuses
+    ): iterable {
+        return $statuses->map(function (Status $status) use ($service) {
+            return $service->apply($status);
+        });
+    }
+
+    public function queryPublicationCollection(
+        string $memberScreenName,
+        DateTimeInterface $earliestDate,
+        DateTimeInterface $latestDate
+    ) {
+        $queryBuilder = $this->createQueryBuilder('s');
+
+        $this->between($queryBuilder, $earliestDate, $latestDate);
+
+        $queryBuilder->andWhere('s.screenName = :screen_name');
+        $queryBuilder->setParameter('screen_name', $memberScreenName);
+
+        return new ArrayCollection($queryBuilder->getQuery()->getResult());
     }
 }

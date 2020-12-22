@@ -63,6 +63,8 @@ services:
             likedStatusRepository:    '@repository.liked_status'
             registry:                 '@doctrine'
 
+    App\Twitter\Domain\Publication\Repository\StatusRepositoryInterface: '@App\Twitter\Infrastructure\Api\Repository\StatusRepository'
+
     App\Twitter\Infrastructure\Api\Repository\ArchivedStatusRepository:
         class:  'App\Twitter\Infrastructure\Api\Repository\ArchivedStatusRepository'
         arguments:
@@ -143,6 +145,8 @@ services:
         arguments:
             - '@doctrine.orm.entity_manager'
             - '@logger'
+        calls:
+            - [ 'setStatusRepository', [ '@App\Twitter\Domain\Publication\Repository\StatusRepositoryInterface' ] ]
 
     App\Twitter\Infrastructure\Api\Accessor:
         class: 'App\Twitter\Infrastructure\Api\Accessor'

@@ -13,12 +13,6 @@
     "autoload-dev": {
         "psr-4": { "App\\Tests\\": "tests/" }
     },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/WeavingTheWeb/DoctrineExtensions.git"
-        }
-    ],
     "require": {
         "php": ">=7.2.9",
         "ext-bcmath": "*",
@@ -27,7 +21,7 @@
         "ext-pdo": "*",
         "abraham/twitteroauth": "dev-main",
         "auth0/auth0-php": "~5.0",
-        "beberlei/doctrineextensions": "dev-master",
+        "beberlei/doctrineextensions": "^1.3",
         "doctrine/doctrine-bundle": "^2.2",
         "doctrine/doctrine-migrations-bundle": "^3.1",
         "doctrine/inflector": "*",

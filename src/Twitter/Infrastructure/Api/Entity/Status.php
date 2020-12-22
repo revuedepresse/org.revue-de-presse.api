@@ -11,7 +11,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * @ORM\Entity(repositoryClass="App\Twitter\Infrastructure\Api\Repository\StatusRepository")
+ * @ORM\Entity
  * @ORM\Table(
  *      name="weaving_status",
  *      uniqueConstraints={

@@ -115,10 +115,6 @@ class AggregateSubscriptionRepository extends ServiceEntityRepository
     /**
      * @param string $memberName
      * @param string $aggregateName
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     * @throws \Doctrine\ORM\OptimisticLockException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\SuspendedAccountException
-     * @throws \WeavingTheWeb\Bundle\TwitterBundle\Exception\UnavailableResourceException
      */
     public function letMemberSubscribeToAggregate(string $memberName, string $aggregateName): void
     {

@@ -15,6 +15,7 @@ use App\Twitter\Infrastructure\Publication\Mapping\MappingAwareInterface;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Twitter\Collector\PublicationCollector;
 use DateTime;
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\NonUniqueResultException;
@@ -64,20 +65,6 @@ class StatusRepository extends ArchivedStatusRepository
         }
 
         return $status;
-    }
-
-    /**
-     * @param MappingAwareInterface $service
-     * @param ArrayCollection       $statuses
-     * @return ArrayCollection
-     */
-    public function mapStatusCollectionToService(
-        MappingAwareInterface $service,
-        ArrayCollection $statuses
-    ) {
-        return $statuses->map(function (Status $status) use ($service) {
-            return $service->apply($status);
-        });
     }
 
     /**
@@ -188,27 +175,6 @@ class StatusRepository extends ArchivedStatusRepository
         return $status->setUpdatedAt(
             new DateTime('now', new \DateTimeZone('UTC'))
         );
-    }
-
-    /**
-     * @param string    $memberScreenName
-     * @param DateTime $earliestDate
-     * @param DateTime $latestDate
-     * @return ArrayCollection
-     */
-    public function queryPublicationCollection(
-        string $memberScreenName,
-        DateTime $earliestDate,
-        DateTime $latestDate
-    ) {
-        $queryBuilder = $this->createQueryBuilder('s');
-
-        $this->between($queryBuilder, $earliestDate, $latestDate);
-
-        $queryBuilder->andWhere('s.screenName = :screen_name');
-        $queryBuilder->setParameter('screen_name', $memberScreenName);
-
-        return new ArrayCollection($queryBuilder->getQuery()->getResult());
     }
 
     /**

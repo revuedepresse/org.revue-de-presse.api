@@ -3,9 +3,9 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Amqp\MessageHandler;
 
-use App\Twitter\Infrastructure\Api\AccessToken\Repository\TokenRepositoryInterface;
+use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Twitter\Infrastructure\Api\Entity\Token;
-use App\Twitter\Infrastructure\Api\Entity\TokenInterface;
+use App\Twitter\Domain\Api\Model\TokenInterface;
 use App\Twitter\Infrastructure\Amqp\Message\FetchMemberLikes;
 use App\Twitter\Infrastructure\Amqp\Message\FetchMemberStatus;
 use App\Twitter\Infrastructure\Amqp\Message\FetchPublicationInterface;

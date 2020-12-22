@@ -28,6 +28,7 @@
             <group>member_subscription</group>
             <group>ownership</group>
             <group>persistence</group>
+            <group>production_fixtures</group>
             <group>publication</group>
             <group>publication_message_dispatcher</group>
             <group>repository_publishers_list</group>

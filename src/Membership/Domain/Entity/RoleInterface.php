@@ -2,9 +2,6 @@
 
 namespace App\Membership\Domain\Entity;
 
-/**
- * @package WeavingTheWeb\Bundle\UserBundle\Entity
- */
 interface RoleInterface
 {
     const ROLE_USER = 'user';

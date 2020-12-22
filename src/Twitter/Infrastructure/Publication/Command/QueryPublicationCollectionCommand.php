@@ -35,7 +35,7 @@ class QueryPublicationCollectionCommand extends Command implements CommandReturn
 
     public function configure()
     {
-        $this->setName('press-review:query-publication-collection')
+        $this->setName('devobs:query-publication-collection')
             ->setDescription('Query a collection of publication from criteria.')
             ->addOption(
                 self::OPTION_SCREEN_NAME,

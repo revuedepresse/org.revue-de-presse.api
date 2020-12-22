@@ -31,5 +31,7 @@ services:
 
     test.App\Twitter\Infrastructure\Subscription\Console\UnfollowInactiveMembersCommand: '@App\Twitter\Infrastructure\Subscription\Console\UnfollowInactiveMembersCommand'
 
+    test.App\Twitter\Infrastructure\Operation\Console\LoadProductionFixtures: '@App\Twitter\Infrastructure\Operation\Console\LoadProductionFixtures'
+
     App\Tests\NewsReview\Infrastructure\Repository\InMemoryPopularPublicationRepository:
         class: 'App\Tests\NewsReview\Infrastructure\Repository\InMemoryPopularPublicationRepository'

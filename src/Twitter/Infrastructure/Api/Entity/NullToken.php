@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Api\Entity;
 
+use App\Twitter\Domain\Api\Model\TokenInterface;
+
 class NullToken implements TokenInterface
 {
     use TokenTrait;
