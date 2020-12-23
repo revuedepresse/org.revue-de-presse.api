@@ -339,42 +339,6 @@ class StatusRepository extends ArchivedStatusRepository
     }
 
     /**
-     * @param        $status
-     * @param string $memberName
-     *
-     * @return MemberInterface
-     */
-    public function declareMaximumLikedStatusId(
-        $status,
-        string $memberName
-    ): MemberInterface {
-        $maxStatus = $status->id_str;
-
-        return $this->memberRepository->declareMaxLikeIdForMemberWithScreenName(
-            $maxStatus,
-            $memberName
-        );
-    }
-
-    /**
-     * @param        $status
-     * @param string $memberName
-     *
-     * @return MemberInterface
-     */
-    public function declareMinimumLikedStatusId(
-        $status,
-        string $memberName
-    ): MemberInterface {
-        $minStatus = $status->id_str;
-
-        return $this->memberRepository->declareMinLikeIdForMemberWithScreenName(
-            $minStatus,
-            $memberName
-        );
-    }
-
-    /**
      * @param Aggregate $aggregate
      * @return array
      */

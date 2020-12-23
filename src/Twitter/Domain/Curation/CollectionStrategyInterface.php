@@ -13,8 +13,6 @@ interface CollectionStrategyInterface
 
     public function PublishersListId(): ?int;
 
-    public function fetchLikes(): bool;
-
     public function maxStatusId();
 
     public function minStatusId();
@@ -34,8 +32,6 @@ interface CollectionStrategyInterface
     public function optInToCollectStatusForPublishersListOfId(
         ?int $publishersList = null
     ): self;
-
-    public function optInToFetchLikes(bool $fetchLikes = false): self;
 
     public static function fromArray(array $options): self;
 }

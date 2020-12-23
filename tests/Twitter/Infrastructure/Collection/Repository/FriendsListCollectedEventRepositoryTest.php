@@ -32,12 +32,11 @@ class FriendsListCollectedEventRepositoryTest extends KernelTestCase
      */
     public function it_should_collect_friends_list_of_a_member(): void
     {
-        $accessor = FriendsListAccessorBuilder::make();
+        $accessor = FriendsListAccessorBuilder::build();
 
         $friendsList = $this->repository->collectedList(
             $accessor,
             new FriendsListSelector(
-                UuidV4::uuid4(),
                 self::SCREEN_NAME
             )
         );

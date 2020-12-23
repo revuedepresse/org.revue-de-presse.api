@@ -22,10 +22,7 @@ class FriendsListAccessorTest extends KernelTestCase
     public function it_should_get_friends_list_at_default_cursor(): void
     {
         $friendsList = $this->accessor->getListAtCursor(
-            new FriendsListSelector(
-                UuidV4::uuid4(),
-                'mipsytipsy',
-            )
+            new FriendsListSelector('mipsytipsy')
         );
 
         self::assertCount(200, $friendsList->getList());
@@ -33,6 +30,6 @@ class FriendsListAccessorTest extends KernelTestCase
 
     public function setUp()
     {
-        $this->accessor = FriendsListAccessorBuilder::make();
+        $this->accessor = FriendsListAccessorBuilder::build();
     }
 }

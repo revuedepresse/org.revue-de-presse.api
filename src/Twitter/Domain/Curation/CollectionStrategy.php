@@ -3,10 +3,8 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Curation;
 
-use App\Twitter\Domain\Publication\Repository\LikedStatusRepositoryInterface;
 use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use App\Twitter\Domain\Publication\Repository\StatusRepositoryInterface;
-use App\Twitter\Domain\Curation\LikedStatusCollectionAwareInterface;
 use function array_key_exists;
 use const INF;
 
@@ -30,24 +28,12 @@ class CollectionStrategy implements CollectionStrategyInterface
             $strategy->optInToCollectStatusFor($options['screen_name']);
         }
 
-        if (
-            array_key_exists(
-                LikedStatusCollectionAwareInterface::INTENT_TO_FETCH_LIKES,
-                $options
-            )
-            && $options[LikedStatusCollectionAwareInterface::INTENT_TO_FETCH_LIKES]
-        ) {
-            $strategy->optInToFetchLikes(true);
-        }
-
         return $strategy;
     }
 
     private ?string $dateBeforeWhichStatusAreCollected = null;
 
     private ?int $publishersListId = null;
-
-    private bool $shouldFetchLikes = false;
 
     private string $screenName;
 
@@ -56,15 +42,9 @@ class CollectionStrategy implements CollectionStrategyInterface
     private $minStatusId;
 
     public function shouldLookUpPublicationsWithMinId(
-        LikedStatusRepositoryInterface $likedStatusRepository,
         StatusRepositoryInterface $statusRepository,
         MemberRepositoryInterface $memberRepository
     ): bool {
-        if ($this->fetchLikes()) {
-            return $likedStatusRepository->countHowManyLikesFor($this->screenName())
-                > self::MAX_AVAILABLE_TWEETS_PER_USER;
-        }
-
         $minPublicationId = $memberRepository->getMinPublicationIdForMemberHavingScreenName(
             $this->screenName()
         );
@@ -80,11 +60,6 @@ class CollectionStrategy implements CollectionStrategyInterface
     public function dateBeforeWhichPublicationsAreToBeCollected(): ?string
     {
         return $this->dateBeforeWhichStatusAreCollected;
-    }
-
-    public function fetchLikes(): bool
-    {
-        return $this->shouldFetchLikes;
     }
 
     public function maxStatusId()
@@ -143,13 +118,6 @@ class CollectionStrategy implements CollectionStrategyInterface
     public function optInToCollectStatusWhichIdIsGreaterThan($minStatusId): CollectionStrategyInterface
     {
         $this->minStatusId = $minStatusId;
-
-        return $this;
-    }
-
-    public function optInToFetchLikes(?bool $fetchLikes = false): self
-    {
-        $this->shouldFetchLikes = $fetchLikes;
 
         return $this;
     }

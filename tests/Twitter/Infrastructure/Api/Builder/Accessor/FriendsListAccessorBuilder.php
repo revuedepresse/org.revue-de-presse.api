@@ -15,7 +15,7 @@ class FriendsListAccessorBuilder extends TestCase
     /**
      * @return ListAccessorInterface
      */
-    public static function make(): ListAccessorInterface
+    public static function build(): ListAccessorInterface
     {
         $testCase = new self();
 

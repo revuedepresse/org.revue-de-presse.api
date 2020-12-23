@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 
 class SimpleTokenRepositoryBuilder extends TestCase
 {
-    public static function make(): TokenRepositoryInterface
+    public static function build(): TokenRepositoryInterface
     {
         $testCase = new self();
 

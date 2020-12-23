@@ -3,28 +3,33 @@ declare (strict_types=1);
 
 namespace App\Twitter\Infrastructure\Twitter\Api\Selector;
 
-use Ramsey\Uuid\UuidInterface;
+use App\Twitter\Domain\Api\Selector\ListSelectorInterface;
+use App\Twitter\Infrastructure\Operation\Correlation\CorrelationId;
+use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdAwareInterface;
+use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdInterface;
 
-class FriendsListSelector implements ListSelector
+class FriendsListSelector implements ListSelectorInterface, CorrelationIdAwareInterface
 {
-    /**
-     * @var UuidInterface
-     */
-    private UuidInterface $correlationId;
+    private CorrelationIdInterface $correlationId;
     private string $screenName;
     private string $cursor;
 
     public function __construct(
-        UuidInterface $correlationId,
         string $screenName,
-        string $cursor = '-1'
+        string $cursor = '-1',
+        CorrelationIdInterface $correlationId = null
     ) {
-        $this->correlationId = $correlationId;
         $this->screenName = $screenName;
         $this->cursor = $cursor;
+
+        if ($correlationId === null) {
+            $correlationId = CorrelationId::generate();
+        }
+
+        $this->correlationId = $correlationId;
     }
 
-    public function correlationId(): UuidInterface
+    public function correlationId(): CorrelationIdInterface
     {
         return $this->correlationId;
     }

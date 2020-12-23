@@ -103,22 +103,16 @@ class StatusLogger implements StatusLoggerInterface
     /**
      * @param int    $statusesCount
      * @param string $memberName
-     * @param bool   $collectingLikes
      *
      * @return int
      */
     public function logHowManyItemsHaveBeenSaved(
         int $statusesCount,
-        string $memberName,
-        bool $collectingLikes
+        string $memberName
     ): int {
         if ($statusesCount > 0) {
             $messageKey = 'logs.info.status_saved';
             $total      = 'total_status';
-            if ($collectingLikes) {
-                $messageKey = 'logs.info.likes_saved';
-                $total      = 'total_likes';
-            }
 
             $savedTweets = $this->translator->trans(
                 $messageKey,
@@ -203,9 +197,6 @@ class StatusLogger implements StatusLoggerInterface
         int $totalCollectedStatuses
     ): void {
         $subject = 'statuses';
-        if ($collectionStrategy->fetchLikes()) {
-            $subject = 'likes';
-        }
 
         if ($this->collectedAllAvailableStatuses(
             $lastCollectionBatchSize,

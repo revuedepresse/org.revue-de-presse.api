@@ -30,29 +30,21 @@ trait FetchPublicationTrait
     private ?bool $dateBeforeWhichStatusAreCollected;
 
     /**
-     * @var bool
-     */
-    private bool $fetchLikes;
-
-    /**
      * @param string         $screenName
      * @param int            $aggregateId
      * @param TokenInterface $token
-     * @param bool|null      $fetchLikes
      * @param string|null    $dateBeforeWhichStatusAreCollected
      */
     public function __construct(
         string $screenName,
         int $aggregateId,
         TokenInterface $token,
-        bool $fetchLikes = null,
         ?string $dateBeforeWhichStatusAreCollected = null
     ) {
         $this->screenName = $screenName;
         $this->aggregateId = $aggregateId;
         $this->dateBeforeWhichStatusAreCollected = $dateBeforeWhichStatusAreCollected;
         $this->token = $token;
-        $this->fetchLikes = (bool) $fetchLikes;
     }
 
     /**
@@ -87,23 +79,16 @@ trait FetchPublicationTrait
         return $this->token;
     }
 
-    public function shouldFetchLikes(): bool
-    {
-        return $this->fetchLikes;
-    }
-
     public static function makeMemberIdentityCard(
         Aggregate $aggregate,
         TokenInterface $token,
         MemberInterface $member,
-        ?string $dateBeforeWhichStatusAreCollected,
-        bool $fetchLikes = false
+        ?string $dateBeforeWhichStatusAreCollected
     ): FetchPublicationInterface {
         return new self(
             $member->getTwitterUsername(),
             $aggregate->getId(),
             $token,
-            $fetchLikes,
             $dateBeforeWhichStatusAreCollected
         );
     }

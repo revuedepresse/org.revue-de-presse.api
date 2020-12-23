@@ -10,7 +10,7 @@ use App\Membership\Domain\Entity\MemberInterface;
 interface FetchPublicationInterface
 {
     public const BEFORE = 'before';
-    public const publishers_list_ID = 'aggregate_id';
+    public const PUBLISHERS_LIST_ID = 'aggregate_id';
     public const SCREEN_NAME         = 'screen_name';
 
     public function aggregateId(): int;
@@ -19,15 +19,12 @@ interface FetchPublicationInterface
 
     public function screenName(): string;
 
-    public function shouldFetchLikes(): bool;
-
     public function token(): TokenInterface;
 
     public static function makeMemberIdentityCard(
         Aggregate $aggregate,
         TokenInterface $token,
         MemberInterface $member,
-        ?string $dateBeforeWhichStatusAreCollected,
-        bool $fetchLikes = false
-    ): self;
+        ?string $dateBeforeWhichStatusAreCollected
+    ): FetchPublicationInterface;
 }

@@ -52,4 +52,13 @@ class TokenRepositoryBuilder
 
         return $this;
     }
+
+    public function willReturnTheCountOfUnfrozenTokensExceptFrom(TokenInterface $token, int $count): TokenRepositoryBuilder
+    {
+        $this->prophecy
+            ->howManyUnfrozenTokenAreThereExceptFrom($token)
+            ->willReturn($count);
+
+        return $this;
+    }
 }

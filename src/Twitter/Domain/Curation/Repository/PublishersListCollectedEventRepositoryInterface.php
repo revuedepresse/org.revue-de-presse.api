@@ -9,8 +9,8 @@ use App\Twitter\Domain\Api\ApiAccessorInterface;
 
 interface PublishersListCollectedEventRepositoryInterface
 {
-    public const OPTION_publishers_list_ID = 'list_id';
-    public const OPTION_publishers_list_NAME = 'list_name';
+    public const OPTION_PUBLISHERS_LIST_ID = 'list_id';
+    public const OPTION_PUBLISHERS_LIST_NAME = 'list_name';
 
     public function collectedPublishersList(
         ApiAccessorInterface $accessor,

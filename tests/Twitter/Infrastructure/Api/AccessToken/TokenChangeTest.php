@@ -7,6 +7,7 @@ use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Twitter\Infrastructure\Api\AccessToken\TokenChange;
 use App\Twitter\Infrastructure\Api\Entity\Token;
 use App\Twitter\Domain\Api\Model\TokenInterface;
+use App\Twitter\Infrastructure\Api\Exception\CanNotReplaceAccessTokenException;
 use App\Twitter\Infrastructure\Api\Exception\InvalidSerializedTokenException;
 use App\Twitter\Infrastructure\Api\Exception\UnavailableTokenException;
 use App\Tests\Twitter\Infrastructure\Api\AccessToken\Builder\Repository\SimpleTokenRepositoryBuilder;
@@ -32,7 +33,7 @@ class TokenChangeTest extends TestCase
      * @test
      * @throws InvalidSerializedTokenException
      */
-    public function it_can_not_change_the_token_of_an_api_accessor(): void
+    public function it_does_not_replace_the_token_of_an_api_accessor(): void
     {
         // Arrange
 
@@ -67,9 +68,44 @@ class TokenChangeTest extends TestCase
 
     /**
      * @test
-     * @throws InvalidSerializedTokenException
      */
-    public function it_changes_the_token_of_an_api_accessor(): void
+    public function it_does_not_replace_the_token_of_an_api_accessor_when_there_is_no_token_left(): void
+    {
+        // Arrange
+
+        $expectedTokenReplacement = null;
+
+        $this->willNotFindReplacementToken();
+
+        $tokenChange = new TokenChange(
+            $this->tokenRepository,
+            new NullLogger()
+        );
+
+        // Act
+
+        try {
+            $tokenChange->replaceAccessToken(
+                $this->excludedToken,
+                $this->accessor
+            );
+        }
+
+        catch (Exception $exception) {
+
+        // Assert
+
+            self::assertInstanceOf(
+                CanNotReplaceAccessTokenException::class,
+                $exception
+            );
+        }
+    }
+
+    /**
+     * @test
+     */
+    public function it_replaces_the_token_of_an_api_accessor(): void
     {
         // Arrange
 
@@ -111,18 +147,18 @@ class TokenChangeTest extends TestCase
             'consumer_secret',
             'access_token',
             'access_token_secret',
-            SimpleTokenRepositoryBuilder::make(),
+            SimpleTokenRepositoryBuilder::build(),
             new NullLogger()
         );
     }
 
     /**
      * @param Token|null $replacementToken
-     *
      * @throws InvalidSerializedTokenException
      */
-    private function willFindReplacementToken(Token $replacementToken = null): void
-    {
+    private function willFindReplacementToken(
+        Token $replacementToken = null
+    ): void {
         $this->excludedToken = Token::fromArray(
             [
                 'token'  => 'token',
@@ -131,9 +167,30 @@ class TokenChangeTest extends TestCase
         );
 
         $this->tokenRepository = TokenRepositoryBuilder::newTokenRepositoryBuilder()
-                                                       ->willFindATokenOtherThan(
-                                                           $this->excludedToken,
-                                                           $replacementToken
-                                                       )->build();
+            ->willReturnTheCountOfUnfrozenTokensExceptFrom(
+                $this->excludedToken,
+                1
+            )
+           ->willFindATokenOtherThan(
+               $this->excludedToken,
+               $replacementToken
+           )
+           ->build();
+    }
+
+    private function willNotFindReplacementToken(): void {
+        $this->excludedToken = Token::fromArray(
+            [
+                'token'  => 'token',
+                'secret' => 'secret'
+            ]
+        );
+
+        $this->tokenRepository = TokenRepositoryBuilder::newTokenRepositoryBuilder()
+           ->willReturnTheCountOfUnfrozenTokensExceptFrom(
+                $this->excludedToken,
+                0
+           )
+           ->build();
     }
 }

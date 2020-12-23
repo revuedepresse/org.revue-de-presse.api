@@ -5,7 +5,7 @@ namespace App\Twitter\Infrastructure\Twitter\Api\Accessor;
 
 use App\Twitter\Infrastructure\Twitter\Api\Resource\FollowersList;
 use App\Twitter\Infrastructure\Twitter\Api\Resource\ResourceList;
-use App\Twitter\Infrastructure\Twitter\Api\Selector\ListSelector;
+use App\Twitter\Domain\Api\Selector\ListSelectorInterface;
 use App\Twitter\Domain\Api\ApiAccessorInterface;
 use Closure;
 use Psr\Log\LoggerInterface;
@@ -25,7 +25,7 @@ class FollowersListAccessor implements ListAccessorInterface
     }
 
     public function getListAtCursor(
-        ListSelector $selector,
+        ListSelectorInterface $selector,
         Closure $onFinishCollection = null
     ): ResourceList {
         try {

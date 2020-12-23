@@ -3,22 +3,22 @@ declare (strict_types=1);
 
 namespace App\Tests\Twitter\Domain\Curation\Infrastructure\Builder\Repository;
 
+use App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\FollowersListAccessorBuilder;
 use App\Twitter\Domain\Curation\Entity\FollowersListCollectedEvent;
-use App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository;
 use App\Twitter\Domain\Curation\Repository\ListCollectedEventRepositoryInterface;
+use App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository;
+use App\Twitter\Infrastructure\Operation\Correlation\CorrelationId;
 use App\Twitter\Infrastructure\Twitter\Api\Accessor\ListAccessorInterface;
 use App\Twitter\Infrastructure\Twitter\Api\Selector\FollowersListSelector;
-use App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\FollowersListAccessorBuilder;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
-use Ramsey\Uuid\Rfc4122\UuidV4;
 
 class FollowersListCollectedEventRepositoryBuilder extends TestCase
 {
     /**
      * @return ListCollectedEventRepositoryInterface
      */
-    public static function make(): ListCollectedEventRepositoryInterface
+    public static function build(): ListCollectedEventRepositoryInterface
     {
         $testCase = new self();
         $prophecy = $testCase->prophesize(FollowersListCollectedEventRepository::class);
@@ -27,7 +27,7 @@ class FollowersListCollectedEventRepositoryBuilder extends TestCase
             ->will(function ($arguments) {
                 $resourcePath = '../../../../../../Resources/Subscribees.b64';
 
-                return [FollowersListCollectedEvent::unserialize(
+                return [FollowersListCollectedEvent::jsonDeserialize(
                     base64_decode(
                         file_get_contents(__DIR__ . '/' . $resourcePath)
                     ),
@@ -38,13 +38,10 @@ class FollowersListCollectedEventRepositoryBuilder extends TestCase
             Argument::type(ListAccessorInterface::class),
             Argument::type('string')
         )->will(function ($arguments) {
-            $followersListAccessor = FollowersListAccessorBuilder::make();
+            $followersListAccessor = FollowersListAccessorBuilder::build();
 
             return $followersListAccessor->getListAtCursor(
-                new FollowersListSelector(
-                    UuidV4::uuid4(),
-                    $arguments[1],
-                )
+                new FollowersListSelector($arguments[1])
             );
         });
 

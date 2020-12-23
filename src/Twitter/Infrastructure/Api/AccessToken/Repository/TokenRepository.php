@@ -5,23 +5,21 @@ namespace App\Twitter\Infrastructure\Api\AccessToken\Repository;
 
 use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Twitter\Domain\Api\Model\TokenInterface;
+use App\Twitter\Infrastructure\Api\Entity\Token;
+use App\Twitter\Infrastructure\Api\Entity\TokenType;
 use App\Twitter\Infrastructure\Api\Exception\UnavailableTokenException;
 use App\Twitter\Infrastructure\Database\Connection\ConnectionAwareInterface;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
+use App\Twitter\Infrastructure\Exception\InvalidTokensException;
 use DateTime;
 use DateTimeZone;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
+use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\QueryBuilder;
-use Doctrine\ORM\NoResultException;
-
 use Exception;
-use Psr\Log\LoggerInterface;
-
-use App\Twitter\Infrastructure\Api\Entity\Token,
-    App\Twitter\Infrastructure\Api\Entity\TokenType;
 
 /**
  * @method TokenInterface|null find($id, $lockMode = null, $lockVersion = null)
@@ -57,7 +55,7 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
 
         // Ensure the newly created token is not frozen yet
         // equivalent to setting the frozen until date in the past
-        $token->setFrozenUntil(new DateTime('now - 15min'));
+        $token->unfreeze();
 
         return $token;
     }
@@ -82,56 +80,33 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
         $this->save($token);
     }
 
-    /**
-     * @param $oauthToken
-     * @param string $until
-     * @throws Exception
-     */
-    public function freezeToken($oauthToken, $until = 'now + 15min'): void
+    public function freezeToken(TokenInterface $oauthToken): void
     {
-        /** @var Token $token */
+        /** @var TokenInterface $token */
         $token = $this->findOneBy(['oauthToken' => $oauthToken]);
-        $token->setFrozenUntil(new DateTime($until));
+
+        if (!($token instanceof TokenInterface)) {
+            UnavailableTokenException::throws();
+        }
+
+        $token->freeze();
 
         $this->save($token);
     }
 
-    /**
-     * @param string          $oauthToken
-     * @param LoggerInterface $logger
-     *
-     * @return TokenInterface
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
-    public function refreshFreezeCondition(
-        string $oauthToken,
-        LoggerInterface $logger
-    ): TokenInterface {
-        $frozen = false;
+    public function findByUserToken(string $userToken): TokenInterface {
+        $matchingTokens= $this->findBy(['oauthToken' => $userToken]);
 
-        $token = $this->findOneBy(['oauthToken' => $oauthToken]);
-
-        if ($token === null) {
-            $token = $this->makeToken(['oauth_token' => $oauthToken, 'oauth_token_secret' => '']);
-            $this->save($token);
-
-            $logger->info('[token creation] ' . $token->getOauthToken());
-        } elseif ($this->isTokenFrozen($token)) {
-            /**
-             * The token is frozen if the "frozen until" date is in the future
-             */
-            $frozen = true;
+        if (empty($matchingTokens)) {
+            throw new UnavailableTokenException(
+                sprintf(
+                    'No token matching "%s" user token',
+                    $userToken
+                )
+            );
         }
-        /**
-         *  else {
-         *      The token was frozen but not anymore as "frozen until" date is now in the past
-         *  }
-         */
 
-        $token->setFrozen($frozen);
-
-        return $token;
+        return $matchingTokens[0];
     }
 
     /**
@@ -146,6 +121,17 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
             $token->getFrozenUntil()->getTimestamp() >
                 (new DateTime('now', new DateTimeZone('UTC')))
                     ->getTimestamp();
+    }
+
+    /**
+     * @param Token $token
+     *
+     * @return bool
+     * @throws Exception
+     */
+    protected function isTokenNotFrozen(Token $token): bool
+    {
+        return !$this->isTokenFrozen($token);
     }
 
     /**
@@ -191,6 +177,23 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
     {
         $queryBuilder = $this->createQueryBuilder('t');
         $queryBuilder->select('COUNT(t.id) as count_');
+
+        $this->applyUnfrozenTokenCriteria($this->createQueryBuilder('t'));
+
+        try {
+            return $queryBuilder->getQuery()->getSingleResult()['count_'];
+        } catch (NoResultException $exception) {
+            UnavailableTokenException::throws();
+        }
+    }
+
+    public function howManyUnfrozenTokenAreThereExceptFrom(TokenInterface $excludedToken): int
+    {
+        $queryBuilder = $this->createQueryBuilder('t');
+        $queryBuilder->select('COUNT(t.id) as count_');
+
+        $queryBuilder->andWhere('t.oauthToken != :user_token');
+        $queryBuilder->setParameter(':user_token', $excludedToken->getOAuthToken());
 
         $this->applyUnfrozenTokenCriteria($this->createQueryBuilder('t'));
 

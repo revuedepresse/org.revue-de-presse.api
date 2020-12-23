@@ -34,6 +34,9 @@ run-stack: ## Run stack and its dependencies
 run-worker: ## Run worker and its dependencies
 		@/bin/bash -c 'source ./bin/console.sh && run_worker'
 
+set-up-amqp-queues: ## Set up AMQP queues
+		@/bin/bash -c 'source ./.env.local && source ./bin/console.sh && set_up_amqp_queues'
+
 list-amqp-messages: ## List AMQP messags
 		@/bin/bash -c 'source ./bin/console.sh && list_amqp_queues'
 
@@ -62,4 +65,4 @@ create-test-database: ## Create test database
 		@/bin/bash -c 'source ./bin/console.sh && create_test_database'
 
 load-production-fixtures: ## Load production fixtures
-		@/bin/bash -c 'source ./bin/console.sh && load_production_fixtures'
+		@/bin/bash -c 'source ./.env.local && source ./bin/console.sh && load_production_fixtures'

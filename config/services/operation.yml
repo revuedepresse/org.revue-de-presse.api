@@ -14,6 +14,7 @@ services:
         arguments:
             - 'devobs:load-production-fixtures'
             - '@App\Twitter\Domain\Api\Repository\TokenTypeRepositoryInterface'
+            - '@App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface'
         tags:
             - { name: 'console.command' }
 
@@ -24,5 +25,9 @@ services:
             - 'App\Twitter\Infrastructure\Api\Entity\TokenType'
         calls:
             - [ 'setLogger', [ '@monolog.logger.doctrine' ]]
+        tags:
+            - { name: 'doctrine.repository_service' }
 
     App\Twitter\Domain\Api\Repository\TokenTypeRepositoryInterface: '@App\Twitter\Infrastructure\Api\Repository\TokenTypeRepository'
+
+    App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface: '@App\Twitter\Infrastructure\Api\AccessToken\Repository\TokenRepository'

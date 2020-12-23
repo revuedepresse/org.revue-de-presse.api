@@ -6,13 +6,11 @@ namespace App\Twitter\Infrastructure\Amqp\MessageHandler;
 use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Twitter\Infrastructure\Api\Entity\Token;
 use App\Twitter\Domain\Api\Model\TokenInterface;
-use App\Twitter\Infrastructure\Amqp\Message\FetchMemberLikes;
 use App\Twitter\Infrastructure\Amqp\Message\FetchMemberStatus;
 use App\Twitter\Infrastructure\Amqp\Message\FetchPublicationInterface;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Twitter\Infrastructure\Twitter\Collector\PublicationCollectorInterface;
-use App\Twitter\Domain\Curation\LikedStatusCollectionAwareInterface;
 use App\Twitter\Domain\Api\TwitterErrorAwareInterface;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
@@ -66,8 +64,7 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
         }
 
         $options = [
-            LikedStatusCollectionAwareInterface::INTENT_TO_FETCH_LIKES => $message->shouldFetchLikes(),
-            $message::publishers_list_ID                              => $message->aggregateId(),
+            $message::PUBLISHERS_LIST_ID                              => $message->aggregateId(),
             $message::BEFORE                                           => $message->dateBeforeWhichStatusAreCollected(),
             'count'                                                    => 200,
             'oauth'                                                    => $options[TokenInterface::FIELD_TOKEN],

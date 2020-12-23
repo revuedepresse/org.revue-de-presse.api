@@ -42,6 +42,7 @@ make build-stack-images
 
 ```shell
 make run-stack
+make set-up-amqp-queues
 ```
 
 ## Run test suites

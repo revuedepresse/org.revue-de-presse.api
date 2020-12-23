@@ -3,14 +3,15 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Curation\Entity;
 
-use App\Twitter\Infrastructure\Twitter\Api\Selector\ListSelector;
+use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdInterface;
+use App\Twitter\Domain\Api\Selector\ListSelectorInterface;
 use DateTimeInterface;
 use Ramsey\Uuid\UuidInterface;
 
 interface ListCollectedEvent
 {
     public function __construct(
-        ListSelector $selector,
+        ListSelectorInterface $selector,
         DateTimeInterface $occurredAt,
         DateTimeInterface $startedAt,
         ?string $payload = null,
@@ -18,7 +19,7 @@ interface ListCollectedEvent
     );
 
     public function id(): UuidInterface;
-    public function correlationId(): UuidInterface;
+    public function correlationId(): CorrelationIdInterface;
     public function screenName(): string;
     public function atCursor(): string;
     public function payload(): string;

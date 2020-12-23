@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace App\Twitter\Domain\Api\AccessToken\Repository;
 
 use App\Twitter\Domain\Api\Model\TokenInterface;
-use Psr\Log\LoggerInterface;
 
 /**
  * @method TokenInterface|null find($id, $lockMode = null, $lockVersion = null)
@@ -14,6 +13,8 @@ use Psr\Log\LoggerInterface;
  */
 interface TokenRepositoryInterface
 {
+    public function findByUserToken(string $userToken): TokenInterface;
+
     public function findTokenOtherThan(string $token): ?TokenInterface;
 
     public function findFirstUnfrozenToken(): ?TokenInterface;
@@ -22,6 +23,8 @@ interface TokenRepositoryInterface
 
     public function howManyUnfrozenTokenAreThere(): int;
 
+    public function howManyUnfrozenTokenAreThereExceptFrom(TokenInterface $excludedToken): int;
+
     public function ensureTokenExists(
         string $oauthToken,
         string $oauthTokenSecret,
@@ -29,8 +32,5 @@ interface TokenRepositoryInterface
         string $consumerSecret
     ): void;
 
-    public function refreshFreezeCondition(
-        string $oauthToken,
-        LoggerInterface $logger
-    ): TokenInterface;
+    public function freezeToken(TokenInterface $oauthToken): void;
 }

@@ -7,12 +7,17 @@ use App\Twitter\Infrastructure\Amqp\Exception\SkippableMemberException;
 use App\Twitter\Domain\Resource\MemberIdentity;
 use App\Twitter\Domain\Resource\PublishersList;
 use App\Membership\Domain\Entity\MemberInterface;
+use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdAwareInterface;
+use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdAwareTrait;
+use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdInterface;
 use function array_key_exists;
 use function count;
 use function sprintf;
 
-class PublicationStrategy implements PublicationStrategyInterface
+class PublicationStrategy implements PublicationStrategyInterface, CorrelationIdAwareInterface
 {
+    use CorrelationIdAwareTrait;
+
     private string $screenName;
 
     private ?string $dateBeforeWhichPublicationsAreCollected = null;
@@ -31,9 +36,12 @@ class PublicationStrategy implements PublicationStrategyInterface
 
     private bool $includeOwner = false;
 
-    private bool $fetchLikes = false;
-
     private int $cursor = -1;
+
+    public function __construct(CorrelationIdInterface $correlationId)
+    {
+        $this->correlationId = $correlationId;
+    }
 
     /**
      * @return bool
@@ -268,18 +276,6 @@ class PublicationStrategy implements PublicationStrategyInterface
     public function willCollectPublicationsPreceding(?string $date): PublicationStrategyInterface
     {
         $this->dateBeforeWhichPublicationsAreCollected = $date;
-
-        return $this;
-    }
-
-    /**
-     * @param bool $fetchLikes
-     *
-     * @return PublicationStrategyInterface
-     */
-    public function willFetchLikes(bool $fetchLikes = false): PublicationStrategyInterface
-    {
-        $this->fetchLikes = $fetchLikes;
 
         return $this;
     }

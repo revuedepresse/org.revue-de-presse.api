@@ -5,10 +5,9 @@ namespace App\Twitter\Domain\Api;
 
 use App\Twitter\Domain\Api\Model\TokenInterface;
 use App\Twitter\Domain\Resource\MemberCollection;
-use App\Twitter\Domain\Resource\OwnershipCollection;
 use stdClass;
 
-interface ApiAccessorInterface
+interface ApiAccessorInterface extends MemberOwnershipsAccessorInterface
 {
     public const MAX_OWNERSHIPS = 800;
 
@@ -19,12 +18,6 @@ interface ApiAccessorInterface
     public function setConsumerKey(string $secret): self;
 
     public function setConsumerSecret(string $secret): self;
-
-    public function getMemberOwnerships(
-        string $screenName,
-        int $cursor = -1,
-        int $count = self::MAX_OWNERSHIPS
-    ): OwnershipCollection;
 
     public function getListMembers(string $listId): MemberCollection;
 

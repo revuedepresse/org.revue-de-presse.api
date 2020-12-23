@@ -4,6 +4,9 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Api\Entity;
 
 use App\Twitter\Domain\Api\Model\TokenInterface;
+use DateTimeImmutable;
+use DateTimeInterface;
+use DateTimeZone;
 
 class NullToken implements TokenInterface
 {
@@ -44,23 +47,43 @@ class NullToken implements TokenInterface
         return false;
     }
 
-    public function isNotFrozen(): bool
+    public function isFrozen(): bool
     {
-        return false;
+        return true;
     }
 
-    public function setFrozenUntil(\DateTimeInterface $frozenUntil): TokenInterface
+    public function isNotFrozen(): bool
     {
-        return $this;
+        return !$this->isFrozen();
     }
 
     public function getFrozenUntil(): \DateTimeInterface
     {
-        return new \DateTimeImmutable();
+        return $this->nextFreezeEndsAt();
     }
 
     public function firstIdentifierCharacters(): string
     {
         return '';
+    }
+
+    public function freeze(): TokenInterface
+    {
+        // no oop, can not freeze a null token
+        return $this;
+    }
+
+    public function unfreeze(): TokenInterface
+    {
+        // no oop, can not unfreeze a null token
+        return $this;
+    }
+
+    public function nextFreezeEndsAt(): DateTimeInterface
+    {
+        return new DateTimeImmutable(
+            'now + 10 years',
+            new DateTimeZone('UTC')
+        );
     }
 }

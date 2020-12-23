@@ -21,9 +21,7 @@ use App\Twitter\Infrastructure\Publication\Mapping\MappingAwareInterface;
 use App\Twitter\Infrastructure\Twitter\Api\Normalizer\Normalizer;
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Twitter\Infrastructure\Operation\Collection\CollectionInterface;
-use App\Twitter\Domain\Curation\Entity\LikedStatus;
 use App\Twitter\Domain\Publication\Repository\ExtremumAwareInterface;
-use App\Twitter\Infrastructure\Publication\Repository\LikedStatusRepository;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
@@ -61,8 +59,6 @@ class ArchivedStatusRepository extends ResourceRepository implements
     public ManagerRegistry $registry;
 
     public LoggerInterface $appLogger;
-
-    public LikedStatusRepository $likedStatusRepository;
 
     public Connection $connection;
 
@@ -343,8 +339,6 @@ class ArchivedStatusRepository extends ResourceRepository implements
             $this->appLogger
         );
 
-        $likedStatuses = [];
-
         $entityManager = $this->getEntityManager();
 
         /** @var TaggedStatus $taggedStatus */
@@ -390,13 +384,6 @@ class ArchivedStatusRepository extends ResourceRepository implements
                 }
 
                 if ($member instanceof MemberInterface) {
-                    $likedStatuses[] = $this->likedStatusRepository->ensureMemberStatusHasBeenMarkedAsLikedBy(
-                        $member,
-                        $memberStatus,
-                        $likedBy,
-                        $aggregate
-                    );
-
                     $entityManager->persist($memberStatus);
                 }
             } catch (ORMException $exception) {
@@ -411,7 +398,6 @@ class ArchivedStatusRepository extends ResourceRepository implements
         }
 
         $this->flushAndResetManagerOnUniqueConstraintViolation($entityManager);
-        $this->flushLikedStatuses($likedStatuses, $entityManager);
 
         if (count($extracts) > 0) {
             $this->memberRepository->incrementTotalLikesOfMemberWithName(
@@ -462,25 +448,6 @@ class ArchivedStatusRepository extends ResourceRepository implements
 
             InsertDuplicatesException::throws($exception);
         }
-    }
-
-    /**
-     * @param                        $likedStatuses
-     * @param EntityManagerInterface $entityManager
-     */
-    private function flushLikedStatuses(
-        $likedStatuses,
-        EntityManagerInterface $entityManager
-    ): void {
-        (new ArrayCollection($likedStatuses))->map(
-            function (LikedStatus $likedStatus) use ($entityManager) {
-                $entityManager->persist($likedStatus);
-            }
-        );
-
-        $this->flushAndResetManagerOnUniqueConstraintViolation(
-            $entityManager
-        );
     }
 
     /**

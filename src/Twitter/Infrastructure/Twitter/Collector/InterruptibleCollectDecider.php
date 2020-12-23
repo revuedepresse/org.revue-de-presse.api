@@ -1,37 +1,35 @@
-<?php /** @noinspection PhpUnused */
+<?php
+
 declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Twitter\Collector;
 
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\ApiRateLimitingException;
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
-use App\Twitter\Infrastructure\Amqp\Exception\SkippableMessageException;
-use App\Twitter\Infrastructure\Api\Entity\Whisperer;
 use App\Twitter\Domain\Curation\CollectionStrategyInterface;
 use App\Twitter\Domain\Membership\Exception\MembershipException;
 use App\Twitter\Domain\Publication\Exception\LockedPublishersListException;
 use App\Twitter\Domain\Publication\PublishersListInterface;
+use App\Twitter\Infrastructure\Amqp\Exception\SkippableMessageException;
 use App\Twitter\Infrastructure\Amqp\Message\FetchPublicationInterface;
+use App\Twitter\Infrastructure\Api\Entity\Whisperer;
 use App\Twitter\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Api\ApiLimitModeratorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Api\StatusAccessorTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Collection\LikedStatusCollectDecider;
 use App\Twitter\Infrastructure\DependencyInjection\Collection\MemberProfileCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\WhispererRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublishersListRepositoryTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Status\LikedStatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusPersistenceTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TokenRepositoryTrait;
-use App\Twitter\Infrastructure\Twitter\Collector\Exception\RateLimitedException;
-use App\Twitter\Infrastructure\Twitter\Collector\Exception\SkipCollectException;
 use App\Twitter\Infrastructure\Exception\BadAuthenticationDataException;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
+use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\ApiRateLimitingException;
+use App\Twitter\Infrastructure\Twitter\Collector\Exception\RateLimitedException;
+use App\Twitter\Infrastructure\Twitter\Collector\Exception\SkipCollectException;
 use DateTime;
 use Exception;
 use function array_key_exists;
@@ -43,8 +41,6 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
 {
     use ApiAccessorTrait;
     use ApiLimitModeratorTrait;
-    use LikedStatusRepositoryTrait;
-    use LikedStatusCollectDecider;
     use MemberRepositoryTrait;
     use MemberProfileCollectedEventRepositoryTrait;
     use PublishersListRepositoryTrait;
@@ -242,16 +238,6 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
             }
         }
 
-        if ($this->collectionStrategy->fetchLikes()) {
-            return $this->likedStatusCollectDecider
-                ->shouldSkipLikedStatusCollect(
-                    $options,
-                    $statuses,
-                    $this->collectionStrategy,
-                    $publishersList
-                );
-        }
-
         $this->afterUpdatingLastPublicationDate(
             $options,
             $whisperer
@@ -304,10 +290,7 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
             SkippableMessageException::stopMessageConsumption();
         }
 
-        $isNotAboutCollectingLikes = !$this->collectionStrategy->fetchLikes();
-        if ($isNotAboutCollectingLikes) {
-            $this->whispererRepository->forgetAboutWhisperer($whisperer);
-        }
+        $this->whispererRepository->forgetAboutWhisperer($whisperer);
 
         SkippableMessageException::continueMessageConsumption();
     }
@@ -320,13 +303,13 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
     private function extractAggregateIdFromOptions(
         $options
     ): ?int {
-        if (!array_key_exists(FetchPublicationInterface::publishers_list_ID, $options)) {
+        if (!array_key_exists(FetchPublicationInterface::PUBLISHERS_LIST_ID, $options)) {
             return null;
         }
 
-        $this->collectionStrategy->optInToCollectStatusForPublishersListOfId($options[FetchPublicationInterface::publishers_list_ID]);
+        $this->collectionStrategy->optInToCollectStatusForPublishersListOfId($options[FetchPublicationInterface::PUBLISHERS_LIST_ID]);
 
-        return $options[FetchPublicationInterface::publishers_list_ID];
+        return $options[FetchPublicationInterface::PUBLISHERS_LIST_ID];
     }
 
     /**
@@ -338,10 +321,6 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
         ?Whisperer $whisperer
     ): void {
         if (!($whisperer instanceof Whisperer)) {
-            return;
-        }
-
-        if ($this->collectionStrategy->fetchLikes()) {
             return;
         }
 
@@ -370,10 +349,6 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
     private function beforeFetchingStatuses(
         $options
     ): ?Whisperer {
-        if ($this->collectionStrategy->fetchLikes()) {
-            return null;
-        }
-
         $whisperer = $this->whispererRepository->findOneBy(
             ['name' => $options[FetchPublicationInterface::SCREEN_NAME]]
         );

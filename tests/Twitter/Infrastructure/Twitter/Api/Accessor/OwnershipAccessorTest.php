@@ -6,13 +6,17 @@ namespace App\Tests\Twitter\Infrastructure\Twitter\Api\Accessor;
 use App\Twitter\Domain\Curation\Repository\OwnershipBatchCollectedEventRepositoryInterface;
 use App\Twitter\Domain\Resource\MemberOwnerships;
 use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
+use App\Twitter\Infrastructure\Api\AccessToken\TokenChangeInterface;
 use App\Twitter\Infrastructure\Api\Entity\Token;
 use App\Twitter\Infrastructure\Api\Exception\InvalidSerializedTokenException;
+use App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository;
+use App\Twitter\Infrastructure\Operation\Correlation\CorrelationId;
 use App\Twitter\Infrastructure\Twitter\Api\Accessor\OwnershipAccessor;
 use App\Tests\Twitter\Infrastructure\Api\AccessToken\Builder\Entity\TokenChangeBuilder;
 use App\Tests\Twitter\Infrastructure\Api\AccessToken\Builder\Repository\TokenRepositoryBuilder;
 use App\Tests\Twitter\Infrastructure\Twitter\Api\Builder\ApiAccessorBuilder;
 use App\Twitter\Infrastructure\Exception\OverCapacityException;
+use App\Twitter\Infrastructure\Twitter\Api\Selector\AuthenticatedSelector;
 use Exception;
 use Psr\Log\NullLogger;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -36,7 +40,7 @@ class OwnershipAccessorTest extends KernelTestCase
         self::$kernel = self::bootKernel();
         self::$container = self::$kernel->getContainer();
 
-        $this->eventRepository = self::$container->get('test.event_repository.ownership_batch_collected');
+        $this->eventRepository = self::$container->get('test.'.OwnershipBatchCollectedEventRepository::class);
     }
 
     /**
@@ -71,8 +75,10 @@ class OwnershipAccessorTest extends KernelTestCase
         // Act
 
         $ownerships = $ownershipAccessor->getOwnershipsForMemberHavingScreenNameAndToken(
-            self::MEMBER_SCREEN_NAME,
-            $activeToken
+            new AuthenticatedSelector(
+                $activeToken,
+                self::MEMBER_SCREEN_NAME
+            )
         );
 
         // Assert
@@ -114,8 +120,10 @@ class OwnershipAccessorTest extends KernelTestCase
         // Act
 
         $ownerships = $ownershipAccessor->getOwnershipsForMemberHavingScreenNameAndToken(
-            self::MEMBER_SCREEN_NAME,
-            $activeToken
+            new AuthenticatedSelector(
+                $activeToken,
+                self::MEMBER_SCREEN_NAME
+            )
         );
 
         // Assert
@@ -160,9 +168,11 @@ class OwnershipAccessorTest extends KernelTestCase
         try {
             // Act
 
-            $ownerships = $ownershipAccessor->getOwnershipsForMemberHavingScreenNameAndToken(
-                self::MEMBER_SCREEN_NAME,
-                $activeToken = $this->getActiveToken()
+            $ownershipAccessor->getOwnershipsForMemberHavingScreenNameAndToken(
+                new AuthenticatedSelector(
+                    $this->getActiveToken(),
+                    self::MEMBER_SCREEN_NAME
+                )
             );
         } catch (Exception $exception) {
             self::assertInstanceOf(
@@ -190,11 +200,7 @@ class OwnershipAccessorTest extends KernelTestCase
         );
     }
 
-    /**
-     * @return object
-     * @throws InvalidSerializedTokenException
-     */
-    private function makeTokenChange(): object
+    private function makeTokenChange(): TokenChangeInterface
     {
         $tokenChangeBuilder = new TokenChangeBuilder();
         $tokenChangeBuilder = $tokenChangeBuilder->willReplaceAccessToken(

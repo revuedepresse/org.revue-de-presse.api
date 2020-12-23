@@ -18,7 +18,7 @@ class FriendsListCollectedEventRepositoryBuilder extends TestCase
     /**
      * @return ListCollectedEventRepositoryInterface
      */
-    public static function make(): ListCollectedEventRepositoryInterface
+    public static function build(): ListCollectedEventRepositoryInterface
     {
         $testCase = new self();
         $prophecy = $testCase->prophesize(FriendsListCollectedEventRepository::class);
@@ -27,7 +27,7 @@ class FriendsListCollectedEventRepositoryBuilder extends TestCase
             ->will(function ($arguments) {
                 $resourcePath = '../../../../../../Resources/Subscriptions.b64';
 
-                return [FriendsListCollectedEvent::unserialize(
+                return [FriendsListCollectedEvent::jsonDeserialize(
                     base64_decode(
                         file_get_contents(__DIR__ . '/' . $resourcePath)
                     ),
@@ -38,13 +38,10 @@ class FriendsListCollectedEventRepositoryBuilder extends TestCase
             Argument::type(ListAccessorInterface::class),
             Argument::type('string')
         )->will(function ($arguments) {
-            $friendsListAccessor = FriendsListAccessorBuilder::make();
+            $friendsListAccessor = FriendsListAccessorBuilder::build();
 
             return $friendsListAccessor->getListAtCursor(
-                new FriendsListSelector(
-                    UuidV4::uuid4(),
-                    $arguments[1]
-                )
+                new FriendsListSelector($arguments[1])
             );
         });
 

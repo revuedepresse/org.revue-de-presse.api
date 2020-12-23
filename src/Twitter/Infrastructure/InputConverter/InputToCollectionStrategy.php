@@ -5,16 +5,19 @@ namespace App\Twitter\Infrastructure\InputConverter;
 
 use App\Twitter\Domain\Curation\PublicationStrategy;
 use App\Twitter\Domain\Curation\PublicationStrategyInterface;
+use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdAwareCommandTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use function array_walk;
 use function explode;
 
 class InputToCollectionStrategy
 {
+    use CorrelationIdAwareCommandTrait;
+
     public static function convertInputToCollectionStrategy(
         InputInterface $input
     ): PublicationStrategyInterface {
-        $strategy = new PublicationStrategy();
+        $strategy = new PublicationStrategy(self::convertInputOptionIntoCorrelationId($input));
 
         $strategy->forMemberHavingScreenName(self::screenName($input));
 

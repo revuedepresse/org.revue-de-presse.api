@@ -35,7 +35,7 @@ services:
         class: 'App\Twitter\Infrastructure\Log\StatusLogger'
         arguments:
             - '@App\Twitter\Infrastructure\Translation\Translator'
-            - '@monolog.logger.status'
+            - '@monolog.logger.twitter_api'
 
     App\Twitter\Infrastructure\Publication\Formatter\PublicationFormatter:
         public: true
@@ -60,8 +60,9 @@ services:
             appLogger:                '@logger'
             archivedStatusRepository: '@App\Twitter\Infrastructure\Api\Repository\ArchivedStatusRepository'
             connection:               '@doctrine.dbal.default_connection'
-            likedStatusRepository:    '@repository.liked_status'
             registry:                 '@doctrine'
+        tags:
+            - { name: 'doctrine.repository_service' }
 
     App\Twitter\Domain\Publication\Repository\StatusRepositoryInterface: '@App\Twitter\Infrastructure\Api\Repository\StatusRepository'
 
@@ -80,7 +81,6 @@ services:
         properties:
             appLogger:              '@logger'
             connection:             '@doctrine.dbal.default_connection'
-            likedStatusRepository:  '@repository.liked_status'
             registry:               '@doctrine'
 
     weaving_the_web_twitter.repository.read.status:
@@ -96,9 +96,8 @@ services:
             - [ 'setTaggedStatusRepository', [ '@App\Twitter\Infrastructure\Repository\Status\TaggedStatusRepository' ] ]
             - [ 'setTimelyStatusRepository', [ '@repository.timely_status' ] ]
         properties:
-            likedStatusRepository:  '@repository.liked_status'
             registry:               '@doctrine'
-            statusLogger:           '@monolog.logger.status'
+            statusLogger:           '@monolog.logger.twitter_api'
             connection:             '@doctrine.dbal.default_connection'
 
     App\Twitter\Infrastructure\Amqp\ResourceProcessor\MemberIdentityProcessor:
@@ -156,7 +155,7 @@ services:
             - '%weaving_the_web_twitter.oauth_token.default%'
             - '%weaving_the_web_twitter.oauth_secret.default%'
             - '@repository.access_token'
-            - '@logger'
+            - '@monolog.logger.twitter_api'
         properties:
             environment:          '%kernel.environment%'
             twitterApiLogger:     '@monolog.logger.twitter_api'
@@ -180,7 +179,6 @@ services:
         calls:
             - [ 'setApiAccessor',                               [ '@App\Twitter\Infrastructure\Api\Accessor' ] ]
             - [ 'setLogger',                                    [ '@logger' ] ]
-            - [ 'setLikedStatusRepository',                     [ '@repository.liked_status' ] ]
             - [ 'setMemberRepository',                          [ '@App\Twitter\Infrastructure\Repository\Membership\MemberRepository' ] ]
             - [ 'setMemberProfileCollectedEventRepository',     [ '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository' ] ]
             - [ 'setPublicationPersistence',                    [ '@App\Twitter\Infrastructure\Publication\Persistence\PublicationPersistence' ] ]
@@ -220,8 +218,7 @@ services:
         calls:
             - [ 'setApiAccessor',                               [ '@App\Twitter\Infrastructure\Api\Accessor' ] ]
             - [ 'setInterruptibleCollectDeciderInterface',      [ '@App\Twitter\Infrastructure\Twitter\Collector\InterruptibleCollectDecider' ] ]
-            - [ 'setLogger',                                    [ '@monolog.logger.status' ] ]
-            - [ 'setLikedStatusRepository',                     [ '@repository.liked_status' ] ]
+            - [ 'setLogger',                                    [ '@monolog.logger.twitter_api' ] ]
             - [ 'setMemberProfileCollectedEventRepository',     [ '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository' ] ]
             - [ 'setMemberRepository',                          [ '@App\Twitter\Infrastructure\Repository\Membership\MemberRepository' ] ]
             - [ 'setModerator',                                 [ '@App\Twitter\Infrastructure\Api\Moderator\ApiLimitModerator' ] ]
@@ -253,7 +250,6 @@ services:
 parameters:
     monolog_channels:
         - 'twitter_api'
-        - 'status'
         - 'development'
         - 'membership'
 

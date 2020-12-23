@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Twitter\Collector;
 
+use App\Twitter\Infrastructure\Api\Entity\FreezableToken;
 use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\ApiRateLimitingException;
 use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
 use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\ReadOnlyApplicationException;
@@ -27,7 +28,6 @@ use App\Twitter\Infrastructure\DependencyInjection\{Api\ApiAccessorTrait,
     Membership\WhispererRepositoryTrait,
     Publication\PublishersListRepositoryTrait,
     Publication\PublicationPersistenceTrait,
-    Status\LikedStatusRepositoryTrait,
     Status\StatusLoggerTrait,
     Status\StatusPersistenceTrait,
     Status\StatusRepositoryTrait,
@@ -36,7 +36,6 @@ use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Twitter\Infrastructure\Twitter\Collector\Exception\RateLimitedException;
 use App\Twitter\Infrastructure\Twitter\Collector\Exception\SkipCollectException;
 use App\Membership\Domain\Entity\MemberInterface;
-use App\Twitter\Domain\Curation\LikedStatusCollectionAwareInterface;
 use App\Twitter\Infrastructure\Exception\BadAuthenticationDataException;
 use App\Twitter\Infrastructure\Exception\InconsistentTokenRepository;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
@@ -68,7 +67,6 @@ class PublicationCollector implements PublicationCollectorInterface
     use PublicationPersistenceTrait;
     use StatusLoggerTrait;
     use StatusPersistenceTrait;
-    use LikedStatusRepositoryTrait;
     use StatusAccessorTrait;
     use StatusRepositoryTrait;
     use TokenRepositoryTrait;
@@ -161,7 +159,6 @@ class PublicationCollector implements PublicationCollectorInterface
         }
 
         if ($this->collectionStrategy->shouldLookUpPublicationsWithMinId(
-            $this->likedStatusRepository,
             $this->statusRepository,
             $this->memberRepository
         )) {
@@ -226,14 +223,12 @@ class PublicationCollector implements PublicationCollectorInterface
      */
     private function updateLastStatusPublicationDate(array $options): void
     {
-        if (!$this->collectionStrategy->fetchLikes()) {
-            try {
-                $this->statusRepository->updateLastStatusPublicationDate(
-                    $options[FetchPublicationInterface::SCREEN_NAME]
-                );
-            } catch (NotFoundStatusException $exception) {
-                $this->logger->info($exception->getMessage());
-            }
+        try {
+            $this->statusRepository->updateLastStatusPublicationDate(
+                $options[FetchPublicationInterface::SCREEN_NAME]
+            );
+        } catch (NotFoundStatusException $exception) {
+            $this->logger->info($exception->getMessage());
         }
     }
 
@@ -282,8 +277,8 @@ class PublicationCollector implements PublicationCollectorInterface
         if ($this->collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected()) {
             unset($options[FetchPublicationInterface::BEFORE]);
         }
-        if (array_key_exists(FetchPublicationInterface::publishers_list_ID, $options)) {
-            unset($options[FetchPublicationInterface::publishers_list_ID]);
+        if (array_key_exists(FetchPublicationInterface::PUBLISHERS_LIST_ID, $options)) {
+            unset($options[FetchPublicationInterface::PUBLISHERS_LIST_ID]);
         }
 
         return $options;
@@ -372,7 +367,7 @@ class PublicationCollector implements PublicationCollectorInterface
             if ($exception->getCode() === $this->apiAccessor->getEmptyReplyErrorCode()) {
                 $availableApi = true;
             } else {
-                $this->tokenRepository->freezeToken($this->apiAccessor->userToken);
+                $this->tokenRepository->freezeToken(FreezableToken::fromUserToken($this->apiAccessor->userToken));
             }
         }
 
@@ -406,10 +401,7 @@ class PublicationCollector implements PublicationCollectorInterface
     {
         $availableApi = false;
 
-        $token = $this->tokenRepository->refreshFreezeCondition(
-            $this->apiAccessor->userToken,
-            $this->logger
-        );
+        $token = $this->tokenRepository->findByUserToken($this->apiAccessor->userToken);
 
         if ($token->isNotFrozen()) {
             $availableApi = $this->isApiAvailable();
@@ -457,57 +449,15 @@ class PublicationCollector implements PublicationCollectorInterface
 
     protected function remainingItemsToCollect(array $options): bool
     {
-        if ($this->collectionStrategy->fetchLikes()) {
-            return $this->remainingLikes($options);
-        }
-
         return $this->remainingStatuses($options);
-    }
-
-    protected function remainingLikes(array $options): bool
-    {
-        $serializedLikesCount =
-            $this->likedStatusRepository->countHowManyLikesFor($options[FetchPublicationInterface::SCREEN_NAME]);
-        $existingStatus       = $this->translator->trans(
-            'logs.info.likes_existing',
-            [
-                'total_likes' => $serializedLikesCount,
-                'count'       => $serializedLikesCount,
-                'member'      => $options[FetchPublicationInterface::SCREEN_NAME],
-            ],
-            'logs'
-        );
-        $this->logger->info($existingStatus);
-
-        $member = $this->collectMemberProfile(
-            $options[FetchPublicationInterface::SCREEN_NAME]
-        );
-        if (!isset($member->statuses_count)) {
-            $member->statuses_count = 0;
-        }
-
-        /**
-         * Twitter allows 3200 past tweets at most to be retrieved for any given user
-         */
-        $likesCount      = max($member->statuses_count, CollectionStrategyInterface::MAX_AVAILABLE_TWEETS_PER_USER);
-        $discoveredLikes = $this->translator->trans(
-            'logs.info.likes_discovered',
-            [
-                'total_likes' => $likesCount,
-                'member'      => $options[FetchPublicationInterface::SCREEN_NAME],
-                'count'       => $likesCount,
-            ],
-            'logs'
-        );
-        $this->logger->info($discoveredLikes);
-
-        return $serializedLikesCount < $likesCount;
     }
 
     /**
      * @param $options
      *
      * @return bool
+     * @throws NoResultException
+     * @throws NonUniqueResultException
      */
     protected function remainingStatuses($options): bool
     {
@@ -642,24 +592,6 @@ class PublicationCollector implements PublicationCollectorInterface
             );
         }
 
-        if ($this->collectionStrategy->fetchLikes()) {
-            if ($shouldDeclareMaximumStatusId) {
-                $lastStatusFetched = $statuses[0];
-
-                return $this->statusRepository->declareMaximumLikedStatusId(
-                    $lastStatusFetched,
-                    $memberName
-                );
-            }
-
-            $firstStatusFetched = $statuses[count($statuses) - 1];
-
-            return $this->statusRepository->declareMinimumLikedStatusId(
-                $firstStatusFetched,
-                $memberName
-            );
-        }
-
         if ($shouldDeclareMaximumStatusId) {
             $lastStatusFetched = $statuses[0];
 
@@ -681,8 +613,6 @@ class PublicationCollector implements PublicationCollectorInterface
         if (array_key_exists('max_id', $options) && is_infinite($options['max_id'])) {
             unset($options['max_id']);
         }
-
-        $options[LikedStatusCollectionAwareInterface::INTENT_TO_FETCH_LIKES] = $this->collectionStrategy->fetchLikes();
 
         return $options;
     }
@@ -725,12 +655,6 @@ class PublicationCollector implements PublicationCollectorInterface
      */
     private function getExtremeStatusesIdsFor($options): array
     {
-        if ($this->collectionStrategy->fetchLikes()) {
-            return $this->likedStatusRepository->getIdsOfExtremeStatusesSavedForMemberHavingScreenName(
-                $options[FetchPublicationInterface::SCREEN_NAME]
-            );
-        }
-
         return $this->statusRepository->getIdsOfExtremeStatusesSavedForMemberHavingScreenName(
             $options[FetchPublicationInterface::SCREEN_NAME]
         );
@@ -867,7 +791,7 @@ class PublicationCollector implements PublicationCollectorInterface
                 $discoverPublicationsWithMaxId;
 
             if ($greedy) {
-                $options[FetchPublicationInterface::publishers_list_ID] = $this->collectionStrategy->publishersListId();
+                $options[FetchPublicationInterface::PUBLISHERS_LIST_ID] = $this->collectionStrategy->publishersListId();
                 $options[FetchPublicationInterface::BEFORE]              =
                     $this->collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected();
 
@@ -882,7 +806,7 @@ class PublicationCollector implements PublicationCollectorInterface
                     $discoverPublicationWithMinId
                     && $this->collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected() === null
                 ) {
-                    unset($options[FetchPublicationInterface::publishers_list_ID]);
+                    unset($options[FetchPublicationInterface::PUBLISHERS_LIST_ID]);
 
                     $options = $this->statusAccessor->updateExtremum(
                         $this->collectionStrategy,
@@ -892,7 +816,6 @@ class PublicationCollector implements PublicationCollectorInterface
                     $options = $this->apiAccessor->guessMaxId(
                         $options,
                         $this->collectionStrategy->shouldLookUpPublicationsWithMinId(
-                            $this->likedStatusRepository,
                             $this->statusRepository,
                             $this->memberRepository
                         )

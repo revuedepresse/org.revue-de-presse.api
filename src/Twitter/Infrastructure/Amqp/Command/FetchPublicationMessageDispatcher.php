@@ -34,8 +34,8 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
     private const OPTION_LISTS                  = PublicationStrategyInterface::RULE_LISTS;
     private const OPTION_CURSOR                 = PublicationStrategyInterface::RULE_CURSOR;
 
-    private const OPTION_OAUTH_TOKEN  = 'oauth_token';
-    private const OPTION_OAUTH_SECRET = 'oauth_secret';
+    private const OPTION_OAUTH_TOKEN            = 'oauth_token';
+    private const OPTION_OAUTH_SECRET           = 'oauth_secret';
 
     use OwnershipAccessorTrait;
     use PublicationMessageDispatcherTrait;

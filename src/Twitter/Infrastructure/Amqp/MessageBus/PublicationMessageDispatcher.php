@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Amqp\MessageBus;
 
+use App\Twitter\Domain\Resource\OwnershipCollectionInterface;
 use App\Twitter\Infrastructure\Amqp\Exception\InvalidListNameException;
 use App\Twitter\Infrastructure\Amqp\Exception\UnexpectedOwnershipException;
 use App\Twitter\Infrastructure\Api\AccessToken\TokenChangeInterface;
@@ -21,6 +22,11 @@ use App\Twitter\Infrastructure\DependencyInjection\TokenChangeTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Twitter\Domain\Api\ApiAccessorInterface;
 use App\Twitter\Infrastructure\Exception\EmptyListException;
+use App\Twitter\Infrastructure\Operation\Correlation\CorrelationId;
+use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdAwareInterface;
+use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdInterface;
+use App\Twitter\Infrastructure\Twitter\Api\Selector\AuthenticatedSelector;
+use App\Twitter\Infrastructure\Twitter\Api\Selector\MemberOwnershipsBatchSelector;
 use Closure;
 use DateTimeImmutable;
 use Exception;
@@ -32,7 +38,7 @@ use function implode;
 use function in_array;
 use function sprintf;
 
-class PublicationMessageDispatcher implements PublicationMessageDispatcherInterface
+class PublicationMessageDispatcher implements PublicationMessageDispatcherInterface, CorrelationIdAwareInterface
 {
     use ApiLimitModeratorTrait;
     use OwnershipBatchCollectedEventRepositoryTrait;
@@ -76,7 +82,7 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
         $this->writer   = $writer;
         $this->strategy = $strategy;
 
-        $memberOwnerships = $this->fetchMemberOwnerships($strategy, $token);
+        $memberOwnerships = $this->fetchMemberOwnerships($token);
 
         /** @var PublishersList $list */
         foreach ($memberOwnerships->ownershipCollection()->toArray() as $list) {
@@ -116,10 +122,16 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
         }
     }
 
-    private function fetchMemberOwnerships(
-        PublicationStrategyInterface $strategy,
-        TokenInterface $token
-    ): MemberOwnerships {
+    public function correlationId(): CorrelationIdInterface
+    {
+        if ($this->strategy instanceof CorrelationIdAwareInterface) {
+            return $this->strategy->correlationId();
+        }
+
+        return CorrelationId::generate();
+    }
+
+    private function fetchMemberOwnerships(TokenInterface $token): MemberOwnerships {
         $cursor = $this->strategy->shouldFetchPublicationsFromCursor();
 
         $memberOwnership = null;
@@ -127,11 +139,14 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
 
         while ($this->keepDispatching($memberOwnership)) {
             $nextMemberOwnership = $this->guardAgainstTokenFreeze(
-                function (TokenInterface $token) use ($strategy, $memberOwnership) {
+                function (TokenInterface $token) use ($memberOwnership) {
                     return $this->ownershipAccessor
                         ->getOwnershipsForMemberHavingScreenNameAndToken(
-                            $strategy->onBehalfOfWhom(),
-                            $token,
+                            new AuthenticatedSelector(
+                                $token,
+                                $this->strategy->onBehalfOfWhom(),
+                                $this->correlationId()
+                            ),
                             $memberOwnership
                         );
                 },
@@ -164,7 +179,7 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
         $allOwnerships = $allOwnerships[count($allOwnerships) - 1];
         usort(
             $allOwnerships,
-            function (PublishersList $leftPublishersList, PublishersList $rightPublishersList) {
+            static function (PublishersList $leftPublishersList, PublishersList $rightPublishersList) {
                 return $leftPublishersList->id() <=> $rightPublishersList->id();
             }
         );
@@ -175,14 +190,9 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
         );
     }
 
-    /**
-     * @param OwnershipCollection $ownerships
-     *
-     * @return OwnershipCollection
-     */
     private function findNextBatchOfListOwnerships(
-        OwnershipCollection $ownerships
-    ): OwnershipCollection {
+        OwnershipCollectionInterface $ownerships
+    ): OwnershipCollectionInterface {
         $previousCursor = -1;
 
         $eventRepository = $this->ownershipBatchCollectedEventRepository;
@@ -190,10 +200,11 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
         if ($this->strategy->listRestriction()) {
             return $eventRepository->collectedOwnershipBatch(
                 $this->accessor,
-                [
-                    $eventRepository::OPTION_SCREEN_NAME => $this->strategy->onBehalfOfWhom(),
-                    $eventRepository::OPTION_NEXT_PAGE   => $ownerships->nextPage()
-                ]
+                new MemberOwnershipsBatchSelector(
+                    $this->strategy->onBehalfOfWhom(),
+                    (string) $ownerships->nextPage(),
+                    $this->correlationId()
+                )
             );
         }
 
@@ -203,10 +214,11 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
         )) {
             $ownerships = $eventRepository->collectedOwnershipBatch(
                 $this->accessor,
-                [
-                    $eventRepository::OPTION_SCREEN_NAME => $this->strategy->onBehalfOfWhom(),
-                    $eventRepository::OPTION_NEXT_PAGE   => $ownerships->nextPage()
-                ]
+                new MemberOwnershipsBatchSelector(
+                    $this->strategy->onBehalfOfWhom(),
+                    (string) $ownerships->nextPage(),
+                    $this->correlationId()
+                )
             );
 
             if (!$ownerships->nextPage() || $previousCursor === $ownerships->nextPage()) {
@@ -231,17 +243,10 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
         return $ownerships;
     }
 
-    /**
-     * @param OwnershipCollection $ownerships
-     * @param TokenInterface      $token
-     *
-     * @return OwnershipCollection
-     * @throws InvalidListNameException
-     */
     private function guardAgainstInvalidListName(
-        OwnershipCollection $ownerships,
+        OwnershipCollectionInterface $ownerships,
         TokenInterface $token
-    ): OwnershipCollection {
+    ): OwnershipCollectionInterface {
         if ($this->strategy->noListRestriction()) {
             return $ownerships;
         }
@@ -278,17 +283,10 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
         return $ownerships;
     }
 
-    /**
-     * @param OwnershipCollection $ownerships
-     *
-     * @param TokenInterface      $token
-     *
-     * @return OwnershipCollection
-     */
     private function guardAgainstInvalidToken(
-        OwnershipCollection $ownerships,
+        OwnershipCollectionInterface $ownerships,
         TokenInterface $token
-    ): OwnershipCollection {
+    ): OwnershipCollectionInterface {
         $this->tokenChange->replaceAccessToken(
             $token,
             $this->accessor
@@ -305,11 +303,17 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
         try {
             return $callable($token);
         } catch (UnavailableTokenException $exception) {
+            $unavailableToken = $token;
             $token = $exception::firstTokenToBeAvailable();
-            $now   = new DateTimeImmutable(
+
+            $now = new DateTimeImmutable(
                 'now',
-                $token->getFrozenUntil()->getTimezone()
+                $unavailableToken->getFrozenUntil()->getTimezone()
             );
+
+            if ($token === null) {
+                $token = $unavailableToken;
+            }
 
             $this->moderator->waitFor(
                 $token->getFrozenUntil()->getTimestamp() - $now->getTimestamp(),
@@ -332,12 +336,7 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
                 && $memberOwnership->ownershipCollection()->isNotEmpty());
     }
 
-    /**
-     * @param $ownerships
-     *
-     * @return array
-     */
-    private function mapOwnershipsLists(OwnershipCollection $ownerships): array
+    private function mapOwnershipsLists(OwnershipCollectionInterface $ownerships): array
     {
         return array_map(
             fn(PublishersList $list) => $list->name(),

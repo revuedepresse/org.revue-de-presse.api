@@ -67,7 +67,7 @@ services:
         class:                          "%press_review.publication_message.handler.class%"
         calls:
             - [ 'setCollector',         [ '@App\Twitter\Infrastructure\Twitter\Collector\PublicationCollector'] ]
-            - [ 'setLogger',            [ '@monolog.logger.status'] ]
+            - [ 'setLogger',            [ '@monolog.logger.twitter_api'] ]
             - [ 'setMemberRepository',  [ '@App\Twitter\Infrastructure\Repository\Membership\MemberRepository'] ]
         properties:
             tokenRepository:            '@repository.access_token'
@@ -169,7 +169,7 @@ services:
     weaving_the_web_amqp.consumer.conversation_status:
         class:                        "%weaving_the_web_amqp.consumer.conversation_status.class%"
         calls:
-            - [ 'setLogger',            [ '@monolog.logger.status'] ]
+            - [ 'setLogger',            [ '@monolog.logger.twitter_api'] ]
             - [ 'setStatusAccessor',    [ '@App\Twitter\Infrastructure\Twitter\Api\Accessor\StatusAccessor' ] ]
             - [ 'setStatusRepository',  [ '@App\Twitter\Infrastructure\Api\Repository\StatusRepository' ] ]
             - [ 'setUserRepository',    [ '@user_manager'] ]
@@ -184,7 +184,7 @@ services:
             operationClock:          '@operation.clock'
             tokenRepository:         '@repository.access_token'
         calls:
-            - [ 'setLogger',            [ '@monolog.logger.status'] ]
+            - [ 'setLogger',            [ '@monolog.logger.twitter_api'] ]
 
     weaving_the_web_amqp.producer.conversation_status:
         class:               "%weaving_the_web_amqp.producer.produce_conversation_messages_command.class%"

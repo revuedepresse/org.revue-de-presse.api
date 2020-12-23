@@ -43,12 +43,7 @@ class InterruptibleCollectDeciderTest extends KernelTestCase
         $tokenRepository = $tokenRepositoryBuilder->willFindFirstFrozenToken(
             (new Token())
                 ->setOAuthToken('1232108293-token')
-                ->setFrozenUntil(
-                    new \DateTime(
-                        'now',
-                        new \DateTimeZone('UTC')
-                    )
-                )
+                ->freeze()
         )->build();
         $this->decider->setTokenRepository($tokenRepository);
 

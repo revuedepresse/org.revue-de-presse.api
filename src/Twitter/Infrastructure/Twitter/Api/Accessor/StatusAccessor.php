@@ -21,11 +21,9 @@ use App\Twitter\Infrastructure\DependencyInjection\Collection\PublicationBatchCo
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Status\LikedStatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Twitter\Domain\Curation\Entity\NullStatus;
-use App\Twitter\Domain\Curation\LikedStatusCollectionAwareInterface;
 use App\Twitter\Domain\Publication\Repository\ExtremumAwareInterface;
 use App\Twitter\Infrastructure\Publication\Repository\NotFoundStatusRepository;
 use App\Twitter\Infrastructure\Exception\BadAuthenticationDataException;
@@ -43,15 +41,11 @@ use function array_key_exists;
 use function count;
 use function sprintf;
 
-/**
- * @package App\Accessor
- */
 class StatusAccessor implements StatusAccessorInterface
 {
     use ApiAccessorTrait;
     use MemberProfileCollectedEventRepositoryTrait;
     use PublicationPersistenceTrait;
-    use LikedStatusRepositoryTrait;
     use LoggerTrait;
     use StatusRepositoryTrait;
     use MemberRepositoryTrait;
@@ -286,7 +280,6 @@ class StatusAccessor implements StatusAccessorInterface
         $options,
         bool $discoverPublicationWithMaxId = true
     ): array {
-        $options[LikedStatusCollectionAwareInterface::INTENT_TO_FETCH_LIKES] = $collectionStrategy->fetchLikes();
         $options = $this->removeCollectOptions($collectionStrategy, $options);
         $options = $this->updateExtremum(
             $collectionStrategy,
@@ -423,14 +416,6 @@ class StatusAccessor implements StatusAccessorInterface
         array $options,
         $findingDirection
     ): array {
-        if ($collectionStrategy->fetchLikes()) {
-            return $this->findLikeExtremum(
-                $collectionStrategy,
-                $options,
-                $findingDirection
-            );
-        }
-
         if ($collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected()) {
             return $this->statusRepository->findNextExtremum(
                 $options[FetchPublicationInterface::SCREEN_NAME],
@@ -441,32 +426,6 @@ class StatusAccessor implements StatusAccessorInterface
 
         return $this->statusRepository->findLocalMaximum(
             $options[FetchPublicationInterface::SCREEN_NAME],
-            $collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected()
-        );
-    }
-
-    /**
-     * @param CollectionStrategyInterface $collectionStrategy
-     * @param                             $options
-     * @param                             $findingDirection
-     *
-     * @return array|mixed
-     */
-    private function findLikeExtremum(
-        CollectionStrategyInterface $collectionStrategy,
-        $options,
-        $findingDirection
-    ): array {
-        if (!$collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected()) {
-            return $this->likedStatusRepository->findLocalMaximum(
-                $options[FetchPublicationInterface::SCREEN_NAME],
-                $collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected()
-            );
-        }
-
-        return $this->likedStatusRepository->findNextExtremum(
-            $options[FetchPublicationInterface::SCREEN_NAME],
-            $findingDirection,
             $collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected()
         );
     }
@@ -540,8 +499,8 @@ class StatusAccessor implements StatusAccessorInterface
         if ($collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected()) {
             unset($options[FetchPublicationInterface::BEFORE]);
         }
-        if (array_key_exists(FetchPublicationInterface::publishers_list_ID, $options)) {
-            unset($options[FetchPublicationInterface::publishers_list_ID]);
+        if (array_key_exists(FetchPublicationInterface::PUBLISHERS_LIST_ID, $options)) {
+            unset($options[FetchPublicationInterface::PUBLISHERS_LIST_ID]);
         }
 
         return $options;

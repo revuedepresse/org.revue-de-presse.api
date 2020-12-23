@@ -7,6 +7,6 @@ services:
         arguments:
             - '@App\Twitter\Infrastructure\Api\Accessor'
         calls:
-            - [ 'setLogger', [ '@monolog.logger.status'  ] ]
+            - [ 'setLogger', [ '@monolog.logger.twitter_api'  ] ]
             - [ 'setPublicationPersistence', [ '@App\Twitter\Infrastructure\Publication\Persistence\PublicationPersistence'  ] ]
             - [ 'setStatusRepository', [ '@App\Twitter\Infrastructure\Api\Repository\StatusRepository'  ] ]

@@ -13,7 +13,7 @@ use Prophecy\Argument;
 
 class FriendshipMutatorBuilder extends TestCase
 {
-    public static function make(): FriendshipMutatorInterface
+    public static function build(): FriendshipMutatorInterface
     {
         $testCase = new self();
 

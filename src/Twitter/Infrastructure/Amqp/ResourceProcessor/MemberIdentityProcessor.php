@@ -19,6 +19,8 @@ use App\Twitter\Infrastructure\Amqp\Message\FetchMemberStatus;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberProfileAccessorTrait;
 use App\Twitter\Domain\PublishersList\Repository\PublishersListRepositoryInterface;
 use App\Twitter\Infrastructure\Twitter\Api\Accessor\MemberProfileAccessorInterface;
+use Doctrine\ORM\OptimisticLockException;
+use Doctrine\ORM\ORMException;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Messenger\MessageBusInterface;
 use function sprintf;
@@ -96,12 +98,13 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
     }
 
     /**
-     * @param MemberIdentity               $memberIdentity
+     * @param MemberIdentity $memberIdentity
      * @param PublicationStrategyInterface $strategy
-     * @param TokenInterface               $token
-     * @param PublishersList              $list
-     *
+     * @param TokenInterface $token
+     * @param PublishersList $list
      * @throws SkippableMemberException
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     private function dispatchPublications(
         MemberIdentity $memberIdentity,
@@ -128,19 +131,8 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
             ),
             $token,
             $member,
-            $strategy->dateBeforeWhichPublicationsAreCollected(),
-            $strategy->shouldFetchLikes()
+            $strategy->dateBeforeWhichPublicationsAreCollected()
         );
-
-        if ($strategy->shouldFetchLikes()) {
-            $this->dispatcher->dispatch(
-                FetchMemberLikes::from(
-                    $FetchMemberStatus
-                )
-            );
-
-            return;
-        }
 
         $this->dispatcher->dispatch($FetchMemberStatus);
     }

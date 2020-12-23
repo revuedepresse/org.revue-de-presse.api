@@ -13,7 +13,7 @@ services:
     App\Tests\Context\:
         resource: '../tests/Context/*'
 
-    test.event_repository.ownership_batch_collected: '@App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository'
+    test.App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository: '@App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository'
 
     test.event_repository.member_profile_collected: '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository'
 

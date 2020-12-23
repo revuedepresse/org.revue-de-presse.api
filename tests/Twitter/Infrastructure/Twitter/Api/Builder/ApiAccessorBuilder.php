@@ -4,8 +4,11 @@ declare(strict_types=1);
 namespace App\Tests\Twitter\Infrastructure\Twitter\Api\Builder;
 
 use App\Twitter\Domain\Api\ApiAccessorInterface;
+use App\Twitter\Domain\Api\Selector\ListSelectorInterface;
 use App\Twitter\Domain\Resource\OwnershipCollection;
+use App\Twitter\Domain\Resource\OwnershipCollectionInterface;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
+use Prophecy\Argument;
 use Prophecy\Prophecy\ObjectProphecy;
 use Prophecy\Prophet;
 use stdClass;
@@ -56,10 +59,7 @@ class ApiAccessorBuilder
         ];
     }
 
-    /**
-     * @return OwnershipCollection
-     */
-    public function makeOwnershipCollection(): OwnershipCollection
+    public function makeOwnershipCollection(): OwnershipCollectionInterface
     {
         return OwnershipCollection::fromArray(
             [
@@ -84,14 +84,11 @@ class ApiAccessorBuilder
     }
 
     public function willGetOwnershipCollectionForMember(
-        OwnershipCollection $ownershipCollection,
+        OwnershipCollectionInterface $ownershipCollection,
         string $screenName
     ): self {
         $this->prophecy
-            ->getMemberOwnerships(
-                $screenName,
-                -1
-            )
+            ->getMemberOwnerships(Argument::type(ListSelectorInterface::class))
             ->willReturn($ownershipCollection);
 
         return $this;
@@ -101,26 +98,20 @@ class ApiAccessorBuilder
         string $screenName
     ): self {
         $this->prophecy
-            ->getMemberOwnerships(
-                $screenName,
-                -1
-            )
+            ->getMemberOwnerships(Argument::type(ListSelectorInterface::class))
             ->willThrow(new UnavailableResourceException());
 
         return $this;
     }
 
     public function willGetOwnershipCollectionAfterThrowingForMember(
-        OwnershipCollection $ownershipCollection,
+        OwnershipCollectionInterface $ownershipCollection,
         string $screenName
     ): self {
         static $calls = 0;
 
         $this->prophecy
-            ->getMemberOwnerships(
-                $screenName,
-                -1
-            )
+            ->getMemberOwnerships(Argument::type(ListSelectorInterface::class))
             ->will(function () use (&$calls, $ownershipCollection) {
                 if ($calls === 0) {
                     $calls++;

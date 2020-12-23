@@ -12,14 +12,11 @@ class MemberOwnerships
      */
     private TokenInterface $token;
 
-    /**
-     * @var OwnershipCollection
-     */
-    private OwnershipCollection $ownershipCollection;
+    private OwnershipCollectionInterface $ownershipCollection;
 
     private function __construct(
         TokenInterface $token,
-        OwnershipCollection $ownershipCollection
+        OwnershipCollectionInterface $ownershipCollection
     )
     {
         $this->token = $token;
@@ -28,7 +25,7 @@ class MemberOwnerships
 
     public static function from(
         TokenInterface $token,
-        OwnershipCollection $ownershipCollection
+        OwnershipCollectionInterface $ownershipCollection
     ): MemberOwnerships {
         return new self($token, $ownershipCollection);
     }
@@ -38,7 +35,7 @@ class MemberOwnerships
         return $this->token;
     }
 
-    public function ownershipCollection(): OwnershipCollection
+    public function ownershipCollection(): OwnershipCollectionInterface
     {
         return $this->ownershipCollection;
     }

@@ -19,9 +19,21 @@
         </id>
 
         <field
+            name="correlationId"
+            column="correlation_id"
+            type="uuid"
+        />
+
+        <field
             name="screenName"
             column="screen_name"
             type="string"
+            length="255"
+        />
+
+        <field
+            name="atCursor"
+            column="at_cursor"
             length="255"
         />
 

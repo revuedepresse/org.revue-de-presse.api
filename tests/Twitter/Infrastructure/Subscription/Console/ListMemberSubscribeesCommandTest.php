@@ -31,8 +31,8 @@ class ListMemberSubscribeesCommandTest extends KernelTestCase
         $application = new Application($kernel);
 
         $this->command = $application->find('devobs:list-member-subscribees');
-        $this->command->setAccessor(FollowersListAccessorBuilder::make());
-        $this->command->setRepository(FollowersListCollectedEventRepositoryBuilder::make());
+        $this->command->setAccessor(FollowersListAccessorBuilder::build());
+        $this->command->setRepository(FollowersListCollectedEventRepositoryBuilder::build());
 
         $this->commandTester = new CommandTester($command);
     }

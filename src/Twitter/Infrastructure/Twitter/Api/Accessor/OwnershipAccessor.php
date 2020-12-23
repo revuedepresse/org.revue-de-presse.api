@@ -4,14 +4,17 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Twitter\Api\Accessor;
 
 use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
-use App\Twitter\Infrastructure\Api\AccessToken\TokenChangeInterface;
-use App\Twitter\Domain\Api\Model\TokenInterface;
+use App\Twitter\Domain\Api\ApiAccessorInterface;
+use App\Twitter\Domain\Api\Selector\AuthenticatedSelectorInterface;
 use App\Twitter\Domain\Resource\MemberOwnerships;
 use App\Twitter\Domain\Resource\OwnershipCollection;
+use App\Twitter\Infrastructure\Api\AccessToken\TokenChangeInterface;
 use App\Twitter\Infrastructure\DependencyInjection\Collection\OwnershipBatchCollectedEventRepositoryTrait;
-use App\Twitter\Domain\Api\ApiAccessorInterface;
 use App\Twitter\Infrastructure\Exception\OverCapacityException;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
+use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdAwareInterface;
+use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdInterface;
+use App\Twitter\Infrastructure\Twitter\Api\Selector\MemberOwnershipsBatchSelector;
 use Psr\Log\LoggerInterface;
 
 class OwnershipAccessor implements OwnershipAccessorInterface
@@ -39,23 +42,19 @@ class OwnershipAccessor implements OwnershipAccessorInterface
         $this->logger = $logger;
     }
 
-    /**
-     * @param string                $screenName
-     * @param TokenInterface        $token
-     *
-     * @param MemberOwnerships|null $memberOwnership
-     *
-     * @return MemberOwnerships
-     * @throws OverCapacityException
-     */
     public function getOwnershipsForMemberHavingScreenNameAndToken(
-        string $screenName,
-        TokenInterface $token,
+        AuthenticatedSelectorInterface $selector,
         MemberOwnerships $memberOwnership = null
     ): MemberOwnerships {
-        $activeToken = $token;
+        $activeToken = $selector->authenticationToken();
         $totalUnfrozenToken = $this->tokenRepository->howManyUnfrozenTokenAreThere();
         $ownershipCollection = OwnershipCollection::fromArray([]);
+
+        if ($selector instanceof CorrelationIdAwareInterface) {
+            $correlationId = $selector->correlationId();
+        } else {
+            $correlationId = CorrelationIdInterface::generate();
+        }
 
         $eventRepository = $this->ownershipBatchCollectedEventRepository;
 
@@ -75,16 +74,17 @@ class OwnershipAccessor implements OwnershipAccessorInterface
 
                 $ownershipCollection = $eventRepository->collectedOwnershipBatch(
                     $this->accessor,
-                    [
-                        $eventRepository::OPTION_SCREEN_NAME => $screenName,
-                        $eventRepository::OPTION_NEXT_PAGE => $nextPage
-                    ]
+                    new MemberOwnershipsBatchSelector(
+                        $selector->screenName(),
+                        (string) $nextPage,
+                        $correlationId
+                    )
                 );
             } catch (UnavailableResourceException $exception) {
                 $this->logger->info($exception->getMessage());
                 if ($ownershipCollection->isEmpty()) {
                     $activeToken = $this->tokenChange->replaceAccessToken(
-                        $token,
+                        $selector->authenticationToken(),
                         $this->accessor
                     );
                 }

@@ -3,18 +3,20 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Curation\Entity;
 
+use App\Twitter\Infrastructure\Operation\Correlation\CorrelationId;
+use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdAwareInterface;
+use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdInterface;
 use App\Twitter\Infrastructure\Twitter\Api\Selector\FollowersListSelector;
-use App\Twitter\Infrastructure\Twitter\Api\Selector\ListSelector;
+use App\Twitter\Domain\Api\Selector\ListSelectorInterface;
 use DateTimeImmutable;
 use DateTimeInterface;
-use Ramsey\Uuid\Rfc4122\UuidV4;
 use Ramsey\Uuid\UuidInterface;
 
-class FriendsListCollectedEvent implements ListCollectedEvent
+class FriendsListCollectedEvent implements ListCollectedEvent, JsonSerializableInterface
 {
     private UuidInterface $id;
 
-    private UuidInterface $correlationId;
+    private CorrelationIdInterface $correlationId;
 
     private ?string $payload;
 
@@ -29,20 +31,27 @@ class FriendsListCollectedEvent implements ListCollectedEvent
     private ?DateTimeInterface $endedAt;
 
     public function __construct(
-        ListSelector $selector,
+        ListSelectorInterface $selector,
         DateTimeInterface $occurredAt,
         DateTimeInterface $startedAt,
         ?string $payload = null,
         ?DateTimeInterface $endedAt = null
     )
     {
-        $this->correlationId = $selector->correlationId();
         $this->screenName = $selector->screenName();
         $this->atCursor = $selector->cursor();
         $this->payload = $payload;
         $this->occurredAt = $occurredAt;
         $this->startedAt = $startedAt;
         $this->endedAt = $endedAt;
+
+        if ($selector instanceof CorrelationIdAwareInterface) {
+            $this->correlationId = $selector->correlationId();
+
+            return;
+        }
+
+        $this->correlationId = CorrelationId::generate();
     }
 
     public function id(): UuidInterface
@@ -50,7 +59,7 @@ class FriendsListCollectedEvent implements ListCollectedEvent
         return $this->id;
     }
 
-    public function correlationId(): UuidInterface
+    public function correlationId(): CorrelationIdInterface
     {
         return $this->correlationId;
     }
@@ -93,28 +102,28 @@ class FriendsListCollectedEvent implements ListCollectedEvent
         return $this;
     }
 
-    public function serialize(): string
+    public function jsonSerialize(): string
     {
         return json_encode([
             'payload' => $this->payload(),
-            'correlation_id' => $this->screenName(),
+            'correlation_id' => $this->correlationId(),
             'screen_name' => $this->screenName(),
             'cursor' => $this->atCursor(),
-            'occurred_at' => $this->occurredAt()->format(\DateTimeInterface::ATOM),
-            'ended_at' => $this->occurredAt()->format(\DateTimeInterface::ATOM),
-            'started_at' => $this->occurredAt()->format(\DateTimeInterface::ATOM),
+            'occurred_at' => $this->occurredAt()->format(DateTimeInterface::ATOM),
+            'ended_at' => $this->occurredAt()->format(DateTimeInterface::ATOM),
+            'started_at' => $this->occurredAt()->format(DateTimeInterface::ATOM),
         ], JSON_THROW_ON_ERROR);
     }
 
-    public static function unserialize(string $serializedEvent): self
+    public static function jsonDeserialize(string $serializedSubject): self
     {
-        $decodedSerializedEvent = json_decode($serializedEvent, true, 512, JSON_THROW_ON_ERROR);
+        $decodedSerializedEvent = json_decode($serializedSubject, true, 512, JSON_THROW_ON_ERROR);
 
         return new self(
             new FollowersListSelector(
-                UuidV4::fromString($decodedSerializedEvent['correlation_id']),
                 $decodedSerializedEvent['screen_name'],
-                $decodedSerializedEvent['cursor']
+                $decodedSerializedEvent['cursor'],
+                CorrelationId::fromString($decodedSerializedEvent['correlation_id'])
             ),
             new DateTimeImmutable($decodedSerializedEvent['occurred_at']),
             new DateTimeImmutable($decodedSerializedEvent['started_at']),

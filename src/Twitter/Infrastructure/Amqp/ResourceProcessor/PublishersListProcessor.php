@@ -10,6 +10,7 @@ use App\Twitter\Domain\Resource\MemberIdentity;
 use App\Twitter\Domain\Resource\PublishersList;
 use App\Twitter\Infrastructure\Amqp\Exception\ContinuePublicationException;
 use App\Twitter\Infrastructure\Amqp\Exception\StopPublicationException;
+use App\Twitter\Infrastructure\Api\Exception\CanNotReplaceAccessTokenException;
 use App\Twitter\Infrastructure\DependencyInjection\Collection\MemberProfileCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Collection\PublishersListCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberIdentityProcessorTrait;
@@ -69,8 +70,8 @@ class PublishersListProcessor implements PublishersListProcessorInterface
             $memberCollection = $eventRepository->collectedPublishersList(
                 $this->accessor,
                 [
-                    $eventRepository::OPTION_publishers_list_ID => $list->id(),
-                    $eventRepository::OPTION_publishers_list_NAME => $list->name()
+                    $eventRepository::OPTION_PUBLISHERS_LIST_ID => $list->id(),
+                    $eventRepository::OPTION_PUBLISHERS_LIST_NAME => $list->name()
                 ]
             );
             $memberCollection = $this->addOwnerToListOptionally(
@@ -103,13 +104,17 @@ class PublishersListProcessor implements PublishersListProcessorInterface
                 $strategy
             );
 
-            // Change token for each list
-            // Members lists can only be accessed by authenticated users owning the lists
-            // See also https://dev.twitter.com/rest/reference/get/lists/ownerships
-            $this->tokenChange->replaceAccessToken(
-                $token,
-                $this->accessor
-            );
+            try {
+                // Change token for each list unless there is only one single token available
+                // Members lists can only be accessed by authenticated users owning the lists
+                // See also https://dev.twitter.com/rest/reference/get/lists/ownerships
+                $this->tokenChange->replaceAccessToken(
+                    $token,
+                    $this->accessor
+                );
+            } catch (CanNotReplaceAccessTokenException $exception) {
+                // keep going with the current token
+            }
 
             return $publishedMessages;
         }

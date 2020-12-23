@@ -23,8 +23,8 @@ class PublishersListCollectedEventRepository extends ServiceEntityRepository imp
         ApiAccessorInterface $accessor,
         array $options
     ): MemberCollection {
-        $listId   = $options[self::OPTION_publishers_list_ID];
-        $listName = $options[self::OPTION_publishers_list_NAME];
+        $listId   = $options[self::OPTION_PUBLISHERS_LIST_ID];
+        $listName = $options[self::OPTION_PUBLISHERS_LIST_NAME];
 
         $event                = $this->startCollectOfPublishersList(
             (int) $listId,

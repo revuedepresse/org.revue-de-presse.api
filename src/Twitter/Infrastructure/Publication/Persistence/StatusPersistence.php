@@ -244,22 +244,15 @@ class StatusPersistence implements StatusPersistenceInterface
             $screenName
         );
 
-        $likedBy = null;
-        if ($collectionStrategy->fetchLikes()) {
-            $likedBy = $this->apiAccessor->ensureMemberHavingNameExists($screenName);
-        }
-
         $savedStatuses = $this->saveStatuses(
             $statuses,
             $collectionStrategy,
-            $publishersList,
-            $likedBy
+            $publishersList
         );
 
         return $this->collectStatusLogger->logHowManyItemsHaveBeenSaved(
             $savedStatuses->count(),
-            $screenName,
-            $collectionStrategy->fetchLikes()
+            $screenName
         );
     }
 
@@ -267,29 +260,14 @@ class StatusPersistence implements StatusPersistenceInterface
      * @param array                       $statuses
      * @param CollectionStrategyInterface $collectionStrategy
      * @param Aggregate|null              $publishersList
-     * @param MemberInterface|null        $likedBy
      *
      * @return CollectionInterface
      */
     private function saveStatuses(
         array $statuses,
         CollectionStrategyInterface $collectionStrategy,
-        Aggregate $publishersList = null,
-        MemberInterface $likedBy = null
+        Aggregate $publishersList = null
     ): CollectionInterface {
-        if ($likedBy !== null && $collectionStrategy->fetchLikes()) {
-            return $this->statusRepository->saveLikes(
-                $statuses,
-                $this->apiAccessor->getOAuthToken(),
-                $publishersList,
-                $this->logger,
-                $likedBy,
-                function ($memberName) {
-                    return $this->apiAccessor->ensureMemberHavingNameExists($memberName);
-                }
-            );
-        }
-
         return $this->publicationPersistence->persistStatusPublications(
             $statuses,
             new AccessToken($this->apiAccessor->getOAuthToken()),
