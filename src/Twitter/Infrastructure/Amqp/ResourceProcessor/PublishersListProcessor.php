@@ -5,6 +5,7 @@ namespace App\Twitter\Infrastructure\Amqp\ResourceProcessor;
 
 use App\Twitter\Domain\Api\Model\TokenInterface;
 use App\Twitter\Domain\Curation\PublicationStrategyInterface;
+use App\Twitter\Domain\Membership\Exception\MembershipException;
 use App\Twitter\Domain\Resource\MemberCollection;
 use App\Twitter\Domain\Resource\MemberIdentity;
 use App\Twitter\Domain\Resource\PublishersList;
@@ -153,6 +154,10 @@ class PublishersListProcessor implements PublishersListProcessorInterface
 
                 continue;
             } catch (StopPublicationException $exception) {
+                if ($exception->getPrevious() instanceof MembershipException) {
+                    break;
+                }
+
                 $this->logger->error($exception->getMessage());
 
                 break;

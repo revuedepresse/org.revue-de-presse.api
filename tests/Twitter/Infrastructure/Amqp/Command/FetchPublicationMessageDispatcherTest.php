@@ -38,8 +38,8 @@ class FetchPublicationMessageDispatcherTest extends KernelTestCase
 
         $this->commandTester->execute(
             [
-                '--list'        => ApiAccessorBuilder::LIST_NAME,
-                '--screen_name' => ApiAccessorBuilder::SCREEN_NAME,
+                PublicationStrategyInterface::RULE_SCREEN_NAME => ApiAccessorBuilder::SCREEN_NAME,
+                '--'.PublicationStrategyInterface::RULE_LIST => ApiAccessorBuilder::LIST_NAME,
             ]
         );
 

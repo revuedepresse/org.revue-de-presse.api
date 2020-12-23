@@ -525,7 +525,7 @@ function dispatch_fetch_publications_messages {
     fi
 
     local arguments
-    arguments="${priority_option}"'--screen_name='"${username}"' '"${list_option}"' '"${query_restriction}"
+    arguments="${priority_option}"' '"${list_option}"' '"${query_restriction}"' '"${username}"
     arguments="${arguments}${cursor_argument}"
     run_command 'bin/console devobs:dispatch-messages-to-fetch-member-statuses '"${arguments}"
 }
@@ -615,7 +615,6 @@ function list_amqp_queues() {
 
     /bin/bash -c "docker-compose --project-name=${project_name} exec messenger watch -n1 'rabbitmqctl list_queues -p ${rabbitmq_vhost}'"
 }
-
 
 function get_rabbitmq_virtual_host() {
     local virtual_host

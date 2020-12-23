@@ -15,6 +15,7 @@ use App\Twitter\Infrastructure\Exception\OverCapacityException;
 use App\Twitter\Infrastructure\InputConverter\InputToCollectionStrategy;
 use App\Twitter\Infrastructure\Operation\OperationClock;
 use Exception;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -24,13 +25,14 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class FetchPublicationMessageDispatcher extends AggregateAwareCommand
 {
+    private const ARGUMENT_SCREEN_NAME          = PublicationStrategyInterface::RULE_SCREEN_NAME;
+
+    private const OPTION_LIST                   = PublicationStrategyInterface::RULE_LIST;
     private const OPTION_BEFORE                 = PublicationStrategyInterface::RULE_BEFORE;
-    private const OPTION_SCREEN_NAME            = PublicationStrategyInterface::RULE_SCREEN_NAME;
     private const OPTION_MEMBER_RESTRICTION     = PublicationStrategyInterface::RULE_MEMBER_RESTRICTION;
     private const OPTION_INCLUDE_OWNER          = PublicationStrategyInterface::RULE_INCLUDE_OWNER;
     private const OPTION_IGNORE_WHISPERS        = PublicationStrategyInterface::RULE_IGNORE_WHISPERS;
     private const OPTION_PRIORITY_TO_AGGREGATES = PublicationStrategyInterface::RULE_PRIORITY_TO_AGGREGATES;
-    private const OPTION_LIST                   = PublicationStrategyInterface::RULE_LIST;
     private const OPTION_LISTS                  = PublicationStrategyInterface::RULE_LISTS;
     private const OPTION_CURSOR                 = PublicationStrategyInterface::RULE_CURSOR;
 
@@ -54,28 +56,29 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
     public function configure()
     {
         $this->setName('devobs:dispatch-messages-to-fetch-member-statuses')
-             ->setDescription('Dispatch messages to fetch member statuses')
-             ->addOption(
-                 self::OPTION_OAUTH_TOKEN,
-                 null,
-                 InputOption::VALUE_OPTIONAL,
-                 'A token is required'
-             )->addOption(
+            ->setDescription('Dispatch messages to fetch member statuses')
+            ->addArgument(
+                self::ARGUMENT_SCREEN_NAME,
+                InputArgument::REQUIRED,
+                'The screen name of a user'
+            )
+            ->addOption(
+                self::OPTION_OAUTH_TOKEN,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                'A token is required'
+            )->addOption(
                 self::OPTION_OAUTH_SECRET,
                 null,
                 InputOption::VALUE_OPTIONAL,
                 'A secret is required'
             )->addOption(
-                self::OPTION_SCREEN_NAME,
-                null,
-                InputOption::VALUE_REQUIRED,
-                'The screen name of a user'
-            )->addOption(
                 self::OPTION_LIST,
                 null,
                 InputOption::VALUE_OPTIONAL,
                 'A list to which production is restricted to'
-            )->addOption(
+            )
+            ->addOption(
                 self::OPTION_LISTS,
                 'l',
                 InputOption::VALUE_OPTIONAL,
@@ -93,10 +96,10 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
                 InputOption::VALUE_OPTIONAL,
                 'Cursor from which ownership are to be fetched'
             )->addOption(
-               self::OPTION_MEMBER_RESTRICTION,
-               'mr',
-               InputOption::VALUE_OPTIONAL,
-               'Restrict to member, which screen name has been passed as value of this option'
+                self::OPTION_MEMBER_RESTRICTION,
+                'mr',
+                InputOption::VALUE_OPTIONAL,
+                'Restrict to member, which screen name has been passed as value of this option'
             )->addOption(
                 self::OPTION_BEFORE,
                 null,

@@ -270,18 +270,16 @@ class MemberRepository extends ServiceEntityRepository implements MemberReposito
 
     /**
      * @param string $screenName
-     *
+     * @param string $twitterId
      * @return Member|MemberInterface
      * @throws InvalidMemberIdentifier
-     * @throws ORMException
-     * @throws OptimisticLockException
      */
-    public function declareUserAsProtected(string $screenName)
+    public function declareUserAsProtected(string $screenName, string $twitterId)
     {
         $member = $this->findOneBy(['twitter_username' => $screenName]);
         if (!$member instanceof MemberInterface) {
             return $this->make(
-                '0',
+                $twitterId ?? (string) (int) microtime(true),
                 $screenName,
                 $protected = true
             );

@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Amqp\ResourceProcessor;
 
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\UnexpectedApiResponseException;
 use App\PublishersList\AggregateAwareTrait;
 use App\Twitter\Infrastructure\Amqp\Exception\SkippableMemberException;
 use App\Twitter\Domain\Api\Model\TokenInterface;
@@ -14,7 +13,6 @@ use App\Twitter\Domain\Resource\MemberIdentity;
 use App\Twitter\Domain\Resource\PublishersList;
 use App\Twitter\Infrastructure\Amqp\Exception\ContinuePublicationException;
 use App\Twitter\Infrastructure\Amqp\Exception\StopPublicationException;
-use App\Twitter\Infrastructure\Amqp\Message\FetchMemberLikes;
 use App\Twitter\Infrastructure\Amqp\Message\FetchMemberStatus;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberProfileAccessorTrait;
 use App\Twitter\Domain\PublishersList\Repository\PublishersListRepositoryInterface;
@@ -86,7 +84,7 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
             if (MemberFacingStrategy::shouldBreakPublication($exception)) {
                 $this->logger->info($exception->getMessage());
 
-                StopPublicationException::throws($exception->getMessage());
+                StopPublicationException::throws($exception->getMessage(), $exception);
             }
 
             if (MemberFacingStrategy::shouldContinuePublication($exception)) {

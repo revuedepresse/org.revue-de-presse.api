@@ -32,7 +32,7 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
     public static function getHandledMessages(): iterable
     {
         yield FetchMemberStatus::class => [
-            'from_transport' => 'news_status'
+            'from_transport' => 'publications'
         ];
     }
 

@@ -41,7 +41,7 @@ class InputToCollectionStrategy
     protected static function screenName(
         InputInterface $input
     ): string {
-        return $input->getOption(PublicationStrategyInterface::RULE_SCREEN_NAME);
+        return $input->getArgument(PublicationStrategyInterface::RULE_SCREEN_NAME);
     }
 
     /**

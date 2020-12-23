@@ -7,20 +7,15 @@ namespace App\Twitter\Infrastructure\Exception;
  */
 class SuspendedAccountException extends UnavailableResourceException
 {
-    public $screenName;
+    public string $screenName;
+    public string $twitterId;
 
-    /**
-     * @param string          $screenName
-     * @param int             $code
-     * @param \Throwable|null $previous
-     * @return SuspendedAccountException
-     * @throws SuspendedAccountException
-     */
     public static function raiseExceptionAboutSuspendedMemberHavingScreenName(
         string $screenName,
+        string $twitterId,
         int $code = 0,
         \Throwable $previous = null
-    ): self {
+    ): void {
         $exception = new self(
             sprintf(
                 'Member with screen name "%s" is suspended',
@@ -30,6 +25,7 @@ class SuspendedAccountException extends UnavailableResourceException
             $previous
         );
         $exception->screenName = $screenName;
+        $exception->twitterId = $twitterId;
 
         throw $exception;
     }

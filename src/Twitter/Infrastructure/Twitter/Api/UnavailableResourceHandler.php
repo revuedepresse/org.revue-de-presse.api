@@ -143,7 +143,7 @@ class UnavailableResourceHandler implements UnavailableResourceHandlerInterface
             $resource->getType(),
             $resource->getMessage()
         );
-        $this->logger->error($message);
+        $this->logger->info($message);
 
         MembershipException::throws($message, self::UNAVAILABLE_RESOURCE);
     }

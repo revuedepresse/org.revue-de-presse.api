@@ -83,7 +83,7 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
     public function freezeToken(TokenInterface $oauthToken): void
     {
         /** @var TokenInterface $token */
-        $token = $this->findOneBy(['oauthToken' => $oauthToken]);
+        $token = $this->findOneBy(['oauthToken' => $oauthToken->getOAuthToken()]);
 
         if (!($token instanceof TokenInterface)) {
             UnavailableTokenException::throws();

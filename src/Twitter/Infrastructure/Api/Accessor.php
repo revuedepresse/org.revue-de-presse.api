@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Api;
 
 use Abraham\TwitterOAuth\TwitterOAuth as TwitterClient;
+use Abraham\TwitterOAuth\TwitterOAuthException;
 use App\Membership\Domain\Entity\AggregateSubscription;
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Membership\Infrastructure\Repository\Exception\InvalidMemberIdentifier;
@@ -63,8 +64,6 @@ use const PHP_URL_USER;
  */
 class Accessor implements ApiAccessorInterface, TwitterErrorAwareInterface
 {
-    public const ERROR_PROTECTED_ACCOUNT = 2048;
-
     private const TWITTER_API_VERSION_1_1 = '1.1';
 
     private const MAX_RETRIES = 5;
@@ -347,6 +346,14 @@ class Accessor implements ApiAccessorInterface, TwitterErrorAwareInterface
             $content = $this->connectToEndpoint($endpoint);
             $this->checkApiLimit();
         } catch (Exception $exception) {
+            // Retry in case of operation timed out error raised by curl
+            if ($exception instanceof TwitterOAuthException &&
+                $exception->getCode() === CURLE_OPERATION_TIMEDOUT
+            ) {
+                $this->logger->info('Retrying to reach endpoint after operation timed out');
+                return $this->contactEndpointUsingConsumerKey($endpoint, $token);
+            }
+
             $content = $this->handleResponseContentWithEmptyErrorCode($exception, $token);
         }
 
@@ -532,8 +539,6 @@ class Accessor implements ApiAccessorInterface, TwitterErrorAwareInterface
             return $this->contactEndpoint(strtr($listMembersEndpoint, ['{{ id }}' => $id]));
         };
 
-        $members = [];
-
         try {
             $members = $sendRequest();
         } catch (UnavailableResourceException $exception) {
@@ -545,7 +550,7 @@ class Accessor implements ApiAccessorInterface, TwitterErrorAwareInterface
 
             $members = $sendRequest();
         } finally {
-            return MemberCollection::fromArray($members->users);
+            return MemberCollection::fromArray($members->users ?? []);
         }
     }
 
@@ -869,10 +874,8 @@ class Accessor implements ApiAccessorInterface, TwitterErrorAwareInterface
      * @return |null
      * @throws ApiRateLimitingException
      * @throws BadAuthenticationDataException
-     * @throws NonUniqueResultException
      * @throws NotFoundMemberException
      * @throws NotFoundStatusException
-     * @throws OptimisticLockException
      * @throws ProtectedAccountException
      * @throws ReadOnlyApplicationException
      * @throws SuspendedAccountException
@@ -1436,6 +1439,7 @@ class Accessor implements ApiAccessorInterface, TwitterErrorAwareInterface
 
                 SuspendedAccountException::raiseExceptionAboutSuspendedMemberHavingScreenName(
                     $suspendedMember->getTwitterUsername(),
+                    $suspendedMember->getTwitterID(),
                     $exception->getCode(),
                     $exception
                 );
@@ -1450,13 +1454,14 @@ class Accessor implements ApiAccessorInterface, TwitterErrorAwareInterface
                     $member = $this->userRepository->declareMemberHavingScreenNameNotFound($screenName);
                 }
 
-                if ($member instanceof MemberInterface && !$member->isNotFound()) {
+                if ($member instanceof MemberInterface && !$member->hasBeenDeclaredAsNotFound()) {
                     $this->userRepository->declareMemberAsNotFound($member);
                 }
 
                 $this->logNotFoundMemberMessage($screenName ?? $identifier);
                 NotFoundMemberException::raiseExceptionAboutNotFoundMemberHavingScreenName(
                     is_null($screenName) ? $identifier : $screenName,
+                    $identifier,
                     $exception->getCode(),
                     $exception
                 );
@@ -1785,10 +1790,11 @@ class Accessor implements ApiAccessorInterface, TwitterErrorAwareInterface
             return true;
         }
 
-        $this->userRepository->declareUserAsProtected($twitterUser->screen_name);
+        $this->userRepository->declareUserAsProtected($twitterUser->screen_name, $twitterUser->id_str);
 
         ProtectedAccountException::raiseExceptionAboutProtectedMemberHavingScreenName(
             $twitterUser->screen_name,
+            $twitterUser->id_str,
             self::ERROR_PROTECTED_ACCOUNT
         );
     }
@@ -2098,6 +2104,7 @@ class Accessor implements ApiAccessorInterface, TwitterErrorAwareInterface
                 $this->logSuspendedMemberMessage($member->getTwitterUsername());
                 SuspendedAccountException::raiseExceptionAboutSuspendedMemberHavingScreenName(
                     $member->getTwitterUsername(),
+                    $member->getTwitterID(),
                     self::ERROR_SUSPENDED_ACCOUNT
                 );
             }
@@ -2106,6 +2113,7 @@ class Accessor implements ApiAccessorInterface, TwitterErrorAwareInterface
                 $this->logNotFoundMemberMessage($member->getTwitterUsername());
                 NotFoundMemberException::raiseExceptionAboutNotFoundMemberHavingScreenName(
                     $member->getTwitterUsername(),
+                    $member->getTwitterID(),
                     self::ERROR_NOT_FOUND
                 );
             }
@@ -2114,6 +2122,7 @@ class Accessor implements ApiAccessorInterface, TwitterErrorAwareInterface
                 $this->logProtectedMemberMessage($member->getTwitterUsername());
                 ProtectedAccountException::raiseExceptionAboutProtectedMemberHavingScreenName(
                     $member->getTwitterUsername(),
+                    $member->getTwitterID(),
                     self::ERROR_PROTECTED_ACCOUNT
                 );
             }
@@ -2135,14 +2144,16 @@ class Accessor implements ApiAccessorInterface, TwitterErrorAwareInterface
                 $this->logSuspendedMemberMessage($screenName);
                 SuspendedAccountException::raiseExceptionAboutSuspendedMemberHavingScreenName(
                     $screenName,
+                    $member->getTwitterID(),
                     self::ERROR_SUSPENDED_ACCOUNT
                 );
             }
 
-            if ($member->isNotFound()) {
+            if ($member->hasBeenDeclaredAsNotFound()) {
                 $this->logNotFoundMemberMessage($screenName);
                 NotFoundMemberException::raiseExceptionAboutNotFoundMemberHavingScreenName(
                     $screenName,
+                    $member->getTwitterID(),
                     self::ERROR_NOT_FOUND
                 );
             }
@@ -2151,6 +2162,7 @@ class Accessor implements ApiAccessorInterface, TwitterErrorAwareInterface
                 $this->logProtectedMemberMessage($screenName);
                 ProtectedAccountException::raiseExceptionAboutProtectedMemberHavingScreenName(
                     $screenName,
+                    $member->getTwitterID(),
                     self::ERROR_PROTECTED_ACCOUNT
                 );
             }
