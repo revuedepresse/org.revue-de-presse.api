@@ -2,11 +2,11 @@
 
 namespace App\Membership\Infrastructure\Repository;
 
-use App\Membership\Domain\Entity\MemberSubscribee;
+use App\Membership\Infrastructure\Entity\MemberSubscribee;
 use App\Membership\Domain\Entity\MemberInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityRepository;
-use App\Twitter\Infrastructure\Repository\Membership\MemberRepository;
+use App\Twitter\Infrastructure\Membership\Repository\MemberRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 class MemberSubscribeeRepository extends ServiceEntityRepository

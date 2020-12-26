@@ -7,7 +7,7 @@ use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusExce
 use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\ReadOnlyApplicationException;
 use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\UnexpectedApiResponseException;
 use App\Twitter\Infrastructure\Console\CommandReturnCodeAwareInterface;
-use App\Membership\Domain\Entity\AggregateSubscription;
+use App\Membership\Infrastructure\Entity\AggregateSubscription;
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository;
 use App\Twitter\Infrastructure\Exception\BadAuthenticationDataException;
@@ -27,7 +27,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use App\Twitter\Infrastructure\Api\Repository\PublishersListRepository;
 use App\Twitter\Infrastructure\Api\Accessor;
-use App\Twitter\Infrastructure\Repository\Membership\MemberRepository;
+use App\Twitter\Infrastructure\Membership\Repository\MemberRepository;
 
 class AddMemberToAggregateCommand extends Command implements CommandReturnCodeAwareInterface
 {

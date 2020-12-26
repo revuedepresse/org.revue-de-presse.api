@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Curation\Repository;
 
 use App\Twitter\Domain\Api\MemberOwnershipsAccessorInterface;
-use App\Twitter\Domain\Curation\Entity\OwnershipBatchCollectedEvent;
+use App\Twitter\Infrastructure\Curation\Entity\OwnershipBatchCollectedEvent;
 use App\Twitter\Domain\Curation\Repository\OwnershipBatchCollectedEventRepositoryInterface;
 use App\Twitter\Domain\Resource\OwnershipCollectionInterface;
 use App\Twitter\Domain\Resource\PublishersList;

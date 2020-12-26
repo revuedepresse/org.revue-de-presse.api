@@ -4,7 +4,7 @@ declare (strict_types=1);
 namespace App\Tests\Twitter\Domain\Curation\Infrastructure\Builder\Repository;
 
 use App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\FollowersListAccessorBuilder;
-use App\Twitter\Domain\Curation\Entity\FollowersListCollectedEvent;
+use App\Twitter\Infrastructure\Curation\Entity\FollowersListCollectedEvent;
 use App\Twitter\Domain\Curation\Repository\ListCollectedEventRepositoryInterface;
 use App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationId;

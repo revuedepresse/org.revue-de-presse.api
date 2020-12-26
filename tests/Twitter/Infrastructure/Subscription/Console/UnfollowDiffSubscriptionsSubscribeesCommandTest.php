@@ -12,7 +12,7 @@ use App\Membership\Domain\Entity\MemberInterface;
 use App\Tests\Twitter\Domain\Curation\Infrastructure\Builder\Repository\FollowersListCollectedEventRepositoryBuilder;
 use App\Tests\Twitter\Domain\Curation\Infrastructure\Builder\Repository\FriendsListCollectedEventRepositoryBuilder;
 use App\Tests\Membership\Builder\Repository\MemberRepositoryBuilder;
-use App\Membership\Domain\Entity\Legacy\Member;
+use App\Membership\Infrastructure\Entity\Legacy\Member;
 use Prophecy\Argument;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;

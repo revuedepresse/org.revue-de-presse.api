@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Twitter\Domain\Curation\Entity;
+namespace App\Twitter\Infrastructure\Curation\Entity;
 
 use App\Twitter\Domain\Publication\PublishersListInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
@@ -10,7 +10,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
 /**
- * @package App\Twitter\Domain\Curation\Entity
+ * @package App\Twitter\Infrastructure\Curation\Entity
  */
 trait StatusTrait
 {

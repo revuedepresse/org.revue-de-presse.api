@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Membership\Domain\Entity;
+namespace App\Membership\Infrastructure\Entity;
 
 class MemberSubscribee
 {

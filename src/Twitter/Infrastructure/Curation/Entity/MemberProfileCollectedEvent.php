@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Twitter\Domain\Curation\Entity;
+namespace App\Twitter\Infrastructure\Curation\Entity;
 
 use DateTimeInterface;
 use Ramsey\Uuid\UuidInterface;
 
-class PublishersListCollectedEvent
+class MemberProfileCollectedEvent
 {
     private UuidInterface $id;
 
@@ -14,24 +14,20 @@ class PublishersListCollectedEvent
 
     private DateTimeInterface $occurredAt;
 
-    private int $listId;
+    private string $screenName;
 
     private DateTimeInterface $startedAt;
 
     private ?DateTimeInterface $endedAt;
 
-    private string $listName;
-
     public function __construct(
-        int $listId,
-        string $listName,
+        string $screenName,
         DateTimeInterface $occurredAt,
         DateTimeInterface $startedAt,
         ?string $payload = null,
         ?DateTimeInterface $endedAt = null
     ) {
-        $this->listId     = $listId;
-        $this->listName     = $listName;
+        $this->screenName     = $screenName;
         $this->payload    = $payload;
         $this->occurredAt = $occurredAt;
         $this->startedAt  = $startedAt;
@@ -43,14 +39,9 @@ class PublishersListCollectedEvent
         return $this->id;
     }
 
-    public function listId(): int
+    public function screenName(): string
     {
-        return $this->listId;
-    }
-
-    public function listName(): string
-    {
-        return $this->listName;
+        return $this->screenName;
     }
 
     public function occurredAt(): DateTimeInterface

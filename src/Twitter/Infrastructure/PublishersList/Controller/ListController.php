@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\PublishersList\Controller;
 
-use App\Membership\Domain\Entity\Legacy\Member;
+use App\Membership\Infrastructure\Entity\Legacy\Member;
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Membership\Infrastructure\Repository\AuthenticationTokenRepository;
 use App\NewsReview\Domain\Repository\PopularPublicationRepositoryInterface;
@@ -18,7 +18,7 @@ use App\Twitter\Infrastructure\Cache\RedisCache;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublishersListDispatcherTrait;
 use App\Twitter\Infrastructure\Http\SearchParams;
 use App\Twitter\Infrastructure\Publication\Repository\HighlightRepository;
-use App\Twitter\Infrastructure\Repository\Membership\MemberRepository;
+use App\Twitter\Infrastructure\Membership\Repository\MemberRepository;
 use App\Twitter\Infrastructure\Security\Cors\CorsHeadersAwareTrait;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;

@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Twitter\Infrastructure\Repository\Membership;
+namespace App\Twitter\Infrastructure\Membership\Repository;
 
 use App\Twitter\Infrastructure\PublishersList\Repository\PaginationAwareTrait;
 use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
@@ -10,13 +10,13 @@ use App\Twitter\Domain\Membership\Exception\InvalidMemberException;
 use App\Twitter\Domain\Resource\MemberIdentity;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\Http\SearchParams;
-use App\Membership\Domain\Entity\Legacy\Member;
+use App\Membership\Infrastructure\Entity\Legacy\Member;
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Membership\Infrastructure\Repository\Exception\InvalidMemberIdentifier;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;

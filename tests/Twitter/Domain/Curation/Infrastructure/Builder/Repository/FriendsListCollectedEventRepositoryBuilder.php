@@ -3,7 +3,7 @@ declare (strict_types=1);
 
 namespace App\Tests\Twitter\Domain\Curation\Infrastructure\Builder\Repository;
 
-use App\Twitter\Domain\Curation\Entity\FriendsListCollectedEvent;
+use App\Twitter\Infrastructure\Curation\Entity\FriendsListCollectedEvent;
 use App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository;
 use App\Twitter\Domain\Curation\Repository\ListCollectedEventRepositoryInterface;
 use App\Twitter\Infrastructure\Twitter\Api\Accessor\ListAccessorInterface;

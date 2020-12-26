@@ -5,7 +5,7 @@ namespace App\Twitter\Infrastructure\Api;
 
 use Abraham\TwitterOAuth\TwitterOAuth as TwitterClient;
 use Abraham\TwitterOAuth\TwitterOAuthException;
-use App\Membership\Domain\Entity\AggregateSubscription;
+use App\Membership\Infrastructure\Entity\AggregateSubscription;
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Membership\Infrastructure\Repository\Exception\InvalidMemberIdentifier;
 use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
@@ -29,7 +29,7 @@ use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
 use App\Twitter\Infrastructure\Exception\UnknownApiAccessException;
-use App\Twitter\Infrastructure\Repository\Membership\MemberRepository;
+use App\Twitter\Infrastructure\Membership\Repository\MemberRepository;
 use App\Twitter\Infrastructure\Translation\Translator;
 use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\ApiRateLimitingException;
 use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;

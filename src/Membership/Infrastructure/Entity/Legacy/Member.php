@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Membership\Domain\Entity\Legacy;
+namespace App\Membership\Infrastructure\Entity\Legacy;
 
 use App\Twitter\Infrastructure\Api\Entity\Token;
 use App\Membership\Domain\Entity\MemberInterface;
@@ -35,7 +35,7 @@ use const JSON_THROW_ON_ERROR;
  *          })
  *      }
  * )
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="App\Twitter\Infrastructure\Membership\Repository\MemberRepository")
  * @ORM\InheritanceType("SINGLE_TABLE")
  * @ORM\DiscriminatorColumn(name="usr_position_in_hierarchy", type="integer")
  * @ORM\DiscriminatorMap({"1" = "Member"})
@@ -234,7 +234,7 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
 
     /**
      * @ORM\OneToMany(
-     *      targetEntity="\App\Twitter\Domain\Curation\Entity\PublicationBatchCollectedEvent",
+     *      targetEntity="\App\Twitter\Infrastructure\Curation\Entity\PublicationBatchCollectedEvent",
      *      mappedBy="member"
      * )
      */

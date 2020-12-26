@@ -19,7 +19,7 @@ use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
 
 /**
- * App\Twitter\Domain\Curation\Entity
+ * App\Twitter\Infrastructure\Curation\Entity
  */
 class PublicationRepository extends ServiceEntityRepository implements PublicationRepositoryInterface
 {

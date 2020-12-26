@@ -89,7 +89,7 @@ services:
             - [ 'setHttpAuthenticator',            [ '@App\Twitter\Infrastructure\Security\Authentication\HttpAuthenticator' ] ]
             - [ 'setLogger',                       [ '@monolog.logger.membership' ] ]
             - [ 'setMemberSubscriptionRepository', [ '@repository.member_subscription' ] ]
-            - [ 'setMemberRepository',             [ '@App\Twitter\Infrastructure\Repository\Membership\MemberRepository' ] ]
+            - [ 'setMemberRepository',             [ '@App\Twitter\Infrastructure\Membership\Repository\MemberRepository' ] ]
             - [ 'setPublishersListDispatcher',    [ '@App\Twitter\Infrastructure\Amqp\MessageBus\PublishersListDispatcher' ] ]
             - [ 'setTokenRepository',              [ '@repository.access_token' ] ]
         properties:

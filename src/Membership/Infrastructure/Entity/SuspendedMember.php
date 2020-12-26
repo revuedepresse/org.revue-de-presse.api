@@ -1,9 +1,11 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Membership\Domain\Entity;
+namespace App\Membership\Infrastructure\Entity;
 
-use App\Membership\Domain\Entity\Legacy\Member;
+use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Entity\TwitterMemberInterface;
+use App\Membership\Infrastructure\Entity\Legacy\Member;
 
 class SuspendedMember implements TwitterMemberInterface
 {

@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Membership\Infrastructure\Security\Authentication;
 
-use App\Membership\Domain\Entity\AuthenticationToken;
+use App\Membership\Infrastructure\Entity\AuthenticationToken;
 use App\Membership\Infrastructure\Repository\AuthenticationTokenRepository;
 use Auth0\SDK\Exception\CoreException;
 use Auth0\SDK\Exception\InvalidTokenException;

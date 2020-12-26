@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Twitter\Domain\Curation\Entity;
+namespace App\Twitter\Infrastructure\Curation\Entity;
 
 use App\Twitter\Infrastructure\Api\Entity\Status;
 use App\Twitter\Domain\Publication\PublishersListInterface;
@@ -23,7 +23,7 @@ class Highlight
     private $status;
 
     /**
-     * App\Membership\Domain\Entity\Member
+     * App\Membership\Infrastructure\Entity\Member
      */
     private $member;
 

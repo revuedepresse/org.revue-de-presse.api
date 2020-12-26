@@ -3,7 +3,7 @@ declare (strict_types=1);
 
 namespace App\Twitter\Infrastructure\Subscription\Console;
 
-use App\Twitter\Domain\Curation\Entity\FriendsListCollectedEvent;
+use App\Twitter\Infrastructure\Curation\Entity\FriendsListCollectedEvent;
 use App\Twitter\Domain\Curation\Repository\ListCollectedEventRepositoryInterface;
 use App\Twitter\Domain\Resource\MemberCollection;
 use App\Twitter\Domain\Resource\MemberIdentity;

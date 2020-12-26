@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\DependencyInjection\Membership;
 
-use App\Twitter\Infrastructure\Repository\Membership\WhispererRepositoryInterface;
+use App\Twitter\Domain\Membership\Repository\WhispererRepositoryInterface;
 
 trait WhispererRepositoryTrait
 {

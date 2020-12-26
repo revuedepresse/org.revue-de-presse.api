@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Curation\Repository;
 
-use App\Twitter\Domain\Curation\Entity\FollowersListCollectedEvent;
+use App\Twitter\Infrastructure\Curation\Entity\FollowersListCollectedEvent;
 use App\Twitter\Domain\Curation\Entity\ListCollectedEvent;
 use App\Twitter\Domain\Curation\Repository\ListCollectedEventRepositoryInterface;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;

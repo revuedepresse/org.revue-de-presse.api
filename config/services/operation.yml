@@ -15,6 +15,7 @@ services:
             - 'devobs:load-production-fixtures'
             - '@App\Twitter\Domain\Api\Repository\TokenTypeRepositoryInterface'
             - '@App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface'
+            - '@App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface'
         tags:
             - { name: 'console.command' }
 

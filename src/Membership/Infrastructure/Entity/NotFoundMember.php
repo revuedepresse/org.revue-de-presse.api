@@ -1,20 +1,21 @@
 <?php
-declare(strict_types=1);
 
-namespace App\Membership\Domain\Entity;
+namespace App\Membership\Infrastructure\Entity;
 
-use App\Membership\Domain\Entity\Legacy\Member;
+use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Entity\TwitterMemberInterface;
+use App\Membership\Infrastructure\Entity\Legacy\Member;
 
-class ProtectedMember implements TwitterMemberInterface
+class NotFoundMember implements TwitterMemberInterface
 {
     use MemberTrait;
     use ExceptionalUserInterfaceTrait;
 
     /**
-     * @param bool $protected
+     * @param $notFound
      * @return MemberInterface
      */
-    public function setProtected(bool $protected): MemberInterface
+    public function setNotFound(bool $notFound): MemberInterface
     {
         return $this;
     }
@@ -22,15 +23,15 @@ class ProtectedMember implements TwitterMemberInterface
     /**
      * @return boolean
      */
-    public function isProtected(): bool
+    public function hasBeenDeclaredAsNotFound(): bool
     {
         return true;
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
-    public function isNotProtected(): bool
+    public function hasNotBeenDeclaredAsNotFound(): bool
     {
         return false;
     }
@@ -41,7 +42,7 @@ class ProtectedMember implements TwitterMemberInterface
         $member->setScreenName($screenName);
         $member->setTwitterID((string) $id);
         $member->setEmail('@'.$screenName);
-        $member->setProtected(true);
+        $member->setNotFound(true);
 
         return $member;
     }

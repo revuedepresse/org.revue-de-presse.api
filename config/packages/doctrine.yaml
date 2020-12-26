@@ -140,13 +140,13 @@ doctrine:
                         alias:      'Member'
                         dir:        '%kernel.project_dir%/config/model/member'
                         is_bundle:  false
-                        prefix:     App\Membership\Domain\Entity
+                        prefix:     App\Membership\Infrastructure\Entity
                         type:       xml
                     Membership:
                         alias:      'Membership'
-                        dir:        '%kernel.project_dir%/src/Membership/Domain/Entity/Legacy'
+                        dir:        '%kernel.project_dir%/src/Membership/Infrastructure/Entity/Legacy'
                         is_bundle:  false
-                        prefix:     App\Membership\Domain\Entity\Legacy
+                        prefix:     App\Membership\Infrastructure\Entity\Legacy
                         type:       annotation
                     PressMedia:
                         alias:      'PressMedia'
@@ -170,7 +170,7 @@ doctrine:
                         alias:      'PublicationBatchCollectedEvent'
                         dir:        '%kernel.project_dir%/config/model/curation'
                         is_bundle:  false
-                        prefix:     App\Twitter\Domain\Curation\Entity
+                        prefix:     App\Twitter\Infrastructure\Curation\Entity
                         type:       xml
                     PublishersList:
                         alias:      'PublishersList'

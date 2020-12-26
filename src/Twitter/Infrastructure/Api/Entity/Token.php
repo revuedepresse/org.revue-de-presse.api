@@ -5,7 +5,7 @@ namespace App\Twitter\Infrastructure\Api\Entity;
 
 use App\Twitter\Domain\Api\Model\TokenInterface;
 use App\Twitter\Infrastructure\Api\Exception\InvalidSerializedTokenException;
-use App\Membership\Domain\Entity\Legacy\Member;
+use App\Membership\Infrastructure\Entity\Legacy\Member;
 use DateTime;
 use DateTimeImmutable;
 use DateTimeInterface;
@@ -134,7 +134,7 @@ class Token implements TokenInterface
     protected ?DateTimeInterface $updatedAt;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Membership\Domain\Entity\Legacy\Member", mappedBy="tokens")
+     * @ORM\ManyToMany(targetEntity="App\Membership\Infrastructure\Entity\Legacy\Member", mappedBy="tokens")
      */
     protected Collection $users;
 

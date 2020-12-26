@@ -1,12 +1,13 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Twitter\Domain\Curation\Entity;
+namespace App\Twitter\Infrastructure\Curation\Entity;
 
+use App\Membership\Domain\Entity\MemberInterface;
 use DateTimeInterface;
 use Ramsey\Uuid\UuidInterface;
 
-class MemberFriendsCollectedEvent
+class PublicationBatchCollectedEvent
 {
     private UuidInterface $id;
 
@@ -14,20 +15,20 @@ class MemberFriendsCollectedEvent
 
     private DateTimeInterface $occurredAt;
 
-    private string $screenName;
+    private MemberInterface $member;
 
     private DateTimeInterface $startedAt;
 
     private ?DateTimeInterface $endedAt;
 
     public function __construct(
-        string $screenName,
+        MemberInterface $member,
         DateTimeInterface $occurredAt,
         DateTimeInterface $startedAt,
         ?string $payload = null,
         ?DateTimeInterface $endedAt = null
     ) {
-        $this->screenName     = $screenName;
+        $this->member     = $member;
         $this->payload    = $payload;
         $this->occurredAt = $occurredAt;
         $this->startedAt  = $startedAt;
@@ -39,9 +40,9 @@ class MemberFriendsCollectedEvent
         return $this->id;
     }
 
-    public function screenName(): string
+    public function member(): MemberInterface
     {
-        return $this->screenName;
+        return $this->member;
     }
 
     public function occurredAt(): DateTimeInterface

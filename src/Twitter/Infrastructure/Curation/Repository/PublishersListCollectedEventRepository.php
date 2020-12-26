@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Curation\Repository;
 
-use App\Twitter\Domain\Curation\Entity\PublishersListCollectedEvent;
+use App\Twitter\Infrastructure\Curation\Entity\PublishersListCollectedEvent;
 use App\Twitter\Domain\Curation\Repository\PublishersListCollectedEventRepositoryInterface;
 use App\Twitter\Domain\Resource\MemberCollection;
 use App\Twitter\Domain\Resource\MemberIdentity;

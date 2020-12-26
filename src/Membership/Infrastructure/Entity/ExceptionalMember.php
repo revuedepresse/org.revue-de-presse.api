@@ -1,7 +1,9 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Membership\Domain\Entity;
+namespace App\Membership\Infrastructure\Entity;
+
+use App\Membership\Domain\Entity\TwitterMemberInterface;
 
 class ExceptionalMember implements TwitterMemberInterface
 {

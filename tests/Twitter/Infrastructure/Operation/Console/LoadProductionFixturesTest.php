@@ -3,6 +3,8 @@ declare (strict_types=1);
 
 namespace App\Tests\Twitter\Infrastructure\Operation\Console;
 
+use App\Membership\Infrastructure\Entity\Legacy\Member;
+use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use App\Twitter\Infrastructure\Api\Entity\Token;
 use App\Twitter\Infrastructure\Api\Entity\TokenType;
 use App\Twitter\Infrastructure\Operation\Console\LoadProductionFixtures;
@@ -18,6 +20,8 @@ use Symfony\Component\Console\Tester\CommandTester;
  */
 class LoadProductionFixturesTest extends KernelTestCase
 {
+    private const API_ACCESS_TOKEN = '___sec___access__token__';
+
     private Command $command;
 
     private CommandTester $commandTester;
@@ -27,6 +31,8 @@ class LoadProductionFixturesTest extends KernelTestCase
     private ObjectRepository $tokenTypeRepository;
 
     private ObjectRepository $tokenRepository;
+
+    private MemberRepositoryInterface $memberRepository;
 
     protected function setUp(): void
     {
@@ -39,6 +45,7 @@ class LoadProductionFixturesTest extends KernelTestCase
         $this->entityManager = self::$container->get('doctrine.orm.entity_manager');
         $this->tokenTypeRepository = $this->entityManager->getRepository(TokenType::class);
         $this->tokenRepository = $this->entityManager->getRepository(Token::class);
+        $this->memberRepository = $this->entityManager->getRepository(Member::class);
 
         $this->removeExistingFixtures();
 
@@ -63,6 +70,7 @@ class LoadProductionFixturesTest extends KernelTestCase
             LoadProductionFixtures::ARGUMENT_USER_SECRET => 'secret',
             LoadProductionFixtures::ARGUMENT_CONSUMER_KEY => 'consumer_key',
             LoadProductionFixtures::ARGUMENT_CONSUMER_SECRET => 'consumer_secret',
+            LoadProductionFixtures::ARGUMENT_API_ACCESS_TOKEN => self::API_ACCESS_TOKEN,
         ]);
 
         // Assert
@@ -75,6 +83,7 @@ class LoadProductionFixturesTest extends KernelTestCase
 
         $tokenTypes = $this->tokenTypeRepository->findAll();
         $token = $this->tokenRepository->findAll();
+        $apiConsumingMembers = $this->memberRepository->findBy(['apiKey' => self::API_ACCESS_TOKEN]);
 
         self::assertCount(
             2,
@@ -117,6 +126,12 @@ class LoadProductionFixturesTest extends KernelTestCase
             $token->getConsumerSecret(),
             'The consumer secret property of the token should be the consumer secret argument value of the command'
         );
+
+        self::assertCount(
+            1,
+            $apiConsumingMembers,
+            'There should be exactly one member able to consume the API'
+        );
     }
 
     protected function tearDown(): void
@@ -133,6 +148,9 @@ class LoadProductionFixturesTest extends KernelTestCase
         ');
         $this->entityManager->getConnection()->executeQuery('
             DELETE FROM weaving_token_type;
+        ');
+        $this->entityManager->getConnection()->executeQuery('
+            DELETE FROM weaving_user;
         ');
     }
 }

@@ -3,9 +3,10 @@
 namespace App\PressMedia\Repository;
 
 use App\PressMedia\Entity\Media;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityRepository;
 
-class MediaRepository extends EntityRepository
+class MediaRepository extends ServiceEntityRepository
 {
     /**
      * @var \Psr\Log\LoggerInterface

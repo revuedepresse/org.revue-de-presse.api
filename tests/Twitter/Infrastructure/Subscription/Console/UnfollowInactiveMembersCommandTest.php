@@ -5,7 +5,7 @@ namespace App\Tests\Twitter\Infrastructure\Subscription\Console;
 
 use App\Twitter\Infrastructure\Subscription\Console\UnfollowInactiveMembersCommand;
 use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
-use App\Membership\Domain\Entity\Legacy\Member;
+use App\Membership\Infrastructure\Entity\Legacy\Member;
 use App\Tests\Twitter\Domain\Curation\Infrastructure\Builder\Repository\FriendsListCollectedEventRepositoryBuilder;
 use App\Tests\Membership\Builder\Repository\MemberRepositoryBuilder;
 use App\Tests\Twitter\Infrastructure\Api\Builder\Mutator\FriendshipMutatorBuilder;

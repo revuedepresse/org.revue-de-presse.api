@@ -19,7 +19,7 @@ services:
             - { name: 'console.command' }
         calls:
             - [ 'setLogger', ['@logger'] ]
-            - [ 'setMemberRepository', ['@App\Twitter\Infrastructure\Repository\Membership\MemberRepository'] ]
+            - [ 'setMemberRepository', ['@App\Twitter\Infrastructure\Membership\Repository\MemberRepository'] ]
             - [ 'setMemberSubscriptionRepository', ['@repository.member_subscription'] ]
             - [ 'setMutator', ['@App\Twitter\Infrastructure\Twitter\Api\Mutator\FriendshipMutator'] ]
             - [ 'setNetworkRepository', ['@repository.network'] ]
@@ -55,7 +55,7 @@ services:
             - [ 'setLogger',                                [ '@logger'] ]
             - [ 'setMemberFriendsCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\MemberFriendsCollectedEventRepository'] ]
             - [ 'setMemberProfileCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository'] ]
-            - [ 'setMemberRepository',                      [ '@App\Twitter\Infrastructure\Repository\Membership\MemberRepository'] ]
+            - [ 'setMemberRepository',                      [ '@App\Twitter\Infrastructure\Membership\Repository\MemberRepository'] ]
             - [ 'setMessageBus',                            [ '@messenger.default_bus'] ]
             - [ 'setTranslator',                            [ '@translator'] ]
         tags:
@@ -67,7 +67,7 @@ services:
         calls:
             - [ 'setCollector',         [ '@App\Twitter\Infrastructure\Twitter\Collector\PublicationCollector'] ]
             - [ 'setLogger',            [ '@monolog.logger.twitter_api'] ]
-            - [ 'setMemberRepository',  [ '@App\Twitter\Infrastructure\Repository\Membership\MemberRepository'] ]
+            - [ 'setMemberRepository',  [ '@App\Twitter\Infrastructure\Membership\Repository\MemberRepository'] ]
         properties:
             tokenRepository:            '@repository.access_token'
         tags:

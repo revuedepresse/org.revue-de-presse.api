@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Membership\Domain\Entity;
+namespace App\Membership\Infrastructure\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection,
     Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\Collection;
+use App\Membership\Domain\Entity\RoleInterface;
 
 /**
  * @ORM\Entity
@@ -34,7 +35,7 @@ class Role implements RoleInterface
     protected $role;
 
     /**
-     * @ORM\ManyToMany(targetEntity="App\Membership\Domain\Entity\Legacy\Member", mappedBy="roles")
+     * @ORM\ManyToMany(targetEntity="App\Membership\Infrastructure\Entity\Legacy\Member", mappedBy="roles")
      */
     protected $users;
 

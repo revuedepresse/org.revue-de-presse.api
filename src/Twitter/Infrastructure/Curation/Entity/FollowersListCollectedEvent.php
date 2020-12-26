@@ -1,8 +1,10 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Twitter\Domain\Curation\Entity;
+namespace App\Twitter\Infrastructure\Curation\Entity;
 
+use App\Twitter\Domain\Curation\Entity\JsonSerializableInterface;
+use App\Twitter\Domain\Curation\Entity\ListCollectedEvent;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationId;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdAwareInterface;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdInterface;
@@ -12,7 +14,7 @@ use DateTimeImmutable;
 use DateTimeInterface;
 use Ramsey\Uuid\UuidInterface;
 
-class FriendsListCollectedEvent implements ListCollectedEvent, JsonSerializableInterface
+class FollowersListCollectedEvent implements ListCollectedEvent, JsonSerializableInterface
 {
     private UuidInterface $id;
 
@@ -36,14 +38,13 @@ class FriendsListCollectedEvent implements ListCollectedEvent, JsonSerializableI
         DateTimeInterface $startedAt,
         ?string $payload = null,
         ?DateTimeInterface $endedAt = null
-    )
-    {
-        $this->screenName = $selector->screenName();
-        $this->atCursor = $selector->cursor();
-        $this->payload = $payload;
-        $this->occurredAt = $occurredAt;
-        $this->startedAt = $startedAt;
-        $this->endedAt = $endedAt;
+    ) {
+        $this->screenName    = $selector->screenName();
+        $this->atCursor      = $selector->cursor();
+        $this->payload       = $payload;
+        $this->occurredAt    = $occurredAt;
+        $this->startedAt     = $startedAt;
+        $this->endedAt       = $endedAt;
 
         if ($selector instanceof CorrelationIdAwareInterface) {
             $this->correlationId = $selector->correlationId();
@@ -106,16 +107,16 @@ class FriendsListCollectedEvent implements ListCollectedEvent, JsonSerializableI
     {
         return json_encode([
             'payload' => $this->payload(),
-            'correlation_id' => $this->correlationId(),
+            'correlation_id' => $this->correlationId()->asString(),
             'screen_name' => $this->screenName(),
             'cursor' => $this->atCursor(),
-            'occurred_at' => $this->occurredAt()->format(DateTimeInterface::ATOM),
-            'ended_at' => $this->occurredAt()->format(DateTimeInterface::ATOM),
-            'started_at' => $this->occurredAt()->format(DateTimeInterface::ATOM),
+            'occurred_at' => $this->occurredAt()->format(\DateTimeInterface::ATOM),
+            'ended_at' => $this->occurredAt()->format(\DateTimeInterface::ATOM),
+            'started_at' => $this->occurredAt()->format(\DateTimeInterface::ATOM),
         ], JSON_THROW_ON_ERROR);
     }
 
-    public static function jsonDeserialize(string $serializedSubject): self
+    public static function jsonDeserialize(string $serializedSubject): JsonSerializableInterface
     {
         $decodedSerializedEvent = json_decode($serializedSubject, true, 512, JSON_THROW_ON_ERROR);
 
@@ -132,4 +133,3 @@ class FriendsListCollectedEvent implements ListCollectedEvent, JsonSerializableI
         );
     }
 }
-

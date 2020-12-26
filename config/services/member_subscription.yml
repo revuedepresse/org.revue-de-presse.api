@@ -10,7 +10,7 @@ services:
         calls:
             - [ 'setApiAccessor', [ '@App\Twitter\Infrastructure\Api\Accessor' ] ]
             - [ 'setLogger', [ '@logger' ] ]
-            - [ 'setMemberRepository', [ '@App\Twitter\Infrastructure\Repository\Membership\MemberRepository' ] ]
+            - [ 'setMemberRepository', [ '@App\Twitter\Infrastructure\Membership\Repository\MemberRepository' ] ]
             - [ 'setMemberSubscriptionRepository', [ '@repository.member_subscription' ] ]
 
     App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscriptionsCommand:
@@ -26,6 +26,6 @@ services:
         calls:
             - [ 'setMutator', [ '@App\Twitter\Infrastructure\Twitter\Api\Mutator\FriendshipMutator' ] ]
             - [ 'setListCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository' ] ]
-            - [ 'setMemberRepository', [ '@App\Twitter\Infrastructure\Repository\Membership\MemberRepository' ] ]
+            - [ 'setMemberRepository', [ '@App\Twitter\Infrastructure\Membership\Repository\MemberRepository' ] ]
         tags:
             - { name: 'console.command' }

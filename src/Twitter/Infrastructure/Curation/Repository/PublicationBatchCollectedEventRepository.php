@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Curation\Repository;
 
 use App\Twitter\Domain\Curation\CollectionStrategyInterface;
-use App\Twitter\Domain\Curation\Entity\PublicationBatchCollectedEvent;
+use App\Twitter\Infrastructure\Curation\Entity\PublicationBatchCollectedEvent;
 use App\Twitter\Domain\Curation\Repository\PublicationBatchCollectedEventRepositoryInterface;
 use App\Twitter\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;

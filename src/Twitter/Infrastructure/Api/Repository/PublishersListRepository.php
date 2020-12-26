@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Api\Repository;
 
-use App\Membership\Domain\Entity\Legacy\Member;
+use App\Membership\Infrastructure\Entity\Legacy\Member;
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Twitter\Infrastructure\PublishersList\Entity\TimelyStatus;
 use App\Twitter\Infrastructure\PublishersList\Repository\PaginationAwareTrait;

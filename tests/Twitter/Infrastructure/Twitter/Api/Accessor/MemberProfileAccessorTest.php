@@ -9,7 +9,7 @@ use App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRe
 use App\Twitter\Infrastructure\Twitter\Api\Accessor\MemberProfileAccessor;
 use App\Twitter\Infrastructure\Twitter\Api\UnavailableResourceHandler;
 use App\Twitter\Infrastructure\Twitter\Api\UnavailableResourceHandlerInterface;
-use App\Membership\Domain\Entity\Legacy\Member;
+use App\Membership\Infrastructure\Entity\Legacy\Member;
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Tests\Membership\Builder\Repository\MemberRepositoryBuilder;
 use App\Twitter\Domain\Api\ApiAccessorInterface;

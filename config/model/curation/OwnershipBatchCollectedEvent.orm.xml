@@ -5,7 +5,7 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="App\Twitter\Domain\Curation\Entity\OwnershipBatchCollectedEvent"
+    <entity name="App\Twitter\Infrastructure\Curation\Entity\OwnershipBatchCollectedEvent"
             repository-class="App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository"
             table="ownership_batch_collected_event">
 

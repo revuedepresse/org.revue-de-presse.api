@@ -12,7 +12,7 @@ use App\Twitter\Infrastructure\DependencyInjection\Collection\MemberProfileColle
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\MessageBusTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
-use App\Membership\Domain\Entity\Legacy\Member;
+use App\Membership\Infrastructure\Entity\Legacy\Member;
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;

@@ -1,12 +1,12 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Twitter\Domain\Curation\Entity;
+namespace App\Twitter\Infrastructure\Curation\Entity;
 
 use DateTimeInterface;
 use Ramsey\Uuid\UuidInterface;
 
-class MemberProfileCollectedEvent
+class MemberFriendsCollectedEvent
 {
     private UuidInterface $id;
 

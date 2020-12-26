@@ -4,13 +4,14 @@ declare(strict_types=1);
 namespace App\Membership\Infrastructure\Repository;
 
 use App\Membership\Infrastructure\Security\Authentication\Authenticator;
-use App\Membership\Domain\Entity\AuthenticationToken;
+use App\Membership\Infrastructure\Entity\AuthenticationToken;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityRepository;
-use App\Membership\Domain\Entity\Legacy\Member;
-use App\Twitter\Infrastructure\Repository\Membership\MemberRepository;
+use App\Membership\Infrastructure\Entity\Legacy\Member;
+use App\Twitter\Infrastructure\Membership\Repository\MemberRepository;
 use const JSON_THROW_ON_ERROR;
 
-class AuthenticationTokenRepository extends EntityRepository
+class AuthenticationTokenRepository extends ServiceEntityRepository
 {
     /**
      * @var MemberRepository

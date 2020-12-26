@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Membership\Domain\Entity;
+namespace App\Membership\Infrastructure\Entity;
 
 class AuthenticationToken
 {

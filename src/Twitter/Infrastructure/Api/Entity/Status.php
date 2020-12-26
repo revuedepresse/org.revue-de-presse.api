@@ -5,7 +5,7 @@ namespace App\Twitter\Infrastructure\Api\Entity;
 
 use App\Twitter\Domain\Publication\PublishersListInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
-use App\Twitter\Domain\Curation\Entity\StatusTrait;
+use App\Twitter\Infrastructure\Curation\Entity\StatusTrait;
 use DateTimeInterface;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;

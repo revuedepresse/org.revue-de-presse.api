@@ -23,7 +23,7 @@ use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTr
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use App\Membership\Domain\Entity\MemberInterface;
-use App\Twitter\Domain\Curation\Entity\NullStatus;
+use App\Twitter\Infrastructure\Curation\Entity\NullStatus;
 use App\Twitter\Domain\Publication\Repository\ExtremumAwareInterface;
 use App\Twitter\Infrastructure\Publication\Repository\NotFoundStatusRepository;
 use App\Twitter\Infrastructure\Exception\BadAuthenticationDataException;
