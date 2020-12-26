@@ -71,7 +71,7 @@ parameters:
             any_value: DoctrineExtensions\Query\Mysql\AnyValue
             ascii: DoctrineExtensions\Query\Mysql\Ascii
             binary: DoctrineExtensions\Query\Mysql\Binary
-            cast: DoctrineExtensions\Query\Mysql\Cast
+            cast: Oro\ORM\Query\AST\Functions\Cast
             char_length: DoctrineExtensions\Query\Mysql\CharLength
             collate: DoctrineExtensions\Query\Mysql\Collate
             concat_ws: DoctrineExtensions\Query\Mysql\ConcatWs

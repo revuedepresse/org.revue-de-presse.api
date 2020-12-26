@@ -167,9 +167,11 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
                 $memberOwnership->token()
             );
 
-            $mergeResult = array_merge(
-                $allOwnerships[count($allOwnerships) - 1],
-                $ownerships->toArray()
+            $mergeResult = array_unique(
+                array_merge(
+                    $allOwnerships[count($allOwnerships) - 1],
+                    $ownerships->toArray()
+                )
             );
 
             if ($mergeResult !== $allOwnerships[count($allOwnerships) - 1]) {
@@ -262,7 +264,6 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
             return $this->findNextBatchOfListOwnerships($ownerships);
         }
 
-        // Change tokens
         if ($this->targetListHasNotBeenFound($ownerships, $listRestriction)) {
             $ownerships = $this->guardAgainstInvalidToken(
                 $ownerships,

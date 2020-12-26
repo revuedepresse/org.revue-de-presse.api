@@ -642,5 +642,5 @@ function stop_workers() {
     local project_name
     project_name="$(get_project_name)"
 
-    /bin/bash -c "docker-compose --project-name=${project_name} run --rm worker bin/console messenger:stop-workers"
+    /bin/bash -c "docker-compose --project-name=${project_name} exec worker bin/console messenger:stop-workers"
 }

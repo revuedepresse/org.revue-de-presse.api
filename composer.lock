@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "5d63a047a46f30d41eaf1c85ee1be610",
+    "content-hash": "f0ac2e7210bc607b01ed4f3e1b917ceb",
     "packages": [
         {
             "name": "abraham/twitteroauth",
@@ -3380,6 +3380,64 @@
                 "source": "https://github.com/Ocramius/ProxyManager/tree/2.2.x"
             },
             "time": "2019-08-10T08:37:15+00:00"
+        },
+        {
+            "name": "oro/doctrine-extensions",
+            "version": "dev-cast-support-for-bigint",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/thierrymarianne/contrib-doctrine-extensions.git",
+                "reference": "8ea17b389c55f30d7560f2caf66733dcb20c03b5"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/thierrymarianne/contrib-doctrine-extensions/zipball/8ea17b389c55f30d7560f2caf66733dcb20c03b5",
+                "reference": "8ea17b389c55f30d7560f2caf66733dcb20c03b5",
+                "shasum": ""
+            },
+            "require": {
+                "doctrine/orm": ">=2.2.3",
+                "php": ">=5.4.0"
+            },
+            "require-dev": {
+                "doctrine/common": "<3.0.0",
+                "doctrine/data-fixtures": "^1.0",
+                "doctrine/orm": "<2.5.0",
+                "phpunit/phpunit": "4.*",
+                "squizlabs/php_codesniffer": "2.8.*",
+                "symfony/yaml": "2.*"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Oro\\DBAL": "src/",
+                    "Oro\\ORM": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Oro, Inc",
+                    "homepage": "http://www.orocrm.com"
+                }
+            ],
+            "description": "Doctrine Extensions for MySQL and PostgreSQL.",
+            "homepage": "https://github.com/orocrm/doctrine-extensions/",
+            "keywords": [
+                "database",
+                "doctrine",
+                "dql",
+                "function",
+                "mysql",
+                "postgresql",
+                "type"
+            ],
+            "support": {
+                "source": "https://github.com/thierrymarianne/contrib-doctrine-extensions/tree/cast-support-for-bigint"
+            },
+            "time": "2020-12-25T16:59:49+00:00"
         },
         {
             "name": "predis/predis",
@@ -8064,12 +8122,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/service-contracts.git",
-                "reference": "0aeee2f70f4550e6c48c9a796d98f5ceda58dfda"
+                "reference": "5c448a39281b671be2cc8d208e6df75ac2d4b366"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/service-contracts/zipball/0aeee2f70f4550e6c48c9a796d98f5ceda58dfda",
-                "reference": "0aeee2f70f4550e6c48c9a796d98f5ceda58dfda",
+                "url": "https://api.github.com/repos/symfony/service-contracts/zipball/5c448a39281b671be2cc8d208e6df75ac2d4b366",
+                "reference": "5c448a39281b671be2cc8d208e6df75ac2d4b366",
                 "shasum": ""
             },
             "require": {
@@ -8137,7 +8195,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2020-10-14T17:08:19+00:00"
+            "time": "2020-12-23T15:38:30+00:00"
         },
         {
             "name": "symfony/stopwatch",
@@ -12180,6 +12238,7 @@
         "abraham/twitteroauth": 20,
         "fabpot/goutte": 20,
         "fzaninotto/faker": 20,
+        "oro/doctrine-extensions": 20,
         "predis/predis": 20,
         "ramsey/uuid-doctrine": 20,
         "symfony/orm-pack": 20,
@@ -12191,7 +12250,7 @@
         "symfony/maker-bundle": 20,
         "symfony/test-pack": 20
     },
-    "prefer-stable": true,
+    "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
         "php": ">=7.2.9",

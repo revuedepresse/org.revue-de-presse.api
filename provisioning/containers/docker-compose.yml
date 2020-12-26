@@ -61,6 +61,7 @@ services:
             devobs-network:
                 aliases:
                     - database
+#        command: ["postgres", "-c", "log_statement=all"]
         restart: always
         env_file:
             - ../../.env.local

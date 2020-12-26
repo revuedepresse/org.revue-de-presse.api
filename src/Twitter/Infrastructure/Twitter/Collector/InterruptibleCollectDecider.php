@@ -200,7 +200,7 @@ class InterruptibleCollectDecider implements InterruptibleCollectDeciderInterfac
     ): bool {
         try {
             $this->guardAgainstExceptionalMember($options);
-            $publishersList = $this->guardAgainstLockedPublishersList();
+            $this->guardAgainstLockedPublishersList();
             $whisperer = $this->beforeFetchingStatuses($options);
         } catch (MembershipException|LockedPublishersListException $exception) {
             $this->logger->info($exception->getMessage());

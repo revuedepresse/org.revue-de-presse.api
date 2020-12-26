@@ -398,16 +398,17 @@ QUERY;
     public function hasBeenUpdatedBetween7HoursAgoAndNow(string $screenName): bool
     {
         $query = <<< QUERY
-            SELECT TIME_TO_SEC(
-                TIMEDIFF(
-                    NOW(),
-                    last_status_publication_date
+            SELECT 
+            EXTRACT(
+                EPOCH from (
+                    NOW()::timestamp -
+                    last_status_publication_date::timestamp
                 )
             ) > 3600*7 AS has_been_updated_between_seven_hours_ago_and_now
             FROM weaving_user 
             WHERE
             usr_twitter_username = '%s' 
-            AND DATEDIFF(NOW(), last_status_publication_date) < 1;
+            AND EXTRACT(EPOCH FROM (NOW()::timestamp - last_status_publication_date::timestamp)) < 24 * 3600;
 QUERY;
 
         try {
