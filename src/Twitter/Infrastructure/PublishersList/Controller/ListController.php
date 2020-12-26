@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\PublishersList\Controller;
 
 use App\Membership\Infrastructure\Entity\Legacy\Member;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Infrastructure\Repository\AuthenticationTokenRepository;
 use App\NewsReview\Domain\Repository\PopularPublicationRepositoryInterface;
 use App\Twitter\Infrastructure\PublishersList\Controller\Exception\InvalidRequestException;

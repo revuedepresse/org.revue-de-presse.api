@@ -8,7 +8,7 @@ use App\Twitter\Infrastructure\Subscription\Console\UnfollowDiffSubscriptionsSub
 use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use App\Twitter\Infrastructure\Twitter\Api\Mutator\FriendshipMutatorInterface;
 use App\Membership\Domain\Repository\NetworkRepositoryInterface;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use App\Tests\Twitter\Domain\Curation\Infrastructure\Builder\Repository\FollowersListCollectedEventRepositoryBuilder;
 use App\Tests\Twitter\Domain\Curation\Infrastructure\Builder\Repository\FriendsListCollectedEventRepositoryBuilder;
 use App\Tests\Membership\Builder\Repository\MemberRepositoryBuilder;

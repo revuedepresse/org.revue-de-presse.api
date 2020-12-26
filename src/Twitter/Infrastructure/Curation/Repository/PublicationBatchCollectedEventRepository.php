@@ -9,7 +9,7 @@ use App\Twitter\Domain\Curation\Repository\PublicationBatchCollectedEventReposit
 use App\Twitter\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Throwable;
 use const JSON_THROW_ON_ERROR;

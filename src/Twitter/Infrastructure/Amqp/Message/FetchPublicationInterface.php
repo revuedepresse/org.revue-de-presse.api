@@ -5,7 +5,7 @@ namespace App\Twitter\Infrastructure\Amqp\Message;
 
 use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use App\Twitter\Domain\Api\Model\TokenInterface;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 
 interface FetchPublicationInterface
 {

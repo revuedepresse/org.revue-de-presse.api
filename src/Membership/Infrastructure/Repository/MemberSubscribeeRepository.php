@@ -3,7 +3,7 @@
 namespace App\Membership\Infrastructure\Repository;
 
 use App\Membership\Infrastructure\Entity\MemberSubscribee;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityRepository;
 use App\Twitter\Infrastructure\Membership\Repository\MemberRepository;

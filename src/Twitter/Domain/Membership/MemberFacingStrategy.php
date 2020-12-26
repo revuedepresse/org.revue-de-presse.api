@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Domain\Membership;
 
 use App\Twitter\Infrastructure\Amqp\Exception\SkippableMemberException;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use App\Twitter\Domain\Resource\MemberIdentity;
 use Exception;
 use function sprintf;

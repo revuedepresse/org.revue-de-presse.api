@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Repository\Subscription;
 
 use App\Membership\Infrastructure\Entity\MemberSubscription;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use Symfony\Component\HttpFoundation\Request;
 
 /**

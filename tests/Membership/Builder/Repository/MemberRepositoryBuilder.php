@@ -6,7 +6,7 @@ namespace App\Tests\Membership\Builder\Repository;
 use App\Twitter\Domain\Resource\MemberIdentity;
 use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use App\Membership\Infrastructure\Entity\Legacy\Member;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use Prophecy\Argument;
 use Prophecy\Prophecy\ObjectProphecy;
 use Prophecy\Prophet;

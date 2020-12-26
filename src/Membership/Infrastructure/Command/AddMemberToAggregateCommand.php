@@ -8,7 +8,7 @@ use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\ReadOnlyApplicatio
 use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\UnexpectedApiResponseException;
 use App\Twitter\Infrastructure\Console\CommandReturnCodeAwareInterface;
 use App\Membership\Infrastructure\Entity\AggregateSubscription;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository;
 use App\Twitter\Infrastructure\Exception\BadAuthenticationDataException;
 use App\Twitter\Infrastructure\Exception\InconsistentTokenRepository;

@@ -15,7 +15,7 @@ use App\Twitter\Infrastructure\Membership\Repository\MemberRepository;
 use App\Membership\Infrastructure\Entity\AggregateSubscription;
 use App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository;
 use App\Membership\Infrastructure\Repository\NetworkRepository;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use App\Twitter\Domain\Api\ApiAccessorInterface;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;

@@ -3,7 +3,7 @@
 namespace App\Twitter\Infrastructure\PublishersList\Repository;
 
 use App\Twitter\Infrastructure\PublishersList\Entity\MemberAggregateSubscription;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;

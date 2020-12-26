@@ -11,7 +11,7 @@ use App\Twitter\Domain\Resource\MemberIdentity;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\Http\SearchParams;
 use App\Membership\Infrastructure\Entity\Legacy\Member;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Infrastructure\Repository\Exception\InvalidMemberIdentifier;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;

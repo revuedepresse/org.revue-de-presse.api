@@ -276,7 +276,7 @@ parameters:
 
     allowed.origin:                                               '%env(resolve:ALLOWED_ORIGIN)%'
 
-    highlight_aggregate_default:                                  '%env(resolve:HIGHLIGHT_AGGREGATE_DEFAULT)%'
+    publishers_list_default:                                      '%env(resolve:PUBLISHERS_LIST_DEFAULT)%'
 
     admin_route_name:                                             '%env(resolve:ADMIN_ROUTE_NAME)%'
 

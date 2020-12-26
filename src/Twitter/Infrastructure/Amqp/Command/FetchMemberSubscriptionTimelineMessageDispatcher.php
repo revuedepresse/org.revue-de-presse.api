@@ -13,7 +13,7 @@ use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTr
 use App\Twitter\Infrastructure\DependencyInjection\MessageBusTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Membership\Infrastructure\Entity\Legacy\Member;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;

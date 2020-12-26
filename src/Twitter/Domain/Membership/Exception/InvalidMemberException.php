@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Membership\Exception;
 
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use function sprintf;
 

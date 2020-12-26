@@ -4,7 +4,7 @@ namespace App\Twitter\Infrastructure\Curation\Entity;
 
 use App\Twitter\Infrastructure\Api\Entity\Status;
 use App\Twitter\Domain\Publication\PublishersListInterface;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
 use DateTime;
 

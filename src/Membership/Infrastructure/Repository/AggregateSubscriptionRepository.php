@@ -7,7 +7,7 @@ use App\Twitter\Infrastructure\PublishersList\Repository\MemberAggregateSubscrip
 use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use App\Membership\Infrastructure\Entity\AggregateSubscription;
 use App\Membership\Infrastructure\Entity\MemberSubscription;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ManagerRegistry;

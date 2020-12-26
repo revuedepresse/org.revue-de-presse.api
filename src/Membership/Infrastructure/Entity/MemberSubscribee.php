@@ -2,21 +2,14 @@
 
 namespace App\Membership\Infrastructure\Entity;
 
+use App\Membership\Domain\Model\MemberInterface;
+
 class MemberSubscribee
 {
-    /**
-     * @var string
-     */
     private $id;
 
-    /**
-     * @var MemberInterface
-     */
     private $member;
 
-    /**
-     * @var MemberInterface
-     */
     private $subscribee;
 
     /**

@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace App\Membership\Infrastructure\Entity;
 
-use App\Membership\Domain\Entity\MemberInterface;
-use App\Membership\Domain\Entity\TwitterMemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
+use App\Membership\Domain\Model\TwitterMemberInterface;
 use App\Membership\Infrastructure\Entity\Legacy\Member;
 
 class SuspendedMember implements TwitterMemberInterface

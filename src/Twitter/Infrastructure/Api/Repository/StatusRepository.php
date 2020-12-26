@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Api\Repository;
 
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use App\Twitter\Domain\Curation\CollectionStrategyInterface;
 use App\Twitter\Domain\Publication\Repository\ExtremumAwareInterface;
 use App\Twitter\Domain\Publication\StatusInterface;

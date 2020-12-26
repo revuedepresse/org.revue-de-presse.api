@@ -86,6 +86,11 @@ class PublishersList implements PublishersListInterface
      */
     public UuidInterface $publicId;
 
+    public function publicId(): UuidInterface
+    {
+        return $this->publicId;
+    }
+
     /**
      * @ORM\Column(name="total_members", type="integer", options={"default": 0})
      */

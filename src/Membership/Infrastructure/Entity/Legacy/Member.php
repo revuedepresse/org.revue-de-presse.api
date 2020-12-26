@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Membership\Infrastructure\Entity\Legacy;
 
 use App\Twitter\Infrastructure\Api\Entity\Token;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Domain\Model\Member as MemberModel;
 use App\Twitter\Infrastructure\Serialization\JsonEncodingAwareInterface;
 use DateTime;

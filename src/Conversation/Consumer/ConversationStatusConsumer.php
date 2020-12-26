@@ -12,7 +12,7 @@ use App\Twitter\Infrastructure\Operation\OperationClock;
 use App\Twitter\Infrastructure\Membership\Repository\MemberRepository;
 use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
 use App\Membership\Infrastructure\Entity\Legacy\Member;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;

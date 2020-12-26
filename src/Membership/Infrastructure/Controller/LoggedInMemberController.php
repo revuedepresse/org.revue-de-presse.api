@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Membership\Infrastructure\Controller;
 
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Infrastructure\Repository\AuthenticationTokenRepository;
 use App\Twitter\Infrastructure\Security\Cors\CorsHeadersAwareTrait;
 use Psr\Log\LoggerInterface;

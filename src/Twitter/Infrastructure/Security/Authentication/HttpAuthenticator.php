@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Security\Authentication;
 
 use App\Twitter\Infrastructure\Security\Exception\UnauthorizedRequestException;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Infrastructure\Repository\AuthenticationTokenRepository;
 use Symfony\Component\HttpFoundation\Request;
 use function array_key_exists;

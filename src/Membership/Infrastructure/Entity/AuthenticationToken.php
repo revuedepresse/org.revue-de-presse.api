@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Membership\Infrastructure\Entity;
 
+use App\Membership\Domain\Model\MemberInterface;
+
 class AuthenticationToken
 {
     /**
@@ -36,14 +38,8 @@ class AuthenticationToken
         return $this->grantedRoutes;
     }
 
-    /**
-     * @var MemberInterface
-     */
     private MemberInterface $member;
 
-    /**
-     * @return MemberInterface
-     */
     public function getMember(): MemberInterface {
         return $this->member;
     }

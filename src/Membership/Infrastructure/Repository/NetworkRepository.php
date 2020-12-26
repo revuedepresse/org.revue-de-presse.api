@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace App\Membership\Infrastructure\Repository;
 
-use App\Membership\Domain\Entity\TwitterMemberInterface;
+use App\Membership\Domain\Model\TwitterMemberInterface;
 use App\Twitter\Infrastructure\Membership\Repository\MemberRepository;
 use App\Membership\Domain\Repository\NetworkRepositoryInterface;
 use App\Membership\Infrastructure\Entity\ExceptionalMember;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Infrastructure\Entity\NotFoundMember;
 use App\Membership\Infrastructure\Entity\ProtectedMember;
 use App\Membership\Infrastructure\Entity\SuspendedMember;

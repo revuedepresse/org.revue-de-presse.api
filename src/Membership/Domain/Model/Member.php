@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Membership\Domain\Model;
 
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use function mt_rand;
 use function sha1;
 use function uniqid;

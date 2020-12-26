@@ -6,7 +6,7 @@ namespace App\Twitter\Infrastructure\Api;
 use Abraham\TwitterOAuth\TwitterOAuth as TwitterClient;
 use Abraham\TwitterOAuth\TwitterOAuthException;
 use App\Membership\Infrastructure\Entity\AggregateSubscription;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Infrastructure\Repository\Exception\InvalidMemberIdentifier;
 use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Twitter\Domain\Api\ApiAccessorInterface;

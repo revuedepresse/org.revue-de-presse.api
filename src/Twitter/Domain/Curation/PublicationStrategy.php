@@ -6,7 +6,7 @@ namespace App\Twitter\Domain\Curation;
 use App\Twitter\Infrastructure\Amqp\Exception\SkippableMemberException;
 use App\Twitter\Domain\Resource\MemberIdentity;
 use App\Twitter\Domain\Resource\PublishersList;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdAwareInterface;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdAwareTrait;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdInterface;

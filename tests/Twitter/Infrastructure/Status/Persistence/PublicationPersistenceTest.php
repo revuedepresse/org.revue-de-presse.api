@@ -8,7 +8,7 @@ use App\Twitter\Infrastructure\Publication\Dto\TaggedStatus;
 use App\Twitter\Infrastructure\Publication\Persistence\PublicationPersistence;
 use App\Twitter\Infrastructure\Publication\Persistence\PublicationPersistenceInterface;
 use App\Membership\Infrastructure\Entity\Legacy\Member;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use App\Twitter\Infrastructure\Operation\Collection\CollectionInterface;
 use DateTimeInterface;
 use DateTimeZone;

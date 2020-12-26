@@ -19,7 +19,7 @@ use App\Twitter\Infrastructure\DependencyInjection\TaggedStatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
 use App\Twitter\Infrastructure\Publication\Mapping\MappingAwareInterface;
 use App\Twitter\Infrastructure\Twitter\Api\Normalizer\Normalizer;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use App\Twitter\Infrastructure\Operation\Collection\CollectionInterface;
 use App\Twitter\Domain\Publication\Repository\ExtremumAwareInterface;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;

@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace App\Membership\Infrastructure\Entity;
 
+use App\Membership\Domain\Model\MemberInterface;
+
 use Ramsey\Uuid\UuidInterface;
 
 class MemberSubscription

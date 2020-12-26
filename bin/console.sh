@@ -592,6 +592,7 @@ function load_production_fixtures() {
     ${API_TWITTER_USER_SECRET} \
     ${API_TWITTER_CONSUMER_KEY} \
     ${API_TWITTER_CONSUMER_SECRET} \
+    ${API_ACCESS_TOKEN} \
     -vvvv"
 
   run_php_script "${script}" 'interactive_mode'

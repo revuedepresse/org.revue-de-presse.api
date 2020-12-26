@@ -2,7 +2,7 @@
 
 namespace App\Membership\Infrastructure\Entity;
 
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 
 trait MemberTrait
 {

@@ -13,7 +13,7 @@ use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Subscription\MemberSubscriptionRepositoryTrait;
 use App\Twitter\Infrastructure\Twitter\Api\Mutator\FriendshipMutatorInterface;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Domain\Repository\NetworkRepositoryInterface;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;

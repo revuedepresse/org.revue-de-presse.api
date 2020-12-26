@@ -5,7 +5,7 @@ namespace App\Membership\Infrastructure\Entity;
 use Doctrine\Common\Collections\ArrayCollection,
     Doctrine\ORM\Mapping as ORM;
 use Doctrine\Common\Collections\Collection;
-use App\Membership\Domain\Entity\RoleInterface;
+use App\Membership\Domain\Model\RoleInterface;
 
 /**
  * @ORM\Entity

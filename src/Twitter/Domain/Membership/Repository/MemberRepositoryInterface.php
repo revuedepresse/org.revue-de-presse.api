@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Domain\Membership\Repository;
 
 use App\Twitter\Domain\Resource\MemberIdentity;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 
 interface MemberRepositoryInterface
 {

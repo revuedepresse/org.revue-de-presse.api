@@ -8,7 +8,7 @@ use App\Twitter\Domain\Publication\PublishersListInterface;
 use App\Twitter\Infrastructure\Amqp\Message\FetchMemberStatus;
 use App\Twitter\Infrastructure\DependencyInjection\MessageBusTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublishersListRepositoryTrait;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use App\Twitter\Domain\Publication\Exception\InvalidMemberAggregate;
 
 class PublishersListDispatcher implements PublishersListDispatcherInterface

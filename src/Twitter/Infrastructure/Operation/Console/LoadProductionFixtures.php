@@ -4,7 +4,7 @@ declare (strict_types=1);
 
 namespace App\Twitter\Infrastructure\Operation\Console;
 
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Twitter\Domain\Api\Repository\TokenTypeRepositoryInterface;
 use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;

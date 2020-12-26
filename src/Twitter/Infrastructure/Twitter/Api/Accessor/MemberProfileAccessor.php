@@ -12,7 +12,7 @@ use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTr
 use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use App\Twitter\Infrastructure\Twitter\Api\UnavailableResource;
 use App\Twitter\Infrastructure\Twitter\Api\UnavailableResourceHandlerInterface;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Domain\Model\Member;
 use App\Twitter\Domain\Api\ApiAccessorInterface;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;

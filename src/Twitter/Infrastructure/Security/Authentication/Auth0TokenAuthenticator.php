@@ -6,7 +6,7 @@ namespace App\Twitter\Infrastructure\Security\Authentication;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Membership\Infrastructure\Security\Authentication\Authenticator;
 use App\Membership\Infrastructure\Repository\AuthenticationTokenRepository;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Security\Core\User\UserProviderInterface;

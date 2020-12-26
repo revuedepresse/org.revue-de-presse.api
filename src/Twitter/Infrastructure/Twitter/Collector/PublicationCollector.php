@@ -35,7 +35,7 @@ use App\Twitter\Infrastructure\DependencyInjection\{Api\ApiAccessorTrait,
 use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Twitter\Infrastructure\Twitter\Collector\Exception\RateLimitedException;
 use App\Twitter\Infrastructure\Twitter\Collector\Exception\SkipCollectException;
-use App\Membership\Domain\Entity\MemberInterface;
+use App\Membership\Domain\Model\MemberInterface;
 use App\Twitter\Infrastructure\Exception\BadAuthenticationDataException;
 use App\Twitter\Infrastructure\Exception\InconsistentTokenRepository;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
