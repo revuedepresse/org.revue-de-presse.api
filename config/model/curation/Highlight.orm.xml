@@ -49,7 +49,7 @@
             target-entity="App\Twitter\Infrastructure\Publication\Entity\PublishersList"
             field="aggregate"
             inversed-by="timelyStatuses">
-            <join-column name="aggregate_id" />
+            <join-column name="aggregate_id" nullable="false" />
         </many-to-one>
 
         <field
