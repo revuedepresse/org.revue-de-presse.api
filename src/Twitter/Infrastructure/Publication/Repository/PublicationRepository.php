@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Publication\Repository;
 
-use App\Twitter\Domain\Publication\Entity\Publication;
+use App\Twitter\Infrastructure\Publication\Entity\Publication;
 use App\Twitter\Domain\Publication\Repository\PublicationRepositoryInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Infrastructure\Api\Adapter\StatusToArray;

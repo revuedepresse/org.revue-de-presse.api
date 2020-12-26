@@ -5,8 +5,8 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="App\PublishersList\Entity\ArchivedTimelyStatus"
-            repository-class="App\PublishersList\Repository\ArchivedTimelyStatusRepository"
+    <entity name="App\Twitter\Infrastructure\PublishersList\Entity\ArchivedTimelyStatus"
+            repository-class="App\Twitter\Infrastructure\PublishersList\Repository\ArchivedTimelyStatusRepository"
             table="archived_timely_status">
 
         <indexes>
@@ -30,7 +30,7 @@
         </one-to-one>
 
         <many-to-one
-            target-entity="App\Twitter\Infrastructure\Api\Entity\Aggregate"
+            target-entity="App\Twitter\Infrastructure\Publication\Entity\PublishersList"
             field="aggregate"
             inversed-by="timelyStatuses"
         />

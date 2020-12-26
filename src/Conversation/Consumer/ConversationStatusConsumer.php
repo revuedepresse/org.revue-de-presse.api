@@ -2,7 +2,7 @@
 
 namespace App\Conversation\Consumer;
 
-use App\PublishersList\AggregateAwareTrait;
+use App\Twitter\Infrastructure\PublishersList\AggregateAwareTrait;
 use App\Twitter\Infrastructure\Api\Entity\Status;
 use App\Twitter\Infrastructure\Api\Repository\PublishersListRepository;
 use App\Conversation\ConversationAwareTrait;

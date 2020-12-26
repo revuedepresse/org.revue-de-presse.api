@@ -14,7 +14,7 @@ services:
 
     controller.list:
         public: true
-        class: 'App\PublishersList\Controller\ListController'
+        class: 'App\Twitter\Infrastructure\PublishersList\Controller\ListController'
         arguments:
             - '%allowed.origin%'
             - '%kernel.environment%'
@@ -32,7 +32,7 @@ services:
             tokenRepository:                '@repository.access_token'
             popularPublicationRepository:   '@App\NewsReview\Infrastructure\Repository\PopularPublicationRepository'
 
-    App\PublishersList\Controller\ListController: '@controller.list'
+    App\Twitter\Infrastructure\PublishersList\Controller\ListController: '@controller.list'
 
     controller.logged_in_member:
         public: true
@@ -46,7 +46,7 @@ services:
 
     controller.keyword:
         public: true
-        class: 'App\PublishersList\Controller\KeywordController'
+        class: 'App\Twitter\Infrastructure\PublishersList\Controller\KeywordController'
         arguments:
             - '%allowed.origin%'
             - '%kernel.environment%'
@@ -69,7 +69,7 @@ services:
 
     controller.publishers_list:
         public: true
-        class: 'App\PublishersList\Controller\PublishersListController'
+        class: 'App\Twitter\Infrastructure\PublishersList\Controller\PublishersListController'
         arguments:
             - '%allowed.origin%'
             - '%kernel.environment%'

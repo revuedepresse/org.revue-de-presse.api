@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Amqp\Message;
 
-use App\Twitter\Infrastructure\Api\Entity\Aggregate;
+use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use App\Twitter\Domain\Api\Model\TokenInterface;
 use App\Membership\Domain\Entity\MemberInterface;
 
@@ -22,7 +22,7 @@ interface FetchPublicationInterface
     public function token(): TokenInterface;
 
     public static function makeMemberIdentityCard(
-        Aggregate $aggregate,
+        PublishersList $aggregate,
         TokenInterface $token,
         MemberInterface $member,
         ?string $dateBeforeWhichStatusAreCollected

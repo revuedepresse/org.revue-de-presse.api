@@ -159,8 +159,14 @@ doctrine:
                         alias:      'Popularity'
                         dir:        '%kernel.project_dir%/config/model/popularity'
                         is_bundle:  false
-                        prefix:     App\PublicationPopularity\Entity
+                        prefix:     App\Twitter\Infrastructure\PublicationPopularity\Entity
                         type:       xml
+                    Publication:
+                        alias:      'Publication'
+                        dir:        '%kernel.project_dir%/src/Twitter/Infrastructure/Publication/Entity'
+                        is_bundle:  false
+                        prefix:     App\Twitter\Infrastructure\Publication\Entity
+                        type:       annotation
                     PublicationBatchCollectedEvent:
                         alias:      'PublicationBatchCollectedEvent'
                         dir:        '%kernel.project_dir%/config/model/curation'
@@ -171,11 +177,5 @@ doctrine:
                         alias:      'PublishersList'
                         dir:        '%kernel.project_dir%/config/model/publication-list'
                         is_bundle:  false
-                        prefix:     App\PublishersList\Entity
+                        prefix:     App\Twitter\Infrastructure\PublishersList\Entity
                         type:       xml
-                    Publication:
-                        alias:      'Publication'
-                        dir:        '%kernel.project_dir%/src/Twitter/Domain/Publication/Entity'
-                        is_bundle:  false
-                        prefix:     App\Twitter\Domain\Publication\Entity
-                        type:       annotation

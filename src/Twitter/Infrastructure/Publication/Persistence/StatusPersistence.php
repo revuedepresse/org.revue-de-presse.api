@@ -4,14 +4,14 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Publication\Persistence;
 
 use App\Twitter\Infrastructure\Api\AccessToken\AccessToken;
-use App\Twitter\Infrastructure\Api\Entity\Aggregate;
+use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use App\Twitter\Infrastructure\Api\Entity\ArchivedStatus;
 use App\Twitter\Infrastructure\Api\Entity\Status;
 use App\Twitter\Infrastructure\Api\Exception\InsertDuplicatesException;
 use App\Twitter\Domain\Curation\CollectionStrategyInterface;
-use App\Twitter\Domain\Publication\StatusCollection;
+use App\Twitter\Infrastructure\Publication\Dto\StatusCollection;
 use App\Twitter\Domain\Publication\StatusInterface;
-use App\Twitter\Domain\Publication\TaggedStatus;
+use App\Twitter\Infrastructure\Publication\Dto\TaggedStatus;
 use App\Twitter\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublishersListRepositoryTrait;
@@ -22,7 +22,6 @@ use App\Twitter\Infrastructure\DependencyInjection\TaggedStatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
 use App\Twitter\Domain\Publication\Repository\TimelyStatusRepositoryInterface;
 use App\Twitter\Infrastructure\Twitter\Api\Normalizer\Normalizer;
-use App\Membership\Domain\Entity\MemberInterface;
 use App\Twitter\Infrastructure\Operation\Collection\CollectionInterface;
 use Closure;
 use DateTime;
@@ -78,7 +77,7 @@ class StatusPersistence implements StatusPersistenceInterface
     public function persistAllStatuses(
         array $statuses,
         AccessToken $accessToken,
-        Aggregate $aggregate = null
+        PublishersList $aggregate = null
     ): array {
         $propertiesCollection = Normalizer::normalizeAll(
             $statuses,
@@ -144,7 +143,7 @@ class StatusPersistence implements StatusPersistenceInterface
     private function persistStatus(
         CollectionInterface $statuses,
         TaggedStatus $taggedStatus,
-        ?Aggregate $aggregate
+        ?PublishersList $aggregate
     ): CollectionInterface {
         $extract = $taggedStatus->toLegacyProps();
         $status  = $this->taggedStatusRepository
@@ -163,7 +162,7 @@ class StatusPersistence implements StatusPersistenceInterface
     }
 
     private function persistTimelyStatus(
-        ?Aggregate $aggregate,
+        ?PublishersList $aggregate,
         StatusInterface $status
     ): void {
         if ($aggregate instanceof Aggregate) {
@@ -233,7 +232,7 @@ class StatusPersistence implements StatusPersistenceInterface
         $publishersList = null;
         $publishersListId = $collectionStrategy->publishersListId();
         if ($publishersListId !== null) {
-            /** @var Aggregate $publishersList */
+            /** @var PublishersList $publishersList */
             $publishersList = $this->publishersListRepository->findOneBy(
                 ['id' => $publishersListId]
             );
@@ -266,7 +265,7 @@ class StatusPersistence implements StatusPersistenceInterface
     private function saveStatuses(
         array $statuses,
         CollectionStrategyInterface $collectionStrategy,
-        Aggregate $publishersList = null
+        PublishersList $publishersList = null
     ): CollectionInterface {
         return $this->publicationPersistence->persistStatusPublications(
             $statuses,

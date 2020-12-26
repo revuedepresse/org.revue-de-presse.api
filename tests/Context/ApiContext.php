@@ -2,7 +2,7 @@
 
 namespace App\Tests\Context;
 
-use App\PublishersList\Controller\ListController;
+use App\Twitter\Infrastructure\PublishersList\Controller\ListController;
 use App\Tests\NewsReview\Infrastructure\Repository\InMemoryPopularPublicationRepository;
 use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use App\Twitter\Domain\Resource\MemberIdentity;

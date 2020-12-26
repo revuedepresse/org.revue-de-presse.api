@@ -32,7 +32,7 @@
 
         <many-to-one
             field="memberAggregateSubscription"
-            target-entity="App\PublishersList\Entity\MemberAggregateSubscription"
+            target-entity="App\Twitter\Infrastructure\PublishersList\Entity\MemberAggregateSubscription"
         >
             <join-column
                 name="member_aggregate_subscription_id"

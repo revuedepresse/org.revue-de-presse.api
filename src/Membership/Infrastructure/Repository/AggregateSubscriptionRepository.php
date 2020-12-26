@@ -2,9 +2,9 @@
 
 namespace App\Membership\Infrastructure\Repository;
 
-use App\PublishersList\Entity\MemberAggregateSubscription;
-use App\PublishersList\Repository\MemberAggregateSubscriptionRepository;
-use App\Twitter\Infrastructure\Api\Entity\Aggregate;
+use App\Twitter\Infrastructure\PublishersList\Entity\MemberAggregateSubscription;
+use App\Twitter\Infrastructure\PublishersList\Repository\MemberAggregateSubscriptionRepository;
+use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use App\Membership\Domain\Entity\AggregateSubscription;
 use App\Membership\Domain\Entity\MemberSubscription;
 use App\Membership\Domain\Entity\MemberInterface;

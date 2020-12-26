@@ -47,7 +47,7 @@ class PublishersListRepositoryTest extends KernelTestCase
 
         $statement = $this->connection->query('
             SELECT total_statuses AS total_status
-            FROM weaving_aggregate    
+            FROM publishers_list    
             WHERE id = '.$publishersListId.'
         ');
         $result = $statement->fetch();
@@ -75,7 +75,7 @@ class PublishersListRepositoryTest extends KernelTestCase
     private function preparePublishersList(): int
     {
         $insertPublishersList = <<<QUERY
-            INSERT INTO weaving_aggregate (
+            INSERT INTO publishers_list (
                 screen_name,
                 name,
                 locked,
@@ -94,7 +94,7 @@ QUERY;
         $statement = $this->connection->query(
             '
             SELECT id as publication_id
-            FROM weaving_aggregate
+            FROM publishers_list
         '
         );
         $result    = $statement->fetch();

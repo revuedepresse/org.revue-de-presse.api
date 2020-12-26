@@ -5,8 +5,8 @@
                   xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping
                   http://doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
 
-    <entity name="App\PublishersList\Entity\MemberAggregateSubscription"
-            repository-class="App\PublishersList\Repository\MemberAggregateSubscriptionRepository"
+    <entity name="App\Twitter\Infrastructure\PublishersList\Entity\MemberAggregateSubscription"
+            repository-class="App\Twitter\Infrastructure\PublishersList\Repository\MemberAggregateSubscriptionRepository"
             table="member_aggregate_subscription">
 
         <options>
@@ -40,7 +40,7 @@
 
         <one-to-many
             field="aggregates"
-            target-entity="App\Twitter\Infrastructure\Api\Entity\Aggregate"
+            target-entity="App\Twitter\Infrastructure\Publication\Entity\PublishersList"
             mapped-by="memberAggregateSubscription" />
 
         <field

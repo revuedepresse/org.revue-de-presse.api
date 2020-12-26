@@ -118,7 +118,11 @@ class ArchivedStatus implements StatusInterface
     protected ?DateTimeInterface $updatedAt;
 
     /**
-     * @ORM\ManyToMany(targetEntity="Aggregate", inversedBy="userStreams", cascade={"persist"})
+     * @ORM\ManyToMany(
+     *      targetEntity="App\Twitter\Infrastructure\Publication\Entity\PublishersList",
+     *     inversedBy="userStreams",
+     *     cascade={"persist"}
+     * )
      * @ORM\JoinTable(name="weaving_archived_status_aggregate",
      *      joinColumns={@ORM\JoinColumn(name="status_id", referencedColumnName="ust_id")},
      *      inverseJoinColumns={@ORM\JoinColumn(name="aggregate_id", referencedColumnName="id")}

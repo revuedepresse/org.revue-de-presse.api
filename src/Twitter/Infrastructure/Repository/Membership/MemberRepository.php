@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Repository\Membership;
 
-use App\PublishersList\Repository\PaginationAwareTrait;
+use App\Twitter\Infrastructure\PublishersList\Repository\PaginationAwareTrait;
 use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use App\Twitter\Infrastructure\Api\Repository\PublishersListRepository;
 use App\Twitter\Domain\Membership\Exception\InvalidMemberException;
@@ -822,12 +822,12 @@ QUERY;
             aggregate.locked, 
             aggregate.locked_at AS lockedAt,
             aggregate.unlocked_at AS unlockedAt
-            FROM weaving_aggregate a
-            INNER JOIN weaving_aggregate aggregate
+            FROM publishers_list a
+            INNER JOIN publishers_list aggregate
             ON aggregate.screen_name = a.screen_name AND aggregate.screen_name IS NOT NULL
             WHERE a.name in (
                 SELECT a.name
-                FROM weaving_aggregate a
+                FROM publishers_list a
                 WHERE id = ?
             )
             $keywordCondition

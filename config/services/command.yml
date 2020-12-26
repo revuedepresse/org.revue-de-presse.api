@@ -6,7 +6,6 @@ parameters:
 
     weaving_the_web_amqp.consumer.conversation_status.class:                    'App\Conversation\Consumer\ConversationStatusConsumer'
     weaving_the_web_amqp.producer.produce_conversation_messages_command.class:  'App\Conversation\Producer\ProduceConversationMessagesCommand'
-    weaving_the_web_amqp.producer.produce_timely_status_messages_command.class: 'App\PublishersList\Producer\ProduceTimelyStatusMessagesCommand'
     weaving_the_web_amqp.producer.produce_member_messages_command.class:        'App\Conversation\Producer\ProduceMemberMessagesCommand'
     weaving_the_web_amqp.consumer.network.class:                                'App\Membership\Infrastructure\Consumer\NetworkConsumer'
 
@@ -125,8 +124,8 @@ services:
         tags:
             - { name: 'console.command' }
 
-    App\PublishersList\Command\ImportMemberPublishersListsCommand:
-        class:                                      'App\PublishersList\Command\ImportMemberPublishersListsCommand'
+    App\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommand:
+        class:                                      'App\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommand'
         properties:
             accessor:                               '@App\Twitter\Infrastructure\Api\Accessor'
             aggregateSubscriptionRepository:        '@repository.publishers_list_subscription'
@@ -191,13 +190,6 @@ services:
         properties:
             operationClock:  '@operation.clock'
             filesystem:      '@filesystem'
-            statusDirectory: "%kernel.project_dir%/../src/App/Resources/statuses"
-        tags:
-            - { name: 'console.command' }
-
-    weaving_the_web_amqp.producer.timely_status:
-        class:               "%weaving_the_web_amqp.producer.produce_timely_status_messages_command.class%"
-        properties:
             statusDirectory: "%kernel.project_dir%/../src/App/Resources/statuses"
         tags:
             - { name: 'console.command' }

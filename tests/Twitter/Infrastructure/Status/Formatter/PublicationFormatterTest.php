@@ -66,7 +66,7 @@ class PublicationFormatterTest extends KernelTestCase
                         )
                     ),
                     [
-                        '30:"App\Twitter\Entity\Publication' => '49:"App\Twitter\Domain\Publication\Entity\Publication',
+                        '30:"App\Twitter\Entity\Publication' => '57:"App\Twitter\Infrastructure\Publication\Entity\Publication',
                     ]
                 )
             )

@@ -3,13 +3,13 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Api\Repository;
 
-use App\Twitter\Infrastructure\Api\Entity\Aggregate;
+use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use App\Twitter\Infrastructure\Api\Entity\ArchivedStatus;
 use App\Twitter\Infrastructure\Api\Entity\Status;
 use App\Twitter\Infrastructure\Api\Exception\InsertDuplicatesException;
 use App\Twitter\Domain\Publication\Repository\StatusRepositoryInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
-use App\Twitter\Domain\Publication\TaggedStatus;
+use App\Twitter\Infrastructure\Publication\Dto\TaggedStatus;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationRepositoryTrait;
@@ -318,7 +318,7 @@ class ArchivedStatusRepository extends ResourceRepository implements
     public function saveLikes(
         array $statuses,
         $identifier,
-        ?Aggregate $aggregate,
+        ?PublishersList $aggregate,
         LoggerInterface $logger,
         MemberInterface $likedBy,
         callable $ensureMemberExists

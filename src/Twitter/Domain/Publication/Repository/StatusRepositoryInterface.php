@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Domain\Publication\Repository;
 
 use App\Twitter\Domain\Publication\StatusInterface;
-use App\Twitter\Domain\Publication\TaggedStatus;
+use App\Twitter\Infrastructure\Publication\Dto\TaggedStatus;
 use App\Twitter\Infrastructure\Publication\Mapping\MappingAwareInterface;
 use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;

@@ -98,7 +98,7 @@ services:
         class:  'App\Twitter\Infrastructure\Api\Repository\PublishersListRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Twitter\Infrastructure\Api\Entity\Aggregate'
+            - 'App\Twitter\Infrastructure\Publication\Entity\PublishersList'
         calls:
             - [ 'setLogger',                    [ '@logger' ] ]
             - [ 'setPublishersListDispatcher', [ '@App\Twitter\Infrastructure\Amqp\MessageBus\PublishersListDispatcher' ] ]
@@ -112,7 +112,7 @@ services:
         class: 'App\Twitter\Infrastructure\Publication\Repository\PublicationRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Twitter\Domain\Publication\Entity\Publication'
+            - 'App\Twitter\Infrastructure\Publication\Entity\Publication'
         calls:
             - [ 'setEntityManager', [ '@doctrine.orm.entity_manager' ] ]
             - [ 'setPublicationFormatter', [ '@App\Twitter\Infrastructure\Publication\Formatter\PublicationFormatter' ] ]
@@ -169,9 +169,9 @@ services:
 
     repository.member_aggregate_subscription:
         factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
-        class: 'App\PublishersList\Repository\MemberAggregateSubscriptionRepository'
+        class: 'App\Twitter\Infrastructure\PublishersList\Repository\MemberAggregateSubscriptionRepository'
         arguments:
-            - 'App\PublishersList\Entity\MemberAggregateSubscription'
+            - 'App\Twitter\Infrastructure\PublishersList\Entity\MemberAggregateSubscription'
 
     repository.keyword:
         class: 'App\Twitter\Infrastructure\Publication\Repository\KeywordRepository'
@@ -199,10 +199,10 @@ services:
             - 'App\Twitter\Domain\Curation\Entity\NotFoundStatus'
 
     repository.timely_status:
-        class: 'App\PublishersList\Repository\TimelyStatusRepository'
+        class: 'App\Twitter\Infrastructure\PublishersList\Repository\TimelyStatusRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\PublishersList\Entity\TimelyStatus'
+            - 'App\Twitter\Infrastructure\PublishersList\Entity\TimelyStatus'
         calls:
             - [ 'setStatusAccessor',    [ '@App\Twitter\Infrastructure\Twitter\Api\Accessor\StatusAccessor'] ]
             - [ 'setStatusRepository',  [ '@App\Twitter\Infrastructure\Api\Repository\StatusRepository'] ]

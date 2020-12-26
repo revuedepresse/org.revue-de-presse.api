@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Twitter\Domain\Repository;
 
-use App\Twitter\Infrastructure\Api\Entity\Aggregate;
+use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use App\Twitter\Infrastructure\Api\Entity\Status;
 use App\Twitter\Infrastructure\Repository\Status\TaggedStatusRepository;
 use Psr\Log\NullLogger;
@@ -42,7 +42,7 @@ class TaggedStatusRepositoryTest extends KernelTestCase
             'identifier' => '12120997-3231083wkeowo'
         ];
 
-        $aggregate = new Aggregate('mariec', 'science');
+        $aggregate = new PublishersList('mariec', 'science');
 
         $status = $repository->convertPropsToStatus(
             $props,

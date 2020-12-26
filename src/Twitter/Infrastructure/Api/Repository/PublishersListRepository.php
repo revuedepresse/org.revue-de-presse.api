@@ -5,13 +5,13 @@ namespace App\Twitter\Infrastructure\Api\Repository;
 
 use App\Membership\Domain\Entity\Legacy\Member;
 use App\Membership\Domain\Entity\MemberInterface;
-use App\PublishersList\Entity\TimelyStatus;
-use App\PublishersList\Repository\PaginationAwareTrait;
+use App\Twitter\Infrastructure\PublishersList\Entity\TimelyStatus;
+use App\Twitter\Infrastructure\PublishersList\Repository\PaginationAwareTrait;
 use App\Twitter\Domain\Api\Model\TokenInterface;
 use App\Twitter\Domain\Publication\PublishersListInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
-use App\Twitter\Domain\PublishersList\Repository\PublishersListRepositoryInterface;
-use App\Twitter\Infrastructure\Api\Entity\Aggregate;
+use App\Twitter\Domain\Publication\Repository\PublishersListRepositoryInterface;
+use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublishersListDispatcherTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
@@ -261,7 +261,7 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
             return $aggregate;
         }
 
-        return new Aggregate($screenName, $listName);
+        return new PublishersList($screenName, $listName);
     }
 
     /**
@@ -273,11 +273,11 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
     {
         $query        = <<<QUERY
             SELECT id, screen_name
-            FROM weaving_aggregate
+            FROM publishers_list
             WHERE screen_name IS NOT NULL
             AND name in (
                 SELECT name 
-                FROM weaving_aggregate
+                FROM publishers_list
                 WHERE id in (:ids)
             )
 QUERY;
@@ -356,7 +356,7 @@ QUERY;
     public function resetTotalStatusesForAggregates(array $aggregateIds)
     {
         $query        = <<<QUERY
-            UPDATE weaving_aggregate a
+            UPDATE publishers_list a
             SET total_statuses = 0
             WHERE id in (:ids)
 QUERY;
@@ -408,7 +408,7 @@ QUERY;
             screen_name member_screen_name, 
             `name` aggregate_name,
             u.usr_twitter_id member_id
-            FROM weaving_aggregate a, weaving_user u
+            FROM publishers_list a, weaving_user u
             WHERE screen_name IS NOT NULL 
             AND a.screen_name = u.usr_twitter_username
             AND id NOT IN (
@@ -464,8 +464,8 @@ QUERY;
                     FROM weaving_status_aggregate
                     WHERE aggregate_id in (
                       SELECT am.id
-                      FROM weaving_aggregate a
-                      INNER JOIN weaving_aggregate am 
+                      FROM publishers_list a
+                      INNER JOIN publishers_list am 
                       ON ( a.screen_name = am.screen_name AND am.screen_name IS NOT NULL )
                       WHERE a.id = ? 
                     );
@@ -623,11 +623,11 @@ QUERY;
             $query      = <<<QUERY
                 SELECT 
                 COUNT(a.screen_name) as total_members
-                FROM weaving_aggregate a
+                FROM publishers_list a
                 WHERE screen_name IS NOT NULL
                 AND name in (
                     SELECT a.name
-                    FROM weaving_aggregate a
+                    FROM publishers_list a
                     WHERE id = ?
                 )
                 GROUP BY a.screen_name
@@ -657,7 +657,7 @@ QUERY;
             name,
             total_members,
             total_statuses as total_status
-            FROM weaving_aggregate
+            FROM publishers_list
             WHERE screen_name IS NULL
             AND name not like ?
             ORDER BY name

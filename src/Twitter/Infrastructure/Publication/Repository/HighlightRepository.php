@@ -4,8 +4,8 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Publication\Repository;
 
 use App\NewsReview\Domain\Repository\SearchParamsInterface;
-use App\PublishersList\Repository\MemberAggregateSubscriptionRepository;
-use App\PublishersList\Repository\PaginationAwareTrait;
+use App\Twitter\Infrastructure\PublishersList\Repository\MemberAggregateSubscriptionRepository;
+use App\Twitter\Infrastructure\PublishersList\Repository\PaginationAwareTrait;
 use App\Conversation\ConversationAwareTrait;
 use App\Twitter\Domain\Publication\Repository\PaginationAwareRepositoryInterface;
 use App\Twitter\Infrastructure\Api\Repository\PublishersListRepository;
@@ -307,7 +307,7 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
                 usr_id as memberId,
                 count(h.id) totalHighlights
                 FROM highlight h,
-                weaving_aggregate a,
+                publishers_list a,
                 weaving_status s,
                 weaving_user m
                 WHERE h.member_id = m.usr_id

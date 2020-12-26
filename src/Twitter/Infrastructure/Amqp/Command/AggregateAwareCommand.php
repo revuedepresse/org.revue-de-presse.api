@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Amqp\Command;
 
-use App\PublishersList\AggregateAwareTrait;
+use App\Twitter\Infrastructure\PublishersList\AggregateAwareTrait;
 use App\Twitter\Infrastructure\Api\Repository\PublishersListRepository;
 use App\Twitter\Infrastructure\Console\CommandReturnCodeAwareInterface;
 use Doctrine\ORM\EntityManager;

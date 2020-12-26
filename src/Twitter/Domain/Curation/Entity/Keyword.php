@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Domain\Curation\Entity;
 
 use App\Membership\Domain\Entity\MemberInterface;
+use App\Twitter\Domain\Publication\PublishersListInterface;
 use Predis\Configuration\Option\Aggregate;
 use App\Twitter\Domain\Publication\StatusInterface;
 
@@ -29,10 +30,7 @@ class Keyword
      */
     private $member;
 
-    /**
-     * @var Aggregate
-     */
-    private $aggregate;
+    private PublishersListInterface $aggregate;
 
     /**
      * @var string

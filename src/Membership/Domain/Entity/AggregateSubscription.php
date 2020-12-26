@@ -2,7 +2,7 @@
 
 namespace App\Membership\Domain\Entity;
 
-use App\PublishersList\Entity\MemberAggregateSubscription;
+use App\Twitter\Infrastructure\PublishersList\Entity\MemberAggregateSubscription;
 
 class AggregateSubscription
 {

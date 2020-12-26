@@ -3,19 +3,15 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Api\Repository;
 
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
-use App\Twitter\Infrastructure\Api\Entity\Aggregate;
-use App\Twitter\Infrastructure\Api\Entity\Status;
-use App\Twitter\Domain\Curation\CollectionStrategyInterface;
-use App\Twitter\Domain\Publication\StatusInterface;
-use App\Twitter\Domain\Publication\TaggedStatus;
 use App\Membership\Domain\Entity\MemberInterface;
+use App\Twitter\Domain\Curation\CollectionStrategyInterface;
 use App\Twitter\Domain\Publication\Repository\ExtremumAwareInterface;
-use App\Twitter\Infrastructure\Publication\Mapping\MappingAwareInterface;
-use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
-use App\Twitter\Infrastructure\Twitter\Collector\PublicationCollector;
+use App\Twitter\Domain\Publication\StatusInterface;
+use App\Twitter\Infrastructure\Publication\Dto\TaggedStatus;
+use App\Twitter\Infrastructure\Api\Entity\Status;
+use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
+use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
 use DateTime;
-use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\NonUniqueResultException;
@@ -339,10 +335,10 @@ class StatusRepository extends ArchivedStatusRepository
     }
 
     /**
-     * @param Aggregate $aggregate
+     * @param PublishersList $aggregate
      * @return array
      */
-    public function findByAggregate(Aggregate $aggregate)
+    public function findByAggregate(PublishersList $aggregate)
     {
         $queryBuilder = $this->createQueryBuilder('s');
         $queryBuilder->join('s.aggregates', 'a');

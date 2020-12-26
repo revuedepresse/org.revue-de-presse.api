@@ -5,7 +5,7 @@ namespace App\Twitter\Infrastructure\Publication\Persistence;
 
 use App\Twitter\Infrastructure\Api\AccessToken\AccessToken;
 use App\Twitter\Infrastructure\Api\Adapter\StatusToArray;
-use App\Twitter\Infrastructure\Api\Entity\Aggregate;
+use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationRepositoryTrait;
@@ -40,7 +40,7 @@ class PublicationPersistence implements PublicationPersistenceInterface
     public function persistStatusPublications(
         array $statuses,
         AccessToken $identifier,
-        Aggregate $aggregate = null
+        PublishersList $aggregate = null
     ): CollectionInterface {
         $statusPersistence = $this->statusPersistence;
         $result           = $statusPersistence->persistAllStatuses(
