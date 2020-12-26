@@ -305,16 +305,6 @@ class ArchivedStatusRepository extends ResourceRepository implements
         );
     }
 
-    /**
-     * @param array           $statuses
-     * @param                 $identifier
-     * @param Aggregate       $aggregate
-     * @param LoggerInterface $logger
-     * @param MemberInterface $likedBy
-     * @param callable        $ensureMemberExists
-     *
-     * @return CollectionInterface
-     */
     public function saveLikes(
         array $statuses,
         $identifier,

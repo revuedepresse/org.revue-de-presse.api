@@ -69,7 +69,7 @@ class RefreshStatusMapping implements MappingAwareInterface
         $reachBeforeRefresh = $this->statusRepository->extractReachOfStatus($status);
 
         $aggregate = $status->getAggregates()->first();
-        if (!($aggregate instanceof Aggregate)) {
+        if (!($aggregate instanceof PublishersList)) {
             $aggregate = null;
         }
 

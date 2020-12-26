@@ -9,11 +9,6 @@
             repository-class="App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository"
             table="aggregate_subscription">
 
-        <options>
-            <option name="collate">utf8mb4_general_ci</option>
-            <option name="charset">utf8mb4</option>
-        </options>
-
         <indexes>
             <index name="subscription_idx" columns="member_aggregate_subscription_id,subscription_id"/>
         </indexes>

@@ -18,7 +18,6 @@ use Ramsey\Uuid\UuidInterface;
  *          @ORM\UniqueConstraint(
  *              name="publication_unique_hash", columns={"hash"}),
  *      },
- *      options={"collate":"utf8mb4_general_ci", "charset":"utf8mb4"},
  *      indexes={
  *          @ORM\Index(
  *              name="idx_publication",

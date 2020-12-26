@@ -364,7 +364,7 @@ QUERY;
 
         $statement = $connection->executeQuery($query, [$screenName], [\PDO::PARAM_STR]);
 
-        return $statement->fetchAll();
+        return $statement->fetchAllAssociative();
     }
 
     /**
@@ -388,7 +388,7 @@ QUERY;
 QUERY;
 
         $statement = $connection->executeQuery($query, [$screenName], [\PDO::PARAM_STR]);
-        $result = $statement->fetchAll();
+        $result = $statement->fetchAllAssociative();
 
         $criteria = ['id' => $result[0]['id']];
 

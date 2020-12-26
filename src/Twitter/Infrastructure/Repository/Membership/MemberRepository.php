@@ -312,7 +312,7 @@ QUERY;
             [$tokenInfo['sub']],
             [\PDO::PARAM_STR]
         );
-        $results    = $statement->fetchAll();
+        $results    = $statement->fetchAllAssociative();
 
         if (
             count($results) !== 1
@@ -425,7 +425,7 @@ QUERY;
             return false;
         }
 
-        $results = $statement->fetchAll();
+        $results = $statement->fetchAllAssociative();
 
         if ($results === []) {
             return false;
@@ -865,7 +865,7 @@ QUERY;
             $paramsTypes
         );
 
-        $results = $statement->fetchAll();
+        $results = $statement->fetchAllAssociative();
 
         $results = array_map(
             function (array $aggregate) {

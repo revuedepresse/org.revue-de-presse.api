@@ -354,7 +354,7 @@ QUERY;
             return [];
         }
 
-        return $statement->fetchAll();
+        return $statement->fetchAllAssociative();
     }
 
     /**

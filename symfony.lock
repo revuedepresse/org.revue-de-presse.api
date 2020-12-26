@@ -573,6 +573,9 @@
     "symfony/polyfill-php80": {
         "version": "1.21-dev"
     },
+    "symfony/polyfill-uuid": {
+        "version": "v1.20.0"
+    },
     "symfony/profiler-pack": {
         "version": "dev-master"
     },
@@ -673,6 +676,9 @@
     },
     "symfony/twig-pack": {
         "version": "dev-master"
+    },
+    "symfony/uid": {
+        "version": "v5.2.1"
     },
     "symfony/validator": {
         "version": "4.3",

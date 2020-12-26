@@ -165,7 +165,7 @@ class StatusPersistence implements StatusPersistenceInterface
         ?PublishersList $aggregate,
         StatusInterface $status
     ): void {
-        if ($aggregate instanceof Aggregate) {
+        if ($aggregate instanceof PublishersList) {
             $timelyStatus = $this->timelyStatusRepository->fromAggregatedStatus(
                 $status,
                 $aggregate
@@ -255,13 +255,6 @@ class StatusPersistence implements StatusPersistenceInterface
         );
     }
 
-    /**
-     * @param array                       $statuses
-     * @param CollectionStrategyInterface $collectionStrategy
-     * @param Aggregate|null              $publishersList
-     *
-     * @return CollectionInterface
-     */
     private function saveStatuses(
         array $statuses,
         CollectionStrategyInterface $collectionStrategy,

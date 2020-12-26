@@ -53,13 +53,13 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
             'screenName' => $properties['member_name']
         ]);
 
-        if (!($aggregate instanceof Aggregate)) {
+        if (!($aggregate instanceof PublishersList)) {
             $aggregate = $this->aggregateRepository->findOneBy([
                 'name' => $properties['aggregate_name'],
                 'screenName' => $properties['member_name']
             ]);
 
-            if (!($aggregate instanceof Aggregate)) {
+            if (!($aggregate instanceof PublishersList)) {
                 $aggregate = $this->aggregateRepository->make(
                     $properties['member_name'],
                     $properties['aggregate_name']
@@ -101,12 +101,6 @@ class TimelyStatusRepository extends ServiceEntityRepository implements TimelySt
         return $queryBuilder;
     }
 
-    /**
-     * @param StatusInterface $status
-     * @param Aggregate|null  $aggregate
-     * @return TimeRangeAwareInterface
-     * @throws \Exception
-     */
     public function fromAggregatedStatus(
         StatusInterface $status,
         PublishersList $aggregate = null

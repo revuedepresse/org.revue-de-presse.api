@@ -19,8 +19,7 @@ use App\Twitter\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TokenRepositoryTrait;
 use App\Twitter\Infrastructure\Http\SearchParams;
 use App\Twitter\Infrastructure\Operation\CapableOfDeletionInterface;
-use Doctrine\DBAL\DBALException;
-use Doctrine\DBAL\FetchMode;
+use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
@@ -73,7 +72,7 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
             ]
         );
 
-        if (!($aggregate instanceof Aggregate)) {
+        if (!($aggregate instanceof PublishersList)) {
             $aggregate = $this->make($member->getTwitterUsername(), $list->name);
         }
 
@@ -155,7 +154,7 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
                 if ($aggregate['totalStatuses'] === 0) {
                     /** @var PublishersListInterface $existingAggregate */
                     $existingAggregate = $this->findOneBy(['id' => $aggregate['id']]);
-                    if (!($existingAggregate instanceof Aggregate)) {
+                    if (!($existingAggregate instanceof PublishersList)) {
                         return $aggregate;
                     }
                 }
@@ -293,7 +292,7 @@ QUERY;
                     ]
                 )
             );
-            $records   = $statement->fetchAll();
+            $records   = $statement->fetchAllAssociative();
         } catch (Exception $exception) {
             $this->logger->critical($exception->getMessage());
             $records = [];
@@ -418,7 +417,7 @@ QUERY;
 
         $statement = $this->getEntityManager()->getConnection()->executeQuery($selectAggregates);
 
-        return $statement->fetchAll();
+        return $statement->fetchAllAssociative();
     }
 
     /**
@@ -478,7 +477,7 @@ QUERY;
                 [\PDO::PARAM_INT]
             );
 
-            $aggregate['totalStatuses'] = (int) $statement->fetchAll()[0]['total_status'];
+            $aggregate['totalStatuses'] = (int) $statement->fetchAllAssociative()[0]['total_status'];
 
             $matchingAggregate->setTotalStatus($aggregate['totalStatuses']);
             if ($aggregate['totalStatuses'] === 0) {
@@ -552,7 +551,7 @@ QUERY;
             ]
         );
 
-        if ($aggregate instanceof Aggregate) {
+        if ($aggregate instanceof PublishersList) {
             $aggregates = $this->findBy(
                 [
                     'screenName' => $screenName,
@@ -669,6 +668,6 @@ QUERY;
             [ParameterType::STRING]
         );
 
-        return $statement->fetchAll(FetchMode::ASSOCIATIVE);
+        return $statement->fetchAllAssociative();
     }
 }

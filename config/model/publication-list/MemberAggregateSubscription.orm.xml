@@ -9,11 +9,6 @@
             repository-class="App\Twitter\Infrastructure\PublishersList\Repository\MemberAggregateSubscriptionRepository"
             table="member_aggregate_subscription">
 
-        <options>
-            <option name="collate">utf8mb4_general_ci</option>
-            <option name="charset">utf8mb4</option>
-        </options>
-
         <indexes>
             <index name="member_aggregate_subscription_idx" columns="id,member_id,list_id,list_name" />
             <index name="mas_id_name" columns="list_name" />

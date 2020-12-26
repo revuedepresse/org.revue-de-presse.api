@@ -12,12 +12,13 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use InvalidArgumentException;
+use Ramsey\Uuid\Rfc4122\UuidV5;
+use Ramsey\Uuid\UuidInterface;
 
 /**
  * @ORM\Entity
  * @ORM\Table(
  *     name="publishers_list",
- *     options={"collate":"utf8mb4_general_ci", "charset":"utf8mb4"},
  *     indexes={
  *         @ORM\Index(
  *             name="name",
@@ -28,9 +29,9 @@ use InvalidArgumentException;
  */
 class PublishersList implements PublishersListInterface
 {
+    private const NAMESPACE = '14549ef6-01b8-4925-be2c-636cd9580b5d';
+
     /**
-     * @var integer
-     *
      * @ORM\Column(name="id", type="integer", nullable=false)
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="IDENTITY")
@@ -79,6 +80,11 @@ class PublishersList implements PublishersListInterface
      * @ORM\Column(name="list_id", type="string", nullable=true)
      */
     public ?string $listId;
+
+    /**
+     * @ORM\Column(name="public_id", type="uuid")
+     */
+    public UuidInterface $publicId;
 
     /**
      * @ORM\Column(name="total_members", type="integer", options={"default": 0})
@@ -177,6 +183,7 @@ class PublishersList implements PublishersListInterface
             );
         }
 
+        $this->publicId = UuidV5::uuid5(self::NAMESPACE, $listName);
         $this->name = $listName;
         $this->screenName = $screenName;
         $this->createdAt = new DateTime();

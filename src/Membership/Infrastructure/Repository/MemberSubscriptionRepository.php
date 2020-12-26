@@ -96,7 +96,7 @@ QUERY;
             )
         );
 
-        $results = $statement->fetchAll();
+        $results = $statement->fetchAllAssociative();
         if ($this->emptyResults($results, 'count_')) {
             return 0;
         }
@@ -114,7 +114,7 @@ QUERY;
     public function findMissingSubscriptions(MemberInterface $member, array $subscriptions)
     {
         $query = <<< QUERY
-            SELECT GROUP_CONCAT(sm.usr_twitter_id) subscription_ids
+            SELECT array_agg(sm.usr_twitter_id) subscription_ids
             FROM member_subscription s,
             weaving_user sm
             WHERE sm.usr_id = s.subscription_id
@@ -135,7 +135,7 @@ QUERY;
             )
         );
 
-        $results = $statement->fetchAll();
+        $results = $statement->fetchAllAssociative();
 
         $remainingSubscriptions = $subscriptions;
         if (array_key_exists(0, $results) && array_key_exists('subscription_ids', $results[0])) {
@@ -250,7 +250,7 @@ QUERY
               COALESCE(a.id, 0),
               CONCAT(
                 '{',
-                GROUP_CONCAT(
+                array_agg(
                   CONCAT('"', a.id, '": "', a.name, '"') ORDER BY a.name DESC SEPARATOR ","
                 ), 
                 '}'
@@ -304,7 +304,7 @@ QUERY
             ['screen_name' => $subscriber->getTwitterUsername()]
         );
 
-        $cancelledSubscriptions = $statement->fetchAll();
+        $cancelledSubscriptions = $statement->fetchAllAssociative();
 
         return array_map(
             static fn (array $subscription) => (string) $subscription['subscription_id'],
@@ -365,7 +365,7 @@ QUERY
         );
         $statement = $connection->executeQuery($query);
 
-        $results = $statement->fetchAll();
+        $results = $statement->fetchAllAssociative();
         if (!array_key_exists(0, $results)) {
             return [];
         }
@@ -411,7 +411,7 @@ QUERY
             <<<QUERY
                 SELECT CONCAT(
                     '{',
-                    GROUP_CONCAT(
+                    array_agg(
                         DISTINCT CONCAT(
                             '"',
                             select_.id, 
@@ -443,7 +443,7 @@ QUERY
                 ]
             )
         );
-        $aggregateResults = $statement->fetchAll();
+        $aggregateResults = $statement->fetchAllAssociative();
 
         $aggregates = [];
         if (!$this->emptyResults($aggregateResults, 'aggregates')) {

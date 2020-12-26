@@ -18,7 +18,6 @@ use Doctrine\ORM\Mapping as ORM;
  *          @ORM\UniqueConstraint(
  *              name="status_unique_hash", columns={"ust_hash"}),
  *      },
- *      options={"collate":"utf8mb4_general_ci", "charset":"utf8mb4"},
  *      indexes={
  *          @ORM\Index(name="hash", columns={"ust_hash"}),
  *          @ORM\Index(name="status_screen_name", columns={"ust_full_name"}),

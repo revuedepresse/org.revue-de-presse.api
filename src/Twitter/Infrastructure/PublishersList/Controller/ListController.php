@@ -562,7 +562,7 @@ class ListController
            'id' => $requirementsOrJsonResponse['aggregate_id'],
         ]);
 
-        if (!($aggregate instanceof Aggregate)) {
+        if (!($aggregate instanceof PublishersList)) {
             return new JsonResponse(
                 'Invalid aggregate',
                 422,

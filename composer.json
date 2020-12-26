@@ -57,6 +57,7 @@
         "symfony/security-bundle": "^5.2",
         "symfony/translation": "^5.2",
         "symfony/twig-pack": "dev-main",
+        "symfony/uid": "^5.2",
         "symfony/validator": "^5.2",
         "thecodingmachine/safe": "^0.1.0@dev"
     },
