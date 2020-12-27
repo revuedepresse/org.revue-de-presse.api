@@ -84,6 +84,26 @@ services:
         volumes:
             - ../volumes/rabbitmq:/var/lib/rabbitmq
 
+    web-worker:
+        build: ./php-fpm
+        ports:
+            - "127.0.0.1:9005:9000"
+        restart: always
+        volumes:
+            - ../containers/php-fpm/templates/agent.dist:/etc/blackfire/agent
+            - ../containers/php-fpm/templates/.blackfire.ini.dist:/root/.blackfire.ini
+            - ../containers/php-fpm/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini
+            - ../containers/php-fpm/templates/zz-blackfire.ini.dist:/usr/local/etc/php/conf.d/zz-blackfire.ini
+            - ../containers/php-fpm/templates/extensions.ini.dist:/usr/local/etc/php/conf.d/extensions.ini
+            - ../containers/php-fpm/templates/docker.conf:/usr/local/etc/php-fpm.d/docker.conf
+            - ../containers/php-fpm/templates/devobs.conf:/usr/local/etc/php-fpm.d/www.conf
+            - ../containers/php-fpm/templates/zz-docker.conf:/usr/local/etc/php-fpm.d/zz-docker.conf
+            - ../../:/var/www/api
+        networks:
+            devobs-network:
+                aliases:
+                    - web-worker
+
     cache:
         image: redis
         command:
