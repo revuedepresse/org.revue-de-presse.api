@@ -73,7 +73,7 @@ function create_network() {
     command="$(echo -n 'docker network create '"${network}"' \
     --subnet=192.169.193.0/28 \
     --ip-range=192.169.193.0/28 \
-    --gateway=192.168.193.1')"
+    --gateway=192.169.193.1')"
 
     /bin/bash -c "${command}"
 }
