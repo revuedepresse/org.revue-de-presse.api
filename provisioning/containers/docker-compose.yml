@@ -86,8 +86,8 @@ services:
 
     web-worker:
         build: ./php-fpm
-        ports:
-            - "127.0.0.1:9005:9000"
+        expose:
+            - "9000"
         restart: always
         volumes:
             - ../containers/php-fpm/templates/agent.dist:/etc/blackfire/agent
