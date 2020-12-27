@@ -297,7 +297,7 @@ function run_php_script() {
     project_name="$(get_project_name)"
 
     local container_name
-    container_name="$(echo "${script}" | sha256sum | awk '{print $1}')"
+    container_name="$(echo "${project_name}-${script}" | sha256sum | awk '{print $1}')"
 
     local command
 
@@ -405,7 +405,7 @@ function get_environment_option() {
 }
 
 function before_running_command() {
-    make remove-php-container
+    remove_exited_containers
 
     export XDEBUG_CONFIG="idekey='phpstorm-xdebug'"
 
@@ -440,10 +440,10 @@ function run_command {
         export PHP_MEMORY_LIMIT=' -d memory_limit='"${memory_limit}"
     fi
 
-    echo 'Logging standard output of worker in '"${output_log}"
-    echo 'Logging standard error of worker in '"${error_log}"
+    echo 'Logging standard output of worker in '"${rabbitmq_output_log}"
+    echo 'Logging standard error of worker in '"${rabbitmq_error_log}"
 
-    execute_command "${output_log}" "${error_log}"
+    execute_command "${rabbitmq_output_log}" "${rabbitmq_error_log}"
 }
 
 function ensure_blackfire_is_configured() {
