@@ -619,7 +619,7 @@ function list_amqp_queues() {
 
 function get_rabbitmq_virtual_host() {
     local virtual_host
-    virtual_host="$(cat <(cat .env.local | grep PUBLICATIONS=amqp | sed -E 's#.+(/.+)/[^/]*$#\1#' | sed -E 's/\/%2f/\//g'))"
+    virtual_host="$(cat <(cat .env.local | grep "PUBLICATIONS='amqp" | sed -E 's#.+(/.+)/[^/]*$#\1#' | sed -E 's/\/%2f/\//g'))"
 
     echo "${virtual_host}"
 }
