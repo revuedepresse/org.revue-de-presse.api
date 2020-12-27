@@ -62,7 +62,7 @@ function get_project_name() {
 }
 
 function get_docker_network() {
-    get_project_name
+    echo "$(get_project_name)-network"
 }
 
 function create_network() {
