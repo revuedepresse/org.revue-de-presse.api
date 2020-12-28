@@ -940,7 +940,7 @@ function run_stack() {
 
 function run_worker() {
     cd provisioning/containers || exit
-    docker-compose up worker
+    docker-compose up -d worker
     cd ../..
 }
 
