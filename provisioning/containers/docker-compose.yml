@@ -99,6 +99,8 @@ services:
             - ../containers/php-fpm/templates/devobs.conf:/usr/local/etc/php-fpm.d/www.conf
             - ../containers/php-fpm/templates/zz-docker.conf:/usr/local/etc/php-fpm.d/zz-docker.conf
             - ../../:/var/www/api
+        depends_on:
+            - cache
         networks:
             devobs-network:
                 aliases:
