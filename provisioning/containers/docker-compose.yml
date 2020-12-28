@@ -92,7 +92,5 @@ services:
 
 networks:
     press-review-network:
-        driver: bridge
-        ipam:
-            config:
-                - subnet: 192.169.194.0/25
+        external:
+            name: press-review-network
