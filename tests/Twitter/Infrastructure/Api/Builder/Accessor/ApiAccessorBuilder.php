@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Tests\Twitter\Infrastructure\Twitter\Api\Builder;
+namespace App\Tests\Twitter\Infrastructure\Api\Builder\Accessor;
 
 use App\Twitter\Domain\Api\ApiAccessorInterface;
 use App\Twitter\Domain\Api\Selector\ListSelectorInterface;

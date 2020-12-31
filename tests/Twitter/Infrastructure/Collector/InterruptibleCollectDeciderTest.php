@@ -1,12 +1,14 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Twitter\Infrastructure\Twitter\Collector;
+namespace App\Tests\Twitter\Infrastructure\Collector;
 
 use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Twitter\Infrastructure\Api\Entity\Token;
 use App\Twitter\Infrastructure\Api\Throttling\ApiLimitModeratorInterface;
 use App\Tests\Twitter\Infrastructure\Api\AccessToken\Builder\Repository\TokenRepositoryBuilder;
+use App\Twitter\Infrastructure\Twitter\Collector\InterruptibleCollectDecider;
+use App\Twitter\Infrastructure\Twitter\Collector\InterruptibleCollectDeciderInterface;
 use Prophecy\Argument;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 

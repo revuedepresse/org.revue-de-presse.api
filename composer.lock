@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "3a9c0a68896536d9c4b6e74681755b13",
+    "content-hash": "8557db7e41bbab8f73bc4f1d6a8aa837",
     "packages": [
         {
             "name": "abraham/twitteroauth",
-            "version": "dev-main",
+            "version": "2.0.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/abraham/twitteroauth.git",
-                "reference": "d2fdb233ddd35be449ab62b13ff412aca61511e2"
+                "reference": "af6d0ba772731d4f83524fccb24281fe6149ef43"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/abraham/twitteroauth/zipball/d2fdb233ddd35be449ab62b13ff412aca61511e2",
-                "reference": "d2fdb233ddd35be449ab62b13ff412aca61511e2",
+                "url": "https://api.github.com/repos/abraham/twitteroauth/zipball/af6d0ba772731d4f83524fccb24281fe6149ef43",
+                "reference": "af6d0ba772731d4f83524fccb24281fe6149ef43",
                 "shasum": ""
             },
             "require": {
@@ -29,10 +29,9 @@
                 "php-vcr/php-vcr": "^1",
                 "php-vcr/phpunit-testlistener-vcr": "dev-php-8",
                 "phpmd/phpmd": "^2",
-                "phpunit/phpunit": "^8 || ^9",
+                "phpunit/phpunit": "^8",
                 "squizlabs/php_codesniffer": "^3"
             },
-            "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
@@ -66,7 +65,7 @@
                 "issues": "https://github.com/abraham/twitteroauth/issues",
                 "source": "https://github.com/abraham/twitteroauth"
             },
-            "time": "2020-12-15T00:26:36+00:00"
+            "time": "2020-12-02T01:37:06+00:00"
         },
         {
             "name": "auth0/auth0-php",
@@ -12340,7 +12339,6 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "abraham/twitteroauth": 20,
         "fabpot/goutte": 20,
         "fzaninotto/faker": 20,
         "oro/doctrine-extensions": 20,

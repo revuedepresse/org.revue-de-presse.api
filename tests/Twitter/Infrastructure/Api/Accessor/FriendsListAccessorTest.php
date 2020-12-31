@@ -1,7 +1,7 @@
 <?php
 declare (strict_types=1);
 
-namespace App\Tests\Twitter\Infrastructure\Twitter\Api;
+namespace App\Tests\Twitter\Infrastructure\Api\Accessor;
 
 use App\Twitter\Infrastructure\Twitter\Api\Accessor\ListAccessorInterface;
 use App\Twitter\Infrastructure\Twitter\Api\Selector\FriendsListSelector;

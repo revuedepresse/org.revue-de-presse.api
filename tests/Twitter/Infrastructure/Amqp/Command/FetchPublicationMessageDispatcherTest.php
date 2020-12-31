@@ -7,7 +7,7 @@ use App\Twitter\Infrastructure\Amqp\Command\FetchPublicationMessageDispatcher;
 use App\Twitter\Domain\Api\Model\TokenInterface;
 use App\Twitter\Domain\Curation\PublicationStrategyInterface;
 use App\Twitter\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher;
-use App\Tests\Twitter\Infrastructure\Twitter\Api\Builder\ApiAccessorBuilder;
+use App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\ApiAccessorBuilder;
 use Prophecy\Argument;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;

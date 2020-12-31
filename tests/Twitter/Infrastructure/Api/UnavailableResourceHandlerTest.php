@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Tests\Twitter\Infrastructure\Twitter\Api;
+namespace App\Tests\Twitter\Infrastructure\Api;
 
 use App\Twitter\Domain\Membership\Exception\ExceptionalMemberInterface;
 use App\Twitter\Domain\Membership\Exception\MembershipException;

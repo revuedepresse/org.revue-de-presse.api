@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Tests\Twitter\Infrastructure\Twitter\Api\Accessor;
+namespace App\Tests\Twitter\Infrastructure\Api\Accessor;
 
 use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\UnexpectedApiResponseException;
 use App\Twitter\Domain\Resource\MemberIdentity;
@@ -19,7 +19,7 @@ use Exception;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /**
- * @package App\Tests\Twitter\Infrastructure\Twitter\Api\Accessor
+ * @package App\Tests\Twitter\Infrastructure\Api\Accessor
  * @group membership
  */
 class MemberProfileAccessorTest extends KernelTestCase

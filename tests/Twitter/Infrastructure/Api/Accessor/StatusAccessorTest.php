@@ -1,7 +1,7 @@
 <?php
 declare(strict_types=1);
 
-namespace App\Tests\Twitter\Infrastructure\Twitter\Api\Accessor;
+namespace App\Tests\Twitter\Infrastructure\Api\Accessor;
 
 use App\Twitter\Infrastructure\Twitter\Api\Accessor\StatusAccessor;
 use App\Twitter\Domain\Curation\CollectionStrategy;

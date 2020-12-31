@@ -1,10 +1,9 @@
 <?php
 declare (strict_types=1);
 
-namespace App\Tests\Twitter\Infrastructure\Twitter\Api;
+namespace App\Tests\Twitter\Infrastructure\Api\Accessor;
 
 use App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\FollowersListAccessorBuilder;
-use App\Twitter\Infrastructure\Operation\Correlation\CorrelationId;
 use App\Twitter\Infrastructure\Twitter\Api\Accessor\ListAccessorInterface;
 use App\Twitter\Infrastructure\Twitter\Api\Selector\FollowersListSelector;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
