@@ -180,7 +180,14 @@ function consume_fetch_publication_messages {
     local project_name
     project_name=$(get_project_name)
 
-    command="docker-compose --project-name=${project_name} run --rm --name ${SUPERVISOR_PROCESS_NAME} -T -e ${symfony_environment} worker ${SCRIPT}"
+    local override_option
+    override_option=''
+    if [ -e './docker-compose.override.yml' ];
+    then
+        override_option=' -f ./docker-compose.yml -f ./docker-compose.override.yml '
+    fi
+
+    command="docker-compose${override_option} --project-name=${project_name} run --rm --name ${SUPERVISOR_PROCESS_NAME} -T -e ${symfony_environment} worker ${SCRIPT}"
     echo 'Executing command: "'$command'"'
     echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
     echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"

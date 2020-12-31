@@ -6,10 +6,6 @@ services:
         image: traefik:v2.3
         command:
             - "--configFile=/etc/traefik/traefik.toml"
-        networks:
-            devobs-network:
-                aliases:
-                    - reverse-proxy
         ports:
             - "127.0.0.1:443:443"
             - "127.0.0.1:8080:8080"
@@ -21,8 +17,6 @@ services:
 
     web:
         build: ./apache
-        networks:
-            - devobs-network
         expose:
             - "80"
         volumes:
@@ -45,10 +39,6 @@ services:
 
     worker:
         build: ./php
-        networks:
-            devobs-network:
-                aliases:
-                    - worker
         volumes:
             - ../containers/php/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini
             - ../../:/var/www/api
@@ -57,16 +47,9 @@ services:
 
     database:
         build: ./postgres
-        networks:
-            devobs-network:
-                aliases:
-                    - database
-#        command: ["postgres", "-c", "log_statement=all"]
         restart: always
         env_file:
             - ../../.env.local
-        ports:
-            - "127.0.0.1:5432:5432"
         volumes:
             - ../volumes/postgres:/var/lib/postgresql/data
 
@@ -74,10 +57,6 @@ services:
         build: ./rabbitmq
         expose:
             - "5672"
-        networks:
-            devobs-network:
-                aliases:
-                    - messenger
         restart: always
         env_file:
             - ../../.env.local
@@ -101,10 +80,6 @@ services:
             - ../../:/var/www/api
         depends_on:
             - cache
-        networks:
-            devobs-network:
-                aliases:
-                    - web-worker
 
     cache:
         image: redis
@@ -113,16 +88,6 @@ services:
         expose:
             - "6379"
         restart: always
-        networks:
-            devobs-network:
-                aliases:
-                    - cache
         volumes:
             - ../volumes/redis:/data
 
-networks:
-    devobs-network:
-        driver: bridge
-        ipam:
-            config:
-                - subnet: 192.169.193.0/28

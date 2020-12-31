@@ -8,6 +8,7 @@ build/*
 !build/.gitignore
 composer.phar
 provisioning/containers/mysql/templates/mysql/my.cnf
+provisioning/containers/docker-compose.override.yml
 provisioning/volumes/postgres/*
 provisioning/volumes/postgres*
 vendor
