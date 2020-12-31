@@ -20,7 +20,7 @@ class PublishersListDispatcher implements PublishersListDispatcherInterface
         MemberInterface $member,
         TokenInterface $accessToken
     ): void {
-        $username = $member->getTwitterUsername();
+        $username = $member->twitterScreenName();
 
         $aggregate = $this->publishersListRepository
             ->getMemberAggregateByUsername($username);

@@ -9,21 +9,10 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 abstract class AbstractCommand extends Command implements CommandReturnCodeAwareInterface
 {
-    /**
-     * @var InputInterface
-     */
     protected InputInterface $input;
 
-    /**
-     * @var OutputInterface
-     */
     protected OutputInterface $output;
 
-    /**
-     * @param InputInterface  $input
-     * @param OutputInterface $output
-     * @return int|null|void
-     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         // Enforce implementation of this method

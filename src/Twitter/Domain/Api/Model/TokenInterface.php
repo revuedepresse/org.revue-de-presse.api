@@ -10,15 +10,23 @@ interface TokenInterface
     public const FIELD_TOKEN = 'token';
     public const FIELD_SECRET = 'secret';
     
-    public function getOAuthToken(): string;
+    public function getAccessToken(): string;
 
-    public function getOAuthSecret(): string;
+    public function getAccessTokenSecret(): string;
 
     public function getConsumerKey(): string;
 
     public function getConsumerSecret(): string;
 
     public function hasConsumerKey(): bool;
+
+    public function setAccessToken(string $accessToken): TokenInterface;
+
+    public function setAccessTokenSecret(string $accessTokenSecret): TokenInterface;
+
+    public function setUpdatedAt(DateTimeInterface $date): TokenInterface;
+
+    public function updatedAt(): DateTimeInterface;
 
     public function isValid(): bool;
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Api\AccessToken;
 
 use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
-use App\Twitter\Domain\Api\ApiAccessorInterface;
+use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
 use App\Twitter\Domain\Api\Model\TokenInterface;
 use App\Twitter\Infrastructure\Api\Entity\NullToken;
 use App\Twitter\Infrastructure\Api\Exception\CanNotReplaceAccessTokenException;
@@ -46,7 +46,7 @@ class TokenChange implements TokenChangeInterface
 
         try {
             /** @var TokenInterface $token */
-            $token = $this->tokenRepository->findTokenOtherThan($excludedToken->getOAuthToken());
+            $token = $this->tokenRepository->findTokenOtherThan($excludedToken->getAccessToken());
         } catch (NoResultException|NonUniqueResultException $exception) {
             $this->logger->error($exception->getMessage());
         }
@@ -59,7 +59,7 @@ class TokenChange implements TokenChangeInterface
             });
         }
 
-        $accessor->setAccessToken($token);
+        $accessor->fromToken($token);
 
         return $token;
     }

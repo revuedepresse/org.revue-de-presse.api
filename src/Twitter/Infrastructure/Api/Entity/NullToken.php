@@ -12,16 +12,6 @@ class NullToken implements TokenInterface
 {
     use TokenTrait;
 
-    public function getOAuthToken(): string
-    {
-        return '';
-    }
-
-    public function getOAuthSecret(): string
-    {
-        return '';
-    }
-
     public function getConsumerKey(): string
     {
         return '';
@@ -85,5 +75,47 @@ class NullToken implements TokenInterface
             'now + 10 years',
             new DateTimeZone('UTC')
         );
+    }
+
+    private string $accessToken = '';
+
+    public function setAccessToken(string $accessToken): TokenInterface
+    {
+        $this->accessToken = $accessToken;
+
+        return $this;
+    }
+
+    public function getAccessToken(): string
+    {
+        return $this->accessToken;
+    }
+
+    private string $accessTokenSecret = '';
+
+    public function setAccessTokenSecret(string $accessTokenSecret): TokenInterface
+    {
+        $this->accessTokenSecret = $accessTokenSecret;
+
+        return $this;
+    }
+
+    public function getAccessTokenSecret(): string
+    {
+        return $this->accessTokenSecret;
+    }
+
+    private DateTimeInterface $updatedAt;
+
+    public function setUpdatedAt(DateTimeInterface $date): TokenInterface
+    {
+        $this->updatedAt =  $date;
+
+        return $this;
+    }
+
+    public function updatedAt(): DateTimeInterface
+    {
+        return $this->updatedAt;
     }
 }

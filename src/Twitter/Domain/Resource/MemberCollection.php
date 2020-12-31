@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Resource;
 
-use App\Twitter\Infrastructure\Operation\Collection\StrictCollectionInterface;
+use App\Twitter\Domain\Operation\Collection\StrictCollectionInterface;
 use Closure;
 use function count;
 

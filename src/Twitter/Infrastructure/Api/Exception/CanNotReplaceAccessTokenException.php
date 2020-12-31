@@ -13,7 +13,7 @@ class CanNotReplaceAccessTokenException extends Exception
         throw new self(
             sprintf(
                 'Can not replace "%s" token with another one',
-                $token->getOAuthToken()
+                $token->getAccessToken()
             )
         );
     }

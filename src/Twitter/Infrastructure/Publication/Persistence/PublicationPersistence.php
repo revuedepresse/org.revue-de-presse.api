@@ -12,7 +12,7 @@ use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationReposi
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusPersistenceTrait;
 use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use App\Twitter\Infrastructure\Operation\Collection\Collection;
-use App\Twitter\Infrastructure\Operation\Collection\CollectionInterface;
+use App\Twitter\Domain\Operation\Collection\CollectionInterface;
 use App\Twitter\Domain\Publication\Repository\PublicationRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use function count;

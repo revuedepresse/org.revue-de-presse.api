@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Operation\Collection;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use App\Twitter\Domain\Operation\Collection\CollectionInterface;
 
 /**
  * @package App\Twitter\Infrastructure\Operation\Collection

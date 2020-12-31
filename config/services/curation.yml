@@ -1,6 +1,6 @@
 services:
-    App\Twitter\Infrastructure\Twitter\Collector\InterruptibleCollectDecider:
-        class: 'App\Twitter\Infrastructure\Twitter\Collector\InterruptibleCollectDecider'
+    App\Twitter\Infrastructure\Collector\InterruptibleCollectDecider:
+        class: 'App\Twitter\Infrastructure\Collector\InterruptibleCollectDecider'
         calls:
             - [ 'setApiAccessor',                           [ '@App\Twitter\Infrastructure\Api\Accessor'] ]
             - [ 'setLogger',                                [ '@logger' ] ]
@@ -8,9 +8,9 @@ services:
             - [ 'setMemberRepository',                      [ '@App\Twitter\Infrastructure\Membership\Repository\MemberRepository' ] ]
             - [ 'setModerator',                             [ '@App\Twitter\Infrastructure\Api\Moderator\ApiLimitModerator' ] ]
             - [ 'setPublishersListRepository',             [ '@App\Twitter\Infrastructure\Api\Repository\PublishersListRepository' ] ]
-            - [ 'setStatusAccessor',                        [ '@App\Twitter\Infrastructure\Twitter\Api\Accessor\StatusAccessor' ] ]
+            - [ 'setStatusAccessor',                        [ '@App\Twitter\Infrastructure\Api\Accessor\StatusAccessor' ] ]
             - [ 'setStatusRepository',                      [ '@App\Twitter\Infrastructure\Api\Repository\StatusRepository' ] ]
             - [ 'setStatusPersistence',                     [ '@App\Twitter\Infrastructure\Publication\Persistence\StatusPersistence' ] ]
-            - [ 'setTokenRepository',                       [ '@repository.access_token' ] ]
+            - [ 'setTokenRepository',                       [ '@App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface' ] ]
             - [ 'setWhispererRepository',                   [ '@repository.whisperer' ] ]
         public: true

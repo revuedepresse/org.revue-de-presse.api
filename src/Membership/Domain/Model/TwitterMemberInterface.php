@@ -7,7 +7,7 @@ interface TwitterMemberInterface extends MemberInterface
     /**
      * @return string
      */
-    public function getTwitterID(): ?string;
+    public function twitterId(): ?string;
 
     /**
      * @param string $twitterId
@@ -24,10 +24,10 @@ interface TwitterMemberInterface extends MemberInterface
      * @param $twitterUsername
      * @return TwitterMemberInterface
      */
-    public function setTwitterUsername(string $twitterUsername): MemberInterface;
+    public function setTwitterScreenName(string $twitterUsername): MemberInterface;
 
     /**
      * @return string
      */
-    public function getTwitterUsername(): string;
+    public function twitterScreenName(): string;
 }

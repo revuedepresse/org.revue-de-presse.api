@@ -108,12 +108,12 @@ class LoadProductionFixturesTest extends KernelTestCase
 
         self::assertEquals(
             'token',
-            $token->getOAuthToken(),
+            $token->getAccessToken(),
             'The oauth token property of the token should be the user token argument value of the command'
         );
         self::assertEquals(
             'secret',
-            $token->getOAuthSecret(),
+            $token->getAccessTokenSecret(),
             'The oauth secret property of the token should be the user secret argument value of the command'
         );
         self::assertEquals(
@@ -148,6 +148,9 @@ class LoadProductionFixturesTest extends KernelTestCase
         ');
         $this->entityManager->getConnection()->executeQuery('
             DELETE FROM weaving_token_type;
+        ');
+        $this->entityManager->getConnection()->executeQuery('
+            DELETE FROM weaving_user_token;
         ');
         $this->entityManager->getConnection()->executeQuery('
             DELETE FROM weaving_user;

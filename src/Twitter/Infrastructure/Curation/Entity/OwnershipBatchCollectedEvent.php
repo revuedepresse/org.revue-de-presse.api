@@ -8,7 +8,7 @@ use App\Twitter\Domain\Curation\Entity\JsonSerializableInterface;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationId;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdAwareInterface;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdInterface;
-use App\Twitter\Infrastructure\Twitter\Api\Selector\MemberOwnershipsBatchSelector;
+use App\Twitter\Infrastructure\Api\Selector\MemberOwnershipsBatchSelector;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Ramsey\Uuid\UuidInterface;

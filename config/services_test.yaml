@@ -13,25 +13,29 @@ services:
     App\Tests\Context\:
         resource: '../tests/Context/*'
 
-    test.App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository: '@App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository'
-
     test.event_repository.member_profile_collected: '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository'
 
     test.App\Twitter\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher: '@App\Twitter\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher'
 
     test.App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscriptionsCommand: '@App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscriptionsCommand'
-
     test.App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscribeesCommand: '@App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscribeesCommand'
-
     test.App\Twitter\Infrastructure\Subscription\Console\UnfollowDiffSubscriptionsSubscribeesCommand: '@App\Twitter\Infrastructure\Subscription\Console\UnfollowDiffSubscriptionsSubscribeesCommand'
-
-    test.App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository: '@App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository'
-
-    test.App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository: '@App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository'
-
     test.App\Twitter\Infrastructure\Subscription\Console\UnfollowInactiveMembersCommand: '@App\Twitter\Infrastructure\Subscription\Console\UnfollowInactiveMembersCommand'
+    test.App\Twitter\Infrastructure\Api\Security\Authorization\Console\AuthorizeApplicationCommand: '@App\Twitter\Infrastructure\Api\Security\Authorization\Console\AuthorizeApplicationCommand'
+
+    App\Twitter\Domain\Api\Accessor\MemberProfileAccessorInterface:
+        factory: [ 'App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\MemberProfileAccessorBuilder', 'build' ]
+
+    test.App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface: '@App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface'
+    test.App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface: '@App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface'
+    test.App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository: '@App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository'
+    test.App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository: '@App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository'
+    test.App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository: '@App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository'
+    App\Tests\NewsReview\Infrastructure\Repository\InMemoryPopularPublicationRepository:
+        class: 'App\Tests\NewsReview\Infrastructure\Repository\InMemoryPopularPublicationRepository'
 
     test.App\Twitter\Infrastructure\Operation\Console\LoadProductionFixtures: '@App\Twitter\Infrastructure\Operation\Console\LoadProductionFixtures'
 
-    App\Tests\NewsReview\Infrastructure\Repository\InMemoryPopularPublicationRepository:
-        class: 'App\Tests\NewsReview\Infrastructure\Repository\InMemoryPopularPublicationRepository'
+    App\Twitter\Infrastructure\Api\Security\Authorization\AuthorizeAccess:
+        factory: ['App\Tests\Twitter\Infrastructure\Api\Security\Authorization\Builder\AuthorizeAccessBuilder', 'build']
+

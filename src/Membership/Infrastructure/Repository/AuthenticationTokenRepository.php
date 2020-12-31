@@ -40,7 +40,7 @@ class AuthenticationTokenRepository extends ServiceEntityRepository
 
         if (!($token instanceof AuthenticationToken)) {
             $defaultMember = new Member();
-            $defaultMember->setScreenName('revue_2_presse');
+            $defaultMember->setTwitterScreenName('revue_2_presse');
 
             return [
                 'member' => $defaultMember,

@@ -493,7 +493,7 @@ class ListController
                 $this->aggregateRepository->resetTotalStatusesForAggregateRelatedToScreenName($memberName);
 
                 $this->publishersListDispatcher->dispatchMemberPublishersListMessage(
-                    (new Member())->setScreenName($memberName),
+                    (new Member())->setTwitterScreenName($memberName),
                     $requirements['token']
                 );
             }
@@ -524,7 +524,7 @@ class ListController
         }
 
         $this->publishersListDispatcher->dispatchMemberPublishersListMessage(
-            (new Member)->setScreenName($requirementsOrJsonResponse['member_name']),
+            (new Member)->setTwitterScreenName($requirementsOrJsonResponse['member_name']),
             $requirementsOrJsonResponse['token']
         );
 

@@ -16,7 +16,7 @@ use App\Twitter\Infrastructure\Amqp\Exception\StopPublicationException;
 use App\Twitter\Infrastructure\Amqp\Message\FetchMemberStatus;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberProfileAccessorTrait;
 use App\Twitter\Domain\Publication\Repository\PublishersListRepositoryInterface;
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\MemberProfileAccessorInterface;
+use App\Twitter\Domain\Api\Accessor\MemberProfileAccessorInterface;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Psr\Log\LoggerInterface;
@@ -123,7 +123,7 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
 
         $FetchMemberStatus = FetchMemberStatus::makeMemberIdentityCard(
             $this->aggregateRepository->getListAggregateByName(
-                $member->getTwitterUsername(),
+                $member->twitterScreenName(),
                 $list->name(),
                 $list->id()
             ),

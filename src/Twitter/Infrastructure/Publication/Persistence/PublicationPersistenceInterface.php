@@ -5,7 +5,7 @@ namespace App\Twitter\Infrastructure\Publication\Persistence;
 
 use App\Twitter\Infrastructure\Api\AccessToken\AccessToken;
 use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
-use App\Twitter\Infrastructure\Operation\Collection\CollectionInterface;
+use App\Twitter\Domain\Operation\Collection\CollectionInterface;
 
 interface PublicationPersistenceInterface
 {

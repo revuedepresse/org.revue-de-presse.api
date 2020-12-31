@@ -5,12 +5,13 @@ namespace App\Twitter\Infrastructure\Api\AccessToken\Repository;
 
 use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Twitter\Domain\Api\Model\TokenInterface;
+use App\Twitter\Domain\Api\Repository\TokenTypeRepositoryInterface;
+use App\Twitter\Domain\Api\Security\Authorization\AccessTokenInterface;
 use App\Twitter\Infrastructure\Api\Entity\Token;
 use App\Twitter\Infrastructure\Api\Entity\TokenType;
 use App\Twitter\Infrastructure\Api\Exception\UnavailableTokenException;
 use App\Twitter\Infrastructure\Database\Connection\ConnectionAwareInterface;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
-use App\Twitter\Infrastructure\Exception\InvalidTokensException;
 use DateTime;
 use DateTimeZone;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -19,6 +20,7 @@ use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\QueryBuilder;
+use Doctrine\Persistence\ManagerRegistry;
 use Exception;
 
 /**
@@ -30,6 +32,26 @@ use Exception;
 class TokenRepository extends ServiceEntityRepository implements TokenRepositoryInterface, ConnectionAwareInterface
 {
     use LoggerTrait;
+
+    private string $consumerKey;
+    private string $consumerSecret;
+    /**
+     * @var TokenTypeRepositoryInterface
+     */
+    private TokenTypeRepositoryInterface $tokenTypeRepository;
+
+    public function __construct(
+        ManagerRegistry $registry,
+        string $entityClass,
+        TokenTypeRepositoryInterface $tokenTypeRepository,
+        string $consumerKey,
+        string $consumerSecret
+    ) {
+        parent::__construct($registry, $entityClass);
+        $this->consumerKey = $consumerKey;
+        $this->consumerSecret = $consumerSecret;
+        $this->tokenTypeRepository = $tokenTypeRepository;
+    }
 
     /**
      * @param $properties
@@ -50,8 +72,8 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
         $tokenType = $tokenRepository->findOneBy(['name' => TokenType::USER]);
         $token->setType($tokenType);
 
-        $token->setOauthToken($properties['oauth_token']);
-        $token->setOauthTokenSecret($properties['oauth_token_secret']);
+        $token->setAccessToken($properties['oauth_token']);
+        $token->setAccessTokenSecret($properties['oauth_token_secret']);
 
         // Ensure the newly created token is not frozen yet
         // equivalent to setting the frozen until date in the past
@@ -60,11 +82,11 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
         return $token;
     }
 
-    public function ensureTokenExists(
-        $oauthToken,
-        $oauthTokenSecret,
-        $consumerKey,
-        $consumerSecret
+    public function ensureAccessTokenExists(
+        string $oauthToken,
+        string $oauthTokenSecret,
+        string $consumerKey,
+        string $consumerSecret
     ): void {
         if ($this->findOneBy(['oauthToken' => $oauthToken]) !== null) {
             return;
@@ -83,7 +105,7 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
     public function freezeToken(TokenInterface $oauthToken): void
     {
         /** @var TokenInterface $token */
-        $token = $this->findOneBy(['oauthToken' => $oauthToken->getOAuthToken()]);
+        $token = $this->findOneBy(['oauthToken' => $oauthToken->getAccessToken()]);
 
         if (!($token instanceof TokenInterface)) {
             UnavailableTokenException::throws();
@@ -193,7 +215,7 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
         $queryBuilder->select('COUNT(t.id) as count_');
 
         $queryBuilder->andWhere('t.oauthToken != :user_token');
-        $queryBuilder->setParameter(':user_token', $excludedToken->getOAuthToken());
+        $queryBuilder->setParameter(':user_token', $excludedToken->getAccessToken());
 
         $this->applyUnfrozenTokenCriteria($this->createQueryBuilder('t'));
 
@@ -238,8 +260,8 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
         $tokenType = $tokenRepository->findOneBy(['name' => TokenType::APPLICATION]);
 
         $token = new Token();
-        $token->setOauthToken($applicationToken);
-        $token->setOauthTokenSecret($accessToken);
+        $token->setAccessToken($applicationToken);
+        $token->setAccessTokenSecret($accessToken);
         $token->setType($tokenType);
         $token->setCreatedAt(new DateTime());
 
@@ -317,20 +339,47 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
         return $queryBuilder->getQuery()->getSingleResult();
     }
 
-    private function save(Token $token): void
+    private function save(TokenInterface $token): TokenInterface
     {
+        $token->setUpdatedAt(new DateTime('now', new DateTimeZone('UTC')));
+
         $entityManager = $this->getEntityManager();
 
         try {
             $entityManager->persist($token);
             $entityManager->flush();
+
+            return $token;
         } catch (\Throwable $exception) {
-            $this->logger->error($exception->getMessage(), ['token' => $token->getOAuthToken()]);
+            $this->logger->error($exception->getMessage(), ['token' => $token->getAccessToken()]);
         }
     }
 
     public function reconnect(): void {
         $entityManager = $this->getEntityManager();
         $entityManager->getConnection()->connect();
+    }
+
+    public function saveAccessToken(AccessTokenInterface $accessToken): TokenInterface
+    {
+        $this->tokenTypeRepository->ensureTokenTypesExist();
+
+        $existingToken = $this->findOneBy(['oauthToken' => $accessToken->token()]);
+
+        if ($existingToken instanceof TokenInterface) {
+            $existingToken->setAccessToken($accessToken->token());
+            $existingToken->setAccessTokenSecret($accessToken->secret());
+
+            return $this->save($existingToken);
+        }
+
+        $token = $this->makeToken([
+            'oauth_token' => $accessToken->token(),
+            'oauth_token_secret' => $accessToken->secret()
+        ]);
+        $token->setConsumerKey($this->consumerKey);
+        $token->setConsumerSecret($this->consumerSecret);
+
+        return $this->save($token);
     }
 }

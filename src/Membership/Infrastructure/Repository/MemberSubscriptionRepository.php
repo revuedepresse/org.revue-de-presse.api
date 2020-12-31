@@ -301,7 +301,7 @@ QUERY
         $connection = $this->getEntityManager()->getConnection();
         $statement = $connection->executeQuery(
             $queryCancelledMemberSubscriptionsIds,
-            ['screen_name' => $subscriber->getTwitterUsername()]
+            ['screen_name' => $subscriber->twitterScreenName()]
         );
 
         $cancelledSubscriptions = $statement->fetchAllAssociative();

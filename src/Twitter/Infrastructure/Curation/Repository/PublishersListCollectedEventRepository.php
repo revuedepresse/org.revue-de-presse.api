@@ -9,7 +9,7 @@ use App\Twitter\Domain\Resource\MemberCollection;
 use App\Twitter\Domain\Resource\MemberIdentity;
 use App\Twitter\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
-use App\Twitter\Domain\Api\ApiAccessorInterface;
+use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Throwable;
 use const JSON_THROW_ON_ERROR;

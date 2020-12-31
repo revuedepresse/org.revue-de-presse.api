@@ -68,12 +68,12 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
         $aggregate = $this->findOneBy(
             [
                 'name'       => $list->name,
-                'screenName' => $member->getTwitterUsername()
+                'screenName' => $member->twitterScreenName()
             ]
         );
 
         if (!($aggregate instanceof PublishersList)) {
-            $aggregate = $this->make($member->getTwitterUsername(), $list->name);
+            $aggregate = $this->make($member->twitterScreenName(), $list->name);
         }
 
         $aggregate->listId = $list->id_str;
@@ -317,7 +317,7 @@ QUERY;
                 $token = $this->tokenRepository->findFirstUnfrozenToken();
                 if ($token instanceof TokenInterface) {
                     $this->publishersListDispatcher->dispatchMemberPublishersListMessage(
-                        (new Member())->setScreenName($aggregate->screenName),
+                        (new Member())->setTwitterScreenName($aggregate->screenName),
                         $token
                     );
 

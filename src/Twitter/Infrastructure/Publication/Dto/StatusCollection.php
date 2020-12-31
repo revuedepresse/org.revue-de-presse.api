@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Publication\Dto;
 
 use App\Twitter\Domain\Publication\StatusInterface;
-use App\Twitter\Infrastructure\Operation\Collection\StrictCollectionInterface;
+use App\Twitter\Domain\Operation\Collection\StrictCollectionInterface;
 use Closure;
 use function count;
 

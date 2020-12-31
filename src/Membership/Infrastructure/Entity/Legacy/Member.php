@@ -125,18 +125,44 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
     protected ?int $id;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="usr_twitter_id", type="string", length=255, nullable=true)
      */
     protected ?string $twitterID;
 
     /**
-     * @var string
-     *
+     * @return MemberInterface
+     */
+    public function setTwitterID(string $twitterId): MemberInterface
+    {
+        $this->twitterID = $twitterId;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function twitterId(): ?string
+    {
+        return $this->twitterID;
+    }
+
+    /**
      * @ORM\Column(name="usr_twitter_username", type="string", nullable=true)
      */
     protected ?string $twitter_username;
+
+    public function setTwitterScreenName(string $twitterScreenName): MemberInterface
+    {
+        $this->twitter_username = $twitterScreenName;
+
+        return $this;
+    }
+
+    public function twitterScreenName(): ?string
+    {
+        return $this->twitter_username;
+    }
 
     /**
      * @var string
@@ -195,7 +221,9 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
      * @ORM\ManyToMany(
      *      targetEntity="\App\Twitter\Infrastructure\Api\Entity\Token",
      *      inversedBy="users",
-     *      fetch="EAGER"
+     *      fetch="EAGER",
+     *      cascade={"persist"},
+     *      indexBy="id"
      * )
      * @ORM\JoinTable(name="weaving_user_token",
      *      joinColumns={
@@ -245,20 +273,6 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
         parent::__construct();
 
         $this->tokens = new ArrayCollection();
-    }
-
-    /**
-     * Add tokens
-     *
-     * @param Token $tokens
-     *
-     * @return MemberInterface
-     */
-    public function addToken(Token $tokens)
-    {
-        $this->tokens[] = $tokens;
-
-        return $this;
     }
 
     /**
@@ -402,53 +416,9 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
         return $this->password;
     }
 
-    /**
-     * Get tokens
-     *
-     * @return \Doctrine\Common\Collections\Collection
-     */
-    public function getTokens()
+    public function getTokens(): Selectable
     {
         return $this->tokens;
-    }
-
-    /**
-     * @return string
-     */
-    public function getTwitterID(): ?string
-    {
-        return $this->twitterID;
-    }
-
-    /**
-     * @param string $twitterId
-     *
-     * @return MemberInterface
-     */
-    public function setTwitterID(string $twitterId): MemberInterface
-    {
-        $this->twitterID = $twitterId;
-
-        return $this;
-    }
-
-    public function getTwitterUsername(): ?string
-    {
-        return $this->twitter_username;
-    }
-
-    /**
-     * @param $twitterUsername
-     *
-     * @return $this
-     * @deprecated in favor of ->setScreenName
-     *
-     */
-    public function setTwitterUsername(string $twitterUsername): MemberInterface
-    {
-        $this->twitter_username = $twitterUsername;
-
-        return $this;
     }
 
     /**
@@ -626,18 +596,6 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
     public function setPassword(string $password): self
     {
         $this->password = $password;
-
-        return $this;
-    }
-
-    /**
-     * @param string $screenName
-     *
-     * @return MemberInterface
-     */
-    public function setScreenName(string $screenName): MemberInterface
-    {
-        $this->twitter_username = $screenName;
 
         return $this;
     }

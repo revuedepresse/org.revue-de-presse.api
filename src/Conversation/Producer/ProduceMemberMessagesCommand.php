@@ -100,7 +100,7 @@ class ProduceMemberMessagesCommand extends AggregateAwareCommand
                         return;
                     }
 
-                    $messageBody['screen_name'] = $member->getTwitterUsername();
+                    $messageBody['screen_name'] = $member->twitterScreenName();
                     $messageBody['aggregate_id'] = $record['aggregate_id'];
 
 

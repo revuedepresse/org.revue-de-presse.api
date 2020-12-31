@@ -1,12 +1,12 @@
 services:
-    App\Twitter\Infrastructure\Twitter\Api\Accessor\FriendsListAccessor:
-        class: 'App\Twitter\Infrastructure\Twitter\Api\Accessor\FriendsListAccessor'
+    App\Twitter\Infrastructure\Api\Accessor\FriendsListAccessor:
+        class: 'App\Twitter\Infrastructure\Api\Accessor\FriendsListAccessor'
         arguments:
             - '@App\Twitter\Infrastructure\Api\Accessor'
             - '@logger'
 
-    App\Twitter\Infrastructure\Twitter\Api\Mutator\FriendshipMutator:
-        class: 'App\Twitter\Infrastructure\Twitter\Api\Mutator\FriendshipMutator'
+    App\Twitter\Infrastructure\Api\Mutator\FriendshipMutator:
+        class: 'App\Twitter\Infrastructure\Api\Mutator\FriendshipMutator'
         calls:
             - [ 'setApiAccessor', [ '@App\Twitter\Infrastructure\Api\Accessor' ] ]
             - [ 'setLogger', [ '@logger' ] ]
@@ -16,7 +16,7 @@ services:
     App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscriptionsCommand:
         class: 'App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscriptionsCommand'
         calls:
-            - [ 'setAccessor', ['@App\Twitter\Infrastructure\Twitter\Api\Accessor\FriendsListAccessor'] ]
+            - [ 'setAccessor', ['@App\Twitter\Infrastructure\Api\Accessor\FriendsListAccessor'] ]
             - [ 'setRepository', ['@App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository'] ]
         tags:
             - { name: 'console.command' }
@@ -24,7 +24,7 @@ services:
     App\Twitter\Infrastructure\Subscription\Console\UnfollowInactiveMembersCommand:
         class: 'App\Twitter\Infrastructure\Subscription\Console\UnfollowInactiveMembersCommand'
         calls:
-            - [ 'setMutator', [ '@App\Twitter\Infrastructure\Twitter\Api\Mutator\FriendshipMutator' ] ]
+            - [ 'setMutator', [ '@App\Twitter\Infrastructure\Api\Mutator\FriendshipMutator' ] ]
             - [ 'setListCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository' ] ]
             - [ 'setMemberRepository', [ '@App\Twitter\Infrastructure\Membership\Repository\MemberRepository' ] ]
         tags:

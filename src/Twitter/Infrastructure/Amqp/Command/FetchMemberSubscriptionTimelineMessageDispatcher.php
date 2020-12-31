@@ -116,7 +116,7 @@ class FetchMemberSubscriptionTimelineMessageDispatcher extends AggregateAwareCom
                 try {
                     $this->handlePreExistingMember(
                         $member,
-                        $member->getTwitterUsername(),
+                        $member->twitterScreenName(),
                         $messageBody
                     );
                 } catch (SkippableMemberException $exception) {
@@ -155,7 +155,7 @@ class FetchMemberSubscriptionTimelineMessageDispatcher extends AggregateAwareCom
         $tokens = $this->getTokensFromInputOrFallback();
 
 
-        $this->accessor->setAccessToken(Token::fromArray($tokens));
+        $this->accessor->fromToken(Token::fromArray($tokens));
 
         // noop
         $this->setUpLogger();
@@ -173,7 +173,7 @@ class FetchMemberSubscriptionTimelineMessageDispatcher extends AggregateAwareCom
         $screenName,
         $messageBody
     ): void {
-        $twitterUsername = $member->getTwitterUsername();
+        $twitterUsername = $member->twitterScreenName();
 
         $this->guardAgainstMembersWhichShouldBeSkipped($member, $screenName);
 
@@ -186,8 +186,8 @@ class FetchMemberSubscriptionTimelineMessageDispatcher extends AggregateAwareCom
             $twitterUsername,
             $aggregate->getId(),
             (new Token)
-                ->setOAuthToken($this->getOAuthToken())
-                ->setOAuthSecret($this->getOAuthSecret())
+                ->setAccessToken($this->getAccessToken())
+                ->setAccessTokenSecret($this->getAccessTokenSecret())
         );
 
         $this->dispatcher->dispatch($message);
@@ -333,7 +333,7 @@ class FetchMemberSubscriptionTimelineMessageDispatcher extends AggregateAwareCom
                 $member->setNotFound(false);
             }
 
-            $member->setTwitterUsername($twitterMember->screen_name);
+            $member->setTwitterScreenName($twitterMember->screen_name);
             $member->setTwitterID($memberIdentifier);
             $member->setEnabled(false);
             $member->setLocked(false);

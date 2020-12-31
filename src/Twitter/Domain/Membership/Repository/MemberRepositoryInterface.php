@@ -14,6 +14,8 @@ interface MemberRepositoryInterface
 
     public function findOneBy(array $criteria, ?array $orderBy = null);
 
+    public function saveMember(MemberInterface $member): MemberInterface;
+
     public function saveApiConsumer(MemberIdentity $memberIdentity, string $apiKey): MemberInterface;
 
     public function saveMemberFromIdentity(MemberIdentity $memberIdentity): MemberInterface;

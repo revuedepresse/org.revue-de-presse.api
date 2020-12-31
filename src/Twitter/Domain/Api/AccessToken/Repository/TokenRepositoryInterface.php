@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace App\Twitter\Domain\Api\AccessToken\Repository;
 
 use App\Twitter\Domain\Api\Model\TokenInterface;
+use App\Twitter\Domain\Api\Security\Authorization\AccessTokenInterface;
 
 /**
  * @method TokenInterface|null find($id, $lockMode = null, $lockVersion = null)
@@ -25,7 +26,7 @@ interface TokenRepositoryInterface
 
     public function howManyUnfrozenTokenAreThereExceptFrom(TokenInterface $excludedToken): int;
 
-    public function ensureTokenExists(
+    public function ensureAccessTokenExists(
         string $oauthToken,
         string $oauthTokenSecret,
         string $consumerKey,
@@ -33,4 +34,6 @@ interface TokenRepositoryInterface
     ): void;
 
     public function freezeToken(TokenInterface $oauthToken): void;
+
+    public function saveAccessToken(AccessTokenInterface $accessToken): TokenInterface;
 }

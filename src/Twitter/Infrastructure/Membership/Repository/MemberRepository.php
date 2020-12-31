@@ -26,8 +26,6 @@ use function is_numeric;
 use function sprintf;
 
 /**
- * @package App\Membership\Infrastructure\Repository
- *
  * @method MemberInterface|null find($id, $lockMode = null, $lockVersion = null)
  * @method MemberInterface|null findOneBy(array $criteria, array $orderBy = null)
  * @method MemberInterface[]    findAll()
@@ -510,7 +508,7 @@ QUERY;
             $member->setTwitterID($twitterId);
         }
 
-        $member->setScreenName($screenName);
+        $member->setTwitterScreenName($screenName);
 
         $member->setEnabled(false);
         $member->setLocked(false);
@@ -629,7 +627,7 @@ QUERY;
         }
 
         $member = new Member();
-        $member->setTwitterUsername($screenName);
+        $member->setTwitterScreenName($screenName);
         $member->setTwitterID('0');
         $member->setEnabled(false);
         $member->setLocked(false);
@@ -659,7 +657,7 @@ QUERY;
         }
 
         $suspendedMember = new Member();
-        $suspendedMember->setTwitterUsername((string) $identifier);
+        $suspendedMember->setTwitterScreenName((string) $identifier);
         $suspendedMember->setTwitterID((string) $identifier);
         $suspendedMember->setEnabled(false);
         $suspendedMember->setLocked(false);

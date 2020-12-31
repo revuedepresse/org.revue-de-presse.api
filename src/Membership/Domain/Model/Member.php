@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Membership\Domain\Model;
 
-use App\Membership\Domain\Model\MemberInterface;
+use App\Twitter\Domain\Api\Model\TokenInterface;
 use function mt_rand;
 use function sha1;
 use function uniqid;
@@ -261,5 +261,29 @@ abstract class Member implements MemberInterface
     public function getRoles(): array
     {
         return ['ROLE_USER'];
+    }
+
+    public function addToken(TokenInterface $token): MemberInterface
+    {
+        $tokenToBeRevised = $this->tokens->filter(function (TokenInterface $existingToken) use ($token) {
+            return $existingToken->getConsumerKey() === $token->getConsumerKey() &&
+                $existingToken->getConsumerSecret() === $token->getConsumerSecret();
+        })->first();
+
+        $this->tokens->map(function (TokenInterface $token) use ($tokenToBeRevised) {
+            if ($token === $tokenToBeRevised) {
+                $token->setAccessToken($token->getAccessToken());
+                $token->setAccessTokenSecret($token->getAccessTokenSecret());
+                $token->setUpdatedAt($token->updatedAt());
+            }
+        });
+
+        if ($tokenToBeRevised) {
+            return $this;
+        }
+
+        $this->tokens[] = $token;
+
+        return $this;
     }
 }

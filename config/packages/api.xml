@@ -8,7 +8,6 @@
         <parameter key="weaving_the_web_api.entity.aggregate.class">App\Twitter\Infrastructure\Publication\Entity\PublishersList</parameter>
         <parameter key="weaving_the_web_api.entity.status.class">App\Twitter\Infrastructure\Api\Entity\Status</parameter>
         <parameter key="weaving_the_web_api.repository.publishers_list.class">App\Twitter\Infrastructure\Api\Repository\PublishersListRepository</parameter>
-        <parameter key="repository.access_token.class">App\Twitter\Infrastructure\Api\AccessToken\Repository\TokenRepository</parameter>
         <parameter key="weaving_the_web_api.repository.archived_status.class">App\Twitter\Infrastructure\Api\Repository\ArchivedStatusRepository</parameter>
         <parameter key="repository.whisperer.class">App\Twitter\Infrastructure\Api\Repository\WhispererRepository</parameter>
     </parameters>

@@ -9,7 +9,7 @@ use App\Membership\Infrastructure\Entity\AggregateSubscription;
 use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Infrastructure\Repository\Exception\InvalidMemberIdentifier;
 use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
-use App\Twitter\Domain\Api\ApiAccessorInterface;
+use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
 use App\Twitter\Domain\Api\Model\TokenInterface;
 use App\Twitter\Domain\Api\Selector\ListSelectorInterface;
 use App\Twitter\Domain\Api\TwitterErrorAwareInterface;
@@ -31,11 +31,11 @@ use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
 use App\Twitter\Infrastructure\Exception\UnknownApiAccessException;
 use App\Twitter\Infrastructure\Membership\Repository\MemberRepository;
 use App\Twitter\Infrastructure\Translation\Translator;
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\ApiRateLimitingException;
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\ReadOnlyApplicationException;
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\UnexpectedApiResponseException;
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\StatusAccessor;
+use App\Twitter\Infrastructure\Api\Accessor\Exception\ApiRateLimitingException;
+use App\Twitter\Infrastructure\Api\Accessor\Exception\NotFoundStatusException;
+use App\Twitter\Infrastructure\Api\Accessor\Exception\ReadOnlyApplicationException;
+use App\Twitter\Infrastructure\Api\Accessor\Exception\UnexpectedApiResponseException;
+use App\Twitter\Infrastructure\Api\Accessor\StatusAccessor;
 use Doctrine\DBAL\Exception\ConnectionException;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\OptimisticLockException;
@@ -338,8 +338,8 @@ class Accessor implements ApiAccessorInterface, TwitterErrorAwareInterface
         $this->setUpTwitterClient(
             $token->getConsumerKey(),
             $token->getConsumerSecret(),
-            $token->getOAuthToken(),
-            $token->getOAuthSecret(),
+            $token->getAccessToken(),
+            $token->getAccessTokenSecret(),
         );
 
         try {
@@ -654,19 +654,6 @@ class Accessor implements ApiAccessorInterface, TwitterErrorAwareInterface
     }
 
     /**
-     * @param string $secret
-     *
-     * @return Accessor
-     * @deprecated
-     */
-    public function setUserSecret(string $secret): self
-    {
-        $this->setOAuthSecret($secret);
-
-        return $this;
-    }
-
-    /**
      * @param string $endpoint
      * @param array  $parameters
      *
@@ -717,40 +704,21 @@ class Accessor implements ApiAccessorInterface, TwitterErrorAwareInterface
         );
     }
 
-    private function setOAuthSecret(string $secret): self
+    public function setAccessToken(string $token): ApiAccessorInterface
     {
-        $this->userSecret = $secret;
+        $this->userToken = $token;
 
         return $this;
     }
 
-    /**
-     * @deprecated in favor of ->getOAuthToken()
-     */
-    public function getUserToken()
-    {
-        return $this->getOAuthToken();
-    }
-
-    public function getOAuthToken()
+    public function getAccessToken(): string
     {
         return $this->userToken;
     }
 
-    /**
-     * @param string $token
-     *
-     * @return Accessor
-     * @deprecated in favor of ->setOAuthToken
-     */
-    public function setUserToken(string $token): self
+    public function setAccessTokenSecret(string $secret): ApiAccessorInterface
     {
-        return $this->setOAuthToken($token);
-    }
-
-    private function setOAuthToken(string $token): self
-    {
-        $this->userToken = $token;
+        $this->userSecret = $secret;
 
         return $this;
     }
@@ -950,7 +918,7 @@ class Accessor implements ApiAccessorInterface, TwitterErrorAwareInterface
             throw new Exception($message, $rateLimitStatus->errors[0]->code);
         } else {
             $token = new Token();
-            $token->setOauthToken($this->userToken);
+            $token->setAccessToken($this->userToken);
 
             $fullEndpoint = $endpoint;
             $resourceType = 'statuses';
@@ -1060,7 +1028,7 @@ class Accessor implements ApiAccessorInterface, TwitterErrorAwareInterface
         $this->twitterApiLogger->info('[code] ' . $exception->getCode());
 
         $token = $this->maybeGetToken($endpoint, $token);
-        $this->twitterApiLogger->info('[token] ' . $token->getOauthToken());
+        $this->twitterApiLogger->info('[token] ' . $token->getAccessToken());
 
         return $exception;
     }
@@ -1164,13 +1132,10 @@ class Accessor implements ApiAccessorInterface, TwitterErrorAwareInterface
         return $this->contactEndpoint($endpoint);
     }
 
-    /**
-     * @param TokenInterface $token
-     */
-    public function setAccessToken(TokenInterface $token)
+    public function fromToken(TokenInterface $token): void
     {
-        $this->setOAuthToken($token->getOAuthToken());
-        $this->setOAuthSecret($token->getOAuthSecret());
+        $this->setAccessToken($token->getAccessToken());
+        $this->setAccessTokenSecret($token->getAccessTokenSecret());
 
         if ($token->hasConsumerKey()) {
             $this->setConsumerKey($token->getConsumerKey());
@@ -1179,8 +1144,8 @@ class Accessor implements ApiAccessorInterface, TwitterErrorAwareInterface
             $this->setUpTwitterClient(
                 $token->getConsumerKey(),
                 $token->getConsumerSecret(),
-                $token->getOAuthToken(),
-                $token->getOAuthSecret()
+                $token->getAccessToken(),
+                $token->getAccessTokenSecret()
             );
         }
     }
@@ -1435,11 +1400,11 @@ class Accessor implements ApiAccessorInterface, TwitterErrorAwareInterface
         } catch (UnavailableResourceException $exception) {
             if ($exception->getCode() === self::ERROR_SUSPENDED_USER) {
                 $suspendedMember = $this->userRepository->suspendMemberByScreenNameOrIdentifier($identifier);
-                $this->logSuspendedMemberMessage($suspendedMember->getTwitterUsername());
+                $this->logSuspendedMemberMessage($suspendedMember->twitterScreenName());
 
                 SuspendedAccountException::raiseExceptionAboutSuspendedMemberHavingScreenName(
-                    $suspendedMember->getTwitterUsername(),
-                    $suspendedMember->getTwitterID(),
+                    $suspendedMember->twitterScreenName(),
+                    $suspendedMember->twitterId(),
                     $exception->getCode(),
                     $exception
                 );
@@ -1536,7 +1501,7 @@ class Accessor implements ApiAccessorInterface, TwitterErrorAwareInterface
         return $this->contactEndpoint(
             str_replace(
                 '{{ screen_name }}',
-                $subscription->subscription->getTwitterUsername(),
+                $subscription->subscription->twitterScreenName(),
                 $endpoint
             )
         );
@@ -1866,7 +1831,7 @@ class Accessor implements ApiAccessorInterface, TwitterErrorAwareInterface
                 default:
 
                     $this->logger->error($exception->getMessage());
-                    $this->tokenRepository->freezeToken(FreezableToken::fromUserToken($this->userToken));
+                    $this->tokenRepository->freezeToken(FreezableToken::fromAccessToken($this->userToken));
             }
         }
 
@@ -1878,12 +1843,11 @@ class Accessor implements ApiAccessorInterface, TwitterErrorAwareInterface
      * @param Token $token
      *
      * @return bool
-     * @throws OptimisticLockException
      */
     protected function isApiAvailableForToken($endpoint, Token $token): bool
     {
-        $this->setOAuthToken($token->getOauthToken());
-        $this->setOAuthSecret($token->getOauthTokenSecret());
+        $this->setAccessToken($token->getAccessToken());
+        $this->setAccessTokenSecret($token->getAccessTokenSecret());
         $this->setConsumerKey($token->consumerKey);
         $this->setConsumerSecret($token->consumerSecret);
 
@@ -1897,7 +1861,7 @@ class Accessor implements ApiAccessorInterface, TwitterErrorAwareInterface
      */
     protected function takeFirstTokenCharacters(Token $token): string
     {
-        return substr($token->getOauthToken(), 0, 8);
+        return substr($token->getAccessToken(), 0, 8);
     }
 
     /**
@@ -2101,28 +2065,28 @@ class Accessor implements ApiAccessorInterface, TwitterErrorAwareInterface
         $member = $this->userRepository->findOneBy(['twitterID' => $identifier]);
         if ($member instanceof MemberInterface) {
             if ($member->isSuspended()) {
-                $this->logSuspendedMemberMessage($member->getTwitterUsername());
+                $this->logSuspendedMemberMessage($member->twitterScreenName());
                 SuspendedAccountException::raiseExceptionAboutSuspendedMemberHavingScreenName(
-                    $member->getTwitterUsername(),
-                    $member->getTwitterID(),
+                    $member->twitterScreenName(),
+                    $member->twitterId(),
                     self::ERROR_SUSPENDED_ACCOUNT
                 );
             }
 
             if ($member->hasNotBeenDeclaredAsNotFound()) {
-                $this->logNotFoundMemberMessage($member->getTwitterUsername());
+                $this->logNotFoundMemberMessage($member->twitterScreenName());
                 NotFoundMemberException::raiseExceptionAboutNotFoundMemberHavingScreenName(
-                    $member->getTwitterUsername(),
-                    $member->getTwitterID(),
+                    $member->twitterScreenName(),
+                    $member->twitterId(),
                     self::ERROR_NOT_FOUND
                 );
             }
 
             if ($member->isProtected()) {
-                $this->logProtectedMemberMessage($member->getTwitterUsername());
+                $this->logProtectedMemberMessage($member->twitterScreenName());
                 ProtectedAccountException::raiseExceptionAboutProtectedMemberHavingScreenName(
-                    $member->getTwitterUsername(),
-                    $member->getTwitterID(),
+                    $member->twitterScreenName(),
+                    $member->twitterId(),
                     self::ERROR_PROTECTED_ACCOUNT
                 );
             }
@@ -2144,7 +2108,7 @@ class Accessor implements ApiAccessorInterface, TwitterErrorAwareInterface
                 $this->logSuspendedMemberMessage($screenName);
                 SuspendedAccountException::raiseExceptionAboutSuspendedMemberHavingScreenName(
                     $screenName,
-                    $member->getTwitterID(),
+                    $member->twitterId(),
                     self::ERROR_SUSPENDED_ACCOUNT
                 );
             }
@@ -2153,7 +2117,7 @@ class Accessor implements ApiAccessorInterface, TwitterErrorAwareInterface
                 $this->logNotFoundMemberMessage($screenName);
                 NotFoundMemberException::raiseExceptionAboutNotFoundMemberHavingScreenName(
                     $screenName,
-                    $member->getTwitterID(),
+                    $member->twitterId(),
                     self::ERROR_NOT_FOUND
                 );
             }
@@ -2162,7 +2126,7 @@ class Accessor implements ApiAccessorInterface, TwitterErrorAwareInterface
                 $this->logProtectedMemberMessage($screenName);
                 ProtectedAccountException::raiseExceptionAboutProtectedMemberHavingScreenName(
                     $screenName,
-                    $member->getTwitterID(),
+                    $member->twitterId(),
                     self::ERROR_PROTECTED_ACCOUNT
                 );
             }

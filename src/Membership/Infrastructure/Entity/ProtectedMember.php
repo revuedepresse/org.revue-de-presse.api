@@ -40,7 +40,7 @@ class ProtectedMember implements TwitterMemberInterface
     public function make(string $screenName, int $id): MemberInterface
     {
         $member = new Member();
-        $member->setScreenName($screenName);
+        $member->setTwitterScreenName($screenName);
         $member->setTwitterID((string) $id);
         $member->setEmail('@'.$screenName);
         $member->setProtected(true);

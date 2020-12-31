@@ -12,7 +12,7 @@ use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Infrastructure\Publication\Dto\TaggedStatus;
 use App\Twitter\Infrastructure\Publication\Persistence\StatusPersistence;
 use App\Twitter\Infrastructure\Publication\Persistence\StatusPersistenceInterface;
-use App\Twitter\Infrastructure\Operation\Collection\CollectionInterface;
+use App\Twitter\Domain\Operation\Collection\CollectionInterface;
 use DateTime;
 use DateTimeInterface;
 use DateTimeZone;

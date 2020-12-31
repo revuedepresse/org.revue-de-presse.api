@@ -62,7 +62,7 @@ class UnfollowInactiveMembersCommandTest extends KernelTestCase
         return MemberRepositoryBuilder::newMemberRepositoryBuilder()
             ->willFindAMemberByTwitterScreenName(
                 self::SUBSCRIBER_SCREEN_NAME,
-                (new Member())->setScreenName(self::SUBSCRIBER_SCREEN_NAME)
+                (new Member())->setTwitterScreenName(self::SUBSCRIBER_SCREEN_NAME)
             )
             ->build();
     }

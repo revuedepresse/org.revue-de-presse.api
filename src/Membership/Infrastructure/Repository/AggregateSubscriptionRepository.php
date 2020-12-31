@@ -144,7 +144,7 @@ class AggregateSubscriptionRepository extends ServiceEntityRepository
                     function () use ($subscription) {
                         $this->accessor->subscribeToMemberTimeline($subscription);
                     },
-                    $subscription->subscription->getTwitterID()
+                    $subscription->subscription->twitterId()
                 );
 
                 $this->memberSubscriptionRepository->saveMemberSubscription(

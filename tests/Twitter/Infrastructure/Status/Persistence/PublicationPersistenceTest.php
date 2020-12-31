@@ -9,7 +9,7 @@ use App\Twitter\Infrastructure\Publication\Persistence\PublicationPersistence;
 use App\Twitter\Infrastructure\Publication\Persistence\PublicationPersistenceInterface;
 use App\Membership\Infrastructure\Entity\Legacy\Member;
 use App\Membership\Domain\Model\MemberInterface;
-use App\Twitter\Infrastructure\Operation\Collection\CollectionInterface;
+use App\Twitter\Domain\Operation\Collection\CollectionInterface;
 use DateTimeInterface;
 use DateTimeZone;
 use Doctrine\ORM\EntityManagerInterface;
@@ -53,7 +53,7 @@ class PublicationPersistenceTest extends KernelTestCase
         $publicationPersistence = self::$container->get(PublicationPersistence::class);
 
         $member = new Member();
-        $member->setScreenName('mariec');
+        $member->setTwitterScreenName('mariec');
         $member->setName('Marie Curie');
         $member->setAvatar('https://gravatar.com/mariec');
         $member->setEmail('@mariec');

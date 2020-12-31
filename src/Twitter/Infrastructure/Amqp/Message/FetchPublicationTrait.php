@@ -86,7 +86,7 @@ trait FetchPublicationTrait
         ?string $dateBeforeWhichStatusAreCollected
     ): FetchPublicationInterface {
         return new self(
-            $member->getTwitterUsername(),
+            $member->twitterScreenName(),
             $aggregate->getId(),
             $token,
             $dateBeforeWhichStatusAreCollected

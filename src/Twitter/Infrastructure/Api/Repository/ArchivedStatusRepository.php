@@ -18,9 +18,9 @@ use App\Twitter\Infrastructure\DependencyInjection\Status\StatusPersistenceTrait
 use App\Twitter\Infrastructure\DependencyInjection\TaggedStatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
 use App\Twitter\Infrastructure\Publication\Mapping\MappingAwareInterface;
-use App\Twitter\Infrastructure\Twitter\Api\Normalizer\Normalizer;
+use App\Twitter\Infrastructure\Api\Normalizer\Normalizer;
 use App\Membership\Domain\Model\MemberInterface;
-use App\Twitter\Infrastructure\Operation\Collection\CollectionInterface;
+use App\Twitter\Domain\Operation\Collection\CollectionInterface;
 use App\Twitter\Domain\Publication\Repository\ExtremumAwareInterface;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
@@ -392,7 +392,7 @@ class ArchivedStatusRepository extends ResourceRepository implements
         if (count($extracts) > 0) {
             $this->memberRepository->incrementTotalLikesOfMemberWithName(
                 count($extracts),
-                $likedBy->getTwitterUsername()
+                $likedBy->twitterScreenName()
             );
         }
 

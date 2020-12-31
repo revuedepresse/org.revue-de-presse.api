@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\InputConverter;
 
-use App\Twitter\Domain\Curation\PublicationStrategy;
+use App\Twitter\Infrastructure\Curation\PublicationStrategy;
 use App\Twitter\Domain\Curation\PublicationStrategyInterface;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdAwareCommandTrait;
 use Symfony\Component\Console\Input\InputInterface;

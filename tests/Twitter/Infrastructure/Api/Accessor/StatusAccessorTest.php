@@ -3,11 +3,11 @@ declare(strict_types=1);
 
 namespace App\Tests\Twitter\Infrastructure\Api\Accessor;
 
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\StatusAccessor;
-use App\Twitter\Domain\Curation\CollectionStrategy;
+use App\Twitter\Infrastructure\Api\Accessor\StatusAccessor;
+use App\Twitter\Infrastructure\Curation\CollectionStrategy;
 use App\Twitter\Domain\Publication\Repository\StatusRepositoryInterface;
 use App\Twitter\Infrastructure\Amqp\Message\FetchPublicationInterface;
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\StatusAccessorInterface;
+use App\Twitter\Domain\Api\Accessor\StatusAccessorInterface;
 use App\Twitter\Domain\Publication\Repository\ExtremumAwareInterface;
 use Prophecy\Prophecy\ObjectProphecy;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;

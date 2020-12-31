@@ -17,7 +17,7 @@ use App\Twitter\Infrastructure\DependencyInjection\Collection\PublishersListColl
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberIdentityProcessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TokenChangeTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
-use App\Twitter\Domain\Api\ApiAccessorInterface;
+use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
 use App\Twitter\Infrastructure\Exception\EmptyListException;
 use Exception;
 use Psr\Log\LoggerInterface;

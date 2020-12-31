@@ -6,7 +6,7 @@ namespace App\Tests\Twitter\Infrastructure\Subscription\Console;
 use App\Twitter\Domain\Resource\MemberCollection;
 use App\Twitter\Infrastructure\Subscription\Console\UnfollowDiffSubscriptionsSubscribeesCommand;
 use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
-use App\Twitter\Infrastructure\Twitter\Api\Mutator\FriendshipMutatorInterface;
+use App\Twitter\Infrastructure\Api\Mutator\FriendshipMutatorInterface;
 use App\Membership\Domain\Repository\NetworkRepositoryInterface;
 use App\Membership\Domain\Model\MemberInterface;
 use App\Tests\Twitter\Domain\Curation\Infrastructure\Builder\Repository\FollowersListCollectedEventRepositoryBuilder;
@@ -88,7 +88,7 @@ class UnfollowDiffSubscriptionsSubscribeesCommandTest extends KernelTestCase
         return MemberRepositoryBuilder::newMemberRepositoryBuilder()
             ->willFindAMemberByTwitterScreenName(
                 self::SUBSCRIBER_SCREEN_NAME,
-                (new Member())->setScreenName(self::SUBSCRIBER_SCREEN_NAME)
+                (new Member())->setTwitterScreenName(self::SUBSCRIBER_SCREEN_NAME)
             )
             ->build();
     }

@@ -16,11 +16,11 @@ use App\Membership\Infrastructure\Entity\AggregateSubscription;
 use App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository;
 use App\Membership\Infrastructure\Repository\NetworkRepository;
 use App\Membership\Domain\Model\MemberInterface;
-use App\Twitter\Domain\Api\ApiAccessorInterface;
+use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
-use App\Twitter\Infrastructure\Twitter\Api\Selector\MemberOwnershipsBatchSelector;
+use App\Twitter\Infrastructure\Api\Selector\MemberOwnershipsBatchSelector;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Psr\Log\LoggerInterface;
@@ -90,7 +90,7 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
             $listSubscriptions = $eventRepository->collectedOwnershipBatch(
                 $this->accessor,
                 new MemberOwnershipsBatchSelector(
-                    $member->getTwitterUsername(),
+                    $member->twitterScreenName(),
                     (string) $nextPage,
                     $correlationId
                 )
@@ -189,7 +189,7 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
                 array_walk(
                     $members,
                     function (MemberInterface $member) use (&$membersIndexedByTwitterId) {
-                        $membersIndexedByTwitterId[$member->getTwitterID()] = $member;
+                        $membersIndexedByTwitterId[$member->twitterId()] = $member;
                     }
                 );
 

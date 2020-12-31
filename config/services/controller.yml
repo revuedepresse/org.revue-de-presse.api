@@ -29,7 +29,7 @@ services:
             router:                         '@router'
             redisCache:                     '@app.cache.redis'
             timelyStatusRepository:         '@repository.timely_status'
-            tokenRepository:                '@repository.access_token'
+            tokenRepository:                '@App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface'
             popularPublicationRepository:   '@App\NewsReview\Infrastructure\Repository\PopularPublicationRepository'
 
     App\Twitter\Infrastructure\PublishersList\Controller\ListController: '@controller.list'
@@ -64,7 +64,7 @@ services:
             - [ 'setCache',                 [ '@app.cache.redis' ]]
             - [ 'setLogger',            [ '@logger' ] ]
             - [ 'setPublicationRepository', [ '@App\Twitter\Infrastructure\Publication\Repository\PublicationRepository' ]]
-            - [ 'setStatusAccessor',    [ '@App\Twitter\Infrastructure\Twitter\Api\Accessor\StatusAccessor' ]]
+            - [ 'setStatusAccessor',    [ '@App\Twitter\Infrastructure\Api\Accessor\StatusAccessor' ]]
             - [ 'setStatusRepository',  [ '@App\Twitter\Infrastructure\Api\Repository\StatusRepository' ]]
 
     controller.publishers_list:
@@ -91,6 +91,6 @@ services:
             - [ 'setMemberSubscriptionRepository', [ '@repository.member_subscription' ] ]
             - [ 'setMemberRepository',             [ '@App\Twitter\Infrastructure\Membership\Repository\MemberRepository' ] ]
             - [ 'setPublishersListDispatcher',    [ '@App\Twitter\Infrastructure\Amqp\MessageBus\PublishersListDispatcher' ] ]
-            - [ 'setTokenRepository',              [ '@repository.access_token' ] ]
+            - [ 'setTokenRepository',              [ '@App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface' ] ]
         properties:
             redisCache:                     '@app.cache.redis'

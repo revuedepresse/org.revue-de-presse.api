@@ -10,7 +10,7 @@ use App\Twitter\Infrastructure\Amqp\Message\FetchMemberStatus;
 use App\Twitter\Infrastructure\Amqp\Message\FetchPublicationInterface;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
-use App\Twitter\Infrastructure\Twitter\Collector\PublicationCollectorInterface;
+use App\Twitter\Domain\Collector\PublicationCollectorInterface;
 use App\Twitter\Domain\Api\TwitterErrorAwareInterface;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
@@ -152,8 +152,8 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
 
         if ($token->isValid()) {
             return [
-                TokenInterface::FIELD_TOKEN  => $token->getOAuthToken(),
-                TokenInterface::FIELD_SECRET => $token->getOAuthSecret(),
+                TokenInterface::FIELD_TOKEN  => $token->getAccessToken(),
+                TokenInterface::FIELD_SECRET => $token->getAccessTokenSecret(),
             ];
         }
 
@@ -161,8 +161,8 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
         $token = $this->tokenRepository->findFirstUnfrozenToken();
 
         return [
-            TokenInterface::FIELD_TOKEN  => $token->getOAuthToken(),
-            TokenInterface::FIELD_SECRET => $token->getOAuthSecret(),
+            TokenInterface::FIELD_TOKEN  => $token->getAccessToken(),
+            TokenInterface::FIELD_SECRET => $token->getAccessTokenSecret(),
         ];
     }
 }

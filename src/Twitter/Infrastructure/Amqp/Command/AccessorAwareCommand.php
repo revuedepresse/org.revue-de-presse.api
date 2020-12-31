@@ -5,7 +5,7 @@ namespace App\Twitter\Infrastructure\Amqp\Command;
 
 use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
-use App\Twitter\Domain\Api\ApiAccessorInterface;
+use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -65,7 +65,7 @@ abstract class AccessorAwareCommand extends Command
     /**
      * @return bool|string|string[]|null
      */
-    protected function getOAuthSecret()
+    protected function getAccessTokenSecret()
     {
         $secret = $this->defaultSecret;
         if ($this->hasOAuthSecretBeenPassedAsOption()) {
@@ -78,7 +78,7 @@ abstract class AccessorAwareCommand extends Command
     /**
      * @return bool|string|string[]|null
      */
-    protected function getOAuthToken()
+    protected function getAccessToken()
     {
         $token = $this->defaultToken;
         if ($this->hasOAuthTokenBeenPassedAsOption()) {
@@ -91,8 +91,8 @@ abstract class AccessorAwareCommand extends Command
     protected function getTokensFromInputOrFallback(): array
     {
         return [
-            'token'  => $this->getOAuthToken(),
-            'secret' => $this->getOAuthSecret(),
+            'token'  => $this->getAccessToken(),
+            'secret' => $this->getAccessTokenSecret(),
         ];
     }
 

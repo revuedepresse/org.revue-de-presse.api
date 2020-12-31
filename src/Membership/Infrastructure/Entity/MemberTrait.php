@@ -3,6 +3,7 @@
 namespace App\Membership\Infrastructure\Entity;
 
 use App\Membership\Domain\Model\MemberInterface;
+use App\Twitter\Domain\Api\Model\TokenInterface;
 
 trait MemberTrait
 {
@@ -73,7 +74,7 @@ trait MemberTrait
      * @param $twitterUsername
      * @return $this
      */
-    public function setTwitterUsername(string $twitterUsername): MemberInterface
+    public function setTwitterScreenName(string $twitterUsername): MemberInterface
     {
         return $this;
     }
@@ -81,7 +82,7 @@ trait MemberTrait
     /**
      * @return string
      */
-    public function getTwitterUsername(): string
+    public function twitterScreenName(): string
     {
         return '';
     }
@@ -89,7 +90,7 @@ trait MemberTrait
     /**
      * @return string
      */
-    public function getTwitterID(): ?string
+    public function twitterId(): ?string
     {
         return '';
     }
@@ -102,12 +103,7 @@ trait MemberTrait
      */
     public function setFullName(string $fullName): MemberInterface
     {
-        return $this->setScreenName();
-    }
-
-    public function setScreenName(string $screeName): MemberInterface
-    {
-        return $this;
+        return $this->setTwitterScreenName($fullName);
     }
 
     /**
@@ -227,5 +223,11 @@ trait MemberTrait
     public function hasTwitterId(): bool
     {
         return $this->twitterID === null;
+    }
+
+
+    public function addToken(TokenInterface $token): MemberInterface
+    {
+        return $this;
     }
 }

@@ -4,8 +4,8 @@ declare (strict_types=1);
 namespace App\Tests\Twitter\Infrastructure\Api\Accessor;
 
 use App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\FollowersListAccessorBuilder;
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\ListAccessorInterface;
-use App\Twitter\Infrastructure\Twitter\Api\Selector\FollowersListSelector;
+use App\Twitter\Domain\Api\Accessor\ListAccessorInterface;
+use App\Twitter\Infrastructure\Api\Selector\FollowersListSelector;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /**

@@ -56,7 +56,7 @@ class LoggedInMemberController
 
         return new JsonResponse(
             [
-                'username' => $memberProperties['member']->getTwitterUsername(),
+                'username' => $memberProperties['member']->twitterScreenName(),
                 'grantedRoutes' => json_decode($memberProperties['granted_routes'])
             ],
             200,

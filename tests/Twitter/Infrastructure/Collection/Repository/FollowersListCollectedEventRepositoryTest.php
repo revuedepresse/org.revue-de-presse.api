@@ -5,7 +5,7 @@ namespace App\Tests\Twitter\Infrastructure\Collection\Repository;
 
 use App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\FollowersListAccessorBuilder;
 use App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository;
-use App\Twitter\Infrastructure\Twitter\Api\Selector\FollowersListSelector;
+use App\Twitter\Infrastructure\Api\Selector\FollowersListSelector;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /**

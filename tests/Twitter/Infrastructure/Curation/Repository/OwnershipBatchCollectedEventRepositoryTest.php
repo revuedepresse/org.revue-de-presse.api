@@ -7,7 +7,7 @@ use App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\MemberOwnershipsAccess
 use App\Twitter\Domain\Api\MemberOwnershipsAccessorInterface;
 use App\Twitter\Domain\Api\Selector\ListSelectorInterface;
 use App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository;
-use App\Twitter\Infrastructure\Twitter\Api\Selector\MemberOwnershipsBatchSelector;
+use App\Twitter\Infrastructure\Api\Selector\MemberOwnershipsBatchSelector;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /**

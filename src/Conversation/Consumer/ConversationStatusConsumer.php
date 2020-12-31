@@ -10,7 +10,7 @@ use App\Twitter\Infrastructure\Amqp\AmqpMessageAwareTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\Operation\OperationClock;
 use App\Twitter\Infrastructure\Membership\Repository\MemberRepository;
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
+use App\Twitter\Infrastructure\Api\Accessor\Exception\NotFoundStatusException;
 use App\Membership\Infrastructure\Entity\Legacy\Member;
 use App\Membership\Domain\Model\MemberInterface;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
@@ -91,7 +91,7 @@ class ConversationStatusConsumer
 
             $member = $this->ensureStatusAuthorExists($status);
 
-            $aggregate = $this->aggregateRepository->getListAggregateByName($member->getTwitterUsername(), $options['aggregate_name']);
+            $aggregate = $this->aggregateRepository->getListAggregateByName($member->twitterScreenName(), $options['aggregate_name']);
         } catch (NotFoundMemberException $notFoundMemberException) {
             [$aggregate, $status] = $this->handleMemberNotFoundException($notFoundMemberException, $options);
         } catch (NotFoundStatusException $exception) {
@@ -164,7 +164,7 @@ class ConversationStatusConsumer
         array $options
     ): array {
         $member = $this->statusAccessor->ensureMemberHavingNameExists($notFoundMemberException->screenName);
-        $aggregate = $this->getListAggregateByName($member->getTwitterUsername(), $options['aggregate_name']);
+        $aggregate = $this->getListAggregateByName($member->twitterScreenName(), $options['aggregate_name']);
         $status = $this->statusAccessor->refreshStatusByIdentifier(
             $options['status_id'],
             $skipExistingStatus = false,
@@ -210,7 +210,7 @@ class ConversationStatusConsumer
         $member = $this->userRepository->findOneBy(['twitter_username' => $status->getScreenName()]);
         if (!$member instanceof MemberInterface) {
             $member = $this->statusAccessor->ensureMemberHavingNameExists($status->getScreenName());
-            $existingMember = $this->userRepository->findOneBy(['twitterID' => $member->getTwitterID()]);
+            $existingMember = $this->userRepository->findOneBy(['twitterID' => $member->twitterId()]);
 
             if ($existingMember) {
                 return $existingMember;

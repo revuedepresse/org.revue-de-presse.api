@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Publication\Mapping;
 
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
+use App\Twitter\Infrastructure\Api\Accessor\Exception\NotFoundStatusException;
 use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
 use App\Twitter\Infrastructure\Api\Entity\Status;
 use App\Twitter\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
@@ -43,7 +43,7 @@ class RefreshStatusMapping implements MappingAwareInterface
         $this->apiAccessor->propagateNotFoundStatuses = true;
 
         $this->apiAccessor->setUserToken($oauthTokens['token']);
-        $this->apiAccessor->setUserSecret($oauthTokens['secret']);
+        $this->apiAccessor->setAccessTokenSecret($oauthTokens['secret']);
 
         if (array_key_exists('consumer_token', $oauthTokens)) {
             $this->apiAccessor->setConsumerKey($oauthTokens['consumer_token']);

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Curation\Repository;
 
-use App\Twitter\Infrastructure\Curation\Entity\ListCollectedEvent;
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\ListAccessorInterface;
-use App\Twitter\Infrastructure\Twitter\Api\Resource\ResourceList;
+use App\Twitter\Domain\Curation\Entity\ListCollectedEvent;
+use App\Twitter\Domain\Api\Accessor\ListAccessorInterface;
+use App\Twitter\Domain\Api\Resource\ResourceList;
 use App\Twitter\Domain\Api\Selector\ListSelectorInterface;
 
 /**

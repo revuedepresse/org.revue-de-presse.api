@@ -5,6 +5,9 @@
     "auth0/auth0-php": {
         "version": "5.7.0"
     },
+    "beberlei/assert": {
+        "version": "v3.3.0"
+    },
     "beberlei/doctrineextensions": {
         "version": "dev-master"
     },

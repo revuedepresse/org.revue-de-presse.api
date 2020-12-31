@@ -11,7 +11,7 @@ use App\Twitter\Infrastructure\Api\Entity\ArchivedStatus;
 use App\Twitter\Infrastructure\Api\Entity\Status;
 use App\Twitter\Infrastructure\DependencyInjection\Formatter\PublicationFormatterTrait;
 use App\Twitter\Infrastructure\Operation\Collection\Collection;
-use App\Twitter\Infrastructure\Operation\Collection\CollectionInterface;
+use App\Twitter\Domain\Operation\Collection\CollectionInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
@@ -211,7 +211,7 @@ QUERY
         }
     }
 
-    public function getLatestPublications(): Collection
+    public function getLatestPublications(): CollectionInterface
     {
         $queryBuilder = $this->createQueryBuilder(self::TABLE_ALIAS);
 

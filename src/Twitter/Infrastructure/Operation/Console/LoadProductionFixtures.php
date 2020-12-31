@@ -54,7 +54,7 @@ class LoadProductionFixtures extends AbstractCommand
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->tokenTypeRepository->ensureTokenTypesExist();
-        $this->tokenRepository->ensureTokenExists(
+        $this->tokenRepository->ensureAccessTokenExists(
             $input->getArgument(self::ARGUMENT_USER_TOKEN),
             $input->getArgument(self::ARGUMENT_USER_SECRET),
             $input->getArgument(self::ARGUMENT_CONSUMER_KEY),

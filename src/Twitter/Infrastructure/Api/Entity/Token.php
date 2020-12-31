@@ -42,42 +42,40 @@ class Token implements TokenInterface
     protected $type;
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="token", type="string", length=255)
      */
-    protected $oauthToken;
+    protected string $oauthToken;
 
-    /**
-     * @param string $oauthToken
-     *
-     * @return Token
-     */
-    public function setOAuthToken($oauthToken): self
+    public function setAccessToken(string $accessToken): TokenInterface
     {
-        $this->oauthToken = $oauthToken;
+        $this->oauthToken = $accessToken;
 
         return $this;
     }
 
-    /**
-     * @return string
-     */
-    public function getOAuthToken(): string
+    public function getAccessToken(): string
     {
         return $this->oauthToken;
     }
 
     /**
-     * @var string
-     *
      * @ORM\Column(name="secret", type="string", length=255, nullable=true)
      */
     protected ?string $oauthTokenSecret;
 
+    public function setAccessTokenSecret(string $accessTokenSecret): TokenInterface
+    {
+        $this->oauthTokenSecret = $accessTokenSecret;
+
+        return $this;
+    }
+
+    public function getAccessTokenSecret(): string
+    {
+        return $this->oauthTokenSecret;
+    }
+
     /**
-     * @var string
-     *
      * @ORM\Column(name="consumer_key", type="string", length=255, nullable=true)
      */
     public ?string $consumerKey = null;
@@ -147,26 +145,6 @@ class Token implements TokenInterface
     }
 
     /**
-     * @param string $oauthTokenSecret
-     *
-     * @return Token
-     */
-    public function setOauthTokenSecret($oauthTokenSecret)
-    {
-        $this->oauthTokenSecret = $oauthTokenSecret;
-
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getOauthTokenSecret()
-    {
-        return $this->getOAuthSecret();
-    }
-
-    /**
      * Set createdAt
      *
      * @param DateTime $createdAt
@@ -185,11 +163,16 @@ class Token implements TokenInterface
         return $this->createdAt;
     }
 
-    public function setUpdatedAt(DateTimeInterface $updatedAt)
+    public function setUpdatedAt(DateTimeInterface $updatedAt): TokenInterface
     {
         $this->updatedAt = $updatedAt;
 
         return $this;
+    }
+
+    public function updatedAt(): DateTimeInterface
+    {
+        return $this->updatedAt;
     }
 
     public function getUpdatedAt()
@@ -252,14 +235,9 @@ class Token implements TokenInterface
      */
     public function __toString()
     {
-        return $this->getOAuthToken();
+        return $this->getAccessToken();
     }
 
-    /**
-     * @param TokenType $type
-     *
-     * @return Token
-     */
     public function setType(TokenType $type = null)
     {
         $this->type = $type;
@@ -296,18 +274,6 @@ class Token implements TokenInterface
         return !$this->isFrozen();
     }
 
-    public function getOAuthSecret(): string
-    {
-        return $this->oauthTokenSecret;
-    }
-
-    public function setOAuthSecret($oauthSecret): self
-    {
-        $this->oauthTokenSecret = $oauthSecret;
-
-        return $this;
-    }
-
     /**
      * @param array $properties
      *
@@ -336,8 +302,8 @@ class Token implements TokenInterface
             $consumerSecret = $properties['consumer_secret'];
         }
 
-        $token->setOAuthToken($properties['token']);
-        $token->setOAuthSecret($properties['secret']);
+        $token->setAccessToken($properties['token']);
+        $token->setAccessTokenSecret($properties['secret']);
         $token->setConsumerKey($consumerKey);
         $token->setConsumerSecret($consumerSecret);
 
@@ -346,13 +312,13 @@ class Token implements TokenInterface
 
     public function isValid(): bool
     {
-        return $this->getOAuthToken() !== null
-            && $this->getOAuthSecret() !== null;
+        return $this->getAccessToken() !== null
+            && $this->getAccessTokenSecret() !== null;
     }
 
     public function firstIdentifierCharacters(): string
     {
-        return substr($this->getOAuthToken(), 0, 8);
+        return substr($this->getAccessToken(), 0, 8);
     }
 
     /** The token is frozen when the "frozen until" date is in the future */

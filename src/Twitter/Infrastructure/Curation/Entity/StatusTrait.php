@@ -62,11 +62,6 @@ trait StatusTrait
         return $this->hash;
     }
 
-    /**
-     * @param string $screenName
-     *
-     * @return $this
-     */
     public function setScreenName(string $screenName): StatusInterface
     {
         $this->screenName = $screenName;

@@ -169,7 +169,6 @@ class Status implements StatusInterface
         $status->setIndexed($archivedStatus->getIndexed());
         $status->setStatusId($archivedStatus->getStatusId());
         $status->setUserAvatar($archivedStatus->getUserAvatar());
-        $status->setScreenName($archivedStatus->getScreenName());
 
         if ($archivedStatus->belongsToAList()) {
             $archivedStatus->getAggregates()->map(

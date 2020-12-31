@@ -21,8 +21,8 @@ use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TaggedStatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
 use App\Twitter\Domain\Publication\Repository\TimelyStatusRepositoryInterface;
-use App\Twitter\Infrastructure\Twitter\Api\Normalizer\Normalizer;
-use App\Twitter\Infrastructure\Operation\Collection\CollectionInterface;
+use App\Twitter\Infrastructure\Api\Normalizer\Normalizer;
+use App\Twitter\Domain\Operation\Collection\CollectionInterface;
 use Closure;
 use DateTime;
 use DateTimeZone;
@@ -262,7 +262,7 @@ class StatusPersistence implements StatusPersistenceInterface
     ): CollectionInterface {
         return $this->publicationPersistence->persistStatusPublications(
             $statuses,
-            new AccessToken($this->apiAccessor->getOAuthToken()),
+            new AccessToken($this->apiAccessor->getAccessToken()),
             $publishersList
         );
     }

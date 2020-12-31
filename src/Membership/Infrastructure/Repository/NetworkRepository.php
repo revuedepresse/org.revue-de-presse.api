@@ -11,7 +11,7 @@ use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Infrastructure\Entity\NotFoundMember;
 use App\Membership\Infrastructure\Entity\ProtectedMember;
 use App\Membership\Infrastructure\Entity\SuspendedMember;
-use App\Twitter\Domain\Api\ApiAccessorInterface;
+use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
@@ -75,8 +75,8 @@ class NetworkRepository implements NetworkRepositoryInterface
 
                 $this->logger->info(sprintf(
                     'About to save subscription of member "%s" for member "%s"',
-                    $member->getTwitterUsername(),
-                    $subscriptionMember->getTwitterUsername()
+                    $member->twitterScreenName(),
+                    $subscriptionMember->twitterScreenName()
                 ));
 
                 $memberSubscription = $this->memberSubscriptionRepository->saveMemberSubscription(
@@ -126,8 +126,8 @@ class NetworkRepository implements NetworkRepositoryInterface
 
                 $this->logger->info(sprintf(
                     'About to save subscribees of member "%s" for member "%s"',
-                    $member->getTwitterUsername(),
-                    $subscribeeMember->getTwitterUsername()
+                    $member->twitterScreenName(),
+                    $subscribeeMember->twitterScreenName()
                 ));
 
                 $memberSubscribee = $this->memberSubscribeeRepository->saveMemberSubscribee(
@@ -169,7 +169,7 @@ class NetworkRepository implements NetworkRepositoryInterface
             function (string $member) {
                 $member = $this->accessor->ensureMemberHavingNameExists($member);
 
-                $friends = $this->accessor->getFriendsOfMemberHavingScreenName($member->getTwitterUsername());
+                $friends = $this->accessor->getFriendsOfMemberHavingScreenName($member->twitterScreenName());
                 if ($member instanceof MemberInterface) {
                     $this->saveMemberSubscriptions(
                         $member,
@@ -177,7 +177,7 @@ class NetworkRepository implements NetworkRepositoryInterface
                     );
                 }
 
-                $subscribees = $this->accessor->showMemberSubscribees($member->getTwitterUsername());
+                $subscribees = $this->accessor->showMemberSubscribees($member->twitterScreenName());
                 if ($member instanceof MemberInterface) {
                     $this->saveMemberSubscribees($member, $subscribees->ids);
                 }
@@ -255,9 +255,9 @@ class NetworkRepository implements NetworkRepositoryInterface
                 if (
                     $member instanceof TwitterMemberInterface &&
                     $member->hasTwitterId() &&
-                    ($existingMember->getTwitterID() !== $member->getTwitterID())
+                    ($existingMember->twitterId() !== $member->twitterId())
                 ) {
-                    $existingMember->setTwitterID($member->getTwitterID());
+                    $existingMember->setTwitterID($member->twitterId());
 
                     return $this->memberRepository->saveMember($existingMember);
                 }

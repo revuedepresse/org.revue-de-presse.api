@@ -5,14 +5,14 @@ namespace App\Tests\Twitter\Infrastructure\Amqp\MessageBus;
 
 use App\Tests\Twitter\Infrastructure\Api\Builder\Entity\Token;
 use App\Twitter\Infrastructure\Api\Exception\UnavailableTokenException;
-use App\Twitter\Domain\Curation\PublicationStrategy;
+use App\Twitter\Infrastructure\Curation\PublicationStrategy;
 use App\Twitter\Domain\Curation\PublicationStrategyInterface;
 use App\Twitter\Domain\Resource\MemberOwnerships;
 use App\Twitter\Domain\Resource\OwnershipCollection;
 use App\Twitter\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationId;
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\OwnershipAccessor;
-use App\Twitter\Infrastructure\Twitter\Api\Selector\AuthenticatedSelector;
+use App\Twitter\Infrastructure\Api\Accessor\OwnershipAccessor;
+use App\Twitter\Infrastructure\Api\Selector\AuthenticatedSelector;
 use Prophecy\Argument;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
@@ -48,7 +48,7 @@ class PublicationMessageDispatcherTest extends KernelTestCase
                 UnavailableTokenException::throws(
                     function () {
                         return (new Token())
-                            ->setOAuthToken('identifier-122131212')
+                            ->setAccessToken('identifier-122131212')
                             ->freeze();
                     }
                 );

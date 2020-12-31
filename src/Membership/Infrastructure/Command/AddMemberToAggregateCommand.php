@@ -2,10 +2,10 @@
 
 namespace App\Membership\Infrastructure\Command;
 
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\ApiRateLimitingException;
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\NotFoundStatusException;
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\ReadOnlyApplicationException;
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\UnexpectedApiResponseException;
+use App\Twitter\Infrastructure\Api\Accessor\Exception\ApiRateLimitingException;
+use App\Twitter\Infrastructure\Api\Accessor\Exception\NotFoundStatusException;
+use App\Twitter\Infrastructure\Api\Accessor\Exception\ReadOnlyApplicationException;
+use App\Twitter\Infrastructure\Api\Accessor\Exception\UnexpectedApiResponseException;
 use App\Twitter\Infrastructure\Console\CommandReturnCodeAwareInterface;
 use App\Membership\Infrastructure\Entity\AggregateSubscription;
 use App\Membership\Domain\Model\MemberInterface;
@@ -234,7 +234,7 @@ class AddMemberToAggregateCommand extends Command implements CommandReturnCodeAw
             array_walk(
                 $subscriptions,
                 function (AggregateSubscription $subscription) use ($targetList, &$memberList) {
-                    $memberName = $subscription->subscription->getTwitterUsername();
+                    $memberName = $subscription->subscription->twitterScreenName();
                     $memberList[] = $memberName;
                 }
             );

@@ -7,8 +7,8 @@ use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Twitter\Infrastructure\Api\Entity\Token;
 use App\Twitter\Infrastructure\Api\Throttling\ApiLimitModeratorInterface;
 use App\Tests\Twitter\Infrastructure\Api\AccessToken\Builder\Repository\TokenRepositoryBuilder;
-use App\Twitter\Infrastructure\Twitter\Collector\InterruptibleCollectDecider;
-use App\Twitter\Infrastructure\Twitter\Collector\InterruptibleCollectDeciderInterface;
+use App\Twitter\Infrastructure\Collector\InterruptibleCollectDecider;
+use App\Twitter\Domain\Collector\InterruptibleCollectDeciderInterface;
 use Prophecy\Argument;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
@@ -44,7 +44,7 @@ class InterruptibleCollectDeciderTest extends KernelTestCase
         $tokenRepositoryBuilder = TokenRepositoryBuilder::newTokenRepositoryBuilder();
         $tokenRepository = $tokenRepositoryBuilder->willFindFirstFrozenToken(
             (new Token())
-                ->setOAuthToken('1232108293-token')
+                ->setAccessToken('1232108293-token')
                 ->freeze()
         )->build();
         $this->decider->setTokenRepository($tokenRepository);

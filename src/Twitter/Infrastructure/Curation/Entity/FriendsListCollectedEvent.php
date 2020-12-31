@@ -8,7 +8,7 @@ use App\Twitter\Domain\Curation\Entity\ListCollectedEvent;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationId;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdAwareInterface;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdInterface;
-use App\Twitter\Infrastructure\Twitter\Api\Selector\FollowersListSelector;
+use App\Twitter\Infrastructure\Api\Selector\FollowersListSelector;
 use App\Twitter\Domain\Api\Selector\ListSelectorInterface;
 use DateTimeImmutable;
 use DateTimeInterface;
