@@ -900,8 +900,6 @@ QUERY;
      *
      * @return MemberInterface
      * @throws InvalidMemberIdentifier
-     * @throws ORMException
-     * @throws OptimisticLockException
      */
     private function saveMemberWithAdditionalProps(
         MemberIdentity $memberIdentity,

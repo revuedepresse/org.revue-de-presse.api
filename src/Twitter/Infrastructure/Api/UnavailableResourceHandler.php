@@ -91,13 +91,17 @@ class UnavailableResourceHandler implements UnavailableResourceHandlerInterface
                 $resource->getType(),
                 $resource->getMessage()
             );
-            $this->logger->error($message);
+            $this->logger->info($message);
 
-            $this->memberRepository->saveProtectedMember(
+            $member = $this->memberRepository->saveProtectedMember(
                 $memberIdentity
             );
 
-            MembershipException::throws($message, self::PROTECTED_ACCOUNT);
+            MembershipException::throws(
+                $message,
+                self::PROTECTED_ACCOUNT,
+                $member
+            );
         }
     }
 

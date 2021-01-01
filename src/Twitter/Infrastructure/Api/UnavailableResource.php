@@ -61,6 +61,6 @@ class UnavailableResource implements UnavailableResourceInterface
 
     public function isMemberProtected(): bool
     {
-        return $this->type === self::ERROR_PROTECTED_TWEET;
+        return $this->type === self::ERROR_PROTECTED_TWEET || $this->type === self::ERROR_PROTECTED_ACCOUNT;
     }
 }

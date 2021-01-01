@@ -14,7 +14,6 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
 
 /**
- * @package App\Tests\Twitter\Infrastructure\Twitter\Api
  * @group   unavailable_resource
  */
 class UnavailableResourceHandlerTest extends TestCase

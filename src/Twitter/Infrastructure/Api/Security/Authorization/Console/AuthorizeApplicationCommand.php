@@ -5,6 +5,7 @@ namespace App\Twitter\Infrastructure\Api\Security\Authorization\Console;
 
 use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Twitter\Domain\Api\Security\Authorization\AuthorizeAccessInterface;
+use App\Twitter\Domain\Membership\Exception\MembershipException;
 use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use App\Twitter\Domain\Resource\MemberIdentity;
 use App\Twitter\Infrastructure\Api\Security\Authorization\InvalidPinCodeException;
@@ -134,11 +135,15 @@ class AuthorizeApplicationCommand extends AbstractCommand implements SignalableC
 
         $token = $this->tokenRepository->saveAccessToken($accessToken);
 
-        $member = $this->memberProfileAccessor->getMemberByIdentity(
-            new MemberIdentity($accessToken->screenName(), $accessToken->userId())
-        )->addToken($token);
+        try {
+            $member = $this->memberProfileAccessor->getMemberByIdentity(
+                new MemberIdentity($accessToken->screenName(), $accessToken->userId())
+            );
+        } catch (MembershipException $exception) {
+            $member = $exception->exceptionalMember();
+        }
 
-        $this->memberRepository->saveMember($member);
+        $this->memberRepository->saveMember($member->addToken($token));
 
         $this->output->writeln('This Twitter application has been granted access to Twitter API on your behalf.');
     }
