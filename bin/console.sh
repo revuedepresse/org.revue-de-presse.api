@@ -308,7 +308,7 @@ function run_php_script() {
 
     local override_option
     override_option=' -f ./docker-compose.yml'
-    if [ -e './docker-compose.override.yml' ];
+    if [ -e './provisioning/containers/docker-compose.override.yml' ];
     then
         override_option=' -f ./docker-compose.yml -f ./docker-compose.override.yml'
     fi
