@@ -181,10 +181,10 @@ function consume_fetch_publication_messages {
     project_name=$(get_project_name)
 
     local override_option
-    override_option=''
+    override_option=' -f ./docker-compose.yml'
     if [ -e './docker-compose.override.yml' ];
     then
-        override_option=' -f ./docker-compose.yml -f ./docker-compose.override.yml '
+        override_option=' -f ./docker-compose.yml -f ./docker-compose.override.yml'
     fi
 
     command="docker-compose${override_option} --project-name=${project_name} run --rm --name ${SUPERVISOR_PROCESS_NAME} -T -e ${symfony_environment} worker ${SCRIPT}"
@@ -306,15 +306,21 @@ function run_php_script() {
     local container_name
     container_name="$(echo "${project_name}-${script}" | sha256sum | awk '{print $1}')"
 
-    local command
+    local override_option
+    override_option=' -f ./docker-compose.yml'
+    if [ -e './docker-compose.override.yml' ];
+    then
+        override_option=' -f ./docker-compose.yml -f ./docker-compose.override.yml'
+    fi
 
+    local command
     if [ -z "${interactive_mode}" ];
     then
         command="$(echo -n 'cd provisioning/containers && \
-        docker-compose --project-name='"${project_name}"' run -T --rm --name='"${container_name}"' '"${option_detached}"'worker '"${script}")"
+        docker-compose --project-name='"${project_name}""${override_option}"' run -T --rm --name='"${container_name}"' '"${option_detached}"'worker '"${script}")"
     else
         command="$(echo -n 'cd provisioning/containers && \
-        docker-compose --project-name='"${project_name}"' exec '"${option_detached}"'worker '"${script}")"
+        docker-compose --project-name='"${project_name}""${override_option}"' exec '"${option_detached}"'worker '"${script}")"
     fi
 
     echo 'About to execute "'"${command}"'"'
@@ -335,8 +341,15 @@ function run_php() {
     local project_name=''
     project_name="$(get_project_name)"
 
+    local override_option
+    override_option=' -f ./docker-compose.yml'
+    if [ -e './docker-compose.override.yml' ];
+    then
+        override_option=' -f ./docker-compose.yml -f ./docker-compose.override.yml'
+    fi
+
     local command
-    command=$(echo -n 'docker-compose --project-name='"${project_name}"' -f docker-compose.yml exec -T worker '"${arguments}")
+    command=$(echo -n 'docker-compose --project-name='"${project_name}""${override_option}"' exec -T worker '"${arguments}")
 
     echo 'About to execute '"${command}"
     /bin/bash -c "${command}"
