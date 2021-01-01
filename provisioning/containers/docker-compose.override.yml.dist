@@ -3,25 +3,25 @@ services:
 
     reverse-proxy:
         networks:
-            journaliste-feministe-network:
+            custom_network:
                 aliases:
                     - reverse-proxy
 
     web:
         networks:
-            journaliste-feministe-network:
+            custom_network:
                 aliases:
                     - web
 
     web-worker:
         networks:
-            journaliste-feministe-network:
+            custom_network:
                 aliases:
                     - web-worker
 
     worker:
         networks:
-            journaliste-feministe-network:
+            custom_network:
                 aliases:
                     - worker
 
@@ -29,28 +29,27 @@ services:
         ports:
             - "127.0.0.1:5433:5432"
         networks:
-            journaliste-feministe-network:
+            custom_network:
                 aliases:
                     - database
 
     cache:
         networks:
-            journaliste-feministe-network:
+            custom_network:
                 aliases:
                     - cache
 
     messenger:
         networks:
-            journaliste-feministe-network:
+            custom_network:
                 aliases:
                     - messenger
 
 networks:
-    journaliste-feministe-network:
+    custom_network:
         driver: bridge
         ipam:
             config:
-                - ip-range: 192.168.196.0/28
-                  subnet: 192.168.196.0/28
+                - subnet: 192.168.196.0/28
                   gateway: 192.168.196.1
 

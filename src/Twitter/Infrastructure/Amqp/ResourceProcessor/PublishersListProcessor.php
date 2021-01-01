@@ -155,7 +155,7 @@ class PublishersListProcessor implements PublishersListProcessorInterface
                 continue;
             } catch (StopPublicationException $exception) {
                 if ($exception->getPrevious() instanceof MembershipException) {
-                    break;
+                    continue;
                 }
 
                 $this->logger->error($exception->getMessage());
