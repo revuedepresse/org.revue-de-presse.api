@@ -88,7 +88,7 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
             }
 
             if (MemberFacingStrategy::shouldContinuePublication($exception)) {
-                ContinuePublicationException::throws($exception);
+                ContinuePublicationException::throws($exception->getMessage(), $exception);
             }
 
             throw $exception;
