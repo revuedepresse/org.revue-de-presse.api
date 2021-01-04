@@ -46,7 +46,7 @@ class ProduceMemberMessagesCommand extends AggregateAwareCommand
     public function execute(InputInterface $input, OutputInterface $output)
     {
         if ($this->operationClock->shouldSkipOperation()) {
-            return self::RETURN_STATUS_SUCCESS;
+            return self::SUCCESS;
         }
 
 //        $this->producer = $this->getContainer()->get(

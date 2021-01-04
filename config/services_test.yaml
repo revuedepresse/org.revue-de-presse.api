@@ -39,3 +39,22 @@ services:
     App\Twitter\Infrastructure\Api\Security\Authorization\AuthorizeAccess:
         factory: ['App\Tests\Twitter\Infrastructure\Api\Security\Authorization\Builder\AuthorizeAccessBuilder', 'build']
 
+    App\Twitter\Domain\Api\Accessor\ApiAccessorInterface:
+        factory: ['App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\ApiAccessorBuilder', 'willAllowPublishersListToBeImportedForMemberHavingScreenName']
+        arguments:
+            - '@App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface'
+            - !php/const App\Tests\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommandTest::SCREEN_NAME
+
+    App\Membership\Domain\Repository\NetworkRepositoryInterface:
+        factory: ['App\Tests\Membership\Builder\Repository\NetworkRepositoryBuilder', 'build']
+        arguments:
+            - '@App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface'
+
+    test.App\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommand:
+        '@App\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommand'
+
+    test.App\Twitter\Infrastructure\Subscription\Console\ListSubscriptionsToPublishersListsCommand:
+        '@App\Twitter\Infrastructure\Subscription\Console\ListSubscriptionsToPublishersListsCommand'
+
+    test.App\Twitter\Domain\Curation\Repository\OwnershipBatchCollectedEventRepositoryInterface:
+        '@App\Twitter\Domain\Curation\Repository\OwnershipBatchCollectedEventRepositoryInterface'

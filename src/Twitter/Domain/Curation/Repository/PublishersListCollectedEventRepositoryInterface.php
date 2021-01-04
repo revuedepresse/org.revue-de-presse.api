@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Domain\Curation\Repository;
 
-use App\Twitter\Domain\Resource\MemberCollection;
+use App\Twitter\Domain\Api\Resource\MemberCollectionInterface;
 use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
 
 interface PublishersListCollectedEventRepositoryInterface
@@ -15,5 +15,7 @@ interface PublishersListCollectedEventRepositoryInterface
     public function collectedPublishersList(
         ApiAccessorInterface $accessor,
         array $options
-    ): MemberCollection;
+    ): MemberCollectionInterface;
+
+    public function byListId(string $listId): MemberCollectionInterface;
 }

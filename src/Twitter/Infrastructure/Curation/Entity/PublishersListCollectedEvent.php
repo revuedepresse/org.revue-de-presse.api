@@ -14,7 +14,7 @@ class PublishersListCollectedEvent
 
     private DateTimeInterface $occurredAt;
 
-    private int $listId;
+    private string $listId;
 
     private DateTimeInterface $startedAt;
 
@@ -23,7 +23,7 @@ class PublishersListCollectedEvent
     private string $listName;
 
     public function __construct(
-        int $listId,
+        string $listId,
         string $listName,
         DateTimeInterface $occurredAt,
         DateTimeInterface $startedAt,
@@ -43,7 +43,7 @@ class PublishersListCollectedEvent
         return $this->id;
     }
 
-    public function listId(): int
+    public function listId(): string
     {
         return $this->listId;
     }

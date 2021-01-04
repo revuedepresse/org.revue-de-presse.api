@@ -11,9 +11,10 @@ use App\Membership\Infrastructure\Repository\Exception\InvalidMemberIdentifier;
 use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
 use App\Twitter\Domain\Api\Model\TokenInterface;
+use App\Twitter\Domain\Api\Resource\MemberCollectionInterface;
 use App\Twitter\Domain\Api\Selector\ListSelectorInterface;
 use App\Twitter\Domain\Api\TwitterErrorAwareInterface;
-use App\Twitter\Domain\Resource\MemberCollection;
+use App\Twitter\Infrastructure\Api\Resource\MemberCollection;
 use App\Twitter\Domain\Resource\OwnershipCollection;
 use App\Twitter\Domain\Resource\OwnershipCollectionInterface;
 use App\Twitter\Infrastructure\Api\Entity\FreezableToken;
@@ -522,15 +523,7 @@ class Accessor implements ApiAccessorInterface, TwitterErrorAwareInterface
         return self::ERROR_EXCEEDED_RATE_LIMIT;
     }
 
-    /**
-     * @param string $id
-     *
-     * @return MemberCollection
-     * @throws ApiRateLimitingException
-     * @throws InconsistentTokenRepository
-     * @throws OptimisticLockException
-     */
-    public function getListMembers(string $id): MemberCollection
+    public function getListMembers(string $id): MemberCollectionInterface
     {
         $listMembersEndpoint = $this->getListMembersEndpoint();
         $this->guardAgainstApiLimit($listMembersEndpoint);

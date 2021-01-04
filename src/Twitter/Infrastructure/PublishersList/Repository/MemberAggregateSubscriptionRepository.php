@@ -2,6 +2,7 @@
 
 namespace App\Twitter\Infrastructure\PublishersList\Repository;
 
+use App\Membership\Domain\Repository\MemberPublishersListSubscriptionRepositoryInterface;
 use App\Twitter\Infrastructure\PublishersList\Entity\MemberAggregateSubscription;
 use App\Membership\Domain\Model\MemberInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -9,7 +10,7 @@ use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use const JSON_THROW_ON_ERROR;
 
-class MemberAggregateSubscriptionRepository extends ServiceEntityRepository
+class MemberAggregateSubscriptionRepository extends ServiceEntityRepository implements MemberPublishersListSubscriptionRepositoryInterface
 {
     public const TABLE_ALIAS = 'member_aggregate_subscription';
 

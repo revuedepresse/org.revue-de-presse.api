@@ -3,7 +3,7 @@ declare (strict_types=1);
 
 namespace App\Tests\Twitter\Infrastructure\Subscription\Console;
 
-use App\Twitter\Domain\Resource\MemberCollection;
+use App\Twitter\Infrastructure\Api\Resource\MemberCollection;
 use App\Twitter\Infrastructure\Subscription\Console\UnfollowDiffSubscriptionsSubscribeesCommand;
 use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use App\Twitter\Infrastructure\Api\Mutator\FriendshipMutatorInterface;

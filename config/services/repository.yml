@@ -93,6 +93,9 @@ services:
         tags:
             - { name: 'doctrine.repository_service' }
 
+    App\Twitter\Domain\Curation\Repository\OwnershipBatchCollectedEventRepositoryInterface:
+        '@App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository'
+
     App\Twitter\Infrastructure\Api\Repository\PublishersListRepository:
         public: true
         class:  'App\Twitter\Infrastructure\Api\Repository\PublishersListRepository'
@@ -137,7 +140,7 @@ services:
     App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface:
         '@App\Twitter\Infrastructure\Api\AccessToken\Repository\TokenRepository'
 
-    repository.publishers_list_subscription:
+    App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository:
         class:      'App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
@@ -145,9 +148,12 @@ services:
         properties:
             accessor:                               '@App\Twitter\Infrastructure\Api\Accessor'
             logger:                                 '@logger'
-            memberAggregateSubscriptionRepository:  '@repository.member_aggregate_subscription'
+            memberAggregateSubscriptionRepository:  '@App\Twitter\Infrastructure\PublishersList\Repository\MemberAggregateSubscriptionRepository'
             memberSubscriptionRepository:           '@repository.member_subscription'
-            networkRepository:                      '@repository.network'
+            networkRepository:                      '@App\Membership\Infrastructure\Repository\NetworkRepository'
+
+    App\Membership\Domain\Repository\PublishersListSubscriptionRepositoryInterface:
+        '@App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository'
 
     repository.authentication_token:
         class:   'App\Membership\Infrastructure\Repository\AuthenticationTokenRepository'
@@ -180,7 +186,7 @@ services:
         tags:
             - { name: 'doctrine.repository_service' }
 
-    repository.member_aggregate_subscription:
+    App\Twitter\Infrastructure\PublishersList\Repository\MemberAggregateSubscriptionRepository:
         class: 'App\Twitter\Infrastructure\PublishersList\Repository\MemberAggregateSubscriptionRepository'
         arguments:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
@@ -222,7 +228,7 @@ services:
             - [ 'setStatusAccessor',    [ '@App\Twitter\Infrastructure\Api\Accessor\StatusAccessor'] ]
             - [ 'setStatusRepository',  [ '@App\Twitter\Infrastructure\Api\Repository\StatusRepository'] ]
 
-    repository.network:
+    App\Membership\Infrastructure\Repository\NetworkRepository:
         class:                            'App\Membership\Infrastructure\Repository\NetworkRepository'
         properties:
             accessor:                     '@App\Twitter\Infrastructure\Api\Accessor'
@@ -231,6 +237,9 @@ services:
             memberRepository:             "@user_manager"
             memberSubscribeeRepository:   "@repository.member_subscribee"
             memberSubscriptionRepository: "@repository.member_subscription"
+
+    App\Membership\Domain\Repository\NetworkRepositoryInterface:
+        '@App\Membership\Infrastructure\Repository\NetworkRepository'
 
     repository.member_subscription:
         class: 'App\Membership\Infrastructure\Repository\MemberSubscriptionRepository'

@@ -71,6 +71,6 @@ class LoadProductionFixtures extends AbstractCommand
 
         $output->writeln('<info>Production fixtures have been loaded successfully.</info>');
 
-        return self::RETURN_STATUS_SUCCESS;
+        return self::SUCCESS;
     }
 }

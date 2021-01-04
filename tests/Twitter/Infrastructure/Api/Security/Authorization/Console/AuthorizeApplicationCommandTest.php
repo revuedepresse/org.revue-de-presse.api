@@ -56,7 +56,7 @@ class AuthorizeApplicationCommandTest extends KernelTestCase
 
         $this->commandTester = new CommandTester($this->testedCommand);
 
-        $this->removeExistingFixtures();
+        $this->removeFixtures();
     }
 
     /**
@@ -69,7 +69,7 @@ class AuthorizeApplicationCommandTest extends KernelTestCase
         $this->commandTester->execute(['command' => $this->testedCommand::COMMAND_NAME]);
 
         self::assertEquals(
-            $this->testedCommand::RETURN_STATUS_SUCCESS,
+            $this->testedCommand::SUCCESS,
             $this->commandTester->getStatusCode(),
             'The command should exit successfully.'
         );
@@ -161,24 +161,27 @@ class AuthorizeApplicationCommandTest extends KernelTestCase
 
     protected function tearDown(): void
     {
-        $this->removeExistingFixtures();
+        $this->removeFixtures();
 
         parent::tearDown();
     }
 
-    private function removeExistingFixtures(): void
+    private function removeFixtures(): void
     {
         $this->entityManager->getConnection()->executeQuery('
-            DELETE FROM weaving_user_token;
+            TRUNCATE TABLE member_aggregate_subscription CASCADE;
         ');
         $this->entityManager->getConnection()->executeQuery('
-            DELETE FROM weaving_access_token;
+            TRUNCATE TABLE weaving_user_token;
         ');
         $this->entityManager->getConnection()->executeQuery('
-            DELETE FROM weaving_token_type;
+            TRUNCATE TABLE weaving_access_token CASCADE;
         ');
         $this->entityManager->getConnection()->executeQuery('
-            DELETE FROM weaving_user;
+            TRUNCATE TABLE weaving_token_type CASCADE;
+        ');
+        $this->entityManager->getConnection()->executeQuery('
+            TRUNCATE TABLE weaving_user CASCADE;
         ');
     }
 }

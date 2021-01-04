@@ -2,7 +2,6 @@
 
 namespace App\Membership\Infrastructure\Command;
 
-use App\Twitter\Infrastructure\Console\CommandReturnCodeAwareInterface;
 use App\Membership\Infrastructure\Repository\NetworkRepository;
 use OldSound\RabbitMqBundle\RabbitMq\ProducerInterface;
 use Symfony\Component\Console\Command\Command;
@@ -11,7 +10,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 
-class ImportNetworkCommand extends Command implements CommandReturnCodeAwareInterface
+class ImportNetworkCommand extends Command
 {
     private const OPTION_MEMBER_LIST = 'member-list';
 
@@ -96,12 +95,12 @@ class ImportNetworkCommand extends Command implements CommandReturnCodeAwareInte
                 }
             );
 
-            return self::RETURN_STATUS_SUCCESS;
+            return self::SUCCESS;
         }
 
         $this->networkRepository->saveNetwork([$memberName]);
 
-        return self::RETURN_STATUS_SUCCESS;
+        return self::SUCCESS;
     }
 
     /**

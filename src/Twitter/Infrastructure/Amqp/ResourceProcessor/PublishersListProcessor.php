@@ -4,9 +4,10 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Amqp\ResourceProcessor;
 
 use App\Twitter\Domain\Api\Model\TokenInterface;
+use App\Twitter\Domain\Api\Resource\MemberCollectionInterface;
 use App\Twitter\Domain\Curation\PublicationStrategyInterface;
 use App\Twitter\Domain\Membership\Exception\MembershipException;
-use App\Twitter\Domain\Resource\MemberCollection;
+use App\Twitter\Infrastructure\Api\Resource\MemberCollection;
 use App\Twitter\Domain\Resource\MemberIdentity;
 use App\Twitter\Domain\Resource\PublishersList;
 use App\Twitter\Infrastructure\Amqp\Exception\ContinuePublicationException;
@@ -123,17 +124,8 @@ class PublishersListProcessor implements PublishersListProcessorInterface
         return 0;
     }
 
-    /**
-     * @param MemberCollection             $members
-     * @param PublishersList              $list
-     * @param TokenInterface               $token
-     *
-     * @param PublicationStrategyInterface $strategy
-     *
-     * @return int
-     */
     private function processMemberOriginatingFromListWithToken(
-        MemberCollection $members,
+        MemberCollectionInterface $members,
         PublishersList $list,
         TokenInterface $token,
         PublicationStrategyInterface $strategy
@@ -177,16 +169,10 @@ class PublishersListProcessor implements PublishersListProcessorInterface
         return $publishedMessages;
     }
 
-    /**
-     * @param MemberCollection             $memberCollection
-     * @param PublicationStrategyInterface $strategy
-     *
-     * @return MemberCollection
-     */
     private function addOwnerToListOptionally(
-        MemberCollection $memberCollection,
+        MemberCollectionInterface $memberCollection,
         PublicationStrategyInterface $strategy
-    ): MemberCollection
+    ): MemberCollectionInterface
     {
         $members = $memberCollection->toArray();
         if ($strategy->shouldIncludeOwner()) {

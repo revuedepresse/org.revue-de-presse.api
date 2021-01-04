@@ -65,11 +65,11 @@ class SubscribeToMemberTimelinesCommand extends AbstractCommand
             $this->logger->critical($exception->getMessage());
             $this->output->writeln($exception->getMessage());
 
-            return self::RETURN_STATUS_FAILURE;
+            return self::FAILURE;
         } catch (\Exception $exception) {
             $this->logger->critical($exception->getMessage());
 
-            return self::RETURN_STATUS_FAILURE;
+            return self::FAILURE;
         }
 
         $this->output->writeln(sprintf(
@@ -78,6 +78,6 @@ class SubscribeToMemberTimelinesCommand extends AbstractCommand
             $aggregateName
         ));
 
-        return self::RETURN_STATUS_SUCCESS;
+        return self::SUCCESS;
     }
 }

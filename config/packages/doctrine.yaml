@@ -121,6 +121,7 @@ doctrine:
                 logging: false
         types:
             uuid:  Ramsey\Uuid\Doctrine\UuidType
+            correlation_id:  App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdType
     orm:
         auto_generate_proxy_classes: true
         entity_managers:

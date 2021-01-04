@@ -4,36 +4,43 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\PublishersList\Console;
 
-use App\Twitter\Infrastructure\PublishersList\Repository\MemberAggregateSubscriptionRepository;
-use App\Twitter\Infrastructure\Console\AbstractCommand;
-use App\Twitter\Domain\Resource\MemberIdentity;
-use App\Twitter\Domain\Resource\PublishersList;
-use App\Twitter\Infrastructure\DependencyInjection\Collection\OwnershipBatchCollectedEventRepositoryTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Collection\PublishersListCollectedEventRepositoryTrait;
-use App\Twitter\Infrastructure\Operation\Correlation\CorrelationId;
-use App\Twitter\Infrastructure\Membership\Repository\MemberRepository;
+use App\Membership\Domain\Model\MemberInterface;
+use App\Membership\Domain\Repository\MemberPublishersListSubscriptionRepositoryInterface;
+use App\Membership\Domain\Repository\NetworkRepositoryInterface;
+use App\Membership\Domain\Repository\PublishersListSubscriptionRepositoryInterface;
 use App\Membership\Infrastructure\Entity\AggregateSubscription;
 use App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository;
 use App\Membership\Infrastructure\Repository\NetworkRepository;
-use App\Membership\Domain\Model\MemberInterface;
 use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
+use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
+use App\Twitter\Domain\Resource\MemberIdentity;
+use App\Twitter\Domain\Resource\PublishersList;
+use App\Twitter\Infrastructure\Api\Selector\MemberOwnershipsBatchSelector;
+use App\Twitter\Infrastructure\Console\AbstractCommand;
+use App\Twitter\Infrastructure\DependencyInjection\Collection\OwnershipBatchCollectedEventRepositoryTrait;
+use App\Twitter\Infrastructure\DependencyInjection\Collection\PublishersListCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
-use App\Twitter\Infrastructure\Api\Selector\MemberOwnershipsBatchSelector;
+use App\Twitter\Infrastructure\Membership\Repository\MemberRepository;
+use App\Twitter\Infrastructure\Operation\Correlation\CorrelationId;
+use App\Twitter\Infrastructure\PublishersList\Repository\MemberAggregateSubscriptionRepository;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class ImportMemberPublishersListsCommand extends AbstractCommand
 {
+    public const COMMAND_NAME = 'devobs:import-publishers-lists';
+
     use OwnershipBatchCollectedEventRepositoryTrait;
     use PublishersListCollectedEventRepositoryTrait;
 
-    private const OPTION_MEMBER_NAME = 'member-name';
+    private const ARGUMENT_SCREEN_NAME = 'screen_name';
 
     private const OPTION_LIST_RESTRICTION = 'list-restriction';
 
@@ -41,9 +48,9 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
 
     public ?string $listRestriction = null;
 
-    public AggregateSubscriptionRepository $aggregateSubscriptionRepository;
+    public AggregateSubscriptionRepository $publishersListSubscriptionRepository;
 
-    public MemberAggregateSubscriptionRepository $memberAggregateSubscriptionRepository;
+    public MemberAggregateSubscriptionRepository $memberPublishersListSubscriptionRepository;
 
     public NetworkRepository $networkRepository;
 
@@ -51,14 +58,32 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
 
     public LoggerInterface $logger;
 
+    public function __construct(
+        string $name,
+        ApiAccessorInterface $accessor,
+        PublishersListSubscriptionRepositoryInterface $publishersListSubscriptionRepository,
+        MemberPublishersListSubscriptionRepositoryInterface  $memberPublishersListSubscriptionRepository,
+        NetworkRepositoryInterface $networkRepository,
+        MemberRepositoryInterface $memberRepository,
+        LoggerInterface $logger
+    ) {
+        $this->accessor = $accessor;
+        $this->publishersListSubscriptionRepository = $publishersListSubscriptionRepository;
+        $this->memberPublishersListSubscriptionRepository = $memberPublishersListSubscriptionRepository;
+        $this->networkRepository = $networkRepository;
+        $this->memberRepository = $memberRepository;
+        $this->logger = $logger;
+
+        parent::__construct($name);
+    }
+
     protected function configure(): void
     {
-        $this->setName('import-aggregates')
-             ->addOption(
-                 self::OPTION_MEMBER_NAME,
-                 'm',
-                 InputOption::VALUE_REQUIRED,
-                 'The name of a member'
+        $this->setName(self::COMMAND_NAME)
+             ->addArgument(
+                 self::ARGUMENT_SCREEN_NAME,
+                 InputArgument::REQUIRED,
+                 'The screen name of a Twitter member'
              )
              ->addOption(
                  self::OPTION_LIST_RESTRICTION,
@@ -78,7 +103,7 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
     {
         parent::execute($input, $output);
 
-        $memberName = $this->input->getOption(self::OPTION_MEMBER_NAME);
+        $memberName = $this->input->getArgument(self::ARGUMENT_SCREEN_NAME);
         $member     = $this->accessor->ensureMemberHavingNameExists($memberName);
 
         $correlationId = CorrelationId::generate();
@@ -108,7 +133,7 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
             )
         );
 
-        return self::RETURN_STATUS_SUCCESS;
+        return self::SUCCESS;
     }
 
     /**
@@ -138,7 +163,7 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
         array_walk(
             $subscriptions,
             function (PublishersList $list) use ($member) {
-                $memberAggregateSubscription = $this->memberAggregateSubscriptionRepository
+                $memberAggregateSubscription = $this->memberPublishersListSubscriptionRepository
                     ->make(
                         $member,
                         $list->toArray()
@@ -196,7 +221,7 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
                 $memberAggregateSubscriptions = [];
 
                 try {
-                    $memberAggregateSubscriptions = $this->aggregateSubscriptionRepository
+                    $memberAggregateSubscriptions = $this->publishersListSubscriptionRepository
                         ->createQueryBuilder('aggs')
                         ->andWhere(
                             'aggs.memberAggregateSubscription = :member_aggregate_subscription'
@@ -262,7 +287,7 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
 
                         $index = sprintf('%s-%d', $memberAggregateSubscription->getId(), $member->getId());
                         if (!\array_key_exists($index, $indexedMemberAggregateSubscriptions)) {
-                            $this->aggregateSubscriptionRepository->make($memberAggregateSubscription, $member);
+                            $this->publishersListSubscriptionRepository->make($memberAggregateSubscription, $member);
                         }
                     }
                 );

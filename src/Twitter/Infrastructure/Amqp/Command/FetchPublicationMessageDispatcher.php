@@ -138,10 +138,10 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
         } catch (InvalidSerializedTokenException $exception) {
             $this->logger->info($exception->getMessage());
 
-            return self::RETURN_STATUS_FAILURE;
+            return self::FAILURE;
         }
 
-        $returnStatus = self::RETURN_STATUS_FAILURE;
+        $returnStatus = self::FAILURE;
         try {
             $this->publicationMessageDispatcher->dispatchPublicationMessages(
                 $this->collectionStrategy,
@@ -150,7 +150,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
                     $this->output->writeln($message);
                 }
             );
-            $returnStatus = self::RETURN_STATUS_SUCCESS;
+            $returnStatus = self::SUCCESS;
         } catch (UnexpectedOwnershipException|OverCapacityException $exception) {
             $this->logger->error(
                 $exception->getMessage(),

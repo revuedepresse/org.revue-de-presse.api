@@ -3,7 +3,7 @@ declare (strict_types=1);
 
 namespace App\Tests\Twitter\Infrastructure\Api\Builder\Mutator;
 
-use App\Twitter\Domain\Resource\MemberCollection;
+use App\Twitter\Infrastructure\Api\Resource\MemberCollection;
 use App\Twitter\Domain\Resource\MemberIdentity;
 use App\Twitter\Infrastructure\Api\Mutator\FriendshipMutator;
 use App\Twitter\Infrastructure\Api\Mutator\FriendshipMutatorInterface;

@@ -22,7 +22,7 @@
         <field
             name="correlationId"
             column="correlation_id"
-            type="uuid"
+            type="correlation_id"
         />
 
         <field

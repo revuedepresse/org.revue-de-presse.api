@@ -62,7 +62,7 @@ class ListMemberSubscriptionsCommand extends AbstractCommand
             }
         );
 
-        return self::RETURN_STATUS_SUCCESS;
+        return self::SUCCESS;
     }
 
     /**

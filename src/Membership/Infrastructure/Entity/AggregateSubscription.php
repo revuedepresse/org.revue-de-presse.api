@@ -3,30 +3,20 @@
 namespace App\Membership\Infrastructure\Entity;
 
 use App\Twitter\Infrastructure\PublishersList\Entity\MemberAggregateSubscription;
+use App\Membership\Domain\Model\MemberInterface;
+use Ramsey\Uuid\UuidInterface;
 
 class AggregateSubscription
 {
-    /**
-     * @var string
-     */
-    private $id;
+    private UuidInterface $id;
 
-    /**
-     * @var MemberAggregateSubscription
-     */
-    private $memberAggregateSubscription;
+    private MemberAggregateSubscription $memberAggregateSubscription;
 
-    /**
-     * @return MemberAggregateSubscription
-     */
-    public function getMemberAggregateSubscription() {
+    public function getMemberAggregateSubscription(): MemberAggregateSubscription {
         return $this->memberAggregateSubscription;
     }
 
-    /**
-     * @var MemberInterface
-     */
-    public $subscription;
+    public MemberInterface $subscription;
 
     /**
      * @param MemberAggregateSubscription $memberAggregateSubscription

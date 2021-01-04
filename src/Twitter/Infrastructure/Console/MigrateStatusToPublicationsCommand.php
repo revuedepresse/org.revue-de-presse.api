@@ -12,7 +12,7 @@ use Symfony\Component\Console\Command\Command;
  * @package App\Twitter\Command
  * @author Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
-class MigrateStatusToPublicationsCommand extends Command implements CommandReturnCodeAwareInterface
+class MigrateStatusToPublicationsCommand extends Command
 {
     private PublicationRepositoryInterface $publicationRepository;
 
@@ -41,6 +41,6 @@ class MigrateStatusToPublicationsCommand extends Command implements CommandRetur
     {
         $this->publicationRepository->migrateStatusesToPublications();
 
-        return self::RETURN_STATUS_SUCCESS;
+        return self::SUCCESS;
     }
 }

@@ -170,6 +170,9 @@ services:
             - [ 'setAccessToken', [ '%weaving_the_web_twitter.oauth_token.default%' ] ]
             - [ 'setAccessTokenSecret', [ '%weaving_the_web_twitter.oauth_secret.default%' ] ]
 
+    App\Twitter\Domain\Api\Accessor\ApiAccessorInterface:
+        '@App\Twitter\Infrastructure\Api\Accessor'
+
     App\Twitter\Infrastructure\Api\Accessor\StatusAccessor:
         class: 'App\Twitter\Infrastructure\Api\Accessor\StatusAccessor'
         properties:

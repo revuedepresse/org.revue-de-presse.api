@@ -4,6 +4,8 @@ namespace App\Membership\Infrastructure\Entity;
 
 use App\Membership\Domain\Model\MemberInterface;
 use App\Twitter\Domain\Api\Model\TokenInterface;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Selectable;
 
 trait MemberTrait
 {
@@ -229,5 +231,10 @@ trait MemberTrait
     public function addToken(TokenInterface $token): MemberInterface
     {
         return $this;
+    }
+
+    public function getTokens(): Selectable
+    {
+        return new ArrayCollection([]);
     }
 }

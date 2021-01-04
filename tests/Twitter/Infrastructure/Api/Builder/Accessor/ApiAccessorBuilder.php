@@ -3,8 +3,13 @@ declare(strict_types=1);
 
 namespace App\Tests\Twitter\Infrastructure\Api\Builder\Accessor;
 
+use App\Membership\Domain\Model\MemberInterface;
+use App\Tests\Membership\Builder\Entity\Legacy\MemberBuilder;
 use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
 use App\Twitter\Domain\Api\Selector\ListSelectorInterface;
+use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
+use App\Twitter\Infrastructure\Api\Resource\MemberCollection;
+use App\Twitter\Domain\Resource\MemberIdentity;
 use App\Twitter\Domain\Resource\OwnershipCollection;
 use App\Twitter\Domain\Resource\OwnershipCollectionInterface;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
@@ -15,7 +20,7 @@ use stdClass;
 
 class ApiAccessorBuilder
 {
-    public const LIST_ID   = 1;
+    public const LIST_ID   = '1';
     public const LIST_NAME = 'science';
 
     public const MEMBER_ID          = '1';
@@ -23,6 +28,8 @@ class ApiAccessorBuilder
     public const MEMBER_SCREEN_NAME = 'mariec';
 
     public const SCREEN_NAME = 'BobEponge';
+    public const PUBLISHERS_LIST_MEMBER_SCREEN_NAME = 'publishers-list-member';
+    public const PUBLISHERS_LIST_MEMBER_TWITTER_ID = '2';
 
     public static function newApiAccessorBuilder()
     {
@@ -65,16 +72,17 @@ class ApiAccessorBuilder
             [
                 self::LIST_NAME => (object) [
                     'name'   => self::LIST_NAME,
-                    'id'     => self::LIST_ID,
-                    'id_str' => (string) self::LIST_ID,
+                    'id'     => (int) self::LIST_ID,
+                    'id_str' => self::LIST_ID,
                 ]
-            ]
+            ],
+            0
         );
     }
 
     public function willGetMembersInList(
-        int $listId,
-        \stdClass $members
+        string $listId,
+        MemberCollection $members
     ): self {
         $this->prophecy
             ->getListMembers($listId)
@@ -89,7 +97,15 @@ class ApiAccessorBuilder
     ): self {
         $this->prophecy
             ->getMemberOwnerships(Argument::type(ListSelectorInterface::class))
-            ->willReturn($ownershipCollection);
+            ->will(function ($arguments) use ($ownershipCollection) {
+                if ($arguments[0] instanceof ListSelectorInterface &&
+                    $arguments[0]->cursor() !== '0'
+                ) {
+                    return $ownershipCollection;
+                }
+
+                return OwnershipCollection::fromArray([]);
+            });
 
         return $this;
     }
@@ -134,5 +150,51 @@ class ApiAccessorBuilder
             ->willReturn($profile);
 
         return $this;
+    }
+
+    public function willEnsureMemberHavingNameExists(
+        MemberRepositoryInterface $memberRepository,
+        string $screenName
+    ): self {
+        $member = MemberBuilder::build($screenName);
+
+        $existingMember = $memberRepository->findOneBy(['twitterID' => $member->twitterId()]);
+        if ($existingMember instanceof MemberInterface) {
+            $member = $existingMember;
+        } else {
+            $member = $memberRepository->saveMember($member);
+        }
+
+        $this->prophecy
+            ->ensureMemberHavingNameExists($screenName)
+            ->willReturn($member);
+
+        return $this;
+    }
+
+    public static function willAllowPublishersListToBeImportedForMemberHavingScreenName(
+        MemberRepositoryInterface $memberRepository,
+        string $screenName
+    )
+    {
+        $builder = new self();
+
+        $builder->willGetOwnershipCollectionForMember(
+            $builder->makeOwnershipCollection(),
+            $screenName
+        );
+
+        $builder->willEnsureMemberHavingNameExists($memberRepository, $screenName);
+        $builder->willGetMembersInList(
+            self::LIST_ID,
+            MemberCollection::fromArray([
+                new MemberIdentity(
+                    self::PUBLISHERS_LIST_MEMBER_SCREEN_NAME,
+                    self::PUBLISHERS_LIST_MEMBER_TWITTER_ID
+                )
+            ])
+        );
+
+        return $builder->build();
     }
 }

@@ -2,19 +2,18 @@
 
 namespace App\Membership\Infrastructure\Repository;
 
-use App\Twitter\Infrastructure\PublishersList\Entity\MemberAggregateSubscription;
-use App\Twitter\Infrastructure\PublishersList\Repository\MemberAggregateSubscriptionRepository;
-use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
+use App\Membership\Domain\Model\MemberInterface;
+use App\Membership\Domain\Repository\PublishersListSubscriptionRepositoryInterface;
 use App\Membership\Infrastructure\Entity\AggregateSubscription;
 use App\Membership\Infrastructure\Entity\MemberSubscription;
-use App\Membership\Domain\Model\MemberInterface;
+use App\Twitter\Infrastructure\Api\Accessor;
+use App\Twitter\Infrastructure\PublishersList\Entity\MemberAggregateSubscription;
+use App\Twitter\Infrastructure\PublishersList\Repository\MemberAggregateSubscriptionRepository;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\EntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 use Psr\Log\LoggerInterface;
-use App\Twitter\Infrastructure\Api\Accessor;
 
-class AggregateSubscriptionRepository extends ServiceEntityRepository
+class AggregateSubscriptionRepository extends ServiceEntityRepository implements PublishersListSubscriptionRepositoryInterface
 {
     /**
      * @var Accessor
@@ -78,7 +77,6 @@ class AggregateSubscriptionRepository extends ServiceEntityRepository
     /**
      * @param AggregateSubscription $aggregateSubscription
      * @return AggregateSubscription
-     * @throws \Doctrine\ORM\OptimisticLockException
      */
     public function saveAggregateSubscription(AggregateSubscription $aggregateSubscription)
     {

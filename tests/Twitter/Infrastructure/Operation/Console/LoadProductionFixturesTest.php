@@ -47,7 +47,7 @@ class LoadProductionFixturesTest extends KernelTestCase
         $this->tokenRepository = $this->entityManager->getRepository(Token::class);
         $this->memberRepository = $this->entityManager->getRepository(Member::class);
 
-        $this->removeExistingFixtures();
+        $this->removeFixtures();
 
         $command = self::$container->get('test.'.LoadProductionFixtures::class);
 
@@ -136,12 +136,12 @@ class LoadProductionFixturesTest extends KernelTestCase
 
     protected function tearDown(): void
     {
-        $this->removeExistingFixtures();
+        $this->removeFixtures();
 
         parent::tearDown();
     }
 
-    private function removeExistingFixtures(): void
+    private function removeFixtures(): void
     {
         $this->entityManager->getConnection()->executeQuery('
             DELETE FROM weaving_access_token;
@@ -153,7 +153,7 @@ class LoadProductionFixturesTest extends KernelTestCase
             DELETE FROM weaving_user_token;
         ');
         $this->entityManager->getConnection()->executeQuery('
-            DELETE FROM weaving_user;
+            DELETE FROM weaving_user CASCADE;
         ');
     }
 }

@@ -5,7 +5,6 @@ namespace App\Membership\Infrastructure\Entity;
 use App\Membership\Domain\Model\MemberInterface;
 use App\Membership\Domain\Model\TwitterMemberInterface;
 use App\Membership\Infrastructure\Entity\Legacy\Member;
-use App\Twitter\Domain\Api\Model\TokenInterface;
 
 class NotFoundMember implements TwitterMemberInterface
 {

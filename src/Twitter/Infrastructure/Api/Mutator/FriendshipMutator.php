@@ -4,7 +4,7 @@ declare (strict_types=1);
 namespace App\Twitter\Infrastructure\Api\Mutator;
 
 use Abraham\TwitterOAuth\TwitterOAuthException;
-use App\Twitter\Domain\Resource\MemberCollection;
+use App\Twitter\Infrastructure\Api\Resource\MemberCollection;
 use App\Twitter\Domain\Resource\MemberIdentity;
 use App\Twitter\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;

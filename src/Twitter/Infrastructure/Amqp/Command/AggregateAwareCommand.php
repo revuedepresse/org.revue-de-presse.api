@@ -5,13 +5,12 @@ namespace App\Twitter\Infrastructure\Amqp\Command;
 
 use App\Twitter\Infrastructure\PublishersList\AggregateAwareTrait;
 use App\Twitter\Infrastructure\Api\Repository\PublishersListRepository;
-use App\Twitter\Infrastructure\Console\CommandReturnCodeAwareInterface;
 use Doctrine\ORM\EntityManager;
 
 /**
  * @package App\Twitter\Infrastructure\Amqp\Command
  */
-abstract class AggregateAwareCommand extends AccessorAwareCommand implements CommandReturnCodeAwareInterface
+abstract class AggregateAwareCommand extends AccessorAwareCommand
 {
     use AggregateAwareTrait;
 

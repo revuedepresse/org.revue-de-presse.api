@@ -17,4 +17,6 @@ interface OwnershipBatchCollectedEventRepositoryInterface
         MemberOwnershipsAccessorInterface $accessor,
         ListSelectorInterface $selector
     ): OwnershipCollectionInterface;
+
+    public function byScreenName(string $screenName): OwnershipCollectionInterface;
 }

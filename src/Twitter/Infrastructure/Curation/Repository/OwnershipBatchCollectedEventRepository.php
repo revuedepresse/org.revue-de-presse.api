@@ -4,16 +4,26 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Curation\Repository;
 
 use App\Twitter\Domain\Api\MemberOwnershipsAccessorInterface;
-use App\Twitter\Infrastructure\Curation\Entity\OwnershipBatchCollectedEvent;
+use App\Twitter\Domain\Api\Selector\ListSelectorInterface;
+use App\Twitter\Domain\Curation\Exception\OwnershipBatchNotFoundException;
 use App\Twitter\Domain\Curation\Repository\OwnershipBatchCollectedEventRepositoryInterface;
+use App\Twitter\Domain\Resource\OwnershipCollection;
 use App\Twitter\Domain\Resource\OwnershipCollectionInterface;
 use App\Twitter\Domain\Resource\PublishersList;
+use App\Twitter\Infrastructure\Curation\Entity\OwnershipBatchCollectedEvent;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
-use App\Twitter\Domain\Api\Selector\ListSelectorInterface;
+use App\Twitter\Infrastructure\Operation\Correlation\CorrelationId;
+use Assert\Assert;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Throwable;
 use const JSON_THROW_ON_ERROR;
 
+/**
+ * @method OwnershipBatchCollectedEventRepositoryInterface|null find($id, $lockMode = null, $lockVersion = null)
+ * @method OwnershipBatchCollectedEventRepositoryInterface|null findOneBy(array $criteria, array $orderBy = null)
+ * @method OwnershipBatchCollectedEventRepositoryInterface[]    findAll()
+ * @method OwnershipBatchCollectedEventRepositoryInterface[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ */
 class OwnershipBatchCollectedEventRepository extends ServiceEntityRepository implements OwnershipBatchCollectedEventRepositoryInterface
 {
     use LoggerTrait;
@@ -100,5 +110,68 @@ class OwnershipBatchCollectedEventRepository extends ServiceEntityRepository imp
         );
 
         return $this->save($event);
+    }
+
+    public function byScreenName(string $screenName): OwnershipCollectionInterface
+    {
+        $connection = $this->getEntityManager()->getConnection();
+
+        $query =<<<QUERY
+            SELECT correlation_id
+            FROM ownership_batch_collected_event e,
+            (
+                SELECT 
+                max(occurred_at) most_recent_occurrence_date,
+                screen_name
+                FROM ownership_batch_collected_event
+                WHERE screen_name = :screen_name
+                AND payload IS NOT NULL
+                GROUP BY screen_name 
+            ) _subquery
+            WHERE (e.occurred_at, e.screen_name) IN ((
+                _subquery.most_recent_occurrence_date,
+                _subquery.screen_name
+            )) and payload IS NOT NULL
+QUERY
+;
+        $statement = $connection->executeQuery($query, ['screen_name' => $screenName]);
+        $record = $statement->fetchAssociative();
+
+        if (!empty($record)) {
+            $batches = $this->findBy(['correlationId' => CorrelationId::fromString($record['correlation_id'])]);
+            $lists = array_map(
+                static function (OwnershipBatchCollectedEvent $event) {
+                    $decodedPayload = json_decode(
+                        $event->payload(),
+                        true,
+                        512,
+                        JSON_THROW_ON_ERROR
+                    );
+
+                    Assert::lazy()
+                        ->that($decodedPayload)->isArray()
+                        ->that($decodedPayload)->keyExists('response')
+                        ->that($decodedPayload['response'])->isArray()
+                    ->tryAll();
+
+                    return array_map(
+                        static fn ($publishersList) => new PublishersList($publishersList['id'], $publishersList['name']),
+                        $decodedPayload['response']
+                    );
+                },
+                $batches,
+            );
+
+            $mergedLists = array_merge([], ...$lists);
+
+            usort(
+                $mergedLists,
+                static fn (PublishersList $leftList, PublishersList $rightList) => $leftList->id() <=> $rightList->id()
+            );
+
+            return OwnershipCollection::fromArray($mergedLists);
+        }
+
+        OwnershipBatchNotFoundException::throws($screenName);
     }
 }

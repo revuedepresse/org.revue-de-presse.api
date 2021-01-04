@@ -68,14 +68,14 @@ class AuthorizeApplicationCommand extends AbstractCommand implements SignalableC
         } catch (InterruptedConsoleCommandException $exception) {
             $this->output->writeln('Quitting now. Bye.');
 
-            return self::RETURN_STATUS_SUCCESS;
+            return self::SUCCESS;
         } catch (\Throwable $exception) {
             $this->logger->error($exception);
 
-            return self::RETURN_STATUS_FAILURE;
+            return self::FAILURE;
         }
 
-        return self::RETURN_STATUS_SUCCESS;
+        return self::SUCCESS;
     }
 
     public function getSubscribedSignals(): array

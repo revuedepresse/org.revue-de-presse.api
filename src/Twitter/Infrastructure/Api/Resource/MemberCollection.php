@@ -1,13 +1,16 @@
 <?php
+
 declare(strict_types=1);
 
-namespace App\Twitter\Domain\Resource;
+namespace App\Twitter\Infrastructure\Api\Resource;
 
+use App\Twitter\Domain\Api\Resource\MemberCollectionInterface;
 use App\Twitter\Domain\Operation\Collection\StrictCollectionInterface;
+use App\Twitter\Domain\Resource\MemberIdentity;
 use Closure;
 use function count;
 
-class MemberCollection implements StrictCollectionInterface
+class MemberCollection implements MemberCollectionInterface
 {
     private array $members;
 

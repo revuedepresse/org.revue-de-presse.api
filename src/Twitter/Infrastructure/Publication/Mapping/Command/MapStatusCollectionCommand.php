@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Twitter\Infrastructure\Publication\Mapping\Command;
 
 use App\Twitter\Domain\Publication\Repository\StatusRepositoryInterface;
-use App\Twitter\Infrastructure\Console\CommandReturnCodeAwareInterface;
 use App\Twitter\Infrastructure\Publication\Mapping\RefreshStatusMapping;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Console\Command\Command;
@@ -13,7 +12,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class MapStatusCollectionCommand extends Command implements CommandReturnCodeAwareInterface
+class MapStatusCollectionCommand extends Command
 {
     const OPTION_SCREEN_NAME = 'screen-name';
 
@@ -118,7 +117,7 @@ class MapStatusCollectionCommand extends Command implements CommandReturnCodeAwa
 
         $this->output->writeln($this->getSuccessMessage($mappedStatuses));
 
-        return self::RETURN_STATUS_SUCCESS;
+        return self::SUCCESS;
     }
 
     /**

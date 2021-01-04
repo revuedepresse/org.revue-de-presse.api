@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Recommendation\Command;
 
-use App\Twitter\Infrastructure\Console\CommandReturnCodeAwareInterface;
 use Doctrine\DBAL\DBALException;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Console\Command\Command;
@@ -11,7 +10,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class RecommendSubscriptionsCommand extends Command implements CommandReturnCodeAwareInterface
+class RecommendSubscriptionsCommand extends Command
 {
     const OPTION_REFERENCE_MEMBER = 'reference-member';
 

@@ -3,14 +3,13 @@
 namespace App\Twitter\Infrastructure\Publication\Command;
 
 use App\Twitter\Domain\Publication\Repository\StatusRepositoryInterface;
-use App\Twitter\Infrastructure\Console\CommandReturnCodeAwareInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class QueryPublicationCollectionCommand extends Command implements CommandReturnCodeAwareInterface
+class QueryPublicationCollectionCommand extends Command
 {
     const OPTION_SCREEN_NAME = 'screen-name';
 
@@ -74,7 +73,7 @@ class QueryPublicationCollectionCommand extends Command implements CommandReturn
 
         $this->output->writeln($this->getSuccessMessage($statusCollection));
 
-        return self::RETURN_STATUS_SUCCESS;
+        return self::SUCCESS;
     }
 
     /**
