@@ -121,4 +121,9 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
             'statuses' => $statuses,
         ];
     }
+
+    public function getFallbackPublishersListFingerprint(): string
+    {
+        return sha1($this->defaultPublishersList);
+    }
 }

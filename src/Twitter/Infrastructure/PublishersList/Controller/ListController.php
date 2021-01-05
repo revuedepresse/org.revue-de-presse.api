@@ -272,6 +272,7 @@ class ListController
             ';'
             , [
                 $prefix,
+                $this->popularPublicationRepository->getFallbackPublishersListFingerprint(),
                 $searchParams->getParams()['startDate']->format('Y-m-d H'),
                 $searchParams->getParams()['endDate']->format('Y-m-d H'),
                 implode(',', $sortedSelectedAggregates),

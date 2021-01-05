@@ -2019,6 +2019,8 @@ class Accessor implements ApiAccessorInterface, TwitterErrorAwareInterface
                 );
 
                 break;
+            } catch (ApiRateLimitingException $exception) {
+                $content = $fetchContent($endpoint);
             } catch (OverCapacityException $exception) {
                 $this->logger->info(
                     sprintf(

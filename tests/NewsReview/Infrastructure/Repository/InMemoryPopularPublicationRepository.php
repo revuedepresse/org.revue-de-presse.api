@@ -21,4 +21,9 @@ class InMemoryPopularPublicationRepository implements PopularPublicationReposito
     {
         return $this->highlights;
     }
+
+    public function getFallbackPublishersListFingerprint(): string
+    {
+        return sha1('fallback');
+    }
 }
