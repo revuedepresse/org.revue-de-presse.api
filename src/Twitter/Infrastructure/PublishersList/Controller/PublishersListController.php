@@ -86,7 +86,7 @@ class PublishersListController
         }
 
         $publishersLists = $this->publishersListRepository
-            ->getAllPublishersLists($request);
+            ->allPublishersLists($request);
 
         return new JsonResponse(
             $publishersLists,

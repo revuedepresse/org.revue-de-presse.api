@@ -271,4 +271,5 @@ services:
             - '%publishers_list_default%'
             - '@repository.highlight'
             - '@App\Twitter\Domain\Publication\Repository\PublishersListRepositoryInterface'
+            - '@App\NewsReview\Domain\Repository\PublishersListRouteRepositoryInterface'
             - '@logger'

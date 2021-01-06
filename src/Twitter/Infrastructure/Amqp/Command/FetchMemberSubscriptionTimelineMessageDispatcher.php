@@ -177,7 +177,7 @@ class FetchMemberSubscriptionTimelineMessageDispatcher extends AggregateAwareCom
 
         $this->guardAgainstMembersWhichShouldBeSkipped($member, $screenName);
 
-        $aggregate = $this->getListAggregateByName($twitterUsername, 'user :: ' . $twitterUsername);
+        $aggregate = $this->byName($twitterUsername, 'user :: ' . $twitterUsername);
 
         $messageBody['aggregate_id'] = $aggregate->getId();
         $messageBody['screen_name'] = $twitterUsername;

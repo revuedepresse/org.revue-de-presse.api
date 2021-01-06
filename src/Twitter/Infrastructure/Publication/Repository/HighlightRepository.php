@@ -80,7 +80,7 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
         $results = $queryBuilder->getQuery()->getArrayResult();
 
         return [
-            'aggregates' => $this->selectDistinctAggregates($searchParams),
+            'links' => $this->selectDistinctAggregates($searchParams),
             'statuses' => $this->mapStatuses($searchParams, $results),
         ];
     }

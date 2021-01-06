@@ -22,7 +22,7 @@ class Tag
 
     public function name(): string
     {
-        return $this->tag->getName();
+        return $this->tag->name();
     }
 
     public function tag(): PublishersList

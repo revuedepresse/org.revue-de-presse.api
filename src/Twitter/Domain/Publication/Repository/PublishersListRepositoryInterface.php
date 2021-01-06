@@ -14,9 +14,15 @@ use Symfony\Component\HttpFoundation\Request;
  */
 interface PublishersListRepositoryInterface
 {
-    public function getAllPublishersLists(
-        Request $request
-    );
+    public function allPublishersLists(Request $request): array;
+
+    public function publicPublishersList(): array;
+
+    public function byName(
+        string $screenName,
+        string $listName,
+        ?string $listId = null
+    ): PublishersListInterface;
 
     public function make(string $screenName, string $listName);
 

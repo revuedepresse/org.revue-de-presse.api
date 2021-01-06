@@ -43,12 +43,14 @@ services:
         factory: ['App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\ApiAccessorBuilder', 'willAllowPublishersListToBeImportedForMemberHavingScreenName']
         arguments:
             - '@App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface'
+            - '@logger'
             - !php/const App\Tests\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommandTest::SCREEN_NAME
 
     App\Membership\Domain\Repository\NetworkRepositoryInterface:
         factory: ['App\Tests\Membership\Builder\Repository\NetworkRepositoryBuilder', 'build']
         arguments:
             - '@App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface'
+            - '@logger'
 
     test.App\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommand:
         '@App\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommand'
@@ -58,3 +60,6 @@ services:
 
     test.App\Twitter\Domain\Curation\Repository\OwnershipBatchCollectedEventRepositoryInterface:
         '@App\Twitter\Domain\Curation\Repository\OwnershipBatchCollectedEventRepositoryInterface'
+
+    test.App\NewsReview\Infrastructure\Routing\Console\ExposePublishersListCommand:
+        '@App\NewsReview\Infrastructure\Routing\Console\ExposePublishersListCommand'

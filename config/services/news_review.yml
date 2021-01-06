@@ -1,0 +1,29 @@
+services:
+    App\NewsReview\Infrastructure\Repository\PublishersListRepository:
+        class: 'App\NewsReview\Infrastructure\Repository\PublishersListRepository'
+        arguments:
+            - '@App\Twitter\Domain\Publication\Repository\PublishersListRepositoryInterface'
+
+    App\NewsReview\Domain\Repository\PublishersListRepositoryInterface:
+        '@App\NewsReview\Infrastructure\Repository\PublishersListRepository'
+
+    App\NewsReview\Infrastructure\Repository\PublishersListRouteRepository:
+        class: 'App\NewsReview\Infrastructure\Repository\PublishersListRouteRepository'
+        arguments:
+            - '@Doctrine\Common\Persistence\ManagerRegistry'
+            - 'App\NewsReview\Infrastructure\Routing\Entity\PublishersListRoute'
+        tags:
+            - { name: 'doctrine.repository_service' }
+
+    App\NewsReview\Domain\Repository\PublishersListRouteRepositoryInterface:
+        '@App\NewsReview\Infrastructure\Repository\PublishersListRouteRepository'
+
+    App\NewsReview\Infrastructure\Routing\Console\ExposePublishersListCommand:
+        class: 'App\NewsReview\Infrastructure\Routing\Console\ExposePublishersListCommand'
+        arguments:
+            - !php/const 'App\NewsReview\Infrastructure\Routing\Console\ExposePublishersListCommand::COMMAND_NAME'
+            - '@App\NewsReview\Domain\Repository\PublishersListRepositoryInterface'
+            - '@App\NewsReview\Domain\Repository\PublishersListRouteRepositoryInterface'
+            - '@logger'
+        tags:
+            - { name: 'console.command' }

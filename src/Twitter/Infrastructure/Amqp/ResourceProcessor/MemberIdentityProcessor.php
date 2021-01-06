@@ -122,7 +122,7 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
         MemberFacingStrategy::guardAgainstSuspendedMember($member, $memberIdentity);
 
         $FetchMemberStatus = FetchMemberStatus::makeMemberIdentityCard(
-            $this->aggregateRepository->getListAggregateByName(
+            $this->aggregateRepository->byName(
                 $member->twitterScreenName(),
                 $list->name(),
                 $list->id()

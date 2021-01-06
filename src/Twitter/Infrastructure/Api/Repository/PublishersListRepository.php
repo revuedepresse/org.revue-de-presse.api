@@ -28,6 +28,7 @@ use Doctrine\ORM\QueryBuilder;
 use Exception;
 use stdClass;
 use Symfony\Component\HttpFoundation\Request;
+use Throwable;
 use function array_map;
 use function array_sum;
 
@@ -178,34 +179,26 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
         return $aggregates;
     }
 
-    /**
-     * @param string      $screenName
-     * @param string      $listName
-     * @param string|null $listId
-     *
-     * @return PublishersListInterface|object|null
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
-    public function getListAggregateByName(
+    public function byName(
         string $screenName,
         string $listName,
-        string $listId = null
-    ) {
-        $aggregate = $this->make(
+        ?string $listId = null
+    ): PublishersListInterface
+    {
+        $publishersList = $this->make(
             $screenName,
             $listName
         );
 
-        $this->getEntityManager()->persist($aggregate);
+        $this->getEntityManager()->persist($publishersList);
 
         if ($listId !== null) {
-            $aggregate->listId = $listId;
+            $publishersList->listId = $listId;
         }
 
         $this->getEntityManager()->flush();
 
-        return $aggregate;
+        return $publishersList;
     }
 
     /**
@@ -341,7 +334,7 @@ QUERY;
         array_walk(
             $aggregates,
             function (PublishersListInterface $aggregate) {
-                $aggregate->totalStatuses = 0;
+                $aggregate->setTotalStatus(0);
 
                 $this->getEntityManager()->persist($aggregate);
                 $this->getEntityManager()->flush();
@@ -647,10 +640,10 @@ QUERY;
         return $aggregate;
     }
 
-    public function getAllPublishersLists(Request $request = null): array {
+    public function allPublishersLists(Request $request = null): array {
         $connection = $this->getEntityManager()->getConnection();
 
-        $getMemberSubscription = <<<'QUERY'
+        $getMemberSubscription = <<<QUERY
             SELECT 
             id,
             name,
@@ -669,5 +662,29 @@ QUERY;
         );
 
         return $statement->fetchAllAssociative();
+    }
+
+    public function publicPublishersList(): array
+    {
+        try {
+            $connection = $this->getEntityManager()->getConnection();
+
+            $findPublicPublishersList = <<<QUERY
+                SELECT DISTINCT name as name, list_id as id
+                FROM 
+                publishers_list l,
+                publishers_list_route r
+                WHERE r.public_id = l.public_id
+                GROUP BY name, list_id
+    QUERY;
+
+            $statement = $connection->executeQuery($findPublicPublishersList);
+
+            return $statement->fetchAllAssociative();
+        } catch (Throwable $e) {
+            $this->logger->error($e->getMessage(), ['exception' => $e]);
+
+            return [];
+        }
     }
 }

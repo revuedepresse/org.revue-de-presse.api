@@ -4,8 +4,9 @@ declare (strict_types=1);
 namespace App\NewsReview\Infrastructure\Repository;
 
 use App\NewsReview\Domain\Repository\PopularPublicationRepositoryInterface;
+use App\NewsReview\Domain\Repository\PublishersListRouteRepositoryInterface;
 use App\NewsReview\Domain\Repository\SearchParamsInterface;
-use App\NewsReview\Exception\UnknownPublishersListException;
+use App\NewsReview\Domain\Exception\UnknownPublishersListException;
 use App\Twitter\Domain\Publication\PublishersListInterface;
 use App\Twitter\Domain\Publication\Repository\PublishersListRepositoryInterface;
 use App\Twitter\Infrastructure\Publication\Repository\HighlightRepository;
@@ -26,6 +27,8 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
 
     private PublishersListRepositoryInterface $publishersListRepository;
 
+    private PublishersListRouteRepositoryInterface $publishersListRouteRepository;
+
     private string $defaultPublishersList;
 
     public function __construct(
@@ -34,6 +37,7 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
         string $defaultPublishersList,
         HighlightRepository $highlightRepository,
         PublishersListRepositoryInterface $publishersListRepository,
+        PublishersListRouteRepositoryInterface $publishersListRouteRepository,
         LoggerInterface $logger
     )
     {
@@ -43,6 +47,7 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
 
         $this->highlightRepository = $highlightRepository;
         $this->publishersListRepository = $publishersListRepository;
+        $this->publishersListRouteRepository = $publishersListRouteRepository;
         $this->logger = $logger;
     }
 
@@ -91,7 +96,7 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
              );
         } catch (UnknownPublishersListException $exception) {
             return [
-                'aggregates' => [],
+                'links' => [],
                 'statuses' => [],
             ];
         }
@@ -102,7 +107,7 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
         }
 
         $highlights = array_reverse($col);
-        $highlights = array_map(function (array $highlight) {
+        $highlights = array_map(static function (array $highlight) {
             return [
                 'original_document' => $highlight['json'],
                 'id' => $highlight['id'],
@@ -116,8 +121,10 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
 
         $statuses = $this->highlightRepository->mapStatuses($searchParams, $highlights);
 
+        $publicationsListsRoutes = $this->publishersListRouteRepository->allPublishersRoutes();
+
         return [
-            'aggregates' => [],
+            'links' => $publicationsListsRoutes->toArray(),
             'statuses' => $statuses,
         ];
     }

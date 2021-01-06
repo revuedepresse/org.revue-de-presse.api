@@ -317,10 +317,13 @@ function run_php_script() {
     if [ -z "${interactive_mode}" ];
     then
         command="$(echo -n 'cd provisioning/containers && \
-        docker-compose --project-name='"${project_name}""${override_option}"' run -T --rm --name='"${container_name}"' '"${option_detached}"'worker '"${script}")"
+        docker-compose --project-name='"${project_name}""${override_option}"' \
+        run -e '"${symfony_environment}"' -T --rm \
+        --name='"${container_name}"' '"${option_detached}"'worker '"${script}")"
     else
         command="$(echo -n 'cd provisioning/containers && \
-        docker-compose --project-name='"${project_name}""${override_option}"' exec '"${option_detached}"'worker '"${script}")"
+        docker-compose --project-name='"${project_name}""${override_option}"' \
+        exec -e '"${symfony_environment}"' '"${option_detached}"'worker '"${script}")"
     fi
 
     echo 'About to execute "'"${command}"'"'

@@ -7,9 +7,11 @@ use Ramsey\Uuid\UuidInterface;
 
 interface PublishersListInterface
 {
+    public function setTotalStatus(int $totalStatus): self;
+
     public function totalStatus(): int;
 
-    public function setTotalStatus(int $totalStatus): self;
+    public function name(): string;
 
     public function publicId(): UuidInterface;
 }

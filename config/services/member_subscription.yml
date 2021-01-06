@@ -33,7 +33,7 @@ services:
     App\Twitter\Infrastructure\Subscription\Console\ListSubscriptionsToPublishersListsCommand:
         class: 'App\Twitter\Infrastructure\Subscription\Console\ListSubscriptionsToPublishersListsCommand'
         arguments:
-            - !php/const App\Twitter\Infrastructure\Subscription\Console\ListSubscriptionsToPublishersListsCommand::COMMAND_NAME
+            - !php/const 'App\Twitter\Infrastructure\Subscription\Console\ListSubscriptionsToPublishersListsCommand::COMMAND_NAME'
             - '@App\Twitter\Domain\Curation\Repository\OwnershipBatchCollectedEventRepositoryInterface'
             - '@logger'
         tags:
@@ -42,7 +42,7 @@ services:
     App\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommand:
         class: 'App\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommand'
         arguments:
-            - !php/const App\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommand::COMMAND_NAME
+            - !php/const 'App\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommand::COMMAND_NAME'
             - '@App\Twitter\Domain\Api\Accessor\ApiAccessorInterface'
             - '@App\Membership\Domain\Repository\PublishersListSubscriptionRepositoryInterface'
             - '@App\Twitter\Infrastructure\PublishersList\Repository\MemberAggregateSubscriptionRepository'

@@ -91,7 +91,7 @@ class ConversationStatusConsumer
 
             $member = $this->ensureStatusAuthorExists($status);
 
-            $aggregate = $this->aggregateRepository->getListAggregateByName($member->twitterScreenName(), $options['aggregate_name']);
+            $aggregate = $this->aggregateRepository->byName($member->twitterScreenName(), $options['aggregate_name']);
         } catch (NotFoundMemberException $notFoundMemberException) {
             [$aggregate, $status] = $this->handleMemberNotFoundException($notFoundMemberException, $options);
         } catch (NotFoundStatusException $exception) {
@@ -164,7 +164,7 @@ class ConversationStatusConsumer
         array $options
     ): array {
         $member = $this->statusAccessor->ensureMemberHavingNameExists($notFoundMemberException->screenName);
-        $aggregate = $this->getListAggregateByName($member->twitterScreenName(), $options['aggregate_name']);
+        $aggregate = $this->byName($member->twitterScreenName(), $options['aggregate_name']);
         $status = $this->statusAccessor->refreshStatusByIdentifier(
             $options['status_id'],
             $skipExistingStatus = false,

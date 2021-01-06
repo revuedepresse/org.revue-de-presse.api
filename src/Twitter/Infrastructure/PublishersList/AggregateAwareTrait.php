@@ -12,7 +12,7 @@ trait AggregateAwareTrait
      * @param string|null $listId
      * @return mixed
      */
-    protected function getListAggregateByName(
+    protected function byName(
         string $screenName,
         string $listName,
         string $listId = null

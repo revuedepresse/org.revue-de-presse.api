@@ -13,10 +13,13 @@ use App\Twitter\Domain\Resource\MemberIdentity;
 use App\Twitter\Domain\Resource\OwnershipCollection;
 use App\Twitter\Domain\Resource\OwnershipCollectionInterface;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
+use PDOException;
 use Prophecy\Argument;
 use Prophecy\Prophecy\ObjectProphecy;
 use Prophecy\Prophet;
+use Psr\Log\LoggerInterface;
 use stdClass;
+use Throwable;
 
 class ApiAccessorBuilder
 {
@@ -154,15 +157,24 @@ class ApiAccessorBuilder
 
     public function willEnsureMemberHavingNameExists(
         MemberRepositoryInterface $memberRepository,
+        LoggerInterface $logger,
         string $screenName
     ): self {
         $member = MemberBuilder::build($screenName);
 
-        $existingMember = $memberRepository->findOneBy(['twitterID' => $member->twitterId()]);
-        if ($existingMember instanceof MemberInterface) {
-            $member = $existingMember;
-        } else {
-            $member = $memberRepository->saveMember($member);
+        try {
+            $existingMember = $memberRepository->findOneBy(['twitterID' => $member->twitterId()]);
+            if ($existingMember instanceof MemberInterface) {
+                $member = $existingMember;
+            } else {
+                $member = $memberRepository->saveMember($member);
+            }
+        } catch (Throwable $e) {
+            if ($e instanceof PDOException) {
+                $logger->error($e->getMessage(), ['exception' => $e]);
+            }
+
+            return $this;
         }
 
         $this->prophecy
@@ -174,6 +186,7 @@ class ApiAccessorBuilder
 
     public static function willAllowPublishersListToBeImportedForMemberHavingScreenName(
         MemberRepositoryInterface $memberRepository,
+        LoggerInterface $logger,
         string $screenName
     )
     {
@@ -184,7 +197,7 @@ class ApiAccessorBuilder
             $screenName
         );
 
-        $builder->willEnsureMemberHavingNameExists($memberRepository, $screenName);
+        $builder->willEnsureMemberHavingNameExists($memberRepository, $logger, $screenName);
         $builder->willGetMembersInList(
             self::LIST_ID,
             MemberCollection::fromArray([

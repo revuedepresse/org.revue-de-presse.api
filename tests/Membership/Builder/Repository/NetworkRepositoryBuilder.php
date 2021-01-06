@@ -9,20 +9,32 @@ use App\Membership\Infrastructure\Repository\NetworkRepository;
 use App\Tests\Membership\Builder\Entity\Legacy\MemberBuilder;
 use App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\ApiAccessorBuilder;
 use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
+use PDOException;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 use Prophecy\Prophecy\ObjectProphecy;
+use Psr\Log\LoggerInterface;
+use Throwable;
 
 class NetworkRepositoryBuilder extends TestCase
 {
-    public static function build(MemberRepositoryInterface $repository)
+    public static function build(MemberRepositoryInterface $repository, LoggerInterface $logger)
     {
         $testCase = new self();
 
-        $member = self::ensureMembersExistsInDatabase($repository);
-
         /** @var NetworkRepositoryInterface|ObjectProphecy $prophecy */
         $prophecy = $testCase->prophesize(NetworkRepository::class);
+
+        try {
+            $member = self::ensureMembersExistsInDatabase($repository);
+        } catch (Throwable $e) {
+            if ($e instanceof PDOException) {
+                $logger->error($e->getMessage(), ['exception' => $e]);
+            }
+
+            return $prophecy->reveal();
+        }
+
         $prophecy->ensureMemberExists(Argument::type('string'))
             ->willReturn($member);
 

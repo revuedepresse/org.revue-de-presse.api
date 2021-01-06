@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Membership\Repository;
 
+use App\Twitter\Domain\Publication\PublishersListInterface;
 use App\Twitter\Infrastructure\PublishersList\Repository\PaginationAwareTrait;
 use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use App\Twitter\Infrastructure\Api\Repository\PublishersListRepository;
@@ -872,11 +873,13 @@ QUERY;
                         ['id' => (int) $aggregate['id']]
                     );
 
-                    $this->aggregateRepository->updateTotalStatuses(
-                        $aggregate,
-                        $matchingAggregate
-                    );
-                    $aggregate['totalStatuses'] = $matchingAggregate->totalStatuses;
+                    if ($matchingAggregate instanceof PublishersListInterface) {
+                        $this->aggregateRepository->updateTotalStatuses(
+                            $aggregate,
+                            $matchingAggregate
+                        );
+                        $aggregate['totalStatuses'] = $matchingAggregate->totalStatus();
+                    }
                 }
 
                 return $aggregate;

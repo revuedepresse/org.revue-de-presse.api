@@ -53,7 +53,7 @@ class TimelyStatus implements TimeRangeAwareInterface
         $this->aggregate = $aggregate;
         $this->publicationDateTime = $publicationDateTime;
 
-        $this->aggregateName = $this->aggregate->getName();
+        $this->aggregateName = $this->aggregate->name();
         $this->memberName = $status->getScreenName();
 
         $this->updateTimeRange();
@@ -62,7 +62,7 @@ class TimelyStatus implements TimeRangeAwareInterface
     public function updateAggregate(PublishersList $aggregate)
     {
         $this->aggregate = $aggregate;
-        $this->aggregateName = $aggregate->getName();
+        $this->aggregateName = $aggregate->name();
 
         $this->updateTimeRange();
     }

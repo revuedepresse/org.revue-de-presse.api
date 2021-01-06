@@ -39,7 +39,7 @@ services:
     App\Twitter\Infrastructure\Api\Security\Authorization\Console\AuthorizeApplicationCommand:
         class: 'App\Twitter\Infrastructure\Api\Security\Authorization\Console\AuthorizeApplicationCommand'
         arguments:
-            - !php/const App\Twitter\Infrastructure\Api\Security\Authorization\Console\AuthorizeApplicationCommand::COMMAND_NAME
+            - !php/const 'App\Twitter\Infrastructure\Api\Security\Authorization\Console\AuthorizeApplicationCommand::COMMAND_NAME'
             - '@App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface'
             - '@App\Twitter\Domain\Api\Security\Authorization\AuthorizeAccessInterface'
             - '@App\Twitter\Domain\Api\Accessor\MemberProfileAccessorInterface'

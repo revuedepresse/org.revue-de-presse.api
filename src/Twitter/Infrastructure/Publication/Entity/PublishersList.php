@@ -16,7 +16,7 @@ use Ramsey\Uuid\Rfc4122\UuidV5;
 use Ramsey\Uuid\UuidInterface;
 
 /**
- * @ORM\Entity
+ * @ORM\Entity(repositoryClass="App\Twitter\Infrastructure\Api\Repository\PublishersListRepository")
  * @ORM\Table(
  *     name="publishers_list",
  *     indexes={
@@ -52,6 +52,11 @@ class PublishersList implements PublishersListInterface
      * @ORM\Column(name="name", type="string", length=255)
      */
     protected string $name;
+
+    public function name(): string
+    {
+        return $this->name;
+    }
 
     /**
      * @var string
@@ -96,7 +101,7 @@ class PublishersList implements PublishersListInterface
      */
     public int $totalMembers = 0;
 
-    public function setTotalMembers(int $totalMembers): self
+    public function setTotalMembers(int $totalMembers): PublishersListInterface
     {
         $this->totalMembers = $totalMembers;
 
@@ -104,18 +109,16 @@ class PublishersList implements PublishersListInterface
     }
 
     /**
-     * @deprecated in favor of setter / getter
-     *
      * @ORM\Column(name="total_statuses", type="integer", options={"default": 0})
      */
-    public int $totalStatuses = 0;
+    private int $totalStatuses = 0;
 
     public function totalStatus(): int
     {
         return $this->totalStatuses;
     }
 
-    public function setTotalStatus(int $totalStatus): self
+    public function setTotalStatus(int $totalStatus): PublishersListInterface
     {
         $this->totalStatuses = $totalStatus;
 
@@ -127,14 +130,14 @@ class PublishersList implements PublishersListInterface
      */
     private ?DateTimeInterface $deletedAt;
 
-    public function markAsDeleted(): self
+    public function markAsDeleted(): PublishersListInterface
     {
         $this->deletedAt = new DateTime('now', new DateTimeZone('UTC'));
 
         return $this;
     }
 
-    public function lock(): self
+    public function lock(): PublishersListInterface
     {
         $this->locked = true;
         $this->lockedAt = new DateTime('now', new DateTimeZone('UTC'));
@@ -143,7 +146,7 @@ class PublishersList implements PublishersListInterface
         return $this;
     }
 
-    public function unlock(): self
+    public function unlock(): PublishersListInterface
     {
         $this->locked = false;
         $this->lockedAt = null;
@@ -158,24 +161,11 @@ class PublishersList implements PublishersListInterface
     }
 
     /**
-     * @return string
-     */
-    public function getName(): string
-    {
-        return $this->name;
-    }
-
-    /**
      * @ORM\Column(name="created_at", type="datetime")
      */
     protected DateTimeInterface $createdAt;
 
-    /**
-     * Get createdAt
-     *
-     * @return DateTime
-     */
-    public function getCreatedAt()
+    public function getCreatedAt(): DateTimeInterface
     {
         return $this->createdAt;
     }

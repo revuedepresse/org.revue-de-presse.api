@@ -427,7 +427,7 @@ class ListController
             $response = $this->makeOkResponse([]);
             if ($request->getPathInfo() === $highlightUrl) {
                 $response = $this->makeOkResponse([
-                    'aggregates' => $this->highlightRepository->selectDistinctAggregates($searchParams),
+                    'links' => $this->highlightRepository->selectDistinctAggregates($searchParams),
                 ]);
             }
 
