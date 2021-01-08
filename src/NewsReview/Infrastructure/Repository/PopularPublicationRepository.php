@@ -4,7 +4,7 @@ declare (strict_types=1);
 namespace App\NewsReview\Infrastructure\Repository;
 
 use App\NewsReview\Domain\Repository\PopularPublicationRepositoryInterface;
-use App\NewsReview\Domain\Repository\PublishersListRouteRepositoryInterface;
+use App\NewsReview\Domain\Routing\Repository\PublishersListRouteRepositoryInterface;
 use App\NewsReview\Domain\Repository\SearchParamsInterface;
 use App\NewsReview\Domain\Exception\UnknownPublishersListException;
 use App\Twitter\Domain\Publication\PublishersListInterface;

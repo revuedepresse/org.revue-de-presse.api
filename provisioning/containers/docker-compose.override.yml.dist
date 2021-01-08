@@ -2,6 +2,9 @@ version: '3'
 services:
 
     reverse-proxy:
+        ports:
+            - "127.0.0.1:443:443"
+            - "127.0.0.1:8080:8080"
         networks:
             custom_network:
                 aliases:

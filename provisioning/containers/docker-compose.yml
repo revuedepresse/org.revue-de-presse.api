@@ -6,9 +6,6 @@ services:
         image: traefik:v2.3
         command:
             - "--configFile=/etc/traefik/traefik.toml"
-        ports:
-            - "127.0.0.1:443:443"
-            - "127.0.0.1:8080:8080"
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock
             - ./reverse-proxy/templates/traefik.toml:/etc/traefik/traefik.toml
@@ -28,13 +25,14 @@ services:
             - ../containers/apache/templates/blackfire/agent:/etc/blackfire/agent
             - ../../:/var/www/api
         depends_on:
+            - database
             - cache
             - worker
             - reverse-proxy
         labels:
             - "traefik.enable=true"
             - "traefik.docker.network=docker-network"
-            - "traefik.http.routers.web.rule=Host(`api.local.devobs.app`)"
+            - "traefik.http.routers.web.rule=Host(`api.devobs.me`)"
             - "traefik.http.routers.web.entrypoints=websecure"
 
     worker:

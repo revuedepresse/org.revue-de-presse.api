@@ -23,6 +23,9 @@ services:
     test.App\Twitter\Infrastructure\Subscription\Console\UnfollowInactiveMembersCommand: '@App\Twitter\Infrastructure\Subscription\Console\UnfollowInactiveMembersCommand'
     test.App\Twitter\Infrastructure\Api\Security\Authorization\Console\AuthorizeApplicationCommand: '@App\Twitter\Infrastructure\Api\Security\Authorization\Console\AuthorizeApplicationCommand'
 
+    test.App\NewsReview\Domain\Routing\Repository\PublishersListRouteRepositoryInterface:
+        '@App\NewsReview\Domain\Routing\Repository\PublishersListRouteRepositoryInterface'
+
     App\Twitter\Domain\Api\Accessor\MemberProfileAccessorInterface:
         factory: [ 'App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\MemberProfileAccessorBuilder', 'build' ]
 

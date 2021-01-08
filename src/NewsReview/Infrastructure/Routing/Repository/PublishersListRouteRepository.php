@@ -1,9 +1,9 @@
 <?php
 declare (strict_types=1);
 
-namespace App\NewsReview\Infrastructure\Repository;
+namespace App\NewsReview\Infrastructure\Routing\Repository;
 
-use App\NewsReview\Domain\Repository\PublishersListRouteRepositoryInterface;
+use App\NewsReview\Domain\Routing\Repository\PublishersListRouteRepositoryInterface;
 use App\NewsReview\Domain\Exception\PublishersListRouteAlreadyExposedException;
 use App\NewsReview\Domain\Routing\Model\RouteCollectionInterface;
 use App\NewsReview\Infrastructure\Routing\Collection\PublishersListRouteCollection;
@@ -46,7 +46,7 @@ class PublishersListRouteRepository extends ServiceEntityRepository implements P
 
     public function allPublishersRoutes(): RouteCollectionInterface
     {
-        return PublishersListRouteCollection::fromArray($this->findAll());
+        return PublishersListRouteCollection::fromArray($this->findBy([], ['hostname' => 'ASC']));
     }
 
     private function openPublishersListRouteAt(

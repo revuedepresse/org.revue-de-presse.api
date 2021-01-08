@@ -588,7 +588,7 @@ function generate_development_tls_certificate_and_key() {
     project_name="$(get_project_name)"
 
     local domain_name
-    domain_name="api.local.${project_name}.app"
+    domain_name="api.${project_name}.me"
 
     mkcert \
       -cert-file="${destination}/${domain_name}.pem" \

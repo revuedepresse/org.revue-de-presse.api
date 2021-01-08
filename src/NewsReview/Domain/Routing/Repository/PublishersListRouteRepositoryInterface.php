@@ -1,6 +1,6 @@
 <?php
 
-namespace App\NewsReview\Domain\Repository;
+namespace App\NewsReview\Domain\Routing\Repository;
 
 use App\NewsReview\Domain\Routing\Model\RouteCollectionInterface;
 use App\NewsReview\Domain\Routing\Model\RouteInterface;

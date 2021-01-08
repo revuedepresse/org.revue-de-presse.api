@@ -5,7 +5,7 @@ namespace App\NewsReview\Infrastructure\Routing\Console;
 
 use App\AbstractCommand;
 use App\NewsReview\Domain\Exception\PublishersListRouteAlreadyExposedException;
-use App\NewsReview\Domain\Repository\PublishersListRouteRepositoryInterface;
+use App\NewsReview\Domain\Routing\Repository\PublishersListRouteRepositoryInterface;
 use App\NewsReview\Domain\Exception\UnknownPublishersListException;
 use App\NewsReview\Domain\Repository\PublishersListRepositoryInterface;
 use Psr\Log\LoggerInterface;

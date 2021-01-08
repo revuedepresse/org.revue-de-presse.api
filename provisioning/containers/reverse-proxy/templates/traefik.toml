@@ -20,7 +20,7 @@ defaultEntryPoints = ["https"]
     address = ":443"
     [entryPoints.websecure.http.tls]
       [[entryPoints.websecure.http.tls.domains]]
-        main = "app.local.devobs.app"
+        main = "api.devobs.me"
 
 [providers]
   [providers.file]

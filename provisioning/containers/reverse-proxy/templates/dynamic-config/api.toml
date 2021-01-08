@@ -1,3 +1,3 @@
 [[tls.certificates]]
-  certFile = "/certificates/api.local.devobs.app.pem"
-  keyFile = "/certificates/api.local.devobs.app-key.pem"
+  certFile = "/certificates/api.devobs.me.pem"
+  keyFile = "/certificates/api.devobs.me-key.pem"

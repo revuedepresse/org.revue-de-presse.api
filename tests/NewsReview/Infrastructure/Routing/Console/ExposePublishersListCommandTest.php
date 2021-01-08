@@ -4,7 +4,7 @@ declare (strict_types=1);
 
 namespace App\Tests\NewsReview\Infrastructure\Routing\Console;
 
-use App\NewsReview\Domain\Repository\PublishersListRouteRepositoryInterface;
+use App\NewsReview\Domain\Routing\Repository\PublishersListRouteRepositoryInterface;
 use App\NewsReview\Infrastructure\Routing\Console\ExposePublishersListCommand;
 use App\NewsReview\Infrastructure\Routing\Entity\PublishersListRoute;
 use App\Twitter\Domain\Publication\Repository\PublishersListRepositoryInterface;
