@@ -4,16 +4,18 @@ declare(strict_types=1);
 namespace App\Twitter\Domain\Api\Accessor;
 
 use App\Membership\Domain\Model\MemberInterface;
-use App\Twitter\Domain\Api\MemberOwnershipsAccessorInterface;
 use App\Twitter\Domain\Api\Model\TokenInterface;
 use App\Twitter\Domain\Api\Resource\MemberCollectionInterface;
 use stdClass;
 
-interface ApiAccessorInterface extends MemberOwnershipsAccessorInterface
+interface ApiAccessorInterface
 {
-    public const MAX_OWNERSHIPS = 800;
-
     public function ensureMemberHavingNameExists(string $memberName): MemberInterface;
+
+    public function guardAgainstApiLimit(
+        string $endpoint,
+        bool $findNextAvailableToken = true
+    ): ?TokenInterface;
 
     public function getApiBaseUrl(): string;
 

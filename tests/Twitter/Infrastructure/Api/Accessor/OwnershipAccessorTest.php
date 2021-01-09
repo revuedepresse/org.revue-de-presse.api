@@ -21,7 +21,6 @@ use Psr\Log\NullLogger;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /**
- * @package App\Tests\Twitter\Api
  * @group   ownership
  */
 class OwnershipAccessorTest extends KernelTestCase
@@ -53,10 +52,8 @@ class OwnershipAccessorTest extends KernelTestCase
 
         $builder  = new ApiAccessorBuilder();
         $ownershipCollection = $builder->makeOwnershipCollection();
-        $accessor = $builder->willGetOwnershipCollectionForMember(
-            $ownershipCollection,
-            self::MEMBER_SCREEN_NAME
-        )->build();
+        $accessor = $builder->willGetOwnershipCollectionForMember($ownershipCollection)
+            ->build();
 
         $ownershipAccessor = new OwnershipAccessor(
             $accessor,
@@ -82,7 +79,6 @@ class OwnershipAccessorTest extends KernelTestCase
 
         // Assert
 
-        self::assertInstanceOf(MemberOwnerships::class, $ownerships);
         self::assertEquals($activeToken, $ownerships->token());
         self::assertEquals($ownershipCollection, $ownerships->ownershipCollection());
     }
@@ -100,7 +96,6 @@ class OwnershipAccessorTest extends KernelTestCase
         $ownershipCollection = $builder->makeOwnershipCollection();
         $accessor = $builder->willGetOwnershipCollectionAfterThrowingForMember(
             $ownershipCollection,
-            self::MEMBER_SCREEN_NAME
         )->build();
 
         $ownershipAccessor = new OwnershipAccessor(
@@ -134,7 +129,6 @@ class OwnershipAccessorTest extends KernelTestCase
             ]
         );
 
-        self::assertInstanceOf(MemberOwnerships::class, $ownerships);
         self::assertEquals($replacementToken, $ownerships->token());
         self::assertEquals($ownershipCollection, $ownerships->ownershipCollection());
     }
@@ -149,9 +143,8 @@ class OwnershipAccessorTest extends KernelTestCase
         // Arrange
 
         $builder  = new ApiAccessorBuilder();
-        $accessor = $builder->willThrowWhenGettingOwnershipCollectionForMember(
-            self::MEMBER_SCREEN_NAME
-        )->build();
+        $accessor = $builder->willThrowWhenGettingOwnershipCollectionForMember()
+            ->build();
 
         $ownershipAccessor = new OwnershipAccessor(
             $accessor,
@@ -182,7 +175,7 @@ class OwnershipAccessorTest extends KernelTestCase
             return;
         }
 
-        $this->fail('There should be a exception raised');
+        self::fail('There should be a exception raised');
     }
 
     /**

@@ -2,6 +2,8 @@
 
 namespace App\Membership\Infrastructure\Entity;
 
+use App\Membership\Domain\Model\MemberInterface;
+
 trait ExceptionalUserInterfaceTrait
 {
     private $exception;
@@ -55,5 +57,14 @@ trait ExceptionalUserInterfaceTrait
     public function setException(\Exception $exception)
     {
         return $this->exception = $exception;
+    }
+
+    public function setUsername(string $username): MemberInterface
+    {
+        return $this;
+    }
+
+    public function setEmail(string $email): MemberInterface {
+        return $this;
     }
 }

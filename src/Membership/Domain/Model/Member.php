@@ -139,7 +139,7 @@ abstract class Member implements MemberInterface
      * @param $usernameCanonical
      * @return $this
      */
-    public function setUsernameCanonical($usernameCanonical): self
+    public function setUsernameCanonical($usernameCanonical): MemberInterface
     {
         $this->usernameCanonical = $usernameCanonical;
 
@@ -166,7 +166,7 @@ abstract class Member implements MemberInterface
      * @param $email
      * @return $this
      */
-    public function setEmail(string $email): self
+    public function setEmail(string $email): MemberInterface
     {
         $this->email = $email;
 
@@ -202,7 +202,7 @@ abstract class Member implements MemberInterface
      * @param $username
      * @return $this
      */
-    public function setUsername($username): self
+    public function setUsername(string $username): MemberInterface
     {
         $this->username = $username;
 
@@ -213,7 +213,7 @@ abstract class Member implements MemberInterface
      * @param $emailCanonical
      * @return $this
      */
-    public function setEmailCanonical(string $emailCanonical): self
+    public function setEmailCanonical(string $emailCanonical): MemberInterface
     {
         $this->emailCanonical = $emailCanonical;
 
@@ -224,7 +224,7 @@ abstract class Member implements MemberInterface
      * @param bool $enabled
      * @return $this
      */
-    public function setEnabled(bool $enabled): self
+    public function setEnabled(bool $enabled): MemberInterface
     {
         $this->enabled = $enabled;
 

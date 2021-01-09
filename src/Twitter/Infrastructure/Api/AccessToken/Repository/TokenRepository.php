@@ -66,10 +66,8 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
         $token->setCreatedAt($now);
         $token->setUpdatedAt($now);
 
-        $tokenRepository = $this->getEntityManager()->getRepository('Api:TokenType');
-
         /** @var TokenType $tokenType */
-        $tokenType = $tokenRepository->findOneBy(['name' => TokenType::USER]);
+        $tokenType = $this->tokenTypeRepository->findOneBy(['name' => TokenType::USER]);
         $token->setType($tokenType);
 
         $token->setAccessToken($properties['oauth_token']);

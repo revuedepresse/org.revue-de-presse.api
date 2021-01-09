@@ -2,7 +2,7 @@ services:
     App\Twitter\Infrastructure\Identification\WhispererIdentification:
         class: 'App\Twitter\Infrastructure\Identification\WhispererIdentification'
         calls:
-            - [ 'setApiAccessor',                           [ '@App\Twitter\Infrastructure\Api\Accessor' ] ]
+            - [ 'setApiAccessor',                           [ '@App\Twitter\Domain\Api\Accessor\ApiAccessorInterface' ] ]
             - [ 'setMemberProfileCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository' ] ]
             - [ 'setStatusLogger',                          [ '@App\Twitter\Infrastructure\Log\StatusLogger' ] ]
             - [ 'setStatusRepository',                      [ '@App\Twitter\Infrastructure\Api\Repository\StatusRepository' ] ]

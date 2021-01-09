@@ -2,7 +2,7 @@ services:
     App\Twitter\Infrastructure\Collector\InterruptibleCollectDecider:
         class: 'App\Twitter\Infrastructure\Collector\InterruptibleCollectDecider'
         calls:
-            - [ 'setApiAccessor',                           [ '@App\Twitter\Infrastructure\Api\Accessor'] ]
+            - [ 'setApiAccessor',                           [ '@App\Twitter\Domain\Api\Accessor\ApiAccessorInterface'] ]
             - [ 'setLogger',                                [ '@logger' ] ]
             - [ 'setMemberProfileCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\MemberProfileCollectedEventRepository' ] ]
             - [ 'setMemberRepository',                      [ '@App\Twitter\Infrastructure\Membership\Repository\MemberRepository' ] ]

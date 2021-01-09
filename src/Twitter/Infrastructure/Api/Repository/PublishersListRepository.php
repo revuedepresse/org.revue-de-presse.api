@@ -9,6 +9,7 @@ use App\Twitter\Infrastructure\PublishersList\Entity\TimelyStatus;
 use App\Twitter\Infrastructure\PublishersList\Repository\PaginationAwareTrait;
 use App\Twitter\Domain\Api\Model\TokenInterface;
 use App\Twitter\Domain\Publication\PublishersListInterface;
+use App\Twitter\Domain\Resource\PublishersList as PublishersListResource;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Domain\Publication\Repository\PublishersListRepositoryInterface;
 use App\Twitter\Infrastructure\Publication\Entity\PublishersList;
@@ -64,20 +65,20 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
      */
     public function addMemberToList(
         MemberInterface $member,
-        stdClass $list
+        PublishersListResource $list
     ): PublishersListInterface {
         $aggregate = $this->findOneBy(
             [
-                'name'       => $list->name,
+                'name'       => $list->name(),
                 'screenName' => $member->twitterScreenName()
             ]
         );
 
         if (!($aggregate instanceof PublishersList)) {
-            $aggregate = $this->make($member->twitterScreenName(), $list->name);
+            $aggregate = $this->make($member->twitterScreenName(), $list->name());
         }
 
-        $aggregate->listId = $list->id_str;
+        $aggregate->listId = $list->id();
 
         return $this->save($aggregate);
     }

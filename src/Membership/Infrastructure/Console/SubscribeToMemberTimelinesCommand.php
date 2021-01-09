@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Membership\Infrastructure\Command;
+namespace App\Membership\Infrastructure\Console;
 
 use App\Twitter\Infrastructure\Api\Accessor\Exception\ReadOnlyApplicationException;
 use App\Twitter\Infrastructure\Console\AbstractCommand;

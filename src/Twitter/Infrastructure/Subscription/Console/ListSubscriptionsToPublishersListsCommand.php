@@ -4,6 +4,7 @@ declare (strict_types=1);
 namespace App\Twitter\Infrastructure\Subscription\Console;
 
 use App\Twitter\Domain\Curation\Exception\OwnershipBatchNotFoundException;
+use App\Twitter\Domain\Curation\Repository\OwnershipBatchCollectedEventRepositoryInterface;
 use App\Twitter\Domain\Resource\PublishersList;
 use App\Twitter\Infrastructure\Console\AbstractCommand;
 use App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository;
@@ -26,7 +27,7 @@ class ListSubscriptionsToPublishersListsCommand extends AbstractCommand
 
     public function __construct(
         $name,
-        OwnershipBatchCollectedEventRepository $repository,
+        OwnershipBatchCollectedEventRepositoryInterface $repository,
         LoggerInterface $logger
     ) {
         $this->repository = $repository;

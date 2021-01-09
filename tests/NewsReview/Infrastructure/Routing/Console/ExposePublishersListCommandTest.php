@@ -74,7 +74,7 @@ class ExposePublishersListCommandTest extends KernelTestCase
         self::assertEquals(
             $this->commandTester->getStatusCode(),
             $this->commandUnderTest::FAILURE,
-            'The status code of this command should be unsuccessful',
+            'The return code of this command execution should be unsuccessful.',
         );
 
         self::assertEquals(
@@ -152,7 +152,7 @@ class ExposePublishersListCommandTest extends KernelTestCase
         self::assertEquals(
             $this->commandTester->getStatusCode(),
             $this->commandUnderTest::FAILURE,
-            'The status code of this command should be unsuccessful',
+            'The return code of this command execution should be unsuccessful.',
         );
 
         self::assertEquals(

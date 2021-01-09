@@ -53,7 +53,7 @@ class UnfollowInactiveMembersCommandTest extends KernelTestCase
         self::assertEquals(
             $this->commandTester->getStatusCode(),
             $this->command::SUCCESS,
-            'The status code of a command should be successful',
+            'The return code of this command execution should be successful.',
         );
     }
 

@@ -131,7 +131,7 @@ services:
             - '@App\Twitter\Infrastructure\Translation\Translator'
         calls:
             - [ 'setModerator',                              [ '@App\Twitter\Infrastructure\Api\Moderator\ApiLimitModerator' ] ]
-            - [ 'setOwnershipAccessor',                      [ '@App\Twitter\Infrastructure\Api\Accessor\OwnershipAccessor' ] ]
+            - [ 'setOwnershipAccessor',                      [ '@App\Twitter\Domain\Api\Accessor\OwnershipAccessorInterface' ] ]
             - [ 'setOwnershipBatchCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository' ] ]
 
     App\Twitter\Infrastructure\Api\UnavailableResourceHandler:
@@ -189,6 +189,9 @@ services:
             - [ 'setStatusRepository',                          [ '@App\Twitter\Infrastructure\Api\Repository\StatusRepository' ] ]
             - [ 'setPublicationBatchCollectedEventRepository',  [ '@App\Twitter\Infrastructure\Curation\Repository\PublicationBatchCollectedEventRepository' ] ]
         public: true
+
+    App\Twitter\Domain\Api\Accessor\StatusAccessorInterface:
+        '@App\Twitter\Infrastructure\Api\Accessor\StatusAccessor'
 
     app.cache.redis:
         class: '%redis_cache.class%'

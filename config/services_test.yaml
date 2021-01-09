@@ -47,13 +47,27 @@ services:
         arguments:
             - '@App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface'
             - '@logger'
-            - !php/const App\Tests\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommandTest::SCREEN_NAME
+            - !php/const 'App\Tests\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommandTest::SCREEN_NAME'
+
+    App\Twitter\Domain\Api\Accessor\OwnershipAccessorInterface:
+        factory: ['App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\OwnershipAccessorBuilder', 'willAllowPublishersListToBeImportedForMemberHavingScreenName']
+
+    App\Twitter\Domain\Api\Accessor\StatusAccessorInterface:
+        factory: ['App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\StatusAccessorBuilder', 'willEnsureMemberHavingNameExists']
+        arguments:
+            - '@App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface'
+
+    App\Twitter\Domain\Api\Accessor\MembersListAccessorInterface:
+        factory: ['App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\MembersListAccessorBuilder', 'willAddMembersToList']
 
     App\Membership\Domain\Repository\NetworkRepositoryInterface:
         factory: ['App\Tests\Membership\Builder\Repository\NetworkRepositoryBuilder', 'build']
         arguments:
             - '@App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface'
             - '@logger'
+
+    test.App\Membership\Infrastructure\Console\AddMemberToPublishersListCommand:
+        '@App\Membership\Infrastructure\Console\AddMemberToPublishersListCommand'
 
     test.App\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommand:
         '@App\Twitter\Infrastructure\PublishersList\Console\ImportMemberPublishersListsCommand'

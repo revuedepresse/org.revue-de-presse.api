@@ -62,7 +62,6 @@ class FetchMemberSubscriptionTimelineMessageDispatcher extends AggregateAwareCom
         $this->input = $input;
         $this->output = $output;
 
-
         $this->setUpDependencies();
 
         $exceptionalMembers = 0;

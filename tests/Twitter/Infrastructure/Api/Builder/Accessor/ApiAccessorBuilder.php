@@ -8,10 +8,11 @@ use App\Tests\Membership\Builder\Entity\Legacy\MemberBuilder;
 use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
 use App\Twitter\Domain\Api\Selector\ListSelectorInterface;
 use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
-use App\Twitter\Infrastructure\Api\Resource\MemberCollection;
 use App\Twitter\Domain\Resource\MemberIdentity;
 use App\Twitter\Domain\Resource\OwnershipCollection;
 use App\Twitter\Domain\Resource\OwnershipCollectionInterface;
+use App\Twitter\Domain\Resource\PublishersList;
+use App\Twitter\Infrastructure\Api\Resource\MemberCollection;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
 use PDOException;
 use Prophecy\Argument;
@@ -46,6 +47,8 @@ class ApiAccessorBuilder
         $prophet = new Prophet();
 
         $this->prophecy = $prophet->prophesize(ApiAccessorInterface::class);
+        $this->prophecy->getApiBaseUrl()->willReturn('https://example.com');
+        $this->prophecy->guardAgainstApiLimit(Argument::type('string'))->willReturn(null);
     }
 
     public function build(): ApiAccessorInterface
@@ -94,43 +97,43 @@ class ApiAccessorBuilder
         return $this;
     }
 
-    public function willGetOwnershipCollectionForMember(
-        OwnershipCollectionInterface $ownershipCollection,
-        string $screenName
-    ): self {
+    public function willGetOwnershipCollectionForMember(OwnershipCollectionInterface $ownershipCollection): self {
         $this->prophecy
-            ->getMemberOwnerships(Argument::type(ListSelectorInterface::class))
+            ->contactEndpoint(Argument::type('string'))
             ->will(function ($arguments) use ($ownershipCollection) {
                 if ($arguments[0] instanceof ListSelectorInterface &&
                     $arguments[0]->cursor() !== '0'
                 ) {
-                    return $ownershipCollection;
+                    return (object) [
+                        'lists' => $ownershipCollection->toArray(),
+                        'next_cursor' => $ownershipCollection->nextPage()
+                    ];
                 }
 
-                return OwnershipCollection::fromArray([]);
+                return (object) [
+                    'lists' => $ownershipCollection->toArray(),
+                    'next_cursor' => $ownershipCollection->nextPage()
+                ];
             });
 
         return $this;
     }
 
-    public function willThrowWhenGettingOwnershipCollectionForMember(
-        string $screenName
-    ): self {
+    public function willThrowWhenGettingOwnershipCollectionForMember(): self {
         $this->prophecy
-            ->getMemberOwnerships(Argument::type(ListSelectorInterface::class))
+            ->contactEndpoint(Argument::type('string'))
             ->willThrow(new UnavailableResourceException());
 
         return $this;
     }
 
     public function willGetOwnershipCollectionAfterThrowingForMember(
-        OwnershipCollectionInterface $ownershipCollection,
-        string $screenName
+        OwnershipCollectionInterface $ownershipCollection
     ): self {
         static $calls = 0;
 
         $this->prophecy
-            ->getMemberOwnerships(Argument::type(ListSelectorInterface::class))
+            ->contactEndpoint(Argument::type('string'))
             ->will(function () use (&$calls, $ownershipCollection) {
                 if ($calls === 0) {
                     $calls++;
@@ -138,7 +141,19 @@ class ApiAccessorBuilder
                     throw new UnavailableResourceException();
                 }
 
-                return $ownershipCollection;
+                return (object) [
+                    'lists' => array_map(
+                        static function (PublishersList $list) {
+                            return (object) [
+                                'name' => $list->name(),
+                                'id' => (int) $list->id(),
+                                'id_str' => $list->id(),
+                            ];
+                        },
+                        $ownershipCollection->toArray()
+                    ),
+                    'next_cursor' => $ownershipCollection->nextPage()
+                ];
             });
 
         return $this;
@@ -194,7 +209,6 @@ class ApiAccessorBuilder
 
         $builder->willGetOwnershipCollectionForMember(
             $builder->makeOwnershipCollection(),
-            $screenName
         );
 
         $builder->willEnsureMemberHavingNameExists($memberRepository, $logger, $screenName);

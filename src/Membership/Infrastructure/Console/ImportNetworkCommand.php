@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Membership\Infrastructure\Command;
+namespace App\Membership\Infrastructure\Console;
 
 use App\Membership\Infrastructure\Repository\NetworkRepository;
 use OldSound\RabbitMqBundle\RabbitMq\ProducerInterface;

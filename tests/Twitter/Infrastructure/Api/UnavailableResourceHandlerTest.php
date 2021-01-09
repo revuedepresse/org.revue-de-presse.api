@@ -79,7 +79,7 @@ class UnavailableResourceHandlerTest extends TestCase
             return;
         }
 
-        $this->fail('An exception should have been thrown');
+        self::fail('An exception should have been thrown');
     }
 
     /**
@@ -126,7 +126,7 @@ class UnavailableResourceHandlerTest extends TestCase
             return;
         }
 
-        $this->fail('An exception should have been thrown');
+        self::fail('An exception should have been thrown');
     }
 
     /**
@@ -173,7 +173,7 @@ class UnavailableResourceHandlerTest extends TestCase
             return;
         }
 
-        $this->fail('An exception should have been thrown');
+        self::fail('An exception should have been thrown');
     }
 
     /**
@@ -219,6 +219,6 @@ class UnavailableResourceHandlerTest extends TestCase
             return;
         }
 
-        $this->fail('An exception should have been thrown');
+        self::fail('An exception should have been thrown');
     }
 }

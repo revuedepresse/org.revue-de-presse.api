@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Curation\Repository;
 
-use App\Twitter\Domain\Api\MemberOwnershipsAccessorInterface;
+use App\Twitter\Domain\Api\Accessor\OwnershipAccessorInterface;
 use App\Twitter\Domain\Api\Selector\ListSelectorInterface;
 use App\Twitter\Domain\Curation\Exception\OwnershipBatchNotFoundException;
 use App\Twitter\Domain\Curation\Repository\OwnershipBatchCollectedEventRepositoryInterface;
@@ -29,7 +29,7 @@ class OwnershipBatchCollectedEventRepository extends ServiceEntityRepository imp
     use LoggerTrait;
 
     public function collectedOwnershipBatch(
-        MemberOwnershipsAccessorInterface $accessor,
+        OwnershipAccessorInterface $accessor,
         ListSelectorInterface $selector
     ): OwnershipCollectionInterface {
         $event               = $this->startCollectOfOwnershipBatch($selector);
@@ -44,7 +44,7 @@ class OwnershipBatchCollectedEventRepository extends ServiceEntityRepository imp
                         self::OPTION_NEXT_PAGE => $selector->cursor(),
                     ],
                     'response' => array_map(
-                        fn (PublishersList $ownership) => $ownership->toArray(),
+                        static fn (PublishersList $ownership) => $ownership->toArray(),
                         $ownershipCollection->toArray()
                     )
                 ],

@@ -202,7 +202,7 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
 
         if ($this->strategy->listRestriction()) {
             return $eventRepository->collectedOwnershipBatch(
-                $this->accessor,
+                $this->ownershipAccessor,
                 new MemberOwnershipsBatchSelector(
                     $this->strategy->onBehalfOfWhom(),
                     (string) $ownerships->nextPage(),
@@ -216,7 +216,7 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
             $this->strategy->forWhichList()
         )) {
             $ownerships = $eventRepository->collectedOwnershipBatch(
-                $this->accessor,
+                $this->ownershipAccessor,
                 new MemberOwnershipsBatchSelector(
                     $this->strategy->onBehalfOfWhom(),
                     (string) $ownerships->nextPage(),
