@@ -129,12 +129,21 @@ class AddMemberToPublishersListCommand extends AbstractCommand
         );
 
         $publishersListName = $this->input->getOption(self::OPTION_PUBLISHERS_LIST_NAME);
-        $filteredLists = array_filter(
-            $ownershipsLists->toArray(),
-            static function (PublishersList $list) use ($publishersListName) {
-                return $list->name() === $publishersListName;
-            }
-        );
+
+        $filteredLists = [];
+
+        while (empty($filteredLists) && $ownershipsLists->nextPage() !== -1) {
+            $filteredLists = array_filter(
+                $ownershipsLists->toArray(),
+                static function (PublishersList $list) use ($publishersListName) {
+                    return $list->name() === $publishersListName;
+                }
+            );
+
+            $ownershipsLists = $this->ownershipAccessor->getMemberOwnerships(
+                new MemberOwnershipsBatchSelector($screenName, $ownershipsLists->nextPage())
+            );
+        }
 
         if (count($filteredLists) !== 1) {
             throw new LogicException('There should be exactly one remaining list.');
