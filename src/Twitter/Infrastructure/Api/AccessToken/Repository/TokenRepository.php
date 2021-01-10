@@ -103,7 +103,10 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
     public function freezeToken(TokenInterface $oauthToken): void
     {
         /** @var TokenInterface $token */
-        $token = $this->findOneBy(['oauthToken' => $oauthToken->getAccessToken()]);
+        $token = $this->findOneBy([
+            'oauthToken' => $oauthToken->getAccessToken(),
+            'consumerKey' => $oauthToken->getConsumerKey()
+        ]);
 
         if (!($token instanceof TokenInterface)) {
             UnavailableTokenException::throws();
@@ -230,11 +233,9 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
      * @return QueryBuilder
      */
     private function applyUnfrozenTokenCriteria(QueryBuilder $queryBuilder): QueryBuilder {
+        $tokenType = $this->tokenTypeRepository->findOneBy(['name' => TokenType::USER]);
+
         $queryBuilder->andWhere('t.type = :type');
-
-        $tokenTypeRepository = $this->getEntityManager()->getRepository('Api:TokenType');
-
-        $tokenType = $tokenTypeRepository->findOneBy(['name' => TokenType::USER]);
         $queryBuilder->setParameter('type', $tokenType);
 
         $queryBuilder->andWhere('t.oauthTokenSecret IS NOT NULL');

@@ -7,10 +7,14 @@ use App\Twitter\Domain\Api\Model\TokenInterface;
 
 class FreezableToken extends Token
 {
-    public static function fromAccessToken(string $accessToken): TokenInterface
+    public static function fromAccessToken(
+        string $accessToken,
+        string $consumerKey
+    ): TokenInterface
     {
         $token = new self();
         $token->setAccessToken($accessToken);
+        $token->setConsumerKey($consumerKey);
 
         return $token;
     }

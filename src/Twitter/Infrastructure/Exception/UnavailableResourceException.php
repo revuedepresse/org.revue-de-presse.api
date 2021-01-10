@@ -120,7 +120,7 @@ class UnavailableResourceException extends Exception implements TwitterErrorAwar
         }
 
         if ($errorCode === self::ERROR_EXCEEDED_RATE_LIMIT) {
-            if (self::onApiRateLimitStatusAccess($endpoint)) {
+            if (self::exceptWhenAccessingApiRateLimitStatus($endpoint)) {
                 $onApiLimitExceeded($endpoint);
             }
 
@@ -203,8 +203,8 @@ class UnavailableResourceException extends Exception implements TwitterErrorAwar
      * @param string $endpoint
      * @return bool
      */
-    private static function onApiRateLimitStatusAccess(string $endpoint): bool
+    private static function exceptWhenAccessingApiRateLimitStatus(string $endpoint): bool
     {
-        return strpos($endpoint, self::API_ENDPOINT_RATE_LIMIT_STATUS) !== false;
+        return strpos($endpoint, self::API_ENDPOINT_RATE_LIMIT_STATUS) === false;
     }
 }

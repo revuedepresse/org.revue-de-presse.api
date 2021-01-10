@@ -64,11 +64,11 @@ class FetchPublicationMessageHandler implements MessageSubscriberInterface
         }
 
         $options = [
-            $message::PUBLISHERS_LIST_ID                              => $message->aggregateId(),
-            $message::BEFORE                                           => $message->dateBeforeWhichStatusAreCollected(),
-            'count'                                                    => 200,
-            'oauth'                                                    => $options[TokenInterface::FIELD_TOKEN],
-            $message::SCREEN_NAME                                      => $message->screenName(),
+            $message::PUBLISHERS_LIST_ID => $message->aggregateId(),
+            $message::BEFORE             => $message->dateBeforeWhichStatusAreCollected(),
+            'count'                      => 200,
+            'oauth'                      => $options[TokenInterface::FIELD_TOKEN],
+            $message::SCREEN_NAME        => $message->screenName(),
         ];
 
         try {

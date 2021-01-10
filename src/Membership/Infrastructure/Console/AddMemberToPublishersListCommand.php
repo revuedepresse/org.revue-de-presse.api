@@ -22,7 +22,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class AddMemberToPublishersListCommand extends AbstractCommand
 {
-    public const COMMAND_NAME = 'membership:add-members-to-aggregate';
+    public const COMMAND_NAME = 'membership:add-members-to-publishers-list';
 
     public const OPTION_PUBLISHERS_LIST_NAME = 'publishers_list_name';
 
