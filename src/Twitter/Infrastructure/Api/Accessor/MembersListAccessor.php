@@ -6,6 +6,7 @@ namespace App\Twitter\Infrastructure\Api\Accessor;
 use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
 use App\Twitter\Domain\Api\Accessor\MembersListAccessorInterface;
 use App\Twitter\Domain\Api\Accessor\TwitterApiEndpointsAwareInterface;
+use stdClass;
 
 class MembersListAccessor implements TwitterApiEndpointsAwareInterface, MembersListAccessorInterface
 {
@@ -17,10 +18,22 @@ class MembersListAccessor implements TwitterApiEndpointsAwareInterface, MembersL
         $this->accessor = $accessor;
     }
 
-    public function addMembersToList(array $members, string $listId)
+    public function addMembersToList(array $members, string $listId): ?stdClass
     {
         if (count($members) > 100) {
-            throw new \LogicException('No more than 100 members can be added to a list at once');
+            $partition = array_chunk($members, 100);
+            $list = null;
+
+            while (!empty($partition)) {
+                $members = array_pop($partition);
+                $endpoint = $this->getAddMembersToListEndpoint() .
+                    "screen_name=" . implode(',', $members) .
+                    '&list_id=' . $listId;
+
+                $list = $this->accessor->contactEndpoint($endpoint);
+            }
+
+            return $list;
         }
 
         $endpoint = $this->getAddMembersToListEndpoint() .

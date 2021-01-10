@@ -78,7 +78,7 @@ class InputToCollectionStrategy
             $restiction->list = [];
             array_walk(
                 $listCollectionRestriction,
-                function ($list) use ($restiction) {
+                static function ($list) use ($restiction) {
                     $restiction->list[$list] = $list;
                 }
             );
