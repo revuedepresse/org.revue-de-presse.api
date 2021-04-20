@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 
+function clone_emoji_repository() {
+    cd ./public || exit
+    git clone https://github.com/iamcal/emoji-data.git
+}
+
 function get_docker_network() {
     echo 'press-review-network'
 }
