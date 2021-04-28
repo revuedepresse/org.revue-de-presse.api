@@ -1227,18 +1227,18 @@ function run_php_features_tests() {
 }
 
 function remove_redis_container {
-    if [ `docker ps -a | grep redis | grep -c ''` -gt 0 ];
+    if [ $(docker ps -a | grep redis | grep -c '') -gt 0 ];
     then
-        docker rm -f `docker ps -a | grep redis | awk '{print $1}'`
+        docker rm -f $(docker ps -a | grep redis | awk '{print $1}')
     fi
 }
 
 function today_statuses() {
-    cat var/logs/dev.log | awk '{$1=$2=$3="";print $0}' | sed -e 's/^\s\+//' | grep `date -I` | awk '{$1=$2="";print $0}'
+    cat var/logs/dev.log | awk '{$1=$2=$3="";print $0}' | sed -e 's/^\s\+//' | grep $(date -I) | awk '{$1=$2="";print $0}'
 }
 
 function follow_today_statuses() {
-    tail -f var/logs/dev.log | awk '{$1=$2=$3="";print $0}' | sed -e 's/^\s\+//' | grep `date -I` | awk '{$1=$2="";print $0}'
+    tail -f var/logs/dev.log | awk '{$1=$2=$3="";print $0}' | sed -e 's/^\s\+//' | grep $(date -I) | awk '{$1=$2="";print $0}'
 }
 
 function restart_web_server() {
