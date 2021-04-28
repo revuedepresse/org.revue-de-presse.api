@@ -916,7 +916,7 @@ function run_php_script() {
         docker-compose '"${project_name}"'run -T --rm --name='"${container_name}"' '"${option_detached}"'worker '"${script}")"
     else
         command="$(echo -n 'cd provisioning/containers && \
-        docker-compose '"${project_name}"'exec '"${option_detached}"'worker '"${script}")"
+        docker-compose '"${project_name}"'exec -u1000:1000 '"${option_detached}"'worker '"${script}")"
     fi
 
     echo 'About to execute "'"${command}"'"'
