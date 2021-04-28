@@ -1,15 +1,3 @@
-parameters:
-    main_log_level: debug
-    monolog_flat_logging_handler:
-        type:     stream
-        path:     "%kernel.logs_dir%/%kernel.environment%.log"
-        level:    "%main_log_level%"
-    monolog_json_logging_handler:
-        type:     stream
-        path:     "%kernel.logs_dir%/%kernel.environment%.json"
-        level:    info
-        formatter: monolog.json_formatter
-
 monolog:
     handlers:
         main:

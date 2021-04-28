@@ -253,6 +253,19 @@ parameters:
         - 'development'
         - 'membership'
 
+    main_log_level: debug
+
+    monolog_flat_logging_handler:
+        type:     stream
+        path:     "%kernel.logs_dir%/%kernel.environment%.log"
+        level:    "%main_log_level%"
+
+    monolog_json_logging_handler:
+        type:     stream
+        path:     "%kernel.logs_dir%/%kernel.environment%.json"
+        level:    info
+        formatter: monolog.json_formatter
+
     redis_cache.class:                                                  'App\Twitter\Infrastructure\Cache\RedisCache'
 
     weaving_the_web_twitter.api_host:                             'api.twitter.com'
