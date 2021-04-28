@@ -5,11 +5,8 @@ namespace App\NewsReview\Infrastructure\Repository;
 
 use App\NewsReview\Domain\Repository\PopularPublicationRepositoryInterface;
 use App\NewsReview\Domain\Repository\SearchParamsInterface;
+use App\NewsReview\Infrastructure\RealTimeDatabase\Firebase\FirebaseAccessor;
 use App\Twitter\Infrastructure\Publication\Repository\HighlightRepository;
-use DateTimeInterface;
-use Kreait\Firebase\Database;
-use Kreait\Firebase\Database\Snapshot;
-use Kreait\Firebase\Factory;
 use Psr\Log\LoggerInterface;
 
 class PopularPublicationRepository implements PopularPublicationRepositoryInterface
@@ -34,50 +31,20 @@ class PopularPublicationRepository implements PopularPublicationRepositoryInterf
         $this->highlightRepository = $highlightRepository;
     }
 
-    private function getFirebaseDatabase(): Database
-    {
-        return (new Factory)
-            ->withServiceAccount($this->serviceAccountConfig)
-            ->withDatabaseUri($this->databaseUri)
-            ->createDatabase();
-    }
-
-    private function getFirebaseDatabaseSnapshot(
-        DateTimeInterface $date,
-        bool $includeRetweets = false
-    ): Snapshot {
-        $database = $this->getFirebaseDatabase();
-
-        $aggregateId = 1;
-        $path = '/'.implode(
-            '/',
-            [
-                'highlights',
-                $aggregateId,
-                $date->format('Y-m-d'),
-                $includeRetweets ? 'retweet' : 'status'
-            ]
-        );
-        $this->logger->info(sprintf('About to access Firebase Path: "%s"', $path));
-        $reference = $database->getReference($path);
-
-        return $reference
-            ->orderByChild('totalRetweets')
-            ->getSnapshot();
-    }
-
     public function findBy(SearchParamsInterface $searchParams): array {
-        $snapshot = $this->getFirebaseDatabaseSnapshot(
+
+        $databaseAccessor = FirebaseAccessor::getDatabaseAccessor(
+            $this->serviceAccountConfig,
+            $this->databaseUri,
+            $this->logger
+        );
+
+        $snapshotColumn = $databaseAccessor->getRealTimeDatabaseSnapshot(
             $searchParams->getParams()['startDate'],
             $searchParams->getParams()['includeRetweets']
-         );
+        );
 
-        $col = $snapshot->getValue();
-        if ($col === null) {
-            $col = [];
-        }
-
-        $highlights = array_reverse($col);
+        $highlights = array_reverse($snapshotColumn);
         $highlights = array_map(function (array $highlight) {
             return [
                 'original_document' => $highlight['json'],
