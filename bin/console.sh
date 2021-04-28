@@ -743,30 +743,30 @@ function get_apache_container_interactive_shell() {
 }
 
 function ensure_blackfire_configuration_files_are_present() {
-    if [ ! -e `pwd`'/provisioning/containers/apache/templates/blackfire/zz-blackfire.ini' ];
+    if [ ! -e './provisioning/containers/apache/templates/blackfire/zz-blackfire.ini' ];
     then
-      cp `pwd`'/provisioning/containers/apache/templates/blackfire/zz-blackfire.ini.dist' \
-        `pwd`'/provisioning/containers/apache/templates/blackfire/zz-blackfire.ini'
+      cp './provisioning/containers/apache/templates/blackfire/zz-blackfire.ini.dist' \
+        './provisioning/containers/apache/templates/blackfire/zz-blackfire.ini'
     fi
 
-    if [ ! -e `pwd`'/provisioning/containers/apache/templates/blackfire/agent' ];
+    if [ ! -e './provisioning/containers/apache/templates/blackfire/agent' ];
     then
-      cp `pwd`'/provisioning/containers/apache/templates/blackfire/agent.dist' \
-        `pwd`'/provisioning/containers/apache/templates/blackfire/agent'
+      cp './provisioning/containers/apache/templates/blackfire/agent.dist' \
+        './provisioning/containers/apache/templates/blackfire/agent'
     fi
 
-    if [ ! -e `pwd`'/provisioning/containers/apache/templates/blackfire/.blackfire.ini' ];
+    if [ ! -e './provisioning/containers/apache/templates/blackfire/.blackfire.ini' ];
     then
-      cp `pwd`'/provisioning/containers/apache/templates/blackfire/.blackfire.ini.dist' \
-        `pwd`'/provisioning/containers/apache/templates/blackfire/.blackfire.ini'
+      cp './provisioning/containers/apache/templates/blackfire/.blackfire.ini.dist' \
+        './provisioning/containers/apache/templates/blackfire/.blackfire.ini'
     fi
 
-    if [ ! -e `pwd`'/var/logs/apache.error.press-review.log' ];
+    if [ ! -e './var/logs/apache.error.press-review.log' ];
     then
       touch './var/logs/apache.error.press-review.log'
     fi
 
-    if [ ! -e `pwd`'/var/logs/apache.access.press-review.log' ];
+    if [ ! -e './var/logs/apache.access.press-review.log' ];
     then
       touch './var/logs/apache.access.press-review.log'
     fi
