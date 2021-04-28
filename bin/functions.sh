@@ -760,6 +760,16 @@ function ensure_blackfire_configuration_files_are_present() {
       cp `pwd`'/provisioning/containers/apache/templates/blackfire/.blackfire.ini.dist' \
         `pwd`'/provisioning/containers/apache/templates/blackfire/.blackfire.ini'
     fi
+
+    if [ ! -e `pwd`'/var/logs/apache.error.press-review.log' ];
+    then
+      touch './var/logs/apache.error.press-review.log'
+    fi
+
+    if [ ! -e `pwd`'/var/logs/apache.access.press-review.log' ];
+    then
+      touch './var/logs/apache.access.press-review.log'
+    fi
 }
 
 function build_php_fpm_container() {
@@ -938,6 +948,7 @@ function stop_development_stack() {
 }
 
 function run_development_stack() {
+    ensure_blackfire_configuration_files_are_present
     cd provisioning/containers || exit
     docker-compose up -d
     cd ../..
