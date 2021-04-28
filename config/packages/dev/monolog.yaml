@@ -5,6 +5,8 @@ monolog:
             path: "%kernel.logs_dir%/%kernel.environment%.log"
             level: debug
             channels: ["!event"]
+        json: '%monolog_json_logging_handler%'
+        flat: '%monolog_flat_logging_handler%'
         console:
             type: console
             process_psr_3_messages: false
