@@ -716,7 +716,7 @@ function list_amqp_queues() {
 function set_permissions_in_apache_container() {
     sudo rm -rf ./var/cache
     sudo mkdir ./var/cache
-    sudo chown -R `whoami` ./var/logs ./var
+    sudo chown -R $(whoami) ./var/logs ./var
 
     cd ./provisioning/containers || exit
     docker-compose exec worker bin/console cache:clear -e prod --no-warmup
@@ -730,7 +730,7 @@ function build_apache_container() {
 }
 
 function remove_apache_container {
-    if [ `docker ps -a | grep apache -c` -eq 0 ]
+    if [ $(docker ps -a | grep apache -c) -eq 0 ]
     then
         return;
     fi

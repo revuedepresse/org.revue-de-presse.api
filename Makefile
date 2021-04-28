@@ -10,6 +10,9 @@ help:
 clone-emoji-repository: ## Clone emoji repository
 		@/bin/bash -c 'source ./bin/functions.sh && clone_emoji_repository'
 
+cache-clear: ## Clear application cache
+		@/bin/bash -c 'export INTERACTIVE_MODE="true" SCRIPT="bin/console cache:clear" && make run-php-script'
+
 create-network: ## Create Docker network
 		@/bin/bash -c 'source ./bin/functions.sh && create_network'
 
