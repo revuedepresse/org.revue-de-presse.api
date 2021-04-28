@@ -27,4 +27,6 @@ VOLUME /var/www/devobs
 
 WORKDIR /var/www/devobs
 
+ENTRYPOINT ["/usr/local/bin/php", "-d", "memory_limit=-1", "-d", "xdebug.remote_enable=0", "-d", "-d", "xdebug.default_enable=0", "-d", "xdebug.profiler_enable=0"]
+
 CMD ["tail", "-f", "/dev/null"]
