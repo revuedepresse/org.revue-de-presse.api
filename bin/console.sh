@@ -781,6 +781,18 @@ function ensure_emoji_assets_are_available() {
     fi
 }
 
+function ensure_firebase_service_account_configuration_file_is_present() {
+    local how_many_configuration_files
+    how_many_configuration_files=$(/bin/bash -c '\ls ./config/*.json 2> /dev/null | grep -c ""')
+
+    if [ ${how_many_configuration_files} -eq 1 ];
+    then
+        return 0
+    fi
+
+    return 1
+}
+
 function build_php_fpm_container() {
     cd provisioning/containers/php-fpm || exit
     docker build -t php-fpm .
@@ -960,6 +972,15 @@ function run_development_stack() {
     ensure_blackfire_configuration_files_are_present
 
     ensure_emoji_assets_are_available
+
+    if ! ensure_firebase_service_account_configuration_file_is_present;
+    then
+        echo '⚠️⚠️⚠️⚠️⚠️⚠️'
+        echo 'Please copy the missing required service account configuration file for real time database access.'
+        echo '⚠️⚠️⚠️⚠️⚠️⚠️'
+        return 1;
+    fi
+
     cd provisioning/containers || exit
     docker-compose up -d
     cd ../..
