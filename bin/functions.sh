@@ -931,9 +931,15 @@ function run_php() {
     /bin/bash -c "${command}"
 }
 
-function run_stack() {
+function stop_development_stack() {
     cd provisioning/containers || exit
-    docker-compose up
+    docker-compose down --remove-orphans --volumes
+    cd ../..
+}
+
+function run_development_stack() {
+    cd provisioning/containers || exit
+    docker-compose up -d
     cd ../..
 }
 

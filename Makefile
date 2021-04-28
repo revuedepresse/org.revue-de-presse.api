@@ -77,7 +77,7 @@ run-php-script: ## Run PHP script
 		@/bin/bash -c 'source ./bin/functions.sh && run_php_script'
 
 run-stack: ## Run stack and its dependencies
-		@/bin/bash -c 'source ./bin/functions.sh && run_stack'
+		@/bin/bash -c 'source ./bin/functions.sh && run_development_stack'
 
 run-worker: ## Run worker and its dependencies
 		@/bin/bash -c 'source ./bin/functions.sh && run_worker'
@@ -135,6 +135,9 @@ keep-php-container-running: ## Keep a running container having PHP
 
 stop-workers: ## Stop workers
 		@/bin/bash -c 'source ./bin/functions.sh && stop_workers'
+
+stop-stack: ## Stop development stack
+		@/bin/bash -c 'source ./bin/functions.sh && stop_development_stack'
 
 today-statuses: ## Filter the statuses for today from the log file
 		@/bin/bash -c 'source ./bin/functions.sh && today_statuses'
