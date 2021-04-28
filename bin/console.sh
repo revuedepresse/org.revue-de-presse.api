@@ -772,6 +772,15 @@ function ensure_blackfire_configuration_files_are_present() {
     fi
 }
 
+function ensure_emoji_assets_are_available() {
+    if [ ! -d ./public/emoji-data ];
+    then
+        echo '😢 Emoji will be missing.'
+        echo 'The required assets can be cloned from //github.com/iamcal/emoji-data.git per next instructions'
+        echo 'cd public && git clone https://github.com/iamcal/emoji-data.git'
+    fi
+}
+
 function build_php_fpm_container() {
     cd provisioning/containers/php-fpm || exit
     docker build -t php-fpm .
@@ -949,6 +958,8 @@ function stop_development_stack() {
 
 function run_development_stack() {
     ensure_blackfire_configuration_files_are_present
+
+    ensure_emoji_assets_are_available
     cd provisioning/containers || exit
     docker-compose up -d
     cd ../..
