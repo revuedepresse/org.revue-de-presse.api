@@ -773,7 +773,7 @@ function ensure_blackfire_configuration_files_are_present() {
 }
 
 function build_php_fpm_container() {
-    cd provisioning/containers/php-fpm
+    cd provisioning/containers/php-fpm || exit
     docker build -t php-fpm .
 }
 
