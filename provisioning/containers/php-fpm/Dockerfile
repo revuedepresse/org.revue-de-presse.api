@@ -23,5 +23,5 @@ RUN apt-get update && apt-get install wget unzip libcurl4-openssl-dev -y && \
 
 ADD templates/20-xdebug.ini.dist /usr/local/etc/php/conf.d/20-xdebug.ini
 
-CMD ["/etc/init.d/blackfire-agent restart && php-fpm"]
+CMD ["php-fpm"]
 
