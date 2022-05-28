@@ -3,6 +3,37 @@ set -Eeuo pipefail
 
 export COMPOSE_PROJECT_NAME='revue-de-presse-org'
 
+function _set_file_permissions() {
+    local temporary_directory
+    temporary_directory="${1}"
+
+    if [ -z "${temporary_directory}" ];
+    then
+        printf 'A %s is expected as %s (%s).%s' 'non-empty string' '1st argument' 'temporary directory file path' $'\n'
+
+        return 1;
+    fi
+
+    if [ ! -d "${temporary_directory}" ];
+    then
+        printf 'A %s is expected as %s (%s).%s' 'directory' '1st argument' 'temporary directory file path' $'\n'
+
+        return 1;
+    fi
+
+    cd ./provisioning/containers || exit
+
+    docker compose \
+        -f ./provisioning/containers/docker-compose.yaml \
+        -f ./provisioning/containers/docker-compose.override.yaml \
+        run \
+        --rm \
+        --user root \
+        --volume "${temporary_directory}:/tmp/remove-me" \
+        app \
+        /bin/bash -c 'chmod -R ug+w /tmp/remove-me'
+}
+
 function kill_existing_consumers {
     local pids
     pids=( $(ps ux | grep "rabbitmq:consumer" | grep -v '/bash' | grep -v grep | cut -d ' ' -f 2-3) )
