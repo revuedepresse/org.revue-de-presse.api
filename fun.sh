@@ -60,7 +60,7 @@ function build() {
         app \
         cache \
         service \
-        wroekr
+        worker
 }
 
 function clean() {
