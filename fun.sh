@@ -788,10 +788,19 @@ function run_php_script() {
     if [ -z "${interactive_mode}" ];
     then
         command="$(echo -n 'cd provisioning/containers && \
-        docker compose run -T --rm --name='"${container_name}"' '"${option_detached}"'worker '"${script}")"
+            docker compose \
+                --file=docker-compose.yaml \
+                --file=docker-compose.override.yaml \
+                run \
+                -T \
+                --rm \
+                --name='"${container_name}"' '"${option_detached}"'worker '"${script}")"
     else
         command="$(echo -n 'cd provisioning/containers && \
-        docker compose exec '"${option_detached}"'worker '"${script}")"
+           docker compose \
+                --file=docker-compose.yaml \
+                --file=docker-compose.override.yaml \
+                exec '"${option_detached}"'worker '"${script}")"
     fi
 
     echo 'About to execute "'"${command}"'"'
