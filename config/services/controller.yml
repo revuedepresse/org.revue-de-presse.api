@@ -15,16 +15,13 @@ services:
         calls:
             - [ 'setPublishersListDispatcher', ['@App\Twitter\Infrastructure\Amqp\MessageBus\PublishersListDispatcher']]
         properties:
-            authenticationTokenRepository:  '@repository.authentication_token'
-            aggregateRepository:            '@App\Twitter\Infrastructure\Api\Repository\PublishersListRepository'
-            highlightRepository:            '@repository.highlight'
             logger:                         '@logger'
+            highlightRepository:            '@repository.highlight'
             memberRepository:               '@user_manager'
-            router:                         '@router'
             redisCache:                     '@app.cache.redis'
-            timelyStatusRepository:         '@repository.timely_status'
-            tokenRepository:                '@repository.access_token'
+            router:                         '@router'
             popularPublicationRepository:   '@App\NewsReview\Infrastructure\Repository\PopularPublicationRepository'
+            tokenRepository:                '@repository.access_token'
 
     App\PublishersList\Controller\ListController: '@controller.list'
     controller.publication:

@@ -3,14 +3,11 @@ declare(strict_types=1);
 
 namespace App\PublishersList\Controller;
 
-use App\Membership\Domain\Entity\Legacy\Member;
-use App\Membership\Domain\Entity\MemberInterface;
 use App\Membership\Infrastructure\Repository\AuthenticationTokenRepository;
 use App\NewsReview\Domain\Repository\PopularPublicationRepositoryInterface;
 use App\PublishersList\Controller\Exception\InvalidRequestException;
 use App\PublishersList\Repository\TimelyStatusRepository;
 use App\Twitter\Infrastructure\Api\AccessToken\Repository\TokenRepository;
-use App\Twitter\Infrastructure\Api\Entity\Aggregate;
 use App\Twitter\Infrastructure\Api\Entity\Token;
 use App\Twitter\Infrastructure\Api\Entity\TokenInterface;
 use App\Twitter\Infrastructure\Api\Repository\PublishersListRepository;
@@ -35,17 +32,11 @@ class ListController
     use CorsHeadersAwareTrait;
     use PublishersListDispatcherTrait;
 
-    public AuthenticationTokenRepository $authenticationTokenRepository;
-
     public TokenRepository $tokenRepository;
-
-    public PublishersListRepository $aggregateRepository;
 
     public MemberRepository $memberRepository;
 
     public HighlightRepository $highlightRepository;
-
-    public TimelyStatusRepository $timelyStatusRepository;
 
     public LoggerInterface $logger;
 
@@ -54,64 +45,6 @@ class ListController
     public RouterInterface $router;
 
     public PopularPublicationRepositoryInterface $popularPublicationRepository;
-
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     * @throws Exception
-     */
-    public function getAggregates(Request $request)
-    {
-        $client = $this->redisCache->getClient();
-
-        return $this->getCollection(
-            $request,
-            $counter = function (SearchParams $searchParams) use ($client) {
-                $key = 'aggregates.total_pages.'.$searchParams->getFingerprint();
-
-                $totalPages = $client->get($key);
-
-                if ($this->shouldRefreshCacheForAggregates($client) && $totalPages) {
-                    $client->del($key);
-                    $totalPages = null;
-                }
-
-                if (is_null($totalPages)) {
-                    $totalPages = $this->aggregateRepository->countTotalPages($searchParams);
-                    $client->set($key, $totalPages);
-                }
-
-                return $totalPages;
-            },
-            $finder = function (SearchParams $searchParams) use ($client) {
-                $key = 'aggregates.items.'.$searchParams->getFingerprint();
-                $aggregates = $client->get($key);
-
-                if ($this->shouldRefreshCacheForAggregates($client) && $aggregates) {
-                    $client->del($key);
-
-                    if ($client->get('aggregates.recent_delete')) {
-                        $client->del('aggregates.recent_delete');
-                    }
-                    if ($client->get('aggregates.recent_statuses_collect')) {
-                        $client->del('aggregates.recent_statuses_collect');
-                    }
-                    if ($client->get('aggregates.total_statuses_reset')) {
-                        $client->del('aggregates.total_statuses_reset');
-                    }
-
-                    $aggregates = null;
-                }
-
-                if (is_null($aggregates)) {
-                    $aggregates = json_encode($this->aggregateRepository->findAggregates($searchParams));
-                    $client->set($key, $aggregates);
-                }
-
-                return json_decode($aggregates, true);
-            }
-        );
-    }
 
     /**
      * @param Client $client
@@ -189,26 +122,7 @@ class ListController
             return $unauthorizedJsonResponse;
         }
 
-        $queriedRouteAccess = $searchParams->hasParam('routeName');
-        if ($queriedRouteAccess && !$request->headers->has('x-auth-admin-token')) {
-            return $unauthorizedJsonResponse;
-        }
-
-        if ($queriedRouteAccess) {
-            $tokenId = $request->headers->get('x-auth-admin-token');
-            $memberProperties = $this->authenticationTokenRepository->findByTokenIdentifier($tokenId);
-
-            if (!\array_key_exists('member', $memberProperties) ||
-                !($memberProperties['member'] instanceof MemberInterface)) {
-                return $unauthorizedJsonResponse;
-            }
-        }
-
         $key = $this->getCacheKey('highlights.total_pages', $searchParams);
-
-        if (!$searchParams->hasParam('selectedAggregates') && !$queriedRouteAccess) {
-            return 1;
-        }
 
         $client = $this->redisCache->getClient();
         $totalPages = $client->get($key);
@@ -295,87 +209,6 @@ class ListController
     }
 
     /**
-     * @param Request $request
-     *
-     * @return int|null|JsonResponse
-     * @throws Exception
-     */
-    public function getMembers(Request $request)
-    {
-        $client = $this->redisCache->getClient();
-
-        return $this->getCollection(
-            $request,
-            $counter = function (SearchParams $searchParams) use ($client) {
-                $key = 'members.total_pages.'.$searchParams->getFingerprint();
-                $totalPages = $client->get($key);
-
-                if ($this->shouldRefreshCacheForMembers($client) && $totalPages) {
-                    $client->del($key);
-                    $totalPages = null;
-                }
-
-                if ($totalPages === null) {
-                    $totalPages = $this->memberRepository->countTotalPages($searchParams);
-                    $client->set($key, $totalPages);
-                }
-
-                return (int) $totalPages;
-            },
-            $finder = function (SearchParams $searchParams) use ($client) {
-                $key = 'members.items.'.$searchParams->getFingerprint();
-
-                $members = $client->get($key);
-
-                if ($this->shouldRefreshCacheForMembers($client) && $members) {
-                    $client->del($key);
-
-                    if ($client->get('members.recent_delete')) {
-                        $client->del('members.recent_delete');
-                    }
-
-                    if ($client->get('members.recent_statuses_collect')) {
-                        $client->del('members.recent_statuses_collect');
-                    }
-
-                    if ($client->get('members.total_statuses_reset')) {
-                        $client->del('members.total_statuses_reset');
-                    }
-
-                    $members = null;
-                }
-
-                if (is_null($members)) {
-                    $members = json_encode($this->memberRepository->findMembers($searchParams));
-                    $client->set($key, $members);
-                }
-
-                return $members;
-            },
-            ['aggregateId' => 'int']
-        );
-    }
-
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     * @throws Exception
-     */
-    public function getStatuses(Request $request)
-    {
-        return $this->getCollection(
-            $request,
-            $counter = function (SearchParams $searchParams) {
-                return $this->timelyStatusRepository->countTotalPages($searchParams);
-            },
-            $finder = function (SearchParams $searchParams) {
-                return $this->timelyStatusRepository->findStatuses($searchParams);
-            },
-            ['memberName' => 'string']
-        );
-    }
-
-    /**
      * @param Request  $request
      * @param callable $counter
      * @param callable $finder
@@ -459,123 +292,6 @@ class ListController
                 $this->allowedOrigin
             )
         );
-    }
-
-    /**
-     * @param Request $request
-     *
-     * @return array|JsonResponse
-     * @throws InvalidRequestException
-     * @throws NonUniqueResultException
-     */
-    public function bulkCollectAggregatesStatuses(Request $request)
-    {
-        if ($request->isMethod('OPTIONS')) {
-            return $this->getCorsOptionsResponse(
-                $this->environment,
-                $this->allowedOrigin
-            );
-        }
-
-        $requirementsOrJsonResponse = $this->guardAgainstMissingRequirementsForBulkStatusCollection($request);
-        if ($requirementsOrJsonResponse instanceof JsonResponse) {
-            return $requirementsOrJsonResponse;
-        }
-
-        array_walk(
-            $requirementsOrJsonResponse['members_names'],
-            function ($memberName) use ($requirementsOrJsonResponse) {
-                $requirements = [
-                    'token' => $requirementsOrJsonResponse['token'],
-                    'member_name' => $memberName,
-                    'aggregate_id' => $requirementsOrJsonResponse['aggregate_id']
-                ];
-                $this->aggregateRepository->resetTotalStatusesForAggregateRelatedToScreenName($memberName);
-
-                $this->publishersListDispatcher->dispatchMemberPublishersListMessage(
-                    (new Member())->setScreenName($memberName),
-                    $requirements['token']
-                );
-            }
-        );
-
-        return $this->makeJsonResponse();
-    }
-
-    /**
-     * @param Request $request
-     *
-     * @return JsonResponse
-     * @throws InvalidRequestException
-     * @throws NonUniqueResultException
-     */
-    public function requestCollection(Request $request)
-    {
-        if ($request->isMethod('OPTIONS')) {
-            return $this->getCorsOptionsResponse(
-                $this->environment,
-                $this->allowedOrigin
-            );
-        }
-
-        $requirementsOrJsonResponse = $this->guardAgainstMissingRequirementsForStatusCollection($request);
-        if ($requirementsOrJsonResponse instanceof JsonResponse) {
-            return $requirementsOrJsonResponse;
-        }
-
-        $this->publishersListDispatcher->dispatchMemberPublishersListMessage(
-            (new Member)->setScreenName($requirementsOrJsonResponse['member_name']),
-            $requirementsOrJsonResponse['token']
-        );
-
-        return $this->makeJsonResponse();
-    }
-
-    /**
-     * @param Request $request
-     *
-     * @return array|JsonResponse
-     * @throws InvalidRequestException
-     * @throws NonUniqueResultException
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
-    public function unlockAggregate(Request $request)
-    {
-        if ($request->isMethod('OPTIONS')) {
-            return $this->getCorsOptionsResponse(
-                $this->environment,
-                $this->allowedOrigin
-            );
-        }
-
-        $requirementsOrJsonResponse = $this->guardAgainstMissingRequirementsForStatusCollection($request);
-        if ($requirementsOrJsonResponse instanceof JsonResponse) {
-            return $requirementsOrJsonResponse;
-        }
-
-        /**
-         * @var Aggregate $aggregate
-         */
-        $aggregate = $this->aggregateRepository->findOneBy([
-           'screenName' => $requirementsOrJsonResponse['member_name'],
-           'id' => $requirementsOrJsonResponse['aggregate_id'],
-        ]);
-
-        if (!($aggregate instanceof Aggregate)) {
-            return new JsonResponse(
-                'Invalid aggregate',
-                422,
-                $this->getAccessControlOriginHeaders(
-                    $this->environment,
-                    $this->allowedOrigin
-                )
-            );
-        }
-
-        $this->aggregateRepository->unlockPublishersList($aggregate);
-
-        return $this->makeJsonResponse();
     }
 
     /**

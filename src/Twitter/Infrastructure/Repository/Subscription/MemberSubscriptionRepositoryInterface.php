@@ -15,11 +15,6 @@ use Symfony\Component\HttpFoundation\Request;
  */
 interface MemberSubscriptionRepositoryInterface
 {
-    public function getMemberSubscriptions(
-        MemberInterface $member,
-        Request $request
-    ): array;
-
     public function getCancelledMemberSubscriptions(MemberInterface $subscriber): array;
 
     public function cancelMemberSubscription(

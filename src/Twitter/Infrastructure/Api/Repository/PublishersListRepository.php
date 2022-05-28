@@ -86,29 +86,6 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
     }
 
     /**
-     * @param array $aggregateIds
-     *
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
-    public function bulkRemoveAggregates(array $aggregateIds)
-    {
-        $queryBuilder = $this->createQueryBuilder(self::TABLE_ALIAS);
-        $queryBuilder->andWhere(self::TABLE_ALIAS . '.id in (:aggregate_ids)');
-        $queryBuilder->setParameter('aggregate_ids', $aggregateIds);
-
-        $aggregates = $queryBuilder->getQuery()->getResult();
-        array_walk(
-            $aggregates,
-            function (PublishersListInterface $aggregate) {
-                $aggregate->markAsDeleted();
-            }
-        );
-
-        $this->getEntityManager()->flush();
-    }
-
-    /**
      * @param SearchParams $searchParams
      *
      * @return int
@@ -351,37 +328,6 @@ QUERY;
                 $this->getEntityManager()->flush();
             }
         );
-    }
-
-    /**
-     * @param array $aggregateIds
-     */
-    public function resetTotalStatusesForAggregates(array $aggregateIds)
-    {
-        $query        = <<<QUERY
-            UPDATE weaving_aggregate a
-            SET total_statuses = 0
-            WHERE id in (:ids)
-QUERY;
-        $connection   = $this->getEntityManager()->getConnection();
-        $aggregateIds = $this->castIds($aggregateIds);
-        $aggregateIdsParams = implode(
-            ',',
-            $aggregateIds
-        );
-
-        try {
-            $connection->executeQuery(
-                strtr(
-                    $query,
-                    [
-                        ':ids' => $aggregateIdsParams
-                    ]
-                )
-            );
-        } catch (Exception $exception) {
-            $this->logger->critical($exception->getMessage());
-        }
     }
 
     /**
