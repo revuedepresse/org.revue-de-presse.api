@@ -7,6 +7,9 @@ SHELL:=/bin/bash
 help:
 		@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
+clean: ## Remove service container
+		@/bin/bash -c 'source ./fun.sh && clean'
+
 remove-mysql-container: ## Remove MySQL container
 		@/bin/bash -c 'source ./fun.sh && remove_mysql_container'
 
@@ -69,9 +72,6 @@ build-php-fpm-container: ## Build PHP-FPM image
 
 run-php-fpm: ## Run PHP-FPM worker
 		@/bin/bash -c 'source ./fun.sh && run_php_fpm'
-
-remove-php-fpm-container: ## Remove PHP-FPM container
-		@/bin/bash -c 'source ./fun.sh && remove_php_fpm_container'
 
 create-database-schema-test: # Create database schema in test environment
 		@/bin/bash -c 'source ./fun.sh && create_database_test_schema'

@@ -821,8 +821,8 @@ function run_php_fpm() {
     /bin/bash -c "${command}"
 }
 
-function remove_php_fpm_container {
-    if [ `docker ps -a | grep fpm -c` -eq 0 ]
+function clean {
+    if [ `docker ps -a | grep service -c` -eq 0 ]
     then
         return;
     fi
@@ -883,9 +883,6 @@ function run_php_script() {
     then
         option_detached='-d '
     fi
-
-    local project_name=''
-    project_name="$(get_project_name)"
 
     local container_name
     container_name="$(echo "${script}" | sha256sum | awk '{print $1}')"
