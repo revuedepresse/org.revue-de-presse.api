@@ -131,7 +131,7 @@ function kill_existing_consumers {
         totalProcesses="$(docker ps -a | grep php | grep -c '')"
     fi
 
-    if [ `expr 0 + "${totalProcesses}"` -le `expr 0 + "${MAX_PROCESSES}"` ];
+    if [ $(expr 0 + "${totalProcesses}") -le $(expr 0 + "${MAX_PROCESSES}") ];
     then
         return
     fi
@@ -149,6 +149,7 @@ function kill_existing_consumers {
     fi
 
     export IFS=$'\n'
+
     for pid in ${pids[@]};
     do echo 'About to kill process with pid '"${pid}" && \
         _pid=$(echo 0 + `echo "${pid}" | sed -e "s/[[:space:]]+//g"` | bc) && \
@@ -1011,9 +1012,9 @@ function run_php_features_tests() {
 }
 
 function remove_redis_container {
-    if [ `docker ps -a | grep redis | grep -c ''` -gt 0 ];
+    if [ $(docker ps -a | grep redis | grep -c '') -gt 0 ];
     then
-        docker rm -f `docker ps -a | grep redis | awk '{print $1}'`
+        docker rm -f $(docker ps -a | grep redis | awk '{print $1}')
     fi
 }
 
