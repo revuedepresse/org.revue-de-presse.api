@@ -1,15 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-function get_project_name() {
-    local project_name
-    project_name=''
-    if [ -n "${PROJECT_NAME}" ]; then
-        project_name='-p '"$PROJECT_NAME "
-    fi
-
-    echo "${project_name}"
-}
+export COMPOSE_PROJECT_NAME=revue-de-presse-org
 
 function kill_existing_consumers {
     local pids
@@ -70,15 +62,12 @@ function kill_existing_consumers {
 }
 
 function stop_workers() {
-    local project_name
-    project_name=$(get_project_name)
-
     local symfony_environment
     symfony_environment="$(get_symfony_environment)"
 
     local script
     script='bin/console messenger:stop-workers -e prod'
-    command="docker-compose ${project_name} exec -T -e ${symfony_environment} worker ${script}"
+    command="docker compose exec -T -e ${symfony_environment} worker ${script}"
 
     echo '=> About to stop consumers'
     /bin/bash -c "${command}"
@@ -154,9 +143,7 @@ function handle_messages {
     local symfony_environment
     symfony_environment="$(get_symfony_environment)"
 
-    local project_name
-    project_name=$(get_project_name)
-    command="docker-compose ${project_name} run --rm --name ${SUPERVISOR_PROCESS_NAME} -T -e ${symfony_environment} worker ${SCRIPT}"
+    command="docker compose run --rm --name ${SUPERVISOR_PROCESS_NAME} -T -e ${symfony_environment} worker ${SCRIPT}"
     echo 'Executing command: "'$command'"'
     echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
     echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
@@ -196,12 +183,9 @@ function purge_queues() {
 
     cd provisioning/containers || exit
 
-    local project_name
-    project_name="$(get_project_name)"
-
-    /bin/bash -c "docker-compose ${project_name} exec -d messenger rabbitmqctl purge_queue get-news-status -p ${rabbitmq_vhost}"
-    /bin/bash -c "docker-compose ${project_name} exec -d messenger rabbitmqctl purge_queue get-news-likes -p ${rabbitmq_vhost}"
-    /bin/bash -c "docker-compose ${project_name} exec -d messenger rabbitmqctl purge_queue failures -p ${rabbitmq_vhost}"
+    /bin/bash -c "docker compose exec -d messenger rabbitmqctl purge_queue get-news-status -p ${rabbitmq_vhost}"
+    /bin/bash -c "docker compose exec -d messenger rabbitmqctl purge_queue get-news-likes -p ${rabbitmq_vhost}"
+    /bin/bash -c "docker compose exec -d messenger rabbitmqctl purge_queue failures -p ${rabbitmq_vhost}"
 }
 
 function stop_workers() {
@@ -751,11 +735,10 @@ function remove_php_container() {
 function list_amqp_queues() {
     local rabbitmq_vhost
     rabbitmq_vhost="$(cat <(cat .env.local | grep STATUS=amqp | sed -E 's#.+(/.+)/[^/]*$#\1#' | sed -E 's/\/%2f/\//g'))"
+
     cd provisioning/containers || exit
 
-    local project_name
-    project_name="$(get_project_name)"
-    /bin/bash -c "docker-compose ${project_name} exec messenger watch -n1 'rabbitmqctl list_queues -p ${rabbitmq_vhost}'"
+    /bin/bash -c "docker compose exec messenger watch -n1 'rabbitmqctl list_queues -p ${rabbitmq_vhost}'"
 }
 
 function build_php_fpm_container() {
@@ -893,10 +876,10 @@ function run_php_script() {
     if [ -z "${interactive_mode}" ];
     then
         command="$(echo -n 'cd provisioning/containers && \
-        docker-compose '"${project_name}"'run -T --rm --name='"${container_name}"' '"${option_detached}"'worker '"${script}")"
+        docker compose run -T --rm --name='"${container_name}"' '"${option_detached}"'worker '"${script}")"
     else
         command="$(echo -n 'cd provisioning/containers && \
-        docker-compose '"${project_name}"'exec '"${option_detached}"'worker '"${script}")"
+        docker compose exec '"${option_detached}"'worker '"${script}")"
     fi
 
     echo 'About to execute "'"${command}"'"'
