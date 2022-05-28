@@ -82,6 +82,7 @@ services:
             context: .
             dockerfile: ./worker/Dockerfile
         volumes:
-            - ../../:/var/www/revue-de-presse.org
+            - '../../:/var/www/revue-de-presse.org'
         depends_on:
             - amqp
+        working_dir: '/var/www/revue-de-presse.org'
