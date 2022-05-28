@@ -95,7 +95,7 @@ run-composer: # Run composer
 run-php-features-tests: ## Run features tests with Behat
 	@/bin/bash -c 'source ./fun.sh && run_php_features_tests'
 
-run-php-unit-tests: ## Run unit tests with PHPUnit
+test: ## Run unit tests with PHPUnit
 	@/bin/bash -c 'source ./fun.sh && run_php_unit_tests'
 
 start: ## Run PHP-FPM worker
