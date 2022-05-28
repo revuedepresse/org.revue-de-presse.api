@@ -714,8 +714,8 @@ docker compose \
       --file=./provisioning/containers/docker-compose.yaml \
       --file=./provisioning/containers/docker-compose.override.yaml \
 			up \
-			--detach
-			php-fpm
+			--detach \
+			service
 SCRIPT
 )
 
