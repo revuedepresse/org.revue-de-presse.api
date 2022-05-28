@@ -1,13 +1,14 @@
-# Press review
+# Revue-de-presse.org
 
 [![Codeship Status for thierrymarianne/daily-press-review](https://app.codeship.com/projects/24369620-8f96-0136-7068-0e8ef5ba2310/status?branch=main)](https://app.codeship.com/projects/304052)
 
-Easing observation of Twitter lists to publish a daily press review
+API serving daily short lists (10 items) of top news in France sorted by popularity.
+Their popularity is based on retweets only retrieved by using Twitter API.
 
 ## Installation
 
-The shell scripts written to install the project dependencies
-have been tested under Ubuntu 19.10.
+The shell scripts written for bash   
+have been tested with Ubuntu 22.04 (`Jammy Jellyfish`).
 
 ### Requirements
 
@@ -17,61 +18,32 @@ Install Docker by following instructions from the [official documentation](https
 
 Install Docker compose by following instructions from the [official documentation](https://docs.docker.com/compose/install/).
 
-### MySQL
+### Build docker images
 
 ```
-# Generate queries to be executed
-# when the project data model has been modified
-make diff-schema
+make build
 ```
 
-### RabbitMQ
-
-List AMQP messages
+## Install application dependencies
 
 ```
-make list-amqp-messages
+make install
 ```
 
-## Running containers
+## Start service
 
 ```
-make run-stack
+make start
 ```
 
-## Available commands
-
-Add members to a list
+## Stop service
 
 ```
-bin/console add-members-to-aggregate -e prod \
---member-name="username-of-list-owner" \
---aggregate-name="list-name" \
---member-list="member-username"
-```
-
-Import subscriptions related to a list
-
-```
-bin/console import-aggregates -e prod \
---member-name="username-of-list-owner" \
---find-ownerships
-```
-
-Add members from a list to another list 
-(requires importing source list beforehand)
-
-```
-bin/console add-members-to-aggregate -e prod \
---member-name="username-of-list-owner" \
---aggregate-name="name-of-destination-list" 
---list="name-of-source-list"
+make stop
 ```
 
 ## Testing
 
-Run unit tests with PHPUnit 
-
 ```
-make run-php-unit-tests
+make test
 ```
