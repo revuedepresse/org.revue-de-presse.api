@@ -5,14 +5,55 @@ function install_app_requirements() {
     local project_dir
     project_dir='/var/www/revue-de-presse.org'
 
-    echo 'worker UID: '"${WORKER_UID}"
-    echo 'worker GID: '"${WORKER_GID}"
+    rm -rf "${project_dir}"'/vendor'
 
-    chown -R "${WORKER_UID}:${WORKER_GID}"  /scripts
+    local WORKER_UID
+    local WORKER_GID
+    local GITHUB_API_TOKEN
 
-    chmod     o-rwx                         /scripts
-    chmod -R ug+rx                          /scripts
-    chmod -R  u+w                           /scripts
+    source "${project_dir}/.env.local"
+
+    if [ -z "${GITHUB_API_TOKEN}" ];
+    then
+
+      printf 'A %s is expected as %s ("%s").%s' 'non-empty string' 'environment variable' 'GITHUB_API_TOKEN' $'\n'
+
+      return 1
+
+    fi
+
+    if [ -z "${WORKER_UID}" ];
+    then
+
+      printf 'A %s is expected as %s ("%s").%s' 'non-empty numeric' 'system user uid' 'WORKER_UID' $'\n'
+
+      return 1
+
+    fi
+
+    if [ -z "${WORKER_GID}" ];
+    then
+
+      printf 'A %s is expected as %s ("%s").%s' 'non-empty numeric' 'system user gid' 'WORKER_GID' $'\n'
+
+      return 1
+
+    fi
+
+    # [Command line github-oauth](https://getcomposer.org/doc/articles/authentication-for-private-packages.md#command-line-github-oauth)
+    composer config -g github-oauth.github.com "${GITHUB_API_TOKEN}"
+
+    composer install \
+        --prefer-dist \
+        --no-dev \
+        --no-interaction \
+        --classmap-authoritative
+
+    chown --verbose -R "${WORKER_UID}:${WORKER_GID}" /scripts
+
+    chmod     o-rwx /scripts
+    chmod -R ug+rx  /scripts
+    chmod -R  u+w   /scripts
 
     if [ ! -e '/templates/www.conf.dist' ];
     then
