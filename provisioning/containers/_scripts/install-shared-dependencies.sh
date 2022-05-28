@@ -14,6 +14,11 @@ function install_shared_dependencies() {
     # Update package source repositories
     apt-get update
 
+   mkdir \
+      --verbose \
+      --parents \
+      /var/www/revue-de-presse.org
+
     if [ $(cat /etc/group | grep "${WORKER_GID}" -c) -eq 0 ]; then
         groupadd \
             --gid "${WORKER_GID}" \
