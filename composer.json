@@ -27,7 +27,6 @@
         "doctrine/migrations": "^3.0",
         "doctrine/orm": "^2.8",
         "fabpot/goutte": "^4.0",
-        "fzaninotto/faker": "^1.9",
         "guzzlehttp/guzzle": "^7.4",
         "incenteev/composer-parameter-handler": "^2.0",
         "kreait/firebase-bundle": "^4.0",

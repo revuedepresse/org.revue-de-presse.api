@@ -5,9 +5,7 @@ namespace App\Tests\Twitter\Infrastructure\Api\Repository;
 
 use App\Twitter\Infrastructure\Api\Repository\PublishersListRepository;
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\ParameterType;
-use Faker\Factory;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /**
@@ -160,8 +158,6 @@ QUERY;
             VALUES 
 QUERY;
 
-        $faker = Factory::create();
-
         $placeholders = [];
         $statusParams = [];
         $paramsTypes  = [];
@@ -170,8 +166,8 @@ QUERY;
 
             $placeholders[] = '(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
 
-            $firstName = $faker->firstName;
-            $lastName  = $faker->lastName;
+            $firstName = 'John';
+            $lastName  = 'Doe';
 
             $statusParams[] = sha1((string) random_int(0, 1000000));
             $statusParams[] = $firstName . ' ' . $lastName;
