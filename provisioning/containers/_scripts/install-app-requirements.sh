@@ -5,6 +5,20 @@ function install_app_requirements() {
     local project_dir
     project_dir='/var/www/revue-de-presse.org'
 
+    rm -f "${project_dir}/bin/behat"
+    rm -f "${project_dir}/bin/console"
+    rm -f "${project_dir}/bin/doctrine"
+    rm -f "${project_dir}/bin/doctrine-dbal"
+    rm -f "${project_dir}/bin/doctrine-migrations"
+    rm -f "${project_dir}/bin/google-cloud-batch"
+    rm -f "${project_dir}/bin/jp.php"
+    rm -f "${project_dir}/bin/patch-type-declarations"
+    rm -f "${project_dir}/bin/php-parse"
+    rm -f "${project_dir}/bin/phpunit"
+    rm -f "${project_dir}/bin/simple-phpunit"
+    rm -f "${project_dir}/bin/sql-formatter"
+    rm -f "${project_dir}/bin/var-dump-server"
+    rm -f "${project_dir}/bin/yaml-lint"
     rm -rf "${project_dir}"'/vendor'
 
     local WORKER_UID
