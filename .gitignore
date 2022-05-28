@@ -1,8 +1,12 @@
+
+bin/behat
+bin/console
 bin/doctrine
 bin/doctrine-dbal
 bin/doctrine-migrations
 bin/google-cloud-batch
 bin/jp.php
+bin/patch-type-declarations
 bin/phpunit
 bin/php-parse
 bin/simple-phpunit
