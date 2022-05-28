@@ -13,7 +13,7 @@
     (max id option is removed otherwise)
     - finding the next extremum (when max id is defined)
     or a local maximum:    
-    in order to find a local maximum (local with regards to a member),
+    in order to find a local maximum (local regarding a member),
     the descending order of ids is applied, so that the biggest
     publication id is identified.
     Member profiles are also updated with their extremum. 
