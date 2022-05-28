@@ -6,7 +6,6 @@ function install_app_requirements() {
     project_dir='/var/www/revue-de-presse.org'
 
     rm -f "${project_dir}/bin/behat"
-    rm -f "${project_dir}/bin/console"
     rm -f "${project_dir}/bin/doctrine"
     rm -f "${project_dir}/bin/doctrine-dbal"
     rm -f "${project_dir}/bin/doctrine-migrations"
