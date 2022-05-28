@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Recommendation\Command;
 
 use App\Twitter\Infrastructure\Console\CommandReturnCodeAwareInterface;
-use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;

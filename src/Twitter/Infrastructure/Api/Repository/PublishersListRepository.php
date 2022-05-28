@@ -21,7 +21,7 @@ use App\Membership\Domain\Entity\Legacy\Member;
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Twitter\Infrastructure\Operation\CapableOfDeletionInterface;
 use App\Twitter\Domain\Curation\Entity\LikedStatus;
-use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\FetchMode;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\ORM\NonUniqueResultException;
