@@ -110,12 +110,9 @@ function kill_existing_consumers {
 }
 
 function stop_workers() {
-    local symfony_environment
-    symfony_environment="$(get_symfony_environment)"
-
     local script
     script='bin/console messenger:stop-workers -e prod'
-    command="docker compose exec -T -e ${symfony_environment} worker ${script}"
+    command="docker compose exec -T worker ${script}"
 
     echo '=> About to stop consumers'
     /bin/bash -c "${command}"
@@ -188,10 +185,7 @@ function handle_messages {
 
     cd "${PROJECT_DIR}/provisioning/containers" || exit
 
-    local symfony_environment
-    symfony_environment="$(get_symfony_environment)"
-
-    command="docker compose run --rm --name ${SUPERVISOR_PROCESS_NAME} -T -e ${symfony_environment} worker ${SCRIPT}"
+    command="docker compose run --rm --name ${SUPERVISOR_PROCESS_NAME} -T worker ${SCRIPT}"
     echo 'Executing command: "'$command'"'
     echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
     echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
@@ -781,11 +775,10 @@ function run_php_script() {
     suffix='-'"${namespace}""$(cat /dev/urandom | tr -cd 'a-f0-9' | head -c 32 2>> /dev/null)"
 
     export SUFFIX="${suffix}"
-    local symfony_environment
-    symfony_environment="$(get_symfony_environment)"
 
     local option_detached
     option_detached=''
+
     if [ -z "${interactive_mode}" ];
     then
         option_detached='-d '
@@ -1003,12 +996,9 @@ function refresh_statuses() {
     local php_command
     php_command='bin/console press-review:map-aggregate-status-collection --aggregate-name="'"${aggregate_name}"'" -vvv'
 
-    local symfony_environment
-    symfony_environment="$(get_symfony_environment)"
-
     if [ -z "${DOCKER_MODE}" ];
     then
-        command="${symfony_environment} /usr/bin/php $PROJECT_DIR/${php_command}"
+        command="/usr/bin/php $PROJECT_DIR/${php_command}"
         echo 'Executing command: "'$command'"'
         echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
         echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
