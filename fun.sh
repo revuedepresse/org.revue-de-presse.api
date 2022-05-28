@@ -208,15 +208,15 @@ function handle_messages {
     fi
 
     local minimum_execution_time=10
-    if [ ! -z "${MINIMUM_EXECUTION_TIME}" ];
+    if [ -n "${MINIMUM_EXECUTION_TIME}" ];
     then
         minimum_execution_time="${MINIMUM_EXECUTION_TIME}"
     fi
 
     remove_exited_containers
 
-    local rabbitmq_output_log="./var/log/rabbitmq."${NAMESPACE}".out.log"
-    local rabbitmq_error_log="./var/log/rabbitmq."${NAMESPACE}".error.log"
+    local rabbitmq_output_log="./var/log/rabbitmq.${NAMESPACE}.out.log"
+    local rabbitmq_error_log="./var/log/rabbitmq.${NAMESPACE}.error.log"
     ensure_log_files_exist "${rabbitmq_output_log}" "${rabbitmq_error_log}"
     rabbitmq_output_log="${PROJECT_DIR}/${rabbitmq_output_log}"
     rabbitmq_error_log="${PROJECT_DIR}/${rabbitmq_error_log}"
@@ -661,9 +661,9 @@ function remove_exited_containers() {
 
 function remove_php_container() {
     local namespace=''
-    if [ -n  "${NAMESPACE}" ];
+    if [ -n "${NAMESPACE}" ];
     then
-        namespace=' | grep '"'""${NAMESPACE}""'"
+        namespace=' | grep '"'"${NAMESPACE}"'"
     fi
 
     remove_exited_containers
@@ -722,7 +722,7 @@ function run_php_script() {
 
     if [ -z "${interactive_mode}" ];
     then
-      interactive_mode="${INTERACTIVE_MODE}";
+        interactive_mode="${INTERACTIVE_MODE}";
     fi
 
     if [ -z "${script}" ];
@@ -876,8 +876,8 @@ function run_command {
     local php_command=${1}
     local memory_limit=${2}
 
-    local rabbitmq_output_log="var/log/rabbitmq."${NAMESPACE}".out.log"
-    local rabbitmq_error_log="var/log/rabbitmq."${NAMESPACE}".error.log"
+    local rabbitmq_output_log="var/log/rabbitmq.${NAMESPACE}.out.log"
+    local rabbitmq_error_log="var/log/rabbitmq.${NAMESPACE}.error.log"
 
     local PROJECT_DIR
     PROJECT_DIR='.'
@@ -962,8 +962,8 @@ function refresh_statuses() {
         export PROJECT_DIR='/var/www/revue-de-presse.org'
     fi
 
-    local rabbitmq_output_log="var/log/rabbitmq."${NAMESPACE}".out.log"
-    local rabbitmq_error_log="var/log/rabbitmq."${NAMESPACE}".error.log"
+    local rabbitmq_output_log="var/log/rabbitmq.${NAMESPACE}.out.log"
+    local rabbitmq_error_log="var/log/rabbitmq.${NAMESPACE}.error.log"
     ensure_log_files_exist "${rabbitmq_output_log}" "${rabbitmq_error_log}"
     rabbitmq_output_log="${PROJECT_DIR}/${rabbitmq_output_log}"
     rabbitmq_error_log="${PROJECT_DIR}/${rabbitmq_error_log}"
