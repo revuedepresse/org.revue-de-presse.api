@@ -1,6 +1,15 @@
+
+bin/doctrine
+bin/doctrine-dbal
+bin/doctrine-migrations
+bin/google-cloud-batch
+bin/jp.php
 bin/phpunit
 bin/php-parse
 bin/simple-phpunit
+bin/sql-formatter
+bin/yaml-lint
+bin/var-dump-server
 
 build/*
 !build/.gitignore
