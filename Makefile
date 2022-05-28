@@ -28,26 +28,8 @@ grant-privileges: ## Grant privileges
 build-php-container: ## Build PHP image
 		@/bin/bash -c 'source ./fun.sh && build_php_container'
 
-dispatch-messages-from-aggregates-lists: ## Produce messages from aggregates list
-		@/bin/bash -c 'source ./fun.sh && dispatch_messages_for_aggregates_list'
-
-dispatch-messages-from-member-timeline: ## Produce messages from member timeline
-		@/bin/bash -c 'source ./fun.sh && dispatch_messages_from_member_timeline'
-
-dispatch-messages-from-members-lists: ## Produce messages from members lists
-		@/bin/bash -c 'source ./fun.sh && dispatch_messages_from_members_lists'
-
-dispatch-messages-from-networks: ## Produce messages for networks
-		@/bin/bash -c 'source ./fun.sh && dispatch_messages_for_networks'
-
 dispatch-messages-from-news-list: ## Produce messages from news list
 		@/bin/bash -c 'source ./fun.sh && dispatch_messages_for_news_list'
-
-dispatch-messages-from-search-query: ## Produce messages from search query
-		@/bin/bash -c 'source ./fun.sh && dispatch_messages_for_search_query'
-
-dispatch-messages-from-timely-statuses: ## Produce messages for timely statuses
-		@/bin/bash -c 'source ./fun.sh && dispatch_messages_for_timely_statuses'
 
 remove-php-container: ## Remove PHP container
 		@/bin/bash -c 'source ./fun.sh && remove_php_container'

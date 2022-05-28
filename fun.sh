@@ -305,118 +305,6 @@ function get_param_value_from_config() {
     echo "${param_value}"
 }
 
-# @deprecated
-# In the past, all existing migrations were removed before computing new ones
-function diff_schema {
-    local question="Would you like to remove the previous queries generated? Not doing so might have some unpredictable consequences."
-
-    if [ $(ls app/DoctrineMigrations/Version* | grep -c '') -gt 0 ];
-    then
-        if whiptail --defaultno --yesno "${question}" 20 60;
-        then
-
-            echo 'OK, let us remove those previous queries.'
-            # Ensuring the migrations files belong to rightful owner
-            sudo chown `whoami` ./app/DoctrineMigrations/Version*
-            local migration_directory="`pwd`/app/DoctrineMigrations/"
-
-            cd ./app/DoctrineMigrations/ || exit
-
-            ls ./Version* | xargs -I{} /bin/bash -c 'version="'${migration_directory}{}'" && echo "About to remove ${version}" && \
-                rm "${version}"'
-
-            cd ./../../ || exit
-
-        else
-
-            echo 'Ok, let us learn from our mistakes.'
-
-        fi
-    fi
-
-    /bin/bash -c "export PROJECT_DIR=`pwd`; echo 'php /var/www/revue-de-presse.org/bin/console doc:mig:diff -vvvv' | make run-php"
-}
-
-# @deprecated
-# In production, export the *appropriate* environment variable (contains "_accepted_") to migrate a schema
-# No export of variable environment is provided here or in the Makefile documentation to prevent bad mistakes
-# from happening
-# In development, "app/config/parameters.yml" should contain a parameter %port_local%
-# holding the port of a development database
-function migrate_schema {
-    local pattern
-    pattern=$"s/\(\$this\->addSql('\)//g"
-
-    local first_query
-    first_query=$(cat "$(ls app/DoctrineMigrations/Version*.php | tail -n1)" | \
-        grep addSql \
-        | sed -e "${pattern}" )
-
-    local queries
-    queries=$(printf %s "$(echo ${first_query} | head -n1 | head -c500)")
-
-    local port_accepted_once=''
-    if [ -n "${accepted_database_port}" ];
-    then
-        port_accepted_once="${accepted_database_port}"
-        unset accepted_database_port
-    fi;
-
-    local port_admin
-    port_admin="$(get_param_value_from_config "database_port_admin")"
-
-    local with_risks=0
-    if [ "${port_accepted_once}" == "${port_admin}" ];
-    then
-        with_risks=1
-    fi
-
-    if [ ${with_risks} -eq 1 ];
-    then
-        local confirmation_request
-        confirmation_request="Are you fully aware of what you're doing at this time: "
-
-        local now
-        now="$(date '+%Y-%m-%d %H:%M:%S')"
-
-        local question
-        question="$(printf "%s %s?" "${confirmation_request}" "${now}" )"
-
-        if whiptail --defaultno --yesno "${question}...${queries}" 20 60;
-        then
-            echo 'OK, let us migrate this schema, dear being capable of running commands.'
-        else
-            echo 'OK, good bye.'
-            return
-        fi
-    else
-        if [ ${port_admin} != '%port_local%' ];
-        then
-            echo "Sorry won't do for your own sake (please see README.md)."
-            return
-        fi
-    fi
-
-    local question="Are you sure you'd like to migrate the schema for database running on port ${port_admin}?"
-    # @see https://stackoverflow.com/a/27875395/282073
-    # The second most voted proposition was adopted for its ease of use and readability
-    #
-    # About the box width and height to be rendered
-    # $ man whiptail | grep yesno -A4
-    if whiptail --defaultno --yesno "${question}...${queries}" 20 60;
-    then
-        echo 'OK, let us migrate this schema.'
-    else
-        echo 'OK, good bye.'
-        return
-    fi
-
-    local project_dir
-    project_dir="$(get_project_dir)"
-
-    echo 'php '"${project_dir}"'/bin/console doc:mig:mig --em=admin' | make run-php
-}
-
 function compute_schema_differences_for_read_database() {
     run_php_script "php /var/www/revue-de-presse.org/bin/console doc:mig:diff -vvvv --em=default -n" interactive_mode
 }
@@ -969,59 +857,6 @@ function get_environment_option() {
     echo ' APP_ENV='"${symfony_env}"
 }
 
-# @deprecated
-function dispatch_messages_from_members_lists {
-    export NAMESPACE="produce_messages_from_members_lists"
-    before_running_command
-
-    if [ -z "${username}" ];
-    then
-        echo 'Please export a valid username: export username="bob"'
-
-        return
-    fi
-
-    run_command 'bin/console weaving_the_web:amqp:produce:lists_members --screen_name='"${username}"
-}
-
-# @deprecated
-function dispatch_messages_for_networks {
-    export NAMESPACE="produce_messages_for_networks"
-    before_running_command
-
-    if [ -z "${MEMBER_LIST}" ];
-    then
-        echo 'Please export a valid member list: export MEMBER_LIST="bob,alice"'
-
-        return
-    fi
-
-    run_command 'bin/console import-network --member-list="'${MEMBER_LIST}'"'
-}
-
-# @deprecated
-function dispatch_messages_for_timely_statuses {
-    export NAMESPACE="produce_messages_for_timely_statuses"
-    before_running_command
-
-    run_command 'bin/console weaving_the_web:amqp:produce:timely_statuses'
-}
-
-# @deprecated
-function dispatch_messages_from_member_timeline {
-    export NAMESPACE="produce_messages_from_member_timeline"
-
-    before_running_command
-    if [ -z "${username}" ];
-    then
-        echo 'Please export a valid username: export username="bob"'
-
-        return
-    fi
-
-    run_command 'bin/console weaving_the_web:amqp:produce:user_timeline --screen_name="'"${username}"'" -vvv'
-}
-
 function before_running_command() {
     make remove-php-container
 
@@ -1059,19 +894,6 @@ function run_command {
     echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
 
     execute_command "${rabbitmq_output_log}" "${rabbitmq_error_log}"
-}
-
-# @deprecated
-function dispatch_messages_for_aggregates_list {
-    export in_priority=1
-    export NAMESPACE="produce_aggregates_messages"
-    dispatch_messages_for_news_list
-}
-
-# @deprecated
-function dispatch_messages_for_search_query {
-    export NAMESPACE="produce_search_query"
-    dispatch_messages_for_news_list
 }
 
 function dispatch_messages_for_news_list {
