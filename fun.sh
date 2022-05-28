@@ -414,14 +414,16 @@ function cache_clear_warmup() {
         docker compose \
             -f ./provisioning/containers/docker-compose.yaml \
             -f ./provisioning/containers/docker-compose.override.yaml \
-            up -d app
+            up \
+            --detach \
+            app
     fi
 
     docker compose \
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
         exec \
-        -u "${WORKER_UID}:${WORKER_GID}" \
+        --user "${WORKER_UID}:${WORKER_GID}" \
         app \
         /bin/bash -c '. /scripts/clear-cache.sh'
 
