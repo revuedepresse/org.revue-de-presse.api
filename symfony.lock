@@ -150,9 +150,6 @@
     "friendsofphp/proxy-manager-lts": {
         "version": "1.x-dev"
     },
-    "fzaninotto/faker": {
-        "version": "1.9-dev"
-    },
     "google/auth": {
         "version": "v1.6.1"
     },
@@ -527,9 +524,6 @@
             "config/packages/test/monolog.yaml"
         ]
     },
-    "symfony/orm-pack": {
-        "version": "dev-master"
-    },
     "symfony/password-hasher": {
         "version": "6.2.x-dev"
     },
@@ -635,9 +629,6 @@
     "symfony/string": {
         "version": "5.x-dev"
     },
-    "symfony/test-pack": {
-        "version": "dev-master"
-    },
     "symfony/translation": {
         "version": "3.3",
         "recipe": {
@@ -670,9 +661,6 @@
             "config/packages/twig.yaml",
             "templates/base.html.twig"
         ]
-    },
-    "symfony/twig-pack": {
-        "version": "dev-master"
     },
     "symfony/validator": {
         "version": "4.3",
