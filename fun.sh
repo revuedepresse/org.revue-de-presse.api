@@ -37,8 +37,6 @@ function _set_file_permissions() {
         return 1;
     fi
 
-    cd ./provisioning/containers || exit
-
     docker compose \
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
