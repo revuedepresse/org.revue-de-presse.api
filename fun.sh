@@ -401,22 +401,28 @@ function migrate_schema_of_write_database() {
     run_php_script "php /var/www/revue-de-presse.org/bin/console doc:mig:mig --em=write" interactive_mode
 }
 
-function install_php_dependencies {
-    local project_dir
-    project_dir="$(get_project_dir)"
+function install {
+    _set_up_configuration_files
 
-    local production_option
-    production_option=''
-    if [ -n "${APP_ENV}" ] && [ "${APP_ENV}" = 'prod' ];
-    then
-        production_option='--apcu-autoloader '
-    fi
+    clean ''
 
-    local command
-    command=$(echo -n '/bin/bash -c "cd '"${project_dir}"' &&
-    source '"${project_dir}"'/bin/install-composer.sh &&
-    php '"${project_dir}"'/composer.phar install '"${production_option}"'--prefer-dist -n"')
-    echo "${command}" | make run-php
+    docker compose \
+        -f ./provisioning/containers/docker-compose.yaml \
+        -f ./provisioning/containers/docker-compose.override.yaml \
+        up -d app
+
+    docker compose \
+        -f ./provisioning/containers/docker-compose.yaml \
+        -f ./provisioning/containers/docker-compose.override.yaml \
+        exec \
+        --user root \
+        -T app \
+        /bin/bash -c 'source /scripts/install-app-requirements.sh'
+
+    docker compose \
+        -f ./provisioning/containers/docker-compose.yaml \
+        -f ./provisioning/containers/docker-compose.override.yaml \
+        down
 }
 
 function run_composer {
