@@ -5,7 +5,7 @@ namespace App\Tests\Twitter\Infrastructure\Api\Repository;
 
 use App\Twitter\Infrastructure\Api\Repository\PublishersListRepository;
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\DBALException as DBALExceptionAlias;
+use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\ParameterType;
 use Faker\Factory;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -139,9 +139,6 @@ QUERY;
         return (int) $publishersListId;
     }
 
-    /**
-     * @throws DBALExceptionAlias
-     */
     private function publishStatus(): void
     {
         $this->tearDownFixtures();
