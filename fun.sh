@@ -305,17 +305,6 @@ function grant_privileges {
         -e "$(cat provisioning/containers/mysql/templates/grant-privileges-to-user.sql)"
 }
 
-function get_project_dir {
-    local project_dir='/var/www/revue-de-presse.org'
-
-    if [ -n "${PROJECT_DIR}" ];
-    then
-        project_dir="${PROJECT_DIR}"
-    fi
-
-    echo "${project_dir}"
-}
-
 function create_database_schema {
     local env="${1}"
 
@@ -400,12 +389,8 @@ function run_composer {
 
     command="${COMMAND}"
 
-    local project_dir
-    project_dir="$(get_project_dir)"
-
     local command
-    command=$(echo -n 'php /bin/bash -c "cd '"${project_dir}"' &&
-    php -dmemory_limit="-1" '"${project_dir}"'/composer.phar "'"${command}")
+    command=$(echo -n 'php /bin/bash -c "php -dmemory_limit="-1" '"${project_dir}"'/composer.phar "'"${command}")
     echo ${command} | make run-php
 }
 
@@ -424,12 +409,8 @@ function run_composer {
 
     command="${COMMAND}"
 
-    local project_dir
-    project_dir="$(get_project_dir)"
-
     local command
-    command=$(echo -n 'php /bin/bash -c "cd '"${project_dir}"' &&
-    php -dmemory_limit="-1" '"${project_dir}"'/composer.phar "'"${command}")
+    command=$(echo -n 'php /bin/bash -c "php -dmemory_limit="-1" '"${project_dir}"'/composer.phar "'"${command}")
     echo ${command} | make run-php
 }
 
