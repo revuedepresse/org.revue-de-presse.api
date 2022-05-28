@@ -1,6 +1,6 @@
 {
-    "name": "weaving-the-web/experiments",
-    "description": "Driving experiments for fun's sake",
+    "name": "revuedepresse/revue-de-presse",
+    "description": "API fournissant une revue quotidienne des publications en provenance des comptes presse français.",
     "autoload": {
         "psr-4": {
             "App\\": "src/"
@@ -15,7 +15,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/WeavingTheWeb/DoctrineExtensions.git"
+            "url": "https://github.com/revuedepresse/DoctrineExtensions.git"
         }
     ],
     "require": {
@@ -82,7 +82,10 @@
         "platform": {
             "php": "7.4.2"
         },
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "symfony/flex": true
+        }
     },
     "minimum-stability": "dev",
     "extra": {
