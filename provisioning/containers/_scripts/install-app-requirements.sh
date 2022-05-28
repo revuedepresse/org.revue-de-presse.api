@@ -106,7 +106,7 @@ function install_app_requirements() {
         -type f \
         -not -path "${project_dir}"'/bin' \
         -exec /bin/bash -c 'export file_path="{}" && \chown --recursive '"${WORKER_UID}"':'"${WORKER_GID}"' "${file_path}"' \; \
-        -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive ug+x "${file_path}"' \; \
+        -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive ug+x "${file_path}"' \; && \
         printf '%s.%s' 'Successfully changed directories permissions' $'\n'
 }
 install_app_requirements
