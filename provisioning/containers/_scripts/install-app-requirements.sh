@@ -66,7 +66,7 @@ function install_app_requirements() {
     \sed -E 's/__SOCK__/revue-de-presse.org/g' | \
     \sed -E 's/__UID__/'"${WORKER_UID}"'/g' | \
     \sed -E 's/__GID__/'"${WORKER_GID}"'/g' \
-    > '/templates/www.conf' && \
+    > "${project_dir}/provisioning/containers/service/templates/www.conf" && \
     printf '%s.%s' 'Successfully copied php-fpm template' $'\n'
 
     echo '--- BEGIN ---'
