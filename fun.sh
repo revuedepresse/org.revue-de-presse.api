@@ -191,7 +191,7 @@ function purge_queues() {
 function stop_workers() {
     cd provisioning/containers || exit
 
-    docker-compose run --rm worker bin/console messenger:stop-workers
+    docker compose run --rm worker bin/console messenger:stop-workers
 }
 
 function execute_command () {
@@ -788,16 +788,22 @@ function run_php_fpm() {
     extensions_volume="-v ${extensions}:/usr/local/etc/php/conf.d/extensions.ini"
 
     local command
-    command=$(echo -n 'docker run \
---restart=always \
--d -p '${host}''${port}':9000 \
--e '"${symfony_environment}"' '"${extensions_volume}"' \
--v '`pwd`'/provisioning/containers/service/templates/www.conf:/usr/local/etc/php-fpm.d/www.conf \
--v '`pwd`'/provisioning/containers/service/templates/docker.conf:/usr/local/etc/php-fpm.d/docker.conf \
--v '`pwd`'/provisioning/containers/service/templates/empty.conf:/usr/local/etc/php-fpm.d/zz-docker.conf \
-'"${mount}"' \
--v '`pwd`':/var/www/revue-de-presse.org \
---name=php-fpm php-fpm php-fpm'
+    command=$(cat <<-SCRIPT
+docker compose \
+			run \
+			--restart=always \
+			-d \
+			-e '"${symfony_environment}"' '"${extensions_volume}"' \
+			-v '`pwd`'/provisioning/containers/service/templates/www.conf:/usr/local/etc/php-fpm.d/www.conf \
+			-v '`pwd`'/provisioning/containers/service/templates/docker.conf:/usr/local/etc/php-fpm.d/docker.conf \
+			-v '`pwd`'/provisioning/containers/service/templates/empty.conf:/usr/local/etc/php-fpm.d/zz-docker.conf \
+			'"${mount}"' \
+			-v '`pwd`':/var/www/revue-de-presse.org \
+			up \
+			--detach
+			php-fpm \
+			php-fpm
+SCRIPT
 )
 
     echo 'About to execute "'"${command}"'"'
@@ -898,7 +904,7 @@ function run_php() {
     cd ./provisioning/containers || exit
 
     local command
-    command=$(echo -n 'docker-compose -f docker-compose.yml exec -T worker '"${arguments}")
+    command=$(echo -n 'docker compose -f docker compose.yml exec -T worker '"${arguments}")
 
     echo 'About to execute '"${command}"
     /bin/bash -c "${command}"
@@ -906,13 +912,13 @@ function run_php() {
 
 function run_stack() {
     cd provisioning/containers || exit
-    docker-compose up
+    docker compose up
     cd ../..
 }
 
 function run_worker() {
     cd provisioning/containers || exit
-    docker-compose up -d worker
+    docker compose up -d worker
     cd ../..
 }
 
