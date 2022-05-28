@@ -141,15 +141,6 @@ services:
             memberSubscriptionRepository:           '@repository.member_subscription'
             networkRepository:                      '@repository.network'
 
-    repository.authentication_token:
-        factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
-        class:   'App\Membership\Infrastructure\Repository\AuthenticationTokenRepository'
-        arguments:
-            - 'App\Membership\Domain\Entity\AuthenticationToken'
-        properties:
-            memberRepository: "@user_manager"
-            authenticator:    "@app.authenticator"
-
     repository.owner:
         factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
         class: 'App\PressMedia\Repository\OwnerRepository'
