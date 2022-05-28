@@ -20,11 +20,21 @@ function install_app_requirements() {
     rm -f "${project_dir}/bin/yaml-lint"
     rm -rf "${project_dir}"'/vendor'
 
+    local APP_SECRET
+    local GITHUB_API_TOKEN
     local WORKER_UID
     local WORKER_GID
-    local GITHUB_API_TOKEN
 
     source "${project_dir}/.env.local"
+
+    if [ -z "${APP_SECRET}" ];
+    then
+
+      printf 'A %s is expected as %s ("%s").%s' 'non-empty string' 'environment variable' 'APP_SECRET' $'\n'
+
+      return 1
+
+    fi
 
     if [ -z "${GITHUB_API_TOKEN}" ];
     then
