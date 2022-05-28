@@ -69,7 +69,7 @@ function clean() {
     then
         printf 'About to remove "%s".%s' "${temporary_directory}" $'\n'
 
-        set_file_permissions "${temporary_directory}"
+        _set_file_permissions "${temporary_directory}"
 
         return 0
     fi
