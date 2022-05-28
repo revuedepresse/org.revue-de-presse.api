@@ -50,10 +50,10 @@ services:
             dockerfile: ./service/Dockerfile
         restart: always
         volumes:
-            - "./php-fpm/templates/extensions.ini.dist:/usr/local/etc/php/conf.d/extensions.ini"
-            - "./php-fpm/templates/docker.conf:/usr/local/etc/php-fpm.d/docker.conf"
-            - "./php-fpm/templates/empty.conf:/usr/local/etc/php-fpm.d/zz-docker.conf"
-            - "./php-fpm/templates/www.conf:/usr/local/etc/php-fpm.d/www.conf"
+            - "./service/templates/extensions.ini.dist:/usr/local/etc/php/conf.d/extensions.ini"
+            - "./service/templates/docker.conf:/usr/local/etc/php-fpm.d/docker.conf"
+            - "./service/templates/empty.conf:/usr/local/etc/php-fpm.d/zz-docker.conf"
+            - "./service/templates/www.conf:/usr/local/etc/php-fpm.d/www.conf"
             - "../../:/var/www/revue-de-presse.org"
         env_file:
             - ../../.env.local
