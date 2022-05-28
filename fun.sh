@@ -51,6 +51,19 @@ function _set_file_permissions() {
         /bin/bash -c 'chmod -R ug+w /tmp/remove-me'
 }
 
+function build() {
+    docker compose \
+        --file=./provisioning/containers/docker-compose.yaml \
+        --file=./provisioning/containers/docker-compose.override.yaml \
+        build \
+        --build-arg "WORKER_UID=${WORKER_UID}" \
+        --build-arg "WORKER_GID=${WORKER_GID}" \
+        app \
+        cache \
+        service \
+        wroekr
+}
+
 function kill_existing_consumers {
     local pids
     pids=( $(ps ux | grep "rabbitmq:consumer" | grep -v '/bash' | grep -v grep | cut -d ' ' -f 2-3) )
@@ -606,12 +619,6 @@ function run_rabbitmq_container {
     /bin/bash -c "${cmd}"
 }
 
-function build_php_container() {
-    cd provisioning/containers/php || exit
-
-    docker build -t php .
-}
-
 function remove_exited_containers() {
     /bin/bash -c "docker ps -a | grep Exited | awk ""'"'{print $1}'"'"" | xargs docker rm -f >> /dev/null 2>&1"
 }
@@ -650,12 +657,6 @@ function list_amqp_queues() {
     cd provisioning/containers || exit
 
     /bin/bash -c "docker compose exec messenger watch -n1 'rabbitmqctl list_queues -p ${rabbitmq_vhost}'"
-}
-
-function build_php_fpm_container() {
-    cd provisioning/containers/php-fpm || exit
-
-    docker build -t php-fpm .
 }
 
 function run_php_fpm() {

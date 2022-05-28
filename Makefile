@@ -7,6 +7,9 @@ SHELL:=/bin/bash
 help:
 		@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
+build: ## Build web worker image (PHP FPM)
+		@/bin/bash -c 'source ./fun.sh && build'
+
 clean: ## Remove service container
 		@/bin/bash -c 'source ./fun.sh && clean'
 
@@ -24,9 +27,6 @@ initialize-mysql-volume: ## Set up MySQL container
 
 grant-privileges: ## Grant privileges
 		@/bin/bash -c 'source ./fun.sh && grant_privileges'
-
-build-php-container: ## Build PHP image
-		@/bin/bash -c 'source ./fun.sh && build_php_container'
 
 dispatch-messages-from-news-list: ## Produce messages from news list
 		@/bin/bash -c 'source ./fun.sh && dispatch_messages_for_news_list'
@@ -48,9 +48,6 @@ run-stack: ## Run stack and its dependencies
 
 run-worker: ## Run worker and its dependencies
 		@/bin/bash -c 'source ./fun.sh && run_worker'
-
-build-php-fpm-container: ## Build PHP-FPM image
-		@/bin/bash -c 'source ./fun.sh && build_php_fpm_container'
 
 run-php-fpm: ## Run PHP-FPM worker
 		@/bin/bash -c 'source ./fun.sh && run_php_fpm'
