@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-export COMPOSE_PROJECT_NAME=revue-de-presse-org
+export COMPOSE_PROJECT_NAME='revue-de-presse-org'
 
 function kill_existing_consumers {
     local pids
