@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -Eeuo pipefail
 
 function get_project_name() {
     local project_name
@@ -1221,3 +1222,4 @@ function follow_today_statuses() {
     | awk '{$1=$2="";print $0}'
 }
 
+set +Eeuo pipefail
