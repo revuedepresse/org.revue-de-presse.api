@@ -64,6 +64,41 @@ function build() {
         wroekr
 }
 
+function clean() {
+    local temporary_directory
+    temporary_directory="${1}"
+
+    if [ -n "${temporary_directory}" ];
+    then
+        printf 'About to remove "%s".%s' "${temporary_directory}" $'\n'
+
+        set_file_permissions "${temporary_directory}"
+
+        return 0
+    fi
+
+    local DEBUG
+
+    source ./.env.local
+
+    docker ps -a |
+        \grep "${COMPOSE_PROJECT_NAME}" |
+        \grep 'app' |
+        awk '{print $1}' |
+        xargs -I{} docker rm -f {}
+
+    if [ -n "${DEBUG}" ];
+    then
+        docker images -a |
+            \grep "${COMPOSE_PROJECT_NAME}" |
+            \grep 'app' |
+            awk '{print $3}' |
+            xargs -I{} docker rmi {}
+
+        build
+    fi
+}
+
 function kill_existing_consumers {
     local pids
     pids=( $(ps ux | grep "rabbitmq:consumer" | grep -v '/bash' | grep -v grep | cut -d ' ' -f 2-3) )
@@ -659,77 +694,22 @@ function list_amqp_queues() {
     /bin/bash -c "docker compose exec messenger watch -n1 'rabbitmqctl list_queues -p ${rabbitmq_vhost}'"
 }
 
-function run_php_fpm() {
-    remove_php_fpm_container
-
-    local port=80
-    if [ -n "${PRESS_REVIEW_PHP_FPM_PORT}" ];
-    then
-        port="${PRESS_REVIEW_PHP_FPM_PORT}"
-    fi
-
-    host host=''
-    if [ -n "${PRESS_REVIEW_PHP_FPM_HOST}" ];
-    then
-        host="${PRESS_REVIEW_PHP_FPM_HOST}"':'
-    fi
-
-    host mount=''
-    if [ -n "${PRESS_REVIEW_PHP_FPM_MOUNT}" ];
-    then
-        mount="${PRESS_REVIEW_PHP_FPM_MOUNT}"
-    fi
-
-    local symfony_environment
-    symfony_environment="$(get_symfony_environment)"
-
-    if [ ! -e "`pwd`/provisioning/containers/php-fpm/templates/.blackfire.ini" ]
-    then
-        /bin/bash -c "cp `pwd`/provisioning/containers/php-fpm/templates/.blackfire.ini{.dist,}";
-    fi
-
-    if [ ! -e "`pwd`/provisioning/containers/php-fpm/templates/zz-blackfire.ini" ];
-    then
-        /bin/bash -c "cp `pwd`/provisioning/containers/php-fpm/templates/zz-blackfire.ini{.dist,}";
-    fi
-
-    local extensions
-    extensions=`pwd`"/provisioning/containers/php-fpm/templates/extensions.ini.dist";
-
-    local extensions_volume
-    extensions_volume="-v ${extensions}:/usr/local/etc/php/conf.d/extensions.ini"
+function start() {
+    clean ''
 
     local command
     command=$(cat <<-SCRIPT
 docker compose \
-			run \
-			--restart=always \
-			-d \
-			-e '"${symfony_environment}"' '"${extensions_volume}"' \
-			-v '`pwd`'/provisioning/containers/service/templates/www.conf:/usr/local/etc/php-fpm.d/www.conf \
-			-v '`pwd`'/provisioning/containers/service/templates/docker.conf:/usr/local/etc/php-fpm.d/docker.conf \
-			-v '`pwd`'/provisioning/containers/service/templates/empty.conf:/usr/local/etc/php-fpm.d/zz-docker.conf \
-			'"${mount}"' \
-			-v '`pwd`':/var/www/revue-de-presse.org \
+      --file=./provisioning/containers/docker-compose.yaml \
+      --file=./provisioning/containers/docker-compose.override.yaml \
 			up \
 			--detach
-			php-fpm \
 			php-fpm
 SCRIPT
 )
 
     echo 'About to execute "'"${command}"'"'
-
     /bin/bash -c "${command}"
-}
-
-function clean {
-    if [ `docker ps -a | grep service -c` -eq 0 ]
-    then
-        return;
-    fi
-
-    docker ps -a | grep fpm | awk '{print $1}' | xargs docker rm -f
 }
 
 function run_php_script() {
