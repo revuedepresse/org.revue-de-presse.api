@@ -757,57 +757,9 @@ function list_amqp_queues() {
     /bin/bash -c "docker-compose ${project_name} exec messenger watch -n1 'rabbitmqctl list_queues -p ${rabbitmq_vhost}'"
 }
 
-function set_permissions_in_apache_container() {
-    sudo rm -rf ./var/cache
-    sudo mkdir ./var/cache
-    sudo chown -R "$(whoami)" ./var/logs ./var
-
-    cd ./provisioning/containers || exit
-    docker-compose exec worker bin/console cache:clear -e prod --no-warmup
-    docker-compose exec worker bin/console cache:clear -e dev --no-warmup
-    cd "../../"
-}
-
-function build_apache_container() {
-    cd provisioning/containers/apache || exit
-    docker build -t apache .
-}
-
-function remove_apache_container {
-    if [ `docker ps -a | grep apache -c` -eq 0 ]
-    then
-        return;
-    fi
-
-    docker ps -a | grep apache | awk '{print $1}' | xargs docker rm -f
-}
-
-function get_apache_container_interactive_shell() {
-    docker exec -ti apache bash
-}
-
-function ensure_blackfire_configuration_files_are_present() {
-    if [ ! -e `pwd`'/provisioning/containers/apache/templates/blackfire/zz-blackfire.ini' ];
-    then
-      cp `pwd`'/provisioning/containers/apache/templates/blackfire/zz-blackfire.ini.dist' \
-        `pwd`'/provisioning/containers/apache/templates/blackfire/zz-blackfire.ini'
-    fi
-
-    if [ ! -e `pwd`'/provisioning/containers/apache/templates/blackfire/agent' ];
-    then
-      cp `pwd`'/provisioning/containers/apache/templates/blackfire/agent.dist' \
-        `pwd`'/provisioning/containers/apache/templates/blackfire/agent'
-    fi
-
-    if [ ! -e `pwd`'/provisioning/containers/apache/templates/blackfire/.blackfire.ini' ];
-    then
-      cp `pwd`'/provisioning/containers/apache/templates/blackfire/.blackfire.ini.dist' \
-        `pwd`'/provisioning/containers/apache/templates/blackfire/.blackfire.ini'
-    fi
-}
-
 function build_php_fpm_container() {
-    cd provisioning/containers/php-fpm
+    cd provisioning/containers/php-fpm || exit
+
     docker build -t php-fpm .
 }
 
