@@ -3,6 +3,23 @@ set -Eeuo pipefail
 
 export COMPOSE_PROJECT_NAME='revue-de-presse-org'
 
+function _set_up_configuration_files() {
+    if [ ! -e ./provisioning/containers/docker-compose.override.yaml ]; then
+        cp ./provisioning/containers/docker-compose.override.yaml{.dist,}
+    fi
+
+    if [ ! -e ./.env.local ]; then
+        cp --verbose ./.env.local{.dist,}
+        touch ./.env
+    fi
+
+    if [ ! -e ./.env ]; then
+        touch ./.env
+    fi
+
+    source ./.env.local
+}
+
 function _set_file_permissions() {
     local temporary_directory
     temporary_directory="${1}"
