@@ -24,16 +24,3 @@ services:
             tokenRepository:                '@repository.access_token'
 
     App\PublishersList\Controller\ListController: '@controller.list'
-    controller.publication:
-        public: true
-        class: 'App\Twitter\Infrastructure\Publication\Controller\PublicationController'
-        arguments:
-            - '%allowed.origin%'
-            - '%kernel.environment%'
-        calls:
-            - [ 'setCache',                 [ '@app.cache.redis' ]]
-            - [ 'setLogger',            [ '@logger' ] ]
-            - [ 'setPublicationRepository', [ '@App\Twitter\Infrastructure\Publication\Repository\PublicationRepository' ]]
-            - [ 'setStatusAccessor',    [ '@App\Twitter\Infrastructure\Twitter\Api\Accessor\StatusAccessor' ]]
-            - [ 'setStatusRepository',  [ '@App\Twitter\Infrastructure\Api\Repository\StatusRepository' ]]
-
