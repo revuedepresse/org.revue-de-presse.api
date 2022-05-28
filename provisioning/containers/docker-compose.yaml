@@ -10,17 +10,15 @@ services:
             - "5672"
         restart: always
         env_file:
-            - ../../.env.local
+            - '../../.env.local'
         volumes:
-            - ../volumes/amqp:/var/lib/rabbitmq
+            - '../volumes/amqp:/var/lib/rabbitmq'
 
     app:
         build:
             context: .
-            dockerfile: ./service/Dockerfile
-        command: tail -f /dev/null
         env_file:
-            - ../../.env.local
+            - '../../.env.local'
         restart: always
         volumes:
             - '../containers/service/templates/extensions.ini.dist:/usr/local/etc/php/conf.d/extensions.ini'
@@ -37,7 +35,7 @@ services:
             - "6379"
         restart: always
         volumes:
-            - ../volumes/cache:/data
+            - '../volumes/cache:/data'
 
     db_read:
         build: ./mysql
@@ -47,7 +45,7 @@ services:
         ports:
             - "127.0.0.1:33062:3306"
         volumes:
-            - ../volumes/db_read:/var/lib/mysql
+            - '../volumes/db_read:/var/lib/mysql'
 
     db_write:
         build: ./mariadb
@@ -57,8 +55,8 @@ services:
         env_file:
             - ../../.env.local
         volumes:
-            - ../volumes/db_write:/var/lib/mysql
-            - ./db_write/templates/docker.cnf:/etc/mysql/mariadb.conf.d/docker.cnf
+            - '../volumes/db_write:/var/lib/mysql'
+            - './db_write/templates/docker.cnf:/etc/mysql/mariadb.conf.d/docker.cnf'
 
     service:
         build:
@@ -72,7 +70,7 @@ services:
             - './service/templates/www.conf:/usr/local/etc/php-fpm.d/www.conf'
             - '../../:/var/www/revue-de-presse.org'
         env_file:
-            - ../../.env.local
+            - '../../.env.local'
         depends_on:
             - cache
         working_dir: '/var/www/revue-de-presse.org'
