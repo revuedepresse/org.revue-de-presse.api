@@ -44,22 +44,6 @@ services:
             - ../volumes/db_write:/var/lib/mysql
             - ./db_write/templates/docker.cnf:/etc/mysql/mariadb.conf.d/docker.cnf
 
-    web:
-        build: ./apache
-        networks:
-            - press-review-network
-        ports:
-            - "127.0.0.1:80:80"
-        volumes:
-            - ../containers/apache/templates:/templates
-            - ../containers/apache/tasks:/tasks
-            - ../../:/var/www/revue-de-presse.org
-        external_links:
-            - mysql
-        depends_on:
-            - cache
-            - worker
-
     web-worker:
         build:
             context: .

@@ -1224,7 +1224,3 @@ function follow_today_statuses() {
     | awk '{$1=$2="";print $0}'
 }
 
-function restart_web_server() {
-    cd ./provisioning/containers || exit
-    docker-compose restart web
-}

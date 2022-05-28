@@ -132,6 +132,3 @@ run-php-features-tests: ## Run features tests with Behat
 
 run-composer: # Run composer
 		@/bin/bash -c 'source ./fun.sh && run_composer'
-
-restart-web-server: # Restart web Server
-		@/bin/bash -c 'source ./fun.sh && restart_web_server'
