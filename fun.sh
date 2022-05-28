@@ -10,7 +10,6 @@ function _set_up_configuration_files() {
 
     if [ ! -e ./.env.local ]; then
         cp --verbose ./.env.local{.dist,}
-        touch ./.env
     fi
 
     if [ ! -e ./.env ]; then
