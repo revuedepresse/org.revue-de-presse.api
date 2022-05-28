@@ -12,24 +12,6 @@ security:
                 manager_name:   default
 
     firewalls:
-        dev:
-            pattern: ^/(_(profiler|wdt)|css|images|js)/
-            security: false
-
-        # @see https://symfony.com/doc/current/security/multiple_guard_authenticators.html#multiple-authenticators-with-separate-entry-points
-        auth0:
-            pattern: '^/api/twitter/admin'
-
-            logout: ~
-
-            provider: user_provider
-
-            guard:
-                authenticators:
-                    - app.auth0_token_authenticator
-
-            stateless: true
-
         main:
             anonymous: ~
 

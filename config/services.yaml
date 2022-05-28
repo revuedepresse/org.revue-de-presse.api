@@ -192,13 +192,6 @@ services:
 
     App\Twitter\Infrastructure\Cache\RedisCache: '@app.cache.redis'
 
-    app.authenticator:
-        class: 'App\Membership\Infrastructure\Security\Authentication\Authenticator'
-        properties:
-            authenticationTokenRepository:  '@repository.authentication_token'
-            authorizedIss:                  '%authorized_iss%'
-            validAudience:                  '%valid_audience%'
-
     app.event_subscriber.console:
         class: 'App\Twitter\Infrastructure\Console\EventSubscriber\ConsoleEventsSubscriber'
         properties:
