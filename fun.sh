@@ -696,33 +696,6 @@ function remove_exited_containers() {
     /bin/bash -c "docker ps -a | grep Exited | awk ""'"'{print $1}'"'"" | xargs docker rm -f >> /dev/null 2>&1"
 }
 
-function remove_php_container() {
-    local namespace=''
-    if [ -n "${NAMESPACE}" ];
-    then
-        namespace=' | grep '"'"${NAMESPACE}"'"
-    fi
-
-    remove_exited_containers
-
-    local running_containers_matching_namespace="docker ps -a | grep hours | grep php-""${namespace}"
-
-    local running_containers
-    running_containers=$(/bin/bash -c "${running_containers_matching_namespace} | grep -c ''")
-
-    if [ "${running_containers}" -eq 0 ];
-    then
-        echo 'No more PHP container to be removed'
-
-        return
-    fi
-
-    command="${running_containers_matching_namespace} | awk '{print "'$1'"}' | xargs docker rm -f >> /dev/null 2>&1"
-    echo '=> About to execute command "'"${command}"'"'
-
-    /bin/bash -c "${command}" || echo 'No more container to be removed'
-}
-
 function list_amqp_queues() {
     local rabbitmq_vhost
     rabbitmq_vhost="$(cat <(cat .env.local | grep STATUS=amqp | sed -E 's#.+(/.+)/[^/]*$#\1#' | sed -E 's/\/%2f/\//g'))"
@@ -821,24 +794,6 @@ function run_php_script() {
     /bin/bash -c "${command}"
 }
 
-function run_php() {
-    local arguments
-    arguments="$(cat -)"
-
-    if [ -z "${arguments}" ];
-    then
-        arguments="${ARGUMENT}"
-    fi
-
-    cd ./provisioning/containers || exit
-
-    local command
-    command=$(echo -n 'docker compose -f docker compose.yml exec -T worker '"${arguments}")
-
-    echo 'About to execute '"${command}"
-    /bin/bash -c "${command}"
-}
-
 function run_stack() {
     cd provisioning/containers || exit
     docker compose up
@@ -849,10 +804,6 @@ function run_worker() {
     cd provisioning/containers || exit
     docker compose up -d worker
     cd ../..
-}
-
-function keep_php_container_running() {
-    echo 'php -r "while (true) { sleep(1); } "' | make run-php
 }
 
 function ensure_log_files_exist() {
