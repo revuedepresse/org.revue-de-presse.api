@@ -14,6 +14,22 @@ services:
         volumes:
             - ../volumes/amqp:/var/lib/rabbitmq
 
+    app:
+        build:
+            context: .
+            dockerfile: ./service/Dockerfile
+        command: tail -f /dev/null
+        env_file:
+            - ../../.env.local
+        restart: always
+        volumes:
+            - '../containers/service/templates/extensions.ini.dist:/usr/local/etc/php/conf.d/extensions.ini'
+            - '../containers/service/templates:/templates'
+            - '../volumes/app:/root/.composer'
+            - '../../:/var/www/revue-de-presse.org'
+            - '../../../shared:/var/www/shared'
+        working_dir: '/var/www/revue-de-presse.org'
+
     cache:
         image: redis
         command: redis-server --appendonly yes
@@ -44,21 +60,22 @@ services:
             - ../volumes/db_write:/var/lib/mysql
             - ./db_write/templates/docker.cnf:/etc/mysql/mariadb.conf.d/docker.cnf
 
-    web-worker:
+    service:
         build:
             context: .
             dockerfile: ./service/Dockerfile
         restart: always
         volumes:
-            - "./service/templates/extensions.ini.dist:/usr/local/etc/php/conf.d/extensions.ini"
-            - "./service/templates/docker.conf:/usr/local/etc/php-fpm.d/docker.conf"
-            - "./service/templates/empty.conf:/usr/local/etc/php-fpm.d/zz-docker.conf"
-            - "./service/templates/www.conf:/usr/local/etc/php-fpm.d/www.conf"
-            - "../../:/var/www/revue-de-presse.org"
+            - './service/templates/extensions.ini.dist:/usr/local/etc/php/conf.d/extensions.ini'
+            - './service/templates/docker.conf:/usr/local/etc/php-fpm.d/docker.conf'
+            - './service/templates/empty.conf:/usr/local/etc/php-fpm.d/zz-docker.conf'
+            - './service/templates/www.conf:/usr/local/etc/php-fpm.d/www.conf'
+            - '../../:/var/www/revue-de-presse.org'
         env_file:
             - ../../.env.local
         depends_on:
             - cache
+        working_dir: '/var/www/revue-de-presse.org'
 
     worker:
         build:
