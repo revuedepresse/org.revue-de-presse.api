@@ -12,11 +12,8 @@ use App\Twitter\Domain\Publication\TaggedStatus;
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Twitter\Domain\Publication\Repository\ExtremumAwareInterface;
 use App\Twitter\Infrastructure\Publication\Mapping\MappingAwareInterface;
-use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
-use App\Twitter\Infrastructure\Twitter\Collector\PublicationCollector;
 use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\DBAL\Exception;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
 use Doctrine\ORM\OptimisticLockException;
@@ -148,7 +145,6 @@ class StatusRepository extends ArchivedStatusRepository
      * @param $screenName
      *
      * @return MemberInterface
-     * @throws DBALException
      * @throws NotFoundStatusException
      */
     public function updateLastStatusPublicationDate($screenName): MemberInterface
@@ -444,7 +440,6 @@ QUERY;
     /**
      * @param string $screenName
      * @return null|Status
-     * @throws DBALException
      */
     private function getLastKnownStatusForMemberHavingScreenName(string $screenName)
     {
@@ -473,7 +468,6 @@ QUERY;
      * @param string $screenName
      * @return Status
      * @throws NotFoundStatusException
-     * @throws DBALException
      */
     private function getLastKnownStatusFor(string $screenName): StatusInterface {
         $result = $this->howManyStatusesForMemberHavingScreenName($screenName);
