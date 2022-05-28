@@ -90,7 +90,3 @@ services:
         volumes:
             - ../volumes/redis:/data
 
-networks:
-    press-review-network:
-        external:
-            name: press-review-network

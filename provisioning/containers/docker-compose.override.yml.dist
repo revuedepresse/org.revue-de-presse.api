@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+    web-worker:
+        build: ./php-fpm
+        restart: always
+        volumes:
+            - "./php-fpm/templates/extensions.ini.dist:/usr/local/etc/php/conf.d/extensions.ini"
+            - "./php-fpm/templates/zz-docker.conf:/usr/local/etc/php-fpm.d/zz-docker.conf"
+            - "./php-fpm/templates/zz-blackfire.ini:/usr/local/etc/php/conf.d/zz-blackfire.ini"
+            - "./php-fpm/templates/.blackfire.ini:/root/.blackfire.ini"
+            - "./apache/templates/blackfire/agent:/etc/blackfire/agent"
+            - "./php-fpm/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini"
+            - "./php-fpm/templates/press-review.conf:/usr/local/etc/php-fpm.d/www.conf"
+            - "./php-fpm/templates/docker.conf:/usr/local/etc/php-fpm.d/docker.conf"
+            - "../../:/var/www/api.revue-de-presse.org"
+        env_file:
+            - ../../.env.local
+        depends_on:
+            - cache
+
+networks:
+    press-review-network:
+        driver: bridge
+        ipam:
+            config:
+                - ip-range: 172.18.0.0/16
+                  subnet: 172.18.0.0/16
+                  gateway: 172.18.0.1
