@@ -74,33 +74,40 @@ function install_app_requirements() {
     echo '--- END ---'
 
     find "${project_dir}"  \
-      -maxdepth 1 \
-      -executable \
-      -readable \
-      -type d \
-      -not -path "${project_dir}"'/.git/**/*' \
-      -exec /bin/bash -c 'export file_path="{}" && \chown --recursive '"${WORKER_UID}"':'"${WORKER_GID}"' "${file_path}"' \; \
-      -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive og-rwx "${file_path}"' \; \
-      -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive g+rx "${file_path}"' \; && \
-      printf '%s.%s' 'Successfully changed directories permissions' $'\n'
-
-      find "${project_dir}" \
-      -maxdepth 2 \
-      -executable \
-      -readable \
-      -path "${project_dir}"'/var' \
-      -type d \
-      -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive g+w "${file_path}"' \; && \
-      printf '%s.%s' 'Successfully made var directories writable' $'\n'
+        -maxdepth 1 \
+        -executable \
+        -readable \
+        -type d \
+        -not -path "${project_dir}"'/.git/**/*' \
+        -exec /bin/bash -c 'export file_path="{}" && \chown --recursive '"${WORKER_UID}"':'"${WORKER_GID}"' "${file_path}"' \; \
+        -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive og-rwx "${file_path}"' \; \
+        -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive g+rx "${file_path}"' \; && \
+        printf '%s.%s' 'Successfully changed directories permissions' $'\n'
 
     find "${project_dir}" \
-      -type f \
-      -readable \
-      -not -path "${project_dir}"'/.git/**/*' \
-      -exec /bin/bash -c 'export file_path="{}" && \chown '"${WORKER_UID}"':'"${WORKER_GID}"' "${file_path}"' \; \
-      -exec /bin/bash -c 'export file_path="{}" && \chmod og-rwx "${file_path}"' \; \
-      -exec /bin/bash -c 'export file_path="{}" && \chmod g+r "${file_path}"' \; && \
-      printf '%s.%s' 'Successfully changed files permissions' $'\n'
+        -maxdepth 2 \
+        -executable \
+        -readable \
+        -path "${project_dir}"'/var' \
+        -type d \
+        -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive g+w "${file_path}"' \; && \
+        printf '%s.%s' 'Successfully made var directories writable' $'\n'
+
+    find "${project_dir}" \
+        -type f \
+        -readable \
+        -not -path "${project_dir}"'/.git/**/*' \
+        -exec /bin/bash -c 'export file_path="{}" && \chown '"${WORKER_UID}"':'"${WORKER_GID}"' "${file_path}"' \; \
+        -exec /bin/bash -c 'export file_path="{}" && \chmod og-rwx "${file_path}"' \; \
+        -exec /bin/bash -c 'export file_path="{}" && \chmod g+r "${file_path}"' \; && \
+        printf '%s.%s' 'Successfully changed files permissions' $'\n'
+
+    find "${project_dir}"  \
+        -type f \
+        -not -path "${project_dir}"'/bin' \
+        -exec /bin/bash -c 'export file_path="{}" && \chown --recursive '"${WORKER_UID}"':'"${WORKER_GID}"' "${file_path}"' \; \
+        -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive ug+x "${file_path}"' \; \
+        printf '%s.%s' 'Successfully changed directories permissions' $'\n'
 }
 install_app_requirements
 

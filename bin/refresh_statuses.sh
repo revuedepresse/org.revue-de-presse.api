@@ -9,4 +9,4 @@ fi
 
 source "${current_directory}/fun.sh"
 
-consume_amqp_lively_status_messages
+refresh_statuses
