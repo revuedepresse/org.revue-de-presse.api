@@ -10,18 +10,6 @@ help:
 remove-mysql-container: ## Remove MySQL container
 		@/bin/bash -c 'source ./fun.sh && remove_mysql_container'
 
-build-apache-container: ## Build Apache image
-		@/bin/bash -c 'source ./fun.sh && build_apache_container'
-
-set-permissions-in-apache-container: # Set permissions in Apache container
-		@/bin/bash -c 'source ./fun.sh && set_permissions_in_apache_container'
-
-get-apache-interactive-shell: ## Get Apache interactive shell
-		@/bin/bash -c 'source ./fun.sh && get_apache_container_interactive_shell'
-
-remove-apache-container: ## Remove Apache container
-		@/bin/bash -c 'source ./fun.sh && remove_apache_container'
-
 run-mysql-container: ## Run MySQL container (https://hub.docker.com/_/mysql/)
 		@/bin/bash -c 'source ./fun.sh && run_mysql_container'
 
