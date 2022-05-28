@@ -82,7 +82,9 @@ services:
             context: .
             dockerfile: ./worker/Dockerfile
         volumes:
+            - '../volumes/app:/root/.composer'
             - '../../:/var/www/revue-de-presse.org'
+            - '../../../shared:/var/www/shared'
         depends_on:
             - amqp
         working_dir: '/var/www/revue-de-presse.org'
