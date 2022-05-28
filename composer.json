@@ -1,6 +1,6 @@
 {
     "name": "revuedepresse/revue-de-presse",
-    "description": "API fournissant une revue quotidienne des publications en provenance des comptes presse français.",
+    "description": "API fournissant une revue quotidienne des publications en provenance des comptes de la presse française.",
     "autoload": {
         "psr-4": {
             "App\\": "src/"
@@ -12,61 +12,56 @@
     "autoload-dev": {
         "psr-4": { "App\\Tests\\": "tests/" }
     },
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/revuedepresse/DoctrineExtensions.git"
-        }
-    ],
     "require": {
-        "php": ">=7.2.9",
+        "php": ">=8.1",
         "ext-bcmath": "*",
         "ext-json": "*",
         "ext-mbstring": "*",
         "ext-mysqli": "*",
         "ext-pdo": "*",
-        "abraham/twitteroauth": "dev-main",
-        "auth0/auth0-php": "~5.0",
-        "beberlei/doctrineextensions": "dev-master",
+        "abraham/twitteroauth": "4.0",
+        "beberlei/doctrineextensions": "^1.3.0",
         "doctrine/doctrine-bundle": "^2.2",
         "doctrine/doctrine-migrations-bundle": "^3.1",
         "doctrine/inflector": "*",
         "doctrine/migrations": "^3.0",
         "doctrine/orm": "^2.8",
-        "fabpot/goutte": "^3.2@dev",
-        "fzaninotto/faker": "^1.9@dev",
-        "guzzle/guzzle": "3.3.1",
-        "incenteev/composer-parameter-handler": "~2.0",
-        "kreait/firebase-php": "~4.18",
+        "fabpot/goutte": "^4.0",
+        "fzaninotto/faker": "^1.9",
+        "guzzlehttp/guzzle": "^7.4",
+        "incenteev/composer-parameter-handler": "^2.0",
+        "kreait/firebase-bundle": "^4.0",
         "ocramius/package-versions": "^1.9",
         "ocramius/proxy-manager": "2.2.3",
-        "predis/predis": "^2.0@dev",
-        "ramsey/uuid-doctrine": "dev-master",
-        "scienta/doctrine-json-functions": "~4.1",
+        "predis/predis": "^1.1",
+        "ramsey/uuid-doctrine": "^1.8",
+        "scienta/doctrine-json-functions": "^4.1",
         "sensio/framework-extra-bundle": "^5.6",
-        "symfony/console": "^5.2",
-        "symfony/dotenv": "^5.2",
-        "symfony/flex": "^1.10",
-        "symfony/framework-bundle": "^5.2",
-        "symfony/messenger": "^5.2",
-        "symfony/monolog-bundle": "^3.6",
-        "symfony/orm-pack": "dev-main",
-        "symfony/profiler-pack": "dev-main",
-        "symfony/proxy-manager-bridge": "^5.2",
-        "symfony/security-bundle": "^5.2",
-        "symfony/translation": "^5.2",
-        "symfony/twig-pack": "dev-main",
-        "symfony/validator": "^5.2",
-        "thecodingmachine/safe": "^0.1.0@dev"
+        "symfony/console": "^5.4",
+        "symfony/dotenv": "^5.4",
+        "symfony/flex": "^2.1",
+        "symfony/framework-bundle": "^5.4",
+        "symfony/messenger": "^5.4",
+        "symfony/monolog-bundle": "^3.8",
+        "symfony/proxy-manager-bridge": "^5.4",
+        "symfony/security-bundle": "^5.4",
+        "symfony/translation": "^5.4",
+        "symfony/twig-bundle": "^5.4",
+        "symfony/validator": "^5.4",
+        "thecodingmachine/safe": "^2.2.0",
+        "twig/extra-bundle": "^2.12|^3.0",
+        "twig/twig": "^2.12|^3.0"
     },
     "require-dev": {
         "behat/behat": "^3.8",
         "doctrine/doctrine-fixtures-bundle": "^3.3@dev",
         "friends-of-behat/symfony-extension": "^2.0",
-        "phpunit/phpunit": "7.1.5",
+        "phpunit/phpunit": "^9.5",
         "roave/security-advisories": "dev-latest",
-        "symfony/maker-bundle": "^1.0@dev",
-        "symfony/test-pack": "dev-main"
+        "symfony/browser-kit": "^5.4",
+        "symfony/css-selector": "^5.4",
+        "symfony/maker-bundle": "^1.43",
+        "symfony/phpunit-bridge": "6.2.x-dev"
     },
     "scripts": {
         "auto-scripts": {
@@ -80,7 +75,7 @@
     "config": {
         "bin-dir": "bin",
         "platform": {
-            "php": "7.4.2"
+            "php": "8.1.6"
         },
         "sort-packages": true,
         "allow-plugins": {
