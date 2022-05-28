@@ -1,4 +1,3 @@
-
 bin/doctrine
 bin/doctrine-dbal
 bin/doctrine-migrations
@@ -11,17 +10,17 @@ bin/sql-formatter
 bin/yaml-lint
 bin/var-dump-server
 
-build/*
-!build/.gitignore
 composer.phar
+
 provisioning/containers/docker-compose.override.yml
 provisioning/containers/mysql/templates/mysql/my.cnf
+provisioning/containers/service/templates/www.conf
+
 provisioning/volumes/mysql/*
 provisioning/volumes/mysql*/*
 vendor
 public/graphs
 
-###> symfony/framework-bundle ###
 /.env.local
 /.env.local.php
 /.env.*.local
@@ -31,17 +30,12 @@ public/graphs
 /var/cache
 /var/logs
 /vendor/
-###< symfony/framework-bundle ###
-
-###> phpunit/phpunit ###
 /phpunit.xml
 .phpunit.result.cache
-###< phpunit/phpunit ###
-
-###> symfony/phpunit-bridge ###
 .phpunit
 .phpunit.result.cache
 /phpunit.xml
-###< symfony/phpunit-bridge ###
 
 public/emoji-data/
+
+
