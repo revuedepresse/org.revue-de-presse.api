@@ -11,13 +11,15 @@ function clean() {
 }
 
 function install_shared_dependencies() {
+    echo 'deb [trusted=yes] https://repo.symfony.com/apt/ /' | tee /etc/apt/sources.list.d/symfony-cli.list
+
     # Update package source repositories
     apt-get update
 
-   mkdir \
-      --verbose \
-      --parents \
-      /var/www/revue-de-presse.org
+    mkdir \
+        --verbose \
+        --parents \
+        /var/www/revue-de-presse.org
 
     if [ $(cat /etc/group | grep "${WORKER_GID}" -c) -eq 0 ]; then
         groupadd \
@@ -44,6 +46,7 @@ function install_shared_dependencies() {
         libicu-dev \
         librabbitmq-dev \
         procps \
+        symfony-cli \
         tini \
         unzip \
         wget
