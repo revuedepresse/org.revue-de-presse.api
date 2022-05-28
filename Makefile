@@ -33,6 +33,9 @@ grant-privileges: ## Grant privileges
 dispatch-messages-from-news-list: ## Produce messages from news list
 	@/bin/bash -c 'source ./fun.sh && dispatch_messages_for_news_list'
 
+install: ## Install requirements
+	@/bin/bash -c 'source fun.sh && install'
+
 install-php-dependencies: ## Install PHP dependencies (APP_ENV=prod)
 	@/bin/bash -c 'source ./fun.sh && install_php_dependencies'
 
