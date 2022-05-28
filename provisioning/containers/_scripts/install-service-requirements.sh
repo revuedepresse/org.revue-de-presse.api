@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+function install_service_requirements() {
+  # Update package source repositories
+  apt-get update
+
+  # Install debian packages
+  apt-get install --assume-yes \
+      apt-utils \
+      ca-certificates \
+      git \
+      libcurl4-gnutls-dev \
+      libicu-dev \
+      procps \
+      tini \
+      unzip \
+      wget
+
+    docker-php-ext-install \
+        bcmath \
+        mysqli \
+        intl \
+        pcntl \
+        pdo_mysql \
+        sockets
+
+    cd /tmp || exit
+    wget https://github.com/xdebug/xdebug/archive/3.1.4.zip
+    unzip 3.1.4.zip
+    cd xdebug-3.1.4
+    phpize .
+    ./configure --with-php-config="$(which php-config)"
+    make
+    make install
+
+    pecl install apcu-5.1.19
+    docker-php-ext-enable apcu0
+
+    cd /tmp || exit
+    wget https://github.com/DataDog/dd-trace-php/archive/0.74.0.tar.gz -O /tmp/datadog-php-tracer.tar.gz
+    tar -xvzf /tmp/datadog-php-tracer.tar.gz
+
+    cd dd-trace-php-0.74.0 || exit
+    phpize .
+    ./configure --with-php-config="$(which php-config)"
+    make
+    make install
+
+    if [ $(cat /etc/group | grep "${WORKER_GID}" -c) -eq 0 ]; then
+        groupadd \
+            --gid "${WORKER_GID}" \
+            service
+    fi
+
+    if [ $(cat /etc/passwd | grep "${WORKER_UID}" -c) -eq 0 ]; then
+        useradd \
+            --shell /usr/sbin/nologin \
+            --uid ${WORKER_UID} \
+            --gid ${WORKER_GID} \
+            --no-user-group \
+            --no-create-home \
+            service
+    fi
+
+    # Remove packages installed with apt except for tini
+    apt-get remove --assume-yes build-essential gcc build-essential wget
+    apt-get autoremove --assume-yes &&
+    apt-get purge --assume-yes
+    apt-get clean &&
+    rm -rf /var/lib/apt/lists/*
+}
+install_service_requirements
+
+set -Eeuo pipefail
+
