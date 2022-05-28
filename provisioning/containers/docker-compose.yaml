@@ -5,7 +5,7 @@ services:
     amqp:
         build:
             context: .
-            dockerfile: ./amqp/Dockerfile
+            dockerfile: './amqp/Dockerfile'
         expose:
             - "5672"
         restart: always
@@ -17,14 +17,13 @@ services:
     app:
         build:
             context: .
-            dockerfile: ./worker/Dockerfile
+            dockerfile: './worker/Dockerfile'
         env_file:
             - '../../.env.local'
         restart: always
         volumes:
             - '../containers/service/templates/extensions.ini.dist:/usr/local/etc/php/conf.d/extensions.ini'
             - '../containers/service/templates:/templates'
-            - '../volumes/app:/root/.composer'
             - '../../:/var/www/revue-de-presse.org'
             - '../../../shared:/var/www/shared'
         working_dir: '/var/www/revue-de-presse.org'
@@ -42,7 +41,7 @@ services:
         build: ./mysql
         restart: always
         env_file:
-            - ../../.env.local
+            - '../../.env.local'
         ports:
             - "127.0.0.1:33062:3306"
         volumes:
@@ -54,7 +53,7 @@ services:
         ports:
             - "127.0.0.1:33061:3306"
         env_file:
-            - ../../.env.local
+            - '../../.env.local'
         volumes:
             - '../volumes/db_write:/var/lib/mysql'
             - './db_write/templates/docker.cnf:/etc/mysql/mariadb.conf.d/docker.cnf'
@@ -62,7 +61,7 @@ services:
     service:
         build:
             context: .
-            dockerfile: ./service/Dockerfile
+            dockerfile: './service/Dockerfile'
         restart: always
         volumes:
             - './service/templates/extensions.ini.dist:/usr/local/etc/php/conf.d/extensions.ini'
@@ -79,9 +78,10 @@ services:
     worker:
         build:
             context: .
-            dockerfile: ./worker/Dockerfile
+            dockerfile: './worker/Dockerfile'
+        env_file:
+            - '../../.env.local'
         volumes:
-            - '../volumes/app:/root/.composer'
             - '../../:/var/www/revue-de-presse.org'
             - '../../../shared:/var/www/shared'
         depends_on:
