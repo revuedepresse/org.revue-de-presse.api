@@ -401,6 +401,36 @@ function migrate_schema_of_write_database() {
     run_php_script "php /var/www/revue-de-presse.org/bin/console doc:mig:mig --em=write" interactive_mode
 }
 
+function cache_clear_warmup() {
+    local WORKER_UID
+    local WORKER_GID
+
+    _set_up_configuration_files
+
+    local reuse_existing_container
+    reuse_existing_container="${1}"
+
+    if [ -z "${reuse_existing_container}" ];
+    then
+        remove_container_image 'app'
+
+        docker compose \
+            -f ./provisioning/containers/docker-compose.yaml \
+            -f ./provisioning/containers/docker-compose.override.yaml \
+            up -d app
+    fi
+
+    docker compose \
+        -f ./provisioning/containers/docker-compose.yaml \
+        -f ./provisioning/containers/docker-compose.override.yaml \
+        exec \
+        -u "${WORKER_UID}:${WORKER_GID}" \
+        app \
+        /bin/bash -c '. /scripts/clear-cache.sh'
+
+    clean ''
+}
+
 function install {
     _set_up_configuration_files
 
@@ -423,6 +453,8 @@ function install {
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
         down
+
+    cache_clear_warmup --reuse-existing-container
 }
 
 function run_composer {
