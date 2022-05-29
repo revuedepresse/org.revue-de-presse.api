@@ -16,7 +16,7 @@ bin/var-dump-server
 
 composer.phar
 
-provisioning/containers/docker-compose.override.yml
+docker-compose.override.yaml
 provisioning/containers/mysql/templates/mysql/my.cnf
 provisioning/containers/service/templates/www.conf
 
