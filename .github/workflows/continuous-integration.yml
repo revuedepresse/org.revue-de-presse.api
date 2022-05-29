@@ -6,9 +6,6 @@ on:
   pull_request:
     branches: [ main ]
 
-permissions:
-  contents: read
-
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -43,7 +40,7 @@ jobs:
         uses: php-actions/composer@v6
         with:
           php_version: ${{ matrix.php-version }}
-          php_extensions: amqp bcmath intl json mbstring mysqli pcntl pdo_mysql sodium sockets
+          php_extensions: amqp bcmath intl mysqli pcntl pdo_mysql sockets
           version: 2.x
 
       - name: Remove auth.json file
