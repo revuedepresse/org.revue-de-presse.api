@@ -62,9 +62,9 @@ jobs:
 
       - name: Copy test environment variables configuration file
         run: >
-          \cat ${GITHUB_WORKSPACE}/.env.test.dist |
-          sed -E 's/_APP_SECRET_/'"${APP_SECRET}"/'#g' |
-          sed -E 's/_PASS_/'"${MARIADB_ROOT_PASSWORD}"'/g' > ${GITHUB_WORKSPACE}/.env.local
+          \cat $GITHUB_WORKSPACE/.env.test.dist |
+          sed -E 's/_APP_SECRET_/'${{ secrets.APP_SECRET }}/'#g' |
+          sed -E 's/_PASS_/'${{ secrets.MARIADB_ROOT_PASSWORD }}'/g' > $GITHUB_WORKSPACE/.env.local
 
       - name: Clear cache
         run: APP_ENV=test php bin/console cache:clear -e test
