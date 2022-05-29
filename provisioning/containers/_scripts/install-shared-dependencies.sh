@@ -59,38 +59,21 @@ function install_shared_dependencies() {
         intl \
         pcntl \
         pdo_mysql \
-        sockets
+        sockets \
+        sodium
 
+    wget https://github.com/xdebug/xdebug/archive/3.1.4.zip -O /tmp/3.1.4.zip
     cd /tmp || exit
-    wget https://github.com/xdebug/xdebug/archive/3.1.4.zip
-    unzip 3.1.4.zip
-    cd xdebug-3.1.4
+    unzip /tmp/3.1.4.zip
+    cd xdebug-3.1.4 || exit
     phpize .
     ./configure --with-php-config="$(which php-config)"
     make
     make install
 
-    cd /tmp || exit
-    wget https://pecl.php.net/get/libsodium-2.0.23.tgz
-    tar -xvzf /tmp/libsodium-2.0.23.tgz
-    cd libsodium-2.0.23
-    phpize .
-    ./configure --with-php-config="$(which php-config)"
-    make
-    make install
-
-    pecl channel-update pecl.php.net
-
-    pecl install apcu-5.1.19
-    docker-php-ext-enable apcu
-
-    pecl install libsodium
-    docker-php-ext-enable libsodium
-
-    cd /tmp || exit
     wget https://github.com/DataDog/dd-trace-php/archive/0.74.0.tar.gz -O /tmp/datadog-php-tracer.tar.gz
+    cd /tmp || exit
     tar -xvzf /tmp/datadog-php-tracer.tar.gz
-
     cd dd-trace-php-0.74.0 || exit
     phpize .
     ./configure --with-php-config="$(which php-config)"
