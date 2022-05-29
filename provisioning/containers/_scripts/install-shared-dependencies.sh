@@ -46,6 +46,7 @@ function install_shared_dependencies() {
         libicu-dev \
         librabbitmq-dev \
         procps \
+        libsodium \
         symfony-cli \
         tini \
         unzip \
