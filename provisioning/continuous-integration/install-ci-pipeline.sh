@@ -7,15 +7,15 @@ function install_pipeline() {
     phpenv global 8.0
     phpenv rehash
 
-    wget https://pecl.php.net/get/amqp-1.10.2.tgz -O /tmp/amqp-1.10.2.tgz
-    cd /tmp && tar -xvzf /tmp/amqp-1.10.2.tgz && cd amqp-1.10.2
+    wget https://pecl.php.net/get/amqp-1.11.0.tgz -O /tmp/amqp-1.11.0.tgz
+    cd /tmp && tar -xvzf /tmp/amqp-1.11.0.tgz && cd amqp-1.11.0
     /bin/bash -c "${HOME}/.phpenv/versions/$(phpenv version-name)/bin/phpize ."
     /bin/bash -c "./configure --with-php-config=${HOME}/.phpenv/versions/$(phpenv version-name)/bin/php-config"
     make && make install
 
     # [libsodium](https://docs.cloudbees.com/docs/cloudbees-codeship/latest/basic-languages-frameworks/php#_libsodium)
-
-    LIBSODIUM_VERSION='2.0.22' \curl -sSL https://raw.githubusercontent.com/codeship/scripts/master/packages/libsodium.sh | bash -s
+    wget https://raw.githubusercontent.com/codeship/scripts/master/packages/libsodium.sh -O /tmp/libsodium.sh
+    LIBSODIUM_VERSION='2.0.22' bash -c '. /tmp/libsodium.sh'
     LD_LIBRARY_PATH="${HOME}/cache/libsodium/lib PKG_CONFIG_PATH=${HOME}/cache/libsodium/lib/pkgconfig" \
     LDFLAGS="-L${HOME}/cache/libsodium/lib" pecl install libsodium
 
