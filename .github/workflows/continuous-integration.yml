@@ -10,6 +10,12 @@ jobs:
   release:
     runs-on: ubuntu-20.04
 
+    services:
+      mysql:
+        image: mariadb:10.8
+        ports:
+          - 3306:3306
+
     steps:
       - name: Install packages
         run: sudo apt-get install bash gzip tar wget
