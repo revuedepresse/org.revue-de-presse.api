@@ -47,7 +47,7 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
         $token->setCreatedAt($now);
         $token->setUpdatedAt($now);
 
-        $tokenRepository = $this->getEntityManager()->getRepository('Api:TokenType');
+        $tokenRepository = $this->getEntityManager()->getRepository('App\Twitter\Infrastructure\Api\Entity\TokenType');
 
         /** @var TokenType $tokenType */
         $tokenType = $tokenRepository->findOneBy(['name' => TokenType::USER]);
