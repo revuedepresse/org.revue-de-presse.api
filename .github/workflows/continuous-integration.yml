@@ -65,10 +65,16 @@ jobs:
           cat ${GITHUB_WORKSPACE}/provisioning/continuous-integration/parameters_test.yml.dist \
           | sed -E 's#_APP_SECRET_#'"${APP_SECRET}"'#g' \
           | sed -E 's#_PASS_#'"${MARIADB_ROOT_PASSWORD}"'#g' \
-          > ${GITHUB_WORKSPACE}/.env.test
+          > ${GITHUB_WORKSPACE}/.env.local
+
+      - name: Clear cache
+        run: APP_ENV=test php bin/console cache:clear -e test
+
+      - name: Warm-up cache
+        run: APP_ENV=test php bin/console cache:warmup -e test
 
       - name: Create test database schema
-        run: php bin/console doctrine:schema:create -n -e test
+        run: APP_ENV=test php bin/console doctrine:schema:create -n -e test
 
       - name: Run unit tests
         run: make test
