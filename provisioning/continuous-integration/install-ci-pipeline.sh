@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
+echo $PATH
+
 function install_pipeline() {
     # [PHP](https://documentation.codeship.com/basic/languages-frameworks/php/)
     phpenv local 8.0
