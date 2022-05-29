@@ -61,6 +61,41 @@ function build() {
         worker
 }
 
+function remove_container_image() {
+    local container_name
+    container_name="${1}"
+
+    if [ -z "${container_name}" ];
+    then
+
+        printf 'A %s is expected as %s ("%s").%s' 'non-empty string' '1st argument' 'container name' $'\n'
+
+        return 1
+
+    fi
+
+    local DEBUG
+
+    source ./.env.local
+
+    docker ps -a |
+        \grep "${COMPOSE_PROJECT_NAME}" |
+        \grep "${container_name}" |
+        awk '{print $1}' |
+        xargs -I{} docker rm -f {}
+
+    if [ -n "${DEBUG}" ];
+    then
+        docker images -a |
+            \grep "${COMPOSE_PROJECT_NAME}" |
+            \grep "${container_name}" |
+            awk '{print $3}' |
+            xargs -I{} docker rmi {}
+
+        build
+    fi
+}
+
 function clean() {
     local temporary_directory
     temporary_directory="${1}"
@@ -74,26 +109,7 @@ function clean() {
         return 0
     fi
 
-    local DEBUG
-
-    source ./.env.local
-
-    docker ps -a |
-        \grep "${COMPOSE_PROJECT_NAME}" |
-        \grep 'app' |
-        awk '{print $1}' |
-        xargs -I{} docker rm -f {}
-
-    if [ -n "${DEBUG}" ];
-    then
-        docker images -a |
-            \grep "${COMPOSE_PROJECT_NAME}" |
-            \grep 'app' |
-            awk '{print $3}' |
-            xargs -I{} docker rmi {}
-
-        build
-    fi
+    remove_container_image "${app}"
 }
 
 function kill_existing_consumers {
@@ -373,6 +389,8 @@ function get_param_value_from_config() {
     if [ -z "${name}" ];
     then
         echo 'Please provide the non-empty name of a parameter available in the configuration, which has not been commented out.'
+
+        return 1
     fi
 
     local param_value
@@ -681,6 +699,8 @@ SCRIPT
 }
 
 function start_database() {
+    remove_container_image 'database'
+
     local command
     command=$(cat <<-SCRIPT
 docker compose \
