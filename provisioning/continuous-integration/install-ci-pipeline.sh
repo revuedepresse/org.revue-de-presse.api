@@ -8,22 +8,31 @@ function install_pipeline() {
     phpenv rehash
 
     wget https://pecl.php.net/get/amqp-1.11.0.tgz -O /tmp/amqp-1.11.0.tgz
-    cd /tmp && tar -xvzf /tmp/amqp-1.11.0.tgz && cd amqp-1.11.0
+    cd /tmp && tar -xzf /tmp/amqp-1.11.0.tgz && cd amqp-1.11.0
     "${HOME}/.phpenv/versions/$(phpenv version-name)/bin/phpize" .
-    ./configure --with-php-config="${HOME}/.phpenv/versions/$(phpenv version-name)/bin/php-config"
-    make && make install
+    ./configure --with-php-config="${HOME}/.phpenv/versions/$(phpenv version-name)/bin/php-config" >> /dev/null 2>&1
+    ( make && make install ) >> /dev/null 2>&1
 
-    echo "extension=${HOME}/.phpenv/versions/8.0.18/lib/php/extensions/no-debug-non-zts-20200930/amqp.so" \
-    > "${HOME}/.phpenv/versions/$(phpenv version-name)/etc/conf.d/amqp.ini"
+    if [ $? -eq 0 ];
+    then
+        echo "extension=${HOME}/.phpenv/versions/8.0.18/lib/php/extensions/no-debug-non-zts-20200930/amqp.so" \
+        > "${HOME}/.phpenv/versions/$(phpenv version-name)/etc/conf.d/amqp.ini"
+    else
+        echo 'Could not install PHP amqp extension.' 1>&2
+
+        return 1
+    fi
 
     (
         # [libsodium](https://docs.cloudbees.com/docs/cloudbees-codeship/latest/basic-languages-frameworks/php#_libsodium)
         LIBSODIUM_VERSION='1.0.18'
         LIBSODIUM_DIR="${HOME}/cache/libsodium"
         CACHED_DOWNLOAD="${HOME}/cache/libsodium-${LIBSODIUM_VERSION}.tar.gz"
+        rm -f "${CACHED_DOWNLOAD}"
 
         mkdir -p "${HOME}/libsodium"
-        wget --continue --output-document "${CACHED_DOWNLOAD}" "https://download.libsodium.org/libsodium/releases/libsodium-${LIBSODIUM_VERSION}.tar.gz"
+        wget  "https://download.libsodium.org/libsodium/releases/libsodium-${LIBSODIUM_VERSION}.tar.gz" \
+            --output-document "${CACHED_DOWNLOAD}"
         tar -xaf "${CACHED_DOWNLOAD}" --strip-components=1 --directory "${HOME}/libsodium"
 
         cd "${HOME}/libsodium" || exit
