@@ -1,0 +1,56 @@
+name: Revue-de-presse.org
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: read
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        php-version: [8.1]
+
+    steps:
+      - name: Install packages
+        run: sudo apt-get install tar gzip wget bash
+
+      - name: Checkout project
+        uses: actions/checkout@v3
+
+      - name: Validate composer.json and composer.lock
+        run: composer validate --strict
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v2
+        with:
+          path: /tmp/composer-cache
+          key: ${{ runner.os }}-${{ hashFiles('**/composer.lock') }}
+
+      - name: Add HTTP basic auth credentials
+        run: echo '${{ secrets.COMPOSER_AUTH_JSON }}' > $GITHUB_WORKSPACE/auth.json
+
+      - name: Copy test environment variables configuration file
+        run: cp ${GITHUB_WORKSPACE}/provisioning/continuous-integration/parameters_test.yml.dist ${GITHUB_WORKSPACE}/.env.test
+
+      - name: Install dependencies
+        uses: php-actions/composer@v6
+        with:
+          php_version: ${{ matrix.node-version }}
+          php_extensions: amqp bcmath intl json mbstring mysqli pcntl pdo_mysql sodium sockets
+          version: 2.x
+
+      - name: Remove auth.json file
+        run: rm -f $GITHUB_WORKSPACE/auth.json
+
+      - name: Create test database schema
+        run: php bin/console doctrine:schema:create -n -e test
+
+      - name: Run unit tests
+        run: make test

@@ -79,8 +79,13 @@ function install_shared_dependencies() {
     make
     make install
 
+    pecl channel-update pecl.php.net
+
     pecl install apcu-5.1.19
     docker-php-ext-enable apcu
+
+    pecl install libsodium
+    docker-php-ext-enable libsodium
 
     cd /tmp || exit
     wget https://github.com/DataDog/dd-trace-php/archive/0.74.0.tar.gz -O /tmp/datadog-php-tracer.tar.gz
