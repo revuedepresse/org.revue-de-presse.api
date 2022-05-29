@@ -69,6 +69,7 @@ services:
             - './service/templates/empty.conf:/usr/local/etc/php-fpm.d/zz-docker.conf'
             - './service/templates/www.conf:/usr/local/etc/php-fpm.d/www.conf'
             - '../../:/var/www/revue-de-presse.org'
+            - '../../../shared:/var/www/shared'
         env_file:
             - '../../.env.local'
         depends_on:
