@@ -214,7 +214,6 @@ parameters:
 
     weaving_the_web_twitter.api_host:                             'api.twitter.com'
 
-    weaving_the_web_twitter.authenticate_application.class:       'App\Twitter\Infrastructure\Console\AuthenticateApplicationCommand'
     weaving_the_web_twitter.authentication_uri:                   '/oauth2/token'
 
     weaving_the_web_twitter.client.class:                         '\Goutte\Client'

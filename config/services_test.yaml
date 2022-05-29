@@ -19,15 +19,9 @@ services:
 
     test.App\Twitter\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher: '@App\Twitter\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher'
 
-    test.App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscriptionsCommand: '@App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscriptionsCommand'
-
-    test.App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscribeesCommand: '@App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscribeesCommand'
-
     test.App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository: '@App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository'
 
     test.App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository: '@App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository'
-
-    test.App\Twitter\Infrastructure\Subscription\Console\UnfollowInactiveMembersCommand: '@App\Twitter\Infrastructure\Subscription\Console\UnfollowInactiveMembersCommand'
 
     App\Tests\NewsReview\Infrastructure\Repository\InMemoryPopularPublicationRepository:
         class: 'App\Tests\NewsReview\Infrastructure\Repository\InMemoryPopularPublicationRepository'
