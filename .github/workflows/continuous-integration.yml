@@ -61,10 +61,12 @@ jobs:
         run: rm -f $GITHUB_WORKSPACE/auth.json
 
       - name: Copy test environment variables configuration file
-        run: >
-          \cat $GITHUB_WORKSPACE/.env.test.dist |
-          sed -E 's/_APP_SECRET_/'${{ secrets.APP_SECRET }}/'#g' |
+        run: |
+          \cat $GITHUB_WORKSPACE/.env.test.dist | \
+          sed -E 's/_APP_SECRET_/'${{ secrets.APP_SECRET }}/'#g' | \
           sed -E 's/_PASS_/'${{ secrets.MARIADB_ROOT_PASSWORD }}'/g' > $GITHUB_WORKSPACE/.env.test
+          ls $GITHUB_WORKSPACE
+          cat $GITHUB_WORKSPACE/.env.test
 
       - name: Clear cache
         run: php bin/console cache:clear -e test
