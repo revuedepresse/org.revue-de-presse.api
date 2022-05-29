@@ -24,7 +24,9 @@ function install_pipeline() {
     pecl channel-update pecl.php.net
 
     export LIBSODIUM_VERSION='1.0.18'
-    source /tmp/libsodium.sh
+    source /tmp/libsodium.sh && \
+    echo 'Installed libsodium successfully.' || \
+    echo 'Could not install libsodium.'
 
     LD_LIBRARY_PATH="${HOME}/cache/libsodium/lib PKG_CONFIG_PATH=${HOME}/cache/libsodium/lib/pkgconfig" \
     LDFLAGS="-L${HOME}/cache/libsodium/lib" pecl install -f libsodium
