@@ -9,8 +9,6 @@ function install_pipeline() {
     phpenv global 8.0
     phpenv rehash
 
-    sudo apt-get install libsodium-dev
-
     wget https://pecl.php.net/get/amqp-1.11.0.tgz -O /tmp/amqp-1.11.0.tgz
     cd /tmp && tar -xvzf /tmp/amqp-1.11.0.tgz && cd amqp-1.11.0
     "${HOME}/.phpenv/versions/$(phpenv version-name)/bin/phpize" .
