@@ -1,8 +1,8 @@
 APP_ENV=test
-APP_SECRET=64ba62c3b4d48062948d77bc9b7a224f
+APP_SECRET=_APP_SECRET_
 
-DATABASE_URL=mysql://root:test@127.0.0.1:3306/test?serverVersion=5.7
-DATABASE_WRITE_URL=mysql://root:test@127.0.0.1:3306/test?serverVersion=5.7
+DATABASE_URL=mysql://root:root@127.0.0.1:3306/test?serverVersion=5.7
+DATABASE_WRITE_URL=mysql://root:root@127.0.0.1:3306/test?serverVersion=5.7
 
 MESSENGER_TRANSPORT_DSN_FAILURES=amqp://guest:guest@127.0.0.1:5672/%2f/failures
 MESSENGER_TRANSPORT_DSN_STATUS=amqp://guest:guest@127.0.0.1:5672/%2f/get-news-status
