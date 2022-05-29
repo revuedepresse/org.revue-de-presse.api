@@ -23,8 +23,6 @@ services:
 
     test.App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscribeesCommand: '@App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscribeesCommand'
 
-    test.App\Twitter\Infrastructure\Subscription\Console\UnfollowDiffSubscriptionsSubscribeesCommand: '@App\Twitter\Infrastructure\Subscription\Console\UnfollowDiffSubscriptionsSubscribeesCommand'
-
     test.App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository: '@App\Twitter\Infrastructure\Curation\Repository\FriendsListCollectedEventRepository'
 
     test.App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository: '@App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository'
