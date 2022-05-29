@@ -20,6 +20,7 @@ docker-compose.override.yaml
 provisioning/containers/mysql/templates/mysql/my.cnf
 provisioning/containers/service/templates/www.conf
 
+provisioning/volumes/database*
 provisioning/volumes/database/*
 vendor
 public/graphs
