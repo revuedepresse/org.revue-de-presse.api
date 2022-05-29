@@ -13,25 +13,33 @@ function install_pipeline() {
     ./configure --with-php-config="${HOME}/.phpenv/versions/$(phpenv version-name)/bin/php-config"
     make && make install
 
-    ls -lahtr "${HOME}/.phpenv/versions/8.0.18/lib/php/extensions/no-debug-non-zts-20200930/"
     echo "extension=${HOME}/.phpenv/versions/8.0.18/lib/php/extensions/no-debug-non-zts-20200930/amqp.so" \
     > "${HOME}/.phpenv/versions/$(phpenv version-name)/etc/conf.d/amqp.ini"
 
-    # [libsodium](https://docs.cloudbees.com/docs/cloudbees-codeship/latest/basic-languages-frameworks/php#_libsodium)
-    wget https://raw.githubusercontent.com/codeship/scripts/master/packages/libsodium.sh -O /tmp/libsodium.sh
+    (
+        # [libsodium](https://docs.cloudbees.com/docs/cloudbees-codeship/latest/basic-languages-frameworks/php#_libsodium)
+        LIBSODIUM_VERSION='1.0.18'
+        LIBSODIUM_DIR="${HOME}/cache/libsodium"
+        CACHED_DOWNLOAD="${HOME}/cache/libsodium-${LIBSODIUM_VERSION}.tar.gz"
+
+        mkdir -p "${HOME}/libsodium"
+        wget --continue --output-document "${CACHED_DOWNLOAD}" "https://download.libsodium.org/libsodium/releases/libsodium-${LIBSODIUM_VERSION}.tar.gz"
+        tar -xaf "${CACHED_DOWNLOAD}" --strip-components=1 --directory "${HOME}/libsodium"
+
+        cd "${HOME}/libsodium" || exit
+        ./configure --prefix="${LIBSODIUM_DIR}" && make && make install
+
+        if [ $? -eq 0 ];
+        then
+            printf '%s.%s' 'Installed libsodium successfully' $'\n'
+        else
+            printf '%s.%s' 'Could not install libsodium.' $'\n'
+
+            return 1
+        fi
+    )
+
     pecl channel-update pecl.php.net
-
-    export LIBSODIUM_VERSION='1.0.18'
-    source /tmp/libsodium.sh
-
-    if [ $? -eq 0 ];
-    then
-        printf '%s.%s' 'Installed libsodium successfully' $'\n'
-    else
-        printf '%s.%s' 'Could not install libsodium.' $'\n'
-
-        return 1
-    fi
 
     LD_LIBRARY_PATH="${HOME}/cache/libsodium/lib PKG_CONFIG_PATH=${HOME}/cache/libsodium/lib/pkgconfig" \
     LDFLAGS="-L${HOME}/cache/libsodium/lib" pecl install -f libsodium
