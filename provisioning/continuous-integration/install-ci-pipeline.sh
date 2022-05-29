@@ -23,35 +23,10 @@ function install_pipeline() {
         return 1
     fi
 
-    (
-        # [libsodium](https://docs.cloudbees.com/docs/cloudbees-codeship/latest/basic-languages-frameworks/php#_libsodium)
-        LIBSODIUM_VERSION='1.0.18'
-        LIBSODIUM_DIR="${HOME}/cache/libsodium"
-        CACHED_DOWNLOAD="${HOME}/cache/libsodium-${LIBSODIUM_VERSION}.tar.gz"
-        rm -f "${CACHED_DOWNLOAD}"
-
-        mkdir -p "${HOME}/libsodium"
-        wget  "https://download.libsodium.org/libsodium/releases/libsodium-${LIBSODIUM_VERSION}.tar.gz" \
-            --output-document "${CACHED_DOWNLOAD}"
-        tar -xaf "${CACHED_DOWNLOAD}" --strip-components=1 --directory "${HOME}/libsodium"
-
-        cd "${HOME}/libsodium" || exit
-        ./configure --prefix="${LIBSODIUM_DIR}" && make && make install
-
-        if [ $? -eq 0 ];
-        then
-            printf '%s.%s' 'Installed libsodium successfully' $'\n'
-        else
-            printf '%s.%s' 'Could not install libsodium.' $'\n'
-
-            return 1
-        fi
-    )
-
+    sudo apt update --assume-yes
+    sudo apt install libsodium-dev
     pecl channel-update pecl.php.net
-
-    LD_LIBRARY_PATH="${HOME}/cache/libsodium/lib PKG_CONFIG_PATH=${HOME}/cache/libsodium/lib/pkgconfig" \
-    LDFLAGS="-L${HOME}/cache/libsodium/lib" pecl install -f libsodium
+    pecl install -f libsodium
     echo "extension=${HOME}/.phpenv/versions/8.0.18/lib/php/extensions/no-debug-non-zts-20200930/libsodium.so" \
     > "${HOME}/.phpenv/versions/$(phpenv version-name)/etc/conf.d/libsodium.ini"
 
