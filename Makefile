@@ -89,9 +89,6 @@ handle-news-messages: ## Consume twitter API news messages
 
 restart: stop start ## Restart service
 
-run-composer: # Run composer
-	@/bin/bash -c 'source ./fun.sh && run_composer'
-
 run-php-features-tests: ## Run features tests with Behat
 	@/bin/bash -c 'source ./fun.sh && run_php_features_tests'
 
