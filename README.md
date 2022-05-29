@@ -1,6 +1,6 @@
 # Revue-de-presse.org
 
-[![Codeship Status for thierrymarianne/daily-press-review](https://app.codeship.com/projects/24369620-8f96-0136-7068-0e8ef5ba2310/status?branch=main)](https://app.codeship.com/projects/304052)
+![revue-de-presse.org continuous integration](https://github.com/thierrymarianne/api.revue-de-presse.org/actions/workflows/continuous-integration/badge.svg)
 
 API serving daily short lists (10 items) of top news in France sorted by popularity.
 Their popularity is based on retweets only retrieved by using Twitter API.
