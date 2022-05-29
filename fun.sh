@@ -680,6 +680,13 @@ SCRIPT
     /bin/bash -c "${command}"
 }
 
+function stop() {
+    docker compose \
+        -f ./provisioning/containers/docker-compose.yaml \
+        -f ./provisioning/containers/docker-compose.override.yaml \
+        down
+}
+
 function run_php_script() {
     local script
     script="${1}"
