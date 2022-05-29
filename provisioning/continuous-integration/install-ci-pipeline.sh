@@ -12,14 +12,19 @@ function install_pipeline() {
     /bin/bash -c "${HOME}/.phpenv/versions/$(phpenv version-name)/bin/phpize ."
     /bin/bash -c "./configure --with-php-config=${HOME}/.phpenv/versions/$(phpenv version-name)/bin/php-config"
     make && make install
-    echo 'extension=amqp' > "${HOME}/.phpenv/versions/$(phpenv version-name)/etc/conf.d/amqp.ini"
+
+    ls -lahtr "${HOME}/.phpenv/versions/8.0.18/lib/php/extensions/no-debug-non-zts-20200930/"
+    echo "extension=${HOME}/.phpenv/versions/8.0.18/lib/php/extensions/no-debug-non-zts-20200930/amqp.so" \
+    > "${HOME}/.phpenv/versions/$(phpenv version-name)/etc/conf.d/amqp.ini"
 
     # [libsodium](https://docs.cloudbees.com/docs/cloudbees-codeship/latest/basic-languages-frameworks/php#_libsodium)
     wget https://raw.githubusercontent.com/codeship/scripts/master/packages/libsodium.sh -O /tmp/libsodium.sh
+    pecl channel-update pecl.php.net
     LIBSODIUM_VERSION='1.0.18' bash -c '. /tmp/libsodium.sh'
     LD_LIBRARY_PATH="${HOME}/cache/libsodium/lib PKG_CONFIG_PATH=${HOME}/cache/libsodium/lib/pkgconfig" \
     LDFLAGS="-L${HOME}/cache/libsodium/lib" pecl install -f libsodium
-    echo 'extension=libsodium' > "${HOME}/.phpenv/versions/$(phpenv version-name)/etc/conf.d/libsodium.ini"
+    echo "extension=${HOME}/.phpenv/versions/8.0.18/lib/php/extensions/no-debug-non-zts-20200930/libsodium.so" \
+    > "${HOME}/.phpenv/versions/$(phpenv version-name)/etc/conf.d/libsodium.ini"
 
     local xdebug_configuration_file
     xdebug_configuration_file="${HOME}/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini"
@@ -33,6 +38,42 @@ function install_pipeline() {
 
     php bin/console doctrine:schema:create -n -e test
 }
+
+LANG="${LANG}" \
+RAILSONFIRE="${RAILSONFIRE}" \
+CODESHIP="${CODESHIP}" \
+DISPLAY="${DISPLAY}" \
+GOPATH="${GOPATH}" \
+PATH="${PATH}" \
+PARALLEL_TEST_PROCESSORS="${PARALLEL_TEST_PROCESSORS}" \
+PG_USER="${PG_USER}" \
+PGUSER="${PGUSER}" \
+PG_PASSWORD="${PG_PASSWORD}" \
+PGPASSWORD="${PGPASSWORD}" \
+PIP_CACHE_DIR="${PIP_CACHE_DIR}" \
+MYSQL_USER="${MYSQL_USER}" \
+MYSQL_PASSWORD="${MYSQL_PASSWORD}" \
+COMPOSER_HOME="${COMPOSER_HOME}" \
+CODESHIP_VIRTUALENV="${CODESHIP_VIRTUALENV}" \
+COMMIT_ID="${COMMIT_ID}" \
+CI="${CI}" \
+CI_BUILD_NUMBER="${CI_BUILD_NUMBER}" \
+CI_BUILD_ID="${CI_BUILD_ID}" \
+CI_BUILD_URL="${CI_BUILD_URL}" \
+CI_PULL_REQUEST="${CI_PULL_REQUEST}" \
+CI_PR_NUMBER="${CI_PR_NUMBER}" \
+CI_BRANCH="${CI_BRANCH}" \
+CI_COMMIT_ID="${CI_COMMIT_ID}" \
+CI_COMMIT_MESSAGE="${CI_COMMIT_MESSAGE}" \
+CI_COMMITTER_NAME="${CI_COMMITTER_NAME}" \
+CI_COMMITTER_EMAIL="${CI_COMMITTER_EMAIL}" \
+CI_COMMITTER_USERNAME="${CI_COMMITTER_USERNAME}" \
+CI_MESSAGE="${CI_MESSAGE}" \
+CI_NAME="${CI_NAME}" \
+CI_NODE_TOTAL="${CI_NODE_TOTAL}" \
+CI_REPO_NAME="${CI_REPO_NAME}" \
+GITHUB_ACCESS_TOKEN="${GITHUB_ACCESS_TOKEN}" \
+SYMFONY_DEPRECATIONS_HELPER="${SYMFONY_DEPRECATIONS_HELPER}" \
 install_pipeline
 
 set +Eeuo pipefail
