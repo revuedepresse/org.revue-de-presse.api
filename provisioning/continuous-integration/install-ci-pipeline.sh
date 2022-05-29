@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-echo $PATH
-
 function install_pipeline() {
     # [PHP](https://documentation.codeship.com/basic/languages-frameworks/php/)
     phpenv local 8.0
@@ -24,9 +22,16 @@ function install_pipeline() {
     pecl channel-update pecl.php.net
 
     export LIBSODIUM_VERSION='1.0.18'
-    source /tmp/libsodium.sh && \
-    echo 'Installed libsodium successfully.' || \
-    echo 'Could not install libsodium.'
+    source /tmp/libsodium.sh
+
+    if [ $? -eq 0 ];
+    then
+        printf '%s.%s' 'Installed libsodium successfully' $'\n'
+    else
+        printf '%s.%s' 'Could not install libsodium.' $'\n'
+
+        return 1
+    fi
 
     LD_LIBRARY_PATH="${HOME}/cache/libsodium/lib PKG_CONFIG_PATH=${HOME}/cache/libsodium/lib/pkgconfig" \
     LDFLAGS="-L${HOME}/cache/libsodium/lib" pecl install -f libsodium
