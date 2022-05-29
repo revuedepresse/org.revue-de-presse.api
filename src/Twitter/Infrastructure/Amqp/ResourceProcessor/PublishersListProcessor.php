@@ -10,8 +10,6 @@ use App\Twitter\Domain\Resource\MemberIdentity;
 use App\Twitter\Domain\Resource\PublishersList;
 use App\Twitter\Infrastructure\Amqp\Exception\ContinuePublicationException;
 use App\Twitter\Infrastructure\Amqp\Exception\StopPublicationException;
-use App\Twitter\Infrastructure\DependencyInjection\Collection\MemberProfileCollectedEventRepositoryTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Collection\PublishersListCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberIdentityProcessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TokenChangeTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
@@ -26,8 +24,6 @@ use function sprintf;
 class PublishersListProcessor implements PublishersListProcessorInterface
 {
     use MemberIdentityProcessorTrait;
-    use MemberProfileCollectedEventRepositoryTrait;
-    use PublishersListCollectedEventRepositoryTrait;
     use TokenChangeTrait;
     use TranslatorTrait;
 

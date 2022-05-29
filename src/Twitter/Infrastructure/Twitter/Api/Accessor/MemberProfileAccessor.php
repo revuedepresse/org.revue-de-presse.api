@@ -7,7 +7,6 @@ use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\UnexpectedApiRespo
 use App\Twitter\Domain\Membership\Exception\InvalidMemberException;
 use App\Twitter\Domain\Membership\Exception\MembershipException;
 use App\Twitter\Domain\Resource\MemberIdentity;
-use App\Twitter\Infrastructure\DependencyInjection\Collection\MemberProfileCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use App\Twitter\Infrastructure\Twitter\Api\UnavailableResource;
@@ -19,9 +18,6 @@ use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
 
 class MemberProfileAccessor implements MemberProfileAccessorInterface
 {
-    use MemberProfileCollectedEventRepositoryTrait;
-    use MemberRepositoryTrait;
-
     private ApiAccessorInterface $accessor;
 
     private UnavailableResourceHandlerInterface $unavailableResourceHandler;

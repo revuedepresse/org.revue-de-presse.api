@@ -14,7 +14,6 @@ use Doctrine\ORM\Mapping as ORM;
 use const JSON_THROW_ON_ERROR;
 
 /**
- * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
  *
  * @ORM\Table(
  *      name="weaving_user",
@@ -462,9 +461,9 @@ class Member extends MemberModel
     /**
      * @return string|null
      */
-    public function getUsername(): ?string
+    public function getUserIdentifier(): string
     {
-        return $this->username;
+        return (string) $this->username;
     }
 
     /**

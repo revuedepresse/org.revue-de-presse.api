@@ -277,19 +277,6 @@ class StatusPersistence implements StatusPersistenceInterface
         Aggregate $publishersList = null,
         MemberInterface $likedBy = null
     ): CollectionInterface {
-        if ($likedBy !== null && $collectionStrategy->fetchLikes()) {
-            return $this->statusRepository->saveLikes(
-                $statuses,
-                $this->apiAccessor->getOAuthToken(),
-                $publishersList,
-                $this->logger,
-                $likedBy,
-                function ($memberName) {
-                    return $this->apiAccessor->ensureMemberHavingNameExists($memberName);
-                }
-            );
-        }
-
         return $this->publicationPersistence->persistStatusPublications(
             $statuses,
             new AccessToken($this->apiAccessor->getOAuthToken()),

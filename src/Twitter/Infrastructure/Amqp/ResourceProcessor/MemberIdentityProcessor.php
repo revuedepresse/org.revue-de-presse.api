@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Amqp\ResourceProcessor;
 
-use App\Twitter\Infrastructure\Twitter\Api\Accessor\Exception\UnexpectedApiResponseException;
 use App\PublishersList\AggregateAwareTrait;
 use App\Twitter\Infrastructure\Amqp\Exception\SkippableMemberException;
 use App\Twitter\Infrastructure\Api\Entity\TokenInterface;
@@ -16,7 +15,6 @@ use App\Twitter\Infrastructure\Amqp\Exception\ContinuePublicationException;
 use App\Twitter\Infrastructure\Amqp\Exception\StopPublicationException;
 use App\Twitter\Infrastructure\Amqp\Message\FetchMemberLikes;
 use App\Twitter\Infrastructure\Amqp\Message\FetchMemberStatus;
-use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberProfileAccessorTrait;
 use App\Twitter\Domain\PublishersList\Repository\PublishersListRepositoryInterface;
 use App\Twitter\Infrastructure\Twitter\Api\Accessor\MemberProfileAccessorInterface;
 use Psr\Log\LoggerInterface;
@@ -26,7 +24,6 @@ use function sprintf;
 class MemberIdentityProcessor implements MemberIdentityProcessorInterface
 {
     use AggregateAwareTrait;
-    use MemberProfileAccessorTrait;
 
     /**
      * @var MessageBusInterface

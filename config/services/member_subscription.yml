@@ -11,7 +11,6 @@ services:
             - [ 'setApiAccessor', [ '@App\Twitter\Infrastructure\Api\Accessor' ] ]
             - [ 'setLogger', [ '@logger' ] ]
             - [ 'setMemberRepository', [ '@App\Twitter\Infrastructure\Repository\Membership\MemberRepository' ] ]
-            - [ 'setMemberSubscriptionRepository', [ '@repository.member_subscription' ] ]
 
     App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscriptionsCommand:
         class: 'App\Twitter\Infrastructure\Subscription\Console\ListMemberSubscriptionsCommand'

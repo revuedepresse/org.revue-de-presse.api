@@ -16,12 +16,9 @@ use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Domain\Publication\TaggedStatus;
 use App\Twitter\Infrastructure\Amqp\Message\FetchPublicationInterface;
 use App\Twitter\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Collection\MemberProfileCollectedEventRepositoryTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Collection\PublicationBatchCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationPersistenceTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Status\LikedStatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Twitter\Domain\Curation\Entity\NullStatus;
@@ -49,13 +46,10 @@ use function sprintf;
 class StatusAccessor implements StatusAccessorInterface
 {
     use ApiAccessorTrait;
-    use MemberProfileCollectedEventRepositoryTrait;
     use PublicationPersistenceTrait;
-    use LikedStatusRepositoryTrait;
     use LoggerTrait;
     use StatusRepositoryTrait;
     use MemberRepositoryTrait;
-    use PublicationBatchCollectedEventRepositoryTrait;
 
     public ArchivedStatusRepository $archivedStatusRepository;
 
@@ -423,14 +417,6 @@ class StatusAccessor implements StatusAccessorInterface
         array $options,
         $findingDirection
     ): array {
-        if ($collectionStrategy->fetchLikes()) {
-            return $this->findLikeExtremum(
-                $collectionStrategy,
-                $options,
-                $findingDirection
-            );
-        }
-
         if ($collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected()) {
             return $this->statusRepository->findNextExtremum(
                 $options[FetchPublicationInterface::SCREEN_NAME],
@@ -441,32 +427,6 @@ class StatusAccessor implements StatusAccessorInterface
 
         return $this->statusRepository->findLocalMaximum(
             $options[FetchPublicationInterface::SCREEN_NAME],
-            $collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected()
-        );
-    }
-
-    /**
-     * @param CollectionStrategyInterface $collectionStrategy
-     * @param                             $options
-     * @param                             $findingDirection
-     *
-     * @return array|mixed
-     */
-    private function findLikeExtremum(
-        CollectionStrategyInterface $collectionStrategy,
-        $options,
-        $findingDirection
-    ): array {
-        if (!$collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected()) {
-            return $this->likedStatusRepository->findLocalMaximum(
-                $options[FetchPublicationInterface::SCREEN_NAME],
-                $collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected()
-            );
-        }
-
-        return $this->likedStatusRepository->findNextExtremum(
-            $options[FetchPublicationInterface::SCREEN_NAME],
-            $findingDirection,
             $collectionStrategy->dateBeforeWhichPublicationsAreToBeCollected()
         );
     }

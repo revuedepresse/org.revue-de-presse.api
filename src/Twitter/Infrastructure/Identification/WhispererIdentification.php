@@ -7,10 +7,8 @@ use App\Twitter\Infrastructure\Api\Entity\Whisperer;
 use App\Twitter\Domain\Curation\CollectionStrategyInterface;
 use App\Twitter\Infrastructure\Amqp\Message\FetchPublicationInterface;
 use App\Twitter\Infrastructure\DependencyInjection\Api\ApiAccessorTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Collection\MemberProfileCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\WhispererRepositoryTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Status\LikedStatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusLoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
@@ -18,9 +16,7 @@ use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
 class WhispererIdentification implements WhispererIdentificationInterface
 {
     use ApiAccessorTrait;
-    use LikedStatusRepositoryTrait;
     use LoggerTrait;
-    use MemberProfileCollectedEventRepositoryTrait;
     use StatusLoggerTrait;
     use StatusRepositoryTrait;
     use TranslatorTrait;
@@ -96,18 +92,6 @@ class WhispererIdentification implements WhispererIdentificationInterface
                 $maxId = INF
             );
         };
-        if ($collectionStrategy->fetchLikes()) {
-            $subjectInSingularForm = 'like';
-            $subjectInPluralForm   = 'likes';
-            $countCollectedItems   = function (
-                string $memberName
-            ) {
-                return $this->likedStatusRepository->countCollectedLikes(
-                    $memberName,
-                    $maxId = INF
-                );
-            };
-        }
 
         $totalStatuses = $countCollectedItems(
             $collectionStrategy->screenName(),

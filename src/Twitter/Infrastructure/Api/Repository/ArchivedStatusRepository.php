@@ -20,9 +20,7 @@ use App\Twitter\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
 use App\Twitter\Infrastructure\Twitter\Api\Normalizer\Normalizer;
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Twitter\Infrastructure\Operation\Collection\CollectionInterface;
-use App\Twitter\Domain\Curation\Entity\LikedStatus;
 use App\Twitter\Domain\Publication\Repository\ExtremumAwareInterface;
-use App\Twitter\Infrastructure\Publication\Repository\LikedStatusRepository;
 use App\Twitter\Infrastructure\Exception\NotFoundMemberException;
 use App\Twitter\Infrastructure\Exception\ProtectedAccountException;
 use App\Twitter\Infrastructure\Exception\SuspendedAccountException;
@@ -59,8 +57,6 @@ class ArchivedStatusRepository extends ResourceRepository implements
     public ManagerRegistry $registry;
 
     public LoggerInterface $appLogger;
-
-    public LikedStatusRepository $likedStatusRepository;
 
     public Connection $connection;
 
@@ -308,120 +304,6 @@ class ArchivedStatusRepository extends ResourceRepository implements
     }
 
     /**
-     * @param array           $statuses
-     * @param                 $identifier
-     * @param Aggregate       $aggregate
-     * @param LoggerInterface $logger
-     * @param MemberInterface $likedBy
-     * @param callable        $ensureMemberExists
-     *
-     * @return CollectionInterface
-     */
-    public function saveLikes(
-        array $statuses,
-        $identifier,
-        ?Aggregate $aggregate,
-        LoggerInterface $logger,
-        MemberInterface $likedBy,
-        callable $ensureMemberExists
-    ): CollectionInterface {
-        $this->appLogger = $logger;
-
-        $statusIds = $this->getStatusIdentities($statuses);
-
-        $indexedStatus = $this->createIndexOfExistingStatus($statusIds);
-
-        $extracts = Normalizer::normalizeAll(
-            $statuses,
-            function ($extract) use ($identifier, $indexedStatus) {
-                $extract['identifier'] = $identifier;
-
-                return $extract;
-            },
-            $this->appLogger
-        );
-
-        $likedStatuses = [];
-
-        $entityManager = $this->getEntityManager();
-
-        /** @var TaggedStatus $taggedStatus */
-        foreach ($extracts->toArray() as $key => $taggedStatus) {
-            $extract      = $taggedStatus->toLegacyProps();
-
-            $memberStatus = null;
-            if (array_key_exists($taggedStatus->documentId(), $indexedStatus)) {
-                $memberStatus = $indexedStatus[$taggedStatus->documentId()];
-            }
-
-            if (!($memberStatus instanceof StatusInterface)) {
-                $memberStatus = $this->taggedStatusRepository
-                    ->convertPropsToStatus($extract, $aggregate);
-            }
-
-            if ($memberStatus->getId() === null) {
-                $this->collectStatusLogger->logStatus($memberStatus);
-            }
-
-            if ($memberStatus instanceof ArchivedStatus) {
-                $memberStatus = $this->statusPersistence->unarchiveStatus(
-                    $memberStatus,
-                    $entityManager
-                );
-            }
-
-            try {
-                if ($memberStatus->getId()) {
-                    $memberStatus->setUpdatedAt(
-                        new DateTime(
-                            'now',
-                            new \DateTimeZone('UTC')
-                        )
-                    );
-                }
-
-                try {
-                    $member = $ensureMemberExists($memberStatus->getScreenName());
-                } catch (ProtectedAccountException|SuspendedAccountException|NotFoundMemberException $exception) {
-                    $member =
-                        $this->memberRepository->findOneBy(['twitter_username' => $memberStatus->getScreenName()]);
-                }
-
-                if ($member instanceof MemberInterface) {
-                    $likedStatuses[] = $this->likedStatusRepository->ensureMemberStatusHasBeenMarkedAsLikedBy(
-                        $member,
-                        $memberStatus,
-                        $likedBy,
-                        $aggregate
-                    );
-
-                    $entityManager->persist($memberStatus);
-                }
-            } catch (ORMException $exception) {
-                if ($exception->getMessage() === ORMException::entityManagerClosed()->getMessage()) {
-                    $entityManager = $this->registry->resetManager('default');
-                    $entityManager->persist($memberStatus);
-                }
-            } catch (Exception $exception) {
-                $this->appLogger->critical($exception->getMessage());
-                continue;
-            }
-        }
-
-        $this->flushAndResetManagerOnUniqueConstraintViolation($entityManager);
-        $this->flushLikedStatuses($likedStatuses, $entityManager);
-
-        if (count($extracts) > 0) {
-            $this->memberRepository->incrementTotalLikesOfMemberWithName(
-                count($extracts),
-                $likedBy->getTwitterUsername()
-            );
-        }
-
-        return $extracts;
-    }
-
-    /**
      * @param array $statusIds
      *
      * @return array
@@ -460,25 +342,6 @@ class ArchivedStatusRepository extends ResourceRepository implements
 
             InsertDuplicatesException::throws($exception);
         }
-    }
-
-    /**
-     * @param                        $likedStatuses
-     * @param EntityManagerInterface $entityManager
-     */
-    private function flushLikedStatuses(
-        $likedStatuses,
-        EntityManagerInterface $entityManager
-    ): void {
-        (new ArrayCollection($likedStatuses))->map(
-            function (LikedStatus $likedStatus) use ($entityManager) {
-                $entityManager->persist($likedStatus);
-            }
-        );
-
-        $this->flushAndResetManagerOnUniqueConstraintViolation(
-            $entityManager
-        );
     }
 
     /**

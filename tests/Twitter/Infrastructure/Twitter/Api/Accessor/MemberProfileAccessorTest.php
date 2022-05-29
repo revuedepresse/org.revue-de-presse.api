@@ -61,10 +61,6 @@ class MemberProfileAccessorTest extends KernelTestCase
             $this->prophesizeUnavailableResourceHandler()
         );
 
-        $memberProfileAccessor->setMemberProfileCollectedEventRepository(
-           $this->eventRepository
-        );
-
         // Act
 
         $member = $memberProfileAccessor->getMemberByIdentity(
@@ -99,10 +95,6 @@ class MemberProfileAccessorTest extends KernelTestCase
             $this->prophesizeApiAccessor(null),
             $memberRepository,
             $this->prophesizeUnavailableResourceHandler()
-        );
-
-        $memberProfileAccessor->setMemberProfileCollectedEventRepository(
-            $this->eventRepository
         );
 
         // Act
@@ -141,10 +133,6 @@ class MemberProfileAccessorTest extends KernelTestCase
             $this->prophesizeApiAccessor((object) ['screen_name' => 'existing_member']),
             $memberRepository,
             $this->prophesizeUnavailableResourceHandler()
-        );
-
-        $memberProfileAccessor->setMemberProfileCollectedEventRepository(
-            $this->eventRepository
         );
 
         // Act
@@ -189,10 +177,6 @@ class MemberProfileAccessorTest extends KernelTestCase
             $this->prophesizeApiAccessor((object) ['screen_name' => 'existing_member']),
             $memberRepository,
             $this->prophesizeUnavailableResourceHandler()
-        );
-
-        $memberProfileAccessor->setMemberProfileCollectedEventRepository(
-            $this->eventRepository
         );
 
         // Act

@@ -10,7 +10,6 @@ use Doctrine\ORM\ORMException;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
  *
  * @method Whisperer|null find($id, $lockMode = null, $lockVersion = null)
  * @method Whisperer|null findOneBy(array $criteria, array $orderBy = null)

@@ -142,12 +142,6 @@ doctrine:
                         dir:        '%kernel.project_dir%/src/Twitter/Infrastructure/Api/Entity'
                         prefix:     'App\Twitter\Infrastructure\Api\Entity'
                         type:       annotation
-                    Member:
-                        alias:      'Member'
-                        dir:        '%kernel.project_dir%/config/model/member'
-                        is_bundle:  false
-                        prefix:     App\Membership\Domain\Entity
-                        type:       xml
                     Membership:
                         alias:      'Membership'
                         dir:        '%kernel.project_dir%/src/Membership/Domain/Entity/Legacy'
