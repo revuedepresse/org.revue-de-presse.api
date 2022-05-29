@@ -42,7 +42,7 @@ jobs:
       - name: Install dependencies
         uses: php-actions/composer@v6
         with:
-          php_version: ${{ matrix.node-version }}
+          php_version: ${{ matrix.php-version }}
           php_extensions: amqp bcmath intl json mbstring mysqli pcntl pdo_mysql sodium sockets
           version: 2.x
 
