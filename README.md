@@ -1,6 +1,7 @@
+
 # Revue-de-presse.org
 
-![revue-de-presse.org continuous integration](https://github.com/thierrymarianne/api.revue-de-presse.org/actions/workflows/continuous-integration/badge.svg)
+![revue-de-presse.org continuous integration](https://github.com/thierrymarianne/api.revue-de-presse.org/actions/workflows/continuous-integration.yml/badge.svg)
 
 API serving daily short lists (10 items) of top news in France sorted by popularity.
 Their popularity is based on retweets only retrieved by using Twitter API.
