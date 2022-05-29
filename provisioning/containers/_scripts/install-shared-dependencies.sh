@@ -68,6 +68,15 @@ function install_shared_dependencies() {
     make
     make install
 
+    cd /tmp || exit
+    wget https://pecl.php.net/get/libsodium-2.0.23.tgz
+    tar -xvzf /tmp/libsodium-2.0.23.tgz
+    cd libsodium-2.0.23
+    phpize .
+    ./configure --with-php-config="$(which php-config)"
+    make
+    make install
+
     pecl install apcu-5.1.19
     docker-php-ext-enable apcu
 
