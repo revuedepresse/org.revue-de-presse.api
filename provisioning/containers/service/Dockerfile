@@ -11,10 +11,10 @@ COPY --chown=${WORKER_UID}:${WORKER_GID} ./service/templates    /templates
 
 RUN /bin/bash -c 'source /scripts/install-service-requirements.sh'
 
-USER ${WORKER_UID}:${WORKER_GID}
-
 # [composer official image](https://hub.docker.com/_/composer?tab=tags&page=1&name=2.3)
 COPY --from=composer:2.3 /usr/bin/composer /usr/bin/composer
+
+USER ${WORKER_UID}:${WORKER_GID}
 
 VOLUME ["/scripts", "/root/.composer", "/var/www/revue-de-presse.org", "/var/www/shared"]
 
