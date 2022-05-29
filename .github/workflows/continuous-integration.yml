@@ -10,10 +10,6 @@ jobs:
   release:
     runs-on: ubuntu-20.04
 
-    strategy:
-      matrix:
-        php-version: [8.1]
-
     steps:
       - name: Install packages
         run: sudo apt-get install bash gzip tar wget
@@ -29,7 +25,7 @@ jobs:
       - name: Install PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: ${{ matrix.php-versions }}
+          php-version: 8.1
           tools: composer:v2.2
 
       - name: Cache composer packages
