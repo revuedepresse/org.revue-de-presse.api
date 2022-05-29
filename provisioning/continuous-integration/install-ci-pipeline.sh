@@ -14,10 +14,10 @@ function install_pipeline() {
     make && make install
 
     # [libsodium](https://docs.cloudbees.com/docs/cloudbees-codeship/latest/basic-languages-frameworks/php#_libsodium)
-    \curl -sSL https://raw.githubusercontent.com/codeship/scripts/master/packages/libsodium.sh | bash -s
+
+    LIBSODIUM_VERSION='2.0.22' \curl -sSL https://raw.githubusercontent.com/codeship/scripts/master/packages/libsodium.sh | bash -s
     LD_LIBRARY_PATH="${HOME}/cache/libsodium/lib PKG_CONFIG_PATH=${HOME}/cache/libsodium/lib/pkgconfig" \
-    LDFLAGS="-L${HOME}/cache/libsodium/lib" \
-    pecl install libsodium
+    LDFLAGS="-L${HOME}/cache/libsodium/lib" pecl install libsodium
 
     /bin/bash -c "rm -f ${HOME}/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini"
     echo 'extension=amqp' > "${HOME}/.phpenv/versions/$(phpenv version-name)/etc/conf.d/amqp.ini"
