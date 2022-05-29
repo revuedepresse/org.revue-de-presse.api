@@ -39,7 +39,7 @@ jobs:
         run: cp ${GITHUB_WORKSPACE}/provisioning/continuous-integration/parameters_test.yml.dist ${GITHUB_WORKSPACE}/.env.test
 
       - name: Install dependencies
-        uses: php-actions/composer@v6
+        uses: php-actions/composer@v5
         with:
           php_extensions: amqp bcmath intl mysqli pcntl pdo_mysql sockets
           php_version: ${{ matrix.php-version }}
