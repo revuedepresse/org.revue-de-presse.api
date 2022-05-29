@@ -21,6 +21,16 @@ function clear_cache() {
     ./bin/console cache:warmup \
     --no-debug \
     --env=dev
+
+    php \
+    ./bin/console \
+    doctrine:cache:clear-metadata \
+    --env=dev
+
+    php \
+    ./bin/console \
+    doctrine:cache:clear-metadata \
+    --env=prod
 }
 clear_cache
 
