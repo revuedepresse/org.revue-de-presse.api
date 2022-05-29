@@ -109,7 +109,7 @@ function clean() {
         return 0
     fi
 
-    remove_container_image "${app}"
+    remove_container_image 'app'
 }
 
 function kill_existing_consumers {
