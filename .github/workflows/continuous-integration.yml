@@ -64,16 +64,16 @@ jobs:
         run: >
           \cat $GITHUB_WORKSPACE/.env.test.dist |
           sed -E 's/_APP_SECRET_/'${{ secrets.APP_SECRET }}/'#g' |
-          sed -E 's/_PASS_/'${{ secrets.MARIADB_ROOT_PASSWORD }}'/g' > $GITHUB_WORKSPACE/.env.local
+          sed -E 's/_PASS_/'${{ secrets.MARIADB_ROOT_PASSWORD }}'/g' > $GITHUB_WORKSPACE/.env.test
 
       - name: Clear cache
-        run: APP_ENV=test php bin/console cache:clear -e test
+        run: php bin/console cache:clear -e test
 
       - name: Warm-up cache
-        run: APP_ENV=test php bin/console cache:warmup -e test
+        run: php bin/console cache:warmup -e test
 
       - name: Create test database schema
-        run: APP_ENV=test php bin/console doctrine:schema:create -n -e test
+        run: php bin/console doctrine:schema:create -n -e test
 
       - name: Run unit tests
         run: make test
