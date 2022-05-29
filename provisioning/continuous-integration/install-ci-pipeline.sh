@@ -35,7 +35,7 @@ function install_pipeline() {
     test -e "${xdebug_configuration_file}" && rm -f "${xdebug_configuration_file}"
 
     cd ~/src/github.com/thierrymarianne/api.revue-de-presse.org || exit
-    cp provisioning/continuous-integration/parameters_test_codeship.yml.dist .env.test
+    cp provisioning/continuous-integration/parameters_test.yml.dist .env.test
 
     COMPOSER_HOME=${HOME}/cache/composer composer config -g github-oauth.github.com "${GITHUB_ACCESS_TOKEN}"
     COMPOSER_HOME=${HOME}/cache/composer composer install --prefer-dist --no-scripts
