@@ -1,11 +1,8 @@
 APP_ENV=test
 APP_SECRET=64ba62c3b4d48062948d77bc9b7a224f
 
-###> doctrine/doctrine-bundle ###
-# MySQL database password is injected by codeship
-DATABASE_URL=mysql://root:${MYSQL_PASSWORD}@127.0.0.1:3306/test?serverVersion=5.7
-DATABASE_WRITE_URL=mysql://root:${MYSQL_PASSWORD}@127.0.0.1:3306/test?serverVersion=5.7
-###< doctrine/doctrine-bundle ###
+DATABASE_URL=mysql://root:test@127.0.0.1:3306/test?serverVersion=5.7
+DATABASE_WRITE_URL=mysql://root:test@127.0.0.1:3306/test?serverVersion=5.7
 
 MESSENGER_TRANSPORT_DSN_FAILURES=amqp://guest:guest@127.0.0.1:5672/%2f/failures
 MESSENGER_TRANSPORT_DSN_STATUS=amqp://guest:guest@127.0.0.1:5672/%2f/get-news-status
