@@ -46,6 +46,9 @@ jobs:
       - name: Remove auth.json file
         run: rm -f $GITHUB_WORKSPACE/auth.json
 
+      - name: Shutdown running database
+        run: sudo service mysql stop
+
       - name: Run MySQL
         uses: mirromutth/mysql-action@v1.1
         with:
