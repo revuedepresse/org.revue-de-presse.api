@@ -46,22 +46,8 @@ jobs:
       - name: Remove auth.json file
         run: rm -f $GITHUB_WORKSPACE/auth.json
 
-      - name: Shutdown running database
-        run: sudo service mysql stop
-
-      - name: Run MySQL
-        uses: mirromutth/mysql-action@v1.1
-        with:
-          host port: 3306
-          container port: 3306
-          character set server: 'utf8mb4'
-          collation server: 'utf8mb4_general_ci'
-          mysql version: '5.7'
-          mysql database: test
-          mysql root password: test
-
       - name: Copy test environment variables configuration file
-        run: cp ${GITHUB_WORKSPACE}/provisioning/continuous-integration/parameters_test.yml.dist ${GITHUB_WORKSPACE}/.env.test
+        run: cat ${GITHUB_WORKSPACE}/provisioning/continuous-integration/parameters_test.yml.dist | sed -E 's#_APP_SECRET_#'"${APP_SECRET}"'#g' ${GITHUB_WORKSPACE}/.env.test
 
       - name: Create test database schema
         run: php bin/console doctrine:schema:create -n -e test
