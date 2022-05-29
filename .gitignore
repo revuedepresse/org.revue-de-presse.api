@@ -31,14 +31,10 @@ public/graphs
 /.env.test
 /config/secrets/prod/prod.decrypt.private.php
 /public/bundles/
-/var/cache
-/var/logs
 /vendor/
 /phpunit.xml
 .phpunit.result.cache
 .phpunit
-.phpunit.result.cache
-/phpunit.xml
 
 public/emoji-data/
 
