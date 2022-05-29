@@ -430,7 +430,7 @@ function cache_clear_warmup() {
     clean ''
 }
 
-function install {
+function install() {
     _set_up_configuration_files
 
     clean ''
