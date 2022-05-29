@@ -38,15 +38,16 @@ function install_shared_dependencies() {
     fi
 
     # Install debian packages
-    apt-get install --assume-yes \
+    apt-get install \
+        --assume-yes \
         apt-utils \
         ca-certificates \
         git \
         libcurl4-gnutls-dev \
         libicu-dev \
         librabbitmq-dev \
+        libsodium-dev \
         procps \
-        libsodium \
         symfony-cli \
         tini \
         unzip \
