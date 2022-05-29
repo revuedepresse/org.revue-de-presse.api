@@ -3,8 +3,8 @@ set -Eeuo pipefail
 
 function install_pipeline() {
     # [PHP](https://documentation.codeship.com/basic/languages-frameworks/php/)
-    phpenv local 8.0.11
-    phpenv global 8.0.11
+    phpenv local 8.0
+    phpenv global 8.0
     phpenv rehash
 
     wget https://pecl.php.net/get/amqp-1.10.2.tgz -O /tmp/amqp-1.10.2.tgz
