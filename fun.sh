@@ -448,11 +448,6 @@ function install() {
         -T app \
         /bin/bash -c 'source /scripts/install-app-requirements.sh'
 
-    docker compose \
-        -f ./provisioning/containers/docker-compose.yaml \
-        -f ./provisioning/containers/docker-compose.override.yaml \
-        down
-
     cache_clear_warmup --reuse-existing-container
 }
 
