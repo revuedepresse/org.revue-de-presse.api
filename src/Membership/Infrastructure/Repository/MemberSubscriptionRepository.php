@@ -193,6 +193,52 @@ QUERY
         );
     }
 
+    /**
+     * @param MemberInterface $member
+     * @param Request         $request
+     *
+     * @return array
+     * @throws \Exception
+     */
+    public function getMemberSubscriptions(
+        MemberInterface $member,
+        Request $request = null
+    ): array {
+        $memberSubscriptions = [];
+
+        $paginationParams        = null;
+        $publishersListIdentity = null;
+        if ($request instanceof Request) {
+            $paginationParams        = PaginationParams::fromRequest($request);
+            $publishersListIdentity = PublishersListIdentity::fromRequest($request);
+        }
+
+        $totalSubscriptions = $this->countMemberSubscriptions($member);
+        if ($totalSubscriptions) {
+            $memberSubscriptions = $this->selectMemberSubscriptions(
+                $member,
+                $paginationParams,
+                $publishersListIdentity
+            );
+        }
+
+        $aggregates = [];
+        if ($paginationParams instanceof PaginationParams) {
+            $aggregates = $this->getAggregatesRelatedToMemberSubscriptions(
+                $member,
+                $paginationParams
+            );
+        }
+
+        return [
+            'subscriptions'       => [
+                'aggregates'    => $aggregates,
+                'subscriptions' => $memberSubscriptions
+            ],
+            'total_subscriptions' => $totalSubscriptions,
+        ];
+    }
+
     public function getSelection()
     {
         return <<<QUERY

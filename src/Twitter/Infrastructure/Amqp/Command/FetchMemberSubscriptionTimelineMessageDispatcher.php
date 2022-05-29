@@ -7,8 +7,6 @@ use App\Twitter\Infrastructure\Amqp\Exception\SkippableMemberException;
 use App\Twitter\Infrastructure\Api\Entity\Token;
 use App\Twitter\Infrastructure\Api\Exception\InvalidSerializedTokenException;
 use App\Twitter\Infrastructure\Amqp\Message\FetchMemberStatus;
-use App\Twitter\Infrastructure\DependencyInjection\Collection\MemberFriendsCollectedEventRepositoryTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Collection\MemberProfileCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\MessageBusTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
@@ -30,8 +28,6 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class FetchMemberSubscriptionTimelineMessageDispatcher extends AggregateAwareCommand
 {
-    use MemberProfileCollectedEventRepositoryTrait;
-    use MemberFriendsCollectedEventRepositoryTrait;
     use MemberRepositoryTrait;
     use MessageBusTrait;
     use TranslatorTrait;

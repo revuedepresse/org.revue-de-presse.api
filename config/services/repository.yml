@@ -101,7 +101,6 @@ services:
             - '@Doctrine\Common\Persistence\ManagerRegistry'
             - 'App\Twitter\Infrastructure\Api\Entity\Aggregate'
         calls:
-            - [ 'setLikedStatusRepository',     [ '@repository.liked_status' ] ]
             - [ 'setLogger',                    [ '@logger' ] ]
             - [ 'setPublishersListDispatcher', [ '@App\Twitter\Infrastructure\Amqp\MessageBus\PublishersListDispatcher' ] ]
             - [ 'setStatusRepository',          [ '@App\Twitter\Infrastructure\Api\Repository\StatusRepository' ] ]
@@ -138,8 +137,6 @@ services:
             accessor:                               '@App\Twitter\Infrastructure\Api\Accessor'
             logger:                                 '@logger'
             memberAggregateSubscriptionRepository:  '@repository.member_aggregate_subscription'
-            memberSubscriptionRepository:           '@repository.member_subscription'
-            networkRepository:                      '@repository.network'
 
     repository.owner:
         factory: [ '@doctrine.orm.entity_manager', 'getRepository' ]
@@ -197,16 +194,6 @@ services:
             - [ 'setStatusAccessor',    [ '@App\Twitter\Infrastructure\Twitter\Api\Accessor\StatusAccessor'] ]
             - [ 'setStatusRepository',  [ '@App\Twitter\Infrastructure\Api\Repository\StatusRepository'] ]
 
-    repository.network:
-        class:                            'App\Membership\Infrastructure\Repository\NetworkRepository'
-        properties:
-            accessor:                     '@App\Twitter\Infrastructure\Api\Accessor'
-            entityManager:                "@doctrine.orm.entity_manager"
-            logger:                       "@logger"
-            memberRepository:             "@user_manager"
-            memberSubscribeeRepository:   "@repository.member_subscribee"
-            memberSubscriptionRepository: "@repository.member_subscription"
-
     repository.saved_search:
         class: 'App\PublishersList\Repository\SavedSearchRepository'
         arguments:
@@ -221,31 +208,6 @@ services:
         properties:
             statusRepository: '@App\Twitter\Infrastructure\Api\Repository\StatusRepository'
             logger:           "@logger"
-
-    repository.liked_status:
-        class: 'App\Twitter\Infrastructure\Publication\Repository\LikedStatusRepository'
-        arguments:
-            - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Twitter\Domain\Curation\Entity\LikedStatus'
-        properties:
-            memberRepository: "@user_manager"
-            statusRepository: '@App\Twitter\Infrastructure\Api\Repository\StatusRepository'
-
-    repository.member_subscription:
-        class: 'App\Membership\Infrastructure\Repository\MemberSubscriptionRepository'
-        arguments:
-            - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Membership\Domain\Entity\MemberSubscription'
-        properties:
-            memberRepository: "@user_manager"
-
-    repository.member_subscribee:
-        class: 'App\Membership\Infrastructure\Repository\MemberSubscribeeRepository'
-        arguments:
-            - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Membership\Domain\Entity\MemberSubscribee'
-        properties:
-            memberRepository: "@user_manager"
 
     repository.whisperer:
         class: '%repository.whisperer.class%'

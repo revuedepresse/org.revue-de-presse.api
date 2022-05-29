@@ -7,7 +7,7 @@ security:
                 providers: [user_provider]
         user_provider:
             entity:
-                class:          Membership:Member
+                class:          App\Membership\Domain\Entity\Legacy\Member
                 property:       apiKey
                 manager_name:   default
 

@@ -6,7 +6,6 @@ use Doctrine\ORM\Mapping as ORM;
 use MyProject\Proxies\__CG__\stdClass;
 
 /**
- * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
  * @ORM\Entity(repositoryClass="WeavingTheWeb\Bundle\ApiBundle\Repository\WhispererRepository")
  * @ORM\Table(name="weaving_whisperer",
  *  uniqueConstraints={

@@ -62,10 +62,6 @@ class OwnershipAccessorTest extends KernelTestCase
             new NullLogger()
         );
 
-        $ownershipAccessor->setOwnershipBatchCollectedEventRepository(
-            $this->eventRepository
-        );
-
         $activeToken = $this->getActiveToken();
 
         // Act
@@ -103,10 +99,6 @@ class OwnershipAccessorTest extends KernelTestCase
             $this->makeTokenRepository(2),
             $this->makeTokenChange(),
             new NullLogger()
-        );
-
-        $ownershipAccessor->setOwnershipBatchCollectedEventRepository(
-            $this->eventRepository
         );
 
         $activeToken = $this->getActiveToken();
@@ -151,10 +143,6 @@ class OwnershipAccessorTest extends KernelTestCase
             $this->makeTokenRepository(1),
             $this->makeTokenChange(),
             new NullLogger()
-        );
-
-        $ownershipAccessor->setOwnershipBatchCollectedEventRepository(
-            $this->eventRepository
         );
 
         try {

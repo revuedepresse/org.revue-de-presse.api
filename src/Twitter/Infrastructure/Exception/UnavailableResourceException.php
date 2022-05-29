@@ -17,7 +17,6 @@ use function sprintf;
 
 /**
  * @package App\Twitter\Infrastructure\Exception
- * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
 class UnavailableResourceException extends Exception implements TwitterErrorAwareInterface
 {

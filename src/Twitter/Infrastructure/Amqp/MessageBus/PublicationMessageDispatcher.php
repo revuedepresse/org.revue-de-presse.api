@@ -14,9 +14,7 @@ use App\Twitter\Domain\Resource\OwnershipCollection;
 use App\Twitter\Domain\Resource\PublishersList;
 use App\Twitter\Infrastructure\Amqp\ResourceProcessor\PublishersListProcessorInterface;
 use App\Twitter\Infrastructure\DependencyInjection\Api\ApiLimitModeratorTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Collection\OwnershipBatchCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\OwnershipAccessorTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Publication\PublishersListProcessorTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TokenChangeTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Twitter\Domain\Api\ApiAccessorInterface;
@@ -35,9 +33,7 @@ use function sprintf;
 class PublicationMessageDispatcher implements PublicationMessageDispatcherInterface
 {
     use ApiLimitModeratorTrait;
-    use OwnershipBatchCollectedEventRepositoryTrait;
     use OwnershipAccessorTrait;
-    use PublishersListProcessorTrait;
     use TokenChangeTrait;
     use TranslatorTrait;
 

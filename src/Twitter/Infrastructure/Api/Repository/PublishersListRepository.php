@@ -12,7 +12,6 @@ use App\Twitter\Domain\Publication\PublishersListInterface;
 use App\Twitter\Domain\Publication\StatusInterface;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublishersListDispatcherTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Status\LikedStatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Status\StatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TimelyStatusRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\TokenRepositoryTrait;
@@ -20,7 +19,6 @@ use App\Twitter\Domain\PublishersList\Repository\PublishersListRepositoryInterfa
 use App\Membership\Domain\Entity\Legacy\Member;
 use App\Membership\Domain\Entity\MemberInterface;
 use App\Twitter\Infrastructure\Operation\CapableOfDeletionInterface;
-use App\Twitter\Domain\Curation\Entity\LikedStatus;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\FetchMode;
 use Doctrine\DBAL\ParameterType;
@@ -46,7 +44,6 @@ class PublishersListRepository extends ResourceRepository implements CapableOfDe
     PublishersListRepositoryInterface
 {
     use StatusRepositoryTrait;
-    use LikedStatusRepositoryTrait;
     use LoggerTrait;
     use PaginationAwareTrait;
     use PublishersListDispatcherTrait;
@@ -534,14 +531,6 @@ QUERY;
                     /** @var TimelyStatus $timelyStatus */
                     foreach ($timelyStatuses as $timelyStatus) {
                         $timelyStatus->updateAggregate($firstAggregate);
-                    }
-
-                    $likedStatuses = $this->likedStatusRepository
-                        ->findBy(['aggregate' => $aggregate]);
-
-                    /** @var LikedStatus $likedStatus */
-                    foreach ($likedStatuses as $likedStatus) {
-                        $likedStatus->setAggregate($firstAggregate);
                     }
                 }
 

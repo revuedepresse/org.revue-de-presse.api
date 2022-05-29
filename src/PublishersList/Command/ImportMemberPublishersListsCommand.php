@@ -7,8 +7,6 @@ use App\PublishersList\Repository\MemberAggregateSubscriptionRepository;
 use App\Twitter\Infrastructure\Console\AbstractCommand;
 use App\Twitter\Domain\Resource\MemberIdentity;
 use App\Twitter\Domain\Resource\PublishersList;
-use App\Twitter\Infrastructure\DependencyInjection\Collection\OwnershipBatchCollectedEventRepositoryTrait;
-use App\Twitter\Infrastructure\DependencyInjection\Collection\PublishersListCollectedEventRepositoryTrait;
 use App\Twitter\Infrastructure\Repository\Membership\MemberRepository;
 use App\Membership\Domain\Entity\AggregateSubscription;
 use App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository;
@@ -27,9 +25,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ImportMemberPublishersListsCommand extends AbstractCommand
 {
-    use OwnershipBatchCollectedEventRepositoryTrait;
-    use PublishersListCollectedEventRepositoryTrait;
-
     private const OPTION_MEMBER_NAME = 'member-name';
 
     private const OPTION_LIST_RESTRICTION = 'list-restriction';

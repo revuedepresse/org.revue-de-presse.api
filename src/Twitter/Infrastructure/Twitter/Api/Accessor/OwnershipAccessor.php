@@ -8,7 +8,6 @@ use App\Twitter\Infrastructure\Api\AccessToken\TokenChangeInterface;
 use App\Twitter\Infrastructure\Api\Entity\TokenInterface;
 use App\Twitter\Domain\Resource\MemberOwnerships;
 use App\Twitter\Domain\Resource\OwnershipCollection;
-use App\Twitter\Infrastructure\DependencyInjection\Collection\OwnershipBatchCollectedEventRepositoryTrait;
 use App\Twitter\Domain\Api\ApiAccessorInterface;
 use App\Twitter\Infrastructure\Exception\OverCapacityException;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
@@ -16,8 +15,6 @@ use Psr\Log\LoggerInterface;
 
 class OwnershipAccessor implements OwnershipAccessorInterface
 {
-    use OwnershipBatchCollectedEventRepositoryTrait;
-
     private ApiAccessorInterface $accessor;
 
     private TokenRepositoryInterface $tokenRepository;
