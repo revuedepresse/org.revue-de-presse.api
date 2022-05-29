@@ -28,6 +28,17 @@ services:
             - '../../../shared:/var/www/shared'
         working_dir: '/var/www/revue-de-presse.org'
 
+    database:
+        build: ./database
+        restart: always
+        ports:
+            - "127.0.0.1:3306:3306"
+        env_file:
+            - '../../.env.local'
+        volumes:
+            - '../volumes/database:/var/lib/mysql'
+            - './database/templates/database.cnf:/etc/mysql/mariadb.conf.d/docker.cnf'
+
     cache:
         image: redis
         command: redis-server --appendonly yes
@@ -36,27 +47,6 @@ services:
         restart: always
         volumes:
             - '../volumes/cache:/data'
-
-    db_read:
-        build: ./mysql
-        restart: always
-        env_file:
-            - '../../.env.local'
-        ports:
-            - "127.0.0.1:33062:3306"
-        volumes:
-            - '../volumes/db_read:/var/lib/mysql'
-
-    db_write:
-        build: ./mariadb
-        restart: always
-        ports:
-            - "127.0.0.1:33061:3306"
-        env_file:
-            - '../../.env.local'
-        volumes:
-            - '../volumes/db_write:/var/lib/mysql'
-            - './db_write/templates/docker.cnf:/etc/mysql/mariadb.conf.d/docker.cnf'
 
     service:
         build:
