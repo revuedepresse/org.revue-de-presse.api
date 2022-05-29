@@ -999,13 +999,15 @@ function refresh_statuses() {
 }
 
 function run_php_unit_tests() {
+    export SYMFONY_DEPRECATIONS_HELPER=disabled
+
     if [ -z ${DEBUG} ];
     then
-        bin/phpunit -c ./phpunit.xml.dist --process-isolation
+        bin/phpunit -c ./phpunit.xml.dist --process-isolation --stop-on-failure --stop-on-error
         return
     fi
 
-    bin/phpunit -c ./phpunit.xml.dist --verbose --debug
+    bin/phpunit -c ./phpunit.xml.dist --verbose --debug --stop-on-failure --stop-on-error
 }
 
 function run_php_features_tests() {
