@@ -16,15 +16,17 @@ jobs:
 
     steps:
       - name: Install packages
-        run: sudo apt-get install tar gzip wget bash
+        run: sudo apt-get install bash gzip tar wget
 
       - name: Checkout project
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
 
       - name: Validate composer.json and composer.lock
         run: composer validate --strict
 
-      - name: Cache Composer dependencies
+      - name: Cache composer dependencies
         uses: actions/cache@v2
         with:
           path: /tmp/composer-cache
@@ -39,8 +41,8 @@ jobs:
       - name: Install dependencies
         uses: php-actions/composer@v6
         with:
-          php_version: ${{ matrix.php-version }}
           php_extensions: amqp bcmath intl mysqli pcntl pdo_mysql sockets
+          php_version: ${{ matrix.php-version }}
           version: 2.x
 
       - name: Remove auth.json file
