@@ -680,6 +680,22 @@ SCRIPT
     /bin/bash -c "${command}"
 }
 
+function start_database() {
+    local command
+    command=$(cat <<-SCRIPT
+docker compose \
+      --file=./provisioning/containers/docker-compose.yaml \
+      --file=./provisioning/containers/docker-compose.override.yaml \
+			up \
+			--detach \
+			database
+SCRIPT
+)
+
+    echo 'About to execute "'"${command}"'"'
+    /bin/bash -c "${command}"
+}
+
 function stop() {
     docker compose \
         -f ./provisioning/containers/docker-compose.yaml \
