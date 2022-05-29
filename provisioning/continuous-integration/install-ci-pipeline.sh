@@ -9,10 +9,12 @@ function install_pipeline() {
     phpenv global 8.0
     phpenv rehash
 
+    sudo apt-install libsodium-dev
+
     wget https://pecl.php.net/get/amqp-1.11.0.tgz -O /tmp/amqp-1.11.0.tgz
     cd /tmp && tar -xvzf /tmp/amqp-1.11.0.tgz && cd amqp-1.11.0
-    /bin/bash -c "${HOME}/.phpenv/versions/$(phpenv version-name)/bin/phpize ."
-    /bin/bash -c "./configure --with-php-config=${HOME}/.phpenv/versions/$(phpenv version-name)/bin/php-config"
+    "${HOME}/.phpenv/versions/$(phpenv version-name)/bin/phpize" .
+    ./configure --with-php-config="${HOME}/.phpenv/versions/$(phpenv version-name)/bin/php-config"
     make && make install
 
     ls -lahtr "${HOME}/.phpenv/versions/8.0.18/lib/php/extensions/no-debug-non-zts-20200930/"
@@ -22,7 +24,10 @@ function install_pipeline() {
     # [libsodium](https://docs.cloudbees.com/docs/cloudbees-codeship/latest/basic-languages-frameworks/php#_libsodium)
     wget https://raw.githubusercontent.com/codeship/scripts/master/packages/libsodium.sh -O /tmp/libsodium.sh
     pecl channel-update pecl.php.net
-    LIBSODIUM_VERSION='1.0.18' bash -c '. /tmp/libsodium.sh'
+
+    export LIBSODIUM_VERSION='1.0.18'
+    source. /tmp/libsodium.sh
+
     LD_LIBRARY_PATH="${HOME}/cache/libsodium/lib PKG_CONFIG_PATH=${HOME}/cache/libsodium/lib/pkgconfig" \
     LDFLAGS="-L${HOME}/cache/libsodium/lib" pecl install -f libsodium
     echo "extension=${HOME}/.phpenv/versions/8.0.18/lib/php/extensions/no-debug-non-zts-20200930/libsodium.so" \
@@ -30,7 +35,7 @@ function install_pipeline() {
 
     local xdebug_configuration_file
     xdebug_configuration_file="${HOME}/.phpenv/versions/$(phpenv version-name)/etc/conf.d/xdebug.ini"
-    /bin/bash -c "test -e ${xdebug_configuration_file} && rm -f ${xdebug_configuration_file}"
+    test -e "${xdebug_configuration_file}" && rm -f "${xdebug_configuration_file}"
 
     cd ~/src/github.com/thierrymarianne/api.revue-de-presse.org || exit
     cp provisioning/continuous-integration/parameters_test_codeship.yml.dist .env.test
