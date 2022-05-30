@@ -4,7 +4,7 @@ namespace App\Twitter\Infrastructure\Publication\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Types\Type;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\EntityRepository;
 
 class KeywordRepository extends ServiceEntityRepository
@@ -79,8 +79,8 @@ QUERY;
             $endDate,
         ];
         $types = [
-            Type::DATETIME,
-            Type::DATETIME,
+            Types::DATETIME_MUTABLE,
+            Types::DATETIME_MUTABLE,
         ];
         $query = str_replace(
             '{{ dates }}',
@@ -93,7 +93,7 @@ QUERY;
                 $startDate,
             ];
             $types = [
-                Type::DATETIME,
+                Types::DATETIME_MUTABLE,
             ];
             $query = str_replace(
                 '{{ dates }}',

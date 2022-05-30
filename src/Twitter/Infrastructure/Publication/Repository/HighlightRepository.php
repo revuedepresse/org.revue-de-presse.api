@@ -11,7 +11,7 @@ use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\Http\SearchParams;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Types\Type;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\QueryBuilder;
@@ -293,12 +293,12 @@ QUERY;
                 ],
                 [
                     \Pdo::PARAM_STR,
-                    Type::DATETIME,
-                    Type::DATETIME,
-                    Type::DATETIME,
-                    Type::DATETIME,
-                    Type::DATETIME,
-                    Type::DATETIME,
+                    Types::DATETIME_MUTABLE,
+                    Types::DATETIME_MUTABLE,
+                    Types::DATETIME_MUTABLE,
+                    Types::DATETIME_MUTABLE,
+                    Types::DATETIME_MUTABLE,
+                    Types::DATETIME_MUTABLE,
                 ]
             );
         } catch (\Exception $exception) {
