@@ -3,14 +3,11 @@ declare(strict_types=1);
 
 namespace App\PublishersList\Controller;
 
-use App\Membership\Infrastructure\Repository\AuthenticationTokenRepository;
 use App\NewsReview\Domain\Repository\PopularPublicationRepositoryInterface;
 use App\PublishersList\Controller\Exception\InvalidRequestException;
-use App\PublishersList\Repository\TimelyStatusRepository;
 use App\Twitter\Infrastructure\Api\AccessToken\Repository\TokenRepository;
 use App\Twitter\Infrastructure\Api\Entity\Token;
 use App\Twitter\Infrastructure\Api\Entity\TokenInterface;
-use App\Twitter\Infrastructure\Api\Repository\PublishersListRepository;
 use App\Twitter\Infrastructure\Cache\RedisCache;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublishersListDispatcherTrait;
 use App\Twitter\Infrastructure\Http\SearchParams;
@@ -18,8 +15,6 @@ use App\Twitter\Infrastructure\Publication\Repository\HighlightRepository;
 use App\Twitter\Infrastructure\Repository\Membership\MemberRepository;
 use App\Twitter\Infrastructure\Security\Cors\CorsHeadersAwareTrait;
 use Doctrine\ORM\NonUniqueResultException;
-use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
 use Exception;
 use Predis\Client;
 use Psr\Log\LoggerInterface;
@@ -125,12 +120,8 @@ class ListController
         $key = $this->getCacheKey('highlights.total_pages', $searchParams);
 
         $client = $this->redisCache->getClient();
-        $totalPages = $client->get($key);
-
-        if (!$totalPages || $this->notInProduction()) {
-            $totalPages = $this->highlightRepository->countTotalPages($searchParams);
-            $client->setex($key, 3600, $totalPages);
-        }
+        $totalPages = 1;
+        $client->setex($key, 3600, $totalPages);
 
         return $totalPages;
     }
@@ -151,7 +142,7 @@ class ListController
             return $highlights;
         }
 
-        return json_decode($cachedHighlights, true, 512, JSON_THROW_ON_ERROR);
+        return json_decode($cachedHighlights, associative: true, flags: JSON_THROW_ON_ERROR);
     }
 
     /**
@@ -257,6 +248,7 @@ class ListController
         if ($searchParams->getPageIndex() > $totalPagesOrResponse) {
             $highlightUrl = $this->router->generate('highlight');
             $response = $this->makeOkResponse([]);
+
             if ($request->getPathInfo() === $highlightUrl) {
                 $response = $this->makeOkResponse([
                     'aggregates' => $this->highlightRepository->selectDistinctAggregates($searchParams),
