@@ -54,6 +54,24 @@ function build() {
 
     _set_up_configuration_files
 
+    if [ -z "${WORKER_UID}" ];
+    then
+
+      printf 'A %s is expected as %s ("%s").%s' 'non-empty numeric' 'system user uid' 'WORKER_UID' $'\n'
+
+      return 1
+
+    fi
+
+    if [ -z "${WORKER_GID}" ];
+    then
+
+      printf 'A %s is expected as %s ("%s").%s' 'non-empty numeric' 'system user gid' 'WORKER_GID' $'\n'
+
+      return 1
+
+    fi
+
     docker compose \
         --file=./provisioning/containers/docker-compose.yaml \
         --file=./provisioning/containers/docker-compose.override.yaml \
