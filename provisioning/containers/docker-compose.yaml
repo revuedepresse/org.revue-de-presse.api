@@ -42,8 +42,9 @@ services:
     cache:
         image: redis
         command: redis-server --appendonly yes
-        expose:
-            - "6379"
+#        network_mode: host
+#        ports:
+#            - "127.0.0.1:6379:6379"
         restart: always
         volumes:
             - '../volumes/cache:/data'
@@ -53,6 +54,7 @@ services:
             context: .
             dockerfile: './service/Dockerfile'
         restart: always
+#        network_mode: host
         volumes:
             - './service/templates/extensions.ini.dist:/usr/local/etc/php/conf.d/extensions.ini'
             - './service/templates/docker.conf:/usr/local/etc/php-fpm.d/docker.conf'
