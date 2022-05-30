@@ -16,7 +16,7 @@ COPY --from=composer:2.3 /usr/bin/composer /usr/bin/composer
 
 USER ${WORKER_UID}:${WORKER_GID}
 
-VOLUME ["/scripts", "/root/.composer", "/var/www/revue-de-presse.org", "/var/www/shared"]
+VOLUME ["/scripts", "/var/www/revue-de-presse.org", "/var/www/shared"]
 
 WORKDIR /var/www/revue-de-presse.org
 
