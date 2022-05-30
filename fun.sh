@@ -49,6 +49,11 @@ function _set_file_permissions() {
 }
 
 function build() {
+    local WORKER_UID
+    local WORKER_GID
+
+    _set_up_configuration_files
+
     docker compose \
         --file=./provisioning/containers/docker-compose.yaml \
         --file=./provisioning/containers/docker-compose.override.yaml \
