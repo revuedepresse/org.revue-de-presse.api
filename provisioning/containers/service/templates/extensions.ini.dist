@@ -2,15 +2,8 @@ date.timezone='UTC';
 error_reporting='E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED'
 
 ;zend_extension=/usr/local/lib/php/extensions/no-debug-non-zts-20210902/xdebug.so
-;xdebug.remote_port=
-;xdebug.remote_mode=req
-;xdebug.remote_handler=dbgp
-;xdebug.remote_enable=1
-;xdebug.remote_autostart=1
-;xdebug.remote_host=
-;xdebug.idekey='_'
-;xdebug.overload_var_dump=1
-;xdebug.trace_format=1
-;xdebug.show_exception_trace=0
-;xdebug.default_enable=1
-;xdebug.max_nesting_level=2500
+;
+;xdebug.mode=debug
+;xdebug.start_with_request=yes
+;xdebug.log=/var/www/revue-de-presse.org/var/log/xdebug.log
+;xdebug.discover_client_host=yes
