@@ -27,6 +27,13 @@ services:
             - '../../:/var/www/revue-de-presse.org'
             - '../../../shared:/var/www/shared'
 
+    cache:
+        image: redis:7-bullseye
+        command: redis-server --appendonly yes
+        restart: always
+        volumes:
+            - '../volumes/cache:/data'
+
     database:
         build: ./database
         restart: always
@@ -37,13 +44,6 @@ services:
         volumes:
             - '../volumes/database:/var/lib/mysql'
             - './database/templates/database.cnf:/etc/mysql/mariadb.conf.d/docker.cnf'
-
-    cache:
-        image: redis
-        command: redis-server --appendonly yes
-        restart: always
-        volumes:
-            - '../volumes/cache:/data'
 
     service:
         build:
