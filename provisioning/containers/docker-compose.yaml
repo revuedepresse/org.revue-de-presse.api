@@ -49,6 +49,10 @@ services:
         build:
             context: .
             dockerfile: './service/Dockerfile'
+        depends_on:
+            - cache
+        env_file:
+            - '../../.env.local'
         restart: always
         volumes:
             - './service/templates/extensions.ini.dist:/usr/local/etc/php/conf.d/extensions.ini'
@@ -57,19 +61,15 @@ services:
             - './service/templates/www.conf:/usr/local/etc/php-fpm.d/www.conf'
             - '../../:/var/www/revue-de-presse.org'
             - '../../../shared:/var/www/shared'
-        env_file:
-            - '../../.env.local'
-        depends_on:
-            - cache
 
     worker:
         build:
             context: .
             dockerfile: './worker/Dockerfile'
+        depends_on:
+            - amqp
         env_file:
             - '../../.env.local'
         volumes:
             - '../../:/var/www/revue-de-presse.org'
             - '../../../shared:/var/www/shared'
-        depends_on:
-            - amqp
