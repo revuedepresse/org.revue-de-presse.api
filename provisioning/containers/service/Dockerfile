@@ -18,7 +18,7 @@ USER ${WORKER_UID}:${WORKER_GID}
 
 VOLUME ["/scripts", "/var/www/revue-de-presse.org", "/var/www/shared"]
 
-WORKDIR /var/www/revue-de-presse.org
+WORKDIR '/var/www/revue-de-presse.org'
 
 ENTRYPOINT ["/usr/bin/tini", "--"]
 

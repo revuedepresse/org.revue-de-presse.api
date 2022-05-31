@@ -16,6 +16,6 @@ COPY --from=composer:2.3 /usr/bin/composer /usr/bin/composer
 
 VOLUME ["/scripts", "/root/.composer", "/var/www/revue-de-presse.org", "/var/www/shared"]
 
-WORKDIR /var/www/revue-de-presse.org
+WORKDIR '/var/www/revue-de-presse.org'
 
 CMD ["tail", "-f", "/dev/null"]
