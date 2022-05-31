@@ -11,7 +11,7 @@ RUN /bin/bash -c 'source /scripts/install-worker-requirements.sh'
 
 USER ${WORKER_UID}:${WORKER_GID}
 
-# [composer official image](https://hub.docker.com/_/composer?tab=tags&page=1&name=2.3)
+# [Composer 2.3](https://hub.docker.com/_/composer?tab=tags&page=1&name=2.3)
 COPY --from=composer:2.3 /usr/bin/composer /usr/bin/composer
 
 VOLUME ["/scripts", "/var/www/revue-de-presse.org", "/var/www/shared"]
