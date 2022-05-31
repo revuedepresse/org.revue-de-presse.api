@@ -14,7 +14,7 @@ USER ${WORKER_UID}:${WORKER_GID}
 # [composer official image](https://hub.docker.com/_/composer?tab=tags&page=1&name=2.3)
 COPY --from=composer:2.3 /usr/bin/composer /usr/bin/composer
 
-VOLUME ["/scripts", "/root/.composer", "/var/www/revue-de-presse.org", "/var/www/shared"]
+VOLUME ["/scripts", "/var/www/revue-de-presse.org", "/var/www/shared"]
 
 WORKDIR '/var/www/revue-de-presse.org'
 
