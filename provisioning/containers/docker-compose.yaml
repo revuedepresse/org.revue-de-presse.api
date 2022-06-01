@@ -22,10 +22,11 @@ services:
             - '../../.env.local'
         restart: always
         volumes:
-            - '../containers/service/templates/extensions.ini.dist:/usr/local/etc/php/conf.d/extensions.ini'
-            - '../containers/service/templates:/templates'
-            - '../../:/var/www/revue-de-presse.org'
-            - '../../../shared:/var/www/shared'
+            - './service/templates/extensions.ini.dist:/usr/local/etc/php/conf.d/extensions.ini'
+            - './service/templates/:/templates/'
+            - '../../:/var/www/revue-de-presse.org/'
+            - '../../../shared/:/var/www/shared/'
+            - '../../../shared/emoji-data/:/var/www/revue-de-presse.org/public/emoji-data/'
 
     cache:
         image: redis:7-bullseye
@@ -60,8 +61,8 @@ services:
             - './service/templates/empty.conf:/usr/local/etc/php-fpm.d/zz-docker.conf'
             - './service/templates/www.conf:/usr/local/etc/php-fpm.d/www.conf'
             - '../../:/var/www/revue-de-presse.org/'
-            - '../../../shared:/var/www/shared'
-            - '../../../shared/emoji-data:/var/www/revue-de-presse.org/public/emoji-data'
+            - '../../../shared/:/var/www/shared/'
+            - '../../../shared/emoji-data/:/var/www/revue-de-presse.org/public/emoji-data/'
 
     worker:
         build:
@@ -72,6 +73,6 @@ services:
         env_file:
             - '../../.env.local'
         volumes:
-            - '../../:/var/www/revue-de-presse.org'
-            - '../../../shared:/var/www/shared'
-            - '../../../shared/emoji-data:/var/www/revue-de-presse.org/public/emoji-data'
+            - '../../:/var/www/revue-de-presse.org/'
+            - '../../../shared/:/var/www/shared/'
+            - '../../../shared/emoji-data/:/var/www/revue-de-presse.org/public/emoji-data/'
