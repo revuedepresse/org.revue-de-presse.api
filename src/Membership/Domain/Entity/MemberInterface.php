@@ -26,13 +26,13 @@ interface MemberInterface extends UserInterface
      * @param string $twitterId
      * @return MemberInterface
      */
-    public function setTwitterID(string $twitterId): MemberInterface;
+    public function setTwitterID(string $twitterId): self;
 
     /**
      * @param $twitterUsername
      * @return $this
      */
-    public function setTwitterUsername(string $twitterUsername): MemberInterface;
+    public function setTwitterUsername(string $twitterUsername): self;
 
     /**
      * @return string|null
@@ -50,9 +50,9 @@ interface MemberInterface extends UserInterface
      * @param string $fullName
      * @return MemberInterface
      */
-    public function setFullName(string $fullName): MemberInterface;
+    public function setFullName(string $fullName): self;
 
-    public function setScreenName(string $screenName): MemberInterface;
+    public function setScreenName(string $screenName): self;
 
     /**
      * @return string
@@ -63,7 +63,7 @@ interface MemberInterface extends UserInterface
      * @param bool $protected
      * @return MemberInterface
      */
-    public function setProtected(bool $protected): MemberInterface;
+    public function setProtected(bool $protected): self;
 
     /**
      * @return boolean
@@ -79,7 +79,7 @@ interface MemberInterface extends UserInterface
      * @param bool $suspended
      * @return MemberInterface
      */
-    public function setSuspended(bool $suspended): MemberInterface;
+    public function setSuspended(bool $suspended): self;
 
     /**
      * @return bool
@@ -95,7 +95,7 @@ interface MemberInterface extends UserInterface
      * @param $notFound
      * @return MemberInterface
      */
-    public function setNotFound(bool $notFound): MemberInterface;
+    public function setNotFound(bool $notFound): self;
 
     /**
      * @return boolean
@@ -124,7 +124,7 @@ interface MemberInterface extends UserInterface
 
     public function totalStatus(): int;
 
-    public function setTotalStatus($totalStatus): MemberInterface;
+    public function setTotalStatus($totalStatus): self;
 
     public function getMinStatusId(): int;
 }

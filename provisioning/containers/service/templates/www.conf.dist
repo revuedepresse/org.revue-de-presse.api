@@ -1,5 +1,4 @@
 [press_review]
-
 access.log                      = /proc/self/fd/1
 prefix                          = /var/www/revue-de-presse.org/public
 
@@ -8,13 +7,9 @@ group                           = __GID__
 
 listen                          = /var/www/revue-de-presse.org/var/run/__SOCK__.sock
 
-
 listen.owner                    = __UID__
 listen.group                    = __GID__
 listen.mode                     = 0660
-
-
-
 
 pm                              = dynamic
 pm.max_children                 = 300

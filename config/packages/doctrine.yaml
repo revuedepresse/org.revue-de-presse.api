@@ -128,8 +128,8 @@ doctrine:
         types:
             uuid:  Ramsey\Uuid\Doctrine\UuidType
     orm:
-        default_entity_manager:     default
-        auto_generate_proxy_classes: true
+        default_entity_manager:         default
+        auto_generate_proxy_classes:    true
         entity_managers:
             default:
                 naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware

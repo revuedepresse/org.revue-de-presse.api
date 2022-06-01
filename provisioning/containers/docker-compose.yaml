@@ -59,8 +59,9 @@ services:
             - './service/templates/docker.conf:/usr/local/etc/php-fpm.d/docker.conf'
             - './service/templates/empty.conf:/usr/local/etc/php-fpm.d/zz-docker.conf'
             - './service/templates/www.conf:/usr/local/etc/php-fpm.d/www.conf'
-            - '../../:/var/www/revue-de-presse.org'
+            - '../../:/var/www/revue-de-presse.org/'
             - '../../../shared:/var/www/shared'
+            - '../../../shared/emoji-data:/var/www/revue-de-presse.org/public/emoji-data'
 
     worker:
         build:
@@ -73,3 +74,4 @@ services:
         volumes:
             - '../../:/var/www/revue-de-presse.org'
             - '../../../shared:/var/www/shared'
+            - '../../../shared/emoji-data:/var/www/revue-de-presse.org/public/emoji-data'
