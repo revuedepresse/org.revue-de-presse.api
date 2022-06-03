@@ -135,7 +135,7 @@ function clean() {
     remove_container_image 'app'
 }
 
-function cache_clear_warmup() {
+function clear_cache_warmup() {
     local WORKER_UID
     local WORKER_GID
 
@@ -175,7 +175,9 @@ function install() {
     docker compose \
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
-        up -d app
+        up \
+        --detach \
+        app
 
     docker compose \
         -f ./provisioning/containers/docker-compose.yaml \
@@ -185,7 +187,7 @@ function install() {
         -T app \
         /bin/bash -c 'source /scripts/install-app-requirements.sh'
 
-    cache_clear_warmup --reuse-existing-container
+    clear_cache_warmup --reuse-existing-container
 }
 
 function start() {
