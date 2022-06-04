@@ -1,15 +1,15 @@
-date.timezone='UTC';
-
+date.timezone               = 'UTC';
 display_errors              = off
 display_startup_errors      = off
 error_reporting             = 'E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED'
 expose_php                  = off
-html_errors                 = on
+extension                   = '/usr/local/lib/php/extensions/no-debug-non-zts-20210902/ddtrace.so'
 log_errors                  = on
-
-;zend_extension=/usr/local/lib/php/extensions/no-debug-non-zts-20210902/xdebug.so
-;
+log_errors_max_len          = 1024
+html_errors                 = on
+output_buffering            = on
+;xdebug.discover_client_host=yes
+;xdebug.log=/var/www/revue-de-presse.org/var/log/xdebug.log
 ;xdebug.mode=debug
 ;xdebug.start_with_request=yes
-;xdebug.log=/var/www/revue-de-presse.org/var/log/xdebug.log
-;xdebug.discover_client_host=yes
+;zend_extension=/usr/local/lib/php/extensions/no-debug-non-zts-20210902/xdebug.so
