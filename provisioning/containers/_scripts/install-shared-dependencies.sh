@@ -87,7 +87,8 @@ function install_shared_dependencies() {
     cd /tmp || exit
     php datadog-setup.php \
     --php-bin all \
-    --enable-appsec
+    --enable-appsec \
+    --enable-profiling
 }
 
 set -Eeuo pipefail
