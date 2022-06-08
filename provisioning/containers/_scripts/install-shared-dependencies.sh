@@ -62,7 +62,8 @@ function install_shared_dependencies() {
         sockets \
         sodium
 
-    wget https://github.com/xdebug/xdebug/archive/3.1.4.zip -O /tmp/3.1.4.zip
+    wget https://github.com/xdebug/xdebug/archive/3.1.4.zip \
+    --output-document /tmp/3.1.4.zip
     cd /tmp || exit
     unzip /tmp/3.1.4.zip
     cd xdebug-3.1.4 || exit
@@ -71,7 +72,8 @@ function install_shared_dependencies() {
     make
     make install
 
-    wget https://github.com/DataDog/dd-trace-php/archive/0.74.0.tar.gz -O /tmp/datadog-php-tracer.tar.gz
+    wget https://github.com/DataDog/dd-trace-php/archive/0.74.0.tar.gz \
+    --output-document /tmp/datadog-php-tracer.tar.gz
     cd /tmp || exit
     tar -xvzf /tmp/datadog-php-tracer.tar.gz
     cd dd-trace-php-0.74.0 || exit
@@ -79,6 +81,13 @@ function install_shared_dependencies() {
     ./configure --with-php-config="$(which php-config)"
     make
     make install
+
+    wget https://github.com/DataDog/dd-trace-php/releases/latest/download/datadog-setup.php \
+    --output-document=/tmp/datadog-setup.php
+    cd /tmp || exit
+    php datadog-setup.php \
+    --php-bin all \
+    --enable-appsec
 }
 
 set -Eeuo pipefail
