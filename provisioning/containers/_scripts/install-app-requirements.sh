@@ -96,12 +96,16 @@ function install_app_requirements() {
     \cat '/templates/www.conf'
     echo '--- END ---'
 
+    if [ ! -d "${project_dir}/.git" ];
+    then
+        rm --recursive --force --verbose "${project_dir}/.git"
+    fi
+
     find "${project_dir}"  \
         -maxdepth 1 \
         -executable \
         -readable \
         -type d \
-        -not -path "${project_dir}"'/.git/**/*' \
         -exec /bin/bash -c 'export file_path="{}" && \chown --recursive '"${WORKER_UID}"':'"${WORKER_GID}"' "${file_path}"' \; \
         -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive og-rwx "${file_path}"' \; \
         -exec /bin/bash -c 'export file_path="{}" && \chmod --recursive g+rx "${file_path}"' \; && \
@@ -119,7 +123,6 @@ function install_app_requirements() {
     find "${project_dir}" \
         -type f \
         -readable \
-        -not -path "${project_dir}"'/.git/**/*' \
         -exec /bin/bash -c 'export file_path="{}" && \chown '"${WORKER_UID}"':'"${WORKER_GID}"' "${file_path}"' \; \
         -exec /bin/bash -c 'export file_path="{}" && \chmod og-rwx "${file_path}"' \; \
         -exec /bin/bash -c 'export file_path="{}" && \chmod g+r "${file_path}"' \; && \
