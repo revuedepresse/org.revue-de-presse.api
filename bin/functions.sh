@@ -104,7 +104,7 @@ function stop_workers() {
 
     local script
     script='bin/console messenger:stop-workers -e prod'
-    command="docker-compose ${project_name} exec -T -e ${symfony_environment} worker ${script}"
+    command="docker-compose ${project_name} -f docker-compose.yaml -f docker-compose.override.yaml exec -T -e ${symfony_environment} worker ${script}"
 
     echo '=> About to stop consumers'
     /bin/bash -c "${command}"
@@ -182,7 +182,9 @@ function handle_messages {
 
     local project_name
     project_name=$(get_project_name)
-    command="docker-compose ${project_name} run --rm --name ${SUPERVISOR_PROCESS_NAME} -T -e ${symfony_environment} worker ${SCRIPT}"
+
+
+    command="docker-compose ${project_name} -f docker-compose.yaml -f docker-compose.override.yaml run --rm --name ${SUPERVISOR_PROCESS_NAME} -T -e ${symfony_environment} worker ${SCRIPT}"
     echo 'Executing command: "'$command'"'
     echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
     echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
@@ -224,15 +226,19 @@ function purge_queues() {
     local project_name
     project_name="$(get_project_name)"
 
-    /bin/bash -c "docker-compose ${project_name} exec -d messenger rabbitmqctl purge_queue get-news-status -p ${rabbitmq_vhost}"
-    /bin/bash -c "docker-compose ${project_name} exec -d messenger rabbitmqctl purge_queue get-news-likes -p ${rabbitmq_vhost}"
-    /bin/bash -c "docker-compose ${project_name} exec -d messenger rabbitmqctl purge_queue failures -p ${rabbitmq_vhost}"
+
+    /bin/bash -c "docker-compose ${project_name} -f docker-compose.yaml -f docker-compose.override.yaml exec -d messenger rabbitmqctl purge_queue get-news-status -p ${rabbitmq_vhost}"
+    /bin/bash -c "docker-compose ${project_name} -f docker-compose.yaml -f docker-compose.override.yaml exec -d messenger rabbitmqctl purge_queue get-news-likes -p ${rabbitmq_vhost}"
+    /bin/bash -c "docker-compose ${project_name} -f docker-compose.yaml -f docker-compose.override.yaml exec -d messenger rabbitmqctl purge_queue failures -p ${rabbitmq_vhost}"
 }
 
 function stop_workers() {
     cd provisioning/containers || exit
 
-    docker-compose run --rm worker bin/console messenger:stop-workers
+    docker-compose \
+        -f docker-compose.yaml \
+        -f docker-compose.override.yaml \
+        run --rm worker bin/console messenger:stop-workers
 }
 
 function execute_command () {
@@ -705,7 +711,9 @@ function list_amqp_queues() {
 
     local project_name
     project_name="$(get_project_name)"
-    /bin/bash -c "docker-compose ${project_name} exec messenger watch -n1 'rabbitmqctl list_queues -p ${rabbitmq_vhost}'"
+
+
+    /bin/bash -c "docker-compose ${project_name} -f docker-compose.yaml -f docker-compose.override.yaml exec messenger watch -n1 'rabbitmqctl list_queues -p ${rabbitmq_vhost}'"
 }
 
 function set_permissions_in_apache_container() {
@@ -714,8 +722,8 @@ function set_permissions_in_apache_container() {
     sudo chown -R `whoami` ./var/logs ./var
 
     cd ./provisioning/containers || exit
-    docker-compose exec worker bin/console cache:clear -e prod --no-warmup
-    docker-compose exec worker bin/console cache:clear -e dev --no-warmup
+    docker-compose -f docker-compose.yaml -f docker-compose.override.yaml exec worker bin/console cache:clear -e prod --no-warmup
+    docker-compose -f docker-compose.yaml -f docker-compose.override.yaml exec worker bin/console cache:clear -e dev --no-warmup
     cd "../../"
 }
 
@@ -904,10 +912,10 @@ function run_php_script() {
     if [ -z "${interactive_mode}" ];
     then
         command="$(echo -n 'cd provisioning/containers && \
-        docker-compose '"${project_name}"'run -T --rm --name='"${container_name}"' '"${option_detached}"'worker '"${script}")"
+        docker-compose '"${project_name}"'-f docker-compose.yaml -f docker-compose.override.yaml run -T --rm --name='"${container_name}"' '"${option_detached}"'worker '"${script}")"
     else
         command="$(echo -n 'cd provisioning/containers && \
-        docker-compose '"${project_name}"'exec '"${option_detached}"'worker '"${script}")"
+        docker-compose '"${project_name}"'-f docker-compose.yaml -f docker-compose.override.yaml exec '"${option_detached}"'worker '"${script}")"
     fi
 
     echo 'About to execute "'"${command}"'"'
@@ -926,7 +934,7 @@ function run_php() {
     cd ./provisioning/containers || exit
 
     local command
-    command=$(echo -n 'docker-compose -f docker-compose.yml exec -T worker '"${arguments}")
+    command=$(echo -n 'docker-compose -f docker-compose.yaml -f docker-compose.override.yaml exec -T worker '"${arguments}")
 
     echo 'About to execute '"${command}"
     /bin/bash -c "${command}"
@@ -934,14 +942,20 @@ function run_php() {
 
 function run_stack() {
     cd provisioning/containers || exit
-    docker-compose up
+    docker-compose -f docker-compose.yaml -f docker-compose.override.yaml up
     cd ../..
 }
 
 function run_worker() {
     cd provisioning/containers || exit
-    docker-compose up -d worker
     cd ../..
+    docker-compose \
+        -f docker-compose.yaml \
+        -f docker-compose.override.yaml up \
+        --force-recreate \
+        --remove-orphans \
+        --detach \
+        worker
 }
 
 function keep_php_container_running() {
@@ -1227,5 +1241,7 @@ function follow_today_statuses() {
 
 function restart_web_server() {
     cd ./provisioning/containers || exit
-    docker-compose restart web
+    docker-compose \
+        -f docker-compose.yaml \
+        -f docker-compose.override.yaml restart web
 }

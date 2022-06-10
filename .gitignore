@@ -5,6 +5,7 @@ bin/simple-phpunit
 build/*
 !build/.gitignore
 composer.phar
+provisioning/containers/docker-compose.override.yaml
 provisioning/containers/mysql/templates/mysql/my.cnf
 provisioning/volumes/mysql/*
 provisioning/volumes/mysql*/*

@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+
+    db_write:
+        #ports:
+        #    - "127.0.0.1:3306:3306"
+        volumes:
+            - ./mariadb/templates/docker.cnf:/etc/mysql/mariadb.conf.d/docker.cnf
+
+networks:
+    default:
+        name: # [Network Configuration Reference](https://docs.docker.com/compose/compose-file/compose-file-v3/#network-configuration-reference)
+        external: true
+
