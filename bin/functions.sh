@@ -254,7 +254,7 @@ function execute_command() {
     local error_log="${2}"
 
     cd "${PROJECT_DIR}"
-    make run-php-script >>"${output_log}" 2>>"${error_log}"
+    PROJECT_NAME="${PROJECT_NAME}" make run-php-script >>"${output_log}" 2>>"${error_log}"
 
     if [ -n "${VERBOSE}" ]; then
         cat "${output_log}" | tail -n1000
@@ -839,7 +839,8 @@ function run_php_script() {
             echo 'Please pass a valid path to a script by export an environment variable'
             echo 'e.g.'
             echo 'export SCRIPT="bin/console cache:clear"'
-            return
+
+            return 1
         fi
 
         script="${SCRIPT}"
