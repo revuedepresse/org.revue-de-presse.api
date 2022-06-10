@@ -6,8 +6,6 @@ services:
 
     web:
         build: ./apache
-        ports:
-            - "127.0.0.1:80:80"
         volumes:
             - ../containers/apache/templates:/templates
             - ../containers/apache/tasks:/tasks
@@ -35,16 +33,12 @@ services:
         restart: always
         env_file:
             - ../../.env.local
-        ports:
-            - "127.0.0.1:33062:3306"
         volumes:
             - ../volumes/mysql:/var/lib/mysql
 
     db_write:
         build: ./mariadb
         restart: always
-        ports:
-            - "127.0.0.1:33061:3306"
         env_file:
             - ../../.env.local
         volumes:
