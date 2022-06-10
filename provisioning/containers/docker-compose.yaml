@@ -1,4 +1,7 @@
-version: '3'
+version: '3.8'
+
+name: 'news-review'
+
 services:
 
     web:
