@@ -99,6 +99,14 @@ function stop_workers() {
     local project_name
     project_name=$(get_project_name)
 
+    if [ -z "${project_name}" ]; then
+
+        printf 'A %s is expected (%s).%s' 'non-empty string' 'project name' $'\n' 1>&2
+
+        return 1
+
+    fi
+
     local symfony_environment
     symfony_environment="$(get_symfony_environment)"
 
@@ -183,6 +191,13 @@ function handle_messages {
     local project_name
     project_name=$(get_project_name)
 
+    if [ -z "${project_name}" ]; then
+
+        printf 'A %s is expected (%s).%s' 'non-empty string' 'project name' $'\n' 1>&2
+
+        return 1
+
+    fi
 
     command="docker-compose ${project_name} -f docker-compose.yaml -f docker-compose.override.yaml run --rm --name ${SUPERVISOR_PROCESS_NAME} -T -e ${symfony_environment} worker ${SCRIPT}"
     echo 'Executing command: "'$command'"'
@@ -226,6 +241,13 @@ function purge_queues() {
     local project_name
     project_name="$(get_project_name)"
 
+    if [ -z "${project_name}" ]; then
+
+        printf 'A %s is expected (%s).%s' 'non-empty string' 'project name' $'\n' 1>&2
+
+        return 1
+
+    fi
 
     /bin/bash -c "docker-compose ${project_name} -f docker-compose.yaml -f docker-compose.override.yaml exec -d messenger rabbitmqctl purge_queue get-news-status -p ${rabbitmq_vhost}"
     /bin/bash -c "docker-compose ${project_name} -f docker-compose.yaml -f docker-compose.override.yaml exec -d messenger rabbitmqctl purge_queue get-news-likes -p ${rabbitmq_vhost}"
@@ -712,6 +734,13 @@ function list_amqp_queues() {
     local project_name
     project_name="$(get_project_name)"
 
+    if [ -z "${project_name}" ]; then
+
+        printf 'A %s is expected (%s).%s' 'non-empty string' 'project name' $'\n' 1>&2
+
+        return 1
+
+    fi
 
     /bin/bash -c "docker-compose ${project_name} -f docker-compose.yaml -f docker-compose.override.yaml exec messenger watch -n1 'rabbitmqctl list_queues -p ${rabbitmq_vhost}'"
 }
@@ -903,6 +932,14 @@ function run_php_script() {
 
     local project_name=''
     project_name="$(get_project_name)"
+
+    if [ -z "${project_name}" ]; then
+
+        printf 'A %s is expected (%s).%s' 'non-empty string' 'project name' $'\n' 1>&2
+
+        return 1
+
+    fi
 
     local container_name
     container_name="$(echo "${script}" | sha256sum | awk '{print $1}')"
