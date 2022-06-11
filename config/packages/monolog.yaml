@@ -1,0 +1,77 @@
+parameters:
+    main_log_level: debug
+    monolog_flat_logging_handler:
+        type:     stream
+        path:     "%kernel.logs_dir%/%kernel.environment%.log"
+        level:    "%main_log_level%"
+    monolog_json_logging_handler:
+        type:     stream
+        path:     "%kernel.logs_dir%/%kernel.environment%.json"
+        level:    info
+        formatter: monolog.formatter.json
+
+monolog:
+    channels:
+        - deprecation # Deprecations are logged in the dedicated "deprecation" channel when it exists
+
+when@dev:
+    monolog:
+        handlers:
+            main:
+                type: stream
+                path: "%kernel.logs_dir%/%kernel.environment%.log"
+                level: debug
+                channels: ["!event"]
+            # uncomment to get logging in your browser
+            # you may have to allow bigger header sizes in your Web server configuration
+            #firephp:
+            #    type: firephp
+            #    level: info
+            #chromephp:
+            #    type: chromephp
+            #    level: info
+            console:
+                type: console
+                process_psr_3_messages: false
+                channels: ["!event", "!doctrine", "!console"]
+
+when@test:
+    monolog:
+        handlers:
+            main:
+                type: fingers_crossed
+                action_level: error
+                handler: nested
+                excluded_http_codes: [404, 405]
+                channels: ["!event"]
+            nested:
+                type: stream
+                path: "%kernel.logs_dir%/%kernel.environment%.log"
+                level: debug
+
+when@prod:
+    monolog:
+        handlers:
+            main:
+                type:    group
+                action_level: debug
+                excluded_http_codes: [404, 405]
+                members: [json, flat]
+                buffer_size: 50 # How many messages should be saved? Prevent memory leaks
+            json: '%monolog_json_logging_handler%'
+            flat: '%monolog_flat_logging_handler%'
+            console:
+                type: console
+                process_psr_3_messages: false
+                channels: ["!event", "!doctrine"]
+            deprecation:
+                type: stream
+                channels: [deprecation]
+                path: "%kernel.logs_dir%/%kernel.environment%.deprecations.log"
+            deprecation_filter:
+                type: filter
+                handler: deprecation
+                max_level: info
+                channels: ["php"]
+
+        channels: "%monolog_channels%"
