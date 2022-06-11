@@ -15,7 +15,7 @@ function _set_up_configuration_files() {
     fi
 
     source ./.env.local
-}
+} >> ./var/log/build.log 2>> ./var/log/build.error.log
 
 function _set_file_permissions() {
     local temporary_directory
@@ -44,7 +44,7 @@ function _set_file_permissions() {
         --volume "${temporary_directory}:/tmp/remove-me" \
         app \
         /bin/bash -c 'chmod -R ug+w /tmp/remove-me'
-}
+} >> ./var/log/build.log 2>> ./var/log/build.error.log
 
 function build() {
     local WORKER
@@ -93,7 +93,7 @@ function build() {
         cache \
         service \
         worker
-}
+} >> ./var/log/build.log 2>> ./var/log/build.error.log
 
 function guard_against_missing_variables() {
     if [ -z "${COMPOSE_PROJECT_NAME}" ];
@@ -122,7 +122,7 @@ function guard_against_missing_variables() {
         exit 1
 
     fi
-}
+} >> ./var/log/build.log 2>> ./var/log/build.error.log
 
 function remove_container_image() {
     local container_name
@@ -160,7 +160,7 @@ function remove_container_image() {
 
         build
     fi
-}
+} >> ./var/log/build.log 2>> ./var/log/build.error.log
 
 function clean() {
     local temporary_directory
@@ -176,7 +176,7 @@ function clean() {
     fi
 
     remove_container_image 'app'
-}
+} >> ./var/log/build.log 2>> ./var/log/build.error.log
 
 function clear_cache_warmup() {
     local WORKER_UID
@@ -209,7 +209,7 @@ function clear_cache_warmup() {
         /bin/bash -c '. /scripts/clear-app-cache.sh'
 
     clean ''
-}
+} >> ./var/log/build.log 2>> ./var/log/build.error.log
 
 function install() {
     guard_against_missing_variables
@@ -237,7 +237,7 @@ function install() {
         /bin/bash -c 'source /scripts/install-app-requirements.sh'
 
     clear_cache_warmup --reuse-existing-container
-}
+} >> ./var/log/build.log 2>> ./var/log/build.error.log
 
 function run_unit_tests() {
     export SYMFONY_DEPRECATIONS_HELPER='disabled'
@@ -249,7 +249,7 @@ function run_unit_tests() {
     fi
 
     bin/phpunit -c ./phpunit.xml.dist --verbose --debug --stop-on-failure --stop-on-error
-}
+} >> ./var/log/build.log 2>> ./var/log/build.error.log
 
 function start() {
     guard_against_missing_variables
@@ -269,7 +269,7 @@ SCRIPT
 
     echo 'About to execute "'"${command}"'"'
     /bin/bash -c "${command}"
-}
+} >> ./var/log/build.log 2>> ./var/log/build.error.log
 
 function start_database() {
     guard_against_missing_variables
@@ -289,7 +289,7 @@ SCRIPT
 
     echo 'About to execute "'"${command}"'"'
     /bin/bash -c "${command}"
-}
+} >> ./var/log/build.log 2>> ./var/log/build.error.log
 
 function stop() {
     guard_against_missing_variables
@@ -298,13 +298,13 @@ function stop() {
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
         down
-}
+} >> ./var/log/build.log 2>> ./var/log/build.error.log
 
 function validate_docker_compose_configuration() {
     docker compose \
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
         config
-}
+} >> ./var/log/build.log 2>> ./var/log/build.error.log
 
 set +Eeuo pipefail
