@@ -11,7 +11,6 @@ imports:
     - { resource: services/operation.yml }
     - { resource: services/repository.yml }
     - { resource: services/persistence.yml }
-    - { resource: services/security.yml }
     - { resource: services/worker.yml }
 
 services:
@@ -288,7 +287,3 @@ parameters:
 
     redis_host:                                                   '%env(resolve:REDIS_HOST)%'
     redis_port:                                                   '%env(resolve:REDIS_PORT)%'
-
-    valid_audience:                                               '%env(resolve:VALID_AUDIENCE)%'
-
-    authorized_iss:                                               '%env(resolve:AUTHORIZED_ISS)%'
