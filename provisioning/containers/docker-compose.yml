@@ -5,7 +5,7 @@ name: wildcard
 services:
 
     amqp:
-        build: ./rabbitmq
+        build: ./amqp
         expose:
             - "5672"
         restart: always
