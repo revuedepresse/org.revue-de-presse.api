@@ -3,7 +3,6 @@ SHELL:=/bin/bash
 .PHONY: help build clean clear-app-cache install restart start start-database stop test
 
 WORKER ?= 'worker.example.org'
-COMPOSE_PROJECT_NAME ?= ''
 TMP_DIR ?= '/tmp/tmp_${WORKER}'
 
 help:

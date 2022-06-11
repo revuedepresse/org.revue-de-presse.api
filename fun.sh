@@ -94,15 +94,6 @@ function build() {
 } >> ./var/log/build.log 2>> ./var/log/build.error.log
 
 function guard_against_missing_variables() {
-    if [ -z "${COMPOSE_PROJECT_NAME}" ];
-    then
-
-        printf 'A %s is expected as %s ("%s" environment variable).%s' 'non-empty string' 'project name' 'COMPOSE_PROJECT_NAME' $'\n'
-
-        exit 1
-
-    fi
-
     if [ -z "${WORKER}" ];
     then
 
