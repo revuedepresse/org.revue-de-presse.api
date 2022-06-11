@@ -44,7 +44,7 @@ services:
             - ./reverse-proxy/certificates:/certificates
 
     service:
-        build: ./php-fpm
+        build: ./service
         expose:
             - "9000"
         restart: always
