@@ -10,8 +10,8 @@ ARG WORKER="${_WORKER}"
 HEALTHCHECK CMD /bin/bash -c "test $(ps ax | \grep -E '\/dev\/null' -c) -gt 0"
 
 COPY --chown=${WORKER_UID}:${WORKER_GID} ./_scripts                 /scripts
-COPY --chown=${WORKER_UID}:${WORKER_GID} ./service/templates        /templates
 COPY --chown=${WORKER_UID}:${WORKER_GID} ./_scripts/cmd-worker.sh   /start.sh
+COPY --chown=${WORKER_UID}:${WORKER_GID} ./worker/templates         /templates
 
 RUN /bin/bash -c 'source /scripts/install-worker-requirements.sh'
 
