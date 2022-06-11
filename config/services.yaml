@@ -278,8 +278,6 @@ parameters:
 
     weaving_the_web_twitter.version:                              '%env(resolve:API_TWITTER_VERSION)%'
 
-    allowed.origin:                                               '%env(resolve:ALLOWED_ORIGIN)%'
-
     publishers_list_default:                                      '%env(resolve:PUBLISHERS_LIST_DEFAULT)%'
     redis_host:                                                   '%env(resolve:REDIS_HOST)%'
     redis_port:                                                   '%env(resolve:REDIS_PORT)%'
