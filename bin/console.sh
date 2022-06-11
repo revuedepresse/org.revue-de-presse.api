@@ -61,6 +61,14 @@ function get_project_name() {
         project_name="${PROJECT_NAME}"
     fi
 
+    if [ -z "${project_name}" ]; then
+
+        printf 'A %s is expected (%s).%s' 'non-empty string' 'project name' $'\n'
+
+        exit 1
+
+    fi
+
     echo "${project_name}"
 }
 
@@ -256,6 +264,15 @@ function run_php_script() {
 
     local project_name=''
     project_name="$(get_project_name)"
+
+    if [ $? -gt 0 ];
+    then
+        printf 'A %s is expected as %s ("%s").%s' 'A non-empty string' 'project name' 'PROJECT_NAME environment variable' $'\n' 1>&2
+        printf '%s%s' 'example:' $'\n' 1>&2
+        printf '%s%s' 'export PROJECT_NAME="worker.example.org"' '\n' 1>&2
+
+        return 1
+    fi
 
     local container_name
     container_name="$(echo "${project_name}-${script}" | sha256sum | awk '{print $1}')"
