@@ -10,6 +10,14 @@ function install_php_libraries() {
         --no-dev \
         --no-interaction \
         --classmap-authoritative
+
+    if [ -n "${COMPOSER_UPDATE_DEPS}" ];
+    then
+        composer update \
+            --prefer-dist \
+            --no-dev \
+            --no-interaction
+    fi
 }
 
 function remove_binaries_vendors() {
