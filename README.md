@@ -1,68 +1,30 @@
-# DevObs
+# revue-de-presse.org worker
 
-[![Codeship Status for thierrymarianne/devobs-api](https://app.codeship.com/projects/beea8780-6695-0137-8a94-5e66d93e8e29/status?branch=main)](https://app.codeship.com/projects/345349)
+![worker.revue-de-presse.org continuous integration](https://github.com/thierrymarianne/devobs-api/actions/workflows/continuous-integration.yml/badge.svg)
 
-Easing observation of Twitter lists related to software development
+Worker collecting publications from social media (Twitter) from [public lists](https://help.twitter.com/en/using-twitter/twitter-lists).
 
 ## Installation
 
-The shell scripts written to install the project dependencies
-have been tested under Ubuntu 20.04.
+The shell scripts written for bash   
+have been tested with Ubuntu 22.04 (`Jammy Jellyfish`).
 
 ### Requirements
 
 Install git by following instructions from the [official documentation](https://git-scm.org/).
 
-Install mkcert by folllowing instructions from [https://mkcert.dev/](https://mkcert.dev/)
-
 Install Docker by following instructions from the [official documentation](https://docs.docker.com/install/linux/docker-ce/ubuntu/).
 
 Install Docker compose by following instructions from the [official documentation](https://docs.docker.com/compose/install/).
 
-Intall all PHP vendors
+### Documentation
 
-```shell
-make install-php-dependencies
+```
+make help
 ```
 
-Generate TLS certificates
+## License
 
-```shell
-make install-local-ca-store
-make generate-development-tls-certificate-and-key
-```
+GNU General Public License v3.0 or later
 
-Build Docker images
-
-```shell
-make build-stack-images
-```
-
-## Run development stack
-
-```shell
-make run-stack
-make set-up-amqp-queues
-```
-
-## Run test suites
-
-Create test database
-
-```shell
-# requires granting privileges to a test user
-# See provisioning/containers/postgres/templates/grant_privileges.sql
-make create-test-database
-```
-
-Run unit tests with PHPUnit 
-
-```shell
-make run-php-unit-tests
-```
-
-Run features tests with Behat
-
-```shell
-make run-php-features-tests
-``` 
+See [COPYING](./COPYING) to see the full text.
