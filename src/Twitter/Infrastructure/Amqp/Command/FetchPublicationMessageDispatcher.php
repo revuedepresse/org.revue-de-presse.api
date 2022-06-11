@@ -13,8 +13,6 @@ use App\Twitter\Infrastructure\DependencyInjection\Publication\PublicationMessag
 use App\Twitter\Infrastructure\DependencyInjection\TranslatorTrait;
 use App\Twitter\Infrastructure\Exception\OverCapacityException;
 use App\Twitter\Infrastructure\InputConverter\InputToCollectionStrategy;
-use App\Twitter\Infrastructure\Operation\OperationClock;
-use Exception;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -42,11 +40,6 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
     use OwnershipAccessorTrait;
     use PublicationMessageDispatcherTrait;
     use TranslatorTrait;
-
-    /**
-     * @var OperationClock
-     */
-    public OperationClock $operationClock;
 
     /**
      * @var PublicationStrategyInterface
@@ -170,10 +163,6 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
      */
     private function setUpDependencies(): void
     {
-        if ($this->shouldSkipOperation()) {
-            SkippableOperationException::throws('This operation has to be skipped.');
-        }
-
         $this->setUpLogger();
 
         $this->accessor->fromToken(
@@ -196,16 +185,5 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
             // old_sound_rabbit_mq.weaving_the_web_amqp.producer.aggregates_likes_producer
             // services
         }
-    }
-
-    /**
-     * @return bool
-     * @throws Exception
-     */
-    private function shouldSkipOperation(): bool
-    {
-        return $this->operationClock->shouldSkipOperation()
-            && $this->collectionStrategy->allListsAreEquivalent()
-            && $this->collectionStrategy->noQueryRestriction();
     }
 }

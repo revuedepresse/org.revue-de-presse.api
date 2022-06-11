@@ -27,8 +27,6 @@ services:
 
     App\Twitter\Infrastructure\Amqp\Command\FetchPublicationMessageDispatcher:
         class:                              "%press_review.fetch_member_status.class%"
-        properties:
-            operationClock:                 '@operation.clock'
         calls:
             - [ 'setAccessor',                      [ '@App\Twitter\Domain\Api\Accessor\ApiAccessorInterface'] ]
             - [ 'setAggregateRepository',           [ '@App\Twitter\Infrastructure\Api\Repository\PublishersListRepository'] ]
@@ -148,12 +146,10 @@ services:
         properties:
             aggregateRepository:    '@App\Twitter\Infrastructure\Api\Repository\PublishersListRepository'
             entityManager:          '@doctrine.orm.entity_manager'
-            operationClock:         '@operation.clock'
 
     weaving_the_web_amqp.twitter:
         class:                       "%press_review.publication_message.handler.class%"
         properties:
-            operationClock:          '@operation.clock'
             tokenRepository:         '@App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface'
         calls:
             - [ 'setLogger',            [ '@monolog.logger.twitter_api'] ]
@@ -161,7 +157,6 @@ services:
     weaving_the_web_amqp.producer.conversation_status:
         class:               "%weaving_the_web_amqp.producer.produce_conversation_messages_command.class%"
         properties:
-            operationClock:  '@operation.clock'
             filesystem:      '@filesystem'
             statusDirectory: "%kernel.project_dir%/../src/App/Resources/statuses"
         tags:
@@ -170,7 +165,6 @@ services:
     weaving_the_web_amqp.producer.member_status:
         class:               "%weaving_the_web_amqp.producer.produce_member_messages_command.class%"
         properties:
-            operationClock:  '@operation.clock'
             statusDirectory: "%kernel.project_dir%/../src/App/Resources/statuses"
         tags:
             - { name: 'console.command' }

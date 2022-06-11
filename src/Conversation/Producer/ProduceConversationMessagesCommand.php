@@ -2,7 +2,6 @@
 
 namespace App\Conversation\Producer;
 
-use App\Twitter\Infrastructure\Operation\OperationClock;
 use Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Input\InputOption,
     Symfony\Component\Console\Output\OutputInterface;
@@ -29,11 +28,6 @@ class ProduceConversationMessagesCommand extends AggregateAwareCommand
      * @var TranslatorInterface
      */
     private $translator;
-
-    /**
-     * @var OperationClock
-     */
-    public $operationClock;
 
     /**
      * @var Filesystem
@@ -78,10 +72,6 @@ class ProduceConversationMessagesCommand extends AggregateAwareCommand
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        if ($this->operationClock->shouldSkipOperation()) {
-            return self::SUCCESS;
-        }
-
         $this->input = $input;
         $this->output = $output;
 

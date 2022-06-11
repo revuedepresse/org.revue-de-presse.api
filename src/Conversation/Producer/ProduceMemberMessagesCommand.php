@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace App\Conversation\Producer;
 
 use App\Twitter\Infrastructure\Amqp\Command\AggregateAwareCommand;
-use App\Twitter\Infrastructure\Operation\OperationClock;
 use Exception;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -25,11 +24,6 @@ class ProduceMemberMessagesCommand extends AggregateAwareCommand
      */
     private TranslatorInterface $translator;
 
-    /**
-     * @var OperationClock
-     */
-    public OperationClock $operationClock;
-
     public function configure()
     {
         $this->setName('weaving_the_web:amqp:produce:member_messages')
@@ -45,10 +39,6 @@ class ProduceMemberMessagesCommand extends AggregateAwareCommand
      */
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        if ($this->operationClock->shouldSkipOperation()) {
-            return self::SUCCESS;
-        }
-
 //        $this->producer = $this->getContainer()->get(
 //            'old_sound_rabbit_mq.weaving_the_web_amqp.producer.member_status_producer'
 //        );
