@@ -18,7 +18,7 @@ clean: ## Remove worker container
 clear-app-cache: ## Clear application cache
 	@/bin/bash -c 'source fun.sh && clear_cache_warmup'
 
-install: ## Install requirements
+install: build ## Install requirements
 	@/bin/bash -c 'source fun.sh && install'
 
 restart: clear-app-cache stop start ## Restart worker
