@@ -9,7 +9,7 @@ services:
 
   amqp:
     volumes:
-      - ../volumes/rabbitmq:/var/lib/rabbitmq
+      - ../volumes/amqp:/var/lib/rabbitmq
 
   database:
     ports:
