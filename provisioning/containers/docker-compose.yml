@@ -1,4 +1,7 @@
 version: '3'
+
+name: wildcard
+
 services:
 
     # https://doc.traefik.io/traefik/getting-started/quick-start/
