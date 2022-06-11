@@ -313,8 +313,6 @@ function run_php() {
 }
 
 function run_stack() {
-    ensure_blackfire_is_configured
-
     cd provisioning/containers || exit
 
     local project_name
@@ -421,39 +419,6 @@ function run_command {
     echo 'Logging standard error of worker in '"${rabbitmq_error_log}"
 
     execute_command "${rabbitmq_output_log}" "${rabbitmq_error_log}"
-}
-
-function ensure_blackfire_is_configured() {
-    local working_directory
-    working_directory="$(pwd)"
-
-    cd ./provisioning/containers/apache/templates/blackfire || exit
-
-    if [ ! -e zz-blackfire.ini ];
-    then
-        cp zz-blackfire.ini{.dist,}
-        echo 'Copied "zz-blackfire.ini" configuration file'
-    else
-        echo '"zz-blackfire.ini" configuration file already exists'
-    fi
-
-    if [ ! -e .blackfire.ini ];
-    then
-        cp .blackfire.ini{.dist,}
-        echo 'Copied ".blackfire.ini" configuration file'
-    else
-        echo '".blackfire.ini" configuration file already exists'
-    fi
-
-    if [ ! -e agent ];
-    then
-        cp agent{.dist,}
-        echo 'Copied "agent" configuration file'
-    else
-        echo '"agent" configuration file already exists'
-    fi
-
-    cd "${working_directory}" || exit
 }
 
 function dispatch_fetch_publications_messages {
