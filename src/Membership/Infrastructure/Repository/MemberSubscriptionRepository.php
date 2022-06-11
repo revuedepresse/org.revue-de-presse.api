@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 namespace App\Membership\Infrastructure\Repository;
 
-use App\Twitter\Domain\Publication\PublishersListIdentity;
+use App\Twitter\Infrastructure\Publication\Dto\PublishersListIdentity;
 use App\Twitter\Domain\Publication\PublishersListIdentityInterface;
 use App\Twitter\Infrastructure\Http\PaginationParams;
 use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;

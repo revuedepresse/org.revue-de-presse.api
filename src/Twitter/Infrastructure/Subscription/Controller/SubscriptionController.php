@@ -7,7 +7,7 @@ use App\Twitter\Infrastructure\Api\Entity\Token;
 use App\Twitter\Infrastructure\Cache\RedisCache;
 use App\Twitter\Domain\Membership\Exception\InvalidMemberException;
 use App\Twitter\Domain\Publication\Exception\InvalidMemberAggregate;
-use App\Twitter\Domain\Publication\PublishersListIdentity;
+use App\Twitter\Infrastructure\Publication\Dto\PublishersListIdentity;
 use App\Twitter\Infrastructure\DependencyInjection\LoggerTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Membership\MemberRepositoryTrait;
 use App\Twitter\Infrastructure\DependencyInjection\Publication\PublishersListDispatcherTrait;
