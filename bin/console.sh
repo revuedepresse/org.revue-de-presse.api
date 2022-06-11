@@ -61,11 +61,6 @@ function get_project_name() {
     echo "${project_name}"
 }
 
-function build_stack_images() {
-    docker-compose -f ./provisioning/containers/docker-compose.yml \
-    --project-name="$(get_project_name)" build
-}
-
 function stop_workers() {
     local project_name
     project_name=$(get_project_name)
