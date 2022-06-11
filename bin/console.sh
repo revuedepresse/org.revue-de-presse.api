@@ -133,10 +133,10 @@ function consume_fetch_publication_messages {
     remove_exited_containers
 
     local rabbitmq_output_log
-    rabbitmq_output_log="./var/logs/rabbitmq.out.log"
+    rabbitmq_output_log="./var/log/rabbitmq.out.log"
 
     local rabbitmq_error_log
-    rabbitmq_error_log="./var/logs/rabbitmq.error.log"
+    rabbitmq_error_log="./var/log/rabbitmq.error.log"
 
     ensure_log_files_exist "${rabbitmq_output_log}" "${rabbitmq_error_log}"
     rabbitmq_output_log="${PROJECT_DIR}/${rabbitmq_output_log}"
@@ -385,10 +385,10 @@ function run_command {
     php_command=${1}
 
     local rabbitmq_output_log
-    rabbitmq_output_log="var/logs/rabbitmq.out.log"
+    rabbitmq_output_log="var/log/rabbitmq.out.log"
 
     local rabbitmq_error_log
-    rabbitmq_error_log="var/logs/rabbitmq.error.log"
+    rabbitmq_error_log="var/log/rabbitmq.error.log"
 
     local PROJECT_DIR
     PROJECT_DIR='.'

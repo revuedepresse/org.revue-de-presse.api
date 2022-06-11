@@ -49,7 +49,7 @@ class Kernel extends HttpKernel
      */
     public function getLogDir()
     {
-        return dirname(__DIR__).'/var/logs';
+        return dirname(__DIR__).'/var/log';
     }
 
     protected function configureContainer(ContainerBuilder $container, LoaderInterface $loader): void
