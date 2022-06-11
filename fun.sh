@@ -293,7 +293,7 @@ function validate_docker_compose_configuration() {
     docker compose \
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
-        config
+        config -q
 } >> ./var/log/build.log 2>> ./var/log/build.error.log
 
 set +Eeuo pipefail
