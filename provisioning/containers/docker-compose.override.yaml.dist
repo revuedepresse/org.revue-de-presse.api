@@ -12,7 +12,7 @@ services:
 
     worker:
         volumes:
-            - '../../__WORKER__:/var/www/__WORKER__'
+            - '../../:/var/www/worker.example.org'
 
 networks:
     default:
