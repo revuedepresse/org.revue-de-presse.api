@@ -369,16 +369,6 @@ function get_symfony_environment() {
     echo 'APP_ENV='"${symfony_env}"
 }
 
-function get_environment_option() {
-    local symfony_env='dev'
-    if [ -n "${SYMFONY_ENV}" ];
-    then
-        symfony_env="${SYMFONY_ENV}"
-    fi
-
-    echo ' APP_ENV='"${symfony_env}"
-}
-
 function before_running_command() {
     remove_exited_containers
 
