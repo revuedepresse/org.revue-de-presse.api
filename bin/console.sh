@@ -321,15 +321,6 @@ function run_php() {
     /bin/bash -c "${command}"
 }
 
-    cd provisioning/containers || exit
-
-    local project_name
-    project_name="$(get_project_name)"
-
-    docker compose --project-name="${project_name}" up
-    cd ../..
-}
-
 function run_worker() {
     cd provisioning/containers || exit
 
@@ -479,39 +470,6 @@ function run_php_unit_tests() {
     fi
 
     bin/phpunit -c ./phpunit.xml.dist --verbose --debug
-}
-
-function run_php_features_tests() {
-    bin/behat -c ./behat.yml
-}
-
-function restart_web_server() {
-    cd ./provisioning/containers || exit
-
-    local project_name
-    project_name="$(get_project_name)"
-
-    docker compose --project-name="${project_name}" restart web
-}
-
-function install_local_ca_store() {
-    mkcert -install
-}
-
-function generate_development_tls_certificate_and_key() {
-    local destination
-    destination='./provisioning/containers/reverse-proxy/certificates'
-
-    local project_name
-    project_name="$(get_project_name)"
-
-    local domain_name
-    domain_name="api.${project_name}.me"
-
-    mkcert \
-      -cert-file="${destination}/${domain_name}.pem" \
-      -key-file="${destination}/${domain_name}-key.pem" \
-      "${domain_name}"
 }
 
 function create_test_database() {
