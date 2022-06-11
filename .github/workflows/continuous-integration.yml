@@ -20,11 +20,6 @@ jobs:
         ports:
           - 5433:5432
 
-      redis:
-        image: redis
-        ports:
-          - 6379:6379
-
     steps:
       - name: Install packages
         run: sudo apt-get install bash gzip tar wget
