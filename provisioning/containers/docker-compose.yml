@@ -50,9 +50,6 @@ services:
         restart: always
         volumes:
             - ../containers/php-fpm/templates/agent.dist:/etc/blackfire/agent
-            - ../containers/php-fpm/templates/.blackfire.ini.dist:/root/.blackfire.ini
-            - ../containers/php-fpm/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini
-            - ../containers/php-fpm/templates/zz-blackfire.ini.dist:/usr/local/etc/php/conf.d/zz-blackfire.ini
             - ../containers/php-fpm/templates/extensions.ini.dist:/usr/local/etc/php/conf.d/extensions.ini
             - ../containers/php-fpm/templates/docker.conf:/usr/local/etc/php-fpm.d/docker.conf
             - ../containers/php-fpm/templates/devobs.conf:/usr/local/etc/php-fpm.d/www.conf
@@ -68,10 +65,6 @@ services:
         volumes:
             - ../containers/apache/templates:/templates
             - ../containers/apache/tasks:/tasks
-            - ../containers/apache/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini
-            - ../containers/apache/templates/blackfire/zz-blackfire.ini:/usr/local/etc/php/conf.d/zz-blackfire.ini
-            - ../containers/apache/templates/blackfire/.blackfire.ini:/root/.blackfire.ini
-            - ../containers/apache/templates/blackfire/agent:/etc/blackfire/agent
             - ../../:/var/www/api
         depends_on:
             - database
@@ -87,7 +80,6 @@ services:
     worker:
         build: ./worker
         volumes:
-            - ../containers/php/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini
             - ../../:/var/www/api
         depends_on:
             - messenger
