@@ -145,7 +145,7 @@ function remove_container_image() {
             \grep "${COMPOSE_PROJECT_NAME}" |
             \grep "${container_name}" |
             awk '{print $3}' |
-            xargs -I{} docker rmi {}
+            xargs -I{} docker rmi -f {}
 
         build
     fi
