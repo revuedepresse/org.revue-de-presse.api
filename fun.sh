@@ -53,6 +53,8 @@ function build() {
 
     _set_up_configuration_files
 
+    validate_docker_compose_configuration
+
     if [ -z "${WORKER}" ];
     then
 
@@ -296,6 +298,13 @@ function stop() {
         -f ./provisioning/containers/docker-compose.yaml \
         -f ./provisioning/containers/docker-compose.override.yaml \
         down
+}
+
+function validate_docker_compose_configuration() {
+    docker compose \
+        -f ./provisioning/containers/docker-compose.yaml \
+        -f ./provisioning/containers/docker-compose.override.yaml \
+        config
 }
 
 set +Eeuo pipefail
