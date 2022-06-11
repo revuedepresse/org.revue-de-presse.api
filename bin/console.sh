@@ -73,7 +73,7 @@ function stop_workers() {
 
     local script
     script='bin/console messenger:stop-workers -e prod'
-    command="docker-compose --project-name=${project_name} exec -T -e ${symfony_environment} worker ${script}"
+    command="docker compose --project-name=${project_name} exec -T -e ${symfony_environment} worker ${script}"
 
     echo '=> About to stop consumers'
     /bin/bash -c "${command}"
@@ -168,7 +168,7 @@ function consume_fetch_publication_messages {
         override_option=' -f ./docker-compose.yml -f ./docker-compose.override.yml'
     fi
 
-    command="docker-compose${override_option} --project-name=${project_name} run --rm --name ${SUPERVISOR_PROCESS_NAME} -T -e ${symfony_environment} worker ${SCRIPT}"
+    command="docker compose${override_option} --project-name=${project_name} run --rm --name ${SUPERVISOR_PROCESS_NAME} -T -e ${symfony_environment} worker ${SCRIPT}"
     echo 'Executing command: "'$command'"'
     echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
     echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
@@ -271,12 +271,12 @@ function run_php_script() {
     if [ -z "${interactive_mode}" ];
     then
         command="$(echo -n 'cd provisioning/containers && \
-        docker-compose --project-name='"${project_name}""${override_option}"' \
+        docker compose --project-name='"${project_name}""${override_option}"' \
         run -e '"${symfony_environment}"' -T --rm \
         --name='"${container_name}"' '"${option_detached}"'worker '"${script}")"
     else
         command="$(echo -n 'cd provisioning/containers && \
-        docker-compose --project-name='"${project_name}""${override_option}"' \
+        docker compose --project-name='"${project_name}""${override_option}"' \
         exec -e '"${symfony_environment}"' '"${option_detached}"'worker '"${script}")"
     fi
 
@@ -306,7 +306,7 @@ function run_php() {
     fi
 
     local command
-    command=$(echo -n 'docker-compose --project-name='"${project_name}""${override_option}"' exec -T worker '"${arguments}")
+    command=$(echo -n 'docker compose --project-name='"${project_name}""${override_option}"' exec -T worker '"${arguments}")
 
     echo 'About to execute '"${command}"
     /bin/bash -c "${command}"
@@ -318,7 +318,7 @@ function run_stack() {
     local project_name
     project_name="$(get_project_name)"
 
-    docker-compose --project-name="${project_name}" up
+    docker compose --project-name="${project_name}" up
     cd ../..
 }
 
@@ -328,7 +328,7 @@ function run_worker() {
     local project_name
     project_name="$(get_project_name)"
 
-    docker-compose --project-name="${project_name}" up worker
+    docker compose --project-name="${project_name}" up worker
     cd ../..
 }
 
@@ -482,7 +482,7 @@ function restart_web_server() {
     local project_name
     project_name="$(get_project_name)"
 
-    docker-compose --project-name="${project_name}" restart web
+    docker compose --project-name="${project_name}" restart web
 }
 
 function install_local_ca_store() {
@@ -545,7 +545,7 @@ function list_amqp_queues() {
     local project_name
     project_name="$(get_project_name)"
 
-    /bin/bash -c "docker-compose --project-name=${project_name} exec messenger watch -n1 'rabbitmqctl list_queues -p ${rabbitmq_vhost}'"
+    /bin/bash -c "docker compose --project-name=${project_name} exec messenger watch -n1 'rabbitmqctl list_queues -p ${rabbitmq_vhost}'"
 }
 
 function get_rabbitmq_virtual_host() {
@@ -564,8 +564,8 @@ function purge_queues() {
     local project_name
     project_name="$(get_project_name)"
 
-    /bin/bash -c "docker-compose --project-name=${project_name} exec -d messenger rabbitmqctl purge_queue publications -p ${rabbitmq_vhost}"
-    /bin/bash -c "docker-compose --project-name=${project_name} exec -d messenger rabbitmqctl purge_queue failures -p ${rabbitmq_vhost}"
+    /bin/bash -c "docker compose --project-name=${project_name} exec -d messenger rabbitmqctl purge_queue publications -p ${rabbitmq_vhost}"
+    /bin/bash -c "docker compose --project-name=${project_name} exec -d messenger rabbitmqctl purge_queue failures -p ${rabbitmq_vhost}"
 }
 
 function stop_workers() {
@@ -574,5 +574,5 @@ function stop_workers() {
     local project_name
     project_name="$(get_project_name)"
 
-    /bin/bash -c "docker-compose --project-name=${project_name} exec worker bin/console messenger:stop-workers"
+    /bin/bash -c "docker compose --project-name=${project_name} exec worker bin/console messenger:stop-workers"
 }
