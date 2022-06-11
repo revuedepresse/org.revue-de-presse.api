@@ -1,40 +1,6 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-function configure_php_fpm_pool() {
-    local project_dir
-    project_dir="${1}"
-
-    if [ -z "${project_dir}" ];
-    then
-
-        printf 'A %s is expected as %s ("%s").%s' 'non-empty string' '1st argument' 'project directory' $'\n'
-
-        return 1
-
-    fi
-
-    if [ ! -e '/templates/www.conf.dist' ];
-    then
-
-        printf 'A %s is expected (%s).%s' 'regular file' 'PHP FPM configuration file template.' $'\n' 1>&2
-
-        exit 1
-
-    fi
-
-    \cat '/templates/www.conf.dist' | \
-    \sed -E 's/__WORKER__/'"${WORKER}"'/g' | \
-    \sed -E 's/__UID__/'"${WORKER_UID}"'/g' | \
-    \sed -E 's/__GID__/'"${WORKER_GID}"'/g' \
-    > "${project_dir}/provisioning/containers/service/templates/www.conf" && \
-    printf '%s.%s' 'Successfully copied php-fpm template' $'\n'
-
-    echo '--- BEGIN ---'
-    \cat '/templates/www.conf'
-    echo '--- END ---'
-}
-
 function install_php_libraries() {
     # [Command line github-oauth](https://getcomposer.org/doc/articles/authentication-for-private-packages.md#command-line-github-oauth)
     composer config -g github-oauth.github.com "${GITHUB_API_TOKEN}"
@@ -192,7 +158,6 @@ function install_app_requirements() {
 
     remove_binaries_vendors "${project_dir}"
     install_php_libraries
-    configure_php_fpm_pool "${project_dir}"
     remove_distributed_version_control_system_files_git "${project_dir}"
     set_file_permissions "${project_dir}"
 }
