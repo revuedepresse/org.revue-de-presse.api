@@ -14,6 +14,14 @@ services:
         volumes:
             - ../volumes/rabbitmq:/var/lib/rabbitmq
 
+    database:
+        build: ./postgres
+        restart: always
+        env_file:
+            - ../../.env.local
+        volumes:
+            - ../volumes/postgres:/var/lib/postgresql/data
+
     cache:
         image: redis
         command:
@@ -34,14 +42,6 @@ services:
             - ./reverse-proxy/templates/traefik.toml:/etc/traefik/traefik.toml
             - ./reverse-proxy/templates/dynamic-config:/etc/traefik/dynamic-config
             - ./reverse-proxy/certificates:/certificates
-
-    database:
-        build: ./postgres
-        restart: always
-        env_file:
-            - ../../.env.local
-        volumes:
-            - ../volumes/postgres:/var/lib/postgresql/data
 
     service:
         build: ./php-fpm
