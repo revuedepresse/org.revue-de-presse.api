@@ -52,7 +52,7 @@
 
 function get_project_name() {
     local project_name
-    project_name='devobs'
+    project_name='wildcard'
 
     if [ -n "${PROJECT_NAME}" ]; then
         project_name="${PROJECT_NAME}"
