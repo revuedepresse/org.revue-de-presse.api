@@ -30,8 +30,6 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
 
     public string $aggregate;
 
-    public string $adminRouteName;
-
     private const TABLE_ALIAS = 'h';
 
     /**
@@ -66,9 +64,6 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
         $queryBuilder->setFirstResult($searchParams->getFirstItemIndex());
 
         $maxResults = min($searchParams->getPageSize(), 10);
-        if ($this->accessingAdministrativeRoute($searchParams)) {
-            $maxResults = 100;
-        }
 
         $queryBuilder->setMaxResults($maxResults);
 
@@ -251,8 +246,7 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
         QueryBuilder $queryBuilder,
         SearchParams $searchParams
     ): self {
-        if ($this->accessingAdministrativeRoute($searchParams)
-            || $searchParams->hasParam('term')
+        if ($searchParams->hasParam('term')
         ) {
             $queryBuilder->andWhere(self::TABLE_ALIAS . '.aggregateName != :aggregate');
             $queryBuilder->setParameter('aggregate', $this->aggregate);
@@ -269,18 +263,6 @@ class HighlightRepository extends ServiceEntityRepository implements PaginationA
         $queryBuilder->setParameter('aggregates', $aggregates);
 
         return $this;
-    }
-
-    /**
-     * @param SearchParams $searchParams
-     * @return bool
-     */
-    private function accessingAdministrativeRoute(SearchParams $searchParams): bool
-    {
-        return $searchParams->paramBelongsTo(
-            'routeName',
-            $this->adminRouteName
-        );
     }
 
     /**
@@ -434,9 +416,6 @@ QUERY;
         SearchParams $searchParams
     ): string {
         $aggregateRestriction = 'AND a.name = ? ';
-        if ($this->accessingAdministrativeRoute($searchParams)) {
-            $aggregateRestriction = 'AND a.name != ? ';
-        }
 
         return $aggregateRestriction;
     }
@@ -453,10 +432,6 @@ QUERY;
 
         if ($searchParams->hasParam(SearchParams::PARAM_AGGREGATE_IDS)) {
             return $groupBy;
-        }
-
-        if ($this->accessingAdministrativeRoute($searchParams)) {
-            $groupBy = 'GROUP BY h.aggregate_id';
         }
 
         return $groupBy;

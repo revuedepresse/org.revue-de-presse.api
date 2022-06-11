@@ -211,7 +211,6 @@ services:
             - [ 'setStatusRepository', [ '@App\Twitter\Infrastructure\Api\Repository\StatusRepository'] ]
         properties:
             aggregate:      '%publishers_list_default%'
-            adminRouteName: '%admin_route_name%'
 
     repository.not_found_status:
         class: 'App\Twitter\Infrastructure\Publication\Repository\NotFoundStatusRepository'
