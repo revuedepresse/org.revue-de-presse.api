@@ -14,14 +14,6 @@ services:
         volumes:
             - ../volumes/rabbitmq:/var/lib/rabbitmq
 
-    database:
-        build: ./postgres
-        restart: always
-        env_file:
-            - ../../.env.local
-        volumes:
-            - ../volumes/postgres:/var/lib/postgresql/data
-
     cache:
         image: redis
         command:
@@ -31,6 +23,14 @@ services:
         restart: always
         volumes:
             - ../volumes/redis:/data
+
+    database:
+        build: ./database
+        restart: always
+        env_file:
+            - ../../.env.local
+        volumes:
+            - ../volumes/postgres:/var/lib/postgresql/data
 
     # https://doc.traefik.io/traefik/getting-started/quick-start/
     reverse-proxy:
