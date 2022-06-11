@@ -73,15 +73,12 @@ function get_project_name() {
 }
 
 function stop_workers() {
-    local project_name
-    project_name=$(get_project_name)
-
     local symfony_environment
     symfony_environment="$(get_symfony_environment)"
 
     local script
     script='bin/console messenger:stop-workers -e prod'
-    command="docker compose --project-name=${project_name} exec -T -e ${symfony_environment} worker ${script}"
+    command="docker compose exec -T -e ${symfony_environment} worker ${script}"
 
     echo '=> About to stop consumers'
     /bin/bash -c "${command}"
@@ -166,9 +163,6 @@ function consume_fetch_publication_messages {
     local symfony_environment
     symfony_environment="$(get_symfony_environment)"
 
-    local project_name
-    project_name=$(get_project_name)
-
     local override_option
     override_option=' -f ./docker-compose.yml'
     if [ -e './docker-compose.override.yml' ];
@@ -176,7 +170,7 @@ function consume_fetch_publication_messages {
         override_option=' -f ./docker-compose.yml -f ./docker-compose.override.yml'
     fi
 
-    command="docker compose${override_option} --project-name=${project_name} run --rm --name ${SUPERVISOR_PROCESS_NAME} -T -e ${symfony_environment} worker ${SCRIPT}"
+    command="docker compose${override_option} run --rm --name ${SUPERVISOR_PROCESS_NAME} -T -e ${symfony_environment} worker ${SCRIPT}"
     echo 'Executing command: "'$command'"'
     echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
     echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
@@ -262,7 +256,7 @@ function run_php_script() {
         option_detached='-d '
     fi
 
-    local project_name=''
+    local project_name
     project_name="$(get_project_name)"
 
     if [ $? -gt 0 ];
@@ -288,12 +282,12 @@ function run_php_script() {
     if [ -z "${interactive_mode}" ];
     then
         command="$(echo -n 'cd provisioning/containers && \
-        docker compose --project-name='"${project_name}""${override_option}"' \
+        docker compose '"${override_option}"' \
         run -e '"${symfony_environment}"' -T --rm \
         --name='"${container_name}"' '"${option_detached}"'worker '"${script}")"
     else
         command="$(echo -n 'cd provisioning/containers && \
-        docker compose --project-name='"${project_name}""${override_option}"' \
+        docker compose '"${override_option}"' \
         exec -e '"${symfony_environment}"' '"${option_detached}"'worker '"${script}")"
     fi
 
@@ -312,9 +306,6 @@ function run_php() {
 
     cd ./provisioning/containers || exit
 
-    local project_name=''
-    project_name="$(get_project_name)"
-
     local override_option
     override_option=' -f ./docker-compose.yml'
     if [ -e './docker-compose.override.yml' ];
@@ -323,7 +314,7 @@ function run_php() {
     fi
 
     local command
-    command=$(echo -n 'docker compose --project-name='"${project_name}""${override_option}"' exec -T worker '"${arguments}")
+    command=$(echo -n 'docker compose'"${override_option}"' exec -T worker '"${arguments}")
 
     echo 'About to execute '"${command}"
     /bin/bash -c "${command}"
@@ -342,10 +333,11 @@ function run_stack() {
 function run_worker() {
     cd provisioning/containers || exit
 
-    local project_name
-    project_name="$(get_project_name)"
+    local project_files
+    project_files='-f ./docker-compose.yaml -f ./docker-compose.override.yaml'
 
-    docker compose --project-name="${project_name}" up worker
+    /bin/bash -c "docker compose ${project_files} up worker"
+
     cd ../..
 }
 
@@ -559,10 +551,10 @@ function list_amqp_queues() {
 
     cd provisioning/containers || exit
 
-    local project_name
-    project_name="$(get_project_name)"
+    local project_files
+    project_files='-f ./docker-compose.yaml -f ./docker-compose.override.yaml'
 
-    /bin/bash -c "docker compose --project-name=${project_name} exec messenger watch -n1 'rabbitmqctl list_queues -p ${rabbitmq_vhost}'"
+    /bin/bash -c "docker compose exec ${project_files} messenger watch -n1 'rabbitmqctl list_queues -p ${rabbitmq_vhost}'"
 }
 
 function get_rabbitmq_virtual_host() {
@@ -578,18 +570,18 @@ function purge_queues() {
 
     cd provisioning/containers || exit
 
-    local project_name
-    project_name="$(get_project_name)"
+    local project_files
+    project_files='-f ./docker-compose.yaml -f ./docker-compose.override.yaml'
 
-    /bin/bash -c "docker compose --project-name=${project_name} exec -d messenger rabbitmqctl purge_queue publications -p ${rabbitmq_vhost}"
-    /bin/bash -c "docker compose --project-name=${project_name} exec -d messenger rabbitmqctl purge_queue failures -p ${rabbitmq_vhost}"
+    /bin/bash -c "docker compose exec ${project_files} -d messenger rabbitmqctl purge_queue publications -p ${rabbitmq_vhost}"
+    /bin/bash -c "docker compose exec ${project_files} -d messenger rabbitmqctl purge_queue failures -p ${rabbitmq_vhost}"
 }
 
 function stop_workers() {
     cd provisioning/containers || exit
 
-    local project_name
-    project_name="$(get_project_name)"
+    local project_files
+    project_files='-f ./docker-compose.yaml -f ./docker-compose.override.yaml'
 
-    /bin/bash -c "docker compose --project-name=${project_name} exec worker bin/console messenger:stop-workers"
+    /bin/bash -c "docker compose ${project_files} exec worker bin/console messenger:stop-workers"
 }
