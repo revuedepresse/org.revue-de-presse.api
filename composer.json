@@ -1,7 +1,7 @@
 {
-    "name": "revue_2_presse/worker",
+    "name": "snapshots/worker",
     "license": "GPL-3.0-or-later",
-    "description": "A worker collecting publications via Twitter API.",
+    "description": "A worker collecting publications from online social network via Twitter API.",
     "autoload": {
         "psr-4": {
             "App\\": "src/"
