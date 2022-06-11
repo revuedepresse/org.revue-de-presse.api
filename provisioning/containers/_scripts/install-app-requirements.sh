@@ -54,9 +54,9 @@ function set_file_permissions() {
 
     chown --verbose -R "${WORKER_UID}:${WORKER_GID}" /scripts
 
-    chmod     o-rwx /scripts
-    chmod -R ug+rx  /scripts
-    chmod -R  u+w   /scripts
+    chmod --verbose     o-rwx /scripts
+    chmod --verbose -R ug+rx  /scripts
+    chmod --verbose -R  u+w   /scripts
 
     find "${project_dir}"  \
         -maxdepth 1 \
