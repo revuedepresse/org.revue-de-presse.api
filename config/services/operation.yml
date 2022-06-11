@@ -1,7 +1,4 @@
 services:
-    monolog.json_formatter:
-        class:                                  'Monolog\Formatter\JsonFormatter'
-
     App\Twitter\Infrastructure\Api\Repository\TokenTypeRepository:
         class: App\Twitter\Infrastructure\Api\Repository\TokenTypeRepository
         arguments:
