@@ -1,5 +1,3 @@
-version: '3.8'
-
 name: wildcard
 
 services:
@@ -83,3 +81,5 @@ services:
             - ../../:/var/www/api
         depends_on:
             - messenger
+
+version: '3.8'
