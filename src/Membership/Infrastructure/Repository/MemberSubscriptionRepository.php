@@ -11,8 +11,6 @@ use App\Twitter\Infrastructure\Repository\Subscription\MemberSubscriptionReposit
 use App\Membership\Infrastructure\Entity\MemberSubscription;
 use App\Membership\Domain\Model\MemberInterface;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
-use Doctrine\ORM\OptimisticLockException;
-use Doctrine\ORM\ORMException;
 use JsonException;
 use Symfony\Component\HttpFoundation\Request;
 use function array_diff;
@@ -265,8 +263,6 @@ QUERY;
      * @param MemberInterface $subscription
      *
      * @return MemberSubscription
-     * @throws ORMException
-     * @throws OptimisticLockException
      */
     public function saveMemberSubscription(
         MemberInterface $member,
