@@ -164,10 +164,10 @@ function consume_fetch_publication_messages {
     symfony_environment="$(get_symfony_environment)"
 
     local override_option
-    override_option=' -f ./docker-compose.yml'
-    if [ -e './docker-compose.override.yml' ];
+    override_option=' -f ./docker-compose.yaml'
+    if [ -e './docker-compose.override.yaml' ];
     then
-        override_option=' -f ./docker-compose.yml -f ./docker-compose.override.yml'
+        override_option=' -f ./docker-compose.yaml -f ./docker-compose.override.yaml'
     fi
 
     command="docker compose${override_option} run --rm --name ${SUPERVISOR_PROCESS_NAME} -T -e ${symfony_environment} worker ${SCRIPT}"
@@ -272,10 +272,10 @@ function run_php_script() {
     container_name="$(echo "${project_name}-${script}" | sha256sum | awk '{print $1}')"
 
     local override_option
-    override_option=' -f ./docker-compose.yml'
-    if [ -e './provisioning/containers/docker-compose.override.yml' ];
+    override_option=' -f ./docker-compose.yaml'
+    if [ -e './provisioning/containers/docker-compose.override.yaml' ];
     then
-        override_option=' -f ./docker-compose.yml -f ./docker-compose.override.yml'
+        override_option=' -f ./docker-compose.yaml -f ./docker-compose.override.yaml'
     fi
 
     local command
@@ -307,10 +307,11 @@ function run_php() {
     cd ./provisioning/containers || exit
 
     local override_option
-    override_option=' -f ./docker-compose.yml'
-    if [ -e './docker-compose.override.yml' ];
+    override_option=' -f ./docker-compose.yaml'
+
+    if [ -e './docker-compose.override.yaml' ];
     then
-        override_option=' -f ./docker-compose.yml -f ./docker-compose.override.yml'
+        override_option=' -f ./docker-compose.yaml -f ./docker-compose.override.yaml'
     fi
 
     local command
@@ -320,7 +321,6 @@ function run_php() {
     /bin/bash -c "${command}"
 }
 
-function run_stack() {
     cd provisioning/containers || exit
 
     local project_name
