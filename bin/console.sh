@@ -61,23 +61,6 @@ function get_project_name() {
     echo "${project_name}"
 }
 
-function get_docker_network() {
-    echo "$(get_project_name)-network"
-}
-
-function create_network() {
-    local network
-    network="$(get_docker_network)"
-
-    local command
-    command="$(echo -n 'docker network create '"${network}"' \
-    --subnet=192.169.193.0/28 \
-    --ip-range=192.169.193.0/28 \
-    --gateway=192.169.193.1')"
-
-    /bin/bash -c "${command}"
-}
-
 function build_stack_images() {
     docker-compose -f ./provisioning/containers/docker-compose.yml \
     --project-name="$(get_project_name)" build
