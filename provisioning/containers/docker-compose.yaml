@@ -24,6 +24,7 @@ services:
             - '../../.env.local'
         volumes:
             - './_scripts/:/scripts'
+            - './service/templates:/templates'
             - './service/templates/extensions.ini.dist:/usr/local/etc/php/conf.d/extensions.ini'
             - '../../:/var/www/worker'
             - '../../../shared:/var/www/shared'
