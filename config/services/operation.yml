@@ -9,16 +9,6 @@ services:
     monolog.json_formatter:
         class:                                  'Monolog\Formatter\JsonFormatter'
 
-    App\Twitter\Infrastructure\Operation\Console\LoadProductionFixtures:
-        class: App\Twitter\Infrastructure\Operation\Console\LoadProductionFixtures
-        arguments:
-            - 'devobs:load-production-fixtures'
-            - '@App\Twitter\Domain\Api\Repository\TokenTypeRepositoryInterface'
-            - '@App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface'
-            - '@App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface'
-        tags:
-            - { name: 'console.command' }
-
     App\Twitter\Infrastructure\Api\Repository\TokenTypeRepository:
         class: App\Twitter\Infrastructure\Api\Repository\TokenTypeRepository
         arguments:

@@ -37,8 +37,6 @@ services:
     App\Tests\NewsReview\Infrastructure\Repository\InMemoryPopularPublicationRepository:
         class: 'App\Tests\NewsReview\Infrastructure\Repository\InMemoryPopularPublicationRepository'
 
-    test.App\Twitter\Infrastructure\Operation\Console\LoadProductionFixtures: '@App\Twitter\Infrastructure\Operation\Console\LoadProductionFixtures'
-
     App\Twitter\Infrastructure\Api\Security\Authorization\AuthorizeAccess:
         factory: ['App\Tests\Twitter\Infrastructure\Api\Security\Authorization\Builder\AuthorizeAccessBuilder', 'build']
 
