@@ -1,68 +1,36 @@
 SHELL:=/bin/bash
 
-## See also https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
+.PHONY: help build clean clear-app-cache install restart start start-database stop test
 
-.PHONY: help
+SERVICE ?= 'worker.example.org'
+COMPOSE_PROJECT_NAME ?= ''
+TMP_DIR ?= '/tmp/tmp_${SERVICE}'
 
 help:
-		@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-create-network: ## Create Docker network
-		@/bin/bash -c 'source ./bin/console.sh && create_network'
+build: ## Build worker image
+	@/bin/bash -c 'source fun.sh && build'
 
-build-stack-images: ## Build Docker images required by development stack
-		@/bin/bash -c 'source ./bin/console.sh && build_stack_images'
+clean: ## Remove worker container
+	@/bin/bash -c 'source fun.sh && clean "${TMP_DIR}"'
 
-dispatch-fetch-publications-messages: ## Produce messages to fetch publications
-		@/bin/bash -c 'source ./bin/console.sh && dispatch_fetch_publications_messages'
+clear-app-cache: ## Clear application cache
+	@/bin/bash -c 'source fun.sh && clear_cache_warmup'
 
-consume-fetch-publication-messages: ## Consume Fetch publication messages
-		@/bin/bash -c 'export PROJECT_DIR=`pwd` && cd "${PROJECT_DIR}" && source bin/consume_fetch_publication_messages.sh'
+install: ## Install requirements
+	@/bin/bash -c 'source fun.sh && install'
 
-install-php-dependencies: ## Install PHP dependencies (APP_ENV=prod)
-		@/bin/bash -c 'source ./bin/console.sh && install_php_dependencies'
+restart: clear-app-cache stop start ## Restart worker
 
-run-php: ## Run PHP with arguments
-		@/bin/bash -c 'source ./bin/console.sh && run_php'
+start: ## Run worker
+	@/bin/bash -c 'source fun.sh && start'
 
-run-php-script: ## Run PHP script
-		@/bin/bash -c 'source ./bin/console.sh && run_php_script'
+start-database: ## Start database
+	@/bin/bash -c 'source fun.sh && start_database'
 
-run-stack: ## Run stack and its dependencies
-		@/bin/bash -c 'source ./bin/console.sh && run_stack'
+stop: ## Stop worker
+	@/bin/bash -c 'source fun.sh && stop'
 
-run-worker: ## Run worker and its dependencies
-		@/bin/bash -c 'source ./bin/console.sh && run_worker'
-
-set-up-amqp-queues: ## Set up AMQP queues
-		@/bin/bash -c 'source ./.env.local && source ./bin/console.sh && set_up_amqp_queues'
-
-list-amqp-messages: ## List AMQP messags
-		@/bin/bash -c 'source ./bin/console.sh && list_amqp_queues'
-
-purge-amqp-queue: ## Purge queue
-		@/bin/bash -c 'source ./bin/console.sh && purge_queues'
-
-stop-workers: ## Stop workers
-		@/bin/bash -c 'source ./bin/console.sh && stop_workers'
-
-run-php-unit-tests: ## Run unit tests with PHPUnit
-		@/bin/bash -c 'source ./bin/console.sh && run_php_unit_tests'
-
-run-php-features-tests: ## Run features tests with Behat
-		@/bin/bash -c 'source ./bin/console.sh && run_php_features_tests'
-
-restart-web-server: ## Restart web Server
-		@/bin/bash -c 'source ./bin/console.sh && restart_web_server'
-
-install-local-ca-store: ## Install local CA in the system trust store
-		@/bin/bash -c 'source ./bin/console.sh && install_local_ca_store'
-
-generate-development-tls-certificate-and-key: ## Generate TLS certificate and key for development
-		@/bin/bash -c 'source ./bin/console.sh && generate_development_tls_certificate_and_key'
-
-create-test-database: ## Create test database
-		@/bin/bash -c 'source ./bin/console.sh && create_test_database'
-
-load-production-fixtures: ## Load production fixtures
-		@/bin/bash -c 'source ./.env.local && source ./bin/console.sh && load_production_fixtures'
+test: ## Run unit tests
+	@/bin/bash -c 'source fun.sh && run_php_unit_tests'
