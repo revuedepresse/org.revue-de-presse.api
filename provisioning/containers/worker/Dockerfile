@@ -1,5 +1,4 @@
-# [PHP 8.1 FPM Bullseye](https://hub.docker.com/_/php?tab=tags&page=1&name=8.1-bullseye)
-FROM php:8.1-fpm-bullseye
+FROM php:8.1-cli-bullseye
 
 ENV _WORKER='worker'
 
