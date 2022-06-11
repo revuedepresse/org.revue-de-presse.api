@@ -85,7 +85,7 @@ services:
             - "traefik.http.routers.web.entrypoints=websecure"
 
     worker:
-        build: ./php
+        build: ./worker
         volumes:
             - ../containers/php/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini
             - ../../:/var/www/api
