@@ -252,7 +252,7 @@ docker compose \
       --file=./provisioning/containers/docker-compose.override.yaml \
 			up \
 			--detach \
-			service
+			worker
 SCRIPT
 )
 
