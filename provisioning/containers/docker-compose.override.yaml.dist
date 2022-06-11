@@ -1,0 +1,24 @@
+services:
+
+    amqp:
+        volumes:
+            - ../volumes/rabbitmq:/var/lib/rabbitmq
+
+    cache:
+        volumes:
+            - ../volumes/redis:/data
+
+    database:
+        ports:
+            - "127.0.0.1:5433:5432"
+        volumes:
+            - ../volumes/postgres:/var/lib/postgresql/data
+
+    worker:
+        volumes:
+            - '../../__SERVICE__:/var/www/__SERVICE__'
+
+networks:
+    default:
+        # [Use a pre-existing network](https://docs.docker.com/compose/networking/#use-a-pre-existing-network)
+        name: # external-network-name
