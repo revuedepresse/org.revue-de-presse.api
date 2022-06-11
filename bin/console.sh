@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+#
+# 2022-06-11 - Clean up
+#
 # 2019-11-10 - Notes about dependencies addition or removal
 #
 # ```
@@ -197,33 +200,6 @@ function get_project_dir {
     fi
 
     echo "${project_dir}"
-}
-
-# @see https://getcomposer.org/doc/articles/authentication-for-private-packages.md#github-oauth
-function install_php_dependencies {
-    local project_dir
-    project_dir="$(get_project_dir)"
-
-    local production_option
-    production_option=''
-    if [ -n "${APP_ENV}" ] && [ "${APP_ENV}" = 'prod' ];
-    then
-        production_option='--apcu-autoloader '
-    fi
-
-    if [ -z "${GITHUB_TOKEN}" ];
-    then
-        echo 'Please export a valid github token e.g.'
-        echo 'export GITHUB_TOKEN="__fill_me__"'
-        return 1
-    fi
-
-    local command
-    command=$(echo -n '/bin/bash -c "cd '"${project_dir}"' &&
-    source '"${project_dir}"'/bin/install-composer.sh &&
-    php '"${project_dir}"'/composer.phar config github-oauth.github.com '"${GITHUB_TOKEN}"' \
-    && '"${project_dir}"'/composer.phar install '"${production_option}"'--prefer-dist -n"')
-    echo "${command}" | make run-php
 }
 
 function remove_exited_containers() {
