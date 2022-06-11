@@ -1,4 +1,11 @@
+x-vol: &shared-volumes
+  volumes:
+    - '../../:/var/www/worker.snapshots.fr'
+
 services:
+
+  app:
+    <<: *shared-volumes
 
   amqp:
     volumes:
@@ -8,11 +15,10 @@ services:
     ports:
       - "127.0.0.1:5433:5432"
     volumes:
-      - ../volumes/postgres:/var/lib/postgresql/data
+      - ../volumes/database:/var/lib/database/data
 
   worker:
-    volumes:
-      - '../../:/var/www/worker.example.org'
+    <<: *shared-volumes
 
 networks:
   default:
