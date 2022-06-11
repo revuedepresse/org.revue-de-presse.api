@@ -10,13 +10,6 @@ services:
         env_file:
             - '../../.env.local'
 
-    cache:
-        image: 'redis'
-        command: redis-server --appendonly yes
-        expose:
-            - "6379"
-        restart: 'always'
-
     database:
         image: 'postgres:14-bullseye'
         restart: 'always'
