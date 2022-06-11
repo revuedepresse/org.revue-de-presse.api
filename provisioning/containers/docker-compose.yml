@@ -1,8 +1,28 @@
-version: '3'
+version: '3.8'
 
 name: wildcard
 
 services:
+
+    amqp:
+        build: ./rabbitmq
+        expose:
+            - "5672"
+        restart: always
+        env_file:
+            - ../../.env.local
+        volumes:
+            - ../volumes/rabbitmq:/var/lib/rabbitmq
+
+    cache:
+        image: redis
+        command:
+            redis-server --appendonly yes
+        expose:
+            - "6379"
+        restart: always
+        volumes:
+            - ../volumes/redis:/data
 
     # https://doc.traefik.io/traefik/getting-started/quick-start/
     reverse-proxy:
@@ -14,6 +34,32 @@ services:
             - ./reverse-proxy/templates/traefik.toml:/etc/traefik/traefik.toml
             - ./reverse-proxy/templates/dynamic-config:/etc/traefik/dynamic-config
             - ./reverse-proxy/certificates:/certificates
+
+    database:
+        build: ./postgres
+        restart: always
+        env_file:
+            - ../../.env.local
+        volumes:
+            - ../volumes/postgres:/var/lib/postgresql/data
+
+    service:
+        build: ./php-fpm
+        expose:
+            - "9000"
+        restart: always
+        volumes:
+            - ../containers/php-fpm/templates/agent.dist:/etc/blackfire/agent
+            - ../containers/php-fpm/templates/.blackfire.ini.dist:/root/.blackfire.ini
+            - ../containers/php-fpm/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini
+            - ../containers/php-fpm/templates/zz-blackfire.ini.dist:/usr/local/etc/php/conf.d/zz-blackfire.ini
+            - ../containers/php-fpm/templates/extensions.ini.dist:/usr/local/etc/php/conf.d/extensions.ini
+            - ../containers/php-fpm/templates/docker.conf:/usr/local/etc/php-fpm.d/docker.conf
+            - ../containers/php-fpm/templates/devobs.conf:/usr/local/etc/php-fpm.d/www.conf
+            - ../containers/php-fpm/templates/zz-docker.conf:/usr/local/etc/php-fpm.d/zz-docker.conf
+            - ../../:/var/www/api
+        depends_on:
+            - cache
 
     web:
         build: ./apache
@@ -45,50 +91,3 @@ services:
             - ../../:/var/www/api
         depends_on:
             - messenger
-
-    database:
-        build: ./postgres
-        restart: always
-        env_file:
-            - ../../.env.local
-        volumes:
-            - ../volumes/postgres:/var/lib/postgresql/data
-
-    messenger:
-        build: ./rabbitmq
-        expose:
-            - "5672"
-        restart: always
-        env_file:
-            - ../../.env.local
-        volumes:
-            - ../volumes/rabbitmq:/var/lib/rabbitmq
-
-    web-worker:
-        build: ./php-fpm
-        expose:
-            - "9000"
-        restart: always
-        volumes:
-            - ../containers/php-fpm/templates/agent.dist:/etc/blackfire/agent
-            - ../containers/php-fpm/templates/.blackfire.ini.dist:/root/.blackfire.ini
-            - ../containers/php-fpm/templates/20-no-xdebug.ini.dist:/usr/local/etc/php/conf.d/20-xdebug.ini
-            - ../containers/php-fpm/templates/zz-blackfire.ini.dist:/usr/local/etc/php/conf.d/zz-blackfire.ini
-            - ../containers/php-fpm/templates/extensions.ini.dist:/usr/local/etc/php/conf.d/extensions.ini
-            - ../containers/php-fpm/templates/docker.conf:/usr/local/etc/php-fpm.d/docker.conf
-            - ../containers/php-fpm/templates/devobs.conf:/usr/local/etc/php-fpm.d/www.conf
-            - ../containers/php-fpm/templates/zz-docker.conf:/usr/local/etc/php-fpm.d/zz-docker.conf
-            - ../../:/var/www/api
-        depends_on:
-            - cache
-
-    cache:
-        image: redis
-        command:
-            redis-server --appendonly yes
-        expose:
-            - "6379"
-        restart: always
-        volumes:
-            - ../volumes/redis:/data
-
