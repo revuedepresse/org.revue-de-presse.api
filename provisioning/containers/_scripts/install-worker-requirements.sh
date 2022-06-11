@@ -88,7 +88,7 @@ function install_service_requirements() {
     mkdir \
         --verbose \
         --parents \
-        "/var/www/${SERVICE}"
+        "/var/www/${WORKER}"
 }
 
 function install_system_packages() {

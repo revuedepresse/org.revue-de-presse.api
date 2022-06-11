@@ -16,7 +16,7 @@ services:
 
     worker:
         volumes:
-            - '../../__SERVICE__:/var/www/__SERVICE__'
+            - '../../__WORKER__:/var/www/__WORKER__'
 
 networks:
     default:

@@ -1,11 +1,11 @@
 # [PHP 8.1 FPM Bullseye](https://hub.docker.com/_/php?tab=tags&page=1&name=8.1-bullseye)
 FROM php:8.1-fpm-bullseye
 
-ENV _SERVICE='worker'
+ENV _WORKER='worker'
 
 ARG WORKER_UID=1000
 ARG WORKER_GID=101
-ARG SERVICE="${_SERVICE}"
+ARG WORKER="${_WORKER}"
 
 HEALTHCHECK CMD /bin/bash -c "test $(ps ax | \grep -E '\/dev\/null' -c) -gt 0"
 
@@ -20,9 +20,9 @@ COPY --from=composer:2.3 /usr/bin/composer /usr/bin/composer
 
 USER    ${WORKER_UID}:${WORKER_GID}
 
-VOLUME  ["/scripts", "/var/www/${SERVICE}", "/var/www/shared"]
+VOLUME  ["/scripts", "/var/www/${WORKER}", "/var/www/shared"]
 
-WORKDIR "/var/www/${SERVICE}"
+WORKDIR "/var/www/${WORKER}"
 
 ENTRYPOINT ["/usr/bin/tini", "--"]
 

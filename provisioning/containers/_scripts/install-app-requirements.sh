@@ -24,7 +24,7 @@ function configure_php_fpm_pool() {
     fi
 
     \cat '/templates/www.conf.dist' | \
-    \sed -E 's/__SERVICE__/'"${SERVICE}"'/g' | \
+    \sed -E 's/__WORKER__/'"${WORKER}"'/g' | \
     \sed -E 's/__UID__/'"${WORKER_UID}"'/g' | \
     \sed -E 's/__GID__/'"${WORKER_GID}"'/g' \
     > "${project_dir}/provisioning/containers/service/templates/www.conf" && \
@@ -140,17 +140,17 @@ function install_app_requirements() {
     local WORKER_UID
     local WORKER_GID
 
-    if [ -z "${SERVICE}" ];
+    if [ -z "${WORKER}" ];
     then
 
-      printf 'A %s is expected as %s ("%s").%s' 'non-empty string' 'environment variable' 'SERVICE' $'\n'
+      printf 'A %s is expected as %s ("%s").%s' 'non-empty string' 'environment variable' 'WORKER' $'\n'
 
       return 1
 
     fi
 
     local project_dir
-    project_dir='/var/www/'${SERVICE}
+    project_dir='/var/www/'${WORKER}
 
     source "${project_dir}/.env.local"
 
