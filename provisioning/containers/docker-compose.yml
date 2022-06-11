@@ -62,7 +62,7 @@ services:
             - cache
 
     web:
-        build: ./apache
+        build: ./web
         expose:
             - "80"
         volumes:
