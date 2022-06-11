@@ -33,4 +33,4 @@ stop: ## Stop worker
 	@/bin/bash -c 'source fun.sh && stop'
 
 test: ## Run unit tests
-	@/bin/bash -c 'source fun.sh && run_php_unit_tests'
+	@/bin/bash -c 'source fun.sh && run_unit_tests'
