@@ -191,13 +191,6 @@ services:
     App\Twitter\Domain\Api\Accessor\StatusAccessorInterface:
         '@App\Twitter\Infrastructure\Api\Accessor\StatusAccessor'
 
-    app.authenticator:
-        class: 'App\Membership\Infrastructure\Security\Authentication\Authenticator'
-        properties:
-            authenticationTokenRepository:  '@repository.authentication_token'
-            authorizedIss:                  '%authorized_iss%'
-            validAudience:                  '%valid_audience%'
-
     app.event_subscriber.console:
         class: 'App\Twitter\Infrastructure\Console\EventSubscriber\ConsoleEventsSubscriber'
         properties:
