@@ -1,4 +1,4 @@
-name: DevObs API
+name: worker.snapshots.fr
 
 on:
   push:
