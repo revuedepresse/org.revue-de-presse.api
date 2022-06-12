@@ -14,6 +14,7 @@ use App\Tests\Twitter\Domain\Curation\Infrastructure\Builder\Repository\FriendsL
 use App\Tests\Membership\Builder\Repository\MemberRepositoryBuilder;
 use App\Membership\Infrastructure\Entity\Legacy\Member;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Tester\CommandTester;
@@ -23,6 +24,8 @@ use Symfony\Component\Console\Tester\CommandTester;
  */
 class UnfollowDiffSubscriptionsSubscribeesCommandTest extends KernelTestCase
 {
+    use ProphecyTrait;
+
     private const SUBSCRIBER_SCREEN_NAME = 'thierrymarianne';
 
     private UnfollowDiffSubscriptionsSubscribeesCommand $command;

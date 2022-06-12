@@ -7,7 +7,9 @@ use App\Twitter\Domain\Resource\MemberIdentity;
 use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use App\Membership\Infrastructure\Entity\Legacy\Member;
 use App\Membership\Domain\Model\MemberInterface;
+use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Prophecy\Prophet;
 
@@ -20,8 +22,19 @@ class MemberRepositoryBuilder
 
     private function __construct()
     {
-        $prophet = new Prophet();
-        $this->prophecy = $prophet->prophesize(MemberRepositoryInterface::class);
+        $testCase = new class() extends TestCase {
+            use ProphecyTrait;
+
+            public function __construct()
+            {
+                $this->prophet = $this->getProphet();
+            }
+
+            public function prophesize(?string $classOrInterface = null): ObjectProphecy {
+                return $this->prophet->prophesize($classOrInterface);
+            }
+        };
+        $this->prophecy = $testCase->prophesize(MemberRepositoryInterface::class);
     }
 
     public static function newMemberRepositoryBuilder()

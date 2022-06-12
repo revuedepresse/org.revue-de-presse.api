@@ -10,6 +10,7 @@ use App\Tests\Twitter\Infrastructure\Api\AccessToken\Builder\Repository\TokenRep
 use App\Twitter\Infrastructure\Collector\InterruptibleCollectDecider;
 use App\Twitter\Domain\Collector\InterruptibleCollectDeciderInterface;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /**
@@ -17,6 +18,8 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
  */
 class InterruptibleCollectDeciderTest extends KernelTestCase
 {
+    use ProphecyTrait;
+
     private InterruptibleCollectDeciderInterface $decider;
 
     /**

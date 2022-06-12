@@ -27,7 +27,7 @@ class FollowersListAccessorTest extends KernelTestCase
         self::assertCount(200, $friendsList->getList());
     }
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->accessor = FollowersListAccessorBuilder::build();
     }

@@ -32,7 +32,7 @@ class ExposePublishersListCommandTest extends KernelTestCase
 
     private CommandTester $commandTester;
 
-    public function setUp()
+    public function setUp(): void
     {
         $kernel = static::bootKernel();
 

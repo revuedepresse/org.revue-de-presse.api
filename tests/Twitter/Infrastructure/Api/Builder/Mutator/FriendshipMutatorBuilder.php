@@ -10,15 +10,29 @@ use App\Twitter\Infrastructure\Api\Mutator\FriendshipMutatorInterface;
 use App\Membership\Domain\Model\MemberInterface;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
+use Prophecy\Prophet;
 
 class FriendshipMutatorBuilder extends TestCase
 {
+    use ProphecyTrait;
+
+    public function __construct()
+    {
+        $this->prophet = $this->getProphet();
+    }
+
+    public function prophet(): Prophet
+    {
+        return $this->prophet;
+    }
+
     public static function build(): FriendshipMutatorInterface
     {
         $testCase = new self();
 
         /** @var FriendshipMutatorInterface $mutator */
-        $mutator = $testCase->prophesize(FriendshipMutator::class);
+        $mutator = $testCase->prophet()->prophesize(FriendshipMutator::class);
 
         $mutator->unfollowMembers(
             Argument::type(MemberCollection::class),

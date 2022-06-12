@@ -8,6 +8,9 @@ use App\Twitter\Domain\Api\Accessor\ListAccessorInterface;
 use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
+use Prophecy\Prophecy\ObjectProphecy;
+use Prophecy\Prophet;
 use Psr\Log\NullLogger;
 
 class FriendsListAccessorBuilder extends TestCase
@@ -17,7 +20,18 @@ class FriendsListAccessorBuilder extends TestCase
      */
     public static function build(): ListAccessorInterface
     {
-        $testCase = new self();
+        $testCase = new class() extends TestCase {
+            use ProphecyTrait;
+
+            public function __construct()
+            {
+                $this->prophet = $this->getProphet();
+            }
+
+            public function prophesize(?string $classOrInterface = null): ObjectProphecy {
+                return $this->prophet->prophesize($classOrInterface);
+            }
+        };
 
         /** @var ApiAccessorInterface $apiAccessor */
         $apiAccessor = $testCase->prophesize(ApiAccessorInterface::class);

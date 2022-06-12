@@ -18,6 +18,7 @@ use DateTimeInterface;
 use DateTimeZone;
 use Exception;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use function count;
@@ -28,6 +29,8 @@ use function count;
  */
 class StatusPersistenceTest extends KernelTestCase
 {
+    use ProphecyTrait;
+
     private const ARCHIVE_STATUS_HASH = 'b90db10b2ac5a0a399886d677ef0c11200a6f2c5';
 
     private StatusPersistenceInterface $statusPersistence;

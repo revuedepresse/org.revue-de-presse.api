@@ -16,6 +16,7 @@ use App\Twitter\Infrastructure\Api\Resource\MemberCollection;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
 use PDOException;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Prophecy\Prophet;
 use Psr\Log\LoggerInterface;
@@ -24,6 +25,8 @@ use Throwable;
 
 class ApiAccessorBuilder
 {
+    use ProphecyTrait;
+
     public const LIST_ID   = '1';
     public const LIST_NAME = 'science';
 
@@ -44,7 +47,7 @@ class ApiAccessorBuilder
 
     public function __construct()
     {
-        $prophet = new Prophet();
+        $prophet = $this->getProphet();
 
         $this->prophecy = $prophet->prophesize(ApiAccessorInterface::class);
         $this->prophecy->getApiBaseUrl()->willReturn('https://example.com');

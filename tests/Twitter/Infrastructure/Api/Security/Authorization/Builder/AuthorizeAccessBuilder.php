@@ -9,10 +9,14 @@ use App\Twitter\Infrastructure\Api\Security\Authorization\AccessToken;
 use App\Twitter\Infrastructure\Api\Security\Authorization\RequestToken;
 use App\Twitter\Infrastructure\Api\Security\Authorization\Verifier;
 use PHPUnit\Framework\TestCase;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
+use Prophecy\Prophet;
 
 class AuthorizeAccessBuilder extends TestCase
 {
+    use ProphecyTrait;
+
     public const REQUEST_TOKEN = 'request_token';
     public const REQUEST_SECRET = 'request_secret';
     public const PIN_CODE = '1234';
@@ -22,12 +26,22 @@ class AuthorizeAccessBuilder extends TestCase
     public const USER_ID = '1';
     public const SCREEN_NAME = 'jane';
 
+    public function __construct()
+    {
+        $this->prophet = $this->getProphet();
+    }
+
+    public function prophet(): Prophet
+    {
+        return $this->prophet;
+    }
+
     public static function build(): AuthorizeAccessInterface
     {
         $testCase = new self();
 
         /** @var AuthorizeAccessInterface|ObjectProphecy $prophecy */
-        $prophecy = $testCase->prophesize(AuthorizeAccessInterface::class);
+        $prophecy = $testCase->prophet()->prophesize(AuthorizeAccessInterface::class);
 
         $requestToken = new RequestToken(self::REQUEST_TOKEN, self::REQUEST_SECRET);
         $prophecy->requestToken()

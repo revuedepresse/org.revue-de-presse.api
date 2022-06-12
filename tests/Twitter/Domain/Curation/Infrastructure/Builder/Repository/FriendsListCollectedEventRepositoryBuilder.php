@@ -11,10 +11,13 @@ use App\Twitter\Infrastructure\Api\Selector\FriendsListSelector;
 use App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\FriendsListAccessorBuilder;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Ramsey\Uuid\Rfc4122\UuidV4;
 
 class FriendsListCollectedEventRepositoryBuilder extends TestCase
 {
+    use ProphecyTrait;
+
     /**
      * @return ListCollectedEventRepositoryInterface
      */

@@ -14,6 +14,7 @@ use App\Twitter\Infrastructure\Operation\Correlation\CorrelationId;
 use App\Twitter\Infrastructure\Api\Accessor\OwnershipAccessor;
 use App\Twitter\Infrastructure\Api\Selector\AuthenticatedSelector;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /**
@@ -21,6 +22,8 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
  */
 class PublicationMessageDispatcherTest extends KernelTestCase
 {
+    use ProphecyTrait;
+
     /**
      * @throws
      *

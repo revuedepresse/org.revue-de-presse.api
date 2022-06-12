@@ -8,10 +8,26 @@ use App\Twitter\Domain\Api\Accessor\ListAccessorInterface;
 use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
+use Prophecy\Prophet;
 use Psr\Log\NullLogger;
 
 class FollowersListAccessorBuilder extends TestCase
 {
+    use ProphecyTrait;
+
+    private $prophet;
+
+    public function __construct()
+    {
+        $this->prophet = $this->getProphet();
+    }
+
+    public function prophet(): Prophet
+    {
+        return $this->prophet;
+    }
+
     /**
      * @return ListAccessorInterface
      */
@@ -20,7 +36,7 @@ class FollowersListAccessorBuilder extends TestCase
         $testCase = new self();
 
         /** @var ApiAccessorInterface $apiAccessor */
-        $apiAccessor = $testCase->prophesize(ApiAccessorInterface::class);
+        $apiAccessor = $testCase->prophet()->prophesize(ApiAccessorInterface::class);
         $apiAccessor->getApiBaseUrl()->willReturn('https://twitter.api');
         $apiAccessor->contactEndpoint(Argument::any())
             ->will(function ($arguments) {

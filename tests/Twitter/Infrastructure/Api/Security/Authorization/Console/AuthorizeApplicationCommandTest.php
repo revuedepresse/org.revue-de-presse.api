@@ -76,13 +76,13 @@ class AuthorizeApplicationCommandTest extends KernelTestCase
 
         $display = $this->commandTester->getDisplay();
 
-        self::assertContains(
+        self::assertStringContainsString(
             AuthorizeAccessBuilder::AUTHORIZATION_URL,
             $display,
             'The command should render a clickable authorization URL.'
         );
 
-        self::assertContains(
+        self::assertStringContainsString(
             'This Twitter application has been granted access to Twitter API on your behalf.',
             $display,
             'The command should acknowledge the authorization.'

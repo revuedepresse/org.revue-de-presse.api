@@ -54,37 +54,37 @@ class ListMemberSubscribeesCommandTest extends KernelTestCase
 
         $display = $this->commandTester->getDisplay();
 
-        self::assertContains(
+        self::assertStringContainsString(
             'Name',
             $display,
             'The command output contains a name.'
         );
 
-        self::assertContains(
+        self::assertStringContainsString(
             'Description',
             $display,
             'The command output contains a description.'
         );
 
-        self::assertContains(
+        self::assertStringContainsString(
             'URL',
             $display,
             'The command output contains a URL.'
         );
 
-        self::assertContains(
+        self::assertStringContainsString(
             'Followers',
             $display,
             'The command output contains a followers count.'
         );
 
-        self::assertContains(
+        self::assertStringContainsString(
             'Friends',
             $display,
             'The command output contains a friends count.'
         );
 
-        self::assertContains(
+        self::assertStringContainsString(
             'Location',
             $display,
             'The command output contains a location.'
