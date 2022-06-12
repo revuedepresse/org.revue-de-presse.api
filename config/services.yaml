@@ -245,9 +245,6 @@ parameters:
 
     weaving_the_web_twitter.api_host:                             'api.twitter.com'
 
-    weaving_the_web_twitter.authenticate_application.class:       'App\Twitter\Infrastructure\Console\AuthenticateApplicationCommand'
-    weaving_the_web_twitter.authentication_uri:                   '/oauth2/token'
-
     twitter_api.consumer_key:                                     '%env(resolve:API_TWITTER_CONSUMER_KEY)%'
     twitter_api.consumer_secret:                                  '%env(resolve:API_TWITTER_CONSUMER_SECRET)%'
 
