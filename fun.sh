@@ -237,9 +237,8 @@ function run_unit_tests() {
         return
     fi
 
-    bin/phpunit -c ./phpunit.xml.dist --verbose --debug --stop-on-failure --stop-on-error || \
-    tail -F ./var/log/build.*log     
-} >> ./var/log/build.log 2>> ./var/log/build.error.log
+    bin/phpunit -c ./phpunit.xml.dist --verbose --debug --stop-on-failure --stop-on-error
+}
 
 function start() {
     guard_against_missing_variables
