@@ -155,17 +155,6 @@ services:
     App\Membership\Domain\Repository\PublishersListSubscriptionRepositoryInterface:
         '@App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository'
 
-    repository.authentication_token:
-        class:   'App\Membership\Infrastructure\Repository\AuthenticationTokenRepository'
-        arguments:
-            - '@Doctrine\Common\Persistence\ManagerRegistry'
-            - 'App\Membership\Infrastructure\Entity\AuthenticationToken'
-        properties:
-            memberRepository: "@user_manager"
-            authenticator:    "@app.authenticator"
-        tags:
-            - { name: 'doctrine.repository_service' }
-
     repository.owner:
         class: 'App\PressMedia\Repository\OwnerRepository'
         arguments:
