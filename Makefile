@@ -1,6 +1,6 @@
 SHELL:=/bin/bash
 
-.PHONY: help build clean clear-app-cache install restart start start-database stop test
+.PHONY: help build clean clear-app-cache install restart start start-database stop stop-database test
 
 WORKER ?= 'worker.example.org'
 TMP_DIR ?= '/tmp/tmp_${WORKER}'
@@ -30,6 +30,9 @@ start-database: ## Start database
 
 stop: ## Stop worker
 	@/bin/bash -c 'source fun.sh && stop'
+
+stop-database: ## Stop database
+	@/bin/bash -c 'source fun.sh && stop_database'
 
 test: ## Run unit tests
 	@/bin/bash -c 'source fun.sh && run_unit_tests'

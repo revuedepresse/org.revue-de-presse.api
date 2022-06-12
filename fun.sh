@@ -289,6 +289,12 @@ function stop() {
         down
 } >> ./var/log/build.log 2>> ./var/log/build.error.log
 
+function stop_database() {
+    guard_against_missing_variables
+
+    remove_container_image 'database'
+} >> ./var/log/build.log 2>> ./var/log/build.error.log
+
 function validate_docker_compose_configuration() {
     docker compose \
         -f ./provisioning/containers/docker-compose.yaml \
