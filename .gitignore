@@ -3,7 +3,6 @@
 /.env.*.local
 !/\.env*\.dist
 auth.json
-
 bin/behat
 bin/console
 bin/doctrine
@@ -18,7 +17,6 @@ bin/simple-phpunit
 bin/sql-formatter
 bin/yaml-lint
 bin/var-dump-server
-
 composer.phar
 /config/secrets/prod/prod.decrypt.private.php
 /phpunit.xml
