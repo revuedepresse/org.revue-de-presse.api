@@ -15,6 +15,10 @@ interface MemberInterface extends UserInterface
 
     public function getUsername(): ?string;
 
+    public function setUsername(string $username): MemberInterface;
+
+    public function setEmail(string $email): MemberInterface;
+
     public function setTwitterID(string $twitterId): MemberInterface;
 
     public function twitterId(): ?string;

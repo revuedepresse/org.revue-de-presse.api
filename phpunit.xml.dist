@@ -1,62 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
-
 <!-- https://phpunit.readthedocs.io/en/latest/configuration.html -->
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
-         backupGlobals="false"
-         colors="true"
-         bootstrap="tests/bootstrap.php"
->
-    <php>
-        <ini name="error_reporting" value="-1" />
-        <server name="APP_ENV" value="test" force="true" />
-        <server name="SHELL_VERBOSITY" value="-1" />
-        <server name="KERNEL_CLASS" value="App\Kernel" />
-    </php>
-
-    <groups>
-        <include>
-            <group>api_access</group>
-            <group>command</group>
-            <group>conversation</group>
-            <group>curating_member_ownerships</group>
-            <group>diffing</group>
-            <group>formatter</group>
-            <group>interruptible_collect_decider</group>
-            <group>status_accessor</group>
-            <group>membership</group>
-            <group>member_subscribee</group>
-            <group>member_subscription</group>
-            <group>ownership</group>
-            <group>persistence</group>
-            <group>production_fixtures</group>
-            <group>publication</group>
-            <group>publication_message_dispatcher</group>
-            <group>publishers_list</group>
-            <group>repository_publishers_list</group>
-            <group>status_decoration</group>
-            <group>tagged_status</group>
-            <group>unavailable_resource</group>
-        </include>
-    </groups>
-
-    <testsuites>
-        <testsuite name="Project Test Suite">
-            <directory>tests</directory>
-        </testsuite>
-    </testsuites>
-
-    <filter>
-        <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">src/Amqp/Command/FetchMemberStatusMessageDispatcher.php</directory>
-            <directory suffix=".php">src/Api/AccessToken/TokenChange.php</directory>
-            <directory suffix=".php">src/Conversation/Consistency/StatusConsistency.php</directory>
-            <directory suffix=".php">src/Twitter/Infrastructure/Status/Persistence/StatusPersistence.php</directory>
-            <directory suffix=".php">src/Twitter/Infrastructure/Status/Persistence/PublicationPersistence.php</directory>
-            <directory suffix=".php">src/Twitter/Infrastructure/Twitter/Api/Accessor/MemberProfileAccessor.php</directory>
-            <directory suffix=".php">src/Twitter/Infrastructure/Twitter/Api/Accessor/OwnershipAccessor.php</directory>
-            <directory suffix=".php">src/Twitter/Infrastructure/Twitter/Api/Normalizer/Normalizer.php</directory>
-            <directory suffix=".php">src/Twitter/Infrastructure/Twitter/Collector/InterruptibleCollectDecider.php</directory>
-        </whitelist>
-    </filter>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd" backupGlobals="false" colors="true" bootstrap="tests/bootstrap.php">
+  <coverage processUncoveredFiles="true">
+    <include>
+      <directory suffix=".php">src/Amqp/Command/FetchMemberStatusMessageDispatcher.php</directory>
+      <directory suffix=".php">src/Api/AccessToken/TokenChange.php</directory>
+      <directory suffix=".php">src/Conversation/Consistency/StatusConsistency.php</directory>
+      <directory suffix=".php">src/Twitter/Infrastructure/Status/Persistence/StatusPersistence.php</directory>
+      <directory suffix=".php">src/Twitter/Infrastructure/Status/Persistence/PublicationPersistence.php</directory>
+      <directory suffix=".php">src/Twitter/Infrastructure/Twitter/Api/Accessor/MemberProfileAccessor.php</directory>
+      <directory suffix=".php">src/Twitter/Infrastructure/Twitter/Api/Accessor/OwnershipAccessor.php</directory>
+      <directory suffix=".php">src/Twitter/Infrastructure/Twitter/Api/Normalizer/Normalizer.php</directory>
+      <directory suffix=".php">src/Twitter/Infrastructure/Twitter/Collector/InterruptibleCollectDecider.php</directory>
+    </include>
+  </coverage>
+  <php>
+    <ini name="error_reporting" value="-1"/>
+    <server name="APP_ENV" value="test" force="true"/>
+    <server name="SHELL_VERBOSITY" value="-1"/>
+    <server name="KERNEL_CLASS" value="App\Kernel"/>
+    <!-- ###+ symfony/framework-bundle ### -->
+    <env name="APP_ENV" value="dev"/>
+    <env name="APP_SECRET" value="7979f017f873ccf7011c0ecb5c1136d4"/>
+  </php>
+  <groups>
+    <include>
+      <group>api_access</group>
+      <group>command</group>
+      <group>conversation</group>
+      <group>curating_member_ownerships</group>
+      <group>diffing</group>
+      <group>formatter</group>
+      <group>interruptible_collect_decider</group>
+      <group>status_accessor</group>
+      <group>membership</group>
+      <group>member_subscribee</group>
+      <group>member_subscription</group>
+      <group>ownership</group>
+      <group>persistence</group>
+      <group>production_fixtures</group>
+      <group>publication</group>
+      <group>publication_message_dispatcher</group>
+      <group>publishers_list</group>
+      <group>repository_publishers_list</group>
+      <group>status_decoration</group>
+      <group>tagged_status</group>
+      <group>unavailable_resource</group>
+    </include>
+  </groups>
+  <testsuites>
+    <testsuite name="Project Test Suite">
+      <directory>tests</directory>
+    </testsuite>
+  </testsuites>
 </phpunit>

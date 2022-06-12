@@ -7,14 +7,16 @@ use App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\FollowersListAccessorB
 use App\Twitter\Infrastructure\Curation\Entity\FollowersListCollectedEvent;
 use App\Twitter\Domain\Curation\Repository\ListCollectedEventRepositoryInterface;
 use App\Twitter\Infrastructure\Curation\Repository\FollowersListCollectedEventRepository;
-use App\Twitter\Infrastructure\Operation\Correlation\CorrelationId;
 use App\Twitter\Domain\Api\Accessor\ListAccessorInterface;
 use App\Twitter\Infrastructure\Api\Selector\FollowersListSelector;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 
 class FollowersListCollectedEventRepositoryBuilder extends TestCase
 {
+    use ProphecyTrait;
+
     /**
      * @return ListCollectedEventRepositoryInterface
      */

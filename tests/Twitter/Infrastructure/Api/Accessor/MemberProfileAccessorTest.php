@@ -16,6 +16,7 @@ use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
 use App\Twitter\Domain\Api\TwitterErrorAwareInterface;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
 use Exception;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 /**
@@ -24,6 +25,8 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
  */
 class MemberProfileAccessorTest extends KernelTestCase
 {
+    use ProphecyTrait;
+
     /** @var MemberProfileCollectedEventRepository */
     private $eventRepository;
 
@@ -209,6 +212,8 @@ class MemberProfileAccessorTest extends KernelTestCase
         self::assertInstanceOf(MemberInterface::class, $member);
         self::assertEquals($expectedTwitterUserName, $member->twitterScreenName());
     }
+
+    use ProphecyTrait;
 
     /**
      * @param \stdClass|null $memberProfile

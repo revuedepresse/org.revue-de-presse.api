@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace App\Twitter\Infrastructure\Exception;
 
+use App\Twitter\Domain\Api\Accessor\TwitterApiEndpointsAwareInterface;
 use App\Twitter\Infrastructure\Api\Accessor\Exception\ApiRateLimitingException;
 use App\Twitter\Infrastructure\Api\Accessor\Exception\NotFoundStatusException;
 use App\Twitter\Infrastructure\Api\Accessor\Exception\ReadOnlyApplicationException;
@@ -19,7 +20,7 @@ use function sprintf;
  * @package App\Twitter\Infrastructure\Exception
  * @author  Thierry Marianne <thierry.marianne@weaving-the-web.org>
  */
-class UnavailableResourceException extends Exception implements TwitterErrorAwareInterface
+class UnavailableResourceException extends Exception implements TwitterErrorAwareInterface, TwitterApiEndpointsAwareInterface
 {
 
     /**
@@ -119,7 +120,10 @@ class UnavailableResourceException extends Exception implements TwitterErrorAwar
         }
 
         if ($errorCode === self::ERROR_EXCEEDED_RATE_LIMIT) {
-            $onApiLimitExceeded($endpoint);
+            if (self::exceptWhenAccessingApiRateLimitStatus($endpoint)) {
+                $onApiLimitExceeded($endpoint);
+            }
+
             throw new ApiRateLimitingException(
                 $error->message,
                 $error->code
@@ -193,5 +197,14 @@ class UnavailableResourceException extends Exception implements TwitterErrorAwar
         $logger->error($message);
 
         return $message;
+    }
+
+    /**
+     * @param string $endpoint
+     * @return bool
+     */
+    private static function exceptWhenAccessingApiRateLimitStatus(string $endpoint): bool
+    {
+        return strpos($endpoint, self::API_ENDPOINT_RATE_LIMIT_STATUS) === false;
     }
 }

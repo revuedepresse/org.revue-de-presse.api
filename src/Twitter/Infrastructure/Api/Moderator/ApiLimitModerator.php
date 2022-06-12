@@ -39,7 +39,6 @@ class ApiLimitModerator implements ApiLimitModeratorInterface
 
             $message = 'API limit has been reached for token "{{ token }}...", '.
                 'operations are currently frozen (waiting for {{ wait_time }} )';
-            ;
             $parameters['{{ wait_time }}'] = $humanlyReadableWaitTime;
             $this->logger->info(strtr($message, $parameters));
         }

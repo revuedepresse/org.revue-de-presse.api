@@ -3,7 +3,7 @@ declare (strict_types=1);
 
 namespace App\Tests\Twitter\Infrastructure\Subscription\Console;
 
-use App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\MemberOwnershipsAccessorBuilder;
+use App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\OwnershipAccessorBuilder;
 use App\Twitter\Domain\Curation\Repository\OwnershipBatchCollectedEventRepositoryInterface;
 use App\Twitter\Infrastructure\Api\Selector\MemberOwnershipsBatchSelector;
 use App\Twitter\Infrastructure\Subscription\Console\ListSubscriptionsToPublishersListsCommand;
@@ -59,7 +59,7 @@ class ListSubscriptionsToPublishersListsCommandTest extends KernelTestCase
         self::assertEquals(
             $this->commandTester->getStatusCode(),
             $this->command::FAILURE,
-            'The status code of this command should be unsuccessful',
+            'The return code of this command execution should be unsuccessful.',
         );
     }
 
@@ -72,7 +72,7 @@ class ListSubscriptionsToPublishersListsCommandTest extends KernelTestCase
 
         $screenName = 'thierrymarianne';
         $this->repository->collectedOwnershipBatch(
-            MemberOwnershipsAccessorBuilder::willReturnSomeOwnership(),
+            OwnershipAccessorBuilder::willReturnSomeOwnership(),
             new MemberOwnershipsBatchSelector($screenName)
         );
 

@@ -3,8 +3,8 @@ declare (strict_types=1);
 
 namespace App\Tests\Twitter\Infrastructure\Curation\Repository;
 
-use App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\MemberOwnershipsAccessorBuilder;
-use App\Twitter\Domain\Api\MemberOwnershipsAccessorInterface;
+use App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\OwnershipAccessorBuilder;
+use App\Twitter\Domain\Api\Accessor\OwnershipAccessorInterface;
 use App\Twitter\Domain\Api\Selector\ListSelectorInterface;
 use App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository;
 use App\Twitter\Infrastructure\Api\Selector\MemberOwnershipsBatchSelector;
@@ -16,7 +16,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 class OwnershipBatchCollectedEventRepositoryTest extends KernelTestCase
 {
     private OwnershipBatchCollectedEventRepository $subjectUnderTest;
-    private MemberOwnershipsAccessorInterface $accessor;
+    private OwnershipAccessorInterface $accessor;
 
     protected function setUp(): void
     {
@@ -27,7 +27,7 @@ class OwnershipBatchCollectedEventRepositoryTest extends KernelTestCase
         self::$container = $kernel->getContainer();
 
         $this->subjectUnderTest = self::$container->get('test.'.OwnershipBatchCollectedEventRepository::class);
-        $this->accessor = MemberOwnershipsAccessorBuilder::build();
+        $this->accessor = OwnershipAccessorBuilder::build();
     }
 
     /**

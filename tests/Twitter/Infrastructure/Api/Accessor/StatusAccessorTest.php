@@ -9,6 +9,7 @@ use App\Twitter\Domain\Publication\Repository\StatusRepositoryInterface;
 use App\Twitter\Infrastructure\Amqp\Message\FetchPublicationInterface;
 use App\Twitter\Domain\Api\Accessor\StatusAccessorInterface;
 use App\Twitter\Domain\Publication\Repository\ExtremumAwareInterface;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
@@ -17,6 +18,8 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
  */
 class StatusAccessorTest extends KernelTestCase
 {
+    use ProphecyTrait;
+
     private StatusAccessorInterface $accessor;
 
     /**

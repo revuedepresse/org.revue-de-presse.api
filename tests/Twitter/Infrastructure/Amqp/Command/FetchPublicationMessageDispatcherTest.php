@@ -9,6 +9,7 @@ use App\Twitter\Domain\Curation\PublicationStrategyInterface;
 use App\Twitter\Infrastructure\Amqp\MessageBus\PublicationMessageDispatcher;
 use App\Tests\Twitter\Infrastructure\Api\Builder\Accessor\ApiAccessorBuilder;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Component\Console\Command\Command;
@@ -19,6 +20,8 @@ use Symfony\Component\Console\Tester\CommandTester;
  */
 class FetchPublicationMessageDispatcherTest extends KernelTestCase
 {
+    use ProphecyTrait;
+
     /**
      * @var Command
      */
@@ -48,7 +51,7 @@ class FetchPublicationMessageDispatcherTest extends KernelTestCase
         self::assertEquals(
             $this->commandTester->getStatusCode(),
             $this->command::SUCCESS,
-            'The status code of a command should be successful',
+            'The return code of this command execution should be successful.',
         );
     }
 

@@ -12,6 +12,7 @@ use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use PDOException;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Prophecy\PhpUnit\ProphecyTrait;
 use Prophecy\Prophecy\ObjectProphecy;
 use Psr\Log\LoggerInterface;
 use Throwable;
@@ -20,7 +21,18 @@ class NetworkRepositoryBuilder extends TestCase
 {
     public static function build(MemberRepositoryInterface $repository, LoggerInterface $logger)
     {
-        $testCase = new self();
+        $testCase = new class() extends TestCase {
+            use ProphecyTrait;
+
+            public function __construct()
+            {
+                $this->prophet = $this->getProphet();
+            }
+
+            public function prophesize(?string $classOrInterface = null): ObjectProphecy {
+                return $this->prophet->prophesize($classOrInterface);
+            }
+        };
 
         /** @var NetworkRepositoryInterface|ObjectProphecy $prophecy */
         $prophecy = $testCase->prophesize(NetworkRepository::class);

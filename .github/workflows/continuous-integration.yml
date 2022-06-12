@@ -1,0 +1,74 @@
+name: ci.worker.snapshots.fr
+
+on:
+  push:
+    branches: [ wildcard ]
+  pull_request:
+    branches: [ wildcard ]
+
+jobs:
+  release:
+    runs-on: ubuntu-20.04
+
+    services:
+      postgres:
+        image: postgres:14-bullseye
+        env:
+          POSTGRES_USER: test
+          POSTGRES_DB: test
+          POSTGRES_PASSWORD: test
+        ports:
+          - 5433:5432
+
+    steps:
+      - name: Install packages
+        run: sudo apt-get install bash gzip tar wget
+
+      - name: Checkout project
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+
+      - name: Validate composer.json and composer.lock
+        run: composer validate --strict
+
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: 8.1
+          tools: composer:v2.2
+
+      - name: Cache composer packages
+        id: composer-cache
+        uses: actions/cache@v2
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
+
+      - name: Add HTTP basic auth credentials
+        run: echo '${{ secrets.COMPOSER_AUTH_JSON }}' > $GITHUB_WORKSPACE/auth.json
+
+      - name: Install dependencies
+        run: composer install --prefer-dist
+
+      - name: Remove auth.json file
+        run: rm -f $GITHUB_WORKSPACE/auth.json
+
+      - name: Copy test environment variables configuration file
+        run: |
+          cp $GITHUB_WORKSPACE/.env.test.dist $GITHUB_WORKSPACE/.env.test
+          cat $GITHUB_WORKSPACE/.env.test
+
+      - name: Clear cache
+        run: php bin/console cache:clear -e test
+
+      - name: Warm-up cache
+        run: php bin/console cache:warmup -e test
+
+      - name: Create test database schema
+        run: php bin/console doctrine:schema:create -n -e test
+
+      - name: Run unit tests
+        run: make test

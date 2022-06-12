@@ -30,8 +30,6 @@ class ConversationStatusConsumer
 
     private const ERROR_CODE_USER_NOT_FOUND = 100;
 
-    public OperationClock $operationClock;
-
     public EntityManagerInterface $entityManager;
 
     public PublishersListRepository $aggregateRepository;
@@ -58,10 +56,6 @@ class ConversationStatusConsumer
      */
     public function execute(AmqpMessage $message)
     {
-        if ($this->operationClock->shouldSkipOperation()) {
-            return true;
-        }
-
         try {
             $options = $this->parseMessage($message);
         } catch (\Exception $exception) {

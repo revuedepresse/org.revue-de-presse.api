@@ -7,15 +7,19 @@ use App\Twitter\Domain\Api\Accessor\OwnershipAccessorInterface;
 use App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface;
 use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
 use App\Twitter\Domain\Api\Selector\AuthenticatedSelectorInterface;
+use App\Twitter\Domain\Api\Selector\ListSelectorInterface;
 use App\Twitter\Domain\Resource\MemberOwnerships;
 use App\Twitter\Domain\Resource\OwnershipCollection;
+use App\Twitter\Domain\Resource\OwnershipCollectionInterface;
 use App\Twitter\Infrastructure\Api\AccessToken\TokenChangeInterface;
 use App\Twitter\Infrastructure\DependencyInjection\Collection\OwnershipBatchCollectedEventRepositoryTrait;
+use App\Twitter\Infrastructure\Exception\InconsistentTokenRepository;
 use App\Twitter\Infrastructure\Exception\OverCapacityException;
 use App\Twitter\Infrastructure\Exception\UnavailableResourceException;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdAwareInterface;
 use App\Twitter\Infrastructure\Operation\Correlation\CorrelationIdInterface;
 use App\Twitter\Infrastructure\Api\Selector\MemberOwnershipsBatchSelector;
+use Doctrine\ORM\NonUniqueResultException;
 use Psr\Log\LoggerInterface;
 
 class OwnershipAccessor implements OwnershipAccessorInterface
@@ -43,6 +47,46 @@ class OwnershipAccessor implements OwnershipAccessorInterface
         $this->logger = $logger;
     }
 
+    /**
+     * @param ListSelectorInterface $selector
+     * @return OwnershipCollectionInterface
+     */
+    public function getMemberOwnerships(ListSelectorInterface $selector): OwnershipCollectionInterface {
+        $endpoint = $this->getOwnershipsEndpoint();
+        $this->accessor->guardAgainstApiLimit($endpoint);
+
+        $ownerships = $this->accessor->contactEndpoint(
+            strtr(
+                $endpoint,
+                [
+                    '{{ screenName }}' => $selector->screenName(),
+                    '{{ reverse }}'    => true,
+                    '{{ count }}'      => self::MAX_OWNERSHIPS,
+                    '{{ cursor }}'     => $selector->cursor(),
+                ]
+            )
+        );
+
+        return OwnershipCollection::fromArray(
+            $ownerships->lists,
+            $ownerships->next_cursor
+        );
+    }
+
+    private function getOwnershipsEndpoint(): string
+    {
+        return implode([
+            $this->accessor->getApiBaseUrl(),
+            self::API_ENDPOINT_OWNERSHIPS,
+            '.json?reverse={{ reverse }}',
+            '&screen_name={{ screenName }}' .
+            '&count={{ count }}&cursor={{ cursor }}'
+        ]);
+    }
+
+    /**
+     * @throws OverCapacityException
+     */
     public function getOwnershipsForMemberHavingScreenNameAndToken(
         AuthenticatedSelectorInterface $selector,
         MemberOwnerships $memberOwnership = null
@@ -74,7 +118,7 @@ class OwnershipAccessor implements OwnershipAccessorInterface
                 }
 
                 $ownershipCollection = $eventRepository->collectedOwnershipBatch(
-                    $this->accessor,
+                    $this,
                     new MemberOwnershipsBatchSelector(
                         $selector->screenName(),
                         (string) $nextPage,

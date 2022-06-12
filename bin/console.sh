@@ -1,5 +1,8 @@
 #!/usr/bin/env bash
 
+#
+# 2022-06-11 - Clean up
+#
 # 2019-11-10 - Notes about dependencies addition or removal
 #
 # ```
@@ -52,47 +55,30 @@
 
 function get_project_name() {
     local project_name
-    project_name='devobs'
+    project_name='wildcard'
 
     if [ -n "${PROJECT_NAME}" ]; then
         project_name="${PROJECT_NAME}"
     fi
 
+    if [ -z "${project_name}" ]; then
+
+        printf 'A %s is expected (%s).%s' 'non-empty string' 'project name' $'\n'
+
+        exit 1
+
+    fi
+
     echo "${project_name}"
 }
 
-function get_docker_network() {
-    echo "$(get_project_name)-network"
-}
-
-function create_network() {
-    local network
-    network="$(get_docker_network)"
-
-    local command
-    command="$(echo -n 'docker network create '"${network}"' \
-    --subnet=192.169.193.0/28 \
-    --ip-range=192.169.193.0/28 \
-    --gateway=192.169.193.1')"
-
-    /bin/bash -c "${command}"
-}
-
-function build_stack_images() {
-    docker-compose -f ./provisioning/containers/docker-compose.yml \
-    --project-name="$(get_project_name)" build
-}
-
 function stop_workers() {
-    local project_name
-    project_name=$(get_project_name)
-
     local symfony_environment
     symfony_environment="$(get_symfony_environment)"
 
     local script
     script='bin/console messenger:stop-workers -e prod'
-    command="docker-compose --project-name=${project_name} exec -T -e ${symfony_environment} worker ${script}"
+    command="docker compose exec -T -e ${symfony_environment} worker ${script}"
 
     echo '=> About to stop consumers'
     /bin/bash -c "${command}"
@@ -152,10 +138,10 @@ function consume_fetch_publication_messages {
     remove_exited_containers
 
     local rabbitmq_output_log
-    rabbitmq_output_log="./var/logs/rabbitmq.out.log"
+    rabbitmq_output_log="./var/log/rabbitmq.out.log"
 
     local rabbitmq_error_log
-    rabbitmq_error_log="./var/logs/rabbitmq.error.log"
+    rabbitmq_error_log="./var/log/rabbitmq.error.log"
 
     ensure_log_files_exist "${rabbitmq_output_log}" "${rabbitmq_error_log}"
     rabbitmq_output_log="${PROJECT_DIR}/${rabbitmq_output_log}"
@@ -177,17 +163,14 @@ function consume_fetch_publication_messages {
     local symfony_environment
     symfony_environment="$(get_symfony_environment)"
 
-    local project_name
-    project_name=$(get_project_name)
-
     local override_option
-    override_option=' -f ./docker-compose.yml'
-    if [ -e './docker-compose.override.yml' ];
+    override_option=' -f ./docker-compose.yaml'
+    if [ -e './docker-compose.override.yaml' ];
     then
-        override_option=' -f ./docker-compose.yml -f ./docker-compose.override.yml'
+        override_option=' -f ./docker-compose.yaml -f ./docker-compose.override.yaml'
     fi
 
-    command="docker-compose${override_option} --project-name=${project_name} run --rm --name ${SUPERVISOR_PROCESS_NAME} -T -e ${symfony_environment} worker ${SCRIPT}"
+    command="docker compose${override_option} run --rm --name ${SUPERVISOR_PROCESS_NAME} -T -e ${symfony_environment} worker ${SCRIPT}"
     echo 'Executing command: "'$command'"'
     echo 'Logging standard output of RabbitMQ messages consumption in '"${rabbitmq_output_log}"
     echo 'Logging standard error of RabbitMQ messages consumption in '"${rabbitmq_error_log}"
@@ -219,33 +202,6 @@ function get_project_dir {
     fi
 
     echo "${project_dir}"
-}
-
-# @see https://getcomposer.org/doc/articles/authentication-for-private-packages.md#github-oauth
-function install_php_dependencies {
-    local project_dir
-    project_dir="$(get_project_dir)"
-
-    local production_option
-    production_option=''
-    if [ -n "${APP_ENV}" ] && [ "${APP_ENV}" = 'prod' ];
-    then
-        production_option='--apcu-autoloader '
-    fi
-
-    if [ -z "${GITHUB_TOKEN}" ];
-    then
-        echo 'Please export a valid github token e.g.'
-        echo 'export GITHUB_TOKEN="__fill_me__"'
-        return 1
-    fi
-
-    local command
-    command=$(echo -n '/bin/bash -c "cd '"${project_dir}"' &&
-    source '"${project_dir}"'/bin/install-composer.sh &&
-    php '"${project_dir}"'/composer.phar config github-oauth.github.com '"${GITHUB_TOKEN}"' \
-    && '"${project_dir}"'/composer.phar install '"${production_option}"'--prefer-dist -n"')
-    echo "${command}" | make run-php
 }
 
 function remove_exited_containers() {
@@ -300,29 +256,38 @@ function run_php_script() {
         option_detached='-d '
     fi
 
-    local project_name=''
+    local project_name
     project_name="$(get_project_name)"
+
+    if [ $? -gt 0 ];
+    then
+        printf 'A %s is expected as %s ("%s").%s' 'A non-empty string' 'project name' 'PROJECT_NAME environment variable' $'\n' 1>&2
+        printf '%s%s' 'example:' $'\n' 1>&2
+        printf '%s%s' 'export PROJECT_NAME="worker.example.org"' '\n' 1>&2
+
+        return 1
+    fi
 
     local container_name
     container_name="$(echo "${project_name}-${script}" | sha256sum | awk '{print $1}')"
 
     local override_option
-    override_option=' -f ./docker-compose.yml'
-    if [ -e './provisioning/containers/docker-compose.override.yml' ];
+    override_option=' -f ./docker-compose.yaml'
+    if [ -e './provisioning/containers/docker-compose.override.yaml' ];
     then
-        override_option=' -f ./docker-compose.yml -f ./docker-compose.override.yml'
+        override_option=' -f ./docker-compose.yaml -f ./docker-compose.override.yaml'
     fi
 
     local command
     if [ -z "${interactive_mode}" ];
     then
         command="$(echo -n 'cd provisioning/containers && \
-        docker-compose --project-name='"${project_name}""${override_option}"' \
+        docker compose '"${override_option}"' \
         run -e '"${symfony_environment}"' -T --rm \
         --name='"${container_name}"' '"${option_detached}"'worker '"${script}")"
     else
         command="$(echo -n 'cd provisioning/containers && \
-        docker-compose --project-name='"${project_name}""${override_option}"' \
+        docker compose '"${override_option}"' \
         exec -e '"${symfony_environment}"' '"${option_detached}"'worker '"${script}")"
     fi
 
@@ -341,42 +306,29 @@ function run_php() {
 
     cd ./provisioning/containers || exit
 
-    local project_name=''
-    project_name="$(get_project_name)"
-
     local override_option
-    override_option=' -f ./docker-compose.yml'
-    if [ -e './docker-compose.override.yml' ];
+    override_option=' -f ./docker-compose.yaml'
+
+    if [ -e './docker-compose.override.yaml' ];
     then
-        override_option=' -f ./docker-compose.yml -f ./docker-compose.override.yml'
+        override_option=' -f ./docker-compose.yaml -f ./docker-compose.override.yaml'
     fi
 
     local command
-    command=$(echo -n 'docker-compose --project-name='"${project_name}""${override_option}"' exec -T worker '"${arguments}")
+    command=$(echo -n 'docker compose'"${override_option}"' exec -T worker '"${arguments}")
 
     echo 'About to execute '"${command}"
     /bin/bash -c "${command}"
 }
 
-function run_stack() {
-    ensure_blackfire_is_configured
-
-    cd provisioning/containers || exit
-
-    local project_name
-    project_name="$(get_project_name)"
-
-    docker-compose --project-name="${project_name}" up
-    cd ../..
-}
-
 function run_worker() {
     cd provisioning/containers || exit
 
-    local project_name
-    project_name="$(get_project_name)"
+    local project_files
+    project_files='-f ./docker-compose.yaml -f ./docker-compose.override.yaml'
 
-    docker-compose --project-name="${project_name}" up worker
+    /bin/bash -c "docker compose ${project_files} up worker"
+
     cd ../..
 }
 
@@ -417,16 +369,6 @@ function get_symfony_environment() {
     echo 'APP_ENV='"${symfony_env}"
 }
 
-function get_environment_option() {
-    local symfony_env='dev'
-    if [ -n "${SYMFONY_ENV}" ];
-    then
-        symfony_env="${SYMFONY_ENV}"
-    fi
-
-    echo ' APP_ENV='"${symfony_env}"
-}
-
 function before_running_command() {
     remove_exited_containers
 
@@ -443,10 +385,10 @@ function run_command {
     php_command=${1}
 
     local rabbitmq_output_log
-    rabbitmq_output_log="var/logs/rabbitmq.out.log"
+    rabbitmq_output_log="var/log/rabbitmq.out.log"
 
     local rabbitmq_error_log
-    rabbitmq_error_log="var/logs/rabbitmq.error.log"
+    rabbitmq_error_log="var/log/rabbitmq.error.log"
 
     local PROJECT_DIR
     PROJECT_DIR='.'
@@ -467,39 +409,6 @@ function run_command {
     echo 'Logging standard error of worker in '"${rabbitmq_error_log}"
 
     execute_command "${rabbitmq_output_log}" "${rabbitmq_error_log}"
-}
-
-function ensure_blackfire_is_configured() {
-    local working_directory
-    working_directory="$(pwd)"
-
-    cd ./provisioning/containers/apache/templates/blackfire || exit
-
-    if [ ! -e zz-blackfire.ini ];
-    then
-        cp zz-blackfire.ini{.dist,}
-        echo 'Copied "zz-blackfire.ini" configuration file'
-    else
-        echo '"zz-blackfire.ini" configuration file already exists'
-    fi
-
-    if [ ! -e .blackfire.ini ];
-    then
-        cp .blackfire.ini{.dist,}
-        echo 'Copied ".blackfire.ini" configuration file'
-    else
-        echo '".blackfire.ini" configuration file already exists'
-    fi
-
-    if [ ! -e agent ];
-    then
-        cp agent{.dist,}
-        echo 'Copied "agent" configuration file'
-    else
-        echo '"agent" configuration file already exists'
-    fi
-
-    cd "${working_directory}" || exit
 }
 
 function dispatch_fetch_publications_messages {
@@ -563,39 +472,6 @@ function run_php_unit_tests() {
     bin/phpunit -c ./phpunit.xml.dist --verbose --debug
 }
 
-function run_php_features_tests() {
-    bin/behat -c ./behat.yml
-}
-
-function restart_web_server() {
-    cd ./provisioning/containers || exit
-
-    local project_name
-    project_name="$(get_project_name)"
-
-    docker-compose --project-name="${project_name}" restart web
-}
-
-function install_local_ca_store() {
-    mkcert -install
-}
-
-function generate_development_tls_certificate_and_key() {
-    local destination
-    destination='./provisioning/containers/reverse-proxy/certificates'
-
-    local project_name
-    project_name="$(get_project_name)"
-
-    local domain_name
-    domain_name="api.${project_name}.me"
-
-    mkcert \
-      -cert-file="${destination}/${domain_name}.pem" \
-      -key-file="${destination}/${domain_name}-key.pem" \
-      "${domain_name}"
-}
-
 function create_test_database() {
   rm ./src/Twitter/Infrastructure/Database/Migrations/Version* -f
 
@@ -615,7 +491,6 @@ function load_production_fixtures() {
     ${API_TWITTER_USER_SECRET} \
     ${API_TWITTER_CONSUMER_KEY} \
     ${API_TWITTER_CONSUMER_SECRET} \
-    ${API_ACCESS_TOKEN} \
     -vvvv"
 
   run_php_script "${script}" 'interactive_mode'
@@ -634,10 +509,10 @@ function list_amqp_queues() {
 
     cd provisioning/containers || exit
 
-    local project_name
-    project_name="$(get_project_name)"
+    local project_files
+    project_files='-f ./docker-compose.yaml -f ./docker-compose.override.yaml'
 
-    /bin/bash -c "docker-compose --project-name=${project_name} exec messenger watch -n1 'rabbitmqctl list_queues -p ${rabbitmq_vhost}'"
+    /bin/bash -c "docker compose exec ${project_files} messenger watch -n1 'rabbitmqctl list_queues -p ${rabbitmq_vhost}'"
 }
 
 function get_rabbitmq_virtual_host() {
@@ -653,18 +528,18 @@ function purge_queues() {
 
     cd provisioning/containers || exit
 
-    local project_name
-    project_name="$(get_project_name)"
+    local project_files
+    project_files='-f ./docker-compose.yaml -f ./docker-compose.override.yaml'
 
-    /bin/bash -c "docker-compose --project-name=${project_name} exec -d messenger rabbitmqctl purge_queue publications -p ${rabbitmq_vhost}"
-    /bin/bash -c "docker-compose --project-name=${project_name} exec -d messenger rabbitmqctl purge_queue failures -p ${rabbitmq_vhost}"
+    /bin/bash -c "docker compose exec ${project_files} -d messenger rabbitmqctl purge_queue publications -p ${rabbitmq_vhost}"
+    /bin/bash -c "docker compose exec ${project_files} -d messenger rabbitmqctl purge_queue failures -p ${rabbitmq_vhost}"
 }
 
 function stop_workers() {
     cd provisioning/containers || exit
 
-    local project_name
-    project_name="$(get_project_name)"
+    local project_files
+    project_files='-f ./docker-compose.yaml -f ./docker-compose.override.yaml'
 
-    /bin/bash -c "docker-compose --project-name=${project_name} exec worker bin/console messenger:stop-workers"
+    /bin/bash -c "docker compose ${project_files} exec worker bin/console messenger:stop-workers"
 }

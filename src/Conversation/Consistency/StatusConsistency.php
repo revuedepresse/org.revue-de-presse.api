@@ -2,6 +2,7 @@
 
 namespace App\Conversation\Consistency;
 
+use Safe\Exceptions\JsonException;
 use function array_key_exists;
 use function Safe\json_decode;
 
@@ -15,7 +16,7 @@ class StatusConsistency
      * @param array  $status
      *
      * @return array
-     * @throws \Safe\Exceptions\JsonException
+     * @throws JsonException
      */
     public static function fillMissingStatusProps(
         string $json,

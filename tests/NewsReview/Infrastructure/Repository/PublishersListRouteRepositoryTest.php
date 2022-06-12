@@ -17,7 +17,7 @@ class PublishersListRouteRepositoryTest extends KernelTestCase
     private PublishersListRouteRepositoryInterface $repositoryUnderTest;
     private EntityManagerInterface $entityManager;
 
-    public function setUp()
+    public function setUp(): void
     {
         $kernel = static::bootKernel();
 
@@ -58,13 +58,11 @@ class PublishersListRouteRepositoryTest extends KernelTestCase
         self::assertArrayHasKey(0, $routes, 'There should be a first route matching the first publishers list.');
         self::assertArrayHasKey(1, $routes, 'There should be a second route matching the second publishers list.');
 
-        self::assertInternalType(
-            'array',
+        self::assertIsArray(
             $routes[0],
             'The first publishers list route should be represented as an array',
         );
-        self::assertInternalType(
-            'array',
+        self::assertIsArray(
             $routes[1],
             'The second publishers list route should be represented as an array',
         );

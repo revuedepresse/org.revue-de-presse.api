@@ -2,7 +2,6 @@ imports:
     - { resource: services/api.yml }
     - { resource: services/curation.yml }
     - { resource: services/console.yml }
-    - { resource: services/controller.yml }
     - { resource: services/mapping.yml }
     - { resource: services/membership.yml }
     - { resource: services/member_subscribee.yml }
@@ -11,7 +10,6 @@ imports:
     - { resource: services/operation.yml }
     - { resource: services/repository.yml }
     - { resource: services/persistence.yml }
-    - { resource: services/security.yml }
     - { resource: services/worker.yml }
 
 services:
@@ -131,7 +129,7 @@ services:
             - '@App\Twitter\Infrastructure\Translation\Translator'
         calls:
             - [ 'setModerator',                              [ '@App\Twitter\Infrastructure\Api\Moderator\ApiLimitModerator' ] ]
-            - [ 'setOwnershipAccessor',                      [ '@App\Twitter\Infrastructure\Api\Accessor\OwnershipAccessor' ] ]
+            - [ 'setOwnershipAccessor',                      [ '@App\Twitter\Domain\Api\Accessor\OwnershipAccessorInterface' ] ]
             - [ 'setOwnershipBatchCollectedEventRepository', [ '@App\Twitter\Infrastructure\Curation\Repository\OwnershipBatchCollectedEventRepository' ] ]
 
     App\Twitter\Infrastructure\Api\UnavailableResourceHandler:
@@ -190,20 +188,8 @@ services:
             - [ 'setPublicationBatchCollectedEventRepository',  [ '@App\Twitter\Infrastructure\Curation\Repository\PublicationBatchCollectedEventRepository' ] ]
         public: true
 
-    app.cache.redis:
-        class: '%redis_cache.class%'
-        arguments:
-            - "%redis_host%"
-            - "%redis_port%"
-
-    App\Twitter\Infrastructure\Cache\RedisCache: '@app.cache.redis'
-
-    app.authenticator:
-        class: 'App\Membership\Infrastructure\Security\Authentication\Authenticator'
-        properties:
-            authenticationTokenRepository:  '@repository.authentication_token'
-            authorizedIss:                  '%authorized_iss%'
-            validAudience:                  '%valid_audience%'
+    App\Twitter\Domain\Api\Accessor\StatusAccessorInterface:
+        '@App\Twitter\Infrastructure\Api\Accessor\StatusAccessor'
 
     app.event_subscriber.console:
         class: 'App\Twitter\Infrastructure\Console\EventSubscriber\ConsoleEventsSubscriber'
@@ -253,16 +239,12 @@ services:
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
     monolog_channels:
+        - 'deprecation' # Deprecations are logged in the dedicated "deprecation" channel when it exists
         - 'twitter_api'
         - 'development'
         - 'membership'
 
-    redis_cache.class:                                                  'App\Twitter\Infrastructure\Cache\RedisCache'
-
     weaving_the_web_twitter.api_host:                             'api.twitter.com'
-
-    weaving_the_web_twitter.authenticate_application.class:       'App\Twitter\Infrastructure\Console\AuthenticateApplicationCommand'
-    weaving_the_web_twitter.authentication_uri:                   '/oauth2/token'
 
     twitter_api.consumer_key:                                     '%env(resolve:API_TWITTER_CONSUMER_KEY)%'
     twitter_api.consumer_secret:                                  '%env(resolve:API_TWITTER_CONSUMER_SECRET)%'
@@ -277,15 +259,4 @@ parameters:
 
     weaving_the_web_twitter.version:                              '%env(resolve:API_TWITTER_VERSION)%'
 
-    allowed.origin:                                               '%env(resolve:ALLOWED_ORIGIN)%'
-
     publishers_list_default:                                      '%env(resolve:PUBLISHERS_LIST_DEFAULT)%'
-
-    admin_route_name:                                             '%env(resolve:ADMIN_ROUTE_NAME)%'
-
-    redis_host:                                                   '%env(resolve:REDIS_HOST)%'
-    redis_port:                                                   '%env(resolve:REDIS_PORT)%'
-
-    valid_audience:                                               '%env(resolve:VALID_AUDIENCE)%'
-
-    authorized_iss:                                               '%env(resolve:AUTHORIZED_ISS)%'

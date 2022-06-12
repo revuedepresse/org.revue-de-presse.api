@@ -12,6 +12,7 @@ use App\Membership\Infrastructure\Entity\AggregateSubscription;
 use App\Membership\Infrastructure\Repository\AggregateSubscriptionRepository;
 use App\Membership\Infrastructure\Repository\NetworkRepository;
 use App\Twitter\Domain\Api\Accessor\ApiAccessorInterface;
+use App\Twitter\Domain\Api\Accessor\OwnershipAccessorInterface;
 use App\Twitter\Domain\Membership\Repository\MemberRepositoryInterface;
 use App\Twitter\Domain\Resource\MemberIdentity;
 use App\Twitter\Domain\Resource\PublishersList;
@@ -44,23 +45,26 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
 
     private const OPTION_LIST_RESTRICTION = 'list-restriction';
 
-    public ApiAccessorInterface $accessor;
+    private ApiAccessorInterface $accessor;
+
+    private OwnershipAccessorInterface $ownershipAccessor;
 
     public ?string $listRestriction = null;
 
-    public AggregateSubscriptionRepository $publishersListSubscriptionRepository;
+    private AggregateSubscriptionRepository $publishersListSubscriptionRepository;
 
-    public MemberAggregateSubscriptionRepository $memberPublishersListSubscriptionRepository;
+    private MemberAggregateSubscriptionRepository $memberPublishersListSubscriptionRepository;
 
-    public NetworkRepository $networkRepository;
+    private NetworkRepository $networkRepository;
 
-    public MemberRepository $memberRepository;
+    private MemberRepository $memberRepository;
 
-    public LoggerInterface $logger;
+    private LoggerInterface $logger;
 
     public function __construct(
         string $name,
         ApiAccessorInterface $accessor,
+        OwnershipAccessorInterface $ownershipAccessor,
         PublishersListSubscriptionRepositoryInterface $publishersListSubscriptionRepository,
         MemberPublishersListSubscriptionRepositoryInterface  $memberPublishersListSubscriptionRepository,
         NetworkRepositoryInterface $networkRepository,
@@ -68,10 +72,13 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
         LoggerInterface $logger
     ) {
         $this->accessor = $accessor;
-        $this->publishersListSubscriptionRepository = $publishersListSubscriptionRepository;
+        $this->ownershipAccessor = $ownershipAccessor;
+
+        $this->memberRepository = $memberRepository;
         $this->memberPublishersListSubscriptionRepository = $memberPublishersListSubscriptionRepository;
         $this->networkRepository = $networkRepository;
-        $this->memberRepository = $memberRepository;
+        $this->publishersListSubscriptionRepository = $publishersListSubscriptionRepository;
+
         $this->logger = $logger;
 
         parent::__construct($name);
@@ -113,7 +120,7 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
         do {
             $eventRepository   = $this->ownershipBatchCollectedEventRepository;
             $listSubscriptions = $eventRepository->collectedOwnershipBatch(
-                $this->accessor,
+                $this->ownershipAccessor,
                 new MemberOwnershipsBatchSelector(
                     $member->twitterScreenName(),
                     (string) $nextPage,

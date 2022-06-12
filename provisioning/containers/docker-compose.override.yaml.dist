@@ -1,0 +1,26 @@
+x-vol: &shared-volumes
+  volumes:
+    - '../../:/var/www/worker.snapshots.fr'
+
+services:
+
+  app:
+    <<: *shared-volumes
+
+  amqp:
+    volumes:
+      - ../volumes/amqp:/var/lib/rabbitmq
+
+  database:
+    ports:
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - ../volumes/database:/var/lib/database/data
+
+  worker:
+    <<: *shared-volumes
+
+networks:
+  default:
+    # [Use a pre-existing network](https://docs.docker.com/compose/networking/#use-a-pre-existing-network)
+    name: # external-network-name
