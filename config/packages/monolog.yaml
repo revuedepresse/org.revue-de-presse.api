@@ -11,8 +11,7 @@ parameters:
         formatter: monolog.formatter.json
 
 monolog:
-    channels:
-        - deprecation # Deprecations are logged in the dedicated "deprecation" channel when it exists
+    channels: "%monolog_channels%"
 
 when@dev:
     monolog:
@@ -72,5 +71,3 @@ when@prod:
                 handler: deprecation
                 max_level: info
                 channels: ["php"]
-
-        channels: "%monolog_channels%"

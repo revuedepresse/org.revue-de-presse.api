@@ -239,6 +239,7 @@ services:
 # https://symfony.com/doc/current/best_practices/configuration.html#application-related-configuration
 parameters:
     monolog_channels:
+        - 'deprecation' # Deprecations are logged in the dedicated "deprecation" channel when it exists
         - 'twitter_api'
         - 'development'
         - 'membership'
