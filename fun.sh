@@ -272,6 +272,7 @@ docker compose \
       --file=./provisioning/containers/docker-compose.override.yaml \
 			up \
 			--detach \
+			--force-recreate \
 			database
 SCRIPT
 )
