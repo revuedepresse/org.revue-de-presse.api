@@ -1,4 +1,4 @@
-name: worker.snapshots.fr
+name: ci.worker.snapshots.fr
 
 on:
   push:
