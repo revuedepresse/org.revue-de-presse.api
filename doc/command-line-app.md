@@ -9,4 +9,3 @@ php ./bin/console devobs:import-publishers-lists --list-restriction="${LIST_NAME
 ```
 
 List created by [Renee Marie Parilak Teate](https://twitter.com/BecomingDataSci)  
-See [Connecting to STEM Diversity on Twitter - Scientific American Blog Network](https://blogs.scientificamerican.com/urban-scientist/connecting-to-stem-diversity-on-twitter/)
