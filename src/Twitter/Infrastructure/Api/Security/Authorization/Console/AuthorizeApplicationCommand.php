@@ -54,7 +54,7 @@ class AuthorizeApplicationCommand extends AbstractCommand implements SignalableC
     protected function configure(): void
     {
         $this->setDescription(
-                'Authorize Twitter application accesssing Twitter API on behalf of member.'
+                'Authorize Twitter application accessing Twitter API on behalf of member.'
             );
     }
 
