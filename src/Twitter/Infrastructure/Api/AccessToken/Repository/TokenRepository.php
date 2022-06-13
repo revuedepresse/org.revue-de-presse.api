@@ -255,7 +255,7 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
      */
     public function persistBearerToken($applicationToken, $accessToken)
     {
-        $tokenRepository = $this->getEntityManager()->getRepository('Api:TokenType');
+        $tokenRepository = $this->getEntityManager()->getRepository(TokenType::class);
         $tokenType = $tokenRepository->findOneBy(['name' => TokenType::APPLICATION]);
 
         $token = new Token();
@@ -294,7 +294,7 @@ class TokenRepository extends ServiceEntityRepository implements TokenRepository
     {
         $queryBuilder = $this->createQueryBuilder('t');
 
-        $tokenRepository = $this->getEntityManager()->getRepository('Api:TokenType');
+        $tokenRepository = $this->getEntityManager()->getRepository(TokenType::class);
         $tokenType = $tokenRepository->findOneBy(['name' => TokenType::USER]);
 
         $queryBuilder->andWhere('t.type = :type');
