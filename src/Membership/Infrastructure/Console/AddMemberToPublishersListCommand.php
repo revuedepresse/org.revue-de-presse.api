@@ -175,8 +175,14 @@ class AddMemberToPublishersListCommand extends AbstractCommand
     private function ensureMembersExist($memberList): array
     {
         return array_map(
-            function (string $memberName) {
-                $member = $this->memberRepository->findOneBy(['twitter_username' => $memberName]);
+            function (string $memberIdentifier) {
+
+                if (is_numeric($memberIdentifier)) {
+                    $member = $this->memberRepository->findOneBy(['twitter_username' => $memberIdentifier]);
+                } else {
+                    $member = $this->memberRepository->findOneBy(['twitter_username' => $memberIdentifier]);
+                }
+
                 if (!($member instanceof MemberInterface)) {
                     $member = $this->statusAccessor->ensureMemberHavingNameExists($memberName);
                 }

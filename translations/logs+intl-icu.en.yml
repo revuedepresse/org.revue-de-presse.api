@@ -5,7 +5,7 @@ logs.info.calls_remaining: >-
         =1    {{remaining_calls} is remaining for token "{identifier}" and endpoint {endpoint}.}
         other {{remaining_calls} calls are remaining for token "{identifier}" and endpoint {endpoint}.}
     }
-logs.info.empty_error_code: 'Response with empty error code received, assuming rate limit has been exceeded for token starting with "{oauth token start}".'
+logs.info.empty_error_code: 'Response with empty error code received, assuming rate limit has been exceeded for token starting with "{oauth_token_start}".'
 
 logs.info.status_discovered: >-
     {count, plural,

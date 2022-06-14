@@ -4,6 +4,8 @@ namespace App\Twitter\Domain\Api\Accessor;
 
 interface TwitterApiEndpointsAwareInterface
 {
+    public const API_ENDPOINT_GET_MEMBERS_LISTS = '/lists/members';
+
     public const API_ENDPOINT_MEMBERS_LISTS = '/lists/members/create_all';
 
     public const API_ENDPOINT_REMOVE_MEMBERS_FROM_LISTS = '/lists/members/destroy_all';
