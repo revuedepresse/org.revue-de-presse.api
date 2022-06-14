@@ -178,13 +178,13 @@ class AddMemberToPublishersListCommand extends AbstractCommand
             function (string $memberIdentifier) {
 
                 if (is_numeric($memberIdentifier)) {
-                    $member = $this->memberRepository->findOneBy(['twitter_username' => $memberIdentifier]);
+                    $member = $this->memberRepository->findOneBy(['twitterID' => $memberIdentifier]);
                 } else {
                     $member = $this->memberRepository->findOneBy(['twitter_username' => $memberIdentifier]);
                 }
 
                 if (!($member instanceof MemberInterface)) {
-                    $member = $this->statusAccessor->ensureMemberHavingNameExists($memberName);
+                    $member = $this->statusAccessor->ensureMemberHavingNameExists($memberIdentifier);
                 }
 
                 return $member;
