@@ -204,6 +204,7 @@ class Accessor implements ApiAccessorInterface, TwitterApiEndpointsAwareInterfac
             strpos($endpoint, 'create.json') !== false
             || strpos($endpoint, 'create_all.json') !== false
             || strpos($endpoint, 'destroy.json') !== false
+            || strpos($endpoint, 'destroy_all.json') !== false
         ) {
             return $this->twitterClient->post($path, $parameters);
         }
