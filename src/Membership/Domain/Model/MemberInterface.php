@@ -23,6 +23,8 @@ interface MemberInterface extends UserInterface
 
     public function twitterId(): ?string;
 
+    public function getUserIdentifier(): string;
+
     public function setTwitterScreenName(string $twitterScreenName): MemberInterface;
 
     public function twitterScreenName(): ?string;

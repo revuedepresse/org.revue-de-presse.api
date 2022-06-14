@@ -12,7 +12,7 @@ class CorrelationIdType extends GuidType
 {
     const NAME = 'correlation_id';
 
-    public function convertToPHPValue($value, AbstractPlatform $platform)
+    public function convertToPHPValue($value, AbstractPlatform $platform): mixed
     {
         if ($value === null || $value === '') {
             return null;
@@ -31,7 +31,7 @@ class CorrelationIdType extends GuidType
         return $uuid;
     }
 
-    public function convertToDatabaseValue($value, AbstractPlatform $platform)
+    public function convertToDatabaseValue($value, AbstractPlatform $platform): mixed
     {
         if ($value === null || $value === '') {
             return null;
@@ -47,7 +47,7 @@ class CorrelationIdType extends GuidType
         throw ConversionException::conversionFailed($value, static::NAME);
     }
 
-    public function getName()
+    public function getName(): string
     {
         return static::NAME;
     }

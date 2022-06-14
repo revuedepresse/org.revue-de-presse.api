@@ -275,6 +275,11 @@ class Member extends MemberModel implements JsonEncodingAwareInterface
         $this->tokens = new ArrayCollection();
     }
 
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->twitterId();
+    }
+
     /**
      * @return false|string
      */

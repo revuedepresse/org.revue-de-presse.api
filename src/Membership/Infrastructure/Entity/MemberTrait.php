@@ -97,6 +97,11 @@ trait MemberTrait
         return '';
     }
 
+    public function getUserIdentifier(): string
+    {
+        return $this->twitterId();
+    }
+
     /**
      * @deprecated
      *

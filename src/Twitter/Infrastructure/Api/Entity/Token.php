@@ -225,7 +225,7 @@ class Token implements TokenInterface
         return $this;
     }
 
-    public function getFrozenUntil(): \DateTimeInterface
+    public function getFrozenUntil(): ?\DateTimeInterface
     {
         return $this->frozenUntil;
     }
