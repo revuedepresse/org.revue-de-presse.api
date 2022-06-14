@@ -207,7 +207,7 @@ class AddMemberToPublishersListCommand extends AbstractCommand
             array_walk(
                 $subscriptions,
                 static function (AggregateSubscription $subscription) use (&$memberList) {
-                    $memberName = $subscription->subscription->twitterScreenName();
+                    $memberName = $subscription->subscription->twitterId();
                     $memberList[] = $memberName;
                 }
             );
