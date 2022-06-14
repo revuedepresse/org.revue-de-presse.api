@@ -26,9 +26,16 @@ class MembersListAccessor implements TwitterApiEndpointsAwareInterface, MembersL
 
             while (!empty($partition)) {
                 $members = array_pop($partition);
-                $endpoint = $this->getAddMembersToListEndpoint() .
-                    "screen_name=" . implode(',', $members) .
-                    '&list_id=' . $listId;
+
+                if (array_key_exists(0, $members) && is_numeric($members[0])) {
+                    $endpoint = $this->getAddMembersToListEndpoint() .
+                        "user_id=" . implode(',', $members) .
+                        '&list_id=' . $listId;
+                } else {
+                    $endpoint = $this->getAddMembersToListEndpoint() .
+                        "screen_name=" . implode(',', $members) .
+                        '&list_id=' . $listId;
+                }
 
                 $list = $this->accessor->contactEndpoint($endpoint);
             }
@@ -36,9 +43,15 @@ class MembersListAccessor implements TwitterApiEndpointsAwareInterface, MembersL
             return $list;
         }
 
-        $endpoint = $this->getAddMembersToListEndpoint() .
-            "screen_name=" . implode(',', $members) .
-            '&list_id=' . $listId;
+        if (array_key_exists(0, $members) && is_numeric($members[0])) {
+            $endpoint = $this->getAddMembersToListEndpoint() .
+                "user_id=" . implode(',', $members) .
+                '&list_id=' . $listId;
+        } else {
+            $endpoint = $this->getAddMembersToListEndpoint() .
+                "screen_name=" . implode(',', $members) .
+                '&list_id=' . $listId;
+        }
 
         return $this->accessor->contactEndpoint($endpoint);
     }
