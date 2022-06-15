@@ -198,17 +198,38 @@ class Accessor implements ApiAccessorInterface, TwitterApiEndpointsAwareInterfac
         array $parameters = []
     ) {
         $path = $this->reducePath($endpoint);
+
+        $endpointContainsCreateAll = strpos($endpoint, 'create_all.json') !== false;
+        $endpointContainsListsMembers = strpos($endpoint, 'lists/members.json') !== false;
+
         $parameters = $this->reduceParameters($endpoint, $parameters);
 
         if (
-            strpos($endpoint, 'create.json') !== false
-            || strpos($endpoint, 'create_all.json') !== false
+            $endpointContainsCreateAll
+            || strpos($endpoint, 'create.json') !== false
             || strpos($endpoint, 'destroy.json') !== false
+            || strpos($endpoint, 'destroy_all.json') !== false
         ) {
-            return $this->twitterClient->post($path, $parameters);
+            $response = $this->twitterClient->post($path, $parameters);
+
+            if ($endpointContainsCreateAll) {
+                $this->twitterApiLogger->info('sent POST request to "lists/members/create_all" route',
+                    ['params' => $parameters, 'path' => $path, 'response' => $response]
+                );
+            }
+
+            return $response;
         }
 
-        return $this->twitterClient->get($path, $parameters);
+        $response = $this->twitterClient->get($path, $parameters);
+
+        if ($endpointContainsListsMembers) {
+            $this->twitterApiLogger->info('sent GET request to "lists/members" route',
+                ['params' => $parameters, 'path' => $path, 'response' => $response]
+            );
+        }
+
+        return $response;
     }
 
     /**
@@ -754,7 +775,7 @@ class Accessor implements ApiAccessorInterface, TwitterApiEndpointsAwareInterfac
         if ($exception->getCode() === 0) {
             $emptyErrorCodeMessage   = $this->translator->trans(
                 'logs.info.empty_error_code',
-                ['oauth token start' => $this->takeFirstTokenCharacters($token)],
+                ['oauth_token_start' => $this->takeFirstTokenCharacters($token)],
                 'logs'
             );
             $emptyErrorCodeException = EmptyErrorCodeException::encounteredWhenUsingToken(

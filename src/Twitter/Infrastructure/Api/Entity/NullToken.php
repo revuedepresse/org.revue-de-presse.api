@@ -47,7 +47,7 @@ class NullToken implements TokenInterface
         return !$this->isFrozen();
     }
 
-    public function getFrozenUntil(): \DateTimeInterface
+    public function getFrozenUntil(): ?\DateTimeInterface
     {
         return $this->nextFreezeEndsAt();
     }
