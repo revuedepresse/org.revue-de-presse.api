@@ -115,7 +115,7 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
         TokenInterface $token,
         PublishersList $list
     ): void {
-        $this->skipUnrestrictedMember($memberIdentity, $strategy);
+        $this->isSkippingMemberDictatedByStrategy($memberIdentity, $strategy);
 
         $member = $this->memberProfileAccessor->getMemberByIdentity(
             $memberIdentity
@@ -146,7 +146,7 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
      *
      * @throws SkippableMemberException
      */
-    private function skipUnrestrictedMember(
+    private function isSkippingMemberDictatedByStrategy(
         MemberIdentity $memberIdentity,
         PublicationStrategyInterface $strategy
     ): void {
