@@ -1,6 +1,6 @@
 # snapshots.fr worker
 
-![wildcard.snapshots.fr continuous integration](https://github.com/thierrymarianne/wildcard.snapshots.fr/actions/workflows/continuous-integration.yml/badge.svg)
+![worker.snapshots.fr continuous integration](https://github.com/thierrymarianne/snapshots.fr/actions/workflows/continuous-integration.yml/badge.svg)
 
 Worker collecting publications from social media (Twitter) and [public lists](https://help.twitter.com/en/using-twitter/twitter-lists).
 
