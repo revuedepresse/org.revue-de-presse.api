@@ -505,8 +505,8 @@ function purge_queues() {
     local project_files
     project_files='-f ./docker-compose.yaml -f ./docker-compose.override.yaml'
 
-    /bin/bash -c "docker compose exec ${project_files} -d messenger rabbitmqctl purge_queue publications -p ${rabbitmq_vhost}"
-    /bin/bash -c "docker compose exec ${project_files} -d messenger rabbitmqctl purge_queue failures -p ${rabbitmq_vhost}"
+    /bin/bash -c "docker compose exec ${project_files} -d amqp rabbitmqctl purge_queue publications -p ${rabbitmq_vhost}"
+    /bin/bash -c "docker compose exec ${project_files} -d amqp rabbitmqctl purge_queue failures -p ${rabbitmq_vhost}"
 }
 
 function stop_workers() {
