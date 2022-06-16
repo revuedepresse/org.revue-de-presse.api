@@ -376,7 +376,7 @@ function dispatch_fetch_publications_messages {
     if [ -n "${in_priority}" ];
     then
 
-        priority_option='--priority_to_aggregates '
+        priority_option=' --priority_to_aggregates '
 
     fi
 
@@ -386,25 +386,28 @@ function dispatch_fetch_publications_messages {
     if [ -n "${QUERY_RESTRICTION}" ];
     then
 
-        query_restriction='--query_restriction='"${QUERY_RESTRICTION}"
+        query_restriction=' --query_restriction='"${QUERY_RESTRICTION}"
+
+    fi
+
+    if [ -z "${list_name}" ] && [ -z "${multiple_lists}" ];
+    then
+
+        printf 'A %s is expected as %s ("%s" environment variable).%s' 'non-empty string' 'a list' 'list_name' $'\n' 1>&2
+        printf 'or%s' $'\n'  1>&2
+        printf 'A %s is expected as %s ("%s" environment variable).%s' 'non-empty string' 'comma-separated lists' 'multiple_lists' $'\n' 1>&2
+
+        return 1;
 
     fi
 
     local list_option
-    list_option=''
+    list_option=' --list='"'${list_name}'"
 
-    if [ -n "${list_name}" ];
+    if [ -n "${multiple_lists}" ];
     then
 
-        local list_option
-        list_option='--list='"'${list_name}'"
-
-        if [ -n "${multiple_lists}" ];
-        then
-
-            list_option='--lists='"'${multiple_lists}'"
-
-        fi
+        list_option=' --lists='"'${multiple_lists}'"
 
     fi
 
@@ -417,14 +420,20 @@ function dispatch_fetch_publications_messages {
     fi
 
     local arguments
-    arguments="${priority_option}"' '"${list_option}"' '"${query_restriction}"' '"${username}"
+    arguments="${priority_option}${list_option}${query_restriction} ${username}"
     arguments="${arguments}${cursor_argument}"
 
     local cmd
-    cmd="bin/console devobs:dispatch-messages-to-fetch-member-statuses ${arguments}"
+    cmd="bin/console devobs:dispatch-messages-to-fetch-member-statuses${arguments}"
 
-    echo 'About to run command:'
-    echo '"'"${cmd}"'"'
+    if [ -n "${DRY_MODE}" ];
+    then
+        printf '%s%s' 'About to run command:' $'\n' 1>&2
+        printf '%s%s' '"'"${cmd}"'"' $'\n' 1>&2
+    else
+        printf '%s%s' "${cmd}" $'\n'
+
+    fi
 }
 
 function run_php_unit_tests() {
