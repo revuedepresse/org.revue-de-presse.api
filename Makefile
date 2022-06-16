@@ -1,6 +1,6 @@
 SHELL:=/bin/bash
 
-.PHONY: help build clean install restart start stop test
+.PHONY: doc build clean help install restart start stop test
 
 .PHONY: clear-app-cache
 
@@ -13,7 +13,7 @@ SHELL:=/bin/bash
 WORKER ?= 'worker.example.org'
 TMP_DIR ?= '/tmp/tmp_${WORKER}'
 
-help:
+help: doc
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
 build: ## Build worker image
@@ -30,6 +30,9 @@ consume-fetch-publication-messages: ## Consume AMQP Fetch publication messages
 
 dispatch-fetch-publications-messages: ## Dispatch AMQP Fetch publications messages
 	@/bin/bash -c 'source ./bin/console.sh && dispatch_fetch_publications_messages'
+
+doc:
+	@command -v bat && bat ./doc/commands.md || cat ./doc/commands.md
 
 install: build ## Install requirements
 	@/bin/bash -c 'source fun.sh && install'
