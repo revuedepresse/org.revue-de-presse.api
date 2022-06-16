@@ -17,6 +17,9 @@ services:
     volumes:
       - ../volumes/database:/var/lib/database/data
 
+  process-manager:
+    <<: *shared-volumes
+
   worker:
     <<: *shared-volumes
 

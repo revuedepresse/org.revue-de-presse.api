@@ -90,6 +90,7 @@ function build() {
         --build-arg "WORKER_GID=${WORKER_GID}" \
         --build-arg "WORKER=${WORKER}" \
         app \
+        process-manager \
         worker
 } >> ./var/log/build.log 2>> ./var/log/build.error.log
 
