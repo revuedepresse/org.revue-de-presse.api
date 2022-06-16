@@ -94,8 +94,9 @@ class ImportMemberPublishersListsCommand extends AbstractCommand
              )
              ->addOption(
                  self::OPTION_LIST_RESTRICTION,
-                 'lr',
-                 InputOption::VALUE_OPTIONAL
+                 'r',
+                 InputOption::VALUE_OPTIONAL,
+                 'Restrict list import to single list'
              )
              ->setDescription('Import publishers list');
     }
