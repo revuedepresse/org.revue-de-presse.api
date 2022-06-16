@@ -72,18 +72,6 @@ function get_project_name() {
     echo "${project_name}"
 }
 
-function stop_workers() {
-    local symfony_environment
-    symfony_environment="$(get_symfony_environment)"
-
-    local script
-    script='bin/console messenger:stop-workers -e prod'
-    command="docker compose exec -T -e ${symfony_environment} worker ${script}"
-
-    echo '=> About to stop consumers'
-    /bin/bash -c "${command}"
-}
-
 function consume_fetch_publication_messages {
     local command_suffix
     command_suffix="${1}"
