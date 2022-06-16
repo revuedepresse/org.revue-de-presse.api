@@ -14,6 +14,8 @@ function _set_up_configuration_files() {
         touch ./.env
     fi
 
+    validate_docker_compose_configuration
+
     source ./.env.local
 } >> ./var/log/build.log 2>> ./var/log/build.error.log
 
@@ -52,8 +54,6 @@ function build() {
     local WORKER_GID
 
     _set_up_configuration_files
-
-    validate_docker_compose_configuration
 
     if [ -z "${WORKER}" ];
     then
