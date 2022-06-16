@@ -37,19 +37,9 @@ class PublicationStrategy implements PublicationStrategyInterface, CorrelationId
 
     private string $screenName;
 
-    private bool $weightedAggregates = false;
-
     public function __construct(CorrelationIdInterface $correlationId)
     {
         $this->correlationId = $correlationId;
-    }
-
-    /**
-     * @return bool
-     */
-    public function allListsAreEquivalent(): bool
-    {
-        return !$this->shouldPrioritizeLists();
     }
 
     /**
@@ -199,14 +189,6 @@ class PublicationStrategy implements PublicationStrategyInterface, CorrelationId
     public function shouldIncludeOwner(): bool
     {
         return $this->includeOwner;
-    }
-
-    /**
-     * @return bool
-     */
-    public function shouldPrioritizeLists(): bool
-    {
-        return $this->weightedAggregates;
     }
 
     /**

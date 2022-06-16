@@ -30,7 +30,6 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
     private const OPTION_MEMBER_RESTRICTION     = PublicationStrategyInterface::RULE_MEMBER_RESTRICTION;
     private const OPTION_INCLUDE_OWNER          = PublicationStrategyInterface::RULE_INCLUDE_OWNER;
     private const OPTION_IGNORE_WHISPERS        = PublicationStrategyInterface::RULE_IGNORE_WHISPERS;
-    private const OPTION_PRIORITY_TO_AGGREGATES = PublicationStrategyInterface::RULE_PRIORITY_TO_AGGREGATES;
     private const OPTION_LISTS                  = PublicationStrategyInterface::RULE_LISTS;
     private const OPTION_CURSOR                 = PublicationStrategyInterface::RULE_CURSOR;
 
@@ -68,12 +67,6 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
                 'l',
                 InputOption::VALUE_OPTIONAL,
                 'List to which publication of messages is restricted to'
-            )
-            ->addOption(
-                self::OPTION_PRIORITY_TO_AGGREGATES,
-                'pa',
-                InputOption::VALUE_NONE,
-                'Publish messages the priority queue for visible aggregates'
             )
             ->addOption(
                 self::OPTION_CURSOR,

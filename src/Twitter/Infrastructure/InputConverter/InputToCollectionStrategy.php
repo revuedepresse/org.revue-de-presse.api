@@ -24,7 +24,6 @@ class InputToCollectionStrategy
         self::listRestriction($input, $strategy);
         self::listCollectionRestriction($input, $strategy);
         self::collectionSchedule($input, $strategy);
-        self::aggregatePriority($input, $strategy);
         self::memberRestriction($input, $strategy);
         self::ignoreWhispers($input, $strategy);
         self::includeOwner($input, $strategy);
@@ -102,22 +101,6 @@ class InputToCollectionStrategy
             $strategy->willCollectPublicationsPreceding(
                 $input->getOption(PublicationStrategyInterface::RULE_BEFORE)
             );
-        }
-    }
-
-    /**
-     * @param InputInterface               $input
-     * @param PublicationStrategyInterface $strategy
-     */
-    private static function aggregatePriority(
-        InputInterface $input,
-        PublicationStrategyInterface $strategy
-    ): void {
-        if (
-            $input->hasOption(PublicationStrategyInterface::RULE_PRIORITY_TO_AGGREGATES)
-            && $input->getOption(PublicationStrategyInterface::RULE_PRIORITY_TO_AGGREGATES)
-        ) {
-            $strategy->willPrioritizeAggregates($input->getOption(PublicationStrategyInterface::RULE_PRIORITY_TO_AGGREGATES));
         }
     }
 
