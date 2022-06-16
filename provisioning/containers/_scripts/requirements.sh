@@ -139,18 +139,6 @@ function install_php_extensions() {
     make install
 }
 
-function install_service_requirements() {
-    install_system_packages
-    add_system_user_group
-    install_php_extensions
-    clear_package_management_system_cache
-
-    mkdir \
-        --verbose \
-        --parents \
-        "/var/www/${WORKER}"
-}
-
 function install_system_packages() {
     # Update package source repositories
     apt-get update
