@@ -150,7 +150,7 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
         MemberIdentity $memberIdentity,
         PublicationStrategyInterface $strategy
     ): void {
-        if ($strategy->restrictDispatchToSpecificMember($memberIdentity)) {
+        if ($strategy->isSingleMemberAmqpMessagePublicationStrategyActive($memberIdentity)) {
             throw new SkippableMemberException(
                 sprintf(
                     'Skipping "%s" as member restriction applies',

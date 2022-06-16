@@ -153,7 +153,7 @@ class PublicationStrategy implements PublicationStrategyInterface, CorrelationId
      *
      * @return bool
      */
-    public function restrictDispatchToSpecificMember(MemberIdentity $memberIdentity): bool
+    public function isSingleMemberAmqpMessagePublicationStrategyActive(MemberIdentity $memberIdentity): bool
     {
         if ($this->noMemberRestriction()) {
             return false;
