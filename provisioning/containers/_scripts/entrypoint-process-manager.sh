@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -Eeo pipefail
 
-source /scripts/log.sh
+source '/scripts/requirements.sh'
 
 function dockerize() {
     create_log_files_when_non_existing "${WORKER}"
