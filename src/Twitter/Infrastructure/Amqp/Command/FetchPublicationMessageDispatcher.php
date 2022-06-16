@@ -41,9 +41,6 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
     use PublicationMessageDispatcherTrait;
     use TranslatorTrait;
 
-    /**
-     * @var PublicationStrategyInterface
-     */
     private PublicationStrategyInterface $collectionStrategy;
 
     public function configure()
