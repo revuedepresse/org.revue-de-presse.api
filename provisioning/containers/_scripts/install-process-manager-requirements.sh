@@ -31,7 +31,7 @@ function install_process_manager() {
     pm2 install pm2-logrotate
 }
 
-function install_dependencies() {
+function install_process_manager_requirements() {
     install_system_packages
     add_system_user_group
     create_log_files_when_non_existing "${WORKER}"
@@ -39,6 +39,6 @@ function install_dependencies() {
     install_process_manager
     clear_package_management_system_cache
 }
-install_dependencies
+install_process_manager_requirements
 
 set +Eeo pipefail
