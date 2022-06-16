@@ -104,7 +104,7 @@ services:
             - 'App\Twitter\Infrastructure\Publication\Entity\PublishersList'
         calls:
             - [ 'setLogger',                    [ '@logger' ] ]
-            - [ 'setPublishersListDispatcher', [ '@App\Twitter\Infrastructure\Amqp\MessageBus\PublishersListDispatcher' ] ]
+            - [ 'setPublishersListDispatcher',  [ '@App\Twitter\Infrastructure\Amqp\MessageBus\PublishersListDispatcher' ] ]
             - [ 'setStatusRepository',          [ '@App\Twitter\Infrastructure\Api\Repository\StatusRepository' ] ]
             - [ 'setTimelyStatusRepository',    [ '@repository.timely_status' ] ]
             - [ 'setTokenRepository',           [ '@App\Twitter\Domain\Api\AccessToken\Repository\TokenRepositoryInterface' ] ]

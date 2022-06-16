@@ -90,6 +90,7 @@ function build() {
         --build-arg "WORKER_GID=${WORKER_GID}" \
         --build-arg "WORKER=${WORKER}" \
         app \
+        process-manager \
         worker
 } >> ./var/log/build.log 2>> ./var/log/build.error.log
 
@@ -274,6 +275,27 @@ docker compose \
 			--detach \
 			--force-recreate \
 			database
+SCRIPT
+)
+
+    echo 'About to execute "'"${command}"'"'
+    /bin/bash -c "${command}"
+} >> ./var/log/build.log 2>> ./var/log/build.error.log
+
+function start_process_manager() {
+    guard_against_missing_variables
+
+    remove_container_image 'process-manager'
+
+    local command
+    command=$(cat <<-SCRIPT
+docker compose \
+      --file=./provisioning/containers/docker-compose.yaml \
+      --file=./provisioning/containers/docker-compose.override.yaml \
+			up \
+			--detach \
+			--force-recreate \
+			process-manager
 SCRIPT
 )
 

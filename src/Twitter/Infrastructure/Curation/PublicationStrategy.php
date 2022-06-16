@@ -19,25 +19,25 @@ class PublicationStrategy implements PublicationStrategyInterface, CorrelationId
 {
     use CorrelationIdAwareTrait;
 
-    private string $screenName;
+    private int $cursor = -1;
 
     private ?string $dateBeforeWhichPublicationsAreCollected = null;
-
-    private ?string $listRestriction = null;
-
-    private array $listCollectionRestriction = [];
-
-    private bool $weightedAggregates = false;
-
-    private ?string $queryRestriction = null;
-
-    private ?string $memberRestriction = null;
 
     private bool $ignoreWhispers = false;
 
     private bool $includeOwner = false;
 
-    private int $cursor = -1;
+    private array $listCollectionRestriction = [];
+
+    private ?string $listRestriction = null;
+
+    private ?string $memberRestriction = null;
+
+    private ?string $queryRestriction = null;
+
+    private string $screenName;
+
+    private bool $weightedAggregates = false;
 
     public function __construct(CorrelationIdInterface $correlationId)
     {
@@ -153,13 +153,13 @@ class PublicationStrategy implements PublicationStrategyInterface, CorrelationId
      *
      * @return bool
      */
-    public function restrictDispatchToSpecificMember(MemberIdentity $memberIdentity): bool
+    public function isSingleMemberAmqpMessagePublicationStrategyActive(MemberIdentity $memberIdentity): bool
     {
         if ($this->noMemberRestriction()) {
             return false;
         }
 
-        return $memberIdentity->screenName() !== $this->forSpecificMember();
+        return $memberIdentity->screenName() !== $this->applyStrategyForSingleMemberOnly();
     }
 
     /**
@@ -351,7 +351,7 @@ class PublicationStrategy implements PublicationStrategyInterface, CorrelationId
     /**
      * @return string
      */
-    private function forSpecificMember(): ?string
+    private function applyStrategyForSingleMemberOnly(): ?string
     {
         return $this->memberRestriction;
     }
@@ -361,7 +361,7 @@ class PublicationStrategy implements PublicationStrategyInterface, CorrelationId
      */
     private function noMemberRestriction(): bool
     {
-        return $this->forSpecificMember() === null;
+        return $this->applyStrategyForSingleMemberOnly() === null;
     }
 
     /**

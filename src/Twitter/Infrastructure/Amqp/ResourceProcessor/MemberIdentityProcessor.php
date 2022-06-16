@@ -8,7 +8,7 @@ use App\Twitter\Infrastructure\Amqp\Exception\SkippableMemberException;
 use App\Twitter\Domain\Api\Model\TokenInterface;
 use App\Twitter\Domain\Curation\PublicationStrategyInterface;
 use App\Twitter\Domain\Membership\Exception\MembershipException;
-use App\Twitter\Domain\Membership\MemberFacingStrategy;
+use App\Twitter\Domain\Membership\MemberwiseStrategy;
 use App\Twitter\Domain\Resource\MemberIdentity;
 use App\Twitter\Domain\Resource\PublishersList;
 use App\Twitter\Infrastructure\Amqp\Exception\ContinuePublicationException;
@@ -73,7 +73,12 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
         PublishersList $list
     ): int {
         try {
-            $this->dispatchPublications($memberIdentity, $strategy, $token, $list);
+            $this->dispatchAmqpMessagesForFetchingMemberPublications(
+                $memberIdentity,
+                $strategy,
+                $token,
+                $list
+            );
 
             return 1;
         } catch (SkippableMemberException $exception) {
@@ -81,13 +86,13 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
 
             return 0;
         } catch (MembershipException $exception) {
-            if (MemberFacingStrategy::shouldBreakPublication($exception)) {
+            if (MemberwiseStrategy::shouldBreakPublication($exception)) {
                 $this->logger->info($exception->getMessage());
 
                 StopPublicationException::throws($exception->getMessage(), $exception);
             }
 
-            if (MemberFacingStrategy::shouldContinuePublication($exception)) {
+            if (MemberwiseStrategy::shouldContinuePublication($exception)) {
                 ContinuePublicationException::throws($exception->getMessage(), $exception);
             }
 
@@ -104,13 +109,13 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
      * @throws ORMException
      * @throws OptimisticLockException
      */
-    private function dispatchPublications(
+    private function dispatchAmqpMessagesForFetchingMemberPublications(
         MemberIdentity $memberIdentity,
         PublicationStrategyInterface $strategy,
         TokenInterface $token,
         PublishersList $list
     ): void {
-        $this->skipUnrestrictedMember($memberIdentity, $strategy);
+        $this->isSkippingMemberDictatedByStrategy($memberIdentity, $strategy);
 
         $member = $this->memberProfileAccessor->getMemberByIdentity(
             $memberIdentity
@@ -118,8 +123,8 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
 
         $strategy->guardAgainstWhisperingMember($member, $memberIdentity);
 
-        MemberFacingStrategy::guardAgainstProtectedMember($member, $memberIdentity);
-        MemberFacingStrategy::guardAgainstSuspendedMember($member, $memberIdentity);
+        MemberwiseStrategy::guardAgainstProtectedMember($member, $memberIdentity);
+        MemberwiseStrategy::guardAgainstSuspendedMember($member, $memberIdentity);
 
         $FetchMemberStatus = FetchMemberStatus::makeMemberIdentityCard(
             $this->aggregateRepository->byName(
@@ -141,11 +146,11 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
      *
      * @throws SkippableMemberException
      */
-    private function skipUnrestrictedMember(
+    private function isSkippingMemberDictatedByStrategy(
         MemberIdentity $memberIdentity,
         PublicationStrategyInterface $strategy
     ): void {
-        if ($strategy->restrictDispatchToSpecificMember($memberIdentity)) {
+        if ($strategy->isSingleMemberAmqpMessagePublicationStrategyActive($memberIdentity)) {
             throw new SkippableMemberException(
                 sprintf(
                     'Skipping "%s" as member restriction applies',

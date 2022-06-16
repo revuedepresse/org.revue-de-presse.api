@@ -41,20 +41,12 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
     use PublicationMessageDispatcherTrait;
     use TranslatorTrait;
 
-    /**
-     * @var PublicationStrategyInterface
-     */
     private PublicationStrategyInterface $collectionStrategy;
 
     public function configure()
     {
         $this->setName('devobs:dispatch-messages-to-fetch-member-statuses')
-            ->setDescription('Dispatch messages to fetch member statuses')
-            ->addArgument(
-                self::ARGUMENT_SCREEN_NAME,
-                InputArgument::REQUIRED,
-                'The screen name of a user'
-            )
+            ->setDescription('Dispatch AMQP messages to fetch member publications.')
             ->addOption(
                 self::OPTION_OAUTH_TOKEN,
                 null,
@@ -108,10 +100,19 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
                 'iw',
                 InputOption::VALUE_NONE,
                 'Should ignore whispers (publication from members having not published anything for a month)'
-            )->setAliases(['pr:d-m-t-f-m-s']);
+            )
+            ->addArgument(
+                self::ARGUMENT_SCREEN_NAME,
+                InputArgument::REQUIRED,
+                'A member screen name'
+            )
+            ->setAliases(['pr:d-m-t-f-m-s']);
     }
 
     /**
+     * \App\Twitter\Infrastructure\Amqp\ResourceProcessor\MemberIdentityProcessor->dispatchPublications
+     * method is responsible for dispatching AMQP messages
+     *
      * @param InputInterface  $input
      * @param OutputInterface $output
      *
@@ -135,6 +136,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
         }
 
         $returnStatus = self::FAILURE;
+
         try {
             $this->publicationMessageDispatcher->dispatchPublicationMessages(
                 $this->collectionStrategy,
@@ -143,6 +145,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
                     $this->output->writeln($message);
                 }
             );
+
             $returnStatus = self::SUCCESS;
         } catch (UnexpectedOwnershipException|OverCapacityException $exception) {
             $this->logger->error(
@@ -155,6 +158,7 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
                 ['stacktrace' => $exception->getTraceAsString()]
             );
         }
+
         return $returnStatus;
     }
 
@@ -172,18 +176,5 @@ class FetchPublicationMessageDispatcher extends AggregateAwareCommand
         );
 
         $this->setupAggregateRepository();
-
-        if (
-            $this->collectionStrategy->shouldPrioritizeLists()
-            && ($this->collectionStrategy->listRestriction()
-                || $this->collectionStrategy->shouldApplyListCollectionRestriction())
-        ) {
-            // TODO customize message to be dispatched
-            // Before introducting messenger component
-            // it produced messages with
-            // old_sound_rabbit_mq.weaving_the_web_amqp.twitter.aggregates_status_producer
-            // old_sound_rabbit_mq.weaving_the_web_amqp.producer.aggregates_likes_producer
-            // services
-        }
     }
 }

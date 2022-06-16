@@ -7,6 +7,6 @@ else
     current_directory="$(dirname "$0")"
 fi
 
-source "${current_directory}"/console.sh
+source "${current_directory}/console.sh"
 
 consume_fetch_publication_messages

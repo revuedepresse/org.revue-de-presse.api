@@ -64,7 +64,7 @@ class PublicationMessageDispatcher implements PublicationMessageDispatcherInterf
         TranslatorInterface $translator
     ) {
         $this->accessor                 = $accessor;
-        $this->publishersListProcessor = $publishersListProcessor;
+        $this->publishersListProcessor  = $publishersListProcessor;
         $this->tokenChange              = $tokenChange;
         $this->translator               = $translator;
         $this->logger                   = $logger;
