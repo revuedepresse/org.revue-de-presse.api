@@ -159,7 +159,7 @@ class PublicationStrategy implements PublicationStrategyInterface, CorrelationId
             return false;
         }
 
-        return $memberIdentity->screenName() !== $this->forSpecificMember();
+        return $memberIdentity->screenName() !== $this->applyStrategyForSingleMemberOnly();
     }
 
     /**
@@ -351,7 +351,7 @@ class PublicationStrategy implements PublicationStrategyInterface, CorrelationId
     /**
      * @return string
      */
-    private function forSpecificMember(): ?string
+    private function applyStrategyForSingleMemberOnly(): ?string
     {
         return $this->memberRestriction;
     }
@@ -361,7 +361,7 @@ class PublicationStrategy implements PublicationStrategyInterface, CorrelationId
      */
     private function noMemberRestriction(): bool
     {
-        return $this->forSpecificMember() === null;
+        return $this->applyStrategyForSingleMemberOnly() === null;
     }
 
     /**
