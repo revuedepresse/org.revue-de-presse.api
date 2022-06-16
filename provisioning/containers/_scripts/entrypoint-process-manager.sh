@@ -10,7 +10,7 @@ function dockerize() {
     cmd="$(cat <<-CMD
     /usr/local/bin/dockerize \
     -stdout "/var/www/${WORKER}/var/log/${WORKER}.log" \
-    -stderr "/var/www/${WORKER}/var/log/${WORKER}.error.logv \
+    -stderr "/var/www/${WORKER}/var/log/${WORKER}.error.log" \
     -timeout 600s \
     /start.sh
 CMD
