@@ -4,7 +4,7 @@ SHELL:=/bin/bash
 
 .PHONY: clear-app-cache
 
-.PHONY: consume-fetch-publication-messages dispatch-fetch-publications-messages
+.PHONY: consume-fetch-publication-messages dispatch-amqp-messages
 
 .PHONY: purge-amqp-queue set-up-amqp-queues
 
@@ -25,11 +25,11 @@ clean: ## Remove worker container
 clear-app-cache: ## Clear application cache
 	@/bin/bash -c 'source fun.sh && clear_cache_warmup'
 
+dispatch-amqp-messages: ## Dispatch AMQP Fetch publications messages
+	@/bin/bash -c 'source fun.sh && dispatch_amqp_messages'
+
 consume-fetch-publication-messages: ## Consume AMQP Fetch publication messages
 	@/bin/bash -c 'source ./bin/console.sh && bin/consume-fetch-publication-messages.sh'
-
-dispatch-fetch-publications-messages: ## Dispatch AMQP Fetch publications messages
-	@/bin/bash -c 'source ./bin/console.sh && dispatch_fetch_publications_messages'
 
 doc:
 	@command -v bat && bat ./doc/commands.md || cat ./doc/commands.md
