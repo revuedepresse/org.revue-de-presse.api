@@ -13,7 +13,7 @@ start() {
       SYMFONY_ENV=prod \
       TIME_LIMIT=600
 
-    pm2 start bin/console make consume-fetch-publication-messages  \
+    pm2 start bin/consume-fetch-publication-messages.sh \
       2>> "/var/www/${WORKER}/var/log/${WORKER}.error.log" | \
       tee --append "/var/www/${WORKER}/var/log/${WORKER}.log"
 }

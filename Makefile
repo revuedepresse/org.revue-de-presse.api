@@ -26,7 +26,7 @@ clear-app-cache: ## Clear application cache
 	@/bin/bash -c 'source fun.sh && clear_cache_warmup'
 
 consume-fetch-publication-messages: ## Consume AMQP Fetch publication messages
-	@/bin/bash -c 'source ./bin/console.sh && bin/consume_fetch_publication_messages.sh'
+	@/bin/bash -c 'source ./bin/console.sh && bin/consume-fetch-publication-messages.sh'
 
 dispatch-fetch-publications-messages: ## Dispatch AMQP Fetch publications messages
 	@/bin/bash -c 'source ./bin/console.sh && dispatch_fetch_publications_messages'
