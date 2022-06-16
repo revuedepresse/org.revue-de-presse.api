@@ -9,7 +9,7 @@ use App\Twitter\Domain\Resource\MemberIdentity;
 use Exception;
 use function sprintf;
 
-class MemberFacingStrategy implements MemberFacingStrategyInterface
+class MemberwiseStrategy implements MemberFacingStrategyInterface
 {
     /**
      * @param MemberInterface $member

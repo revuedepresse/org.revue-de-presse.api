@@ -81,13 +81,13 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
 
             return 0;
         } catch (MembershipException $exception) {
-            if (MemberFacingStrategy::shouldBreakPublication($exception)) {
+            if (MemberwiseStrategy::shouldBreakPublication($exception)) {
                 $this->logger->info($exception->getMessage());
 
                 StopPublicationException::throws($exception->getMessage(), $exception);
             }
 
-            if (MemberFacingStrategy::shouldContinuePublication($exception)) {
+            if (MemberwiseStrategy::shouldContinuePublication($exception)) {
                 ContinuePublicationException::throws($exception->getMessage(), $exception);
             }
 
@@ -118,8 +118,8 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
 
         $strategy->guardAgainstWhisperingMember($member, $memberIdentity);
 
-        MemberFacingStrategy::guardAgainstProtectedMember($member, $memberIdentity);
-        MemberFacingStrategy::guardAgainstSuspendedMember($member, $memberIdentity);
+        MemberwiseStrategy::guardAgainstProtectedMember($member, $memberIdentity);
+        MemberwiseStrategy::guardAgainstSuspendedMember($member, $memberIdentity);
 
         $FetchMemberStatus = FetchMemberStatus::makeMemberIdentityCard(
             $this->aggregateRepository->byName(
