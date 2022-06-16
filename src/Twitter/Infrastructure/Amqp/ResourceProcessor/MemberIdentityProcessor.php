@@ -73,7 +73,12 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
         PublishersList $list
     ): int {
         try {
-            $this->dispatchPublications($memberIdentity, $strategy, $token, $list);
+            $this->dispatchAmqpMessagesForFetchingMemberPublications(
+                $memberIdentity,
+                $strategy,
+                $token,
+                $list
+            );
 
             return 1;
         } catch (SkippableMemberException $exception) {
@@ -104,7 +109,7 @@ class MemberIdentityProcessor implements MemberIdentityProcessorInterface
      * @throws ORMException
      * @throws OptimisticLockException
      */
-    private function dispatchPublications(
+    private function dispatchAmqpMessagesForFetchingMemberPublications(
         MemberIdentity $memberIdentity,
         PublicationStrategyInterface $strategy,
         TokenInterface $token,
