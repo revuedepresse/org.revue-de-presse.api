@@ -8,7 +8,7 @@ use App\Twitter\Infrastructure\Amqp\Exception\SkippableMemberException;
 use App\Twitter\Domain\Api\Model\TokenInterface;
 use App\Twitter\Domain\Curation\PublicationStrategyInterface;
 use App\Twitter\Domain\Membership\Exception\MembershipException;
-use App\Twitter\Domain\Membership\MemberFacingStrategy;
+use App\Twitter\Domain\Membership\MemberwiseStrategy;
 use App\Twitter\Domain\Resource\MemberIdentity;
 use App\Twitter\Domain\Resource\PublishersList;
 use App\Twitter\Infrastructure\Amqp\Exception\ContinuePublicationException;
